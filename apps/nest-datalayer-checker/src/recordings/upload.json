@@ -1,0 +1,42 @@
+{
+    "title": "upload",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1039,
+            "height": 707,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "https://gtm-config-generator.netlify.app/",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://gtm-config-generator.netlify.app/",
+                    "title": "DataLayerCheckerUi"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "button:nth-of-type(2) > span.mat-mdc-button-touch-target"
+                ],
+                [
+                    "xpath//html/body/app-root/div/app-main-page/div/div[2]/div[2]/app-functional-card/div/div[1]/button[2]/span[4]"
+                ],
+                [
+                    "pierce/button:nth-of-type(2) > span.mat-mdc-button-touch-target"
+                ]
+            ],
+            "offsetY": 12,
+            "offsetX": 108.25
+        }
+    ]
+}

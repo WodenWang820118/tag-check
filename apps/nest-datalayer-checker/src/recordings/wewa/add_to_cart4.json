@@ -1,0 +1,65 @@
+{
+    "title": "add_to_cart4",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1587,
+            "height": 1078,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "https://club-uat.wewacard.com/",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://club-uat.wewacard.com/",
+                    "title": "Home | Wewa Club"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "div:nth-of-type(3) div.swiper-slide-next > div > div a"
+                ],
+                [
+                    "xpath//html/body/main/div[3]/div/div[2]/div[1]/div[2]/div/div/div[2]/a"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) div.swiper-slide-next > div > div a"
+                ]
+            ],
+            "offsetY": 16.09814453125,
+            "offsetX": 133.28570556640625
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/繼續購物"
+                ],
+                [
+                    "div:nth-of-type(3) > button"
+                ],
+                [
+                    "xpath//html/body/div[6]/div[2]/div[3]/button"
+                ],
+                [
+                    "pierce/div:nth-of-type(3) > button"
+                ],
+                [
+                    "text/繼續購物"
+                ]
+            ],
+            "offsetY": 10.85711669921875,
+            "offsetX": 263
+        }
+    ]
+}
