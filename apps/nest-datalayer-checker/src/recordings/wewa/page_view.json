@@ -1,0 +1,25 @@
+{
+    "title": "page_view",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 1061,
+            "height": 707,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "https://club-uat.wewacard.com/",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "https://club-uat.wewacard.com/",
+                    "title": "Home | Wewa Club"
+                }
+            ]
+        }
+    ]
+}
