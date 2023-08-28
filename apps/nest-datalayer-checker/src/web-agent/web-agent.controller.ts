@@ -8,15 +8,15 @@ export class WebAgentController {
   @Get('/action/:name')
   async executeAndGetDataLayer(
     @Param('name') name: string,
-    @Query('args') args: string = '',
-    @Query('headless') headless: string = 'false',
-    @Query('path') path?: string,
+    @Query('args') args = '',
+    @Query('headless') headless = 'false',
+    @Query('path') path?: string
   ) {
     return await this.webAgentService.executeAndGetDataLayer(
       name,
       args,
       headless,
-      path,
+      path
     );
   }
 }
