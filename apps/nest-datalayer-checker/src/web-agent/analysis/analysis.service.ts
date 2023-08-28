@@ -10,17 +10,25 @@ export class AnalysisService {
   /**
    * Retrieves the data layer from a page
    * @param page The page to retrieve the data layer from
-   * @param seconds Optional time in milliseconds to wait before retrieving the data layer
+   * @param timeout Optional time in milliseconds to wait before retrieving the data layer
    * @returns A Promise resolving to an array of data layer objects
    */
-  async getDataLayer(page: Page, seconds: number = 1000) {
+  async getDataLayer(page: Page, timeout = 2000) {
     try {
-      await page.waitForFunction(() => typeof window.dataLayer !== 'undefined');
-      await new Promise(resolve => setTimeout(resolve, seconds));
-      return await page.evaluate(() => {
-        // TODO: sometmies cannot retreive dataLayer
+      await page.waitForFunction(
+        () => typeof window.dataLayer !== 'undefined',
+        { timeout: 5000 } // timeout here to fail fast if needed
+      );
+      await new Promise((resolve) => setTimeout(resolve, timeout));
+      const dataLayer = await page.evaluate(() => {
+        console.log(window.dataLayer); // Debug line to understand what's in dataLayer
         return window.dataLayer;
       });
+      if (!dataLayer) {
+        console.error('DataLayer is empty or undefined');
+        throw new Error('DataLayer is empty or undefined');
+      }
+      return dataLayer;
     } catch (error) {
       console.error(error);
       throw new Error(error);
@@ -34,7 +42,7 @@ export class AnalysisService {
    */
   getGcs(requests: string[]) {
     if (!requests) return [];
-    return requests.map(request => request.split('gcs=')[1].split('&')[0]);
+    return requests.map((request) => request.split('gcs=')[1].split('&')[0]);
   }
 
   /**
@@ -45,12 +53,12 @@ export class AnalysisService {
    */
   async getInstalledGtms(page: Page, url: string) {
     const requests = await this.getAllRequests(page, url);
-    const gtmRequests = requests.filter(request =>
-      request.includes('collect?v=2'),
+    const gtmRequests = requests.filter((request) =>
+      request.includes('collect?v=2')
     );
     if (gtmRequests.length > 0) {
       const installedGtms = gtmRequests.map(
-        request => request.split('tid=')[1].split('&')[0],
+        (request) => request.split('tid=')[1].split('&')[0]
       );
       return installedGtms;
     }

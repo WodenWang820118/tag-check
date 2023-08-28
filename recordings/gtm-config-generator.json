@@ -1,0 +1,152 @@
+{
+  "title": "gtm-config-generator",
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 1327,
+      "height": 923,
+      "deviceScaleFactor": 1,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": false
+    },
+    {
+      "type": "navigate",
+      "url": "https://gtm-config-generator.netlify.app/",
+      "assertedEvents": [
+        {
+          "type": "navigation",
+          "url": "https://gtm-config-generator.netlify.app/",
+          "title": "DataLayerCheckerUi"
+        }
+      ]
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/Advanced Settings"],
+        ["#mat-expansion-panel-header-0"],
+        ["xpath///*[@id=\"mat-expansion-panel-header-0\"]"],
+        ["pierce/#mat-expansion-panel-header-0"]
+      ],
+      "offsetY": 34,
+      "offsetX": 71.03125
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/Include Video Tag"],
+        ["#mat-mdc-checkbox-1-input"],
+        ["xpath///*[@id=\"mat-mdc-checkbox-1-input\"]"],
+        ["pierce/#mat-mdc-checkbox-1-input"]
+      ],
+      "offsetY": 22,
+      "offsetX": 32.03125
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["mat-form-field.ng-tns-c1205077789-0 mat-label"],
+        ["xpath///*[@id=\"mat-mdc-form-field-label-0\"]/mat-label"],
+        ["pierce/mat-form-field.ng-tns-c1205077789-0 mat-label"],
+        ["text/Tag Manager URL"]
+      ],
+      "offsetY": 6.5,
+      "offsetX": 125.046875
+    },
+    {
+      "type": "change",
+      "value": "https://tagmanager.google.com/#/container/accounts/6072698131/containers/102416705/workspaces/14",
+      "selectors": [
+        ["aria/Tag Manager URL"],
+        ["#mat-input-0"],
+        ["xpath///*[@id=\"mat-input-0\"]"],
+        ["pierce/#mat-input-0"]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/Container Name"],
+        ["#mat-input-1"],
+        ["xpath///*[@id=\"mat-input-1\"]"],
+        ["pierce/#mat-input-1"]
+      ],
+      "offsetY": 8,
+      "offsetX": 203.046875
+    },
+    {
+      "type": "change",
+      "value": " validation",
+      "selectors": [
+        ["aria/Container Name"],
+        ["#mat-input-1"],
+        ["xpath///*[@id=\"mat-input-1\"]"],
+        ["pierce/#mat-input-1"]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["aria/GTM ID"],
+        ["#mat-input-2"],
+        ["xpath///*[@id=\"mat-input-2\"]"],
+        ["pierce/#mat-input-2"]
+      ],
+      "offsetY": 14,
+      "offsetX": 170.046875,
+      "button": "secondary"
+    },
+    {
+      "type": "change",
+      "value": "GTM-WJ6N3RM",
+      "selectors": [
+        ["aria/GTM ID"],
+        ["#mat-input-2"],
+        ["xpath///*[@id=\"mat-input-2\"]"],
+        ["pierce/#mat-input-2"]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "div.main-page__board button:nth-of-type(1) > span.mat-mdc-button-touch-target"
+        ],
+        [
+          "xpath//html/body/app-root/div/app-main-page/div/div[2]/div[2]/app-functional-card/div/div[1]/button[1]/span[4]"
+        ],
+        [
+          "pierce/div.main-page__board button:nth-of-type(1) > span.mat-mdc-button-touch-target"
+        ]
+      ],
+      "offsetY": 28,
+      "offsetX": 153.046875
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        ["mat-dialog-content > div:nth-of-type(2) span.mdc-button__label"],
+        [
+          "xpath///*[@id=\"mat-mdc-dialog-0\"]/div/div/app-conversion-success-dialog/mat-dialog-content/div[2]/button/span[2]"
+        ],
+        [
+          "pierce/mat-dialog-content > div:nth-of-type(2) span.mdc-button__label"
+        ],
+        ["text/Copy to clipboard"]
+      ],
+      "offsetY": 19.5,
+      "offsetX": 80.296875
+    }
+  ]
+}
