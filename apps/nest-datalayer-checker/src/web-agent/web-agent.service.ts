@@ -9,7 +9,7 @@ export class WebAgentService {
   constructor(
     private readonly puppeteerService: PuppeteerService,
     private readonly actionService: ActionService,
-    private readonly analysisService: AnalysisService,
+    private readonly analysisService: AnalysisService
   ) {}
 
   /**
@@ -21,7 +21,7 @@ export class WebAgentService {
     name: string,
     args: string,
     headless: string,
-    path: string,
+    path: string
   ) {
     try {
       const operation = this.actionService.getOperationJson(name, path);
@@ -32,8 +32,9 @@ export class WebAgentService {
       const pages = await browser.pages(); // get all pages
       const page = pages[pages.length - 1]; // last page opened since when opening a brwoser, there's a default page
       await this.actionService.performOperation(page, operation);
+      const dataLayer = await this.analysisService.getDataLayer(page);
       await browser.close();
-      return await this.analysisService.getDataLayer(page);
+      return dataLayer;
     } catch (error) {
       console.error(error);
       throw new Error(error);

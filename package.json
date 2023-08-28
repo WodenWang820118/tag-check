@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nx serve",
+    "backend": "nx serve nest-datalayer-checker --watch",
     "build": "nx build",
     "test": "nx test"
   },

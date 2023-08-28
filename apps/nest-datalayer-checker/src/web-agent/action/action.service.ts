@@ -2,18 +2,52 @@ import { Injectable } from '@nestjs/common';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 import { Page } from 'puppeteer';
-import * as puppeteer from 'puppeteer';
 import { UtilitiesService } from '../utilities/utilities.service';
+import {
+  CSSClickStrategy,
+  ClickStrategy,
+  PierceClickStrategy,
+  TextClickStrategy,
+  XPathClickStrategy,
+} from './strategies/click-strategy';
+import {
+  AriaChangeStrategy,
+  CSSChangeStrategy,
+  ChangeStrategy,
+  PiercingChangeStrategy,
+  XpathChangeStrategy,
+} from './strategies/change-strategy';
+import { SelectorType, getSelectorType } from './action-utilities';
 
 enum BrowserAction {
   CLICK = 'click',
   NAVIGATE = 'navigate',
   SETVIEWPORT = 'setViewport',
+  CHANGE = 'change',
+  KEYDOWN = 'keyDown',
+  KEYUP = 'keyUp',
 }
 
 @Injectable()
 export class ActionService {
-  constructor(private utilitiesService: UtilitiesService) {}
+  private clickStrategies: { [key: string]: ClickStrategy };
+  private changeStrategies: { [key: string]: ChangeStrategy };
+
+  constructor(private utilitiesService: UtilitiesService) {
+    this.clickStrategies = {
+      [SelectorType.CSS]: new CSSClickStrategy(),
+      [SelectorType.XPATH]: new XPathClickStrategy(),
+      [SelectorType.PIERCE]: new PierceClickStrategy(),
+      [SelectorType.TEXT]: new TextClickStrategy(),
+    };
+
+    this.changeStrategies = {
+      [SelectorType.CSS]: new CSSChangeStrategy(),
+      [SelectorType.XPATH]: new XpathChangeStrategy(),
+      [SelectorType.PIERCE]: new PiercingChangeStrategy(),
+      [SelectorType.ARIA]: new AriaChangeStrategy(),
+    };
+  }
 
   /**
    * Returns the operation JSON object for a given operation name
@@ -22,9 +56,7 @@ export class ActionService {
    */
   getOperationJson(name: string, folderPath?: string) {
     const rootDir = process.cwd();
-    const pathToUse = folderPath
-      ? `src\\recordings\\${folderPath}`
-      : '\\src\\recordings';
+    const pathToUse = folderPath ? `${folderPath}` : '\\recordings';
     const fullPath = path.join(rootDir, pathToUse, `${name}.json`);
     return JSON.parse(readFileSync(fullPath, 'utf8'));
   }
@@ -44,6 +76,10 @@ export class ActionService {
 
         case BrowserAction.CLICK:
           await this.handleClick(page, step);
+          break;
+
+        case BrowserAction.CHANGE:
+          await this.handleChange(page, step);
           break;
 
         // Add more cases for other browser actions if needed
@@ -66,137 +102,84 @@ export class ActionService {
     await page.goto(step.url);
   }
 
-  async handleClick(page: Page, step: any) {
+  async handleClick(page: Page, step: any): Promise<void> {
     console.log('click');
-    console.log('step.selectors: ', step.selectors);
+    let clickedSuccessfully = false;
+
     for (const selectorGroup of step.selectors) {
       try {
         await this.utilitiesService.scrollIntoViewIfNeeded(
           selectorGroup,
           page,
-          30000,
+          30000
         );
       } catch (error) {
         console.error('scrollIntoViewIfNeeded error: ', error);
-      } finally {
-        if (await this.clickElement(page, selectorGroup[0])) {
-          return; // Return as soon as one selector works
-        }
+      }
+
+      if (await this.clickElement(page, selectorGroup[0])) {
+        clickedSuccessfully = true;
+        break; // Exit the loop as soon as one selector works
       }
     }
 
-    throw new Error(
-      `Failed to click. None of the selectors worked for action ${step.target}`,
-    );
+    if (!clickedSuccessfully) {
+      throw new Error(
+        `Failed to click. None of the selectors worked for action ${step.target}`
+      );
+    }
   }
 
-  async clickElement(page: Page, selector: string, timeout: number = 30000) {
-    console.log('clickElement: ', selector);
-    try {
-      if (
-        !selector.startsWith('xpath/') &&
-        !selector.startsWith('pierce/') &&
-        !selector.startsWith('text/')
-      ) {
-        console.log('first try normal selector: ', selector);
-        return await this.tryClickCSSSelector(page, selector, timeout);
-      } else if (selector.startsWith('xpath/')) {
-        // Handle XPath
-        console.log('try xpath selector');
-        return await this.tryClickXPathSelector(page, selector, timeout);
-      } else if (selector.startsWith('pierce')) {
-        console.log('try pierce selector');
-        return await this.tryClickPierceSelector(page, selector);
-      } else if (selector.startsWith('text')) {
-        // Handle Text selector
-        console.log('try xpath with searching text');
-        return await this.tryClickTextSelector(page, selector, timeout);
+  async handleChange(page: Page, step: any, timeout = 1000) {
+    const selectors = step.selectors;
+    const value = step.value;
+
+    for (const selectorArray of selectors) {
+      try {
+        return await this.changeElement(page, selectorArray[0], value, timeout);
+      } catch (error) {
+        console.error(
+          `Failed to change value with selector ${selectorArray[0]}. Reason: ${error.message}`
+        );
       }
-      return false; // Return false if the selector didn't work
-    } catch (error) {
-      console.error(
-        `Failed to click with selector ${selector}. Reason: ${error.message}`,
-      );
+    }
+    return false;
+  }
+
+  // ----------------------------------------------
+  // Click strategies
+  // ----------------------------------------------
+
+  async clickElement(page: Page, selector: string, timeout = 1000) {
+    const type = getSelectorType(selector); // Implement this function to get the type (CSS, XPath, etc.) from the selector
+    const strategy = this.clickStrategies[type];
+
+    if (!strategy) {
+      console.error(`No strategy found for selector type ${type}`);
       return false;
     }
+
+    return await strategy.clickElement(page, selector, timeout);
   }
 
-  async tryClickCSSSelector(
+  // ----------------------------------------------
+  // Change strategies
+  // ----------------------------------------------
+
+  async changeElement(
     page: Page,
     selector: string,
-    timeout: number,
-  ): Promise<boolean> {
-    await page.waitForSelector(selector, { timeout });
-    await page.focus(selector);
-    await new Promise(r => setTimeout(r, 1000)); // for future recording purpose
-    await page.$eval(selector, el => (el as HTMLButtonElement).click());
-    return true;
-  }
+    value: string,
+    timeout = 1000
+  ) {
+    const type = getSelectorType(selector);
+    const strategy = this.changeStrategies[type];
 
-  async tryClickXPathSelector(
-    page: Page,
-    selector: string,
-    timeout: number,
-  ): Promise<boolean> {
-    const xpath = selector.replace('xpath/', '');
-    await page.waitForXPath(xpath, { timeout });
-    const [element] = await page.$x(xpath);
-    if (element) {
-      await element.focus();
-      await (element as puppeteer.ElementHandle<Element>).click({
-        delay: 1000,
-      });
-      return true;
+    if (!strategy) {
+      console.error(`No strategy found for selector type ${type}`);
+      return false;
     }
-    return false;
-  }
 
-  async tryClickPierceSelector(page: Page, selector: string): Promise<boolean> {
-    const elementHandle = await this.queryShadowDom(
-      page,
-      ...selector.replace('pierce/', '').split('/'),
-    );
-    if (elementHandle instanceof puppeteer.ElementHandle) {
-      await elementHandle.click({ delay: 1000 });
-      return true;
-    }
-    return false;
-  }
-
-  async tryClickTextSelector(
-    page: Page,
-    selector: string,
-    timeout: number,
-  ): Promise<boolean> {
-    const xpath = `//*[text()="${selector.replace('text/', '')}"]`;
-    await page.waitForXPath(xpath, { timeout });
-    const [element] = await page.$x(xpath);
-    if (element) {
-      await (element as puppeteer.ElementHandle<Element>).click({
-        delay: 1000,
-      });
-      return true;
-    }
-    return false;
-  }
-
-  async queryShadowDom(page: Page, ...selectors: any[]) {
-    const jsHandle = await page.evaluateHandle((...selectors) => {
-      let element: any = document;
-
-      for (let selector of selectors) {
-        if (element.shadowRoot) {
-          element = element.shadowRoot.querySelector(selector);
-        } else {
-          element = element.querySelector(selector);
-        }
-
-        if (!element) return null;
-      }
-
-      return element;
-    }, ...selectors);
-
-    return jsHandle;
+    return await strategy.changeElement(page, selector, value, timeout);
   }
 }
