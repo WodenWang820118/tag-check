@@ -1,5 +1,4 @@
-import { Page } from 'puppeteer';
-import * as puppeteer from 'puppeteer';
+import { Page, ElementHandle } from 'puppeteer';
 import { SelectorType, queryShadowDom, sleep } from '../action-utilities';
 
 export interface ClickStrategy {
@@ -33,9 +32,9 @@ export class XPathClickStrategy implements ClickStrategy {
     const xpath = selector.replace(SelectorType.XPATH + '/', '');
     await page.waitForXPath(xpath, { timeout });
     const [element] = await page.$x(xpath);
-    if (element) {
+    if (isElementHandle(element)) {
       await element.focus();
-      await (element as puppeteer.ElementHandle<Element>).click({
+      await element.click({
         delay: 1000,
       });
       return true;
@@ -55,7 +54,7 @@ export class PierceClickStrategy implements ClickStrategy {
       ...selector.replace(SelectorType.PIERCE + '/', '').split('/'),
       { timeout }
     );
-    if (elementHandle instanceof puppeteer.ElementHandle) {
+    if (isElementHandle(elementHandle)) {
       await elementHandle.click({ delay: 1000 });
       return true;
     }
@@ -75,12 +74,18 @@ export class TextClickStrategy implements ClickStrategy {
     )}"]`;
     await page.waitForXPath(xpath, { timeout });
     const [element] = await page.$x(xpath);
-    if (element) {
-      await (element as puppeteer.ElementHandle<Element>).click({
+    if (isElementHandle(element)) {
+      await element.click({
         delay: 1000,
       });
       return true;
     }
     return false;
   }
+}
+
+function isElementHandle(obj: any): obj is ElementHandle<Element> {
+  return (
+    obj && typeof obj.click === 'function' && typeof obj.focus === 'function'
+  );
 }
