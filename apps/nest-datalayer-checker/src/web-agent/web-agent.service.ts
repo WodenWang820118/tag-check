@@ -21,7 +21,7 @@ export class WebAgentService {
     name: string,
     args: string,
     headless: string,
-    path: string
+    path?: string
   ) {
     try {
       const operation = this.actionService.getOperationJson(name, path);
@@ -35,6 +35,35 @@ export class WebAgentService {
       const dataLayer = await this.analysisService.getDataLayer(page);
       await browser.close();
       return dataLayer;
+    } catch (error) {
+      console.error(error);
+      throw new Error(error);
+    }
+  }
+
+  async executeAndGetDataLayerByProject(
+    project: string,
+    args: string,
+    headless: string,
+    path: string
+  ) {
+    try {
+      const operations = this.actionService.getOperationJsonByProject(
+        project,
+        path
+      );
+      const dataLayers = [];
+
+      for (const operation of operations) {
+        const dataLayer = await this.executeAndGetDataLayer(
+          operation,
+          args,
+          headless,
+          project
+        );
+        dataLayers.push(dataLayer);
+      }
+      return dataLayers;
     } catch (error) {
       console.error(error);
       throw new Error(error);
