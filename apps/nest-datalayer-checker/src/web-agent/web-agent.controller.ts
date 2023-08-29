@@ -19,4 +19,19 @@ export class WebAgentController {
       path
     );
   }
+
+  @Get('/projects/:project')
+  async executeAndGetDataLayerByProject(
+    @Param('project') project: string,
+    @Query('args') args = '',
+    @Query('headless') headless = 'false',
+    @Query('path') path?: string
+  ) {
+    return await this.webAgentService.executeAndGetDataLayerByProject(
+      project,
+      args,
+      headless,
+      path
+    );
+  }
 }
