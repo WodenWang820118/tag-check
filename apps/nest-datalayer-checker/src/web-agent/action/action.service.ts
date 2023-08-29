@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { readFileSync } from 'fs';
-import * as path from 'path';
 import { Page } from 'puppeteer';
 import { UtilitiesService } from '../utilities/utilities.service';
 import {
@@ -18,7 +16,6 @@ import {
   XpathChangeStrategy,
 } from './strategies/change-strategy';
 import { SelectorType, getSelectorType } from './action-utilities';
-import * as fs from 'fs';
 
 enum BrowserAction {
   CLICK = 'click',
@@ -48,44 +45,6 @@ export class ActionService {
       [SelectorType.PIERCE]: new PiercingChangeStrategy(),
       [SelectorType.ARIA]: new AriaChangeStrategy(),
     };
-  }
-
-  /**
-   * Returns the operation JSON object for a given operation name
-   * @param name The name of the operation
-   * @returns The operation JSON object
-   */
-  getOperationJson(name: string, folderPath?: string) {
-    const rootDir = process.cwd();
-    const pathToUse = folderPath
-      ? `\\recordings\\${folderPath}\\${name}`
-      : `\\recordings\\${name}`;
-    const fullPath = path.join(rootDir, pathToUse, `${name}`);
-    return JSON.parse(readFileSync(fullPath, 'utf8'));
-  }
-
-  getJsonFilesFromDir(dirPath: string): string[] {
-    try {
-      const files = fs.readdirSync(dirPath);
-      const jsonFiles = files.filter((file) => path.extname(file) === '.json');
-      return jsonFiles;
-    } catch (error) {
-      console.error('An error occurred:', error);
-      return [];
-    }
-  }
-
-  getOperationJsonByProject(project: string, folderPath?: string) {
-    const rootDir = process.cwd();
-    const pathToUse = folderPath ? `${folderPath}` : `recordings\\${project}`;
-    const fullPath = path.join(rootDir, pathToUse);
-
-    const jsonFiles = this.getJsonFilesFromDir(fullPath);
-
-    // If you want only files that match the project name
-    const projectFiles = jsonFiles.filter((file) => file.endsWith(`.json`));
-
-    return projectFiles;
   }
 
   async performOperation(page: Page, operation: any) {
