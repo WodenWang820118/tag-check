@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { AnalysisService } from './analysis/analysis.service';
+import { SharedServiceService } from '../shared-module/shared-service.service';
 import { Browser } from 'puppeteer';
 
 @Injectable()
@@ -9,7 +10,8 @@ export class WebAgentService {
   constructor(
     private readonly puppeteerService: PuppeteerService,
     private readonly actionService: ActionService,
-    private readonly analysisService: AnalysisService
+    private readonly analysisService: AnalysisService,
+    private readonly sharedService: SharedServiceService
   ) {}
 
   /**
@@ -24,7 +26,7 @@ export class WebAgentService {
     path?: string
   ) {
     try {
-      const operation = this.actionService.getOperationJson(name, path);
+      const operation = this.sharedService.getOperationJson(name, path);
       const browser = await this.puppeteerService.initAndReturnBrowser({
         headless: headless === 'true' ? true : false,
       });
@@ -48,7 +50,7 @@ export class WebAgentService {
     path: string
   ) {
     try {
-      const operations = this.actionService.getOperationJsonByProject(
+      const operations = this.sharedService.getOperationJsonByProject(
         project,
         path
       );
