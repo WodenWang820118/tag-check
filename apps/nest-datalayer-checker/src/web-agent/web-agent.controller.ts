@@ -5,14 +5,16 @@ import { WebAgentService } from './web-agent.service';
 export class WebAgentController {
   constructor(private readonly webAgentService: WebAgentService) {}
   // for demo purposes
-  @Get('/action/:name')
+  @Get('/action/:projectName/:name')
   async executeAndGetDataLayer(
+    @Param('projectName') projectName: string,
     @Param('name') name: string,
     @Query('args') args = '',
     @Query('headless') headless = 'false',
     @Query('path') path?: string
   ) {
     return await this.webAgentService.executeAndGetDataLayer(
+      projectName,
       name,
       args,
       headless,
@@ -20,15 +22,15 @@ export class WebAgentController {
     );
   }
 
-  @Get('/projects/:project')
+  @Get('/projects/:projectName')
   async executeAndGetDataLayerByProject(
-    @Param('project') project: string,
+    @Param('projectName') projectName: string,
     @Query('args') args = '',
     @Query('headless') headless = 'false',
     @Query('path') path?: string
   ) {
     return await this.webAgentService.executeAndGetDataLayerByProject(
-      project,
+      projectName,
       args,
       headless,
       path
