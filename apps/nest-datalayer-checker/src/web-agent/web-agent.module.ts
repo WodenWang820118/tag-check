@@ -5,7 +5,7 @@ import { PuppeteerModule } from './puppeteer/puppeteer.module';
 import { UtilitiesModule } from './utilities/utilities.module';
 import { WebAgentService } from './web-agent.service';
 import { WebAgentController } from './web-agent.controller';
-import { SharedModuleModule } from '../shared-module/shared-module.module';
+import { SharedModule } from '../shared-module/shared-module.module';
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import { SharedModuleModule } from '../shared-module/shared-module.module';
     AnalysisModule,
     PuppeteerModule,
     UtilitiesModule,
-    SharedModuleModule,
+    SharedModule,
   ],
   exports: [WebAgentService],
   providers: [WebAgentService],

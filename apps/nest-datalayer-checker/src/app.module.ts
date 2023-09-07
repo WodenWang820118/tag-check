@@ -4,7 +4,8 @@ import { AirtableModule } from './airtable/airtable.module';
 import { DataLayerCheckerModule } from './data-layer-checker/data-layer-checker.module';
 import { GtmOperatorModule } from './gtm-operator/gtm-operator.module';
 import { WebAgentModule } from './web-agent/web-agent.module';
-import { SharedModuleModule } from './shared-module/shared-module.module';
+import { SharedModule } from './shared-module/shared-module.module';
+import { InspectorModule } from './inspector/inspector.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { SharedModuleModule } from './shared-module/shared-module.module';
     AirtableModule,
     DataLayerCheckerModule,
     GtmOperatorModule,
-    SharedModuleModule,
+    SharedModule,
+    InspectorModule,
   ],
   controllers: [],
   providers: [],
