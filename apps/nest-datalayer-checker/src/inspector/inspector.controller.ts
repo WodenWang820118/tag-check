@@ -19,4 +19,17 @@ export class InspectorController {
       path
     );
   }
+
+  @Get('/inspect/:projectName')
+  async inspectProjectDataLayer(
+    @Param('projectName') projectName: string,
+    @Query('headless') headless = 'true',
+    @Query('path') path?: string
+  ) {
+    return await this.inspectorService.inspectProjectDataLayer(
+      projectName,
+      headless,
+      path
+    );
+  }
 }

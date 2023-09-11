@@ -37,16 +37,13 @@ export interface BaseECommerce {
 }
 
 export interface BaseDataLayerEvent {
+  event?: string;
+  ecommerce?: BaseECommerce;
+  [key: string]: string | number | BaseECommerce | undefined | null;
+}
+
+export interface StrictDataLayerEvent {
   event: string;
   ecommerce?: BaseECommerce;
+  [key: string]: string | number | BaseECommerce | undefined | null;
 }
-
-// Dynamic parts
-interface DynamicProps {
-  [key: string]: string | number | Item[] | undefined | null;
-}
-
-// Combine base and dynamic parts
-export type Item = BaseItem & DynamicProps;
-export type ECommerce = BaseECommerce & DynamicProps;
-export type DataLayerEvent = BaseDataLayerEvent & DynamicProps;
