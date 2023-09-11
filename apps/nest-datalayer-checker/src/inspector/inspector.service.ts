@@ -6,9 +6,12 @@ import {
   EcommerceEventValidationStrategy,
   OldGA4EventsValidationStrategy,
   ValidationStrategy,
-  ValidationStrategyType,
-} from './dataLayerValidationStrategy';
-import { DataLayerEvent } from '../interfaces/dataLayer.interface';
+} from './strategy/dataLayer-validation-strategy';
+import { ValidationStrategyType, determineStrategy } from './utilities';
+import {
+  BaseDataLayerEvent,
+  StrictDataLayerEvent,
+} from '../interfaces/dataLayer.interface';
 
 @Injectable()
 export class InspectorService {
@@ -43,7 +46,7 @@ export class InspectorService {
 
     // expectedObj is the spec to be compared with the result
     const expectedObj = specs.find(
-      (spec: DataLayerEvent) => spec.event === testName
+      (spec: BaseDataLayerEvent) => spec.event === testName
     );
 
     // 2. Execute the recording script and get the result
@@ -60,11 +63,44 @@ export class InspectorService {
     return this.isDataLayerCorrect(result, expectedObj);
   }
 
+  async inspectProjectDataLayer(
+    projectName: string,
+    headless: string,
+    path?: string
+  ) {
+    const operations = this.sharedService.getOperationJsonByProject({
+      name: projectName,
+    });
+    console.log(operations);
+    const results = [];
+    for (const operation of operations) {
+      try {
+        const result = await this.inspectDataLayer(
+          projectName,
+          operation.replace('.json', ''),
+          headless,
+          path
+        );
+        results.push(result);
+      } catch (error) {
+        results.push({
+          passed: false,
+          message: 'There is no corresponding test recording',
+          dataLayerSpec: operation,
+        });
+      }
+    }
+    return results;
+  }
+
   // return true if the dataLayer is correct
   // return missing keys if the dataLayer is partially correct
   // return false if the dataLayer object hasn't been found
-  isDataLayerCorrect(dataLayer: DataLayerEvent[], spec: DataLayerEvent) {
-    const strategyType = this.determineStrategy(spec);
+  isDataLayerCorrect(
+    dataLayer: StrictDataLayerEvent[],
+    spec: StrictDataLayerEvent
+  ) {
+    const strategyType = determineStrategy(spec);
 
     try {
       switch (strategyType) {
@@ -84,14 +120,6 @@ export class InspectorService {
     } catch (error) {
       console.error('An error occurred:', error);
       return false;
-    }
-  }
-
-  determineStrategy(spec: DataLayerEvent) {
-    if (spec.event[ValidationStrategyType.ECOMMERCE]) {
-      return ValidationStrategyType.ECOMMERCE;
-    } else {
-      return ValidationStrategyType.OLDGA4EVENTS;
     }
   }
 }
