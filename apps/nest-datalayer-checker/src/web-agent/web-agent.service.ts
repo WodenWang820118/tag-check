@@ -2,14 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { AnalysisService } from './analysis/analysis.service';
+import { SharedService } from '../shared-module/shared-service.service';
 import { Browser } from 'puppeteer';
+import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 
 @Injectable()
 export class WebAgentService {
   constructor(
     private readonly puppeteerService: PuppeteerService,
     private readonly actionService: ActionService,
-    private readonly analysisService: AnalysisService
+    private readonly analysisService: AnalysisService,
+    private readonly sharedService: SharedService
   ) {}
 
   /**
@@ -18,13 +21,21 @@ export class WebAgentService {
    * @returns A Promise resolving to an array of data layer objects
    */
   async executeAndGetDataLayer(
-    name: string,
+    projectName: string,
+    testName: string,
     args: string,
     headless: string,
     path?: string
   ) {
     try {
-      const operation = this.actionService.getOperationJson(name, path);
+      const operationOption: FilePathOptions = {
+        name: testName,
+        absolutePath: path,
+      };
+      const operation = this.sharedService.getOperationJson(
+        projectName,
+        operationOption
+      );
       const browser = await this.puppeteerService.initAndReturnBrowser({
         headless: headless === 'true' ? true : false,
       });
@@ -42,24 +53,27 @@ export class WebAgentService {
   }
 
   async executeAndGetDataLayerByProject(
-    project: string,
+    projectName: string,
     args: string,
     headless: string,
     path: string
   ) {
     try {
-      const operations = this.actionService.getOperationJsonByProject(
-        project,
-        path
-      );
+      const specOption: FilePathOptions = {
+        name: projectName,
+        absolutePath: path,
+      };
+
+      const operations =
+        this.sharedService.getOperationJsonByProject(specOption);
       const dataLayers = [];
 
       for (const operation of operations) {
         const dataLayer = await this.executeAndGetDataLayer(
+          projectName,
           operation,
           args,
-          headless,
-          project
+          headless
         );
         dataLayers.push(dataLayer);
       }
