@@ -9,7 +9,7 @@ export class WebAgentController {
   async executeAndGetDataLayer(
     @Param('projectName') projectName: string,
     @Param('name') name: string,
-    @Query('args') args = '',
+    @Query('args') args = [''],
     @Query('headless') headless = 'false',
     @Query('path') path?: string
   ) {
@@ -22,10 +22,29 @@ export class WebAgentController {
     );
   }
 
+  @Get('/action/gtmValidation/:projectName/:name')
+  async executeAndGetDataLayerAndRequest(
+    @Param('projectName') projectName: string,
+    @Param('name') name: string,
+    @Query('args') args = [''],
+    @Query('headless') headless = 'false',
+    @Query('path') path?: string,
+    @Query('measurementId') measurementId?: string
+  ) {
+    return await this.webAgentService.executeAndGetDataLayerAndRequest(
+      projectName,
+      name,
+      args,
+      headless,
+      path,
+      measurementId
+    );
+  }
+
   @Get('/projects/:projectName')
   async executeAndGetDataLayerByProject(
     @Param('projectName') projectName: string,
-    @Query('args') args = '',
+    @Query('args') args = [''],
     @Query('headless') headless = 'false',
     @Query('path') path?: string
   ) {

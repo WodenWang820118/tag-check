@@ -14,10 +14,10 @@ export class GtmOperatorController {
   async observeAndKeepGcsAnomaliesViaGtm(
     @Query('gtmUrl') gtmUrl: string,
     @Query('expectValue') expectValue: string,
-    @Query('loops') loops: string = '1',
-    @Query('chunkSize') chunkSize: string = '1',
-    @Query('args') args: string = '--incognito',
-    @Query('headless') headless = 'false',
+    @Query('loops') loops = '1',
+    @Query('chunkSize') chunkSize = '1',
+    @Query('args') args: string[] = ['--incognito'],
+    @Query('headless') headless = 'false'
   ) {
     return this.gtmOperatorService.observeAndKeepGcsAnomaliesViaGtm(
       gtmUrl,
@@ -25,7 +25,7 @@ export class GtmOperatorController {
       Number(loops),
       Number(chunkSize),
       args,
-      headless,
+      headless
     );
   }
 }

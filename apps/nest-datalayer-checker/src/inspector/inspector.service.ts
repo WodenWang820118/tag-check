@@ -53,7 +53,7 @@ export class InspectorService {
     const result = await this.webAgentService.executeAndGetDataLayer(
       projectName,
       testName,
-      '',
+      [''],
       headless
     );
 

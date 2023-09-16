@@ -12,7 +12,7 @@ import { WebAgentService } from '../web-agent/web-agent.service';
 export class DataLayerCheckerService {
   constructor(
     private readonly airtableService: AirtableService,
-    private readonly webAgentService: WebAgentService,
+    private readonly webAgentService: WebAgentService
   ) {}
 
   /**
@@ -24,8 +24,8 @@ export class DataLayerCheckerService {
    */
   validateDataLayerWithSpecs(specData: object, data: Array<object>): boolean {
     const specs = Object.keys(specData);
-    const matchingDataObj = data.find(ele =>
-      Object.keys(ele).some(key => specs.includes(key)),
+    const matchingDataObj = data.find((ele) =>
+      Object.keys(ele).some((key) => specs.includes(key))
     );
 
     return matchingDataObj
@@ -87,7 +87,7 @@ export class DataLayerCheckerService {
    */
   examineResults(records: Observable<any[]>, fieldName: string) {
     return records.pipe(
-      map(async records => {
+      map(async (records) => {
         for (const record of records) {
           // two cases: 1. operation 2. url
           if (
@@ -101,7 +101,7 @@ export class DataLayerCheckerService {
           }
         }
         return records;
-      }),
+      })
     );
   }
 
@@ -114,19 +114,19 @@ export class DataLayerCheckerService {
         actualDataLayer = await this.webAgentService.executeAndGetDataLayer(
           JSON.parse(record.fields['Recording']),
           '',
-          '',
-          '',
+          [''],
+          ''
         );
       } else if (record.fields['URL']) {
         // if there is a URL to get dataLayer directly, use the URL to get the data layer
         actualDataLayer = await this.webAgentService.fetchDataLayer(
-          record.fields['URL'],
+          record.fields['URL']
         );
       }
       // if there is a code specs, use the code specs to examine the data layer
       result = this.validateDataLayerWithSpecs(
         JSON.parse(record.fields['Code Specs']),
-        actualDataLayer,
+        actualDataLayer
       );
     } catch (error) {
       console.error('Error processing record:', error);
@@ -147,24 +147,24 @@ export class DataLayerCheckerService {
     baseId: string,
     tableId: string,
     fieldName: string,
-    token: string,
+    token: string
   ) {
     const records: Observable<any> = this.airtableService.getRecords(
       baseId,
       tableId,
-      token,
+      token
     );
     const examineResults = this.examineResults(
       records.pipe(
         map(
-          (response: { data: { records: object[] } }) => response.data.records,
-        ),
+          (response: { data: { records: object[] } }) => response.data.records
+        )
       ),
-      fieldName,
+      fieldName
     );
     examineResults
       .pipe(
-        tap(async results => {
+        tap(async (results) => {
           // console.log('results: ', results);
           // If there are no records, return an error
           if (!results) {
@@ -178,11 +178,11 @@ export class DataLayerCheckerService {
           for (const batch of batches) {
             this.airtableService
               .updateCodeSpecRecords(baseId, tableId, batch, fieldName, token)
-              .subscribe(res => {
+              .subscribe((res) => {
                 console.log('res: ', res.status);
               });
           }
-        }),
+        })
       )
       .subscribe();
   }
