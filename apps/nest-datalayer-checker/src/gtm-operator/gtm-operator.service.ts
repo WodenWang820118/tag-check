@@ -17,11 +17,11 @@ export class GtmOperatorService {
    * @param headless Optional boolean flag indicating whether to run the browser in headless mode.
    * @returns An object containing the browser and page instances.
    */
-  async goToPageViaGtm(gtmUrl: string, args?: string, headless?: string) {
+  async goToPageViaGtm(gtmUrl: string, args?: string[], headless?: string) {
     // 1) Open the GTM interface
     const websiteUrl = gtmUrl
       .split('&')
-      .find(element => element.startsWith('url='))
+      .find((element) => element.startsWith('url='))
       .split('=')[1];
 
     // TODO: use web-agent service
@@ -31,18 +31,18 @@ export class GtmOperatorService {
     // });
     const browser = await this.webAgentService.getCurrentBrowser(
       args,
-      headless,
+      headless
     );
     const page = await this.webAgentService.getGtmTestingPage(gtmUrl, browser);
 
     // 2) Do not include the debug mode
-    await page.$('#include-debug-param').then(el => el?.click());
+    await page.$('#include-debug-param').then((el) => el?.click());
 
     // 3) Start tag manager preview mode
-    await page.$('#domain-start-button').then(el => el?.click());
+    await page.$('#domain-start-button').then((el) => el?.click());
 
     // 4) Wait for the page to completely load
-    await browser.waitForTarget(target => target.url() === websiteUrl);
+    await browser.waitForTarget((target) => target.url() === websiteUrl);
     return { browser, page };
   }
 
@@ -55,7 +55,7 @@ export class GtmOperatorService {
     const responses: string[] = [];
 
     // 1) Listen to all responses, push the ones that contain the gcs parameter
-    page.on('response', async response => {
+    page.on('response', async (response) => {
       try {
         if (response.request().url().includes('gcs=')) {
           responses.push(response.request().url());
@@ -65,7 +65,7 @@ export class GtmOperatorService {
       }
     });
 
-    await page.waitForResponse(response => response.url().includes('gcs='));
+    await page.waitForResponse((response) => response.url().includes('gcs='));
     return responses;
   }
 
@@ -76,7 +76,7 @@ export class GtmOperatorService {
    * @param headless Optional boolean flag indicating whether to run the browser in headless mode.
    * @returns An object containing the browser instance and an array of GCS.
    */
-  async observeGcsViaGtm(gtmUrl: string, args?: string, headless?: string) {
+  async observeGcsViaGtm(gtmUrl: string, args?: string[], headless?: string) {
     const { browser, page } = await this.goToPageViaGtm(gtmUrl, args, headless);
     const pages = await browser.pages();
     const responses = await this.crawlPageResponses(pages[pages.length - 1]);
@@ -99,8 +99,8 @@ export class GtmOperatorService {
     expectValue: string,
     loops: number,
     chunkSize: number,
-    args?: string,
-    headless?: string,
+    args?: string[],
+    headless?: string
   ) {
     const report = [];
     let anomalyCount = 0;
@@ -109,12 +109,12 @@ export class GtmOperatorService {
 
     for (let i = 0; i < chunkedLoops.length; i++) {
       const chunkReport = await Promise.all(
-        chunkedLoops[i].map(async index => {
+        chunkedLoops[i].map(async (index) => {
           try {
             const { browser, gcs } = await this.observeGcsViaGtm(
               gtmUrl,
               args,
-              headless,
+              headless
             );
             if (!gcs.includes(expectValue)) {
               console.log(
@@ -122,7 +122,7 @@ export class GtmOperatorService {
                   'Batch: ' +
                   (i + 1) +
                   ' with instances ' +
-                  index,
+                  index
               );
               console.log(gcs);
               anomalyCount++;
@@ -138,7 +138,7 @@ export class GtmOperatorService {
                   'Batch: ' +
                   (i + 1) +
                   ' with instances ' +
-                  index,
+                  index
               );
               await browser.close();
               return {
@@ -150,7 +150,7 @@ export class GtmOperatorService {
           } catch (error) {
             console.log(error);
           }
-        }),
+        })
       );
       report.push(...chunkReport);
     }
