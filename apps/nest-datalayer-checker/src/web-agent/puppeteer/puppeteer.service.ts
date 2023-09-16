@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Browser, Page } from 'puppeteer';
+import { Browser, BrowserLaunchArgumentOptions, Page } from 'puppeteer';
 import * as puppeteer from 'puppeteer';
 
 enum BrowserAction {
@@ -15,7 +15,7 @@ export class PuppeteerService {
    * @param settings Optional browser settings
    * @returns A Promise resolving to the Browser instance
    */
-  async initAndReturnBrowser(settings?: object) {
+  async initAndReturnBrowser(settings: BrowserLaunchArgumentOptions) {
     return await puppeteer.launch(settings);
   }
 
@@ -25,7 +25,7 @@ export class PuppeteerService {
    * @param browser The browser instance to use
    * @returns A Promise resolving to the Page instance
    */
-  async nativateTo(url: string, browser: Browser) {
+  async navigateTo(url: string, browser: Browser) {
     const page = await browser.newPage();
     await page.goto(url);
     return page;
