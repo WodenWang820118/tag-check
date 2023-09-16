@@ -61,6 +61,9 @@ export class ActionService {
           break;
 
         case BrowserAction.CLICK:
+          // click too fast will be identified as bot, _s=number at the end of the url
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+
           await this.handleClick(page, step);
           break;
 
@@ -79,8 +82,8 @@ export class ActionService {
 
   async handleSetViewport(page: Page, step: any) {
     await page.setViewport({
-      width: step.width,
-      height: step.height,
+      width: step.width + (1920 - step.width),
+      height: step.height + (1080 - step.height),
     });
   }
 

@@ -4,7 +4,8 @@ import { Page } from 'puppeteer';
 import { USER_AGENT } from '../../configs/puppeteer.config';
 
 @Injectable()
-export class AnalysisService {
+export class WebMonitoringService {
+  private requests: string[] = [];
   constructor(private puppeteerService: PuppeteerService) {}
 
   /**
@@ -71,10 +72,12 @@ export class AnalysisService {
    * @returns A Promise resolving to an array of GTM IDs
    */
   async detectGtm(url: string) {
-    const browser = await this.puppeteerService.initAndReturnBrowser();
+    const browser = await this.puppeteerService.initAndReturnBrowser({
+      headless: true,
+    });
 
     try {
-      const page = await this.puppeteerService.nativateTo(url, browser);
+      const page = await this.puppeteerService.navigateTo(url, browser);
       const result = await this.getInstalledGtms(page, url);
       // console.dir('result', result);
       return result;
@@ -90,30 +93,7 @@ export class AnalysisService {
    * @returns A Promise resolving to an array of request URLs
    */
   async getAllRequests(page: Page, url: string): Promise<string[]> {
-    const requests: string[] = [];
-    await page.setRequestInterception(true);
-    await page.setUserAgent(USER_AGENT);
-
-    // This handler function captures the request URLs
-    const requestHandler = async (request: {
-      isInterceptResolutionHandled: () => any;
-      url: () => string;
-      continue: () => any;
-    }) => {
-      try {
-        if (request.isInterceptResolutionHandled()) return;
-        requests.push(request.url());
-        await request.continue();
-      } catch (error) {
-        console.error('Error in request interception:', error);
-        // Cleanup before rethrowing
-        page.off('request', requestHandler);
-        throw error;
-      }
-    };
-
-    // Attach the handler
-    page.on('request', requestHandler);
+    await this.initializeRequestCapture(page);
 
     try {
       await page.goto(url);
@@ -121,13 +101,28 @@ export class AnalysisService {
     } catch (error) {
       console.error('Error while navigating:', error);
       throw error;
-    } finally {
-      // Cleanup: Ensure the listener is removed to avoid potential memory leaks
-      page.off('request', requestHandler);
-      // It's a good practice to turn off request interception after done
-      await page.setRequestInterception(false);
     }
+    return await this.stopRequestCapture(page);
+  }
 
-    return requests;
+  async initializeRequestCapture(page: Page): Promise<void> {
+    this.requests = []; // Reset the request list
+
+    await page.setRequestInterception(true);
+    await page.setUserAgent(USER_AGENT);
+
+    const requestHandler = async (request) => {
+      if (request.isInterceptResolutionHandled()) return;
+      this.requests.push(request.url());
+      await request.continue();
+    };
+
+    page.on('request', requestHandler);
+  }
+
+  async stopRequestCapture(page: Page): Promise<string[]> {
+    page.removeAllListeners('request');
+    await page.setRequestInterception(false);
+    return this.requests;
   }
 }
