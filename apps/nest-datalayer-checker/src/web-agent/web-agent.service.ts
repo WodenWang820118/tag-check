@@ -178,6 +178,16 @@ export class WebAgentService {
         eventRequest = request.url();
       }
 
+      // 3) save screenshots/videos
+      // TODO: temporary solution, it could be better in different stages of the workflow
+      const resultFolder =
+        this.sharedService.getReportSavingFolder(projectName);
+      await this.puppeteerService.snapshot(
+        page,
+        `${resultFolder}/${testName}.png`
+      );
+
+      // 4) close the browser
       await browser.close();
 
       return {

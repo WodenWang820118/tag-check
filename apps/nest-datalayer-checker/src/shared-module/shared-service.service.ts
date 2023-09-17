@@ -7,6 +7,7 @@ import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 const rootDir = process.cwd();
 const rootProjectFolder = 'projects';
 const recordingFolder = 'dataLayer_recordings';
+const resultFolder = 'dataLayer_inspection_results';
 const configFolder = 'config';
 
 @Injectable()
@@ -32,6 +33,10 @@ export class SharedService {
       console.error('An error occurred:', error);
       return null;
     }
+  }
+
+  getReportSavingFolder(projectName: string) {
+    return path.join(rootDir, rootProjectFolder, projectName, resultFolder);
   }
 
   getOperationJson(projectName: string, options: FilePathOptions) {
