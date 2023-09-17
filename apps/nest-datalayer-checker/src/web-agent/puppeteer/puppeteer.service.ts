@@ -47,4 +47,8 @@ export class PuppeteerService {
       password: credentials.password,
     });
   }
+
+  async snapshot(page: Page, path: string) {
+    await page.screenshot({ path });
+  }
 }
