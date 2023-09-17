@@ -3,7 +3,7 @@ import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
 import { SharedService } from '../shared-module/shared-service.service';
-import { Browser } from 'puppeteer';
+import { Browser, Credentials } from 'puppeteer';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 
 @Injectable()
@@ -20,7 +20,8 @@ export class WebAgentService {
     testName: string,
     args: string[],
     headless: string,
-    path?: string
+    path?: string,
+    credentials?: Credentials
   ) {
     const headlessBool = headless === 'true' ? true : false;
     const { dataLayer } = await this.performTest(
@@ -28,7 +29,10 @@ export class WebAgentService {
       testName,
       args,
       headlessBool,
-      path
+      path,
+      false,
+      null,
+      credentials
     );
     return dataLayer;
   }
@@ -37,7 +41,8 @@ export class WebAgentService {
     projectName: string,
     args: string[],
     headless: string,
-    path: string
+    path: string,
+    credentials?: Credentials
   ) {
     try {
       const specOption: FilePathOptions = {
@@ -54,7 +59,9 @@ export class WebAgentService {
           projectName,
           operation,
           args,
-          headless
+          headless,
+          path,
+          credentials
         );
         dataLayers.push(dataLayer);
       }
@@ -65,11 +72,15 @@ export class WebAgentService {
     }
   }
 
-  async fetchDataLayer(url: string) {
+  async fetchDataLayer(url: string, credentials?: Credentials) {
     const browser = await this.puppeteerService.initAndReturnBrowser({
       headless: true,
     });
-    const page = await this.puppeteerService.navigateTo(url, browser);
+    const page = await this.puppeteerService.navigateTo(
+      url,
+      browser,
+      credentials
+    );
     const result = await this.webMonitoringService.getDataLayer(page);
     await browser.close();
     return result;
@@ -96,7 +107,8 @@ export class WebAgentService {
     args: string[],
     headless: string,
     path?: string,
-    measurementId?: string
+    measurementId?: string,
+    credentials?: Credentials
   ) {
     const headlessBool = headless === 'true' ? true : false;
     const { dataLayer, eventRequest } = await this.performTest(
@@ -106,7 +118,8 @@ export class WebAgentService {
       headlessBool,
       path,
       true,
-      measurementId
+      measurementId,
+      credentials
     );
     return {
       dataLayer,
@@ -121,7 +134,8 @@ export class WebAgentService {
     headless: boolean,
     path?: string,
     captureRequest = false,
-    measurementId?: string
+    measurementId?: string,
+    credentials?: Credentials
   ) {
     // 1) gather all necessary data
     const operationOption: FilePathOptions = {
@@ -139,7 +153,11 @@ export class WebAgentService {
       args: args,
     });
 
-    await this.puppeteerService.navigateTo(operation.steps[1].url, browser);
+    await this.puppeteerService.navigateTo(
+      operation.steps[1].url,
+      browser,
+      credentials
+    );
 
     const pages = await browser.pages();
     const page = pages[pages.length - 1];

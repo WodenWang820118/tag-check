@@ -11,14 +11,20 @@ export class WebAgentController {
     @Param('name') name: string,
     @Query('args') args = [''],
     @Query('headless') headless = 'false',
-    @Query('path') path?: string
+    @Query('path') path?: string,
+    @Query('username') username?: string,
+    @Query('password') password?: string
   ) {
     return await this.webAgentService.executeAndGetDataLayer(
       projectName,
       name,
       args,
       headless,
-      path
+      path,
+      {
+        username,
+        password,
+      }
     );
   }
 
@@ -29,7 +35,9 @@ export class WebAgentController {
     @Query('args') args = [''],
     @Query('headless') headless = 'false',
     @Query('path') path?: string,
-    @Query('measurementId') measurementId?: string
+    @Query('measurementId') measurementId?: string,
+    @Query('username') username?: string,
+    @Query('password') password?: string
   ) {
     return await this.webAgentService.executeAndGetDataLayerAndRequest(
       projectName,
@@ -37,7 +45,11 @@ export class WebAgentController {
       args,
       headless,
       path,
-      measurementId
+      measurementId,
+      {
+        username,
+        password,
+      }
     );
   }
 
@@ -46,13 +58,19 @@ export class WebAgentController {
     @Param('projectName') projectName: string,
     @Query('args') args = [''],
     @Query('headless') headless = 'false',
-    @Query('path') path?: string
+    @Query('path') path?: string,
+    @Query('username') username?: string,
+    @Query('password') password?: string
   ) {
     return await this.webAgentService.executeAndGetDataLayerByProject(
       projectName,
       args,
       headless,
-      path
+      path,
+      {
+        username,
+        password,
+      }
     );
   }
 }
