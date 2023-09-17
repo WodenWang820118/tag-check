@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { Browser, BrowserLaunchArgumentOptions, Page } from 'puppeteer';
+import {
+  Browser,
+  BrowserLaunchArgumentOptions,
+  Credentials,
+  Page,
+} from 'puppeteer';
 import * as puppeteer from 'puppeteer';
-
-enum BrowserAction {
-  CLICK = 'click',
-  NAVIGATE = 'navigate',
-  SETVIEWPORT = 'setViewport',
-}
 
 @Injectable()
 export class PuppeteerService {
@@ -25,8 +24,11 @@ export class PuppeteerService {
    * @param browser The browser instance to use
    * @returns A Promise resolving to the Page instance
    */
-  async navigateTo(url: string, browser: Browser) {
+  async navigateTo(url: string, browser: Browser, credentials?: Credentials) {
     const page = await browser.newPage();
+    if (credentials) {
+      await this.httpAuth(page, credentials);
+    }
     await page.goto(url);
     return page;
   }
@@ -39,7 +41,7 @@ export class PuppeteerService {
    * @param credentials The authentication credentials
    * @returns A Promise resolving when authentication is complete
    */
-  async httpAuth(page: Page, credentials: any) {
+  async httpAuth(page: Page, credentials: puppeteer.Credentials) {
     await page.authenticate({
       username: credentials.username,
       password: credentials.password,
