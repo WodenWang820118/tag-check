@@ -1,7 +1,7 @@
 // Base types for known properties
 export interface BaseItem {
-  item_id: string;
-  item_name: string;
+  item_id?: string;
+  item_name?: string;
   affiliation?: string;
   coupon?: string;
   discount?: string;
