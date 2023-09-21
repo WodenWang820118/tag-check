@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
-import { SharedService } from '../shared-module/shared-service.service';
+import { SharedService } from '../shared/shared.service';
 import { Browser, Credentials } from 'puppeteer';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 

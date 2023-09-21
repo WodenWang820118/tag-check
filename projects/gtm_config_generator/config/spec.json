@@ -1,6 +1,0 @@
-[
-  { "event": "btn_upload_click" },
-  { "event": "btn_convert_click" },
-  { "event": "btn_copy_click" },
-  { "event": "btn_download_click" }
-]

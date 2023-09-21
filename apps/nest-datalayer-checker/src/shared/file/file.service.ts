@@ -1,25 +1,22 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import * as path from 'path';
 import * as fs from 'fs';
 import { readFileSync } from 'fs';
-import { FilePathOptions } from '../interfaces/filePathOptions.interface';
-
-const rootDir = process.cwd();
-const rootProjectFolder = 'projects';
-const recordingFolder = 'dataLayer_recordings';
-const resultFolder = 'dataLayer_inspection_results';
-const configFolder = 'config';
+import path from 'path';
+import { configFolder, recordingFolder, resultFolder } from '../utilities';
+import { FilePathOptions } from '../../interfaces/filePathOptions.interface';
+import { ProjectService } from '../project/project.service';
 
 @Injectable()
-export class SharedService {
+export class FileService {
+  constructor(private readonly projectService: ProjectService) {}
+
   private buildFilePath(
     projectName: string,
     folderName: string,
     fileName?: string
   ) {
     return path.join(
-      rootDir,
-      rootProjectFolder,
+      this.projectService.rootProjectFolder,
       projectName,
       folderName,
       fileName || ''
@@ -36,13 +33,15 @@ export class SharedService {
   }
 
   getReportSavingFolder(projectName: string) {
-    return path.join(rootDir, rootProjectFolder, projectName, resultFolder);
+    return path.join(
+      this.projectService.rootProjectFolder,
+      projectName,
+      resultFolder
+    );
   }
 
   getOperationJson(projectName: string, options: FilePathOptions) {
-    if (!projectName || !options) {
-      throw new BadRequestException('Project name or options cannot be empty');
-    }
+    this.validateInput(projectName, options);
 
     const filePath =
       options.absolutePath ||
@@ -72,6 +71,12 @@ export class SharedService {
     } catch (error) {
       console.error('An error occurred:', error);
       return [];
+    }
+  }
+
+  private validateInput(projectName: string, options: FilePathOptions): void {
+    if (!projectName || !options) {
+      throw new BadRequestException('Project name or options cannot be empty');
     }
   }
 }
