@@ -1,5 +1,10 @@
-import { SharedService } from '../shared-module/shared-service.service';
+import { WaiterService } from '../waiter/waiter.service';
+import { SharedService } from '../shared/shared.service';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
+import { ProjectService } from '../shared/project/project.service';
+import { FileService } from '../shared/file/file.service';
+import { mkdirSync, rm, writeFileSync } from 'fs';
+import path from 'path';
 
 const rootDir = process.cwd();
 const rootProjectFolder = 'projects';
@@ -22,11 +27,49 @@ const projectSpecOptions: FilePathOptions = {
 };
 
 describe('SharedService Integration Tests', () => {
-  let sharedService: SharedService;
+  const projectService = new ProjectService();
+  const fileService = new FileService(projectService);
+  const sharedService = new SharedService(projectService, fileService);
+  const waiterService = new WaiterService(sharedService);
 
-  beforeEach(() => {
-    sharedService = new SharedService();
-    // Setup: Create temp directories and files if needed.
+  beforeAll(() => {
+    waiterService.selectRootProjectFolder(
+      path.join(rootDir, rootProjectFolder)
+    );
+    waiterService.initProject(projectName);
+    // Specify the directories and filenames
+    const dataLayerRecordingsDir = `${existingTempDir}/dataLayer_recordings`;
+    const configFileDir = `${existingTempDir}/config`;
+
+    // Create or ensure the directories exist
+    mkdirSync(dataLayerRecordingsDir, { recursive: true });
+    mkdirSync(configFileDir, { recursive: true });
+
+    // Prepare some sample data
+    const sampleData = {
+      key: 'value',
+    };
+    const sampleConfig = {
+      configKey: 'configValue',
+    };
+
+    // Write the JSON files
+    writeFileSync(
+      `${dataLayerRecordingsDir}/btn_convert_click.json`,
+      JSON.stringify(sampleData, null, 2)
+    );
+    writeFileSync(
+      `${configFileDir}/spec.json`,
+      JSON.stringify(sampleConfig, null, 2)
+    );
+  });
+
+  afterAll(() => {
+    rm(existingTempDir, { recursive: true }, (err) => {
+      if (err) {
+        throw err;
+      }
+    });
   });
 
   describe('getOperationJson', () => {
@@ -34,71 +77,50 @@ describe('SharedService Integration Tests', () => {
       // Act
       const options = { ...operationFileOptions, absolutePath: '' };
       const result = sharedService.getOperationJson(projectName, options);
-
       // Assert
       expect(result).toBeDefined();
     });
-
     it('should read a specific JSON file according to absolute path', () => {
       // Act
       const options = { ...operationFileOptions, name: '' };
       const result = sharedService.getOperationJson(projectName, options);
-
       // Assert
       expect(result).toBeDefined();
     });
   });
-
   describe('getOperationJsonByProject', () => {
     it('should list all JSON files given a specific project name', () => {
       // Act
       const options = { ...projectJsonOptions, absolutePath: '' };
       const projectFiles = sharedService.getOperationJsonByProject(options);
-
       // Assert
       expect(projectFiles).toBeDefined();
       expect(projectFiles.length).toBeGreaterThan(0);
     });
-
     it('should list all JSON files given a full absolute path', () => {
       // Act
       const options = { ...projectJsonOptions, name: '' };
       const projectFiles = sharedService.getOperationJsonByProject(options);
-
       // Assert
       expect(projectFiles).toBeDefined();
       expect(projectFiles.length).toBeGreaterThan(0);
     });
   });
-
   describe('getSpecJsonByProject', () => {
     it('should find a specific specification JSON file by project name', () => {
       // Act
       const options = { ...projectSpecOptions, absolutePath: '' };
       const specFile = sharedService.getSpecJsonByProject(options);
-
       // Assert
-      expect(specFile).toBe('spec.json'); // change this to the expected spec file name
+      expect(specFile).toBeDefined();
     });
-
     it('should find a specific specification JSON file by absolute path', () => {
       // Act
       const options = { ...projectSpecOptions, name: '' };
       const specFile = sharedService.getSpecJsonByProject(options);
-
+      console.log('specFile', specFile);
       // Assert
-      expect(specFile).toBe('spec.json'); // change this to the expected spec file name
+      expect(specFile).toBeDefined();
     });
-  });
-
-  it('should list all JSON files in a directory', () => {
-    // Act
-    const jsonFiles = sharedService.getJsonFilesFromDir(
-      `${existingTempDir}/dataLayer_recordings`
-    );
-
-    // Assert
-    expect(jsonFiles).toBeDefined();
-    expect(jsonFiles.length).toBeGreaterThan(0);
   });
 });

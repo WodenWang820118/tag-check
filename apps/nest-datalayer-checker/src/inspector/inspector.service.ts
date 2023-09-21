@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { WebAgentService } from '../web-agent/web-agent.service';
-import { SharedService } from '../shared-module/shared-service.service';
+import { SharedService } from '../shared/shared.service';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import {
   EcommerceEventValidationStrategy,
@@ -43,7 +43,6 @@ export class InspectorService {
       name: projectName,
       absolutePath: path,
     };
-
     const specs = this.sharedService.getSpecJsonByProject(specOption);
 
     // expectedObj is the spec to be compared with the result
