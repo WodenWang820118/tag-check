@@ -8,3 +8,4 @@ This version mimics users' behaviors to use the app.
 2. `http://localhost:8080/waiter/setProjectName?projectName=<name>`: select a existed project based on the folder name, otherwise
 3. `http://localhost:8080/waiter/initProject?projectName=<name>`: initialize the project if it's not existed
 4. Other APIs for testing automation
+   Note the `cachedSetting.json` might be used for the integration test, so it might lose original settings for the real usage.
