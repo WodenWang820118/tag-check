@@ -5,7 +5,7 @@ import { PuppeteerModule } from './puppeteer/puppeteer.module';
 import { UtilitiesModule } from './utilities/utilities.module';
 import { WebAgentService } from './web-agent.service';
 import { WebAgentController } from './web-agent.controller';
-import { SharedModule } from '../shared-module/shared-module.module';
+import { SharedModule } from '../shared/shared.module';
 
 @Module({
   imports: [
