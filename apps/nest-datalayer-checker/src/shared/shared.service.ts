@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import { ProjectService } from './project/project.service';
 import { FileService } from './file/file.service';
+import { XlsxReportService } from './xlsx-report/xlsx-report.service';
 
 @Injectable()
 export class SharedService {
   constructor(
     private readonly projectService: ProjectService,
-    private readonly fileService: FileService
+    private readonly fileService: FileService,
+    private readonly xlsxReportService: XlsxReportService
   ) {}
 
   get rootProjectFolder() {
@@ -44,5 +46,19 @@ export class SharedService {
 
   getSpecJsonByProject(options: FilePathOptions) {
     return this.fileService.getSpecJsonByProject(options);
+  }
+
+  writeXlsxFile(
+    filename: string,
+    filePath: string,
+    sheetName: string,
+    data: any[]
+  ) {
+    return this.xlsxReportService.writeXlsxFile(
+      filename,
+      filePath,
+      sheetName,
+      data
+    );
   }
 }
