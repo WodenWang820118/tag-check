@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AirtableModule } from './airtable/airtable.module';
-import { DataLayerCheckerModule } from './data-layer-checker/data-layer-checker.module';
-import { GtmOperatorModule } from './gtm-operator/gtm-operator.module';
+import { AirtableModule } from './unsorted-endpoints/airtable/airtable.module';
+import { DataLayerCheckerModule } from './unsorted-endpoints/data-layer-checker/data-layer-checker.module';
+import { GtmOperatorModule } from './unsorted-endpoints/gtm-operator/gtm-operator.module';
 import { WebAgentModule } from './web-agent/web-agent.module';
 import { SharedModule } from './shared/shared.module';
 import { InspectorModule } from './inspector/inspector.module';

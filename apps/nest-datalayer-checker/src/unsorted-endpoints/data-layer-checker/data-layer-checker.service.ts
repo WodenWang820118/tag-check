@@ -1,8 +1,8 @@
 import { Observable, map, tap } from 'rxjs';
 import { Injectable } from '@nestjs/common';
 import { AirtableService } from '../airtable/airtable.service';
-import { chunk } from '../utilities/utilities';
-import { WebAgentService } from '../web-agent/web-agent.service';
+import { chunk } from '../../utilities/utilities';
+import { WebAgentService } from '../../web-agent/web-agent.service';
 
 /**
  * DataLayerCheckerService

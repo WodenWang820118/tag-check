@@ -50,15 +50,17 @@ export class SharedService {
 
   writeXlsxFile(
     filename: string,
-    filePath: string,
     sheetName: string,
-    data: any[]
+    data: any,
+    testName?: string,
+    projectName?: string
   ) {
     return this.xlsxReportService.writeXlsxFile(
       filename,
-      filePath,
       sheetName,
-      data
+      data,
+      testName,
+      projectName
     );
   }
 }
