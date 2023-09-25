@@ -20,4 +20,13 @@ export class WaiterController {
   selectProject(@Query('projectName') projectName: string) {
     return this.waiterService.selectProject(projectName);
   }
+
+  @Get('/writeXlsxFile')
+  writeXlsxFile(
+    @Query('filename') filename: string,
+    @Query('filePath') filePath: string,
+    @Query('sheetName') sheetName: string
+  ) {
+    return this.waiterService.writeXlsxFile(filename, filePath, sheetName);
+  }
 }

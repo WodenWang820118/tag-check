@@ -19,4 +19,19 @@ export class WaiterService {
   selectProject(projectName: string) {
     this.sharedService.projectFolder = projectName;
   }
+
+  writeXlsxFile(filename: string, filePath: string, sheetName: string) {
+    // TODO: arrange the actual data
+    const data = [
+      {
+        name: 'John Doe',
+        age: 24,
+      },
+      {
+        name: 'Jane Doe',
+        age: 25,
+      },
+    ];
+    this.sharedService.writeXlsxFile(filename, filePath, sheetName, data);
+  }
 }
