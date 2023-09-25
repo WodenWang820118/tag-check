@@ -26,6 +26,8 @@ export class RequestProcessorService {
     const enIndex = queryString.indexOf('en=' + event);
     if (enIndex === -1) return;
 
+    // TODO: will need all parameters for other issues
+    // payload request when parameters are too long
     const remainingParams = queryString.slice(
       enIndex + ('en=' + event).length + 1
     );
@@ -88,7 +90,9 @@ export class RequestProcessorService {
     this.addCustomEventParameters(dataLayer, queryString, event);
     const items = this.extractItems(queryParams, queryString);
 
-    dataLayer.items = items;
+    if (items.length) {
+      dataLayer.items = items;
+    }
     return dataLayer;
   }
 

@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DataLayerCheckerService } from './data-layer-checker.service';
 import { AirtableService } from '../airtable/airtable.service';
 import { mockAirtableService } from '../airtable/airtable.service.spec';
-import { PuppeteerService } from '../web-agent/puppeteer/puppeteer.service';
-import { mockPuppeteerService } from '../web-agent/puppeteer/puppeteer.service.spec';
+import { PuppeteerService } from '../../web-agent/puppeteer/puppeteer.service';
+import { mockPuppeteerService } from '../../web-agent/puppeteer/puppeteer.service.spec';
 
 export const mockDataLayerCheckerService = {
   examineResults: jest
@@ -64,9 +64,9 @@ describe('DataLayerCheckerService', () => {
       'should return $expected when $desc',
       ({ specData, data, expected }) => {
         expect(service.validateDataLayerWithSpecs(specData, data)).toBe(
-          expected,
+          expected
         );
-      },
+      }
     );
 
     it('should return true if a matching object is found', () => {
@@ -109,7 +109,7 @@ describe('DataLayerCheckerService', () => {
       'should return $expected when $desc',
       ({ specObj, dataObj, expected }) => {
         expect(service.validateSchema(specObj, dataObj)).toBe(expected);
-      },
+      }
     );
   });
 });

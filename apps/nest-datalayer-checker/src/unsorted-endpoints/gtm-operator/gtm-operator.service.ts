@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { chunk } from '../utilities/utilities';
-import { WebAgentService } from '../web-agent/web-agent.service';
+import { chunk } from '../../utilities/utilities';
+import { WebAgentService } from '../../web-agent/web-agent.service';
 
 /**
  * A service for interacting with Google Tag Manager (GTM) via Puppeteer.
