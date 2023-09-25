@@ -32,9 +32,4 @@ export class InspectorController {
       path
     );
   }
-
-  @Get('/process/request')
-  async processRequest() {
-    return await this.inspectorService.processRequest();
-  }
 }

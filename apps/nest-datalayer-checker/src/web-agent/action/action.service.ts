@@ -50,6 +50,8 @@ export class ActionService {
   async performOperation(page: Page, operation: any) {
     if (!operation || !operation.steps) return;
 
+    const randomDelay = 3000 + Math.floor(Math.random() * 2000);
+
     for (const step of operation.steps) {
       switch (step.type) {
         case BrowserAction.SETVIEWPORT:
@@ -62,12 +64,12 @@ export class ActionService {
 
         case BrowserAction.CLICK:
           // click too fast will be identified as bot, _s=number at the end of the url
-          await new Promise((resolve) => setTimeout(resolve, 3000));
-
+          await new Promise((resolve) => setTimeout(resolve, randomDelay));
           await this.handleClick(page, step);
           break;
 
         case BrowserAction.CHANGE:
+          await new Promise((resolve) => setTimeout(resolve, randomDelay));
           await this.handleChange(page, step);
           break;
 
@@ -89,6 +91,9 @@ export class ActionService {
 
   async handleNavigate(page: Page, step: any) {
     await page.goto(step.url);
+    // await page.reload({
+    //   waitUntil: 'networkidle2',
+    // });
   }
 
   async handleClick(page: Page, step: any): Promise<void> {

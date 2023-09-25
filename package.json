@@ -42,6 +42,7 @@
     "@nestjs/core": "^10.0.2",
     "@nestjs/platform-express": "^10.0.2",
     "axios": "^1.0.0",
+    "exceljs": "^4.3.0",
     "nestjs-spelunker": "^1.1.5",
     "puppeteer": "^21.1.0",
     "reflect-metadata": "^0.1.13",
