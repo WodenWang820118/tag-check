@@ -45,11 +45,13 @@ export class WaiterService {
     );
 
     // 3.2) construct the data to be written to the xlsx file
-    // TODO: how to include snapshots?
+
     const data = [
       {
         dataLayerResult: JSON.stringify(result.dataLayerCheckResult, null, 2),
-        requestCheckResult: JSON.stringify(result.requestCheckResult, null, 2),
+        requestCheckResult: result.requestCheckResult
+          ? JSON.stringify(result.requestCheckResult, null, 2)
+          : '',
       },
     ];
     // 3.3) write the data to the xlsx file
@@ -60,9 +62,11 @@ export class WaiterService {
       testName,
       projectName
     );
-  }
-  // 3) inspect all operations under a project
 
+    return data;
+  }
+
+  // 3) inspect all operations under a project
   async inspectProject(
     projectName: string,
     headless: string,
@@ -83,7 +87,9 @@ export class WaiterService {
     const data = result.map((item) => {
       return {
         dataLayerResult: JSON.stringify(item.dataLayerCheckResult, null, 2),
-        requestCheckResult: JSON.stringify(item.requestCheckResult, null, 2),
+        requestCheckResult: item.requestCheckResult
+          ? JSON.stringify(item.requestCheckResult, null, 2)
+          : '',
       };
     });
 
@@ -97,5 +103,7 @@ export class WaiterService {
       undefined,
       projectName
     );
+
+    return data;
   }
 }

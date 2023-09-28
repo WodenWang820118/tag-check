@@ -54,37 +54,63 @@ export class InspectorService {
     );
 
     // 2. Execute the recording script and get the result
-    const result = await this.webAgentService.executeAndGetDataLayerAndRequest(
-      projectName,
-      testName,
-      [''],
-      headless,
-      path,
-      measurementId,
-      credentials
-    );
+    // switch the measurementId to determine whether to grab requests
+    switch (measurementId) {
+      case undefined: {
+        const result = await this.webAgentService.executeAndGetDataLayer(
+          projectName,
+          testName,
+          [''],
+          headless,
+          path
+        );
 
-    // 3. Compare the result with the project spec
-    // 3.1 Get the corresponding event object from the result
-    // 3.2 Compare the expectedObj with the result, applying strategies
-    const dataLayerCheckResult = this.isDataLayerCorrect(
-      result.dataLayer,
-      expectedObj
-    );
+        // 3. Compare the result with the project spec
+        // 3.1 Get the corresponding event object from the result
+        // 3.2 Compare the expectedObj with the result, applying strategies
+        const dataLayerCheckResult = this.isDataLayerCorrect(
+          result,
+          expectedObj
+        );
 
-    const recomposedRequest = this.requestProcessorService.recomposeGA4ECEvent(
-      result.eventRequest
-    );
+        return {
+          dataLayerCheckResult,
+        };
+      }
+      default: {
+        const result =
+          await this.webAgentService.executeAndGetDataLayerAndRequest(
+            projectName,
+            testName,
+            [''],
+            headless,
+            path,
+            measurementId,
+            credentials
+          );
 
-    const requestCheckResult = this.isDataLayerCorrect(
-      [recomposedRequest],
-      expectedObj
-    );
+        // 3. Compare the result with the project spec
+        // 3.1 Get the corresponding event object from the result
+        // 3.2 Compare the expectedObj with the result, applying strategies
+        const dataLayerCheckResult = this.isDataLayerCorrect(
+          result.dataLayer,
+          expectedObj
+        );
 
-    return {
-      dataLayerCheckResult,
-      requestCheckResult,
-    };
+        const recomposedRequest =
+          this.requestProcessorService.recomposeGA4ECEvent(result.eventRequest);
+
+        const requestCheckResult = this.isDataLayerCorrect(
+          [recomposedRequest],
+          expectedObj
+        );
+
+        return {
+          dataLayerCheckResult,
+          requestCheckResult,
+        };
+      }
+    }
   }
 
   async inspectProjectDataLayer(
@@ -97,7 +123,6 @@ export class InspectorService {
     const operations = this.sharedService.getOperationJsonByProject({
       name: projectName,
     });
-    // console.log(operations);
     const results = [];
     for (const operation of operations) {
       try {
