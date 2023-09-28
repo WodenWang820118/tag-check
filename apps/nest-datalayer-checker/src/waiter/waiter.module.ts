@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
-import { WaiterController } from './waiter.controller';
+import { WaiterController } from './waiter-path.controller';
+import { WaiterQaController } from './waiter-qa.controller';
+import { WaiterDataLayerController } from './waiter-datalayer.controller';
 
 // other modules
 import { FileModule } from '../shared/file/file.module';
@@ -39,7 +41,11 @@ const sharedServices = [
 ];
 @Module({
   imports: [SharedModule, FileModule, WebAgentModule, InspectorModule],
-  controllers: [WaiterController],
+  controllers: [
+    WaiterController,
+    WaiterQaController,
+    WaiterDataLayerController,
+  ],
   providers: [
     ...inspectorServices,
     ...webAgentServices,
