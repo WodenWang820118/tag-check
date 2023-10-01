@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { chunk } from '../../utilities/utilities';
 import { WebAgentService } from '../../web-agent/web-agent.service';
@@ -61,7 +61,10 @@ export class GtmOperatorService {
           responses.push(response.request().url());
         }
       } catch (error) {
-        console.log(error);
+        throw new HttpException(
+          'An error occurred while crawling the page responses.',
+          500
+        );
       }
     });
 
@@ -148,7 +151,10 @@ export class GtmOperatorService {
               };
             }
           } catch (error) {
-            console.log(error);
+            throw new HttpException(
+              'An error occurred while observing the GCS via GTM.',
+              500
+            );
           }
         })
       );

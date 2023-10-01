@@ -27,8 +27,10 @@ export class FileService {
     try {
       return JSON.parse(readFileSync(`${filePath}`, 'utf8'));
     } catch (error) {
-      console.error('An error occurred:', error);
-      return null;
+      // console.error('An error occurred:', error);
+      throw new BadRequestException(
+        `An error occurred while reading the file: ${filePath}`
+      );
     }
   }
 
@@ -69,8 +71,9 @@ export class FileService {
       const files = fs.readdirSync(dirPath);
       return files.filter((file) => path.extname(file) === '.json');
     } catch (error) {
-      console.error('An error occurred:', error);
-      return [];
+      throw new BadRequestException(
+        `An error occurred while reading the directory: ${dirPath}`
+      );
     }
   }
 
