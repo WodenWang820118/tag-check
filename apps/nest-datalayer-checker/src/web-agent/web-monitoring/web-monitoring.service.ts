@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { PuppeteerService } from '../puppeteer/puppeteer.service';
 import { Page } from 'puppeteer';
 import { USER_AGENT } from '../../configs/puppeteer.config';
@@ -31,8 +31,11 @@ export class WebMonitoringService {
       }
       return dataLayer;
     } catch (error) {
-      console.error(error);
-      throw new Error(error);
+      // throw new Error(error);
+      throw new HttpException(
+        'DataLayer is empty or undefined',
+        error.status || 500
+      );
     }
   }
 
