@@ -49,9 +49,11 @@ export class WaiterService {
     const data = [
       {
         dataLayerResult: JSON.stringify(result.dataLayerCheckResult, null, 2),
+        rawRequest: result.rawRequest,
         requestCheckResult: result.requestCheckResult
           ? JSON.stringify(result.requestCheckResult, null, 2)
           : '',
+        destinationUrl: result.destinationUrl,
       },
     ];
     // 3.3) write the data to the xlsx file
@@ -90,6 +92,8 @@ export class WaiterService {
         requestCheckResult: item.requestCheckResult
           ? JSON.stringify(item.requestCheckResult, null, 2)
           : '',
+        rawRequest: item.rawRequest,
+        destinationUrl: item.destinationUrl,
       };
     });
 
