@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { WebAgentService } from '../web-agent/web-agent.service';
 import { SharedService } from '../shared/shared.service';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
@@ -150,6 +150,10 @@ export class InspectorService {
           message: 'There is no corresponding test recording',
           dataLayerSpec: operation,
         });
+        throw new HttpException(
+          'There is no corresponding test recording',
+          404
+        );
       }
     }
     return results;
@@ -180,8 +184,7 @@ export class InspectorService {
           return false;
       }
     } catch (error) {
-      console.error('An error occurred:', error);
-      return false;
+      throw new HttpException('An error occurred', 500);
     }
   }
 }

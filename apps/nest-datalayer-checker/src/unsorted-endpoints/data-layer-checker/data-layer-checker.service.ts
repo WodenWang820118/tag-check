@@ -1,5 +1,5 @@
 import { Observable, map, tap } from 'rxjs';
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { AirtableService } from '../airtable/airtable.service';
 import { chunk } from '../../utilities/utilities';
 import { WebAgentService } from '../../web-agent/web-agent.service';
@@ -63,7 +63,7 @@ export class DataLayerCheckerService {
     const dataKeys = Object.keys(dataObj);
 
     // Ensure every key in specObj is present in dataObj
-    for (let key of specKeys) {
+    for (const key of specKeys) {
       if (!dataKeys.includes(key)) {
         return false;
       }
@@ -129,8 +129,11 @@ export class DataLayerCheckerService {
         actualDataLayer
       );
     } catch (error) {
-      console.error('Error processing record:', error);
       result = false;
+      throw new HttpException(
+        'Error processing record, please check the record',
+        500
+      );
     }
     record.fields[`${fieldName}`] = result.toString();
   }

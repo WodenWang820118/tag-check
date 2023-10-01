@@ -11,7 +11,7 @@ export class UtilitiesService {
       }
     }
     throw new Error(
-      'Could not find element for selectors: ' + JSON.stringify(selectors),
+      'Could not find element for selectors: ' + JSON.stringify(selectors)
     );
   }
 
@@ -28,7 +28,7 @@ export class UtilitiesService {
     if (isInViewport) {
       return;
     }
-    await element.evaluate(element => {
+    await element.evaluate((element) => {
       element.scrollIntoView({
         block: 'center',
         inline: 'center',
@@ -70,8 +70,8 @@ export class UtilitiesService {
       }
       if (i < selector.length - 1) {
         element = (
-          await element.evaluateHandle(el =>
-            el.shadowRoot ? el.shadowRoot : el,
+          await element.evaluateHandle((el) =>
+            el.shadowRoot ? el.shadowRoot : el
           )
         ).asElement();
       }
@@ -101,7 +101,7 @@ export class UtilitiesService {
       const elementsHandle = await frame.evaluateHandle((...elements) => {
         return elements;
       }, ...elements);
-      await Promise.all(elements.map(element => element.dispose()));
+      await Promise.all(elements.map((element) => element.dispose()));
       if (result && (properties || attributes)) {
         result = await elementsHandle.evaluate(
           (elements, properties, attributes) => {
@@ -140,7 +140,7 @@ export class UtilitiesService {
             }
           },
           properties,
-          attributes,
+          attributes
         );
       }
       await elementsHandle.dispose();
@@ -184,7 +184,9 @@ export class UtilitiesService {
         const tmpElements = [];
         for (const el of elements) {
           const newEl = (
-            await el.evaluateHandle(el => (el.shadowRoot ? el.shadowRoot : el))
+            await el.evaluateHandle((el) =>
+              el.shadowRoot ? el.shadowRoot : el
+            )
           ).asElement();
           if (newEl) {
             tmpElements.push(newEl);
@@ -207,14 +209,14 @@ export class UtilitiesService {
         clearTimeout(timeoutId);
         return;
       }
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
     throw new Error('Timed out');
   }
 
   async changeSelectElement(element, value) {
     await element.select(value);
-    await element.evaluateHandle(e => {
+    await element.evaluateHandle((e) => {
       e.blur();
       e.focus();
     });
