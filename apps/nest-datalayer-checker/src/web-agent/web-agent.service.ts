@@ -24,7 +24,7 @@ export class WebAgentService {
     credentials?: Credentials
   ) {
     const headlessBool = headless === 'true' ? true : false;
-    const { dataLayer } = await this.performTest(
+    const { dataLayer, destinationUrl } = await this.performTest(
       projectName,
       testName,
       args,
@@ -34,7 +34,10 @@ export class WebAgentService {
       null,
       credentials
     );
-    return dataLayer;
+    return {
+      dataLayer,
+      destinationUrl,
+    };
   }
 
   async executeAndGetDataLayerByProject(
@@ -111,7 +114,7 @@ export class WebAgentService {
     credentials?: Credentials
   ) {
     const headlessBool = headless === 'true' ? true : false;
-    const { dataLayer, eventRequest } = await this.performTest(
+    const { dataLayer, eventRequest, destinationUrl } = await this.performTest(
       projectName,
       testName,
       args,
@@ -124,6 +127,7 @@ export class WebAgentService {
     return {
       dataLayer,
       eventRequest,
+      destinationUrl,
     };
   }
 
@@ -168,6 +172,7 @@ export class WebAgentService {
     try {
       await this.actionService.performOperation(page, operation);
       const dataLayer = await this.webMonitoringService.getDataLayer(page);
+      const destinationUrl = this.sharedService.findDestinationUrl(operation);
 
       if (captureRequest) {
         const request = await page.waitForRequest(
@@ -193,6 +198,7 @@ export class WebAgentService {
       return {
         dataLayer,
         eventRequest,
+        destinationUrl,
       };
     } catch (error) {
       console.error(`Error in performTest: ${error}`);

@@ -15,8 +15,10 @@ export class XlsxReportService {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(sheetName);
     worksheet.columns = [
-      { header: 'dataLayerResult', key: 'dataLayerResult', width: 50 },
-      { header: 'requestCheckResult', key: 'requestCheckResult', width: 50 },
+      { header: 'DataLayer Result', key: 'dataLayerResult', width: 50 },
+      { header: 'Request Result', key: 'requestCheckResult', width: 50 },
+      { header: 'Raw Request', key: 'rawRequest', width: 50 },
+      { header: 'Destination URL', key: 'destinationUrl', width: 50 },
     ];
     // single test
     if (testName) {
@@ -36,8 +38,6 @@ export class XlsxReportService {
 
       const obj = JSON.parse(JSON.stringify(data));
       for (let i = 0; i < obj.length; i++) {
-        console.log('data[i]: ' + obj[i]);
-        console.log(JSON.parse(obj[i]['dataLayerResult']));
         const imageId = workbook.addImage({
           buffer: readFileSync(
             `${folderPath}\\${
@@ -48,7 +48,7 @@ export class XlsxReportService {
         });
 
         worksheet.addImage(imageId, {
-          tl: { col: 2, row: i + 1 },
+          tl: { col: worksheet.columns.length, row: i + 1 },
           ext: { width: 100, height: 50 },
         });
       }
