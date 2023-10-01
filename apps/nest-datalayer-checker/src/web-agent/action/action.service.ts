@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { UtilitiesService } from '../utilities/utilities.service';
 import {
@@ -118,8 +118,9 @@ export class ActionService {
     }
 
     if (!clickedSuccessfully) {
-      throw new Error(
-        `Failed to click. None of the selectors worked for action ${step.target}`
+      throw new HttpException(
+        `Failed to click. None of the selectors worked for action ${step.target}`,
+        500
       );
     }
   }
@@ -132,8 +133,9 @@ export class ActionService {
       try {
         return await this.changeElement(page, selectorArray[0], value, timeout);
       } catch (error) {
-        console.error(
-          `Failed to change value with selector ${selectorArray[0]}. Reason: ${error.message}`
+        throw new HttpException(
+          `Failed to change value with selector ${selectorArray[0]}. Reason: ${error.message}`,
+          500
         );
       }
     }

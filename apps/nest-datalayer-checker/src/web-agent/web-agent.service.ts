@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
@@ -70,8 +70,11 @@ export class WebAgentService {
       }
       return dataLayers;
     } catch (error) {
-      console.error(error);
-      throw new Error(error);
+      throw new HttpException(
+        'An error occurred while executing and getting the data layer: ' +
+          error,
+        500
+      );
     }
   }
 
@@ -201,9 +204,11 @@ export class WebAgentService {
         destinationUrl,
       };
     } catch (error) {
-      console.error(`Error in performTest: ${error}`);
       await browser?.close();
-      throw error;
+      throw new HttpException(
+        `An error occurred while performing the test: ${error}`,
+        500
+      );
     }
   }
 }
