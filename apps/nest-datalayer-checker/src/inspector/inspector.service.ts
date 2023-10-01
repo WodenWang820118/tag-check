@@ -69,12 +69,15 @@ export class InspectorService {
         // 3.1 Get the corresponding event object from the result
         // 3.2 Compare the expectedObj with the result, applying strategies
         const dataLayerCheckResult = this.isDataLayerCorrect(
-          result,
+          result.dataLayer,
           expectedObj
         );
 
+        const destinationUrl = result.destinationUrl;
+
         return {
           dataLayerCheckResult,
+          destinationUrl,
         };
       }
       default: {
@@ -97,6 +100,8 @@ export class InspectorService {
           expectedObj
         );
 
+        const rawRequest = result.eventRequest;
+
         const recomposedRequest =
           this.requestProcessorService.recomposeGA4ECEvent(result.eventRequest);
 
@@ -105,9 +110,13 @@ export class InspectorService {
           expectedObj
         );
 
+        const destinationUrl = result.destinationUrl;
+
         return {
           dataLayerCheckResult,
+          rawRequest,
           requestCheckResult,
+          destinationUrl,
         };
       }
     }

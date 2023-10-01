@@ -48,6 +48,10 @@ export class SharedService {
     return this.fileService.getSpecJsonByProject(options);
   }
 
+  findDestinationUrl(json: any) {
+    return this.fileService.findDestinationUrl(json);
+  }
+
   writeXlsxFile(
     filename: string,
     sheetName: string,
