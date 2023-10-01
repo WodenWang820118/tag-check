@@ -74,6 +74,22 @@ export class FileService {
     }
   }
 
+  findDestinationUrl(json: any): string | null {
+    const steps = json.steps;
+    if (!steps || !Array.isArray(steps)) {
+      return null;
+    }
+
+    for (let i = steps.length - 1; i >= 0; i--) {
+      const step = steps[i];
+      if (step.type === 'navigate' && step.url) {
+        return step.url;
+      }
+    }
+
+    return null;
+  }
+
   private validateInput(projectName: string, options: FilePathOptions): void {
     if (!projectName || !options) {
       throw new BadRequestException('Project name or options cannot be empty');
