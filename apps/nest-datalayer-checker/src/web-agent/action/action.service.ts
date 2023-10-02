@@ -16,12 +16,20 @@ import {
   XpathChangeStrategy,
 } from './strategies/change-strategy';
 import { SelectorType, getSelectorType } from './action-utilities';
+import {
+  CSSHoverStrategy,
+  HoverStrategy,
+  XPathHoverStrategy,
+  TextHoverStrategy,
+  PierceHoverStrategy,
+} from './strategies/hover-strategy';
 
 enum BrowserAction {
   CLICK = 'click',
   NAVIGATE = 'navigate',
   SETVIEWPORT = 'setViewport',
   CHANGE = 'change',
+  HOVER = 'hover',
   KEYDOWN = 'keyDown',
   KEYUP = 'keyUp',
 }
@@ -30,6 +38,7 @@ enum BrowserAction {
 export class ActionService {
   private clickStrategies: { [key: string]: ClickStrategy };
   private changeStrategies: { [key: string]: ChangeStrategy };
+  private hoverStrategies: { [key: string]: HoverStrategy };
 
   constructor(private utilitiesService: UtilitiesService) {
     this.clickStrategies = {
@@ -44,6 +53,13 @@ export class ActionService {
       [SelectorType.XPATH]: new XpathChangeStrategy(),
       [SelectorType.PIERCE]: new PiercingChangeStrategy(),
       [SelectorType.ARIA]: new AriaChangeStrategy(),
+    };
+
+    this.hoverStrategies = {
+      [SelectorType.CSS]: new CSSHoverStrategy(),
+      [SelectorType.XPATH]: new XPathHoverStrategy(),
+      [SelectorType.PIERCE]: new PierceHoverStrategy(),
+      [SelectorType.TEXT]: new TextHoverStrategy(),
     };
   }
 
@@ -73,6 +89,11 @@ export class ActionService {
           await this.handleChange(page, step);
           break;
 
+        case BrowserAction.HOVER:
+          await new Promise((resolve) => setTimeout(resolve, randomDelay));
+          await this.handleHover(page, step);
+          break;
+
         // Add more cases for other browser actions if needed
         default:
           console.warn(`Unknown action type: ${step.type}`);
@@ -90,10 +111,10 @@ export class ActionService {
   }
 
   async handleNavigate(page: Page, step: any) {
-    await page.goto(step.url);
-    // await page.reload({
-    //   waitUntil: 'networkidle2',
-    // });
+    await page.goto(step.url, { waitUntil: 'networkidle2' });
+    await page.reload({
+      waitUntil: 'networkidle2',
+    });
   }
 
   async handleClick(page: Page, step: any): Promise<void> {
@@ -142,6 +163,30 @@ export class ActionService {
     return false;
   }
 
+  async handleHover(page: Page, step: any) {
+    console.log('hover');
+    const selectors = step.selectors;
+    let hoveredSuccessfully = false;
+
+    for (const selectorArray of selectors) {
+      try {
+        if (await this.hoverElement(page, selectorArray[0])) {
+          hoveredSuccessfully = true;
+          break; // Exit the loop as soon as one selector works
+        }
+      } catch (error) {
+        console.error('hoverElement error: ', error);
+      }
+    }
+
+    if (!hoveredSuccessfully) {
+      throw new HttpException(
+        `Failed to hover. None of the selectors worked for action ${step.target}`,
+        500
+      );
+    }
+  }
+
   // ----------------------------------------------
   // Click strategies
   // ----------------------------------------------
@@ -177,5 +222,21 @@ export class ActionService {
     }
 
     return await strategy.changeElement(page, selector, value, timeout);
+  }
+
+  // ----------------------------------------------
+  // Hover strategies
+  // ----------------------------------------------
+
+  async hoverElement(page: Page, selector: string, timeout = 1000) {
+    const type = getSelectorType(selector); // Implement this function to get the type (CSS, XPath, etc.) from the selector
+    const strategy = this.hoverStrategies[type];
+
+    if (!strategy) {
+      console.error(`No strategy found for selector type ${type}`);
+      return false;
+    }
+
+    return await strategy.hoverElement(page, selector, timeout);
   }
 }
