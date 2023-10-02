@@ -170,7 +170,7 @@ export class ActionService {
 
     for (const selectorArray of selectors) {
       try {
-        if (await this.hoverElement(page, selectorArray[0])) {
+        if (await this.hoverElement(page, selectorArray)) {
           hoveredSuccessfully = true;
           break; // Exit the loop as soon as one selector works
         }
