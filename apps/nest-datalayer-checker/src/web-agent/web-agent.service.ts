@@ -3,7 +3,7 @@ import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
 import { SharedService } from '../shared/shared.service';
-import { Browser, Credentials } from 'puppeteer';
+import { Browser, Credentials, Target } from 'puppeteer';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 
 @Injectable()
@@ -160,7 +160,8 @@ export class WebAgentService {
       args: args,
     });
 
-    const page = await browser.newPage();
+    const [page] = await browser.pages();
+
     if (credentials) {
       await this.puppeteerService.httpAuth(page, credentials);
     }
@@ -188,18 +189,19 @@ export class WebAgentService {
       const resultFolder =
         this.sharedService.getReportSavingFolder(projectName);
 
-      // there's always a page opened, so we need to use the last one
-      // await this.puppeteerService.snapshot(
-      //   await browser.pages()[(await browser.pages()).length - 1],
-      //   `${resultFolder}/${testName}.png`
-      // );
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      await this.puppeteerService.snapshot(
+        page,
+        `${resultFolder}/${testName}.png`,
+        true
+      );
 
       // 4) close the browser
       // TODO: will do multiple tests in the same browser
-      // await page.close();
+      await page.close();
       await browser.close();
 
-      Logger.log('dataLayer in the performTest: ', dataLayer);
+      // Logger.log('dataLayer in the performTest: ', dataLayer);
 
       return {
         dataLayer,

@@ -33,9 +33,8 @@ export class XlsxReportService {
       // });
     } else if (projectName) {
       // all tests
-      const folderPath = path.join(file.split('result.xlsx')[0]);
-
-      const obj = JSON.parse(JSON.stringify(data));
+      // const folderPath = path.join(file.split('result.xlsx')[0]);
+      // const obj = JSON.parse(JSON.stringify(data));
       // for (let i = 0; i < obj.length; i++) {
       //   // FIXME: when running multiple tests, the image is not added to the xlsx file
       //   Logger.log('obj[i]: ', obj[i]);
@@ -47,7 +46,6 @@ export class XlsxReportService {
       //     buffer: readFileSync(imagePath),
       //     extension: 'png',
       //   });
-
       //   worksheet.addImage(imageId, {
       //     tl: { col: worksheet.columns.length, row: i + 1 },
       //     ext: { width: 100, height: 50 },
