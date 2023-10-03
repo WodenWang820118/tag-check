@@ -173,7 +173,7 @@ export class WebAgentService {
     try {
       await this.actionService.performOperation(page, operation);
       const dataLayer = this.webMonitoringService.getMyDataLayer(testName);
-      const destinationUrl = this.sharedService.findDestinationUrl(operation);
+      const destinationUrl = page.url();
 
       if (captureRequest) {
         const request = await page.waitForRequest(
@@ -189,7 +189,7 @@ export class WebAgentService {
       const resultFolder =
         this.sharedService.getReportSavingFolder(projectName);
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await this.puppeteerService.snapshot(
         page,
         `${resultFolder}/${testName}.png`,
