@@ -52,15 +52,17 @@ export class SharedService {
     return this.fileService.findDestinationUrl(json);
   }
 
-  writeXlsxFile(
-    filename: string,
+  async writeXlsxFile(
+    savingFolder: string,
+    fileName: string,
     sheetName: string,
     data: any,
     testName?: string,
     projectName?: string
   ) {
-    return this.xlsxReportService.writeXlsxFile(
-      filename,
+    return await this.xlsxReportService.writeXlsxFile(
+      savingFolder,
+      fileName,
       sheetName,
       data,
       testName,

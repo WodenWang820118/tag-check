@@ -48,17 +48,16 @@ export class WaiterService {
 
     const data = [
       {
-        dataLayerResult: JSON.stringify(result.dataLayerCheckResult, null, 2),
+        dataLayerResult: result.dataLayerCheckResult,
         rawRequest: result.rawRequest,
-        requestCheckResult: result.requestCheckResult
-          ? JSON.stringify(result.requestCheckResult, null, 2)
-          : '',
+        requestCheckResult: result.requestCheckResult,
         destinationUrl: result.destinationUrl,
       },
     ];
     // 3.3) write the data to the xlsx file
-    this.sharedService.writeXlsxFile(
-      `${this.sharedService.getReportSavingFolder(projectName)}\\result.xlsx`,
+    await this.sharedService.writeXlsxFile(
+      this.sharedService.getReportSavingFolder(projectName),
+      'result.xlsx',
       'Sheet1',
       data,
       testName,
@@ -88,10 +87,8 @@ export class WaiterService {
     // 3.2) construct the data to be written to the xlsx file
     const data = result.map((item) => {
       return {
-        dataLayerResult: JSON.stringify(item.dataLayerCheckResult, null, 2),
-        requestCheckResult: item.requestCheckResult
-          ? JSON.stringify(item.requestCheckResult, null, 2)
-          : '',
+        dataLayerResult: item.dataLayerCheckResult,
+        requestCheckResult: item.requestCheckResult,
         rawRequest: item.rawRequest,
         destinationUrl: item.destinationUrl,
       };
@@ -100,8 +97,9 @@ export class WaiterService {
     console.log(data);
 
     // 3.3) write the data to the xlsx file
-    this.sharedService.writeXlsxFile(
-      `${this.sharedService.getReportSavingFolder(projectName)}\\result.xlsx`,
+    await this.sharedService.writeXlsxFile(
+      this.sharedService.getReportSavingFolder(projectName),
+      'result.xlsx',
       'Sheet1',
       data,
       undefined,
