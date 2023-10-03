@@ -81,7 +81,7 @@ export class ActionService {
         request.url().includes('select_promotion') ||
         request.url().includes('eePromoClick')
       ) {
-        Logger.log('request.url(): ', request.url());
+        // Logger.log('request.url(): ', request.url());
         // small delay will cause the dataLayer to be different
         // it's unknown why, but instead of using webMonitoringService.updateSelfDataLayer
         // we use updateSelfDataLayerAlgorithm to update the dataLayer manually

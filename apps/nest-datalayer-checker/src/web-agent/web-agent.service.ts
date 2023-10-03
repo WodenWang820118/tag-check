@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
@@ -187,15 +187,19 @@ export class WebAgentService {
       // TODO: temporary solution, it could be better in different stages of the workflow
       const resultFolder =
         this.sharedService.getReportSavingFolder(projectName);
-      await this.puppeteerService.snapshot(
-        page,
-        `${resultFolder}/${testName}.png`
-      );
+
+      // there's always a page opened, so we need to use the last one
+      // await this.puppeteerService.snapshot(
+      //   await browser.pages()[(await browser.pages()).length - 1],
+      //   `${resultFolder}/${testName}.png`
+      // );
 
       // 4) close the browser
       // TODO: will do multiple tests in the same browser
-      await page.close();
+      // await page.close();
       await browser.close();
+
+      Logger.log('dataLayer in the performTest: ', dataLayer);
 
       return {
         dataLayer,

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { readFileSync } from 'fs';
 import path from 'path';
@@ -23,35 +23,36 @@ export class XlsxReportService {
     // single test
     if (testName) {
       //TODO: result.xlsx could be different naming
-      const imageId = workbook.addImage({
-        buffer: readFileSync(file.replace('result.xlsx', `${testName}.png`)),
-        extension: 'png',
-      });
-
-      worksheet.addImage(imageId, {
-        tl: { col: 2, row: 1 },
-        ext: { width: 100, height: 50 },
-      });
+      // const imageId = workbook.addImage({
+      //   buffer: readFileSync(file.replace('result.xlsx', `${testName}.png`)),
+      //   extension: 'png',
+      // });
+      // worksheet.addImage(imageId, {
+      //   tl: { col: 2, row: 1 },
+      //   ext: { width: 100, height: 50 },
+      // });
     } else if (projectName) {
       // all tests
       const folderPath = path.join(file.split('result.xlsx')[0]);
 
       const obj = JSON.parse(JSON.stringify(data));
-      for (let i = 0; i < obj.length; i++) {
-        const imageId = workbook.addImage({
-          buffer: readFileSync(
-            `${folderPath}\\${
-              JSON.parse(obj[i]['dataLayerResult']).dataLayerSpec.event
-            }.png`
-          ),
-          extension: 'png',
-        });
+      // for (let i = 0; i < obj.length; i++) {
+      //   // FIXME: when running multiple tests, the image is not added to the xlsx file
+      //   Logger.log('obj[i]: ', obj[i]);
+      //   const imagePath = path.join(
+      //     folderPath,
+      //     `${JSON.parse(obj[i]['dataLayerResult']).dataLayerSpec.event}.png`
+      //   );
+      //   const imageId = workbook.addImage({
+      //     buffer: readFileSync(imagePath),
+      //     extension: 'png',
+      //   });
 
-        worksheet.addImage(imageId, {
-          tl: { col: worksheet.columns.length, row: i + 1 },
-          ext: { width: 100, height: 50 },
-        });
-      }
+      //   worksheet.addImage(imageId, {
+      //     tl: { col: worksheet.columns.length, row: i + 1 },
+      //     ext: { width: 100, height: 50 },
+      //   });
+      // }
     }
 
     worksheet.addRows(data);

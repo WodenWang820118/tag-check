@@ -166,7 +166,7 @@ export class WebMonitoringService {
       }
     });
 
-    console.warn('myDataLayer', myDataLayer);
+    // console.warn('myDataLayer', myDataLayer);
     writeFileSync(myDataLayerFile, JSON.stringify(myDataLayer, null, 2));
   }
 

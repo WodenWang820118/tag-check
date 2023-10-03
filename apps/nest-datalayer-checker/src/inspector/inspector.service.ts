@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { WebAgentService } from '../web-agent/web-agent.service';
 import { SharedService } from '../shared/shared.service';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
@@ -57,6 +57,7 @@ export class InspectorService {
     // switch the measurementId to determine whether to grab requests
     switch (measurementId) {
       case undefined: {
+        Logger.log('measurementId is undefined');
         const result = await this.webAgentService.executeAndGetDataLayer(
           projectName,
           testName,
@@ -72,6 +73,7 @@ export class InspectorService {
           result.dataLayer,
           expectedObj
         );
+        Logger.log('dataLayerCheckResult: ', dataLayerCheckResult);
 
         const destinationUrl = result.destinationUrl;
 
@@ -143,17 +145,16 @@ export class InspectorService {
           measurementId,
           credentials
         );
+        Logger.log('result: ', result);
         results.push(result);
       } catch (error) {
+        Logger.error('error: ', error);
         results.push({
           passed: false,
           message: 'There is no corresponding test recording',
           dataLayerSpec: operation,
         });
-        throw new HttpException(
-          'There is no corresponding test recording',
-          404
-        );
+        // throw new HttpException(error, 500);
       }
     }
     return results;
@@ -166,6 +167,7 @@ export class InspectorService {
     dataLayer: StrictDataLayerEvent[],
     spec: StrictDataLayerEvent
   ) {
+    Logger.log('isDataLayerCorrect', dataLayer, spec);
     const strategyType = determineStrategy(spec);
 
     try {
