@@ -23,7 +23,7 @@ export class WebAgentService {
     path?: string,
     credentials?: Credentials
   ) {
-    const headlessBool = headless === 'true' ? true : false;
+    const headlessBool = headless === 'new' ? 'new' : false;
     const { dataLayer, destinationUrl } = await this.performTest(
       projectName,
       testName,
@@ -80,7 +80,7 @@ export class WebAgentService {
 
   async fetchDataLayer(url: string, credentials?: Credentials) {
     const browser = await this.puppeteerService.initAndReturnBrowser({
-      headless: true,
+      headless: 'new',
     });
     const page = await this.puppeteerService.navigateTo(
       url,
@@ -98,7 +98,7 @@ export class WebAgentService {
 
   async getCurrentBrowser(args?: string[], headless?: string) {
     return await this.puppeteerService.initAndReturnBrowser({
-      headless: headless.toLowerCase() === 'true' ? true : false || false,
+      headless: headless.toLowerCase() === 'new' ? 'new' : false || false,
       args: args,
     });
   }
@@ -116,7 +116,7 @@ export class WebAgentService {
     measurementId?: string,
     credentials?: Credentials
   ) {
-    const headlessBool = headless === 'true' ? true : false;
+    const headlessBool = headless === 'new' ? 'new' : false;
     const { dataLayer, eventRequest, destinationUrl } = await this.performTest(
       projectName,
       testName,
@@ -138,7 +138,7 @@ export class WebAgentService {
     projectName: string,
     testName: string,
     args: string[],
-    headless: boolean,
+    headless: 'new' | boolean,
     path?: string,
     captureRequest = false,
     measurementId?: string,
@@ -160,21 +160,18 @@ export class WebAgentService {
       args: args,
     });
 
-    await this.puppeteerService.navigateTo(
-      operation.steps[1].url,
-      browser,
-      credentials
-    );
-
-    const pages = await browser.pages();
-    const page = pages[pages.length - 1];
+    const page = await browser.newPage();
+    if (credentials) {
+      await this.puppeteerService.httpAuth(page, credentials);
+    }
+    await this.webMonitoringService.initSelfDataLayer(testName);
 
     let eventRequest: string = null;
 
     // 2) perform the test operation
     try {
       await this.actionService.performOperation(page, operation);
-      const dataLayer = await this.webMonitoringService.getDataLayer(page);
+      const dataLayer = this.webMonitoringService.getMyDataLayer(testName);
       const destinationUrl = this.sharedService.findDestinationUrl(operation);
 
       if (captureRequest) {
@@ -196,6 +193,8 @@ export class WebAgentService {
       );
 
       // 4) close the browser
+      // TODO: will do multiple tests in the same browser
+      await page.close();
       await browser.close();
 
       return {

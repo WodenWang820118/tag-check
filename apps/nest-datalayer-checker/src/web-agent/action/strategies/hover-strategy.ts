@@ -39,6 +39,25 @@ export class XPathHoverStrategy implements HoverStrategy {
   }
 }
 
+export class AriaHoverStrategy implements HoverStrategy {
+  async hoverElement(
+    page: Page,
+    selector: string,
+    timeout = 1000
+  ): Promise<boolean> {
+    const xpath = `//*[@aria-label="${selector
+      .replace(SelectorType.ARIA + '/', '')
+      .replace(/"/g, '\\"')}"]`;
+    await page.waitForXPath(xpath, { timeout });
+    const [element] = await page.$x(xpath);
+    if (isElementHandle(element)) {
+      await element.hover();
+      return true;
+    }
+    return false;
+  }
+}
+
 export class PierceHoverStrategy implements HoverStrategy {
   async hoverElement(
     page: Page,

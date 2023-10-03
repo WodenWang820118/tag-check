@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { UtilitiesService } from '../utilities/utilities.service';
 import {
@@ -22,7 +22,9 @@ import {
   XPathHoverStrategy,
   TextHoverStrategy,
   PierceHoverStrategy,
+  AriaHoverStrategy,
 } from './strategies/hover-strategy';
+import { WebMonitoringService } from '../web-monitoring/web-monitoring.service';
 
 enum BrowserAction {
   CLICK = 'click',
@@ -40,7 +42,10 @@ export class ActionService {
   private changeStrategies: { [key: string]: ChangeStrategy };
   private hoverStrategies: { [key: string]: HoverStrategy };
 
-  constructor(private utilitiesService: UtilitiesService) {
+  constructor(
+    private utilitiesService: UtilitiesService,
+    private webMonitoringService: WebMonitoringService
+  ) {
     this.clickStrategies = {
       [SelectorType.CSS]: new CSSClickStrategy(),
       [SelectorType.XPATH]: new XPathClickStrategy(),
@@ -60,13 +65,37 @@ export class ActionService {
       [SelectorType.XPATH]: new XPathHoverStrategy(),
       [SelectorType.PIERCE]: new PierceHoverStrategy(),
       [SelectorType.TEXT]: new TextHoverStrategy(),
+      [SelectorType.ARIA]: new AriaHoverStrategy(),
     };
   }
 
   async performOperation(page: Page, operation: any) {
     if (!operation || !operation.steps) return;
-
     const randomDelay = 3000 + Math.floor(Math.random() * 2000);
+
+    // eeListClick, select_product, select_promotion, eePromoClick
+    await page.setRequestInterception(true);
+    page.on('request', async (request) => {
+      if (
+        request.url().includes('eeListClick') ||
+        request.url().includes('select_promotion') ||
+        request.url().includes('eePromoClick')
+      ) {
+        Logger.log('request.url(): ', request.url());
+        // small delay will cause the dataLayer to be different
+        // it's unknown why, but instead of using webMonitoringService.updateSelfDataLayer
+        // we use updateSelfDataLayerAlgorithm to update the dataLayer manually
+        const latestDataLayer = await page.evaluate(() => {
+          return window.dataLayer;
+        });
+        // console.log('latestDataLayer: ', latestDataLayer);
+        this.webMonitoringService.updateSelfDataLayerAlgorithm(
+          latestDataLayer,
+          operation.title
+        );
+      }
+      await request.continue();
+    });
 
     for (const step of operation.steps) {
       switch (step.type) {
@@ -82,11 +111,19 @@ export class ActionService {
           // click too fast will be identified as bot, _s=number at the end of the url
           await new Promise((resolve) => setTimeout(resolve, randomDelay));
           await this.handleClick(page, step);
+          await this.webMonitoringService.updateSelfDataLayer(
+            page,
+            operation.title
+          );
           break;
 
         case BrowserAction.CHANGE:
           await new Promise((resolve) => setTimeout(resolve, randomDelay));
           await this.handleChange(page, step);
+          await this.webMonitoringService.updateSelfDataLayer(
+            page,
+            operation.title
+          );
           break;
 
         case BrowserAction.HOVER:
@@ -96,11 +133,11 @@ export class ActionService {
 
         // Add more cases for other browser actions if needed
         default:
-          console.warn(`Unknown action type: ${step.type}`);
+          Logger.warn(`Unknown action type: ${step.type}`);
       }
     }
 
-    console.log('performOperation completes');
+    Logger.log('performOperation completes');
   }
 
   async handleSetViewport(page: Page, step: any) {
@@ -118,22 +155,32 @@ export class ActionService {
   }
 
   async handleClick(page: Page, step: any): Promise<void> {
-    console.log('click');
+    Logger.log('click');
     let clickedSuccessfully = false;
 
     for (const selectorGroup of step.selectors) {
-      try {
-        await this.utilitiesService.scrollIntoViewIfNeeded(
-          selectorGroup,
-          page,
-          30000
-        );
-      } catch (error) {
-        console.error('scrollIntoViewIfNeeded error: ', error);
-      }
+      // TODO: Scroll into view if needed
+      // try {
+      //   await this.utilitiesService.scrollIntoViewIfNeeded(
+      //     Array.isArray(selectorGroup) ? selectorGroup[0] : [selectorGroup],
+      //     page,
+      //     20000
+      //   );
+      // } catch (error) {
+      //   console.error('scrollIntoViewIfNeeded error: ', error);
+      // }
 
-      if (await this.clickElement(page, selectorGroup[0])) {
+      if (
+        await this.clickElement(
+          page,
+          Array.isArray(selectorGroup) ? selectorGroup[0] : selectorGroup
+        )
+      ) {
         clickedSuccessfully = true;
+        Logger.log(
+          'click success! ',
+          Array.isArray(selectorGroup) ? selectorGroup[0] : selectorGroup
+        );
         break; // Exit the loop as soon as one selector works
       }
     }
@@ -164,18 +211,27 @@ export class ActionService {
   }
 
   async handleHover(page: Page, step: any) {
-    console.log('hover');
+    Logger.log('handleHover');
     const selectors = step.selectors;
     let hoveredSuccessfully = false;
 
     for (const selectorArray of selectors) {
       try {
-        if (await this.hoverElement(page, selectorArray)) {
+        if (
+          await this.hoverElement(
+            page,
+            Array.isArray(selectorArray) ? selectorArray[0] : selectorArray
+          )
+        ) {
           hoveredSuccessfully = true;
+          Logger.log(
+            'hover success! ',
+            Array.isArray(selectorArray) ? selectorArray[0] : selectorArray
+          );
           break; // Exit the loop as soon as one selector works
         }
       } catch (error) {
-        console.error('hoverElement error: ', error);
+        Logger.error('hoverElement error ', error);
       }
     }
 
@@ -196,10 +252,10 @@ export class ActionService {
     const strategy = this.clickStrategies[type];
 
     if (!strategy) {
-      console.error(`No strategy found for selector type ${type}`);
+      Logger.error(`No strategy found for selector type ${type}`);
       return false;
     }
-
+    Logger.log('clickElement: ', selector);
     return await strategy.clickElement(page, selector, timeout);
   }
 
@@ -217,7 +273,7 @@ export class ActionService {
     const strategy = this.changeStrategies[type];
 
     if (!strategy) {
-      console.error(`No strategy found for selector type ${type}`);
+      Logger.error(`No strategy found for selector type ${type}`);
       return false;
     }
 
@@ -233,7 +289,7 @@ export class ActionService {
     const strategy = this.hoverStrategies[type];
 
     if (!strategy) {
-      console.error(`No strategy found for selector type ${type}`);
+      Logger.error(`No strategy found for selector type ${type}`);
       return false;
     }
 
