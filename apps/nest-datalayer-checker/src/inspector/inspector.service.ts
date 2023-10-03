@@ -57,7 +57,6 @@ export class InspectorService {
     // switch the measurementId to determine whether to grab requests
     switch (measurementId) {
       case undefined: {
-        Logger.log('measurementId is undefined');
         const result = await this.webAgentService.executeAndGetDataLayer(
           projectName,
           testName,
@@ -73,7 +72,6 @@ export class InspectorService {
           result.dataLayer,
           expectedObj
         );
-        Logger.log('dataLayerCheckResult: ', dataLayerCheckResult);
 
         const destinationUrl = result.destinationUrl;
 
@@ -145,8 +143,8 @@ export class InspectorService {
           measurementId,
           credentials
         );
-        Logger.log('result: ', result);
         results.push(result);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         Logger.error('error: ', error);
         results.push({
@@ -167,7 +165,6 @@ export class InspectorService {
     dataLayer: StrictDataLayerEvent[],
     spec: StrictDataLayerEvent
   ) {
-    Logger.log('isDataLayerCorrect', dataLayer, spec);
     const strategyType = determineStrategy(spec);
 
     try {

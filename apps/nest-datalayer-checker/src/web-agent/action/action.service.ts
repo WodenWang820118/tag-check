@@ -41,6 +41,7 @@ export class ActionService {
   private clickStrategies: { [key: string]: ClickStrategy };
   private changeStrategies: { [key: string]: ChangeStrategy };
   private hoverStrategies: { [key: string]: HoverStrategy };
+  private isFirstNavigation = true; // Used to limit the time to reload the landing page
 
   constructor(
     private utilitiesService: UtilitiesService,
@@ -137,6 +138,7 @@ export class ActionService {
       }
     }
 
+    this.isFirstNavigation = true;
     Logger.log('performOperation completes');
   }
 
@@ -149,9 +151,13 @@ export class ActionService {
 
   async handleNavigate(page: Page, step: any) {
     await page.goto(step.url, { waitUntil: 'networkidle2' });
-    await page.reload({
-      waitUntil: 'networkidle2',
-    });
+    if (this.isFirstNavigation) {
+      // only reload the landing page, trying to skip the overlay
+      await page.reload({
+        waitUntil: 'networkidle2',
+      });
+      this.isFirstNavigation = false;
+    }
   }
 
   async handleClick(page: Page, step: any): Promise<void> {
