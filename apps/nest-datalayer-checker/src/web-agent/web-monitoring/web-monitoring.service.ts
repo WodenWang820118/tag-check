@@ -1,12 +1,18 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { PuppeteerService } from '../puppeteer/puppeteer.service';
 import { Page } from 'puppeteer';
 import { USER_AGENT } from '../../configs/puppeteer.config';
+import { SharedService } from '../../shared/shared.service';
+import { writeFileSync, readFileSync } from 'fs';
+import path from 'path';
 
 @Injectable()
 export class WebMonitoringService {
   private requests: string[] = [];
-  constructor(private puppeteerService: PuppeteerService) {}
+  constructor(
+    private puppeteerService: PuppeteerService,
+    private sharedService: SharedService
+  ) {}
 
   /**
    * Retrieves the data layer from a page
@@ -14,24 +20,16 @@ export class WebMonitoringService {
    * @param timeout Optional time in milliseconds to wait before retrieving the data layer
    * @returns A Promise resolving to an array of data layer objects
    */
-  async getDataLayer(page: Page, timeout = 2000) {
+  async getDataLayer(page: Page, timeout = 5000) {
+    await page.waitForFunction(
+      () => typeof window.dataLayer !== 'undefined',
+      { timeout: timeout } // timeout here to fail fast if needed
+    );
     try {
-      await page.waitForFunction(
-        () => typeof window.dataLayer !== 'undefined',
-        { timeout: 5000 } // timeout here to fail fast if needed
-      );
-      await new Promise((resolve) => setTimeout(resolve, timeout));
-      const dataLayer = await page.evaluate(() => {
-        console.log(window.dataLayer); // Debug line to understand what's in dataLayer
+      return await page.evaluate(() => {
         return window.dataLayer;
       });
-      if (!dataLayer) {
-        console.error('DataLayer is empty or undefined');
-        throw new Error('DataLayer is empty or undefined');
-      }
-      return dataLayer;
     } catch (error) {
-      // throw new Error(error);
       throw new HttpException(
         'DataLayer is empty or undefined',
         error.status || 500
@@ -127,5 +125,59 @@ export class WebMonitoringService {
     page.removeAllListeners('request');
     await page.setRequestInterception(false);
     return this.requests;
+  }
+
+  async initSelfDataLayer(testName: string) {
+    const rootProjectFolder = this.sharedService.rootProjectFolder;
+    const projectFolder = this.sharedService.projectFolder;
+    const filePath = path.join(
+      rootProjectFolder,
+      projectFolder,
+      `${testName} - myDataLayer.json`
+    );
+    writeFileSync(filePath, '[]');
+  }
+
+  async updateSelfDataLayer(page: Page, testName: string) {
+    const dataLayer = await this.getDataLayer(page);
+    this.updateSelfDataLayerAlgorithm(dataLayer, testName);
+  }
+
+  updateSelfDataLayerAlgorithm(dataLayer: any[], testName: string) {
+    const myDataLayerFile = path.join(
+      this.sharedService.rootProjectFolder,
+      this.sharedService.projectFolder,
+      `${testName} - myDataLayer.json`
+    );
+
+    // Ensure to read the file content before trying to parse it as JSON
+    const myDataLayerContent = readFileSync(myDataLayerFile, 'utf8');
+    const myDataLayer = JSON.parse(myDataLayerContent);
+
+    dataLayer.forEach((dataLayerObject) => {
+      const existingIndex = myDataLayer.findIndex((myDataLayerObject) => {
+        return myDataLayerObject.event === dataLayerObject.event;
+      });
+
+      if (existingIndex === -1) {
+        myDataLayer.push(dataLayerObject);
+      } else {
+        myDataLayer[existingIndex] = dataLayerObject;
+      }
+    });
+
+    console.warn('myDataLayer', myDataLayer);
+    writeFileSync(myDataLayerFile, JSON.stringify(myDataLayer, null, 2));
+  }
+
+  getMyDataLayer(testName: string) {
+    const myDataLayerFile = path.join(
+      this.sharedService.rootProjectFolder,
+      this.sharedService.projectFolder,
+      `${testName} - myDataLayer.json`
+    );
+    const myDataLayerContent = readFileSync(myDataLayerFile, 'utf8');
+    const myDataLayer = JSON.parse(myDataLayerContent);
+    return myDataLayer;
   }
 }
