@@ -48,7 +48,7 @@ export class PuppeteerService {
     });
   }
 
-  async snapshot(page: Page, path: string) {
-    await page.screenshot({ path });
+  async snapshot(page: Page, path: string, fullPage = false) {
+    await page.screenshot({ path, fullPage });
   }
 }

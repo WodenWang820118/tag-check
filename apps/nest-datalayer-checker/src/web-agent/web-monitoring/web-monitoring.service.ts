@@ -1,43 +1,18 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PuppeteerService } from '../puppeteer/puppeteer.service';
 import { Page } from 'puppeteer';
-import { USER_AGENT } from '../../configs/puppeteer.config';
+import { SharedService } from '../../shared/shared.service';
+import { mkdirSync, existsSync } from 'fs';
+import path from 'path';
+import { RequestService } from './request/request.service';
 
 @Injectable()
 export class WebMonitoringService {
-  private requests: string[] = [];
-  constructor(private puppeteerService: PuppeteerService) {}
-
-  /**
-   * Retrieves the data layer from a page
-   * @param page The page to retrieve the data layer from
-   * @param timeout Optional time in milliseconds to wait before retrieving the data layer
-   * @returns A Promise resolving to an array of data layer objects
-   */
-  async getDataLayer(page: Page, timeout = 2000) {
-    try {
-      await page.waitForFunction(
-        () => typeof window.dataLayer !== 'undefined',
-        { timeout: 5000 } // timeout here to fail fast if needed
-      );
-      await new Promise((resolve) => setTimeout(resolve, timeout));
-      const dataLayer = await page.evaluate(() => {
-        console.log(window.dataLayer); // Debug line to understand what's in dataLayer
-        return window.dataLayer;
-      });
-      if (!dataLayer) {
-        console.error('DataLayer is empty or undefined');
-        throw new Error('DataLayer is empty or undefined');
-      }
-      return dataLayer;
-    } catch (error) {
-      // throw new Error(error);
-      throw new HttpException(
-        'DataLayer is empty or undefined',
-        error.status || 500
-      );
-    }
-  }
+  constructor(
+    private puppeteerService: PuppeteerService,
+    private sharedService: SharedService,
+    private requestService: RequestService
+  ) {}
 
   /**
    * Retrieves the Google Click ID (GCLID) values from an array of request URLs
@@ -96,7 +71,7 @@ export class WebMonitoringService {
    * @returns A Promise resolving to an array of request URLs
    */
   async getAllRequests(page: Page, url: string): Promise<string[]> {
-    await this.initializeRequestCapture(page);
+    await this.requestService.initializeRequestCapture(page);
 
     try {
       await page.goto(url);
@@ -105,27 +80,19 @@ export class WebMonitoringService {
       console.error('Error while navigating:', error);
       throw error;
     }
-    return await this.stopRequestCapture(page);
+    return await this.requestService.stopRequestCapture(page);
   }
 
-  async initializeRequestCapture(page: Page): Promise<void> {
-    this.requests = []; // Reset the request list
-
-    await page.setRequestInterception(true);
-    await page.setUserAgent(USER_AGENT);
-
-    const requestHandler = async (request) => {
-      if (request.isInterceptResolutionHandled()) return;
-      this.requests.push(request.url());
-      await request.continue();
-    };
-
-    page.on('request', requestHandler);
+  // TODO: need to pass it to the shared service for mediator pattern
+  initEventFolder(projectName: string, testName: string) {
+    const resultFolder = this.sharedService.getReportSavingFolder(projectName);
+    const eventFolder = path.join(resultFolder, testName);
+    if (!existsSync(eventFolder)) mkdirSync(eventFolder);
   }
 
-  async stopRequestCapture(page: Page): Promise<string[]> {
-    page.removeAllListeners('request');
-    await page.setRequestInterception(false);
-    return this.requests;
+  getEventFolder(projectName: string, testName: string) {
+    const resultFolder = this.sharedService.getReportSavingFolder(projectName);
+    const eventFolder = path.join(resultFolder, testName);
+    return eventFolder;
   }
 }
