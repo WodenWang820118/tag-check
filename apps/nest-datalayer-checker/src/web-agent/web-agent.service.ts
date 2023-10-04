@@ -1,10 +1,12 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
 import { SharedService } from '../shared/shared.service';
-import { Browser, Credentials, Target } from 'puppeteer';
+import { Browser, Credentials } from 'puppeteer';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
+import path from 'path';
+import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
 
 @Injectable()
 export class WebAgentService {
@@ -12,6 +14,7 @@ export class WebAgentService {
     private readonly puppeteerService: PuppeteerService,
     private readonly actionService: ActionService,
     private readonly webMonitoringService: WebMonitoringService,
+    private readonly dataLayerService: DataLayerService,
     private readonly sharedService: SharedService
   ) {}
 
@@ -87,7 +90,7 @@ export class WebAgentService {
       browser,
       credentials
     );
-    const result = await this.webMonitoringService.getDataLayer(page);
+    const result = await this.dataLayerService.getDataLayer(page);
     await browser.close();
     return result;
   }
@@ -139,15 +142,18 @@ export class WebAgentService {
     testName: string,
     args: string[],
     headless: 'new' | boolean,
-    path?: string,
+    filePath?: string,
     captureRequest = false,
     measurementId?: string,
     credentials?: Credentials
   ) {
-    // 1) gather all necessary data
+    // 1) gather all necessary data and initialize the test
+    this.webMonitoringService.initEventFolder(projectName, testName);
+    this.dataLayerService.initSelfDataLayer(projectName, testName);
+
     const operationOption: FilePathOptions = {
       name: testName,
-      absolutePath: path,
+      absolutePath: filePath,
     };
 
     const operation = this.sharedService.getOperationJson(
@@ -165,14 +171,16 @@ export class WebAgentService {
     if (credentials) {
       await this.puppeteerService.httpAuth(page, credentials);
     }
-    await this.webMonitoringService.initSelfDataLayer(testName);
 
     let eventRequest: string = null;
 
     // 2) perform the test operation
     try {
-      await this.actionService.performOperation(page, operation);
-      const dataLayer = this.webMonitoringService.getMyDataLayer(testName);
+      await this.actionService.performOperation(page, projectName, operation);
+      const dataLayer = this.dataLayerService.getMyDataLayer(
+        projectName,
+        testName
+      );
       const destinationUrl = page.url();
 
       if (captureRequest) {
@@ -186,22 +194,20 @@ export class WebAgentService {
 
       // 3) save screenshots/videos
       // TODO: temporary solution, it could be better in different stages of the workflow
-      const resultFolder =
-        this.sharedService.getReportSavingFolder(projectName);
-
+      const imageSavingFolder = path.join(
+        this.sharedService.getReportSavingFolder(projectName),
+        testName
+      );
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await this.puppeteerService.snapshot(
         page,
-        `${resultFolder}/${testName}.png`,
+        path.join(imageSavingFolder, `${testName}.png`),
         true
       );
 
       // 4) close the browser
-      // TODO: will do multiple tests in the same browser
       await page.close();
       await browser.close();
-
-      // Logger.log('dataLayer in the performTest: ', dataLayer);
 
       return {
         dataLayer,
@@ -216,4 +222,5 @@ export class WebAgentService {
       );
     }
   }
+  // TODO: will need to implement one browser for multiple tab tests
 }

@@ -23,7 +23,8 @@ export class XlsxReportService {
     ];
     // single test
     if (testName) {
-      const file = path.join(savingFolder, `${testName}.png`);
+      const eventSavingFolder = path.join(savingFolder, testName);
+      const file = path.join(eventSavingFolder, `${testName}.png`);
       const imageId = workbook.addImage({
         buffer: readFileSync(file),
         extension: 'png',
@@ -40,8 +41,8 @@ export class XlsxReportService {
         // get existing image after the test
         const eventName =
           dataContent[i]['dataLayerResult']['dataLayerSpec']['event'];
-
-        const imagePath = path.join(savingFolder, `${eventName}.png`);
+        const eventSavingFolder = path.join(savingFolder, eventName);
+        const imagePath = path.join(eventSavingFolder, `${eventName}.png`);
         const imageId = workbook.addImage({
           buffer: readFileSync(imagePath),
           extension: 'png',
