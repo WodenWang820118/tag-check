@@ -6,6 +6,7 @@ import { UtilitiesModule } from './utilities/utilities.module';
 import { WebAgentService } from './web-agent.service';
 import { WebAgentController } from './web-agent.controller';
 import { SharedModule } from '../shared/shared.module';
+import { DataLayerModule } from './web-monitoring/data-layer/data-layer.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { SharedModule } from '../shared/shared.module';
     PuppeteerModule,
     UtilitiesModule,
     SharedModule,
+    DataLayerModule,
   ],
   exports: [WebAgentService],
   providers: [WebAgentService],

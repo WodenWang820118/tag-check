@@ -22,6 +22,8 @@ import { RequestProcessorService } from '../inspector/request-processor/request-
 import { UtilitiesService } from '../web-agent/utilities/utilities.service';
 import { ProjectService } from '../shared/project/project.service';
 import { XlsxReportService } from '../shared/xlsx-report/xlsx-report.service';
+import { DataLayerService } from '../web-agent/web-monitoring/data-layer/data-layer.service';
+import { RequestService } from '../web-agent/web-monitoring/request/request.service';
 
 const inspectorServices = [InspectorService, RequestProcessorService];
 
@@ -31,6 +33,8 @@ const webAgentServices = [
   ActionService,
   WebMonitoringService,
   UtilitiesService,
+  DataLayerService,
+  RequestService,
 ];
 
 const sharedServices = [
