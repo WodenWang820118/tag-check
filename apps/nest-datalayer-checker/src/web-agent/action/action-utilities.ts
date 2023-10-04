@@ -1,5 +1,15 @@
 import { Page } from 'puppeteer';
 
+export enum BrowserAction {
+  CLICK = 'click',
+  NAVIGATE = 'navigate',
+  SETVIEWPORT = 'setViewport',
+  CHANGE = 'change',
+  HOVER = 'hover',
+  KEYDOWN = 'keyDown',
+  KEYUP = 'keyUp',
+}
+
 export enum SelectorType {
   CSS = 'css',
   XPATH = 'xpath',

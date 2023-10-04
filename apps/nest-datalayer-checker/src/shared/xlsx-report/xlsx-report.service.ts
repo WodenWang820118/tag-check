@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { readFileSync } from 'fs';
 import path from 'path';
 
 @Injectable()
 export class XlsxReportService {
-  writeXlsxFile(
-    file: string,
+  async writeXlsxFile(
+    savingFolder: string,
+    fileName: string,
     sheetName: string,
     data: any,
     testName?: string,
@@ -22,31 +23,30 @@ export class XlsxReportService {
     ];
     // single test
     if (testName) {
-      //TODO: result.xlsx could be different naming
+      const eventSavingFolder = path.join(savingFolder, testName);
+      const file = path.join(eventSavingFolder, `${testName}.png`);
       const imageId = workbook.addImage({
-        buffer: readFileSync(file.replace('result.xlsx', `${testName}.png`)),
+        buffer: readFileSync(file),
         extension: 'png',
       });
-
       worksheet.addImage(imageId, {
         tl: { col: 2, row: 1 },
         ext: { width: 100, height: 50 },
       });
     } else if (projectName) {
       // all tests
-      const folderPath = path.join(file.split('result.xlsx')[0]);
-
-      const obj = JSON.parse(JSON.stringify(data));
-      for (let i = 0; i < obj.length; i++) {
+      const dataContent = JSON.parse(JSON.stringify(data));
+      Logger.log('dataContent: ', dataContent);
+      for (let i = 0; i < dataContent.length; i++) {
+        // get existing image after the test
+        const eventName =
+          dataContent[i]['dataLayerResult']['dataLayerSpec']['event'];
+        const eventSavingFolder = path.join(savingFolder, eventName);
+        const imagePath = path.join(eventSavingFolder, `${eventName}.png`);
         const imageId = workbook.addImage({
-          buffer: readFileSync(
-            `${folderPath}\\${
-              JSON.parse(obj[i]['dataLayerResult']).dataLayerSpec.event
-            }.png`
-          ),
+          buffer: readFileSync(imagePath),
           extension: 'png',
         });
-
         worksheet.addImage(imageId, {
           tl: { col: worksheet.columns.length, row: i + 1 },
           ext: { width: 100, height: 50 },
@@ -55,6 +55,6 @@ export class XlsxReportService {
     }
 
     worksheet.addRows(data);
-    workbook.xlsx.writeFile(file);
+    await workbook.xlsx.writeFile(path.join(savingFolder, fileName));
   }
 }
