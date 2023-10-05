@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { SharedService } from '../shared/shared.service';
-import { Credentials } from 'puppeteer';
+import puppeteer, { Credentials } from 'puppeteer';
 import { InspectorService } from '../inspector/inspector.service';
 
 @Injectable()
@@ -35,10 +35,17 @@ export class WaiterService {
     credentials?: Credentials
   ) {
     // 3.1) inspect both dataLayer and the request sent to GA4
+    const browser = await puppeteer.launch({
+      headless: headless === 'new' ? 'new' : false,
+      args: [],
+    });
+
+    const [page] = await browser.pages();
+
     const result = await this.inspectorService.inspectDataLayer(
+      page,
       projectName,
       testName,
-      headless,
       path,
       measurementId,
       credentials
@@ -64,6 +71,7 @@ export class WaiterService {
       projectName
     );
 
+    await browser.close();
     return data;
   }
 
@@ -72,16 +80,24 @@ export class WaiterService {
     projectName: string,
     headless: string,
     path?: string,
+    args?: string[],
     measurementId?: string,
-    credentials?: Credentials
+    credentials?: Credentials,
+    concurrency?: number
   ) {
     // 3.1) inspect both dataLayer and the request sent to GA4
+    const browser = await puppeteer.launch({
+      headless: headless === 'new' ? 'new' : false,
+      args: args || [],
+    });
+
     const result = await this.inspectorService.inspectProjectDataLayer(
+      browser,
       projectName,
-      headless,
       path,
       measurementId,
-      credentials
+      credentials,
+      concurrency
     );
 
     // 3.2) construct the data to be written to the xlsx file
@@ -106,6 +122,7 @@ export class WaiterService {
       projectName
     );
 
+    await browser.close();
     return data;
   }
 }
