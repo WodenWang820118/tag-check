@@ -83,18 +83,22 @@ export class WaiterDataLayerController {
     @Query('headless') headless: string,
     @Query('measurementId') measurementId: string,
     @Query('path') path?: string,
+    @Query('args') args?: string[],
     @Query('username') username?: string,
-    @Query('password') password?: string
+    @Query('password') password?: string,
+    @Query('concurrency') concurrency?: string
   ) {
     return await this.waiterService.inspectProject(
       projectName,
       headless,
       path,
+      args,
       measurementId,
       {
         username,
         password,
-      }
+      },
+      Number(concurrency)
     );
   }
 }

@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { WebAgentService } from '../web-agent/web-agent.service';
 import { SharedService } from '../shared/shared.service';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
@@ -13,7 +13,7 @@ import {
   StrictDataLayerEvent,
 } from '../interfaces/dataLayer.interface';
 import { RequestProcessorService } from './request-processor/request-processor.service';
-import { Credentials } from 'puppeteer';
+import { Browser, Credentials, Page } from 'puppeteer';
 
 @Injectable()
 export class InspectorService {
@@ -34,9 +34,9 @@ export class InspectorService {
 
   // inspect one event
   async inspectDataLayer(
+    page: Page,
     projectName: string,
     testName: string,
-    headless: string,
     path?: string,
     measurementId?: string,
     credentials?: Credentials
@@ -55,14 +55,15 @@ export class InspectorService {
 
     // 2. Execute the recording script and get the result
     // switch the measurementId to determine whether to grab requests
+
     switch (measurementId) {
       case undefined: {
         const result = await this.webAgentService.executeAndGetDataLayer(
+          page,
           projectName,
           testName,
-          [''],
-          headless,
-          path
+          path,
+          credentials
         );
 
         // 3. Compare the result with the project spec
@@ -83,10 +84,9 @@ export class InspectorService {
       default: {
         const result =
           await this.webAgentService.executeAndGetDataLayerAndRequest(
+            page,
             projectName,
             testName,
-            [''],
-            headless,
             path,
             measurementId,
             credentials
@@ -123,38 +123,36 @@ export class InspectorService {
   }
 
   async inspectProjectDataLayer(
+    browser: Browser,
     projectName: string,
-    headless: string,
     path?: string,
     measurementId?: string,
-    credentials?: Credentials
+    credentials?: Credentials,
+    concurrency = 2
   ) {
     const operations = this.sharedService.getOperationJsonByProject({
       name: projectName,
     });
+
     const results = [];
-    for (const operation of operations) {
-      try {
-        const result = await this.inspectDataLayer(
+    for (let i = 0; i < operations.length; i += concurrency) {
+      const operationBatch = operations.slice(i, i + concurrency);
+
+      const batchPromises = operationBatch.map(async (operation) => {
+        const page = await browser.newPage();
+        return this.inspectDataLayer(
+          page,
           projectName,
           operation.replace('.json', ''),
-          headless,
           path,
           measurementId,
           credentials
         );
-        results.push(result);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      } catch (error) {
-        Logger.error('error: ', error);
-        results.push({
-          passed: false,
-          message: 'There is no corresponding test recording',
-          dataLayerSpec: operation,
-        });
-        // throw new HttpException(error, 500);
-      }
+      });
+      const batchResults = await Promise.all(batchPromises);
+      results.push(...batchResults);
     }
+
     return results;
   }
 
