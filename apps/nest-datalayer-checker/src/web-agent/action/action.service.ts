@@ -43,15 +43,18 @@ export class ActionService {
     );
 
     for (const step of operation.steps) {
+      const state = {
+        isFirstNavigation: true,
+      };
       await this.stepExecutor.executeStep(
         page,
         step,
         projectName,
-        operation.title
+        operation.title,
+        state
       );
     }
 
-    this.stepExecutor.setIsFirstNavigation(true);
     Logger.log('performOperation completes');
   }
 }
