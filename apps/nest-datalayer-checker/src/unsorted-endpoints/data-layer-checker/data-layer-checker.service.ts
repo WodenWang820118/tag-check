@@ -3,6 +3,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 import { AirtableService } from '../airtable/airtable.service';
 import { chunk } from '../../utilities/utilities';
 import { WebAgentService } from '../../web-agent/web-agent.service';
+import puppeteer from 'puppeteer';
 
 /**
  * DataLayerCheckerService
@@ -110,12 +111,16 @@ export class DataLayerCheckerService {
     let result;
     try {
       // if there is a recording, use the recording to get the data layer
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: [],
+      });
+
       if (record.fields['Recording']) {
         actualDataLayer = await this.webAgentService.executeAndGetDataLayer(
-          JSON.parse(record.fields['Recording']),
-          '',
-          [''],
-          ''
+          await browser.newPage(),
+          'Dummy Project Name',
+          JSON.parse(record.fields['Recording'])
         );
       } else if (record.fields['URL']) {
         // if there is a URL to get dataLayer directly, use the URL to get the data layer

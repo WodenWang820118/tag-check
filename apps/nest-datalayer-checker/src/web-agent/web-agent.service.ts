@@ -3,7 +3,7 @@ import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
 import { SharedService } from '../shared/shared.service';
-import { Browser, Credentials } from 'puppeteer';
+import { Browser, Credentials, Page } from 'puppeteer';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import path from 'path';
 import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
@@ -19,19 +19,16 @@ export class WebAgentService {
   ) {}
 
   async executeAndGetDataLayer(
+    page: Page,
     projectName: string,
     testName: string,
-    args: string[],
-    headless: string,
     path?: string,
     credentials?: Credentials
   ) {
-    const headlessBool = headless === 'new' ? 'new' : false;
     const { dataLayer, destinationUrl } = await this.performTest(
+      page,
       projectName,
       testName,
-      args,
-      headlessBool,
       path,
       false,
       null,
@@ -41,44 +38,6 @@ export class WebAgentService {
       dataLayer,
       destinationUrl,
     };
-  }
-
-  async executeAndGetDataLayerByProject(
-    projectName: string,
-    args: string[],
-    headless: string,
-    path: string,
-    credentials?: Credentials
-  ) {
-    try {
-      const specOption: FilePathOptions = {
-        name: projectName,
-        absolutePath: path,
-      };
-
-      const operations =
-        this.sharedService.getOperationJsonByProject(specOption);
-      const dataLayers = [];
-
-      for (const operation of operations) {
-        const dataLayer = await this.executeAndGetDataLayer(
-          projectName,
-          operation,
-          args,
-          headless,
-          path,
-          credentials
-        );
-        dataLayers.push(dataLayer);
-      }
-      return dataLayers;
-    } catch (error) {
-      throw new HttpException(
-        'An error occurred while executing and getting the data layer: ' +
-          error,
-        500
-      );
-    }
   }
 
   async fetchDataLayer(url: string, credentials?: Credentials) {
@@ -111,20 +70,17 @@ export class WebAgentService {
   }
 
   async executeAndGetDataLayerAndRequest(
+    page: Page,
     projectName: string,
     testName: string,
-    args: string[],
-    headless: string,
     path?: string,
     measurementId?: string,
     credentials?: Credentials
   ) {
-    const headlessBool = headless === 'new' ? 'new' : false;
     const { dataLayer, eventRequest, destinationUrl } = await this.performTest(
+      page,
       projectName,
       testName,
-      args,
-      headlessBool,
       path,
       true,
       measurementId,
@@ -138,10 +94,9 @@ export class WebAgentService {
   }
 
   private async performTest(
+    page: Page,
     projectName: string,
     testName: string,
-    args: string[],
-    headless: 'new' | boolean,
     filePath?: string,
     captureRequest = false,
     measurementId?: string,
@@ -160,13 +115,6 @@ export class WebAgentService {
       projectName,
       operationOption
     );
-
-    const browser = await this.puppeteerService.initAndReturnBrowser({
-      headless: headless,
-      args: args,
-    });
-
-    const [page] = await browser.pages();
 
     if (credentials) {
       await this.puppeteerService.httpAuth(page, credentials);
@@ -205,9 +153,8 @@ export class WebAgentService {
         true
       );
 
-      // 4) close the browser
+      // 4) close the page
       await page.close();
-      await browser.close();
 
       return {
         dataLayer,
@@ -215,12 +162,11 @@ export class WebAgentService {
         destinationUrl,
       };
     } catch (error) {
-      await browser?.close();
+      await page.close();
       throw new HttpException(
         `An error occurred while performing the test: ${error}`,
         500
       );
     }
   }
-  // TODO: will need to implement one browser for multiple tab tests
 }
