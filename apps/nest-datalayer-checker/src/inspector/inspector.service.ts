@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { WebAgentService } from '../web-agent/web-agent.service';
 import { SharedService } from '../shared/shared.service';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
@@ -14,6 +14,8 @@ import {
 } from '../interfaces/dataLayer.interface';
 import { RequestProcessorService } from './request-processor/request-processor.service';
 import { Browser, Credentials, Page } from 'puppeteer';
+import { writeFileSync } from 'fs';
+import path from 'path';
 
 @Injectable()
 export class InspectorService {
@@ -114,9 +116,9 @@ export class InspectorService {
 
         return {
           dataLayerCheckResult,
+          destinationUrl,
           rawRequest,
           requestCheckResult,
-          destinationUrl,
         };
       }
     }
@@ -125,11 +127,14 @@ export class InspectorService {
   async inspectProjectDataLayer(
     browser: Browser,
     projectName: string,
-    path?: string,
+    filePath?: string,
     measurementId?: string,
     credentials?: Credentials,
-    concurrency = 2
+    concurrency?: number
   ) {
+    // deal with invalid concurrency
+    concurrency = Math.max(1, concurrency || 1);
+
     const operations = this.sharedService.getOperationJsonByProject({
       name: projectName,
     });
@@ -139,15 +144,28 @@ export class InspectorService {
       const operationBatch = operations.slice(i, i + concurrency);
 
       const batchPromises = operationBatch.map(async (operation) => {
-        const page = await browser.newPage();
-        return this.inspectDataLayer(
-          page,
-          projectName,
+        const cachePath = path.join(
+          this.sharedService.getReportSavingFolder(projectName),
           operation.replace('.json', ''),
-          path,
-          measurementId,
-          credentials
+          `${operation.replace('.json', '')} - result cache.json`
         );
+        try {
+          const page = await browser.newPage();
+          const result = await this.inspectDataLayer(
+            page,
+            projectName,
+            operation.replace('.json', ''),
+            filePath,
+            measurementId,
+            credentials
+          );
+          writeFileSync(cachePath, JSON.stringify(result, null, 2));
+          return result;
+        } catch (error) {
+          Logger.warn(error, 'error');
+          writeFileSync(cachePath, JSON.stringify(error, null, 2));
+          return { error: error.message };
+        }
       });
       const batchResults = await Promise.all(batchPromises);
       results.push(...batchResults);
