@@ -3,20 +3,24 @@ import { ChangeStrategy } from './strategies/change-strategy';
 import { ClickStrategy } from './strategies/click-strategy';
 import { HoverStrategy } from './strategies/hover-strategy';
 import { Logger, HttpException } from '@nestjs/common';
+import {
+  SelectorsType,
+  Step,
+} from '../../shared/interfaces/recording.interface';
 import { getSelectorType } from './action-utilities';
 
 export interface ActionHandler {
-  handle(page: Page, step: any): Promise<void>;
+  handle(page: Page, step: Step): Promise<void>;
 }
 
-function getFirstSelector(selectorGroup: string | string[]): string {
+function getFirstSelector(selectorGroup: SelectorsType) {
   return Array.isArray(selectorGroup) ? selectorGroup[0] : selectorGroup;
 }
 
 export class ClickHandler implements ActionHandler {
   constructor(private clickStrategies: { [key: string]: ClickStrategy }) {}
 
-  async handle(page: Page, step: any): Promise<void> {
+  async handle(page: Page, step: Step): Promise<void> {
     // Logic of handleClick
     Logger.log('click');
     let clickedSuccessfully = false;
@@ -33,7 +37,9 @@ export class ClickHandler implements ActionHandler {
       //   console.error('scrollIntoViewIfNeeded error: ', error);
       // }
 
-      if (await this.clickElement(page, getFirstSelector(selectorGroup))) {
+      if (
+        await this.clickElement(page, getFirstSelector(selectorGroup) as string)
+      ) {
         clickedSuccessfully = true;
         Logger.log('click success! ', getFirstSelector(selectorGroup));
         break; // Exit the loop as soon as one selector works
@@ -68,7 +74,7 @@ export class ClickHandler implements ActionHandler {
 export class ChangeHandler implements ActionHandler {
   constructor(private changeStrategies: { [key: string]: ChangeStrategy }) {}
 
-  async handle(page: Page, step: any, timeout = 1000): Promise<void> {
+  async handle(page: Page, step: Step, timeout = 1000): Promise<void> {
     const selectors = step.selectors;
     const value = step.value;
 
@@ -107,14 +113,19 @@ export class ChangeHandler implements ActionHandler {
 export class HoverHandler implements ActionHandler {
   constructor(private hoverStrategies: { [key: string]: HoverStrategy }) {}
 
-  async handle(page: Page, step: any): Promise<void> {
+  async handle(page: Page, step: Step): Promise<void> {
     Logger.log('handleHover');
     const selectors = step.selectors;
     let hoveredSuccessfully = false;
 
     for (const selectorArray of selectors) {
       try {
-        if (await this.hoverElement(page, getFirstSelector(selectorArray))) {
+        if (
+          await this.hoverElement(
+            page,
+            getFirstSelector(selectorArray) as string
+          )
+        ) {
           hoveredSuccessfully = true;
           Logger.log('hover success! ', getFirstSelector(selectorArray));
           break; // Exit the loop as soon as one selector works

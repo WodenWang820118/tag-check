@@ -3,6 +3,7 @@ import { ActionHandler } from './action-handlers';
 import { Page } from 'puppeteer';
 import { BrowserAction, sleep } from './action-utilities';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
+import { Step } from '../../shared/interfaces/recording.interface';
 
 export class StepExecutor {
   constructor(
@@ -12,10 +13,10 @@ export class StepExecutor {
 
   async executeStep(
     page: Page,
-    step: any,
+    step: Step,
     projectName: string,
     testName: string,
-    state: any
+    state: { isFirstNavigation: boolean }
   ) {
     const randomDelay = 3000 + Math.floor(Math.random() * 2000);
     const handler = this.handlers[step.type];
@@ -37,14 +38,18 @@ export class StepExecutor {
     }
   }
 
-  async handleSetViewport(page: Page, step: any) {
+  async handleSetViewport(page: Page, step: Step) {
     await page.setViewport({
       width: step.width + (1920 - step.width),
       height: step.height + (1080 - step.height),
     });
   }
 
-  async handleNavigate(page: Page, step: any, state: any) {
+  async handleNavigate(
+    page: Page,
+    step: Step,
+    state: { isFirstNavigation: boolean }
+  ) {
     await page.goto(step.url, { waitUntil: 'networkidle2' });
     if (state.isFirstNavigation) {
       // only reload the landing page, trying to skip the overlay

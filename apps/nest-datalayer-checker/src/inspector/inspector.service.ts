@@ -1,7 +1,7 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { WebAgentService } from '../web-agent/web-agent.service';
 import { SharedService } from '../shared/shared.service';
-import { FilePathOptions } from '../interfaces/filePathOptions.interface';
+import { FilePathOptions } from '../shared/interfaces/file-path-options.interface';
 import {
   EcommerceEventValidationStrategy,
   OldGA4EventsValidationStrategy,
@@ -11,7 +11,7 @@ import { ValidationStrategyType, determineStrategy } from './utilities';
 import {
   BaseDataLayerEvent,
   StrictDataLayerEvent,
-} from '../interfaces/dataLayer.interface';
+} from '../shared/interfaces/data-layer.interface';
 import { RequestProcessorService } from './request-processor/request-processor.service';
 import { Browser, Credentials, Page } from 'puppeteer';
 import { writeFileSync } from 'fs';

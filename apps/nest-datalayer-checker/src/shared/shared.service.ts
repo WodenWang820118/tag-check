@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { FilePathOptions } from '../interfaces/filePathOptions.interface';
+import { FilePathOptions } from './interfaces/file-path-options.interface';
 import { ProjectService } from './project/project.service';
 import { FileService } from './file/file.service';
 import { XlsxReportService } from './xlsx-report/xlsx-report.service';
+import path from 'path';
+import { existsSync, mkdirSync } from 'fs';
+import { Operation } from './interfaces/recording.interface';
 
 @Injectable()
 export class SharedService {
@@ -48,7 +51,7 @@ export class SharedService {
     return this.fileService.getSpecJsonByProject(options);
   }
 
-  findDestinationUrl(json: any) {
+  findDestinationUrl(json: Operation) {
     return this.fileService.findDestinationUrl(json);
   }
 
@@ -56,7 +59,12 @@ export class SharedService {
     savingFolder: string,
     fileName: string,
     sheetName: string,
-    data: any,
+    data: {
+      dataLayerResult: any;
+      requestCheckResult: any;
+      rawRequest: any;
+      destinationUrl: any;
+    }[],
     testName?: string,
     projectName?: string
   ) {
@@ -86,5 +94,17 @@ export class SharedService {
       sheetName,
       projectName
     );
+  }
+
+  initEventFolder(projectName: string, testName: string) {
+    const resultFolder = this.getReportSavingFolder(projectName);
+    const eventFolder = path.join(resultFolder, testName);
+    if (!existsSync(eventFolder)) mkdirSync(eventFolder);
+  }
+
+  getEventFolder(projectName: string, testName: string) {
+    const resultFolder = this.getReportSavingFolder(projectName);
+    const eventFolder = path.join(resultFolder, testName);
+    return eventFolder;
   }
 }

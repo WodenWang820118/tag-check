@@ -1,7 +1,7 @@
 import {
   BaseDataLayerEvent,
   StrictDataLayerEvent,
-} from '../../interfaces/dataLayer.interface';
+} from '../../shared/interfaces/data-layer.interface';
 import {
   EcommerceEventValidationStrategy,
   OldGA4EventsValidationStrategy,

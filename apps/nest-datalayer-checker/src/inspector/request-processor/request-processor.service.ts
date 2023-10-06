@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BaseItem } from '../../interfaces/dataLayer.interface';
+import { BaseItem } from '../../shared/interfaces/data-layer.interface';
 import { parse, URLSearchParams } from 'url';
 import { standardParameterMap } from './utilities';
 

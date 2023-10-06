@@ -3,8 +3,9 @@ import * as fs from 'fs';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { configFolder, recordingFolder, resultFolder } from '../utilities';
-import { FilePathOptions } from '../../interfaces/filePathOptions.interface';
+import { FilePathOptions } from '../interfaces/file-path-options.interface';
 import { ProjectService } from '../project/project.service';
+import { Operation } from '../interfaces/recording.interface';
 
 @Injectable()
 export class FileService {
@@ -77,7 +78,7 @@ export class FileService {
     }
   }
 
-  findDestinationUrl(json: any): string | null {
+  findDestinationUrl(json: Operation): string | null {
     const steps = json.steps;
     if (!steps || !Array.isArray(steps)) {
       return null;

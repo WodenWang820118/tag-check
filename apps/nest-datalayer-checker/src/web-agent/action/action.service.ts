@@ -4,18 +4,20 @@ import { DataLayerService } from '../web-monitoring/data-layer/data-layer.servic
 import { StrategyManager } from './strategies/strategy-manager';
 import { StepExecutor } from './step-executor';
 import { ClickHandler, ChangeHandler, HoverHandler } from './action-handlers';
-import { RequestInterceptor } from './request-interceptor';
 import { BrowserAction } from './action-utilities';
+import { WebMonitoringService } from '../web-monitoring/web-monitoring.service';
+import { Operation } from '../../shared/interfaces/recording.interface';
 
 @Injectable()
 export class ActionService {
   private strategyManager: StrategyManager;
   private stepExecutor: StepExecutor;
-  private requestInterceptor: RequestInterceptor;
 
-  constructor(private dataLayerService: DataLayerService) {
+  constructor(
+    private dataLayerService: DataLayerService,
+    private webMonitoringService: WebMonitoringService
+  ) {
     this.strategyManager = new StrategyManager();
-    this.requestInterceptor = new RequestInterceptor(this.dataLayerService);
     this.stepExecutor = new StepExecutor(
       {
         [BrowserAction.CLICK]: new ClickHandler(
@@ -32,11 +34,15 @@ export class ActionService {
     );
   }
 
-  async performOperation(page: Page, projectName: string, operation: any) {
+  async performOperation(
+    page: Page,
+    projectName: string,
+    operation: Operation
+  ) {
     if (!operation || !operation.steps) return;
 
     // intercept specific requests that update dataLayer and navigate to other pages
-    await this.requestInterceptor.interceptRequest(
+    await this.webMonitoringService.interceptRequest(
       page,
       projectName,
       operation

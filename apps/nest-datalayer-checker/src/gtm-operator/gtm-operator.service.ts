@@ -1,15 +1,12 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { Page } from 'puppeteer';
-import { chunk } from '../../utilities/utilities';
-import { WebAgentService } from '../../web-agent/web-agent.service';
+import puppeteer, { Page } from 'puppeteer';
+import { chunk } from './utilities';
 
 /**
  * A service for interacting with Google Tag Manager (GTM) via Puppeteer.
  */
 @Injectable()
 export class GtmOperatorService {
-  constructor(private webAgentService: WebAgentService) {}
-
   /**
    * Goes to a GTM URL and returns the browser and page instances.
    * @param gtmUrl The URL of the GTM interface.
@@ -24,16 +21,12 @@ export class GtmOperatorService {
       .find((element) => element.startsWith('url='))
       .split('=')[1];
 
-    // TODO: use web-agent service
-    // const browser = await this.puppeteerService.initAndReturnBrowser({
-    //   headless: headless.toLowerCase() === 'true' ? true : false || false,
-    //   args: args.split(','),
-    // });
-    const browser = await this.webAgentService.getCurrentBrowser(
-      args,
-      headless
-    );
-    const page = await this.webAgentService.getGtmTestingPage(gtmUrl, browser);
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: [''],
+    });
+    const [page] = await browser.pages();
+    await page.goto(gtmUrl);
 
     // 2) Do not include the debug mode
     await page.$('#include-debug-param').then((el) => el?.click());
@@ -83,7 +76,9 @@ export class GtmOperatorService {
     const { browser, page } = await this.goToPageViaGtm(gtmUrl, args, headless);
     const pages = await browser.pages();
     const responses = await this.crawlPageResponses(pages[pages.length - 1]);
-    const gcs = this.webAgentService.getGcs(responses);
+    const gcs = responses.map(
+      (request) => request.split('gcs=')[1].split('&')[0]
+    );
     return { browser, gcs };
   }
 

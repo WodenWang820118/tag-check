@@ -1,15 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { PuppeteerService } from '../puppeteer/puppeteer.service';
-import { Page } from 'puppeteer';
+import puppeteer, { Page } from 'puppeteer';
 import { SharedService } from '../../shared/shared.service';
-import { mkdirSync, existsSync } from 'fs';
-import path from 'path';
 import { RequestService } from './request/request.service';
+import { Operation } from '../../shared/interfaces/recording.interface';
 
 @Injectable()
 export class WebMonitoringService {
   constructor(
-    private puppeteerService: PuppeteerService,
     private sharedService: SharedService,
     private requestService: RequestService
   ) {}
@@ -50,12 +47,14 @@ export class WebMonitoringService {
    * @returns A Promise resolving to an array of GTM IDs
    */
   async detectGtm(url: string) {
-    const browser = await this.puppeteerService.initAndReturnBrowser({
+    const browser = await puppeteer.launch({
       headless: true,
+      args: [],
     });
 
     try {
-      const page = await this.puppeteerService.navigateTo(url, browser);
+      const [page] = await browser.pages();
+      await page.goto(url);
       const result = await this.getInstalledGtms(page, url);
       // console.dir('result', result);
       return result;
@@ -83,16 +82,19 @@ export class WebMonitoringService {
     return await this.requestService.stopRequestCapture(page);
   }
 
-  // TODO: need to pass it to the shared service for mediator pattern
   initEventFolder(projectName: string, testName: string) {
-    const resultFolder = this.sharedService.getReportSavingFolder(projectName);
-    const eventFolder = path.join(resultFolder, testName);
-    if (!existsSync(eventFolder)) mkdirSync(eventFolder);
+    this.sharedService.initEventFolder(projectName, testName);
   }
 
   getEventFolder(projectName: string, testName: string) {
-    const resultFolder = this.sharedService.getReportSavingFolder(projectName);
-    const eventFolder = path.join(resultFolder, testName);
-    return eventFolder;
+    this.sharedService.getEventFolder(projectName, testName);
+  }
+
+  async interceptRequest(
+    page: Page,
+    projectName: string,
+    operation: Operation
+  ) {
+    await this.requestService.interceptRequest(page, projectName, operation);
   }
 }

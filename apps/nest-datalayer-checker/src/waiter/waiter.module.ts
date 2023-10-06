@@ -15,7 +15,6 @@ import { SharedService } from '../shared/shared.service';
 import { FileService } from '../shared/file/file.service';
 import { WebAgentService } from '../web-agent/web-agent.service';
 import { InspectorService } from '../inspector/inspector.service';
-import { PuppeteerService } from '../web-agent/puppeteer/puppeteer.service';
 import { ActionService } from '../web-agent/action/action.service';
 import { WebMonitoringService } from '../web-agent/web-monitoring/web-monitoring.service';
 import { RequestProcessorService } from '../inspector/request-processor/request-processor.service';
@@ -29,7 +28,6 @@ const inspectorServices = [InspectorService, RequestProcessorService];
 
 const webAgentServices = [
   WebAgentService,
-  PuppeteerService,
   ActionService,
   WebMonitoringService,
   UtilitiesService,

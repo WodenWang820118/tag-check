@@ -1,6 +1,6 @@
 import { WaiterService } from '../waiter/waiter.service';
 import { SharedService } from '../shared/shared.service';
-import { FilePathOptions } from '../interfaces/filePathOptions.interface';
+import { FilePathOptions } from '../shared/interfaces/file-path-options.interface';
 import { ProjectService } from '../shared/project/project.service';
 import { FileService } from '../shared/file/file.service';
 import { mkdirSync, rm, writeFileSync } from 'fs';
