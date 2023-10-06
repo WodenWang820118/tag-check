@@ -9,7 +9,12 @@ export class XlsxReportService {
     savingFolder: string,
     fileName: string,
     sheetName: string,
-    data: any,
+    data: {
+      dataLayerResult: any;
+      requestCheckResult: any;
+      rawRequest: any;
+      destinationUrl: any;
+    }[],
     testName?: string,
     projectName?: string
   ) {
@@ -36,7 +41,7 @@ export class XlsxReportService {
     } else if (projectName) {
       // all tests
       const dataContent = JSON.parse(JSON.stringify(data));
-      Logger.log('dataContent: ', dataContent);
+      // console.log('dataContent: ', dataContent);
       for (let i = 0; i < dataContent.length; i++) {
         // get existing image after the test
         const eventName =
@@ -56,5 +61,43 @@ export class XlsxReportService {
 
     worksheet.addRows(data);
     await workbook.xlsx.writeFile(path.join(savingFolder, fileName));
+  }
+
+  async writeXlsxFileForAllTests(
+    savingFolder: string,
+    operations: string[],
+    fileName: string,
+    sheetName: string,
+    projectName: string
+  ) {
+    const data = [];
+    for (let i = 0; i < operations.length; i++) {
+      const operation = operations[i];
+      const cachePath = path.join(
+        savingFolder,
+        operation.replace('.json', ''),
+        `${operation.replace('.json', '')} - result cache.json`
+      );
+      const cache = JSON.parse(readFileSync(cachePath).toString());
+      data.push(cache);
+    }
+
+    const result = data.map((item) => {
+      return {
+        dataLayerResult: item.dataLayerCheckResult,
+        requestCheckResult: item.requestCheckResult,
+        rawRequest: item.rawRequest,
+        destinationUrl: item.destinationUrl,
+      };
+    });
+
+    await this.writeXlsxFile(
+      savingFolder,
+      fileName,
+      sheetName,
+      result,
+      undefined,
+      projectName
+    );
   }
 }

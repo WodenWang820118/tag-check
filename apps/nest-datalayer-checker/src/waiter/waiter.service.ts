@@ -110,15 +110,13 @@ export class WaiterService {
       };
     });
 
-    console.log(data);
-
-    // 3.3) write the data to the xlsx file
-    await this.sharedService.writeXlsxFile(
-      this.sharedService.getReportSavingFolder(projectName),
+    // 3.3) write the data to the xlsx file using cache file
+    // the reason to use cache file is that there could be 20 tests running at the same time
+    // one failed test will cause all other tests to fail in terms of test execution logic
+    // therefore, we handle the result gathering logic in the xlsx-report.service.ts
+    await this.sharedService.writeXlsxFileForAllTests(
       'result.xlsx',
       'Sheet1',
-      data,
-      undefined,
       projectName
     );
 
