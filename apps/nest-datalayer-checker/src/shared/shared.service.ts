@@ -69,4 +69,22 @@ export class SharedService {
       projectName
     );
   }
+
+  async writeXlsxFileForAllTests(
+    fileName: string,
+    sheetName: string,
+    projectName: string
+  ) {
+    const savingFolder = this.getReportSavingFolder(projectName);
+    const operations = this.getOperationJsonByProject({
+      name: projectName,
+    });
+    return await this.xlsxReportService.writeXlsxFileForAllTests(
+      savingFolder,
+      operations,
+      fileName,
+      sheetName,
+      projectName
+    );
+  }
 }
