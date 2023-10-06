@@ -86,7 +86,7 @@ export class WaiterDataLayerController {
     @Query('args') args?: string[],
     @Query('username') username?: string,
     @Query('password') password?: string,
-    @Query('concurrency') concurrency?: string
+    @Query('concurrency') concurrency = 2
   ) {
     return await this.waiterService.inspectProject(
       projectName,
