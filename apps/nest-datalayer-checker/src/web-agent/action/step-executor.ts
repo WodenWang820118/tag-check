@@ -39,13 +39,14 @@ export class StepExecutor {
 
   async handleSetViewport(page: Page, step: any) {
     await page.setViewport({
-      width: step.width + (1920 - step.width),
-      height: step.height + (1080 - step.height),
+      width: 1920,
+      height: 1080,
     });
   }
 
   async handleNavigate(page: Page, step: any, state: any) {
     await page.goto(step.url, { waitUntil: 'networkidle2' });
+
     if (state.isFirstNavigation) {
       // only reload the landing page, trying to skip the overlay
       await page.reload({

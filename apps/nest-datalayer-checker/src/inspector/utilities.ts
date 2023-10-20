@@ -1,3 +1,4 @@
+import { HttpException, Logger } from '@nestjs/common';
 import {
   BaseDataLayerEvent,
   StrictDataLayerEvent,
@@ -48,9 +49,15 @@ export function compareKeys(specKeys: string[], implKeys: string[]) {
 }
 
 export function determineStrategy(spec: StrictDataLayerEvent) {
-  if (spec.event[ValidationStrategyType.ECOMMERCE]) {
-    return ValidationStrategyType.ECOMMERCE;
-  } else {
-    return ValidationStrategyType.OLDGA4EVENTS;
+  try {
+    if (spec.event[ValidationStrategyType.ECOMMERCE]) {
+      return ValidationStrategyType.ECOMMERCE;
+    } else {
+      return ValidationStrategyType.OLDGA4EVENTS;
+    }
+  } catch (error) {
+    const errorMessage = `There is no spec available for determining strategy.`;
+    Logger.error(errorMessage, 'Error: ');
+    throw new HttpException(errorMessage, 500);
   }
 }

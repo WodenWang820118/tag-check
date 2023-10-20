@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { SharedService } from '../shared/shared.service';
 import puppeteer, { Credentials } from 'puppeteer';
 import { InspectorService } from '../inspector/inspector.service';
@@ -71,7 +71,10 @@ export class WaiterService {
       projectName
     );
 
-    await browser.close();
+    Logger.log('Single test is done!');
+
+    // no need to close the browser since it has one page only and the page has been closed already
+    Logger.log('Browser is closed!');
     return data;
   }
 
@@ -119,8 +122,8 @@ export class WaiterService {
       'Sheet1',
       projectName
     );
-
-    await browser.close();
+    Logger.log('All tests are done!');
+    Logger.log('Browser is closed!');
     return data;
   }
 }

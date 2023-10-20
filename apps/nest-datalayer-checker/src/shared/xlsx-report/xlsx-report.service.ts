@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { readFileSync } from 'fs';
 import path from 'path';
@@ -18,6 +18,8 @@ export class XlsxReportService {
     testName?: string,
     projectName?: string
   ) {
+    Logger.log('Writing xlsx file...');
+    Logger.log(data, 'data');
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(sheetName);
     worksheet.columns = [
@@ -28,37 +30,55 @@ export class XlsxReportService {
     ];
     // single test
     if (testName) {
-      const eventSavingFolder = path.join(savingFolder, testName);
-      const file = path.join(eventSavingFolder, `${testName}.png`);
-      const imageId = workbook.addImage({
-        buffer: readFileSync(file),
-        extension: 'png',
-      });
-      worksheet.addImage(imageId, {
-        tl: { col: 2, row: 1 },
-        ext: { width: 100, height: 50 },
-      });
+      try {
+        Logger.log('adding image...');
+        const eventSavingFolder = path.join(savingFolder, testName);
+        const file = path.join(eventSavingFolder, `${testName}.png`);
+        const imageId = workbook.addImage({
+          buffer: readFileSync(file),
+          extension: 'png',
+        });
+        worksheet.addImage(imageId, {
+          tl: { col: 2, row: 1 },
+          ext: { width: 100, height: 50 },
+        });
+      } catch (error) {
+        Logger.error(error);
+        throw new HttpException(
+          `An error occurred while writing the image: ${error}`,
+          500
+        );
+      }
     } else if (projectName) {
       // all tests
       const dataContent = JSON.parse(JSON.stringify(data));
       // console.log('dataContent: ', dataContent);
       for (let i = 0; i < dataContent.length; i++) {
         // get existing image after the test
-        const eventName =
-          dataContent[i]['dataLayerResult']['dataLayerSpec']['event'];
-        const eventSavingFolder = path.join(savingFolder, eventName);
-        const imagePath = path.join(eventSavingFolder, `${eventName}.png`);
-        const imageId = workbook.addImage({
-          buffer: readFileSync(imagePath),
-          extension: 'png',
-        });
-        worksheet.addImage(imageId, {
-          tl: { col: worksheet.columns.length, row: i + 1 },
-          ext: { width: 100, height: 50 },
-        });
+        try {
+          const eventName =
+            dataContent[i]['dataLayerResult']['dataLayerSpec']['event'];
+          const eventSavingFolder = path.join(savingFolder, eventName);
+          const imagePath = path.join(eventSavingFolder, `${eventName}.png`);
+          const imageId = workbook.addImage({
+            buffer: readFileSync(imagePath),
+            extension: 'png',
+          });
+          worksheet.addImage(imageId, {
+            tl: { col: worksheet.columns.length, row: i + 1 },
+            ext: { width: 100, height: 50 },
+          });
+        } catch (error) {
+          Logger.error(error);
+          throw new HttpException(
+            `An error occurred while writing the image: ${error}`,
+            500
+          );
+        }
       }
     }
 
+    Logger.log('adding rows...');
     worksheet.addRows(data);
     await workbook.xlsx.writeFile(path.join(savingFolder, fileName));
   }

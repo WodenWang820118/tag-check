@@ -2,9 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SpelunkerModule } from 'nestjs-spelunker';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { AllExceptionsFilter } from './all-exceptions-filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // Handle uncaught exceptions
+  app.useGlobalFilters(new AllExceptionsFilter());
   // 1. Generate the tree as text
   const tree = SpelunkerModule.explore(app);
   const root = SpelunkerModule.graph(tree);
