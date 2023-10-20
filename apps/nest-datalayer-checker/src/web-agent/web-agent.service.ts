@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
@@ -49,7 +49,10 @@ export class WebAgentService {
       browser,
       credentials
     );
-    const result = await this.dataLayerService.getDataLayer(page);
+    // const result = await this.dataLayerService.getDataLayer(page);
+    const result = await page.evaluate(() => {
+      return JSON.parse(JSON.stringify(window.dataLayer)); // Serialize the dataLayer object to ensure compatibility.
+    });
     await browser.close();
     return result;
   }
@@ -125,10 +128,19 @@ export class WebAgentService {
     // 2) perform the test operation
     try {
       await this.actionService.performOperation(page, projectName, operation);
-      const dataLayer = this.dataLayerService.getMyDataLayer(
-        projectName,
-        testName
+
+      await page.waitForFunction(
+        () =>
+          Object.prototype.hasOwnProperty.call(window, 'dataLayer') &&
+          Array.isArray(window.dataLayer) &&
+          window.dataLayer.length > 0,
+        { timeout: 3000 }
       );
+
+      const dataLayer = await page.evaluate(() => {
+        return window.dataLayer;
+      });
+
       const destinationUrl = page.url();
 
       if (captureRequest) {
@@ -147,11 +159,15 @@ export class WebAgentService {
         testName
       );
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      await this.puppeteerService.snapshot(
-        page,
-        path.join(imageSavingFolder, `${testName}.png`),
-        true
-      );
+      try {
+        await this.puppeteerService.snapshot(
+          page,
+          path.join(imageSavingFolder, `${testName}.png`),
+          true
+        );
+      } catch (error) {
+        Logger.error('screenshot failed'); // Log the actual error message for debugging.
+      }
 
       // 4) close the page
       await page.close();
