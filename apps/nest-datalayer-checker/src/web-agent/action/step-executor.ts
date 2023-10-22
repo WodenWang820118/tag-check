@@ -39,8 +39,8 @@ export class StepExecutor {
 
   async handleSetViewport(page: Page, step: any) {
     await page.setViewport({
-      width: 1920,
-      height: 1080,
+      width: step.width,
+      height: step.height,
     });
   }
 
