@@ -18,7 +18,6 @@ export class ClickHandler implements ActionHandler {
 
   async handle(page: Page, step: any): Promise<void> {
     // Logic of handleClick
-    Logger.log('click');
     let clickedSuccessfully = false;
 
     for (const selectorGroup of step.selectors) {
@@ -35,7 +34,7 @@ export class ClickHandler implements ActionHandler {
 
       if (await this.clickElement(page, getFirstSelector(selectorGroup))) {
         clickedSuccessfully = true;
-        Logger.log('click success! ', getFirstSelector(selectorGroup));
+        Logger.log(getFirstSelector(selectorGroup), 'ClickHandler.handle');
         break; // Exit the loop as soon as one selector works
       }
     }
@@ -53,15 +52,22 @@ export class ClickHandler implements ActionHandler {
     selector: string,
     timeout = 1000
   ): Promise<boolean> {
-    const type = getSelectorType(selector);
-    const strategy = this.clickStrategies[type];
+    try {
+      const type = getSelectorType(selector);
+      const strategy = this.clickStrategies[type];
 
-    if (!strategy) {
-      Logger.error(`No strategy found for selector type ${type}`);
-      return false;
+      if (!strategy) {
+        Logger.error(
+          `No strategy found for selector type ${type}`,
+          'ClickHandler.clickElement'
+        );
+        return false;
+      }
+      Logger.log(selector, 'ClickHandler.clickElement');
+      return await strategy.clickElement(page, selector, timeout);
+    } catch (error) {
+      Logger.error(error.message, 'ClickHandler.clickElement');
     }
-    Logger.log('clickElement: ', selector);
-    return await strategy.clickElement(page, selector, timeout);
   }
 }
 
@@ -92,15 +98,22 @@ export class ChangeHandler implements ActionHandler {
     value: string,
     timeout = 1000
   ): Promise<boolean> {
-    const type = getSelectorType(selector);
-    const strategy = this.changeStrategies[type];
+    try {
+      const type = getSelectorType(selector);
+      const strategy = this.changeStrategies[type];
 
-    if (!strategy) {
-      Logger.error(`No strategy found for selector type ${type}`);
-      return false;
+      if (!strategy) {
+        Logger.error(
+          `No strategy found for selector type ${type}`,
+          'ChangeHandler.changeElement'
+        );
+        return false;
+      }
+
+      return await strategy.changeElement(page, selector, value, timeout);
+    } catch (error) {
+      Logger.error(error.message, 'ChangeHandler.changeElement');
     }
-
-    return await strategy.changeElement(page, selector, value, timeout);
   }
 }
 
@@ -116,15 +129,19 @@ export class HoverHandler implements ActionHandler {
       try {
         if (await this.hoverElement(page, getFirstSelector(selectorArray))) {
           hoveredSuccessfully = true;
-          Logger.log('hover success! ', getFirstSelector(selectorArray));
+          Logger.log(
+            getFirstSelector(selectorArray),
+            'HoverHandler.handleHover'
+          );
           break; // Exit the loop as soon as one selector works
         }
       } catch (error) {
-        Logger.error('hoverElement error ', error);
+        Logger.error(error.message, 'HoverHandler.handleHover');
       }
     }
 
     if (!hoveredSuccessfully) {
+      // early exit
       throw new HttpException(
         `Failed to hover. None of the selectors worked for action ${step.target}`,
         500
@@ -137,14 +154,21 @@ export class HoverHandler implements ActionHandler {
     selector: string,
     timeout = 1000
   ): Promise<boolean> {
-    const type = getSelectorType(selector);
-    const strategy = this.hoverStrategies[type];
+    try {
+      const type = getSelectorType(selector);
+      const strategy = this.hoverStrategies[type];
 
-    if (!strategy) {
-      Logger.error(`No strategy found for selector type ${type}`);
-      return false;
+      if (!strategy) {
+        Logger.error(
+          `No strategy found for selector type ${type}`,
+          'HoverHandler.hoverElement'
+        );
+        return false;
+      }
+
+      return await strategy.hoverElement(page, selector, timeout);
+    } catch (error) {
+      Logger.error(error.message, 'HoverHandler.hoverElement');
     }
-
-    return await strategy.hoverElement(page, selector, timeout);
   }
 }

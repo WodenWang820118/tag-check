@@ -55,6 +55,9 @@ export class ActionService {
       );
     }
 
-    Logger.log('performOperation completes');
+    Logger.log(
+      'Operation performed successfully',
+      'ActionService.performOperation'
+    );
   }
 }

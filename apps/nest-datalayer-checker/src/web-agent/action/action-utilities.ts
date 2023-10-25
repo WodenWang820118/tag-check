@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 
 export enum BrowserAction {
@@ -8,10 +9,11 @@ export enum BrowserAction {
   HOVER = 'hover',
   KEYDOWN = 'keyDown',
   KEYUP = 'keyUp',
+  WAITFORELEMENT = 'waitForElement',
 }
 
 export enum SelectorType {
-  CSS = 'css',
+  CSS = '#',
   XPATH = 'xpath',
   PIERCE = 'pierce',
   TEXT = 'text',
@@ -19,18 +21,22 @@ export enum SelectorType {
 }
 
 export function getSelectorType(selector: string) {
-  if (selector.startsWith(SelectorType.CSS)) {
+  try {
+    if (selector.startsWith(SelectorType.CSS)) {
+      return SelectorType.CSS;
+    } else if (selector.startsWith(SelectorType.XPATH)) {
+      return SelectorType.XPATH;
+    } else if (selector.startsWith(SelectorType.PIERCE)) {
+      return SelectorType.PIERCE;
+    } else if (selector.startsWith(SelectorType.TEXT)) {
+      return SelectorType.TEXT;
+    } else if (selector.startsWith(SelectorType.ARIA)) {
+      return SelectorType.ARIA;
+    }
     return SelectorType.CSS;
-  } else if (selector.startsWith(SelectorType.XPATH)) {
-    return SelectorType.XPATH;
-  } else if (selector.startsWith(SelectorType.PIERCE)) {
-    return SelectorType.PIERCE;
-  } else if (selector.startsWith(SelectorType.TEXT)) {
-    return SelectorType.TEXT;
-  } else if (selector.startsWith(SelectorType.ARIA)) {
-    return SelectorType.ARIA;
+  } catch (error) {
+    Logger.error(error.message, 'getSelectorType');
   }
-  return SelectorType.CSS;
 }
 
 export async function queryShadowDom(page: Page, ...selectors: any[]) {
