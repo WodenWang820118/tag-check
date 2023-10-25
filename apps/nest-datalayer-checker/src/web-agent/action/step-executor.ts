@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { HttpException, Logger } from '@nestjs/common';
 import { ActionHandler } from './action-handlers';
 import { Page } from 'puppeteer';
 import { BrowserAction, sleep } from './action-utilities';
@@ -32,6 +32,15 @@ export class StepExecutor {
     } else if (step.type === BrowserAction.NAVIGATE) {
       await sleep(randomDelay + Math.random());
       await this.handleNavigate(page, step, state);
+    } else if (
+      step.type === BrowserAction.WAITFORELEMENT &&
+      step.visible === true
+    ) {
+      await this.handleWaitForElement(
+        page,
+        step,
+        step.timeout ? step.timeout : 5000
+      );
     } else {
       Logger.warn(`Unknown action type: ${step.type}`);
     }
@@ -53,6 +62,32 @@ export class StepExecutor {
         waitUntil: 'networkidle2',
       });
       state.isFirstNavigation = false;
+    }
+  }
+
+  async handleWaitForElement(page: Page, step: any, timeout = 5000) {
+    for (const selector of step.selectors) {
+      try {
+        await page.waitForSelector(selector, {
+          visible: step.visible,
+          timeout: timeout,
+        });
+        Logger.log(
+          `${selector} is visible`,
+          'StepExecutor.handleWaitForElement'
+        );
+        return;
+      } catch (error) {
+        Logger.log(
+          `${selector} is invisible`,
+          'StepExecutor.handleWaitForElement'
+        );
+        Logger.error(error.message, 'StepExecutor.handleWaitForElement');
+        throw new HttpException(
+          `Failed to wait for element ${selector}. Stop processing.`,
+          500
+        );
+      }
     }
   }
 }

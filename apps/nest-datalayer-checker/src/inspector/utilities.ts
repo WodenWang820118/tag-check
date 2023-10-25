@@ -57,7 +57,7 @@ export function determineStrategy(spec: StrictDataLayerEvent) {
     }
   } catch (error) {
     const errorMessage = `There is no spec available for determining strategy.`;
-    Logger.error(errorMessage, 'Error: ');
+    Logger.error(errorMessage, 'Utilities.determineStrategy');
     throw new HttpException(errorMessage, 500);
   }
 }

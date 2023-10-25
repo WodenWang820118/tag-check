@@ -56,10 +56,24 @@ export class DataLayerService {
   // }
 
   async updateSelfDataLayer(page: Page, projectName: string, testName: string) {
-    const dataLayer = await page.evaluate(() => {
-      return JSON.parse(JSON.stringify(window.dataLayer)); // Serialize the dataLayer object to ensure compatibility.
-    });
-    this.updateSelfDataLayerAlgorithm(dataLayer, projectName, testName);
+    try {
+      await page.waitForFunction(
+        () =>
+          Object.prototype.hasOwnProperty.call(window, 'dataLayer') &&
+          Array.isArray(window.dataLayer) &&
+          window.dataLayer.length > 0,
+        { timeout: 5000 }
+      );
+
+      const dataLayer = await page.evaluate(() => {
+        return window.dataLayer
+          ? JSON.parse(JSON.stringify(window.dataLayer))
+          : [];
+      });
+      this.updateSelfDataLayerAlgorithm(dataLayer, projectName, testName);
+    } catch (error) {
+      Logger.error(error.message, 'DataLayerService.updateSelfDataLayer'); // Log the actual error message for debugging.
+    }
   }
 
   updateSelfDataLayerAlgorithm(

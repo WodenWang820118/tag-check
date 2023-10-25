@@ -51,8 +51,11 @@ export class WebAgentService {
     );
     // const result = await this.dataLayerService.getDataLayer(page);
     const result = await page.evaluate(() => {
-      return JSON.parse(JSON.stringify(window.dataLayer)); // Serialize the dataLayer object to ensure compatibility.
+      return window.dataLayer
+        ? JSON.parse(JSON.stringify(window.dataLayer))
+        : [];
     });
+
     await browser.close();
     return result;
   }
@@ -134,12 +137,16 @@ export class WebAgentService {
           Object.prototype.hasOwnProperty.call(window, 'dataLayer') &&
           Array.isArray(window.dataLayer) &&
           window.dataLayer.length > 0,
-        { timeout: 3000 }
+        { timeout: 5000 }
       );
 
       const dataLayer = await page.evaluate(() => {
-        return window.dataLayer;
+        return window.dataLayer
+          ? JSON.parse(JSON.stringify(window.dataLayer))
+          : [];
       });
+
+      Logger.log(dataLayer, 'WebAgentService.performTest');
 
       const destinationUrl = page.url();
 
@@ -166,7 +173,7 @@ export class WebAgentService {
           true
         );
       } catch (error) {
-        Logger.error('screenshot failed'); // Log the actual error message for debugging.
+        Logger.error(error.message, 'WebAgent.performTest'); // Log the actual error message for debugging.
       }
 
       // 4) close the page
@@ -179,10 +186,7 @@ export class WebAgentService {
       };
     } catch (error) {
       await page.close();
-      throw new HttpException(
-        `An error occurred while performing the test: ${error}`,
-        500
-      );
+      throw new HttpException(`${error.message}`, 500);
     }
   }
 }

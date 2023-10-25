@@ -16,15 +16,18 @@ export class CSSClickStrategy implements ClickStrategy {
     selector: string,
     timeout = 1000
   ): Promise<boolean> {
-    Logger.log(`${selector}`, 'CSSClickStrategy');
+    Logger.log(selector, 'CSSClickStrategy.clickElement');
     try {
       await page.waitForSelector(selector, { timeout });
       await page.focus(selector);
       await page.click(selector, { delay: 1000 });
-      Logger.log('Clicked using page.click');
+      Logger.log('Clicked using page.click', 'CSSClickStrategy.clickElement');
     } catch (error) {
-      Logger.error(error.message, 'Error with page.click');
-      Logger.log('Trying with page.evaluate');
+      Logger.error(error.message, 'CSSClickStrategy.clickElement');
+      Logger.log(
+        `page.evaluate click: ${selector}`,
+        'CSSClickStrategy.clickElement'
+      );
 
       try {
         // use wait for navigation to wait for the page to load
@@ -33,15 +36,17 @@ export class CSSClickStrategy implements ClickStrategy {
           page.evaluate((sel) => {
             const element = document.querySelector(sel) as HTMLElement;
             if (!element) {
-              throw new Error(`No element found for selector: ${sel}`);
+              Logger.error(
+                `No element found for selector: ${sel}`,
+                'CSSClickStrategy.clickElement'
+              );
             }
             element.click();
           }, selector),
           page.waitForNavigation({ waitUntil: 'networkidle2' }),
         ]);
-        Logger.log('Clicked using page.evaluate');
       } catch (evaluateError) {
-        Logger.error(evaluateError.message, 'Error with page.evaluate');
+        Logger.error(evaluateError.message, 'CSSClickStrategy.clickElement');
         return false;
       }
     }
@@ -55,7 +60,7 @@ export class XPathClickStrategy implements ClickStrategy {
     selector: string,
     timeout = 1000
   ): Promise<boolean> {
-    Logger.log(`${selector}`, 'XPathClickStrategy');
+    Logger.log(`${selector}`, 'XPathClickStrategy.clickElement');
     const xpath = selector.replace(SelectorType.XPATH + '/', '');
 
     try {
@@ -66,9 +71,8 @@ export class XPathClickStrategy implements ClickStrategy {
         await element.click({ delay: 1000 });
         return true;
       }
-      throw new Error('Element not found with XPath');
     } catch (error) {
-      Logger.error(`Error in XPathClickStrategy: ${error.message}`, 'Error');
+      Logger.error(`${error.message}`, 'XPathClickStrategy.clickElement');
       return false;
     }
   }
@@ -80,7 +84,7 @@ export class PierceClickStrategy implements ClickStrategy {
     selector: string,
     timeout = 1000
   ): Promise<boolean> {
-    Logger.log(`${selector}`, 'PierceClickStrategy');
+    Logger.log(`${selector}`, 'PierceClickStrategy.clickElement');
 
     try {
       const elementHandle = await queryShadowDom(
@@ -92,9 +96,8 @@ export class PierceClickStrategy implements ClickStrategy {
         await elementHandle.click({ delay: 1000 });
         return true;
       }
-      throw new Error('Element not found with Pierce selector');
     } catch (error) {
-      Logger.error(`${error.message}`, 'Error in PierceClickStrategy');
+      Logger.error(`${error.message}`, 'PierceClickStrategy.clickElement');
       return false;
     }
   }
@@ -106,7 +109,7 @@ export class TextClickStrategy implements ClickStrategy {
     selector: string,
     timeout = 1000
   ): Promise<boolean> {
-    Logger.log(`${selector}`, 'TextClickStrategy');
+    Logger.log(`${selector}`, 'TextClickStrategy.clickElement');
     const xpath = `//*[text()="${selector.replace(
       SelectorType.TEXT + '/',
       ''
@@ -119,9 +122,8 @@ export class TextClickStrategy implements ClickStrategy {
         await element.click({ delay: 1000 });
         return true;
       }
-      throw new Error('Element not found with Text selector');
     } catch (error) {
-      Logger.log(`${error.message}`, 'Error in TextClickStrategy');
+      Logger.log(`${error.message}`, 'TextClickStrategy.clickElement');
       return false;
     }
   }

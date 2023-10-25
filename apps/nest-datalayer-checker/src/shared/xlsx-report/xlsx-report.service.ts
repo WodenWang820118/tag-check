@@ -18,8 +18,6 @@ export class XlsxReportService {
     testName?: string,
     projectName?: string
   ) {
-    Logger.log('Writing xlsx file...');
-    Logger.log(data, 'data');
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(sheetName);
     worksheet.columns = [
@@ -31,7 +29,6 @@ export class XlsxReportService {
     // single test
     if (testName) {
       try {
-        Logger.log('adding image...');
         const eventSavingFolder = path.join(savingFolder, testName);
         const file = path.join(eventSavingFolder, `${testName}.png`);
         const imageId = workbook.addImage({
@@ -43,7 +40,7 @@ export class XlsxReportService {
           ext: { width: 100, height: 50 },
         });
       } catch (error) {
-        Logger.error(error);
+        Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
         throw new HttpException(
           `An error occurred while writing the image: ${error}`,
           500
@@ -69,16 +66,13 @@ export class XlsxReportService {
             ext: { width: 100, height: 50 },
           });
         } catch (error) {
-          Logger.error(error);
-          throw new HttpException(
-            `An error occurred while writing the image: ${error}`,
-            500
-          );
+          // if throwing the error, other pieces of data will not be written to the xlsx file
+          Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
         }
       }
     }
 
-    Logger.log('adding rows...');
+    Logger.log(data, 'XlsxReportService.writeXlsxFile');
     worksheet.addRows(data);
     await workbook.xlsx.writeFile(path.join(savingFolder, fileName));
   }
