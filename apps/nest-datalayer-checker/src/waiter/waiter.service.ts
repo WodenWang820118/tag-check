@@ -71,10 +71,10 @@ export class WaiterService {
       projectName
     );
 
-    Logger.log('Single test is done!');
+    Logger.log('Single test is done!', 'WaiterService.inspectSingleEvent');
 
     // no need to close the browser since it has one page only and the page has been closed already
-    Logger.log('Browser is closed!');
+    Logger.log('Browser is closed!', 'WaiterService.inspectSingleEvent');
     return data;
   }
 
@@ -122,8 +122,8 @@ export class WaiterService {
       'Sheet1',
       projectName
     );
-    Logger.log('All tests are done!');
-    Logger.log('Browser is closed!');
+    Logger.log('All tests are done!', 'WaiterService.inspectProject');
+    Logger.log('Browser is closed!', 'WaiterService.inspectProject');
     return data;
   }
 }
