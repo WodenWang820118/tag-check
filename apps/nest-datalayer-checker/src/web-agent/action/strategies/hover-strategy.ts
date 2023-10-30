@@ -1,6 +1,8 @@
 import { Page, ElementHandle } from 'puppeteer';
 import { SelectorType, queryShadowDom, sleep } from '../action-utilities';
 
+// TODO: use @Injectable and modules
+
 export interface HoverStrategy {
   hoverElement(
     page: Page,
@@ -45,16 +47,30 @@ export class AriaHoverStrategy implements HoverStrategy {
     selector: string,
     timeout = 1000
   ): Promise<boolean> {
-    const xpath = `//*[@aria-label="${selector
-      .replace(SelectorType.ARIA + '/', '')
-      .replace(/"/g, '\\"')}"]`;
-    await page.waitForXPath(xpath, { timeout });
-    const [element] = await page.$x(xpath);
-    if (isElementHandle(element)) {
-      await element.hover();
-      return true;
+    // Extract the ARIA attribute and value using regex
+    const match = selector.match(/aria\/(aria-\w+)\/(.+)/);
+    if (!match) {
+      throw new Error('Invalid selector format');
     }
-    return false;
+
+    const ariaAttribute = match[1];
+    const ariaValue = match[2];
+    const constructedSelector = `[${ariaAttribute}="${ariaValue}"]`;
+
+    try {
+      await page.waitForSelector(constructedSelector, { timeout });
+      const element = await page.$(constructedSelector);
+      if (element) {
+        await element.hover();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error(
+        `Failed to hover over element with selector: ${constructedSelector}. Error: ${error}`
+      );
+      return false;
+    }
   }
 }
 

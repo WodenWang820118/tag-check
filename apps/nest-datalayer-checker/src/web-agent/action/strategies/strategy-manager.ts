@@ -6,6 +6,7 @@ import {
   XpathChangeStrategy,
 } from './change-strategy';
 import {
+  AriaClickStrategy,
   CSSClickStrategy,
   ClickStrategy,
   PierceClickStrategy,
@@ -22,6 +23,8 @@ import {
 } from './hover-strategy';
 import { SelectorType } from '../action-utilities';
 
+// TODO: use @Injectable and modules
+
 export class StrategyManager {
   clickStrategies: { [key: string]: ClickStrategy };
   changeStrategies: { [key: string]: ChangeStrategy };
@@ -35,16 +38,19 @@ export class StrategyManager {
 
   private initializeClickStrategies(): { [key: string]: ClickStrategy } {
     return {
-      [SelectorType.CSS]: new CSSClickStrategy(),
+      [SelectorType.CSSID]: new CSSClickStrategy(),
+      [SelectorType.CSSCLASS]: new CSSClickStrategy(),
       [SelectorType.XPATH]: new XPathClickStrategy(),
       [SelectorType.PIERCE]: new PierceClickStrategy(),
       [SelectorType.TEXT]: new TextClickStrategy(),
+      [SelectorType.ARIA]: new AriaClickStrategy(),
     };
   }
 
   private initializeChangeStrategies(): { [key: string]: ChangeStrategy } {
     return {
-      [SelectorType.CSS]: new CSSChangeStrategy(),
+      [SelectorType.CSSID]: new CSSChangeStrategy(),
+      [SelectorType.CSSCLASS]: new CSSChangeStrategy(),
       [SelectorType.XPATH]: new XpathChangeStrategy(),
       [SelectorType.PIERCE]: new PiercingChangeStrategy(),
       [SelectorType.ARIA]: new AriaChangeStrategy(),
@@ -53,7 +59,8 @@ export class StrategyManager {
 
   private initializeHoverStrategies(): { [key: string]: HoverStrategy } {
     return {
-      [SelectorType.CSS]: new CSSHoverStrategy(),
+      [SelectorType.CSSID]: new CSSHoverStrategy(),
+      [SelectorType.CSSCLASS]: new CSSHoverStrategy(),
       [SelectorType.XPATH]: new XPathHoverStrategy(),
       [SelectorType.PIERCE]: new PierceHoverStrategy(),
       [SelectorType.TEXT]: new TextHoverStrategy(),

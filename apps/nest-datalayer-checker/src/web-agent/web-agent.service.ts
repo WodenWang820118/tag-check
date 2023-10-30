@@ -177,6 +177,7 @@ export class WebAgentService {
       }
 
       // 4) close the page
+      // TODO: remember to close the page
       await page.close();
 
       return {
@@ -185,6 +186,7 @@ export class WebAgentService {
         destinationUrl,
       };
     } catch (error) {
+      // TODO: remember to close the page
       await page.close();
       throw new HttpException(`${error.message}`, 500);
     }
