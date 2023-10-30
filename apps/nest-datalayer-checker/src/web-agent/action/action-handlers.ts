@@ -5,6 +5,7 @@ import { HoverStrategy } from './strategies/hover-strategy';
 import { Logger, HttpException } from '@nestjs/common';
 import { getSelectorType } from './action-utilities';
 
+// TODO: use @Injectable and modules
 export interface ActionHandler {
   handle(page: Page, step: any): Promise<void>;
 }
@@ -20,11 +21,11 @@ export class ClickHandler implements ActionHandler {
     // Logic of handleClick
     let clickedSuccessfully = false;
 
-    for (const selectorGroup of step.selectors) {
+    for (const selector of step.selectors) {
       // TODO: Scroll into view if needed
       // try {
-      //   await this.utilitiesService.scrollIntoViewIfNeeded(
-      //     Array.isArray(selectorGroup) ? selectorGroup[0] : [selectorGroup],
+      //   await utilitiesService.scrollIntoViewIfNeeded(
+      //     getFirstSelector(selector),
       //     page,
       //     20000
       //   );
@@ -32,9 +33,9 @@ export class ClickHandler implements ActionHandler {
       //   console.error('scrollIntoViewIfNeeded error: ', error);
       // }
 
-      if (await this.clickElement(page, getFirstSelector(selectorGroup))) {
+      if (await this.clickElement(page, getFirstSelector(selector))) {
         clickedSuccessfully = true;
-        Logger.log(getFirstSelector(selectorGroup), 'ClickHandler.handle');
+        Logger.log(getFirstSelector(selector), 'ClickHandler.handle');
         break; // Exit the loop as soon as one selector works
       }
     }
@@ -78,14 +79,21 @@ export class ChangeHandler implements ActionHandler {
     const selectors = step.selectors;
     const value = step.value;
 
-    for (const selectorArray of selectors) {
+    for (const selector of selectors) {
       try {
-        if (await this.changeElement(page, selectorArray[0], value, timeout)) {
+        if (
+          await this.changeElement(
+            page,
+            getFirstSelector(selector),
+            value,
+            timeout
+          )
+        ) {
           break;
         }
       } catch (error) {
         throw new HttpException(
-          `Failed to change value with selector ${selectorArray[0]}. Reason: ${error.message}`,
+          `Failed to change value with selector ${selector}. Reason: ${error.message}`,
           500
         );
       }
@@ -109,7 +117,7 @@ export class ChangeHandler implements ActionHandler {
         );
         return false;
       }
-
+      Logger.log(selector, 'ChangeHandler.changeElement');
       return await strategy.changeElement(page, selector, value, timeout);
     } catch (error) {
       Logger.error(error.message, 'ChangeHandler.changeElement');

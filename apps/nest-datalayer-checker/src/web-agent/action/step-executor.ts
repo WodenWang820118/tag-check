@@ -68,10 +68,16 @@ export class StepExecutor {
   async handleWaitForElement(page: Page, step: any, timeout = 5000) {
     for (const selector of step.selectors) {
       try {
-        await page.waitForSelector(selector, {
-          visible: step.visible,
-          timeout: timeout,
-        });
+        // sometimes SSR may send multiple SPA pages, so it's necessary to wait for navigation
+        // but sometimes it's not necessary, so we do race
+        await Promise.race([
+          page.waitForNavigation({ waitUntil: 'networkidle2' }),
+          page.waitForSelector(selector, {
+            visible: step.visible,
+            timeout: timeout,
+          }),
+        ]);
+
         Logger.log(
           `${selector} is visible`,
           'StepExecutor.handleWaitForElement'

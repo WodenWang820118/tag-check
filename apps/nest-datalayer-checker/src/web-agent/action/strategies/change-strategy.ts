@@ -1,6 +1,8 @@
 import { Page } from 'puppeteer';
 import { SelectorType } from '../action-utilities';
+import { Logger } from '@nestjs/common';
 
+// TODO: use @Injectable and modules
 export interface ChangeStrategy {
   changeElement(
     page: Page,
@@ -17,12 +19,46 @@ export class AriaChangeStrategy implements ChangeStrategy {
     value: string,
     timeout?: number
   ): Promise<boolean> {
-    await page.waitForSelector(
-      `[aria-label="${selector.replace('aria/', '')}"]`,
-      { timeout }
-    );
-    await page.type(`[aria-label="${selector.replace('aria/', '')}"]`, value);
-    return true;
+    // Extract the ARIA attribute and value using regex
+
+    await page.waitForSelector(selector, { timeout });
+
+    const match = selector.match(/aria\/(aria-\w+)\/(.+)/);
+    if (!match) {
+      throw new Error('Invalid selector format');
+    }
+
+    const ariaAttribute = match[1];
+    const ariaValue = match[2];
+    const constructedSelector = `[${ariaAttribute}="${ariaValue}"]`;
+
+    try {
+      // await page.waitForSelector(constructedSelector, { timeout });
+
+      // Check if the element is a select element
+      const isSelect = await page.evaluate((selector) => {
+        const element = document.querySelector(selector);
+        return element && element.tagName.toLowerCase() === 'select';
+      }, constructedSelector);
+
+      if (isSelect) {
+        // If it's a select element, use page.select() to change its value
+        Logger.log('Selecting an option', 'AriaChangeStrategy.changeElement');
+        await page.select(constructedSelector, value);
+      } else {
+        // Otherwise, use page.type() to type the value
+        Logger.log(
+          'Typing the input element',
+          'AriaChangeStrategy.changeElement'
+        );
+        await page.type(constructedSelector, value);
+      }
+
+      return true;
+    } catch (error) {
+      Logger.error(error.message, 'AriaChangeStrategy.changeElement');
+      throw error;
+    }
   }
 }
 
@@ -63,8 +99,32 @@ export class CSSChangeStrategy implements ChangeStrategy {
     value: string,
     timeout?: number
   ): Promise<boolean> {
-    await page.waitForSelector(selector, { timeout });
-    await page.type(selector, value);
-    return true;
+    try {
+      await page.waitForSelector(selector, { timeout });
+
+      // Check if the element is a select element
+      const isSelect = await page.evaluate((selector) => {
+        const element = document.querySelector(selector);
+        return element && element.tagName.toLowerCase() === 'select';
+      }, selector);
+
+      if (isSelect) {
+        // If it's a select element, use page.select() to change its value
+        Logger.log('Select an element', 'CSSChangeStrategy.changeElement');
+        await page.select(selector, value);
+      } else {
+        // Otherwise, use page.type() to type the value
+        Logger.log(
+          'Typing the input element',
+          'CSSChangeStrategy.changeElement'
+        );
+        await page.type(selector, value);
+      }
+
+      return true;
+    } catch (error) {
+      Logger.error(error.message, 'CSSChangeStrategy.changeElement');
+      throw error;
+    }
   }
 }

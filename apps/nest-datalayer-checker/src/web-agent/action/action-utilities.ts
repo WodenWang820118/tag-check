@@ -13,7 +13,8 @@ export enum BrowserAction {
 }
 
 export enum SelectorType {
-  CSS = '#',
+  CSSID = '#',
+  CSSCLASS = '.',
   XPATH = 'xpath',
   PIERCE = 'pierce',
   TEXT = 'text',
@@ -22,8 +23,10 @@ export enum SelectorType {
 
 export function getSelectorType(selector: string) {
   try {
-    if (selector.startsWith(SelectorType.CSS)) {
-      return SelectorType.CSS;
+    if (selector.startsWith(SelectorType.CSSID)) {
+      return SelectorType.CSSID;
+    } else if (selector.startsWith(SelectorType.CSSCLASS)) {
+      return SelectorType.CSSCLASS;
     } else if (selector.startsWith(SelectorType.XPATH)) {
       return SelectorType.XPATH;
     } else if (selector.startsWith(SelectorType.PIERCE)) {
@@ -32,8 +35,9 @@ export function getSelectorType(selector: string) {
       return SelectorType.TEXT;
     } else if (selector.startsWith(SelectorType.ARIA)) {
       return SelectorType.ARIA;
+    } else {
+      return SelectorType.CSSCLASS;
     }
-    return SelectorType.CSS;
   } catch (error) {
     Logger.error(error.message, 'getSelectorType');
   }

@@ -1,6 +1,8 @@
 import { Page, ElementHandle } from 'puppeteer';
-import { SelectorType, queryShadowDom, sleep } from '../action-utilities';
+import { SelectorType, queryShadowDom } from '../action-utilities';
 import { Logger } from '@nestjs/common';
+
+// TODO: use @Injectable and modules
 
 export interface ClickStrategy {
   clickElement(
@@ -8,6 +10,57 @@ export interface ClickStrategy {
     selector: string,
     timeout?: number
   ): Promise<boolean>;
+}
+
+export class AriaClickStrategy implements ClickStrategy {
+  async clickElement(
+    page: Page,
+    selector: string,
+    timeout?: number
+  ): Promise<boolean> {
+    Logger.log(selector, 'AriaClickStrategy.clickElement');
+
+    // Extract the ARIA attribute and value using regex
+    const match = selector.match(/aria\/(aria-\w+)\/(.+)/);
+    if (!match) {
+      Logger.error('Invalid selector format', 'AriaClickStrategy.clickElement');
+      return false;
+    }
+
+    const ariaAttribute = match[1];
+    const ariaValue = match[2];
+    const constructedSelector = `[${ariaAttribute}="${ariaValue}"]`;
+
+    try {
+      await page.waitForSelector(constructedSelector, { timeout });
+      await page.focus(constructedSelector);
+      await page.click(constructedSelector, { delay: 1000 });
+      Logger.log('Clicked using page.click', 'AriaClickStrategy.clickElement');
+    } catch (error) {
+      Logger.error(error.message, 'AriaClickStrategy.clickElement');
+      Logger.log(
+        `page.evaluate click: ${constructedSelector}`,
+        'AriaClickStrategy.clickElement'
+      );
+
+      try {
+        await Promise.race([
+          page.evaluate((sel) => {
+            const element = document.querySelector(sel) as HTMLElement;
+            if (!element) {
+              throw new Error(`No element found for selector: ${sel}`);
+            }
+            element.click();
+          }, constructedSelector),
+          page.waitForNavigation({ waitUntil: 'networkidle2' }),
+        ]);
+      } catch (evaluateError) {
+        Logger.error(evaluateError.message, 'AriaClickStrategy.clickElement');
+        return false;
+      }
+    }
+    return true;
+  }
 }
 
 export class CSSClickStrategy implements ClickStrategy {
@@ -31,8 +84,8 @@ export class CSSClickStrategy implements ClickStrategy {
 
       try {
         // use wait for navigation to wait for the page to load
-        // otherwise, error will be thrown
-        await Promise.all([
+        // or click the element directly
+        await Promise.race([
           page.evaluate((sel) => {
             const element = document.querySelector(sel) as HTMLElement;
             if (!element) {
