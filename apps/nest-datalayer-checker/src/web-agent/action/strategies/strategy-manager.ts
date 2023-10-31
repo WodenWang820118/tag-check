@@ -22,9 +22,9 @@ import {
   XPathHoverStrategy,
 } from './hover-strategy';
 import { SelectorType } from '../action-utilities';
+import { Injectable } from '@nestjs/common';
 
-// TODO: use @Injectable and modules
-
+@Injectable()
 export class StrategyManager {
   clickStrategies: { [key: string]: ClickStrategy };
   changeStrategies: { [key: string]: ChangeStrategy };

@@ -1,9 +1,10 @@
-import { HttpException, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ActionHandler } from './action-handlers';
 import { Page } from 'puppeteer';
 import { BrowserAction, sleep } from './action-utilities';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
 
+@Injectable()
 export class StepExecutor {
   constructor(
     private handlers: { [key: string]: ActionHandler },

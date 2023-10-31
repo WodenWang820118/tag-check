@@ -2,10 +2,10 @@ import { Page } from 'puppeteer';
 import { ChangeStrategy } from './strategies/change-strategy';
 import { ClickStrategy } from './strategies/click-strategy';
 import { HoverStrategy } from './strategies/hover-strategy';
-import { Logger, HttpException } from '@nestjs/common';
+import { Logger, HttpException, Injectable } from '@nestjs/common';
 import { getSelectorType } from './action-utilities';
+import { UtilitiesService } from '../utilities/utilities.service';
 
-// TODO: use @Injectable and modules
 export interface ActionHandler {
   handle(page: Page, step: any): Promise<void>;
 }
@@ -14,24 +14,27 @@ function getFirstSelector(selectorGroup: string | string[]): string {
   return Array.isArray(selectorGroup) ? selectorGroup[0] : selectorGroup;
 }
 
+@Injectable()
 export class ClickHandler implements ActionHandler {
-  constructor(private clickStrategies: { [key: string]: ClickStrategy }) {}
+  constructor(
+    private clickStrategies: { [key: string]: ClickStrategy },
+    private utilitiesService: UtilitiesService
+  ) {}
 
   async handle(page: Page, step: any): Promise<void> {
     // Logic of handleClick
     let clickedSuccessfully = false;
 
     for (const selector of step.selectors) {
-      // TODO: Scroll into view if needed
-      // try {
-      //   await utilitiesService.scrollIntoViewIfNeeded(
-      //     getFirstSelector(selector),
-      //     page,
-      //     20000
-      //   );
-      // } catch (error) {
-      //   console.error('scrollIntoViewIfNeeded error: ', error);
-      // }
+      try {
+        await this.utilitiesService.scrollIntoViewIfNeeded(
+          getFirstSelector(selector),
+          page,
+          500
+        );
+      } catch (error) {
+        Logger.error(error.mssage, 'Utilities.scrollIntoViewIfNeeded');
+      }
 
       if (await this.clickElement(page, getFirstSelector(selector))) {
         clickedSuccessfully = true;
@@ -72,6 +75,7 @@ export class ClickHandler implements ActionHandler {
   }
 }
 
+@Injectable()
 export class ChangeHandler implements ActionHandler {
   constructor(private changeStrategies: { [key: string]: ChangeStrategy }) {}
 
@@ -125,6 +129,7 @@ export class ChangeHandler implements ActionHandler {
   }
 }
 
+@Injectable()
 export class HoverHandler implements ActionHandler {
   constructor(private hoverStrategies: { [key: string]: HoverStrategy }) {}
 

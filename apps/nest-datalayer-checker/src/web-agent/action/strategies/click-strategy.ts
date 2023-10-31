@@ -1,8 +1,6 @@
 import { Page, ElementHandle } from 'puppeteer';
 import { SelectorType, queryShadowDom } from '../action-utilities';
-import { Logger } from '@nestjs/common';
-
-// TODO: use @Injectable and modules
+import { Injectable, Logger } from '@nestjs/common';
 
 export interface ClickStrategy {
   clickElement(
@@ -12,6 +10,7 @@ export interface ClickStrategy {
   ): Promise<boolean>;
 }
 
+@Injectable()
 export class AriaClickStrategy implements ClickStrategy {
   async clickElement(
     page: Page,
@@ -63,6 +62,7 @@ export class AriaClickStrategy implements ClickStrategy {
   }
 }
 
+@Injectable()
 export class CSSClickStrategy implements ClickStrategy {
   async clickElement(
     page: Page,
@@ -107,6 +107,7 @@ export class CSSClickStrategy implements ClickStrategy {
   }
 }
 
+@Injectable()
 export class XPathClickStrategy implements ClickStrategy {
   async clickElement(
     page: Page,
@@ -131,6 +132,7 @@ export class XPathClickStrategy implements ClickStrategy {
   }
 }
 
+@Injectable()
 export class PierceClickStrategy implements ClickStrategy {
   async clickElement(
     page: Page,
@@ -156,6 +158,7 @@ export class PierceClickStrategy implements ClickStrategy {
   }
 }
 
+@Injectable()
 export class TextClickStrategy implements ClickStrategy {
   async clickElement(
     page: Page,
