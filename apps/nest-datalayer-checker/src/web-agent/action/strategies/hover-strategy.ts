@@ -1,7 +1,6 @@
 import { Page, ElementHandle } from 'puppeteer';
 import { SelectorType, queryShadowDom, sleep } from '../action-utilities';
-
-// TODO: use @Injectable and modules
+import { Injectable } from '@nestjs/common';
 
 export interface HoverStrategy {
   hoverElement(
@@ -10,7 +9,7 @@ export interface HoverStrategy {
     timeout?: number
   ): Promise<boolean>;
 }
-
+@Injectable()
 export class CSSHoverStrategy implements HoverStrategy {
   async hoverElement(
     page: Page,
@@ -23,7 +22,7 @@ export class CSSHoverStrategy implements HoverStrategy {
     return true;
   }
 }
-
+@Injectable()
 export class XPathHoverStrategy implements HoverStrategy {
   async hoverElement(
     page: Page,
@@ -40,7 +39,7 @@ export class XPathHoverStrategy implements HoverStrategy {
     return false;
   }
 }
-
+@Injectable()
 export class AriaHoverStrategy implements HoverStrategy {
   async hoverElement(
     page: Page,
@@ -73,7 +72,7 @@ export class AriaHoverStrategy implements HoverStrategy {
     }
   }
 }
-
+@Injectable()
 export class PierceHoverStrategy implements HoverStrategy {
   async hoverElement(
     page: Page,
@@ -92,7 +91,7 @@ export class PierceHoverStrategy implements HoverStrategy {
     return false;
   }
 }
-
+@Injectable()
 export class TextHoverStrategy implements HoverStrategy {
   async hoverElement(
     page: Page,

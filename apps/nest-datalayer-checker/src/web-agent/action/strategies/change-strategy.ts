@@ -1,8 +1,6 @@
 import { Page } from 'puppeteer';
 import { SelectorType } from '../action-utilities';
-import { Logger } from '@nestjs/common';
-
-// TODO: use @Injectable and modules
+import { Injectable, Logger } from '@nestjs/common';
 export interface ChangeStrategy {
   changeElement(
     page: Page,
@@ -12,6 +10,7 @@ export interface ChangeStrategy {
   ): Promise<boolean>;
 }
 
+@Injectable()
 export class AriaChangeStrategy implements ChangeStrategy {
   async changeElement(
     page: Page,
@@ -62,6 +61,7 @@ export class AriaChangeStrategy implements ChangeStrategy {
   }
 }
 
+@Injectable()
 export class XpathChangeStrategy implements ChangeStrategy {
   async changeElement(
     page: Page,
@@ -76,6 +76,7 @@ export class XpathChangeStrategy implements ChangeStrategy {
   }
 }
 
+@Injectable()
 export class PiercingChangeStrategy implements ChangeStrategy {
   async changeElement(
     page: Page,
@@ -92,6 +93,7 @@ export class PiercingChangeStrategy implements ChangeStrategy {
   }
 }
 
+@Injectable()
 export class CSSChangeStrategy implements ChangeStrategy {
   async changeElement(
     page: Page,

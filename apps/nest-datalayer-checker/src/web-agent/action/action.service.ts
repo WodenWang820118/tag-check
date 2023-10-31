@@ -6,6 +6,7 @@ import { StepExecutor } from './step-executor';
 import { ClickHandler, ChangeHandler, HoverHandler } from './action-handlers';
 import { RequestInterceptor } from './request-interceptor';
 import { BrowserAction } from './action-utilities';
+import { UtilitiesService } from '../utilities/utilities.service';
 
 @Injectable()
 export class ActionService {
@@ -13,13 +14,17 @@ export class ActionService {
   private stepExecutor: StepExecutor;
   private requestInterceptor: RequestInterceptor;
 
-  constructor(private dataLayerService: DataLayerService) {
+  constructor(
+    private dataLayerService: DataLayerService,
+    private utilitiesService: UtilitiesService
+  ) {
     this.strategyManager = new StrategyManager();
     this.requestInterceptor = new RequestInterceptor(this.dataLayerService);
     this.stepExecutor = new StepExecutor(
       {
         [BrowserAction.CLICK]: new ClickHandler(
-          this.strategyManager.clickStrategies
+          this.strategyManager.clickStrategies,
+          this.utilitiesService
         ),
         [BrowserAction.CHANGE]: new ChangeHandler(
           this.strategyManager.changeStrategies
