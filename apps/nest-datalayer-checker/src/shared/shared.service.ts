@@ -4,6 +4,7 @@ import { ProjectService } from './project/project.service';
 import { FileService } from './file/file.service';
 import { XlsxReportService } from './xlsx-report/xlsx-report.service';
 import path from 'path';
+import { existsSync, mkdirSync } from 'fs';
 
 @Injectable()
 export class SharedService {
@@ -59,6 +60,18 @@ export class SharedService {
       operation.replace('.json', ''),
       `${operation.replace('.json', '')} - result cache.json`
     );
+  }
+
+  getEventFolder(projectName: string, testName: string) {
+    const resultFolder = this.getReportSavingFolder(projectName);
+    const eventFolder = path.join(resultFolder, testName);
+    return eventFolder;
+  }
+
+  initEventFolder(projectName: string, testName: string) {
+    const resultFolder = this.getReportSavingFolder(projectName);
+    const eventFolder = path.join(resultFolder, testName);
+    if (!existsSync(eventFolder)) mkdirSync(eventFolder);
   }
 
   async writeXlsxFile(

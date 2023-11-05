@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { PuppeteerService } from '../puppeteer/puppeteer.service';
 import { Page } from 'puppeteer';
 import { SharedService } from '../../shared/shared.service';
-import { mkdirSync, existsSync } from 'fs';
-import path from 'path';
 import { RequestService } from './request/request.service';
+import { DataLayerService } from './data-layer/data-layer.service';
 
 @Injectable()
 export class WebMonitoringService {
   constructor(
     private puppeteerService: PuppeteerService,
     private sharedService: SharedService,
-    private requestService: RequestService
+    private requestService: RequestService,
+    private dataLayerService: DataLayerService
   ) {}
 
   /**
@@ -83,16 +83,15 @@ export class WebMonitoringService {
     return await this.requestService.stopRequestCapture(page);
   }
 
-  // TODO: need to pass it to the shared service for mediator pattern
   initEventFolder(projectName: string, testName: string) {
-    const resultFolder = this.sharedService.getReportSavingFolder(projectName);
-    const eventFolder = path.join(resultFolder, testName);
-    if (!existsSync(eventFolder)) mkdirSync(eventFolder);
+    this.sharedService.initEventFolder(projectName, testName);
   }
 
   getEventFolder(projectName: string, testName: string) {
-    const resultFolder = this.sharedService.getReportSavingFolder(projectName);
-    const eventFolder = path.join(resultFolder, testName);
-    return eventFolder;
+    return this.sharedService.getEventFolder(projectName, testName);
+  }
+
+  getMyDataLayer(projectName: string, testName: string) {
+    return this.dataLayerService.getMyDataLayer(projectName, testName);
   }
 }
