@@ -132,23 +132,10 @@ export class WebAgentService {
     try {
       await this.actionService.performOperation(page, projectName, operation);
 
-      // TODO: retreive dataLayer from the test results cache file instead of directly from the page
-      // since we don't know when to prevent navigation, it's safe to use the file
-      await page.waitForFunction(
-        () =>
-          Object.prototype.hasOwnProperty.call(window, 'dataLayer') &&
-          Array.isArray(window.dataLayer) &&
-          window.dataLayer.length > 0,
-        { timeout: 10000 }
+      const dataLayer = this.webMonitoringService.getMyDataLayer(
+        projectName,
+        testName
       );
-
-      const dataLayer = await page.evaluate(() => {
-        return window.dataLayer
-          ? JSON.parse(JSON.stringify(window.dataLayer))
-          : [];
-      });
-
-      Logger.log(dataLayer, 'WebAgentService.performTest');
 
       const destinationUrl = page.url();
 
@@ -167,7 +154,7 @@ export class WebAgentService {
         this.sharedService.getReportSavingFolder(projectName),
         testName
       );
-      // await new Promise((resolve) => setTimeout(resolve, 5000));
+
       try {
         await this.puppeteerService.snapshot(
           page,
