@@ -25,6 +25,27 @@ import { XlsxReportService } from '../shared/xlsx-report/xlsx-report.service';
 import { DataLayerService } from '../web-agent/web-monitoring/data-layer/data-layer.service';
 import { RequestService } from '../web-agent/web-monitoring/request/request.service';
 
+// services: action handlers
+import { ChangeHandler } from '../web-agent/action/handlers/change-handler.service';
+import { ClickHandler } from '../web-agent/action/handlers/click-handler.service';
+import { HoverHandler } from '../web-agent/action/handlers/hover-handler.service';
+
+// services: action strategies
+import { AriaChangeStrategy } from '../web-agent/action/strategies/change-strategies/aria-change-strategy.service';
+import { CSSChangeStrategy } from '../web-agent/action/strategies/change-strategies/css-change-strategy.service';
+import { PierceChangeStrategy } from '../web-agent/action/strategies/change-strategies/pierce-change-strategy.service';
+import { XpathChangeStrategy } from '../web-agent/action/strategies/change-strategies/xpath-change-strategy.service';
+import { AriaClickStrategy } from '../web-agent/action/strategies/click-strategies/aria-click-strategy.service';
+import { CSSClickStrategy } from '../web-agent/action/strategies/click-strategies/css-click-strategy.service';
+import { PierceClickStrategy } from '../web-agent/action/strategies/click-strategies/pierce-click-strategy.service';
+import { TextClickStrategy } from '../web-agent/action/strategies/click-strategies/text-click-strategy.service';
+import { XPathClickStrategy } from '../web-agent/action/strategies/click-strategies/xpath-click-strategy.service';
+import { AriaHoverStrategy } from '../web-agent/action/strategies/hover-strategies/aria-hover-strategy.service';
+import { CSSHoverStrategy } from '../web-agent/action/strategies/hover-strategies/css-hover-strategy.service';
+import { PierceHoverStrategy } from '../web-agent/action/strategies/hover-strategies/pierce-hover-strategy.service';
+import { TextHoverStrategy } from '../web-agent/action/strategies/hover-strategies/text-hover-strategy.service';
+import { XPathHoverStrategy } from '../web-agent/action/strategies/hover-strategies/xpath-hover-strategy.service';
+
 const inspectorServices = [InspectorService, RequestProcessorService];
 
 const webAgentServices = [
@@ -43,6 +64,28 @@ const sharedServices = [
   ProjectService,
   XlsxReportService,
 ];
+
+const handlers = [ChangeHandler, ClickHandler, HoverHandler];
+const changeStrategies = [
+  AriaChangeStrategy,
+  CSSChangeStrategy,
+  PierceChangeStrategy,
+  XpathChangeStrategy,
+];
+const clickStrategies = [
+  AriaClickStrategy,
+  CSSClickStrategy,
+  PierceClickStrategy,
+  TextClickStrategy,
+  XPathClickStrategy,
+];
+const hoverStrategies = [
+  AriaHoverStrategy,
+  CSSHoverStrategy,
+  PierceHoverStrategy,
+  TextHoverStrategy,
+  XPathHoverStrategy,
+];
 @Module({
   imports: [SharedModule, FileModule, WebAgentModule, InspectorModule],
   controllers: [
@@ -54,6 +97,10 @@ const sharedServices = [
     ...inspectorServices,
     ...webAgentServices,
     ...sharedServices,
+    ...changeStrategies,
+    ...clickStrategies,
+    ...hoverStrategies,
+    ...handlers,
     WaiterService,
   ],
 })

@@ -1,8 +1,8 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { ActionHandler } from './action-handlers';
 import { Page } from 'puppeteer';
-import { BrowserAction, sleep } from './action-utilities';
+import { BrowserAction, sleep } from './action-utils';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
+import { ActionHandler } from './handlers/utils';
 
 @Injectable()
 export class StepExecutor {
@@ -21,8 +21,12 @@ export class StepExecutor {
   ) {
     const randomDelay = 3000 + Math.floor(Math.random() * 2000);
     const handler = this.handlers[step.type];
+
     if (handler) {
       await sleep(randomDelay);
+      // TODO: how to delay navigation caused by click that dataLayer shows before navigation?
+      // TODO: try get dataLayer before navigation, if found, then don't wait for navigation
+      // it should be done in the handlers
       await handler.handle(page, testName, step, isLastStep);
       await this.dataLayerService.updateSelfDataLayer(
         page,

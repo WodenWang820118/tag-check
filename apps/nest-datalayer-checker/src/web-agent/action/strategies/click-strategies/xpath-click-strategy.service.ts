@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { SelectorType } from '../../action-utilities';
+import { SelectorType } from '../../action-utils';
 import { ClickStrategy } from './utils';
 import { isElementHandle } from './utils';
 

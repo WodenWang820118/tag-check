@@ -5,6 +5,11 @@ import { UtilitiesModule } from '../utilities/utilities.module';
 import { WebMonitoringModule } from '../web-monitoring/web-monitoring.module';
 import { SharedModule } from '../../shared/shared.module';
 import { DataLayerModule } from '../web-monitoring/data-layer/data-layer.module';
+import { HandlerModule } from './handlers/handler.module';
+import { HoverStrategyModule } from './strategies/hover-strategies/hover-strategy.module';
+import { ClickStrategyModule } from './strategies/click-strategies/click-strategy.module';
+import { ChangeStrategyModule } from './strategies/change-strategies/change-strategy.module';
+
 @Module({
   imports: [
     PuppeteerModule,
@@ -12,8 +17,11 @@ import { DataLayerModule } from '../web-monitoring/data-layer/data-layer.module'
     WebMonitoringModule,
     SharedModule,
     DataLayerModule,
+    HandlerModule,
+    ChangeStrategyModule,
+    ClickStrategyModule,
+    HoverStrategyModule,
   ],
-  controllers: [],
   providers: [ActionService],
   exports: [ActionService],
 })

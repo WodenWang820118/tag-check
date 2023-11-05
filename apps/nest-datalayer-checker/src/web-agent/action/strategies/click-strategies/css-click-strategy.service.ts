@@ -48,6 +48,7 @@ export class CSSClickStrategy implements ClickStrategy {
       await page.evaluate((sel) => {
         const element = document.querySelector(sel) as HTMLElement;
         element?.click();
+        // TODO: get dataLayer here before navigation
       }, selector);
       Logger.log(
         `Clicked using page.evaluate for selector: ${selector}`,
