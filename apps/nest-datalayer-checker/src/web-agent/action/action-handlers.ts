@@ -1,13 +1,19 @@
 import { Page } from 'puppeteer';
 import { ChangeStrategy } from './strategies/change-strategy';
-import { ClickStrategy } from './strategies/click-strategy';
+
 import { HoverStrategy } from './strategies/hover-strategy';
 import { Logger, HttpException, Injectable } from '@nestjs/common';
 import { getSelectorType } from './action-utilities';
 import { UtilitiesService } from '../utilities/utilities.service';
+import { ClickStrategy } from './strategies/click-strategies/utils';
 
 export interface ActionHandler {
-  handle(page: Page, step: any): Promise<void>;
+  handle(
+    page: Page,
+    title: string,
+    step: any,
+    isLastStep: boolean
+  ): Promise<void>;
 }
 
 function getFirstSelector(selectorGroup: string | string[]): string {
@@ -21,22 +27,44 @@ export class ClickHandler implements ActionHandler {
     private utilitiesService: UtilitiesService
   ) {}
 
-  async handle(page: Page, step: any): Promise<void> {
+  async handle(
+    page: Page,
+    title: string,
+    step: any,
+    isLastStep: boolean
+  ): Promise<void> {
     // Logic of handleClick
     let clickedSuccessfully = false;
+    const isSelectPromotion = title === 'select_promotion';
+    const isSelectItem = title === 'select_item';
+    let preventNavigation = false;
 
     for (const selector of step.selectors) {
-      try {
-        await this.utilitiesService.scrollIntoViewIfNeeded(
-          getFirstSelector(selector),
-          page,
-          500
-        );
-      } catch (error) {
-        Logger.error(error.mssage, 'Utilities.scrollIntoViewIfNeeded');
-      }
+      // try {
+      //   await this.utilitiesService.scrollIntoViewIfNeeded(
+      //     Array.isArray(selector) ? selector : [selector],
+      //     page,
+      //     500
+      //   );
+      // } catch (error) {
+      //   Logger.error(error.mssage, 'Utilities.scrollIntoViewIfNeeded');
+      // }
 
-      if (await this.clickElement(page, getFirstSelector(selector))) {
+      if (
+        step.type === 'click' &&
+        (isSelectItem || isSelectPromotion) &&
+        isLastStep
+      )
+        preventNavigation = true;
+
+      if (
+        await this.clickElement(
+          page,
+          getFirstSelector(selector),
+          0,
+          preventNavigation
+        )
+      ) {
         clickedSuccessfully = true;
         Logger.log(getFirstSelector(selector), 'ClickHandler.handle');
         break; // Exit the loop as soon as one selector works
@@ -54,7 +82,8 @@ export class ClickHandler implements ActionHandler {
   async clickElement(
     page: Page,
     selector: string,
-    timeout = 1000
+    timeout = 3000,
+    preventNavigation = false
   ): Promise<boolean> {
     try {
       const type = getSelectorType(selector);
@@ -68,7 +97,12 @@ export class ClickHandler implements ActionHandler {
         return false;
       }
       Logger.log(selector, 'ClickHandler.clickElement');
-      return await strategy.clickElement(page, selector, timeout);
+      return await strategy.clickElement(
+        page,
+        selector,
+        timeout,
+        preventNavigation
+      );
     } catch (error) {
       Logger.error(error.message, 'ClickHandler.clickElement');
     }
@@ -79,7 +113,13 @@ export class ClickHandler implements ActionHandler {
 export class ChangeHandler implements ActionHandler {
   constructor(private changeStrategies: { [key: string]: ChangeStrategy }) {}
 
-  async handle(page: Page, step: any, timeout = 1000): Promise<void> {
+  async handle(
+    page: Page,
+    title: string,
+    step: any,
+    isLastStep: boolean,
+    timeout = 3000
+  ): Promise<void> {
     const selectors = step.selectors;
     const value = step.value;
 
@@ -133,7 +173,12 @@ export class ChangeHandler implements ActionHandler {
 export class HoverHandler implements ActionHandler {
   constructor(private hoverStrategies: { [key: string]: HoverStrategy }) {}
 
-  async handle(page: Page, step: any): Promise<void> {
+  async handle(
+    page: Page,
+    title: string,
+    step: any,
+    isLastStep: boolean
+  ): Promise<void> {
     Logger.log('handleHover');
     const selectors = step.selectors;
     let hoveredSuccessfully = false;
