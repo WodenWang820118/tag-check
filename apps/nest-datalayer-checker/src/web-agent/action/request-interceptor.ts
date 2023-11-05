@@ -1,11 +1,12 @@
-import { Logger } from '@nestjs/common';
-import { Page } from 'puppeteer';
+import { Injectable, Logger } from '@nestjs/common';
+import { HTTPRequest, Page } from 'puppeteer';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
 
+@Injectable()
 export class RequestInterceptor {
   constructor(private dataLayerService: DataLayerService) {}
 
-  async interceptRequest(page: Page, projectName: string, operation: any) {
+  async setupInterception(page: Page, projectName: string, operation: any) {
     // Logic for setting request interception and handling requests
     await page.setRequestInterception(true);
     page.on('request', async (request) => {
@@ -28,6 +29,29 @@ export class RequestInterceptor {
           projectName,
           operation.title
         );
+      } else if (request.isNavigationRequest()) {
+        // Logic for handling navigation requests
+        // Logger.log(request.url(), 'RequestInterceptor');
+        // try {
+        //   const latestDataLayer = await page.evaluate(() => {
+        //     return window.dataLayer;
+        //   }, 500);
+        //   this.dataLayerService.updateSelfDataLayerAlgorithm(
+        //     latestDataLayer,
+        //     projectName,
+        //     operation.title
+        //   );
+        // } catch (error) {
+        //   Logger.error(error.message, 'RequestInterceptor');
+        // }
+        // const latestDataLayer = await page.evaluate(() => {
+        //   return window.dataLayer;
+        // });
+        // this.dataLayerService.updateSelfDataLayerAlgorithm(
+        //   latestDataLayer,
+        //   projectName,
+        //   operation.title
+        // );
       }
       await request.continue();
     });

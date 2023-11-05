@@ -1,37 +1,36 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
-import { StrategyManager } from './strategies/strategy-manager';
 import { StepExecutor } from './step-executor';
-import { ClickHandler, ChangeHandler, HoverHandler } from './action-handlers';
 import { RequestInterceptor } from './request-interceptor';
-import { BrowserAction } from './action-utilities';
+import { BrowserAction } from './action-utils';
 import { UtilitiesService } from '../utilities/utilities.service';
+import { ClickHandler } from './handlers/click-handler.service';
+import { ChangeHandler } from './handlers/change-handler.service';
+import { HoverHandler } from './handlers/hover-handler.service';
+// import { ActionStrategyService } from './strategies/action-strategy.service';
 
 @Injectable()
 export class ActionService {
-  private strategyManager: StrategyManager;
+  // private strategyManager: StrategyManager;
   private stepExecutor: StepExecutor;
   private requestInterceptor: RequestInterceptor;
 
   constructor(
     private dataLayerService: DataLayerService,
-    private utilitiesService: UtilitiesService
+    private utilitiesService: UtilitiesService,
+    // private actionStrategyService: ActionStrategyService,
+    private changeHandler: ChangeHandler,
+    private clickHandler: ClickHandler,
+    private hoverHandler: HoverHandler
   ) {
-    this.strategyManager = new StrategyManager();
+    // this.strategyManager = new StrategyManager();
     this.requestInterceptor = new RequestInterceptor(this.dataLayerService);
     this.stepExecutor = new StepExecutor(
       {
-        [BrowserAction.CLICK]: new ClickHandler(
-          this.strategyManager.clickStrategies,
-          this.utilitiesService
-        ),
-        [BrowserAction.CHANGE]: new ChangeHandler(
-          this.strategyManager.changeStrategies
-        ),
-        [BrowserAction.HOVER]: new HoverHandler(
-          this.strategyManager.hoverStrategies
-        ),
+        [BrowserAction.CLICK]: this.clickHandler,
+        [BrowserAction.CHANGE]: this.changeHandler,
+        [BrowserAction.HOVER]: this.hoverHandler,
       },
       this.dataLayerService
     );
@@ -40,8 +39,7 @@ export class ActionService {
   async performOperation(page: Page, projectName: string, operation: any) {
     if (!operation || !operation.steps) return;
 
-    // intercept specific requests that update dataLayer and navigate to other pages
-    await this.requestInterceptor.interceptRequest(
+    await this.requestInterceptor.setupInterception(
       page,
       projectName,
       operation

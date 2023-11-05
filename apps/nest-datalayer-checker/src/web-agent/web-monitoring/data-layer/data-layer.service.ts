@@ -1,9 +1,8 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { SharedService } from '../../../shared/shared.service';
 import { Page } from 'puppeteer';
-import { TimeoutError } from 'puppeteer';
 
 @Injectable()
 export class DataLayerService {
@@ -18,42 +17,6 @@ export class DataLayerService {
     );
     writeFileSync(filePath, '[]');
   }
-
-  // async getDataLayer(page: Page, timeout = 5000) {
-  //   try {
-  //     // Wait for dataLayer to be available on the window object.
-  //     await page.waitForFunction(
-  //       () =>
-  //         Object.prototype.hasOwnProperty.call(window, 'dataLayer') &&
-  //         Array.isArray(window.dataLayer) &&
-  //         window.dataLayer.length > 0,
-  //       { timeout: timeout }
-  //     );
-  //     Logger.log('dataLayer is available on the window object.');
-  //     // Evaluate and get the dataLayer content.
-  //     return await page.evaluate(() => {
-  //       return JSON.parse(JSON.stringify(window.dataLayer)); // Serialize the dataLayer object to ensure compatibility.
-  //     });
-  //   } catch (error) {
-  //     // If it's a timeout error, throw a more specific exception.
-  //     Logger.error(error.message); // Log the actual error message for debugging.
-  //     if (error instanceof TimeoutError) {
-  //       throw new HttpException(
-  //         'Timeout while waiting for dataLayer to become available.',
-  //         408 // '408 Request Timeout' seems more appropriate here
-  //       );
-  //     } else {
-  //       // For all other errors, rethrow them with a 500 status.
-  //       Logger.error(error.message); // Log the actual error message for debugging.
-  //       throw new HttpException(
-  //         error.message ||
-  //           'An unexpected error occurred while retrieving dataLayer.',
-  //         500
-  //       );
-  //       // throw new Error(error);
-  //     }
-  //   }
-  // }
 
   async updateSelfDataLayer(page: Page, projectName: string, testName: string) {
     try {
