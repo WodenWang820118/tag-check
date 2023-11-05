@@ -1,6 +1,6 @@
 import { Page, ElementHandle } from 'puppeteer';
 import { SelectorType, queryShadowDom, sleep } from '../action-utilities';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 export interface HoverStrategy {
   hoverElement(
@@ -16,7 +16,10 @@ export class CSSHoverStrategy implements HoverStrategy {
     selector: string,
     timeout = 1000
   ): Promise<boolean> {
-    await page.waitForSelector(selector, { timeout });
+    await Promise.race([
+      page.waitForSelector(selector, { timeout, visible: true }),
+      page.waitForNavigation({ timeout }),
+    ]);
     await sleep(1000); // for future recording purpose
     await page.hover(selector);
     return true;
@@ -30,7 +33,10 @@ export class XPathHoverStrategy implements HoverStrategy {
     timeout = 1000
   ): Promise<boolean> {
     const xpath = selector.replace(SelectorType.XPATH + '/', '');
-    await page.waitForXPath(xpath, { timeout });
+    await Promise.race([
+      page.waitForXPath(xpath, { timeout, visible: true }),
+      page.waitForNavigation({ timeout }),
+    ]);
     const [element] = await page.$x(xpath);
     if (isElementHandle(element)) {
       await element.hover();
@@ -49,7 +55,8 @@ export class AriaHoverStrategy implements HoverStrategy {
     // Extract the ARIA attribute and value using regex
     const match = selector.match(/aria\/(aria-\w+)\/(.+)/);
     if (!match) {
-      throw new Error('Invalid selector format');
+      Logger.log('Does not find a aria attribute');
+      return false;
     }
 
     const ariaAttribute = match[1];
@@ -57,7 +64,10 @@ export class AriaHoverStrategy implements HoverStrategy {
     const constructedSelector = `[${ariaAttribute}="${ariaValue}"]`;
 
     try {
-      await page.waitForSelector(constructedSelector, { timeout });
+      await Promise.race([
+        page.waitForSelector(constructedSelector, { timeout, visible: true }),
+        page.waitForNavigation({ timeout }),
+      ]);
       const element = await page.$(constructedSelector);
       if (element) {
         await element.hover();
@@ -102,7 +112,10 @@ export class TextHoverStrategy implements HoverStrategy {
       SelectorType.TEXT + '/',
       ''
     )}"]`;
-    await page.waitForXPath(xpath, { timeout });
+    await Promise.race([
+      page.waitForXPath(xpath, { timeout, visible: true }),
+      page.waitForNavigation({ timeout }),
+    ]);
     const [element] = await page.$x(xpath);
     if (isElementHandle(element)) {
       await element.hover();

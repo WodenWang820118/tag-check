@@ -5,14 +5,7 @@ import {
   PiercingChangeStrategy,
   XpathChangeStrategy,
 } from './change-strategy';
-import {
-  AriaClickStrategy,
-  CSSClickStrategy,
-  ClickStrategy,
-  PierceClickStrategy,
-  TextClickStrategy,
-  XPathClickStrategy,
-} from './click-strategy';
+
 import {
   AriaHoverStrategy,
   CSSHoverStrategy,
@@ -23,6 +16,12 @@ import {
 } from './hover-strategy';
 import { SelectorType } from '../action-utilities';
 import { Injectable } from '@nestjs/common';
+import { CSSClickStrategy } from './click-strategies/css-click-strategy';
+import { ClickStrategy } from './click-strategies/utils';
+import { XPathClickStrategy } from './click-strategies/xpath-click-strategy';
+import { PierceClickStrategy } from './click-strategies/pierce-click-strategy';
+import { TextClickStrategy } from './click-strategies/text-click-strategy';
+import { AriaClickStrategy } from './click-strategies/aria-click-strategy';
 
 @Injectable()
 export class StrategyManager {

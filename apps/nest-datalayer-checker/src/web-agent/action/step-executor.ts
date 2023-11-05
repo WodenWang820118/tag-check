@@ -16,13 +16,14 @@ export class StepExecutor {
     step: any,
     projectName: string,
     testName: string,
-    state: any
+    state: any,
+    isLastStep: boolean
   ) {
     const randomDelay = 3000 + Math.floor(Math.random() * 2000);
     const handler = this.handlers[step.type];
     if (handler) {
       await sleep(randomDelay);
-      await handler.handle(page, step);
+      await handler.handle(page, testName, step, isLastStep);
       await this.dataLayerService.updateSelfDataLayer(
         page,
         projectName,
@@ -33,10 +34,7 @@ export class StepExecutor {
     } else if (step.type === BrowserAction.NAVIGATE) {
       await sleep(randomDelay + Math.random());
       await this.handleNavigate(page, step, state);
-    } else if (
-      step.type === BrowserAction.WAITFORELEMENT &&
-      step.visible === true
-    ) {
+    } else if (step.type === BrowserAction.WAITFORELEMENT) {
       await this.handleWaitForElement(
         page,
         step,
@@ -66,15 +64,15 @@ export class StepExecutor {
     }
   }
 
-  async handleWaitForElement(page: Page, step: any, timeout = 5000) {
+  async handleWaitForElement(page: Page, step: any, timeout: number) {
     for (const selector of step.selectors) {
       try {
         // sometimes SSR may send multiple SPA pages, so it's necessary to wait for navigation
         // but sometimes it's not necessary, so we do race
         await Promise.race([
-          page.waitForNavigation({ waitUntil: 'networkidle2' }),
+          page.waitForNavigation({ waitUntil: 'networkidle0', timeout }),
           page.waitForSelector(selector, {
-            visible: step.visible,
+            visible: step.visible ? true : false,
             timeout: timeout,
           }),
         ]);
@@ -90,10 +88,9 @@ export class StepExecutor {
           'StepExecutor.handleWaitForElement'
         );
         Logger.error(error.message, 'StepExecutor.handleWaitForElement');
-        throw new HttpException(
-          `Failed to wait for element ${selector}. Stop processing.`,
-          500
-        );
+        // close the page if stop processing
+        // await page.close();
+        throw new HttpException(`${error.message}, Stop processing.`, 500);
       }
     }
   }

@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
@@ -132,12 +132,14 @@ export class WebAgentService {
     try {
       await this.actionService.performOperation(page, projectName, operation);
 
+      // TODO: retreive dataLayer from the test results cache file instead of directly from the page
+      // since we don't know when to prevent navigation, it's safe to use the file
       await page.waitForFunction(
         () =>
           Object.prototype.hasOwnProperty.call(window, 'dataLayer') &&
           Array.isArray(window.dataLayer) &&
           window.dataLayer.length > 0,
-        { timeout: 5000 }
+        { timeout: 10000 }
       );
 
       const dataLayer = await page.evaluate(() => {
@@ -165,7 +167,7 @@ export class WebAgentService {
         this.sharedService.getReportSavingFolder(projectName),
         testName
       );
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
       try {
         await this.puppeteerService.snapshot(
           page,
@@ -176,19 +178,14 @@ export class WebAgentService {
         Logger.error(error.message, 'WebAgent.performTest'); // Log the actual error message for debugging.
       }
 
-      // 4) close the page
-      // TODO: remember to close the page
-      await page.close();
-
       return {
         dataLayer,
         eventRequest,
         destinationUrl,
       };
     } catch (error) {
-      // TODO: remember to close the page
       await page.close();
-      throw new HttpException(`${error.message}`, 500);
+      Logger.error(error.message, 'WebAgent.performTest');
     }
   }
 }

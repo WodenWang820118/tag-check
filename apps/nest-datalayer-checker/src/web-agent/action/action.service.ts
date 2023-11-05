@@ -46,18 +46,27 @@ export class ActionService {
       projectName,
       operation
     );
+    let isLastStep = false;
+    for (let i = 0; i < operation.steps.length; i++) {
+      const step = operation.steps[i];
 
-    for (const step of operation.steps) {
+      if (i === operation.steps.length - 1) isLastStep = true;
+
       const state = {
         isFirstNavigation: true,
       };
-      await this.stepExecutor.executeStep(
-        page,
-        step,
-        projectName,
-        operation.title,
-        state
-      );
+
+      await Promise.race([
+        page.waitForNavigation({ waitUntil: 'networkidle0' }),
+        this.stepExecutor.executeStep(
+          page,
+          step,
+          projectName,
+          operation.title,
+          state,
+          isLastStep
+        ),
+      ]);
     }
 
     Logger.log(

@@ -20,11 +20,13 @@ export class AriaChangeStrategy implements ChangeStrategy {
   ): Promise<boolean> {
     // Extract the ARIA attribute and value using regex
 
-    await page.waitForSelector(selector, { timeout });
-
     const match = selector.match(/aria\/(aria-\w+)\/(.+)/);
     if (!match) {
-      throw new Error('Invalid selector format');
+      Logger.error(
+        'Does not find a aria attribute',
+        'AriaChangeStrategy.changeElement'
+      );
+      return false;
     }
 
     const ariaAttribute = match[1];
@@ -32,7 +34,13 @@ export class AriaChangeStrategy implements ChangeStrategy {
     const constructedSelector = `[${ariaAttribute}="${ariaValue}"]`;
 
     try {
-      // await page.waitForSelector(constructedSelector, { timeout });
+      await Promise.race([
+        page.waitForSelector(constructedSelector, {
+          timeout,
+          visible: true,
+        }),
+        page.waitForNavigation({ timeout }),
+      ]);
 
       // Check if the element is a select element
       const isSelect = await page.evaluate((selector) => {
@@ -69,7 +77,14 @@ export class XpathChangeStrategy implements ChangeStrategy {
     value: string,
     timeout = 1000
   ): Promise<boolean> {
-    await page.waitForXPath(selector.replace('xpath/', ''), { timeout });
+    await Promise.race([
+      page.waitForXPath(selector.replace(SelectorType.XPATH + '/', ''), {
+        timeout,
+        visible: true,
+      }),
+      page.waitForNavigation({ timeout }),
+    ]);
+
     const [input] = await page.$x(selector.replace('xpath/', ''));
     await input.type(value);
     return true;
@@ -84,10 +99,13 @@ export class PiercingChangeStrategy implements ChangeStrategy {
     value: string,
     timeout?: number
   ): Promise<boolean> {
-    await page.waitForSelector(
-      selector.replace(SelectorType.PIERCE + '/', ''),
-      { timeout }
-    );
+    await Promise.race([
+      page.waitForSelector(selector.replace(SelectorType.PIERCE + '/', ''), {
+        timeout,
+        visible: true,
+      }),
+      page.waitForNavigation({ timeout }),
+    ]);
     await page.type(selector.replace(SelectorType.PIERCE + '/', ''), value);
     return true;
   }
@@ -102,7 +120,11 @@ export class CSSChangeStrategy implements ChangeStrategy {
     timeout?: number
   ): Promise<boolean> {
     try {
-      await page.waitForSelector(selector, { timeout });
+      // it could be a navigation before awaiting the selector
+      await Promise.race([
+        page.waitForSelector(selector, { timeout, visible: true }),
+        page.waitForNavigation({ timeout }),
+      ]);
 
       // Check if the element is a select element
       const isSelect = await page.evaluate((selector) => {

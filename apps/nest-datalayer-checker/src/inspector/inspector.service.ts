@@ -15,7 +15,6 @@ import {
 import { RequestProcessorService } from './request-processor/request-processor.service';
 import { Browser, Credentials, Page } from 'puppeteer';
 import { writeFileSync } from 'fs';
-import path from 'path';
 
 @Injectable()
 export class InspectorService {
@@ -141,16 +140,16 @@ export class InspectorService {
 
     const results = [];
     for (let i = 0; i < operations.length; i += concurrency) {
+      const incognitoContext = await browser.createIncognitoBrowserContext();
       const operationBatch = operations.slice(i, i + concurrency);
 
       const batchPromises = operationBatch.map(async (operation) => {
-        const cachePath = path.join(
-          this.sharedService.getReportSavingFolder(projectName),
-          operation.replace('.json', ''),
-          `${operation.replace('.json', '')} - result cache.json`
+        const cachePath = this.sharedService.getCachePath(
+          projectName,
+          operation
         );
         try {
-          const page = await browser.newPage();
+          const page = await incognitoContext.newPage();
           const result = await this.inspectDataLayer(
             page,
             projectName,
@@ -160,15 +159,25 @@ export class InspectorService {
             credentials
           );
           writeFileSync(cachePath, JSON.stringify(result, null, 2));
+          await page.close();
           return result;
         } catch (error) {
-          Logger.warn(error, 'error');
+          Logger.error(error.message, 'inspector.inspectProjectDataLayer');
           writeFileSync(cachePath, JSON.stringify(error, null, 2));
           return { error: error.message };
         }
       });
-      const batchResults = await Promise.all(batchPromises);
-      results.push(...batchResults);
+      // Wait for the batch to complete
+      const batchResults = await Promise.allSettled(batchPromises);
+      // Extract results or errors
+      batchResults.forEach((result) => {
+        results.push(
+          result.status === 'fulfilled' ? result.value : result.reason
+        );
+      });
+
+      // Dispose of the incognito context after each batch
+      await incognitoContext.close();
     }
 
     return results;
@@ -199,7 +208,7 @@ export class InspectorService {
           return false;
       }
     } catch (error) {
-      throw new HttpException('An error occurred', 500);
+      throw new HttpException(`${error.message}`, 500);
     }
   }
 }

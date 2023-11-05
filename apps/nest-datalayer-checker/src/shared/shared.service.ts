@@ -3,6 +3,7 @@ import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import { ProjectService } from './project/project.service';
 import { FileService } from './file/file.service';
 import { XlsxReportService } from './xlsx-report/xlsx-report.service';
+import path from 'path';
 
 @Injectable()
 export class SharedService {
@@ -50,6 +51,14 @@ export class SharedService {
 
   findDestinationUrl(json: any) {
     return this.fileService.findDestinationUrl(json);
+  }
+
+  getCachePath(projectName: string, operation: string) {
+    return path.join(
+      this.getReportSavingFolder(projectName),
+      operation.replace('.json', ''),
+      `${operation.replace('.json', '')} - result cache.json`
+    );
   }
 
   async writeXlsxFile(
