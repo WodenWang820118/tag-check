@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import {
   existsSync,
   mkdirSync,
@@ -79,6 +79,36 @@ export class ProjectService implements OnModuleInit {
       this.cachedSettingsFilePath,
       JSON.stringify(cachedSettings, null, 2)
     );
+  }
+
+  get cachedSettings() {
+    if (existsSync(this.cachedSettingsFilePath)) {
+      const rawData = readFileSync(this.cachedSettingsFilePath, 'utf8');
+      return JSON.parse(rawData);
+    } else {
+      return {};
+    }
+  }
+
+  get settings() {
+    const rootProjectPath = this.cachedSettings.rootProjectPath;
+    const currentProjectPath = this.cachedSettings.currentProjectPath;
+    const settingsFilePath = path.join(
+      rootProjectPath,
+      currentProjectPath,
+      'settings.json'
+    );
+    Logger.log(settingsFilePath, 'ProjectService.settings');
+    if (existsSync(settingsFilePath)) {
+      const rawData = readFileSync(settingsFilePath, 'utf8');
+      return JSON.parse(rawData);
+    } else {
+      return {};
+    }
+  }
+
+  set settings(settings: any) {
+    writeFileSync(this.settingsFilePath, JSON.stringify(settings, null, 2));
   }
 
   get projectList() {

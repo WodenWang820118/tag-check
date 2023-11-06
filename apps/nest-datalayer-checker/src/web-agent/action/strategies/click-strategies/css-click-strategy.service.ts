@@ -1,11 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ClickStrategy } from './utils';
 import { Page } from 'puppeteer';
+import { DataLayerService } from '../../../web-monitoring/data-layer/data-layer.service';
 
 @Injectable()
 export class CSSClickStrategy implements ClickStrategy {
+  constructor(private dataLayerService: DataLayerService) {}
   async clickElement(
     page: Page,
+    projectName: string,
+    title: string,
     selector: string,
     timeout = 1000,
     preventNavigation = false
@@ -23,11 +27,11 @@ export class CSSClickStrategy implements ClickStrategy {
     if (preventNavigation) {
       this.preventNavigationOnElement(page, selector);
       // the normal click cannot get the dataLayer's data such as select_item
-      return this.evaluateClick(page, selector);
+      return this.evaluateClick(page, projectName, title, selector);
     } else {
-      const result = await this.normalClick(page, selector);
+      const result = await this.normalClick(page, projectName, title, selector);
       if (!result) {
-        return await this.evaluateClick(page, selector);
+        return await this.evaluateClick(page, projectName, title, selector);
       } else {
         return result;
       }
@@ -43,12 +47,16 @@ export class CSSClickStrategy implements ClickStrategy {
     }, selector);
   }
 
-  private async evaluateClick(page: Page, selector: string): Promise<boolean> {
+  private async evaluateClick(
+    page: Page,
+    projectName: string,
+    title: string,
+    selector: string
+  ): Promise<boolean> {
     try {
       await page.evaluate((sel) => {
         const element = document.querySelector(sel) as HTMLElement;
         element?.click();
-        // TODO: get dataLayer here before navigation
       }, selector);
       Logger.log(
         `Clicked using page.evaluate for selector: ${selector}`,
@@ -61,10 +69,15 @@ export class CSSClickStrategy implements ClickStrategy {
     }
   }
 
-  private async normalClick(page: Page, selector: string): Promise<boolean> {
+  private async normalClick(
+    page: Page,
+    projectName: string,
+    title: string,
+    selector: string
+  ): Promise<boolean> {
     try {
-      // await page.focus(selector);
       await page.click(selector, { delay: 100 });
+
       Logger.log(
         `Clicked using page.click for selector: ${selector}`,
         'CSSClickStrategy.clickElement'

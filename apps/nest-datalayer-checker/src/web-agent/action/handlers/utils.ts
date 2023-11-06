@@ -3,6 +3,7 @@ import { Page } from 'puppeteer';
 export interface ActionHandler {
   handle(
     page: Page,
+    projectName: string,
     title: string,
     step: any,
     isLastStep: boolean

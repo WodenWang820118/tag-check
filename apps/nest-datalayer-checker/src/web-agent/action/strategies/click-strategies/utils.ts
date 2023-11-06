@@ -3,6 +3,8 @@ import { ElementHandle, Page } from 'puppeteer';
 export interface ClickStrategy {
   clickElement(
     page: Page,
+    projectName: string,
+    title: string,
     selector: string,
     timeout?: number,
     preventNavigation?: boolean

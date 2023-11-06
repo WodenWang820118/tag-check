@@ -8,7 +8,6 @@ import { UtilitiesService } from '../utilities/utilities.service';
 import { ClickHandler } from './handlers/click-handler.service';
 import { ChangeHandler } from './handlers/change-handler.service';
 import { HoverHandler } from './handlers/hover-handler.service';
-// import { ActionStrategyService } from './strategies/action-strategy.service';
 
 @Injectable()
 export class ActionService {
@@ -19,7 +18,6 @@ export class ActionService {
   constructor(
     private dataLayerService: DataLayerService,
     private utilitiesService: UtilitiesService,
-    // private actionStrategyService: ActionStrategyService,
     private changeHandler: ChangeHandler,
     private clickHandler: ClickHandler,
     private hoverHandler: HoverHandler
@@ -54,17 +52,14 @@ export class ActionService {
         isFirstNavigation: true,
       };
 
-      await Promise.race([
-        page.waitForNavigation({ waitUntil: 'networkidle0' }),
-        this.stepExecutor.executeStep(
-          page,
-          step,
-          projectName,
-          operation.title,
-          state,
-          isLastStep
-        ),
-      ]);
+      await this.stepExecutor.executeStep(
+        page,
+        step,
+        projectName,
+        operation.title,
+        state,
+        isLastStep
+      );
     }
 
     Logger.log(
