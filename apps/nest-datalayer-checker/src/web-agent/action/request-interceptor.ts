@@ -29,31 +29,10 @@ export class RequestInterceptor {
           projectName,
           operation.title
         );
-      } else if (request.isNavigationRequest()) {
-        // Logic for handling navigation requests
-        // Logger.log(request.url(), 'RequestInterceptor');
-        // try {
-        //   const latestDataLayer = await page.evaluate(() => {
-        //     return window.dataLayer;
-        //   }, 500);
-        //   this.dataLayerService.updateSelfDataLayerAlgorithm(
-        //     latestDataLayer,
-        //     projectName,
-        //     operation.title
-        //   );
-        // } catch (error) {
-        //   Logger.error(error.message, 'RequestInterceptor');
-        // }
-        // const latestDataLayer = await page.evaluate(() => {
-        //   return window.dataLayer;
-        // });
-        // this.dataLayerService.updateSelfDataLayerAlgorithm(
-        //   latestDataLayer,
-        //   projectName,
-        //   operation.title
-        // );
+        await request.continue();
+      } else {
+        await request.continue();
       }
-      await request.continue();
     });
   }
 }

@@ -9,6 +9,7 @@ import { CSSClickStrategy } from '../strategies/click-strategies/css-click-strat
 import { PierceClickStrategy } from '../strategies/click-strategies/pierce-click-strategy.service';
 import { TextClickStrategy } from '../strategies/click-strategies/text-click-strategy.service';
 import { XPathClickStrategy } from '../strategies/click-strategies/xpath-click-strategy.service';
+import { SharedService } from '../../../shared/shared.service';
 
 @Injectable()
 export class ClickHandler implements ActionHandler {
@@ -18,19 +19,21 @@ export class ClickHandler implements ActionHandler {
     private pierceClickStrategy: PierceClickStrategy,
     private textClickStrategy: TextClickStrategy,
     private xpathClickStrategy: XPathClickStrategy,
-    private utilitiesService: UtilitiesService
+    private utilitiesService: UtilitiesService,
+    private sharedService: SharedService
   ) {}
 
   async handle(
     page: Page,
+    projectName: string,
     title: string,
     step: any,
     isLastStep: boolean
   ): Promise<void> {
     // Logic of handleClick
     let clickedSuccessfully = false;
-    const isSelectPromotion = title === 'select_promotion';
-    const isSelectItem = title === 'select_item';
+    const preventNavigationEvents =
+      this.sharedService.settings.preventNavigationEvents;
     let preventNavigation = false;
 
     for (const selector of step.selectors) {
@@ -46,7 +49,7 @@ export class ClickHandler implements ActionHandler {
 
       if (
         step.type === 'click' &&
-        (isSelectItem || isSelectPromotion) &&
+        preventNavigationEvents.includes(title) &&
         isLastStep
       )
         preventNavigation = true;
@@ -54,6 +57,8 @@ export class ClickHandler implements ActionHandler {
       if (
         await this.clickElement(
           page,
+          projectName,
+          title,
           getFirstSelector(selector),
           0,
           preventNavigation
@@ -75,6 +80,8 @@ export class ClickHandler implements ActionHandler {
 
   async clickElement(
     page: Page,
+    projectName: string,
+    title: string,
     selector: string,
     timeout = 3000,
     preventNavigation = false
@@ -106,6 +113,8 @@ export class ClickHandler implements ActionHandler {
       Logger.log(selector, 'ClickHandler.clickElement');
       return await strategy.clickElement(
         page,
+        projectName,
+        title,
         selector,
         timeout,
         preventNavigation

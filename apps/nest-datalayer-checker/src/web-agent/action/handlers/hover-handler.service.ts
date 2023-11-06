@@ -21,6 +21,7 @@ export class HoverHandler implements ActionHandler {
 
   async handle(
     page: Page,
+    projectName: string,
     title: string,
     step: any,
     isLastStep: boolean

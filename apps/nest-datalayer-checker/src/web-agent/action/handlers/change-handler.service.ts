@@ -10,7 +10,6 @@ import { ChangeStrategy } from '../strategies/change-strategies/utils';
 
 @Injectable()
 export class ChangeHandler implements ActionHandler {
-  // constructor(private changeStrategies: { [key: string]: ChangeStrategy }) {}
   constructor(
     private ariaChangeStrategy: AriaChangeStrategy,
     private cSSChangeStrategy: CSSChangeStrategy,
@@ -20,6 +19,7 @@ export class ChangeHandler implements ActionHandler {
 
   async handle(
     page: Page,
+    projectName: string,
     title: string,
     step: any,
     isLastStep: boolean,
@@ -57,7 +57,6 @@ export class ChangeHandler implements ActionHandler {
   ): Promise<boolean> {
     try {
       const type = getSelectorType(selector);
-      // const strategy = this.changeStrategies[type];
       let strategy: ChangeStrategy;
 
       if (type === SelectorType.ARIA) {

@@ -6,6 +6,7 @@ import { UtilitiesModule } from '../../utilities/utilities.module';
 import { ChangeStrategyModule } from '../strategies/change-strategies/change-strategy.module';
 import { ClickStrategyModule } from '../strategies/click-strategies/click-strategy.module';
 import { HoverStrategyModule } from '../strategies/hover-strategies/hover-strategy.module';
+import { SharedModule } from '../../../shared/shared.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { HoverStrategyModule } from '../strategies/hover-strategies/hover-strate
     ChangeStrategyModule,
     ClickStrategyModule,
     HoverStrategyModule,
+    SharedModule,
   ],
   providers: [ChangeHandler, ClickHandler, HoverHandler],
   exports: [ChangeHandler, ClickHandler, HoverHandler],

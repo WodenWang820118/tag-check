@@ -8,6 +8,8 @@ import { isElementHandle } from './utils';
 export class XPathClickStrategy implements ClickStrategy {
   async clickElement(
     page: Page,
+    projectName: string,
+    title: string,
     selector: string,
     timeout = 1000,
     preventNavigation = false

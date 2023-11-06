@@ -30,6 +30,14 @@ export class SharedService {
     this.projectService.projectFolder = projectPath;
   }
 
+  get settings() {
+    return this.projectService.settings;
+  }
+
+  set settings(settings: any) {
+    this.projectService.settings = settings;
+  }
+
   initProject(projectName: string) {
     this.projectService.initProject(projectName);
   }

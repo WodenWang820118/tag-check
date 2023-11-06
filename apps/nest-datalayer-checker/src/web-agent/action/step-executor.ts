@@ -24,10 +24,7 @@ export class StepExecutor {
 
     if (handler) {
       await sleep(randomDelay);
-      // TODO: how to delay navigation caused by click that dataLayer shows before navigation?
-      // TODO: try get dataLayer before navigation, if found, then don't wait for navigation
-      // it should be done in the handlers
-      await handler.handle(page, testName, step, isLastStep);
+      await handler.handle(page, projectName, testName, step, isLastStep);
       await this.dataLayerService.updateSelfDataLayer(
         page,
         projectName,
@@ -93,7 +90,7 @@ export class StepExecutor {
         );
         Logger.error(error.message, 'StepExecutor.handleWaitForElement');
         // close the page if stop processing
-        // await page.close();
+        await page.close();
         throw new HttpException(`${error.message}, Stop processing.`, 500);
       }
     }
