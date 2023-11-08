@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nx serve",
+    "backend": "nx serve nest-datalayer-checker --watch",
     "build": "nx build",
     "test": "nx test"
   },
@@ -40,9 +41,11 @@
     "@nestjs/config": "^3.0.0",
     "@nestjs/core": "^10.0.2",
     "@nestjs/platform-express": "^10.0.2",
+    "@nestjs/swagger": "^7.1.12",
     "axios": "^1.0.0",
+    "exceljs": "^4.3.0",
     "nestjs-spelunker": "^1.1.5",
-    "puppeteer": "^21.1.0",
+    "puppeteer": "^21.4.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
     "tslib": "^2.3.0"
