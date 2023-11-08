@@ -25,6 +25,20 @@ export class StepExecutor {
     if (handler) {
       await sleep(randomDelay);
       await handler.handle(page, projectName, testName, step, isLastStep);
+
+      // some actions may trigger navigation, so we need to wait for the navigation to complete
+      if (isLastStep) {
+        try {
+          await page.waitForNavigation({
+            waitUntil: 'networkidle2',
+            timeout: 3000,
+          });
+        } catch (error) {
+          Logger.log('no navigation needed', 'StepExecutor.executeStep');
+        }
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
       await this.dataLayerService.updateSelfDataLayer(
         page,
         projectName,
@@ -40,6 +54,31 @@ export class StepExecutor {
         page,
         step,
         step.timeout ? step.timeout : 5000
+      );
+    } else if (step.type === BrowserAction.KEYDOWN) {
+      Logger.log(`keydown ${step.key}`, 'StepExecutor.executeStep');
+      await page.keyboard.down(step.key);
+    } else if (step.type === BrowserAction.KEYUP) {
+      Logger.log(`keyup ${step.key}`, 'StepExecutor.executeStep');
+
+      // only a pair of keydown and keyup can trigger the website action
+      await page.keyboard.up(step.key);
+
+      // when the keyboard action completes, we may need to wait for the navigation to complete
+      try {
+        await page.waitForNavigation({
+          waitUntil: 'networkidle2',
+          timeout: 5000,
+        });
+      } catch (error) {
+        Logger.log('no navigation needed', 'StepExecutor.executeStep');
+      }
+      // necessary delay for the website to update the data layer
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await this.dataLayerService.updateSelfDataLayer(
+        page,
+        projectName,
+        testName
       );
     } else {
       Logger.warn(`Unknown action type: ${step.type}`);
@@ -70,13 +109,20 @@ export class StepExecutor {
       try {
         // sometimes SSR may send multiple SPA pages, so it's necessary to wait for navigation
         // but sometimes it's not necessary, so we do race
-        await Promise.race([
-          page.waitForNavigation({ waitUntil: 'networkidle0', timeout }),
-          page.waitForSelector(selector, {
+
+        try {
+          await page.waitForNavigation({ waitUntil: 'networkidle2', timeout });
+        } catch (error) {
+          Logger.log('no navigation', 'StepExecutor.handleWaitForElement');
+        }
+        try {
+          await page.waitForSelector(selector, {
             visible: step.visible ? true : false,
             timeout: timeout,
-          }),
-        ]);
+          });
+        } catch (error) {
+          Logger.log('no selector', 'StepExecutor.handleWaitForElement');
+        }
 
         Logger.log(
           `${selector} is visible`,

@@ -164,6 +164,7 @@ export class InspectorService {
         } catch (error) {
           Logger.error(error.message, 'inspector.inspectProjectDataLayer');
           writeFileSync(cachePath, JSON.stringify(error, null, 2));
+          await incognitoContext.close();
           return { error: error.message };
         }
       });
