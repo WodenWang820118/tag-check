@@ -148,23 +148,6 @@ export class WebAgentService {
         eventRequest = request.url();
       }
 
-      // 3) save screenshots/videos
-      // TODO: temporary solution, it could be better in different stages of the workflow
-      const imageSavingFolder = path.join(
-        this.sharedService.getReportSavingFolder(projectName),
-        testName
-      );
-
-      try {
-        await this.puppeteerService.snapshot(
-          page,
-          path.join(imageSavingFolder, `${testName}.png`),
-          true
-        );
-      } catch (error) {
-        Logger.error(error.message, 'WebAgent.performTest'); // Log the actual error message for debugging.
-      }
-
       return {
         dataLayer,
         eventRequest,
