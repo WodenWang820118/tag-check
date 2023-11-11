@@ -14,7 +14,6 @@ import {
 } from '../interfaces/dataLayer.interface';
 import { RequestProcessorService } from './request-processor/request-processor.service';
 import { Browser, Credentials, Page } from 'puppeteer';
-import { writeFileSync } from 'fs';
 
 @Injectable()
 export class InspectorService {
@@ -38,14 +37,14 @@ export class InspectorService {
     page: Page,
     projectName: string,
     testName: string,
-    path?: string,
+    filePath?: string,
     measurementId?: string,
     credentials?: Credentials
   ) {
     // 1. Get the project spec from the local file system
     const specOption: FilePathOptions = {
       name: projectName,
-      absolutePath: path,
+      absolutePath: filePath,
     };
     const specs = this.sharedService.getSpecJsonByProject(specOption);
 
@@ -63,7 +62,7 @@ export class InspectorService {
           page,
           projectName,
           testName,
-          path,
+          filePath,
           credentials
         );
 
@@ -76,6 +75,9 @@ export class InspectorService {
         );
 
         const destinationUrl = result.destinationUrl;
+        await this.sharedService.writeCacheFile(projectName, testName, result);
+        await this.sharedService.screenshot(page, projectName, testName);
+        await page.close();
 
         return {
           dataLayerCheckResult,
@@ -88,7 +90,7 @@ export class InspectorService {
             page,
             projectName,
             testName,
-            path,
+            filePath,
             measurementId,
             credentials
           );
@@ -112,6 +114,9 @@ export class InspectorService {
         );
 
         const destinationUrl = result.destinationUrl;
+        await this.sharedService.writeCacheFile(projectName, testName, result);
+        await this.sharedService.screenshot(page, projectName, testName);
+        await page.close();
 
         return {
           dataLayerCheckResult,
@@ -144,26 +149,32 @@ export class InspectorService {
       const operationBatch = operations.slice(i, i + concurrency);
 
       const batchPromises = operationBatch.map(async (operation) => {
-        const cachePath = this.sharedService.getCachePath(
-          projectName,
-          operation
-        );
+        const testName = operation.replace('.json', '');
         try {
           const page = await incognitoContext.newPage();
           const result = await this.inspectDataLayer(
             page,
             projectName,
-            operation.replace('.json', ''),
+            testName,
             filePath,
             measurementId,
             credentials
           );
-          writeFileSync(cachePath, JSON.stringify(result, null, 2));
+          await this.sharedService.writeCacheFile(
+            projectName,
+            operation,
+            result
+          );
+          await this.sharedService.screenshot(page, projectName, testName);
           await page.close();
           return result;
         } catch (error) {
           Logger.error(error.message, 'inspector.inspectProjectDataLayer');
-          writeFileSync(cachePath, JSON.stringify(error, null, 2));
+          await this.sharedService.writeCacheFile(
+            projectName,
+            operation,
+            error.message
+          );
           await incognitoContext.close();
           return { error: error.message };
         }

@@ -4,7 +4,8 @@ import { ProjectService } from './project/project.service';
 import { FileService } from './file/file.service';
 import { XlsxReportService } from './xlsx-report/xlsx-report.service';
 import path from 'path';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { Page } from 'puppeteer';
 
 @Injectable()
 export class SharedService {
@@ -80,6 +81,22 @@ export class SharedService {
     const resultFolder = this.getReportSavingFolder(projectName);
     const eventFolder = path.join(resultFolder, testName);
     if (!existsSync(eventFolder)) mkdirSync(eventFolder);
+  }
+
+  async screenshot(page: Page, projectName: string, testName: string) {
+    const imageSavingFolder = path.join(
+      this.getReportSavingFolder(projectName),
+      testName
+    );
+
+    await page.screenshot({
+      path: path.join(imageSavingFolder, `${testName}.png`),
+    });
+  }
+
+  async writeCacheFile(projectName: string, operation: string, data: any) {
+    const cachePath = this.getCachePath(projectName, operation);
+    writeFileSync(cachePath, JSON.stringify(data, null, 2));
   }
 
   async writeXlsxFile(
