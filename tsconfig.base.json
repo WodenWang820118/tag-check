@@ -14,7 +14,9 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@/*": ["apps/frontend/src/*"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }
