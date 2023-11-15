@@ -4,6 +4,8 @@ import { queryShadowDom, SelectorType } from '../../action-utils';
 import { ClickStrategy } from './utils';
 import { isElementHandle } from './utils';
 
+// TODO: timeout should be configurable
+
 @Injectable()
 export class PierceClickStrategy implements ClickStrategy {
   async clickElement(

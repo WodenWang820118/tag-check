@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { ClickStrategy } from './utils';
-
+// TODO: timeout should be configurable
 @Injectable()
 export class AriaClickStrategy implements ClickStrategy {
   async clickElement(

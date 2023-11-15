@@ -37,6 +37,7 @@ export class InspectorService {
     page: Page,
     projectName: string,
     testName: string,
+    headless: string,
     filePath?: string,
     measurementId?: string,
     credentials?: Credentials
@@ -77,7 +78,8 @@ export class InspectorService {
         const destinationUrl = result.destinationUrl;
         await this.sharedService.writeCacheFile(projectName, testName, result);
         await this.sharedService.screenshot(page, projectName, testName);
-        await page.close();
+
+        if (headless === 'new') await page.close();
 
         return {
           dataLayerCheckResult,
@@ -132,6 +134,7 @@ export class InspectorService {
     browser: Browser,
     projectName: string,
     filePath?: string,
+    headless?: string,
     measurementId?: string,
     credentials?: Credentials,
     concurrency?: number
@@ -157,6 +160,7 @@ export class InspectorService {
             projectName,
             testName,
             filePath,
+            headless,
             measurementId,
             credentials
           );
