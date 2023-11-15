@@ -1,13 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
 import { SharedService } from '../shared/shared.service';
 import { Browser, Credentials, Page } from 'puppeteer';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
-import path from 'path';
 import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
 
+// TODO: refactor the puppeteer service out of this service
 @Injectable()
 export class WebAgentService {
   constructor(
@@ -123,7 +123,10 @@ export class WebAgentService {
     );
 
     if (credentials) {
-      await this.puppeteerService.httpAuth(page, credentials);
+      await page.authenticate({
+        username: credentials.username,
+        password: credentials.password,
+      });
     }
 
     let eventRequest: string = null;
@@ -131,7 +134,20 @@ export class WebAgentService {
     // 2) perform the test operation
     try {
       await this.actionService.performOperation(page, projectName, operation);
-
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+        await page.waitForNavigation({
+          waitUntil: 'networkidle2',
+          timeout: 10000,
+        });
+      } catch (error) {
+        Logger.log('no navigation needed', 'WebAgent.performTest');
+      }
+      await this.dataLayerService.updateSelfDataLayer(
+        page,
+        projectName,
+        testName
+      );
       const dataLayer = this.webMonitoringService.getMyDataLayer(
         projectName,
         testName
@@ -156,6 +172,7 @@ export class WebAgentService {
     } catch (error) {
       await page.close();
       Logger.error(error.message, 'WebAgent.performTest');
+      throw new HttpException(error.message, 500);
     }
   }
 }
