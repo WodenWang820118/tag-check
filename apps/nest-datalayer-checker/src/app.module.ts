@@ -1,24 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AirtableModule } from './unsorted-endpoints/airtable/airtable.module';
-import { DataLayerCheckerModule } from './unsorted-endpoints/data-layer-checker/data-layer-checker.module';
-import { GtmOperatorModule } from './unsorted-endpoints/gtm-operator/gtm-operator.module';
-import { WebAgentModule } from './web-agent/web-agent.module';
-import { SharedModule } from './shared/shared.module';
-import { InspectorModule } from './inspector/inspector.module';
 import { WaiterModule } from './waiter/waiter.module';
+import { GcsMonitorModule } from './gcs-monitor/gcs-monitor.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot(),
-    WebAgentModule,
-    AirtableModule,
-    DataLayerCheckerModule,
-    GtmOperatorModule,
-    SharedModule,
-    InspectorModule,
-    WaiterModule,
-  ],
+  imports: [ConfigModule.forRoot(), WaiterModule, GcsMonitorModule],
   controllers: [],
   providers: [],
 })

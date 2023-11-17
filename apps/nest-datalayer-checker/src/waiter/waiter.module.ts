@@ -1,13 +1,18 @@
 import { Module } from '@nestjs/common';
-import { WaiterController } from './waiter-path.controller';
-import { WaiterQaController } from './waiter-qa.controller';
-import { WaiterDataLayerController } from './waiter-datalayer.controller';
 
 // other modules
 import { FileModule } from '../shared/file/file.module';
 import { SharedModule } from '../shared/shared.module';
 import { WebAgentModule } from '../web-agent/web-agent.module';
 import { InspectorModule } from '../inspector/inspector.module';
+import { GtmOperatorModule } from '../gtm-operator/gtm-operator.module';
+import { GcsMonitorModule } from '../gcs-monitor/gcs-monitor.module';
+
+// controllers
+import { WaiterController } from './waiter-path.controller';
+import { WaiterQaController } from './waiter-qa.controller';
+import { WaiterDataLayerController } from './waiter-datalayer.controller';
+import { WaiterGtmOperatorController } from './waiter-gtm-operator.controller';
 
 // services
 import { WaiterService } from './waiter.service';
@@ -72,6 +77,7 @@ const changeStrategies = [
   PierceChangeStrategy,
   XpathChangeStrategy,
 ];
+
 const clickStrategies = [
   AriaClickStrategy,
   CSSClickStrategy,
@@ -79,6 +85,7 @@ const clickStrategies = [
   TextClickStrategy,
   XPathClickStrategy,
 ];
+
 const hoverStrategies = [
   AriaHoverStrategy,
   CSSHoverStrategy,
@@ -86,12 +93,21 @@ const hoverStrategies = [
   TextHoverStrategy,
   XPathHoverStrategy,
 ];
+
 @Module({
-  imports: [SharedModule, FileModule, WebAgentModule, InspectorModule],
+  imports: [
+    SharedModule,
+    FileModule,
+    WebAgentModule,
+    InspectorModule,
+    GtmOperatorModule,
+    GcsMonitorModule,
+  ],
   controllers: [
     WaiterController,
     WaiterQaController,
     WaiterDataLayerController,
+    WaiterGtmOperatorController,
   ],
   providers: [
     ...inspectorServices,

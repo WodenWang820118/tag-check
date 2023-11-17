@@ -2,12 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SharedService } from '../shared/shared.service';
 import puppeteer, { Credentials } from 'puppeteer';
 import { InspectorService } from '../inspector/inspector.service';
+import { GtmOperatorService } from '../gtm-operator/gtm-operator.service';
 
 @Injectable()
 export class WaiterService {
   constructor(
     private sharedService: SharedService,
-    private inspectorService: InspectorService
+    private inspectorService: InspectorService,
+    private gtmOperatorService: GtmOperatorService
   ) {}
 
   // 1)
@@ -37,7 +39,16 @@ export class WaiterService {
     // 3.1) inspect both dataLayer and the request sent to GA4
     const browser = await puppeteer.launch({
       headless: headless === 'new' ? 'new' : false,
-      args: [],
+      defaultViewport: null,
+      ignoreHTTPSErrors: true,
+      args: [
+        '--window-size=1440,900',
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+      ],
     });
 
     const [page] = await browser.pages();
@@ -46,6 +57,7 @@ export class WaiterService {
       page,
       projectName,
       testName,
+      headless,
       path,
       measurementId,
       credentials
@@ -91,13 +103,23 @@ export class WaiterService {
     // 3.1) inspect both dataLayer and the request sent to GA4
     const browser = await puppeteer.launch({
       headless: headless === 'new' ? 'new' : false,
-      args: args || [],
+      defaultViewport: null,
+      ignoreHTTPSErrors: true,
+      args: [
+        '--window-size=1440,900',
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+      ],
     });
 
     const result = await this.inspectorService.inspectProjectDataLayer(
       browser,
       projectName,
       path,
+      headless,
       measurementId,
       credentials,
       concurrency
@@ -125,5 +147,23 @@ export class WaiterService {
     Logger.log('All tests are done!', 'WaiterService.inspectProject');
     Logger.log('Browser is closed!', 'WaiterService.inspectProject');
     return data;
+  }
+
+  async inspectSingleEventViaGtm(
+    gtmUrl: string,
+    projectName: string,
+    testName: string,
+    headless: string,
+    filePath?: string,
+    credentials?: Credentials
+  ) {
+    await this.gtmOperatorService.inspectSingleEventViaGtm(
+      gtmUrl,
+      projectName,
+      testName,
+      headless,
+      filePath,
+      credentials
+    );
   }
 }
