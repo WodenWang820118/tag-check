@@ -27,18 +27,19 @@ export class StepExecutor {
       await handler.handle(page, projectName, testName, step, isLastStep);
 
       // some actions may trigger navigation, so we need to wait for the navigation to complete
+      Logger.log(`isLastStep: ${isLastStep}`, 'StepExecutor.executeStep');
       if (isLastStep) {
         try {
           await page.waitForNavigation({
             waitUntil: 'networkidle2',
-            timeout: 3000,
+            timeout: 10000,
           });
         } catch (error) {
           Logger.log('no navigation needed', 'StepExecutor.executeStep');
         }
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await this.dataLayerService.updateSelfDataLayer(
         page,
         projectName,

@@ -8,5 +8,6 @@ import { RequestProcessorService } from './request-processor/request-processor.s
 @Module({
   imports: [WebAgentModule, SharedModule, RequestProcessorModule],
   providers: [InspectorService, RequestProcessorService],
+  exports: [InspectorService],
 })
 export class InspectorModule {}

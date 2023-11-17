@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { DataLayerCheckerController } from './data-layer-checker.controller';
 import { DataLayerCheckerService } from './data-layer-checker.service';
 import { HttpModule } from '@nestjs/axios';
-import { GtmOperatorModule } from '../gtm-operator/gtm-operator.module';
+import { GtmOperatorModule } from '../../gtm-operator/gtm-operator.module';
 import { WebAgentModule } from '../../web-agent/web-agent.module';
 
 @Module({

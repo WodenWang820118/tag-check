@@ -83,6 +83,11 @@ export class SharedService {
     if (!existsSync(eventFolder)) mkdirSync(eventFolder);
   }
 
+  getProjectDomain(projectName: string, options: FilePathOptions) {
+    const operation = this.getOperationJson(projectName, options);
+    return operation.steps[1].url;
+  }
+
   async screenshot(page: Page, projectName: string, testName: string) {
     const imageSavingFolder = path.join(
       this.getReportSavingFolder(projectName),

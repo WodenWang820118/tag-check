@@ -8,7 +8,7 @@ export class CSSHoverStrategy implements HoverStrategy {
   async hoverElement(
     page: Page,
     selector: string,
-    timeout = 1000
+    timeout = 3000
   ): Promise<boolean> {
     await Promise.race([
       page.waitForSelector(selector, { timeout, visible: true }),

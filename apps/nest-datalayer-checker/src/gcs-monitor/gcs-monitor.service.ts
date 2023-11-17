@@ -1,13 +1,10 @@
 import { HttpException, Injectable } from '@nestjs/common';
+import { chunk } from '../utilities/utilities';
 import { Page } from 'puppeteer';
-import { chunk } from '../../utilities/utilities';
-import { WebAgentService } from '../../web-agent/web-agent.service';
+import { WebAgentService } from '../web-agent/web-agent.service';
 
-/**
- * A service for interacting with Google Tag Manager (GTM) via Puppeteer.
- */
 @Injectable()
-export class GtmOperatorService {
+export class GcsMonitorService {
   constructor(private webAgentService: WebAgentService) {}
 
   /**
