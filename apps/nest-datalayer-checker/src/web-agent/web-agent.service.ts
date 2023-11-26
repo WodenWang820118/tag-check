@@ -1,17 +1,13 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { PuppeteerService } from './puppeteer/puppeteer.service';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
 import { SharedService } from '../shared/shared.service';
-import { Browser, Credentials, Page } from 'puppeteer';
+import puppeteer, { Credentials, Page } from 'puppeteer';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
-
-// TODO: refactor the puppeteer service out of this service
 @Injectable()
 export class WebAgentService {
   constructor(
-    private readonly puppeteerService: PuppeteerService,
     private readonly actionService: ActionService,
     private readonly webMonitoringService: WebMonitoringService,
     private readonly dataLayerService: DataLayerService,
@@ -41,14 +37,24 @@ export class WebAgentService {
   }
 
   async fetchDataLayer(url: string, credentials?: Credentials) {
-    const browser = await this.puppeteerService.initAndReturnBrowser({
+    // const browser = await this.puppeteerService.initAndReturnBrowser({
+    //   headless: 'new',
+    // });
+    const browser = await puppeteer.launch({
       headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
-    const page = await this.puppeteerService.navigateTo(
-      url,
-      browser,
-      credentials
-    );
+
+    const [page] = await browser.pages();
+
+    if (credentials) {
+      await page.authenticate({
+        username: credentials.username,
+        password: credentials.password,
+      });
+    }
+    await page.goto(url, { waitUntil: 'networkidle2' });
+
     // const result = await this.dataLayerService.getDataLayer(page);
     const result = await page.evaluate(() => {
       return window.dataLayer
@@ -58,21 +64,6 @@ export class WebAgentService {
 
     await browser.close();
     return result;
-  }
-
-  async getGtmTestingPage(gtmUrl: string, browser: Browser) {
-    return this.puppeteerService.navigateTo(gtmUrl, browser);
-  }
-
-  async getCurrentBrowser(args?: string[], headless?: string) {
-    return await this.puppeteerService.initAndReturnBrowser({
-      headless: headless.toLowerCase() === 'new' ? 'new' : false || false,
-      args: args,
-    });
-  }
-
-  getGcs(requests: string[]) {
-    return this.webMonitoringService.getGcs(requests);
   }
 
   async executeAndGetDataLayerAndRequest(
