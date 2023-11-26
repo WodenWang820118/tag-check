@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PuppeteerService } from '../puppeteer/puppeteer.service';
-import { Page } from 'puppeteer';
+import puppeteer, { Page } from 'puppeteer';
 import { SharedService } from '../../shared/shared.service';
 import { RequestService } from './request/request.service';
 import { DataLayerService } from './data-layer/data-layer.service';
@@ -8,7 +7,6 @@ import { DataLayerService } from './data-layer/data-layer.service';
 @Injectable()
 export class WebMonitoringService {
   constructor(
-    private puppeteerService: PuppeteerService,
     private sharedService: SharedService,
     private requestService: RequestService,
     private dataLayerService: DataLayerService
@@ -50,12 +48,14 @@ export class WebMonitoringService {
    * @returns A Promise resolving to an array of GTM IDs
    */
   async detectGtm(url: string) {
-    const browser = await this.puppeteerService.initAndReturnBrowser({
+    const browser = await puppeteer.launch({
       headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
     try {
-      const page = await this.puppeteerService.navigateTo(url, browser);
+      // const page = await this.puppeteerService.navigateTo(url, browser);
+      const [page] = await browser.pages();
       const result = await this.getInstalledGtms(page, url);
       // console.dir('result', result);
       return result;

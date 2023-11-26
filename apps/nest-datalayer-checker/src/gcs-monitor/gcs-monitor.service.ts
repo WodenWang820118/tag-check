@@ -1,11 +1,11 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { chunk } from '../utilities/utilities';
 import { Page } from 'puppeteer';
-import { WebAgentService } from '../web-agent/web-agent.service';
-
+import puppeteer from 'puppeteer';
+import { WebMonitoringService } from '../web-agent/web-monitoring/web-monitoring.service';
 @Injectable()
 export class GcsMonitorService {
-  constructor(private webAgentService: WebAgentService) {}
+  constructor(private webMonitoringService: WebMonitoringService) {}
 
   /**
    * Goes to a GTM URL and returns the browser and page instances.
@@ -21,16 +21,12 @@ export class GcsMonitorService {
       .find((element) => element.startsWith('url='))
       .split('=')[1];
 
-    // TODO: use web-agent service
-    // const browser = await this.puppeteerService.initAndReturnBrowser({
-    //   headless: headless.toLowerCase() === 'true' ? true : false || false,
-    //   args: args.split(','),
-    // });
-    const browser = await this.webAgentService.getCurrentBrowser(
-      args,
-      headless
-    );
-    const page = await this.webAgentService.getGtmTestingPage(gtmUrl, browser);
+    const browser = await puppeteer.launch({
+      headless: headless.toLowerCase() === 'new' ? 'new' : false || false,
+      args: args,
+    });
+
+    const [page] = await browser.pages();
 
     // 2) Do not include the debug mode
     await page.$('#include-debug-param').then((el) => el?.click());
@@ -80,7 +76,7 @@ export class GcsMonitorService {
     const { browser, page } = await this.goToPageViaGtm(gtmUrl, args, headless);
     const pages = await browser.pages();
     const responses = await this.crawlPageResponses(pages[pages.length - 1]);
-    const gcs = this.webAgentService.getGcs(responses);
+    const gcs = this.webMonitoringService.getGcs(responses);
     return { browser, gcs };
   }
 
