@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GtmOperatorService } from './gtm-operator.service';
-import { mockPuppeteerService } from '../web-agent/puppeteer/puppeteer.service.spec';
+import { mockPuppeteerService } from '../../web-agent/puppeteer/puppeteer.service.spec';
 
 export const mockGtmOperatorService = {
   puppeteerService: mockPuppeteerService,
@@ -8,19 +8,19 @@ export const mockGtmOperatorService = {
     const browser = await mockPuppeteerService.initAndReturnBrowser();
     const page = await mockPuppeteerService.gotoAndReturnPage(
       'https://tagmanager.google.com',
-      browser,
+      browser
     );
 
     // mock the $eval, $ and waitForTarget method of the Puppeteer
     page.$eval = jest.fn((selector, inputElement) => {});
 
-    page.$ = jest.fn(selector => {
+    page.$ = jest.fn((selector) => {
       return Promise.resolve({
         click: jest.fn(),
       });
     });
 
-    browser.waitForTarget = jest.fn().mockImplementation(target => {
+    browser.waitForTarget = jest.fn().mockImplementation((target) => {
       return Promise.resolve({
         url: () => 'https://www.example.com',
       });
@@ -29,18 +29,18 @@ export const mockGtmOperatorService = {
     browser.pages = jest.fn().mockReturnValue([page]);
 
     // implement the test
-    await page.$eval('#domain-start-url', el => {
+    await page.$eval('#domain-start-url', (el) => {
       el.value = '';
     });
-    await page.$eval('#domain-start-url', el => {
+    await page.$eval('#domain-start-url', (el) => {
       el.value = 'https://www.example.com';
     });
 
-    await page.$('#include-debug-param').then(el => el?.click());
-    await page.$('#domain-start-button').then(el => el?.click());
+    await page.$('#include-debug-param').then((el) => el?.click());
+    await page.$('#domain-start-button').then((el) => el?.click());
 
     await browser.waitForTarget(
-      target => target.url() === 'https://www.example.com',
+      (target) => target.url() === 'https://www.example.com'
     );
 
     return { browser, page };
@@ -48,14 +48,14 @@ export const mockGtmOperatorService = {
 
   crawlPageResponses: jest.fn().mockImplementation(async () => {
     const page = mockPuppeteerService.gotoAndReturnPage();
-    page.setRequestInterception = jest.fn().mockImplementation(boolean => {});
+    page.setRequestInterception = jest.fn().mockImplementation((boolean) => {});
     page.on = jest.fn().mockImplementation((event, callback) => {
       callback();
     });
-    page.reload = jest.fn().mockImplementation(options => {});
+    page.reload = jest.fn().mockImplementation((options) => {});
     page.close = jest.fn().mockImplementation(() => {});
     page.setRequestInterception(true);
-    page.on('request', async request => {});
+    page.on('request', async (request) => {});
     page.reload({ waitUntil: 'networkidle2' });
     page.close();
   }),
@@ -66,15 +66,15 @@ export const mockGtmOperatorService = {
         const { browser, page } = await mockGtmOperatorService.goToPageViaGtm(
           gtmUrl,
           args,
-          headless,
+          headless
         );
         const pages = await browser.pages();
         const respones = await mockGtmOperatorService.crawlPageResponses(
-          pages[pages.length - 1],
+          pages[pages.length - 1]
         );
         const gcs = await mockPuppeteerService.getGcs(respones);
         return { browser, gcs };
-      },
+      }
     ),
   observeAndKeepGcsAnomaliesViaGtm: jest.fn(),
 };
@@ -115,7 +115,7 @@ describe('GtmOperatorService', () => {
       const { browser, page } = await service.goToPageViaGtm(
         gtmUrl,
         args,
-        headless,
+        headless
       );
       const pages = await browser.pages();
       // assert
@@ -132,7 +132,7 @@ describe('GtmOperatorService', () => {
       const { browser, page } = await service.goToPageViaGtm(
         gtmUrl,
         args,
-        headless,
+        headless
       );
       const pages = await browser.pages();
       service.crawlPageResponses(pages[pages.length - 1]);
@@ -145,7 +145,7 @@ describe('GtmOperatorService', () => {
       const { browser, page } = await service.goToPageViaGtm(
         gtmUrl,
         args,
-        headless,
+        headless
       );
       const spy = jest.spyOn(browser, 'pages');
       const pages = await browser.pages();
@@ -162,7 +162,7 @@ describe('GtmOperatorService', () => {
       const { browser, page } = await service.goToPageViaGtm(
         gtmUrl,
         args,
-        headless,
+        headless
       );
       const spy = jest.spyOn(browser, 'pages');
       const pages = await browser.pages();
@@ -179,7 +179,7 @@ describe('GtmOperatorService', () => {
       const { browser, page } = await service.goToPageViaGtm(
         gtmUrl,
         args,
-        headless,
+        headless
       );
       const spy = jest.spyOn(browser, 'pages');
       const pages = await browser.pages();
@@ -197,7 +197,7 @@ describe('GtmOperatorService', () => {
       const { browser, page } = await service.goToPageViaGtm(
         gtmUrl,
         args,
-        headless,
+        headless
       );
       const spy = jest.spyOn(browser, 'pages');
       const pages = await browser.pages();
@@ -214,7 +214,7 @@ describe('GtmOperatorService', () => {
       const { browser, page } = await service.goToPageViaGtm(
         gtmUrl,
         args,
-        headless,
+        headless
       );
       const spy = jest.spyOn(browser, 'pages');
       const pages = await browser.pages();
@@ -258,7 +258,7 @@ describe('GtmOperatorService', () => {
         loops,
         chunks,
         args,
-        headless,
+        headless
       );
 
       expect(report).not.toBeNull();
@@ -284,7 +284,7 @@ describe('GtmOperatorService', () => {
         loops,
         chunks,
         args,
-        headless,
+        headless
       );
 
       expect(report).not.toBeNull();

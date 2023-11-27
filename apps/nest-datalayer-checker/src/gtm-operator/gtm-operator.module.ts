@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { GtmOperatorController } from './gtm-operator.controller';
 import { GtmOperatorService } from './gtm-operator.service';
 import { WebAgentModule } from '../web-agent/web-agent.module';
+import { InspectorModule } from '../inspector/inspector.module';
 
 @Module({
-  imports: [WebAgentModule],
-  controllers: [GtmOperatorController],
+  imports: [WebAgentModule, InspectorModule],
   providers: [GtmOperatorService],
   exports: [GtmOperatorService],
 })

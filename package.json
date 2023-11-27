@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nx serve",
+    "backend": "nx serve nest-datalayer-checker --watch",
     "build": "nx build",
     "test": "nx test",
     "start-electron": "electron ./apps/frontend/main.js"
@@ -79,6 +80,7 @@
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@swc/helpers": "~0.5.0",
+    "@nestjs/swagger": "^7.1.12",
     "axios": "^1.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
@@ -87,8 +89,9 @@
     "electron": "^26.2.0",
     "electron-is-dev": "^2.0.0",
     "lucide-react": "^0.287.0",
+    "exceljs": "^4.3.0",
     "nestjs-spelunker": "^1.1.5",
-    "puppeteer": "^21.1.0",
+    "puppeteer": "^21.4.0",
     "react": "18.2.0",
     "react-day-picker": "^8.9.1",
     "react-dom": "18.2.0",

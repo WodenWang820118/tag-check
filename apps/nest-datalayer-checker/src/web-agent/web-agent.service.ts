@@ -1,70 +1,169 @@
-import { Injectable } from '@nestjs/common';
-import { PuppeteerService } from './puppeteer/puppeteer.service';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ActionService } from './action/action.service';
-import { AnalysisService } from './analysis/analysis.service';
-import { Browser } from 'puppeteer';
-
+import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
+import { SharedService } from '../shared/shared.service';
+import puppeteer, { Credentials, Page } from 'puppeteer';
+import { FilePathOptions } from '../interfaces/filePathOptions.interface';
+import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
 @Injectable()
 export class WebAgentService {
   constructor(
-    private readonly puppeteerService: PuppeteerService,
     private readonly actionService: ActionService,
-    private readonly analysisService: AnalysisService,
+    private readonly webMonitoringService: WebMonitoringService,
+    private readonly dataLayerService: DataLayerService,
+    private readonly sharedService: SharedService
   ) {}
 
-  /**
-   * Performs an operation on a page and retrieves the data layer
-   * @param operation The operation to perform
-   * @returns A Promise resolving to an array of data layer objects
-   */
   async executeAndGetDataLayer(
-    name: string,
-    args: string,
-    headless: string,
-    path: string,
+    page: Page,
+    projectName: string,
+    testName: string,
+    path?: string,
+    credentials?: Credentials
   ) {
-    try {
-      const operation = this.actionService.getOperationJson(name, path);
-      const browser = await this.puppeteerService.initAndReturnBrowser({
-        headless: headless === 'true' ? true : false,
-      });
-      await this.puppeteerService.nativateTo(operation.steps[1].url, browser); // navigate to designated URL
-      const pages = await browser.pages(); // get all pages
-      const page = pages[pages.length - 1]; // last page opened since when opening a brwoser, there's a default page
-      await this.actionService.performOperation(page, operation);
-      await browser.close();
-      return await this.analysisService.getDataLayer(page);
-    } catch (error) {
-      console.error(error);
-      throw new Error(error);
-    }
+    const { dataLayer, destinationUrl } = await this.performTest(
+      page,
+      projectName,
+      testName,
+      path,
+      false,
+      null,
+      credentials
+    );
+    return {
+      dataLayer,
+      destinationUrl,
+    };
   }
 
-  /**
-   * Initializes Puppeteer, navigates to a URL, retrieves the data layer, and closes the browser
-   * @param url The URL to navigate to
-   * @returns A Promise resolving to an array of data layer objects
-   */
-  async fetchDataLayer(url: string) {
-    const browser = await this.puppeteerService.initAndReturnBrowser();
-    const page = await this.puppeteerService.nativateTo(url, browser);
-    const result = await this.analysisService.getDataLayer(page);
+  async fetchDataLayer(url: string, credentials?: Credentials) {
+    // const browser = await this.puppeteerService.initAndReturnBrowser({
+    //   headless: 'new',
+    // });
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    });
+
+    const [page] = await browser.pages();
+
+    if (credentials) {
+      await page.authenticate({
+        username: credentials.username,
+        password: credentials.password,
+      });
+    }
+    await page.goto(url, { waitUntil: 'networkidle2' });
+
+    // const result = await this.dataLayerService.getDataLayer(page);
+    const result = await page.evaluate(() => {
+      return window.dataLayer
+        ? JSON.parse(JSON.stringify(window.dataLayer))
+        : [];
+    });
+
     await browser.close();
     return result;
   }
 
-  async getGtmTestingPage(gtmUrl: string, browser: Browser) {
-    return this.puppeteerService.nativateTo(gtmUrl, browser);
+  async executeAndGetDataLayerAndRequest(
+    page: Page,
+    projectName: string,
+    testName: string,
+    path?: string,
+    measurementId?: string,
+    credentials?: Credentials
+  ) {
+    const { dataLayer, eventRequest, destinationUrl } = await this.performTest(
+      page,
+      projectName,
+      testName,
+      path,
+      true,
+      measurementId,
+      credentials
+    );
+    return {
+      dataLayer,
+      eventRequest,
+      destinationUrl,
+    };
   }
 
-  async getCurrentBrowser(args?: string, headless?: string) {
-    return await this.puppeteerService.initAndReturnBrowser({
-      headless: headless.toLowerCase() === 'true' ? true : false || false,
-      args: args.split(','),
-    });
-  }
+  private async performTest(
+    page: Page,
+    projectName: string,
+    testName: string,
+    filePath?: string,
+    captureRequest = false,
+    measurementId?: string,
+    credentials?: Credentials
+  ) {
+    // 1) gather all necessary data and initialize the test
+    this.webMonitoringService.initEventFolder(projectName, testName);
+    this.dataLayerService.initSelfDataLayer(projectName, testName);
 
-  getGcs(requests: string[]) {
-    return this.analysisService.getGcs(requests);
+    const operationOption: FilePathOptions = {
+      name: testName,
+      absolutePath: filePath,
+    };
+
+    const operation = this.sharedService.getOperationJson(
+      projectName,
+      operationOption
+    );
+
+    if (credentials) {
+      await page.authenticate({
+        username: credentials.username,
+        password: credentials.password,
+      });
+    }
+
+    let eventRequest: string = null;
+
+    // 2) perform the test operation
+    try {
+      await this.actionService.performOperation(page, projectName, operation);
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
+      try {
+        await page.waitForNavigation({
+          waitUntil: 'networkidle2',
+          timeout: 10000,
+        });
+      } catch (error) {
+        Logger.log('no navigation needed', 'WebAgent.performTest');
+      }
+      await this.dataLayerService.updateSelfDataLayer(
+        page,
+        projectName,
+        testName
+      );
+      const dataLayer = this.webMonitoringService.getMyDataLayer(
+        projectName,
+        testName
+      );
+
+      const destinationUrl = page.url();
+
+      if (captureRequest) {
+        const request = await page.waitForRequest(
+          (request) =>
+            request.url().includes(`en=${testName}`) &&
+            request.url().includes(`tid=${measurementId}`)
+        );
+        eventRequest = request.url();
+      }
+
+      return {
+        dataLayer,
+        eventRequest,
+        destinationUrl,
+      };
+    } catch (error) {
+      await page.close();
+      Logger.error(error.message, 'WebAgent.performTest');
+      throw new HttpException(error.message, 500);
+    }
   }
 }
