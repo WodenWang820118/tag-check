@@ -8,15 +8,17 @@
 
 - rootProjectFolder: the path of the root folder
 
-2. `http://localhost:8080/waiter-path/setRootProjectFolder` to initialize a project.
+2. `http://localhost:8080/waiter-path/initProject` to initialize a project.
 
 - projectName: the name of the project
 - Once the project is initiated, all default settings and folders will be created.
 - Please update all recordings under the `recordings` folder.
 
-3. `http://localhost:8080/waiter-path/setRootProjectFolder` to set a project folder if you want to change the project folder. The `cachedSettings.json` will be updated under the project folder.
+3. `http://localhost:8080/waiter-path/setProjectFolder` to set a project folder if you want to change the project folder. The `cachedSettings.json` will be updated under the project folder.
 
 - projectName: the name of the project
+
+Please have a look at the root folder and the project folder to see the default settings and folders.
 
 ### Start checking the data layer
 

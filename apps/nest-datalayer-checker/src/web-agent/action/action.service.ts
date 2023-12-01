@@ -4,26 +4,21 @@ import { DataLayerService } from '../web-monitoring/data-layer/data-layer.servic
 import { StepExecutor } from './step-executor';
 import { RequestInterceptor } from './request-interceptor';
 import { BrowserAction } from './action-utils';
-import { UtilitiesService } from '../utilities/utilities.service';
 import { ClickHandler } from './handlers/click-handler.service';
 import { ChangeHandler } from './handlers/change-handler.service';
 import { HoverHandler } from './handlers/hover-handler.service';
 
 @Injectable()
 export class ActionService {
-  // private strategyManager: StrategyManager;
   private stepExecutor: StepExecutor;
-  private requestInterceptor: RequestInterceptor;
 
   constructor(
     private dataLayerService: DataLayerService,
-    private utilitiesService: UtilitiesService,
     private changeHandler: ChangeHandler,
     private clickHandler: ClickHandler,
-    private hoverHandler: HoverHandler
+    private hoverHandler: HoverHandler,
+    private requestInterceptor: RequestInterceptor
   ) {
-    // this.strategyManager = new StrategyManager();
-    this.requestInterceptor = new RequestInterceptor(this.dataLayerService);
     this.stepExecutor = new StepExecutor(
       {
         [BrowserAction.CLICK]: this.clickHandler,
@@ -51,7 +46,6 @@ export class ActionService {
       const state = {
         isFirstNavigation: true,
       };
-
       await this.stepExecutor.executeStep(
         page,
         step,
