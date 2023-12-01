@@ -93,7 +93,7 @@ export class FileService {
     return null;
   }
 
-  private validateInput(projectName: string, options: FilePathOptions): void {
+  validateInput(projectName: string, options: FilePathOptions): void {
     if (!projectName || !options) {
       throw new BadRequestException('Project name or options cannot be empty');
     }

@@ -49,6 +49,7 @@ import { CSSHoverStrategy } from '../web-agent/action/strategies/hover-strategie
 import { PierceHoverStrategy } from '../web-agent/action/strategies/hover-strategies/pierce-hover-strategy.service';
 import { TextHoverStrategy } from '../web-agent/action/strategies/hover-strategies/text-hover-strategy.service';
 import { XPathHoverStrategy } from '../web-agent/action/strategies/hover-strategies/xpath-hover-strategy.service';
+import { RequestInterceptor } from '../web-agent/action/request-interceptor';
 
 const inspectorServices = [InspectorService, RequestProcessorService];
 
@@ -115,6 +116,7 @@ const hoverStrategies = [
     ...clickStrategies,
     ...hoverStrategies,
     ...handlers,
+    RequestInterceptor,
     WaiterService,
   ],
 })

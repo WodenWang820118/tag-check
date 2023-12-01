@@ -22,68 +22,103 @@ export class StepExecutor {
     const randomDelay = 3000 + Math.floor(Math.random() * 2000);
     const handler = this.handlers[step.type];
 
-    if (handler) {
-      await sleep(randomDelay);
-      await handler.handle(page, projectName, testName, step, isLastStep);
-
-      // some actions may trigger navigation, so we need to wait for the navigation to complete
-      Logger.log(`isLastStep: ${isLastStep}`, 'StepExecutor.executeStep');
-      if (isLastStep) {
-        try {
-          await page.waitForNavigation({
-            waitUntil: 'networkidle2',
-            timeout: 10000,
-          });
-        } catch (error) {
-          Logger.log('no navigation needed', 'StepExecutor.executeStep');
+    switch (step.type) {
+      case BrowserAction.SETVIEWPORT:
+        await this.handleSetViewport(page, step);
+        break;
+      case BrowserAction.NAVIGATE:
+        await this.handleNavigate(page, step, state);
+        break;
+      case BrowserAction.WAITFORELEMENT:
+        await this.handleWaitForElement(page, step, step.timeout || 5000);
+        break;
+      case BrowserAction.KEYDOWN:
+        Logger.log(`${step.type} ${step.key}`, 'StepExecutor.executeStep');
+        await page.keyboard.down(step.key);
+        break;
+      case BrowserAction.KEYUP:
+        Logger.log(`${step.type} ${step.key}`, 'StepExecutor.executeStep');
+        await page.keyboard.up(step.key);
+        await this.handleKeyboardAction(
+          page,
+          projectName,
+          testName,
+          isLastStep,
+          randomDelay
+        );
+        break;
+      default:
+        if (handler) {
+          await this.handleDefaultAction(
+            page,
+            step,
+            projectName,
+            testName,
+            isLastStep,
+            randomDelay
+          );
+        } else {
+          Logger.warn(`Unknown action type: ${step.type}`);
         }
-      }
+        break;
+    }
+  }
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await this.dataLayerService.updateSelfDataLayer(
-        page,
-        projectName,
-        testName
-      );
-    } else if (step.type === BrowserAction.SETVIEWPORT) {
-      await this.handleSetViewport(page, step);
-    } else if (step.type === BrowserAction.NAVIGATE) {
-      await sleep(randomDelay + Math.random());
-      await this.handleNavigate(page, step, state);
-    } else if (step.type === BrowserAction.WAITFORELEMENT) {
-      await this.handleWaitForElement(
-        page,
-        step,
-        step.timeout ? step.timeout : 5000
-      );
-    } else if (step.type === BrowserAction.KEYDOWN) {
-      Logger.log(`keydown ${step.key}`, 'StepExecutor.executeStep');
-      await page.keyboard.down(step.key);
-    } else if (step.type === BrowserAction.KEYUP) {
-      Logger.log(`keyup ${step.key}`, 'StepExecutor.executeStep');
+  async handleDefaultAction(
+    page: Page,
+    step: any,
+    projectName: string,
+    testName: string,
+    isLastStep: boolean,
+    delay: number
+  ) {
+    await sleep(delay);
+    await this.handlers[step.type].handle(
+      page,
+      projectName,
+      testName,
+      step,
+      isLastStep
+    );
+    await this.handleNavigationIfNeeded(page, isLastStep);
+    await this.dataLayerService.updateSelfDataLayer(
+      page,
+      projectName,
+      testName
+    );
+  }
 
-      // only a pair of keydown and keyup can trigger the website action
-      await page.keyboard.up(step.key);
+  async handleKeyboardAction(
+    page: Page,
+    projectName: string,
+    testName: string,
+    isLastStep: boolean,
+    delay: number
+  ) {
+    await this.handleNavigationIfNeeded(page, isLastStep, delay);
+    await this.dataLayerService.updateSelfDataLayer(
+      page,
+      projectName,
+      testName
+    );
+  }
 
-      // when the keyboard action completes, we may need to wait for the navigation to complete
+  async handleNavigationIfNeeded(
+    page: Page,
+    isLastStep: boolean,
+    delay = 10000
+  ) {
+    if (isLastStep) {
       try {
         await page.waitForNavigation({
           waitUntil: 'networkidle2',
-          timeout: 5000,
+          timeout: delay,
         });
       } catch (error) {
-        Logger.log('no navigation needed', 'StepExecutor.executeStep');
+        Logger.log('No navigation needed', 'StepExecutor.executeStep');
       }
-      // necessary delay for the website to update the data layer
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await this.dataLayerService.updateSelfDataLayer(
-        page,
-        projectName,
-        testName
-      );
-    } else {
-      Logger.warn(`Unknown action type: ${step.type}`);
     }
+    await sleep(1000); // Necessary delay for the website to update
   }
 
   async handleSetViewport(page: Page, step: any) {

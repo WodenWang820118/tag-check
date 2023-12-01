@@ -37,9 +37,6 @@ export class WebAgentService {
   }
 
   async fetchDataLayer(url: string, credentials?: Credentials) {
-    // const browser = await this.puppeteerService.initAndReturnBrowser({
-    //   headless: 'new',
-    // });
     const browser = await puppeteer.launch({
       headless: 'new',
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -90,7 +87,7 @@ export class WebAgentService {
     };
   }
 
-  private async performTest(
+  async performTest(
     page: Page,
     projectName: string,
     testName: string,

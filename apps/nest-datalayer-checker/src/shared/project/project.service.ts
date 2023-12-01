@@ -12,8 +12,8 @@ import { cwd } from 'process';
 
 @Injectable()
 export class ProjectService implements OnModuleInit {
-  private rootProjectPath = '';
-  private projectPath = '';
+  rootProjectPath = '';
+  projectPath = '';
   private settingsFilePath = '';
   // TODO: temporary solution for backend only
   private cachedSettingsFilePath: string = path.join(
@@ -34,7 +34,7 @@ export class ProjectService implements OnModuleInit {
     }
   }
 
-  private updateSettingsFilePath() {
+  updateSettingsFilePath() {
     this.settingsFilePath = path.join(
       this.rootProjectPath,
       this.projectPath,
@@ -42,7 +42,7 @@ export class ProjectService implements OnModuleInit {
     );
   }
 
-  private createFolder(folderPath: string) {
+  createFolder(folderPath: string) {
     // console.log('folderPath', folderPath);
     if (!existsSync(folderPath)) {
       mkdirSync(folderPath);
