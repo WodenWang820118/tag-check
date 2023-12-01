@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { HTTPRequest, Page } from 'puppeteer';
+import { Page } from 'puppeteer';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
 
 @Injectable()
