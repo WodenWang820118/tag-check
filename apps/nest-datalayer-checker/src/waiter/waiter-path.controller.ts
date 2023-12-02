@@ -1,5 +1,5 @@
 import { WaiterService } from './waiter.service';
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Header, Query } from '@nestjs/common';
 
 @Controller('waiter-path')
 export class WaiterController {
@@ -19,5 +19,14 @@ export class WaiterController {
   @Get('/setProjectFolder')
   selectProject(@Query('projectName') projectName: string) {
     return this.waiterService.selectProject(projectName);
+  }
+
+  @Get('/readImage')
+  @Header('Content-Type', 'image/png')
+  readImage(
+    @Query('projectName') projectName: string,
+    @Query('testName') testName: string
+  ) {
+    return this.waiterService.readImage(projectName, testName);
   }
 }

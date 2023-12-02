@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  StreamableFile,
+} from '@nestjs/common';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import { ProjectService } from './project/project.service';
 import { FileService } from './file/file.service';
 import { XlsxReportService } from './xlsx-report/xlsx-report.service';
 import path from 'path';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { createReadStream, existsSync, mkdirSync, writeFileSync } from 'fs';
 import { Page } from 'puppeteer';
 
 @Injectable()
@@ -138,5 +144,28 @@ export class SharedService {
       sheetName,
       projectName
     );
+  }
+
+  readImage(projectName: string, testName: string) {
+    try {
+      const imageSavingFolder = path.join(
+        this.getReportSavingFolder(projectName),
+        testName
+      );
+      const imagePath = path.join(imageSavingFolder, `${testName}.png`);
+
+      if (!existsSync(imagePath)) {
+        throw new Error(`File not found: ${imagePath}`);
+      }
+
+      Logger.log(imagePath, 'SharedService.readImage');
+      return new StreamableFile(createReadStream(imagePath));
+    } catch (error) {
+      Logger.error(`Error in readImage: ${error.message}`);
+      throw new HttpException(
+        'Error reading image',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 }
