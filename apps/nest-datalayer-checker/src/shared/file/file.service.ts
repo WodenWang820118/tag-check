@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import * as fs from 'fs';
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import path from 'path';
 import { configFolder, recordingFolder, resultFolder } from '../utilities';
 import { FilePathOptions } from '../../interfaces/filePathOptions.interface';
@@ -68,7 +67,7 @@ export class FileService {
 
   getJsonFilesFromDir(dirPath: string): string[] {
     try {
-      const files = fs.readdirSync(dirPath);
+      const files = readdirSync(dirPath);
       return files.filter((file) => path.extname(file) === '.json');
     } catch (error) {
       throw new BadRequestException(
