@@ -166,4 +166,8 @@ export class WaiterService {
       credentials
     );
   }
+
+  readImage(projectName: string, testName: string) {
+    return this.sharedService.readImage(projectName, testName);
+  }
 }
