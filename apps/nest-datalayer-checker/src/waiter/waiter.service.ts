@@ -64,7 +64,6 @@ export class WaiterService {
     );
 
     // 3.2) construct the data to be written to the xlsx file
-
     const data = [
       {
         dataLayerResult: result.dataLayerCheckResult,
@@ -74,9 +73,10 @@ export class WaiterService {
       },
     ];
     // 3.3) write the data to the xlsx file
+    const timestamp = this.getCurrentTimestamp();
     await this.sharedService.writeXlsxFile(
       this.sharedService.getReportSavingFolder(projectName),
-      'result.xlsx',
+      `QA_report_single_${testName}_${timestamp}.xlsx`,
       'Sheet1',
       data,
       testName,
@@ -139,8 +139,9 @@ export class WaiterService {
     // the reason to use cache file is that there could be 20 tests running at the same time
     // one failed test will cause all other tests to fail in terms of test execution logic
     // therefore, we handle the result gathering logic in the xlsx-report.service.ts
+    const timestamp = this.getCurrentTimestamp();
     await this.sharedService.writeXlsxFileForAllTests(
-      'result.xlsx',
+      `QA_report_all_.xlsx_${timestamp}.xlsx`,
       'Sheet1',
       projectName
     );
@@ -169,5 +170,17 @@ export class WaiterService {
 
   readImage(projectName: string, testName: string) {
     return this.sharedService.readImage(projectName, testName);
+  }
+
+  getCurrentTimestamp() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // JavaScript months are 0-indexed
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day}_${hours}${minutes}${seconds}`;
   }
 }

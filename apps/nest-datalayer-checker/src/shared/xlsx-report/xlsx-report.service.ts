@@ -9,12 +9,19 @@ export class XlsxReportService {
     savingFolder: string,
     fileName: string,
     sheetName: string,
-    data: {
-      dataLayerResult: any;
-      requestCheckResult: any;
-      rawRequest: any;
-      destinationUrl: any;
-    }[],
+    data:
+      | {
+          dataLayerResult: any;
+          requestCheckResult: any;
+          rawRequest: any;
+          destinationUrl: any;
+        }[]
+      | {
+          dataLayerResult: any;
+          requestCheckResult: any;
+          rawRequest: any;
+          destinationUrl: any;
+        },
     testName?: string,
     projectName?: string
   ) {
@@ -49,7 +56,6 @@ export class XlsxReportService {
     } else if (projectName) {
       // all tests
       const dataContent = JSON.parse(JSON.stringify(data));
-      // console.log('dataContent: ', dataContent);
       for (let i = 0; i < dataContent.length; i++) {
         // get existing image after the test
         try {
@@ -73,8 +79,18 @@ export class XlsxReportService {
     }
 
     Logger.log(data, 'XlsxReportService.writeXlsxFile');
-    worksheet.addRows(data);
-    await workbook.xlsx.writeFile(path.join(savingFolder, fileName));
+    try {
+      const filePath = path.join(savingFolder, fileName);
+      if (Array.isArray(data)) {
+        worksheet.addRows(data);
+        await workbook.xlsx.writeFile(filePath);
+      } else {
+        worksheet.addRow(data);
+      }
+      await workbook.xlsx.writeFile(filePath);
+    } catch (error) {
+      Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
+    }
   }
 
   async writeXlsxFileForAllTests(
