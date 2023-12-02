@@ -4,9 +4,11 @@ import path from 'path';
 import { configFolder, recordingFolder, resultFolder } from '../utilities';
 import { FilePathOptions } from '../../interfaces/filePathOptions.interface';
 import { ProjectService } from '../project/project.service';
+import { SpecParser } from '@datalayer-checker/spec-parser';
 
 @Injectable()
 export class FileService {
+  private specParser = new SpecParser();
   constructor(private readonly projectService: ProjectService) {}
 
   private buildFilePath(
@@ -96,5 +98,10 @@ export class FileService {
     if (!projectName || !options) {
       throw new BadRequestException('Project name or options cannot be empty');
     }
+  }
+
+  // TODO: the method to test the library
+  fixJsonString(json: string): string {
+    return this.specParser.fixJson(json);
   }
 }
