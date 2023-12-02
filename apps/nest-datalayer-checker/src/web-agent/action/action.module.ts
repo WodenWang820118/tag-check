@@ -8,6 +8,7 @@ import { HandlerModule } from './handlers/handler.module';
 import { HoverStrategyModule } from './strategies/hover-strategies/hover-strategy.module';
 import { ClickStrategyModule } from './strategies/click-strategies/click-strategy.module';
 import { ChangeStrategyModule } from './strategies/change-strategies/change-strategy.module';
+import { RequestInterceptor } from './request-interceptor';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { ChangeStrategyModule } from './strategies/change-strategies/change-stra
     ClickStrategyModule,
     HoverStrategyModule,
   ],
-  providers: [ActionService],
+  providers: [ActionService, RequestInterceptor],
   exports: [ActionService],
 })
 export class ActionModule {}

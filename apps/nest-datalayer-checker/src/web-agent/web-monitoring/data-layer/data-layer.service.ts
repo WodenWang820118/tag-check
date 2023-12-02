@@ -28,10 +28,10 @@ export class DataLayerService {
         { timeout: 2000 }
       );
 
-      const dataLayer = await page.evaluate(() => {
+      const dataLayer: any[] = await page.evaluate(() => {
         return window.dataLayer
           ? JSON.parse(JSON.stringify(window.dataLayer))
-          : [];
+          : [{ event: 'no data layer' }];
       });
       this.updateSelfDataLayerAlgorithm(dataLayer, projectName, testName);
     } catch (error) {
@@ -44,6 +44,7 @@ export class DataLayerService {
     projectName: string,
     testName: string
   ) {
+    if (!dataLayer || dataLayer.length === 0) return;
     const resultFolder = this.sharedService.getReportSavingFolder(projectName);
     const myDataLayerFile = path.join(
       resultFolder,
@@ -55,19 +56,23 @@ export class DataLayerService {
     const myDataLayerContent = readFileSync(myDataLayerFile, 'utf8');
     const myDataLayer = JSON.parse(myDataLayerContent);
 
-    dataLayer.forEach((dataLayerObject) => {
-      const existingIndex = myDataLayer.findIndex((myDataLayerObject) => {
-        return myDataLayerObject.event === dataLayerObject.event;
+    try {
+      dataLayer.forEach((dataLayerObject) => {
+        const existingIndex = myDataLayer.findIndex((myDataLayerObject) => {
+          return myDataLayerObject.event === dataLayerObject.event;
+        });
+
+        if (existingIndex === -1) {
+          myDataLayer.push(dataLayerObject);
+        } else {
+          myDataLayer[existingIndex] = dataLayerObject;
+        }
       });
 
-      if (existingIndex === -1) {
-        myDataLayer.push(dataLayerObject);
-      } else {
-        myDataLayer[existingIndex] = dataLayerObject;
-      }
-    });
-
-    writeFileSync(myDataLayerFile, JSON.stringify(myDataLayer, null, 2));
+      writeFileSync(myDataLayerFile, JSON.stringify(myDataLayer, null, 2));
+    } catch (error) {
+      Logger.error(`Error while updating self data layer: ${error.message}`);
+    }
   }
 
   getMyDataLayer(projectName: string, testName: string) {

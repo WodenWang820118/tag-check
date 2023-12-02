@@ -1,13 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import * as fs from 'fs';
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import path from 'path';
 import { configFolder, recordingFolder, resultFolder } from '../utilities';
 import { FilePathOptions } from '../../interfaces/filePathOptions.interface';
 import { ProjectService } from '../project/project.service';
+import { SpecParser } from '@datalayer-checker/spec-parser';
 
 @Injectable()
 export class FileService {
+  private specParser = new SpecParser();
   constructor(private readonly projectService: ProjectService) {}
 
   private buildFilePath(
@@ -68,7 +69,7 @@ export class FileService {
 
   getJsonFilesFromDir(dirPath: string): string[] {
     try {
-      const files = fs.readdirSync(dirPath);
+      const files = readdirSync(dirPath);
       return files.filter((file) => path.extname(file) === '.json');
     } catch (error) {
       throw new BadRequestException(
@@ -93,9 +94,14 @@ export class FileService {
     return null;
   }
 
-  private validateInput(projectName: string, options: FilePathOptions): void {
+  validateInput(projectName: string, options: FilePathOptions): void {
     if (!projectName || !options) {
       throw new BadRequestException('Project name or options cannot be empty');
     }
+  }
+
+  // TODO: the method to test the library
+  fixJsonString(json: string): string {
+    return this.specParser.fixJson(json);
   }
 }
