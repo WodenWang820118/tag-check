@@ -183,4 +183,12 @@ export class WaiterService {
 
     return `${year}-${month}-${day}_${hours}${minutes}${seconds}`;
   }
+
+  getProjects() {
+    return this.sharedService.getProjects();
+  }
+
+  getProjectRecordings(projectName: string) {
+    return this.sharedService.getProjectRecordings(projectName);
+  }
 }

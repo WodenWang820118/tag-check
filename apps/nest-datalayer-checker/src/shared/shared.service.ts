@@ -168,4 +168,14 @@ export class SharedService {
       );
     }
   }
+
+  getProjects() {
+    return this.projectService.projects;
+  }
+
+  getProjectRecordings(projectName: string) {
+    return this.fileService.getJsonFilesFromDir(
+      this.projectService.getRecordingFolderPath(projectName)
+    );
+  }
 }
