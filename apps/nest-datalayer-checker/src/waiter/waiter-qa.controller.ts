@@ -6,7 +6,7 @@ import { Controller, Get, Query } from '@nestjs/common';
 export class WaiterQaController {
   constructor(private waiterService: WaiterService) {}
 
-  @Get('/singleEvent')
+  @Get('/single-event')
   @ApiOperation({
     summary: 'QA a single event',
     description:
