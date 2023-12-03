@@ -4,17 +4,17 @@
 
 ### Set up a project
 
-1. `http://localhost:8080/waiter-path/set-root-project-folder` to set a global root folder.
+1. `http://localhost:8080/waiter-project/set-root-project-folder` to set a global root folder.
 
 - rootProjectFolder: the path of the root folder
 
-2. `http://localhost:8080/waiter-path/init-project` to initialize a project.
+2. `http://localhost:8080/waiter-project/init-project` to initialize a project.
 
 - projectName: the name of the project
 - Once the project is initiated, all default settings and folders will be created.
 - Please update all recordings under the `recordings` folder.
 
-3. `http://localhost:8080/waiter-path/set-project` to set a project folder if you want to change the project folder. The `cachedSettings.json` will be updated under the project folder.
+3. `http://localhost:8080/waiter-project/set-project` to set a project folder if you want to change the project folder. The `cachedSettings.json` will be updated under the project folder.
 
 - projectName: the name of the project
 
