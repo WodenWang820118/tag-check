@@ -42,6 +42,17 @@ export class ProjectService implements OnModuleInit {
     );
   }
 
+  updateCachedSettings() {
+    const cachedSettings = {
+      rootProjectPath: this.rootProjectPath,
+      currentProjectPath: this.projectPath,
+    };
+    writeFileSync(
+      this.cachedSettingsFilePath,
+      JSON.stringify(cachedSettings, null, 2)
+    );
+  }
+
   createFolder(folderPath: string) {
     // console.log('folderPath', folderPath);
     if (!existsSync(folderPath)) {
@@ -52,10 +63,14 @@ export class ProjectService implements OnModuleInit {
   initProject(projectName: string) {
     const projectRoot = path.join(this.rootProjectPath, projectName);
     // console.log('projectRoot', projectRoot);
-    this.createFolder(projectRoot);
-    this.createFolder(path.join(projectRoot, recordingFolder));
-    this.createFolder(path.join(projectRoot, resultFolder));
-    this.createFolder(path.join(projectRoot, configFolder));
+    try {
+      this.createFolder(projectRoot);
+      this.createFolder(path.join(projectRoot, recordingFolder));
+      this.createFolder(path.join(projectRoot, resultFolder));
+      this.createFolder(path.join(projectRoot, configFolder));
+    } catch (error) {
+      Logger.error(error, 'ProjectService.initProject');
+    }
 
     // Update current project settings
     this.projectPath = projectName;
@@ -68,17 +83,8 @@ export class ProjectService implements OnModuleInit {
       name: `${this.projectPath}`,
       version: '1.0.0',
     };
-    writeFileSync(this.settingsFilePath, JSON.stringify(settings, null, 2));
-
-    // Update cached settings
-    const cachedSettings = {
-      rootProjectPath: this.rootProjectPath,
-      currentProjectPath: this.projectPath,
-    };
-    writeFileSync(
-      this.cachedSettingsFilePath,
-      JSON.stringify(cachedSettings, null, 2)
-    );
+    this.settings = settings;
+    this.updateCachedSettings();
   }
 
   get cachedSettings() {
@@ -126,7 +132,9 @@ export class ProjectService implements OnModuleInit {
 
   set rootProjectFolder(rootProjectPath: string) {
     this.rootProjectPath = rootProjectPath;
+    this.createFolder(rootProjectPath);
     this.updateSettingsFilePath();
+    this.updateCachedSettings();
   }
 
   get projectFolder() {
@@ -136,6 +144,7 @@ export class ProjectService implements OnModuleInit {
   set projectFolder(projectPath: string) {
     this.projectPath = projectPath;
     this.updateSettingsFilePath();
+    this.updateCachedSettings();
   }
 
   getRecordingFolderPath(projectName: string) {

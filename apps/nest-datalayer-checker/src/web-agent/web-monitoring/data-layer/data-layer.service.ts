@@ -1,15 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import { SharedService } from '../../../shared/shared.service';
 import { Page } from 'puppeteer';
+import { FileService } from '../../../shared/file/file.service';
 
 @Injectable()
 export class DataLayerService {
-  constructor(private sharedService: SharedService) {}
+  constructor(private fileService: FileService) {}
 
   initSelfDataLayer(projectName: string, testName: string) {
-    const resultFolder = this.sharedService.getReportSavingFolder(projectName);
+    const resultFolder = this.fileService.getReportSavingFolder(projectName);
     const filePath = path.join(
       resultFolder,
       testName,
@@ -45,7 +45,7 @@ export class DataLayerService {
     testName: string
   ) {
     if (!dataLayer || dataLayer.length === 0) return;
-    const resultFolder = this.sharedService.getReportSavingFolder(projectName);
+    const resultFolder = this.fileService.getReportSavingFolder(projectName);
     const myDataLayerFile = path.join(
       resultFolder,
       testName,
@@ -76,7 +76,7 @@ export class DataLayerService {
   }
 
   getMyDataLayer(projectName: string, testName: string) {
-    const resultFolder = this.sharedService.getReportSavingFolder(projectName);
+    const resultFolder = this.fileService.getReportSavingFolder(projectName);
     const myDataLayerFile = path.join(
       resultFolder,
       testName,
