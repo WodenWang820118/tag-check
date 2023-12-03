@@ -9,7 +9,7 @@ import { GtmOperatorModule } from '../gtm-operator/gtm-operator.module';
 import { GcsMonitorModule } from '../gcs-monitor/gcs-monitor.module';
 
 // controllers
-import { WaiterController } from './waiter-path.controller';
+import { WaiterController } from './waiter-project.controller';
 import { WaiterQaController } from './waiter-qa.controller';
 import { WaiterDataLayerController } from './waiter-datalayer.controller';
 import { WaiterGtmOperatorController } from './waiter-gtm-operator.controller';
