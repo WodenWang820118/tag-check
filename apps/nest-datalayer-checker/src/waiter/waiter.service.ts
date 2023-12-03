@@ -3,28 +3,34 @@ import { SharedService } from '../shared/shared.service';
 import puppeteer, { Credentials } from 'puppeteer';
 import { InspectorService } from '../inspector/inspector.service';
 import { GtmOperatorService } from '../gtm-operator/gtm-operator.service';
+import { ProjectService } from '../shared/project/project.service';
+import { FileService } from '../shared/file/file.service';
+import { XlsxReportService } from '../shared/xlsx-report/xlsx-report.service';
 
 @Injectable()
 export class WaiterService {
   constructor(
     private sharedService: SharedService,
+    private fileService: FileService,
+    private projectService: ProjectService,
+    private xlsxReportService: XlsxReportService,
     private inspectorService: InspectorService,
     private gtmOperatorService: GtmOperatorService
   ) {}
 
   // 1)
   selectRootProjectFolder(rootProjectPath: string) {
-    this.sharedService.rootProjectFolder = rootProjectPath;
+    this.projectService.rootProjectFolder = rootProjectPath;
   }
 
   // 2) init project if not exists
   initProject(projectName: string) {
-    this.sharedService.initProject(projectName);
+    this.projectService.initProject(projectName);
   }
 
   // 2) select project if exists
   selectProject(projectName: string) {
-    this.sharedService.projectFolder = projectName;
+    this.projectService.projectFolder = projectName;
   }
 
   // 3) inspect single operation/event
@@ -74,8 +80,8 @@ export class WaiterService {
     ];
     // 3.3) write the data to the xlsx file
     const timestamp = this.getCurrentTimestamp();
-    await this.sharedService.writeXlsxFile(
-      this.sharedService.getReportSavingFolder(projectName),
+    await this.xlsxReportService.writeXlsxFile(
+      this.fileService.getReportSavingFolder(projectName),
       `QA_report_single_${testName}_${timestamp}.xlsx`,
       'Sheet1',
       data,
@@ -185,7 +191,7 @@ export class WaiterService {
   }
 
   getProjects() {
-    return this.sharedService.getProjects();
+    return this.projectService.projects;
   }
 
   getProjectRecordings(projectName: string) {
