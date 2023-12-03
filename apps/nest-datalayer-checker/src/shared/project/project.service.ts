@@ -111,12 +111,13 @@ export class ProjectService implements OnModuleInit {
     writeFileSync(this.settingsFilePath, JSON.stringify(settings, null, 2));
   }
 
-  get projectList() {
-    return existsSync(this.rootProjectPath)
+  get projects() {
+    const projects = existsSync(this.rootProjectPath)
       ? readdirSync(this.rootProjectPath, { withFileTypes: true })
           .filter((dirent) => dirent.isDirectory())
           .map((dirent) => dirent.name)
       : [];
+    return projects;
   }
 
   get rootProjectFolder() {
@@ -135,5 +136,9 @@ export class ProjectService implements OnModuleInit {
   set projectFolder(projectPath: string) {
     this.projectPath = projectPath;
     this.updateSettingsFilePath();
+  }
+
+  getRecordingFolderPath(projectName: string) {
+    return path.join(this.rootProjectPath, projectName, recordingFolder);
   }
 }
