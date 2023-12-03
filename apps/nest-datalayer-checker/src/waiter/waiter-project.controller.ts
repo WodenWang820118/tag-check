@@ -2,7 +2,7 @@ import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { WaiterService } from './waiter.service';
 import { Controller, Get, Header, Query } from '@nestjs/common';
 
-@Controller('waiter-path')
+@Controller('waiter-project')
 export class WaiterController {
   constructor(private waiterService: WaiterService) {}
 
