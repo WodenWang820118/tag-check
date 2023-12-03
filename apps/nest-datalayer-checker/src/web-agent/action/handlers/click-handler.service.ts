@@ -9,8 +9,7 @@ import { CSSClickStrategy } from '../strategies/click-strategies/css-click-strat
 import { PierceClickStrategy } from '../strategies/click-strategies/pierce-click-strategy.service';
 import { TextClickStrategy } from '../strategies/click-strategies/text-click-strategy.service';
 import { XPathClickStrategy } from '../strategies/click-strategies/xpath-click-strategy.service';
-import { SharedService } from '../../../shared/shared.service';
-
+import { ProjectService } from '../../../shared/project/project.service';
 @Injectable()
 export class ClickHandler implements ActionHandler {
   constructor(
@@ -20,7 +19,7 @@ export class ClickHandler implements ActionHandler {
     private textClickStrategy: TextClickStrategy,
     private xpathClickStrategy: XPathClickStrategy,
     private utilitiesService: UtilitiesService,
-    private sharedService: SharedService
+    private projectService: ProjectService
   ) {}
 
   async handle(
@@ -33,7 +32,7 @@ export class ClickHandler implements ActionHandler {
     // Logic of handleClick
     let clickedSuccessfully = false;
     const preventNavigationEvents =
-      this.sharedService.settings.preventNavigationEvents;
+      this.projectService.settings.preventNavigationEvents;
     let preventNavigation = false;
 
     for (const selector of step.selectors) {

@@ -1,17 +1,17 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
-import { SharedService } from '../shared/shared.service';
 import puppeteer, { Credentials, Page } from 'puppeteer';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
+import { FileService } from '../shared/file/file.service';
 @Injectable()
 export class WebAgentService {
   constructor(
     private readonly actionService: ActionService,
     private readonly webMonitoringService: WebMonitoringService,
     private readonly dataLayerService: DataLayerService,
-    private readonly sharedService: SharedService
+    private readonly fileService: FileService
   ) {}
 
   async executeAndGetDataLayer(
@@ -105,7 +105,7 @@ export class WebAgentService {
       absolutePath: filePath,
     };
 
-    const operation = this.sharedService.getOperationJson(
+    const operation = this.fileService.getOperationJson(
       projectName,
       operationOption
     );
