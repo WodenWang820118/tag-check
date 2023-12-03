@@ -19,7 +19,7 @@ export class WaiterService {
   ) {}
 
   // 1)
-  selectRootProjectFolder(rootProjectPath: string) {
+  setRootProjectFolder(rootProjectPath: string) {
     this.projectService.rootProjectFolder = rootProjectPath;
   }
 
@@ -29,7 +29,7 @@ export class WaiterService {
   }
 
   // 2) select project if exists
-  selectProject(projectName: string) {
+  setProject(projectName: string) {
     this.projectService.projectFolder = projectName;
   }
 
@@ -196,5 +196,13 @@ export class WaiterService {
 
   getProjectRecordings(projectName: string) {
     return this.sharedService.getProjectRecordings(projectName);
+  }
+
+  getEventReport(projectName: string, testName: string) {
+    return this.fileService.getEventReport(projectName, testName);
+  }
+
+  readReport(projectName: string, reportName: string) {
+    return this.fileService.readReport(projectName, reportName);
   }
 }

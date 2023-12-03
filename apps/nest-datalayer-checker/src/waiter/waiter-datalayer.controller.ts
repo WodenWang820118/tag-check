@@ -6,7 +6,7 @@ import { Controller, Get, Query } from '@nestjs/common';
 export class WaiterDataLayerController {
   constructor(private waiterService: WaiterService) {}
 
-  @Get('/singleEvent')
+  @Get('/single-event')
   @ApiOperation({
     summary: 'Inspects a single event dataLayer',
     description:
