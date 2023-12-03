@@ -14,6 +14,7 @@ import {
 } from '../interfaces/dataLayer.interface';
 import { RequestProcessorService } from './request-processor/request-processor.service';
 import { Browser, Credentials, Page } from 'puppeteer';
+import { FileService } from '../shared/file/file.service';
 
 @Injectable()
 export class InspectorService {
@@ -22,6 +23,7 @@ export class InspectorService {
   constructor(
     private webAgentService: WebAgentService,
     private sharedService: SharedService,
+    private fileService: FileService,
     private requestProcessorService: RequestProcessorService
   ) {
     this.validationStrategies = {
@@ -47,7 +49,7 @@ export class InspectorService {
       name: projectName,
       absolutePath: filePath,
     };
-    const specs = this.sharedService.getSpecJsonByProject(specOption);
+    const specs = this.fileService.getSpecJsonByProject(specOption);
 
     // expectedObj is the spec to be compared with the result
     const expectedObj = specs.find(
@@ -142,7 +144,7 @@ export class InspectorService {
     // deal with invalid concurrency
     concurrency = Math.max(1, concurrency || 1);
 
-    const operations = this.sharedService.getOperationJsonByProject({
+    const operations = this.fileService.getOperationJsonByProject({
       name: projectName,
     });
 
