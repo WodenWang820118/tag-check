@@ -2,7 +2,7 @@ import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { BrowserAction, sleep } from './action-utils';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
-import { ActionHandler } from './handlers/utils';
+import { ActionHandler, getFirstSelector } from './handlers/utils';
 
 @Injectable()
 export class StepExecutor {
@@ -30,7 +30,7 @@ export class StepExecutor {
         await this.handleNavigate(page, step, state);
         break;
       case BrowserAction.WAITFORELEMENT:
-        await this.handleWaitForElement(page, step, step.timeout || 5000);
+        await this.handleWaitForElement(page, step, step.timeout || 10000);
         break;
       case BrowserAction.KEYDOWN:
         Logger.log(`${step.type} ${step.key}`, 'StepExecutor.executeStep');
@@ -145,29 +145,20 @@ export class StepExecutor {
       try {
         // sometimes SSR may send multiple SPA pages, so it's necessary to wait for navigation
         // but sometimes it's not necessary, so we do race
-
-        try {
-          await page.waitForNavigation({ waitUntil: 'networkidle2', timeout });
-        } catch (error) {
-          Logger.log('no navigation', 'StepExecutor.handleWaitForElement');
-        }
-        try {
-          await page.waitForSelector(selector, {
+        const fistSelector = getFirstSelector(selector);
+        await Promise.race([
+          page.waitForNavigation({ waitUntil: 'networkidle2', timeout }),
+          page.waitForSelector(fistSelector, {
             visible: step.visible ? true : false,
             timeout: timeout,
-          });
-        } catch (error) {
-          Logger.log('no selector', 'StepExecutor.handleWaitForElement');
-        }
+          }),
+        ]);
 
-        Logger.log(
-          `${selector} is visible`,
-          'StepExecutor.handleWaitForElement'
-        );
+        Logger.log(`${selector} exists`, 'StepExecutor.handleWaitForElement');
         return;
       } catch (error) {
         Logger.log(
-          `${selector} is invisible`,
+          `${selector} does not exist`,
           'StepExecutor.handleWaitForElement'
         );
         Logger.error(error.message, 'StepExecutor.handleWaitForElement');

@@ -35,21 +35,16 @@ import { ClickHandler } from '../web-agent/action/handlers/click-handler.service
 import { HoverHandler } from '../web-agent/action/handlers/hover-handler.service';
 
 // services: action strategies
-import { AriaChangeStrategy } from '../web-agent/action/strategies/change-strategies/aria-change-strategy.service';
-import { CSSChangeStrategy } from '../web-agent/action/strategies/change-strategies/css-change-strategy.service';
-import { PierceChangeStrategy } from '../web-agent/action/strategies/change-strategies/pierce-change-strategy.service';
-import { XpathChangeStrategy } from '../web-agent/action/strategies/change-strategies/xpath-change-strategy.service';
-import { AriaClickStrategy } from '../web-agent/action/strategies/click-strategies/aria-click-strategy.service';
-import { CSSClickStrategy } from '../web-agent/action/strategies/click-strategies/css-click-strategy.service';
-import { PierceClickStrategy } from '../web-agent/action/strategies/click-strategies/pierce-click-strategy.service';
-import { TextClickStrategy } from '../web-agent/action/strategies/click-strategies/text-click-strategy.service';
-import { XPathClickStrategy } from '../web-agent/action/strategies/click-strategies/xpath-click-strategy.service';
-import { AriaHoverStrategy } from '../web-agent/action/strategies/hover-strategies/aria-hover-strategy.service';
-import { CSSHoverStrategy } from '../web-agent/action/strategies/hover-strategies/css-hover-strategy.service';
-import { PierceHoverStrategy } from '../web-agent/action/strategies/hover-strategies/pierce-hover-strategy.service';
-import { TextHoverStrategy } from '../web-agent/action/strategies/hover-strategies/text-hover-strategy.service';
-import { XPathHoverStrategy } from '../web-agent/action/strategies/hover-strategies/xpath-hover-strategy.service';
 import { RequestInterceptor } from '../web-agent/action/request-interceptor';
+import { ClickStrategyService } from '../web-agent/action/strategies/click-strategies/click-strategy.service';
+import { EvaluateClickService } from '../web-agent/action/strategies/click-strategies/evaluate-click.service';
+import { PageClickService } from '../web-agent/action/strategies/click-strategies/page-click.service';
+import { ChangeStrategyService } from '../web-agent/action/strategies/change-strategies/change-strategy.service';
+import { EvaluateChangeService } from '../web-agent/action/strategies/change-strategies/evaluate-change.service';
+import { PageChangeService } from '../web-agent/action/strategies/change-strategies/page-change.service';
+import { HoverStrategyService } from '../web-agent/action/strategies/hover-strategies/hover-strategy.service';
+import { PageHoverService } from '../web-agent/action/strategies/hover-strategies/page-hover.service';
+import { EvaluateHoverService } from '../web-agent/action/strategies/hover-strategies/evaluate-hover.service';
 
 const inspectorServices = [InspectorService, RequestProcessorService];
 
@@ -70,27 +65,14 @@ const sharedServices = [
 ];
 
 const handlers = [ChangeHandler, ClickHandler, HoverHandler];
-const changeStrategies = [
-  AriaChangeStrategy,
-  CSSChangeStrategy,
-  PierceChangeStrategy,
-  XpathChangeStrategy,
-];
 
-const clickStrategies = [
-  AriaClickStrategy,
-  CSSClickStrategy,
-  PierceClickStrategy,
-  TextClickStrategy,
-  XPathClickStrategy,
-];
-
-const hoverStrategies = [
-  AriaHoverStrategy,
-  CSSHoverStrategy,
-  PierceHoverStrategy,
-  TextHoverStrategy,
-  XPathHoverStrategy,
+const operationStrategies = [
+  EvaluateClickService,
+  PageClickService,
+  EvaluateChangeService,
+  PageChangeService,
+  EvaluateHoverService,
+  PageHoverService,
 ];
 
 @Module({
@@ -112,12 +94,13 @@ const hoverStrategies = [
     ...inspectorServices,
     ...webAgentServices,
     ...sharedServices,
-    ...changeStrategies,
-    ...clickStrategies,
-    ...hoverStrategies,
     ...handlers,
     RequestInterceptor,
     WaiterService,
+    ClickStrategyService,
+    ChangeStrategyService,
+    HoverStrategyService,
+    ...operationStrategies,
   ],
 })
 export class WaiterModule {}
