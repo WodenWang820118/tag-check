@@ -104,7 +104,7 @@ export class ProjectService implements OnModuleInit {
       currentProjectPath,
       'settings.json'
     );
-    Logger.log(settingsFilePath, 'ProjectService.settings');
+    // Logger.log(settingsFilePath, 'ProjectService.settings');
     if (existsSync(settingsFilePath)) {
       const rawData = readFileSync(settingsFilePath, 'utf8');
       return JSON.parse(rawData);
