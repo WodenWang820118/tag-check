@@ -1,20 +1,12 @@
 import { Module } from '@nestjs/common';
 import { DataLayerModule } from '../../../web-monitoring/data-layer/data-layer.module';
-import { AriaChangeStrategy } from './aria-change-strategy.service';
-import { CSSChangeStrategy } from './css-change-strategy.service';
-import { PierceChangeStrategy } from './pierce-change-strategy.service';
-import { XpathChangeStrategy } from './xpath-change-strategy.service';
-
-const changeStrategies = [
-  AriaChangeStrategy,
-  CSSChangeStrategy,
-  PierceChangeStrategy,
-  XpathChangeStrategy,
-];
+import { ChangeStrategyService } from './change-strategy.service';
+import { EvaluateChangeService } from './evaluate-change.service';
+import { PageChangeService } from './page-change.service';
 
 @Module({
   imports: [DataLayerModule],
-  providers: [...changeStrategies],
-  exports: [...changeStrategies],
+  providers: [ChangeStrategyService, EvaluateChangeService, PageChangeService],
+  exports: [ChangeStrategyService, EvaluateChangeService, PageChangeService],
 })
 export class ChangeStrategyModule {}

@@ -1,4 +1,4 @@
-import { ElementHandle, Page } from 'puppeteer';
+import { Page } from 'puppeteer';
 
 export interface ClickStrategy {
   clickElement(
@@ -6,13 +6,19 @@ export interface ClickStrategy {
     projectName: string,
     title: string,
     selector: string,
-    timeout?: number,
-    preventNavigation?: boolean
+    selectorType: string,
+    useNormalClick: boolean,
+    timeout?: number
   ): Promise<boolean>;
 }
 
-export function isElementHandle(obj: any): obj is ElementHandle<Element> {
-  return (
-    obj && typeof obj.click === 'function' && typeof obj.focus === 'function'
-  );
+export interface ClickOperation {
+  operate: (
+    page: Page,
+    projectName: string,
+    title: string,
+    selector: string,
+    selectorType: string,
+    timeout?: number
+  ) => Promise<boolean>;
 }

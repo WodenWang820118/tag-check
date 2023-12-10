@@ -1,22 +1,12 @@
 import { Module } from '@nestjs/common';
 import { DataLayerModule } from '../../../web-monitoring/data-layer/data-layer.module';
-import { AriaHoverStrategy } from './aria-hover-strategy.service';
-import { CSSHoverStrategy } from './css-hover-strategy.service';
-import { XPathHoverStrategy } from './xpath-hover-strategy.service';
-import { TextHoverStrategy } from './text-hover-strategy.service';
-import { PierceHoverStrategy } from './pierce-hover-strategy.service';
-
-const hoverStrategies = [
-  AriaHoverStrategy,
-  CSSHoverStrategy,
-  XPathHoverStrategy,
-  TextHoverStrategy,
-  PierceHoverStrategy,
-];
+import { HoverStrategyService } from './hover-strategy.service';
+import { PageHoverService } from './page-hover.service';
+import { EvaluateHoverService } from './evaluate-hover.service';
 
 @Module({
   imports: [DataLayerModule],
-  providers: [...hoverStrategies],
-  exports: [...hoverStrategies],
+  providers: [HoverStrategyService, PageHoverService, EvaluateHoverService],
+  exports: [HoverStrategyService, PageHoverService, EvaluateHoverService],
 })
 export class HoverStrategyModule {}
