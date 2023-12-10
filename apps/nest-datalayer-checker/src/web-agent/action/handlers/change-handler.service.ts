@@ -1,21 +1,15 @@
-import { XpathChangeStrategy } from '../strategies/change-strategies/xpath-change-strategy.service';
-import { PierceChangeStrategy } from '../strategies/change-strategies/pierce-change-strategy.service';
-import { CSSChangeStrategy } from '../strategies/change-strategies/css-change-strategy.service';
-import { AriaChangeStrategy } from '../strategies/change-strategies/aria-change-strategy.service';
 import { Injectable, HttpException, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { SelectorType, getSelectorType } from '../action-utils';
+import { getSelectorType } from '../action-utils';
 import { ActionHandler, getFirstSelector } from './utils';
-import { ChangeStrategy } from '../strategies/change-strategies/utils';
+import { ChangeStrategyService } from '../strategies/change-strategies/change-strategy.service';
 
 @Injectable()
 export class ChangeHandler implements ActionHandler {
-  constructor(
-    private ariaChangeStrategy: AriaChangeStrategy,
-    private cSSChangeStrategy: CSSChangeStrategy,
-    private pierceChangeStrategy: PierceChangeStrategy,
-    private xpathChangeStrategy: XpathChangeStrategy
-  ) {}
+  constructor(private changeStrategyService: ChangeStrategyService) {}
+
+  // TODO: may need to follow the click handler logic
+  // to switch between page service and evaluate service under different domains
 
   async handle(
     page: Page,
@@ -33,6 +27,8 @@ export class ChangeHandler implements ActionHandler {
         if (
           await this.changeElement(
             page,
+            projectName,
+            title,
             getFirstSelector(selector),
             value,
             timeout
@@ -51,36 +47,22 @@ export class ChangeHandler implements ActionHandler {
 
   async changeElement(
     page: Page,
+    projectName: string,
+    title: string,
     selector: string,
     value: string,
-    timeout = 1000
+    timeout?: number
   ): Promise<boolean> {
     try {
-      const type = getSelectorType(selector);
-      let strategy: ChangeStrategy;
-
-      if (type === SelectorType.ARIA) {
-        strategy = this.ariaChangeStrategy;
-      } else if (
-        type === SelectorType.CSSID ||
-        type === SelectorType.CSSCLASS
-      ) {
-        strategy = this.cSSChangeStrategy;
-      } else if (type === SelectorType.PIERCE) {
-        strategy = this.pierceChangeStrategy;
-      } else if (type === SelectorType.XPATH) {
-        strategy = this.xpathChangeStrategy;
-      }
-
-      if (!strategy) {
-        Logger.error(
-          `No strategy found for selector type ${type}`,
-          'ChangeHandler.changeElement'
-        );
-        return false;
-      }
-      Logger.log(selector, 'ChangeHandler.changeElement');
-      return await strategy.changeElement(page, selector, value, timeout);
+      return await this.changeStrategyService.changeElement(
+        page,
+        projectName,
+        title,
+        selector,
+        getSelectorType(selector),
+        value,
+        timeout
+      );
     } catch (error) {
       Logger.error(error.message, 'ChangeHandler.changeElement');
     }
