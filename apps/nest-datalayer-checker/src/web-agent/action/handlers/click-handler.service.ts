@@ -1,25 +1,18 @@
 import { Injectable, Logger, HttpException } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { UtilitiesService } from '../../utilities/utilities.service';
-import { SelectorType, getSelectorType } from '../action-utils';
-import { ClickStrategy } from '../strategies/click-strategies/utils';
+import { getSelectorType } from '../action-utils';
 import { ActionHandler, getFirstSelector } from './utils';
-import { AriaClickStrategy } from '../strategies/click-strategies/aria-click-strategy.service';
-import { CSSClickStrategy } from '../strategies/click-strategies/css-click-strategy.service';
-import { PierceClickStrategy } from '../strategies/click-strategies/pierce-click-strategy.service';
-import { TextClickStrategy } from '../strategies/click-strategies/text-click-strategy.service';
-import { XPathClickStrategy } from '../strategies/click-strategies/xpath-click-strategy.service';
 import { ProjectService } from '../../../shared/project/project.service';
+import { SharedService } from '../../../shared/shared.service';
+import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
 @Injectable()
 export class ClickHandler implements ActionHandler {
   constructor(
-    private ariaClickStrategy: AriaClickStrategy,
-    private cSSClickStrategy: CSSClickStrategy,
-    private pierceClickStrategy: PierceClickStrategy,
-    private textClickStrategy: TextClickStrategy,
-    private xpathClickStrategy: XPathClickStrategy,
     private utilitiesService: UtilitiesService,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    private sharedService: SharedService,
+    private clickStrategyService: ClickStrategyService
   ) {}
 
   async handle(
@@ -59,7 +52,7 @@ export class ClickHandler implements ActionHandler {
           projectName,
           title,
           getFirstSelector(selector),
-          0,
+          5000,
           preventNavigation
         )
       ) {
@@ -85,41 +78,54 @@ export class ClickHandler implements ActionHandler {
     timeout = 3000,
     preventNavigation = false
   ): Promise<boolean> {
-    try {
-      const type = getSelectorType(selector);
-      let strategy: ClickStrategy;
+    const domain = new URL(
+      this.sharedService.getProjectDomain(projectName, {
+        absolutePath: undefined,
+        name: title,
+      })
+    ).hostname;
 
-      if (type === SelectorType.ARIA) {
-        strategy = this.ariaClickStrategy;
-      } else if (
-        type === SelectorType.CSSID ||
-        type === SelectorType.CSSCLASS
-      ) {
-        strategy = this.cSSClickStrategy;
-      } else if (type === SelectorType.PIERCE) {
-        strategy = this.pierceClickStrategy;
-      } else if (type === SelectorType.TEXT) {
-        strategy = this.textClickStrategy;
-      } else if (type === SelectorType.XPATH) {
-        strategy = this.xpathClickStrategy;
-      } else if (!strategy) {
-        Logger.error(
-          `No strategy found for selector type ${type}`,
-          'ClickHandler.clickElement'
-        );
-        return false;
-      }
-      Logger.log(selector, 'ClickHandler.clickElement');
-      return await strategy.clickElement(
+    try {
+      await page.waitForNavigation({ timeout: 3000 });
+    } catch (error) {
+      Logger.log('No navigation needed', 'ClickHandler.clickElement');
+    }
+
+    await page.waitForSelector(selector, { timeout, visible: true });
+
+    // Determine the click method based on conditions
+    // only one page means checking datalayer; two pages mean checking with gtm preview mode
+    // if the current page is not the same as the domain, then it's a third-party gateway
+    const useNormalClick =
+      (await page.browserContext().pages()).length === 1 ||
+      !page.url().includes(domain);
+
+    if (preventNavigation) {
+      this.preventNavigationOnElement(page, selector);
+    }
+
+    try {
+      // low timeout may cause the click to fail
+      return await this.clickStrategyService.clickElement(
         page,
         projectName,
         title,
         selector,
-        timeout,
-        preventNavigation
+        getSelectorType(selector),
+        useNormalClick,
+        timeout
       );
     } catch (error) {
       Logger.error(error.message, 'ClickHandler.clickElement');
     }
+  }
+
+  private async preventNavigationOnElement(page: Page, selector: string) {
+    await page.evaluate((sel) => {
+      const element = document.querySelector(sel);
+      if (element) {
+        element.addEventListener('click', (e) => e.preventDefault());
+      }
+    }, selector);
   }
 }
