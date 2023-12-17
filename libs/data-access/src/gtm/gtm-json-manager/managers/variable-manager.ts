@@ -1,4 +1,4 @@
-import { VariableConfig } from '../../interfaces/gtm-config';
+import { VariableConfig } from '../../../interfaces/gtm-config';
 import { isIncludeScroll, isIncludeVideo } from '../../utilities/event-utils';
 import { createVariable } from '../variables/data-layer-variable';
 import { createRegexMeasurementIdVariable } from '../variables/regex-measurement-id-variable';

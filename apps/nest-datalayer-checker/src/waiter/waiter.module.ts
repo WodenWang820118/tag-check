@@ -13,6 +13,7 @@ import { WaiterController } from './waiter-project.controller';
 import { WaiterQaController } from './waiter-qa.controller';
 import { WaiterDataLayerController } from './waiter-datalayer.controller';
 import { WaiterGtmOperatorController } from './waiter-gtm-operator.controller';
+import { WaiterSpecParserController } from './waiter-gtm-spec-parser.controller';
 
 // services
 import { WaiterService } from './waiter.service';
@@ -89,6 +90,7 @@ const operationStrategies = [
     WaiterQaController,
     WaiterDataLayerController,
     WaiterGtmOperatorController,
+    WaiterSpecParserController,
   ],
   providers: [
     ...inspectorServices,

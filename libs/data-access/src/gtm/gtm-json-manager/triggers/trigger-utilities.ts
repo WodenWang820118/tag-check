@@ -1,7 +1,4 @@
-import {
-  Trigger,
-  TriggerConfig,
-} from '../../../../interfaces/gtm-config-generator';
+import { Trigger, TriggerConfig } from '../../../interfaces/gtm-config';
 import { createVideoTrigger } from './video-trigger';
 import { createScrollTrigger } from './scroll-trigger';
 import { createTrigger } from './event-trigger';

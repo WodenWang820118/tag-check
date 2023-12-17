@@ -138,4 +138,8 @@ export class FileService {
       throw new BadRequestException(error);
     }
   }
+
+  getSpecsPath(projectName: string) {
+    return this.buildFilePath(projectName, configFolder, 'spec.json');
+  }
 }

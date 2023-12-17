@@ -1,4 +1,4 @@
-import { VariableConfig } from 'src/app/interfaces/gtm-config-generator';
+import { VariableConfig } from '../../../interfaces/gtm-config';
 import {
   createBooleanParameter,
   createIntegerParameter,
