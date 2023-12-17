@@ -1,4 +1,4 @@
-import { TriggerConfig } from 'src/app/interfaces/gtm-config-generator';
+import { TriggerConfig } from '../../../interfaces/gtm-config';
 import { createTemplateParameter } from '../parameter-utils';
 
 export function createTrigger(
