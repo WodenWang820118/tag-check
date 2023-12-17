@@ -4,7 +4,7 @@ import {
   TagConfig,
   Trigger,
   TriggerConfig,
-} from '../../interfaces/gtm-config';
+} from '../../../interfaces/gtm-config';
 import { isBuiltInEvent } from '../../utilities/event-utils';
 import { createTag } from '../tags/event-tag';
 import { createGA4Configuration } from '../tags/ga4-configuration-tag';

@@ -1,4 +1,4 @@
-import { Trigger } from '../../interfaces/gtm-config';
+import { Trigger } from '../../../interfaces/gtm-config';
 import { isBuiltInEvent } from '../../utilities/event-utils';
 
 export class TriggerManager {

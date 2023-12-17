@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { readFileSync } from 'fs';
+import { Injectable, Logger, StreamableFile } from '@nestjs/common';
 import { SharedService } from '../shared/shared.service';
 import puppeteer, { Credentials } from 'puppeteer';
 import { InspectorService } from '../inspector/inspector.service';
@@ -6,9 +7,12 @@ import { GtmOperatorService } from '../gtm-operator/gtm-operator.service';
 import { ProjectService } from '../shared/project/project.service';
 import { FileService } from '../shared/file/file.service';
 import { XlsxReportService } from '../shared/xlsx-report/xlsx-report.service';
+import { SpecParser } from '@datalayer-checker/spec-parser';
 
 @Injectable()
 export class WaiterService {
+  specParser: SpecParser = new SpecParser();
+
   constructor(
     private sharedService: SharedService,
     private fileService: FileService,
@@ -204,5 +208,23 @@ export class WaiterService {
 
   readReport(projectName: string, reportName: string) {
     return this.fileService.readReport(projectName, reportName);
+  }
+
+  outputGTMSpec(projectName: string) {
+    try {
+      const specsContent = readFileSync(
+        this.fileService.getSpecsPath(projectName),
+        'utf-8'
+      );
+      const buffer = Buffer.from(
+        JSON.stringify(this.specParser.outputGTMSpec(specsContent), null, 2)
+      );
+      // Create a StreamableFile
+      const stream = new StreamableFile(buffer);
+
+      return stream;
+    } catch (error) {
+      Logger.error(error.message, 'WaiterService.outputGTMSpec');
+    }
   }
 }
