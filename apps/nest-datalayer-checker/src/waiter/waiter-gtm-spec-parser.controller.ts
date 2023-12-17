@@ -14,7 +14,7 @@ export class WaiterSpecParserController {
   })
   @ApiQuery({
     name: 'projectName',
-    description: 'The absolute path to the tagging plan.',
+    description: 'The name of the project',
   })
   @ApiResponse({ status: 200, description: 'Generate GTM configuration' })
   @Get('/output-gtm-spec')
