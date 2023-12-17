@@ -1,8 +1,4 @@
-import {
-  Tag,
-  TagConfig,
-  TriggerConfig,
-} from '../../../../interfaces/gtm-config-generator';
+import { Tag, TagConfig, TriggerConfig } from '../../../interfaces/gtm-config';
 import {
   createTemplateParameter,
   createListParameter,

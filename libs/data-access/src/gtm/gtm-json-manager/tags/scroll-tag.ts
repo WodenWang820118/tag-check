@@ -1,7 +1,4 @@
-import {
-  TagConfig,
-  TriggerConfig,
-} from 'src/app/interfaces/gtm-config-generator';
+import { TagConfig, TriggerConfig } from '../../../interfaces/gtm-config';
 import { isIncludeScroll } from '../../utilities/event-utils';
 import {
   createBooleanParameter,

@@ -4,7 +4,7 @@ import {
   Trigger,
   TriggerConfig,
   VariableConfig,
-} from '../interfaces/gtm-config';
+} from '../../interfaces/gtm-config';
 import { TagManager } from '../gtm-json-manager/managers/tag-manager';
 import { VariableManger } from '../gtm-json-manager/managers/variable-manager';
 import { getTriggers } from '../gtm-json-manager/triggers/trigger-utilities';
