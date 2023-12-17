@@ -1,4 +1,4 @@
-import { TagConfig } from 'src/app/interfaces/gtm-config-generator';
+import { TagConfig } from '../../../interfaces/gtm-config';
 import {
   createBooleanParameter,
   createTemplateParameter,
