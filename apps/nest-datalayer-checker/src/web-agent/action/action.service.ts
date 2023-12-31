@@ -46,6 +46,12 @@ export class ActionService {
       const state = {
         isFirstNavigation: true,
       };
+
+      Logger.log(
+        `Performing step ${i + 1} of ${operation.steps.length}`,
+        'ActionService.performOperation'
+      );
+
       await this.stepExecutor.executeStep(
         page,
         step,
