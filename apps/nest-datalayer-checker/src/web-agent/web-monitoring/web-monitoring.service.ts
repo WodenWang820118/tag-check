@@ -83,15 +83,15 @@ export class WebMonitoringService {
     return await this.requestService.stopRequestCapture(page);
   }
 
-  initEventFolder(projectName: string, testName: string) {
-    this.sharedService.initEventFolder(projectName, testName);
+  async initEventFolder(projectName: string, testName: string) {
+    await this.sharedService.initEventFolder(projectName, testName);
   }
 
-  getEventFolder(projectName: string, testName: string) {
-    return this.sharedService.getEventFolder(projectName, testName);
+  async getEventFolder(projectName: string, testName: string) {
+    return await this.sharedService.getEventFolder(projectName, testName);
   }
 
-  getMyDataLayer(projectName: string, testName: string) {
-    return this.dataLayerService.getMyDataLayer(projectName, testName);
+  async getMyDataLayer(projectName: string, testName: string) {
+    return await this.dataLayerService.getMyDataLayer(projectName, testName);
   }
 }

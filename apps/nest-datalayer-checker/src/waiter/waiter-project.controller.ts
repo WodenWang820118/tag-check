@@ -1,10 +1,10 @@
-import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { WaiterService } from './waiter.service';
-import { Controller, Get, Header, Query } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { WaiterProjectService } from './waiter-project.service';
+import { Body, Controller, Get, Header, Query } from '@nestjs/common';
 
 @Controller('waiter-project')
-export class WaiterController {
-  constructor(private waiterService: WaiterService) {}
+export class WaiterProjectController {
+  constructor(private waiterProjectService: WaiterProjectService) {}
 
   @ApiOperation({
     summary: 'set and create a application root folder',
@@ -18,8 +18,10 @@ export class WaiterController {
   })
   @ApiResponse({ status: 200, description: 'Create a application root folder' })
   @Get('/set-root-project-folder')
-  setRootProjectFolder(@Query('rootProjectPath') rootProjectPath: string) {
-    return this.waiterService.setRootProjectFolder(rootProjectPath);
+  async setRootProjectFolder(
+    @Query('rootProjectPath') rootProjectPath: string
+  ) {
+    await this.waiterProjectService.setRootProjectFolder(rootProjectPath);
   }
 
   @ApiOperation({
@@ -32,9 +34,17 @@ export class WaiterController {
     name: 'projectName',
     description: 'The name of the project to which the event belongs.',
   })
+  @ApiBody({
+    description:
+      'The settings of the project to be created. Please look at the front-end for more details.',
+    type: Object,
+  })
   @Get('/init-project')
-  initProject(@Query('projectName') projectName: string) {
-    return this.waiterService.initProject(projectName);
+  async initProject(
+    @Query('projectName') projectName: string,
+    @Body() settings: any
+  ) {
+    await this.waiterProjectService.initProject(projectName, settings);
   }
 
   // if it exists, the shared service will update and use it
@@ -47,8 +57,8 @@ export class WaiterController {
     description: 'The name of the project to which the event belongs.',
   })
   @Get('/set-project')
-  setProject(@Query('projectName') projectName: string) {
-    return this.waiterService.setProject(projectName);
+  async setProject(@Query('projectName') projectName: string) {
+    await this.waiterProjectService.setProject(projectName);
   }
 
   @ApiOperation({
@@ -64,11 +74,11 @@ export class WaiterController {
   })
   @Get('/read-image')
   @Header('Content-Type', 'image/png')
-  readImage(
+  async readImage(
     @Query('projectName') projectName: string,
     @Query('testName') testName: string
   ) {
-    return this.waiterService.readImage(projectName, testName);
+    return await this.waiterProjectService.readImage(projectName, testName);
   }
 
   @ApiOperation({
@@ -87,19 +97,19 @@ export class WaiterController {
     'Content-Type',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
   )
-  readReport(
+  async readReport(
     @Query('projectName') projectName: string,
     @Query('reportName') reportName: string
   ) {
-    return this.waiterService.readReport(projectName, reportName);
+    return await this.waiterProjectService.readReport(projectName, reportName);
   }
 
   @ApiOperation({
     summary: 'get all project names',
   })
   @Get('/projects')
-  getProjects() {
-    return this.waiterService.getProjects();
+  async getProjects() {
+    return await this.waiterProjectService.getProjects();
   }
 
   @ApiOperation({
@@ -110,8 +120,8 @@ export class WaiterController {
     description: 'The name of the project to which the event belongs.',
   })
   @Get('/projects/recordings')
-  getProjectRecordings(@Query('projectName') projectName: string) {
-    return this.waiterService.getProjectRecordings(projectName);
+  async getProjectRecordings(@Query('projectName') projectName: string) {
+    return await this.waiterProjectService.getProjectRecordings(projectName);
   }
 
   @ApiOperation({
@@ -129,10 +139,13 @@ export class WaiterController {
     description: 'The name of the test associated with the event.',
   })
   @Get('/projects/event-report')
-  getEventReport(
+  async getEventReport(
     @Query('projectName') projectName: string,
     @Query('testName') testName: string
   ) {
-    return this.waiterService.getEventReport(projectName, testName);
+    return await this.waiterProjectService.getEventReport(
+      projectName,
+      testName
+    );
   }
 }

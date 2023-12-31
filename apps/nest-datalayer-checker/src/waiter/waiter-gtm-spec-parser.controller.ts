@@ -1,10 +1,10 @@
 import { Controller, Get, Header, Query, StreamableFile } from '@nestjs/common';
-import { WaiterService } from './waiter.service';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { WaiterGtmSpecParserService } from './waiter-gtm-spec-parser.service';
 
 @Controller('waiter-spec-parser')
 export class WaiterSpecParserController {
-  constructor(private waiterService: WaiterService) {}
+  constructor(private waiterGtmSpecParserService: WaiterGtmSpecParserService) {}
 
   @ApiOperation({
     summary: 'read a tagging plan from a specifc project',
@@ -20,7 +20,9 @@ export class WaiterSpecParserController {
   @Get('/output-gtm-spec')
   @Header('Content-Type', 'application/json')
   @Header('Content-Disposition', 'attachment; filename=gtm-spec.json')
-  outputGTMSpec(@Query('projectName') projectName: string): StreamableFile {
-    return this.waiterService.outputGTMSpec(projectName);
+  async outputGTMSpec(
+    @Query('projectName') projectName: string
+  ): Promise<StreamableFile> {
+    return await this.waiterGtmSpecParserService.outputGTMSpec(projectName);
   }
 }

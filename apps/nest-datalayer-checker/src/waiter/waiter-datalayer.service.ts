@@ -1,41 +1,21 @@
-import { readFileSync } from 'fs';
-import { Injectable, Logger, StreamableFile } from '@nestjs/common';
-import { SharedService } from '../shared/shared.service';
-import puppeteer, { Credentials } from 'puppeteer';
-import { InspectorService } from '../inspector/inspector.service';
+import { Injectable, Logger } from '@nestjs/common';
 import { GtmOperatorService } from '../gtm-operator/gtm-operator.service';
-import { ProjectService } from '../shared/project/project.service';
+import { InspectorService } from '../inspector/inspector.service';
 import { FileService } from '../shared/file/file.service';
+import { SharedService } from '../shared/shared.service';
 import { XlsxReportService } from '../shared/xlsx-report/xlsx-report.service';
-import { SpecParser } from '@datalayer-checker/spec-parser';
+import puppeteer, { Credentials } from 'puppeteer';
+import { getCurrentTimestamp } from './utils';
 
 @Injectable()
-export class WaiterService {
-  specParser: SpecParser = new SpecParser();
-
+export class WaiterDataLayerService {
   constructor(
     private sharedService: SharedService,
     private fileService: FileService,
-    private projectService: ProjectService,
     private xlsxReportService: XlsxReportService,
     private inspectorService: InspectorService,
     private gtmOperatorService: GtmOperatorService
   ) {}
-
-  // 1)
-  setRootProjectFolder(rootProjectPath: string) {
-    this.projectService.rootProjectFolder = rootProjectPath;
-  }
-
-  // 2) init project if not exists
-  initProject(projectName: string) {
-    this.projectService.initProject(projectName);
-  }
-
-  // 2) select project if exists
-  setProject(projectName: string) {
-    this.projectService.projectFolder = projectName;
-  }
 
   // 3) inspect single operation/event
   async inspectSingleEvent(
@@ -83,9 +63,9 @@ export class WaiterService {
       },
     ];
     // 3.3) write the data to the xlsx file
-    const timestamp = this.getCurrentTimestamp();
+    const timestamp = getCurrentTimestamp();
     await this.xlsxReportService.writeXlsxFile(
-      this.fileService.getReportSavingFolder(projectName),
+      await this.fileService.getReportSavingFolder(projectName),
       `QA_report_single_${testName}_${timestamp}.xlsx`,
       'Sheet1',
       data,
@@ -149,7 +129,7 @@ export class WaiterService {
     // the reason to use cache file is that there could be 20 tests running at the same time
     // one failed test will cause all other tests to fail in terms of test execution logic
     // therefore, we handle the result gathering logic in the xlsx-report.service.ts
-    const timestamp = this.getCurrentTimestamp();
+    const timestamp = getCurrentTimestamp();
     await this.sharedService.writeXlsxFileForAllTests(
       `QA_report_all_.xlsx_${timestamp}.xlsx`,
       'Sheet1',
@@ -158,73 +138,5 @@ export class WaiterService {
     Logger.log('All tests are done!', 'WaiterService.inspectProject');
     Logger.log('Browser is closed!', 'WaiterService.inspectProject');
     return data;
-  }
-
-  async inspectSingleEventViaGtm(
-    gtmUrl: string,
-    projectName: string,
-    testName: string,
-    headless: string,
-    filePath?: string,
-    credentials?: Credentials
-  ) {
-    await this.gtmOperatorService.inspectSingleEventViaGtm(
-      gtmUrl,
-      projectName,
-      testName,
-      headless,
-      filePath,
-      credentials
-    );
-  }
-
-  readImage(projectName: string, testName: string) {
-    return this.sharedService.readImage(projectName, testName);
-  }
-
-  getCurrentTimestamp() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // JavaScript months are 0-indexed
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-
-    return `${year}-${month}-${day}_${hours}${minutes}${seconds}`;
-  }
-
-  getProjects() {
-    return this.projectService.projects;
-  }
-
-  getProjectRecordings(projectName: string) {
-    return this.sharedService.getProjectRecordings(projectName);
-  }
-
-  getEventReport(projectName: string, testName: string) {
-    return this.fileService.getEventReport(projectName, testName);
-  }
-
-  readReport(projectName: string, reportName: string) {
-    return this.fileService.readReport(projectName, reportName);
-  }
-
-  outputGTMSpec(projectName: string) {
-    try {
-      const specsContent = readFileSync(
-        this.fileService.getSpecsPath(projectName),
-        'utf-8'
-      );
-      const buffer = Buffer.from(
-        JSON.stringify(this.specParser.outputGTMSpec(specsContent), null, 2)
-      );
-      // Create a StreamableFile
-      const stream = new StreamableFile(buffer);
-
-      return stream;
-    } catch (error) {
-      Logger.error(error.message, 'WaiterService.outputGTMSpec');
-    }
   }
 }
