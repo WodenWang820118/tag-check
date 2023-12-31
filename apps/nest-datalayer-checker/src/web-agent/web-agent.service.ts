@@ -97,15 +97,15 @@ export class WebAgentService {
     credentials?: Credentials
   ) {
     // 1) gather all necessary data and initialize the test
-    this.webMonitoringService.initEventFolder(projectName, testName);
-    this.dataLayerService.initSelfDataLayer(projectName, testName);
+    await this.webMonitoringService.initEventFolder(projectName, testName);
+    await this.dataLayerService.initSelfDataLayer(projectName, testName);
 
     const operationOption: FilePathOptions = {
       name: testName,
       absolutePath: filePath,
     };
 
-    const operation = this.fileService.getOperationJson(
+    const operation = await this.fileService.getOperationJson(
       projectName,
       operationOption
     );
@@ -136,7 +136,7 @@ export class WebAgentService {
         projectName,
         testName
       );
-      const dataLayer = this.webMonitoringService.getMyDataLayer(
+      const dataLayer = await this.webMonitoringService.getMyDataLayer(
         projectName,
         testName
       );

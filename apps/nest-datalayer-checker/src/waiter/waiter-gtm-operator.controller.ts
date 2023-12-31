@@ -1,10 +1,10 @@
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { WaiterService } from './waiter.service';
 import { Controller, Get, Query } from '@nestjs/common';
+import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
 
 @Controller('waiter-gtm-operator')
 export class WaiterGtmOperatorController {
-  constructor(private waiterService: WaiterService) {}
+  constructor(private waiterGtmOperatorService: WaiterGtmOperatorService) {}
 
   @Get('/single-event')
   @ApiOperation({
@@ -54,7 +54,7 @@ export class WaiterGtmOperatorController {
     @Query('username') username?: string,
     @Query('password') password?: string
   ) {
-    await this.waiterService.inspectSingleEventViaGtm(
+    await this.waiterGtmOperatorService.inspectSingleEventViaGtm(
       gtmUrl,
       projectName,
       testName,
