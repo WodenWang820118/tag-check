@@ -82,12 +82,81 @@ export class ProjectService {
   }
 
   async getProjectSettings(projectName: string) {
-    const dbRootProjectPath =
-      await this.configurationService.getRootProjectPath();
-    return readFileSync(
-      path.join(dbRootProjectPath, projectName, 'settings.json'),
-      'utf8'
-    );
+    try {
+      const dbRootProjectPath =
+        await this.configurationService.getRootProjectPath();
+      const settingsFilePath = path.join(
+        dbRootProjectPath,
+        projectName,
+        'settings.json'
+      );
+      return {
+        ...(existsSync(settingsFilePath)
+          ? {
+              path: settingsFilePath,
+              settings: JSON.parse(readFileSync(settingsFilePath, 'utf8')),
+            }
+          : {}),
+      };
+    } catch (error) {
+      Logger.error(error, 'ProjectService.getProjectSettings');
+      return {};
+    }
+  }
+
+  async getProjectConfig(projectName: string) {
+    try {
+      const dbRootProjectPath =
+        await this.configurationService.getRootProjectPath();
+      return path.join(dbRootProjectPath, projectName, 'config', 'spec.json');
+    } catch (error) {
+      Logger.error(error, 'ProjectService.getProjectConfig');
+      return {};
+    }
+  }
+
+  async getProjectDataLayerRecordings(projectName: string) {
+    try {
+      const dbRootProjectPath =
+        await this.configurationService.getRootProjectPath();
+      const recordings = existsSync(dbRootProjectPath)
+        ? readdirSync(
+            path.join(dbRootProjectPath, projectName, 'dataLayer_recordings'),
+            {
+              withFileTypes: true,
+            }
+          )
+        : [];
+      return recordings;
+    } catch (error) {
+      Logger.error(error, 'ProjectService.getProjectDataLayerRecordings');
+      return {};
+    }
+  }
+
+  async getProjectDataLayerInspectionResults(projectName: string) {
+    try {
+      const dbRootProjectPath =
+        await this.configurationService.getRootProjectPath();
+      const resultFolder = path.join(
+        dbRootProjectPath,
+        projectName,
+        'dataLayer_inspection_results'
+      );
+      const results = existsSync(dbRootProjectPath)
+        ? readdirSync(resultFolder, {
+            withFileTypes: true,
+          })
+            .filter((dirent) => dirent.isDirectory())
+            .map((dirent) => path.join(resultFolder, dirent.name))
+        : [];
+      return results;
+    } catch (error) {
+      Logger.error(
+        error,
+        'ProjectService.getProjectDataLayerInspectionResults'
+      );
+    }
   }
 
   async getProjects() {
@@ -99,12 +168,21 @@ export class ProjectService {
           .map((dirent) => dirent.name)
       : [];
 
+    Logger.log(projects, 'ProjectService.getProjects');
     // Map each project to a promise of its settings
     const projectSettingsPromises = projects.map(async (project) => {
+      const projectConfig = await this.getProjectConfig(project);
       const projectSettings = await this.getProjectSettings(project);
+      const projectDataLayerRecordings =
+        await this.getProjectDataLayerRecordings(project);
+      const projectDataLayerInspectionResults =
+        await this.getProjectDataLayerInspectionResults(project);
       return {
         name: project,
-        settings: projectSettings,
+        config: projectConfig,
+        settingsData: projectSettings,
+        dataLayerRecordings: projectDataLayerRecordings,
+        dataLayerInspectionResults: projectDataLayerInspectionResults,
       };
     });
 

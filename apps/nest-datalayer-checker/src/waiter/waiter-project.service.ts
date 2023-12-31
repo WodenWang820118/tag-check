@@ -127,7 +127,16 @@ export class WaiterProjectService {
           value: projectName,
         });
       } else {
-        throw new HttpException('Project not found', 404);
+        Logger.log(
+          'Current project folder not existed! Create current project folder path',
+          'WaiterService.setProject'
+        );
+
+        return this.configurationService.create({
+          title: 'currentProjectPath',
+          description: 'The current project path',
+          value: projectName,
+        });
       }
     } catch (error) {
       Logger.error(error, 'WaiterService.setProject');
