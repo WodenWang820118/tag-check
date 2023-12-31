@@ -1,10 +1,10 @@
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { WaiterService } from './waiter.service';
+import { WaiterDataLayerService } from './waiter-datalayer.service';
 import { Controller, Get, Query } from '@nestjs/common';
 
 @Controller('waiter-datalayer')
 export class WaiterDataLayerController {
-  constructor(private waiterService: WaiterService) {}
+  constructor(private waiterDataLayerService: WaiterDataLayerService) {}
 
   @Get('/single-event')
   @ApiOperation({
@@ -57,7 +57,7 @@ export class WaiterDataLayerController {
     @Query('password') password?: string
   ) {
     // if no measurementId is provided, no need to grab requests
-    return await this.waiterService.inspectSingleEvent(
+    return await this.waiterDataLayerService.inspectSingleEvent(
       projectName,
       testName,
       headless,
@@ -88,7 +88,7 @@ export class WaiterDataLayerController {
     @Query('password') password?: string,
     @Query('concurrency') concurrency = 2
   ) {
-    return await this.waiterService.inspectProject(
+    return await this.waiterDataLayerService.inspectProject(
       projectName,
       headless,
       path,

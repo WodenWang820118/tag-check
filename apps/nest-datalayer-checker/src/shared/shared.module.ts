@@ -6,6 +6,7 @@ import { FileModule } from './file/file.module';
 import { FileService } from './file/file.service';
 import { XlsxWriterModule } from './xlsx-report/xlsx-report.module';
 import { XlsxReportService } from './xlsx-report/xlsx-report.service';
+import { ConfigurationModule } from '../configuration/configuration.module';
 
 const services = [
   SharedService,
@@ -14,8 +15,8 @@ const services = [
   XlsxReportService,
 ];
 @Module({
+  imports: [ProjectModule, FileModule, XlsxWriterModule, ConfigurationModule],
   providers: [...services],
   exports: [...services],
-  imports: [ProjectModule, FileModule, XlsxWriterModule],
 })
 export class SharedModule {}
