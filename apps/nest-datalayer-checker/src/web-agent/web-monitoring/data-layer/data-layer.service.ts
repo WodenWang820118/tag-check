@@ -8,8 +8,10 @@ import { FileService } from '../../../shared/file/file.service';
 export class DataLayerService {
   constructor(private fileService: FileService) {}
 
-  initSelfDataLayer(projectName: string, testName: string) {
-    const resultFolder = this.fileService.getReportSavingFolder(projectName);
+  async initSelfDataLayer(projectName: string, testName: string) {
+    const resultFolder = await this.fileService.getReportSavingFolder(
+      projectName
+    );
     const filePath = path.join(
       resultFolder,
       testName,
@@ -33,19 +35,21 @@ export class DataLayerService {
           ? JSON.parse(JSON.stringify(window.dataLayer))
           : [{ event: 'no data layer' }];
       });
-      this.updateSelfDataLayerAlgorithm(dataLayer, projectName, testName);
+      await this.updateSelfDataLayerAlgorithm(dataLayer, projectName, testName);
     } catch (error) {
       Logger.error(error.message, 'DataLayerService.updateSelfDataLayer'); // Log the actual error message for debugging.
     }
   }
 
-  updateSelfDataLayerAlgorithm(
+  async updateSelfDataLayerAlgorithm(
     dataLayer: any[],
     projectName: string,
     testName: string
   ) {
     if (!dataLayer || dataLayer.length === 0) return;
-    const resultFolder = this.fileService.getReportSavingFolder(projectName);
+    const resultFolder = await this.fileService.getReportSavingFolder(
+      projectName
+    );
     const myDataLayerFile = path.join(
       resultFolder,
       testName,
@@ -75,8 +79,10 @@ export class DataLayerService {
     }
   }
 
-  getMyDataLayer(projectName: string, testName: string) {
-    const resultFolder = this.fileService.getReportSavingFolder(projectName);
+  async getMyDataLayer(projectName: string, testName: string) {
+    const resultFolder = await this.fileService.getReportSavingFolder(
+      projectName
+    );
     const myDataLayerFile = path.join(
       resultFolder,
       testName,

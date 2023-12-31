@@ -9,22 +9,45 @@ import path from 'path';
 import { configFolder, recordingFolder, resultFolder } from '../utilities';
 import { FilePathOptions } from '../../interfaces/filePathOptions.interface';
 import { ProjectService } from '../project/project.service';
+import { ConfigurationService } from '../../configuration/configuration.service';
 
 @Injectable()
 export class FileService {
-  constructor(private readonly projectService: ProjectService) {}
+  constructor(
+    private readonly projectService: ProjectService,
+    private configurationService: ConfigurationService
+  ) {}
 
-  private buildFilePath(
+  private async buildFilePath(
     projectName: string,
     folderName: string,
     fileName?: string
   ) {
-    return path.join(
-      this.projectService.rootProjectFolder,
-      projectName,
-      folderName,
-      fileName || ''
-    );
+    try {
+      const dbRootProjectPath =
+        await this.configurationService.getRootProjectPath();
+      const dbCurrentProjectPath =
+        await this.configurationService.getCurrentProjectPath();
+
+      const filePath2 = path.join(
+        dbRootProjectPath,
+        dbCurrentProjectPath,
+        folderName,
+        fileName || ''
+      );
+      Logger.log('file path ', filePath2, 'FileService.buildFilePath');
+
+      return filePath2;
+    } catch (error) {
+      Logger.error(error, 'FileService.buildFilePath');
+      const filePath = path.join(
+        await this.projectService.getRootProjectFolder(),
+        projectName,
+        folderName,
+        fileName || ''
+      );
+      return filePath;
+    }
   }
 
   private readJsonFile(filePath: string) {
@@ -38,33 +61,60 @@ export class FileService {
     }
   }
 
-  getReportSavingFolder(projectName: string) {
-    return path.join(
-      this.projectService.rootProjectFolder,
-      projectName,
-      resultFolder
-    );
+  async getReportSavingFolder(projectName: string) {
+    try {
+      const dbRootProjectPath =
+        await this.configurationService.getRootProjectPath();
+      const dbCurrentProjectPath =
+        await this.configurationService.getCurrentProjectPath();
+      const folder = path.join(
+        dbRootProjectPath,
+        dbCurrentProjectPath,
+        resultFolder
+      );
+      Logger.log(
+        'report saving folder ',
+        folder,
+        'FileService.getReportSavingFolder'
+      );
+      return folder;
+    } catch (error) {
+      Logger.error(error, 'FileService.getReportSavingFolder');
+      return path.join(
+        await this.projectService.getRootProjectFolder(),
+        projectName,
+        resultFolder
+      );
+    }
   }
 
-  getOperationJson(projectName: string, options: FilePathOptions) {
+  async getOperationJson(projectName: string, options: FilePathOptions) {
     this.validateInput(projectName, options);
 
     const filePath =
       options.absolutePath ||
-      this.buildFilePath(projectName, recordingFolder, `${options.name}.json`);
+      (await this.buildFilePath(
+        projectName,
+        recordingFolder,
+        `${options.name}.json`
+      ));
+
+    Logger.log(`filePath: ${filePath}`, 'FileService.getOperationJson');
     return this.readJsonFile(filePath);
   }
 
-  getOperationJsonByProject(options: FilePathOptions) {
+  async getOperationJsonByProject(options: FilePathOptions) {
     const dirPath =
-      options.absolutePath || this.buildFilePath(options.name, recordingFolder);
+      options.absolutePath ||
+      (await this.buildFilePath(options.name, recordingFolder));
     const jsonFiles = this.getJsonFilesFromDir(dirPath);
     return jsonFiles.filter((file) => file.endsWith('.json'));
   }
 
-  getSpecJsonByProject(options: FilePathOptions) {
+  async getSpecJsonByProject(options: FilePathOptions) {
     const dirPath =
-      options.absolutePath || this.buildFilePath(options.name, configFolder);
+      options.absolutePath ||
+      (await this.buildFilePath(options.name, configFolder));
     const jsonFiles = this.getJsonFilesFromDir(dirPath);
     const specFile = jsonFiles.find((file) => file.endsWith('.json'));
     return this.readJsonFile(path.join(dirPath, specFile));
@@ -103,14 +153,16 @@ export class FileService {
     }
   }
 
-  getEventReport(projectName: string, testName: string) {
-    if (!existsSync(this.buildFilePath(projectName, resultFolder))) {
+  async getEventReport(projectName: string, testName: string) {
+    if (!existsSync(await this.buildFilePath(projectName, resultFolder))) {
       throw new BadRequestException(`Project ${projectName} does not exist!`);
     }
 
     // use regex and testName to get an array of XLSX files
     const regex = new RegExp(`${testName}.*.xlsx`);
-    const files = readdirSync(this.buildFilePath(projectName, resultFolder));
+    const files = readdirSync(
+      await this.buildFilePath(projectName, resultFolder)
+    );
     const filteredFiles = files.filter((file) => regex.test(file));
 
     if (filteredFiles.length === 0) {
@@ -122,9 +174,9 @@ export class FileService {
     return filteredFiles;
   }
 
-  readReport(projectName: string, reportName: string) {
+  async readReport(projectName: string, reportName: string) {
     try {
-      const reportSavingFolder = this.getReportSavingFolder(projectName);
+      const reportSavingFolder = await this.getReportSavingFolder(projectName);
       const reportPath = path.join(reportSavingFolder, `${reportName}`);
 
       if (!existsSync(reportPath)) {
@@ -139,7 +191,7 @@ export class FileService {
     }
   }
 
-  getSpecsPath(projectName: string) {
-    return this.buildFilePath(projectName, configFolder, 'spec.json');
+  async getSpecsPath(projectName: string) {
+    return await this.buildFilePath(projectName, configFolder, 'spec.json');
   }
 }

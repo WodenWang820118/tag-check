@@ -7,16 +7,20 @@ import { WebAgentModule } from '../web-agent/web-agent.module';
 import { InspectorModule } from '../inspector/inspector.module';
 import { GtmOperatorModule } from '../gtm-operator/gtm-operator.module';
 import { GcsMonitorModule } from '../gcs-monitor/gcs-monitor.module';
+import { ConfigurationModule } from '../configuration/configuration.module';
 
 // controllers
-import { WaiterController } from './waiter-project.controller';
+import { WaiterProjectController } from './waiter-project.controller';
 import { WaiterQaController } from './waiter-qa.controller';
 import { WaiterDataLayerController } from './waiter-datalayer.controller';
 import { WaiterGtmOperatorController } from './waiter-gtm-operator.controller';
 import { WaiterSpecParserController } from './waiter-gtm-spec-parser.controller';
 
 // services
-import { WaiterService } from './waiter.service';
+import { WaiterDataLayerService } from './waiter-datalayer.service';
+import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
+import { WaiterGtmSpecParserService } from './waiter-gtm-spec-parser.service';
+import { WaiterProjectService } from './waiter-project.service';
 import { SharedService } from '../shared/shared.service';
 import { FileService } from '../shared/file/file.service';
 import { WebAgentService } from '../web-agent/web-agent.service';
@@ -29,6 +33,7 @@ import { ProjectService } from '../shared/project/project.service';
 import { XlsxReportService } from '../shared/xlsx-report/xlsx-report.service';
 import { DataLayerService } from '../web-agent/web-monitoring/data-layer/data-layer.service';
 import { RequestService } from '../web-agent/web-monitoring/request/request.service';
+import { ConfigurationService } from '../configuration/configuration.service';
 
 // services: action handlers
 import { ChangeHandler } from '../web-agent/action/handlers/change-handler.service';
@@ -46,6 +51,15 @@ import { PageChangeService } from '../web-agent/action/strategies/change-strateg
 import { HoverStrategyService } from '../web-agent/action/strategies/hover-strategies/hover-strategy.service';
 import { PageHoverService } from '../web-agent/action/strategies/hover-strategies/page-hover.service';
 import { EvaluateHoverService } from '../web-agent/action/strategies/hover-strategies/evaluate-hover.service';
+import { SequelizeModule } from '@nestjs/sequelize';
+import { Configuration } from '../configuration/entities/configuration.entity';
+
+const waiterServices = [
+  WaiterDataLayerService,
+  WaiterGtmOperatorService,
+  WaiterGtmSpecParserService,
+  WaiterProjectService,
+];
 
 const inspectorServices = [InspectorService, RequestProcessorService];
 
@@ -84,25 +98,28 @@ const operationStrategies = [
     InspectorModule,
     GtmOperatorModule,
     GcsMonitorModule,
+    ConfigurationModule,
+    SequelizeModule.forFeature([Configuration]),
   ],
   controllers: [
-    WaiterController,
+    WaiterProjectController,
     WaiterQaController,
     WaiterDataLayerController,
     WaiterGtmOperatorController,
     WaiterSpecParserController,
   ],
   providers: [
+    ...waiterServices,
     ...inspectorServices,
     ...webAgentServices,
     ...sharedServices,
     ...handlers,
     RequestInterceptor,
-    WaiterService,
     ClickStrategyService,
     ChangeStrategyService,
     HoverStrategyService,
     ...operationStrategies,
+    ConfigurationService,
   ],
 })
 export class WaiterModule {}

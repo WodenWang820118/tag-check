@@ -21,34 +21,41 @@ export class SharedService {
     private readonly xlsxReportService: XlsxReportService
   ) {}
 
-  getCachePath(projectName: string, operation: string) {
+  async getCachePath(projectName: string, operation: string) {
     return path.join(
-      this.fileService.getReportSavingFolder(projectName),
+      await this.fileService.getReportSavingFolder(projectName),
       operation.replace('.json', ''),
       `${operation.replace('.json', '')} - result cache.json`
     );
   }
 
-  getEventFolder(projectName: string, testName: string) {
-    const resultFolder = this.fileService.getReportSavingFolder(projectName);
+  async getEventFolder(projectName: string, testName: string) {
+    const resultFolder = await this.fileService.getReportSavingFolder(
+      projectName
+    );
     const eventFolder = path.join(resultFolder, testName);
     return eventFolder;
   }
 
-  initEventFolder(projectName: string, testName: string) {
-    const resultFolder = this.fileService.getReportSavingFolder(projectName);
+  async initEventFolder(projectName: string, testName: string) {
+    const resultFolder = await this.fileService.getReportSavingFolder(
+      projectName
+    );
     const eventFolder = path.join(resultFolder, testName);
     if (!existsSync(eventFolder)) mkdirSync(eventFolder);
   }
 
-  getProjectDomain(projectName: string, options: FilePathOptions) {
-    const operation = this.fileService.getOperationJson(projectName, options);
+  async getProjectDomain(projectName: string, options: FilePathOptions) {
+    const operation = await this.fileService.getOperationJson(
+      projectName,
+      options
+    );
     return operation.steps[1].url;
   }
 
   async screenshot(page: Page, projectName: string, testName: string) {
     const imageSavingFolder = path.join(
-      this.fileService.getReportSavingFolder(projectName),
+      await this.fileService.getReportSavingFolder(projectName),
       testName
     );
 
@@ -58,7 +65,7 @@ export class SharedService {
   }
 
   async writeCacheFile(projectName: string, operation: string, data: any) {
-    const cachePath = this.getCachePath(projectName, operation);
+    const cachePath = await this.getCachePath(projectName, operation);
     writeFileSync(cachePath, JSON.stringify(data, null, 2));
   }
 
@@ -67,8 +74,10 @@ export class SharedService {
     sheetName: string,
     projectName: string
   ) {
-    const savingFolder = this.fileService.getReportSavingFolder(projectName);
-    const operations = this.fileService.getOperationJsonByProject({
+    const savingFolder = await this.fileService.getReportSavingFolder(
+      projectName
+    );
+    const operations = await this.fileService.getOperationJsonByProject({
       name: projectName,
     });
     return await this.xlsxReportService.writeXlsxFileForAllTests(
@@ -80,10 +89,10 @@ export class SharedService {
     );
   }
 
-  readImage(projectName: string, testName: string) {
+  async readImage(projectName: string, testName: string) {
     try {
       const imageSavingFolder = path.join(
-        this.fileService.getReportSavingFolder(projectName),
+        await this.fileService.getReportSavingFolder(projectName),
         testName
       );
       const imagePath = path.join(imageSavingFolder, `${testName}.png`);
@@ -103,9 +112,9 @@ export class SharedService {
     }
   }
 
-  getProjectRecordings(projectName: string) {
+  async getProjectRecordings(projectName: string) {
     return this.fileService.getJsonFilesFromDir(
-      this.projectService.getRecordingFolderPath(projectName)
+      await this.projectService.getRecordingFolderPath(projectName)
     );
   }
 }

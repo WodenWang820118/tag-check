@@ -6,6 +6,7 @@ import { AllExceptionsFilter } from './all-exceptions-filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
   // Handle uncaught exceptions
   app.useGlobalFilters(new AllExceptionsFilter());
   // 1. Generate the tree as text
