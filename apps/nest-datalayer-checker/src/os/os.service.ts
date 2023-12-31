@@ -14,7 +14,7 @@ import { createReadStream, existsSync, mkdirSync, writeFileSync } from 'fs';
 import { Page } from 'puppeteer';
 
 @Injectable()
-export class SharedService {
+export class OsService {
   constructor(
     private readonly projectService: ProjectService,
     private readonly fileService: FileService,

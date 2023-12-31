@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 
 // other modules
-import { FileModule } from '../shared/file/file.module';
-import { SharedModule } from '../shared/shared.module';
+import { FileModule } from '../os/file/file.module';
+import { OsModule } from '../os/os.module';
 import { WebAgentModule } from '../web-agent/web-agent.module';
 import { InspectorModule } from '../inspector/inspector.module';
 import { GtmOperatorModule } from '../gtm-operator/gtm-operator.module';
@@ -21,16 +21,16 @@ import { WaiterDataLayerService } from './waiter-datalayer.service';
 import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
 import { WaiterGtmSpecParserService } from './waiter-gtm-spec-parser.service';
 import { WaiterProjectService } from './waiter-project.service';
-import { SharedService } from '../shared/shared.service';
-import { FileService } from '../shared/file/file.service';
+import { OsService } from '../os/os.service';
+import { FileService } from '../os/file/file.service';
 import { WebAgentService } from '../web-agent/web-agent.service';
 import { InspectorService } from '../inspector/inspector.service';
 import { ActionService } from '../web-agent/action/action.service';
 import { WebMonitoringService } from '../web-agent/web-monitoring/web-monitoring.service';
 import { RequestProcessorService } from '../inspector/request-processor/request-processor.service';
 import { UtilitiesService } from '../web-agent/utilities/utilities.service';
-import { ProjectService } from '../shared/project/project.service';
-import { XlsxReportService } from '../shared/xlsx-report/xlsx-report.service';
+import { ProjectService } from '../os/project/project.service';
+import { XlsxReportService } from '../os/xlsx-report/xlsx-report.service';
 import { DataLayerService } from '../web-agent/web-monitoring/data-layer/data-layer.service';
 import { RequestService } from '../web-agent/web-monitoring/request/request.service';
 import { ConfigurationService } from '../configuration/configuration.service';
@@ -74,7 +74,7 @@ const webAgentServices = [
 
 const sharedServices = [
   FileService,
-  SharedService,
+  OsService,
   ProjectService,
   XlsxReportService,
 ];
@@ -92,7 +92,7 @@ const operationStrategies = [
 
 @Module({
   imports: [
-    SharedModule,
+    OsModule,
     FileModule,
     WebAgentModule,
     InspectorModule,

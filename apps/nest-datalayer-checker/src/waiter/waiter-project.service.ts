@@ -1,7 +1,7 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { SharedService } from '../shared/shared.service';
-import { ProjectService } from '../shared/project/project.service';
-import { FileService } from '../shared/file/file.service';
+import { OsService } from '../os/os.service';
+import { ProjectService } from '../os/project/project.service';
+import { FileService } from '../os/file/file.service';
 import { SpecParser } from '@datalayer-checker/spec-parser';
 import { ConfigurationService } from '../configuration/configuration.service';
 import { mkdirSync } from 'fs';
@@ -14,7 +14,7 @@ export class WaiterProjectService {
   specParser: SpecParser = new SpecParser();
 
   constructor(
-    private sharedService: SharedService,
+    private osService: OsService,
     private fileService: FileService,
     private projectService: ProjectService,
     private configurationService: ConfigurationService
@@ -144,7 +144,7 @@ export class WaiterProjectService {
   }
 
   async readImage(projectName: string, testName: string) {
-    return await this.sharedService.readImage(projectName, testName);
+    return await this.osService.readImage(projectName, testName);
   }
 
   async getProjects() {
@@ -152,7 +152,7 @@ export class WaiterProjectService {
   }
 
   async getProjectRecordings(projectName: string) {
-    return await this.sharedService.getProjectRecordings(projectName);
+    return await this.osService.getProjectRecordings(projectName);
   }
 
   async getEventReport(projectName: string, testName: string) {

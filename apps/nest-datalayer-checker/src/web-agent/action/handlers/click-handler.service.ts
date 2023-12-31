@@ -3,15 +3,15 @@ import { Page } from 'puppeteer';
 import { UtilitiesService } from '../../utilities/utilities.service';
 import { getSelectorType } from '../action-utils';
 import { ActionHandler, getFirstSelector } from './utils';
-import { ProjectService } from '../../../shared/project/project.service';
-import { SharedService } from '../../../shared/shared.service';
+import { ProjectService } from '../../../os/project/project.service';
+import { OsService } from '../../../os/os.service';
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
 @Injectable()
 export class ClickHandler implements ActionHandler {
   constructor(
     private utilitiesService: UtilitiesService,
     private projectService: ProjectService,
-    private sharedService: SharedService,
+    private osService: OsService,
     private clickStrategyService: ClickStrategyService
   ) {}
 
@@ -81,7 +81,7 @@ export class ClickHandler implements ActionHandler {
     preventNavigation = false
   ): Promise<boolean> {
     const domain = new URL(
-      await this.sharedService.getProjectDomain(projectName, {
+      await this.osService.getProjectDomain(projectName, {
         absolutePath: undefined,
         name: title,
       })

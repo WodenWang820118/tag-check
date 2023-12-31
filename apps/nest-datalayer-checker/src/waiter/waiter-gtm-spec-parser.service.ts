@@ -1,5 +1,5 @@
 import { Injectable, Logger, StreamableFile } from '@nestjs/common';
-import { FileService } from '../shared/file/file.service';
+import { FileService } from '../os/file/file.service';
 import { readFileSync } from 'fs';
 import { SpecParser } from '@datalayer-checker/spec-parser';
 

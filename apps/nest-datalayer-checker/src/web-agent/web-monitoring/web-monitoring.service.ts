@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import puppeteer, { Page } from 'puppeteer';
-import { SharedService } from '../../shared/shared.service';
+import { OsService } from '../../os/os.service';
 import { RequestService } from './request/request.service';
 import { DataLayerService } from './data-layer/data-layer.service';
 
 @Injectable()
 export class WebMonitoringService {
   constructor(
-    private sharedService: SharedService,
+    private sharedService: OsService,
     private requestService: RequestService,
     private dataLayerService: DataLayerService
   ) {}

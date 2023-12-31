@@ -4,7 +4,7 @@ import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
 import puppeteer, { Credentials, Page } from 'puppeteer';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
-import { FileService } from '../shared/file/file.service';
+import { FileService } from '../os/file/file.service';
 @Injectable()
 export class WebAgentService {
   constructor(
