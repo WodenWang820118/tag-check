@@ -24,8 +24,10 @@ export class ClickHandler implements ActionHandler {
   ): Promise<void> {
     // Logic of handleClick
     let clickedSuccessfully = false;
-    const preventNavigationEvents =
-      this.projectService.settings.preventNavigationEvents;
+    // TODO: typing issue
+    const preventNavigationEvents = (
+      (await this.projectService.getSettings()) as any
+    ).preventNavigationEvents;
     let preventNavigation = false;
 
     for (const selector of step.selectors) {
@@ -79,7 +81,7 @@ export class ClickHandler implements ActionHandler {
     preventNavigation = false
   ): Promise<boolean> {
     const domain = new URL(
-      this.sharedService.getProjectDomain(projectName, {
+      await this.sharedService.getProjectDomain(projectName, {
         absolutePath: undefined,
         name: title,
       })

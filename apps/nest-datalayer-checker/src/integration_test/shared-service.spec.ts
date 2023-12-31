@@ -1,4 +1,4 @@
-import { WaiterService } from '../waiter/waiter.service';
+import { WaiterService } from '../waiter/waiter-project.service';
 import { SharedService } from '../shared/shared.service';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import { ProjectService } from '../shared/project/project.service';

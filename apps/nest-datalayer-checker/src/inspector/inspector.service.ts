@@ -49,8 +49,8 @@ export class InspectorService {
       name: projectName,
       absolutePath: filePath,
     };
-    const specs = this.fileService.getSpecJsonByProject(specOption);
-
+    const specs = await this.fileService.getSpecJsonByProject(specOption);
+    Logger.log(specs, 'inspector.inspectDataLayer');
     // expectedObj is the spec to be compared with the result
     const expectedObj = specs.find(
       (spec: BaseDataLayerEvent) => spec.event === testName
@@ -77,12 +77,15 @@ export class InspectorService {
           expectedObj
         );
 
+        Logger.log(dataLayerCheckResult, 'inspector.inspectDataLayer');
+
         const destinationUrl = result.destinationUrl;
+        Logger.log(destinationUrl, 'inspector.inspectDataLayer');
         await this.sharedService.writeCacheFile(projectName, testName, result);
         await this.sharedService.screenshot(page, projectName, testName);
 
         if (headless === 'new') await page.close();
-
+        Logger.log('Browser is closed!', 'inspector.inspectDataLayer');
         return {
           dataLayerCheckResult,
           destinationUrl,
@@ -144,7 +147,7 @@ export class InspectorService {
     // deal with invalid concurrency
     concurrency = Math.max(1, concurrency || 1);
 
-    const operations = this.fileService.getOperationJsonByProject({
+    const operations = await this.fileService.getOperationJsonByProject({
       name: projectName,
     });
 
