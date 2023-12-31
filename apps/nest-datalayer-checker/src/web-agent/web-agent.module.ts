@@ -3,7 +3,7 @@ import { ActionModule } from './action/action.module';
 import { WebMonitoringModule } from './web-monitoring/web-monitoring.module';
 import { UtilitiesModule } from './utilities/utilities.module';
 import { WebAgentService } from './web-agent.service';
-import { SharedModule } from '../shared/shared.module';
+import { OsModule } from '../os/os.module';
 import { DataLayerModule } from './web-monitoring/data-layer/data-layer.module';
 
 @Module({
@@ -11,7 +11,7 @@ import { DataLayerModule } from './web-monitoring/data-layer/data-layer.module';
     ActionModule,
     WebMonitoringModule,
     UtilitiesModule,
-    SharedModule,
+    OsModule,
     DataLayerModule,
   ],
   exports: [WebAgentService],

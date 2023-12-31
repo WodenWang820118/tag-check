@@ -1,6 +1,6 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { WebAgentService } from '../web-agent/web-agent.service';
-import { SharedService } from '../shared/shared.service';
+import { OsService } from '../os/os.service';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import {
   EcommerceEventValidationStrategy,
@@ -14,7 +14,7 @@ import {
 } from '../interfaces/dataLayer.interface';
 import { RequestProcessorService } from './request-processor/request-processor.service';
 import { Browser, Credentials, Page } from 'puppeteer';
-import { FileService } from '../shared/file/file.service';
+import { FileService } from '../os/file/file.service';
 
 @Injectable()
 export class InspectorService {
@@ -22,7 +22,7 @@ export class InspectorService {
 
   constructor(
     private webAgentService: WebAgentService,
-    private sharedService: SharedService,
+    private osService: OsService,
     private fileService: FileService,
     private requestProcessorService: RequestProcessorService
   ) {
@@ -81,8 +81,8 @@ export class InspectorService {
 
         const destinationUrl = result.destinationUrl;
         Logger.log(destinationUrl, 'inspector.inspectDataLayer');
-        await this.sharedService.writeCacheFile(projectName, testName, result);
-        await this.sharedService.screenshot(page, projectName, testName);
+        await this.osService.writeCacheFile(projectName, testName, result);
+        await this.osService.screenshot(page, projectName, testName);
 
         if (headless === 'new') await page.close();
         Logger.log('Browser is closed!', 'inspector.inspectDataLayer');
@@ -121,8 +121,8 @@ export class InspectorService {
         );
 
         const destinationUrl = result.destinationUrl;
-        await this.sharedService.writeCacheFile(projectName, testName, result);
-        await this.sharedService.screenshot(page, projectName, testName);
+        await this.osService.writeCacheFile(projectName, testName, result);
+        await this.osService.screenshot(page, projectName, testName);
         await page.close();
 
         return {
@@ -169,17 +169,13 @@ export class InspectorService {
             measurementId,
             credentials
           );
-          await this.sharedService.writeCacheFile(
-            projectName,
-            operation,
-            result
-          );
-          await this.sharedService.screenshot(page, projectName, testName);
+          await this.osService.writeCacheFile(projectName, operation, result);
+          await this.osService.screenshot(page, projectName, testName);
           await page.close();
           return result;
         } catch (error) {
           Logger.error(error.message, 'inspector.inspectProjectDataLayer');
-          await this.sharedService.writeCacheFile(
+          await this.osService.writeCacheFile(
             projectName,
             operation,
             error.message

@@ -1,16 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GtmOperatorService } from '../gtm-operator/gtm-operator.service';
 import { InspectorService } from '../inspector/inspector.service';
-import { FileService } from '../shared/file/file.service';
-import { SharedService } from '../shared/shared.service';
-import { XlsxReportService } from '../shared/xlsx-report/xlsx-report.service';
+import { FileService } from '../os/file/file.service';
+import { OsService } from '../os/os.service';
+import { XlsxReportService } from '../os/xlsx-report/xlsx-report.service';
 import puppeteer, { Credentials } from 'puppeteer';
 import { getCurrentTimestamp } from './utils';
 
 @Injectable()
 export class WaiterDataLayerService {
   constructor(
-    private sharedService: SharedService,
+    private osService: OsService,
     private fileService: FileService,
     private xlsxReportService: XlsxReportService,
     private inspectorService: InspectorService,
@@ -130,7 +130,7 @@ export class WaiterDataLayerService {
     // one failed test will cause all other tests to fail in terms of test execution logic
     // therefore, we handle the result gathering logic in the xlsx-report.service.ts
     const timestamp = getCurrentTimestamp();
-    await this.sharedService.writeXlsxFileForAllTests(
+    await this.osService.writeXlsxFileForAllTests(
       `QA_report_all_.xlsx_${timestamp}.xlsx`,
       'Sheet1',
       projectName

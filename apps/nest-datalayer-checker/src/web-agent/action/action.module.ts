@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ActionService } from './action.service';
 import { UtilitiesModule } from '../utilities/utilities.module';
 import { WebMonitoringModule } from '../web-monitoring/web-monitoring.module';
-import { SharedModule } from '../../shared/shared.module';
+import { OsModule } from '../../os/os.module';
 import { DataLayerModule } from '../web-monitoring/data-layer/data-layer.module';
 import { HandlerModule } from './handlers/handler.module';
 import { HoverStrategyModule } from './strategies/hover-strategies/hover-strategy.module';
@@ -14,7 +14,7 @@ import { RequestInterceptor } from './request-interceptor';
   imports: [
     UtilitiesModule,
     WebMonitoringModule,
-    SharedModule,
+    OsModule,
     DataLayerModule,
     HandlerModule,
     ChangeStrategyModule,

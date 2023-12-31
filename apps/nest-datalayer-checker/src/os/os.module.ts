@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { SharedService } from './shared.service';
+import { OsService } from './os.service';
 import { ProjectModule } from './project/project.module';
 import { ProjectService } from './project/project.service';
 import { FileModule } from './file/file.module';
@@ -8,15 +8,10 @@ import { XlsxWriterModule } from './xlsx-report/xlsx-report.module';
 import { XlsxReportService } from './xlsx-report/xlsx-report.service';
 import { ConfigurationModule } from '../configuration/configuration.module';
 
-const services = [
-  SharedService,
-  ProjectService,
-  FileService,
-  XlsxReportService,
-];
+const services = [OsService, ProjectService, FileService, XlsxReportService];
 @Module({
   imports: [ProjectModule, FileModule, XlsxWriterModule, ConfigurationModule],
   providers: [...services],
   exports: [...services],
 })
-export class SharedModule {}
+export class OsModule {}

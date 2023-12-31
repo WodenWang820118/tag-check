@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { Page } from 'puppeteer';
-import { FileService } from '../../../shared/file/file.service';
+import { FileService } from '../../../os/file/file.service';
 
 @Injectable()
 export class DataLayerService {
