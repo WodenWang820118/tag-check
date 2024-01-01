@@ -4,14 +4,16 @@ import { UtilitiesService } from '../../utilities/utilities.service';
 import { getSelectorType } from '../action-utils';
 import { ActionHandler, getFirstSelector } from './utils';
 import { ProjectService } from '../../../os/project/project.service';
-import { OsService } from '../../../os/os.service';
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
+import { FilePathService } from '../../../os/path/file-path/file-path.service';
+import { FileService } from '../../../os/file/file.service';
 @Injectable()
 export class ClickHandler implements ActionHandler {
   constructor(
     private utilitiesService: UtilitiesService,
     private projectService: ProjectService,
-    private osService: OsService,
+    private fileService: FileService,
+    private filePathService: FilePathService,
     private clickStrategyService: ClickStrategyService
   ) {}
 
@@ -26,7 +28,7 @@ export class ClickHandler implements ActionHandler {
     let clickedSuccessfully = false;
     // TODO: typing issue
     const preventNavigationEvents = (
-      (await this.projectService.getSettings()) as any
+      (await this.projectService.getSettings(projectName)) as any
     ).preventNavigationEvents;
     let preventNavigation = false;
 
@@ -80,11 +82,16 @@ export class ClickHandler implements ActionHandler {
     timeout = 3000,
     preventNavigation = false
   ): Promise<boolean> {
-    const domain = new URL(
-      await this.osService.getProjectDomain(projectName, {
+    const operationPath = await this.filePathService.getOperationFilePath(
+      projectName,
+      {
         absolutePath: undefined,
         name: title,
-      })
+      }
+    );
+
+    const domain = new URL(
+      await this.fileService.readJsonFile(operationPath).steps[1].url
     ).hostname;
 
     try {

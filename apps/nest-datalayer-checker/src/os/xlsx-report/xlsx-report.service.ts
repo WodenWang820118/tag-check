@@ -2,11 +2,18 @@ import { HttpException, Injectable, Logger } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { readFileSync } from 'fs';
 import path from 'path';
+import { FolderPathService } from '../path/folder-path/folder-path.service';
+import { FilePathService } from '../path/file-path/file-path.service';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class XlsxReportService {
+  constructor(
+    private folderPathService: FolderPathService,
+    private filePathService: FilePathService,
+    private fileService: FileService
+  ) {}
   async writeXlsxFile(
-    savingFolder: string,
     fileName: string,
     sheetName: string,
     data:
@@ -25,62 +32,68 @@ export class XlsxReportService {
     testName?: string,
     projectName?: string
   ) {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(sheetName);
-    worksheet.columns = [
-      { header: 'DataLayer Result', key: 'dataLayerResult', width: 50 },
-      { header: 'Request Result', key: 'requestCheckResult', width: 50 },
-      { header: 'Raw Request', key: 'rawRequest', width: 50 },
-      { header: 'Destination URL', key: 'destinationUrl', width: 50 },
-    ];
-    // single test
-    if (testName) {
-      try {
-        const eventSavingFolder = path.join(savingFolder, testName);
-        const file = path.join(eventSavingFolder, `${testName}.png`);
-        const imageId = workbook.addImage({
-          buffer: readFileSync(file),
-          extension: 'png',
-        });
-        worksheet.addImage(imageId, {
-          tl: { col: 2, row: 1 },
-          ext: { width: 100, height: 50 },
-        });
-      } catch (error) {
-        Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
-        throw new HttpException(
-          `An error occurred while writing the image: ${error}`,
-          500
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet(sheetName);
+      const eventSavingFolder =
+        await this.folderPathService.getInspectionEventFolderPath(
+          projectName,
+          testName
         );
-      }
-    } else if (projectName) {
-      // all tests
-      const dataContent = JSON.parse(JSON.stringify(data));
-      for (let i = 0; i < dataContent.length; i++) {
-        // get existing image after the test
+      worksheet.columns = [
+        { header: 'DataLayer Result', key: 'dataLayerResult', width: 50 },
+        { header: 'Request Result', key: 'requestCheckResult', width: 50 },
+        { header: 'Raw Request', key: 'rawRequest', width: 50 },
+        { header: 'Destination URL', key: 'destinationUrl', width: 50 },
+      ];
+      // single test
+      if (testName) {
         try {
-          const eventName =
-            dataContent[i]['dataLayerResult']['dataLayerSpec']['event'];
-          const eventSavingFolder = path.join(savingFolder, eventName);
-          const imagePath = path.join(eventSavingFolder, `${eventName}.png`);
+          const file = path.join(eventSavingFolder, `${testName}.png`);
           const imageId = workbook.addImage({
-            buffer: readFileSync(imagePath),
+            buffer: readFileSync(file),
             extension: 'png',
           });
           worksheet.addImage(imageId, {
-            tl: { col: worksheet.columns.length, row: i + 1 },
+            tl: { col: 2, row: 1 },
             ext: { width: 100, height: 50 },
           });
         } catch (error) {
-          // if throwing the error, other pieces of data will not be written to the xlsx file
           Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
+          throw new HttpException(
+            `An error occurred while writing the image: ${error}`,
+            500
+          );
+        }
+      } else if (projectName) {
+        // all tests
+        const dataContent = JSON.parse(JSON.stringify(data));
+        for (let i = 0; i < dataContent.length; i++) {
+          // get existing image after the test
+          try {
+            const eventName =
+              dataContent[i]['dataLayerResult']['dataLayerSpec']['event'];
+            const eventSavingFolder =
+              await this.folderPathService.getInspectionEventFolderPath(
+                projectName,
+                eventName
+              );
+            const imagePath = path.join(eventSavingFolder, `${eventName}.png`);
+            const imageId = workbook.addImage({
+              buffer: readFileSync(imagePath),
+              extension: 'png',
+            });
+            worksheet.addImage(imageId, {
+              tl: { col: worksheet.columns.length, row: i + 1 },
+              ext: { width: 100, height: 50 },
+            });
+          } catch (error) {
+            // if throwing the error, other pieces of data will not be written to the xlsx file
+            Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
+          }
         }
       }
-    }
-
-    Logger.log(data, 'XlsxReportService.writeXlsxFile');
-    try {
-      const filePath = path.join(savingFolder, fileName);
+      const filePath = path.join(eventSavingFolder, fileName);
       if (Array.isArray(data)) {
         worksheet.addRows(data);
         await workbook.xlsx.writeFile(filePath);
@@ -90,11 +103,11 @@ export class XlsxReportService {
       await workbook.xlsx.writeFile(filePath);
     } catch (error) {
       Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
+      throw new HttpException(error.message, 500);
     }
   }
 
   async writeXlsxFileForAllTests(
-    savingFolder: string,
     operations: string[],
     fileName: string,
     sheetName: string,
@@ -103,12 +116,11 @@ export class XlsxReportService {
     const data = [];
     for (let i = 0; i < operations.length; i++) {
       const operation = operations[i];
-      const cachePath = path.join(
-        savingFolder,
-        operation.replace('.json', ''),
-        `${operation.replace('.json', '')} - result cache.json`
+      const cachePath = await this.filePathService.getCacheFilePath(
+        projectName,
+        operation
       );
-      const cache = JSON.parse(readFileSync(cachePath).toString());
+      const cache = this.fileService.readJsonFile(cachePath);
       data.push(cache);
     }
 
@@ -122,7 +134,6 @@ export class XlsxReportService {
     });
 
     await this.writeXlsxFile(
-      savingFolder,
       fileName,
       sheetName,
       result,

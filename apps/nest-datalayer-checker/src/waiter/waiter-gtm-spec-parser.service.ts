@@ -1,16 +1,16 @@
 import { Injectable, Logger, StreamableFile } from '@nestjs/common';
-import { FileService } from '../os/file/file.service';
 import { readFileSync } from 'fs';
 import { SpecParser } from '@datalayer-checker/spec-parser';
+import { FilePathService } from '../os/path/file-path/file-path.service';
 
 @Injectable()
 export class WaiterGtmSpecParserService {
   specParser: SpecParser = new SpecParser();
-  constructor(private fileService: FileService) {}
+  constructor(private filePathService: FilePathService) {}
   async outputGTMSpec(projectName: string) {
     try {
       const specsContent = readFileSync(
-        await this.fileService.getSpecsPath(projectName),
+        await this.filePathService.getProjectConfigFilePath(projectName),
         'utf-8'
       );
       const buffer = Buffer.from(

@@ -2,14 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 import { Page } from 'puppeteer';
-import { FileService } from '../../../os/file/file.service';
-
+import { FolderPathService } from '../../../os/path/folder-path/folder-path.service';
 @Injectable()
 export class DataLayerService {
-  constructor(private fileService: FileService) {}
+  constructor(private folderPathService: FolderPathService) {}
 
   async initSelfDataLayer(projectName: string, testName: string) {
-    const resultFolder = await this.fileService.getReportSavingFolder(
+    const resultFolder = await this.folderPathService.getReportSavingFolderPath(
       projectName
     );
     const filePath = path.join(
@@ -47,7 +46,7 @@ export class DataLayerService {
     testName: string
   ) {
     if (!dataLayer || dataLayer.length === 0) return;
-    const resultFolder = await this.fileService.getReportSavingFolder(
+    const resultFolder = await this.folderPathService.getReportSavingFolderPath(
       projectName
     );
     const myDataLayerFile = path.join(
@@ -80,7 +79,7 @@ export class DataLayerService {
   }
 
   async getMyDataLayer(projectName: string, testName: string) {
-    const resultFolder = await this.fileService.getReportSavingFolder(
+    const resultFolder = await this.folderPathService.getReportSavingFolderPath(
       projectName
     );
     const myDataLayerFile = path.join(

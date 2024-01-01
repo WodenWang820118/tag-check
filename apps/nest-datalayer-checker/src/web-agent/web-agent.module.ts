@@ -6,6 +6,13 @@ import { WebAgentService } from './web-agent.service';
 import { OsModule } from '../os/os.module';
 import { DataLayerModule } from './web-monitoring/data-layer/data-layer.module';
 
+const modules = [
+  ActionModule,
+  WebMonitoringModule,
+  UtilitiesModule,
+  DataLayerModule,
+];
+
 @Module({
   imports: [
     ActionModule,
@@ -14,7 +21,7 @@ import { DataLayerModule } from './web-monitoring/data-layer/data-layer.module';
     OsModule,
     DataLayerModule,
   ],
-  exports: [WebAgentService],
   providers: [WebAgentService],
+  exports: [WebAgentService, ...modules],
 })
 export class WebAgentModule {}
