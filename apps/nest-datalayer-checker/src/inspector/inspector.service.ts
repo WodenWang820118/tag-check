@@ -1,6 +1,5 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { WebAgentService } from '../web-agent/web-agent.service';
-import { SharedService } from '../shared/shared.service';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import {
   EcommerceEventValidationStrategy,
@@ -14,7 +13,8 @@ import {
 } from '../interfaces/dataLayer.interface';
 import { RequestProcessorService } from './request-processor/request-processor.service';
 import { Browser, Credentials, Page } from 'puppeteer';
-import { FileService } from '../shared/file/file.service';
+import { FileService } from '../os/file/file.service';
+import { FilePathService } from '../os/path/file-path/file-path.service';
 
 @Injectable()
 export class InspectorService {
@@ -22,9 +22,9 @@ export class InspectorService {
 
   constructor(
     private webAgentService: WebAgentService,
-    private sharedService: SharedService,
     private fileService: FileService,
-    private requestProcessorService: RequestProcessorService
+    private requestProcessorService: RequestProcessorService,
+    private filePathService: FilePathService
   ) {
     this.validationStrategies = {
       [ValidationStrategyType.ECOMMERCE]:
@@ -49,7 +49,15 @@ export class InspectorService {
       name: projectName,
       absolutePath: filePath,
     };
-    const specs = await this.fileService.getSpecJsonByProject(specOption);
+    const specsPath = await this.filePathService.getProjectConfigFilePath(
+      specOption.name
+    );
+    const specs = await this.fileService.readJsonFile(specsPath);
+    const imageSavingFolder = await this.filePathService.getImageFilePath(
+      projectName,
+      testName
+    );
+
     Logger.log(specs, 'inspector.inspectDataLayer');
     // expectedObj is the spec to be compared with the result
     const expectedObj = specs.find(
@@ -81,8 +89,10 @@ export class InspectorService {
 
         const destinationUrl = result.destinationUrl;
         Logger.log(destinationUrl, 'inspector.inspectDataLayer');
-        await this.sharedService.writeCacheFile(projectName, testName, result);
-        await this.sharedService.screenshot(page, projectName, testName);
+        await this.fileService.writeCacheFile(projectName, testName, result);
+        await page.screenshot({
+          path: imageSavingFolder,
+        });
 
         if (headless === 'new') await page.close();
         Logger.log('Browser is closed!', 'inspector.inspectDataLayer');
@@ -121,8 +131,10 @@ export class InspectorService {
         );
 
         const destinationUrl = result.destinationUrl;
-        await this.sharedService.writeCacheFile(projectName, testName, result);
-        await this.sharedService.screenshot(page, projectName, testName);
+        await this.fileService.writeCacheFile(projectName, testName, result);
+        await page.screenshot({
+          path: imageSavingFolder,
+        });
         await page.close();
 
         return {
@@ -169,17 +181,20 @@ export class InspectorService {
             measurementId,
             credentials
           );
-          await this.sharedService.writeCacheFile(
+          await this.fileService.writeCacheFile(projectName, operation, result);
+          const imageSavingFolder = await this.filePathService.getImageFilePath(
             projectName,
-            operation,
-            result
+            testName
           );
-          await this.sharedService.screenshot(page, projectName, testName);
+
+          await page.screenshot({
+            path: imageSavingFolder,
+          });
           await page.close();
           return result;
         } catch (error) {
           Logger.error(error.message, 'inspector.inspectProjectDataLayer');
-          await this.sharedService.writeCacheFile(
+          await this.fileService.writeCacheFile(
             projectName,
             operation,
             error.message

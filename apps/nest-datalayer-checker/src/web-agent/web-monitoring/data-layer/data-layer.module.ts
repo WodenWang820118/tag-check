@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { DataLayerService } from './data-layer.service';
-import { SharedModule } from '../../../shared/shared.module';
+import { OsModule } from '../../../os/os.module';
 
 @Module({
-  imports: [SharedModule],
+  imports: [OsModule],
   providers: [DataLayerService],
   exports: [DataLayerService],
 })
