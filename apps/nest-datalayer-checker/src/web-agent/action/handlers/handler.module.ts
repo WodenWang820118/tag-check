@@ -20,6 +20,6 @@ const strategies = [
 @Module({
   imports: [UtilitiesModule, OsModule, ...strategies],
   providers: [...handlers, ClickStrategyService],
-  exports: [...handlers, ClickStrategyService],
+  exports: [...handlers],
 })
 export class HandlerModule {}

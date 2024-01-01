@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
 import { XlsxReportService } from './xlsx-report.service';
-
+import { PathModule } from '../path/path.module';
+import { FileModule } from '../file/file.module';
+import { FileService } from '../file/file.service';
 @Module({
-  providers: [XlsxReportService],
+  imports: [PathModule, FileModule],
+  providers: [XlsxReportService, FileService],
+  exports: [XlsxReportService],
 })
-export class XlsxWriterModule {}
+export class XlsxReportModule {}

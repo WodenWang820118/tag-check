@@ -10,18 +10,22 @@ import { ClickStrategyModule } from './strategies/click-strategies/click-strateg
 import { ChangeStrategyModule } from './strategies/change-strategies/change-strategy.module';
 import { RequestInterceptor } from './request-interceptor';
 
+const modules = [
+  HandlerModule,
+  ChangeStrategyModule,
+  ClickStrategyModule,
+  HoverStrategyModule,
+];
+
 @Module({
   imports: [
     UtilitiesModule,
     WebMonitoringModule,
     OsModule,
     DataLayerModule,
-    HandlerModule,
-    ChangeStrategyModule,
-    ClickStrategyModule,
-    HoverStrategyModule,
+    ...modules,
   ],
   providers: [ActionService, RequestInterceptor],
-  exports: [ActionService],
+  exports: [ActionService, RequestInterceptor, ...modules],
 })
 export class ActionModule {}
