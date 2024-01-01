@@ -1,17 +1,21 @@
+import { ProjectInitializationService } from './../os/project-initialization/project-initialization.service';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
 import puppeteer, { Credentials, Page } from 'puppeteer';
 import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
-import { FileService } from '../shared/file/file.service';
+import { FileService } from '../os/file/file.service';
+import { FilePathService } from '../os/path/file-path/file-path.service';
 @Injectable()
 export class WebAgentService {
   constructor(
-    private readonly actionService: ActionService,
-    private readonly webMonitoringService: WebMonitoringService,
-    private readonly dataLayerService: DataLayerService,
-    private readonly fileService: FileService
+    private actionService: ActionService,
+    private webMonitoringService: WebMonitoringService,
+    private dataLayerService: DataLayerService,
+    private fileService: FileService,
+    private filePathService: FilePathService,
+    private projectInitializationService: ProjectInitializationService
   ) {}
 
   async executeAndGetDataLayer(
@@ -97,7 +101,10 @@ export class WebAgentService {
     credentials?: Credentials
   ) {
     // 1) gather all necessary data and initialize the test
-    await this.webMonitoringService.initEventFolder(projectName, testName);
+    await this.projectInitializationService.initInspectionEventSavingFolder(
+      projectName,
+      testName
+    );
     await this.dataLayerService.initSelfDataLayer(projectName, testName);
 
     const operationOption: FilePathOptions = {
@@ -105,9 +112,11 @@ export class WebAgentService {
       absolutePath: filePath,
     };
 
-    const operation = await this.fileService.getOperationJson(
-      projectName,
-      operationOption
+    const operation = await this.fileService.readJsonFile(
+      await this.filePathService.getOperationFilePath(
+        projectName,
+        operationOption
+      )
     );
 
     if (credentials) {
@@ -136,7 +145,7 @@ export class WebAgentService {
         projectName,
         testName
       );
-      const dataLayer = await this.webMonitoringService.getMyDataLayer(
+      const dataLayer = await this.dataLayerService.getMyDataLayer(
         projectName,
         testName
       );

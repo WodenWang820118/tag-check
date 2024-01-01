@@ -6,6 +6,6 @@ import { Configuration } from './entities/configuration.entity';
 @Module({
   imports: [SequelizeModule.forFeature([Configuration])],
   providers: [ConfigurationService],
-  exports: [ConfigurationService],
+  exports: [SequelizeModule.forFeature([Configuration]), ConfigurationService],
 })
 export class ConfigurationModule {}

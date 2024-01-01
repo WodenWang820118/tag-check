@@ -1,16 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { GtmOperatorService } from '../gtm-operator/gtm-operator.service';
 import { InspectorService } from '../inspector/inspector.service';
-import { FileService } from '../shared/file/file.service';
-import { SharedService } from '../shared/shared.service';
-import { XlsxReportService } from '../shared/xlsx-report/xlsx-report.service';
+import { XlsxReportService } from '../os/xlsx-report/xlsx-report.service';
 import puppeteer, { Credentials } from 'puppeteer';
 import { getCurrentTimestamp } from './utils';
+import { FileService } from '../os/file/file.service';
 
 @Injectable()
 export class WaiterDataLayerService {
   constructor(
-    private sharedService: SharedService,
     private fileService: FileService,
     private xlsxReportService: XlsxReportService,
     private inspectorService: InspectorService,
@@ -65,7 +63,6 @@ export class WaiterDataLayerService {
     // 3.3) write the data to the xlsx file
     const timestamp = getCurrentTimestamp();
     await this.xlsxReportService.writeXlsxFile(
-      await this.fileService.getReportSavingFolder(projectName),
       `QA_report_single_${testName}_${timestamp}.xlsx`,
       'Sheet1',
       data,
@@ -130,7 +127,12 @@ export class WaiterDataLayerService {
     // one failed test will cause all other tests to fail in terms of test execution logic
     // therefore, we handle the result gathering logic in the xlsx-report.service.ts
     const timestamp = getCurrentTimestamp();
-    await this.sharedService.writeXlsxFileForAllTests(
+
+    const operations = await this.fileService.getOperationJsonByProject({
+      name: projectName,
+    });
+    await this.xlsxReportService.writeXlsxFileForAllTests(
+      operations,
       `QA_report_all_.xlsx_${timestamp}.xlsx`,
       'Sheet1',
       projectName

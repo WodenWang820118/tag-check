@@ -3,15 +3,17 @@ import { Page } from 'puppeteer';
 import { UtilitiesService } from '../../utilities/utilities.service';
 import { getSelectorType } from '../action-utils';
 import { ActionHandler, getFirstSelector } from './utils';
-import { ProjectService } from '../../../shared/project/project.service';
-import { SharedService } from '../../../shared/shared.service';
+import { ProjectService } from '../../../os/project/project.service';
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
+import { FilePathService } from '../../../os/path/file-path/file-path.service';
+import { FileService } from '../../../os/file/file.service';
 @Injectable()
 export class ClickHandler implements ActionHandler {
   constructor(
     private utilitiesService: UtilitiesService,
     private projectService: ProjectService,
-    private sharedService: SharedService,
+    private fileService: FileService,
+    private filePathService: FilePathService,
     private clickStrategyService: ClickStrategyService
   ) {}
 
@@ -26,7 +28,7 @@ export class ClickHandler implements ActionHandler {
     let clickedSuccessfully = false;
     // TODO: typing issue
     const preventNavigationEvents = (
-      (await this.projectService.getSettings()) as any
+      (await this.projectService.getSettings(projectName)) as any
     ).preventNavigationEvents;
     let preventNavigation = false;
 
@@ -80,11 +82,16 @@ export class ClickHandler implements ActionHandler {
     timeout = 3000,
     preventNavigation = false
   ): Promise<boolean> {
-    const domain = new URL(
-      await this.sharedService.getProjectDomain(projectName, {
+    const operationPath = await this.filePathService.getOperationFilePath(
+      projectName,
+      {
         absolutePath: undefined,
         name: title,
-      })
+      }
+    );
+
+    const domain = new URL(
+      await this.fileService.readJsonFile(operationPath).steps[1].url
     ).hostname;
 
     try {
