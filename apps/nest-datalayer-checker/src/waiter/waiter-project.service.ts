@@ -1,23 +1,28 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { SharedService } from '../shared/shared.service';
-import { ProjectService } from '../shared/project/project.service';
-import { FileService } from '../shared/file/file.service';
+import { ProjectService } from '../os/project/project.service';
+import { FileService } from '../os/file/file.service';
 import { SpecParser } from '@datalayer-checker/spec-parser';
 import { ConfigurationService } from '../configuration/configuration.service';
 import { mkdirSync } from 'fs';
-
-const CONFIG_ROOT_PATH = 'rootProjectPath';
-const CONFIG_CURRENT_PROJECT_PATH = 'currentProjectPath';
+import { ProjectInitializationService } from '../os/project-initialization/project-initialization.service';
+import { FolderService } from '../os/folder/folder.service';
+import { FolderPathService } from '../os/path/folder-path/folder-path.service';
+import {
+  CONFIG_CURRENT_PROJECT_PATH,
+  CONFIG_ROOT_PATH,
+} from '../configs/project.config';
 
 @Injectable()
 export class WaiterProjectService {
   specParser: SpecParser = new SpecParser();
 
   constructor(
-    private sharedService: SharedService,
     private fileService: FileService,
+    private folderService: FolderService,
+    private folderPathService: FolderPathService,
     private projectService: ProjectService,
-    private configurationService: ConfigurationService
+    private configurationService: ConfigurationService,
+    private projectInitializationService: ProjectInitializationService
   ) {}
 
   // 1)
@@ -85,7 +90,10 @@ export class WaiterProjectService {
           title: 'currentProjectPath',
           value: projectName,
         });
-        await this.projectService.initProject(projectName, settings);
+        await this.projectInitializationService.initProject(
+          projectName,
+          settings
+        );
       } else {
         Logger.log(
           'Current project folder not existed! Create current project folder path',
@@ -97,7 +105,10 @@ export class WaiterProjectService {
           description: 'The current project path',
           value: projectName,
         });
-        await this.projectService.initProject(projectName, settings);
+        await this.projectInitializationService.initProject(
+          projectName,
+          settings
+        );
       }
     } catch (error) {
       Logger.error(error, 'WaiterService.setProject');
@@ -144,7 +155,7 @@ export class WaiterProjectService {
   }
 
   async readImage(projectName: string, testName: string) {
-    return await this.sharedService.readImage(projectName, testName);
+    return await this.fileService.readImage(projectName, testName);
   }
 
   async getProjects() {
@@ -152,7 +163,9 @@ export class WaiterProjectService {
   }
 
   async getProjectRecordings(projectName: string) {
-    return await this.sharedService.getProjectRecordings(projectName);
+    return this.folderService.getJsonFilesFromDir(
+      await this.folderPathService.getRecordingFolderPath(projectName)
+    );
   }
 
   async getEventReport(projectName: string, testName: string) {

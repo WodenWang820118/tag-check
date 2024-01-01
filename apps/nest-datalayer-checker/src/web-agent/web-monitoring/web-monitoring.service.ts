@@ -1,16 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import puppeteer, { Page } from 'puppeteer';
-import { SharedService } from '../../shared/shared.service';
 import { RequestService } from './request/request.service';
-import { DataLayerService } from './data-layer/data-layer.service';
 
 @Injectable()
 export class WebMonitoringService {
-  constructor(
-    private sharedService: SharedService,
-    private requestService: RequestService,
-    private dataLayerService: DataLayerService
-  ) {}
+  constructor(private requestService: RequestService) {}
 
   /**
    * Retrieves the Google Click ID (GCLID) values from an array of request URLs
@@ -54,10 +48,8 @@ export class WebMonitoringService {
     });
 
     try {
-      // const page = await this.puppeteerService.navigateTo(url, browser);
       const [page] = await browser.pages();
       const result = await this.getInstalledGtms(page, url);
-      // console.dir('result', result);
       return result;
     } finally {
       await browser.close();
@@ -81,17 +73,5 @@ export class WebMonitoringService {
       throw error;
     }
     return await this.requestService.stopRequestCapture(page);
-  }
-
-  async initEventFolder(projectName: string, testName: string) {
-    await this.sharedService.initEventFolder(projectName, testName);
-  }
-
-  async getEventFolder(projectName: string, testName: string) {
-    return await this.sharedService.getEventFolder(projectName, testName);
-  }
-
-  async getMyDataLayer(projectName: string, testName: string) {
-    return await this.dataLayerService.getMyDataLayer(projectName, testName);
   }
 }

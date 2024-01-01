@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { USER_AGENT } from '../../../configs/puppeteer.config';
+import { USER_AGENT } from '../../../configs/project.config';
 import { Page } from 'puppeteer';
 
 @Injectable()
