@@ -34,7 +34,7 @@ export class ProjectInitializationService {
       const projectSettings = {
         rootProject: `${rootProjectPath}`,
         projectName: `${projectName}`,
-        projectDescription: `${projectName}`,
+        projectDescription: `${settings.projectDescription}`,
         projectSlug: `${settings.projectSlug}`,
         testType: `${settings.testType}`,
         googleSpreadsheetLink: `${settings.googleSpreadsheetLink}`,
@@ -45,8 +45,11 @@ export class ProjectInitializationService {
       };
 
       const settingsFilePath =
+        await this.filePathService.getProjectSettingFilePath(projectName);
+      const configFilePath =
         await this.filePathService.getProjectConfigFilePath(projectName);
       this.setSsettings(settingsFilePath, projectSettings);
+      this.setSsettings(configFilePath, []);
     } catch (error) {
       Logger.error(error.message, 'ProjectInitializationService.initProject');
       throw new HttpException(error.message, 500);
