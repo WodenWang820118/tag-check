@@ -1,52 +1,25 @@
 # DatalayerChecker
 
-## How to use the backend
+## Table of Contents
 
-### Set up a project
+[Overview](#overview)
+[Frontend](#frontend)
+[Backend](#backend)
+[Application](#application)
 
-1. `http://localhost:8080/waiter-project/set-root-project-folder` to set a global root folder.
+## Overview
 
-- rootProjectFolder: the path of the root folder
+Currently, this project is still under development. The goal is to provide a tool to check the data layer of a website. The tool will mimic users' behaviors to check the data layer. The tool will also provide a way to check the data layer with GTM preview mode.
 
-2. `http://localhost:8080/waiter-project/init-project` to initialize a project.
+## Frontend
 
-- projectName: the name of the project
-- Once the project is initiated, all default settings and folders will be created.
-- Please update all recordings under the `recordings` folder.
+Please use the following command to run the frontend server:
 
-3. `http://localhost:8080/waiter-project/set-project` to set a project folder if you want to change the project folder. The `cachedSettings.json` will be updated under the project folder.
+```bash
+npm run frontend
+```
 
-- projectName: the name of the project
-
-Please have a look at the root folder and the project folder to see the default settings and folders.
-
-### Start checking the data layer
-
-- `http://localhost:8080/waiter-datalayer/single-event`
-- projectName: the name of the project
-- headless: 'new' or false
-- testName: the name of the test
-
-### Start checking the data layer with multiple events
-
-- `http://localhost:8080/waiter-datalayer/project`
-- projectName: the name of the project
-- headless: 'new' or false
-- concurrency: the number of concurrent tests
-
-### Start checking the data layer with a single event and with GTM preview mode
-
-- `http://localhost:8080/waiter-gtm-operator`
-- projectName: the name of the project
-- headless: 'new' or false
-- testName: the name of the test
-- gtmUrl: the GTM preview mode sharable URL
-
-### Start checking the data layer with multiple events and with GTM preview mode (TBC)
-
-# Backend development
-
-This version mimics users' behaviors to using the app.
+## Backend
 
 Please use the following command to run the backend server:
 
@@ -54,4 +27,18 @@ Please use the following command to run the backend server:
 npm run backend
 ```
 
-Then, you can route to http://localhost:8080/api to see exposed APIs.
+To see exposed APIs, please route to http://localhost:8080/api.
+
+## Application
+
+Please use the following command to build the application:
+
+```bash
+npm run build
+```
+
+Please use the following command to run the application:
+
+```bash
+npm run app
+```
