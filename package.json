@@ -3,14 +3,13 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "nx serve",
     "backend": "nx serve nest-datalayer-checker --watch",
     "build-backend": "nx build nest-datalayer-checker",
-    "build": "nx build",
     "frontend": "nx serve frontend --watch",
     "build-frontend": "nx build frontend --prod",
-    "test": "nx test",
-    "start-electron": "electron ./apps/frontend/main.js"
+    "start-electron": "electron ./apps/frontend/main.js",
+    "build-application": "npm run build-frontend && npm run build-backend",
+    "start-application": "concurrently \"http-server ./dist/apps/frontend --cors\" \"node ./dist/apps/nest-datalayer-checker/main.js\""
   },
   "private": true,
   "devDependencies": {
