@@ -16,7 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["apps/frontend/src/*"],
-      "@datalayer-checker/spec-parser": ["libs/data-access/src/index.ts"]
+      "@datalayer-checker/spec-parser": ["./libs/data-access/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

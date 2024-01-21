@@ -5,7 +5,10 @@
   "scripts": {
     "start": "nx serve",
     "backend": "nx serve nest-datalayer-checker --watch",
+    "build-backend": "nx build nest-datalayer-checker",
     "build": "nx build",
+    "frontend": "nx serve frontend --watch",
+    "build-frontend": "nx build frontend --prod",
     "test": "nx test",
     "start-electron": "electron ./apps/frontend/main.js"
   },
@@ -61,6 +64,7 @@
     "vitest": "~0.32.0"
   },
   "dependencies": {
+    "@floating-ui/react-dom": "^2.0.6",
     "@nestjs/axios": "^3.0.0",
     "@nestjs/common": "^10.0.2",
     "@nestjs/config": "^3.0.0",
