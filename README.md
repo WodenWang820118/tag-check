@@ -6,6 +6,7 @@
 [Frontend](#frontend)
 [Backend](#backend)
 [Application](#application)
+[Development](#development)
 
 ## Overview
 
@@ -41,4 +42,12 @@ Please use the following command to run the application:
 
 ```bash
 npm run app
+```
+
+## Development
+
+Please use the following command to run the application in development mode:
+
+```bash
+npm run dev-app
 ```

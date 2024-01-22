@@ -8,6 +8,7 @@
     "frontend": "nx serve frontend --watch",
     "build-frontend": "nx build frontend --prod",
     "start-electron": "electron ./apps/frontend/main.js",
+    "dev-app": "concurrently \"npm run frontend\" \"npm run backend\"",
     "build": "npm run build-frontend && npm run build-backend",
     "app": "concurrently \"http-server ./dist/apps/frontend --cors\" \"node ./dist/apps/nest-datalayer-checker/main.js\""
   },
