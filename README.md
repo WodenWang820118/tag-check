@@ -6,6 +6,7 @@
 [Frontend](#frontend)
 [Backend](#backend)
 [Application](#application)
+[Package](#package)
 [Development](#development)
 
 ## Overview
@@ -43,6 +44,18 @@ Please use the following command to run the application:
 ```bash
 npm run app
 ```
+
+## Package
+
+To build the electron app, refer to the documentation [here](https://www.electronjs.org/docs/latest/tutorial/tutorial-packaging) and change the `main` in `package.json` to the specific file path. In the project, it's `apps/frontend/main.js`. The output will be in the `out` folder.
+
+Please run the command to build the Electron app:
+
+```bash
+npm run package
+```
+
+The package will be in the `out` folder. The backend server will be in the `resources` folder, named `main.js`.
 
 ## Development
 
