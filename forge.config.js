@@ -1,7 +1,10 @@
 module.exports = {
   packagerConfig: {
     asar: true,
-    extraResource: ['./dist/apps/nest-datalayer-checker/main.js'],
+    extraResource: [
+      './dist/apps/nest-datalayer-checker/main.js',
+      '.db/data.sqlite3',
+    ],
   },
   rebuildConfig: {},
   makers: [
