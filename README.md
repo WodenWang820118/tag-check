@@ -1,8 +1,11 @@
 # DatalayerChecker
 
+// TODO: remember to add the sqlite3 file to the package
+
 ## Table of Contents
 
 [Overview](#overview)
+[Configuration](#configuration)
 [Frontend](#frontend)
 [Backend](#backend)
 [Application](#application)
@@ -12,6 +15,17 @@
 ## Overview
 
 Currently, this project is still under development. The goal is to provide a tool to check the data layer of a website. The tool will mimic users' behaviors to check the data layer. The tool will also provide a way to check the data layer with GTM preview mode.
+
+## Configuration
+
+Please create a `.env` file in the root folder and add the following content:
+
+```
+NODE_ENV=development
+```
+
+The `NODE_ENV` can be `development` or `production`.
+There could be more configurations in the future.
 
 ## Frontend
 
