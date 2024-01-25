@@ -3,20 +3,26 @@ import path from 'path';
 
 let storagePath: string;
 
-const isDevelopment = process.env.NODE_ENV === 'development';
-const isProduction = process.env.NODE_ENV === 'production';
+console.log(process.env.NODE_ENV);
+
+let isDevelopment = process.env.NODE_ENV === 'development';
+let isProduction = process.env.NODE_ENV === 'production';
 
 if (!isDevelopment && !isProduction) {
-  throw new Error('NODE_ENV is not set');
+  console.log('In the Electron app.');
+  isDevelopment = true;
+  isProduction = false;
 }
 
 // use process.resourcesPath to get the path to the resources folder
 // https://js.electronforge.io/interfaces/_electron_forge_shared_types.InternalOptions.Options.html#extraResource
 if (isDevelopment) {
   storagePath = '.db/data.sqlite3';
-} else if (isProduction) {
+} else {
   storagePath = path.join((process as any).resourcesPath, 'data.sqlite3');
 }
+
+console.log('storagePath', storagePath);
 
 export const dataBaseConfig: SequelizeModuleOptions = {
   dialect: 'sqlite',

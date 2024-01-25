@@ -1,12 +1,38 @@
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
 const isDev = require('electron-is-dev');
+const path = require('path');
+const { app, BrowserWindow } = require('electron');
 const { spawn } = require('child_process');
 
-let mainWindow;
+function startBackend() {
+  const serverPath = isDev
+    ? path.join(
+        __dirname,
+        '..',
+        '..',
+        'dist',
+        'apps',
+        'nest-datalayer-checker',
+        'main.js'
+      )
+    : path.join(process.resourcesPath, 'main.js');
+
+  const serverProcess = spawn('node', [serverPath]);
+
+  serverProcess.stdout.on('data', (data) => {
+    console.log(`Backend: ${data}`);
+  });
+
+  serverProcess.stderr.on('data', (data) => {
+    console.error(`Backend Error: ${data}`);
+  });
+
+  serverProcess.on('close', (code) => {
+    console.log(`Backend process exited with code ${code}`);
+  });
+}
 
 function createWindow() {
-  mainWindow = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -18,43 +44,29 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:4200'); // Load your React app in development mode
     mainWindow.webContents.openDevTools(); // Open DevTools in development
   } else {
-    mainWindow.loadFile(
-      path.join(__dirname, '..', '..', 'dist', 'apps', 'frontend', 'index.html')
-    ); // Load the bundled React app in production
+    // TODO: where is the real production index.html?
+    // https://www.electronjs.org/docs/latest/tutorial/application-distribution
+    try {
+      const indexHtmlPath = path.join(
+        process.resourcesPath,
+        'frontend',
+        'index.html'
+      );
+      mainWindow.webContents.openDevTools(); // Open DevTools in development
+      mainWindow.loadFile(indexHtmlPath);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
+  console.log('isDev', isDev);
+  console.log('process.resourcesPath', process.resourcesPath);
 }
 
-const startNestJsBackend = () => {
-  const backend = spawn('node', [
-    path.join(
-      __dirname,
-      '..',
-      '..',
-      'dist',
-      'apps',
-      'nest-datalayer-checker',
-      'main.js'
-    ),
-  ]); // run the nestjs backend
-  backend.stdout.on('data', (data) => {
-    console.log(`NestJS: ${data}`);
-  });
-
-  backend.stderr.on('data', (data) => {
-    console.error(`NestJS Error: ${data}`);
-  });
-
-  backend.on('close', (code) => {
-    console.log(`NestJS backend exited with code ${code}`);
-  });
-};
-
-app.on('ready', startNestJsBackend);
-app.on('ready', createWindow);
+app.whenReady().then(() => {
+  startBackend();
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -63,7 +75,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  if (mainWindow === null) {
+  if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
 });
