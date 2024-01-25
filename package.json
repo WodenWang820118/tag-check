@@ -10,7 +10,7 @@
     "build-backend": "nx build nest-datalayer-checker",
     "frontend": "nx serve frontend",
     "build-frontend": "nx build frontend --prod",
-    "start-electron": "electron ./apps/frontend/main.js",
+    "start-electron": "npm run build-backend && electron .",
     "dev-app": "concurrently \"npm run frontend\" \"npm run backend\"",
     "build": "npm run build-frontend && npm run build-backend",
     "app": "concurrently \"http-server ./dist/apps/frontend -p 5000 --cors\" \"node ./dist/apps/nest-datalayer-checker/main.js\"",
