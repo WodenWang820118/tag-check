@@ -87,7 +87,8 @@ export class FolderPathService {
     try {
       return await this.pathUtilsService.buildFilePath(
         projectName,
-        configFolder
+        configFolder,
+        ''
       );
     } catch (error) {
       Logger.error(error.message, 'PathService.getProjectConfigPath');
