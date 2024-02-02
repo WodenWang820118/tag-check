@@ -24,10 +24,10 @@ export class FilePathService {
           `${options.name}.json`
         ));
 
-      Logger.log(`filePath: ${filePath}`, 'PathService.getOperationPath');
+      Logger.log(`filePath: ${filePath}`, 'FilePathService.getOperationPath');
       return filePath;
     } catch (error) {
-      Logger.error(error.message, 'PathService.getOperationPath');
+      Logger.error(error.message, 'FilePathService.getOperationPath');
       throw new HttpException(error.message, 500);
     }
   }
@@ -40,7 +40,7 @@ export class FilePathService {
         'spec.json'
       );
     } catch (error) {
-      Logger.error(error.message, 'PathService.getProjectConfigPath');
+      Logger.error(error.message, 'FilePathService.getProjectConfigPath');
       throw new HttpException(error.message, 500);
     }
   }
@@ -53,7 +53,7 @@ export class FilePathService {
         'settings.json'
       );
     } catch (error) {
-      Logger.error(error.message, 'PathService.getProjectSettingPath');
+      Logger.error(error.message, 'FilePathService.getProjectSettingPath');
       throw new HttpException(error.message, 500);
     }
   }
@@ -64,7 +64,7 @@ export class FilePathService {
         await this.folderPathService.getReportSavingFolderPath(projectName);
       return path.join(reportSavingFolder, `${reportName}`);
     } catch (error) {
-      Logger.error(error.message, 'PathService.getReportPath');
+      Logger.error(error.message, 'FilePathService.getReportPath');
       throw new HttpException(error.message, 500);
     }
   }
@@ -85,7 +85,7 @@ export class FilePathService {
       );
       return path.join(imageSavingFolder, `${testName}.png`);
     } catch (error) {
-      Logger.error(error.message, 'PathService.getImagePath');
+      Logger.error(error.message, 'FilePathService.getImagePath');
       throw new HttpException(error.message, 500);
     }
   }

@@ -40,7 +40,7 @@ export class FileService {
       );
       const jsonFiles = this.folderService.getJsonFilesFromDir(dirPath);
       const specFile = jsonFiles.find((file) => file.endsWith('.json'));
-      return this.readJsonFile(path.join(`${dirPath}.json`, specFile));
+      return this.readJsonFile(path.join(`${dirPath}`, specFile));
     } catch (error) {
       Logger.error(error.message, 'FileService.getSpecJsonByProject');
       throw new HttpException(error.message, 500);

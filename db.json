@@ -1,0 +1,114 @@
+{
+  "projects": [
+    {
+      "rootProject": "D:\\projects",
+      "projectName": "[TW] drunk_elephant",
+      "projectSlug": "tw_drunk_elephant",
+      "projectDescription": "This is a project for Drunk Elephant",
+      "testType": "Tag Verifier",
+      "googleSpreadsheetLink": "google sheet link",
+      "tagManagerUrl": "tagManagerUrl",
+      "gtmId": "gtmId",
+      "containerName": "containerName",
+      "version": "1.0.0",
+      "preventNavigationEvents": [
+        "select_promotion",
+        "select_item",
+        "coupon_submission"
+      ],
+      "dataLayerRecordings": [
+        {
+          "name": "add_payment_info.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "add_shipping_info.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "add_to_cart.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "add_to_wishlist.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "begin_checkout.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "coupon_submission.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "login.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "product_interaction.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "purchase.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "remove_from_cart.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "remove_from_wishlist.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "search.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "select_item.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "site_search_cancel.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "social_follow.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "store_locator.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "view_cart.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "view_item.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "view_item_list.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        },
+        {
+          "name": "virtualPageview.json",
+          "path": "D:\\projects\\[TW] drunk_elephant\\dataLayer_recordings"
+        }
+      ],
+      "dataLayerInspectionResults": [
+        "D:\\projects\\D:\\projects\\[TW] drunk_elephant\\dataLayer_inspection_results\\dataLayer_inspection_results\\add_shipping_info",
+        "D:\\projects\\D:\\projects\\[TW] drunk_elephant\\dataLayer_inspection_results\\dataLayer_inspection_results\\add_to_cart",
+        "D:\\projects\\D:\\projects\\[TW] drunk_elephant\\dataLayer_inspection_results\\dataLayer_inspection_results\\add_to_wishlist",
+        "D:\\projects\\D:\\projects\\[TW] drunk_elephant\\dataLayer_inspection_results\\dataLayer_inspection_results\\login",
+        "D:\\projects\\D:\\projects\\[TW] drunk_elephant\\dataLayer_inspection_results\\dataLayer_inspection_results\\purchase",
+        "D:\\projects\\D:\\projects\\[TW] drunk_elephant\\dataLayer_inspection_results\\dataLayer_inspection_results\\remove_from_wishlist",
+        "D:\\projects\\D:\\projects\\[TW] drunk_elephant\\dataLayer_inspection_results\\dataLayer_inspection_results\\search",
+        "D:\\projects\\D:\\projects\\[TW] drunk_elephant\\dataLayer_inspection_results\\dataLayer_inspection_results\\select_item",
+        "D:\\projects\\D:\\projects\\[TW] drunk_elephant\\dataLayer_inspection_results\\dataLayer_inspection_results\\view_item"
+      ]
+    }
+  ]
+}

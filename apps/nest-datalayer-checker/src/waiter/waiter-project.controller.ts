@@ -148,4 +148,18 @@ export class WaiterProjectController {
       testName
     );
   }
+
+  @ApiOperation({
+    summary: 'Read the specs of a project',
+    description: 'This endpoint reads the specs of a project.',
+  })
+  @ApiQuery({
+    name: 'projectName',
+    description: 'The name of the project to which the event belongs.',
+  })
+  @Header('Content-Type', 'application/json')
+  @Get('/projects-specs')
+  async getSpecJsonByProject(@Query('projectName') projectName: string) {
+    return await this.waiterProjectService.getSpecJsonByProject(projectName);
+  }
 }

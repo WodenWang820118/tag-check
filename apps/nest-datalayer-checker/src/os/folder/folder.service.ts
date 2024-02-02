@@ -25,7 +25,7 @@ export class FolderService {
       const files = readdirSync(dirPath);
       return files.filter((file) => path.extname(file) === '.json');
     } catch (error) {
-      Logger.error(error.message, 'FileService.getJsonFilesFromDir');
+      Logger.error(error.message, 'FolderService.getJsonFilesFromDir');
       throw new HttpException(error.message, 500);
     }
   }
