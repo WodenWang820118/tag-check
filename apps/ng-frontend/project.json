@@ -8,19 +8,26 @@
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:application",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/apps/ng-frontend",
         "index": "apps/ng-frontend/src/index.html",
         "browser": "apps/ng-frontend/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": [
+          "zone.js"
+        ],
         "tsConfig": "apps/ng-frontend/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
           "apps/ng-frontend/src/favicon.ico",
           "apps/ng-frontend/src/assets"
         ],
-        "styles": ["apps/ng-frontend/src/styles.scss"],
+        "styles": [
+          "@angular/material/prebuilt-themes/indigo-pink.css",
+          "apps/ng-frontend/src/styles.scss"
+        ],
         "scripts": []
       },
       "configurations": {
@@ -70,7 +77,9 @@
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
         "jestConfig": "apps/ng-frontend/jest.config.ts"
       }
