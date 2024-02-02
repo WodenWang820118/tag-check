@@ -30,10 +30,7 @@ export class ProjectService {
     try {
       const settingsFilePath =
         await this.filePathService.getProjectSettingFilePath(projectName);
-      return {
-        path: settingsFilePath,
-        settings: this.fileService.readJsonFile(settingsFilePath),
-      };
+      return this.fileService.readJsonFile(settingsFilePath);
     } catch (error) {
       Logger.error(error.message, 'ProjectService.getProjectSettings');
       throw new HttpException(error.message, 500);
@@ -93,17 +90,16 @@ export class ProjectService {
       Logger.log(projects, 'ProjectService.getProjects');
       // Map each project to a promise of its settings
       const projectSettingsPromises = projects.map(async (project) => {
-        const projectConfig =
-          await this.filePathService.getProjectConfigFilePath(project);
-        const projectSettings = await this.getProjectSettings(project);
+        // const projectConfig =
+        //   await this.filePathService.getProjectConfigFilePath(project);
+        const settings = await this.getProjectSettings(project);
         const projectDataLayerRecordings =
           await this.getProjectDataLayerRecordings(project);
         const projectDataLayerInspectionResults =
           await this.getProjectDataLayerInspectionResults(project);
         return {
-          name: project,
-          config: projectConfig,
-          settingsData: projectSettings,
+          projectName: project,
+          ...settings,
           dataLayerRecordings: projectDataLayerRecordings,
           dataLayerInspectionResults: projectDataLayerInspectionResults,
         };
