@@ -175,4 +175,8 @@ export class WaiterProjectService {
   async readReport(projectName: string, reportName: string) {
     return await this.fileService.readReport(projectName, reportName);
   }
+
+  async getSpecJsonByProject(projectName: string) {
+    return await this.fileService.getSpecJsonByProject({ name: projectName });
+  }
 }
