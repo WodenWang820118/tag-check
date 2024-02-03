@@ -8,9 +8,10 @@ export interface Project {
   tagManagerUrl: string;
   version: string;
   preventNavigationEvents: string[];
-  dataLayerRecordings: {
+  recordings: {
     name: string;
     path: string;
   }[];
-  dataLayerInspectionResults: string[];
+  reports: string[];
+  specs: any[];
 }
