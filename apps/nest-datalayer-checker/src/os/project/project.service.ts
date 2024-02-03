@@ -90,18 +90,21 @@ export class ProjectService {
       Logger.log(projects, 'ProjectService.getProjects');
       // Map each project to a promise of its settings
       const projectSettingsPromises = projects.map(async (project) => {
-        // const projectConfig =
-        //   await this.filePathService.getProjectConfigFilePath(project);
         const settings = await this.getProjectSettings(project);
-        const projectDataLayerRecordings =
-          await this.getProjectDataLayerRecordings(project);
-        const projectDataLayerInspectionResults =
-          await this.getProjectDataLayerInspectionResults(project);
+        const recordings = await this.getProjectDataLayerRecordings(project);
+        const reports = await this.getProjectDataLayerInspectionResults(
+          project
+        );
+        const specs = await this.fileService.getSpecJsonByProject({
+          name: project,
+        });
+
         return {
           projectName: project,
           ...settings,
-          dataLayerRecordings: projectDataLayerRecordings,
-          dataLayerInspectionResults: projectDataLayerInspectionResults,
+          recordings: recordings,
+          specs: specs,
+          reports: reports,
         };
       });
 
