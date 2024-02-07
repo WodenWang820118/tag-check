@@ -1,15 +1,9 @@
 import {
   BaseDataLayerEvent,
   StrictDataLayerEvent,
+  ValidationStrategy,
 } from '../../interfaces/dataLayer.interface';
-import { ValidationResult, collectKeys, compareKeys } from '../utilities';
-
-export interface ValidationStrategy {
-  validateDataLayer(
-    dataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[],
-    spec: StrictDataLayerEvent
-  ): ValidationResult;
-}
+import { collectKeys, compareKeys } from '../utilities';
 
 export class EcommerceEventValidationStrategy implements ValidationStrategy {
   ecommerceReset = false;

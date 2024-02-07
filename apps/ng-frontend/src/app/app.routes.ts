@@ -14,9 +14,7 @@ export const appRoutes: Route[] = [
   {
     path: 'projects/:slug',
     loadChildren: () =>
-      import('./views/project-view/project-view.module').then(
-        (m) => m.ProjectViewModule
-      ),
+      import('./modules/project/project.module').then((m) => m.ProjectModule),
   },
   // {
   //   path: 'home',

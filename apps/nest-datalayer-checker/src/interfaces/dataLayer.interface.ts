@@ -47,3 +47,18 @@ export interface StrictDataLayerEvent {
   ecommerce?: BaseECommerce;
   [key: string]: string | number | BaseECommerce | undefined | null;
 }
+
+export interface ValidationResult {
+  passed: boolean;
+  message: string;
+  incorrectInfo?: string[];
+  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
+}
+
+export interface ValidationStrategy {
+  validateDataLayer(
+    dataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[],
+    spec: StrictDataLayerEvent
+  ): ValidationResult;
+}

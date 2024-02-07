@@ -11,6 +11,7 @@ import { ProjectInitializationModule } from './project-initialization/project-in
 import { ProjectInitializationService } from './project-initialization/project-initialization.service';
 import { FolderModule } from './folder/folder.module';
 import { FolderService } from './folder/folder.service';
+import { AbstractReportModule } from './abstract-report/abstract-report.module';
 
 const modules = [
   PathModule,
@@ -20,6 +21,7 @@ const modules = [
   ProjectInitializationModule,
   FolderModule,
   ConfigurationModule,
+  AbstractReportModule,
 ];
 
 const services = [
