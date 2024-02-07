@@ -12,6 +12,16 @@ export interface Project {
     name: string;
     path: string;
   }[];
-  reports: string[];
+  reports: TestCase[];
   specs: any[];
+}
+
+export interface TestCase {
+  eventName: string;
+  passed: boolean;
+  dataLayerSpec: any;
+  incorrectInfo?: string[];
+  completedTime?: Date;
+  dataLayer?: any;
+  message?: string;
 }

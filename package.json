@@ -7,7 +7,9 @@
   "license": "MIT",
   "scripts": {
     "backend": "nx serve nest-datalayer-checker --watch",
-    "mock-backend": "json-server db.json --id projectSlug --watch",
+    "mock-project-backend": "json-server db.json --id projectSlug --watch --port 3000",
+    "mock-recording-backend": "json-server db.json --id title --watch --port 3001",
+    "mock-backend": "concurrently \"npm run mock-project-backend\" \"npm run mock-recording-backend\"",
     "build-backend": "nx build nest-datalayer-checker",
     "frontend": "nx serve frontend",
     "ng-frontend": "nx serve ng-frontend",

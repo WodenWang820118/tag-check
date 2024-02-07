@@ -5,6 +5,8 @@ import { XlsxReportService } from '../os/xlsx-report/xlsx-report.service';
 import puppeteer, { Credentials } from 'puppeteer';
 import { getCurrentTimestamp } from './utils';
 import { FileService } from '../os/file/file.service';
+import { AbstractReportService } from '../os/abstract-report/abstract-report.service';
+import { ValidationResult } from '../interfaces/dataLayer.interface';
 
 @Injectable()
 export class WaiterDataLayerService {
@@ -12,7 +14,8 @@ export class WaiterDataLayerService {
     private fileService: FileService,
     private xlsxReportService: XlsxReportService,
     private inspectorService: InspectorService,
-    private gtmOperatorService: GtmOperatorService
+    private gtmOperatorService: GtmOperatorService,
+    private abstractReportService: AbstractReportService
   ) {}
 
   // 3) inspect single operation/event
@@ -68,6 +71,13 @@ export class WaiterDataLayerService {
       data,
       testName,
       projectName
+    );
+
+    // 3.4) write the .json file for other information such as last test time and the test result
+    await this.abstractReportService.writeSingleAbstractTestResultJson(
+      projectName,
+      testName,
+      data[0].dataLayerResult
     );
 
     Logger.log('Single test is done!', 'WaiterService.inspectSingleEvent');
@@ -137,6 +147,13 @@ export class WaiterDataLayerService {
       'Sheet1',
       projectName
     );
+
+    // TODO: 3.4 report to each test
+    await this.abstractReportService.writeProjectAbstractTestRsultJson(
+      projectName,
+      data.map((item) => item.dataLayerResult)
+    );
+
     Logger.log('All tests are done!', 'WaiterService.inspectProject');
     Logger.log('Browser is closed!', 'WaiterService.inspectProject');
     return data;
