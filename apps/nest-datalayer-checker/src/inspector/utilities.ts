@@ -8,13 +8,6 @@ export enum ValidationStrategyType {
   ECOMMERCE = 'ecommerce',
   OLDGA4EVENTS = 'oldGA4Events',
 }
-export interface ValidationResult {
-  passed: boolean;
-  message: string;
-  incorrectInfo?: string[];
-  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
-  dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
-}
 
 export function collectKeys(obj: any, currentPath = '', keys: string[] = []) {
   for (const key of Object.keys(obj)) {

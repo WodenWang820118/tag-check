@@ -1,81 +1,104 @@
+import { ProjectDataSourceService } from '../../services/project-data-source/project-data-source.service';
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
-import { MatTableModule } from '@angular/material/table';
-import { Observable, map } from 'rxjs';
-import { Project } from '../../models/project.interface';
-
-export interface PeriodicElement {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  { position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H' },
-  { position: 2, name: 'Helium', weight: 4.0026, symbol: 'He' },
-  { position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li' },
-  { position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be' },
-  { position: 5, name: 'Boron', weight: 10.811, symbol: 'B' },
-  { position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C' },
-  { position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N' },
-  { position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O' },
-  { position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F' },
-  { position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne' },
-];
+import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { ProjectService } from '../../services/project/project.service';
+import { MatIconModule } from '@angular/material/icon';
+import {
+  animate,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
+import { MatButtonModule } from '@angular/material/button';
+import { combineLatest, take, tap } from 'rxjs';
+import { TestCase } from '../../models/project.interface';
+import { RouterModule } from '@angular/router';
+import { TestCaseService } from '../../services/test-case/test-case.service';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-tests-table',
   standalone: true,
-  imports: [CommonModule, MatTableModule],
-  template: ` <div class="tests-table">
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-      <!--- Note that these columns can be defined in any order.
-        The actual rendered columns are set as a property on the row definition" -->
-
-      <!-- Position Column -->
-      <ng-container matColumnDef="position">
-        <th mat-header-cell *matHeaderCellDef>No.</th>
-        <td mat-cell *matCellDef="let element">{{ element.position }}</td>
-      </ng-container>
-
-      <!-- Name Column -->
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef>Name</th>
-        <td mat-cell *matCellDef="let element">{{ element.name }}</td>
-      </ng-container>
-
-      <!-- Weight Column -->
-      <ng-container matColumnDef="weight">
-        <th mat-header-cell *matHeaderCellDef>Weight</th>
-        <td mat-cell *matCellDef="let element">{{ element.weight }}</td>
-      </ng-container>
-
-      <!-- Symbol Column -->
-      <ng-container matColumnDef="symbol">
-        <th mat-header-cell *matHeaderCellDef>Symbol</th>
-        <td mat-cell *matCellDef="let element">{{ element.symbol }}</td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-    </table>
-  </div>`,
-  styles: `
-   
-  `,
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatIconModule,
+    MatButtonModule,
+    RouterModule,
+    MatPaginatorModule,
+    MatInputModule,
+  ],
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed,void', style({ height: '0px', minHeight: '0' })),
+      state('expanded', style({ height: '*' })),
+      transition(
+        'expanded <=> collapsed',
+        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
+      ),
+    ]),
+  ],
+  templateUrl: './tests-table.component.html',
+  styleUrls: ['./tests-table.component.scss'],
 })
 export class TestsTableComponent {
-  displayedColumns: string[] = ['name', 'dL Specs', 'Last Modified', 'Actions'];
-  displayedColumns2!: string[];
-  dataSource = ELEMENT_DATA;
-  @Input() project$!: Observable<Project>;
+  columnsToDisplay = ['eventName', 'passed', 'completedTime'];
+  columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
+  expandedElement: TestCase | null = null;
 
-  constructor() {
-    this.project$.pipe(
-      map((project) => {
-        this.displayedColumns2 = Object.keys(project);
-      })
-    );
+  testDataSource!: MatTableDataSource<TestCase>;
+  dataToDisplay: TestCase[] = [];
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  constructor(
+    private projectService: ProjectService,
+    private testCaseService: TestCaseService,
+    private projectDataSourceService: ProjectDataSourceService
+  ) {
+    projectService.currentProject$.subscribe((project) => {
+      this.testDataSource = new MatTableDataSource(project.reports);
+      this.testDataSource.paginator = this.paginator;
+      this.testDataSource.sort = this.sort;
+      this.projectDataSourceService.setData(project.reports);
+    });
+  }
+
+  addTest(test: TestCase) {
+    this.dataToDisplay = [...this.dataToDisplay, test];
+    this.projectDataSourceService.setData(this.dataToDisplay);
+    // TODO: add a new test case to the project
+
+    combineLatest([
+      this.projectService.currentProject$,
+      this.projectDataSourceService.connect(),
+    ])
+      .pipe(
+        tap(([project, data]) => {
+          project.specs = data;
+          this.projectService.updateProject(project);
+        })
+      )
+      .subscribe();
+  }
+
+  setTestCase(eventName: string) {
+    combineLatest([this.projectService.currentProject$])
+      .pipe(
+        take(1),
+        tap(([project]) => {
+          if (!project) return;
+          const testCase = project.reports.find(
+            (item) => item.eventName === eventName
+          );
+          this.testCaseService.setTestCase(testCase);
+        })
+      )
+      .subscribe();
   }
 }

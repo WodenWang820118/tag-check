@@ -4,12 +4,12 @@ import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import {
   EcommerceEventValidationStrategy,
   OldGA4EventsValidationStrategy,
-  ValidationStrategy,
 } from './strategy/dataLayer-validation-strategy';
 import { ValidationStrategyType, determineStrategy } from './utilities';
 import {
   BaseDataLayerEvent,
   StrictDataLayerEvent,
+  ValidationStrategy,
 } from '../interfaces/dataLayer.interface';
 import { RequestProcessorService } from './request-processor/request-processor.service';
 import { Browser, Credentials, Page } from 'puppeteer';
@@ -241,7 +241,11 @@ export class InspectorService {
             spec
           );
         default:
-          return false;
+          return {
+            passed: false,
+            message: "The test didn't pass",
+            dataLayerSpec: spec,
+          };
       }
     } catch (error) {
       throw new HttpException(`${error.message}`, 500);

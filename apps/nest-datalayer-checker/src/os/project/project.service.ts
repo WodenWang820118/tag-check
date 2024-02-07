@@ -3,6 +3,8 @@ import { FileService } from '../file/file.service';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
+import { join } from 'path';
+import { statSync } from 'fs';
 
 /**
  * @description
@@ -55,20 +57,30 @@ export class ProjectService {
 
   async getProjectDataLayerInspectionResults(projectName: string) {
     try {
+      const results = [];
+
       const resultFolderPath =
         await this.folderPathService.getInspectionResultFolderPath(projectName);
-      const results = this.folderService
+
+      const eventFolderNames = this.folderService
         .readFolderFiles(resultFolderPath)
         .filter((dirent) => dirent.isDirectory())
-        .map(
-          async (dirent) =>
-            await this.folderPathService.getInspectionEventFolderPath(
-              resultFolderPath,
-              dirent.name
-            )
-        );
+        .map((dirent) => dirent.name);
 
-      return Promise.all(results);
+      for (const name of eventFolderNames) {
+        const filePath = join(resultFolderPath, name, 'abstract.json');
+        const abstractResult = this.fileService.readJsonFile(filePath);
+
+        const completedTime = statSync(filePath).mtime;
+
+        // TODO: get file written time as completedTime
+        results.push({
+          eventName: name,
+          completedTime: completedTime,
+          ...abstractResult,
+        });
+      }
+      return results;
     } catch (error) {
       Logger.error(
         error.message,
@@ -87,7 +99,7 @@ export class ProjectService {
         .filter((dirent) => dirent.isDirectory())
         .map((dirent) => dirent.name);
 
-      Logger.log(projects, 'ProjectService.getProjects');
+      // Logger.log(projects, 'ProjectService.getProjects');
       // Map each project to a promise of its settings
       const projectSettingsPromises = projects.map(async (project) => {
         const settings = await this.getProjectSettings(project);
@@ -111,7 +123,7 @@ export class ProjectService {
       // Resolve all promises before returning
       const projectsAll = await Promise.all(projectSettingsPromises);
 
-      Logger.log(projectsAll, 'ProjectService.getProjects');
+      // Logger.log(projectsAll, 'ProjectService.getProjects');
       return projectsAll;
     } catch (error) {
       Logger.error(error.message, 'ProjectService.getProjects');

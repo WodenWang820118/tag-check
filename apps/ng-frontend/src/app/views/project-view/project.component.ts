@@ -22,23 +22,22 @@ import { TestsTableComponent } from '../../components/tests-table/tests-table.co
     SideNavbarComponent,
     TestsTableComponent,
   ],
-  template: ` <div class="project">
-    <div class="project__content">
-      <div class="container">
-        <app-side-navbar
-          class="grid_item"
-          [project$]="project$"
-          [projects$]="projects$"
-        ></app-side-navbar>
-        <div
-          class="grid_item"
-          style="border-left: 1px solid; padding: 2rem 4rem;"
-        >
-          <!-- <app-tests-table [project$]="project$"></app-tests-table> -->
+  template: `
+    <div class="project">
+      <div class="project__content">
+        <div class="container">
+          <app-side-navbar
+            class="grid_item"
+            [project$]="project$"
+            [projects$]="projects$"
+          ></app-side-navbar>
+          <div class="grid_item project__table">
+            <app-tests-table></app-tests-table>
+          </div>
         </div>
       </div>
     </div>
-  </div>`,
+  `,
   styles: `
     .project {
       .container {
@@ -46,6 +45,14 @@ import { TestsTableComponent } from '../../components/tests-table/tests-table.co
         grid-template-columns: 1fr 3fr; /* Creates two columns */
         gap: 10px; /* Space between rows and columns */
         height: 100vh;
+      }
+
+      &__table {
+        border-left: 1px solid;
+        padding: 2rem 4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;        
       }
     }
   `,
