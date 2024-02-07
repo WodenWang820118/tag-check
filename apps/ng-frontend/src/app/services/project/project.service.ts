@@ -8,8 +8,12 @@ import { BehaviorSubject, Subject, tap } from 'rxjs';
 })
 export class ProjectService {
   mockUrl = 'http://localhost:3000/projects';
+
   currentProject: Subject<Project> = new BehaviorSubject({} as Project);
   currentProject$ = this.currentProject.asObservable();
+
+  projectsData: Subject<Project[]> = new BehaviorSubject([] as Project[]);
+  projectsData$ = this.projectsData.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -41,5 +45,9 @@ export class ProjectService {
         console.log('switched to project', project);
       })
     );
+  }
+
+  updateProject(project: Project) {
+    return this.http.put(`${this.mockUrl}/${project.projectSlug}`, project);
   }
 }

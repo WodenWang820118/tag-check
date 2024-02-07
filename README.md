@@ -29,13 +29,25 @@ There could be more configurations in the future.
 
 ## Frontend
 
+### React
+
 Please use the following command to run the frontend server:
 
 ```bash
 npm run frontend
 ```
 
+### Angular
+
+The Angular is in parallel with the React. It is on purpose to foster frontend development. Please use the following command to run the Angular server:
+
+```bash
+npm run ng-frontend
+```
+
 ## Backend
+
+### NestJS
 
 Please use the following command to run the backend server:
 
@@ -44,6 +56,14 @@ npm run backend
 ```
 
 To see exposed APIs, please route to http://localhost:8080/api.
+
+### json-server
+
+It is on purpose to use it to foster frontend development. Please use the following command to run the json-server:
+
+```bash
+npm run mock-backend
+```
 
 ## Application
 

@@ -6,8 +6,10 @@ import { ToolbarComponent } from './components/toolbar/toolbar.component';
   standalone: true,
   imports: [RouterModule, ToolbarComponent],
   selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss',
+  template: `
+    <app-toolbar></app-toolbar>
+    <router-outlet></router-outlet>
+  `,
 })
 export class AppComponent {
   title = 'ng-frontend';
