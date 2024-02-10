@@ -1,11 +1,7 @@
 <div class="tests-table">
   <div class="tests-table__header">
     <div class="space"></div>
-    <button
-      mat-raised-button
-      color="primary"
-      [routerLink]="['./new-test-case']"
-    >
+    <button mat-raised-button color="primary" [routerLink]="['new-report']">
       Create New Test
     </button>
   </div>
@@ -69,7 +65,7 @@
             mat-raised-button
             color="primary"
             [routerLink]="['./', element.eventName]"
-            (click)="setTestCase(element.eventName)"
+            (click)="setReportDetails(element.eventName)"
           >
             Details
           </button>

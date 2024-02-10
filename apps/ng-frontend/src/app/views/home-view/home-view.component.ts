@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToolbarComponent } from '../../components/toolbar/toolbar.component';
 import { ProjectListComponent } from '../../components/project-list/project-list.component';
-import { ProjectService } from '../../services/project/project.service';
+import { ProjectService } from '../../services/api/project/project.service';
 import { Observable } from 'rxjs';
 import { Project } from '../../models/project.interface';
 

@@ -1,0 +1,430 @@
+{
+  "specs": [
+    {
+      "projectSlug": "cpb-sfcc-ec",
+      "specs": []
+    },
+    {
+      "projectSlug": "gtm_config_generator",
+      "specs": [
+        {
+          "event": "btn_upload_click"
+        },
+        {
+          "event": "btn_convert_click"
+        },
+        {
+          "event": "btn_copy_click"
+        },
+        {
+          "event": "btn_download_click"
+        }
+      ]
+    },
+    {
+      "projectSlug": "drunk_elephant",
+      "specs": [
+        {
+          "event": "view_item",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "siteLocation": "$siteLocation",
+          "ecommerce": {
+            "currency": "$currencyCode",
+            "value": "$transactionTotal",
+            "items": [
+              {
+                "item_name": "$productName",
+                "item_id": "$productId",
+                "price": "$productPrice",
+                "item_brand": "$productBrand",
+                "item_category": "$productCategory/$productSubCategory",
+                "item_category2": "$productType",
+                "item_category3": "$productOutOfStock",
+                "item_category5": "$collectionName",
+                "item_list_id": "$productPosition",
+                "item_list_name": "$listType/$listName",
+                "item_auto_replen": "$productAutoReplen",
+                "item_variant": "$productVariantID"
+              }
+            ]
+          }
+        },
+        {
+          "event": "view_item_list",
+          "currency": "$currencyCode",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "siteLocation": "$siteLocation",
+          "ecommerce": {
+            "item_list_id": "$productPosition",
+            "item_list_name": "$listType/$listName",
+            "items": [
+              {
+                "item_name": "$productName",
+                "item_id": "$productId",
+                "price": "$productPrice",
+                "item_brand": "$productBrand",
+                "item_category": "$productCategory/$productSubCategory",
+                "item_category2": "$productType",
+                "item_category3": "$productOutOfStock",
+                "item_category5": "$collectionName",
+                "item_auto_replen": "$productAutoReplen",
+                "item_variant": "$productVariantID"
+              }
+            ]
+          }
+        },
+        {
+          "event": "add_to_cart",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "siteLocation": "$siteLocation",
+          "addToCartType": "$addToCartType",
+          "ecommerce": {
+            "currency": "$currencyCode",
+            "value": "$transactionTotal",
+            "items": [
+              {
+                "item_name": "$productName",
+                "item_id": "$productId",
+                "price": "$productPrice",
+                "item_brand": "$productBrand",
+                "item_list_id": "$productPosition",
+                "item_list_name": "$listType/$listName",
+                "item_category": "$productCategory/$productSubCategory",
+                "item_category2": "$productType",
+                "item_category3": "$productOutOfStock",
+                "item_category4": "$productOrderType",
+                "item_category5": "$collectionName",
+                "quantity": "$productQuantity",
+                "item_auto_replen": "$productAutoReplen",
+                "item_variant": "$productVariantID"
+              }
+            ]
+          }
+        },
+        {
+          "event": "view_cart",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "ecommerce": {
+            "currency": "$currencyCode",
+            "value": "$transactionTotal",
+            "items": [
+              {
+                "item_name": "$productName",
+                "item_id": "$productId",
+                "price": "$productPrice",
+                "item_brand": "$productBrand",
+                "item_category": "$productCategory/$productSubCategory",
+                "item_category2": "$productType",
+                "item_category3": "$productOutOfStock",
+                "item_variant": "$productVariantId",
+                "quantity": "$productQuantity",
+                "item_category4": "$productOrderType",
+                "item_category5": "$collectionName",
+                "item_auto_replen": "$productAutoReplen"
+              }
+            ]
+          }
+        },
+        {
+          "event": "remove_from_cart",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "ecommerce": {
+            "currency": "$currencyCode",
+            "value": "$transactionTotal",
+            "items": [
+              {
+                "item_name": "$productName",
+                "item_id": "$productId",
+                "price": "$productPrice",
+                "item_brand": "$productBrand",
+                "item_category": "$productCategory/$productSubCategory",
+                "item_category2": "$productType",
+                "item_category4": "$productOrderType",
+                "item_category5": "$collectionName",
+                "quantity": "$productQuantity",
+                "item_auto_replen": "$productAutoReplen",
+                "item_variant": "$productVariantID"
+              }
+            ]
+          }
+        },
+        {
+          "event": "add_shipping_info",
+          "funnelType": "$funnelType",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "giftWrapping": "$giftWrapping",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "ecommerce": {
+            "shipping_tier": "shippingType",
+            "currency": "$currencyCode",
+            "value": "$transactionTotal",
+            "items": [
+              {
+                "item_name": "$productName",
+                "item_id": "$productId",
+                "price": "$productPrice",
+                "item_brand": "$productBrand",
+                "item_category": "$productCategory/$productSubCategory",
+                "item_category2": "$productType",
+                "item_category3": "$productOutOfStock",
+                "item_category4": "$productOrderType",
+                "item_category5": "$collectionName",
+                "quantity": "$productQuantity",
+                "item_auto_replen": "$productAutoReplen",
+                "item_variant": "$productVariantID"
+              }
+            ]
+          }
+        },
+        {
+          "event": "add_payment_info",
+          "funnelType": "$funnelType",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "giftWrapping": "$giftWrapping",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "ecommerce": {
+            "payment_type": "$paymentType",
+            "currency": "$currencyCode",
+            "value": "$transactionTotal",
+            "items": [
+              {
+                "item_name": "$productName",
+                "item_id": "$productId",
+                "price": "$productPrice",
+                "item_brand": "$productBrand",
+                "item_category": "$productCategory/$productSubCategory",
+                "item_category2": "$productType",
+                "item_category3": "$productOutOfStock",
+                "item_category4": "$productOrderType",
+                "item_category5": "$collectionName",
+                "quantity": "$productQuantity",
+                "item_auto_replen": "$productAutoReplen",
+                "item_variant": "$productVariantID"
+              }
+            ]
+          }
+        },
+        {
+          "event": "purchase",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "loginStatus": "$loginStatus",
+          "transactionTotalWithoutCoupon": "$transactionTotalWithoutCoupon",
+          "giftWrapping": "$giftWrapping",
+          "funnelType": "$funnelType",
+          "payment_type": "$paymentType",
+          "siteLocation": "$siteLocation",
+          "ecommerce": {
+            "transaction_id": "$transactionId",
+            "value": "$transactionTotal",
+            "tax": "$transactionTax",
+            "shipping": "$transactionShipping",
+            "currency": "$currencyCode",
+            "coupon": "$transactionCoupon",
+            "items": [
+              {
+                "item_id": "$productId",
+                "item_name": "$productName",
+                "item_category": "$productCategory/$productSubCategory",
+                "item_category2": "$productType",
+                "item_category4": "$productOrderType",
+                "item_category5": "$collectionName",
+                "price": "$productPrice",
+                "quantity": "$productQuantity",
+                "item_brand": "$productBrand",
+                "coupon": "$productCoupon",
+                "item_auto_replen": "$productAutoReplen",
+                "item_variant": "$productVariantID"
+              }
+            ]
+          }
+        },
+        {
+          "event": "select_item",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "siteLocation": "$siteLocation",
+          "ecommerce": {
+            "item_list_id": "$productPosition",
+            "item_list_name": "$listName/$listType",
+            "items": [
+              {
+                "item_name": "$productName",
+                "item_id": "$productId",
+                "price": "$productPrice",
+                "item_brand": "$productBrand",
+                "item_category": "$productCategory/$productSubCategory",
+                "item_category2": "$productType",
+                "item_category3": "$productOutOfStock",
+                "item_category5": "$collectionName",
+                "item_auto_replen": "$productAutoReplen",
+                "item_variant": "$productVariantID"
+              }
+            ]
+          }
+        },
+        {
+          "event": "begin_checkout",
+          "funnelType": "$funnelType",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "giftWrapping": "$giftWrapping",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "ecommerce": {
+            "currency": "$currencyCode",
+            "value": "$transactionTotal",
+            "items": [
+              {
+                "item_name": "$productName",
+                "item_id": "$productId",
+                "price": "$productPrice",
+                "item_brand": "$productBrand",
+                "item_category": "$productCategory/$productSubCategory",
+                "item_category2": "$productType",
+                "item_category3": "$productOutOfStock",
+                "item_category4": "$productOrderType",
+                "item_category5": "$collectionName",
+                "quantity": "$productQuantity",
+                "item_variant": "$productVariantID"
+              }
+            ]
+          }
+        },
+        {
+          "event": "coupon_submission",
+          "coupon": "$productCoupon",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory"
+        },
+        {
+          "event": "add_to_wishlist",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "ecommerce": {
+            "items": [
+              {
+                "item_name": "$productName",
+                "item_id": "$productId",
+                "item_category": "$productCategory/$productSubCategory",
+                "item_variant": "$productVariantID"
+              }
+            ]
+          }
+        },
+        {
+          "event": "product_interaction",
+          "interactionType": "$interactionType",
+          "item_category": "$productCategory/$productSubCategory",
+          "item_name": "$productName",
+          "item_id": "$productId",
+          "item_variant": "$productVariantID",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory"
+        },
+        {
+          "event": "search",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "cat55": "$siteSearchCategory",
+          "search_term": "$siteSearchKeyword",
+          "res55": "$siteSearchResults"
+        },
+        {
+          "event": "site_search_cancel",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "language": "$language",
+          "websiteCountry": "$websiteCountry"
+        },
+        {
+          "event": "store_locator",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory"
+        },
+        {
+          "event": "social_follow",
+          "socialNetwork": "$socialNetwork",
+          "socialAction": "$socialAction",
+          "siteLocation": "$siteLocation",
+          "websiteCountry": "$websiteCountry",
+          "language": "$websiteLanguage",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory"
+        },
+        {
+          "event": "sign_up",
+          "accountType": "$accountType",
+          "crmId": "$crmId",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "loginLocation": "$loginLocation"
+        },
+        {
+          "event": "virtualPageview",
+          "checkoutStep": "2",
+          "funnelType": "$funnelType",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory"
+        },
+        {
+          "event": "remove_from_wishlist",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "item_id": "$productId",
+          "item_category": "$productCategory/$productSubCategory",
+          "item_variant": "$productVariantID",
+          "item_name": "$productName"
+        },
+        {
+          "event": "login",
+          "accountType": "$accountType",
+          "websiteCountry": "$websiteCountry",
+          "language": "$language",
+          "pageCategory": "$pageCategory",
+          "pageSubCategory": "$pageSubCategory",
+          "crmId": "$crmId",
+          "loginLocation": "$loginLocation"
+        }
+      ]
+    },
+    {
+      "projectSlug": "test-1",
+      "specs": [
+        {
+          "event": "page_view",
+          "page_path": "$page_path",
+          "page_title": "$page_title",
+          "page_location": "$page_location"
+        }
+      ]
+    }
+  ]
+}

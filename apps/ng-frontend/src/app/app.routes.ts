@@ -12,7 +12,7 @@ export const appRoutes: Route[] = [
     component: InitProjectViewComponent,
   },
   {
-    path: 'projects/:slug',
+    path: 'projects/:projectSlug',
     loadChildren: () =>
       import('./modules/project/project.module').then((m) => m.ProjectModule),
   },

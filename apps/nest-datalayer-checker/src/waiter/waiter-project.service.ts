@@ -12,6 +12,8 @@ import {
   CONFIG_ROOT_PATH,
 } from '../configs/project.config';
 
+// TODO: endpoints for the frontend to call
+// please look at the collection of db.json files
 @Injectable()
 export class WaiterProjectService {
   specParser: SpecParser = new SpecParser();
