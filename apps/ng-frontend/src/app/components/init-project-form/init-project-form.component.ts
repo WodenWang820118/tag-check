@@ -14,7 +14,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
-import { ProjectService } from '../../services/project/project.service';
+import { ProjectService } from '../../services/api/project/project.service';
+import { ConfigurationService } from '../../services/api/configuration/configuration.service';
+import { switchMap, take } from 'rxjs';
 
 @Component({
   selector: 'app-init-project-form',
@@ -95,7 +97,8 @@ export class InitProjectFormComponent {
   constructor(
     private fb: FormBuilder,
     private projectService: ProjectService,
-    private router: Router
+    private router: Router,
+    private configService: ConfigurationService
   ) {
     this.projectForm = this.fb.group({
       projectName: ['', Validators.required],
@@ -107,7 +110,22 @@ export class InitProjectFormComponent {
   }
 
   onSubmit() {
-    this.projectService.initProject(this.projectForm.value).subscribe();
-    this.router.navigate(['/projects', this.projectForm.value['projectSlug']]);
+    // TODO: Use switchMap to switch to the new project
+    this.configService
+      .getConfiguration('root')
+      .pipe(
+        take(1),
+        switchMap((rootProject) => {
+          this.router.navigate([
+            '/projects',
+            this.projectForm.value['projectSlug'],
+          ]);
+          return this.projectService.initProject(
+            rootProject.value,
+            this.projectForm.value
+          );
+        })
+      )
+      .subscribe();
   }
 }

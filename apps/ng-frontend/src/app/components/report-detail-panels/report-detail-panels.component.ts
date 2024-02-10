@@ -1,15 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Observable } from 'rxjs';
-import { Project, TestCase } from '../../models/project.interface';
+import { Observable, combineLatest, of, switchMap } from 'rxjs';
+import { ReportDetails } from '../../models/report.interface';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { RecordingService } from '../../services/recording/recording.service';
+import { RecordingService } from '../../services/api/recording/recording.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ProjectService } from '../../services/api/project/project.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'app-test-datail-panels',
+  selector: 'app-report-datail-panels',
   standalone: true,
   imports: [
     CommonModule,
@@ -30,7 +32,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         </mat-expansion-panel-header>
         <mat-panel-description>
           <pre class="json">{{
-            (testCase$ | async)?.dataLayerSpec | json
+            (reportDetails$ | async)?.dataLayerSpec | json
           }}</pre>
         </mat-panel-description>
       </mat-expansion-panel>
@@ -56,7 +58,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
             <mat-icon>edit</mat-icon>
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <pre class="json">{{ (testCase$ | async)?.dataLayer | json }}</pre>
+        <pre class="json">{{ (reportDetails$ | async)?.dataLayer | json }}</pre>
       </mat-expansion-panel>
     </mat-accordion>
   </div>`,
@@ -77,17 +79,31 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     }
   `,
 })
-export class TestDetailPanelsComponent implements OnInit {
+export class ReportDetailPanelsComponent implements OnInit {
   @Input() eventName!: string | undefined;
-  @Input() testCase$!: Observable<TestCase | undefined>;
-  @Input() project$!: Observable<Project | undefined>;
-  recording$!: Observable<any> | undefined;
+  @Input() reportDetails$!: Observable<ReportDetails | undefined>;
+  recording$!: Observable<any>;
 
-  constructor(private recordingService: RecordingService) {}
+  constructor(
+    private projectService: ProjectService,
+    private recordingService: RecordingService,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
-    this.recording$ = this.recordingService.getRecordingByEventName(
-      this.eventName
+    this.recording$ = combineLatest([
+      this.projectService.currentProject$,
+      this.reportDetails$,
+    ]).pipe(
+      switchMap(([project, reportDetails]) => {
+        if (!project || !reportDetails) return of(undefined);
+        console.log('project', project);
+        console.log('reportDetails', reportDetails);
+        return this.recordingService.getRecordingDetails(
+          project.projectSlug,
+          reportDetails?.eventName
+        );
+      })
     );
   }
 }
