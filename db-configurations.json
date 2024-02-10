@@ -1,0 +1,12 @@
+{
+  "configurations": [
+    {
+      "name": "root",
+      "value": "D:\\projects"
+    },
+    {
+      "name": "currentProject",
+      "value": "drunk_elephant"
+    }
+  ]
+}

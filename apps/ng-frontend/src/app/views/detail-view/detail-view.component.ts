@@ -1,30 +1,30 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subscription, tap } from 'rxjs';
-import { TestCase } from '../../models/project.interface';
 import { Router } from '@angular/router';
-import { TestCaseService } from '../../services/test-case/test-case.service';
-import { TestDetailPanelsComponent } from '../../components/test-detail-panels/test-detail-panels.component';
+import { ReportDetailsService } from '../../services/report-details/report-details.service';
+import { ReportDetailPanelsComponent } from '../../components/report-detail-panels/report-detail-panels.component';
+import { ReportDetails } from '../../models/report.interface';
 
 @Component({
   selector: 'app-detail-view',
   standalone: true,
-  imports: [CommonModule, TestDetailPanelsComponent],
+  imports: [CommonModule, ReportDetailPanelsComponent],
   template: ` <div class="detail">
     <div class="detail__header">
-      <h1>{{ (testCase$ | async)?.eventName }}</h1>
-      <p>{{ (testCase$ | async)?.passed }}</p>
-      <p>{{ (testCase$ | async)?.completedTime }}</p>
+      <h1>{{ (reportDetails$ | async)?.eventName }}</h1>
+      <p>{{ (reportDetails$ | async)?.passed }}</p>
+      <p>{{ (reportDetails$ | async)?.completedTime }}</p>
     </div>
     <div class="detail__content">
       <div class="detail__image">
         <p>Image Placeholder</p>
       </div>
       <div class="detail__panels">
-        <app-test-datail-panels
-          [testCase$]="testCase$"
-          [eventName]="(testCase$ | async)?.eventName"
-        ></app-test-datail-panels>
+        <app-report-datail-panels
+          [reportDetails$]="reportDetails$"
+          [eventName]="(reportDetails$ | async)?.eventName"
+        ></app-report-datail-panels>
       </div>
     </div>
   </div>`,
@@ -58,26 +58,29 @@ import { TestDetailPanelsComponent } from '../../components/test-detail-panels/t
   `,
 })
 export class DetailViewComponent implements OnInit, OnDestroy {
-  testCase$: Observable<TestCase | undefined>;
+  reportDetails$: Observable<ReportDetails | undefined>;
   subscriptions: Subscription[] = [];
 
-  constructor(public testCaseService: TestCaseService, private router: Router) {
-    this.testCase$ = this.testCaseService.testCase$;
+  constructor(
+    public reportDetailsService: ReportDetailsService,
+    private router: Router
+  ) {
+    this.reportDetails$ = this.reportDetailsService.reportDetails$;
   }
 
   ngOnInit(): void {
     // TODO: how to do image retrieval from the json server?
-    const testCaseSubscription = this.testCase$
+    const reportDetailsSubscription = this.reportDetails$
       .pipe(
-        tap((testCase) => {
-          if (!testCase) {
-            this.router.navigate(['..']);
+        tap((reportDetails) => {
+          if (!reportDetails) {
+            // this.router.navigate(['..']);
           }
         })
       )
       .subscribe();
 
-    this.subscriptions.push(testCaseSubscription);
+    this.subscriptions.push(reportDetailsSubscription);
   }
 
   ngOnDestroy() {

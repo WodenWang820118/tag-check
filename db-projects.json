@@ -1,0 +1,136 @@
+{
+  "projects": [
+    {
+      "projectName": "CPB_sfcc_ec",
+      "rootProject": "D:\\projects",
+      "projectSlug": "cpb-sfcc-ec",
+      "testType": "data layer checker",
+      "googleSpreadsheetLink": "google sheet link",
+      "tagManagerUrl": "tagManagerUrl",
+      "gtmId": "gtmId",
+      "containerName": "containerName",
+      "version": "1.0.0",
+      "preventNavigationEvents": [],
+      "recordings": [],
+      "reports": [
+        "eeListClick",
+        "eeListView"
+      ],
+      "specs": []
+    },
+    {
+      "projectName": "GTM Config Generator",
+      "rootProject": "D:\\projects",
+      "projectSlug": "gtm_config_generator",
+      "testType": "data layer checker",
+      "googleSpreadsheetLink": "google sheet link",
+      "tagManagerUrl": "tagManagerUrl",
+      "gtmId": "gtmId",
+      "containerName": "containerName",
+      "version": "1.0.0",
+      "preventNavigationEvents": [
+        "select_promotion",
+        "select_item",
+        "coupon_submission"
+      ],
+      "recordings": [
+        "btn_convert_click",
+        "btn_upload_click"
+      ],
+      "reports": [],
+      "specs": []
+    },
+    {
+      "projectName": "[TW] drunk_elephant",
+      "rootProject": "D:\\projects",
+      "projectSlug": "drunk_elephant",
+      "testType": "data layer checker",
+      "googleSpreadsheetLink": "google sheet link",
+      "tagManagerUrl": "tagManagerUrl",
+      "gtmId": "gtmId",
+      "containerName": "containerName",
+      "version": "1.0.0",
+      "preventNavigationEvents": [
+        "select_promotion",
+        "select_item",
+        "coupon_submission"
+      ],
+      "recordings": [
+        "add_payment_info",
+        "add_shipping_info",
+        "add_to_cart",
+        "add_to_wishlist",
+        "begin_checkout",
+        "coupon_submission",
+        "login",
+        "product_interaction",
+        "purchase",
+        "remove_from_cart",
+        "remove_from_wishlist",
+        "search",
+        "select_item",
+        "site_search_cancel",
+        "social_follow",
+        "store_locator",
+        "view_cart",
+        "view_item",
+        "view_item_list",
+        "virtualPageview"
+      ],
+      "reports": [
+        "add_payment_info",
+        "add_shipping_info",
+        "add_to_cart",
+        "add_to_wishlist",
+        "begin_checkout",
+        "coupon_submission",
+        "login",
+        "product_interaction",
+        "purchase",
+        "remove_from_cart",
+        "remove_from_wishlist",
+        "search",
+        "select_item",
+        "site_search_cancel",
+        "social_follow",
+        "store_locator"
+      ],
+      "specs": []
+    },
+    {
+      "rootProject": "D:\\projects",
+      "projectName": "Test1",
+      "projectSlug": "test-1",
+      "projectDescription": "",
+      "testType": "Data Layer Checker",
+      "googleSpreadsheetLink": "",
+      "recordings": [],
+      "reports": [
+        "page_view",
+        "page_view2",
+        "page_view3",
+        "page_view4",
+        "page_view5",
+        "page_view6",
+        "page_view7",
+        "page_view8",
+        "page_view9",
+        "page_view10",
+        "page_view11"
+      ],
+      "specs": [
+        "page_view",
+        "page_view2",
+        "page_view3",
+        "page_view4",
+        "page_view5",
+        "page_view6",
+        "page_view7",
+        "page_view8",
+        "page_view9",
+        "page_view10",
+        "page_view11"
+      ]
+    }
+  ]
+}

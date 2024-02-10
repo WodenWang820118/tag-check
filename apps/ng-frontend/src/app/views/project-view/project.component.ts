@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { ProjectService } from '../../services/project/project.service';
-import { Observable, take, tap } from 'rxjs';
+import { ProjectService } from '../../services/api/project/project.service';
+import { Observable, Subscription, take, tap } from 'rxjs';
 import { Project } from '../../models/project.interface';
 import { SideNavbarComponent } from '../../components/side-navbar/side-navbar.component';
-import { TestsTableComponent } from '../../components/tests-table/tests-table.component';
+import { ReportTableComponent } from '../../components/report-table/report-table.component';
 
 @Component({
   selector: 'app-project-view',
@@ -20,7 +20,7 @@ import { TestsTableComponent } from '../../components/tests-table/tests-table.co
     MatButtonModule,
     RouterModule,
     SideNavbarComponent,
-    TestsTableComponent,
+    ReportTableComponent,
   ],
   template: `
     <div class="project">
@@ -32,7 +32,7 @@ import { TestsTableComponent } from '../../components/tests-table/tests-table.co
             [projects$]="projects$"
           ></app-side-navbar>
           <div class="grid_item project__table">
-            <app-tests-table></app-tests-table>
+            <app-report-table [project$]="project$"></app-report-table>
           </div>
         </div>
       </div>
@@ -57,9 +57,10 @@ import { TestsTableComponent } from '../../components/tests-table/tests-table.co
     }
   `,
 })
-export class ProjectViewComponent implements OnInit {
+export class ProjectViewComponent implements OnInit, OnDestroy {
   project$!: Observable<Project>;
   projects$!: Observable<Project[]>;
+  subscriptions: Subscription[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -67,16 +68,23 @@ export class ProjectViewComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.route.params
+    const routeSubscription = this.route.params
       .pipe(
         take(1),
         tap((params) => {
-          console.log(params);
-          this.project$ = this.projectService.switchToProject(params['slug']);
+          // console.log(params);
+          this.project$ = this.projectService.switchToProject(
+            params['projectSlug']
+          );
         })
       )
       .subscribe();
 
     this.projects$ = this.projectService.getProjects();
+    this.subscriptions.push(routeSubscription);
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }
