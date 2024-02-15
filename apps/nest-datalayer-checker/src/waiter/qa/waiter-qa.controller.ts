@@ -1,5 +1,5 @@
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { WaiterDataLayerService } from './waiter-datalayer.service';
+import { WaiterDataLayerService } from '../datalayer/waiter-datalayer.service';
 import { Controller, Get, Query } from '@nestjs/common';
 
 @Controller('waiter-qa')
