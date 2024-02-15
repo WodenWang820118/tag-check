@@ -20,7 +20,7 @@ export class FolderPathService {
     try {
       return await this.configurationService.getRootProjectPath();
     } catch (error) {
-      Logger.error(error.message, 'PathService.getRootProjectPath');
+      Logger.error(error.message, 'FolderPathService.getRootProjectPath');
       throw new HttpException(error.message, 500);
     }
   }
@@ -33,11 +33,11 @@ export class FolderPathService {
       Logger.log(
         'report saving folder ',
         folder,
-        'PathService.getReportSavingFolder'
+        'FolderPathService.getReportSavingFolder'
       );
       return folder;
     } catch (error) {
-      Logger.error(error.message, 'FileService.getReportSavingFolder');
+      Logger.error(error.message, 'FolderService.getReportSavingFolder');
       throw new HttpException(error.messege, 500);
     }
   }
@@ -52,7 +52,10 @@ export class FolderPathService {
         ));
       return dirPath;
     } catch (error) {
-      Logger.error(error.message, 'PathService.getOperationJsonPathByProject');
+      Logger.error(
+        error.message,
+        'FolderPathService.getOperationJsonPathByProject'
+      );
     }
   }
 
@@ -78,7 +81,7 @@ export class FolderPathService {
       );
       return filePath2;
     } catch (error) {
-      Logger.error(error, 'PathService.getRecordingFolderPath');
+      Logger.error(error, 'FolderPathService.getRecordingFolderPath');
       throw new HttpException(error, 500);
     }
   }
@@ -91,7 +94,7 @@ export class FolderPathService {
         ''
       );
     } catch (error) {
-      Logger.error(error.message, 'PathService.getProjectConfigPath');
+      Logger.error(error.message, 'FolderPathService.getProjectConfigPath');
       throw new HttpException(error.message, 500);
     }
   }
@@ -103,7 +106,7 @@ export class FolderPathService {
         resultFolder
       );
     } catch (error) {
-      Logger.error(error.message, 'PathService.getInspectionResultPath');
+      Logger.error(error.message, 'FolderPathService.getInspectionResultPath');
       throw new HttpException(error.message, 500);
     }
   }
@@ -116,7 +119,20 @@ export class FolderPathService {
         testName
       );
     } catch (error) {
-      Logger.error(error.message, 'PathService.getInspectionTestPath');
+      Logger.error(error.message, 'FolderPathService.getInspectionTestPath');
+      throw new HttpException(error.message, 500);
+    }
+  }
+
+  async getRecordingFilePath(projectSlug: string, testName: string) {
+    try {
+      return await this.pathUtilsService.buildFilePath(
+        projectSlug,
+        recordingFolder,
+        testName
+      );
+    } catch (error) {
+      Logger.error(error.message, 'FolderPathService.getRecordingFilePath');
       throw new HttpException(error.message, 500);
     }
   }
