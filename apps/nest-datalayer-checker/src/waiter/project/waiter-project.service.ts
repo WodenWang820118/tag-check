@@ -164,12 +164,6 @@ export class WaiterProjectService {
     return await this.projectService.getProjects();
   }
 
-  async getProjectRecordings(projectName: string) {
-    return this.folderService.getJsonFilesFromDir(
-      await this.folderPathService.getRecordingFolderPath(projectName)
-    );
-  }
-
   async getEventReport(projectName: string, testName: string) {
     return await this.fileService.getEventReport(projectName, testName);
   }
