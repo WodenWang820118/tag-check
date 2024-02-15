@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GtmOperatorService } from '../gtm-operator/gtm-operator.service';
+import { GtmOperatorService } from '../../gtm-operator/gtm-operator.service';
 import { Credentials } from 'puppeteer';
 
 @Injectable()
