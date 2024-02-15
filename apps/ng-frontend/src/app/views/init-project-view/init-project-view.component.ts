@@ -100,7 +100,7 @@ export class InitProjectViewComponent implements OnInit {
 
   ngOnInit() {
     this.configService
-      .getConfiguration('root')
+      .getConfiguration('rootProjectPath')
       .pipe(
         take(1),
         tap((root) => {

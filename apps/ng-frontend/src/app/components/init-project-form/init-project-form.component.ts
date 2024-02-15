@@ -112,7 +112,7 @@ export class InitProjectFormComponent {
   onSubmit() {
     // TODO: Use switchMap to switch to the new project
     this.configService
-      .getConfiguration('root')
+      .getConfiguration('rootProjectPath')
       .pipe(
         take(1),
         switchMap((rootProject) => {
