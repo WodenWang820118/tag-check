@@ -105,26 +105,6 @@ export class WaiterProjectController {
   }
 
   @ApiOperation({
-    summary: 'get all project names',
-  })
-  @Get('/projects')
-  async getProjects() {
-    return await this.waiterProjectService.getProjects();
-  }
-
-  @ApiOperation({
-    summary: 'get all recording file names',
-  })
-  @ApiQuery({
-    name: 'projectName',
-    description: 'The name of the project to which the event belongs.',
-  })
-  @Get('/projects/recordings')
-  async getProjectRecordings(@Query('projectName') projectName: string) {
-    return await this.waiterProjectService.getProjectRecordings(projectName);
-  }
-
-  @ApiOperation({
     summary: 'read report(s) from a specifc project',
     description:
       'This endpoint reads report(s) from a specifc project. \

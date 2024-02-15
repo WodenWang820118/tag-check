@@ -45,7 +45,7 @@ export class RecordingService {
           );
 
           const recording = project?.recordings.find(
-            (recording) => recording.event === eventName
+            (recording) => recording.title === eventName
           );
 
           return recording;
