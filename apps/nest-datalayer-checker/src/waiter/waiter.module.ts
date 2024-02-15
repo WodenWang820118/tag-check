@@ -10,23 +10,37 @@ import { GcsMonitorModule } from '../gcs-monitor/gcs-monitor.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
 
 // controllers
-import { WaiterProjectController } from './waiter-project.controller';
-import { WaiterQaController } from './waiter-qa.controller';
-import { WaiterDataLayerController } from './waiter-datalayer.controller';
-import { WaiterGtmOperatorController } from './waiter-gtm-operator.controller';
-import { WaiterSpecParserController } from './waiter-gtm-spec-parser.controller';
+import { WaiterProjectController } from './project/waiter-project.controller';
+import { WaiterRecordingController } from './recording/waiter-recording.controller';
+import { WaiterSpecController } from './spec/waiter-spec.controller';
+import { WaiterReportController } from './report/waiter-report.controller';
+import { WaiterQaController } from './qa/waiter-qa.controller';
+import { WaiterDataLayerController } from './datalayer/waiter-datalayer.controller';
+import { WaiterGtmOperatorController } from './gtm-operator/waiter-gtm-operator.controller';
+import { WaiterSpecParserController } from './spec-parser/waiter-gtm-spec-parser.controller';
+import { WaiterConfigurationController } from './configuration/waiter-configuration.controller';
 
 // services
-import { WaiterDataLayerService } from './waiter-datalayer.service';
-import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
-import { WaiterGtmSpecParserService } from './waiter-gtm-spec-parser.service';
-import { WaiterProjectService } from './waiter-project.service';
+import { WaiterDataLayerService } from './datalayer/waiter-datalayer.service';
+import { WaiterGtmOperatorService } from './gtm-operator/waiter-gtm-operator.service';
+import { WaiterGtmSpecParserService } from './spec-parser/waiter-gtm-spec-parser.service';
+import { WaiterProjectService } from './project/waiter-project.service';
+import { WaiterSpecService } from './spec/waiter-spec.service';
+import { WaiterReportService } from './report/waiter-report.service';
+import { WaiterRecordingService } from './recording/waiter-recording.service';
+import { WaiterQaService } from './qa/waiter-qa.service';
+import { WaiterConfigurationService } from './configuration/waiter-configuration.service';
 
 const waiterServices = [
   WaiterDataLayerService,
   WaiterGtmOperatorService,
   WaiterGtmSpecParserService,
   WaiterProjectService,
+  WaiterSpecService,
+  WaiterReportService,
+  WaiterRecordingService,
+  WaiterQaService,
+  WaiterConfigurationService,
 ];
 
 @Module({
@@ -45,6 +59,10 @@ const waiterServices = [
     WaiterDataLayerController,
     WaiterGtmOperatorController,
     WaiterSpecParserController,
+    WaiterRecordingController,
+    WaiterSpecController,
+    WaiterReportController,
+    WaiterConfigurationController,
   ],
   providers: [...waiterServices],
 })

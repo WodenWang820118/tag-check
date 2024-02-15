@@ -1,16 +1,16 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { ProjectService } from '../os/project/project.service';
-import { FileService } from '../os/file/file.service';
+import { ProjectService } from '../../os/project/project.service';
+import { FileService } from '../../os/file/file.service';
 import { SpecParser } from '@datalayer-checker/spec-parser';
-import { ConfigurationService } from '../configuration/configuration.service';
+import { ConfigurationService } from '../../configuration/configuration.service';
 import { mkdirSync } from 'fs';
-import { ProjectInitializationService } from '../os/project-initialization/project-initialization.service';
-import { FolderService } from '../os/folder/folder.service';
-import { FolderPathService } from '../os/path/folder-path/folder-path.service';
+import { ProjectInitializationService } from '../../os/project-initialization/project-initialization.service';
+import { FolderService } from '../../os/folder/folder.service';
+import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import {
   CONFIG_CURRENT_PROJECT_PATH,
   CONFIG_ROOT_PATH,
-} from '../configs/project.config';
+} from '../../configs/project.config';
 
 // TODO: endpoints for the frontend to call
 // please look at the collection of db.json files

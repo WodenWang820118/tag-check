@@ -1,7 +1,7 @@
 import { Injectable, Logger, StreamableFile } from '@nestjs/common';
 import { readFileSync } from 'fs';
 import { SpecParser } from '@datalayer-checker/spec-parser';
-import { FilePathService } from '../os/path/file-path/file-path.service';
+import { FilePathService } from '../../os/path/file-path/file-path.service';
 
 @Injectable()
 export class WaiterGtmSpecParserService {
