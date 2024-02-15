@@ -1,7 +1,7 @@
 {
   "configurations": [
     {
-      "name": "root",
+      "name": "rootProjectPath",
       "value": "D:\\projects"
     },
     {
