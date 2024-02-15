@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GtmOperatorService } from '../gtm-operator/gtm-operator.service';
-import { InspectorService } from '../inspector/inspector.service';
-import { XlsxReportService } from '../os/xlsx-report/xlsx-report.service';
+import { GtmOperatorService } from '../../gtm-operator/gtm-operator.service';
+import { InspectorService } from '../../inspector/inspector.service';
+import { XlsxReportService } from '../../os/xlsx-report/xlsx-report.service';
 import puppeteer, { Credentials } from 'puppeteer';
-import { getCurrentTimestamp } from './utils';
-import { FileService } from '../os/file/file.service';
-import { AbstractReportService } from '../os/abstract-report/abstract-report.service';
-import { ValidationResult } from '../interfaces/dataLayer.interface';
+import { getCurrentTimestamp } from '../utils';
+import { FileService } from '../../os/file/file.service';
+import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
+import { ValidationResult } from '../../interfaces/dataLayer.interface';
 
 @Injectable()
 export class WaiterDataLayerService {
