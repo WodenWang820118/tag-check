@@ -12,6 +12,7 @@ import { ProjectInitializationService } from './project-initialization/project-i
 import { FolderModule } from './folder/folder.module';
 import { FolderService } from './folder/folder.service';
 import { AbstractReportModule } from './abstract-report/abstract-report.module';
+import { AbstractReportService } from './abstract-report/abstract-report.service';
 
 const modules = [
   PathModule,
@@ -30,6 +31,7 @@ const services = [
   XlsxReportService,
   ProjectInitializationService,
   FolderService,
+  AbstractReportService,
 ];
 @Module({
   imports: [...modules],

@@ -9,5 +9,6 @@ import { FolderService } from '../folder/folder.service';
 @Module({
   imports: [ConfigurationModule, PathModule, FolderModule],
   providers: [FileService, ConfigurationService, FolderService],
+  exports: [FileService],
 })
 export class FileModule {}

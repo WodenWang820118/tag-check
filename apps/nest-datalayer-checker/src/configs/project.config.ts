@@ -5,3 +5,4 @@ export const resultFolder = 'dataLayer_inspection_results';
 export const configFolder = 'config';
 export const CONFIG_ROOT_PATH = 'rootProjectPath';
 export const CONFIG_CURRENT_PROJECT_PATH = 'currentProjectPath';
+export const ABSTRACT_REPORT_FILE_NAME = 'abstract.json';

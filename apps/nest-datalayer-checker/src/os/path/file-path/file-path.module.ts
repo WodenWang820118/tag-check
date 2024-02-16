@@ -6,9 +6,12 @@ import { FolderPathModule } from '../folder-path/folder-path.module';
 import { FolderPathService } from '../folder-path/folder-path.service';
 import { ConfigurationModule } from '../../../configuration/configuration.module';
 
+const modules = [PathUtilsModule, FolderPathModule, ConfigurationModule];
+const services = [FilePathService, PathUtilsService, FolderPathService];
+
 @Module({
-  imports: [PathUtilsModule, FolderPathModule, ConfigurationModule],
-  providers: [FilePathService, PathUtilsService, FolderPathService],
-  exports: [FilePathService],
+  imports: [...modules],
+  providers: [...services],
+  exports: [...modules, ...services],
 })
 export class FilePathModule {}

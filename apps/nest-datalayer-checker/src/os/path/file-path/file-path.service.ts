@@ -89,4 +89,16 @@ export class FilePathService {
       throw new HttpException(error.message, 500);
     }
   }
+
+  async getInspectionResultFilePath(
+    projectName: string,
+    testName: string,
+    fileName: string
+  ) {
+    return path.join(
+      await this.folderPathService.getInspectionResultFolderPath(projectName),
+      testName,
+      fileName
+    );
+  }
 }
