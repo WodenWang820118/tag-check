@@ -160,6 +160,10 @@ export class WaiterProjectService {
     return await this.projectService.getProjects();
   }
 
+  async getProject(projectSlug: string) {
+    return await this.projectService.getProject(projectSlug);
+  }
+
   // TODO: could be independent of the project endpoint
   async readImage(projectName: string, testName: string) {
     return await this.fileService.readImage(projectName, testName);

@@ -12,6 +12,7 @@ import {
   tap,
 } from 'rxjs';
 import { FormGroup } from '@angular/forms';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -25,11 +26,13 @@ export class ProjectService {
   constructor(private http: HttpClient) {}
 
   getProjects() {
-    return this.http.get<Project[]>(this.mockUrl);
+    return this.http.get<Project[]>(environment.projectApiUrl);
   }
 
   getProject(projectSlug: string) {
-    return this.http.get<Project>(`${this.mockUrl}/${projectSlug}`);
+    return this.http.get<Project>(
+      `${environment.projectApiUrl}/${projectSlug}`
+    );
   }
 
   setCurrentProject(project: Project) {
@@ -39,7 +42,7 @@ export class ProjectService {
   initProject(rootProjectValue: string, settings: any) {
     // TODO: get the root project from the backend
     this.currentProject.next(settings);
-    return this.http.post(`${this.mockUrl}`, {
+    return this.http.post(`${environment.projectApiUrl}`, {
       rootProject: rootProjectValue,
       ...settings,
       specs: [],
@@ -60,7 +63,7 @@ export class ProjectService {
   updateProject(project: Project) {
     console.log('Updating project: ', project);
     return this.http.put<Project>(
-      `${this.mockUrl}/${project.projectSlug}`,
+      `${environment.projectApiUrl}/${project.projectSlug}`,
       project
     );
   }

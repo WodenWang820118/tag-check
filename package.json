@@ -16,6 +16,7 @@
     "build-backend": "nx build nest-datalayer-checker",
     "frontend": "nx serve frontend",
     "ng-frontend": "nx serve ng-frontend",
+    "prod-ng-frontend": "nx serve ng-frontend --prod",
     "build-frontend": "nx build frontend --prod",
     "start-electron": "npm run build-backend && electron .",
     "dev-app": "concurrently \"npm run frontend\" \"npm run backend\"",

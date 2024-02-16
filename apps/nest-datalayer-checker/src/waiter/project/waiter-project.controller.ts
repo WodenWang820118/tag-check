@@ -1,8 +1,8 @@
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { WaiterProjectService } from './waiter-project.service';
-import { Body, Controller, Get, Header, Query } from '@nestjs/common';
+import { Body, Controller, Get, Header, Param, Query } from '@nestjs/common';
 
-@Controller('waiter-project')
+@Controller('projects')
 export class WaiterProjectController {
   constructor(private waiterProjectService: WaiterProjectService) {}
 
@@ -62,6 +62,24 @@ export class WaiterProjectController {
   }
 
   @ApiOperation({
+    summary: 'read all projects metadata',
+  })
+  @Get()
+  async getProjects() {
+    return await this.waiterProjectService.getProjects();
+  }
+
+  @ApiOperation({
+    summary: 'read a project metadata',
+  })
+  @Get(':projectSlug')
+  async getProject(@Param('projectSlug') projectSlug: string) {
+    return await this.waiterProjectService.getProject(projectSlug);
+  }
+
+  // TODO: could be independent of the project endpoint
+
+  @ApiOperation({
     summary: 'read an image from a specifc project',
   })
   @ApiQuery({
@@ -80,6 +98,8 @@ export class WaiterProjectController {
   ) {
     return await this.waiterProjectService.readImage(projectName, testName);
   }
+
+  // TODO: could be independent of the project endpoint
 
   @ApiOperation({
     summary: 'read a report from a specifc project',
@@ -103,6 +123,8 @@ export class WaiterProjectController {
   ) {
     return await this.waiterProjectService.readReport(projectName, reportName);
   }
+
+  // TODO: could be independent of the project endpoint
 
   @ApiOperation({
     summary: 'read report(s) from a specifc project',
