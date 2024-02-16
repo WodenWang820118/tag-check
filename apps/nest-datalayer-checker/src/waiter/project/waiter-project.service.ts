@@ -156,23 +156,22 @@ export class WaiterProjectService {
     }
   }
 
-  async readImage(projectName: string, testName: string) {
-    return await this.fileService.readImage(projectName, testName);
-  }
-
   async getProjects() {
     return await this.projectService.getProjects();
   }
 
+  // TODO: could be independent of the project endpoint
+  async readImage(projectName: string, testName: string) {
+    return await this.fileService.readImage(projectName, testName);
+  }
+
+  // TODO: could be independent of the project endpoint
   async getEventReport(projectName: string, testName: string) {
     return await this.fileService.getEventReport(projectName, testName);
   }
 
+  // TODO: could be independent of the project endpoint
   async readReport(projectName: string, reportName: string) {
     return await this.fileService.readReport(projectName, reportName);
-  }
-
-  async getSpecJsonByProject(projectName: string) {
-    return await this.fileService.getSpecJsonByProject({ name: projectName });
   }
 }
