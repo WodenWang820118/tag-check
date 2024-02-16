@@ -1,7 +1,11 @@
 import { Injectable, Logger, HttpException } from '@nestjs/common';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { FolderPathService } from '../folder-path/folder-path.service';
-import { configFolder, recordingFolder } from '../../../configs/project.config';
+import {
+  SPECS,
+  configFolder,
+  recordingFolder,
+} from '../../../configs/project.config';
 import path from 'path';
 import { FilePathOptions } from '../../../interfaces/filePathOptions.interface';
 
@@ -37,7 +41,7 @@ export class FilePathService {
       return await this.pathUtilsService.buildFilePath(
         projectName,
         configFolder,
-        'spec.json'
+        SPECS
       );
     } catch (error) {
       Logger.error(error.message, 'FilePathService.getProjectConfigPath');
