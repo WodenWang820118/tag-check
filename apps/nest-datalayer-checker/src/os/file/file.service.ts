@@ -130,4 +130,16 @@ export class FileService {
     );
     this.writeJsonFile(cachePath, data);
   }
+
+  async getInspectionResultFilePath(
+    projectName: string,
+    testName: string,
+    fileName: string
+  ) {
+    return await this.filePathService.getInspectionResultFilePath(
+      projectName,
+      testName,
+      fileName
+    );
+  }
 }

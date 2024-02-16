@@ -3,13 +3,15 @@ import { Injectable } from '@nestjs/common';
 import { ValidationResult } from '../../interfaces/dataLayer.interface';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { writeFileSync } from 'fs';
-import { join } from 'path';
+import { FilePathService } from '../path/file-path/file-path.service';
+import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 
 @Injectable()
 export class AbstractReportService {
   constructor(
     private folderPathService: FolderPathService,
-    private folderService: FolderService
+    private folderService: FolderService,
+    private filePathService: FilePathService
   ) {}
 
   async writeSingleAbstractTestResultJson(
@@ -18,12 +20,12 @@ export class AbstractReportService {
     data: ValidationResult
   ) {
     // TODO: haven't verified the function
-    const eventReportPath =
-      await this.folderPathService.getInspectionEventFolderPath(
-        projectName,
-        eventName
-      );
-    const abstractPath = join(eventReportPath, 'abstract.json');
+    const abstractPath = await this.filePathService.getInspectionResultFilePath(
+      projectName,
+      eventName,
+      ABSTRACT_REPORT_FILE_NAME
+    );
+
     writeFileSync(abstractPath, JSON.stringify(data, null, 2));
   }
 
@@ -43,11 +45,12 @@ export class AbstractReportService {
     for (const name of eventFolderNames) {
       for (const dataPiece of data) {
         if (name === dataPiece.dataLayerSpec.event) {
-          const abstractFilePath = join(
-            resultFolderPath,
-            name,
-            'abstract.json'
-          );
+          const abstractFilePath =
+            await this.filePathService.getInspectionResultFilePath(
+              projectName,
+              name,
+              ABSTRACT_REPORT_FILE_NAME
+            );
           writeFileSync(abstractFilePath, JSON.stringify(data, null, 2));
         }
       }
