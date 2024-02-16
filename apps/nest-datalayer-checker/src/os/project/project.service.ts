@@ -1,3 +1,4 @@
+import { map } from 'rxjs';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../file/file.service';
 import { FolderService } from '../folder/folder.service';
@@ -102,22 +103,7 @@ export class ProjectService {
       // Logger.log(projects, 'ProjectService.getProjects');
       // Map each project to a promise of its settings
       const projectSettingsPromises = projects.map(async (project) => {
-        const settings = await this.getProjectSettings(project);
-        const recordings = await this.getProjectDataLayerRecordings(project);
-        const reports = await this.getProjectDataLayerInspectionResults(
-          project
-        );
-        const specs = await this.fileService.getSpecJsonByProject({
-          name: project,
-        });
-
-        return {
-          projectName: project,
-          ...settings,
-          recordings: recordings,
-          specs: specs,
-          reports: reports,
-        };
+        return this.getProject(project);
       });
 
       // Resolve all promises before returning
@@ -128,6 +114,42 @@ export class ProjectService {
     } catch (error) {
       Logger.error(error.message, 'ProjectService.getProjects');
       throw new HttpException(error.message, 500);
+    }
+  }
+
+  async getProject(projectSlug: string) {
+    try {
+      const projectRoot =
+        await this.folderPathService.getRootProjectFolderPath();
+      const projectNames = this.folderService
+        .readFolderFiles(projectRoot)
+        .filter((dirent) => dirent.isDirectory())
+        .map((dirent) => dirent.name);
+
+      const project = projectNames.find((name) => name === projectSlug);
+
+      const settings = await this.getProjectSettings(project);
+      const recordings = (
+        await this.getProjectDataLayerRecordings(project)
+      ).map((item) => item && item.name.replace('.json', ''));
+      const reports = (
+        await this.getProjectDataLayerInspectionResults(project)
+      ).map((item) => item && item.eventName);
+      const specs = (
+        await this.fileService.getSpecJsonByProject({
+          name: project,
+        })
+      ).map((item: { event: any }) => item && item.event);
+
+      return {
+        projectName: project,
+        ...settings,
+        recordings: recordings,
+        specs: specs,
+        reports: reports,
+      };
+    } catch (error) {
+      Logger.error(error.message, 'ProjectService.getProject');
     }
   }
 }
