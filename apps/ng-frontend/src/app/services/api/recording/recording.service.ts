@@ -35,25 +35,19 @@ export class RecordingService {
     eventName: string | undefined
   ): Observable<ProjectRecording> {
     if (!eventName || !projectSlug) return of({} as ProjectRecording);
+    return this.http
+      .get<ProjectRecording>(`${this.mockUrl}/${projectSlug}`)
+      .pipe(
+        map((projectRecordings: ProjectRecording) => {
+          if (projectRecordings && projectRecordings !== undefined) {
+            console.log('Project Recordings', projectRecordings);
 
-    return this.http.get<ProjectRecording[]>(`${this.mockUrl}`).pipe(
-      map((projectRecordings: ProjectRecording[]) => {
-        if (projectRecordings && projectRecordings !== undefined) {
-          console.log('Project Recordings', projectRecordings);
-          const project = projectRecordings.find(
-            (recording) => recording.projectSlug === projectSlug
-          );
-
-          const recording = project?.recordings.find(
-            (recording) => recording.title === eventName
-          );
-
-          return recording;
-        } else {
-          return [{}] as ProjectRecording[];
-        }
-      })
-    );
+            return projectRecordings.recordings.find(
+              (recording) => recording.title === eventName
+            );
+          }
+        })
+      );
   }
 
   addRecording(testCaseForm: FormGroup) {
