@@ -5,6 +5,7 @@ import { FolderPathService } from '../../os/path/folder-path/folder-path.service
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
+import { statSync } from 'fs';
 
 @Injectable()
 export class WaiterReportService {
@@ -23,19 +24,31 @@ export class WaiterReportService {
     );
 
     const reportsPromise = folderNames.map(async (folderName) => {
+      const filePath = await this.filePathService.getInspectionResultFilePath(
+        projectSlug,
+        folderName,
+        ABSTRACT_REPORT_FILE_NAME
+      );
+
+      const completedTime = statSync(filePath).mtime;
       return {
-        name: folderName,
-        data: this.fileService.readJsonFile(
+        eventName: folderName,
+        ...this.fileService.readJsonFile(
           await this.filePathService.getInspectionResultFilePath(
             projectSlug,
             folderName,
             ABSTRACT_REPORT_FILE_NAME
           )
         ),
+        completedTime,
       };
     });
 
-    return await Promise.all(reportsPromise);
+    const reports = await Promise.all(reportsPromise);
+    return {
+      projectSlug: projectSlug,
+      reports: reports,
+    };
   }
 
   // TODO: haven't been tested
