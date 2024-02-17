@@ -1,8 +1,8 @@
 import { FolderService } from './../folder/folder.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ValidationResult } from '../../interfaces/dataLayer.interface';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
-import { writeFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 
@@ -19,7 +19,16 @@ export class AbstractReportService {
     eventName: string,
     data: ValidationResult
   ) {
-    // TODO: haven't verified the function
+    const reportPath =
+      await this.folderPathService.getInspectionEventFolderPath(
+        projectName,
+        eventName
+      );
+
+    if (!existsSync(reportPath)) {
+      mkdirSync(reportPath);
+    }
+
     const abstractPath = await this.filePathService.getInspectionResultFilePath(
       projectName,
       eventName,

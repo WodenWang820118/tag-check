@@ -34,29 +34,12 @@ export class ReportService {
     );
   }
 
-  addReport(reportForm: FormGroup) {
+  addReport(reportForm: FormGroup, reportDetails: ReportDetails) {
     const projectSlug = reportForm.controls['projectSlug'].value;
-    const spec = reportForm.controls['spec'].value;
-    const eventName = JSON.parse(spec).event;
 
-    const reportDetails: ReportDetails = {
-      eventName: eventName,
-      passed: false,
-      dataLayerSpec: JSON.parse(spec),
-      incorrectInfo: [],
-      completedTime: new Date(),
-      dataLayer: {},
-      message: '',
-    };
-
-    return this.getProjectReports(projectSlug).pipe(
-      switchMap((projectReports) => {
-        const updatedReport: ProjectReport = {
-          ...projectReports,
-          reports: [...projectReports.reports, reportDetails],
-        };
-        return this.updateReport(projectSlug, updatedReport);
-      })
+    return this.http.post<ProjectReport>(
+      `${environment.reportApiUrl}/${projectSlug}`,
+      reportDetails
     );
   }
 }
