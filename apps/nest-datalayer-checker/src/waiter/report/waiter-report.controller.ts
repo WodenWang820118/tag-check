@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Put } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Put,
+  Body,
+  Post,
+  Logger,
+} from '@nestjs/common';
 import { WaiterReportService } from './waiter-report.service';
 
 @Controller('reports')
@@ -12,13 +20,19 @@ export class WaiterReportController {
 
   // TODO: haven't been tested
   @Put(':projectSlug')
-  async updateReport(@Param('projectSlug') projectSlug: string, report: any) {
+  async updateReport(
+    @Param('projectSlug') projectSlug: string,
+    @Body() report: any
+  ) {
+    Logger.log('updateReport', report);
     return await this.waiterReportService.updateReport(projectSlug, report);
   }
 
-  // TODO: haven't been tested
-  @Put()
-  async addReport(reportForm: any) {
-    return await this.waiterReportService.addReport(reportForm);
+  @Post(':projectSlug')
+  async addReport(
+    @Param('projectSlug') projectSlug: string,
+    @Body() report: any
+  ) {
+    return await this.waiterReportService.addReport(projectSlug, report);
   }
 }
