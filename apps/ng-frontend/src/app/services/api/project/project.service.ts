@@ -1,17 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Project } from '../../../models/project.interface';
-import {
-  BehaviorSubject,
-  EMPTY,
-  Subject,
-  catchError,
-  of,
-  switchMap,
-  take,
-  tap,
-} from 'rxjs';
-import { FormGroup } from '@angular/forms';
+import { BehaviorSubject, Subject, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
@@ -65,36 +55,6 @@ export class ProjectService {
     return this.http.put<Project>(
       `${environment.projectApiUrl}/${project.projectSlug}`,
       project
-    );
-  }
-
-  addReport(testCaseForm: FormGroup) {
-    console.log('Form: ', testCaseForm.value);
-    const projectSpec = testCaseForm.controls['spec'].value;
-
-    const eventName = JSON.parse(projectSpec).event;
-
-    return this.currentProject$.pipe(
-      take(1),
-      switchMap((project) => {
-        // if the event already exists in the project reports, do nothing
-        if (eventName in project.reports && eventName in project.specs)
-          return EMPTY;
-
-        console.log('Current Project: ', project);
-
-        const updatedProject: Project = {
-          ...project,
-          specs: [...project.specs, eventName],
-          reports: [...project.reports, eventName],
-        };
-        return this.updateProject(updatedProject);
-      }),
-      catchError((error) => {
-        // Handle or log an error
-        console.error('Error updating project', error);
-        return of(undefined);
-      })
     );
   }
 }

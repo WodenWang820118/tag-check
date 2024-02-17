@@ -60,12 +60,11 @@ export class WaiterReportService {
     );
   }
 
-  // TODO: haven't been tested
-  // this method should be creating an empty new report
-  async addReport(reportForm: any) {
-    this.abstractReportService.writeProjectAbstractTestRsultJson(
-      reportForm.projectSlug,
-      reportForm.data
+  async addReport(projectSlug: string, report: any) {
+    this.abstractReportService.writeSingleAbstractTestResultJson(
+      projectSlug,
+      report.eventName,
+      report
     );
   }
 }

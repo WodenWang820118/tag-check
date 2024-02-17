@@ -131,33 +131,32 @@ export class NewReportViewComponent implements OnInit {
   uploadReport() {
     if (this.reportForm.valid) {
       console.log('Form: ', this.reportForm.value);
-      // 1) adding index in the project report with the event name
-      this.projectService.addReport(this.reportForm).subscribe();
-      // 2) adding content in the report service
-      this.reportService.addReport(this.reportForm).subscribe();
-      // 3) adding content in the recording service
+
+      const specValue = JSON.parse(
+        this.reportForm.controls.spec.value as string
+      );
+
+      const reportDetails: ReportDetails = {
+        eventName: specValue,
+        passed: false,
+        dataLayerSpec: specValue,
+        incorrectInfo: [],
+        completedTime: new Date(),
+        dataLayer: {},
+        message: '',
+      };
+
+      // 1) adding content in the report service
+      this.reportService.addReport(this.reportForm, reportDetails).subscribe();
+      // 2) adding content in the recording service
       this.recordingService.addRecording(this.reportForm).subscribe();
-      // 4) adding content in the project data source service to be displayed in the table
+      // 3) adding content in the project data source service to be displayed in the table
       this.projectDataSourceService
         .connect()
         .pipe(
           take(1),
           tap((data) => {
             console.log('Data: ', data);
-            const specValue = JSON.parse(
-              this.reportForm.controls.spec.value as string
-            );
-
-            const reportDetails: ReportDetails = {
-              eventName: specValue,
-              passed: false,
-              dataLayerSpec: specValue,
-              incorrectInfo: [],
-              completedTime: new Date(),
-              dataLayer: {},
-              message: '',
-            };
-
             this.projectDataSourceService.setData([...data, reportDetails]);
           })
         )
