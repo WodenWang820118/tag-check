@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Subject, of, switchMap } from 'rxjs';
 import { ProjectReport, ReportDetails } from '../../../models/report.interface';
 import { FormGroup } from '@angular/forms';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -16,17 +17,19 @@ export class ReportService {
   constructor(private http: HttpClient) {}
 
   getReports() {
-    return this.http.get<Report[]>(this.mockUrl);
+    return this.http.get<Report[]>(environment.reportApiUrl);
   }
 
   getProjectReports(projectSlug: string) {
-    return this.http.get<ProjectReport>(`${this.mockUrl}/${projectSlug}`);
+    return this.http.get<ProjectReport>(
+      `${environment.reportApiUrl}/${projectSlug}`
+    );
   }
 
   updateReport(projectSlug: string, report: ProjectReport) {
     if (!projectSlug || !report) return of({} as ProjectReport);
     return this.http.put<ProjectReport>(
-      `${this.mockUrl}/${projectSlug}`,
+      `${environment.reportApiUrl}/${projectSlug}`,
       report
     );
   }
