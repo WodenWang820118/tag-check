@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { Configuration } from '../../../models/configuration.interface';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -18,10 +19,12 @@ export class ConfigurationService {
   constructor(private http: HttpClient) {}
 
   getConfigurations() {
-    return this.http.get<Configuration[]>(this.mockUrl);
+    return this.http.get<Configuration[]>(environment.configurationApiUrl);
   }
 
   getConfiguration(name: string) {
-    return this.http.get<Configuration>(`${this.mockUrl}/${name}`);
+    return this.http.get<Configuration>(
+      `${environment.configurationApiUrl}/${name}`
+    );
   }
 }
