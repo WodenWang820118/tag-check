@@ -86,7 +86,9 @@ export class ReportTableComponent implements OnInit, OnDestroy {
           const slug = params['projectSlug'];
           return this.reportService.getProjectReports(slug).pipe(
             tap((project) => {
-              this.initializeDataSource(project.reports);
+              if (project) {
+                this.initializeDataSource(project.reports);
+              }
             })
           );
         })
