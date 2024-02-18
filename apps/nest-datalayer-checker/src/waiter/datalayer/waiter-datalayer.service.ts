@@ -138,9 +138,9 @@ export class WaiterDataLayerService {
     // therefore, we handle the result gathering logic in the xlsx-report.service.ts
     const timestamp = getCurrentTimestamp();
 
-    const operations = await this.fileService.getOperationJsonByProject({
-      name: projectName,
-    });
+    const operations = await this.fileService.getOperationJsonByProject(
+      projectName
+    );
     await this.xlsxReportService.writeXlsxFileForAllTests(
       operations,
       `QA_report_all_.xlsx_${timestamp}.xlsx`,

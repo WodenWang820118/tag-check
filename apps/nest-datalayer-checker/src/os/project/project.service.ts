@@ -1,4 +1,3 @@
-import { map } from 'rxjs';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../file/file.service';
 import { FolderService } from '../folder/folder.service';
@@ -7,9 +6,6 @@ import { FilePathService } from '../path/file-path/file-path.service';
 import { join } from 'path';
 import { statSync } from 'fs';
 
-/**
- * @description
- */
 @Injectable()
 export class ProjectService {
   constructor(
@@ -18,21 +14,11 @@ export class ProjectService {
     private folderPathService: FolderPathService,
     private filePathService: FilePathService
   ) {}
-  async getSettings(projectName: string) {
-    try {
-      const settingsFilePath =
-        await this.filePathService.getProjectSettingFilePath(projectName);
-      return this.fileService.readJsonFile(settingsFilePath);
-    } catch (error) {
-      Logger.error(error.message, 'ProjectService.getSettings');
-      throw new HttpException(error.message, 500);
-    }
-  }
 
-  async getProjectSettings(projectName: string) {
+  async getProjectSettings(projectSlug: string) {
     try {
       const settingsFilePath =
-        await this.filePathService.getProjectSettingFilePath(projectName);
+        await this.filePathService.getProjectSettingFilePath(projectSlug);
       return this.fileService.readJsonFile(settingsFilePath);
     } catch (error) {
       Logger.error(error.message, 'ProjectService.getProjectSettings');
@@ -40,28 +26,25 @@ export class ProjectService {
     }
   }
 
-  async getProjectDataLayerRecordings(projectName: string) {
+  async getProjectRecordings(projectSlug: string) {
     try {
       const recordingPath = await this.folderPathService.getRecordingFolderPath(
-        projectName
+        projectSlug
       );
       const recordings = this.folderService.readFolderFiles(recordingPath);
       return recordings;
     } catch (error) {
-      Logger.error(
-        error.message,
-        'ProjectService.getProjectDataLayerRecordings'
-      );
+      Logger.error(error.message, 'ProjectService.getProjectRecordings');
       throw new HttpException(error.message, 500);
     }
   }
 
-  async getProjectDataLayerInspectionResults(projectName: string) {
+  async getProjectInspectionResults(projectSlug: string) {
     try {
       const results = [];
 
       const resultFolderPath =
-        await this.folderPathService.getInspectionResultFolderPath(projectName);
+        await this.folderPathService.getInspectionResultFolderPath(projectSlug);
 
       const eventFolderNames = this.folderService
         .readFolderFiles(resultFolderPath)
@@ -83,15 +66,12 @@ export class ProjectService {
       }
       return results;
     } catch (error) {
-      Logger.error(
-        error.message,
-        'ProjectService.getProjectDataLayerInspectionResults'
-      );
+      Logger.error(error.message, 'ProjectService.getProjectInspectionResults');
       throw new HttpException(error.message, 500);
     }
   }
 
-  async getProjects() {
+  async getProjectsMetadata() {
     try {
       const projectRoot =
         await this.folderPathService.getRootProjectFolderPath();
@@ -103,7 +83,7 @@ export class ProjectService {
       // Logger.log(projects, 'ProjectService.getProjects');
       // Map each project to a promise of its settings
       const projectSettingsPromises = projects.map(async (project) => {
-        return this.getProject(project);
+        return this.getProjectMetadata(project);
       });
 
       // Resolve all promises before returning
@@ -117,7 +97,7 @@ export class ProjectService {
     }
   }
 
-  async getProject(projectSlug: string) {
+  async getProjectMetadata(projectSlug: string) {
     try {
       const projectRoot =
         await this.folderPathService.getRootProjectFolderPath();
@@ -129,17 +109,15 @@ export class ProjectService {
       const project = projectNames.find((name) => name === projectSlug);
 
       const settings = await this.getProjectSettings(project);
-      const recordings = (
-        await this.getProjectDataLayerRecordings(project)
-      ).map((item) => item && item.name.replace('.json', ''));
-      const reports = (
-        await this.getProjectDataLayerInspectionResults(project)
-      ).map((item) => item && item.eventName);
-      const specs = (
-        await this.fileService.getSpecJsonByProject({
-          name: project,
-        })
-      ).map((item: { event: any }) => item && item.event);
+      const recordings = (await this.getProjectRecordings(project)).map(
+        (item) => item && item.name.replace('.json', '')
+      );
+      const reports = (await this.getProjectInspectionResults(project)).map(
+        (item) => item && item.eventName
+      );
+      const specs = this.fileService.readJsonFile(
+        await this.filePathService.getProjectConfigFilePath(project)
+      );
 
       return {
         projectName: project,
