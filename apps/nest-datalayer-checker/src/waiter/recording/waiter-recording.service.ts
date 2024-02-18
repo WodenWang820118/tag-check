@@ -11,10 +11,27 @@ export class WaiterRecordingService {
     private folderPathService: FolderPathService
   ) {}
 
+  // TODO: temporary solution to return the same structure as the json-server's mock backend
+  // but there might be a better way to optimize the data structure
   async getProjectRecordings(projectSlug: string) {
-    return this.folderService.getJsonFilesFromDir(
+    const folderNames = this.folderService.getJsonFilesFromDir(
       await this.folderPathService.getRecordingFolderPath(projectSlug)
     );
+
+    const recordings = await Promise.all(
+      folderNames.map(async (fileName) => {
+        return await this.fileService.readJsonFile(
+          await this.folderPathService.getRecordingFilePath(
+            projectSlug,
+            fileName
+          )
+        );
+      })
+    );
+    return {
+      projectSlug: projectSlug,
+      recordings: recordings,
+    };
   }
 
   async getRecordingDetails(projectSlug: string, recordingId: string) {
