@@ -28,7 +28,7 @@ export class ClickHandler implements ActionHandler {
     let clickedSuccessfully = false;
     // TODO: typing issue
     const preventNavigationEvents = (
-      (await this.projectService.getSettings(projectName)) as any
+      (await this.projectService.getProjectSettings(projectName)) as any
     ).preventNavigationEvents;
     let preventNavigation = false;
 
@@ -84,10 +84,7 @@ export class ClickHandler implements ActionHandler {
   ): Promise<boolean> {
     const operationPath = await this.filePathService.getOperationFilePath(
       projectName,
-      {
-        absolutePath: undefined,
-        name: title,
-      }
+      title
     );
 
     const domain = new URL(

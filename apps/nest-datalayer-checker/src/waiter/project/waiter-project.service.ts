@@ -156,12 +156,12 @@ export class WaiterProjectService {
     }
   }
 
-  async getProjects() {
-    return await this.projectService.getProjects();
+  async getProjectsMetadata() {
+    return await this.projectService.getProjectsMetadata();
   }
 
-  async getProject(projectSlug: string) {
-    return await this.projectService.getProject(projectSlug);
+  async getProjectMetadata(projectSlug: string) {
+    return await this.projectService.getProjectMetadata(projectSlug);
   }
 
   // TODO: could be independent of the project endpoint
