@@ -3,7 +3,6 @@ import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ActionService } from './action/action.service';
 import { WebMonitoringService } from './web-monitoring/web-monitoring.service';
 import puppeteer, { Credentials, Page } from 'puppeteer';
-import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
 import { FileService } from '../os/file/file.service';
 import { FilePathService } from '../os/path/file-path/file-path.service';
@@ -107,16 +106,8 @@ export class WebAgentService {
     );
     await this.dataLayerService.initSelfDataLayer(projectName, testName);
 
-    const operationOption: FilePathOptions = {
-      name: testName,
-      absolutePath: filePath,
-    };
-
     const operation = await this.fileService.readJsonFile(
-      await this.filePathService.getOperationFilePath(
-        projectName,
-        operationOption
-      )
+      await this.filePathService.getOperationFilePath(projectName, testName)
     );
 
     if (credentials) {

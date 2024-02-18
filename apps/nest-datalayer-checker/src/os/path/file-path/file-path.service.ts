@@ -3,11 +3,11 @@ import { PathUtilsService } from '../path-utils/path-utils.service';
 import { FolderPathService } from '../folder-path/folder-path.service';
 import {
   SPECS,
-  configFolder,
-  recordingFolder,
+  CONFIG_FOLDER,
+  RECORDING_FOLDER,
+  SETTINGS,
 } from '../../../configs/project.config';
 import path from 'path';
-import { FilePathOptions } from '../../../interfaces/filePathOptions.interface';
 
 @Injectable()
 export class FilePathService {
@@ -16,19 +16,13 @@ export class FilePathService {
     private folderPathService: FolderPathService
   ) {}
 
-  async getOperationFilePath(projectName: string, options: FilePathOptions) {
+  async getOperationFilePath(projectSlug: string, testName: string) {
     try {
-      this.pathUtilsService.validateInput(projectName, options);
-
-      const filePath =
-        options.absolutePath ||
-        (await this.pathUtilsService.buildFilePath(
-          projectName,
-          recordingFolder,
-          `${options.name}.json`
-        ));
-
-      Logger.log(`filePath: ${filePath}`, 'FilePathService.getOperationPath');
+      const filePath = await this.pathUtilsService.buildFilePath(
+        projectSlug,
+        RECORDING_FOLDER,
+        `${testName}.json`
+      );
       return filePath;
     } catch (error) {
       Logger.error(error.message, 'FilePathService.getOperationPath');
@@ -36,11 +30,11 @@ export class FilePathService {
     }
   }
 
-  async getProjectConfigFilePath(projectName: string) {
+  async getProjectConfigFilePath(projectSlug: string) {
     try {
       return await this.pathUtilsService.buildFilePath(
-        projectName,
-        configFolder,
+        projectSlug,
+        CONFIG_FOLDER,
         SPECS
       );
     } catch (error) {
@@ -49,12 +43,12 @@ export class FilePathService {
     }
   }
 
-  async getProjectSettingFilePath(projectName: string) {
+  async getProjectSettingFilePath(projectSlug: string) {
     try {
       return await this.pathUtilsService.buildFilePath(
-        projectName,
+        projectSlug,
         '',
-        'settings.json'
+        SETTINGS
       );
     } catch (error) {
       Logger.error(error.message, 'FilePathService.getProjectSettingPath');
@@ -62,29 +56,34 @@ export class FilePathService {
     }
   }
 
-  async getReportFilePath(projectName: string, reportName: string) {
+  async getReportFilePath(projectSlug: string, reportName: string) {
     try {
       const reportSavingFolder =
-        await this.folderPathService.getReportSavingFolderPath(projectName);
+        await this.folderPathService.getReportSavingFolderPath(projectSlug);
       return path.join(reportSavingFolder, `${reportName}`);
     } catch (error) {
-      Logger.error(error.message, 'FilePathService.getReportPath');
+      Logger.error(error.message, 'FilePathService.getReportFilePath');
       throw new HttpException(error.message, 500);
     }
   }
 
-  async getCacheFilePath(projectName: string, operation: string) {
-    return path.join(
-      await this.folderPathService.getReportSavingFolderPath(projectName),
-      operation.replace('.json', ''),
-      `${operation.replace('.json', '')} - result cache.json`
-    );
+  async getCacheFilePath(projectSlug: string, operation: string) {
+    try {
+      return path.join(
+        await this.folderPathService.getReportSavingFolderPath(projectSlug),
+        operation.replace('.json', ''),
+        `${operation.replace('.json', '')} - result cache.json`
+      );
+    } catch (error) {
+      Logger.error(error.message, 'FilePathService.getCacheFilePath');
+      throw new HttpException(error.message, 500);
+    }
   }
 
-  async getImageFilePath(projectName: string, testName: string) {
+  async getImageFilePath(projectSlug: string, testName: string) {
     try {
       const imageSavingFolder = path.join(
-        await this.folderPathService.getReportSavingFolderPath(projectName),
+        await this.folderPathService.getReportSavingFolderPath(projectSlug),
         testName
       );
       return path.join(imageSavingFolder, `${testName}.png`);
@@ -95,14 +94,35 @@ export class FilePathService {
   }
 
   async getInspectionResultFilePath(
-    projectName: string,
+    projectSlug: string,
     testName: string,
     fileName: string
   ) {
-    return path.join(
-      await this.folderPathService.getInspectionResultFolderPath(projectName),
-      testName,
-      fileName
-    );
+    try {
+      return path.join(
+        await this.folderPathService.getInspectionResultFolderPath(projectSlug),
+        testName,
+        fileName
+      );
+    } catch (error) {
+      Logger.error(
+        error.message,
+        'FilePathService.getInspectionResultFilePath'
+      );
+      throw new HttpException(error.message, 500);
+    }
+  }
+
+  async getRecordingFilePath(projectSlug: string, testName: string) {
+    try {
+      return await this.pathUtilsService.buildFilePath(
+        projectSlug,
+        RECORDING_FOLDER,
+        testName
+      );
+    } catch (error) {
+      Logger.error(error.message, 'FolderPathService.getRecordingFilePath');
+      throw new HttpException(error.message, 500);
+    }
   }
 }

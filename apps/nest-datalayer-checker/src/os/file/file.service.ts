@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { createReadStream, existsSync, readFileSync, writeFileSync } from 'fs';
 import path from 'path';
-import { FilePathOptions } from '../../interfaces/filePathOptions.interface';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
@@ -33,24 +32,10 @@ export class FileService {
     }
   }
 
-  async getSpecJsonByProject(options: FilePathOptions) {
-    try {
-      const dirPath = await this.folderPathService.getProjectConfigFolderPath(
-        options.name
-      );
-      const jsonFiles = this.folderService.getJsonFilesFromDir(dirPath);
-      const specFile = jsonFiles.find((file) => file.endsWith('.json'));
-      return this.readJsonFile(path.join(`${dirPath}`, specFile));
-    } catch (error) {
-      Logger.error(error.message, 'FileService.getSpecJsonByProject');
-      throw new HttpException(error.message, 500);
-    }
-  }
-
-  async getOperationJsonByProject(options: FilePathOptions) {
+  async getOperationJsonByProject(projectSlug: string) {
     try {
       const dirPath =
-        await this.folderPathService.getOperationJsonPathByProject(options);
+        await this.folderPathService.getOperationJsonPathByProject(projectSlug);
       const jsonFiles = this.folderService.getJsonFilesFromDir(dirPath);
       return jsonFiles.filter((file) => {
         file.endsWith('.json');
@@ -61,12 +46,12 @@ export class FileService {
     }
   }
 
-  async getEventReport(projectName: string, testName: string) {
+  async getEventReport(projectSlug: string, testName: string) {
     try {
       const inspectionResultPath =
-        await this.folderPathService.getInspectionResultFolderPath(projectName);
+        await this.folderPathService.getInspectionResultFolderPath(projectSlug);
       if (!existsSync(inspectionResultPath)) {
-        throw new BadRequestException(`Project ${projectName} does not exist!`);
+        throw new BadRequestException(`Project ${projectSlug} does not exist!`);
       }
       // use regex and testName to get an array of XLSX files
       const regex = new RegExp(`${testName}.*.xlsx`);
@@ -85,10 +70,10 @@ export class FileService {
     }
   }
 
-  async readReport(projectName: string, reportName: string) {
+  async readReport(projectSlug: string, reportName: string) {
     try {
       const reportPath = await this.filePathService.getReportFilePath(
-        projectName,
+        projectSlug,
         reportName
       );
 
@@ -99,10 +84,10 @@ export class FileService {
     }
   }
 
-  async readImage(projectName: string, testName: string) {
+  async readImage(projectSlug: string, testName: string) {
     try {
       const imageSavingFolder = path.join(
-        await this.folderPathService.getReportSavingFolderPath(projectName),
+        await this.folderPathService.getReportSavingFolderPath(projectSlug),
         testName
       );
       const imagePath = path.join(imageSavingFolder, `${testName}.png`);
@@ -123,23 +108,11 @@ export class FileService {
     writeFileSync(filePath, JSON.stringify(content, null, 2));
   }
 
-  async writeCacheFile(projectName: string, operation: string, data: any) {
+  async writeCacheFile(projectSlug: string, operation: string, data: any) {
     const cachePath = await this.filePathService.getCacheFilePath(
-      projectName,
+      projectSlug,
       operation
     );
     this.writeJsonFile(cachePath, data);
-  }
-
-  async getInspectionResultFilePath(
-    projectName: string,
-    testName: string,
-    fileName: string
-  ) {
-    return await this.filePathService.getInspectionResultFilePath(
-      projectName,
-      testName,
-      fileName
-    );
   }
 }
