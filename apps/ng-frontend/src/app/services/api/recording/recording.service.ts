@@ -12,6 +12,7 @@ import {
 } from 'rxjs';
 import { FormGroup } from '@angular/forms';
 import { ProjectRecording } from '../../../models/recording.interface';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -27,7 +28,7 @@ export class RecordingService {
   constructor(private http: HttpClient) {}
 
   getProjectRecordings(projectSlug: string) {
-    return this.http.get(`${this.mockUrl}/${projectSlug}`);
+    return this.http.get(`${environment.recordingApiUrl}/${projectSlug}`);
   }
 
   getRecordingDetails(
@@ -36,11 +37,11 @@ export class RecordingService {
   ): Observable<ProjectRecording> {
     if (!eventName || !projectSlug) return of({} as ProjectRecording);
     return this.http
-      .get<ProjectRecording>(`${this.mockUrl}/${projectSlug}`)
+      .get<ProjectRecording>(`${environment.recordingApiUrl}/${projectSlug}`)
       .pipe(
         map((projectRecordings: ProjectRecording) => {
-          if (projectRecordings && projectRecordings !== undefined) {
-            console.log('Project Recordings', projectRecordings);
+          if (projectRecordings) {
+            // console.log('Project Recordings', projectRecordings);
 
             return projectRecordings.recordings.find(
               (recording) => recording.title === eventName
@@ -55,7 +56,7 @@ export class RecordingService {
     const recording = testCaseForm.controls['recording'].value;
 
     return this.http
-      .get<ProjectRecording>(`${this.mockUrl}/${projectSlug}`)
+      .get<ProjectRecording>(`${environment.recordingApiUrl}/${projectSlug}`)
       .pipe(
         switchMap((project: ProjectRecording) => {
           if (project) {
@@ -66,7 +67,7 @@ export class RecordingService {
 
             console.log('updatedProject', updatedProject);
             return this.http.put<Project>(
-              `${this.mockUrl}/${projectSlug}`,
+              `${environment.recordingApiUrl}/${projectSlug}`,
               updatedProject
             );
           } else {
@@ -76,7 +77,7 @@ export class RecordingService {
         catchError((error) => {
           console.error('error', error);
           // if the project does not exist, create it
-          return this.http.post(`${this.mockUrl}`, {
+          return this.http.post(`${environment.recordingApiUrl}`, {
             recordings: [recording],
           });
         })
