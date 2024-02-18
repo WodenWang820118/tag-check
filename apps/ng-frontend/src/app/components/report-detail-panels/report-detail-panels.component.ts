@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Observable, combineLatest, of, switchMap } from 'rxjs';
+import { Observable, combineLatest, of, switchMap, tap } from 'rxjs';
 import { ReportDetails } from '../../models/report.interface';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { RecordingService } from '../../services/api/recording/recording.service';
@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ProjectService } from '../../services/api/project/project.service';
 import { ActivatedRoute } from '@angular/router';
+import { SpecService } from '../../services/api/spec/spec.service';
 
 @Component({
   selector: 'app-report-datail-panels',
@@ -31,9 +32,7 @@ import { ActivatedRoute } from '@angular/router';
           </mat-panel-description>
         </mat-expansion-panel-header>
         <mat-panel-description>
-          <pre class="json">{{
-            (reportDetails$ | async)?.dataLayerSpec | json
-          }}</pre>
+          <pre class="json">{{ spec$ | async | json }}</pre>
         </mat-panel-description>
       </mat-expansion-panel>
 
@@ -83,10 +82,12 @@ export class ReportDetailPanelsComponent implements OnInit {
   @Input() eventName!: string | undefined;
   @Input() reportDetails$!: Observable<ReportDetails | undefined>;
   recording$!: Observable<any>;
+  spec$!: Observable<any>;
 
   constructor(
     private projectService: ProjectService,
     private recordingService: RecordingService,
+    private specService: SpecService,
     private route: ActivatedRoute
   ) {}
 
@@ -94,16 +95,39 @@ export class ReportDetailPanelsComponent implements OnInit {
     this.recording$ = combineLatest([
       this.projectService.currentProject$,
       this.reportDetails$,
+      this.route.params,
     ]).pipe(
-      switchMap(([project, reportDetails]) => {
+      switchMap(([project, reportDetails, params]) => {
         if (!project || !reportDetails) return of(undefined);
         console.log('project', project);
         console.log('reportDetails', reportDetails);
+
         return this.recordingService.getRecordingDetails(
           project.projectSlug,
           reportDetails?.eventName
         );
       })
     );
+
+    combineLatest([
+      this.route.params,
+      this.route.parent?.params || of({ projectSlug: '' }),
+    ])
+      .pipe(
+        tap(([params, parentParams]) => {
+          if (params && parentParams) {
+            this.spec$ = this.specService.getSpec(
+              parentParams['projectSlug'],
+              params['eventName']
+            );
+
+            this.recording$ = this.recordingService.getRecordingDetails(
+              parentParams['projectSlug'],
+              params['eventName']
+            );
+          }
+        })
+      )
+      .subscribe();
   }
 }
