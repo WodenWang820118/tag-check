@@ -1,6 +1,5 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { WebAgentService } from '../web-agent/web-agent.service';
-import { FilePathOptions } from '../interfaces/filePathOptions.interface';
 import {
   EcommerceEventValidationStrategy,
   OldGA4EventsValidationStrategy,
@@ -45,12 +44,8 @@ export class InspectorService {
     credentials?: Credentials
   ) {
     // 1. Get the project spec from the local file system
-    const specOption: FilePathOptions = {
-      name: projectName,
-      absolutePath: filePath,
-    };
     const specsPath = await this.filePathService.getProjectConfigFilePath(
-      specOption.name
+      projectName
     );
     const specs = await this.fileService.readJsonFile(specsPath);
     const imageSavingFolder = await this.filePathService.getImageFilePath(
@@ -159,9 +154,9 @@ export class InspectorService {
     // deal with invalid concurrency
     concurrency = Math.max(1, concurrency || 1);
 
-    const operations = await this.fileService.getOperationJsonByProject({
-      name: projectName,
-    });
+    const operations = await this.fileService.getOperationJsonByProject(
+      projectName
+    );
 
     const results = [];
     for (let i = 0; i < operations.length; i += concurrency) {

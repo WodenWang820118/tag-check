@@ -66,7 +66,7 @@ export class WaiterProjectController {
   })
   @Get()
   async getProjects() {
-    return await this.waiterProjectService.getProjects();
+    return await this.waiterProjectService.getProjectsMetadata();
   }
 
   @ApiOperation({
@@ -74,7 +74,7 @@ export class WaiterProjectController {
   })
   @Get(':projectSlug')
   async getProject(@Param('projectSlug') projectSlug: string) {
-    return await this.waiterProjectService.getProject(projectSlug);
+    return await this.waiterProjectService.getProjectMetadata(projectSlug);
   }
 
   // TODO: could be independent of the project endpoint
