@@ -1,4 +1,4 @@
-import { Controller, Get, Header, Query } from '@nestjs/common';
+import { Controller, Get, Header, Param, Query } from '@nestjs/common';
 import { WaiterProjectDataRetrievalService } from './waiter-project-data-retrieval.service';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 
@@ -19,15 +19,15 @@ export class WaiterProjectDataRetrievalController {
     name: 'testName',
     description: 'The name of the test associated with the event.',
   })
-  @Get('/read-image')
+  @Get('/images/:projectSlug/:eventName')
   @Header('Content-Type', 'image/png')
   async readImage(
-    @Query('projectName') projectName: string,
-    @Query('testName') testName: string
+    @Param('projectSlug') projectSlug: string,
+    @Param('eventName') eventName: string
   ) {
     return await this.waiterProjectDataRetrievalService.readImage(
-      projectName,
-      testName
+      projectSlug,
+      eventName
     );
   }
 
