@@ -13,6 +13,8 @@ import { FolderModule } from './folder/folder.module';
 import { FolderService } from './folder/folder.service';
 import { AbstractReportModule } from './abstract-report/abstract-report.module';
 import { AbstractReportService } from './abstract-report/abstract-report.service';
+import { ImageModule } from './image/image.module';
+import { ImageService } from './image/image.service';
 
 const modules = [
   PathModule,
@@ -23,6 +25,7 @@ const modules = [
   FolderModule,
   ConfigurationModule,
   AbstractReportModule,
+  ImageModule,
 ];
 
 const services = [
@@ -32,6 +35,7 @@ const services = [
   ProjectInitializationService,
   FolderService,
   AbstractReportService,
+  ImageService,
 ];
 @Module({
   imports: [...modules],

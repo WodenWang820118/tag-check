@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ProjectService } from '../../os/project/project.service';
 import { FileService } from '../../os/file/file.service';
 import { SpecParser } from '@datalayer-checker/spec-parser';
+import { ImageService } from '../../os/image/image.service';
 
 @Injectable()
 export class WaiterProjectDataRetrievalService {
@@ -9,7 +10,8 @@ export class WaiterProjectDataRetrievalService {
 
   constructor(
     private fileService: FileService,
-    private projectService: ProjectService
+    private projectService: ProjectService,
+    private imageService: ImageService
   ) {}
 
   async getProjectsMetadata() {
@@ -20,9 +22,8 @@ export class WaiterProjectDataRetrievalService {
     return await this.projectService.getProjectMetadata(projectSlug);
   }
 
-  // TODO: could be independent of the project endpoint
   async readImage(projectName: string, testName: string) {
-    return await this.fileService.readImage(projectName, testName);
+    return await this.imageService.readImage(projectName, testName);
   }
 
   // TODO: could be independent of the project endpoint
