@@ -10,7 +10,8 @@ import { GcsMonitorModule } from '../gcs-monitor/gcs-monitor.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
 
 // controllers
-import { WaiterProjectController } from './project/waiter-project.controller';
+import { WaiterProjectWorkFlowController } from './project/waiter-project-workflow.controller';
+import { WaiterProjectDataRetrievalController } from './project/waiter-project-data-retrieval.controller';
 import { WaiterRecordingController } from './recording/waiter-recording.controller';
 import { WaiterSpecController } from './spec/waiter-spec.controller';
 import { WaiterReportController } from './report/waiter-report.controller';
@@ -21,10 +22,12 @@ import { WaiterSpecParserController } from './spec-parser/waiter-gtm-spec-parser
 import { WaiterConfigurationController } from './configuration/waiter-configuration.controller';
 
 // services
-import { WaiterDataLayerService } from './datalayer/waiter-datalayer.service';
+import { WaiterDataLayerGroupEventsService } from './datalayer/waiter-datalayer-group-events.service';
+import { WaiterDataLayerSingleEventService } from './datalayer/waiter-datalayer-single-event.service';
 import { WaiterGtmOperatorService } from './gtm-operator/waiter-gtm-operator.service';
 import { WaiterGtmSpecParserService } from './spec-parser/waiter-gtm-spec-parser.service';
-import { WaiterProjectService } from './project/waiter-project.service';
+import { WaiterProjectDataRetrievalService } from './project/waiter-project-data-retrieval.service';
+import { WaiterProjectWorkFlowService } from './project/waiter-project-workflow.service';
 import { WaiterSpecService } from './spec/waiter-spec.service';
 import { WaiterReportService } from './report/waiter-report.service';
 import { WaiterRecordingService } from './recording/waiter-recording.service';
@@ -32,10 +35,12 @@ import { WaiterQaService } from './qa/waiter-qa.service';
 import { WaiterConfigurationService } from './configuration/waiter-configuration.service';
 
 const waiterServices = [
-  WaiterDataLayerService,
+  WaiterDataLayerGroupEventsService,
+  WaiterDataLayerSingleEventService,
   WaiterGtmOperatorService,
   WaiterGtmSpecParserService,
-  WaiterProjectService,
+  WaiterProjectDataRetrievalService,
+  WaiterProjectWorkFlowService,
   WaiterSpecService,
   WaiterReportService,
   WaiterRecordingService,
@@ -54,7 +59,8 @@ const waiterServices = [
     ConfigurationModule,
   ],
   controllers: [
-    WaiterProjectController,
+    WaiterProjectWorkFlowController,
+    WaiterProjectDataRetrievalController,
     WaiterQaController,
     WaiterDataLayerController,
     WaiterGtmOperatorController,

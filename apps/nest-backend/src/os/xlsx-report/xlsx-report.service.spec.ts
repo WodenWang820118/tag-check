@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { XlsxReportService } from './xlsx-report.service';
+import { XlsxReportService } from './xlsx-report-group-events.service';
 
 const mockWorkSheet = {
   addRows: jest.fn().mockImplementation(),
