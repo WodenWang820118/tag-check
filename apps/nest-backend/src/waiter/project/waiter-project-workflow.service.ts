@@ -1,28 +1,18 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { ProjectService } from '../../os/project/project.service';
-import { FileService } from '../../os/file/file.service';
 import { SpecParser } from '@datalayer-checker/spec-parser';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigurationService } from '../../configuration/configuration.service';
-import { mkdirSync } from 'fs';
 import { ProjectInitializationService } from '../../os/project-initialization/project-initialization.service';
-import { FolderService } from '../../os/folder/folder.service';
-import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
+import { mkdirSync } from 'fs';
 import {
-  CONFIG_CURRENT_PROJECT_PATH,
   CONFIG_ROOT_PATH,
+  CONFIG_CURRENT_PROJECT_PATH,
 } from '../../configs/project.config';
 
-// TODO: endpoints for the frontend to call
-// please look at the collection of db.json files
 @Injectable()
-export class WaiterProjectService {
+export class WaiterProjectWorkFlowService {
   specParser: SpecParser = new SpecParser();
 
   constructor(
-    private fileService: FileService,
-    private folderService: FolderService,
-    private folderPathService: FolderPathService,
-    private projectService: ProjectService,
     private configurationService: ConfigurationService,
     private projectInitializationService: ProjectInitializationService
   ) {}
@@ -35,7 +25,7 @@ export class WaiterProjectService {
       if (configurations.length === 0) {
         Logger.log(
           'Creating initial root project folder path',
-          'WaiterService'
+          'WaiterProjectWorkFlowService'
         );
         return await this.configurationService.create({
           title: 'rootProjectPath',
@@ -51,7 +41,7 @@ export class WaiterProjectService {
       if (existingConfig) {
         Logger.log(
           'Updating existing root project folder path',
-          'WaiterService'
+          'WaiterProjectWorkFlowService'
         );
         return this.configurationService.update(existingConfig.id, {
           title: 'rootProjectPath',
@@ -67,7 +57,7 @@ export class WaiterProjectService {
       });
       Logger.log(
         'Set root project folder path!',
-        'WaiterService.setRootProjectFolder'
+        'WaiterProjectWorkFlowService.setRootProjectFolder'
       );
     }
   }
@@ -85,7 +75,7 @@ export class WaiterProjectService {
       if (existingConfig) {
         Logger.log(
           'Current project folder existed! Update current project folder path',
-          'WaiterService.setProject'
+          'WaiterProjectWorkFlowService.setProject'
         );
 
         await this.configurationService.update(existingConfig.id, {
@@ -99,7 +89,7 @@ export class WaiterProjectService {
       } else {
         Logger.log(
           'Current project folder not existed! Create current project folder path',
-          'WaiterService.setProject'
+          'WaiterProjectWorkFlowService.setProject'
         );
 
         await this.configurationService.create({
@@ -132,7 +122,7 @@ export class WaiterProjectService {
       if (existingConfig) {
         Logger.log(
           'Current project folder existed! Update current project folder path',
-          'WaiterService.setProject'
+          'WaiterProjectWorkFlowService.setProject'
         );
 
         return this.configurationService.update(existingConfig.id, {
@@ -142,7 +132,7 @@ export class WaiterProjectService {
       } else {
         Logger.log(
           'Current project folder not existed! Create current project folder path',
-          'WaiterService.setProject'
+          'WaiterProjectWorkFlowService.setProject'
         );
 
         return this.configurationService.create({
@@ -152,30 +142,7 @@ export class WaiterProjectService {
         });
       }
     } catch (error) {
-      Logger.error(error, 'WaiterService.setProject');
+      Logger.error(error, 'WaiterProjectWorkFlowService.setProject');
     }
-  }
-
-  async getProjectsMetadata() {
-    return await this.projectService.getProjectsMetadata();
-  }
-
-  async getProjectMetadata(projectSlug: string) {
-    return await this.projectService.getProjectMetadata(projectSlug);
-  }
-
-  // TODO: could be independent of the project endpoint
-  async readImage(projectName: string, testName: string) {
-    return await this.fileService.readImage(projectName, testName);
-  }
-
-  // TODO: could be independent of the project endpoint
-  async getEventReport(projectName: string, testName: string) {
-    return await this.fileService.getEventReport(projectName, testName);
-  }
-
-  // TODO: could be independent of the project endpoint
-  async readReport(projectName: string, reportName: string) {
-    return await this.fileService.readReport(projectName, reportName);
   }
 }

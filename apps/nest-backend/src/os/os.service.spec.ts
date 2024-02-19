@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SharedService } from './os.service';
 import { ProjectService } from './project/project.service';
 import { FileService } from './file/file.service';
-import { XlsxReportService } from './xlsx-report/xlsx-report.service';
+import { XlsxReportService } from './xlsx-report/xlsx-report-group-events.service';
 
 describe('SharedService', () => {
   let service: SharedService;

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import puppeteer, { Page } from 'puppeteer';
 import { RequestService } from './request/request.service';
+import { BROWSER_ARGS } from '../../configs/project.config';
 
 @Injectable()
 export class WebMonitoringService {
@@ -44,7 +45,7 @@ export class WebMonitoringService {
   async detectGtm(url: string) {
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      args: BROWSER_ARGS,
     });
 
     try {
