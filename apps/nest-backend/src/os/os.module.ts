@@ -4,7 +4,7 @@ import { ProjectService } from './project/project.service';
 import { FileModule } from './file/file.module';
 import { FileService } from './file/file.service';
 import { XlsxReportModule } from './xlsx-report/xlsx-report.module';
-import { XlsxReportService } from './xlsx-report/xlsx-report.service';
+import { XlsxReportGroupEventsService } from './xlsx-report/xlsx-report-group-events.service';
 import { ConfigurationModule } from '../configuration/configuration.module';
 import { PathModule } from './path/path.module';
 import { ProjectInitializationModule } from './project-initialization/project-initialization.module';
@@ -28,7 +28,7 @@ const modules = [
 const services = [
   ProjectService,
   FileService,
-  XlsxReportService,
+  XlsxReportGroupEventsService,
   ProjectInitializationService,
   FolderService,
   AbstractReportService,

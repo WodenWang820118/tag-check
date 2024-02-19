@@ -1,10 +1,14 @@
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { WaiterDataLayerService } from '../datalayer/waiter-datalayer.service';
+import { WaiterDataLayerGroupEventsService } from '../datalayer/waiter-datalayer-group-events.service';
 import { Controller, Get, Query } from '@nestjs/common';
+import { WaiterDataLayerSingleEventService } from '../datalayer/waiter-datalayer-single-event.service';
 
 @Controller('waiter-qa')
 export class WaiterQaController {
-  constructor(private waiterDataLayerService: WaiterDataLayerService) {}
+  constructor(
+    private waiterDataLayerGroupEventsService: WaiterDataLayerGroupEventsService,
+    private waiterDataLayerSingleEventService: WaiterDataLayerSingleEventService
+  ) {}
 
   @Get('/single-event')
   @ApiOperation({
@@ -56,7 +60,7 @@ export class WaiterQaController {
     @Query('username') username?: string,
     @Query('password') password?: string
   ) {
-    return await this.waiterDataLayerService.inspectSingleEvent(
+    return await this.waiterDataLayerSingleEventService.inspectSingleEvent(
       projectName,
       testName,
       headless,
@@ -87,7 +91,7 @@ export class WaiterQaController {
     @Query('password') password?: string,
     @Query('concurrency') concurrency?: string
   ) {
-    return await this.waiterDataLayerService.inspectProject(
+    return await this.waiterDataLayerGroupEventsService.inspectProject(
       projectName,
       headless,
       path,

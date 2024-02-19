@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import puppeteer, { Credentials } from 'puppeteer';
-import { InspectorService } from '../inspector/inspector.service';
+import { InspectorGroupEventsService } from '../inspector/inspector-group-events.service';
+import { BROWSER_ARGS } from '../configs/project.config';
+import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
 
 /**
  * A service for interacting with Google Tag Manager (GTM) via Puppeteer.
@@ -10,7 +12,10 @@ import { InspectorService } from '../inspector/inspector.service';
  */
 @Injectable()
 export class GtmOperatorService {
-  constructor(private inspectorService: InspectorService) {}
+  constructor(
+    private inspectorGroupEventsService: InspectorGroupEventsService,
+    private inspectorSingleEventService: InspectorSingleEventService
+  ) {}
 
   async inspectSingleEventViaGtm(
     gtmUrl: string,
@@ -28,14 +33,7 @@ export class GtmOperatorService {
       timeout: 30000,
       ignoreHTTPSErrors: true,
       // the window size may impact the examination result
-      args: [
-        '--window-size=1440,900',
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--disable-gpu',
-      ],
+      args: BROWSER_ARGS,
     });
 
     const incognitoContext = await browser.createIncognitoBrowserContext();
@@ -65,7 +63,7 @@ export class GtmOperatorService {
     }
 
     try {
-      await this.inspectorService.inspectDataLayer(
+      await this.inspectorSingleEventService.inspectDataLayer(
         testingPage,
         projectName,
         testName,

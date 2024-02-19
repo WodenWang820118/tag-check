@@ -1,8 +1,15 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { BrowserAction, sleep } from './action-utils';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
-import { ActionHandler, getFirstSelector } from './handlers/utils';
+import { ActionHandler } from './handlers/utils';
+import {
+  handleKeyboardAction,
+  handleNavigate,
+  handleNavigationIfNeeded,
+  handleSetViewport,
+  handleWaitForElement,
+} from './step-executor-utils';
 
 @Injectable()
 export class StepExecutor {
@@ -24,13 +31,13 @@ export class StepExecutor {
 
     switch (step.type) {
       case BrowserAction.SETVIEWPORT:
-        await this.handleSetViewport(page, step);
+        await handleSetViewport(page, step);
         break;
       case BrowserAction.NAVIGATE:
-        await this.handleNavigate(page, step, state);
+        await handleNavigate(page, step, state);
         break;
       case BrowserAction.WAITFORELEMENT:
-        await this.handleWaitForElement(page, step, step.timeout || 10000);
+        await handleWaitForElement(page, step, step.timeout || 10000);
         break;
       case BrowserAction.KEYDOWN:
         Logger.log(`${step.type} ${step.key}`, 'StepExecutor.executeStep');
@@ -39,7 +46,7 @@ export class StepExecutor {
       case BrowserAction.KEYUP:
         Logger.log(`${step.type} ${step.key}`, 'StepExecutor.executeStep');
         await page.keyboard.up(step.key);
-        await this.handleKeyboardAction(
+        await handleKeyboardAction(
           page,
           projectName,
           testName,
@@ -80,92 +87,11 @@ export class StepExecutor {
       step,
       isLastStep
     );
-    await this.handleNavigationIfNeeded(page, isLastStep);
+    await handleNavigationIfNeeded(page, isLastStep);
     await this.dataLayerService.updateSelfDataLayer(
       page,
       projectName,
       testName
     );
-  }
-
-  async handleKeyboardAction(
-    page: Page,
-    projectName: string,
-    testName: string,
-    isLastStep: boolean,
-    delay: number
-  ) {
-    await this.handleNavigationIfNeeded(page, isLastStep, delay);
-    await this.dataLayerService.updateSelfDataLayer(
-      page,
-      projectName,
-      testName
-    );
-  }
-
-  async handleNavigationIfNeeded(
-    page: Page,
-    isLastStep: boolean,
-    delay = 10000
-  ) {
-    if (isLastStep) {
-      try {
-        await page.waitForNavigation({
-          waitUntil: 'networkidle2',
-          timeout: delay,
-        });
-      } catch (error) {
-        Logger.log('No navigation needed', 'StepExecutor.executeStep');
-      }
-    }
-    await sleep(1000); // Necessary delay for the website to update
-  }
-
-  async handleSetViewport(page: Page, step: any) {
-    await page.setViewport({
-      width: step.width,
-      height: step.height,
-    });
-  }
-
-  async handleNavigate(page: Page, step: any, state: any) {
-    await page.goto(step.url, { waitUntil: 'networkidle2' });
-
-    if (state.isFirstNavigation) {
-      // only reload the landing page, trying to skip the overlay
-      await page.reload({
-        waitUntil: 'networkidle2',
-      });
-      state.isFirstNavigation = false;
-    }
-  }
-
-  async handleWaitForElement(page: Page, step: any, timeout: number) {
-    for (const selector of step.selectors) {
-      try {
-        // sometimes SSR may send multiple SPA pages, so it's necessary to wait for navigation
-        // but sometimes it's not necessary, so we do race
-        const fistSelector = getFirstSelector(selector);
-        await Promise.race([
-          page.waitForNavigation({ waitUntil: 'networkidle2', timeout }),
-          page.waitForSelector(fistSelector, {
-            visible: step.visible ? true : false,
-            timeout: timeout,
-          }),
-        ]);
-
-        Logger.log(`${selector} exists`, 'StepExecutor.handleWaitForElement');
-        return;
-      } catch (error) {
-        Logger.log(
-          `${selector} does not exist`,
-          'StepExecutor.handleWaitForElement'
-        );
-        Logger.error(error.message, 'StepExecutor.handleWaitForElement');
-        // close the page if stop processing
-        await page.close();
-        throw new HttpException(`${error.message}, Stop processing.`, 500);
-      }
-    }
   }
 }
