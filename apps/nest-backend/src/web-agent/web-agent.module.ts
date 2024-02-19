@@ -5,6 +5,7 @@ import { UtilitiesModule } from './utilities/utilities.module';
 import { WebAgentService } from './web-agent.service';
 import { OsModule } from '../os/os.module';
 import { DataLayerModule } from './web-monitoring/data-layer/data-layer.module';
+import { WebAgentUtilsService } from './web-agent-utils.service';
 
 const modules = [
   ActionModule,
@@ -21,7 +22,7 @@ const modules = [
     OsModule,
     DataLayerModule,
   ],
-  providers: [WebAgentService],
+  providers: [WebAgentService, WebAgentUtilsService],
   exports: [WebAgentService, ...modules],
 })
 export class WebAgentModule {}

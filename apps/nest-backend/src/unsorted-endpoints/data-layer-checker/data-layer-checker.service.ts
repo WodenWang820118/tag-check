@@ -4,6 +4,7 @@ import { AirtableService } from '../airtable/airtable.service';
 import { chunk } from '../../utilities/utilities';
 import { WebAgentService } from '../../web-agent/web-agent.service';
 import puppeteer from 'puppeteer';
+import { BROWSER_ARGS } from '../../configs/project.config';
 
 /**
  * DataLayerCheckerService
@@ -113,7 +114,7 @@ export class DataLayerCheckerService {
       // if there is a recording, use the recording to get the data layer
       const browser = await puppeteer.launch({
         headless: true,
-        args: [],
+        args: BROWSER_ARGS,
       });
 
       if (record.fields['Recording']) {

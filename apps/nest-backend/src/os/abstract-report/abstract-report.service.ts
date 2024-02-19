@@ -1,5 +1,5 @@
 import { FolderService } from './../folder/folder.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ValidationResult } from '../../interfaces/dataLayer.interface';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
