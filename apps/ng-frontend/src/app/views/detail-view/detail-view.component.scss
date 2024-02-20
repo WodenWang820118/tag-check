@@ -1,0 +1,39 @@
+.detail {
+  padding: 2rem 10rem;
+  display: flex;
+  flex-direction: column;
+
+  &__header {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  &__status {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+  }
+
+  &__panels {
+    flex: 1 1 0;
+    max-width: 40vw;
+  }
+
+  &__images {
+    flex: 1 1 0;
+
+    &__item {
+      max-width: 40vw;
+    }
+  }
+}

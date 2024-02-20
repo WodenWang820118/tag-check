@@ -1,0 +1,28 @@
+<div class="detail">
+  <div class="detail__header">
+    <h1>{{ (reportDetails$ | async)?.eventName }}</h1>
+    <div class="detail__status">
+      <h2>Status:</h2>
+      <mat-icon>{{
+        (reportDetails$ | async)?.passed ? 'check_circle' : 'cancel'
+      }}</mat-icon>
+    </div>
+    <p>{{ (reportDetails$ | async)?.completedTime }}</p>
+  </div>
+  <div class="detail__content">
+    <div class="detail__images">
+      <img
+        class="detail__images__item"
+        *ngIf="image$ | async as imageBlob"
+        [src]="imageBlob | blobToUrl"
+        alt="Loaded image"
+      />
+    </div>
+    <div class="detail__panels">
+      <app-report-datail-panels
+        [reportDetails$]="reportDetails$"
+        [eventName]="(reportDetails$ | async)?.eventName"
+      ></app-report-datail-panels>
+    </div>
+  </div>
+</div>
