@@ -22,41 +22,52 @@ import { SpecService } from '../../services/api/spec/spec.service';
   ],
   template: `<div class="test-detail-panels">
     <mat-accordion class=".example-headers-align" multi>
-      <mat-expansion-panel hideToggle>
+      <mat-expansion-panel
+        hideToggle
+        (opened)="switchSpecEdit()"
+        (closed)="switchSpecEdit()"
+      >
         <mat-expansion-panel-header>
           <mat-panel-title> DataLayer Spec </mat-panel-title>
           <mat-panel-description>
-            <mat-icon>chevron_right</mat-icon>
-            <mat-icon>edit</mat-icon>
+            @if (specEdit) {
+            <mat-icon (click)="edit($event)">edit</mat-icon>
+            }
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <mat-panel-description>
+        <ng-template matExpansionPanelContent>
           <pre class="json">{{ spec$ | async | json }}</pre>
-        </mat-panel-description>
+        </ng-template>
       </mat-expansion-panel>
 
-      <mat-expansion-panel hideToggle>
+      <mat-expansion-panel
+        hideToggle
+        (opened)="switchRecordingEdit()"
+        (closed)="switchRecordingEdit()"
+      >
         <mat-expansion-panel-header>
           <mat-panel-title> Chrome Recording </mat-panel-title>
           <mat-panel-description>
-            <mat-icon>chevron_right</mat-icon>
-            <mat-icon matTooltip="Edit">edit</mat-icon>
+            <!-- <mat-icon>chevron_right</mat-icon> -->
+            @if (recordingEdit) {
+            <mat-icon matTooltip="Edit" (click)="edit($event)">edit</mat-icon>
+            }
           </mat-panel-description>
         </mat-expansion-panel-header>
-        <mat-panel-description>
+        <ng-template matExpansionPanelContent>
           <pre class="json">{{ recording$ | async | json }}</pre>
-        </mat-panel-description>
+        </ng-template>
       </mat-expansion-panel>
 
       <mat-expansion-panel hideToggle>
         <mat-expansion-panel-header>
           <mat-panel-title> Test Result </mat-panel-title>
-          <mat-panel-description>
-            <mat-icon>chevron_right</mat-icon>
-            <mat-icon>edit</mat-icon>
-          </mat-panel-description>
         </mat-expansion-panel-header>
-        <pre class="json">{{ (reportDetails$ | async)?.dataLayer | json }}</pre>
+        <ng-template matExpansionPanelContent>
+          <pre class="json">{{
+            (reportDetails$ | async)?.dataLayer | json
+          }}</pre>
+        </ng-template>
       </mat-expansion-panel>
     </mat-accordion>
   </div>`,
@@ -82,6 +93,8 @@ export class ReportDetailPanelsComponent implements OnInit {
   @Input() reportDetails$!: Observable<ReportDetails | undefined>;
   recording$!: Observable<any>;
   spec$!: Observable<any>;
+  specEdit = false;
+  recordingEdit = false;
 
   constructor(
     private recordingService: RecordingService,
@@ -110,5 +123,18 @@ export class ReportDetailPanelsComponent implements OnInit {
         })
       )
       .subscribe();
+  }
+
+  switchSpecEdit() {
+    this.specEdit = !this.specEdit;
+  }
+
+  switchRecordingEdit() {
+    this.recordingEdit = !this.recordingEdit;
+  }
+
+  edit(event: Event) {
+    event.stopPropagation();
+    console.log('edit');
   }
 }
