@@ -1,25 +1,25 @@
 import { DataSource } from '@angular/cdk/collections';
-import { ReportDetails } from '../../models/report.interface';
+import { IReportDetails } from '../../models/report.interface';
 import { Observable, ReplaySubject } from 'rxjs';
 import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ProjectDataSourceService extends DataSource<ReportDetails> {
-  private _dataStream = new ReplaySubject<ReportDetails[]>();
+export class ProjectDataSourceService extends DataSource<IReportDetails> {
+  private _dataStream = new ReplaySubject<IReportDetails[]>();
 
   constructor() {
     super();
   }
 
-  connect(): Observable<ReportDetails[]> {
+  connect(): Observable<IReportDetails[]> {
     return this._dataStream;
   }
 
   disconnect() {}
 
-  setData(data: ReportDetails[]) {
+  setData(data: IReportDetails[]) {
     this._dataStream.next(data);
   }
 }

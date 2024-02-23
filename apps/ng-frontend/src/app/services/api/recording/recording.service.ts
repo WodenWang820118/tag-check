@@ -1,18 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Project } from '../../../models/project.interface';
-import {
-  BehaviorSubject,
-  Observable,
-  Subject,
-  catchError,
-  map,
-  of,
-  switchMap,
-} from 'rxjs';
-import { FormGroup } from '@angular/forms';
+import { BehaviorSubject, Observable, Subject, map, of } from 'rxjs';
 import { ProjectRecording } from '../../../models/recording.interface';
 import { environment } from '../../../../environments/environment';
+import { EditorService } from '../../editor/editor.service';
 
 @Injectable({
   providedIn: 'root',
@@ -25,7 +16,7 @@ export class RecordingService {
   );
   recording$ = this.recordingSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private editorService: EditorService) {}
 
   getProjectRecordings(projectSlug: string) {
     return this.http.get(`${environment.recordingApiUrl}/${projectSlug}`);
@@ -51,36 +42,17 @@ export class RecordingService {
       );
   }
 
-  addRecording(testCaseForm: FormGroup) {
-    const projectSlug = testCaseForm.controls['projectSlug'].value;
-    const recording = testCaseForm.controls['recording'].value;
+  addRecording(projectSlug: string, eventName: string, content: string) {
+    const jsonContent = JSON.parse(content);
+    console.log('Project Slug', projectSlug);
+    console.log('Event Name', eventName);
+    console.log('Recording', jsonContent);
 
-    return this.http
-      .get<ProjectRecording>(`${environment.recordingApiUrl}/${projectSlug}`)
-      .pipe(
-        switchMap((project: ProjectRecording) => {
-          if (project) {
-            const updatedProject = {
-              ...project,
-              recordings: [...project.recordings, recording],
-            };
-
-            console.log('updatedProject', updatedProject);
-            return this.http.put<Project>(
-              `${environment.recordingApiUrl}/${projectSlug}`,
-              updatedProject
-            );
-          } else {
-            return of(undefined);
-          }
-        }),
-        catchError((error) => {
-          console.error('error', error);
-          // if the project does not exist, create it
-          return this.http.post(`${environment.recordingApiUrl}`, {
-            recordings: [recording],
-          });
-        })
-      );
+    return this.http.post(
+      `${environment.recordingApiUrl}/${projectSlug}/${eventName}`,
+      {
+        data: jsonContent,
+      }
+    );
   }
 }

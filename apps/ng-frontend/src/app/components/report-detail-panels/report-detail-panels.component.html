@@ -1,0 +1,63 @@
+<div class="test-detail-panels">
+  <mat-accordion class=".example-headers-align" multi>
+    <mat-expansion-panel
+      hideToggle
+      (opened)="switchSpecEdit()"
+      (closed)="switchSpecEdit()"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title> DataLayer Spec </mat-panel-title>
+        <mat-panel-description>
+          @if (specEdit) {
+          <mat-icon (click)="edit($event)">edit</mat-icon>
+          }
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <ng-template matExpansionPanelContent>
+        <pre class="json">{{ spec$ | async | json }}</pre>
+      </ng-template>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel
+      hideToggle
+      (opened)="switchRecordingEdit()"
+      (closed)="switchRecordingEdit()"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title> Chrome Recording </mat-panel-title>
+        <mat-panel-description>
+          <!-- <mat-icon>chevron_right</mat-icon> -->
+          @if (recordingEdit) {
+          <mat-icon matTooltip="Edit" (click)="edit($event)">edit</mat-icon>
+          <button
+            type="button"
+            mat-raised-button
+            style="margin-bottom: 1rem"
+            (click)="fileInput.click()"
+          >
+            Upload
+          </button>
+          <input
+            hidden
+            (change)="onFileSelected($event)"
+            #fileInput
+            type="file"
+          />
+          }
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <ng-template matExpansionPanelContent>
+        <pre class="json">{{ recording$ | async | json }}</pre>
+      </ng-template>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Test Result </mat-panel-title>
+      </mat-expansion-panel-header>
+      <ng-template matExpansionPanelContent>
+        <pre class="json">{{ (reportDetails$ | async)?.dataLayer | json }}</pre>
+      </ng-template>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>
