@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { ReportDetails } from '../../models/report.interface';
+import { IReportDetails } from '../../models/report.interface';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReportDetailsService {
-  reportDetailsSubject = new BehaviorSubject<ReportDetails | undefined>(
+  reportDetailsSubject = new BehaviorSubject<IReportDetails | undefined>(
     undefined
   );
   reportDetails$ = this.reportDetailsSubject.asObservable();
@@ -14,7 +14,7 @@ export class ReportDetailsService {
   recordingSubject = new BehaviorSubject<any | undefined>(undefined);
   recording$ = this.recordingSubject.asObservable();
 
-  setReportDetails(reportDetails: ReportDetails | undefined) {
+  setReportDetails(reportDetails: IReportDetails | undefined) {
     if (!reportDetails) return;
     this.reportDetailsSubject.next(reportDetails);
   }

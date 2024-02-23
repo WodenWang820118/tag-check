@@ -19,7 +19,7 @@ import {
   take,
   tap,
 } from 'rxjs';
-import { ReportDetails } from '../../models/report.interface';
+import { IReportDetails } from '../../models/report.interface';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ReportDetailsService } from '../../services/report-details/report-details.service';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -57,7 +57,7 @@ export class ReportTableComponent implements OnInit, OnDestroy {
   columnsToDisplay = ['eventName', 'passed', 'completedTime'];
   columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
   expandedElement: Report | null = null;
-  testDataSource!: MatTableDataSource<ReportDetails>;
+  testDataSource!: MatTableDataSource<IReportDetails>;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -98,7 +98,7 @@ export class ReportTableComponent implements OnInit, OnDestroy {
     this.subscriptions.push(routeSubscription);
   }
 
-  initializeDataSource(reports: ReportDetails[]) {
+  initializeDataSource(reports: IReportDetails[]) {
     this.testDataSource = new MatTableDataSource(reports);
     // Make sure to set paginator and sort after view init
     setTimeout(() => {

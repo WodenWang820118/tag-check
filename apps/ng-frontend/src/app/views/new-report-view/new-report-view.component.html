@@ -1,0 +1,35 @@
+<div class="new-report">
+  <form
+    class="new-report__form"
+    [formGroup]="reportForm"
+    (ngSubmit)="setEditorContent(); uploadReport()"
+  >
+    <mat-form-field class="new-report__form__field">
+      <mat-label>Project Slug</mat-label>
+      <input matInput formControlName="projectSlug" />
+    </mat-form-field>
+    <!-- TODO: required field -->
+    <app-editor
+      class="new-report__form__field"
+      [content]="exampleInputJson | json"
+      [editorExtension]="'specJson'"
+    ></app-editor>
+    <app-editor
+      class="new-report__form__field"
+      [editorExtension]="'recordingJson'"
+    ></app-editor>
+    <button
+      type="button"
+      mat-raised-button
+      style="margin-bottom: 1rem"
+      (click)="fileInput.click()"
+    >
+      Upload
+    </button>
+    <input hidden (change)="onFileSelected($event)" #fileInput type="file" />
+    <div class="new-report__form__actions">
+      <button type="button" mat-raised-button (click)="cancel()">Cancel</button>
+      <button type="submit" mat-raised-button color="primary">Submit</button>
+    </div>
+  </form>
+</div>

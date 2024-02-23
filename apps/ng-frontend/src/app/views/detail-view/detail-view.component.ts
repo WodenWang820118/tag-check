@@ -11,7 +11,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReportDetailsService } from '../../services/report-details/report-details.service';
 import { ReportDetailPanelsComponent } from '../../components/report-detail-panels/report-detail-panels.component';
-import { ReportDetails } from '../../models/report.interface';
+import { IReportDetails } from '../../models/report.interface';
 import { ImageService } from '../../services/api/image/image.service';
 import { BlobToUrlPipe } from '../../pipes/blob-to-url-pipe';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,7 +29,7 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrls: ['./detail-view.component.scss'],
 })
 export class DetailViewComponent implements OnInit, OnDestroy {
-  reportDetails$!: Observable<ReportDetails | undefined>;
+  reportDetails$!: Observable<IReportDetails | undefined>;
   image$!: Observable<Blob> | Observable<null>;
   subscriptions: Subscription[] = [];
 
