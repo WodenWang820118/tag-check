@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { InitProjectFormComponent } from '../../components/init-project-form/init-project-form.component';
 import {
@@ -12,7 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { ProjectService } from '../../services/api/project/project.service';
 import { ConfigurationService } from '../../services/api/configuration/configuration.service';
 import { MatCardModule } from '@angular/material/card';
-import { take, tap } from 'rxjs';
+import { Subject, take, takeUntil, tap } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -88,10 +88,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     }
   `,
 })
-export class InitProjectViewComponent implements OnInit {
+export class InitProjectViewComponent implements OnInit, OnDestroy {
   configurationForm = this.fb.group({
     root: ['', Validators.required],
   });
+
+  destroy$ = new Subject<void>();
+
   constructor(
     private projectService: ProjectService,
     private fb: FormBuilder,
@@ -102,10 +105,14 @@ export class InitProjectViewComponent implements OnInit {
     this.configService
       .getConfiguration('rootProjectPath')
       .pipe(
-        take(1),
-        tap((root) => {
-          if (root) {
-            this.configurationForm.controls.root.setValue(root.value);
+        takeUntil(this.destroy$),
+        tap((rootProjectPath) => {
+          console.log('root', rootProjectPath);
+          if (rootProjectPath) {
+            console.log('root', rootProjectPath);
+            this.configurationForm.controls.root.setValue(
+              rootProjectPath.value
+            );
             this.configurationForm.disable();
           }
         })
@@ -119,5 +126,10 @@ export class InitProjectViewComponent implements OnInit {
 
   onSaveRoot() {
     // TODO: save the root configuration to the database
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
