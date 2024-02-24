@@ -104,7 +104,10 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
           takeUntil(this.destroy$),
           tap((data) => {
             if (data) {
-              this.editorService.setContent('recordingJson', data);
+              this.editorService.setContent(
+                'recordingJson',
+                JSON.stringify(data)
+              );
             }
           })
         )

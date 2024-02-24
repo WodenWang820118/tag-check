@@ -63,4 +63,38 @@ export class WaiterSpecService {
       );
     }
   }
+
+  async updateSpec(projectSlug: string, eventName: string, spec: any) {
+    try {
+      const allSpecs = await this.fileService.readJsonFile(
+        await this.filePathService.getProjectConfigFilePath(projectSlug)
+      );
+
+      const updatedSpecs = allSpecs.map((s: any) => {
+        if (s.event === eventName) {
+          return spec.data;
+        }
+        return s;
+      });
+
+      await this.fileService.writeJsonFile(
+        await this.filePathService.getProjectConfigFilePath(projectSlug),
+        updatedSpecs
+      );
+
+      return {
+        projectSlug: projectSlug,
+        specs: updatedSpecs,
+      };
+    } catch (error) {
+      Logger.error(error.message, 'WaiterSpecService.updateSpec');
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Error updating spec',
+        },
+        500
+      );
+    }
+  }
 }
