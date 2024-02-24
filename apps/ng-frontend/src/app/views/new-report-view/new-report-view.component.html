@@ -8,10 +8,8 @@
       <mat-label>Project Slug</mat-label>
       <input matInput formControlName="projectSlug" />
     </mat-form-field>
-    <!-- TODO: required field -->
     <app-editor
       class="new-report__form__field"
-      [content]="exampleInputJson | json"
       [editorExtension]="'specJson'"
     ></app-editor>
     <app-editor

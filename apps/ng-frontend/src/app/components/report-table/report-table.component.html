@@ -61,10 +61,11 @@
         *matCellDef="let element"
         [attr.colspan]="columnsToDisplayWithExpand.length"
       >
+        <!-- temporaray collapsed -->
         <div
           class="example-element-detail"
           [@detailExpand]="
-            element === expandedElement ? 'expanded' : 'collapsed'
+            element === expandedElement ? 'collapsed' : 'collapsed'
           "
         >
           <pre class="json">{{ element.dataLayerSpec | json }}</pre>
