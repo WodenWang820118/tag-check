@@ -37,7 +37,7 @@ export class EditorService {
   initEditorView(
     extension: EditorExtension,
     elementRef: ElementRef,
-    content?: string
+    content: string
   ) {
     const editorView = new EditorView({
       extensions: [
@@ -46,9 +46,9 @@ export class EditorService {
         lintGutter(),
         EditorView.theme(editorStyles),
         EditorView.lineWrapping,
-        placeholder(
-          content ? content : this.contentSubjects[extension].getValue()
-        ),
+        // placeholder(
+        //   content ? content : this.contentSubjects[extension].getValue()
+        // ),
       ],
       parent: elementRef.nativeElement,
     });
@@ -56,7 +56,7 @@ export class EditorService {
     editorView.dispatch({
       changes: {
         from: 0,
-        insert: '',
+        insert: content ? JSON.stringify(JSON.parse(content), null, 2) : '',
         to: editorView.state.doc.length,
       },
     });
