@@ -8,14 +8,40 @@
       <mat-expansion-panel-header>
         <mat-panel-title> DataLayer Spec </mat-panel-title>
         <mat-panel-description>
-          @if (specEdit) {
-          <mat-icon (click)="edit($event)">edit</mat-icon>
+          @if (specEdit && !specEditMode) {
+          <mat-icon (click)="switchSpecEditMode($event)">edit</mat-icon>
           }
         </mat-panel-description>
       </mat-expansion-panel-header>
-      <ng-template matExpansionPanelContent>
+      <mat-panel-description>
+        @if (specEditMode) {
+        <app-editor
+          [editorExtension]="'specJson'"
+          [content]="spec$ | async | json"
+          [editMode]="true"
+        ></app-editor>
+        } @else {
         <pre class="json">{{ spec$ | async | json }}</pre>
-      </ng-template>
+        }
+      </mat-panel-description>
+      @if (specEditMode) {
+      <mat-action-row>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="onSpecUpdate(); switchSpecEditMode($event)"
+        >
+          Save
+        </button>
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="switchSpecEditMode($event)"
+        >
+          Cancel
+        </button>
+      </mat-action-row>
+      }
     </mat-expansion-panel>
 
     <mat-expansion-panel
@@ -26,17 +52,10 @@
       <mat-expansion-panel-header>
         <mat-panel-title> Chrome Recording </mat-panel-title>
         <mat-panel-description>
-          <!-- <mat-icon>chevron_right</mat-icon> -->
-          @if (recordingEdit) {
-          <mat-icon matTooltip="Edit" (click)="edit($event)">edit</mat-icon>
-          <button
-            type="button"
-            mat-raised-button
-            style="margin-bottom: 1rem"
-            (click)="fileInput.click()"
+          @if (recordingEdit && !recordingEditMode) {
+          <mat-icon matTooltip="Edit" (click)="switchRecordingEditMode($event)"
+            >edit</mat-icon
           >
-            Upload
-          </button>
           <input
             hidden
             (change)="onFileSelected($event)"
@@ -46,18 +65,53 @@
           }
         </mat-panel-description>
       </mat-expansion-panel-header>
-      <ng-template matExpansionPanelContent>
+      <mat-panel-description>
+        @if (recordingEditMode) {
+        <app-editor
+          [editorExtension]="'recordingJson'"
+          [content]="recording$ | async | json"
+          [editMode]="true"
+        ></app-editor>
+        } @else {
         <pre class="json">{{ recording$ | async | json }}</pre>
-      </ng-template>
+        }
+      </mat-panel-description>
+      @if (recordingEditMode) {
+      <mat-action-row>
+        <button mat-raised-button color="primary" (click)="fileInput.click()">
+          Upload
+        </button>
+        <input
+          hidden
+          (change)="onFileSelected($event)"
+          #fileInput
+          type="file"
+        />
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="onRecordingUpdate(); switchRecordingEditMode($event)"
+        >
+          Save
+        </button>
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="switchRecordingEditMode($event)"
+        >
+          Cancel
+        </button>
+      </mat-action-row>
+      }
     </mat-expansion-panel>
 
     <mat-expansion-panel hideToggle>
       <mat-expansion-panel-header>
         <mat-panel-title> Test Result </mat-panel-title>
       </mat-expansion-panel-header>
-      <ng-template matExpansionPanelContent>
+      <mat-panel-description>
         <pre class="json">{{ (reportDetails$ | async)?.dataLayer | json }}</pre>
-      </ng-template>
+      </mat-panel-description>
     </mat-expansion-panel>
   </mat-accordion>
 </div>
