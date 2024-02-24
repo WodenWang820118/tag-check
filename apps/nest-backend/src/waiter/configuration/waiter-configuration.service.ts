@@ -9,8 +9,9 @@ export class WaiterConfigurationService {
   }
 
   async getConfiguration(name: string) {
-    return (await this.configurationService.findAll()).find(
+    const value = (await this.configurationService.findAll()).find(
       (item) => item.title === name
-    ).value;
+    )?.value;
+    return { value }; // Wrap the value in an object
   }
 }
