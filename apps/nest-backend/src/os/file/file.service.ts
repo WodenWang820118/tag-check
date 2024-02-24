@@ -84,26 +84,6 @@ export class FileService {
     }
   }
 
-  async readImage(projectSlug: string, testName: string) {
-    try {
-      const imageSavingFolder = path.join(
-        await this.folderPathService.getReportSavingFolderPath(projectSlug),
-        testName
-      );
-      const imagePath = path.join(imageSavingFolder, `${testName}.png`);
-
-      if (!existsSync(imagePath)) {
-        throw new Error(`File not found: ${imagePath}`);
-      }
-
-      Logger.log(imagePath, 'SharedService.readImage');
-      return new StreamableFile(createReadStream(imagePath));
-    } catch (error) {
-      Logger.error(error.message, 'FileService.readImage');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
   async writeJsonFile(filePath: string, content: any) {
     writeFileSync(filePath, JSON.stringify(content, null, 2));
   }

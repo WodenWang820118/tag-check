@@ -1,15 +1,35 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewEncapsulation,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Observable, combineLatest, of, tap } from 'rxjs';
-import { ReportDetails } from '../../models/report.interface';
+import {
+  Observable,
+  Subject,
+  combineLatest,
+  map,
+  mergeMap,
+  of,
+  takeUntil,
+  tap,
+} from 'rxjs';
+import { IReportDetails } from '../../models/report.interface';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { RecordingService } from '../../services/api/recording/recording.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
 import { SpecService } from '../../services/api/spec/spec.service';
-
+import { ReportService } from '../../services/api/report/report.service';
+import { EditorComponent } from '../editor/editor.component';
+import { MatButtonModule } from '@angular/material/button';
+import { EditorService } from '../../services/editor/editor.service';
+import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
+import { Dialog } from '@angular/cdk/dialog';
 @Component({
   selector: 'app-report-datail-panels',
   standalone: true,
@@ -19,96 +39,189 @@ import { SpecService } from '../../services/api/spec/spec.service';
     MatExpansionModule,
     MatFormFieldModule,
     MatTooltipModule,
+    EditorComponent,
+    MatButtonModule,
+    ErrorDialogComponent,
   ],
-  template: `<div class="test-detail-panels">
-    <mat-accordion class=".example-headers-align" multi>
-      <mat-expansion-panel hideToggle>
-        <mat-expansion-panel-header>
-          <mat-panel-title> DataLayer Spec </mat-panel-title>
-          <mat-panel-description>
-            <mat-icon>chevron_right</mat-icon>
-            <mat-icon>edit</mat-icon>
-          </mat-panel-description>
-        </mat-expansion-panel-header>
-        <mat-panel-description>
-          <pre class="json">{{ spec$ | async | json }}</pre>
-        </mat-panel-description>
-      </mat-expansion-panel>
-
-      <mat-expansion-panel hideToggle>
-        <mat-expansion-panel-header>
-          <mat-panel-title> Chrome Recording </mat-panel-title>
-          <mat-panel-description>
-            <mat-icon>chevron_right</mat-icon>
-            <mat-icon matTooltip="Edit">edit</mat-icon>
-          </mat-panel-description>
-        </mat-expansion-panel-header>
-        <mat-panel-description>
-          <pre class="json">{{ recording$ | async | json }}</pre>
-        </mat-panel-description>
-      </mat-expansion-panel>
-
-      <mat-expansion-panel hideToggle>
-        <mat-expansion-panel-header>
-          <mat-panel-title> Test Result </mat-panel-title>
-          <mat-panel-description>
-            <mat-icon>chevron_right</mat-icon>
-            <mat-icon>edit</mat-icon>
-          </mat-panel-description>
-        </mat-expansion-panel-header>
-        <pre class="json">{{ (reportDetails$ | async)?.dataLayer | json }}</pre>
-      </mat-expansion-panel>
-    </mat-accordion>
-  </div>`,
+  templateUrl: './report-detail-panels.component.html',
   encapsulation: ViewEncapsulation.None,
-  styles: `
-    .json {
-      overflow: auto;
-    }
-
-    .example-headers-align {
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .mat-expansion-panel-header-description {
-      justify-content: flex-end;
-      align-items: center;
-    }
-  `,
+  styleUrls: ['./report-detail-panels.component.scss'],
 })
-export class ReportDetailPanelsComponent implements OnInit {
+export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
   @Input() eventName!: string | undefined;
-  @Input() reportDetails$!: Observable<ReportDetails | undefined>;
+  @Input() reportDetails$!: Observable<IReportDetails | undefined>;
   recording$!: Observable<any>;
   spec$!: Observable<any>;
+  destroy$ = new Subject<void>();
+  specEdit = false;
+  recordingEdit = false;
+  specEditMode = false;
+  recordingEditMode = false;
 
   constructor(
     private recordingService: RecordingService,
     private specService: SpecService,
-    private route: ActivatedRoute
+    private reportService: ReportService,
+    private route: ActivatedRoute,
+    private editorService: EditorService,
+    private dialog: Dialog
   ) {}
 
   ngOnInit() {
-    combineLatest([
-      this.route.params,
-      this.route.parent?.params || of({ projectSlug: '' }),
-    ])
-      .pipe(
-        tap(([params, parentParams]) => {
-          if (params && parentParams) {
-            this.spec$ = this.specService.getSpec(
-              parentParams['projectSlug'],
-              params['eventName']
-            );
+    this.initializeDataStreams();
+  }
 
+  private initializeDataStreams() {
+    const projectSlug$ =
+      this.route.parent?.params.pipe(map((params) => params['projectSlug'])) ||
+      of('');
+    const eventName$ = this.route.params.pipe(
+      map((params) => params['eventName'])
+    );
+
+    // Combine projectSlug and eventName streams for use in spec$ and recording$ initializations
+    combineLatest([projectSlug$, eventName$])
+      .pipe(
+        takeUntil(this.destroy$),
+        tap(([projectSlug, eventName]) => {
+          if (projectSlug && eventName) {
+            this.spec$ = this.specService.getSpec(projectSlug, eventName);
             this.recording$ = this.recordingService.getRecordingDetails(
-              parentParams['projectSlug'],
-              params['eventName']
+              projectSlug,
+              eventName
             );
           }
         })
       )
       .subscribe();
+  }
+
+  switchSpecEditMode(event: Event) {
+    event.stopPropagation();
+
+    this.specEditMode = !this.specEditMode;
+  }
+
+  switchRecordingEditMode(event: Event) {
+    event.stopPropagation();
+
+    this.recordingEditMode = !this.recordingEditMode;
+  }
+
+  switchSpecEdit() {
+    this.specEdit = !this.specEdit;
+  }
+
+  switchRecordingEdit() {
+    this.recordingEdit = !this.recordingEdit;
+  }
+
+  onFileSelected(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file: File | null = target.files?.[0] || null;
+    if (file) {
+      this.reportService.readJsonFileContent(file);
+
+      this.reportService.fileContent$
+        .pipe(
+          takeUntil(this.destroy$),
+          tap((data) => {
+            if (data) {
+              this.editorService.setContent(
+                'recordingJson',
+                JSON.stringify(data)
+              );
+            }
+          })
+        )
+        .subscribe();
+    }
+  }
+
+  onSpecUpdate() {
+    combineLatest([
+      this.route.parent?.params || of({ projectSlug: '' }),
+      this.route.params,
+      this.editorService.editor$.specJsonEditor,
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        map(([parentParams, params, specEditor]) => {
+          const specContent = specEditor.state.doc.toString();
+          const eventName = params['eventName'];
+          const projectSlug = parentParams['projectSlug'];
+
+          if (specContent && projectSlug) {
+            return {
+              projectSlug,
+              eventName,
+              specContent,
+            };
+          } else {
+            this.dialog.open(ErrorDialogComponent, {
+              data: {
+                message: 'Spec content is required and cannot be empty.',
+              },
+            });
+            throw new Error('Spec content is required and cannot be empty.');
+          }
+        }),
+        mergeMap(({ projectSlug, eventName, specContent }) => {
+          this.editorService.setContent('specJson', specContent);
+          return this.specService.updateSpec(
+            projectSlug,
+            eventName,
+            specContent
+          );
+        })
+      )
+      .subscribe();
+  }
+
+  onRecordingUpdate() {
+    combineLatest([
+      this.route.parent?.params || of({ projectSlug: '' }),
+      this.route.params,
+      this.editorService.editor$.recordingJsonEditor,
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        map(([parentParams, parames, recordingEditor]) => {
+          const projectSlug = parentParams['projectSlug'];
+          const eventName = parames['eventName'];
+          const recordingContent = recordingEditor.state.doc.toString();
+
+          if (parentParams && projectSlug) {
+            return {
+              projectSlug,
+              eventName,
+              recordingContent,
+            };
+          } else {
+            this.dialog.open(ErrorDialogComponent, {
+              data: {
+                message: 'Recording content is required and cannot be empty.',
+              },
+            });
+            throw new Error(
+              'Recording content is required and cannot be empty.'
+            );
+          }
+        }),
+        mergeMap(({ projectSlug, eventName, recordingContent }) => {
+          this.editorService.setContent('recordingJson', recordingContent);
+          return this.recordingService.addRecording(
+            projectSlug,
+            eventName,
+            recordingContent
+          );
+        })
+      )
+      .subscribe();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

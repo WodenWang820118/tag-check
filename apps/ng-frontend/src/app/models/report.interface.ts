@@ -1,9 +1,9 @@
 export interface ProjectReport {
   projectSlug: string;
-  reports: ReportDetails[];
+  reports: IReportDetails[];
 }
 
-export interface ReportDetails {
+export interface IReportDetails {
   eventName: string;
   passed: boolean;
   dataLayerSpec: any;

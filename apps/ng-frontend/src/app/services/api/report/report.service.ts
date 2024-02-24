@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Subject, of, switchMap } from 'rxjs';
-import { ProjectReport, ReportDetails } from '../../../models/report.interface';
-import { FormGroup } from '@angular/forms';
+import { BehaviorSubject, Subject, of } from 'rxjs';
+import {
+  ProjectReport,
+  IReportDetails,
+} from '../../../models/report.interface';
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
@@ -13,6 +15,9 @@ export class ReportService {
 
   reportsSubject: Subject<Report> = new BehaviorSubject({} as Report);
   reports$ = this.reportsSubject.asObservable();
+
+  fileContent = new BehaviorSubject<any>(null);
+  fileContent$ = this.fileContent.asObservable();
 
   constructor(private http: HttpClient) {}
 
@@ -34,12 +39,31 @@ export class ReportService {
     );
   }
 
-  addReport(reportForm: FormGroup, reportDetails: ReportDetails) {
-    const projectSlug = reportForm.controls['projectSlug'].value;
-
+  addReport(projectSlug: string, reportDetails: IReportDetails) {
     return this.http.post<ProjectReport>(
       `${environment.reportApiUrl}/${projectSlug}`,
       reportDetails
     );
+  }
+
+  readJsonFileContent(file: File): void {
+    const reader = new FileReader();
+
+    reader.onload = (e: any) => {
+      const fileContentString = e.target.result;
+
+      try {
+        // update the file content
+        this.fileContent.next(JSON.parse(fileContentString));
+      } catch (error) {
+        console.error('Error parsing file content', error);
+      }
+    };
+
+    reader.onerror = () => {
+      console.error('Error reading file content');
+    };
+
+    reader.readAsText(file);
   }
 }

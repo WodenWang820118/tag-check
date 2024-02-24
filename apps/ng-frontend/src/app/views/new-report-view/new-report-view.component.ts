@@ -1,7 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ProjectService } from '../../services/api/project/project.service';
-import { take, tap } from 'rxjs';
+import {
+  Subject,
+  combineLatest,
+  forkJoin,
+  map,
+  mergeMap,
+  take,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
   FormBuilder,
@@ -15,7 +23,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { RecordingService } from '../../services/api/recording/recording.service';
 import { ReportService } from '../../services/api/report/report.service';
 import { ProjectDataSourceService } from '../../services/project-data-source/project-data-source.service';
-import { ReportDetails } from '../../models/report.interface';
+import { EditorComponent } from '../../components/editor/editor.component';
+import { EditorService } from '../../services/editor/editor.service';
+import { SpecService } from '../../services/api/spec/spec.service';
+import { ReportDetails } from './report-details';
+import { IReportDetails } from '../../models/report.interface';
+import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-new-report-view',
@@ -28,67 +42,14 @@ import { ReportDetails } from '../../models/report.interface';
     MatInputModule,
     MatButtonModule,
     RouterModule,
+    EditorComponent,
+    ErrorDialogComponent,
   ],
-  template: `
-    <div class="new-report">
-      <form
-        class="new-report__form"
-        [formGroup]="reportForm"
-        (ngSubmit)="uploadReport()"
-      >
-        <mat-form-field class="new-report__form__field">
-          <mat-label>Project Slug</mat-label>
-          <input matInput formControlName="projectSlug" />
-        </mat-form-field>
-
-        <mat-form-field class="new-report__form__field">
-          <mat-label>Spec</mat-label>
-          <textarea
-            style="min-height: 150px;"
-            matInput
-            formControlName="spec"
-            [placeholder]="specPlaceholder | json"
-          ></textarea>
-        </mat-form-field>
-
-        <!-- TODO: could be plain JSON test or file upload -->
-        <mat-form-field class="new-report__form__field">
-          <mat-label>Recording</mat-label>
-          <textarea matInput formControlName="recording"></textarea>
-        </mat-form-field>
-        <!-- TODO: upload function -->
-        <button type="button" mat-raised-button style="margin-bottom: 1rem;">
-          Upload
-        </button>
-        <div class="new-report__form__actions">
-          <button type="button" mat-raised-button>Cancel</button>
-          <button type="submit" mat-raised-button color="primary">
-            Submit
-          </button>
-        </div>
-      </form>
-    </div>
-  `,
-  styles: `
-    .new-report {
-      padding: 2rem 10rem;
-      &__form {
-        &__field {
-          width: 100%;
-        }
-
-        &__actions {
-          display: flex;
-          flex-direction: row;
-          justify-content: flex-start;
-          gap: 1rem;
-        }
-      }
-    }
-  `,
+  templateUrl: './new-report-view.component.html',
+  styleUrls: ['./new-report-view.component.scss'],
 })
-export class NewReportViewComponent implements OnInit {
-  specPlaceholder = {
+export class NewReportViewComponent implements OnInit, OnDestroy {
+  exampleInputJson = {
     event: 'page_view',
     page_path: '$page_path',
     page_title: '$page_title',
@@ -97,30 +58,30 @@ export class NewReportViewComponent implements OnInit {
 
   reportForm = this.fb.group({
     projectSlug: ['', Validators.required],
-    spec: [JSON.stringify(this.specPlaceholder, null, 2), Validators.required],
-    recording: [''],
   });
 
+  private destroy$ = new Subject<void>();
+
   constructor(
-    private projectService: ProjectService,
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private recordingService: RecordingService,
     private reportService: ReportService,
+    private specService: SpecService,
     private location: Location,
-    private projectDataSourceService: ProjectDataSourceService
+    private projectDataSourceService: ProjectDataSourceService,
+    private editorService: EditorService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
     this.route.params
       .pipe(
+        takeUntil(this.destroy$),
         tap((params) => {
-          if (params) {
-            // please refer to the app.routes.ts file
-            console.log('params', params);
-            this.reportForm.controls.projectSlug.setValue(
-              params['projectSlug']
-            );
+          const projectSlug = params['projectSlug'];
+          if (projectSlug) {
+            this.reportForm.controls.projectSlug.setValue(projectSlug);
             this.reportForm.controls.projectSlug.disable();
           }
         })
@@ -128,46 +89,128 @@ export class NewReportViewComponent implements OnInit {
       .subscribe();
   }
 
-  uploadReport() {
-    if (this.reportForm.valid) {
-      console.log('Form: ', this.reportForm.value);
+  cancel() {
+    this.location.back();
+  }
 
-      const specValue = JSON.parse(
-        this.reportForm.controls.spec.value as string
-      );
+  onFileSelected(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file: File | null = target.files?.[0] || null;
+    if (file) {
+      this.reportService.readJsonFileContent(file);
 
-      const reportDetails: ReportDetails = {
-        eventName: specValue,
-        passed: false,
-        dataLayerSpec: specValue,
-        incorrectInfo: [],
-        completedTime: new Date(),
-        dataLayer: {},
-        message: '',
-      };
-
-      // 1) adding content in the report service
-      this.reportService.addReport(this.reportForm, reportDetails).subscribe();
-      // 2) adding content in the recording service
-      this.recordingService.addRecording(this.reportForm).subscribe();
-      // 3) adding content in the project data source service to be displayed in the table
-      this.projectDataSourceService
-        .connect()
+      this.reportService.fileContent$
         .pipe(
-          take(1),
+          takeUntil(this.destroy$),
           tap((data) => {
-            console.log('Data: ', data);
-            this.projectDataSourceService.setData([...data, reportDetails]);
+            if (data) {
+              this.editorService.setContent(
+                'recordingJson',
+                JSON.stringify(data)
+              );
+            }
           })
         )
         .subscribe();
-
-      if (!this.reportForm.controls.recording.value) {
-        this.location.back();
-        return;
-      }
-
-      this.location.back();
     }
+  }
+
+  setEditorContent() {
+    combineLatest([
+      this.editorService.editor$.specJsonEditor,
+      this.editorService.editor$.recordingJsonEditor,
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        tap(([specEditor, recordingEditor]) => {
+          const specContent = specEditor.state.doc.toString();
+          const recordingContent = recordingEditor.state.doc.toString();
+
+          this.editorService.setContent('specJson', specContent);
+          this.editorService.setContent('recordingJson', recordingContent);
+        })
+      )
+      .subscribe();
+  }
+
+  uploadReport() {
+    combineLatest([
+      this.editorService.editor$.specJsonEditor,
+      this.editorService.editor$.recordingJsonEditor,
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        map(([specEditor, recordingEditor]) => {
+          const specContent = specEditor.state.doc.toString();
+          const recordingContent = recordingEditor.state.doc.toString();
+          const projectSlug = this.reportForm.get('projectSlug')?.value;
+
+          if (specContent && projectSlug) {
+            const eventName = JSON.parse(specContent).event;
+            const reportDetails: IReportDetails = new ReportDetails(eventName);
+
+            return {
+              projectSlug,
+              eventName,
+              specContent,
+              recordingContent,
+              reportDetails,
+            };
+          } else {
+            this.dialog.open(ErrorDialogComponent, {
+              data: {
+                message: 'Spec content is required and cannot be empty.',
+              },
+            });
+            throw new Error('Spec content is required and cannot be empty.');
+          }
+        }),
+        mergeMap(
+          ({
+            projectSlug,
+            eventName,
+            specContent,
+            recordingContent,
+            reportDetails,
+          }) =>
+            forkJoin([
+              this.reportService.addReport(projectSlug, reportDetails),
+              this.recordingService.addRecording(
+                projectSlug,
+                eventName,
+                recordingContent
+              ),
+              this.specService.addSpec(projectSlug, specContent),
+            ]).pipe(
+              tap(() => {
+                this.projectDataSourceService
+                  .connect()
+                  .pipe(
+                    take(1),
+                    tap((data) => {
+                      this.projectDataSourceService.setData([
+                        ...data,
+                        reportDetails,
+                      ]);
+                    })
+                  )
+                  .subscribe();
+              })
+            )
+        )
+      )
+      .subscribe({
+        next: () => {
+          console.log('Report and all related data successfully uploaded');
+          this.location.back();
+        },
+        error: (err) => console.error('Error uploading report:', err),
+      });
+  }
+
+  ngOnDestroy() {
+    console.log('Unsubscribing from new-report-view');
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
