@@ -1,5 +1,5 @@
 import { FolderService } from './../folder/folder.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ValidationResult } from '../../interfaces/dataLayer.interface';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
@@ -19,23 +19,31 @@ export class AbstractReportService {
     eventName: string,
     data: ValidationResult
   ) {
-    const reportPath =
-      await this.folderPathService.getInspectionEventFolderPath(
-        projectName,
-        eventName
+    try {
+      const reportPath =
+        await this.folderPathService.getInspectionEventFolderPath(
+          projectName,
+          eventName
+        );
+
+      if (!existsSync(reportPath)) {
+        mkdirSync(reportPath);
+      }
+
+      const abstractPath =
+        await this.filePathService.getInspectionResultFilePath(
+          projectName,
+          eventName,
+          ABSTRACT_REPORT_FILE_NAME
+        );
+
+      writeFileSync(abstractPath, JSON.stringify(data, null, 2));
+    } catch (error) {
+      Logger.error(
+        error.message,
+        'AbstractReportService.writeSingleAbstractTestResultJson'
       );
-
-    if (!existsSync(reportPath)) {
-      mkdirSync(reportPath);
     }
-
-    const abstractPath = await this.filePathService.getInspectionResultFilePath(
-      projectName,
-      eventName,
-      ABSTRACT_REPORT_FILE_NAME
-    );
-
-    writeFileSync(abstractPath, JSON.stringify(data, null, 2));
   }
 
   async writeProjectAbstractTestRsultJson(

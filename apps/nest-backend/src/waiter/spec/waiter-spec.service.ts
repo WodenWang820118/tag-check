@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 
@@ -32,5 +32,35 @@ export class WaiterSpecService {
       projectSlug: projectSlug,
       specs: [spec],
     };
+  }
+
+  async addSpec(projectSlug: string, spec: any) {
+    try {
+      const allSpecs = [
+        ...(await this.fileService.readJsonFile(
+          await this.filePathService.getProjectConfigFilePath(projectSlug)
+        )),
+        spec.data,
+      ];
+
+      await this.fileService.writeJsonFile(
+        await this.filePathService.getProjectConfigFilePath(projectSlug),
+        allSpecs
+      );
+
+      return {
+        projectSlug: projectSlug,
+        specs: allSpecs,
+      };
+    } catch (error) {
+      Logger.error(error.message, 'WaiterSpecService.addSpec');
+      throw new HttpException(
+        {
+          status: 'error',
+          message: 'Error adding spec',
+        },
+        500
+      );
+    }
   }
 }

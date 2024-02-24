@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Subject, map } from 'rxjs';
 import { Spec } from '../../../models/spec.interface';
 import { environment } from '../../../../environments/environment';
+import { EditorService } from '../../editor/editor.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +15,7 @@ export class SpecService {
   currentSpec: Subject<Spec> = new BehaviorSubject({} as Spec);
   currentSpec$ = this.currentSpec.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private editorService: EditorService) {}
 
   getSpecs() {
     return this.http.get<Spec[]>(environment.specApiUrl);
@@ -26,5 +27,14 @@ export class SpecService {
         return project.specs.find((spec) => spec.event === eventName);
       })
     );
+  }
+
+  addSpec(projectSlug: string, content: string) {
+    const jsonContent = JSON.parse(content);
+    console.log('Project Slug', projectSlug);
+    console.log('Spec', jsonContent);
+    return this.http.post(`${environment.specApiUrl}/${projectSlug}`, {
+      data: jsonContent,
+    });
   }
 }
