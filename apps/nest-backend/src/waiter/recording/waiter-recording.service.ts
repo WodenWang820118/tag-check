@@ -49,4 +49,13 @@ export class WaiterRecordingService {
       },
     ];
   }
+
+  async addRecording(projectSlug: string, eventName: string, recording: any) {
+    const recordingPath = await this.filePathService.getRecordingFilePath(
+      projectSlug,
+      `${eventName}.json`
+    );
+
+    await this.fileService.writeJsonFile(recordingPath, recording.data);
+  }
 }
