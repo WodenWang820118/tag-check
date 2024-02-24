@@ -27,4 +27,23 @@ export class SpecService {
       })
     );
   }
+
+  addSpec(projectSlug: string, content: string) {
+    const jsonContent = JSON.parse(content);
+    console.log('Project Slug', projectSlug);
+    console.log('Spec', jsonContent);
+    return this.http.post(`${environment.specApiUrl}/${projectSlug}`, {
+      data: jsonContent,
+    });
+  }
+
+  updateSpec(projectSlug: string, eventName: string, content: string) {
+    const jsonContent = JSON.parse(content);
+    return this.http.put(
+      `${environment.specApiUrl}/${projectSlug}/${eventName}`,
+      {
+        data: jsonContent,
+      }
+    );
+  }
 }

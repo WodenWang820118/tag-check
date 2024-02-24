@@ -1,0 +1,117 @@
+<div class="test-detail-panels">
+  <mat-accordion class=".example-headers-align" multi>
+    <mat-expansion-panel
+      hideToggle
+      (opened)="switchSpecEdit()"
+      (closed)="switchSpecEdit()"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title> DataLayer Spec </mat-panel-title>
+        <mat-panel-description>
+          @if (specEdit && !specEditMode) {
+          <mat-icon (click)="switchSpecEditMode($event)">edit</mat-icon>
+          }
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <mat-panel-description>
+        @if (specEditMode) {
+        <app-editor
+          [editorExtension]="'specJson'"
+          [content]="spec$ | async | json"
+          [editMode]="true"
+        ></app-editor>
+        } @else {
+        <pre class="json">{{ spec$ | async | json }}</pre>
+        }
+      </mat-panel-description>
+      @if (specEditMode) {
+      <mat-action-row>
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="onSpecUpdate(); switchSpecEditMode($event)"
+        >
+          Save
+        </button>
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="switchSpecEditMode($event)"
+        >
+          Cancel
+        </button>
+      </mat-action-row>
+      }
+    </mat-expansion-panel>
+
+    <mat-expansion-panel
+      hideToggle
+      (opened)="switchRecordingEdit()"
+      (closed)="switchRecordingEdit()"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title> Chrome Recording </mat-panel-title>
+        <mat-panel-description>
+          @if (recordingEdit && !recordingEditMode) {
+          <mat-icon matTooltip="Edit" (click)="switchRecordingEditMode($event)"
+            >edit</mat-icon
+          >
+          <input
+            hidden
+            (change)="onFileSelected($event)"
+            #fileInput
+            type="file"
+          />
+          }
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <mat-panel-description>
+        @if (recordingEditMode) {
+        <app-editor
+          [editorExtension]="'recordingJson'"
+          [content]="recording$ | async | json"
+          [editMode]="true"
+        ></app-editor>
+        } @else {
+        <pre class="json">{{ recording$ | async | json }}</pre>
+        }
+      </mat-panel-description>
+      @if (recordingEditMode) {
+      <mat-action-row>
+        <button mat-raised-button color="primary" (click)="fileInput.click()">
+          Upload
+        </button>
+        <input
+          hidden
+          (change)="onFileSelected($event)"
+          #fileInput
+          type="file"
+        />
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="onRecordingUpdate(); switchRecordingEditMode($event)"
+        >
+          Save
+        </button>
+        <button
+          mat-raised-button
+          color="warn"
+          (click)="switchRecordingEditMode($event)"
+        >
+          Cancel
+        </button>
+      </mat-action-row>
+      }
+    </mat-expansion-panel>
+
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Test Result </mat-panel-title>
+      </mat-expansion-panel-header>
+      <mat-panel-description>
+        <pre class="json">{{ (reportDetails$ | async)?.dataLayer | json }}</pre>
+      </mat-panel-description>
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

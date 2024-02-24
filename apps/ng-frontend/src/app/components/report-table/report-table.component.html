@@ -14,7 +14,14 @@
   >
     <ng-container matColumnDef="eventName">
       <th mat-header-cell *matHeaderCellDef>Event</th>
-      <td mat-cell *matCellDef="let element">{{ element.eventName }}</td>
+      <td mat-cell *matCellDef="let element">
+        <a
+          [routerLink]="['./', element.eventName]"
+          (click)="setReportDetails(element.eventName)"
+        >
+          {{ element.eventName }}
+        </a>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="passed">
@@ -26,11 +33,11 @@
       <th mat-header-cell *matHeaderCellDef>Last Modified Time</th>
       <td mat-cell *matCellDef="let element">{{ element.completedTime }}</td>
     </ng-container>
-    <!-- TODO: add the action items and determine the states -->
+
     <ng-container matColumnDef="expand">
       <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
       <td mat-cell *matCellDef="let element">
-        <button
+        <!-- <button
           mat-icon-button
           aria-label="expand row"
           (click)="
@@ -43,7 +50,7 @@
           } @else {
           <mat-icon>keyboard_arrow_down</mat-icon>
           }
-        </button>
+        </button> -->
       </td>
     </ng-container>
 
@@ -54,10 +61,11 @@
         *matCellDef="let element"
         [attr.colspan]="columnsToDisplayWithExpand.length"
       >
+        <!-- temporaray collapsed -->
         <div
           class="example-element-detail"
           [@detailExpand]="
-            element === expandedElement ? 'expanded' : 'collapsed'
+            element === expandedElement ? 'collapsed' : 'collapsed'
           "
         >
           <pre class="json">{{ element.dataLayerSpec | json }}</pre>

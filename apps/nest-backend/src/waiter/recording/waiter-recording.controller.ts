@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { WaiterRecordingService } from './waiter-recording.service';
 import { ApiOperation, ApiParam } from '@nestjs/swagger';
 
@@ -41,6 +41,19 @@ export class WaiterRecordingController {
     return await this.waiterRecordingService.getRecordingDetails(
       projectSlug,
       eventName
+    );
+  }
+
+  @Post(':projectSlug/:eventName')
+  async addRecording(
+    @Param('projectSlug') projectSlug: string,
+    @Param('eventName') eventName: string,
+    @Body() recording: any
+  ) {
+    return await this.waiterRecordingService.addRecording(
+      projectSlug,
+      eventName,
+      recording
     );
   }
 }
