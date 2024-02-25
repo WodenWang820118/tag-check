@@ -27,4 +27,15 @@ export class ConfigurationService {
       `${environment.configurationApiUrl}/${name}`
     );
   }
+
+  resetConfiguration(name: string) {
+    return this.http.delete(`${environment.configurationApiUrl}/reset/${name}`);
+  }
+
+  createConfiguration(configuration: Configuration) {
+    return this.http.post(
+      `${environment.configurationApiUrl}/create`,
+      configuration
+    );
+  }
 }
