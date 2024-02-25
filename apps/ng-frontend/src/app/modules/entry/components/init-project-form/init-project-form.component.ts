@@ -16,7 +16,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { ProjectService } from '../../../../shared/services/api/project/project.service';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
-import { Subject, takeUntil, tap } from 'rxjs';
+import { EMPTY, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -82,21 +82,40 @@ export class InitProjectFormComponent implements OnDestroy {
                 message: 'Please configure the root path first.',
               },
             });
-            return;
+            return EMPTY;
+          } else {
+            return rootProjectPath;
           }
-
+        }),
+        switchMap((rootProjectPath) => {
+          if (!rootProjectPath || this.isEmptyObject(rootProjectPath)) {
+            this.dialog.open(ErrorDialogComponent, {
+              data: {
+                message: 'Please configure the root path first.',
+              },
+            });
+            // Throw an error or return EMPTY to stop the observable chain if configuration is not valid
+            return EMPTY;
+          } else {
+            return this.projectService.initProject(
+              rootProjectPath.value,
+              this.projectForm.value
+            );
+          }
+        })
+      )
+      .subscribe({
+        next: () => {
           this.router.navigate([
             '/projects',
             this.projectForm.value['projectSlug'],
           ]);
-
-          this.projectService.initProject(
-            rootProjectPath.value,
-            this.projectForm.value
-          );
-        })
-      )
-      .subscribe();
+        },
+        error: (error) => {
+          // Handle any errors here
+          console.error('Error initializing project:', error);
+        },
+      });
   }
 
   ngOnDestroy() {
