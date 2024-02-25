@@ -1,15 +1,10 @@
 import { Route } from '@angular/router';
-import { HomeViewComponent } from './views/home-view/home-view.component';
-import { InitProjectViewComponent } from './views/init-project-view/init-project-view.component';
 
 export const appRoutes: Route[] = [
   {
     path: '',
-    component: HomeViewComponent,
-  },
-  {
-    path: 'init-project',
-    component: InitProjectViewComponent,
+    loadChildren: () =>
+      import('./modules/entry/entry.module').then((m) => m.EntryModule),
   },
   {
     path: 'projects/:projectSlug',
