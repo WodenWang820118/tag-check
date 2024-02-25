@@ -6,4 +6,5 @@ export const environment = {
   specApiUrl: 'http://localhost:3003',
   reportApiUrl: 'http://localhost:3004',
   imageApiUrl: 'http://localhost:8080/projects/images',
+  dataLayerApiUrl: 'http://localhost:8080/datalayer',
 };
