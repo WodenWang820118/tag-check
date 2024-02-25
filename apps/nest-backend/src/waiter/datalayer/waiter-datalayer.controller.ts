@@ -1,28 +1,28 @@
-import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { WaiterDataLayerGroupEventsService } from './waiter-datalayer-group-events.service';
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { WaiterDataLayerSingleEventService } from './waiter-datalayer-single-event.service';
 
-@Controller('waiter-datalayer')
+@Controller('datalayer')
 export class WaiterDataLayerController {
   constructor(
     private waiterDataLayerGroupEventsService: WaiterDataLayerGroupEventsService,
     private waiterDataLayerSingleEventService: WaiterDataLayerSingleEventService
   ) {}
 
-  @Get('/single-event')
+  @Get(':projectSlug/:eventName')
   @ApiOperation({
     summary: 'Inspects a single event dataLayer',
     description:
       'This endpoint inspects a single event and returns dataLayer object,\
       and the comparison result written to an xlsx file.',
   })
-  @ApiQuery({
-    name: 'projectName',
+  @ApiParam({
+    name: 'projectSlug',
     description: 'The name of the project to which the event belongs.',
   })
-  @ApiQuery({
-    name: 'testName',
+  @ApiParam({
+    name: 'eventName',
     description: 'The name of the test associated with the event.',
   })
   @ApiQuery({
@@ -52,8 +52,8 @@ export class WaiterDataLayerController {
   })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
   async inspectSingleEvent(
-    @Query('projectName') projectName: string,
-    @Query('testName') testName: string,
+    @Param('projectSlug') projectSlug: string,
+    @Param('eventName') eventName: string,
     @Query('headless') headless: string,
     @Query('measurementId') measurementId?: string,
     @Query('path') path?: string,
@@ -62,8 +62,8 @@ export class WaiterDataLayerController {
   ) {
     // if no measurementId is provided, no need to grab requests
     return await this.waiterDataLayerSingleEventService.inspectSingleEvent(
-      projectName,
-      testName,
+      projectSlug,
+      eventName,
       headless,
       path,
       measurementId,
@@ -74,7 +74,7 @@ export class WaiterDataLayerController {
     );
   }
 
-  @Get('/project')
+  @Get(':projectSlug')
   @ApiOperation({
     summary: 'Inspects a project dataLayer',
     description:
@@ -83,7 +83,7 @@ export class WaiterDataLayerController {
       inspectSingleEvent endpoint for more parameters details.',
   })
   async inspectProject(
-    @Query('projectName') projectName: string,
+    @Param('projectSlug') projectSlug: string,
     @Query('headless') headless: string,
     @Query('measurementId') measurementId: string,
     @Query('path') path?: string,
@@ -93,7 +93,7 @@ export class WaiterDataLayerController {
     @Query('concurrency') concurrency = 2
   ) {
     return await this.waiterDataLayerGroupEventsService.inspectProject(
-      projectName,
+      projectSlug,
       headless,
       path,
       args,

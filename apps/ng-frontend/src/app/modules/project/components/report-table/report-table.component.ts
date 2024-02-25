@@ -13,10 +13,10 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import {
   Observable,
-  Subscription,
+  Subject,
   combineLatest,
   switchMap,
-  take,
+  takeUntil,
   tap,
 } from 'rxjs';
 import { IReportDetails } from '../../../../shared/models/report.interface';
@@ -27,6 +27,7 @@ import { MatSort } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { Project } from '../../../../shared/models/project.interface';
+import { DataLayerService } from '../../../../shared/services/api/datalayer/datalayer.service';
 
 @Component({
   selector: 'app-report-table',
@@ -63,13 +64,14 @@ export class ReportTableComponent implements OnInit, OnDestroy {
   @ViewChild(MatSort) sort!: MatSort;
   @Input() project$!: Observable<Project>;
 
-  subscriptions: Subscription[] = [];
+  destroy$ = new Subject<void>();
 
   constructor(
     private reportService: ReportService,
     private reportDetailsService: ReportDetailsService,
     private projectDataSourceService: ProjectDataSourceService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private dataLayerService: DataLayerService
   ) {}
 
   ngOnInit() {
@@ -79,9 +81,9 @@ export class ReportTableComponent implements OnInit, OnDestroy {
   subscribeToRouteChanges() {
     // when the route changes, get the project reports and initialize the data source
     // otherwise, update the data source when the project reports change
-    const routeSubscription = combineLatest([this.route.params, this.project$])
+    combineLatest([this.route.params, this.project$])
       .pipe(
-        take(1),
+        takeUntil(this.destroy$),
         switchMap(([params, project]) => {
           const slug = params['projectSlug'];
           return this.reportService.getProjectReports(slug).pipe(
@@ -94,8 +96,6 @@ export class ReportTableComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe();
-
-    this.subscriptions.push(routeSubscription);
   }
 
   initializeDataSource(reports: IReportDetails[]) {
@@ -111,6 +111,7 @@ export class ReportTableComponent implements OnInit, OnDestroy {
   setReportDetails(eventName: string) {
     this.route.params
       .pipe(
+        takeUntil(this.destroy$),
         switchMap((params) => {
           const slug = params['projectSlug'];
           return this.reportService.getProjectReports(slug).pipe(
@@ -129,8 +130,22 @@ export class ReportTableComponent implements OnInit, OnDestroy {
       .subscribe();
   }
 
+  runTest(eventName: string) {
+    console.log('running test', eventName);
+    this.route.params
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap((params) => {
+          const slug = params['projectSlug'];
+          return this.dataLayerService.runDataLayerCheck(slug, eventName);
+        })
+      )
+      .subscribe();
+  }
+
   ngOnDestroy() {
     console.log('destroying report-table');
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
