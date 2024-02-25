@@ -1,0 +1,42 @@
+<div class="init-project">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Root</mat-card-title>
+      <mat-card-subtitle
+        >Root folder path for all your projects.</mat-card-subtitle
+      >
+    </mat-card-header>
+    <br />
+    <mat-card-content>
+      <form class="init-project__config" [formGroup]="configurationForm">
+        <mat-form-field>
+          <mat-label>Root folder</mat-label>
+          <input matInput placeholder="D:\\projects" formControlName="root" />
+        </mat-form-field>
+        <mat-card-actions align="end" style="gap: 1rem">
+          <button
+            mat-raised-button
+            color="warn"
+            matTooltip="Reset and configure new root path"
+            [matTooltipPosition]="'below'"
+            (click)="onResetRoot()"
+          >
+            Reset
+          </button>
+          <button
+            mat-raised-button
+            matTooltip="Save new root path"
+            [matTooltipPosition]="'below'"
+            (click)="onFormSubmit()"
+          >
+            Save
+          </button>
+        </mat-card-actions>
+      </form>
+    </mat-card-content>
+  </mat-card>
+  <br />
+  <div class="init-project__form">
+    <app-init-project-form></app-init-project-form>
+  </div>
+</div>

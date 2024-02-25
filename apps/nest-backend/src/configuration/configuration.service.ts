@@ -38,6 +38,12 @@ export class ConfigurationService {
     return await this.configurationRepository.destroy({ where: { id: id } });
   }
 
+  async removeByName(name: string) {
+    return await this.configurationRepository.destroy({
+      where: { title: name },
+    });
+  }
+
   async getRootProjectPath(): Promise<string> {
     return await this.configurationRepository
       .findOne({
