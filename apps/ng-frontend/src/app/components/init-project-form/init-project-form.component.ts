@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import {
@@ -16,7 +16,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
 import { ProjectService } from '../../services/api/project/project.service';
 import { ConfigurationService } from '../../services/api/configuration/configuration.service';
-import { switchMap, take } from 'rxjs';
+import { Subject, takeUntil, tap } from 'rxjs';
+import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-init-project-form',
@@ -31,74 +33,21 @@ import { switchMap, take } from 'rxjs';
     MatSelectModule,
     MatButtonModule,
     RouterModule,
+    ErrorDialogComponent,
   ],
-  template: `
-    <div class="init-project-form">
-      <form #f="ngForm" [formGroup]="projectForm" (ngSubmit)="onSubmit()">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>New Project</mat-card-title>
-            <mat-card-subtitle
-              >Please fill in the required information</mat-card-subtitle
-            >
-          </mat-card-header>
-          <br />
-          <mat-card-content>
-            <div style="display: flex; flex-direction: column; gap: 1rem">
-              <mat-form-field>
-                <mat-label>Project Name</mat-label>
-                <input
-                  matInput
-                  placeholder="Corporate Website Project"
-                  formControlName="projectName"
-                />
-              </mat-form-field>
-              <mat-form-field>
-                <mat-label>Project Slug</mat-label>
-                <input
-                  matInput
-                  placeholder="unique-slug-1234"
-                  formControlName="projectSlug"
-                />
-              </mat-form-field>
-              <mat-form-field>
-                <mat-label>Project Description</mat-label>
-                <input matInput formControlName="projectDescription" />
-              </mat-form-field>
-              <mat-form-field>
-                <mat-label>Choose The Project Type</mat-label>
-                <mat-select formControlName="testType">
-                  <mat-option value="Tag Verifier">Tag Verifier</mat-option>
-                  <mat-option value="Data Layer Checker"
-                    >Data Layer Checker</mat-option
-                  >
-                </mat-select>
-              </mat-form-field>
-              <mat-form-field>
-                <mat-label>Google Spreadsheet Link</mat-label>
-                <input matInput formControlName="googleSpreadsheetLink" />
-              </mat-form-field>
-            </div>
-          </mat-card-content>
-
-          <mat-card-actions align="end">
-            <button mat-button [routerLink]="['/']">Cancel</button>
-            <button mat-button>Submit</button>
-          </mat-card-actions>
-        </mat-card>
-      </form>
-    </div>
-  `,
+  templateUrl: `./init-project-form.component.html`,
   styles: ``,
 })
-export class InitProjectFormComponent {
+export class InitProjectFormComponent implements OnDestroy {
   projectForm: FormGroup;
   testType = ['Tag-Verifier', 'Data layer checker'];
+  destroy$ = new Subject<void>();
   constructor(
     private fb: FormBuilder,
     private projectService: ProjectService,
     private router: Router,
-    private configService: ConfigurationService
+    private configurationService: ConfigurationService,
+    private dialog: MatDialog
   ) {
     this.projectForm = this.fb.group({
       projectName: ['', Validators.required],
@@ -109,23 +58,49 @@ export class InitProjectFormComponent {
     });
   }
 
+  isEmptyObject(obj: any) {
+    return obj && Object.keys(obj).length === 0 && obj.constructor === Object;
+  }
+
   onSubmit() {
-    // TODO: Use switchMap to switch to the new project
-    this.configService
+    if (this.projectForm.invalid) {
+      this.dialog.open(ErrorDialogComponent, {
+        data: {
+          message: 'Please fill in the required fields.',
+        },
+      });
+      return;
+    }
+    this.configurationService
       .getConfiguration('rootProjectPath')
       .pipe(
-        take(1),
-        switchMap((rootProject) => {
+        takeUntil(this.destroy$),
+        tap((rootProjectPath) => {
+          if (!rootProjectPath || this.isEmptyObject(rootProjectPath)) {
+            this.dialog.open(ErrorDialogComponent, {
+              data: {
+                message: 'Please configure the root path first.',
+              },
+            });
+            return;
+          }
+
           this.router.navigate([
             '/projects',
             this.projectForm.value['projectSlug'],
           ]);
-          return this.projectService.initProject(
-            rootProject.value,
+
+          this.projectService.initProject(
+            rootProjectPath.value,
             this.projectForm.value
           );
         })
       )
       .subscribe();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
