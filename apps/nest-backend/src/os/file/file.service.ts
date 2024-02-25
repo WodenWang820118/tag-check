@@ -1,16 +1,14 @@
 import {
-  BadRequestException,
   HttpException,
-  HttpStatus,
   Injectable,
   Logger,
   StreamableFile,
 } from '@nestjs/common';
-import { createReadStream, existsSync, readFileSync, writeFileSync } from 'fs';
-import path from 'path';
+import { createReadStream, readFileSync, writeFileSync } from 'fs';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
+import { join } from 'path';
 
 /**
  * Service responsible for file operations such as reading JSON files, retrieving file paths, and handling reports.
@@ -46,24 +44,22 @@ export class FileService {
     }
   }
 
-  async getEventReport(projectSlug: string, testName: string) {
+  async getEventReport(projectSlug: string, eventName: string) {
     try {
       const inspectionResultPath =
-        await this.folderPathService.getInspectionResultFolderPath(projectSlug);
-      if (!existsSync(inspectionResultPath)) {
-        throw new BadRequestException(`Project ${projectSlug} does not exist!`);
-      }
-      // use regex and testName to get an array of XLSX files
-      const regex = new RegExp(`${testName}.*.xlsx`);
+        await this.folderPathService.getInspectionEventFolderPath(
+          projectSlug,
+          eventName
+        );
+      const regex = new RegExp(`${eventName}.*\\.xlsx$`, 'i');
       const files =
         this.folderService.readFolderFileNames(inspectionResultPath);
+      Logger.log(`Files: ${files}`);
       const filteredFiles = files.filter((file) => regex.test(file));
 
-      if (filteredFiles.length === 0) {
-        throw new BadRequestException(`Test ${testName} does not exist!`);
-      }
+      const filePath = join(inspectionResultPath, filteredFiles[0]);
 
-      return filteredFiles;
+      return new StreamableFile(createReadStream(filePath));
     } catch (error) {
       Logger.error(error.message, 'FileService.getEventReport');
       throw new HttpException(error.message, 500);

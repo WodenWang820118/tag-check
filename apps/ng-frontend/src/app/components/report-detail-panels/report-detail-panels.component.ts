@@ -44,8 +44,8 @@ import { Dialog } from '@angular/cdk/dialog';
     ErrorDialogComponent,
   ],
   templateUrl: './report-detail-panels.component.html',
-  encapsulation: ViewEncapsulation.None,
   styleUrls: ['./report-detail-panels.component.scss'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
   @Input() eventName!: string | undefined;
@@ -215,6 +215,32 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
             eventName,
             recordingContent
           );
+        })
+      )
+      .subscribe();
+  }
+
+  onDownload() {
+    combineLatest([
+      this.route.parent?.params || of({ projectSlug: '' }),
+      this.route.params,
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        tap(([parentParams, params]) => {
+          const projectSlug = parentParams['projectSlug'];
+          const eventName = params['eventName'];
+
+          if (projectSlug && eventName) {
+            return this.reportService.downloadFile(projectSlug, eventName);
+          } else {
+            this.dialog.open(ErrorDialogComponent, {
+              data: {
+                message: 'Project slug and event name are required.',
+              },
+            });
+            throw new Error('Project slug and event name are required.');
+          }
         })
       )
       .subscribe();

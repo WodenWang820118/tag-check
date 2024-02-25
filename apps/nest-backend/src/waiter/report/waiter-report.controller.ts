@@ -6,6 +6,7 @@ import {
   Body,
   Post,
   Logger,
+  Header,
 } from '@nestjs/common';
 import { WaiterReportService } from './waiter-report.service';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
@@ -70,5 +71,35 @@ export class WaiterReportController {
     @Body() report: any
   ) {
     return await this.waiterReportService.addReport(projectSlug, report);
+  }
+
+  @ApiOperation({
+    summary: 'read report(s) from a specifc project',
+    description:
+      'This endpoint reads report(s) from a specifc project. \
+      If multiple reports are found, it will return an array of report names.',
+  })
+  @ApiParam({
+    name: 'projectName',
+    description: 'The name of the project to which the event belongs.',
+  })
+  @ApiParam({
+    name: 'eventName',
+    description: 'The name of the test associated with the event.',
+  })
+  @Get('xlsx/:projectSlug/:eventName')
+  @Header(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  )
+  @Header('Content-Disposition', 'attachment; filename="report.xlsx"')
+  async downloadXlsxReport(
+    @Param('projectSlug') projectSlug: string,
+    @Param('eventName') eventName: string
+  ) {
+    return await this.waiterReportService.downloadXlsxReport(
+      projectSlug,
+      eventName
+    );
   }
 }
