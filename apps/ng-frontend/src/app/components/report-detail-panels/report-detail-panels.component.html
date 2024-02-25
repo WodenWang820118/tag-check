@@ -112,6 +112,11 @@
       <mat-panel-description>
         <pre class="json">{{ (reportDetails$ | async)?.dataLayer | json }}</pre>
       </mat-panel-description>
+      <mat-action-row
+        ><button mat-raised-button color="success" (click)="onDownload()">
+          Download
+        </button></mat-action-row
+      >
     </mat-expansion-panel>
   </mat-accordion>
 </div>
