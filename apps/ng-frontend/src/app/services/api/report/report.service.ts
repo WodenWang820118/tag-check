@@ -66,4 +66,20 @@ export class ReportService {
 
     reader.readAsText(file);
   }
+
+  downloadFile(projectSlug: string, eventName: string) {
+    this.http
+      .get(`${environment.reportApiUrl}/xlsx/${projectSlug}/${eventName}`, {
+        responseType: 'blob',
+      })
+      .subscribe((blob) => {
+        // Create a new Blob object using the response data of the file
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${projectSlug}_${eventName}.xlsx`; // A default filename if none is specified by headers
+        a.click();
+
+        URL.revokeObjectURL(a.href);
+      });
+  }
 }

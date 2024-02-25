@@ -25,14 +25,4 @@ export class WaiterProjectDataRetrievalService {
   async readImage(projectName: string, testName: string) {
     return await this.imageService.readImage(projectName, testName);
   }
-
-  // TODO: could be independent of the project endpoint
-  async getEventReport(projectName: string, testName: string) {
-    return await this.fileService.getEventReport(projectName, testName);
-  }
-
-  // TODO: could be independent of the project endpoint
-  async readReport(projectName: string, reportName: string) {
-    return await this.fileService.readReport(projectName, reportName);
-  }
 }

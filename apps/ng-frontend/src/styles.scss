@@ -2,3 +2,25 @@
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.mat-mdc-button.mat-success,
+.mat-mdc-stroked-button.mat-success {
+  color: #155724 !important;
+}
+
+.mat-mdc-button.mat-success:hover,
+.mat-mdc-stroked-button.mat-success:hover {
+  background-color: #f0fff3 !important;
+}
+
+.mat-mdc-raised-button.mat-success,
+.mat-mdc-flat-button.mat-success,
+.mat-mdc-fab.mat-success,
+.mat-mdc-mini-fab.mat-success {
+  color: #f0fff3 !important;
+  background-color: #155724 !important;
+}
+
+.mat-icon-button.mat-success {
+  color: #155724 !important;
+}

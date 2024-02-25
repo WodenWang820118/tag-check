@@ -67,4 +67,8 @@ export class WaiterReportService {
       report
     );
   }
+
+  async downloadXlsxReport(projectSlug: string, eventName: string) {
+    return await this.fileService.getEventReport(projectSlug, eventName);
+  }
 }
