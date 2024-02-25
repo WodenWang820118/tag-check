@@ -1,6 +1,15 @@
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { WaiterProjectDataRetrievalService } from './waiter-project-data-retrieval.service';
-import { Body, Controller, Get, Header, Param, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  Logger,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { WaiterProjectWorkFlowService } from './waiter-project-workflow.service';
 
 @Controller('projects')
@@ -37,7 +46,7 @@ export class WaiterProjectWorkFlowController {
       Note the project folder could be created after root folder is set.',
   })
   @ApiQuery({
-    name: 'projectName',
+    name: 'projectSlug',
     description: 'The name of the project to which the event belongs.',
   })
   @ApiBody({
@@ -45,12 +54,14 @@ export class WaiterProjectWorkFlowController {
       'The settings of the project to be created. Please look at the front-end for more details.',
     type: Object,
   })
-  @Get('/init-project')
+  @Post('/init-project/:projectSlug')
   async initProject(
-    @Query('projectName') projectName: string,
+    @Param('projectSlug') projectSlug: string,
     @Body() settings: any
   ) {
-    await this.waiterProjectWorkflowService.initProject(projectName, settings);
+    Logger.log('projectSlug', projectSlug);
+    Logger.log('init-project', settings);
+    await this.waiterProjectWorkflowService.initProject(projectSlug, settings);
   }
 
   // if it exists, the shared service will update and use it

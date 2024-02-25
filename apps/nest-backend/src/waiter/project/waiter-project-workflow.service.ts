@@ -97,6 +97,7 @@ export class WaiterProjectWorkFlowService {
           description: 'The current project path',
           value: projectName,
         });
+
         await this.projectInitializationService.initProject(
           projectName,
           settings
