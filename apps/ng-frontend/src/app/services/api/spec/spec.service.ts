@@ -8,7 +8,6 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root',
 })
 export class SpecService {
-  // all RESTful API starts from base path: projects
   mockUrl = 'http://localhost:3003/specs';
 
   currentSpec: Subject<Spec> = new BehaviorSubject({} as Spec);
