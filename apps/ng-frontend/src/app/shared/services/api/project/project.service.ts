@@ -30,15 +30,19 @@ export class ProjectService {
   }
 
   initProject(rootProjectValue: string, settings: any) {
-    // TODO: get the root project from the backend
+    console.log('rootProjectValue', rootProjectValue);
+    console.log('init-project', settings);
     this.currentProject.next(settings);
-    return this.http.post(`${environment.projectApiUrl}`, {
-      rootProject: rootProjectValue,
-      ...settings,
-      specs: [],
-      reports: [],
-      recordings: [],
-    });
+    return this.http.post(
+      `${environment.projectApiUrl}/init-project/${settings.projectSlug}`,
+      {
+        rootProject: rootProjectValue,
+        ...settings,
+        specs: [],
+        reports: [],
+        recordings: [],
+      }
+    );
   }
 
   switchToProject(projectSlug: string) {
