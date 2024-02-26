@@ -17,7 +17,7 @@
       <td mat-cell *matCellDef="let element">
         <a
           style="text-decoration: none"
-          routerLink="{{ ['./', element.eventName] }}"
+          [routerLink]="['./', element.eventName]"
           (click)="setReportDetails(element.eventName)"
         >
           {{ element.eventName }}
