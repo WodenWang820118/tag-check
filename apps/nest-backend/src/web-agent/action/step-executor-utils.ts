@@ -67,7 +67,10 @@ export async function handleNavigate(
     }, settings.application.localStorage); // Pass application.localStorage as an argument to the evaluate function
   }
 
-  // TODO: pre-load the application cookies if any
+  // pre-load the application cookies if any
+  if (settings.application.cookie && settings.application.cookie.data) {
+    await page.setCookie(...settings.application.cookie.data);
+  }
 
   // then reload the page to make sure the localStorage and cookies are set
   // try to skip the overlay or popups
