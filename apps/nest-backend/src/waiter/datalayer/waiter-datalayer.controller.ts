@@ -1,6 +1,6 @@
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { WaiterDataLayerGroupEventsService } from './waiter-datalayer-group-events.service';
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Param, Query } from '@nestjs/common';
 import { WaiterDataLayerSingleEventService } from './waiter-datalayer-single-event.service';
 
 @Controller('datalayer')
@@ -58,7 +58,8 @@ export class WaiterDataLayerController {
     @Query('measurementId') measurementId?: string,
     @Query('path') path?: string,
     @Query('username') username?: string,
-    @Query('password') password?: string
+    @Query('password') password?: string,
+    @Body() application?: any
   ) {
     // if no measurementId is provided, no need to grab requests
     return await this.waiterDataLayerSingleEventService.inspectSingleEvent(
@@ -70,7 +71,8 @@ export class WaiterDataLayerController {
       {
         username,
         password,
-      }
+      },
+      application
     );
   }
 

@@ -23,7 +23,8 @@ export class WebAgentUtilsService {
     filePath?: string,
     captureRequest = false,
     measurementId?: string,
-    credentials?: Credentials
+    credentials?: Credentials,
+    application?: any
   ) {
     // 1) gather all necessary data and initialize the test
     await this.projectInitializationService.initInspectionEventSavingFolder(
@@ -47,7 +48,12 @@ export class WebAgentUtilsService {
 
     // 2) perform the test operation
     try {
-      await this.actionService.performOperation(page, projectName, operation);
+      await this.actionService.performOperation(
+        page,
+        projectName,
+        operation,
+        application
+      );
       // await new Promise((resolve) => setTimeout(resolve, 1000));
       try {
         await page.waitForNavigation({
