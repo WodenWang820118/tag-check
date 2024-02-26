@@ -41,6 +41,7 @@ export class ProjectInitializationService {
         tagManagerUrl: `${settings.tagManagerUrl}`,
         gtmId: `${settings.gtmId}`,
         containerName: `${settings.containerName}`,
+        preventNavigationEvents: ['select_promotion', 'select_item'],
         version: '1.0.0',
       };
 
