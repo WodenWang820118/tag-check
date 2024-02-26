@@ -20,7 +20,8 @@ export class WaiterDataLayerSingleEventService {
     headless: string,
     path?: string,
     measurementId?: string,
-    credentials?: Credentials
+    credentials?: Credentials,
+    application?: any
   ) {
     // 3.1) inspect both dataLayer and the request sent to GA4
     const browser = await puppeteer.launch({
@@ -39,7 +40,8 @@ export class WaiterDataLayerSingleEventService {
       headless,
       path,
       measurementId,
-      credentials
+      credentials,
+      application
     );
 
     // 3.2) construct the data to be written to the xlsx file

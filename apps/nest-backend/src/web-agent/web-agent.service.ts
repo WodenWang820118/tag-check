@@ -11,7 +11,8 @@ export class WebAgentService {
     projectName: string,
     testName: string,
     path?: string,
-    credentials?: Credentials
+    credentials?: Credentials,
+    application?: any
   ) {
     const { dataLayer, destinationUrl } =
       await this.webAgentUtilsService.performTest(
@@ -21,7 +22,8 @@ export class WebAgentService {
         path,
         false,
         null,
-        credentials
+        credentials,
+        application
       );
     return {
       dataLayer,
@@ -62,7 +64,8 @@ export class WebAgentService {
     testName: string,
     path?: string,
     measurementId?: string,
-    credentials?: Credentials
+    credentials?: Credentials,
+    application?: any
   ) {
     const { dataLayer, eventRequest, destinationUrl } =
       await this.webAgentUtilsService.performTest(
