@@ -29,7 +29,12 @@ export class ActionService {
     );
   }
 
-  async performOperation(page: Page, projectName: string, operation: any) {
+  async performOperation(
+    page: Page,
+    projectName: string,
+    operation: any,
+    application?: any
+  ) {
     if (!operation || !operation.steps) return;
 
     await this.requestInterceptor.setupInterception(
@@ -58,7 +63,8 @@ export class ActionService {
         projectName,
         operation.title,
         state,
-        isLastStep
+        isLastStep,
+        application
       );
     }
 
