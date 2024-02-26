@@ -24,7 +24,8 @@ export class StepExecutor {
     projectName: string,
     testName: string,
     state: any,
-    isLastStep: boolean
+    isLastStep: boolean,
+    application?: any
   ) {
     const randomDelay = 3000 + Math.floor(Math.random() * 2000);
     const handler = this.handlers[step.type];
@@ -34,7 +35,7 @@ export class StepExecutor {
         await handleSetViewport(page, step);
         break;
       case BrowserAction.NAVIGATE:
-        await handleNavigate(page, step, state);
+        await handleNavigate(page, step, state, application);
         break;
       case BrowserAction.WAITFORELEMENT:
         await handleWaitForElement(page, step, step.timeout || 10000);

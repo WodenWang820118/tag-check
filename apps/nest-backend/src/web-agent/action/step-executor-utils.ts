@@ -39,14 +39,42 @@ export async function handleSetViewport(page: Page, step: any) {
   });
 }
 
-export async function handleNavigate(page: Page, step: any, state: any) {
-  await page.goto(step.url, { waitUntil: 'networkidle2' });
+export async function handleNavigate(
+  page: Page,
+  step: any,
+  state: any,
+  application?: any
+) {
+  const settings = application;
+  // no need to wait for idle network state since sometimes there are sliders or carousels
+  await page.goto(step.url);
 
+  await sleep(1000); // Necessary delay for the website to update
+
+  // pre-load the application localStorage if any
+  if (settings.application && settings.application.localStorage) {
+    await page.evaluate((appLocalStorage) => {
+      for (const setting of appLocalStorage.data) {
+        // Correctly access the value property of each setting object
+        console.log(setting, 'StepExecutor.handleNavigate - setting');
+        const value =
+          typeof setting.value === 'object'
+            ? JSON.stringify(setting.value)
+            : setting.value;
+        console.log(`Setting localStorage ${setting.key}=${value}`); // Assuming you have a way to log from here
+        localStorage.setItem(setting.key, value);
+      }
+    }, settings.application.localStorage); // Pass application.localStorage as an argument to the evaluate function
+  }
+
+  // TODO: pre-load the application cookies if any
+
+  // then reload the page to make sure the localStorage and cookies are set
+  // try to skip the overlay or popups
   if (state.isFirstNavigation) {
     // only reload the landing page, trying to skip the overlay
-    await page.reload({
-      waitUntil: 'networkidle2',
-    });
+    await page.reload();
+    await sleep(1000); // Necessary delay for the website to update
     state.isFirstNavigation = false;
   }
 }

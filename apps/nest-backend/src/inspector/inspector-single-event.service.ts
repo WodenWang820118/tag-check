@@ -27,7 +27,8 @@ export class InspectorSingleEventService {
     headless: string,
     filePath?: string,
     measurementId?: string,
-    credentials?: Credentials
+    credentials?: Credentials,
+    application?: any
   ) {
     // 1. Get the project spec from the local file system
     const specsPath = await this.filePathService.getProjectConfigFilePath(
@@ -55,7 +56,8 @@ export class InspectorSingleEventService {
           projectName,
           testName,
           filePath,
-          credentials
+          credentials,
+          application
         );
 
         // 3. Compare the result with the project spec
@@ -91,7 +93,8 @@ export class InspectorSingleEventService {
             testName,
             filePath,
             measurementId,
-            credentials
+            credentials,
+            application
           );
 
         // 3. Compare the result with the project spec
