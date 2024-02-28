@@ -1,0 +1,18 @@
+<div class="project-view">
+  <app-toolbar [title]="(project$ | async)?.projectName"></app-toolbar>
+  <mat-sidenav-container
+    class="project-view__sidenav-container"
+    [hasBackdrop]="false"
+  >
+    <mat-sidenav #snav opened [mode]="'over'" fixedTopGap="56">
+      <app-side-nav-list></app-side-nav-list>
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <div class="table-container" style="padding: 5rem 12rem">
+        <!-- <app-report-table [project$]="project$"></app-report-table> -->
+        <router-outlet></router-outlet>
+      </div>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

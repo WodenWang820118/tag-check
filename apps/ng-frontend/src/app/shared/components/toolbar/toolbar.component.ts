@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,4 +18,6 @@ import { RouterModule } from '@angular/router';
   templateUrl: './toolbar.component.html',
   styleUrl: './toolbar.component.scss',
 })
-export class ToolbarComponent {}
+export class ToolbarComponent {
+  @Input() title!: string | undefined;
+}
