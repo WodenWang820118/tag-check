@@ -1,34 +1,39 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { ProjectComponent } from './project.component';
 import { RouterModule, Routes } from '@angular/router';
 import { DetailViewComponent } from './views/detail-view/detail-view.component';
 import { ProjectViewComponent } from './views/project-view/project.component';
 import { NewReportViewComponent } from './views/new-report-view/new-report-view.component';
+import { SettingsViewComponent } from './views/settings-view/settings.component';
+import { ReportViewComponent } from './views/report-view/report-view.component';
 
 const routes: Routes = [
   {
-    path: 'new-report',
-    component: NewReportViewComponent,
-  },
-  {
     path: '',
-    component: ProjectComponent,
+    component: ProjectViewComponent,
     children: [
       {
         path: '',
-        component: ProjectViewComponent,
+        component: ReportViewComponent,
       },
       {
-        path: ':eventName',
+        path: ':projectSlug/settings',
+        component: SettingsViewComponent,
+      },
+      {
+        path: ':projectSlug/:eventName',
         component: DetailViewComponent,
+      },
+      {
+        path: 'new-report',
+        component: NewReportViewComponent,
       },
     ],
   },
 ];
 
 @NgModule({
-  imports: [ProjectComponent, CommonModule, RouterModule.forChild(routes)],
+  imports: [CommonModule, RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
 export class ProjectModule {}
