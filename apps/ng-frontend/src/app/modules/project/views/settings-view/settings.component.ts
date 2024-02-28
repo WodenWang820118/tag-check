@@ -30,15 +30,14 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
     ToolbarComponent,
     SideNavListComponent,
   ],
-  templateUrl: './project.component.html',
-  styleUrls: ['./project.component.scss'],
+  templateUrl: './settings.component.html',
+  styleUrls: ['./settings.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class ProjectViewComponent implements OnInit, OnDestroy {
+export class SettingsViewComponent implements OnInit, OnDestroy {
   project$!: Observable<Project>;
   projects$!: Observable<Project[]>;
   destroy$ = new Subject<void>();
-  hover = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -59,10 +58,6 @@ export class ProjectViewComponent implements OnInit, OnDestroy {
       .subscribe();
 
     this.projects$ = this.projectService.getProjects();
-  }
-
-  switchHover() {
-    this.hover = !this.hover;
   }
 
   ngOnDestroy() {
