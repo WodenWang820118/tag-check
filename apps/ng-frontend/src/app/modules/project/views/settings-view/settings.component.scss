@@ -1,0 +1,19 @@
+.settings {
+  margin: 3rem 13rem 3rem;
+
+  &__cards {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    &__row {
+      display: flex;
+      flex-direction: row;
+      gap: 2rem;
+
+      &__item {
+        flex: 1;
+      }
+    }
+  }
+}
