@@ -3,20 +3,17 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, Subject, map, of } from 'rxjs';
 import { ProjectRecording } from '../../../models/recording.interface';
 import { environment } from '../../../../../environments/environment';
-import { EditorService } from '../../editor/editor.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class RecordingService {
-  mockUrl = 'http://localhost:3001/recordings';
-
   recordingSubject: Subject<ProjectRecording> = new BehaviorSubject(
     {} as ProjectRecording
   );
   recording$ = this.recordingSubject.asObservable();
 
-  constructor(private http: HttpClient, private editorService: EditorService) {}
+  constructor(private http: HttpClient) {}
 
   getProjectRecordings(projectSlug: string) {
     return this.http.get(`${environment.recordingApiUrl}/${projectSlug}`);

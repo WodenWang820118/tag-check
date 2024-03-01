@@ -11,8 +11,6 @@ import { environment } from '../../../../../environments/environment';
  * This service will communicate with SQLite3 databases
  */
 export class ConfigurationService {
-  mockUrl = 'http://localhost:3002/configurations';
-
   rootSubject = new BehaviorSubject('');
   root$ = this.rootSubject.asObservable();
 
