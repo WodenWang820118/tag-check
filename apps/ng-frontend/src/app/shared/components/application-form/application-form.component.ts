@@ -1,13 +1,8 @@
 import { CommonModule } from '@angular/common';
-import {
-  AfterViewInit,
-  Component,
-  OnDestroy,
-  ViewEncapsulation,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject, takeUntil, tap } from 'rxjs';
+import { EMPTY, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
@@ -19,9 +14,10 @@ import {
 } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ConfigurationService } from '../../services/api/configuration/configuration.service';
 import { MatBadgeModule } from '@angular/material/badge';
-import { Application } from '../../models/setting.interface';
+import { CookieData, LocalStorageData } from '../../models/setting.interface';
+import { SettingsService } from '../../services/api/settings/settings.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-application-form',
@@ -42,53 +38,127 @@ import { Application } from '../../models/setting.interface';
   styleUrls: ['./application-form.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class ApplicationFormComponent implements AfterViewInit, OnDestroy {
+export class ApplicationFormComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
 
   applicationForm = this.fb.group({
-    localStorage: this.fb.array([] as Application[]),
-    cookie: this.fb.array([] as Application[]),
+    localStorage: this.fb.array([] as LocalStorageData[]),
+    cookie: this.fb.array([] as CookieData[]),
   });
 
-  hideBadge = true;
+  localStorageSettings: LocalStorageData[] = [];
+  cookieSettings: CookieData[] = [];
+
+  isEmptyLocalStorage = false;
+  isEmptyCookie = false;
 
   constructor(
     private fb: FormBuilder,
-    private configurationService: ConfigurationService // Assuming you're using this service somewhere
-  ) {
-    this.loadInitialData(); // Load initial data when component is initialized
-  }
+    private settingsService: SettingsService,
+    private route: ActivatedRoute
+  ) {}
 
-  ngAfterViewInit(): void {
-    const badge = document.querySelector('.mat-badge-content');
-    if (badge) {
-      (badge as HTMLElement).style.pointerEvents = 'inherit';
-      (badge as HTMLElement).style.cursor = 'pointer';
-      (badge as HTMLElement).addEventListener('click', () => {
-        console.log('Badge clicked');
-      });
-    }
+  ngOnInit(): void {
+    this.route.parent?.params
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap((params) => {
+          const projectSlug = params['projectSlug'];
+          console.log('Parent route params', params);
+          return this.settingsService.getProjectSettings(projectSlug);
+        }),
+        tap((project) => {
+          this.localStorageSettings =
+            project.settings.application.localStorage.data;
+          console.log(
+            'Project localStorage settings',
+            this.localStorageSettings
+          );
+          this.cookieSettings = project.settings.application.cookie.data;
+          console.log('Project cookie settings', this.cookieSettings);
+          this.loadInitialData();
+        })
+      )
+      .subscribe();
+
+    this.observeLocalStorageFormArray().subscribe();
+    this.observeCookieFormArray().subscribe();
   }
 
   get localStorageFormArray() {
     return this.applicationForm.get('localStorage') as FormArray;
   }
 
+  get localStorageFormArrayValue() {
+    return Object.keys(this.localStorageFormArray.controls).map((key) => {
+      return {
+        key: key,
+        value: this.localStorageFormArray.controls[key as any].value,
+      };
+    });
+  }
+
   get cookieFormArray() {
     return this.applicationForm.get('cookie') as FormArray;
   }
 
-  onReset() {
-    console.log('Reset');
-    this.applicationForm.reset();
+  get cookieFormArrayValue() {
+    return Object.keys(this.cookieFormArray.controls).map((key) => {
+      return {
+        key: key,
+        value: this.cookieFormArray.controls[key as any].value,
+      };
+    });
+  }
+
+  observeLocalStorageFormArray() {
+    return this.localStorageFormArray.valueChanges.pipe(
+      takeUntil(this.destroy$),
+      tap((value) => {
+        console.log('LocalStorage form array value changes', value);
+        this.isEmptyLocalStorage = value.some(
+          (setting: LocalStorageData) => !setting.key || !setting.value
+        );
+      })
+    );
+  }
+
+  observeCookieFormArray() {
+    return this.cookieFormArray.valueChanges.pipe(
+      takeUntil(this.destroy$),
+      tap((value) => {
+        console.log('Cookie form array value changes', value);
+        this.isEmptyCookie = value.some(
+          (setting: CookieData) => !setting.key || !setting.value
+        );
+      })
+    );
   }
 
   onFormSubmit() {
-    console.log('Submit', this.applicationForm.value);
+    this.route.parent?.params
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap((params) => {
+          const projectSlug = params['projectSlug'];
+          if (projectSlug) {
+            return this.settingsService.updateSettings(
+              projectSlug,
+              this.applicationForm.value
+            );
+          }
+          return EMPTY;
+        })
+      )
+      .subscribe();
   }
 
   addLocalStorageSetting() {
     this.localStorageFormArray.push(this.createSettingFormGroup('', ''));
+  }
+
+  addCookieSetting() {
+    this.cookieFormArray.push(this.createSettingFormGroup('', ''));
   }
 
   loadInitialData() {
@@ -96,13 +166,13 @@ export class ApplicationFormComponent implements AfterViewInit, OnDestroy {
     const allCookies = this.getAllSettingsFromCookies();
     allSettings.forEach((setting) => {
       this.localStorageFormArray.push(
-        this.createSettingFormGroup(setting.key, setting.value)
+        this.createSettingFormGroup(setting.key, JSON.stringify(setting.value))
       );
     });
 
     allCookies.forEach((setting) => {
       this.cookieFormArray.push(
-        this.createSettingFormGroup(setting.key, setting.value)
+        this.createSettingFormGroup(setting.key, JSON.stringify(setting.value))
       );
     });
   }
@@ -114,22 +184,12 @@ export class ApplicationFormComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  getAllSettingsFromCookies(): Application[] {
-    // Mock implementation. Replace with actual logic to fetch from cookies.
-    return [
-      { key: 'cookie', value: 'true' },
-      { key: 'cookieData', value: 'value' },
-      // Add more if needed
-    ];
+  getAllSettingsFromCookies(): CookieData[] {
+    return this.cookieSettings;
   }
 
-  getAllSettingsFromLocalStorage(): Application[] {
-    // Mock implementation. Replace with actual logic to fetch from localStorage.
-    return [
-      { key: 'consent', value: 'true' },
-      { key: 'data', value: 'value' },
-      // Add more if needed
-    ];
+  getAllSettingsFromLocalStorage(): LocalStorageData[] {
+    return this.localStorageSettings;
   }
 
   removeLocalStorageSetting(index: number) {
@@ -138,10 +198,6 @@ export class ApplicationFormComponent implements AfterViewInit, OnDestroy {
 
   removeCookieSetting(index: number) {
     this.cookieFormArray.removeAt(index);
-  }
-
-  toggleBadgeVisibility(state: boolean) {
-    this.hideBadge = state;
   }
 
   ngOnDestroy(): void {

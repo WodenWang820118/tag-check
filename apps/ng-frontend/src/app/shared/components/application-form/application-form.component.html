@@ -10,8 +10,8 @@
     <form class="application-form" [formGroup]="applicationForm">
       <h2>localStorage</h2>
       <div formArrayName="localStorage">
-        @for (item of localStorageFormArray.value; track item.key; let idx =
-        $index) {
+        @for (item of localStorageFormArrayValue; track item.key; let idx =
+        $index;) {
         <div
           class="application-form__sub-form"
           [formGroupName]="idx"
@@ -42,7 +42,7 @@
       <br />
       <h2>Cookie</h2>
       <div formArrayName="cookie">
-        @for (item of cookieFormArray.value; track item.key; let idx = $index) {
+        @for (item of cookieFormArrayValue; track item.key; let idx = $index) {
         <div class="application-form__sub-form" [formGroupName]="idx">
           <mat-form-field class="application-form__field">
             <mat-label>cookie Key</mat-label>
@@ -67,7 +67,7 @@
           mat-raised-button
           matTooltip="Add new localStorage setting"
           [matTooltipPosition]="'below'"
-          (click)="addLocalStorageSetting()"
+          (click)="addCookieSetting()"
         >
           Add cookie
         </button>
@@ -78,6 +78,7 @@
           matTooltip="Save new root path"
           [matTooltipPosition]="'below'"
           (click)="onFormSubmit()"
+          [disabled]="isEmptyLocalStorage || isEmptyCookie"
         >
           Save
         </button>
