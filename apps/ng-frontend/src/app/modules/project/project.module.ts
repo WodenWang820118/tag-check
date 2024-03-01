@@ -17,16 +17,16 @@ const routes: Routes = [
         component: ReportViewComponent,
       },
       {
-        path: ':projectSlug/settings',
+        path: 'settings',
         component: SettingsViewComponent,
-      },
-      {
-        path: ':projectSlug/:eventName',
-        component: DetailViewComponent,
       },
       {
         path: 'new-report',
         component: NewReportViewComponent,
+      },
+      {
+        path: ':eventName',
+        component: DetailViewComponent,
       },
     ],
   },

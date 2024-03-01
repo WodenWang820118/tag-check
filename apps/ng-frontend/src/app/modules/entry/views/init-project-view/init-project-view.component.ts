@@ -14,6 +14,7 @@ import { MatCardModule } from '@angular/material/card';
 import { Subject, takeUntil, tap } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { RootFormComponent } from '../../../../shared/components/root-form/root-form.component';
 
 @Component({
   selector: 'app-init-project-view',
@@ -28,6 +29,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatCardModule,
     MatButtonModule,
     MatTooltipModule,
+    RootFormComponent,
   ],
   templateUrl: `./init-project-view.component.html`,
   styles: `
@@ -44,7 +46,7 @@ export class InitProjectViewComponent implements OnInit, OnDestroy {
   configurationForm = this.fb.group({
     root: ['', Validators.required],
   });
-
+  isRoot = false;
   destroy$ = new Subject<void>();
 
   constructor(
@@ -60,11 +62,7 @@ export class InitProjectViewComponent implements OnInit, OnDestroy {
         tap((rootProjectPath) => {
           console.log('root', rootProjectPath);
           if (rootProjectPath && !this.isEmptyObject(rootProjectPath)) {
-            console.log('root', rootProjectPath);
-            this.configurationForm.controls.root.setValue(
-              rootProjectPath.value
-            );
-            this.configurationForm.disable();
+            this.isRoot = true;
           }
         })
       )
@@ -73,39 +71,6 @@ export class InitProjectViewComponent implements OnInit, OnDestroy {
 
   isEmptyObject(obj: any) {
     return obj && Object.keys(obj).length === 0 && obj.constructor === Object;
-  }
-
-  onResetRoot() {
-    this.configurationService
-      .resetConfiguration('rootProjectPath')
-      .pipe(
-        takeUntil(this.destroy$),
-        tap(() => {
-          this.configurationForm.reset();
-          this.configurationForm.enable();
-        })
-      )
-      .subscribe();
-  }
-
-  onFormSubmit() {
-    const value = this.configurationForm.controls.root.value;
-    if (!value) {
-      return;
-    }
-    this.configurationService
-      .createConfiguration({
-        name: 'rootProjectPath',
-        value: value,
-      })
-      .pipe(
-        takeUntil(this.destroy$),
-        tap((res) => {
-          console.log('res', res);
-          this.configurationForm.disable();
-        })
-      )
-      .subscribe();
   }
 
   ngOnDestroy() {
