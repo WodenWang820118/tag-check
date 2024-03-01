@@ -3,11 +3,6 @@ export interface ProjectSetting {
   settings: Setting;
 }
 
-export interface Application {
-  key: string;
-  value: string;
-}
-
 interface Setting {
   rootProject: string;
   projectName: string;
@@ -21,4 +16,27 @@ interface Setting {
   version: string;
   preventNavigationEvents: string[];
   application: Application;
+}
+
+export interface Application {
+  localStorage: LocalStorage;
+  cookie: Cookie;
+}
+
+export interface LocalStorage {
+  data: LocalStorageData[];
+}
+
+export interface Cookie {
+  data: CookieData[];
+}
+
+export interface LocalStorageData {
+  key: string;
+  value: string;
+}
+
+export interface CookieData {
+  key: string;
+  value: string;
 }

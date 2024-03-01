@@ -17,6 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { RootFormComponent } from '../../../../shared/components/root-form/root-form.component';
 import { ApplicationFormComponent } from '../../../../shared/components/application-form/application-form.component';
 import { SettingsFormComponent } from '../../../../shared/components/settings-form/settings-form.component';
+import { BrowserFormComponent } from '../../../../shared/components/browser-form/browser-form.component';
 @Component({
   selector: 'app-project-view',
   standalone: true,
@@ -35,6 +36,7 @@ import { SettingsFormComponent } from '../../../../shared/components/settings-fo
     RootFormComponent,
     ApplicationFormComponent,
     SettingsFormComponent,
+    BrowserFormComponent,
   ],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
