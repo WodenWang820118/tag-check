@@ -8,8 +8,6 @@ import { environment } from '../../../../../environments/environment';
   providedIn: 'root',
 })
 export class ProjectService {
-  mockUrl = 'http://localhost:3000/projects';
-
   currentProject: Subject<Project> = new BehaviorSubject({} as Project);
   currentProject$ = this.currentProject.asObservable();
 

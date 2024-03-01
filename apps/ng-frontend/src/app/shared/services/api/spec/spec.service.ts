@@ -8,8 +8,6 @@ import { environment } from '../../../../../environments/environment';
   providedIn: 'root',
 })
 export class SpecService {
-  mockUrl = 'http://localhost:3003/specs';
-
   currentSpec: Subject<Spec> = new BehaviorSubject({} as Spec);
   currentSpec$ = this.currentSpec.asObservable();
 

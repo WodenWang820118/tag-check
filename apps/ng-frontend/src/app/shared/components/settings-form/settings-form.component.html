@@ -1,0 +1,56 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Project Information</mat-card-title>
+    <mat-card-subtitle>Settings within the project.</mat-card-subtitle>
+  </mat-card-header>
+  <br />
+  <mat-card-content>
+    <form [formGroup]="settingsForm" class="settings-form">
+      <mat-form-field class="settings-form__field">
+        <mat-label>Project Name</mat-label>
+        <input matInput formControlName="projectName" />
+      </mat-form-field>
+      <mat-form-field class="settings-form__field">
+        <mat-label>Project Description</mat-label>
+        <textarea matInput formControlName="projectDescription"></textarea>
+      </mat-form-field>
+      <mat-form-field class="settings-form__field">
+        <!-- TODO: get the current and the available test types -->
+        <mat-label>Test Type</mat-label>
+        <mat-select>
+          <mat-option value="1">1</mat-option>
+          <mat-option value="2">2</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="settings-form__field">
+        <mat-label>Google Spreadsheet Link</mat-label>
+        <input matInput formControlName="googleSpreadsheetLink" />
+      </mat-form-field>
+      <mat-form-field class="settings-form__field">
+        <mat-label>GTM Preview Mode URL</mat-label>
+        <input matInput formControlName="tagManagerUrl" />
+      </mat-form-field>
+      <mat-form-field class="settings-form__field">
+        <mat-label>GTM ID</mat-label>
+        <input matInput formControlName="gtmId" />
+      </mat-form-field>
+      <mat-card-actions align="end" style="gap: 1rem">
+        <button
+          mat-raised-button
+          color="warn"
+          matTooltip="Reset and configure new root path"
+          [matTooltipPosition]="'below'"
+        >
+          Reset
+        </button>
+        <button
+          mat-raised-button
+          matTooltip="Save new root path"
+          [matTooltipPosition]="'below'"
+        >
+          Save
+        </button>
+      </mat-card-actions>
+    </form>
+  </mat-card-content>
+</mat-card>
