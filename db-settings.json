@@ -1,0 +1,39 @@
+{
+  "settings": [
+    {
+      "projectSlug": "drunk_elephant",
+      "settings": {
+        "rootProject": "D:/projects",
+        "projectName": "Drunk Elephant",
+        "projectDescription": "",
+        "projectSlug": "drunk_elephante",
+        "testType": "Data Layer Checker",
+        "googleSpreadsheetLink": "",
+        "tagManagerUrl": "undefined",
+        "gtmId": "undefined",
+        "containerName": "undefined",
+        "version": "1.0.0",
+        "preventNavigationEvents": ["select_promotion", "select_item"],
+        "application": {
+          "localStorage": {
+            "data": [
+              {
+                "key": "consentPreferences",
+                "value": {
+                  "ad_storage": true,
+                  "analytics_storage": true,
+                  "ad_user_data": true,
+                  "ad_personalization": false
+                }
+              },
+              {
+                "key": "consent",
+                "value": true
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

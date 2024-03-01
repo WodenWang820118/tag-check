@@ -7,13 +7,16 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProjectService } from '../../../../shared/services/api/project/project.service';
 import { Observable, Subject, takeUntil, tap } from 'rxjs';
 import { Project } from '../../../../shared/models/project.interface';
-import { ReportTableComponent } from '../../components/report-table/report-table.component';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
-import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
-
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormBuilder } from '@angular/forms';
+import { MatInputModule } from '@angular/material/input';
+import { RootFormComponent } from '../../../../shared/components/root-form/root-form.component';
+import { ApplicationFormComponent } from '../../../../shared/components/application-form/application-form.component';
+import { SettingsFormComponent } from '../../../../shared/components/settings-form/settings-form.component';
 @Component({
   selector: 'app-project-view',
   standalone: true,
@@ -23,12 +26,15 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
     MatIconModule,
     MatButtonModule,
     RouterModule,
-    ReportTableComponent,
-    MatSidenavModule,
     MatListModule,
-    MatGridListModule,
+    MatCardModule,
+    MatFormFieldModule,
     ToolbarComponent,
-    SideNavListComponent,
+    MatInputModule,
+    MatGridListModule,
+    RootFormComponent,
+    ApplicationFormComponent,
+    SettingsFormComponent,
   ],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
@@ -39,9 +45,14 @@ export class SettingsViewComponent implements OnInit, OnDestroy {
   projects$!: Observable<Project[]>;
   destroy$ = new Subject<void>();
 
+  rootForm = this.fb.group({
+    name: [''],
+  });
+
   constructor(
     private route: ActivatedRoute,
-    public projectService: ProjectService
+    public projectService: ProjectService,
+    private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
