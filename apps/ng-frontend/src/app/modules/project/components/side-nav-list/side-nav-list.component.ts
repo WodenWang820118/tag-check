@@ -82,7 +82,7 @@ export class SideNavListComponent implements OnInit, OnDestroy {
           this.items.push({
             icon: 'settings',
             title: 'Settings',
-            link: `${projectSlug}/settings`,
+            link: `settings`,
           });
         })
       )
