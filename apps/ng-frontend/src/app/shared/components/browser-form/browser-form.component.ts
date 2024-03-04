@@ -1,14 +1,23 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject, takeUntil, tap } from 'rxjs';
+import { Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ConfigurationService } from '../../services/api/configuration/configuration.service';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { SettingsService } from '../../services/api/settings/settings.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-browser-form',
@@ -23,86 +32,105 @@ import { ConfigurationService } from '../../services/api/configuration/configura
     MatTooltipModule,
     ReactiveFormsModule,
     FormsModule,
+    MatSelectModule,
+    MatOptionModule,
   ],
-  template: `
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>Browser Settings</mat-card-title>
-        <mat-card-subtitle>Browser settings for the project</mat-card-subtitle>
-      </mat-card-header>
-      <br />
-      <mat-card-content>
-        <form [formGroup]="rootForm">
-          <mat-form-field>
-            <mat-label>Root folder</mat-label>
-            <input matInput placeholder="D:\\projects" formControlName="name" />
-          </mat-form-field>
-          <mat-card-actions align="end" style="gap: 1rem">
-            <button
-              mat-raised-button
-              color="warn"
-              matTooltip="Reset and configure new root path"
-              [matTooltipPosition]="'below'"
-              (click)="onResetRoot()"
-            >
-              Reset
-            </button>
-            <button
-              mat-raised-button
-              matTooltip="Save new root path"
-              [matTooltipPosition]="'below'"
-              (click)="onFormSubmit()"
-            >
-              Save
-            </button>
-          </mat-card-actions>
-        </form>
-      </mat-card-content>
-    </mat-card>
-  `,
-  styles: [''],
+  templateUrl: `./browser-form.component.html`,
+  styleUrls: ['./browser-form.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class BrowserFormComponent implements OnDestroy {
+export class BrowserFormComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
 
-  rootForm = this.fb.group({
-    name: [''],
+  browserSettingsForm = this.fb.group({
+    settings: this.fb.array([]),
   });
+
+  browserSettings: string[] = [];
 
   constructor(
     private fb: FormBuilder,
-    private configurationService: ConfigurationService
+    private settingsService: SettingsService,
+    private route: ActivatedRoute
   ) {}
 
-  onResetRoot() {
-    this.configurationService
-      .resetConfiguration('rootProjectPath')
+  ngOnInit() {
+    this.route.parent?.params
       .pipe(
         takeUntil(this.destroy$),
-        tap(() => {
-          this.rootForm.reset();
-          this.rootForm.enable();
+        switchMap((params) => {
+          const projectSlug = params['projectSlug'];
+          console.log('Parent route params', params);
+          return this.settingsService.getProjectSettings(projectSlug);
+        }),
+        tap((project) => {
+          this.browserSettings = project.settings.browser;
+          console.log('Project localStorage settings', this.browserSettings);
+          this.loadInitialData();
         })
       )
       .subscribe();
   }
 
+  get browserSettingsFormFormArray() {
+    return this.browserSettingsForm.get('settings') as FormArray;
+  }
+
+  get localStorageFormArrayValue() {
+    return Object.keys(this.browserSettingsFormFormArray.controls).map(
+      (value) => {
+        return {
+          value,
+        };
+      }
+    );
+  }
+
+  loadInitialData() {
+    const allSettings = this.getAllBrowserSettings();
+    allSettings.forEach((value) => {
+      this.browserSettingsFormFormArray.push(
+        this.createSettingFormGroup(value)
+      );
+    });
+  }
+
+  getAllBrowserSettings(): string[] {
+    return this.browserSettings;
+  }
+
+  addBrowserSetting() {
+    this.browserSettingsFormFormArray.push(this.createSettingFormGroup(''));
+  }
+
+  removeBrowserSetting(index: number) {
+    this.browserSettingsFormFormArray.removeAt(index);
+  }
+
+  createSettingFormGroup(value: string): FormGroup {
+    return this.fb.group({
+      value: [value],
+    });
+  }
+
   onFormSubmit() {
-    const value = this.rootForm.controls.name.value;
-    if (!value) {
-      return;
-    }
-    this.configurationService
-      .createConfiguration({
-        name: 'rootProjectPath',
-        value: value,
-      })
+    const settings = this.browserSettingsFormFormArray.value as {
+      value: string;
+    }[];
+
+    const settingsValue = settings.map((setting) => setting.value);
+
+    this.route.parent?.params
       .pipe(
         takeUntil(this.destroy$),
-        tap((res) => {
-          console.log('res', res);
-          this.rootForm.disable();
+        switchMap((params) => {
+          const projectSlug = params['projectSlug'];
+          console.log('Parent route params', params);
+          return this.settingsService.updateSettings(
+            projectSlug,
+            'browser',
+            settingsValue
+          );
         })
       )
       .subscribe();

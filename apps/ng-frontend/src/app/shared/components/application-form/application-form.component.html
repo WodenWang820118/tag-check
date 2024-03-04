@@ -12,15 +12,11 @@
       <div formArrayName="localStorage">
         @for (item of localStorageFormArrayValue; track item.key; let idx =
         $index;) {
-        <div
-          class="application-form__sub-form"
-          [formGroupName]="idx"
-          (onClick)="removeLocalStorageSetting(idx)"
-        >
-          <mat-form-field class="application-form__field">
+        <div class="application-form__sub-form" [formGroupName]="idx">
+          <mat-form-field class="application-form__field" appearance="outline">
             <input matInput formControlName="key" />
           </mat-form-field>
-          <mat-form-field class="application-form__field">
+          <mat-form-field class="application-form__field" appearance="outline">
             <input matInput formControlName="value" />
           </mat-form-field>
           <button mat-icon-button (click)="removeLocalStorageSetting(idx)">
@@ -44,11 +40,11 @@
       <div formArrayName="cookie">
         @for (item of cookieFormArrayValue; track item.key; let idx = $index) {
         <div class="application-form__sub-form" [formGroupName]="idx">
-          <mat-form-field class="application-form__field">
+          <mat-form-field class="application-form__field" appearance="outline">
             <mat-label>cookie Key</mat-label>
             <input matInput formControlName="key" placeholder="cookie key" />
           </mat-form-field>
-          <mat-form-field class="application-form__field">
+          <mat-form-field class="application-form__field" appearance="outline">
             <mat-label>cookie Value</mat-label>
             <input
               matInput
