@@ -20,7 +20,7 @@ export class WaiterSettingsController {
     return await this.waiterSettingsService.getProjectSettings(projectSlug);
   }
 
-  @Put(':projectSlug')
+  @Put(':projectSlug/sections/:section')
   @ApiOperation({
     summary: 'update project settings',
     description:
@@ -30,16 +30,23 @@ export class WaiterSettingsController {
     name: 'projectSlug',
     description: 'The name of the project to which the event belongs.',
   })
+  @ApiParam({
+    name: 'section',
+    description:
+      'The section of the settings to update. E.g. application, user, etc.',
+  })
   @ApiBody({
     description: 'The settings to update.',
     type: Object,
   })
   async updateProjectSettings(
     @Param('projectSlug') projectSlug: string,
+    @Param('section') section: string,
     @Body() settings: any
   ) {
     return await this.waiterSettingsService.updateProjectSettings(
       projectSlug,
+      section,
       settings
     );
   }
