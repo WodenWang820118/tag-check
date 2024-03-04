@@ -16,6 +16,7 @@ interface Setting {
   version: string;
   preventNavigationEvents: string[];
   application: Application;
+  browser: string[];
 }
 
 export interface Application {

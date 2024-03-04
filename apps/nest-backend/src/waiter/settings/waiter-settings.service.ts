@@ -20,21 +20,57 @@ export class WaiterSettingsService {
     };
   }
 
-  async updateProjectSettings(projectSlug: string, partialSettings: any) {
+  async updateProjectSettings(
+    projectSlug: string,
+    section: string,
+    partialSettings: any
+  ) {
+    switch (section) {
+      case 'application':
+        return this.updateApplicationSettings(projectSlug, partialSettings);
+      case 'browser':
+        return this.updateBrowserSettings(projectSlug, partialSettings);
+      default:
+        return;
+    }
+  }
+
+  async updateBrowserSettings(projectSlug: string, browser: string[]) {
     try {
       const filePath = await this.filePathService.getProjectSettingFilePath(
         projectSlug
       );
 
       const currentSettings = await this.fileService.readJsonFile(filePath);
-      const localStorage = partialSettings.localStorage.map((item: any) => {
+
+      const updatedSettings = {
+        ...currentSettings,
+        browser: browser,
+      };
+
+      await this.fileService.writeJsonFile(filePath, updatedSettings);
+      return updatedSettings;
+    } catch (error) {
+      Logger.error('Error updating settings', error);
+      throw new HttpException('Error updating settings', 500);
+    }
+  }
+
+  async updateApplicationSettings(projectSlug: string, settings: any) {
+    try {
+      const filePath = await this.filePathService.getProjectSettingFilePath(
+        projectSlug
+      );
+
+      const currentSettings = await this.fileService.readJsonFile(filePath);
+      const localStorage = settings.localStorage.map((item: any) => {
         return {
           key: item.key,
           value: JSON.parse(item.value),
         };
       });
 
-      const cookie = partialSettings.cookie.map((item: any) => {
+      const cookie = settings.cookie.map((item: any) => {
         return {
           key: item.key,
           value: JSON.parse(item.value),
