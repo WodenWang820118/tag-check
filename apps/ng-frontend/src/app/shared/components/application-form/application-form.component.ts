@@ -144,6 +144,7 @@ export class ApplicationFormComponent implements OnInit, OnDestroy {
           if (projectSlug) {
             return this.settingsService.updateSettings(
               projectSlug,
+              'application',
               this.applicationForm.value
             );
           }
