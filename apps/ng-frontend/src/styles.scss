@@ -25,6 +25,30 @@ $theme: mat.define-light-theme((color: (primary: $primary,
 @include mat.form-field-theme($theme);
 @include mat.input-theme($theme);
 
+
+// Custom button styles
+.mat-mdc-button.mat-action,
+.mat-mdc-stroked-button.mat-action {
+  color: #1565CF !important;
+}
+
+.mat-mdc-button.mat-action:hover,
+.mat-mdc-stroked-button.mat-action:hover {
+  background-color: #1A73E81A !important;
+}
+
+.mat-mdc-raised-button.mat-action,
+.mat-mdc-flat-button.mat-action,
+.mat-mdc-fab.mat-action,
+.mat-mdc-mini-fab.mat-action {
+  color: #1565CF !important;
+  background-color: #1A73E81A !important;
+}
+
+.mat-icon-button.mat-action {
+  color: #1565CF !important;
+}
+
 // Custom button styles
 .mat-mdc-button.mat-success,
 .mat-mdc-stroked-button.mat-success {

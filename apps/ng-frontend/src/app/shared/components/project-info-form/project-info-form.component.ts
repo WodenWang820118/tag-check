@@ -14,7 +14,7 @@ import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'app-settings-form',
+  selector: 'app-project-info-form',
   standalone: true,
   imports: [
     CommonModule,
@@ -29,17 +29,17 @@ import { ActivatedRoute } from '@angular/router';
     MatSelectModule,
     MatOptionModule,
   ],
-  templateUrl: './settings-form.component.html',
-  styleUrls: ['./settings-form.component.scss'],
+  templateUrl: './project-info-form.component.html',
+  styleUrls: ['./project-info-form.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class SettingsFormComponent implements OnInit, OnDestroy {
+export class ProjectInfoFormComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
 
-  settingsForm = this.fb.group({
+  projectInfoForm = this.fb.group({
     projectName: [''],
     projectDescription: [''],
-    testType: [''],
+    testType: [{ value: '', disabled: true }],
     googleSpreadsheetLink: [''],
     tagManagerUrl: [''],
     gtmId: [''],
@@ -61,7 +61,8 @@ export class SettingsFormComponent implements OnInit, OnDestroy {
           return this.settingsService.getProjectSettings(projectSlug);
         }),
         tap((project) => {
-          if (project.settings) this.settingsForm.patchValue(project.settings);
+          if (project.settings)
+            this.projectInfoForm.patchValue(project.settings);
         })
       )
       .subscribe();

@@ -28,14 +28,20 @@ export class ProjectService {
   }
 
   initProject(rootProjectValue: string, settings: any) {
-    console.log('rootProjectValue', rootProjectValue);
-    console.log('init-project', settings);
+    // console.log('rootProjectValue', rootProjectValue);
+    // console.log('init-project', settings);
     this.currentProject.next(settings);
     return this.http.post(
       `${environment.projectApiUrl}/init-project/${settings.projectSlug}`,
       {
         rootProject: rootProjectValue,
-        ...settings,
+        projectName: settings.projectName,
+        projectDescription: settings.projectDescription || '',
+        projectSlug: settings.projectSlug,
+        testType: settings.testType,
+        googleSpreadsheetLink: settings.googleSpreadsheetLink || '',
+        tagManagerUrl: settings.tagManagerUrl || '',
+        gtmId: settings.gtmId || '',
         specs: [],
         reports: [],
         recordings: [],

@@ -1,22 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { ProjectService } from '../../../../shared/services/api/project/project.service';
-import { Observable, Subject, takeUntil, tap } from 'rxjs';
-import { Project } from '../../../../shared/models/project.interface';
+import { Subject } from 'rxjs';
 import { MatListModule } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormBuilder } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { RootFormComponent } from '../../../../shared/components/root-form/root-form.component';
 import { ApplicationFormComponent } from '../../../../shared/components/application-form/application-form.component';
-import { SettingsFormComponent } from '../../../../shared/components/settings-form/settings-form.component';
+import { ProjectInfoFormComponent } from '../../../../shared/components/project-info-form/project-info-form.component';
 import { BrowserFormComponent } from '../../../../shared/components/browser-form/browser-form.component';
 @Component({
   selector: 'app-project-view',
@@ -35,43 +33,17 @@ import { BrowserFormComponent } from '../../../../shared/components/browser-form
     MatGridListModule,
     RootFormComponent,
     ApplicationFormComponent,
-    SettingsFormComponent,
+    ProjectInfoFormComponent,
     BrowserFormComponent,
   ],
-  templateUrl: './settings.component.html',
-  styleUrls: ['./settings.component.scss'],
+  templateUrl: './settings-view.component.html',
+  styleUrls: ['./settings-view.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class SettingsViewComponent implements OnInit, OnDestroy {
-  project$!: Observable<Project>;
-  projects$!: Observable<Project[]>;
+export class SettingsViewComponent implements OnDestroy {
   destroy$ = new Subject<void>();
 
-  rootForm = this.fb.group({
-    name: [''],
-  });
-
-  constructor(
-    private route: ActivatedRoute,
-    public projectService: ProjectService,
-    private fb: FormBuilder
-  ) {}
-
-  ngOnInit(): void {
-    this.route.params
-      .pipe(
-        takeUntil(this.destroy$),
-        tap((params) => {
-          // console.log(params);
-          this.project$ = this.projectService.switchToProject(
-            params['projectSlug']
-          );
-        })
-      )
-      .subscribe();
-
-    this.projects$ = this.projectService.getProjects();
-  }
+  constructor(public projectService: ProjectService) {}
 
   ngOnDestroy() {
     this.destroy$.next();
