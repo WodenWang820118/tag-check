@@ -40,7 +40,7 @@ import { Subject, takeUntil, tap } from 'rxjs';
     /* Hover state: visible */
     .display {
       display: inline; /* Makes the element take up space and be visible */
-      padding-right: 150px;
+      padding-right: 30px;
     }
 
     /* Adjustments for the list item and side nav list for animation */

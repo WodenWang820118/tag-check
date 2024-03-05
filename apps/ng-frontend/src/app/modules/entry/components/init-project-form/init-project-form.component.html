@@ -1,6 +1,6 @@
 <div class="init-project-form">
   <form #f="ngForm" [formGroup]="projectForm" (ngSubmit)="onSubmit()">
-    <mat-card>
+    <mat-card appearance="outlined">
       <mat-card-header>
         <mat-card-title>New Project</mat-card-title>
         <mat-card-subtitle
@@ -10,7 +10,7 @@
       <br />
       <mat-card-content>
         <div style="display: flex; flex-direction: column; gap: 1rem">
-          <mat-form-field>
+          <mat-form-field appearance="outline">
             <mat-label>Project Name</mat-label>
             <input
               matInput
@@ -18,7 +18,7 @@
               formControlName="projectName"
             />
           </mat-form-field>
-          <mat-form-field>
+          <mat-form-field appearance="outline">
             <mat-label>Project Slug</mat-label>
             <input
               matInput
@@ -26,11 +26,11 @@
               formControlName="projectSlug"
             />
           </mat-form-field>
-          <mat-form-field>
+          <mat-form-field appearance="outline">
             <mat-label>Project Description</mat-label>
-            <input matInput formControlName="projectDescription" />
+            <textarea matInput formControlName="projectDescription"></textarea>
           </mat-form-field>
-          <mat-form-field>
+          <mat-form-field appearance="outline">
             <mat-label>Choose The Project Type</mat-label>
             <mat-select formControlName="testType">
               <mat-option value="Tag Verifier">Tag Verifier</mat-option>
@@ -39,7 +39,7 @@
               >
             </mat-select>
           </mat-form-field>
-          <mat-form-field>
+          <mat-form-field appearance="outline">
             <mat-label>Google Spreadsheet Link</mat-label>
             <input matInput formControlName="googleSpreadsheetLink" />
           </mat-form-field>

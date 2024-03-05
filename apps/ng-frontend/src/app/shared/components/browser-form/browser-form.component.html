@@ -1,0 +1,40 @@
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>Browser Settings</mat-card-title>
+    <mat-card-subtitle>Browser settings for the project</mat-card-subtitle>
+  </mat-card-header>
+  <br />
+  <mat-card-content>
+    <form [formGroup]="browserSettingsForm">
+      <div formArrayName="settings">
+        @for (item of localStorageFormArrayValue; track item.value; let idx =
+        $index;) {
+        <div class="application-form__sub-form" [formGroupName]="idx">
+          <mat-form-field class="application-form__field" appearance="outline">
+            <input matInput formControlName="value" placeholder="value" />
+          </mat-form-field>
+          <button mat-icon-button (click)="removeBrowserSetting(idx)">
+            <mat-icon>remove_circle_outline</mat-icon>
+          </button>
+        </div>
+        }
+      </div>
+      <mat-card-actions align="start">
+        <button
+          mat-raised-button
+          matTooltip="Add new localStorage setting"
+          [matTooltipPosition]="'below'"
+          color="action"
+          (click)="addBrowserSetting()"
+        >
+          Add browser setting
+        </button>
+      </mat-card-actions>
+      <mat-card-actions align="end" style="gap: 1rem">
+        <button mat-raised-button (click)="onFormSubmit()" color="primary">
+          Save
+        </button>
+      </mat-card-actions>
+    </form>
+  </mat-card-content>
+</mat-card>

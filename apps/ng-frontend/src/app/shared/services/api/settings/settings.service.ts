@@ -21,10 +21,10 @@ export class SettingsService {
     );
   }
 
-  updateSettings(projectSlug: string, settings: any) {
+  updateSettings(projectSlug: string, section: string, settings: any) {
     if (!projectSlug || !settings) return of({} as ProjectSetting);
     return this.http.put<ProjectSetting>(
-      `${environment.settingsApiUrl}/${projectSlug}`,
+      `${environment.settingsApiUrl}/${projectSlug}/sections/${section}`,
       settings
     );
   }
