@@ -18,10 +18,10 @@ import { Project } from '../../../../shared/models/project.interface';
           <mat-card>
             <mat-card-header>
               <mat-card-title>New Project</mat-card-title>
-              <mat-card-subtitle>Project Description</mat-card-subtitle>
+              <mat-card-subtitle>Create a new automation</mat-card-subtitle>
             </mat-card-header>
             <mat-card-content>
-              <p>Project Content</p>
+              <p></p>
             </mat-card-content>
           </mat-card>
         </div>
