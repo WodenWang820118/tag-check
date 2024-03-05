@@ -1,0 +1,38 @@
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>Project Information</mat-card-title>
+    <mat-card-subtitle>Settings within the project.</mat-card-subtitle>
+  </mat-card-header>
+  <br />
+  <mat-card-content>
+    <form [formGroup]="projectInfoForm" class="project-info-form">
+      <mat-form-field class="project-info-form__field" appearance="outline">
+        <mat-label>Project Name</mat-label>
+        <input matInput formControlName="projectName" />
+      </mat-form-field>
+      <mat-form-field class="project-info-form__field" appearance="outline">
+        <mat-label>Project Description</mat-label>
+        <textarea matInput formControlName="projectDescription"></textarea>
+      </mat-form-field>
+      <mat-form-field class="project-info-form__field" appearance="outline">
+        <mat-label>Test Type (disabled)</mat-label>
+        <input matInput formControlName="testType" />
+      </mat-form-field>
+      <mat-form-field class="project-info-form__field" appearance="outline">
+        <mat-label>Google Spreadsheet Link</mat-label>
+        <input matInput formControlName="googleSpreadsheetLink" />
+      </mat-form-field>
+      <mat-form-field class="project-info-form__field" appearance="outline">
+        <mat-label>GTM URL</mat-label>
+        <input matInput formControlName="tagManagerUrl" />
+      </mat-form-field>
+      <mat-form-field class="project-info-form__field" appearance="outline">
+        <mat-label>GTM ID</mat-label>
+        <input matInput formControlName="gtmId" />
+      </mat-form-field>
+      <mat-card-actions align="end" style="gap: 1rem">
+        <button mat-raised-button color="primary">Save</button>
+      </mat-card-actions>
+    </form>
+  </mat-card-content>
+</mat-card>

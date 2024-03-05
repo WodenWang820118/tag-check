@@ -1,4 +1,4 @@
-<mat-card>
+<mat-card appearance="outlined">
   <mat-card-header>
     <mat-card-title>Browser Settings</mat-card-title>
     <mat-card-subtitle>Browser settings for the project</mat-card-subtitle>
@@ -24,19 +24,14 @@
           mat-raised-button
           matTooltip="Add new localStorage setting"
           [matTooltipPosition]="'below'"
+          color="action"
           (click)="addBrowserSetting()"
         >
           Add browser setting
         </button>
       </mat-card-actions>
       <mat-card-actions align="end" style="gap: 1rem">
-        <!-- TODO: save function -->
-        <button
-          mat-raised-button
-          matTooltip="Save new root path"
-          [matTooltipPosition]="'below'"
-          (click)="onFormSubmit()"
-        >
+        <button mat-raised-button (click)="onFormSubmit()" color="primary">
           Save
         </button>
       </mat-card-actions>
