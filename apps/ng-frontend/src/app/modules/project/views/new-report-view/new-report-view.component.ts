@@ -49,12 +49,12 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrls: ['./new-report-view.component.scss'],
 })
 export class NewReportViewComponent implements OnInit, OnDestroy {
-  exampleInputJson = {
+  exampleInputJson = JSON.stringify({
     event: 'page_view',
     page_path: '$page_path',
     page_title: '$page_title',
     page_location: '$page_location',
-  };
+  });
 
   reportForm = this.fb.group({
     projectSlug: ['', Validators.required],
@@ -75,7 +75,7 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    this.route.params
+    this.route.parent?.params
       .pipe(
         takeUntil(this.destroy$),
         tap((params) => {

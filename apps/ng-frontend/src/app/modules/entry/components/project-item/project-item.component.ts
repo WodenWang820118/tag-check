@@ -9,7 +9,7 @@ import { Project } from '../../../../shared/models/project.interface';
   imports: [CommonModule, MatCardModule],
   template: `
     <div class="project-item">
-      <mat-card>
+      <mat-card appearance="outlined">
         <mat-card-header>
           <mat-card-title>{{ project.projectName }}</mat-card-title>
           <mat-card-subtitle>{{ project.testType }}</mat-card-subtitle>

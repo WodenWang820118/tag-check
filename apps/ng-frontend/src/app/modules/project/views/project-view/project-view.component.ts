@@ -30,8 +30,8 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
     ToolbarComponent,
     SideNavListComponent,
   ],
-  templateUrl: './project.component.html',
-  styleUrls: ['./project.component.scss'],
+  templateUrl: './project-view.component.html',
+  styleUrls: ['./project-view.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
 export class ProjectViewComponent implements OnInit, OnDestroy {

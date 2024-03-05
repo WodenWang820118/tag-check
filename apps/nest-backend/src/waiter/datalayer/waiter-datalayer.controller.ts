@@ -2,6 +2,7 @@ import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { WaiterDataLayerGroupEventsService } from './waiter-datalayer-group-events.service';
 import { Body, Controller, Get, Logger, Param, Query } from '@nestjs/common';
 import { WaiterDataLayerSingleEventService } from './waiter-datalayer-single-event.service';
+import { InspectEventDto } from '../../dto/inspect-event.dto';
 
 @Controller('datalayer')
 export class WaiterDataLayerController {
@@ -59,9 +60,10 @@ export class WaiterDataLayerController {
     @Query('path') path?: string,
     @Query('username') username?: string,
     @Query('password') password?: string,
-    @Body() application?: any
+    @Body() inspectEventDto?: InspectEventDto
   ) {
     // if no measurementId is provided, no need to grab requests
+    // TODO: add an extra parameter to indicate whether to close the browser or not
     return await this.waiterDataLayerSingleEventService.inspectSingleEvent(
       projectSlug,
       eventName,
@@ -72,7 +74,7 @@ export class WaiterDataLayerController {
         username,
         password,
       },
-      application
+      inspectEventDto
     );
   }
 

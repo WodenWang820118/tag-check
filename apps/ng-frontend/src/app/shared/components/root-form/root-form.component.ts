@@ -49,12 +49,7 @@ import { ConfigurationService } from '../../services/api/configuration/configura
             >
               Reset
             </button>
-            <button
-              mat-raised-button
-              matTooltip="Save new root path"
-              [matTooltipPosition]="'below'"
-              (click)="onFormSubmit()"
-            >
+            <button mat-raised-button color="primary" (click)="onFormSubmit()">
               Save
             </button>
           </mat-card-actions>
