@@ -4,16 +4,18 @@
     [formGroup]="reportForm"
     (ngSubmit)="setEditorContent(); uploadReport()"
   >
-    <mat-form-field class="new-report__form__field">
+    <mat-form-field class="new-report__form__field" appearance="outline">
       <mat-label>Project Slug</mat-label>
       <input matInput formControlName="projectSlug" />
     </mat-form-field>
     <app-editor
       class="new-report__form__field"
+      [content]="exampleInputJson"
       [editorExtension]="'specJson'"
     ></app-editor>
     <app-editor
       class="new-report__form__field"
+      [content]="'{}'"
       [editorExtension]="'recordingJson'"
     ></app-editor>
     <button

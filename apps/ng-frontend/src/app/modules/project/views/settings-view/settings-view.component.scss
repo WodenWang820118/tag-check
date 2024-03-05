@@ -14,6 +14,11 @@
       &__item {
         flex: 1;
       }
+
+      @media screen and (max-width: 1440px) {
+        flex-direction: column;
+        margin-right: 0rem;
+      }
     }
   }
 }

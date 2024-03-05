@@ -1,3 +1,4 @@
+import { InspectEventDto } from './../../dto/inspect-event.dto';
 import { Injectable, Logger } from '@nestjs/common';
 import { InspectorSingleEventService } from '../../inspector/inspector-single-event.service';
 import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
@@ -21,14 +22,14 @@ export class WaiterDataLayerSingleEventService {
     path?: string,
     measurementId?: string,
     credentials?: Credentials,
-    application?: any
+    inspectEventDto?: InspectEventDto
   ) {
     // 3.1) inspect both dataLayer and the request sent to GA4
     const browser = await puppeteer.launch({
       headless: headless === 'new' ? 'new' : false,
       defaultViewport: null,
       ignoreHTTPSErrors: true,
-      args: BROWSER_ARGS,
+      args: inspectEventDto.puppeteerArgs || BROWSER_ARGS,
     });
 
     const [page] = await browser.pages();
@@ -41,7 +42,7 @@ export class WaiterDataLayerSingleEventService {
       path,
       measurementId,
       credentials,
-      application
+      inspectEventDto
     );
 
     // 3.2) construct the data to be written to the xlsx file
