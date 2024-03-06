@@ -1,4 +1,5 @@
 export class ReportDetails {
+  position = 0;
   eventName: string;
   passed = false;
   dataLayerSpec: string;

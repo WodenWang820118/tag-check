@@ -1,0 +1,37 @@
+<mat-card class="gtm-preview-mode-form__card">
+  <mat-card-header>
+    <mat-card-title>GTM Preview Mode</mat-card-title>
+    <mat-card-subtitle>Set the URL for the GTM preview mode</mat-card-subtitle>
+  </mat-card-header>
+  <br />
+  <mat-card-content>
+    <form
+      [formGroup]="previewModeForm"
+      class="gtm-preview-mode-form"
+      (ngSubmit)="onSubmit()"
+    >
+      <div class="gtm-preview-mode-form__field">
+        <mat-checkbox formControlName="isAccompanyMode"
+          >Activate Accompany Mode</mat-checkbox
+        >
+      </div>
+      <div class="gtm-preview-mode-form__field gtm-preview-mode-form__row">
+        <mat-form-field appearance="outline" style="width: 100%">
+          <mat-label>Preview Mode URL</mat-label>
+          <input matInput formControlName="url" />
+          @if (urlValue) {
+          <button
+            matSuffix
+            mat-icon-button
+            aria-label="Clear"
+            (click)="onReset()"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+          }
+        </mat-form-field>
+        <button mat-raised-button color="primary">Save</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
