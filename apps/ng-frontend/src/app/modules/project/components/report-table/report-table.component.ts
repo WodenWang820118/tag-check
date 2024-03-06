@@ -28,6 +28,8 @@ import { MatInputModule } from '@angular/material/input';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { Project } from '../../../../shared/models/project.interface';
 import { DataLayerService } from '../../../../shared/services/api/datalayer/datalayer.service';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Component({
   selector: 'app-report-table',
@@ -40,6 +42,7 @@ import { DataLayerService } from '../../../../shared/services/api/datalayer/data
     RouterModule,
     MatPaginatorModule,
     MatInputModule,
+    MatCheckboxModule,
   ],
   animations: [
     trigger('detailExpand', [
@@ -56,9 +59,10 @@ import { DataLayerService } from '../../../../shared/services/api/datalayer/data
 })
 export class ReportTableComponent implements OnInit, OnDestroy {
   columnsToDisplay = ['eventName', 'passed', 'completedTime'];
-  columnsToDisplayWithExpand = [...this.columnsToDisplay, 'expand'];
+  columnsToDisplayWithExpand = ['select', ...this.columnsToDisplay, 'expand'];
   expandedElement: Report | null = null;
   testDataSource!: MatTableDataSource<IReportDetails>;
+  selection = new SelectionModel<IReportDetails>(true, []);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -76,6 +80,19 @@ export class ReportTableComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscribeToRouteChanges();
+    this.observeTableFilter();
+  }
+
+  observeTableFilter() {
+    this.projectDataSourceService
+      .getFilterStream()
+      .pipe(
+        takeUntil(this.destroy$),
+        tap((filter) => {
+          this.testDataSource.filter = filter;
+        })
+      )
+      .subscribe();
   }
 
   subscribeToRouteChanges() {
@@ -141,6 +158,37 @@ export class ReportTableComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe();
+  }
+
+  /** Whether the number of selected elements matches the total number of rows. */
+  isAllSelected() {
+    if (!this.testDataSource) {
+      return;
+    }
+
+    const numSelected = this.selection.selected.length;
+    const numRows = this.testDataSource.data.length;
+    return numSelected === numRows;
+  }
+
+  /** Selects all rows if they are not all selected; otherwise clear selection. */
+  toggleAllRows() {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+      return;
+    }
+
+    this.selection.select(...this.testDataSource.data);
+  }
+
+  /** The label for the checkbox on the passed row */
+  checkboxLabel(row?: IReportDetails): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+    }
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${
+      row.position + 1
+    }`;
   }
 
   ngOnDestroy() {

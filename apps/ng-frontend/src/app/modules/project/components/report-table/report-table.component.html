@@ -1,17 +1,31 @@
-<div class="tests-table">
-  <div class="tests-table__header">
-    <div class="space"></div>
-    <button mat-raised-button color="primary" [routerLink]="['new-report']">
-      Create New Test
-    </button>
-  </div>
+<div class="report-table">
   <table
     mat-table
     [dataSource]="testDataSource"
     multiTemplateDataRows
-    class="mat-elevation-z8"
+    class=""
     matSort
   >
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox
+          (change)="$event ? toggleAllRows() : null"
+          [checked]="selection.hasValue() && isAllSelected()"
+          [indeterminate]="selection.hasValue() && !isAllSelected()"
+          [aria-label]="checkboxLabel()"
+        >
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let row">
+        <mat-checkbox
+          (click)="$event.stopPropagation()"
+          (change)="$event ? selection.toggle(row) : null"
+          [checked]="selection.isSelected(row)"
+          [aria-label]="checkboxLabel(row)"
+        >
+        </mat-checkbox>
+      </td>
+    </ng-container>
     <ng-container matColumnDef="eventName">
       <th mat-header-cell *matHeaderCellDef>Event</th>
       <td mat-cell *matCellDef="let element">
