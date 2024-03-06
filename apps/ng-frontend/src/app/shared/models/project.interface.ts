@@ -22,6 +22,7 @@ export interface Project {
   projectDescription: string;
   googleSpreadsheetLink: string;
   tagManagerUrl: string;
+  gtmPreviewModeUrl: string;
   version: string;
   preventNavigationEvents: string[];
   recordings: string[];

@@ -8,6 +8,7 @@ import { Injectable } from '@angular/core';
 })
 export class ProjectDataSourceService extends DataSource<IReportDetails> {
   private _dataStream = new ReplaySubject<IReportDetails[]>();
+  private _filterStream = new ReplaySubject<string>();
 
   constructor() {
     super();
@@ -21,5 +22,13 @@ export class ProjectDataSourceService extends DataSource<IReportDetails> {
 
   setData(data: IReportDetails[]) {
     this._dataStream.next(data);
+  }
+
+  getFilterStream(): Observable<string> {
+    return this._filterStream;
+  }
+
+  setFilter(filter: string) {
+    this._filterStream.next(filter);
   }
 }

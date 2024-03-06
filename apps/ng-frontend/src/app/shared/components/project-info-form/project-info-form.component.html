@@ -5,7 +5,11 @@
   </mat-card-header>
   <br />
   <mat-card-content>
-    <form [formGroup]="projectInfoForm" class="project-info-form">
+    <form
+      [formGroup]="projectInfoForm"
+      class="project-info-form"
+      (ngSubmit)="onSubmit()"
+    >
       <mat-form-field class="project-info-form__field" appearance="outline">
         <mat-label>Project Name</mat-label>
         <input matInput formControlName="projectName" />

@@ -3,16 +3,20 @@
     {
       "projectSlug": "drunk_elephant",
       "settings": {
+        "version": "1.0.0",
         "rootProject": "D:/projects",
-        "projectName": "Drunk Elephant",
+        "projectName": "ng gtm integration sample",
         "projectDescription": "",
-        "projectSlug": "drunk_elephante",
+        "projectSlug": "ng_gtm_integration_sample",
         "testType": "Data Layer Checker",
         "googleSpreadsheetLink": "",
-        "tagManagerUrl": "undefined",
-        "gtmId": "undefined",
-        "containerName": "undefined",
-        "version": "1.0.0",
+        "containerName": "",
+        "gtm": {
+          "isAccompanyMode": true,
+          "tagManagerUrl": "",
+          "gtmPreviewModeUrl": "123",
+          "gtmId": ""
+        },
         "preventNavigationEvents": ["select_promotion", "select_item"],
         "application": {
           "localStorage": {
@@ -31,8 +35,24 @@
                 "value": true
               }
             ]
+          },
+          "cookie": {
+            "data": [
+              {
+                "key": "EZN275M5Snzc@Ua",
+                "value": 123
+              }
+            ]
           }
-        }
+        },
+        "browser": [
+          "--window-size=1440,900",
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-accelerated-2d-canvas",
+          "--disable-gpu"
+        ]
       }
     }
   ]

@@ -61,11 +61,24 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
           return this.settingsService.getProjectSettings(projectSlug);
         }),
         tap((project) => {
-          if (project.settings)
-            this.projectInfoForm.patchValue(project.settings);
+          if (project.settings) {
+            const settings = project.settings;
+            this.projectInfoForm.patchValue({
+              projectName: settings.projectName,
+              projectDescription: settings.projectDescription,
+              testType: settings.testType,
+              googleSpreadsheetLink: settings.googleSpreadsheetLink,
+              tagManagerUrl: settings.gtm.tagManagerUrl,
+              gtmId: settings.gtm.gtmId,
+            });
+          }
         })
       )
       .subscribe();
+  }
+
+  onSubmit() {
+    // TODO: Implement onSubmit
   }
 
   ngOnDestroy(): void {

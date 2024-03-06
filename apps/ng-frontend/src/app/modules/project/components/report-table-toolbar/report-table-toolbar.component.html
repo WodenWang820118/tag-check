@@ -1,0 +1,31 @@
+<mat-toolbar class="report-toolbar">
+  <button
+    mat-icon-button
+    class="icon"
+    matTooltip="Add new report"
+    matTooltipPosition="above"
+    aria-label="Add new report"
+    [routerLink]="['new-report']"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    class="icon"
+    matTooltip="Delete"
+    matTooltipPosition="above"
+    aria-label="Delete"
+  >
+    <mat-icon>delete_outline</mat-icon>
+  </button>
+  <div class="spacer"></div>
+  <mat-form-field appearance="outline" class="filter">
+    <mat-label>Filter</mat-label>
+    <input
+      matInput
+      (keyup)="applyFilter($event)"
+      placeholder="add_to_cart"
+      #input
+    />
+  </mat-form-field>
+</mat-toolbar>
