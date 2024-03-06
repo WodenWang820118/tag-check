@@ -11,12 +11,21 @@ interface Setting {
   testType: string;
   googleSpreadsheetLink: string;
   tagManagerUrl: string;
+  gtmPreviewModeUrl: string;
   gtmId: string;
+  gtm: Gtm;
   containerName: string;
   version: string;
   preventNavigationEvents: string[];
   application: Application;
   browser: string[];
+}
+
+export interface Gtm {
+  isAccompanyMode: boolean;
+  tagManagerUrl: string;
+  gtmPreviewModeUrl: string;
+  gtmId: string;
 }
 
 export interface Application {
