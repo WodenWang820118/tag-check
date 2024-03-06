@@ -60,12 +60,10 @@ export class BrowserFormComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
-          console.log('Parent route params', params);
           return this.settingsService.getProjectSettings(projectSlug);
         }),
         tap((project) => {
           this.browserSettings = project.settings.browser;
-          console.log('Project localStorage settings', this.browserSettings);
           this.loadInitialData();
         })
       )
@@ -125,7 +123,6 @@ export class BrowserFormComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
-          console.log('Parent route params', params);
           return this.settingsService.updateSettings(
             projectSlug,
             'browser',

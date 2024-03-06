@@ -4,6 +4,7 @@ export interface ProjectReport {
 }
 
 export interface IReportDetails {
+  position: number;
   eventName: string;
   passed: boolean;
   dataLayerSpec: any;

@@ -30,8 +30,58 @@ export class WaiterSettingsService {
         return this.updateApplicationSettings(projectSlug, partialSettings);
       case 'browser':
         return this.updateBrowserSettings(projectSlug, partialSettings);
+      case 'gtm':
+        return this.updateGtmSettings(projectSlug, partialSettings);
+      case 'others':
+        return this.updateGeneralSettings(projectSlug, partialSettings);
       default:
         return;
+    }
+  }
+
+  async updateGtmSettings(projectSlug: string, settings: any) {
+    try {
+      const filePath = await this.filePathService.getProjectSettingFilePath(
+        projectSlug
+      );
+
+      const currentSettings = await this.fileService.readJsonFile(filePath);
+      const gtmCurrentSettings = currentSettings.gtm;
+
+      const updatedSettings = {
+        ...currentSettings,
+        gtm: {
+          ...gtmCurrentSettings,
+          ...settings,
+        },
+      };
+
+      await this.fileService.writeJsonFile(filePath, updatedSettings);
+      return updatedSettings;
+    } catch (error) {
+      Logger.error('Error updating settings', error);
+      throw new HttpException('Error updating settings', 500);
+    }
+  }
+
+  async updateGeneralSettings(projectSlug: string, settings: any) {
+    try {
+      const filePath = await this.filePathService.getProjectSettingFilePath(
+        projectSlug
+      );
+
+      const currentSettings = await this.fileService.readJsonFile(filePath);
+
+      const updatedSettings = {
+        ...currentSettings,
+        ...settings,
+      };
+
+      await this.fileService.writeJsonFile(filePath, updatedSettings);
+      return updatedSettings;
+    } catch (error) {
+      Logger.error('Error updating settings', error);
+      throw new HttpException('Error updating settings', 500);
     }
   }
 

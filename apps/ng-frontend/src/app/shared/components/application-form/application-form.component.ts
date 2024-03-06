@@ -64,18 +64,12 @@ export class ApplicationFormComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
-          console.log('Parent route params', params);
           return this.settingsService.getProjectSettings(projectSlug);
         }),
         tap((project) => {
           this.localStorageSettings =
             project.settings.application.localStorage.data;
-          console.log(
-            'Project localStorage settings',
-            this.localStorageSettings
-          );
           this.cookieSettings = project.settings.application.cookie.data;
-          console.log('Project cookie settings', this.cookieSettings);
           this.loadInitialData();
         })
       )
@@ -115,7 +109,6 @@ export class ApplicationFormComponent implements OnInit, OnDestroy {
     return this.localStorageFormArray.valueChanges.pipe(
       takeUntil(this.destroy$),
       tap((value) => {
-        console.log('LocalStorage form array value changes', value);
         this.isEmptyLocalStorage = value.some(
           (setting: LocalStorageData) => !setting.key || !setting.value
         );
@@ -127,7 +120,6 @@ export class ApplicationFormComponent implements OnInit, OnDestroy {
     return this.cookieFormArray.valueChanges.pipe(
       takeUntil(this.destroy$),
       tap((value) => {
-        console.log('Cookie form array value changes', value);
         this.isEmptyCookie = value.some(
           (setting: CookieData) => !setting.key || !setting.value
         );
