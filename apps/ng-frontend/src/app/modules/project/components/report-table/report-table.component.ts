@@ -31,6 +31,8 @@ import { Project } from '../../../../shared/models/project.interface';
 import { DataLayerService } from '../../../../shared/services/api/datalayer/datalayer.service';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatBadgeModule } from '@angular/material/badge';
+import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
 
 @Component({
   selector: 'app-report-table',
@@ -44,6 +46,7 @@ import { SelectionModel } from '@angular/cdk/collections';
     MatPaginatorModule,
     MatInputModule,
     MatCheckboxModule,
+    MatBadgeModule,
   ],
   animations: [
     trigger('detailExpand', [
@@ -64,6 +67,7 @@ export class ReportTableComponent implements OnInit, OnDestroy {
   expandedElement: Report | null = null;
   testDataSource!: MatTableDataSource<IReportDetails>;
   selection = new SelectionModel<IReportDetails>(true, []);
+  preventNavigationEvents: string[] = [];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -76,13 +80,89 @@ export class ReportTableComponent implements OnInit, OnDestroy {
     private reportDetailsService: ReportDetailsService,
     private projectDataSourceService: ProjectDataSourceService,
     private route: ActivatedRoute,
-    private dataLayerService: DataLayerService
+    private dataLayerService: DataLayerService,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit() {
     this.subscribeToRouteChanges();
     this.observeTableFilter();
     this.observeDeleteSelected();
+    this.observeNavigationEvents();
+    this.observePreventNavigationSelected();
+  }
+
+  getNewPreventNavigationEvents(events: string[]): string[] {
+    // Create a copy of the current preventNavigationEvents to modify
+    let newSettings: string[] = [...this.preventNavigationEvents];
+
+    for (const receivedEvent of events) {
+      const index = newSettings.indexOf(receivedEvent);
+
+      if (index > -1) {
+        // Event is found, remove it (toggle behavior)
+        newSettings.splice(index, 1);
+      } else {
+        // Event is new, add it to the array
+        newSettings.push(receivedEvent);
+      }
+    }
+
+    // If original array was empty, just return the new events
+    if (!this.preventNavigationEvents.length) {
+      newSettings = [...events];
+    }
+
+    return newSettings;
+  }
+
+  observeNavigationEvents() {
+    this.route.params
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap((params) => {
+          const slug = params['projectSlug'];
+          return this.settingsService.getProjectSettings(slug);
+        }),
+        tap((project) => {
+          this.preventNavigationEvents =
+            project.settings['preventNavigationEvents'];
+        })
+      )
+      .subscribe();
+  }
+
+  observePreventNavigationSelected() {
+    combineLatest([
+      this.route.params,
+      this.projectDataSourceService.getPreventNavigationStream(),
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(([params, value]) => {
+          const projectSlug = params['projectSlug'];
+          if (value === true) {
+            // reset the prevent navigation stream
+            this.projectDataSourceService.setPreventNavigationStream(false);
+            // delete the selected reports
+            const eventNames = this.selection.selected.map(
+              (item) => item.eventName
+            );
+            this.preventNavigationEvents =
+              this.getNewPreventNavigationEvents(eventNames);
+            this.selection.clear();
+            return this.settingsService.updateSettings(
+              projectSlug,
+              'preventNavigationEvents',
+              {
+                preventNavigationEvents: eventNames,
+              }
+            );
+          }
+          return EMPTY;
+        })
+      )
+      .subscribe();
   }
 
   observeDeleteSelected() {

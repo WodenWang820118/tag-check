@@ -19,6 +19,16 @@
   >
     <mat-icon>delete_outline</mat-icon>
   </button>
+  <button
+    mat-icon-button
+    class="icon"
+    matTooltip="Mark to prevent navigation for this event"
+    matTooltipPosition="above"
+    aria-label="Prevent navigation"
+    (click)="preventNavigationSelected()"
+  >
+    <mat-icon>bookmark_border</mat-icon>
+  </button>
   <div class="spacer"></div>
   <mat-form-field appearance="outline" class="filter">
     <mat-label>Filter</mat-label>
