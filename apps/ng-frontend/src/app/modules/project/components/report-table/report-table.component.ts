@@ -12,6 +12,7 @@ import {
 } from '@angular/animations';
 import { MatButtonModule } from '@angular/material/button';
 import {
+  EMPTY,
   Observable,
   Subject,
   combineLatest,
@@ -81,6 +82,36 @@ export class ReportTableComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscribeToRouteChanges();
     this.observeTableFilter();
+    this.observeDeleteSelected();
+  }
+
+  observeDeleteSelected() {
+    combineLatest([
+      this.route.params,
+      this.projectDataSourceService.getDeletedStream(),
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap(([params, value]) => {
+          const projectSlug = params['projectSlug'];
+          if (value === true) {
+            console.log('delete selected in the report table component');
+            // reset the deleted stream
+            this.projectDataSourceService.setDeletedStream(false);
+            // delete the selected reports
+            const remainingReports = this.testDataSource.data.filter(
+              (item) => !this.selection.selected.includes(item)
+            );
+            this.testDataSource.data = remainingReports;
+            return this.reportService.deleteReports(
+              projectSlug,
+              this.selection.selected
+            );
+          }
+          return EMPTY;
+        })
+      )
+      .subscribe();
   }
 
   observeTableFilter() {
@@ -179,6 +210,7 @@ export class ReportTableComponent implements OnInit, OnDestroy {
     }
 
     this.selection.select(...this.testDataSource.data);
+    console.log('selected', this.selection.selected);
   }
 
   /** The label for the checkbox on the passed row */
