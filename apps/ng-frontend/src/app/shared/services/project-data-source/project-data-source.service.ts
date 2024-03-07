@@ -10,6 +10,7 @@ export class ProjectDataSourceService extends DataSource<IReportDetails> {
   private _dataStream = new ReplaySubject<IReportDetails[]>();
   private _filterStream = new ReplaySubject<string>();
   private _deletedStream = new ReplaySubject<boolean>();
+  private _preventNavigationStream = new ReplaySubject<boolean>();
 
   constructor() {
     super();
@@ -43,5 +44,17 @@ export class ProjectDataSourceService extends DataSource<IReportDetails> {
 
   getDeletedStream(): Observable<boolean> {
     return this._deletedStream;
+  }
+
+  setPreventNavigationStream(prevent: boolean) {
+    this._preventNavigationStream.next(prevent);
+  }
+
+  getPreventNavigationStream(): Observable<boolean> {
+    return this._preventNavigationStream;
+  }
+
+  preventNavigationSelected() {
+    this.setPreventNavigationStream(true);
   }
 }
