@@ -1,11 +1,5 @@
 <div class="report-table">
-  <table
-    mat-table
-    [dataSource]="testDataSource"
-    multiTemplateDataRows
-    class=""
-    matSort
-  >
+  <table mat-table [dataSource]="testDataSource" multiTemplateDataRows matSort>
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox
