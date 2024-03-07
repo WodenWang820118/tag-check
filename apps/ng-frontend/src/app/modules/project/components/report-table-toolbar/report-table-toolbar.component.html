@@ -1,4 +1,4 @@
-<mat-toolbar class="report-toolbar">
+<mat-toolbar class="report-toolbar mat-elevation-z8">
   <button
     mat-icon-button
     class="icon"
@@ -15,6 +15,7 @@
     matTooltip="Delete"
     matTooltipPosition="above"
     aria-label="Delete"
+    (click)="deleteSelected()"
   >
     <mat-icon>delete_outline</mat-icon>
   </button>
