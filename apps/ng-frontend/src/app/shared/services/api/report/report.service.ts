@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, Subject, forkJoin, of } from 'rxjs';
 import {
   ProjectReport,
   IReportDetails,
@@ -81,5 +81,14 @@ export class ReportService {
 
         URL.revokeObjectURL(a.href);
       });
+  }
+
+  deleteReports(projectSlug: string, reports: IReportDetails[]) {
+    const tasks = reports.map((report) =>
+      this.http.delete<ProjectReport>(
+        `${environment.reportApiUrl}/${projectSlug}/${report.eventName}`
+      )
+    );
+    return forkJoin(tasks); // Waits for all DELETE operations to complete.
   }
 }
