@@ -41,8 +41,6 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
     projectDescription: [''],
     testType: [{ value: '', disabled: true }],
     googleSpreadsheetLink: [''],
-    tagManagerUrl: [''],
-    gtmId: [''],
     preventNavigationEvents: this.fb.array([]),
   });
 
@@ -68,8 +66,6 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
               projectDescription: settings.projectDescription,
               testType: settings.testType,
               googleSpreadsheetLink: settings.googleSpreadsheetLink,
-              tagManagerUrl: settings.gtm.tagManagerUrl,
-              gtmId: settings.gtm.gtmId,
             });
           }
         })
@@ -78,7 +74,21 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    // TODO: Implement onSubmit
+    this.route.parent?.params
+      .pipe(
+        takeUntil(this.destroy$),
+        switchMap((params) => {
+          const projectSlug = params['projectSlug'];
+          console.log(this.projectInfoForm.value);
+          console.log(projectSlug);
+          return this.settingsService.updateSettings(
+            projectSlug,
+            'others',
+            this.projectInfoForm.value
+          );
+        })
+      )
+      .subscribe();
   }
 
   ngOnDestroy(): void {
