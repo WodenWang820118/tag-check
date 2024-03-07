@@ -17,7 +17,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 @Component({
-  selector: 'app-gtm-preview-mode-form',
+  selector: 'app-gtm-form',
   standalone: true,
   imports: [
     CommonModule,
@@ -31,14 +31,16 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatCardModule,
     MatCheckboxModule,
   ],
-  templateUrl: './gtm-preview-mode-form.component.html',
-  styleUrls: ['./gtm-preview-mode-form.component.scss'],
+  templateUrl: './gtm-form.component.html',
+  styleUrls: ['./gtm-form.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class GtmPreviewModeFormComponent implements OnInit, OnDestroy {
+export class GtmFormComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   previewModeForm = this.fb.group({
     url: [''],
+    tagManagerUrl: [''],
+    gtmId: [''],
     isAccompanyMode: [false],
   });
 
@@ -59,12 +61,15 @@ export class GtmPreviewModeFormComponent implements OnInit, OnDestroy {
         tap((project) => {
           const previewModeUrl = project.settings.gtm['gtmPreviewModeUrl'];
           const isAccompanyMode = project.settings.gtm['isAccompanyMode'];
-          if (previewModeUrl) {
-            this.previewModeForm.patchValue({ url: previewModeUrl });
-            this.previewModeForm.patchValue({
-              isAccompanyMode: isAccompanyMode,
-            });
-          }
+          const tagManagerUrl = project.settings.gtm['tagManagerUrl'];
+          const gtmId = project.settings.gtm['gtmId'];
+
+          this.previewModeForm.patchValue({
+            url: previewModeUrl,
+            isAccompanyMode: isAccompanyMode,
+            tagManagerUrl: tagManagerUrl,
+            gtmId: gtmId,
+          });
         })
       )
       .subscribe();
@@ -88,9 +93,12 @@ export class GtmPreviewModeFormComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
+          console.log(this.previewModeForm.value);
           return this.settingsService.updateSettings(projectSlug, 'gtm', {
             gtmPreviewModeUrl: this.previewModeForm.value.url,
             isAccompanyMode: this.previewModeForm.value.isAccompanyMode,
+            tagManagerUrl: this.previewModeForm.value.tagManagerUrl,
+            gtmId: this.previewModeForm.value.gtmId,
           });
         })
       )
