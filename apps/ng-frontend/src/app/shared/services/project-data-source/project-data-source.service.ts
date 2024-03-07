@@ -9,6 +9,7 @@ import { Injectable } from '@angular/core';
 export class ProjectDataSourceService extends DataSource<IReportDetails> {
   private _dataStream = new ReplaySubject<IReportDetails[]>();
   private _filterStream = new ReplaySubject<string>();
+  private _deletedStream = new ReplaySubject<boolean>();
 
   constructor() {
     super();
@@ -30,5 +31,17 @@ export class ProjectDataSourceService extends DataSource<IReportDetails> {
 
   setFilter(filter: string) {
     this._filterStream.next(filter);
+  }
+
+  setDeletedStream(deleted: boolean) {
+    this._deletedStream.next(deleted);
+  }
+
+  deleteSelected() {
+    this.setDeletedStream(true);
+  }
+
+  getDeletedStream(): Observable<boolean> {
+    return this._deletedStream;
   }
 }

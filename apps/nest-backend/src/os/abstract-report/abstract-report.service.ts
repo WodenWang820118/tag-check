@@ -1,5 +1,5 @@
 import { FolderService } from './../folder/folder.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ValidationResult } from '../../interfaces/dataLayer.interface';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
@@ -71,6 +71,31 @@ export class AbstractReportService {
           writeFileSync(abstractFilePath, JSON.stringify(data, null, 2));
         }
       }
+    }
+  }
+
+  async deleteSingleAbstractTestResultFolder(
+    projectSlug: string,
+    eventName: string
+  ) {
+    try {
+      const folderPath =
+        await this.folderPathService.getInspectionEventFolderPath(
+          projectSlug,
+          eventName
+        );
+
+      if (!existsSync(folderPath)) {
+        throw new HttpException('Report not found', 404);
+      }
+
+      this.folderService.deleteFolder(folderPath);
+    } catch (error) {
+      Logger.log(
+        error.message,
+        'AbstractReportService.deleteSingleAbstractTestResultFolder'
+      );
+      throw new HttpException('Failed to delete report', 500);
     }
   }
 }
