@@ -7,6 +7,7 @@ import {
   Post,
   Logger,
   Header,
+  Delete,
 } from '@nestjs/common';
 import { WaiterReportService } from './waiter-report.service';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
@@ -101,5 +102,27 @@ export class WaiterReportController {
       projectSlug,
       eventName
     );
+  }
+
+  @ApiOperation({
+    summary: 'delete report from a specifc project',
+    description:
+      'This endpoint deletes report(s) from a specifc project. \
+      If multiple reports are found, it will delete all of them.',
+  })
+  @ApiParam({
+    name: 'projectName',
+    description: 'The name of the project to which the event belongs.',
+  })
+  @ApiParam({
+    name: 'eventName',
+    description: 'The name of the test associated with the event.',
+  })
+  @Delete(':projectSlug/:eventName')
+  async deleteReport(
+    @Param('projectSlug') projectSlug: string,
+    @Param('eventName') report: any
+  ) {
+    return await this.waiterReportService.deleteReport(projectSlug, report);
   }
 }

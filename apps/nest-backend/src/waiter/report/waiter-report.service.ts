@@ -76,4 +76,11 @@ export class WaiterReportService {
   async downloadXlsxReport(projectSlug: string, eventName: string) {
     return await this.fileService.getEventReport(projectSlug, eventName);
   }
+
+  async deleteReport(projectSlug: string, eventName: string) {
+    await this.abstractReportService.deleteSingleAbstractTestResultFolder(
+      projectSlug,
+      eventName
+    );
+  }
 }

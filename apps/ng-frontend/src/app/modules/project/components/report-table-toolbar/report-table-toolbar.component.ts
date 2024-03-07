@@ -55,6 +55,10 @@ export class ReportTableToolbarComponent implements OnDestroy {
     this.dataSourceService.setFilter(filterValue);
   }
 
+  deleteSelected() {
+    this.dataSourceService.deleteSelected();
+  }
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
