@@ -16,7 +16,6 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
 import { ReportTableToolbarComponent } from '../../components/report-table-toolbar/report-table-toolbar.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { GtmPreviewModeFormComponent } from '../../../../shared/components/gtm-preview-mode-form/gtm-preview-mode-form.component';
 
 @Component({
   selector: 'app-project-view',
@@ -37,7 +36,6 @@ import { GtmPreviewModeFormComponent } from '../../../../shared/components/gtm-p
     ReportTableToolbarComponent,
     MatFormFieldModule,
     MatInputModule,
-    GtmPreviewModeFormComponent,
   ],
   templateUrl: './report-view.component.html',
   styleUrls: ['./report-view.component.scss'],

@@ -16,7 +16,7 @@ import { RootFormComponent } from '../../../../shared/components/root-form/root-
 import { ApplicationFormComponent } from '../../../../shared/components/application-form/application-form.component';
 import { ProjectInfoFormComponent } from '../../../../shared/components/project-info-form/project-info-form.component';
 import { BrowserFormComponent } from '../../../../shared/components/browser-form/browser-form.component';
-import { GtmPreviewModeFormComponent } from '../../../../shared/components/gtm-preview-mode-form/gtm-preview-mode-form.component';
+import { GtmFormComponent } from '../../../../shared/components/gtm-form/gtm-form.component';
 
 @Component({
   selector: 'app-project-view',
@@ -37,7 +37,7 @@ import { GtmPreviewModeFormComponent } from '../../../../shared/components/gtm-p
     ApplicationFormComponent,
     ProjectInfoFormComponent,
     BrowserFormComponent,
-    GtmPreviewModeFormComponent,
+    GtmFormComponent,
   ],
   templateUrl: './settings-view.component.html',
   styleUrls: ['./settings-view.component.scss'],

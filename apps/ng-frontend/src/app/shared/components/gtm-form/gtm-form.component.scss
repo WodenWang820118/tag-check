@@ -5,17 +5,9 @@ $theme: mat.define-light-theme((density: -4));
 .gtm-preview-mode-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
   width: 100%;
 
   &__field {
-    width: 100%;
-  }
-
-  &__row {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
     width: 100%;
   }
 
