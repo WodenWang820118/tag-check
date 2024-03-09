@@ -59,6 +59,10 @@ export class ReportTableToolbarComponent implements OnDestroy {
     this.dataSourceService.deleteSelected();
   }
 
+  preventNavigationSelected() {
+    this.dataSourceService.preventNavigationSelected();
+  }
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();

@@ -7,7 +7,7 @@ import { environment } from '../../../../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
-export class ProjectService {
+export class ProjectInfoService {
   currentProject: Subject<Project> = new BehaviorSubject({} as Project);
   currentProject$ = this.currentProject.asObservable();
 

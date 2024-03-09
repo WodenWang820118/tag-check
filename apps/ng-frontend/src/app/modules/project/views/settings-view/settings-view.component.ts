@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
-import { ProjectService } from '../../../../shared/services/api/project/project.service';
+import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { Subject } from 'rxjs';
 import { MatListModule } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
@@ -17,6 +17,7 @@ import { ApplicationFormComponent } from '../../../../shared/components/applicat
 import { ProjectInfoFormComponent } from '../../../../shared/components/project-info-form/project-info-form.component';
 import { BrowserFormComponent } from '../../../../shared/components/browser-form/browser-form.component';
 import { GtmFormComponent } from '../../../../shared/components/gtm-form/gtm-form.component';
+import { ProjectIoFormComponent } from '../../../../shared/components/project-io-form/project-io-form.component';
 
 @Component({
   selector: 'app-project-view',
@@ -38,6 +39,7 @@ import { GtmFormComponent } from '../../../../shared/components/gtm-form/gtm-for
     ProjectInfoFormComponent,
     BrowserFormComponent,
     GtmFormComponent,
+    ProjectIoFormComponent,
   ],
   templateUrl: './settings-view.component.html',
   styleUrls: ['./settings-view.component.scss'],
@@ -46,7 +48,7 @@ import { GtmFormComponent } from '../../../../shared/components/gtm-form/gtm-for
 export class SettingsViewComponent implements OnDestroy {
   destroy$ = new Subject<void>();
 
-  constructor(public projectService: ProjectService) {}
+  constructor(public projectInfoService: ProjectInfoService) {}
 
   ngOnDestroy() {
     this.destroy$.next();

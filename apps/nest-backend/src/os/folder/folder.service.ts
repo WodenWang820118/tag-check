@@ -1,5 +1,5 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { existsSync, mkdirSync, readdirSync, rmdirSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
 import path from 'path';
 
 @Injectable()
@@ -32,7 +32,7 @@ export class FolderService {
 
   deleteFolder(folderPath: string) {
     try {
-      rmdirSync(folderPath, { recursive: true });
+      rmSync(folderPath, { recursive: true });
     } catch (error) {
       Logger.error(error.message, 'FolderService.deleteFolder');
       throw new HttpException(error.message, 500);

@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { ProjectService } from '../../../../shared/services/api/project/project.service';
+import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { Observable, Subject, takeUntil, tap } from 'rxjs';
 import { Project } from '../../../../shared/models/project.interface';
 import { ReportTableComponent } from '../../components/report-table/report-table.component';
@@ -48,7 +48,7 @@ export class ReportViewComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    public projectService: ProjectService
+    public projectInfoService: ProjectInfoService
   ) {}
 
   ngOnInit(): void {
@@ -57,7 +57,7 @@ export class ReportViewComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         tap((params) => {
           // console.log(params);
-          this.project$ = this.projectService.switchToProject(
+          this.project$ = this.projectInfoService.switchToProject(
             params['projectSlug']
           );
         })

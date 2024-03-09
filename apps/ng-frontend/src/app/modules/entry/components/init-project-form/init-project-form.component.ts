@@ -14,7 +14,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
-import { ProjectService } from '../../../../shared/services/api/project/project.service';
+import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
 import { EMPTY, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
@@ -44,7 +44,7 @@ export class InitProjectFormComponent implements OnDestroy {
   destroy$ = new Subject<void>();
   constructor(
     private fb: FormBuilder,
-    private projectService: ProjectService,
+    private projectInfoService: ProjectInfoService,
     private router: Router,
     private configurationService: ConfigurationService,
     private dialog: MatDialog
@@ -97,7 +97,7 @@ export class InitProjectFormComponent implements OnDestroy {
             // Throw an error or return EMPTY to stop the observable chain if configuration is not valid
             return EMPTY;
           } else {
-            return this.projectService.initProject(
+            return this.projectInfoService.initProject(
               rootProjectPath.value,
               this.projectForm.value
             );
