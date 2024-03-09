@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { ProjectListComponent } from '../../components/project-list/project-list.component';
-import { ProjectService } from '../../../../shared/services/api/project/project.service';
+import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { Observable } from 'rxjs';
 import { Project } from '../../../../shared/models/project.interface';
 
@@ -27,7 +27,7 @@ import { Project } from '../../../../shared/models/project.interface';
 })
 export class HomeViewComponent {
   projects$: Observable<Project[]>;
-  constructor(private projectService: ProjectService) {
-    this.projects$ = this.projectService.getProjects();
+  constructor(private projectInfoService: ProjectInfoService) {
+    this.projects$ = this.projectInfoService.getProjects();
   }
 }

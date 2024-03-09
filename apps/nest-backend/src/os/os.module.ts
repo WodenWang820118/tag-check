@@ -9,6 +9,8 @@ import { ConfigurationModule } from '../configuration/configuration.module';
 import { PathModule } from './path/path.module';
 import { ProjectInitializationModule } from './project-initialization/project-initialization.module';
 import { ProjectInitializationService } from './project-initialization/project-initialization.service';
+import { ProjectIoModule } from './project-io/project-io.module';
+import { ProjectIoService } from './project-io/project-io.service';
 import { FolderModule } from './folder/folder.module';
 import { FolderService } from './folder/folder.service';
 import { AbstractReportModule } from './abstract-report/abstract-report.module';
@@ -26,6 +28,7 @@ const modules = [
   ConfigurationModule,
   AbstractReportModule,
   ImageModule,
+  ProjectIoModule,
 ];
 
 const services = [
@@ -36,6 +39,7 @@ const services = [
   FolderService,
   AbstractReportService,
   ImageService,
+  ProjectIoService,
 ];
 @Module({
   imports: [...modules],
