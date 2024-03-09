@@ -21,6 +21,7 @@ import { WaiterGtmOperatorController } from './gtm-operator/waiter-gtm-operator.
 import { WaiterSpecParserController } from './spec-parser/waiter-gtm-spec-parser.controller';
 import { WaiterConfigurationController } from './configuration/waiter-configuration.controller';
 import { WaiterSettingsController } from './settings/waiter-settings.controller';
+import { WaiterProjectIoController } from './project-io/waiter-project-io.controller';
 
 // services
 import { WaiterDataLayerGroupEventsService } from './datalayer/waiter-datalayer-group-events.service';
@@ -35,6 +36,7 @@ import { WaiterRecordingService } from './recording/waiter-recording.service';
 import { WaiterQaService } from './qa/waiter-qa.service';
 import { WaiterConfigurationService } from './configuration/waiter-configuration.service';
 import { WaiterSettingsService } from './settings/waiter-settings.service';
+import { WaiterProjectIoService } from './project-io/waiter-project-io.service';
 
 const waiterServices = [
   WaiterDataLayerGroupEventsService,
@@ -49,6 +51,7 @@ const waiterServices = [
   WaiterQaService,
   WaiterConfigurationService,
   WaiterSettingsService,
+  WaiterProjectIoService,
 ];
 
 @Module({
@@ -73,6 +76,7 @@ const waiterServices = [
     WaiterReportController,
     WaiterConfigurationController,
     WaiterSettingsController,
+    WaiterProjectIoController,
   ],
   providers: [...waiterServices],
 })
