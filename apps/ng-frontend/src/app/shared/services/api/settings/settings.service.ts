@@ -15,7 +15,6 @@ export class SettingsService {
   }
 
   getProjectSettings(projectSlug: string) {
-    console.log(`${environment.settingsApiUrl}/${projectSlug}`);
     return this.http.get<ProjectSetting>(
       `${environment.settingsApiUrl}/${projectSlug}`
     );

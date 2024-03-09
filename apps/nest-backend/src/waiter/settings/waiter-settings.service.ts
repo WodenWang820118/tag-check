@@ -32,10 +32,59 @@ export class WaiterSettingsService {
         return this.updateBrowserSettings(projectSlug, partialSettings);
       case 'gtm':
         return this.updateGtmSettings(projectSlug, partialSettings);
+      case 'preventNavigationEvents':
+        return this.updatePreventNavigationEvents(projectSlug, partialSettings);
       case 'others':
         return this.updateGeneralSettings(projectSlug, partialSettings);
       default:
         return;
+    }
+  }
+
+  async updatePreventNavigationEvents(
+    projectSlug: string,
+    partialSettings: any
+  ) {
+    try {
+      const filePath = await this.filePathService.getProjectSettingFilePath(
+        projectSlug
+      );
+
+      const currentSettings = await this.fileService.readJsonFile(filePath);
+      const preventNavigationEvents =
+        currentSettings.preventNavigationEvents as string[];
+      const newEvents = partialSettings.preventNavigationEvents as string[];
+
+      // Create a copy of the current preventNavigationEvents to modify
+      let newSettings: string[] = [...preventNavigationEvents];
+
+      for (const receivedEvent of newEvents) {
+        const index = newSettings.indexOf(receivedEvent);
+
+        if (index > -1) {
+          // Event is found, remove it (toggle behavior)
+          newSettings.splice(index, 1);
+        } else {
+          // Event is new, add it to the array
+          newSettings.push(receivedEvent);
+        }
+      }
+
+      // If original array was empty, just return the new events
+      if (!preventNavigationEvents.length) {
+        newSettings = [...newEvents];
+      }
+
+      const updatedSettings = {
+        ...currentSettings,
+        preventNavigationEvents: newSettings,
+      };
+
+      await this.fileService.writeJsonFile(filePath, updatedSettings);
+      return updatedSettings;
+    } catch (error) {
+      Logger.error('Error updating settings', error);
+      throw new HttpException('Error updating settings', 500);
     }
   }
 

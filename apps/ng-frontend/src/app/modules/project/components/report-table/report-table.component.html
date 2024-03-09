@@ -27,6 +27,11 @@
           style="text-decoration: none"
           [routerLink]="['./', element.eventName]"
           (click)="setReportDetails(element.eventName)"
+          matBadge="bookmark_border"
+          [matBadgeHidden]="
+            !preventNavigationEvents.includes(element.eventName)
+          "
+          matBadgeOverlap="false"
         >
           {{ element.eventName }}
         </a>
