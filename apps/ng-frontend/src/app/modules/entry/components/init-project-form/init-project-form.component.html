@@ -16,15 +16,18 @@
               matInput
               placeholder="Corporate Website Project"
               formControlName="projectName"
+              [errorStateMatcher]="validProjectNameMatcher"
             />
+            @if(projectForm.controls['projectName'].hasError('invalidCharacters'))
+            {
+            <mat-error
+              >Can only have: <strong>-!'",</strong> and spaces</mat-error
+            >
+            }
           </mat-form-field>
           <mat-form-field appearance="outline">
-            <mat-label>Project Slug</mat-label>
-            <input
-              matInput
-              placeholder="unique-slug-1234"
-              formControlName="projectSlug"
-            />
+            <mat-label>Generated Project Slug</mat-label>
+            <input matInput formControlName="projectSlug" />
           </mat-form-field>
           <mat-form-field appearance="outline">
             <mat-label>Project Description</mat-label>
@@ -33,7 +36,7 @@
           <mat-form-field appearance="outline">
             <mat-label>Choose The Project Type</mat-label>
             <mat-select formControlName="testType">
-              <mat-option value="Tag Verifier">Tag Verifier</mat-option>
+              <!-- <mat-option value="Tag Verifier">Tag Verifier</mat-option> -->
               <mat-option value="Data Layer Checker"
                 >Data Layer Checker</mat-option
               >
