@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import {
@@ -19,6 +19,7 @@ import { ConfigurationService } from '../../../../shared/services/api/configurat
 import { EMPTY, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { InstantErrorStateMatcher } from './helper';
 
 @Component({
   selector: 'app-init-project-form',
@@ -38,9 +39,12 @@ import { MatDialog } from '@angular/material/dialog';
   templateUrl: `./init-project-form.component.html`,
   styles: ``,
 })
-export class InitProjectFormComponent implements OnDestroy {
+export class InitProjectFormComponent implements OnInit, OnDestroy {
   projectForm: FormGroup;
-  testType = ['Tag-Verifier', 'Data layer checker'];
+  testType = ['Data layer checker'];
+  allowedSymbolsPattern = /^[a-zA-Z0-9-!'",\s]+$/;
+  validProjectNameMatcher: InstantErrorStateMatcher;
+
   destroy$ = new Subject<void>();
   constructor(
     private fb: FormBuilder,
@@ -49,13 +53,47 @@ export class InitProjectFormComponent implements OnDestroy {
     private configurationService: ConfigurationService,
     private dialog: MatDialog
   ) {
+    this.validProjectNameMatcher = new InstantErrorStateMatcher();
     this.projectForm = this.fb.group({
-      projectName: ['', Validators.required],
-      projectSlug: ['', Validators.required],
+      projectName: [
+        '',
+        [
+          Validators.required,
+          this.validProjectNameMatcher.allowedCharactersValidator(
+            this.allowedSymbolsPattern
+          ),
+        ],
+      ],
+      projectSlug: [{ value: '', disabled: true }],
       projectDescription: [''],
       testType: ['', Validators.required],
       googleSpreadsheetLink: [''],
     });
+  }
+
+  ngOnInit(): void {
+    this.observeProjectNameChanges();
+  }
+
+  observeProjectNameChanges() {
+    this.projectForm.controls['projectName'].valueChanges
+      .pipe(
+        takeUntil(this.destroy$),
+        tap((value) => {
+          const formattedValue = value
+            // Replace allowed symbols with a dash
+            .replace(/[-!'",\s]/g, '-')
+            // Remove all characters that are not dashes, numbers, or lowercase letters
+            .replace(/[^a-z0-9-]/gi, '')
+            // Convert to lowercase
+            .toLowerCase()
+            // Replace consecutive dashes with a single dash
+            .replace(/--+/g, '-');
+
+          this.projectForm.controls['projectSlug'].setValue(formattedValue);
+        })
+      )
+      .subscribe();
   }
 
   isEmptyObject(obj: any) {
