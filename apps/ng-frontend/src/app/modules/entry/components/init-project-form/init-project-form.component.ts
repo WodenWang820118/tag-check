@@ -64,7 +64,7 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
           ),
         ],
       ],
-      projectSlug: [{ value: '', disabled: true }],
+      projectSlug: [''],
       projectDescription: [''],
       testType: ['', Validators.required],
       googleSpreadsheetLink: [''],
@@ -109,6 +109,7 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
       });
       return;
     }
+
     this.configurationService
       .getConfiguration('rootProjectPath')
       .pipe(
@@ -135,6 +136,11 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
             // Throw an error or return EMPTY to stop the observable chain if configuration is not valid
             return EMPTY;
           } else {
+            console.log('project form value: ', this.projectForm.value);
+            console.log(
+              'project slug: ',
+              this.projectForm.value['projectSlug']
+            );
             return this.projectInfoService.initProject(
               rootProjectPath.value,
               this.projectForm.value
