@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import puppeteer, { Credentials, Page } from 'puppeteer';
 import { BROWSER_ARGS } from '../configs/project.config';
 import { WebAgentUtilsService } from './web-agent-utils.service';
+import { InspectEventDto } from '../dto/inspect-event.dto';
 @Injectable()
 export class WebAgentService {
   constructor(private webAgentUtilsService: WebAgentUtilsService) {}
@@ -12,7 +13,7 @@ export class WebAgentService {
     testName: string,
     path?: string,
     credentials?: Credentials,
-    application?: any
+    application?: InspectEventDto['application']
   ) {
     const { dataLayer, destinationUrl } =
       await this.webAgentUtilsService.performTest(
@@ -65,7 +66,7 @@ export class WebAgentService {
     path?: string,
     measurementId?: string,
     credentials?: Credentials,
-    application?: any
+    application?: InspectEventDto['application']
   ) {
     const { dataLayer, eventRequest, destinationUrl } =
       await this.webAgentUtilsService.performTest(
@@ -75,7 +76,8 @@ export class WebAgentService {
         path,
         true,
         measurementId,
-        credentials
+        credentials,
+        application
       );
     return {
       dataLayer,

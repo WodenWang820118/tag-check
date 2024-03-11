@@ -17,6 +17,7 @@ import {
   Subject,
   combineLatest,
   switchMap,
+  take,
   takeUntil,
   tap,
 } from 'rxjs';
@@ -33,6 +34,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatBadgeModule } from '@angular/material/badge';
 import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
+import { InspectEvent } from '../../../../shared/models/inspectData.interface';
 
 @Component({
   selector: 'app-report-table',
@@ -260,12 +262,29 @@ export class ReportTableComponent implements OnInit, OnDestroy {
 
   runTest(eventName: string) {
     console.log('running test', eventName);
-    this.route.params
+    combineLatest([this.route.params, this.project$])
       .pipe(
-        takeUntil(this.destroy$),
-        switchMap((params) => {
+        take(1),
+        switchMap(([params, project]) => {
           const slug = params['projectSlug'];
-          return this.dataLayerService.runDataLayerCheck(slug, eventName);
+          const headless = project.headless;
+          const inspectEventDto: InspectEvent = {
+            application: {
+              localStorage: {
+                data: [...project.application.localStorage.data],
+              },
+              cookie: {
+                data: [...project.application.cookie.data],
+              },
+            },
+            puppeteerArgs: project.browser,
+          };
+          return this.dataLayerService.runDataLayerCheck(
+            slug,
+            eventName,
+            headless,
+            inspectEventDto
+          );
         })
       )
       .subscribe();
