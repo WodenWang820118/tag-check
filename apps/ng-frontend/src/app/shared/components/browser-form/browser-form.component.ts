@@ -18,6 +18,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-browser-form',
@@ -34,19 +35,20 @@ import { ActivatedRoute } from '@angular/router';
     FormsModule,
     MatSelectModule,
     MatOptionModule,
+    MatCheckboxModule,
   ],
   templateUrl: `./browser-form.component.html`,
   styleUrls: ['./browser-form.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
 export class BrowserFormComponent implements OnInit, OnDestroy {
-  destroy$ = new Subject<void>();
-
   browserSettingsForm = this.fb.group({
+    headless: [false],
     settings: this.fb.array([]),
   });
 
   browserSettings: string[] = [];
+  destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
@@ -64,6 +66,9 @@ export class BrowserFormComponent implements OnInit, OnDestroy {
         }),
         tap((project) => {
           this.browserSettings = project.settings.browser;
+          this.browserSettingsForm.controls['headless'].setValue(
+            project.settings.headless
+          );
           this.loadInitialData();
         })
       )
@@ -112,22 +117,21 @@ export class BrowserFormComponent implements OnInit, OnDestroy {
   }
 
   onFormSubmit() {
-    const settings = this.browserSettingsFormFormArray.value as {
+    const settingsArray = this.browserSettingsFormFormArray.value as {
       value: string;
     }[];
-
-    const settingsValue = settings.map((setting) => setting.value);
+    const headless = this.browserSettingsForm.get('headless')?.value as boolean;
+    const browser = settingsArray.map((setting) => setting.value);
 
     this.route.parent?.params
       .pipe(
         takeUntil(this.destroy$),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
-          return this.settingsService.updateSettings(
-            projectSlug,
-            'browser',
-            settingsValue
-          );
+          return this.settingsService.updateSettings(projectSlug, 'browser', {
+            headless,
+            browser,
+          });
         })
       )
       .subscribe();

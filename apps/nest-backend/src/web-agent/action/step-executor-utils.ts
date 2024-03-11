@@ -2,6 +2,7 @@ import { Logger, HttpException } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { sleep } from './action-utils';
 import { getFirstSelector } from './handlers/utils';
+import { InspectEventDto } from '../../dto/inspect-event.dto';
 
 export async function handleKeyboardAction(
   page: Page,
@@ -43,16 +44,13 @@ export async function handleNavigate(
   page: Page,
   step: any,
   state: any,
-  application?: any
+  application: InspectEventDto['application']
 ) {
-  const settings = application;
-  // no need to wait for idle network state since sometimes there are sliders or carousels
   await page.goto(step.url);
 
   await sleep(1000); // Necessary delay for the website to update
-
   // pre-load the application localStorage if any
-  if (settings.application && settings.application.localStorage) {
+  if (application && application.localStorage) {
     await page.evaluate((appLocalStorage) => {
       for (const setting of appLocalStorage.data) {
         // Correctly access the value property of each setting object
@@ -64,12 +62,17 @@ export async function handleNavigate(
         console.log(`Setting localStorage ${setting.key}=${value}`); // Assuming you have a way to log from here
         localStorage.setItem(setting.key, value);
       }
-    }, settings.application.localStorage); // Pass application.localStorage as an argument to the evaluate function
+    }, application.localStorage); // Pass application.localStorage as an argument to the evaluate function
   }
 
   // pre-load the application cookies if any
-  if (settings.application.cookie && settings.application.cookie.data) {
-    await page.setCookie(...settings.application.cookie.data);
+  if (application.cookie && application.cookie.data) {
+    const cookies = application.cookie.data.map((cookie) => ({
+      name: cookie.key.toString(),
+      value: cookie.value.toString(),
+    }));
+
+    await page.setCookie(...cookies);
   }
 
   // then reload the page to make sure the localStorage and cookies are set

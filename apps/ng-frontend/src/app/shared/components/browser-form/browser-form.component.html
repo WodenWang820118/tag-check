@@ -6,6 +6,11 @@
   <br />
   <mat-card-content>
     <form [formGroup]="browserSettingsForm">
+      <div style="width: 100%">
+        <mat-checkbox formControlName="headless"
+          >Hide the browser?</mat-checkbox
+        >
+      </div>
       <div formArrayName="settings">
         @for (item of localStorageFormArrayValue; track item.value; let idx =
         $index;) {
