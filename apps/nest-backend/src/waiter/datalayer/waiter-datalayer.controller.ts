@@ -1,6 +1,15 @@
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { WaiterDataLayerGroupEventsService } from './waiter-datalayer-group-events.service';
-import { Body, Controller, Get, Logger, Param, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Post,
+  Query,
+  ValidationPipe,
+} from '@nestjs/common';
 import { WaiterDataLayerSingleEventService } from './waiter-datalayer-single-event.service';
 import { InspectEventDto } from '../../dto/inspect-event.dto';
 
@@ -11,7 +20,6 @@ export class WaiterDataLayerController {
     private waiterDataLayerSingleEventService: WaiterDataLayerSingleEventService
   ) {}
 
-  @Get(':projectSlug/:eventName')
   @ApiOperation({
     summary: 'Inspects a single event dataLayer',
     description:
@@ -52,6 +60,7 @@ export class WaiterDataLayerController {
     description: 'Optional password for authentication purposes.',
   })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
+  @Post(':projectSlug/:eventName')
   async inspectSingleEvent(
     @Param('projectSlug') projectSlug: string,
     @Param('eventName') eventName: string,
@@ -60,10 +69,11 @@ export class WaiterDataLayerController {
     @Query('path') path?: string,
     @Query('username') username?: string,
     @Query('password') password?: string,
-    @Body() inspectEventDto?: InspectEventDto
+    @Body(ValidationPipe) inspectEventDto?: InspectEventDto
   ) {
     // if no measurementId is provided, no need to grab requests
-    // TODO: add an extra parameter to indicate whether to close the browser or not
+
+    const inspectionEventSettings = inspectEventDto;
     return await this.waiterDataLayerSingleEventService.inspectSingleEvent(
       projectSlug,
       eventName,
@@ -74,7 +84,7 @@ export class WaiterDataLayerController {
         username,
         password,
       },
-      inspectEventDto
+      inspectionEventSettings
     );
   }
 
