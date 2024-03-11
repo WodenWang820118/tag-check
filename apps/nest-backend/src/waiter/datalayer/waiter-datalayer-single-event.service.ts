@@ -26,10 +26,11 @@ export class WaiterDataLayerSingleEventService {
   ) {
     // 3.1) inspect both dataLayer and the request sent to GA4
     const browser = await puppeteer.launch({
-      headless: headless === 'new' ? 'new' : false,
+      headless: headless === 'true' ? 'new' : false,
       defaultViewport: null,
       ignoreHTTPSErrors: true,
-      args: inspectEventDto.puppeteerArgs || BROWSER_ARGS,
+      args:
+        (inspectEventDto as any).inspectEventDto.puppeteerArgs || BROWSER_ARGS,
     });
 
     const [page] = await browser.pages();
@@ -42,7 +43,7 @@ export class WaiterDataLayerSingleEventService {
       path,
       measurementId,
       credentials,
-      inspectEventDto
+      (inspectEventDto as any).inspectEventDto.application
     );
 
     // 3.2) construct the data to be written to the xlsx file
@@ -70,11 +71,6 @@ export class WaiterDataLayerSingleEventService {
       testName,
       data[0].dataLayerResult
     );
-
-    Logger.log('Single test is done!', 'WaiterService.inspectSingleEvent');
-
-    // no need to close the browser since it has one page only and the page has been closed already
-    Logger.log('Browser is closed!', 'WaiterService.inspectSingleEvent');
     return data;
   }
 }

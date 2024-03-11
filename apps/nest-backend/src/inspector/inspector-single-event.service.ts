@@ -6,6 +6,7 @@ import { WebAgentService } from '../web-agent/web-agent.service';
 import { RequestProcessorService } from './request-processor/request-processor.service';
 import { Credentials, Page } from 'puppeteer';
 import { InspectorUtilsService } from './inspector-utils.service';
+import { InspectEventDto } from '../dto/inspect-event.dto';
 
 @Injectable()
 export class InspectorSingleEventService {
@@ -28,7 +29,7 @@ export class InspectorSingleEventService {
     filePath?: string,
     measurementId?: string,
     credentials?: Credentials,
-    application?: any
+    application?: InspectEventDto['application']
   ) {
     // 1. Get the project spec from the local file system
     const specsPath = await this.filePathService.getProjectConfigFilePath(
@@ -40,7 +41,7 @@ export class InspectorSingleEventService {
       testName
     );
 
-    Logger.log(specs, 'inspector.inspectDataLayer');
+    // Logger.log(specs, 'inspector.inspectDataLayer');
     // expectedObj is the spec to be compared with the result
     const expectedObj = specs.find(
       (spec: BaseDataLayerEvent) => spec.event === testName
@@ -122,7 +123,8 @@ export class InspectorSingleEventService {
         await page.screenshot({
           path: imageSavingFolder,
         });
-        await page.close();
+
+        if (headless === 'new') await page.close();
 
         return {
           dataLayerCheckResult,
