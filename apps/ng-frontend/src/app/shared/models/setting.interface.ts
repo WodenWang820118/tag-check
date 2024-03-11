@@ -19,6 +19,7 @@ interface Setting {
   preventNavigationEvents: string[];
   application: Application;
   browser: string[];
+  headless: boolean;
 }
 
 export interface Gtm {
