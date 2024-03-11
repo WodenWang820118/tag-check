@@ -27,7 +27,7 @@ export class WaiterDataLayerGroupEventsService {
   ) {
     // 3.1) inspect both dataLayer and the request sent to GA4
     const browser = await puppeteer.launch({
-      headless: headless === 'new' ? 'new' : false,
+      headless: headless === 'true' ? 'new' : false,
       defaultViewport: null,
       ignoreHTTPSErrors: true,
       args: BROWSER_ARGS,

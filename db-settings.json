@@ -11,6 +11,7 @@
         "testType": "Data Layer Checker",
         "googleSpreadsheetLink": "",
         "containerName": "",
+        "headless": false,
         "gtm": {
           "isAccompanyMode": true,
           "tagManagerUrl": "",

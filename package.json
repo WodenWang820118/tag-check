@@ -142,6 +142,8 @@
     "@swc/helpers": "~0.5.2",
     "archiver": "^7.0.0",
     "axios": "^1.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",

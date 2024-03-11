@@ -134,7 +134,17 @@ export class WaiterSettingsService {
     }
   }
 
-  async updateBrowserSettings(projectSlug: string, browser: string[]) {
+  async updateBrowserSettings(
+    projectSlug: string,
+    rawSettings: {
+      headless: string;
+      browser: string[];
+    }
+  ) {
+    if (!rawSettings.headless || !rawSettings.browser) {
+      throw new HttpException('Invalid settings', 400);
+    }
+
     try {
       const filePath = await this.filePathService.getProjectSettingFilePath(
         projectSlug
@@ -144,7 +154,8 @@ export class WaiterSettingsService {
 
       const updatedSettings = {
         ...currentSettings,
-        browser: browser,
+        headless: rawSettings.headless,
+        browser: rawSettings.browser,
       };
 
       await this.fileService.writeJsonFile(filePath, updatedSettings);
