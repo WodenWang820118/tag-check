@@ -2,18 +2,13 @@ const isDev = require('electron-is-dev');
 const path = require('path');
 const { app, BrowserWindow } = require('electron');
 const { spawn } = require('child_process');
+const { existsSync } = require('fs');
+
+('use strict');
 
 function startBackend() {
   const serverPath = isDev
-    ? path.join(
-        __dirname,
-        '..',
-        '..',
-        'dist',
-        'apps',
-        'nest-datalayer-checker',
-        'main.js'
-      )
+    ? path.join(__dirname, 'dist', 'apps', 'nest-backend', 'main.js')
     : path.join(process.resourcesPath, 'main.js');
 
   const serverProcess = spawn('node', [serverPath]);
@@ -31,36 +26,65 @@ function startBackend() {
   });
 }
 
+function getProductionFrontendPath() {
+  const ngFrontendPath = path.join(
+    process.resourcesPath,
+    'ng-frontend',
+    'browser',
+    'index.html'
+  );
+  if (existsSync(ngFrontendPath)) {
+    return ngFrontendPath;
+  }
+
+  const reactFrontendPath = path.join(
+    process.resourcesPath,
+    'frontend',
+    'index.html'
+  );
+  if (existsSync(reactFrontendPath)) {
+    return reactFrontendPath;
+  }
+
+  // Return null or throw an error if neither path exists
+  return null;
+}
+
+function getDevFrontendPath(environment) {
+  switch (environment) {
+    case 'ng-frontend':
+      return 'dist/apps/ng-frontend/browser/index.html';
+    case 'react-frontend':
+      return 'dist/apps/frontend/index.html';
+    default:
+      throw new Error('Invalid NODE_ENV');
+  }
+}
+
 function createWindow() {
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1400,
+    height: 900,
     webPreferences: {
       nodeIntegration: true,
     },
   });
 
   if (isDev) {
-    mainWindow.loadURL('http://localhost:4200'); // Load your React app in development mode
+    console.log('isDev', isDev);
+    const devFrontendPath = getDevFrontendPath(process.env.NODE_ENV);
+    mainWindow.loadFile(devFrontendPath);
     mainWindow.webContents.openDevTools(); // Open DevTools in development
   } else {
-    // TODO: where is the real production index.html?
     // https://www.electronjs.org/docs/latest/tutorial/application-distribution
     try {
-      const indexHtmlPath = path.join(
-        process.resourcesPath,
-        'frontend',
-        'index.html'
-      );
+      const entryPath = getProductionFrontendPath();
+      mainWindow.loadFile(entryPath);
       mainWindow.webContents.openDevTools(); // Open DevTools in development
-      mainWindow.loadFile(indexHtmlPath);
     } catch (e) {
       console.error(e);
     }
   }
-
-  console.log('isDev', isDev);
-  console.log('process.resourcesPath', process.resourcesPath);
 }
 
 app.whenReady().then(() => {

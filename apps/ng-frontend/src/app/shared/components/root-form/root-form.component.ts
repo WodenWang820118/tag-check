@@ -35,7 +35,7 @@ import { ConfigurationService } from '../../services/api/configuration/configura
       <br />
       <mat-card-content>
         <form [formGroup]="rootForm">
-          <mat-form-field>
+          <mat-form-field appearance="outline">
             <mat-label>Root folder</mat-label>
             <input matInput placeholder="D:\\projects" formControlName="name" />
           </mat-form-field>
