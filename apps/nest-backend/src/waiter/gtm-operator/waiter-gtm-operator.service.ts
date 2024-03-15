@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { GtmOperatorService } from '../../gtm-operator/gtm-operator.service';
 import { Credentials } from 'puppeteer';
+import { InspectEventDto } from '../../dto/inspect-event.dto';
 
 @Injectable()
 export class WaiterGtmOperatorService {
@@ -11,7 +12,8 @@ export class WaiterGtmOperatorService {
     testName: string,
     headless: string,
     filePath?: string,
-    credentials?: Credentials
+    credentials?: Credentials,
+    inspectEventDto?: InspectEventDto
   ) {
     await this.gtmOperatorService.inspectSingleEventViaGtm(
       gtmUrl,
@@ -19,7 +21,8 @@ export class WaiterGtmOperatorService {
       testName,
       headless,
       filePath,
-      credentials
+      credentials,
+      inspectEventDto
     );
   }
 }

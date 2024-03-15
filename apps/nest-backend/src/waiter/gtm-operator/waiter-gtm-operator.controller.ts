@@ -1,12 +1,12 @@
-import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { Controller, Get, Query } from '@nestjs/common';
+import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { Body, Controller, Logger, Param, Post, Query } from '@nestjs/common';
 import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
+import { InspectEventDto } from '../../dto/inspect-event.dto';
 
-@Controller('waiter-gtm-operator')
+@Controller('datalayer')
 export class WaiterGtmOperatorController {
   constructor(private waiterGtmOperatorService: WaiterGtmOperatorService) {}
 
-  @Get('/single-event')
   @ApiOperation({
     summary: 'Inspects a single event dataLayer with GTM',
     description:
@@ -16,12 +16,12 @@ export class WaiterGtmOperatorController {
     name: 'gtmUrl',
     description: 'The URL of the GTM preview mode share link.',
   })
-  @ApiQuery({
-    name: 'projectName',
+  @ApiParam({
+    name: 'projectSlug',
     description: 'The name of the project to which the event belongs.',
   })
-  @ApiQuery({
-    name: 'testName',
+  @ApiParam({
+    name: 'eventName',
     description: 'The name of the test associated with the event.',
   })
   @ApiQuery({
@@ -45,25 +45,31 @@ export class WaiterGtmOperatorController {
     description: 'Optional password for authentication purposes.',
   })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
+  @Post('/gtm-operator/:projectSlug/:eventName')
   async inspectSingleEventViaGtm(
+    @Param('projectSlug') projectSlug: string,
+    @Param('eventName') eventName: string,
     @Query('gtmUrl') gtmUrl: string,
-    @Query('projectName') projectName: string,
-    @Query('testName') testName: string,
     @Query('headless') headless?: string,
     @Query('path') path?: string,
     @Query('username') username?: string,
-    @Query('password') password?: string
+    @Query('password') password?: string,
+    @Body() inspectEventDto?: InspectEventDto
   ) {
+    const settings = inspectEventDto;
+    // FIXME: bug in the original code
+    // cannot complete test after opening the GTM preview mode
     await this.waiterGtmOperatorService.inspectSingleEventViaGtm(
       gtmUrl,
-      projectName,
-      testName,
+      projectSlug,
+      eventName,
       headless,
       path,
       {
         username,
         password,
-      }
+      },
+      settings
     );
   }
 }
