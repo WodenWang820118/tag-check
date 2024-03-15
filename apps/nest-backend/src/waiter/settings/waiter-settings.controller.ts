@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Put, Body, Post } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Put,
+  Body,
+  Post,
+  Logger,
+} from '@nestjs/common';
 import { WaiterSettingsService } from './waiter-settings.service';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 
@@ -20,7 +28,6 @@ export class WaiterSettingsController {
     return await this.waiterSettingsService.getProjectSettings(projectSlug);
   }
 
-  @Put(':projectSlug/sections/:section')
   @ApiOperation({
     summary: 'update project settings',
     description:
@@ -39,6 +46,7 @@ export class WaiterSettingsController {
     description: 'The settings to update.',
     type: Object,
   })
+  @Put(':projectSlug/sections/:section')
   async updateProjectSettings(
     @Param('projectSlug') projectSlug: string,
     @Param('section') section: string,
