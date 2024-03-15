@@ -3,6 +3,7 @@ import puppeteer, { Credentials } from 'puppeteer';
 import { InspectorGroupEventsService } from '../inspector/inspector-group-events.service';
 import { BROWSER_ARGS } from '../configs/project.config';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
+import { InspectEventDto } from '../dto/inspect-event.dto';
 
 /**
  * A service for interacting with Google Tag Manager (GTM) via Puppeteer.
@@ -23,7 +24,8 @@ export class GtmOperatorService {
     testName: string,
     headless: string,
     filePath?: string,
-    credentials?: Credentials
+    credentials?: Credentials,
+    inspectEventDto?: InspectEventDto
   ) {
     // set the defaultViewport to null to use maximum viewport size
     const browser = await puppeteer.launch({
@@ -33,8 +35,14 @@ export class GtmOperatorService {
       timeout: 30000,
       ignoreHTTPSErrors: true,
       // the window size may impact the examination result
-      args: BROWSER_ARGS,
+      args:
+        (inspectEventDto as any).inspectEventDto.puppeteerArgs || BROWSER_ARGS,
     });
+
+    Logger.log(
+      (inspectEventDto as any).inspectEventDto.puppeteerArgs,
+      'GtmOperatorService.inspectSingleEventViaGtm: puppeteerArgs'
+    );
 
     const incognitoContext = await browser.createIncognitoBrowserContext();
     const websiteUrl = this.extractBaseUrlFromGtmUrl(gtmUrl);
@@ -70,7 +78,8 @@ export class GtmOperatorService {
         headless,
         filePath,
         undefined,
-        credentials
+        credentials,
+        inspectEventDto.application
       );
     } catch (error) {
       Logger.error(error.message, 'inspector.inspectProjectDataLayer');

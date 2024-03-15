@@ -35,6 +35,8 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { MatBadgeModule } from '@angular/material/badge';
 import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
 import { InspectEvent } from '../../../../shared/models/inspectData.interface';
+import { GtmOperatorService } from '../../../../shared/services/api/gtm-operator/gtm-operator.service';
+import { getNewPreventNavigationEvents } from './utils';
 
 @Component({
   selector: 'app-report-table',
@@ -83,6 +85,7 @@ export class ReportTableComponent implements OnInit, OnDestroy {
     private projectDataSourceService: ProjectDataSourceService,
     private route: ActivatedRoute,
     private dataLayerService: DataLayerService,
+    private gtmOperatorService: GtmOperatorService,
     private settingsService: SettingsService
   ) {}
 
@@ -92,30 +95,6 @@ export class ReportTableComponent implements OnInit, OnDestroy {
     this.observeDeleteSelected();
     this.observeNavigationEvents();
     this.observePreventNavigationSelected();
-  }
-
-  getNewPreventNavigationEvents(events: string[]): string[] {
-    // Create a copy of the current preventNavigationEvents to modify
-    let newSettings: string[] = [...this.preventNavigationEvents];
-
-    for (const receivedEvent of events) {
-      const index = newSettings.indexOf(receivedEvent);
-
-      if (index > -1) {
-        // Event is found, remove it (toggle behavior)
-        newSettings.splice(index, 1);
-      } else {
-        // Event is new, add it to the array
-        newSettings.push(receivedEvent);
-      }
-    }
-
-    // If original array was empty, just return the new events
-    if (!this.preventNavigationEvents.length) {
-      newSettings = [...events];
-    }
-
-    return newSettings;
   }
 
   observeNavigationEvents() {
@@ -150,8 +129,10 @@ export class ReportTableComponent implements OnInit, OnDestroy {
             const eventNames = this.selection.selected.map(
               (item) => item.eventName
             );
-            this.preventNavigationEvents =
-              this.getNewPreventNavigationEvents(eventNames);
+            this.preventNavigationEvents = getNewPreventNavigationEvents(
+              eventNames,
+              this.preventNavigationEvents
+            );
             this.selection.clear();
             return this.settingsService.updateSettings(
               projectSlug,
@@ -261,7 +242,6 @@ export class ReportTableComponent implements OnInit, OnDestroy {
   }
 
   runTest(eventName: string) {
-    console.log('running test', eventName);
     combineLatest([this.route.params, this.project$])
       .pipe(
         take(1),
@@ -279,6 +259,17 @@ export class ReportTableComponent implements OnInit, OnDestroy {
             },
             puppeteerArgs: project.browser,
           };
+
+          if (project.gtm.isAccompanyMode) {
+            return this.gtmOperatorService.runDataLayerCheckViaGtm(
+              slug,
+              eventName,
+              project.gtm.gtmPreviewModeUrl,
+              headless,
+              inspectEventDto
+            );
+          }
+
           return this.dataLayerService.runDataLayerCheck(
             slug,
             eventName,
