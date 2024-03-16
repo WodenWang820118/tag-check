@@ -57,8 +57,6 @@ export class WaiterGtmOperatorController {
     @Body() inspectEventDto?: InspectEventDto
   ) {
     const settings = inspectEventDto;
-    // FIXME: bug in the original code
-    // cannot complete test after opening the GTM preview mode
     await this.waiterGtmOperatorService.inspectSingleEventViaGtm(
       gtmUrl,
       projectSlug,

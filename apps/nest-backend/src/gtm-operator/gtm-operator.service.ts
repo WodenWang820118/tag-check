@@ -4,6 +4,7 @@ import { InspectorGroupEventsService } from '../inspector/inspector-group-events
 import { BROWSER_ARGS } from '../configs/project.config';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
 import { InspectEventDto } from '../dto/inspect-event.dto';
+import { sleep } from '../web-agent/action/action-utils';
 
 /**
  * A service for interacting with Google Tag Manager (GTM) via Puppeteer.
@@ -39,17 +40,12 @@ export class GtmOperatorService {
         (inspectEventDto as any).inspectEventDto.puppeteerArgs || BROWSER_ARGS,
     });
 
-    Logger.log(
-      (inspectEventDto as any).inspectEventDto.puppeteerArgs,
-      'GtmOperatorService.inspectSingleEventViaGtm: puppeteerArgs'
-    );
-
     const incognitoContext = await browser.createIncognitoBrowserContext();
     const websiteUrl = this.extractBaseUrlFromGtmUrl(gtmUrl);
-    Logger.log(
-      `Website URL: ${websiteUrl}`,
-      'gtm-operator.inspectSingleEventViaGtm'
-    );
+    // Logger.log(
+    //   `Website URL: ${websiteUrl}`,
+    //   'gtm-operator.inspectSingleEventViaGtm'
+    // );
     const page = await incognitoContext.newPage();
 
     await page.goto(gtmUrl, { waitUntil: 'networkidle2' });
@@ -70,6 +66,8 @@ export class GtmOperatorService {
       await pages[0].close();
     }
 
+    await sleep(1000);
+
     try {
       await this.inspectorSingleEventService.inspectDataLayer(
         testingPage,
@@ -79,7 +77,7 @@ export class GtmOperatorService {
         filePath,
         undefined,
         credentials,
-        inspectEventDto.application
+        (inspectEventDto as any).inspectEventDto.application
       );
     } catch (error) {
       Logger.error(error.message, 'inspector.inspectProjectDataLayer');
