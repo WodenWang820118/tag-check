@@ -78,6 +78,15 @@
           <mat-icon>keyboard_arrow_down</mat-icon>
           }
         </button> -->
+        @if (isRunningTest && eventRunningTest === element.eventName) {
+        <mat-progress-spinner
+          class="spinner"
+          color="primary"
+          mode="indeterminate"
+          diameter="30"
+        >
+        </mat-progress-spinner>
+        } @else { @if (hasRecording(element.eventName)) {
         <button
           mat-icon-button
           aria-label="run test"
@@ -85,6 +94,18 @@
         >
           <mat-icon>play_arrow</mat-icon>
         </button>
+        } @else {
+        <button
+          mat-icon-button
+          aria-label="add recording"
+          [routerLink]="['./', element.eventName]"
+          (click)="setReportDetails(element.eventName)"
+          matTooltipPosition="above"
+          matTooltip="Please add recording to run test"
+        >
+          <mat-icon>report_problem</mat-icon>
+        </button>
+        } }
       </td>
     </ng-container>
 
