@@ -1,3 +1,5 @@
+import { Project } from '../../../../shared/models/project.interface';
+
 // utils.ts or a similar file for utility functions
 export function getNewPreventNavigationEvents(
   currentEvents: string[],
@@ -23,4 +25,29 @@ export function getNewPreventNavigationEvents(
   }
 
   return newSettings;
+}
+
+export class InspectEventDto {
+  application: {
+    localStorage: {
+      data: any[];
+    };
+    cookie: {
+      data: any[];
+    };
+  };
+
+  puppeteerArgs: string[];
+
+  constructor(project: Project) {
+    (this.application = {
+      localStorage: {
+        data: [...project.application.localStorage.data],
+      },
+      cookie: {
+        data: [...project.application.cookie.data],
+      },
+    }),
+      (this.puppeteerArgs = [...project.browser]);
+  }
 }

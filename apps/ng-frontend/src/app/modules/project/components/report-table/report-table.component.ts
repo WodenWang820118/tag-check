@@ -34,9 +34,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatBadgeModule } from '@angular/material/badge';
 import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
-import { InspectEvent } from '../../../../shared/models/inspectData.interface';
+import { IInspectEvent } from '../../../../shared/models/inspectData.interface';
 import { GtmOperatorService } from '../../../../shared/services/api/gtm-operator/gtm-operator.service';
-import { getNewPreventNavigationEvents } from './utils';
+import { InspectEventDto, getNewPreventNavigationEvents } from './utils';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-report-table',
@@ -51,6 +52,7 @@ import { getNewPreventNavigationEvents } from './utils';
     MatInputModule,
     MatCheckboxModule,
     MatBadgeModule,
+    MatProgressSpinnerModule,
   ],
   animations: [
     trigger('detailExpand', [
@@ -72,11 +74,14 @@ export class ReportTableComponent implements OnInit, OnDestroy {
   testDataSource!: MatTableDataSource<IReportDetails>;
   selection = new SelectionModel<IReportDetails>(true, []);
   preventNavigationEvents: string[] = [];
+  isRunningTest = false;
+  eventRunningTest = '';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @Input() project$!: Observable<Project>;
 
+  private hasRecordingMap: Map<string, boolean> = new Map();
   destroy$ = new Subject<void>();
 
   constructor(
@@ -90,11 +95,35 @@ export class ReportTableComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    this.observeProjectRecordingStatus();
     this.subscribeToRouteChanges();
     this.observeTableFilter();
     this.observeDeleteSelected();
     this.observeNavigationEvents();
     this.observePreventNavigationSelected();
+  }
+
+  observeProjectRecordingStatus() {
+    this.project$
+      .pipe(
+        takeUntil(this.destroy$),
+        tap((project) => {
+          this.initializeRecordingStatus(project.specs, project.recordings);
+        })
+      )
+      .subscribe();
+  }
+
+  initializeRecordingStatus(specs: any[], recordings: string[]) {
+    this.hasRecordingMap.clear();
+    specs.forEach((spec) => {
+      this.hasRecordingMap.set(spec.event, recordings.includes(spec.event));
+    });
+  }
+
+  // Method to check if an event has a recording
+  hasRecording(eventName: string): boolean {
+    return this.hasRecordingMap.get(eventName) || false;
   }
 
   observeNavigationEvents() {
@@ -248,17 +277,10 @@ export class ReportTableComponent implements OnInit, OnDestroy {
         switchMap(([params, project]) => {
           const slug = params['projectSlug'];
           const headless = project.headless;
-          const inspectEventDto: InspectEvent = {
-            application: {
-              localStorage: {
-                data: [...project.application.localStorage.data],
-              },
-              cookie: {
-                data: [...project.application.cookie.data],
-              },
-            },
-            puppeteerArgs: project.browser,
-          };
+          const inspectEventDto: IInspectEvent = new InspectEventDto(project);
+          // TODO: change the play button to a spinner
+          this.isRunningTest = true;
+          this.eventRunningTest = eventName;
 
           if (project.gtm.isAccompanyMode) {
             return this.gtmOperatorService.runDataLayerCheckViaGtm(
@@ -278,7 +300,14 @@ export class ReportTableComponent implements OnInit, OnDestroy {
           );
         })
       )
-      .subscribe();
+      .subscribe((res) => {
+        console.log('res', res);
+        // TODO: handle the response
+        this.isRunningTest = false;
+        this.eventRunningTest = '';
+        // TODO: change the spinner back to the play button
+        // TODO: update the report details with the new data
+      });
   }
 
   /** Whether the number of selected elements matches the total number of rows. */

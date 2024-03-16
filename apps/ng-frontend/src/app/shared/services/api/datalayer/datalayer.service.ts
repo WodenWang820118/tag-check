@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { InspectEvent } from '../../../models/inspectData.interface';
+import { IInspectEvent } from '../../../models/inspectData.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +13,7 @@ export class DataLayerService {
     projectSlug: string,
     eventName: string,
     headless?: boolean,
-    inspectEventDto?: InspectEvent
+    inspectEventDto?: IInspectEvent
   ) {
     // console.log('runDataLayerCheck', projectSlug, eventName, headless);
     // console.log('inspectEventDto', inspectEventDto);
