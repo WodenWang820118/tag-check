@@ -1,4 +1,4 @@
-export interface InspectEvent {
+export interface IInspectEvent {
   application: {
     localStorage: {
       data: any[];
