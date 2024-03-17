@@ -26,7 +26,7 @@
         <a
           style="text-decoration: none"
           [routerLink]="['./', element.eventName]"
-          (click)="setReportDetails(element.eventName)"
+          (click)="dataSourceFacadeService.setReportDetails(element.eventName)"
           matBadge="bookmark_border"
           [matBadgeHidden]="
             !preventNavigationEvents.includes(element.eventName)
@@ -78,7 +78,9 @@
           <mat-icon>keyboard_arrow_down</mat-icon>
           }
         </button> -->
-        @if (isRunningTest && eventRunningTest === element.eventName) {
+        @if ((testRunningFacadeService.isRunningTest$ | async) &&
+        (testRunningFacadeService.eventRunningTest$ | async) ===
+        element.eventName) {
         <mat-progress-spinner
           class="spinner"
           color="primary"
@@ -86,7 +88,7 @@
           diameter="30"
         >
         </mat-progress-spinner>
-        } @else { @if (hasRecording(element.eventName)) {
+        } @else { @if (projectFacadeService.hasRecording(element.eventName)) {
         <button
           mat-icon-button
           aria-label="run test"
@@ -99,7 +101,7 @@
           mat-icon-button
           aria-label="add recording"
           [routerLink]="['./', element.eventName]"
-          (click)="setReportDetails(element.eventName)"
+          (click)="dataSourceFacadeService.setReportDetails(element.eventName)"
           matTooltipPosition="above"
           matTooltip="Please add recording to run test"
         >
@@ -127,7 +129,9 @@
             mat-raised-button
             color="primary"
             [routerLink]="['./', element.eventName]"
-            (click)="setReportDetails(element.eventName)"
+            (click)="
+              dataSourceFacadeService.setReportDetails(element.eventName)
+            "
           >
             Details
           </button>

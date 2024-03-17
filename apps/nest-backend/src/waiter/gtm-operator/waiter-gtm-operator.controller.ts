@@ -2,10 +2,15 @@ import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Body, Controller, Logger, Param, Post, Query } from '@nestjs/common';
 import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
 import { InspectEventDto } from '../../dto/inspect-event.dto';
+import { ValidationResult } from '../../interfaces/dataLayer.interface';
+import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
 
 @Controller('datalayer')
 export class WaiterGtmOperatorController {
-  constructor(private waiterGtmOperatorService: WaiterGtmOperatorService) {}
+  constructor(
+    private waiterGtmOperatorService: WaiterGtmOperatorService,
+    private abstractRerportService: AbstractReportService
+  ) {}
 
   @ApiOperation({
     summary: 'Inspects a single event dataLayer with GTM',
@@ -57,7 +62,12 @@ export class WaiterGtmOperatorController {
     @Body() inspectEventDto?: InspectEventDto
   ) {
     const settings = inspectEventDto;
-    await this.waiterGtmOperatorService.inspectSingleEventViaGtm(
+    const results: {
+      dataLayerResult: ValidationResult;
+      rawRequest: string;
+      requestCheckResult: ValidationResult;
+      destinationUrl: string;
+    } = await this.waiterGtmOperatorService.inspectSingleEventViaGtm(
       gtmUrl,
       projectSlug,
       eventName,
@@ -69,5 +79,14 @@ export class WaiterGtmOperatorController {
       },
       settings
     );
+
+    Logger.log(results, 'waiter.inspectSingleEventViaGtm');
+
+    const abstractReport =
+      this.abstractRerportService.getSingleAbstractTestResultJson(
+        projectSlug,
+        eventName
+      );
+    return [abstractReport];
   }
 }
