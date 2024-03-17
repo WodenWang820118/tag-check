@@ -1,4 +1,4 @@
-import { Gtm } from './setting.interface';
+import { Application, Authentication, Gtm } from './setting.interface';
 
 export interface Project {
   rootProject: string;
@@ -16,14 +16,8 @@ export interface Project {
   specs: string[];
   browser: string[];
   gtm: Gtm;
-  application: {
-    localStorage: {
-      data: { key: string; value: string }[];
-    };
-    cookie: {
-      data: { key: string; value: string }[];
-    };
-  };
+  application: Application;
+  authentication: Authentication;
 }
 
 // TODO: duplicate schema between settings and project

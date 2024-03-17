@@ -18,6 +18,7 @@ import { ProjectInfoFormComponent } from '../../../../shared/components/project-
 import { BrowserFormComponent } from '../../../../shared/components/browser-form/browser-form.component';
 import { GtmFormComponent } from '../../../../shared/components/gtm-form/gtm-form.component';
 import { ProjectIoFormComponent } from '../../../../shared/components/project-io-form/project-io-form.component';
+import { AuthenticationFormComponent } from '../../../../shared/components/authentication-form/authentication-form.component';
 
 @Component({
   selector: 'app-project-view',
@@ -40,6 +41,7 @@ import { ProjectIoFormComponent } from '../../../../shared/components/project-io
     BrowserFormComponent,
     GtmFormComponent,
     ProjectIoFormComponent,
+    AuthenticationFormComponent,
   ],
   templateUrl: './settings-view.component.html',
   styleUrls: ['./settings-view.component.scss'],

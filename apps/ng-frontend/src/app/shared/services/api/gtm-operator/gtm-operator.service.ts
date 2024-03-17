@@ -14,12 +14,14 @@ export class GtmOperatorService {
     eventName: string,
     gtmUrl: string,
     headless?: boolean,
-    inspectEventDto?: IInspectEvent
+    inspectEventDto?: IInspectEvent,
+    username?: string,
+    password?: string
   ) {
     const encodedGtmUrl = encodeURIComponent(gtmUrl);
 
     return this.http.post(
-      `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventName}?gtmUrl=${encodedGtmUrl}&headless=${headless}`,
+      `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventName}?gtmUrl=${encodedGtmUrl}&headless=${headless}?username=${username}?password=${password}`,
       {
         inspectEventDto: inspectEventDto ? inspectEventDto : {},
       }
