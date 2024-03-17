@@ -13,12 +13,14 @@ export class DataLayerService {
     projectSlug: string,
     eventName: string,
     headless?: boolean,
-    inspectEventDto?: IInspectEvent
+    inspectEventDto?: IInspectEvent,
+    username?: string,
+    password?: string
   ) {
     // console.log('runDataLayerCheck', projectSlug, eventName, headless);
     // console.log('inspectEventDto', inspectEventDto);
     return this.http.post(
-      `${environment.dataLayerApiUrl}/${projectSlug}/${eventName}?headless=${headless}`,
+      `${environment.dataLayerApiUrl}/${projectSlug}/${eventName}?headless=${headless}?username=${username}?password=${password}`,
       {
         inspectEventDto: inspectEventDto ? inspectEventDto : {},
       }

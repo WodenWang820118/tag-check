@@ -20,6 +20,12 @@ interface Setting {
   application: Application;
   browser: string[];
   headless: boolean;
+  authentication: Authentication;
+}
+
+export interface Authentication {
+  username: string;
+  password: string;
 }
 
 export interface Gtm {

@@ -56,7 +56,9 @@ export class TestRunningFacadeService {
               eventName,
               project.gtm.gtmPreviewModeUrl,
               headless,
-              inspectEventDto
+              inspectEventDto,
+              project.authentication.username,
+              project.authentication.password
             );
           }
 
@@ -64,7 +66,9 @@ export class TestRunningFacadeService {
             slug,
             eventName,
             headless,
-            inspectEventDto
+            inspectEventDto,
+            project.authentication.username,
+            project.authentication.password
           );
         })
       )
