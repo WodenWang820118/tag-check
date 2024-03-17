@@ -4,6 +4,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
   Logger,
   Param,
   Post,
@@ -12,12 +13,15 @@ import {
 } from '@nestjs/common';
 import { WaiterDataLayerSingleEventService } from './waiter-datalayer-single-event.service';
 import { InspectEventDto } from '../../dto/inspect-event.dto';
+import { ValidationResult } from '../../interfaces/dataLayer.interface';
+import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
 
 @Controller('datalayer')
 export class WaiterDataLayerController {
   constructor(
     private waiterDataLayerGroupEventsService: WaiterDataLayerGroupEventsService,
-    private waiterDataLayerSingleEventService: WaiterDataLayerSingleEventService
+    private waiterDataLayerSingleEventService: WaiterDataLayerSingleEventService,
+    private abstractReportService: AbstractReportService
   ) {}
 
   @ApiOperation({
@@ -60,7 +64,7 @@ export class WaiterDataLayerController {
     description: 'Optional password for authentication purposes.',
   })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
-  @Post(':projectSlug/:eventName')
+  @Post('/:projectSlug/:eventName')
   async inspectSingleEvent(
     @Param('projectSlug') projectSlug: string,
     @Param('eventName') eventName: string,
@@ -72,20 +76,43 @@ export class WaiterDataLayerController {
     @Body(ValidationPipe) inspectEventDto?: InspectEventDto
   ) {
     // if no measurementId is provided, no need to grab requests
+    try {
+      const inspectionEventSettings = inspectEventDto;
+      const results: {
+        dataLayerResult: ValidationResult;
+        rawRequest: string;
+        requestCheckResult: ValidationResult;
+        destinationUrl: string;
+      }[] = await this.waiterDataLayerSingleEventService.inspectSingleEvent(
+        projectSlug,
+        eventName,
+        headless,
+        path,
+        measurementId,
+        {
+          username,
+          password,
+        },
+        inspectionEventSettings
+      );
+      Logger.log(results, 'waiter.inspectSingleEvent');
 
-    const inspectionEventSettings = inspectEventDto;
-    return await this.waiterDataLayerSingleEventService.inspectSingleEvent(
-      projectSlug,
-      eventName,
-      headless,
-      path,
-      measurementId,
-      {
-        username,
-        password,
-      },
-      inspectionEventSettings
-    );
+      const abstractReport =
+        await this.abstractReportService.getSingleAbstractTestResultJson(
+          projectSlug,
+          eventName
+        );
+      return [abstractReport];
+    } catch (error) {
+      Logger.error(error, 'waiter.inspectSingleEvent');
+      throw new HttpException(
+        {
+          status: 500,
+          error: error.message,
+        },
+        500
+      );
+    }
   }
 
   @Get(':projectSlug')

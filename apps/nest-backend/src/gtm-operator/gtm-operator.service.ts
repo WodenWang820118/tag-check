@@ -30,7 +30,7 @@ export class GtmOperatorService {
   ) {
     // set the defaultViewport to null to use maximum viewport size
     const browser = await puppeteer.launch({
-      headless: headless === 'new' ? 'new' : false,
+      headless: headless === 'true' ? 'new' : false,
       // devtools: true,
       defaultViewport: null,
       timeout: 30000,
@@ -60,6 +60,7 @@ export class GtmOperatorService {
     );
 
     const testingPage = await target.page();
+    await sleep(1000);
     // Close the initial blank page for cleaner operations
     const pages = await browser.pages();
     if (pages.length > 0 && pages[0].url() === 'about:blank') {
@@ -67,9 +68,8 @@ export class GtmOperatorService {
     }
 
     await sleep(1000);
-
     try {
-      await this.inspectorSingleEventService.inspectDataLayer(
+      return await this.inspectorSingleEventService.inspectDataLayer(
         testingPage,
         projectName,
         testName,

@@ -15,7 +15,7 @@ export class WaiterGtmOperatorService {
     credentials?: Credentials,
     inspectEventDto?: InspectEventDto
   ) {
-    await this.gtmOperatorService.inspectSingleEventViaGtm(
+    return await this.gtmOperatorService.inspectSingleEventViaGtm(
       gtmUrl,
       projectName,
       testName,

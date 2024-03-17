@@ -2,16 +2,18 @@ import { FolderService } from './../folder/folder.service';
 import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ValidationResult } from '../../interfaces/dataLayer.interface';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, statSync, writeFileSync } from 'fs';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
+import { FileService } from '../file/file.service';
 
 @Injectable()
 export class AbstractReportService {
   constructor(
     private folderPathService: FolderPathService,
     private folderService: FolderService,
-    private filePathService: FilePathService
+    private filePathService: FilePathService,
+    private fileService: FileService
   ) {}
 
   async writeSingleAbstractTestResultJson(
@@ -96,6 +98,37 @@ export class AbstractReportService {
         'AbstractReportService.deleteSingleAbstractTestResultFolder'
       );
       throw new HttpException('Failed to delete report', 500);
+    }
+  }
+
+  async getSingleAbstractTestResultJson(
+    projectSlug: string,
+    eventName: string
+  ) {
+    try {
+      const filePath = await this.filePathService.getInspectionResultFilePath(
+        projectSlug,
+        eventName,
+        ABSTRACT_REPORT_FILE_NAME
+      );
+
+      if (!existsSync(filePath)) {
+        throw new HttpException('Report not found', 404);
+      }
+
+      const completedTime = statSync(filePath).mtime;
+
+      return {
+        eventName: eventName,
+        ...this.fileService.readJsonFile(filePath),
+        completedTime,
+      };
+    } catch (error) {
+      Logger.error(
+        error.message,
+        'AbstractReportService.getSingleAbstractTestResultJson'
+      );
+      throw new HttpException('Failed to read report', 500);
     }
   }
 }
