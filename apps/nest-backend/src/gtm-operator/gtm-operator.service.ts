@@ -1,10 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import puppeteer, { Credentials } from 'puppeteer';
-import { InspectorGroupEventsService } from '../inspector/inspector-group-events.service';
 import { BROWSER_ARGS } from '../configs/project.config';
-import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
 import { InspectEventDto } from '../dto/inspect-event.dto';
 import { sleep } from '../web-agent/action/action-utils';
+import { PipelineService } from '../pipeline/pipeline.service';
 
 /**
  * A service for interacting with Google Tag Manager (GTM) via Puppeteer.
@@ -14,10 +13,7 @@ import { sleep } from '../web-agent/action/action-utils';
  */
 @Injectable()
 export class GtmOperatorService {
-  constructor(
-    private inspectorGroupEventsService: InspectorGroupEventsService,
-    private inspectorSingleEventService: InspectorSingleEventService
-  ) {}
+  constructor(private pipelineService: PipelineService) {}
 
   async inspectSingleEventViaGtm(
     gtmUrl: string,
@@ -69,7 +65,7 @@ export class GtmOperatorService {
 
     await sleep(1000);
     try {
-      return await this.inspectorSingleEventService.inspectDataLayer(
+      return this.pipelineService.singleEventInspectionRecipe(
         testingPage,
         projectName,
         testName,
@@ -77,7 +73,7 @@ export class GtmOperatorService {
         filePath,
         undefined,
         credentials,
-        (inspectEventDto as any).inspectEventDto.application
+        inspectEventDto
       );
     } catch (error) {
       Logger.error(error.message, 'inspector.inspectProjectDataLayer');
