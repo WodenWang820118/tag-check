@@ -67,7 +67,7 @@ export class WaiterGtmOperatorController {
       rawRequest: string;
       requestCheckResult: ValidationResult;
       destinationUrl: string;
-    } = await this.waiterGtmOperatorService.inspectSingleEventViaGtm(
+    }[] = await this.waiterGtmOperatorService.inspectSingleEventViaGtm(
       gtmUrl,
       projectSlug,
       eventName,
