@@ -15,6 +15,7 @@ export class WaiterDataLayerSingleEventService {
     private abstractReportService: AbstractReportService
   ) {}
 
+  // TODO: The process should align with the gtm-operator endpoint, using the same inspectSingleEvent method
   async inspectSingleEvent(
     projectName: string,
     testName: string,
@@ -32,7 +33,7 @@ export class WaiterDataLayerSingleEventService {
       args:
         (inspectEventDto as any).inspectEventDto.puppeteerArgs || BROWSER_ARGS,
     });
-
+    Logger.log('Browser launched', 'waiter.inspectSingleEvent');
     const [page] = await browser.pages();
 
     const result = await this.inspectorSingleEventService.inspectDataLayer(
@@ -46,15 +47,19 @@ export class WaiterDataLayerSingleEventService {
       (inspectEventDto as any).inspectEventDto.application
     );
 
+    Logger.log('DataLayer inspected', 'waiter.inspectSingleEvent');
+
     // 3.2) construct the data to be written to the xlsx file
     const data = [
       {
-        dataLayerResult: result.dataLayerCheckResult,
+        dataLayerResult: result.dataLayerResult,
         rawRequest: result.rawRequest,
         requestCheckResult: result.requestCheckResult,
         destinationUrl: result.destinationUrl,
       },
     ];
+
+    Logger.log('Data constructed', 'waiter.inspectSingleEvent');
     // 3.3) write the data to the xlsx file
     const timestamp = getCurrentTimestamp();
     await this.xlsxReportSingleEventService.writeXlsxFile(

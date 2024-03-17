@@ -1,6 +1,11 @@
-import { ProjectDataSourceService } from '../../../../shared/services/project-data-source/project-data-source.service';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  Input,
+  OnDestroy,
+  ViewChild,
+} from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import {
@@ -11,33 +16,20 @@ import {
   trigger,
 } from '@angular/animations';
 import { MatButtonModule } from '@angular/material/button';
-import {
-  EMPTY,
-  Observable,
-  Subject,
-  combineLatest,
-  switchMap,
-  take,
-  takeUntil,
-  tap,
-} from 'rxjs';
+import { EMPTY, Observable, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { IReportDetails } from '../../../../shared/models/report.interface';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-import { ReportDetailsService } from '../../../../shared/services/report-details/report-details.service';
+import { RouterModule } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
-import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { Project } from '../../../../shared/models/project.interface';
-import { DataLayerService } from '../../../../shared/services/api/datalayer/datalayer.service';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatBadgeModule } from '@angular/material/badge';
-import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
-import { IInspectEvent } from '../../../../shared/models/inspectData.interface';
-import { GtmOperatorService } from '../../../../shared/services/api/gtm-operator/gtm-operator.service';
-import { InspectEventDto, getNewPreventNavigationEvents } from './utils';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { DataSourceFacadeService } from '../../../../shared/services/facade/data-source-facade.service';
+import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
+import { ProjectFacadeService } from './../../../../shared/services/facade/project-facade.service';
 
 @Component({
   selector: 'app-report-table',
@@ -54,6 +46,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatBadgeModule,
     MatProgressSpinnerModule,
   ],
+  providers: [
+    ProjectFacadeService,
+    DataSourceFacadeService,
+    TestRunningFacadeService,
+  ],
   animations: [
     trigger('detailExpand', [
       state('collapsed,void', style({ height: '0px', minHeight: '0' })),
@@ -67,148 +64,45 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   templateUrl: './report-table.component.html',
   styleUrls: ['./report-table.component.scss'],
 })
-export class ReportTableComponent implements OnInit, OnDestroy {
+export class ReportTableComponent implements AfterViewInit, OnDestroy {
   columnsToDisplay = ['eventName', 'passed', 'completedTime'];
   columnsToDisplayWithExpand = ['select', ...this.columnsToDisplay, 'expand'];
   expandedElement: Report | null = null;
   testDataSource!: MatTableDataSource<IReportDetails>;
   selection = new SelectionModel<IReportDetails>(true, []);
   preventNavigationEvents: string[] = [];
-  isRunningTest = false;
-  eventRunningTest = '';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @Input() project$!: Observable<Project>;
 
-  private hasRecordingMap: Map<string, boolean> = new Map();
   destroy$ = new Subject<void>();
 
   constructor(
-    private reportService: ReportService,
-    private reportDetailsService: ReportDetailsService,
-    private projectDataSourceService: ProjectDataSourceService,
-    private route: ActivatedRoute,
-    private dataLayerService: DataLayerService,
-    private gtmOperatorService: GtmOperatorService,
-    private settingsService: SettingsService
+    public projectFacadeService: ProjectFacadeService,
+    public dataSourceFacadeService: DataSourceFacadeService,
+    public testRunningFacadeService: TestRunningFacadeService
   ) {}
 
-  ngOnInit() {
-    this.observeProjectRecordingStatus();
-    this.subscribeToRouteChanges();
-    this.observeTableFilter();
-    this.observeDeleteSelected();
-    this.observeNavigationEvents();
-    this.observePreventNavigationSelected();
-  }
+  ngAfterViewInit() {
+    this.observeProject().pipe(takeUntil(this.destroy$)).subscribe();
 
-  observeProjectRecordingStatus() {
-    this.project$
+    this.projectFacadeService
+      .observeProjectRecordingStatus(this.project$)
+      .subscribe();
+
+    this.projectFacadeService
+      .observeNavigationEvents()
       .pipe(
         takeUntil(this.destroy$),
-        tap((project) => {
-          this.initializeRecordingStatus(project.specs, project.recordings);
+        tap((preventNavigationEvents) => {
+          this.preventNavigationEvents = preventNavigationEvents;
         })
       )
       .subscribe();
-  }
 
-  initializeRecordingStatus(specs: any[], recordings: string[]) {
-    this.hasRecordingMap.clear();
-    specs.forEach((spec) => {
-      this.hasRecordingMap.set(spec.event, recordings.includes(spec.event));
-    });
-  }
-
-  // Method to check if an event has a recording
-  hasRecording(eventName: string): boolean {
-    return this.hasRecordingMap.get(eventName) || false;
-  }
-
-  observeNavigationEvents() {
-    this.route.params
-      .pipe(
-        takeUntil(this.destroy$),
-        switchMap((params) => {
-          const slug = params['projectSlug'];
-          return this.settingsService.getProjectSettings(slug);
-        }),
-        tap((project) => {
-          this.preventNavigationEvents =
-            project.settings['preventNavigationEvents'];
-        })
-      )
-      .subscribe();
-  }
-
-  observePreventNavigationSelected() {
-    combineLatest([
-      this.route.params,
-      this.projectDataSourceService.getPreventNavigationStream(),
-    ])
-      .pipe(
-        takeUntil(this.destroy$),
-        switchMap(([params, value]) => {
-          const projectSlug = params['projectSlug'];
-          if (value === true) {
-            // reset the prevent navigation stream
-            this.projectDataSourceService.setPreventNavigationStream(false);
-            // delete the selected reports
-            const eventNames = this.selection.selected.map(
-              (item) => item.eventName
-            );
-            this.preventNavigationEvents = getNewPreventNavigationEvents(
-              eventNames,
-              this.preventNavigationEvents
-            );
-            this.selection.clear();
-            return this.settingsService.updateSettings(
-              projectSlug,
-              'preventNavigationEvents',
-              {
-                preventNavigationEvents: eventNames,
-              }
-            );
-          }
-          return EMPTY;
-        })
-      )
-      .subscribe();
-  }
-
-  observeDeleteSelected() {
-    combineLatest([
-      this.route.params,
-      this.projectDataSourceService.getDeletedStream(),
-    ])
-      .pipe(
-        takeUntil(this.destroy$),
-        switchMap(([params, value]) => {
-          const projectSlug = params['projectSlug'];
-          if (value === true) {
-            console.log('delete selected in the report table component');
-            // reset the deleted stream
-            this.projectDataSourceService.setDeletedStream(false);
-            // delete the selected reports
-            const remainingReports = this.testDataSource.data.filter(
-              (item) => !this.selection.selected.includes(item)
-            );
-            this.testDataSource.data = remainingReports;
-            return this.reportService.deleteReports(
-              projectSlug,
-              this.selection.selected
-            );
-          }
-          return EMPTY;
-        })
-      )
-      .subscribe();
-  }
-
-  observeTableFilter() {
-    this.projectDataSourceService
-      .getFilterStream()
+    this.dataSourceFacadeService
+      .observeTableFilter()
       .pipe(
         takeUntil(this.destroy$),
         tap((filter) => {
@@ -216,98 +110,47 @@ export class ReportTableComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe();
-  }
 
-  subscribeToRouteChanges() {
-    // when the route changes, get the project reports and initialize the data source
-    // otherwise, update the data source when the project reports change
-    combineLatest([this.route.params, this.project$])
+    this.dataSourceFacadeService
+      .observePreventNavigationSelected(this.selection)
       .pipe(
         takeUntil(this.destroy$),
-        switchMap(([params, project]) => {
-          const slug = params['projectSlug'];
-          return this.reportService.getProjectReports(slug).pipe(
-            tap((project) => {
-              if (project) {
-                this.initializeDataSource(project.reports);
-              }
-            })
-          );
+        tap((projectSetting) => {
+          this.preventNavigationEvents =
+            projectSetting.settings.preventNavigationEvents;
         })
       )
       .subscribe();
   }
 
-  initializeDataSource(reports: IReportDetails[]) {
-    this.testDataSource = new MatTableDataSource(reports);
-    // Make sure to set paginator and sort after view init
-    setTimeout(() => {
-      this.testDataSource.paginator = this.paginator;
-      this.testDataSource.sort = this.sort;
-      this.projectDataSourceService.setData(reports);
-    });
-  }
-
-  setReportDetails(eventName: string) {
-    this.route.params
+  observeProject() {
+    return this.dataSourceFacadeService
+      .observeProject(this.project$, this.paginator, this.sort)
       .pipe(
         takeUntil(this.destroy$),
-        switchMap((params) => {
-          const slug = params['projectSlug'];
-          return this.reportService.getProjectReports(slug).pipe(
-            tap((project) => {
-              if (project) {
-                const reports = project.reports;
-                const report = reports.find(
-                  (item) => item.eventName === eventName
-                );
-                this.reportDetailsService.setReportDetails(report);
-              }
-            })
-          );
-        })
-      )
-      .subscribe();
+        switchMap(
+          (
+            dataSource: MatTableDataSource<IReportDetails, MatPaginator> | null
+          ) => {
+            if (dataSource) {
+              this.testDataSource = dataSource;
+              return this.dataSourceFacadeService.observeDeleteSelected(
+                this.selection,
+                this.testDataSource
+              );
+            }
+            return EMPTY;
+          }
+        )
+      );
   }
 
   runTest(eventName: string) {
-    combineLatest([this.route.params, this.project$])
-      .pipe(
-        take(1),
-        switchMap(([params, project]) => {
-          const slug = params['projectSlug'];
-          const headless = project.headless;
-          const inspectEventDto: IInspectEvent = new InspectEventDto(project);
-          // TODO: change the play button to a spinner
-          this.isRunningTest = true;
-          this.eventRunningTest = eventName;
-
-          if (project.gtm.isAccompanyMode) {
-            return this.gtmOperatorService.runDataLayerCheckViaGtm(
-              slug,
-              eventName,
-              project.gtm.gtmPreviewModeUrl,
-              headless,
-              inspectEventDto
-            );
-          }
-
-          return this.dataLayerService.runDataLayerCheck(
-            slug,
-            eventName,
-            headless,
-            inspectEventDto
-          );
-        })
-      )
-      .subscribe((res) => {
-        console.log('res', res);
-        // TODO: handle the response
-        this.isRunningTest = false;
-        this.eventRunningTest = '';
-        // TODO: change the spinner back to the play button
-        // TODO: update the report details with the new data
-      });
+    this.testRunningFacadeService.runTest(
+      eventName,
+      this.project$,
+      this.testDataSource
+    );
   }
 
   /** Whether the number of selected elements matches the total number of rows. */
