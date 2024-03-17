@@ -34,10 +34,35 @@ export class WaiterSettingsService {
         return this.updateGtmSettings(projectSlug, partialSettings);
       case 'preventNavigationEvents':
         return this.updatePreventNavigationEvents(projectSlug, partialSettings);
+      case 'authentication':
+        return this.updateAuthenticationSettings(projectSlug, partialSettings);
       case 'others':
         return this.updateGeneralSettings(projectSlug, partialSettings);
       default:
         return;
+    }
+  }
+
+  async updateAuthenticationSettings(projectSlug: string, settings: any) {
+    try {
+      const filePath = await this.filePathService.getProjectSettingFilePath(
+        projectSlug
+      );
+
+      const currentSettings = await this.fileService.readJsonFile(filePath);
+
+      const updatedSettings = {
+        ...currentSettings,
+        authentication: {
+          ...settings,
+        },
+      };
+
+      await this.fileService.writeJsonFile(filePath, updatedSettings);
+      return updatedSettings;
+    } catch (error) {
+      Logger.error('Error updating settings', error);
+      throw new HttpException('Error updating settings', 500);
     }
   }
 
