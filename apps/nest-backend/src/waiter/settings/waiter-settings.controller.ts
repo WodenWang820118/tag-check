@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Put,
-  Body,
-  Post,
-  Logger,
-} from '@nestjs/common';
+import { Controller, Get, Param, Put, Body, Logger } from '@nestjs/common';
 import { WaiterSettingsService } from './waiter-settings.service';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 
@@ -52,34 +44,15 @@ export class WaiterSettingsController {
     @Param('section') section: string,
     @Body() settings: any
   ) {
-    return await this.waiterSettingsService.updateProjectSettings(
-      projectSlug,
-      section,
-      settings
-    );
-  }
-
-  @Post(':projectSlug')
-  @ApiOperation({
-    summary: 'create project settings',
-    description:
-      'Create settings for a project. The project is identified by the projectSlug.',
-  })
-  @ApiParam({
-    name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.',
-  })
-  @ApiBody({
-    description: 'The settings to create.',
-    type: Object,
-  })
-  async createProjectSettings(
-    @Param('projectSlug') projectSlug: string,
-    @Body() settings: any
-  ) {
-    return await this.waiterSettingsService.createProjectSettings(
-      projectSlug,
-      settings
-    );
+    const updatedSettings =
+      await this.waiterSettingsService.updateProjectSettings(
+        projectSlug,
+        section,
+        settings
+      );
+    return {
+      projectSlug: projectSlug,
+      settings: updatedSettings,
+    };
   }
 }
