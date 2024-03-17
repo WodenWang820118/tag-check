@@ -8,6 +8,7 @@ import { InspectorModule } from '../inspector/inspector.module';
 import { GtmOperatorModule } from '../gtm-operator/gtm-operator.module';
 import { GcsMonitorModule } from '../gcs-monitor/gcs-monitor.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
+import { PipelineModule } from '../pipeline/pipeline.module';
 
 // controllers
 import { WaiterProjectWorkFlowController } from './project/waiter-project-workflow.controller';
@@ -63,6 +64,7 @@ const waiterServices = [
     GtmOperatorModule,
     GcsMonitorModule,
     ConfigurationModule,
+    PipelineModule,
   ],
   controllers: [
     WaiterProjectWorkFlowController,
