@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
 import path from 'path';
 
@@ -26,7 +26,7 @@ export class FolderService {
       return files.filter((file) => path.extname(file) === '.json');
     } catch (error) {
       Logger.error(error.message, 'FolderService.getJsonFilesFromDir');
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -35,7 +35,7 @@ export class FolderService {
       rmSync(folderPath, { recursive: true });
     } catch (error) {
       Logger.error(error.message, 'FolderService.deleteFolder');
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

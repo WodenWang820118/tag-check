@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 
@@ -54,13 +54,7 @@ export class WaiterSpecService {
       };
     } catch (error) {
       Logger.error(error.message, 'WaiterSpecService.addSpec');
-      throw new HttpException(
-        {
-          status: 'error',
-          message: 'Error adding spec',
-        },
-        500
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -88,13 +82,7 @@ export class WaiterSpecService {
       };
     } catch (error) {
       Logger.error(error.message, 'WaiterSpecService.updateSpec');
-      throw new HttpException(
-        {
-          status: 'error',
-          message: 'Error updating spec',
-        },
-        500
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

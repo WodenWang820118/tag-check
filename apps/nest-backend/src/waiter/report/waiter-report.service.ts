@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../../os/file/file.service';
 import { FolderService } from '../../os/folder/folder.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
@@ -17,7 +17,7 @@ export class WaiterReportService {
     private abstractReportService: AbstractReportService
   ) {}
 
-  // verified
+  // TODO: refactor and resue the method from the abstract-report.service
   async getProjectReports(projectSlug: string) {
     try {
       const folderNames = this.folderService.readFolderFileNames(
@@ -52,7 +52,10 @@ export class WaiterReportService {
       };
     } catch (error) {
       Logger.error(error);
-      throw new HttpException('Failed to get project reports', 500);
+      throw new HttpException(
+        'Failed to get project reports',
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 
