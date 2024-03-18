@@ -1,8 +1,14 @@
-import { Injectable, StreamableFile } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  StreamableFile,
+} from '@nestjs/common';
 import { ProjectIoService } from '../../os/project-io/project-io.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { join } from 'path';
-import { createReadStream, mkdirSync } from 'fs';
+import { createReadStream, existsSync, mkdirSync } from 'fs';
 import { FolderService } from '../../os/folder/folder.service';
 
 @Injectable()
@@ -14,25 +20,42 @@ export class WaiterProjectIoService {
   ) {}
 
   async exportProject(projectSlug: string) {
-    const projectRootFolderPath =
-      await this.folderPathService.getRootProjectFolderPath();
-    const projectPath = await this.folderPathService.getProjectFolderPath(
-      projectSlug
-    );
-    const tempFolder = join(projectRootFolderPath, 'temp');
-    mkdirSync(tempFolder, { recursive: true });
+    try {
+      const projectRootFolderPath =
+        await this.folderPathService.getRootProjectFolderPath();
+      const projectPath = await this.folderPathService.getProjectFolderPath(
+        projectSlug
+      );
 
-    const projectZipPath = join(tempFolder, `${projectSlug}.zip`);
+      if (!existsSync(projectPath) || !existsSync(projectPath)) {
+        throw new HttpException(
+          `Project with slug ${projectSlug} not found`,
+          HttpStatus.NOT_FOUND
+        );
+      }
 
-    await this.projectIoService.compressProject(projectPath, projectZipPath);
-    const fileStream = createReadStream(projectZipPath);
+      const tempFolder = join(projectRootFolderPath, 'temp');
+      mkdirSync(tempFolder, { recursive: true });
 
-    fileStream.on('close', () => {
-      // Wait for the stream to close before deleting the folder
-      this.folderService.deleteFolder(tempFolder);
-    });
+      const projectZipPath = join(tempFolder, `${projectSlug}.zip`);
 
-    return new StreamableFile(fileStream);
+      await this.projectIoService.compressProject(projectPath, projectZipPath);
+      const fileStream = createReadStream(projectZipPath);
+
+      fileStream.on('close', () => {
+        // Wait for the stream to close before deleting the folder
+        this.folderService.deleteFolder(tempFolder);
+      });
+
+      return new StreamableFile(fileStream);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      Logger.error(error.message, 'WaiterProjectIoService.exportProject');
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 
   async importProject(

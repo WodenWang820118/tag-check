@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 
@@ -62,7 +62,7 @@ export class WaiterSettingsService {
       return updatedSettings;
     } catch (error) {
       Logger.error('Error updating settings', error);
-      throw new HttpException('Error updating settings', 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -109,7 +109,7 @@ export class WaiterSettingsService {
       return updatedSettings;
     } catch (error) {
       Logger.error('Error updating settings', error);
-      throw new HttpException('Error updating settings', 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -134,7 +134,7 @@ export class WaiterSettingsService {
       return updatedSettings;
     } catch (error) {
       Logger.error('Error updating settings', error);
-      throw new HttpException('Error updating settings', 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -155,7 +155,7 @@ export class WaiterSettingsService {
       return updatedSettings;
     } catch (error) {
       Logger.error('Error updating settings', error);
-      throw new HttpException('Error updating settings', 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -185,7 +185,7 @@ export class WaiterSettingsService {
       return updatedSettings;
     } catch (error) {
       Logger.error('Error updating settings', error);
-      throw new HttpException('Error updating settings', 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -226,7 +226,7 @@ export class WaiterSettingsService {
       return updatedSettings;
     } catch (error) {
       Logger.error('Error updating settings', error);
-      throw new HttpException('Error updating settings', 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

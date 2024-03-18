@@ -1,4 +1,4 @@
-import { HttpException, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Logger } from '@nestjs/common';
 import {
   BaseDataLayerEvent,
   StrictDataLayerEvent,
@@ -51,6 +51,6 @@ export function determineStrategy(spec: StrictDataLayerEvent) {
   } catch (error) {
     const errorMessage = `There is no spec available for determining strategy.`;
     Logger.error(errorMessage, 'Utilities.determineStrategy');
-    throw new HttpException(errorMessage, 500);
+    throw new HttpException(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

@@ -1,7 +1,6 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { createReadStream, createWriteStream } from 'fs';
 import * as unzipper from 'unzipper';
-
 import archiver from 'archiver';
 
 @Injectable()
@@ -21,14 +20,25 @@ export class ProjectIoService {
 
       archive.on('error', function (err) {
         Logger.log(err);
+        throw new HttpException(
+          'Failed to compress project',
+          HttpStatus.BAD_REQUEST
+        );
       });
 
       archive.pipe(output);
       archive.directory(projectFolderPath, false);
       await archive.finalize();
     } catch (error) {
-      Logger.error(error);
-      throw new HttpException('Failed to compress project', 500);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      Logger.error(error.message);
+      throw new HttpException(
+        'Failed to compress project',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
@@ -43,8 +53,11 @@ export class ProjectIoService {
         .pipe(unzipper.Extract({ path: outputPath }))
         .promise();
     } catch (error) {
-      Logger.error(error);
-      throw new HttpException('Failed to unzip project', 500);
+      Logger.error(error.message);
+      throw new HttpException(
+        'Failed to unzip project',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 }

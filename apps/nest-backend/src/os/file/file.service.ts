@@ -1,5 +1,6 @@
 import {
   HttpException,
+  HttpStatus,
   Injectable,
   Logger,
   StreamableFile,
@@ -26,7 +27,7 @@ export class FileService {
       return JSON.parse(readFileSync(`${filePath}`, 'utf8'));
     } catch (error) {
       Logger.error(error.message, 'FileService.readJsonFile');
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -40,7 +41,7 @@ export class FileService {
       });
     } catch (error) {
       Logger.error(error.message, 'FileService.getOperationJsonByProject');
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -62,7 +63,7 @@ export class FileService {
       return new StreamableFile(createReadStream(filePath));
     } catch (error) {
       Logger.error(error.message, 'FileService.getEventReport');
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -76,7 +77,7 @@ export class FileService {
       return new StreamableFile(createReadStream(reportPath));
     } catch (error) {
       Logger.error(error.message, 'FileService.readReport');
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

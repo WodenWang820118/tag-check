@@ -1,5 +1,5 @@
 import { FolderService } from './../folder/folder.service';
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ValidationResult } from '../../interfaces/dataLayer.interface';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { existsSync, mkdirSync, statSync, writeFileSync } from 'fs';
@@ -45,6 +45,10 @@ export class AbstractReportService {
         error.message,
         'AbstractReportService.writeSingleAbstractTestResultJson'
       );
+      throw new HttpException(
+        'Failed to write report',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
@@ -88,16 +92,23 @@ export class AbstractReportService {
         );
 
       if (!existsSync(folderPath)) {
-        throw new HttpException('Report not found', 404);
+        throw new HttpException('Report not found', HttpStatus.NOT_FOUND);
       }
 
       this.folderService.deleteFolder(folderPath);
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
       Logger.log(
         error.message,
         'AbstractReportService.deleteSingleAbstractTestResultFolder'
       );
-      throw new HttpException('Failed to delete report', 500);
+      throw new HttpException(
+        'Failed to delete report',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
@@ -113,7 +124,7 @@ export class AbstractReportService {
       );
 
       if (!existsSync(filePath)) {
-        throw new HttpException('Report not found', 404);
+        throw new HttpException('Report not found', HttpStatus.NOT_FOUND);
       }
 
       const completedTime = statSync(filePath).mtime;
@@ -124,11 +135,15 @@ export class AbstractReportService {
         completedTime,
       };
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
       Logger.error(
         error.message,
         'AbstractReportService.getSingleAbstractTestResultJson'
       );
-      throw new HttpException('Failed to read report', 500);
+      throw new HttpException('Failed to read report', HttpStatus.BAD_REQUEST);
     }
   }
 }

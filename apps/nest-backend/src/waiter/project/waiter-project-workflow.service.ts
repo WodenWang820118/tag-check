@@ -1,5 +1,5 @@
 import { SpecParser } from '@datalayer-checker/spec-parser';
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigurationService } from '../../configuration/configuration.service';
 import { ProjectInitializationService } from '../../os/project-initialization/project-initialization.service';
 import { mkdirSync } from 'fs';
@@ -105,7 +105,7 @@ export class WaiterProjectWorkFlowService {
       }
     } catch (error) {
       Logger.error(error, 'WaiterService.setProject');
-      throw new HttpException(error, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -144,6 +144,7 @@ export class WaiterProjectWorkFlowService {
       }
     } catch (error) {
       Logger.error(error, 'WaiterProjectWorkFlowService.setProject');
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
