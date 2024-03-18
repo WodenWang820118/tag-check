@@ -5,6 +5,7 @@ import {
   Controller,
   Get,
   HttpException,
+  HttpStatus,
   Logger,
   Param,
   Post,
@@ -104,14 +105,12 @@ export class WaiterDataLayerController {
         );
       return [abstractReport];
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
       Logger.error(error, 'waiter.inspectSingleEvent');
-      throw new HttpException(
-        {
-          status: 500,
-          error: error.message,
-        },
-        500
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

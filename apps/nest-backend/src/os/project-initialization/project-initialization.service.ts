@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FolderService } from '../folder/folder.service';
 import { FileService } from '../file/file.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
@@ -57,7 +57,7 @@ export class ProjectInitializationService {
       this.setSsettings(configFilePath, []);
     } catch (error) {
       Logger.error(error.message, 'ProjectInitializationService.initProject');
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

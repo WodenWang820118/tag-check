@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../file/file.service';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
@@ -22,7 +22,7 @@ export class ProjectService {
       return this.fileService.readJsonFile(settingsFilePath);
     } catch (error) {
       Logger.error(error.message, 'ProjectService.getProjectSettings');
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -35,7 +35,7 @@ export class ProjectService {
       return recordings;
     } catch (error) {
       Logger.error(error.message, 'ProjectService.getProjectRecordings');
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -67,7 +67,7 @@ export class ProjectService {
       return results;
     } catch (error) {
       Logger.error(error.message, 'ProjectService.getProjectInspectionResults');
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -93,7 +93,7 @@ export class ProjectService {
       return projectsAll;
     } catch (error) {
       Logger.error(error.message, 'ProjectService.getProjects');
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -128,6 +128,7 @@ export class ProjectService {
       };
     } catch (error) {
       Logger.error(error.message, 'ProjectService.getProject');
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

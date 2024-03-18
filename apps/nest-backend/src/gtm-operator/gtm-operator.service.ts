@@ -64,20 +64,16 @@ export class GtmOperatorService {
     }
 
     await sleep(1000);
-    try {
-      return this.pipelineService.singleEventInspectionRecipe(
-        testingPage,
-        projectName,
-        testName,
-        headless,
-        filePath,
-        undefined,
-        credentials,
-        inspectEventDto
-      );
-    } catch (error) {
-      Logger.error(error.message, 'inspector.inspectProjectDataLayer');
-    }
+    return this.pipelineService.singleEventInspectionRecipe(
+      testingPage,
+      projectName,
+      testName,
+      headless,
+      filePath,
+      undefined,
+      credentials,
+      inspectEventDto
+    );
   }
 
   extractBaseUrlFromGtmUrl(gtmUrl: string) {

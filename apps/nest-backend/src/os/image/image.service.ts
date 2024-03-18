@@ -28,12 +28,20 @@ export class ImageService {
       const imagePath = join(imageSavingFolder, `${testName}.png`);
 
       if (!existsSync(imagePath)) {
-        throw new Error(`File not found: ${imagePath}`);
+        Logger.log('File not found', 'SharedService.readImage');
+        throw new HttpException(
+          `File not found: ${imagePath}`,
+          HttpStatus.NOT_FOUND
+        );
       }
 
       Logger.log(imagePath, 'SharedService.readImage');
       return new StreamableFile(createReadStream(imagePath));
     } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
       Logger.error(error.message, 'FileService.readImage');
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
