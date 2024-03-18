@@ -1,16 +1,19 @@
 import {
   Controller,
   Get,
+  HttpException,
+  HttpStatus,
   Logger,
   Param,
   Post,
+  Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { WaiterProjectIoService } from './waiter-project-io.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { Express } from 'express';
+import { Express, Response } from 'express';
 import { ConfigurationService } from '../../configuration/configuration.service';
 
 @Controller('projects')
@@ -43,18 +46,25 @@ export class WaiterProjectIoController {
       },
     })
   )
-  async importProject(@UploadedFile() file: Express.Multer.File) {
-    Logger.log('called importProject');
-    Logger.log('file', file);
-    Logger.log('file', file.path);
-    const rootProjectPath =
-      await this.configurationSerivce.getRootProjectPath();
-    await this.waiterProjectIoService.importProject(
-      file.originalname.split('.')[0],
-      file.path,
-      rootProjectPath
-    );
-    // TODO: consider returning a more meaningful response
-    return { message: 'Project imported successfully' };
+  async importProject(
+    @UploadedFile() file: Express.Multer.File,
+    @Res() response: Response
+  ) {
+    try {
+      Logger.log('called importProject');
+      Logger.log('file', file);
+      Logger.log('file', file.path);
+      const rootProjectPath =
+        await this.configurationSerivce.getRootProjectPath();
+      await this.waiterProjectIoService.importProject(
+        file.originalname.split('.')[0],
+        file.path,
+        rootProjectPath
+      );
+      return response.status(200).send('Project imported successfully');
+    } catch (error) {
+      Logger.error(error.message, 'WaiterProjectIoController.importProject');
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import {
   BaseDataLayerEvent,
   ValidationResult,
@@ -142,14 +142,7 @@ export class InspectorSingleEventService {
       }
     } catch (error) {
       Logger.error(error.message, 'inspector.inspectDataLayer');
-      throw new HttpException(
-        {
-          status: 500,
-          error: 'Internal Server Error',
-          message: error.message,
-        },
-        500
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

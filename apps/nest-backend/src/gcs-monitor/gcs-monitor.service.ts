@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { chunk } from '../utilities/utilities';
 import { Page } from 'puppeteer';
 import puppeteer from 'puppeteer';
@@ -56,7 +56,7 @@ export class GcsMonitorService {
       } catch (error) {
         throw new HttpException(
           'An error occurred while crawling the page responses.',
-          500
+          HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
     });
@@ -146,7 +146,7 @@ export class GcsMonitorService {
           } catch (error) {
             throw new HttpException(
               'An error occurred while observing the GCS via GTM.',
-              500
+              HttpStatus.INTERNAL_SERVER_ERROR
             );
           }
         })

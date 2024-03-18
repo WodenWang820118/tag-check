@@ -1,4 +1,4 @@
-import { Logger, HttpException } from '@nestjs/common';
+import { Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { sleep } from './action-utils';
 import { getFirstSelector } from './handlers/utils';
@@ -46,42 +46,47 @@ export async function handleNavigate(
   state: any,
   application: InspectEventDto['application']
 ) {
-  await page.goto(step.url);
+  try {
+    await page.goto(step.url);
 
-  await sleep(1000); // Necessary delay for the website to update
-  // pre-load the application localStorage if any
-  if (application && application.localStorage) {
-    await page.evaluate((appLocalStorage) => {
-      for (const setting of appLocalStorage.data) {
-        // Correctly access the value property of each setting object
-        console.log(setting, 'StepExecutor.handleNavigate - setting');
-        const value =
-          typeof setting.value === 'object'
-            ? JSON.stringify(setting.value)
-            : setting.value;
-        console.log(`Setting localStorage ${setting.key}=${value}`); // Assuming you have a way to log from here
-        localStorage.setItem(setting.key, value);
-      }
-    }, application.localStorage); // Pass application.localStorage as an argument to the evaluate function
-  }
-
-  // pre-load the application cookies if any
-  if (application.cookie && application.cookie.data) {
-    const cookies = application.cookie.data.map((cookie) => ({
-      name: cookie.key.toString(),
-      value: cookie.value.toString(),
-    }));
-
-    await page.setCookie(...cookies);
-  }
-
-  // then reload the page to make sure the localStorage and cookies are set
-  // try to skip the overlay or popups
-  if (state.isFirstNavigation) {
-    // only reload the landing page, trying to skip the overlay
-    await page.reload();
     await sleep(1000); // Necessary delay for the website to update
-    state.isFirstNavigation = false;
+    // pre-load the application localStorage if any
+    if (application && application.localStorage) {
+      await page.evaluate((appLocalStorage) => {
+        for (const setting of appLocalStorage.data) {
+          // Correctly access the value property of each setting object
+          console.log(setting, 'StepExecutor.handleNavigate - setting');
+          const value =
+            typeof setting.value === 'object'
+              ? JSON.stringify(setting.value)
+              : setting.value;
+          console.log(`Setting localStorage ${setting.key}=${value}`); // Assuming you have a way to log from here
+          localStorage.setItem(setting.key, value);
+        }
+      }, application.localStorage); // Pass application.localStorage as an argument to the evaluate function
+    }
+
+    // pre-load the application cookies if any
+    if (application.cookie && application.cookie.data) {
+      const cookies = application.cookie.data.map((cookie) => ({
+        name: cookie.key.toString(),
+        value: cookie.value.toString(),
+      }));
+
+      await page.setCookie(...cookies);
+    }
+
+    // then reload the page to make sure the localStorage and cookies are set
+    // try to skip the overlay or popups
+    if (state.isFirstNavigation) {
+      // only reload the landing page, trying to skip the overlay
+      await page.reload();
+      await sleep(1000); // Necessary delay for the website to update
+      state.isFirstNavigation = false;
+    }
+  } catch (error) {
+    Logger.error(error.message, 'StepExecutor.handleNavigate');
+    throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -106,14 +111,16 @@ export async function handleWaitForElement(
       Logger.log(`${selector} exists`, 'StepExecutor.handleWaitForElement');
       return;
     } catch (error) {
-      Logger.log(
+      Logger.error(
         `${selector} does not exist`,
         'StepExecutor.handleWaitForElement'
       );
-      Logger.error(error.message, 'StepExecutor.handleWaitForElement');
       // close the page if stop processing
       await page.close();
-      throw new HttpException(`${error.message}, Stop processing.`, 500);
+      throw new HttpException(
+        `${error.message}, Stop processing.`,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 }

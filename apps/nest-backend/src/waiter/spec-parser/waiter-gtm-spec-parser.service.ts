@@ -1,4 +1,10 @@
-import { Injectable, Logger, StreamableFile } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  StreamableFile,
+} from '@nestjs/common';
 import { readFileSync } from 'fs';
 import { SpecParser } from '@datalayer-checker/spec-parser';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
@@ -22,6 +28,7 @@ export class WaiterGtmSpecParserService {
       return stream;
     } catch (error) {
       Logger.error(error.message, 'WaiterService.outputGTMSpec');
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

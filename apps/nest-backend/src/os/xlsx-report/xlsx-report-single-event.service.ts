@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { readFileSync } from 'fs';
 import path from 'path';
@@ -55,8 +55,8 @@ export class XlsxReportSingleEventService {
         } catch (error) {
           Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
           throw new HttpException(
-            `An error occurred while writing the image: ${error}`,
-            500
+            `An error occurred while writing an image: ${error.message}`,
+            HttpStatus.INTERNAL_SERVER_ERROR
           );
         }
       } else if (projectName) {
@@ -82,8 +82,15 @@ export class XlsxReportSingleEventService {
               ext: { width: 100, height: 50 },
             });
           } catch (error) {
-            // if throwing the error, other pieces of data will not be written to the xlsx file
+            if (error instanceof HttpException) {
+              throw error;
+            }
+
             Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
+            throw new HttpException(
+              error.message,
+              HttpStatus.INTERNAL_SERVER_ERROR
+            );
           }
         }
       }
@@ -97,7 +104,7 @@ export class XlsxReportSingleEventService {
       await workbook.xlsx.writeFile(filePath);
     } catch (error) {
       Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
