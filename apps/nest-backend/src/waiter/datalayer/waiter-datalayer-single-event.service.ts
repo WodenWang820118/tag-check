@@ -20,6 +20,7 @@ export class WaiterDataLayerSingleEventService {
     const browser = await puppeteer.launch({
       headless: headless === 'true' ? 'new' : false,
       defaultViewport: null,
+      // devtools: true,
       ignoreHTTPSErrors: true,
       args:
         (inspectEventDto as any).inspectEventDto.puppeteerArgs || BROWSER_ARGS,

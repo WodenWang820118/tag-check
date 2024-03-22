@@ -19,12 +19,17 @@ export class GtmOperatorService {
     password?: string
   ) {
     const encodedGtmUrl = encodeURIComponent(gtmUrl);
+    const queryParams = [`gtmUrl=${encodedGtmUrl}`];
+
+    if (headless !== undefined) queryParams.push(`headless=${headless}`);
+    if (username) queryParams.push(`username=${encodeURIComponent(username)}`);
+    if (password) queryParams.push(`password=${encodeURIComponent(password)}`);
+
+    const queryString = queryParams.join('&');
 
     return this.http.post(
-      `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventName}?gtmUrl=${encodedGtmUrl}&headless=${headless}?username=${username}?password=${password}`,
-      {
-        inspectEventDto: inspectEventDto ? inspectEventDto : {},
-      }
+      `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventName}?${queryString}`,
+      { inspectEventDto: inspectEventDto ? inspectEventDto : {} }
     );
   }
 }

@@ -91,7 +91,6 @@ export class WebAgentUtilsService {
         destinationUrl,
       };
     } catch (error) {
-      await page.close();
       Logger.error(error.message, 'WebAgent.performTest');
       throw new HttpException(error.message, 500);
     }
