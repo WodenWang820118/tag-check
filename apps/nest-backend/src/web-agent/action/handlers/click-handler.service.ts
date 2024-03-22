@@ -80,7 +80,7 @@ export class ClickHandler implements ActionHandler {
     title: string,
     selector: string,
     timeout = 3000,
-    preventNavigation = false
+    preventNavigation: boolean
   ): Promise<boolean> {
     const operationPath = await this.filePathService.getOperationFilePath(
       projectName,
@@ -127,10 +127,30 @@ export class ClickHandler implements ActionHandler {
   }
 
   private async preventNavigationOnElement(page: Page, selector: string) {
+    Logger.log(selector, 'ClickHandler.preventNavigationOnElement');
     await page.evaluate((sel) => {
-      const element = document.querySelector(sel);
-      if (element) {
-        element.addEventListener('click', (e) => e.preventDefault());
+      const isDescendant = (parent, child) => {
+        let node = child.parentNode;
+        while (node != null) {
+          if (node === parent) {
+            return true;
+          }
+          node = node.parentNode;
+        }
+        return false;
+      };
+
+      const elements = document.querySelectorAll(sel);
+      if (elements) {
+        elements.forEach((elem) =>
+          elem.addEventListener('click', (e) => {
+            const target = e.target;
+            // Check if the target is the element itself or a descendant of the element
+            if (target === elem || isDescendant(elem, target)) {
+              e.preventDefault();
+            }
+          })
+        );
       }
     }, selector);
   }
