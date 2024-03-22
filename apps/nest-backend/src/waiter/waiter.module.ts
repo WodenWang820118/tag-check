@@ -6,7 +6,6 @@ import { OsModule } from '../os/os.module';
 import { WebAgentModule } from '../web-agent/web-agent.module';
 import { InspectorModule } from '../inspector/inspector.module';
 import { GtmOperatorModule } from '../gtm-operator/gtm-operator.module';
-import { GcsMonitorModule } from '../gcs-monitor/gcs-monitor.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
 import { PipelineModule } from '../pipeline/pipeline.module';
 
@@ -62,7 +61,6 @@ const waiterServices = [
     WebAgentModule,
     InspectorModule,
     GtmOperatorModule,
-    GcsMonitorModule,
     ConfigurationModule,
     PipelineModule,
   ],
