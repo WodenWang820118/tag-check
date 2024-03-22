@@ -19,11 +19,15 @@ export class DataLayerService {
   ) {
     // console.log('runDataLayerCheck', projectSlug, eventName, headless);
     // console.log('inspectEventDto', inspectEventDto);
+    const queryParams = [];
+    if (headless !== undefined) queryParams.push(`headless=${headless}`);
+    if (username) queryParams.push(`username=${username}`);
+    if (password) queryParams.push(`password=${password}`);
+    const queryString = queryParams.length ? '?' + queryParams.join('&') : '';
+
     return this.http.post(
-      `${environment.dataLayerApiUrl}/${projectSlug}/${eventName}?headless=${headless}?username=${username}?password=${password}`,
-      {
-        inspectEventDto: inspectEventDto ? inspectEventDto : {},
-      }
+      `${environment.dataLayerApiUrl}/${projectSlug}/${eventName}${queryString}`,
+      { inspectEventDto: inspectEventDto ? inspectEventDto : {} }
     );
   }
 }

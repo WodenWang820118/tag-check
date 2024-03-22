@@ -50,19 +50,22 @@ export class GtmOperatorService {
     // 3) Start tag manager preview mode
     await page.$('#domain-start-button').then((el) => el?.click());
 
-    // 4) Wait for the page to completely load
-    const target = await browser.waitForTarget((target) =>
-      target.url().includes(websiteUrl)
-    );
-
-    const testingPage = await target.page();
+    // 4) Wait and close the initial blank page for cleaner operations
     await sleep(1000);
     // Close the initial blank page for cleaner operations
     const pages = await browser.pages();
-    if (pages.length > 0 && pages[0].url() === 'about:blank') {
-      await pages[0].close();
+    for (const subPage of pages) {
+      if (subPage.url() === 'about:blank') {
+        await subPage.close();
+      }
     }
 
+    // 5) Wait for the page to completely load
+    const target = await browser.waitForTarget((target) =>
+      target.url().includes(new URL(websiteUrl).origin)
+    );
+
+    const testingPage = await target.page();
     await sleep(1000);
     return this.pipelineService.singleEventInspectionRecipe(
       testingPage,
@@ -84,7 +87,11 @@ export class GtmOperatorService {
 
     if (encodedUrl) {
       const decodedUrl = decodeURIComponent(encodedUrl);
-      return new URL(decodedUrl).origin; // This will return the base URL
+      Logger.log(
+        new URL(decodedUrl).toString(),
+        'GtmOperatorService.extractBaseUrlFromGtmUrl: decodedUrl'
+      );
+      return new URL(decodedUrl).toString();
     }
 
     return null;
