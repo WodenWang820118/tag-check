@@ -1,100 +1,95 @@
-# DatalayerChecker
-
-// TODO: remember to add the sqlite3 file to the package
-
-## Table of Contents
+# Table of Contents
 
 [Overview](#overview)
-[Configuration](#configuration)
-[Frontend](#frontend)
-[Backend](#backend)
-[Application](#application)
-[Package](#package)
+
 [Development](#development)
 
-## Overview
+- [Frontend (Angular)](#frontend-angular)
+- [Backend (Nest.js)](#backend-nestjs)
 
-Currently, this project is still under development. The goal is to provide a tool to check the data layer of a website. The tool will mimic users' behaviors to check the data layer. The tool will also provide a way to check the data layer with GTM preview mode.
+[Build and Production](#build-and-production)
 
-## Configuration
+- [Frontend (Angular)](#frontend-angular-1)
+- [Backend (Nest.js)](#backend-nestjs-1)
+- [Build](#build)
+- [Package](#package)
 
-Please create a `.env` file in the root folder and add the following content:
+[Feedback and Contribution](#feedback-and-contribution)
 
-```
-NODE_ENV=development
-```
+# Overview
 
-The `NODE_ENV` can be `development` or `production`.
-There could be more configurations in the future.
+This desktop application automates the GTM (Google Tag Manager) container review process and the production analytics deployment validation. It streamlines the quality assurance process by providing:
 
-## Frontend
+1. **GTM Container Review**: The tool can load the GTM preview mode according to the workspace, run the Chrome recorder, and generate a report on dataLayer correctness. Users can review the tag configuration through the GTM preview mode as well.
+2. **Production Analytics Validation**: It validates analytics on the production website, ensuring dataLayer accuracy.
 
-### React
+Designed for QA, development, and analytics teams, this free standalone tool leverages Angular 17, Nest.js, and Electron.
 
-Please use the following command to run the frontend server:
+Upcoming features include enhanced UI/UX, request interception, report consolidation, and improved project import/export capabilities.
 
-```bash
-npm run frontend
-```
+# Development
 
-### Angular
+## Frontend (Angular)
 
-The Angular is in parallel with the React. It is on purpose to foster frontend development. Please use the following command to run the Angular server:
+For development
 
 ```bash
 npm run ng-frontend
 ```
 
-## Backend
+## Backend (Nest.js)
 
-### NestJS
-
-Please use the following command to run the backend server:
-
-```bash
-npm run backend
-```
-
-To see exposed APIs, please route to http://localhost:8080/api.
-
-### json-server
-
-It is on purpose to use it to foster frontend development. Please use the following command to run the json-server:
+Use the following command for backend development with a mock server:
 
 ```bash
 npm run mock-backend
 ```
 
-## Application
+# Build and Production
 
-Please use the following command to build the application:
+## Frontend (Angular)
 
-```bash
-npm run build
-```
-
-Please use the following command to run the application:
+For production usage
 
 ```bash
-npm run app
+npm run prod-ng-frontend
 ```
+
+## Backend (Nest.js)
+
+For production usage
+
+```bash
+npm run backend
+```
+
+## Build
+
+Compile the application with:
+
+```bash
+npm run build-ng
+```
+
+Which will build the Angular app with the production backend.
+
+The output folder will be by default `dist/apps`. There will be two apps:
+
+- `ng-frontend`
+- `nest-backend`
+
+Please refer to `package.json` for more scripts.
 
 ## Package
-
-To build the electron app, refer to the documentation [here](https://www.electronjs.org/docs/latest/tutorial/tutorial-packaging) and change the `main` in `package.json` to the specific file path. In the project, it's `apps/frontend/main.js`. The output will be in the `out` folder.
 
 Please run the command to build the Electron app:
 
 ```bash
-npm run package
+npm run package-ng
 ```
 
-The package will be in the `out` folder. The backend server will be in the `resources` folder, named `main.js`.
+The output will be in the `out` folder.
 
-## Development
+# Feedback and Contribution
 
-Please use the following command to run the application in development mode:
-
-```bash
-npm run dev-app
-```
+We welcome your feedback and contributions! If you have suggestions or encounter issues, please file them in the issues section. For those interested in contributing, check out the contribution guidelines (drafting).
