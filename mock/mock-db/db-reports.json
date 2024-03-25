@@ -1,0 +1,181 @@
+{
+  "reports": [
+    {
+      "projectSlug": "ng_gtm_integration_sample",
+      "reports": [
+        {
+          "passed": true,
+          "eventName": "view_item_list",
+          "completedTime": "2024-02-03T10:15:29.186Z",
+          "message": "Valid",
+          "dataLayer": {
+            "event": "view_item_list",
+            "ecommerce": {
+              "items": [
+                {
+                  "item_id": "city001",
+                  "item_name": "Switzerland",
+                  "item_category": "Switzerland",
+                  "price": 799,
+                  "quantity": 1
+                },
+                {
+                  "item_id": "city002",
+                  "item_name": "Sevilla",
+                  "item_category": "Sevilla",
+                  "price": 799,
+                  "quantity": 1
+                },
+                {
+                  "item_id": "city003",
+                  "item_name": "Providence",
+                  "item_category": "Providence",
+                  "price": 799,
+                  "quantity": 1
+                },
+                {
+                  "item_id": "city004",
+                  "item_name": "San Francisco",
+                  "item_category": "San Francisco",
+                  "price": 799,
+                  "quantity": 1
+                },
+                {
+                  "item_id": "city005",
+                  "item_name": "Paris",
+                  "item_category": "Paris",
+                  "price": 999,
+                  "quantity": 1
+                },
+                {
+                  "item_id": "isl001",
+                  "item_name": "Lanzarote",
+                  "item_category": "Lanzarote",
+                  "price": 799,
+                  "quantity": 1
+                },
+                {
+                  "item_id": "isl002",
+                  "item_name": "Mallorca",
+                  "item_category": "Mallorca",
+                  "price": 799,
+                  "quantity": 1
+                },
+                {
+                  "item_id": "isl003",
+                  "item_name": "Puerto Rico",
+                  "item_category": "Puerto Rico",
+                  "price": 799,
+                  "quantity": 1
+                },
+                {
+                  "item_id": "isl004",
+                  "item_name": "Fuerteventura",
+                  "item_category": "Fuerteventura",
+                  "price": 799,
+                  "quantity": 1
+                },
+                {
+                  "item_id": "isl005",
+                  "item_name": "Réunion",
+                  "item_category": "Réunion",
+                  "price": 1200,
+                  "quantity": 1
+                }
+              ]
+            },
+            "gtm.uniqueEventId": 29
+          },
+          "dataLayerSpec": {
+            "event": "view_item_list",
+            "ecommerce": {
+              "items": [
+                {
+                  "item_id": "$item_id",
+                  "item_name": "$item_name",
+                  "item_category": "$item_category",
+                  "price": "$price",
+                  "quantity": "$quantity"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "passed": true,
+          "eventName": "select_promotion",
+          "completedTime": "2024-02-03T10:15:29.186Z",
+          "message": "Valid",
+          "dataLayer": {
+            "event": "select_promotion",
+            "ecommerce": {
+              "promotion_id": "city001",
+              "promotion_name": "Switzerland",
+              "creative_name": "travel_slide",
+              "creative_slot": "featured_attributor",
+              "items": [
+                {
+                  "item_id": "city001",
+                  "item_name": "Switzerland"
+                }
+              ]
+            },
+            "gtm.uniqueEventId": 20
+          },
+          "dataLayerSpec": {
+            "event": "select_promotion",
+            "ecommerce": {
+              "creative_name": "$creative_name",
+              "creative_slot": "$creative_slot",
+              "promotion_id": "$promotion_id",
+              "promotion_name": "$promotion_name",
+              "items": [
+                {
+                  "item_id": "$item_id",
+                  "item_name": "$item_name"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "passed": true,
+          "message": "Valid",
+          "eventName": "view_promotion",
+          "completedTime": "2024-02-03T10:15:29.186Z",
+          "dataLayer": {
+            "event": "view_promotion",
+            "ecommerce": {
+              "promotion_id": "city001",
+              "promotion_name": "Switzerland",
+              "creative_name": "travel_slide",
+              "creative_slot": "featured_attributor",
+              "items": [
+                {
+                  "item_id": "city001",
+                  "item_name": "Switzerland"
+                }
+              ]
+            },
+            "gtm.uniqueEventId": 12
+          },
+          "dataLayerSpec": {
+            "event": "view_promotion",
+            "ecommerce": {
+              "creative_name": "$creative_name",
+              "creative_slot": "$creative_slot",
+              "promotion_id": "$promotion_id",
+              "promotion_name": "$promotion_name",
+              "items": [
+                {
+                  "item_id": "$item_id",
+                  "item_name": "$item_name"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
