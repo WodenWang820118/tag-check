@@ -1,0 +1,157 @@
+{
+  "recordings": [
+    {
+      "projectSlug": "ng_gtm_integration_sample",
+      "recordings": [
+        {
+          "title": "view_promotion",
+          "steps": [
+            {
+              "type": "setViewport",
+              "width": 1237,
+              "height": 945,
+              "deviceScaleFactor": 1,
+              "isMobile": false,
+              "hasTouch": false,
+              "isLandscape": false
+            },
+            {
+              "type": "navigate",
+              "url": "https://gtm-integration-sample.netlify.app/"
+            }
+          ]
+        },
+        {
+          "title": "view_item",
+          "steps": [
+            {
+              "type": "setViewport",
+              "width": 1108,
+              "height": 695,
+              "deviceScaleFactor": 1,
+              "isMobile": false,
+              "hasTouch": false,
+              "isLandscape": false
+            },
+            {
+              "type": "navigate",
+              "url": "https://gtm-integration-sample.netlify.app/"
+            },
+            {
+              "type": "click",
+              "target": "main",
+              "selectors": [["div.active img"]],
+              "offsetY": 245.80000019073486,
+              "offsetX": 465.5999984741211
+            }
+          ]
+        },
+        {
+          "title": "view_item_list",
+          "steps": [
+            {
+              "type": "setViewport",
+              "width": 1108,
+              "height": 695,
+              "deviceScaleFactor": 1,
+              "isMobile": false,
+              "hasTouch": false,
+              "isLandscape": false
+            },
+            {
+              "type": "navigate",
+              "url": "https://gtm-integration-sample.netlify.app/",
+              "assertedEvents": [
+                {
+                  "type": "navigation",
+                  "url": "https://gtm-integration-sample.netlify.app/",
+                  "title": "Ng GTM Integration App"
+                }
+              ]
+            },
+            {
+              "type": "click",
+              "target": "main",
+              "selectors": [["li:nth-of-type(2) > a"]],
+              "offsetY": 23,
+              "offsetX": 71.61248779296875
+            }
+          ]
+        },
+        {
+          "title": "select_item",
+          "steps": [
+            {
+              "type": "setViewport",
+              "width": 1636,
+              "height": 1100,
+              "deviceScaleFactor": 1,
+              "isMobile": false,
+              "hasTouch": false,
+              "isLandscape": false
+            },
+            {
+              "type": "navigate",
+              "url": "https://gtm-integration-sample.netlify.app/",
+              "assertedEvents": [
+                {
+                  "type": "navigation",
+                  "url": "https://gtm-integration-sample.netlify.app/",
+                  "title": "Ng GTM Integration App"
+                }
+              ]
+            },
+            {
+              "type": "click",
+              "target": "main",
+              "selectors": [["h2"]],
+              "offsetY": 20.42852783203125,
+              "offsetX": 130.43743896484375
+            },
+            {
+              "type": "click",
+              "target": "main",
+              "selectors": [
+                ["div:nth-of-type(1) div:nth-of-type(4) a:nth-of-type(1)"]
+              ],
+              "offsetY": 13.866058349609375,
+              "offsetX": 50.7142333984375
+            }
+          ]
+        },
+        {
+          "title": "add_to_cart",
+          "steps": [
+            {
+              "type": "setViewport",
+              "width": 1237,
+              "height": 945,
+              "deviceScaleFactor": 1,
+              "isMobile": false,
+              "hasTouch": false,
+              "isLandscape": false
+            },
+            {
+              "type": "navigate",
+              "url": "https://gtm-integration-sample.netlify.app/"
+            },
+            {
+              "type": "click",
+              "target": "main",
+              "selectors": [["div.active img"]],
+              "offsetY": 225,
+              "offsetX": 821.5
+            },
+            {
+              "type": "click",
+              "target": "main",
+              "selectors": [["app-details button"]],
+              "offsetY": 13.40625,
+              "offsetX": 56.765625
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
