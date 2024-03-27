@@ -15,7 +15,6 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["apps/frontend/src/*"],
       "@datalayer-checker/spec-parser": ["./libs/data-access/src/index.ts"]
     }
   },

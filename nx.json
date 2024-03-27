@@ -1,6 +1,5 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "npmScope": "datalayer-checker",
   "affected": {
     "defaultBase": "master"
   },
@@ -32,7 +31,6 @@
       "inputs": ["default", "^production"]
     },
     "@angular-devkit/build-angular:application": {
-      "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
     }
