@@ -37,15 +37,6 @@ function getProductionFrontendPath() {
     return ngFrontendPath;
   }
 
-  const reactFrontendPath = path.join(
-    process.resourcesPath,
-    'frontend',
-    'index.html'
-  );
-  if (existsSync(reactFrontendPath)) {
-    return reactFrontendPath;
-  }
-
   // Return null or throw an error if neither path exists
   return null;
 }
@@ -54,8 +45,6 @@ function getDevFrontendPath(environment) {
   switch (environment) {
     case 'ng-frontend':
       return 'dist/apps/ng-frontend/browser/index.html';
-    case 'react-frontend':
-      return 'dist/apps/frontend/index.html';
     default:
       throw new Error('Invalid NODE_ENV');
   }
