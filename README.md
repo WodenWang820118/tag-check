@@ -25,6 +25,6 @@ We are currently developing an alpha version in the `develop` branch, which incl
 The alpha version is in active development and may contain bugs. It is not recommended for production use. Please use it for testing and provide your valuable feedback.
 
 ### Feedback
-Your feedback is crucial to help us improve. Please submit your feedback [here]([link-to-feedback-page](https://github.com/WodenWang820118/datalayer-checker/discussions)).
+Your feedback is crucial to help us improve. Please submit your feedback [here](https://github.com/WodenWang820118/datalayer-checker/discussions).
 
 Thank you for supporting our project!
