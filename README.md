@@ -11,8 +11,8 @@ Upcoming features include enhanced UI/UX, request interception, report consolida
 
 We are currently developing an alpha version in the `develop` branch, which includes new features and improvements. This version is intended for testing and feedback purposes.
 
-- **Access the Alpha Version:** [Develop Branch]([link-to-develop-branch](https://github.com/WodenWang820118/datalayer-checker/tree/develop))
-- **Latest Alpha Release:** [Alpha Release Tag]([link-to-alpha-release-tag](https://github.com/WodenWang820118/datalayer-checker/releases/tag/v1.0.0-alpha))
+- **Access the Alpha Version:** [Develop Branch](https://github.com/WodenWang820118/datalayer-checker/tree/develop)
+- **Latest Alpha Release:** [Alpha Release Tag](https://github.com/WodenWang820118/datalayer-checker/releases/tag/v1.0.0-alpha)
 
 ### What's New in the Alpha Version
 - GTM Sharable Link Preview Mode Automation
