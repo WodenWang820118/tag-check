@@ -6,7 +6,7 @@ import {
   StreamableFile,
 } from '@nestjs/common';
 import { readFileSync } from 'fs';
-import { SpecParser } from '@datalayer-checker/spec-parser';
+import { SpecParser } from '@tag-check/spec-parser';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 
 @Injectable()
