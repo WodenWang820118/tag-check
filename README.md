@@ -32,7 +32,7 @@ Upcoming features include enhanced UI/UX, request interception, report consolida
 Please run
 
 ```bash
-npm install --legacy-peer-deps
+npm install
 
 ```
 
