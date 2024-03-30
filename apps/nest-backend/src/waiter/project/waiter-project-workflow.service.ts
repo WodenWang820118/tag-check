@@ -1,4 +1,4 @@
-import { SpecParser } from '@datalayer-checker/spec-parser';
+import { SpecParser } from '@tag-check/spec-parser';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigurationService } from '../../configuration/configuration.service';
 import { ProjectInitializationService } from '../../os/project-initialization/project-initialization.service';
