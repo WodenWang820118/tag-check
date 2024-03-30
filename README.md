@@ -36,8 +36,6 @@ npm install
 
 ```
 
-Currently, we're facing the incompatible peer dependencies issue with the latest version of Angular and NX on Windows. We'll try to migrate NX to the latest stable version in the future.
-
 ## Frontend (Angular)
 
 For development
