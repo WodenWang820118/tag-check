@@ -4,13 +4,13 @@ import { Credentials, Page } from 'puppeteer';
 import { getCurrentTimestamp } from '../waiter/utils';
 import { InspectEventDto } from '../dto/inspect-event.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
-import { AbstractReportService } from '../os/abstract-report/abstract-report.service';
+import { AbstractDatalayerReportService } from '../os/abstract-datalayer-report/abstract-datalayer-report.service';
 @Injectable()
 export class PipelineService {
   constructor(
     private inspectorSingleEventService: InspectorSingleEventService,
     private xlsxReportSingleEventService: XlsxReportSingleEventService,
-    private abstractReportService: AbstractReportService
+    private abstractDatalayerReportService: AbstractDatalayerReportService
   ) {}
 
   async singleEventInspectionRecipe(
@@ -57,7 +57,7 @@ export class PipelineService {
         projectName
       );
 
-      await this.abstractReportService.writeSingleAbstractTestResultJson(
+      await this.abstractDatalayerReportService.writeSingleAbstractTestResultJson(
         projectName,
         testName,
         data[0].dataLayerResult

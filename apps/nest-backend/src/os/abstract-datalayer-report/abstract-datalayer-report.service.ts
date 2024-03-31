@@ -1,4 +1,4 @@
-import { FolderService } from './../folder/folder.service';
+import { FolderService } from '../folder/folder.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ValidationResult } from '../../interfaces/dataLayer.interface';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
@@ -8,7 +8,7 @@ import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 import { FileService } from '../file/file.service';
 
 @Injectable()
-export class AbstractReportService {
+export class AbstractDatalayerReportService {
   constructor(
     private folderPathService: FolderPathService,
     private folderService: FolderService,

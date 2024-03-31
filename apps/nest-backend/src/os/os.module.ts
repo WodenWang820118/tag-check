@@ -13,8 +13,8 @@ import { ProjectIoModule } from './project-io/project-io.module';
 import { ProjectIoService } from './project-io/project-io.service';
 import { FolderModule } from './folder/folder.module';
 import { FolderService } from './folder/folder.service';
-import { AbstractReportModule } from './abstract-report/abstract-report.module';
-import { AbstractReportService } from './abstract-report/abstract-report.service';
+import { AbstractDatalayerReportModule } from './abstract-datalayer-report/abstract-datalayer-report.module';
+import { AbstractDatalayerReportService } from './abstract-datalayer-report/abstract-datalayer-report.service';
 import { ImageModule } from './image/image.module';
 import { ImageService } from './image/image.service';
 
@@ -26,7 +26,7 @@ const modules = [
   ProjectInitializationModule,
   FolderModule,
   ConfigurationModule,
-  AbstractReportModule,
+  AbstractDatalayerReportModule,
   ImageModule,
   ProjectIoModule,
 ];
@@ -37,7 +37,7 @@ const services = [
   XlsxReportGroupEventsService,
   ProjectInitializationService,
   FolderService,
-  AbstractReportService,
+  AbstractDatalayerReportService,
   ImageService,
   ProjectIoService,
 ];

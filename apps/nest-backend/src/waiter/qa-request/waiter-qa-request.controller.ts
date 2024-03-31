@@ -3,8 +3,9 @@ import { WaiterDataLayerGroupEventsService } from '../datalayer/waiter-datalayer
 import { Controller, Get, Query } from '@nestjs/common';
 import { WaiterDataLayerSingleEventService } from '../datalayer/waiter-datalayer-single-event.service';
 
+// TODO: align implementations to the waiter-datalayer module
 @Controller('waiter-qa')
-export class WaiterQaController {
+export class WaiterQaRequestController {
   constructor(
     private waiterDataLayerGroupEventsService: WaiterDataLayerGroupEventsService,
     private waiterDataLayerSingleEventService: WaiterDataLayerSingleEventService

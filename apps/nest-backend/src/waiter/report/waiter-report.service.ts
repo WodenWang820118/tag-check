@@ -3,7 +3,7 @@ import { FileService } from '../../os/file/file.service';
 import { FolderService } from '../../os/folder/folder.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
-import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
+import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 import { statSync } from 'fs';
 
@@ -14,7 +14,7 @@ export class WaiterReportService {
     private filePathService: FilePathService,
     private folderService: FolderService,
     private folderPathService: FolderPathService,
-    private abstractReportService: AbstractReportService
+    private abstractDatalayerReportService: AbstractDatalayerReportService
   ) {}
 
   // TODO: refactor and resue the method from the abstract-report.service
@@ -61,7 +61,7 @@ export class WaiterReportService {
 
   // TODO: haven't been tested
   async updateReport(projectSlug: string, report: any) {
-    this.abstractReportService.writeSingleAbstractTestResultJson(
+    this.abstractDatalayerReportService.writeSingleAbstractTestResultJson(
       projectSlug,
       report.eventName,
       report
@@ -69,7 +69,7 @@ export class WaiterReportService {
   }
 
   async addReport(projectSlug: string, report: any) {
-    this.abstractReportService.writeSingleAbstractTestResultJson(
+    this.abstractDatalayerReportService.writeSingleAbstractTestResultJson(
       projectSlug,
       report.eventName,
       report
@@ -81,7 +81,7 @@ export class WaiterReportService {
   }
 
   async deleteReport(projectSlug: string, eventName: string) {
-    await this.abstractReportService.deleteSingleAbstractTestResultFolder(
+    await this.abstractDatalayerReportService.deleteSingleAbstractTestResultFolder(
       projectSlug,
       eventName
     );

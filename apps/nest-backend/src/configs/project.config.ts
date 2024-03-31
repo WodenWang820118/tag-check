@@ -6,6 +6,7 @@ export const CONFIG_FOLDER = 'config';
 export const CONFIG_ROOT_PATH = 'rootProjectPath';
 export const CONFIG_CURRENT_PROJECT_PATH = 'currentProjectPath';
 export const ABSTRACT_REPORT_FILE_NAME = 'abstract.json';
+export const ABSTRACT_REQUEST_REPORT_FILE_NAME = 'abstract-request.json';
 export const SPECS = 'spec.json';
 export const SETTINGS = 'settings.json';
 export const BROWSER_ARGS = [

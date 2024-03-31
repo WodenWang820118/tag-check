@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { InspectorGroupEventsService } from './inspector-group-events.service';
 import { WebAgentModule } from '../web-agent/web-agent.module';
 import { OsModule } from '../os/os.module';
-import { RequestProcessorModule } from './request-processor/request-processor.module';
-import { RequestProcessorService } from './request-processor/request-processor.service';
+import { RequestProcessorModule } from '../request-processor/request-processor.module';
+import { RequestProcessorService } from '../request-processor/request-processor.service';
 import { InspectorUtilsService } from './inspector-utils.service';
 import { InspectorSingleEventService } from './inspector-single-event.service';
 
