@@ -15,14 +15,14 @@ import {
 import { WaiterDataLayerSingleEventService } from './waiter-datalayer-single-event.service';
 import { InspectEventDto } from '../../dto/inspect-event.dto';
 import { ValidationResult } from '../../interfaces/dataLayer.interface';
-import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
+import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
 
 @Controller('datalayer')
 export class WaiterDataLayerController {
   constructor(
     private waiterDataLayerGroupEventsService: WaiterDataLayerGroupEventsService,
     private waiterDataLayerSingleEventService: WaiterDataLayerSingleEventService,
-    private abstractReportService: AbstractReportService
+    private abstractDatalayerReportService: AbstractDatalayerReportService
   ) {}
 
   @ApiOperation({
@@ -99,7 +99,7 @@ export class WaiterDataLayerController {
       Logger.log(results, 'waiter.inspectSingleEvent');
 
       const abstractReport =
-        await this.abstractReportService.getSingleAbstractTestResultJson(
+        await this.abstractDatalayerReportService.getSingleAbstractTestResultJson(
           projectSlug,
           eventName
         );

@@ -6,7 +6,7 @@ import {
 import { FileService } from '../os/file/file.service';
 import { FilePathService } from '../os/path/file-path/file-path.service';
 import { WebAgentService } from '../web-agent/web-agent.service';
-import { RequestProcessorService } from './request-processor/request-processor.service';
+import { RequestProcessorService } from '../request-processor/request-processor.service';
 import { Credentials, Page } from 'puppeteer';
 import { InspectorUtilsService } from './inspector-utils.service';
 import { InspectEventDto } from '../dto/inspect-event.dto';
