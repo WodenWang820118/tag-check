@@ -113,6 +113,7 @@ export class InspectorSingleEventService {
 
           const rawRequest = result.eventRequest;
 
+          // TODO: Continue to test the request
           const recomposedRequest =
             this.requestProcessorService.recomposeGA4ECEvent(
               result.eventRequest

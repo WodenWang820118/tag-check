@@ -9,12 +9,13 @@ import { IInspectEvent } from '../../../models/inspectData.interface';
 export class GtmOperatorService {
   constructor(private http: HttpClient) {}
 
-  runDataLayerCheckViaGtm(
+  runInspectionViaGtm(
     projectSlug: string,
     eventName: string,
     gtmUrl: string,
     headless?: boolean,
     inspectEventDto?: IInspectEvent,
+    measurmentId?: string,
     username?: string,
     password?: string
   ) {
@@ -22,6 +23,7 @@ export class GtmOperatorService {
     const queryParams = [`gtmUrl=${encodedGtmUrl}`];
 
     if (headless !== undefined) queryParams.push(`headless=${headless}`);
+    if (measurmentId) queryParams.push(`measurementId=${measurmentId}`);
     if (username) queryParams.push(`username=${encodeURIComponent(username)}`);
     if (password) queryParams.push(`password=${encodeURIComponent(password)}`);
 

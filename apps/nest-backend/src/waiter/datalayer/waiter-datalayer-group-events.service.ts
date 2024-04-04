@@ -20,7 +20,6 @@ export class WaiterDataLayerGroupEventsService {
     projectName: string,
     headless: string,
     path?: string,
-    args?: string[],
     measurementId?: string,
     credentials?: Credentials,
     concurrency?: number

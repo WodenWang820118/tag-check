@@ -7,12 +7,11 @@ interface Setting {
   rootProject: string;
   projectName: string;
   projectDescription: string;
+  measurementId: string;
   projectSlug: string;
-  testType: string;
   googleSpreadsheetLink: string;
   tagManagerUrl: string;
   gtmPreviewModeUrl: string;
-  gtmId: string;
   gtm: Gtm;
   containerName: string;
   version: string;
@@ -30,9 +29,9 @@ export interface Authentication {
 
 export interface Gtm {
   isAccompanyMode: boolean;
+  isRequestCheck: boolean;
   tagManagerUrl: string;
   gtmPreviewModeUrl: string;
-  gtmId: string;
 }
 
 export interface Application {

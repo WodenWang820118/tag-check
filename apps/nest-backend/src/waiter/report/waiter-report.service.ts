@@ -4,8 +4,9 @@ import { FolderService } from '../../os/folder/folder.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
-import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 import { statSync } from 'fs';
+import { OutputValidationResult } from '../../interfaces/dataLayer.interface';
+import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 
 @Injectable()
 export class WaiterReportService {
@@ -17,32 +18,16 @@ export class WaiterReportService {
     private abstractDatalayerReportService: AbstractDatalayerReportService
   ) {}
 
-  // TODO: refactor and resue the method from the abstract-report.service
-  async getProjectReports(projectSlug: string) {
+  async getProjectEventReports(projectSlug: string) {
     try {
-      const folderNames = this.folderService.readFolderFileNames(
-        await this.folderPathService.getInspectionResultFolderPath(projectSlug)
-      );
-
-      const reportsPromise = folderNames.map(async (folderName) => {
-        const filePath = await this.filePathService.getInspectionResultFilePath(
+      const reportsPromise = (
+        await this.getEventReportFolderNames(projectSlug)
+      ).map(async (folderName) => {
+        return await this.buildEventReport(
           projectSlug,
           folderName,
           ABSTRACT_REPORT_FILE_NAME
         );
-
-        const completedTime = statSync(filePath).mtime;
-        return {
-          eventName: folderName,
-          ...this.fileService.readJsonFile(
-            await this.filePathService.getInspectionResultFilePath(
-              projectSlug,
-              folderName,
-              ABSTRACT_REPORT_FILE_NAME
-            )
-          ),
-          completedTime,
-        };
       });
 
       const reports = await Promise.all(reportsPromise);
@@ -53,15 +38,53 @@ export class WaiterReportService {
     } catch (error) {
       Logger.error(error);
       throw new HttpException(
-        'Failed to get project reports',
-        HttpStatus.BAD_REQUEST
+        'Failed to get project event reports',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async getEventReportFolderNames(projectSlug: string) {
+    return this.folderService.readFolderFileNames(
+      await this.folderPathService.getInspectionResultFolderPath(projectSlug)
+    );
+  }
+
+  async buildEventReport(
+    projectSlug: string,
+    eventName: string,
+    fileName: string
+  ) {
+    try {
+      const filePath = await this.filePathService.getInspectionResultFilePath(
+        projectSlug,
+        eventName,
+        fileName
+      );
+
+      const report: OutputValidationResult =
+        this.fileService.readJsonFile(filePath);
+
+      const completedTime = statSync(filePath).mtime;
+      const reportContent = {
+        eventName: eventName,
+        ...report,
+        completedTime,
+      };
+
+      return reportContent;
+    } catch (error) {
+      Logger.log(error.message, 'WaiterReportService.buildReport');
+      throw new HttpException(
+        'Failed to build report',
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
 
   // TODO: haven't been tested
   async updateReport(projectSlug: string, report: any) {
-    this.abstractDatalayerReportService.writeSingleAbstractTestResultJson(
+    await this.abstractDatalayerReportService.writeSingleAbstractTestResultJson(
       projectSlug,
       report.eventName,
       report
@@ -69,7 +92,7 @@ export class WaiterReportService {
   }
 
   async addReport(projectSlug: string, report: any) {
-    this.abstractDatalayerReportService.writeSingleAbstractTestResultJson(
+    await this.abstractDatalayerReportService.writeSingleAbstractTestResultJson(
       projectSlug,
       report.eventName,
       report

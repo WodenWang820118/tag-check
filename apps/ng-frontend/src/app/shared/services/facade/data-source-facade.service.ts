@@ -2,14 +2,13 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SettingsService } from '../api/settings/settings.service';
 import { ProjectDataSourceService } from '../project-data-source/project-data-source.service';
-import { combineLatest, switchMap, EMPTY, tap, Observable, map } from 'rxjs';
+import { combineLatest, switchMap, EMPTY, tap, map } from 'rxjs';
 import { ReportService } from '../api/report/report.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { IReportDetails } from '../../models/report.interface';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { Project } from '../../models/project.interface';
 import { ReportDetailsService } from '../report-details/report-details.service';
 
 @Injectable({
@@ -24,15 +23,12 @@ export class DataSourceFacadeService {
     private settingsService: SettingsService
   ) {}
 
-  observeProject(
-    project$: Observable<Project>,
-    paginator: MatPaginator,
-    sort: MatSort
-  ) {
+  observeProject(paginator: MatPaginator, sort: MatSort) {
     // when the route changes, get the project reports and initialize the data source
     // otherwise, update the data source when the project reports change
-    return combineLatest([this.route.params, project$]).pipe(
-      switchMap(([params, project]) => {
+
+    return combineLatest([this.route.params]).pipe(
+      switchMap(([params]) => {
         const slug = params['projectSlug'];
         return this.reportService.getProjectReports(slug).pipe(
           map((project) => {

@@ -47,7 +47,25 @@ export class WebAgentUtilsService {
 
     let eventRequest: string = null;
 
-    // 2) perform the test operation
+    // 2) capture the request if needed
+    if (captureRequest) {
+      Logger.log('capturing request', 'WebAgentUtils.performTest');
+      page.on('request', (interceptedRequest) => {
+        if (
+          interceptedRequest.url().includes(`en=${testName}`) &&
+          interceptedRequest.url().includes(`tid=${measurementId}`)
+        ) {
+          Logger.log(
+            interceptedRequest.url(),
+            'WebAgentUtils.performTest: request captured'
+          );
+          eventRequest = interceptedRequest.url();
+          page.off('request');
+        }
+      });
+    }
+
+    // 3) perform the test operation
     try {
       await this.actionService.performOperation(
         page,
@@ -76,15 +94,7 @@ export class WebAgentUtilsService {
 
       const destinationUrl = page.url();
 
-      if (captureRequest) {
-        const request = await page.waitForRequest(
-          (request) =>
-            request.url().includes(`en=${testName}`) &&
-            request.url().includes(`tid=${measurementId}`)
-        );
-        eventRequest = request.url();
-      }
-
+      Logger.log('test completed', 'WebAgentUtils.performTest');
       return {
         dataLayer,
         eventRequest,

@@ -14,20 +14,20 @@ import { PipelineService } from '../pipeline/pipeline.service';
 @Injectable()
 export class GtmOperatorService {
   constructor(private pipelineService: PipelineService) {}
-
   async inspectSingleEventViaGtm(
     gtmUrl: string,
     projectName: string,
     testName: string,
     headless: string,
     filePath?: string,
+    measurementId?: string,
     credentials?: Credentials,
     inspectEventDto?: InspectEventDto
   ) {
     // set the defaultViewport to null to use maximum viewport size
     const browser = await puppeteer.launch({
       headless: headless === 'true' ? 'new' : false,
-      // devtools: true,
+      devtools: measurementId ? true : false,
       defaultViewport: null,
       timeout: 30000,
       ignoreHTTPSErrors: true,
@@ -73,7 +73,7 @@ export class GtmOperatorService {
       testName,
       headless,
       filePath,
-      undefined,
+      measurementId,
       credentials,
       inspectEventDto
     );
@@ -95,16 +95,5 @@ export class GtmOperatorService {
     }
 
     return null;
-  }
-
-  // TODO: GTM setup QA automation
-  async inspectAllEventsViaGtm(
-    gtmUrl: string,
-    projectName: string,
-    headless: string,
-    filePath?: string,
-    credentials?: Credentials
-  ) {
-    // TODO: one GTM url for all events
   }
 }

@@ -1,8 +1,8 @@
 import { FolderService } from '../folder/folder.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { ValidationResult } from '../../interfaces/dataLayer.interface';
+import { OutputValidationResult } from '../../interfaces/dataLayer.interface';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
-import { existsSync, mkdirSync, statSync, writeFileSync } from 'fs';
+import { existsSync, statSync, writeFileSync } from 'fs';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 import { FileService } from '../file/file.service';
@@ -17,24 +17,14 @@ export class AbstractDatalayerReportService {
   ) {}
 
   async writeSingleAbstractTestResultJson(
-    projectName: string,
+    projectSlug: string,
     eventName: string,
-    data: ValidationResult
+    data: OutputValidationResult
   ) {
     try {
-      const reportPath =
-        await this.folderPathService.getInspectionEventFolderPath(
-          projectName,
-          eventName
-        );
-
-      if (!existsSync(reportPath)) {
-        mkdirSync(reportPath);
-      }
-
       const abstractPath =
         await this.filePathService.getInspectionResultFilePath(
-          projectName,
+          projectSlug,
           eventName,
           ABSTRACT_REPORT_FILE_NAME
         );
@@ -52,11 +42,11 @@ export class AbstractDatalayerReportService {
     }
   }
 
+  // TODO: haven't verified the function
   async writeProjectAbstractTestRsultJson(
     projectName: string,
-    data: ValidationResult[]
+    data: OutputValidationResult[]
   ) {
-    // TODO: haven't verified the function
     const resultFolderPath =
       await this.folderPathService.getInspectionResultFolderPath(projectName);
 

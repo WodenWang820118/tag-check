@@ -95,13 +95,13 @@ export class FilePathService {
 
   async getInspectionResultFilePath(
     projectSlug: string,
-    testName: string,
+    eventName: string,
     fileName: string
   ) {
     try {
       return path.join(
         await this.folderPathService.getInspectionResultFolderPath(projectSlug),
-        testName,
+        eventName,
         fileName
       );
     } catch (error) {
