@@ -12,4 +12,7 @@ export interface IReportDetails {
   completedTime?: Date;
   dataLayer?: any;
   message?: string;
+  requestPassed?: boolean;
+  rawRequest?: string;
+  reformedDataLayer?: any;
 }

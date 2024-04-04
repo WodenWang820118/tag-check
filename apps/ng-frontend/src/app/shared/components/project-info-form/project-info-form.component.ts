@@ -39,7 +39,6 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
   projectInfoForm = this.fb.group({
     projectName: [''],
     projectDescription: [''],
-    testType: [{ value: '', disabled: true }],
     googleSpreadsheetLink: [''],
     preventNavigationEvents: this.fb.array([]),
   });
@@ -64,7 +63,6 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
             this.projectInfoForm.patchValue({
               projectName: settings.projectName,
               projectDescription: settings.projectDescription,
-              testType: settings.testType,
               googleSpreadsheetLink: settings.googleSpreadsheetLink,
             });
           }

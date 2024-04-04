@@ -65,7 +65,7 @@ import { ProjectFacadeService } from './../../../../shared/services/facade/proje
   styleUrls: ['./report-table.component.scss'],
 })
 export class ReportTableComponent implements AfterViewInit, OnDestroy {
-  columnsToDisplay = ['eventName', 'passed', 'completedTime'];
+  columnsToDisplay = ['eventName', 'passed', 'requestPassed', 'completedTime'];
   columnsToDisplayWithExpand = ['select', ...this.columnsToDisplay, 'expand'];
   expandedElement: Report | null = null;
   testDataSource!: MatTableDataSource<IReportDetails>;
@@ -125,7 +125,7 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
 
   observeProject() {
     return this.dataSourceFacadeService
-      .observeProject(this.project$, this.paginator, this.sort)
+      .observeProject(this.paginator, this.sort)
       .pipe(
         takeUntil(this.destroy$),
         switchMap(

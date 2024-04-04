@@ -6,18 +6,18 @@
   <br />
   <mat-card-content>
     <form [formGroup]="previewModeForm" class="gtm-preview-mode-form">
+      <!-- users can use the accompany mode and the request check at the same time -->
       <div class="gtm-preview-mode-form__field">
         <mat-checkbox formControlName="isAccompanyMode"
           >Activate Accompany Mode</mat-checkbox
+        >
+        <mat-checkbox formControlName="isRequestCheck"
+          >Activate Request Check</mat-checkbox
         >
       </div>
       <mat-form-field class="gtm-preview-mode-form__field" appearance="outline">
         <mat-label>GTM URL</mat-label>
         <input matInput formControlName="tagManagerUrl" />
-      </mat-form-field>
-      <mat-form-field class="gtm-preview-mode-form__field" appearance="outline">
-        <mat-label>GTM ID</mat-label>
-        <input matInput formControlName="gtmId" />
       </mat-form-field>
       <div class="gtm-preview-mode-form__field gtm-preview-mode-form__row">
         <mat-form-field appearance="outline" style="width: 100%">

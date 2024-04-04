@@ -40,8 +40,8 @@ export class GtmFormComponent implements OnInit, OnDestroy {
   previewModeForm = this.fb.group({
     url: [''],
     tagManagerUrl: [''],
-    gtmId: [''],
     isAccompanyMode: [false],
+    isRequestCheck: [false],
   });
 
   constructor(
@@ -62,13 +62,13 @@ export class GtmFormComponent implements OnInit, OnDestroy {
           const previewModeUrl = project.settings.gtm['gtmPreviewModeUrl'];
           const isAccompanyMode = project.settings.gtm['isAccompanyMode'];
           const tagManagerUrl = project.settings.gtm['tagManagerUrl'];
-          const gtmId = project.settings.gtm['gtmId'];
+          const qaRequestCheck = project.settings.gtm['isRequestCheck'];
 
           this.previewModeForm.patchValue({
             url: previewModeUrl,
             isAccompanyMode: isAccompanyMode,
+            isRequestCheck: qaRequestCheck,
             tagManagerUrl: tagManagerUrl,
-            gtmId: gtmId,
           });
         })
       )
@@ -97,8 +97,8 @@ export class GtmFormComponent implements OnInit, OnDestroy {
           return this.settingsService.updateSettings(projectSlug, 'gtm', {
             gtmPreviewModeUrl: this.previewModeForm.value.url,
             isAccompanyMode: this.previewModeForm.value.isAccompanyMode,
+            isRequestCheck: this.previewModeForm.value.isRequestCheck,
             tagManagerUrl: this.previewModeForm.value.tagManagerUrl,
-            gtmId: this.previewModeForm.value.gtmId,
           });
         })
       )

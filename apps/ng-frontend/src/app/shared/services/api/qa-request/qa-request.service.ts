@@ -6,31 +6,28 @@ import { IInspectEvent } from '../../../models/inspectData.interface';
 @Injectable({
   providedIn: 'root',
 })
-export class GtmOperatorService {
+export class QaRequestService {
   constructor(private http: HttpClient) {}
 
-  runInspectionViaGtm(
+  runDataLayerWithRequestCheck(
     projectSlug: string,
     eventName: string,
-    gtmUrl: string,
+    measurementId: string,
     headless?: boolean,
     inspectEventDto?: IInspectEvent,
-    measurmentId?: string,
     username?: string,
     password?: string
   ) {
-    const encodedGtmUrl = encodeURIComponent(gtmUrl);
-    const queryParams = [`gtmUrl=${encodedGtmUrl}`];
-
+    // console.log('runDataLayerCheck', projectSlug, eventName, headless);
+    // console.log('inspectEventDto', inspectEventDto);
+    const queryParams = [];
+    if (measurementId) queryParams.push(`measurementId=${measurementId}`);
     if (headless !== undefined) queryParams.push(`headless=${headless}`);
-    if (measurmentId) queryParams.push(`measurementId=${measurmentId}`);
-    if (username) queryParams.push(`username=${encodeURIComponent(username)}`);
-    if (password) queryParams.push(`password=${encodeURIComponent(password)}`);
-
-    const queryString = queryParams.join('&');
-
+    if (username) queryParams.push(`username=${username}`);
+    if (password) queryParams.push(`password=${password}`);
+    const queryString = queryParams.length ? '?' + queryParams.join('&') : '';
     return this.http.post(
-      `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventName}?${queryString}`,
+      `${environment.dataLayerApiUrl}/${projectSlug}/${eventName}${queryString}`,
       { inspectEventDto: inspectEventDto ? inspectEventDto : {} }
     );
   }
