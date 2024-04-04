@@ -57,6 +57,7 @@ export class WaiterGtmOperatorController {
     @Query('gtmUrl') gtmUrl: string,
     @Query('headless') headless?: string,
     @Query('path') path?: string,
+    @Query('measurementId') measurementId?: string,
     @Query('username') username?: string,
     @Query('password') password?: string,
     @Body() inspectEventDto?: InspectEventDto
@@ -73,6 +74,7 @@ export class WaiterGtmOperatorController {
       eventName,
       headless,
       path,
+      measurementId,
       {
         username,
         password,

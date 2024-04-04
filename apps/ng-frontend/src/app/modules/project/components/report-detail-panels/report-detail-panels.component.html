@@ -107,16 +107,36 @@
 
     <mat-expansion-panel hideToggle>
       <mat-expansion-panel-header>
-        <mat-panel-title> Test Result </mat-panel-title>
+        <mat-panel-title> Raw Request </mat-panel-title>
+      </mat-expansion-panel-header>
+      <mat-panel-description>
+        <p>{{ (reportDetails$ | async)?.rawRequest }}</p>
+      </mat-panel-description>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Request Data Layer </mat-panel-title>
+      </mat-expansion-panel-header>
+      <mat-panel-description>
+        <pre class="json">{{
+          (reportDetails$ | async)?.reformedDataLayer | json
+        }}</pre>
+      </mat-panel-description>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Data Layer </mat-panel-title>
       </mat-expansion-panel-header>
       <mat-panel-description>
         <pre class="json">{{ (reportDetails$ | async)?.dataLayer | json }}</pre>
       </mat-panel-description>
-      <mat-action-row
+      <!-- <mat-action-row
         ><button mat-raised-button color="success" (click)="onDownload()">
           Download
         </button></mat-action-row
-      >
+      > -->
     </mat-expansion-panel>
   </mat-accordion>
 </div>

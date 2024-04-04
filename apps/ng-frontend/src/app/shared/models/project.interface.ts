@@ -4,9 +4,9 @@ export interface Project {
   rootProject: string;
   projectName: string;
   projectSlug: string;
-  testType: string;
   headless: boolean;
   projectDescription: string;
+  measurementId: string;
   googleSpreadsheetLink: string;
   tagManagerUrl: string;
   version: string;

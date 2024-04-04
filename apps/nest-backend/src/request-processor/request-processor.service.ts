@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { BaseItem } from '../interfaces/dataLayer.interface';
 import { parse, URLSearchParams } from 'url';
 import { standardParameterMap } from './utilities';
@@ -16,31 +16,28 @@ export class RequestProcessorService {
     return new URLSearchParams(parsedUrl.query || '');
   }
 
-  extractEvent(queryParams: URLSearchParams): string {
+  extractEventName(queryParams: URLSearchParams): string {
     return queryParams.get('en') || '';
   }
 
-  addCustomEventParameters(
-    dataLayer: any,
-    queryString: string,
-    event: string
-  ): void {
-    const enIndex = queryString.indexOf('en=' + event);
-    if (enIndex === -1) return;
-
-    // TODO: will need all parameters for other issues
-    // payload request when parameters are too long
-    const remainingParams = queryString.slice(
-      enIndex + ('en=' + event).length + 1
-    );
-    const remainingQueryParams = new URLSearchParams(remainingParams);
-
-    for (const [key, val] of remainingQueryParams.entries()) {
-      if (!['en', '_c', '_et'].includes(key) && !/^pr\d+$/.test(key)) {
-        // the key.split('.')[1] is to remove the 'ep.' or 'epn'. etc prefix from the key
-        dataLayer[key.split('.')[1]] = val;
+  addCustomEventParameters(dataLayer: any, queryString: string) {
+    const queryParams = new URLSearchParams(queryString);
+    for (const [key, val] of queryParams.entries()) {
+      // Process custom parameters
+      if (key.startsWith('ep.')) {
+        const customKey = key.split('.')[1];
+        dataLayer[customKey] = val;
+      } else if (key.startsWith('epn.')) {
+        const customKey = key.split('.')[1];
+        dataLayer[customKey] = val;
+      } else if (key.startsWith('cu')) {
+        dataLayer['currency'] = val;
+      } else {
+        // ignore other parameters
+        continue;
       }
     }
+    return dataLayer;
   }
 
   processCustomField(
@@ -85,17 +82,29 @@ export class RequestProcessorService {
   recomposeGA4ECEvent(url: string) {
     const decodedUrl = this.decodeUrl(url);
     const queryParams = this.parseUrl(decodedUrl);
-    const event = this.extractEvent(queryParams);
+    const event = this.extractEventName(queryParams);
     const dataLayer: any = { event };
 
     const queryString = queryParams.toString();
-    this.addCustomEventParameters(dataLayer, queryString, event);
+    const updatedDataLayer = this.addCustomEventParameters(
+      dataLayer,
+      queryString
+    );
     const items = this.extractItems(queryParams, queryString);
 
     if (items.length) {
-      dataLayer.items = items;
+      updatedDataLayer.ecommerce = {
+        value: updatedDataLayer.value || '', // Ensure value is set, default to empty string if not present
+        currency: updatedDataLayer.currency || '', // Ensure currency is set, default to empty string if not present
+        items: items,
+      };
+
+      delete updatedDataLayer.value;
+      delete updatedDataLayer.currency;
     }
-    return dataLayer;
+
+    Logger.log(updatedDataLayer, 'recomposeGA4ECEvent: dataLayer');
+    return updatedDataLayer;
   }
 
   formStandardItemObj(product: string): BaseItem {

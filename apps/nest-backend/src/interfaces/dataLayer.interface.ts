@@ -56,6 +56,25 @@ export interface ValidationResult {
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
 }
 
+export interface RequestValidationResult {
+  requestPassed: boolean;
+  rawRequest: string;
+  reformedDataLayer: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
+}
+
+export interface OutputValidationResult {
+  passed: boolean;
+  requestPassed: boolean;
+  rawRequest: string;
+  message?: string;
+  incorrectInfo?: string[];
+  reformedDataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
+  destinationUrl: string;
+}
+
 export interface ValidationStrategy {
   validateDataLayer(
     dataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[],

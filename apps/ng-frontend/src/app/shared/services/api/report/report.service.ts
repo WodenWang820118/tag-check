@@ -11,8 +11,6 @@ import { environment } from '../../../../../environments/environment';
   providedIn: 'root',
 })
 export class ReportService {
-  mockUrl = 'http://localhost:3004/reports';
-
   reportsSubject: Subject<Report> = new BehaviorSubject({} as Report);
   reports$ = this.reportsSubject.asObservable();
 

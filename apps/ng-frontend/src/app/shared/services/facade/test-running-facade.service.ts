@@ -16,6 +16,7 @@ import { Project } from '../../models/project.interface';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ProjectDataSourceService } from '../project-data-source/project-data-source.service';
+import { QaRequestService } from '../api/qa-request/qa-request.service';
 
 @Injectable({
   providedIn: 'root',
@@ -31,6 +32,7 @@ export class TestRunningFacadeService {
     private route: ActivatedRoute,
     private dataLayerService: DataLayerService,
     private gtmOperatorService: GtmOperatorService,
+    private qaRequestService: QaRequestService,
     private projectDataSourceService: ProjectDataSourceService
   ) {}
 
@@ -50,11 +52,31 @@ export class TestRunningFacadeService {
           this.isRunningTestSubject.next(true);
           this.eventRunningTestSubject.next(eventName);
 
-          if (project.gtm.isAccompanyMode) {
-            return this.gtmOperatorService.runDataLayerCheckViaGtm(
+          // TODO: testing
+          if (
+            project.gtm.isAccompanyMode ||
+            (project.gtm.isAccompanyMode && project.gtm.isRequestCheck)
+          ) {
+            const measurementId = project.gtm.isRequestCheck
+              ? project.measurementId
+              : undefined;
+            return this.gtmOperatorService.runInspectionViaGtm(
               slug,
               eventName,
               project.gtm.gtmPreviewModeUrl,
+              headless,
+              inspectEventDto,
+              measurementId,
+              project.authentication.username,
+              project.authentication.password
+            );
+          }
+
+          if (project.gtm.isRequestCheck) {
+            return this.qaRequestService.runDataLayerWithRequestCheck(
+              slug,
+              eventName,
+              project.measurementId,
               headless,
               inspectEventDto,
               project.authentication.username,
@@ -62,7 +84,7 @@ export class TestRunningFacadeService {
             );
           }
 
-          return this.dataLayerService.runDataLayerCheck(
+          return this.dataLayerService.runDataLayerInspection(
             slug,
             eventName,
             headless,
