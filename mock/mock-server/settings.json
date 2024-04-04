@@ -4,19 +4,17 @@
   "projectName": "ng gtm integration sample",
   "projectDescription": "",
   "projectSlug": "ng_gtm_integration_sample",
-  "testType": "Data Layer Checker",
+  "measurementId": "G-8HK542DQMG",
   "googleSpreadsheetLink": "",
   "containerName": "",
-  "headless": true,
+  "headless": false,
   "gtm": {
-    "isAccompanyMode": true,
+    "isAccompanyMode": false,
+    "isRequestCheck": true,
     "tagManagerUrl": "https://tagmanager.google.com/?utm_source=marketingplatform.google.com&utm_medium=et&utm_campaign=marketingplatform.google.com%2Fabout%2Ftag-manager%2F#/container/accounts/6140708819/containers/168785492/workspaces/28",
-    "gtmPreviewModeUrl": "https://tagassistant.google.com/#/?id=GTM-NBMX2DWS&url=https%3A%2F%2Fwodenwang820118.github.io%2Fng-gtm-integration-sample%2F&source=TAG_MANAGER&gtm_auth=CrwK6Df3R99vLdvceTvMgQ&gtm_preview=env-235",
-    "gtmId": "GTM-NBMX2DWS"
+    "gtmPreviewModeUrl": "https://tagassistant.google.com/#/?id=GTM-NBMX2DWS&url=https%3A%2F%2Fwodenwang820118.github.io%2Fng-gtm-integration-sample%2F&source=TAG_MANAGER&gtm_auth=CrwK6Df3R99vLdvceTvMgQ&gtm_preview=env-235"
   },
-  "specs": ["view_item", "view_item_list", "view_promotion"],
-  "recordings": ["add_to_cart", "view_item_list", "select_item"],
-  "preventNavigationEvents": ["select_item", "select_promotion"],
+  "preventNavigationEvents": ["select_item"],
   "authentication": {
     "username": "",
     "password": ""

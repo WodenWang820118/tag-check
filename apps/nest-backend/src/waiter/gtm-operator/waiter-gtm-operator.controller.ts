@@ -3,13 +3,13 @@ import { Body, Controller, Logger, Param, Post, Query } from '@nestjs/common';
 import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
 import { InspectEventDto } from '../../dto/inspect-event.dto';
 import { ValidationResult } from '../../interfaces/dataLayer.interface';
-import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
+import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
 
 @Controller('datalayer')
 export class WaiterGtmOperatorController {
   constructor(
     private waiterGtmOperatorService: WaiterGtmOperatorService,
-    private abstractRerportService: AbstractReportService
+    private abstractDatalayerRerportService: AbstractDatalayerReportService
   ) {}
 
   @ApiOperation({
@@ -57,6 +57,7 @@ export class WaiterGtmOperatorController {
     @Query('gtmUrl') gtmUrl: string,
     @Query('headless') headless?: string,
     @Query('path') path?: string,
+    @Query('measurementId') measurementId?: string,
     @Query('username') username?: string,
     @Query('password') password?: string,
     @Body() inspectEventDto?: InspectEventDto
@@ -73,6 +74,7 @@ export class WaiterGtmOperatorController {
       eventName,
       headless,
       path,
+      measurementId,
       {
         username,
         password,
@@ -83,7 +85,7 @@ export class WaiterGtmOperatorController {
     Logger.log(results, 'waiter.inspectSingleEventViaGtm');
 
     const abstractReport =
-      await this.abstractRerportService.getSingleAbstractTestResultJson(
+      await this.abstractDatalayerRerportService.getSingleAbstractTestResultJson(
         projectSlug,
         eventName
       );

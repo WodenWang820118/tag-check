@@ -4,13 +4,14 @@ import { Credentials, Page } from 'puppeteer';
 import { getCurrentTimestamp } from '../waiter/utils';
 import { InspectEventDto } from '../dto/inspect-event.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
-import { AbstractReportService } from '../os/abstract-report/abstract-report.service';
+import { AbstractDatalayerReportService } from '../os/abstract-datalayer-report/abstract-datalayer-report.service';
+import { OutputValidationResult } from '../interfaces/dataLayer.interface';
 @Injectable()
 export class PipelineService {
   constructor(
     private inspectorSingleEventService: InspectorSingleEventService,
     private xlsxReportSingleEventService: XlsxReportSingleEventService,
-    private abstractReportService: AbstractReportService
+    private abstractDatalayerReportService: AbstractDatalayerReportService
   ) {}
 
   async singleEventInspectionRecipe(
@@ -57,10 +58,22 @@ export class PipelineService {
         projectName
       );
 
-      await this.abstractReportService.writeSingleAbstractTestResultJson(
+      const outputValidationResult: OutputValidationResult = {
+        passed: result.dataLayerResult.passed,
+        requestPassed: result.requestCheckResult.passed,
+        rawRequest: result.rawRequest,
+        message: result.dataLayerResult.message,
+        incorrectInfo: result.dataLayerResult.incorrectInfo,
+        reformedDataLayer: result.requestCheckResult.dataLayer,
+        dataLayer: result.dataLayerResult.dataLayer,
+        dataLayerSpec: result.dataLayerResult.dataLayerSpec,
+        destinationUrl: result.destinationUrl,
+      };
+
+      await this.abstractDatalayerReportService.writeSingleAbstractTestResultJson(
         projectName,
         testName,
-        data[0].dataLayerResult
+        outputValidationResult
       );
       return data;
     } catch (error) {

@@ -12,7 +12,6 @@ import { Project } from '../../../../shared/models/project.interface';
       <mat-card appearance="outlined">
         <mat-card-header>
           <mat-card-title>{{ project.projectName }}</mat-card-title>
-          <mat-card-subtitle>{{ project.testType }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
           <p>{{ project.projectDescription }}</p>

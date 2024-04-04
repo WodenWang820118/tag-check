@@ -9,7 +9,7 @@ import { IInspectEvent } from '../../../models/inspectData.interface';
 export class DataLayerService {
   constructor(private http: HttpClient) {}
 
-  runDataLayerCheck(
+  runDataLayerInspection(
     projectSlug: string,
     eventName: string,
     headless?: boolean,

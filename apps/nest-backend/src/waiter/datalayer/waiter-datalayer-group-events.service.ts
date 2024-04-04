@@ -4,7 +4,7 @@ import { XlsxReportGroupEventsService } from '../../os/xlsx-report/xlsx-report-g
 import puppeteer, { Credentials } from 'puppeteer';
 import { getCurrentTimestamp } from '../utils';
 import { FileService } from '../../os/file/file.service';
-import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
+import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
 import { BROWSER_ARGS } from '../../configs/project.config';
 
 @Injectable()
@@ -13,14 +13,13 @@ export class WaiterDataLayerGroupEventsService {
     private fileService: FileService,
     private xlsxReportGroupEventsService: XlsxReportGroupEventsService,
     private inspectorGroupEventsService: InspectorGroupEventsService,
-    private abstractReportService: AbstractReportService
+    private abstractDatalayerReportService: AbstractDatalayerReportService
   ) {}
 
   async inspectProject(
     projectName: string,
     headless: string,
     path?: string,
-    args?: string[],
     measurementId?: string,
     credentials?: Credentials,
     concurrency?: number
@@ -71,7 +70,7 @@ export class WaiterDataLayerGroupEventsService {
     );
 
     // TODO: 3.4 report to each test
-    await this.abstractReportService.writeProjectAbstractTestRsultJson(
+    await this.abstractDatalayerReportService.writeProjectAbstractTestRsultJson(
       projectName,
       data.map((item) => item.dataLayerResult)
     );

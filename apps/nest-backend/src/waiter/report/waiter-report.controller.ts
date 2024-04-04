@@ -26,8 +26,8 @@ export class WaiterReportController {
     description: 'The name of the project to which the event belongs.',
   })
   @Get(':projectSlug')
-  async getProjectReports(@Param('projectSlug') projectSlug: string) {
-    return await this.waiterReportService.getProjectReports(projectSlug);
+  async getProjectEventReports(@Param('projectSlug') projectSlug: string) {
+    return await this.waiterReportService.getProjectEventReports(projectSlug);
   }
 
   // TODO: haven't been tested
