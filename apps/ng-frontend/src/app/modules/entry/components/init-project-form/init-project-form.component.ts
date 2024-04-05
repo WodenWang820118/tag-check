@@ -65,8 +65,8 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
         ],
       ],
       projectSlug: [''],
+      measurementId: [''],
       projectDescription: [''],
-      testType: ['', Validators.required],
       googleSpreadsheetLink: [''],
     });
   }
@@ -89,8 +89,12 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
             .toLowerCase()
             // Replace consecutive dashes with a single dash
             .replace(/--+/g, '-');
+          // the random string is added to the end of the project slug to avoid conflicts
+          const fourRandomChars = Math.random().toString(36).substring(2, 6);
 
-          this.projectForm.controls['projectSlug'].setValue(formattedValue);
+          this.projectForm.controls['projectSlug'].setValue(
+            formattedValue + '-' + fourRandomChars
+          );
         })
       )
       .subscribe();
