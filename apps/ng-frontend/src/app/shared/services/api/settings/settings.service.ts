@@ -31,10 +31,17 @@ export class SettingsService {
       )
       .pipe(
         tap((response) => {
-          if (!this.isEmptyObject(response.settings))
+          if (!this.isEmptyObject(response.settings)) {
             this._snackBar.openFromComponent(SnackBarComponent, {
               duration: 5000,
+              data: 'Saved',
             });
+          } else {
+            this._snackBar.openFromComponent(SnackBarComponent, {
+              duration: 5000,
+              data: 'Error',
+            });
+          }
         })
       );
   }
