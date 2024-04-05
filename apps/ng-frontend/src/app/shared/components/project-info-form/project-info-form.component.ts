@@ -38,9 +38,9 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
 
   projectInfoForm = this.fb.group({
     projectName: [''],
+    measurementId: [''],
     projectDescription: [''],
     googleSpreadsheetLink: [''],
-    preventNavigationEvents: this.fb.array([]),
   });
 
   constructor(
@@ -62,6 +62,7 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
             const settings = project.settings;
             this.projectInfoForm.patchValue({
               projectName: settings.projectName,
+              measurementId: settings.measurementId,
               projectDescription: settings.projectDescription,
               googleSpreadsheetLink: settings.googleSpreadsheetLink,
             });
