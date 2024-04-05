@@ -122,7 +122,8 @@ function getElementByText(searchText) {
 }
 
 async function findElementByXPath(page: Page, xpath: string) {
-  const elements = await page.$x(xpath);
+  // TODO: deprecated page.$x; please handle it
+  const elements = await page.$$(xpath);
   if (elements.length > 0) {
     return elements[0]; // Assuming you want the first element found
   } else {

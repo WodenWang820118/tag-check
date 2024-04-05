@@ -48,7 +48,7 @@ export class InspectorGroupEventsService {
 
     const results = [];
     for (let i = 0; i < operations.length; i += concurrency) {
-      const incognitoContext = await browser.createIncognitoBrowserContext();
+      const incognitoContext = await browser.createBrowserContext();
       const operationBatch = operations.slice(i, i + concurrency);
 
       const batchPromises = operationBatch.map(async (operation) => {

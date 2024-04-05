@@ -18,9 +18,9 @@ export class WaiterDataLayerSingleEventService {
     inspectEventDto?: InspectEventDto
   ) {
     const browser = await puppeteer.launch({
-      headless: headless === 'true' ? 'new' : false,
+      headless: headless === 'true' ? true : false,
       defaultViewport: null,
-      // devtools: true,
+      devtools: measurementId ? true : false,
       ignoreHTTPSErrors: true,
       args:
         (inspectEventDto as any).inspectEventDto.puppeteerArgs || BROWSER_ARGS,

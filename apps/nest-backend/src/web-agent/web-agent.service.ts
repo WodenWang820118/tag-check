@@ -34,7 +34,7 @@ export class WebAgentService {
 
   async fetchDataLayer(url: string, credentials?: Credentials) {
     const browser = await puppeteer.launch({
-      headless: 'new',
+      headless: true,
       args: BROWSER_ARGS,
     });
 
