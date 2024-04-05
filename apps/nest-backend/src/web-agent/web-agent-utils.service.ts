@@ -22,7 +22,7 @@ export class WebAgentUtilsService {
     projectName: string,
     testName: string,
     filePath?: string,
-    captureRequest = false,
+    captureRequest?: boolean,
     measurementId?: string,
     credentials?: Credentials,
     application?: InspectEventDto['application']
@@ -61,6 +61,11 @@ export class WebAgentUtilsService {
           );
           eventRequest = interceptedRequest.url();
           page.off('request');
+        } else {
+          Logger.log(
+            interceptedRequest.url(),
+            'WebAgentUtils.performTest: monitoring request'
+          );
         }
       });
     }

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import puppeteer, { Credentials } from 'puppeteer';
+import puppeteer, { Credentials, Page } from 'puppeteer';
 import { BROWSER_ARGS } from '../configs/project.config';
 import { InspectEventDto } from '../dto/inspect-event.dto';
 import { sleep } from '../web-agent/action/action-utils';
@@ -26,7 +26,7 @@ export class GtmOperatorService {
   ) {
     // set the defaultViewport to null to use maximum viewport size
     const browser = await puppeteer.launch({
-      headless: headless === 'true' ? 'new' : false,
+      headless: headless === 'true' ? true : false,
       devtools: measurementId ? true : false,
       defaultViewport: null,
       timeout: 30000,
@@ -36,21 +36,10 @@ export class GtmOperatorService {
         (inspectEventDto as any).inspectEventDto.puppeteerArgs || BROWSER_ARGS,
     });
 
-    const incognitoContext = await browser.createIncognitoBrowserContext();
+    const incognitoContext = await browser.createBrowserContext();
     const websiteUrl = this.extractBaseUrlFromGtmUrl(gtmUrl);
-    // Logger.log(
-    //   `Website URL: ${websiteUrl}`,
-    //   'gtm-operator.inspectSingleEventViaGtm'
-    // );
     const page = await incognitoContext.newPage();
-
-    await page.goto(gtmUrl, { waitUntil: 'networkidle2' });
-    await page.$('#include-debug-param').then((el) => el?.click());
-
-    // 3) Start tag manager preview mode
-    await page.$('#domain-start-button').then((el) => el?.click());
-
-    // 4) Wait and close the initial blank page for cleaner operations
+    await this.operateGtmPreviewMode(page, gtmUrl);
     await sleep(1000);
     // Close the initial blank page for cleaner operations
     const pages = await browser.pages();
@@ -59,12 +48,14 @@ export class GtmOperatorService {
         await subPage.close();
       }
     }
-
     // 5) Wait for the page to completely load
+    await sleep(1000);
+
     const target = await browser.waitForTarget((target) =>
       target.url().includes(new URL(websiteUrl).origin)
     );
 
+    // TODO: Using the preview mode cannot intercept the network requests
     const testingPage = await target.page();
     await sleep(1000);
     return this.pipelineService.singleEventInspectionRecipe(
@@ -77,6 +68,23 @@ export class GtmOperatorService {
       credentials,
       inspectEventDto
     );
+  }
+
+  async operateGtmPreviewMode(page: Page, gtmUrl: string) {
+    Logger.log(
+      'Operating GTM preview mode',
+      'gtm-operator.operateGtmPreviewMode'
+    );
+
+    await page.goto(gtmUrl, { waitUntil: 'networkidle2' });
+    await page.$('#include-debug-param').then((el) => el?.click());
+
+    // 3) Start tag manager preview mode
+    await page.$('#domain-start-button').then((el) => el?.click());
+
+    const btnSelector = '.btn.btn--filled.wd-continue-debugging-button';
+    await page.waitForSelector(btnSelector, { visible: true });
+    await page.$(btnSelector).then((el) => el?.click());
   }
 
   extractBaseUrlFromGtmUrl(gtmUrl: string) {
