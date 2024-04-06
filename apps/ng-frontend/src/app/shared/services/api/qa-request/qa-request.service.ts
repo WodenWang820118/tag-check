@@ -18,8 +18,6 @@ export class QaRequestService {
     username?: string,
     password?: string
   ) {
-    // console.log('runDataLayerCheck', projectSlug, eventName, headless);
-    // console.log('inspectEventDto', inspectEventDto);
     const queryParams = [];
     if (measurementId) queryParams.push(`measurementId=${measurementId}`);
     if (headless !== undefined) queryParams.push(`headless=${headless}`);
@@ -28,7 +26,7 @@ export class QaRequestService {
     const queryString = queryParams.length ? '?' + queryParams.join('&') : '';
     return this.http.post(
       `${environment.dataLayerApiUrl}/${projectSlug}/${eventName}${queryString}`,
-      { inspectEventDto: inspectEventDto ? inspectEventDto : {} }
+      inspectEventDto
     );
   }
 }

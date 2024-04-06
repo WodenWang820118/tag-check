@@ -34,11 +34,6 @@ export class WaiterGtmOperatorController {
     description: 'Specifies if the test runs in headless mode.',
   })
   @ApiQuery({
-    name: 'path',
-    required: false,
-    description: 'The optional path where the event data is stored.',
-  })
-  @ApiQuery({
     name: 'username',
     required: false,
     description:
@@ -56,13 +51,11 @@ export class WaiterGtmOperatorController {
     @Param('eventName') eventName: string,
     @Query('gtmUrl') gtmUrl: string,
     @Query('headless') headless?: string,
-    @Query('path') path?: string,
     @Query('measurementId') measurementId?: string,
     @Query('username') username?: string,
     @Query('password') password?: string,
     @Body() inspectEventDto?: InspectEventDto
   ) {
-    const settings = inspectEventDto;
     const results: {
       dataLayerResult: ValidationResult;
       rawRequest: string;
@@ -73,13 +66,12 @@ export class WaiterGtmOperatorController {
       projectSlug,
       eventName,
       headless,
-      path,
       measurementId,
       {
         username,
         password,
       },
-      settings
+      inspectEventDto
     );
 
     Logger.log(results, 'waiter.inspectSingleEventViaGtm');

@@ -19,7 +19,6 @@ export class GtmOperatorService {
     projectName: string,
     testName: string,
     headless: string,
-    filePath?: string,
     measurementId?: string,
     credentials?: Credentials,
     inspectEventDto?: InspectEventDto
@@ -32,8 +31,7 @@ export class GtmOperatorService {
       timeout: 30000,
       ignoreHTTPSErrors: true,
       // the window size may impact the examination result
-      args:
-        (inspectEventDto as any).inspectEventDto.puppeteerArgs || BROWSER_ARGS,
+      args: inspectEventDto.puppeteerArgs || BROWSER_ARGS,
     });
 
     const incognitoContext = await browser.createBrowserContext();
@@ -63,7 +61,6 @@ export class GtmOperatorService {
       projectName,
       testName,
       headless,
-      filePath,
       measurementId,
       credentials,
       inspectEventDto

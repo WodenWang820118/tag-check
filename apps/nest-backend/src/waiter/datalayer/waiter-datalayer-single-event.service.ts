@@ -12,7 +12,6 @@ export class WaiterDataLayerSingleEventService {
     projectName: string,
     testName: string,
     headless: string,
-    path?: string,
     measurementId?: string,
     credentials?: Credentials,
     inspectEventDto?: InspectEventDto
@@ -22,8 +21,7 @@ export class WaiterDataLayerSingleEventService {
       defaultViewport: null,
       devtools: measurementId ? true : false,
       ignoreHTTPSErrors: true,
-      args:
-        (inspectEventDto as any).inspectEventDto.puppeteerArgs || BROWSER_ARGS,
+      args: inspectEventDto.puppeteerArgs || BROWSER_ARGS,
     });
     Logger.log('Browser launched', 'waiter.inspectSingleEvent');
     const [page] = await browser.pages();
@@ -33,7 +31,6 @@ export class WaiterDataLayerSingleEventService {
       projectName,
       testName,
       headless,
-      path,
       measurementId,
       credentials,
       inspectEventDto
