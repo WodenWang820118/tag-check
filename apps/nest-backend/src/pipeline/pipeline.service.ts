@@ -19,7 +19,6 @@ export class PipelineService {
     projectName: string,
     testName: string,
     headless: string,
-    path?: string,
     measurementId?: string,
     credentials?: Credentials,
     inspectEventDto?: InspectEventDto
@@ -30,10 +29,9 @@ export class PipelineService {
         projectName,
         testName,
         headless,
-        path,
         measurementId,
         credentials,
-        (inspectEventDto as any).inspectEventDto.application
+        inspectEventDto.application
       );
 
       Logger.log('DataLayer inspected', 'waiter.inspectSingleEvent');

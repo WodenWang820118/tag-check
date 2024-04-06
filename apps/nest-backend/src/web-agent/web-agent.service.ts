@@ -11,7 +11,6 @@ export class WebAgentService {
     page: Page,
     projectName: string,
     testName: string,
-    path?: string,
     credentials?: Credentials,
     application?: InspectEventDto['application']
   ) {
@@ -20,7 +19,6 @@ export class WebAgentService {
         page,
         projectName,
         testName,
-        path,
         false,
         null,
         credentials,
@@ -48,7 +46,6 @@ export class WebAgentService {
     }
     await page.goto(url, { waitUntil: 'networkidle2' });
 
-    // const result = await this.dataLayerService.getDataLayer(page);
     const result = await page.evaluate(() => {
       return window.dataLayer
         ? JSON.parse(JSON.stringify(window.dataLayer))
@@ -63,7 +60,6 @@ export class WebAgentService {
     page: Page,
     projectName: string,
     testName: string,
-    path?: string,
     measurementId?: string,
     credentials?: Credentials,
     application?: InspectEventDto['application']
@@ -73,7 +69,6 @@ export class WebAgentService {
         page,
         projectName,
         testName,
-        path,
         true,
         measurementId,
         credentials,

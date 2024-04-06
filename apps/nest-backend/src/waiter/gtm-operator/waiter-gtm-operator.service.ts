@@ -11,7 +11,6 @@ export class WaiterGtmOperatorService {
     projectName: string,
     testName: string,
     headless: string,
-    filePath?: string,
     measurementId?: string,
     credentials?: Credentials,
     inspectEventDto?: InspectEventDto
@@ -21,7 +20,6 @@ export class WaiterGtmOperatorService {
       projectName,
       testName,
       headless,
-      filePath,
       measurementId,
       credentials,
       inspectEventDto

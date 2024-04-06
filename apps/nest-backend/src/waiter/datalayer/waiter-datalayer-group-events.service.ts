@@ -19,7 +19,6 @@ export class WaiterDataLayerGroupEventsService {
   async inspectProject(
     projectName: string,
     headless: string,
-    path?: string,
     measurementId?: string,
     credentials?: Credentials,
     concurrency?: number
@@ -36,7 +35,6 @@ export class WaiterDataLayerGroupEventsService {
       await this.inspectorGroupEventsService.inspectProjectDataLayer(
         browser,
         projectName,
-        path,
         headless,
         measurementId,
         credentials,

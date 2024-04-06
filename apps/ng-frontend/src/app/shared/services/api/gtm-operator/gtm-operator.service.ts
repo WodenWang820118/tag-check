@@ -31,7 +31,7 @@ export class GtmOperatorService {
 
     return this.http.post(
       `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventName}?${queryString}`,
-      { inspectEventDto: inspectEventDto ? inspectEventDto : {} }
+      inspectEventDto
     );
   }
 }

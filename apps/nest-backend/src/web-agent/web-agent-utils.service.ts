@@ -21,7 +21,6 @@ export class WebAgentUtilsService {
     page: Page,
     projectName: string,
     testName: string,
-    filePath?: string,
     captureRequest?: boolean,
     measurementId?: string,
     credentials?: Credentials,

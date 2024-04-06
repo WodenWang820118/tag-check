@@ -13,8 +13,6 @@ import { InspectEventDto } from '../dto/inspect-event.dto';
 
 @Injectable()
 export class InspectorSingleEventService {
-  // private validationStrategies: { [key: string]: ValidationStrategy };
-
   constructor(
     private webAgentService: WebAgentService,
     private fileService: FileService,
@@ -29,7 +27,6 @@ export class InspectorSingleEventService {
     projectName: string,
     testName: string,
     headless: string,
-    filePath?: string,
     measurementId?: string,
     credentials?: Credentials,
     application?: InspectEventDto['application']
@@ -60,7 +57,6 @@ export class InspectorSingleEventService {
             page,
             projectName,
             testName,
-            filePath,
             credentials,
             application
           );
@@ -97,7 +93,6 @@ export class InspectorSingleEventService {
               page,
               projectName,
               testName,
-              filePath,
               measurementId,
               credentials,
               application

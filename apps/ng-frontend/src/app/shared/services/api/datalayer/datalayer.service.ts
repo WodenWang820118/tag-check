@@ -17,8 +17,6 @@ export class DataLayerService {
     username?: string,
     password?: string
   ) {
-    // console.log('runDataLayerCheck', projectSlug, eventName, headless);
-    // console.log('inspectEventDto', inspectEventDto);
     const queryParams = [];
     if (headless !== undefined) queryParams.push(`headless=${headless}`);
     if (username) queryParams.push(`username=${username}`);
@@ -27,7 +25,7 @@ export class DataLayerService {
 
     return this.http.post(
       `${environment.dataLayerApiUrl}/${projectSlug}/${eventName}${queryString}`,
-      { inspectEventDto: inspectEventDto ? inspectEventDto : {} }
+      inspectEventDto
     );
   }
 }
