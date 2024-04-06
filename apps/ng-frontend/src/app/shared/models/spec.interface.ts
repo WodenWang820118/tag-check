@@ -1,4 +1,9 @@
-export interface Spec {
+export interface ProjectSpec {
   projectSlug: string;
-  specs: any[];
+  specs: Spec[];
+}
+
+export interface Spec {
+  event: string;
+  [key: string]: string;
 }

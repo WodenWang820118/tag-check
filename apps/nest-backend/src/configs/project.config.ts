@@ -8,6 +8,7 @@ export const CONFIG_CURRENT_PROJECT_PATH = 'currentProjectPath';
 export const ABSTRACT_REPORT_FILE_NAME = 'abstract.json';
 export const SPECS = 'spec.json';
 export const SETTINGS = 'settings.json';
+export const META_DATA = 'project.json';
 export const BROWSER_ARGS = [
   '--window-size=1440,900',
   '--no-sandbox',

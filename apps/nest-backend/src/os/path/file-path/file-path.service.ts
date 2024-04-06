@@ -6,6 +6,7 @@ import {
   CONFIG_FOLDER,
   RECORDING_FOLDER,
   SETTINGS,
+  META_DATA,
 } from '../../../configs/project.config';
 import path from 'path';
 
@@ -49,6 +50,19 @@ export class FilePathService {
         projectSlug,
         '',
         SETTINGS
+      );
+    } catch (error) {
+      Logger.error(error.message, 'FilePathService.getProjectSettingPath');
+      throw new HttpException(error.message, 500);
+    }
+  }
+
+  async getProjectMetaDataFilePath(projectSlug: string) {
+    try {
+      return await this.pathUtilsService.buildFilePath(
+        projectSlug,
+        '',
+        META_DATA
       );
     } catch (error) {
       Logger.error(error.message, 'FilePathService.getProjectSettingPath');

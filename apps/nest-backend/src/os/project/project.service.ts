@@ -3,8 +3,6 @@ import { FileService } from '../file/file.service';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
-import { join } from 'path';
-import { statSync } from 'fs';
 
 @Injectable()
 export class ProjectService {
@@ -35,38 +33,6 @@ export class ProjectService {
       return recordings;
     } catch (error) {
       Logger.error(error.message, 'ProjectService.getProjectRecordings');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  async getProjectInspectionResults(projectSlug: string) {
-    try {
-      const results = [];
-
-      const resultFolderPath =
-        await this.folderPathService.getInspectionResultFolderPath(projectSlug);
-
-      const eventFolderNames = this.folderService
-        .readFolderFiles(resultFolderPath)
-        .filter((dirent) => dirent.isDirectory())
-        .map((dirent) => dirent.name);
-
-      for (const name of eventFolderNames) {
-        const filePath = join(resultFolderPath, name, 'abstract.json');
-        const abstractResult = this.fileService.readJsonFile(filePath);
-
-        const completedTime = statSync(filePath).mtime;
-
-        // TODO: get file written time as completedTime
-        results.push({
-          eventName: name,
-          completedTime: completedTime,
-          ...abstractResult,
-        });
-      }
-      return results;
-    } catch (error) {
-      Logger.error(error.message, 'ProjectService.getProjectInspectionResults');
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -107,25 +73,10 @@ export class ProjectService {
         .map((dirent) => dirent.name);
 
       const project = projectNames.find((name) => name === projectSlug);
-
-      const settings = await this.getProjectSettings(project);
-      const recordings = (await this.getProjectRecordings(project)).map(
-        (item) => item && item.name.replace('.json', '')
+      const metaData = await this.fileService.readJsonFile(
+        await this.filePathService.getProjectMetaDataFilePath(project)
       );
-      const reports = (await this.getProjectInspectionResults(project)).map(
-        (item) => item && item.eventName
-      );
-      const specs = this.fileService.readJsonFile(
-        await this.filePathService.getProjectConfigFilePath(project)
-      );
-
-      return {
-        projectName: project,
-        ...settings,
-        recordings: recordings,
-        specs: specs,
-        reports: reports,
-      };
+      return metaData;
     } catch (error) {
       Logger.error(error.message, 'ProjectService.getProject');
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -16,8 +16,8 @@ export class WaiterSpecController {
     description: 'The name of the project to which the event belongs.',
   })
   @Get(':projectSlug')
-  async getSpecs(@Param('projectSlug') projectSlug: string) {
-    return await this.waiterSpecService.getSpecs(projectSlug);
+  async getProjectSpecs(@Param('projectSlug') projectSlug: string) {
+    return await this.waiterSpecService.getProjectSpecs(projectSlug);
   }
 
   @ApiOperation({

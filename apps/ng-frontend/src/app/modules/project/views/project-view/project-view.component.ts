@@ -13,6 +13,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
+import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
+import { ProjectSetting } from '../../../../shared/models/setting.interface';
 
 @Component({
   selector: 'app-project-view',
@@ -35,14 +37,15 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
   encapsulation: ViewEncapsulation.None,
 })
 export class ProjectViewComponent implements OnInit, OnDestroy {
-  project$!: Observable<Project>;
+  project$!: Observable<ProjectSetting>;
   projects$!: Observable<Project[]>;
   destroy$ = new Subject<void>();
   hover = false;
 
   constructor(
     private route: ActivatedRoute,
-    public projectInfoService: ProjectInfoService
+    public projectInfoService: ProjectInfoService,
+    private settingsService: SettingsService
   ) {}
 
   ngOnInit(): void {
@@ -51,7 +54,7 @@ export class ProjectViewComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         tap((params) => {
           // console.log(params);
-          this.project$ = this.projectInfoService.switchToProject(
+          this.project$ = this.settingsService.switchToProject(
             params['projectSlug']
           );
         })

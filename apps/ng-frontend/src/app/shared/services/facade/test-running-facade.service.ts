@@ -1,22 +1,15 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import { DataLayerService } from '../api/datalayer/datalayer.service';
 import { GtmOperatorService } from '../api/gtm-operator/gtm-operator.service';
-import {
-  combineLatest,
-  switchMap,
-  Observable,
-  BehaviorSubject,
-  take,
-} from 'rxjs';
+import { switchMap, BehaviorSubject, take } from 'rxjs';
 import { InspectEventDto } from '../../../modules/project/components/report-table/utils';
 import { IInspectEvent } from '../../models/inspectData.interface';
 import { IReportDetails } from '../../models/report.interface';
-import { Project } from '../../models/project.interface';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ProjectDataSourceService } from '../project-data-source/project-data-source.service';
 import { QaRequestService } from '../api/qa-request/qa-request.service';
+import { SettingsService } from '../api/settings/settings.service';
 
 @Injectable({
   providedIn: 'root',
@@ -29,68 +22,68 @@ export class TestRunningFacadeService {
   eventRunningTest$ = this.eventRunningTestSubject.asObservable();
 
   constructor(
-    private route: ActivatedRoute,
     private dataLayerService: DataLayerService,
     private gtmOperatorService: GtmOperatorService,
     private qaRequestService: QaRequestService,
-    private projectDataSourceService: ProjectDataSourceService
+    private projectDataSourceService: ProjectDataSourceService,
+    private settingsService: SettingsService
   ) {}
 
   runTest(
     eventName: string,
-    project$: Observable<Project>,
+    projectSlug: string,
     testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
   ) {
-    combineLatest([this.route.params, project$])
+    return this.settingsService
+      .getProjectSettings(projectSlug)
       .pipe(
         take(1),
-        switchMap(([params, project]) => {
-          const slug = params['projectSlug'];
-          const headless = project.headless;
+        switchMap((project) => {
+          const headless = project.settings.headless;
           const inspectEventDto: IInspectEvent = new InspectEventDto(project);
           // change the play button to a spinner
           this.isRunningTestSubject.next(true);
           this.eventRunningTestSubject.next(eventName);
 
-          // TODO: testing
           if (
-            project.gtm.isAccompanyMode ||
-            (project.gtm.isAccompanyMode && project.gtm.isRequestCheck)
+            project.settings.gtm.isAccompanyMode ||
+            (project.settings.gtm.isAccompanyMode &&
+              project.settings.gtm.isRequestCheck)
           ) {
-            const measurementId = project.gtm.isRequestCheck
-              ? project.measurementId
+            const measurementId = project.settings.gtm.isRequestCheck
+              ? project.settings.measurementId
               : undefined;
             return this.gtmOperatorService.runInspectionViaGtm(
-              slug,
+              projectSlug,
               eventName,
-              project.gtm.gtmPreviewModeUrl,
+              project.settings.gtm.gtmPreviewModeUrl,
               headless,
               inspectEventDto,
               measurementId,
-              project.authentication.username,
-              project.authentication.password
+              project.settings.authentication.username,
+              project.settings.authentication.password
             );
           }
 
-          if (project.gtm.isRequestCheck) {
+          if (project.settings.gtm.isRequestCheck) {
             return this.qaRequestService.runDataLayerWithRequestCheck(
-              slug,
+              projectSlug,
               eventName,
-              project.measurementId,
+              project.settings.measurementId,
               headless,
               inspectEventDto,
-              project.authentication.username,
-              project.authentication.password
+              project.settings.authentication.username,
+              project.settings.authentication.password
             );
           }
 
           return this.dataLayerService.runDataLayerInspection(
-            slug,
+            projectSlug,
             eventName,
             headless,
             inspectEventDto,
-            project.authentication.username,
-            project.authentication.password
+            project.settings.authentication.username,
+            project.settings.authentication.password
           );
         })
       )

@@ -9,7 +9,7 @@ export class WaiterSpecService {
     private filePathService: FilePathService
   ) {}
 
-  async getSpecs(projectSlug: string) {
+  async getProjectSpecs(projectSlug: string) {
     const allSpecs = await this.fileService.readJsonFile(
       await this.filePathService.getProjectConfigFilePath(projectSlug)
     );
