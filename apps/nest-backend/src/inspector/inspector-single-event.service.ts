@@ -2,19 +2,17 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import {
   BaseDataLayerEvent,
   ValidationResult,
-} from '../interfaces/dataLayer.interface';
+} from '@utils';
 import { FileService } from '../os/file/file.service';
 import { FilePathService } from '../os/path/file-path/file-path.service';
 import { WebAgentService } from '../web-agent/web-agent.service';
 import { RequestProcessorService } from '../request-processor/request-processor.service';
 import { Credentials, Page } from 'puppeteer';
 import { InspectorUtilsService } from './inspector-utils.service';
-import { InspectEventDto } from '../dto/inspect-event.dto';
+import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 
 @Injectable()
 export class InspectorSingleEventService {
-  // private validationStrategies: { [key: string]: ValidationStrategy };
-
   constructor(
     private webAgentService: WebAgentService,
     private fileService: FileService,
@@ -29,10 +27,9 @@ export class InspectorSingleEventService {
     projectName: string,
     testName: string,
     headless: string,
-    filePath?: string,
     measurementId?: string,
     credentials?: Credentials,
-    application?: InspectEventDto['application']
+    application?: EventInspectionPresetDto['application']
   ) {
     try {
       // 1. Get the project spec from the local file system
@@ -60,7 +57,6 @@ export class InspectorSingleEventService {
             page,
             projectName,
             testName,
-            filePath,
             credentials,
             application
           );
@@ -97,7 +93,6 @@ export class InspectorSingleEventService {
               page,
               projectName,
               testName,
-              filePath,
               measurementId,
               credentials,
               application

@@ -1,9 +1,9 @@
-import { InspectEventDto } from './../../dto/inspect-event.dto';
+import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 import { Injectable, Logger } from '@nestjs/common';
 import puppeteer, { Credentials } from 'puppeteer';
 import { BROWSER_ARGS } from '../../configs/project.config';
 import { PipelineService } from '../../pipeline/pipeline.service';
-
+// import { IInspectEventDto } from '@utils';
 @Injectable()
 export class WaiterDataLayerSingleEventService {
   constructor(private pipelineService: PipelineService) {}
@@ -12,18 +12,16 @@ export class WaiterDataLayerSingleEventService {
     projectName: string,
     testName: string,
     headless: string,
-    path?: string,
     measurementId?: string,
     credentials?: Credentials,
-    inspectEventDto?: InspectEventDto
+    eventInspectionPresetDto?: EventInspectionPresetDto
   ) {
     const browser = await puppeteer.launch({
       headless: headless === 'true' ? true : false,
       defaultViewport: null,
       devtools: measurementId ? true : false,
       ignoreHTTPSErrors: true,
-      args:
-        (inspectEventDto as any).inspectEventDto.puppeteerArgs || BROWSER_ARGS,
+      args: eventInspectionPresetDto.puppeteerArgs || BROWSER_ARGS,
     });
     Logger.log('Browser launched', 'waiter.inspectSingleEvent');
     const [page] = await browser.pages();
@@ -33,10 +31,9 @@ export class WaiterDataLayerSingleEventService {
       projectName,
       testName,
       headless,
-      path,
       measurementId,
       credentials,
-      inspectEventDto
+      eventInspectionPresetDto
     );
   }
 }

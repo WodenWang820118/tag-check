@@ -13,8 +13,8 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { WaiterDataLayerSingleEventService } from './waiter-datalayer-single-event.service';
-import { InspectEventDto } from '../../dto/inspect-event.dto';
-import { ValidationResult } from '../../interfaces/dataLayer.interface';
+import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
+import { ValidationResult } from '@utils';
 import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
 
 @Controller('datalayer')
@@ -44,11 +44,6 @@ export class WaiterDataLayerController {
     description: 'Specifies if the test runs in headless mode.',
   })
   @ApiQuery({
-    name: 'path',
-    required: false,
-    description: 'The optional path where the event data is stored.',
-  })
-  @ApiQuery({
     name: 'measurementId',
     required: false,
     description: 'An optional identifier to measure or differentiate events.',
@@ -71,14 +66,11 @@ export class WaiterDataLayerController {
     @Param('eventName') eventName: string,
     @Query('headless') headless: string,
     @Query('measurementId') measurementId?: string,
-    @Query('path') path?: string,
     @Query('username') username?: string,
     @Query('password') password?: string,
-    @Body(ValidationPipe) inspectEventDto?: InspectEventDto
+    @Body(ValidationPipe) eventInspectionPresetDto?: EventInspectionPresetDto
   ) {
-    // if no measurementId is provided, no need to grab requests
     try {
-      const inspectionEventSettings = inspectEventDto;
       const results: {
         dataLayerResult: ValidationResult;
         rawRequest: string;
@@ -88,13 +80,12 @@ export class WaiterDataLayerController {
         projectSlug,
         eventName,
         headless,
-        path,
         measurementId,
         {
           username,
           password,
         },
-        inspectionEventSettings
+        eventInspectionPresetDto
       );
       Logger.log(results, 'waiter.inspectSingleEvent');
 
@@ -126,7 +117,6 @@ export class WaiterDataLayerController {
     @Param('projectSlug') projectSlug: string,
     @Query('headless') headless: string,
     @Query('measurementId') measurementId: string,
-    @Query('path') path?: string,
     @Query('username') username?: string,
     @Query('password') password?: string,
     @Query('concurrency') concurrency = 2
@@ -134,7 +124,6 @@ export class WaiterDataLayerController {
     return await this.waiterDataLayerGroupEventsService.inspectProject(
       projectSlug,
       headless,
-      path,
       measurementId,
       {
         username,

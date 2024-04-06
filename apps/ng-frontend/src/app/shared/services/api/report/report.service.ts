@@ -1,10 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Subject, forkJoin, of } from 'rxjs';
-import {
-  ProjectReport,
-  IReportDetails,
-} from '../../../models/report.interface';
+import { ProjectReport, IReportDetails } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({

@@ -4,7 +4,7 @@ import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.
 import { ProjectListComponent } from '../../components/project-list/project-list.component';
 import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { Observable } from 'rxjs';
-import { Project } from '../../../../shared/models/project.interface';
+import { ProjectInfo } from '@utils';
 
 @Component({
   selector: 'app-home-view',
@@ -26,7 +26,7 @@ import { Project } from '../../../../shared/models/project.interface';
   `,
 })
 export class HomeViewComponent {
-  projects$: Observable<Project[]>;
+  projects$: Observable<ProjectInfo[]>;
   constructor(private projectInfoService: ProjectInfoService) {
     this.projects$ = this.projectInfoService.getProjects();
   }

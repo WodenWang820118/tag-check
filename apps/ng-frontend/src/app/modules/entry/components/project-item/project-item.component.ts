@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
-import { Project } from '../../../../shared/models/project.interface';
+import { ProjectInfo } from '@utils';
 
 @Component({
   selector: 'app-project-item',
@@ -22,5 +22,5 @@ import { Project } from '../../../../shared/models/project.interface';
   styles: ``,
 })
 export class ProjectItemComponent {
-  @Input() project!: Project;
+  @Input() project!: ProjectInfo;
 }

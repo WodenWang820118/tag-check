@@ -7,7 +7,7 @@ import { BrowserAction } from './action-utils';
 import { ClickHandler } from './handlers/click-handler.service';
 import { ChangeHandler } from './handlers/change-handler.service';
 import { HoverHandler } from './handlers/hover-handler.service';
-import { InspectEventDto } from '../../dto/inspect-event.dto';
+import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 
 @Injectable()
 export class ActionService {
@@ -34,7 +34,7 @@ export class ActionService {
     page: Page,
     projectName: string,
     operation: any,
-    application?: InspectEventDto['application']
+    application?: EventInspectionPresetDto['application']
   ) {
     if (!operation || !operation.steps) return;
 

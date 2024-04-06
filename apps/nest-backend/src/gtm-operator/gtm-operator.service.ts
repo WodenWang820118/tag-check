@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import puppeteer, { Credentials, Page } from 'puppeteer';
 import { BROWSER_ARGS } from '../configs/project.config';
-import { InspectEventDto } from '../dto/inspect-event.dto';
+import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { sleep } from '../web-agent/action/action-utils';
 import { PipelineService } from '../pipeline/pipeline.service';
 
@@ -19,10 +19,9 @@ export class GtmOperatorService {
     projectName: string,
     testName: string,
     headless: string,
-    filePath?: string,
     measurementId?: string,
     credentials?: Credentials,
-    inspectEventDto?: InspectEventDto
+    eventInspectionPresetDto?: EventInspectionPresetDto
   ) {
     // set the defaultViewport to null to use maximum viewport size
     const browser = await puppeteer.launch({
@@ -32,8 +31,7 @@ export class GtmOperatorService {
       timeout: 30000,
       ignoreHTTPSErrors: true,
       // the window size may impact the examination result
-      args:
-        (inspectEventDto as any).inspectEventDto.puppeteerArgs || BROWSER_ARGS,
+      args: eventInspectionPresetDto.puppeteerArgs || BROWSER_ARGS,
     });
 
     const incognitoContext = await browser.createBrowserContext();
@@ -63,10 +61,9 @@ export class GtmOperatorService {
       projectName,
       testName,
       headless,
-      filePath,
       measurementId,
       credentials,
-      inspectEventDto
+      eventInspectionPresetDto
     );
   }
 

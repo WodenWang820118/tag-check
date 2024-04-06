@@ -6,7 +6,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { Observable, Subject, takeUntil, tap } from 'rxjs';
-import { Project } from '../../../../shared/models/project.interface';
+import { ProjectSetting, ProjectInfo } from '@utils';
 import { ReportTableComponent } from '../../components/report-table/report-table.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -14,7 +14,6 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
 import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
-import { ProjectSetting } from '../../../../shared/models/setting.interface';
 
 @Component({
   selector: 'app-project-view',
@@ -38,7 +37,7 @@ import { ProjectSetting } from '../../../../shared/models/setting.interface';
 })
 export class ProjectViewComponent implements OnInit, OnDestroy {
   project$!: Observable<ProjectSetting>;
-  projects$!: Observable<Project[]>;
+  projects$!: Observable<ProjectInfo[]>;
   destroy$ = new Subject<void>();
   hover = false;
 

@@ -1,8 +1,8 @@
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Body, Controller, Logger, Param, Post, Query } from '@nestjs/common';
 import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
-import { InspectEventDto } from '../../dto/inspect-event.dto';
-import { ValidationResult } from '../../interfaces/dataLayer.interface';
+import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
+import { ValidationResult } from '@utils';
 import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
 
 @Controller('datalayer')
@@ -34,11 +34,6 @@ export class WaiterGtmOperatorController {
     description: 'Specifies if the test runs in headless mode.',
   })
   @ApiQuery({
-    name: 'path',
-    required: false,
-    description: 'The optional path where the event data is stored.',
-  })
-  @ApiQuery({
     name: 'username',
     required: false,
     description:
@@ -56,13 +51,11 @@ export class WaiterGtmOperatorController {
     @Param('eventName') eventName: string,
     @Query('gtmUrl') gtmUrl: string,
     @Query('headless') headless?: string,
-    @Query('path') path?: string,
     @Query('measurementId') measurementId?: string,
     @Query('username') username?: string,
     @Query('password') password?: string,
-    @Body() inspectEventDto?: InspectEventDto
+    @Body() eventInspectionPresetDto?: EventInspectionPresetDto
   ) {
-    const settings = inspectEventDto;
     const results: {
       dataLayerResult: ValidationResult;
       rawRequest: string;
@@ -73,13 +66,12 @@ export class WaiterGtmOperatorController {
       projectSlug,
       eventName,
       headless,
-      path,
       measurementId,
       {
         username,
         password,
       },
-      settings
+      eventInspectionPresetDto
     );
 
     Logger.log(results, 'waiter.inspectSingleEventViaGtm');

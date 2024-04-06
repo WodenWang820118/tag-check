@@ -27,7 +27,7 @@ import { EditorComponent } from '../../../../shared/components/editor/editor.com
 import { EditorService } from '../../../../shared/services/editor/editor.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
 import { ReportDetails } from './report-details';
-import { IReportDetails } from '../../../../shared/models/report.interface';
+import { IReportDetails } from '@utils';
 import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 
