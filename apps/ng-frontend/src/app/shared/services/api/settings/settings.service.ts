@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { ProjectSetting } from '../../../models/setting.interface';
+import { ProjectSetting } from '@utils';
 import { BehaviorSubject, of, Subject, tap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '../../../components/snackbar/snackbar.components';

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InspectorGroupEventsService } from '../../inspector/inspector-group-events.service';
 import { XlsxReportGroupEventsService } from '../../os/xlsx-report/xlsx-report-group-events.service';
 import puppeteer, { Credentials } from 'puppeteer';
-import { getCurrentTimestamp } from '../utils';
+import { getCurrentTimestamp } from '@utils';
 import { FileService } from '../../os/file/file.service';
 import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
 import { BROWSER_ARGS } from '../../configs/project.config';

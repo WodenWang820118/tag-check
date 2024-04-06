@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { IInspectEvent } from '../../../models/inspectData.interface';
+import { EventInspectionPreset } from '@utils';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +13,7 @@ export class DataLayerService {
     projectSlug: string,
     eventName: string,
     headless?: boolean,
-    inspectEventDto?: IInspectEvent,
+    eventInspectionPreset?: EventInspectionPreset,
     username?: string,
     password?: string
   ) {
@@ -25,7 +25,7 @@ export class DataLayerService {
 
     return this.http.post(
       `${environment.dataLayerApiUrl}/${projectSlug}/${eventName}${queryString}`,
-      inspectEventDto
+      eventInspectionPreset
     );
   }
 }

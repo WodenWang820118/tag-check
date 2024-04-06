@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { IInspectEvent } from '../../../models/inspectData.interface';
+import { EventInspectionPreset } from '@utils';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +14,7 @@ export class GtmOperatorService {
     eventName: string,
     gtmUrl: string,
     headless?: boolean,
-    inspectEventDto?: IInspectEvent,
+    eventInspectionPreset?: EventInspectionPreset,
     measurmentId?: string,
     username?: string,
     password?: string
@@ -31,7 +31,7 @@ export class GtmOperatorService {
 
     return this.http.post(
       `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventName}?${queryString}`,
-      inspectEventDto
+      eventInspectionPreset
     );
   }
 }

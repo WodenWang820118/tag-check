@@ -1,9 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BaseItem } from '../interfaces/dataLayer.interface';
+import { BaseItem } from '@utils';
 import { parse, URLSearchParams } from 'url';
 import { standardParameterMap } from './utilities';
-
-// TODO: read the implementations and understand the code
 
 @Injectable()
 export class RequestProcessorService {

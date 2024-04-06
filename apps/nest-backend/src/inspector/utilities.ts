@@ -1,8 +1,5 @@
 import { HttpException, HttpStatus, Logger } from '@nestjs/common';
-import {
-  BaseDataLayerEvent,
-  StrictDataLayerEvent,
-} from '../interfaces/dataLayer.interface';
+import { BaseDataLayerEvent, StrictDataLayerEvent } from '@utils';
 
 export enum ValidationStrategyType {
   ECOMMERCE = 'ecommerce',

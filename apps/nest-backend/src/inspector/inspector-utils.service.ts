@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   StrictDataLayerEvent,
   ValidationStrategy,
-} from '../interfaces/dataLayer.interface';
+} from '@utils';
 import {
   EcommerceEventValidationStrategy,
   OldGA4EventsValidationStrategy,

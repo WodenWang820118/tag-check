@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Subject, map } from 'rxjs';
-import { ProjectSpec, Spec } from '../../../models/spec.interface';
+import { ProjectSpec, Spec } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({

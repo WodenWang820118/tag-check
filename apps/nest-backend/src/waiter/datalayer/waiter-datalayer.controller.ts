@@ -13,8 +13,8 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { WaiterDataLayerSingleEventService } from './waiter-datalayer-single-event.service';
-import { InspectEventDto } from '../../dto/inspect-event.dto';
-import { ValidationResult } from '../../interfaces/dataLayer.interface';
+import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
+import { ValidationResult } from '@utils';
 import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
 
 @Controller('datalayer')
@@ -68,7 +68,7 @@ export class WaiterDataLayerController {
     @Query('measurementId') measurementId?: string,
     @Query('username') username?: string,
     @Query('password') password?: string,
-    @Body(ValidationPipe) inspectEventDto?: InspectEventDto
+    @Body(ValidationPipe) eventInspectionPresetDto?: EventInspectionPresetDto
   ) {
     try {
       const results: {
@@ -85,7 +85,7 @@ export class WaiterDataLayerController {
           username,
           password,
         },
-        inspectEventDto
+        eventInspectionPresetDto
       );
       Logger.log(results, 'waiter.inspectSingleEvent');
 
