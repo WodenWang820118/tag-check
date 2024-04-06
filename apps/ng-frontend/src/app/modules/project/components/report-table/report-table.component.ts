@@ -1,11 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  AfterViewInit,
-  Component,
-  Input,
-  OnDestroy,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import {
@@ -16,13 +10,12 @@ import {
   trigger,
 } from '@angular/animations';
 import { MatButtonModule } from '@angular/material/button';
-import { EMPTY, Observable, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { EMPTY, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
 import { IReportDetails } from '../../../../shared/models/report.interface';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, Params, RouterModule } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
-import { Project } from '../../../../shared/models/project.interface';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -74,21 +67,21 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  @Input() project$!: Observable<Project>;
 
   destroy$ = new Subject<void>();
 
   constructor(
     public projectFacadeService: ProjectFacadeService,
     public dataSourceFacadeService: DataSourceFacadeService,
-    public testRunningFacadeService: TestRunningFacadeService
+    public testRunningFacadeService: TestRunningFacadeService,
+    private route: ActivatedRoute
   ) {}
 
   ngAfterViewInit() {
     this.observeProject().pipe(takeUntil(this.destroy$)).subscribe();
 
-    this.projectFacadeService
-      .observeProjectRecordingStatus(this.project$)
+    this.observeProjectRecordingStatus()
+      .pipe(takeUntil(this.destroy$))
       .subscribe();
 
     this.projectFacadeService
@@ -123,6 +116,17 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
       .subscribe();
   }
 
+  observeProjectRecordingStatus() {
+    return this.route.params.pipe(
+      takeUntil(this.destroy$),
+      switchMap((params: Params) =>
+        this.projectFacadeService.observeProjectRecordingStatus(
+          params['projectSlug']
+        )
+      )
+    );
+  }
+
   observeProject() {
     return this.dataSourceFacadeService
       .observeProject(this.paginator, this.sort)
@@ -146,11 +150,18 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
   }
 
   runTest(eventName: string) {
-    this.testRunningFacadeService.runTest(
-      eventName,
-      this.project$,
-      this.testDataSource
-    );
+    this.route.params
+      .pipe(
+        take(1),
+        tap((params: Params) => {
+          this.testRunningFacadeService.runTest(
+            eventName,
+            params['projectSlug'],
+            this.testDataSource
+          );
+        })
+      )
+      .subscribe();
   }
 
   /** Whether the number of selected elements matches the total number of rows. */

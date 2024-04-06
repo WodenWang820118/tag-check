@@ -2,7 +2,7 @@ import { FolderService } from '../folder/folder.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { OutputValidationResult } from '../../interfaces/dataLayer.interface';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
-import { existsSync, statSync, writeFileSync } from 'fs';
+import { existsSync, mkdir, statSync, writeFileSync } from 'fs';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 import { FileService } from '../file/file.service';
@@ -22,12 +22,32 @@ export class AbstractDatalayerReportService {
     data: OutputValidationResult
   ) {
     try {
+      const folderPath =
+        await this.folderPathService.getInspectionEventFolderPath(
+          projectSlug,
+          eventName
+        );
+
       const abstractPath =
         await this.filePathService.getInspectionResultFilePath(
           projectSlug,
           eventName,
           ABSTRACT_REPORT_FILE_NAME
         );
+      if (!existsSync(folderPath)) {
+        mkdir(folderPath, { recursive: true }, (err) => {
+          if (err) {
+            Logger.error(
+              err.message,
+              'AbstractReportService.writeSingleAbstractTestResultJson'
+            );
+            throw new HttpException(
+              'Failed to write report',
+              HttpStatus.INTERNAL_SERVER_ERROR
+            );
+          }
+        });
+      }
 
       writeFileSync(abstractPath, JSON.stringify(data, null, 2));
     } catch (error) {

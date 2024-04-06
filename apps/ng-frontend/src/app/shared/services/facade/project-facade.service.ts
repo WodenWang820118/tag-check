@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Project } from '../../models/project.interface';
-import { Observable, map, switchMap, tap } from 'rxjs';
+import { combineLatest, map, switchMap, tap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { SettingsService } from '../api/settings/settings.service';
+import { SpecService } from '../api/spec/spec.service';
+import { Spec } from '../../models/spec.interface';
+import { Recording } from '../../models/recording.interface';
+import { RecordingService } from '../api/recording/recording.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,21 +14,30 @@ export class ProjectFacadeService {
   private hasRecordingMap: Map<string, boolean> = new Map();
   constructor(
     private route: ActivatedRoute,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private specsService: SpecService,
+    private recordingService: RecordingService
   ) {}
 
-  observeProjectRecordingStatus(project$: Observable<Project>) {
-    return project$.pipe(
-      tap((project) => {
-        this.initializeRecordingStatus(project.specs, project.recordings);
+  observeProjectRecordingStatus(projectSlug: string) {
+    return combineLatest([
+      this.specsService.getProjectSpec(projectSlug),
+      this.recordingService.getProjectRecordings(projectSlug),
+    ]).pipe(
+      tap(([specs, recordings]) => {
+        this.initializeRecordingStatus(specs.specs, recordings.recordings);
       })
     );
   }
 
-  initializeRecordingStatus(specs: any[], recordings: string[]) {
+  // TODO: Big O(n^2) - can be optimized
+  initializeRecordingStatus(specs: Spec[], recordings: Recording[]) {
     this.hasRecordingMap.clear();
     specs.forEach((spec) => {
-      this.hasRecordingMap.set(spec.event, recordings.includes(spec.event));
+      this.hasRecordingMap.set(
+        spec.event,
+        recordings.some((r) => r.title === spec.event)
+      );
     });
   }
 
@@ -36,7 +48,6 @@ export class ProjectFacadeService {
   observeNavigationEvents() {
     return this.route.params.pipe(
       switchMap((params) => {
-        console.log('params', params);
         const slug = params['projectSlug'];
         return this.settingsService.getProjectSettings(slug);
       }),

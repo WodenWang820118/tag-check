@@ -30,4 +30,14 @@ export class WaiterProjectDataRetrievalController {
       eventName
     );
   }
+
+  @ApiOperation({
+    summary: 'read a project metadata',
+  })
+  @Get(':projectSlug')
+  async getProject(@Param('projectSlug') projectSlug: string) {
+    return await this.waiterProjectDataRetrievalService.getProjectMetadata(
+      projectSlug
+    );
+  }
 }

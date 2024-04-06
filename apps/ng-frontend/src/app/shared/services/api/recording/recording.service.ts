@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, Subject, map, of } from 'rxjs';
+import { BehaviorSubject, Subject, map, of } from 'rxjs';
 import { ProjectRecording } from '../../../models/recording.interface';
 import { environment } from '../../../../../environments/environment';
 
@@ -16,25 +16,25 @@ export class RecordingService {
   constructor(private http: HttpClient) {}
 
   getProjectRecordings(projectSlug: string) {
-    return this.http.get(`${environment.recordingApiUrl}/${projectSlug}`);
+    return this.http.get<ProjectRecording>(
+      `${environment.recordingApiUrl}/${projectSlug}`
+    );
   }
 
-  getRecordingDetails(
-    projectSlug: string | undefined,
-    eventName: string | undefined
-  ): Observable<ProjectRecording> {
+  getRecordingDetails(projectSlug: string, eventName: string) {
     if (!eventName || !projectSlug) return of({} as ProjectRecording);
     return this.http
       .get<ProjectRecording>(`${environment.recordingApiUrl}/${projectSlug}`)
       .pipe(
         map((projectRecordings: ProjectRecording) => {
           if (projectRecordings) {
-            // console.log('Project Recordings', projectRecordings);
-
-            return projectRecordings.recordings.find(
-              (recording) => recording.title === eventName
-            );
+            for (const recording of projectRecordings.recordings) {
+              if (recording.title === eventName) {
+                return recording;
+              }
+            }
           }
+          return {} as ProjectRecording;
         })
       );
   }
