@@ -1,11 +1,11 @@
 import { XlsxReportSingleEventService } from './../os/xlsx-report/xlsx-report-single-event.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
-import { getCurrentTimestamp } from '../waiter/utils';
-import { InspectEventDto } from '../dto/inspect-event.dto';
+import { getCurrentTimestamp } from '@utils';
+import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
 import { AbstractDatalayerReportService } from '../os/abstract-datalayer-report/abstract-datalayer-report.service';
-import { OutputValidationResult } from '../interfaces/dataLayer.interface';
+import { OutputValidationResult } from '@utils';
 @Injectable()
 export class PipelineService {
   constructor(
@@ -21,7 +21,7 @@ export class PipelineService {
     headless: string,
     measurementId?: string,
     credentials?: Credentials,
-    inspectEventDto?: InspectEventDto
+    eventInspectionPresetDto?: EventInspectionPresetDto
   ) {
     try {
       const result = await this.inspectorSingleEventService.inspectDataLayer(
@@ -31,7 +31,7 @@ export class PipelineService {
         headless,
         measurementId,
         credentials,
-        inspectEventDto.application
+        eventInspectionPresetDto.application
       );
 
       Logger.log('DataLayer inspected', 'waiter.inspectSingleEvent');

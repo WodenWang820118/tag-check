@@ -1,4 +1,4 @@
-import { ProjectSetting } from '../../../../shared/models/setting.interface';
+import { ProjectSetting } from '../../../../../../../../libs/utils/src/lib/interfaces/setting.interface';
 
 // utils.ts or a similar file for utility functions
 export function getNewPreventNavigationEvents(

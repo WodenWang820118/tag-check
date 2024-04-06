@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { IInspectEvent } from '../../../models/inspectData.interface';
+import { EventInspectionPreset } from '@utils';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +14,7 @@ export class QaRequestService {
     eventName: string,
     measurementId: string,
     headless?: boolean,
-    inspectEventDto?: IInspectEvent,
+    eventInspectionPreset?: EventInspectionPreset,
     username?: string,
     password?: string
   ) {
@@ -26,7 +26,7 @@ export class QaRequestService {
     const queryString = queryParams.length ? '?' + queryParams.join('&') : '';
     return this.http.post(
       `${environment.dataLayerApiUrl}/${projectSlug}/${eventName}${queryString}`,
-      inspectEventDto
+      eventInspectionPreset
     );
   }
 }

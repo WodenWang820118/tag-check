@@ -15,7 +15,10 @@ import {
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-import { CookieData, LocalStorageData } from '../../models/setting.interface';
+import {
+  CookieData,
+  LocalStorageData,
+} from '../../../../../../../libs/utils/src/lib/interfaces/setting.interface';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
 

@@ -5,7 +5,7 @@ import { ProjectInitializationService } from '../os/project-initialization/proje
 import { ActionService } from './action/action.service';
 import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
 import { Page, Credentials } from 'puppeteer';
-import { InspectEventDto } from '../dto/inspect-event.dto';
+import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 
 @Injectable()
 export class WebAgentUtilsService {
@@ -24,7 +24,7 @@ export class WebAgentUtilsService {
     captureRequest?: boolean,
     measurementId?: string,
     credentials?: Credentials,
-    application?: InspectEventDto['application']
+    application?: EventInspectionPresetDto['application']
   ) {
     // 1) gather all necessary data and initialize the test
     await this.projectInitializationService.initInspectionEventSavingFolder(

@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ProjectItemComponent } from '../project-item/project-item.component';
 import { MatCardModule } from '@angular/material/card';
 import { Observable } from 'rxjs';
-import { Project } from '../../../../shared/models/project.interface';
+import { ProjectInfo } from '@utils';
 
 @Component({
   selector: 'app-project-list',
@@ -51,5 +51,5 @@ import { Project } from '../../../../shared/models/project.interface';
   `,
 })
 export class ProjectListComponent {
-  @Input() projects!: Observable<Project[]>;
+  @Input() projects!: Observable<ProjectInfo[]>;
 }

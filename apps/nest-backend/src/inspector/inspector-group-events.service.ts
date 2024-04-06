@@ -4,10 +4,7 @@ import {
   OldGA4EventsValidationStrategy,
 } from './strategy/dataLayer-validation-strategy';
 import { ValidationStrategyType, determineStrategy } from './utilities';
-import {
-  StrictDataLayerEvent,
-  ValidationStrategy,
-} from '../interfaces/dataLayer.interface';
+import { StrictDataLayerEvent, ValidationStrategy } from '@utils';
 import { Browser, Credentials } from 'puppeteer';
 import { FileService } from '../os/file/file.service';
 import { FilePathService } from '../os/path/file-path/file-path.service';

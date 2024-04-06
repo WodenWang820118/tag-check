@@ -5,7 +5,7 @@ import { FolderPathService } from '../../os/path/folder-path/folder-path.service
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
 import { statSync } from 'fs';
-import { OutputValidationResult } from '../../interfaces/dataLayer.interface';
+import { OutputValidationResult } from '@utils';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 
 @Injectable()

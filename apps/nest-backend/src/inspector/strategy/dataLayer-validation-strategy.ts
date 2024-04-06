@@ -2,7 +2,7 @@ import {
   BaseDataLayerEvent,
   StrictDataLayerEvent,
   ValidationStrategy,
-} from '../../interfaces/dataLayer.interface';
+} from '@utils';
 import { collectKeys, compareKeys } from '../utilities';
 
 export class EcommerceEventValidationStrategy implements ValidationStrategy {

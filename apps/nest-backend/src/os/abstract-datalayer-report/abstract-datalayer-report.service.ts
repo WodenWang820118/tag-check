@@ -1,6 +1,6 @@
 import { FolderService } from '../folder/folder.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { OutputValidationResult } from '../../interfaces/dataLayer.interface';
+import { OutputValidationResult } from '@utils';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { existsSync, mkdir, statSync, writeFileSync } from 'fs';
 import { FilePathService } from '../path/file-path/file-path.service';

@@ -1,8 +1,8 @@
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Body, Controller, Logger, Param, Post, Query } from '@nestjs/common';
 import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
-import { InspectEventDto } from '../../dto/inspect-event.dto';
-import { ValidationResult } from '../../interfaces/dataLayer.interface';
+import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
+import { ValidationResult } from '@utils';
 import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
 
 @Controller('datalayer')
@@ -54,7 +54,7 @@ export class WaiterGtmOperatorController {
     @Query('measurementId') measurementId?: string,
     @Query('username') username?: string,
     @Query('password') password?: string,
-    @Body() inspectEventDto?: InspectEventDto
+    @Body() eventInspectionPresetDto?: EventInspectionPresetDto
   ) {
     const results: {
       dataLayerResult: ValidationResult;
@@ -71,7 +71,7 @@ export class WaiterGtmOperatorController {
         username,
         password,
       },
-      inspectEventDto
+      eventInspectionPresetDto
     );
 
     Logger.log(results, 'waiter.inspectSingleEventViaGtm');

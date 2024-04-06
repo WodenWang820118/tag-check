@@ -3,17 +3,14 @@ export interface ProjectSetting {
   settings: Setting;
 }
 
-interface Setting {
+export interface Setting {
   rootProject: string;
   projectName: string;
   projectDescription: string;
   measurementId: string;
   projectSlug: string;
   googleSpreadsheetLink: string;
-  tagManagerUrl: string;
-  gtmPreviewModeUrl: string;
   gtm: Gtm;
-  containerName: string;
   version: string;
   preventNavigationEvents: string[];
   application: Application;

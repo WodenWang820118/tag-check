@@ -11,7 +11,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReportDetailsService } from '../../../../shared/services/report-details/report-details.service';
 import { ReportDetailPanelsComponent } from '../../components/report-detail-panels/report-detail-panels.component';
-import { IReportDetails } from '../../../../shared/models/report.interface';
+import { IReportDetails } from '../../../../../../../../libs/utils/src/lib/interfaces/report.interface';
 import { ImageService } from '../../../../shared/services/api/image/image.service';
 import { BlobToUrlPipe } from '../../../../shared/pipes/blob-to-url-pipe';
 import { MatIconModule } from '@angular/material/icon';

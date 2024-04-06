@@ -17,7 +17,7 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { IReportDetails } from '../../../../shared/models/report.interface';
+import { IReportDetails } from '../../../../../../../../libs/utils/src/lib/interfaces/report.interface';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
