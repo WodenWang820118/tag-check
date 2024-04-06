@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { ProjectSetting } from '../../../models/setting.interface';
-import { of, tap } from 'rxjs';
+import { BehaviorSubject, of, Subject, tap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '../../../components/snackbar/snackbar.components';
 
@@ -10,6 +10,10 @@ import { SnackBarComponent } from '../../../components/snackbar/snackbar.compone
   providedIn: 'root',
 })
 export class SettingsService {
+  currentProject: Subject<ProjectSetting> = new BehaviorSubject(
+    {} as ProjectSetting
+  );
+  currentProject$ = this.currentProject.asObservable();
   constructor(private http: HttpClient, private _snackBar: MatSnackBar) {}
 
   getSettings() {
@@ -51,6 +55,18 @@ export class SettingsService {
       `${environment.settingsApiUrl}/${projectSlug}`,
       settings
     );
+  }
+
+  switchToProject(projectSlug: string) {
+    return this.getProjectSettings(projectSlug).pipe(
+      tap((project) => {
+        this.setCurrentProject(project);
+      })
+    );
+  }
+
+  setCurrentProject(project: ProjectSetting) {
+    this.currentProject.next(project);
   }
 
   private isEmptyObject(obj: any) {

@@ -1,5 +1,7 @@
 <div class="project-view">
-  <app-toolbar [title]="(project$ | async)?.projectName"></app-toolbar>
+  <app-toolbar
+    [title]="(project$ | async)?.settings?.projectName"
+  ></app-toolbar>
   <mat-sidenav-container
     class="project-view__sidenav-container"
     [hasBackdrop]="false"

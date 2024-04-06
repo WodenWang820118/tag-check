@@ -85,14 +85,4 @@ export class WaiterProjectWorkFlowController {
   async getProjects() {
     return await this.waiterProjectDataRetrievalService.getProjectsMetadata();
   }
-
-  @ApiOperation({
-    summary: 'read a project metadata',
-  })
-  @Get(':projectSlug')
-  async getProject(@Param('projectSlug') projectSlug: string) {
-    return await this.waiterProjectDataRetrievalService.getProjectMetadata(
-      projectSlug
-    );
-  }
 }

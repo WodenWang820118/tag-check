@@ -31,30 +31,57 @@ export class ProjectInitializationService {
         await this.folderPathService.getProjectConfigFolderPath(projectName)
       );
 
-      const projectSettings = {
+      // TODO: Refactor this to use a DTO
+      const projectMetaData = {
+        version: '1.0.0',
         rootProject: `${rootProjectPath}`,
         projectName: `${projectName}`,
         projectDescription: `${settings.projectDescription}`,
         projectSlug: `${settings.projectSlug}`,
-        testType: `${settings.testType}`,
+        measurementId: `${settings.measurementId}`,
         googleSpreadsheetLink: `${settings.googleSpreadsheetLink}`,
-        gtm: {
-          isAccompanyMode: false,
-          tagManagerUrl: `${settings.tagManagerUrl}`,
-          gtmPreviewModeUrl: '',
-          gtmId: `${settings.gtmId}`,
-        },
-        containerName: `${settings.containerName}`,
-        preventNavigationEvents: ['select_promotion', 'select_item'],
-        version: '1.0.0',
       };
 
+      const projectSettings = {
+        ...projectMetaData,
+        headless: false,
+        gtm: {
+          isAccompanyMode: false,
+          isRequestCheck: false,
+          tagManagerUrl: '',
+          gtmPreviewModeUrl: '',
+        },
+        preventNavigationEvents: [],
+        authentication: {
+          username: '',
+          password: '',
+        },
+        application: {
+          localStorage: {
+            data: [],
+          },
+          cookie: {
+            data: [],
+          },
+        },
+        browser: [],
+      };
+
+      // settings file for complex settings
       const settingsFilePath =
         await this.filePathService.getProjectSettingFilePath(projectName);
+
+      // metadata file for project brief information
+      const projectMetadataPath =
+        await this.filePathService.getProjectMetaDataFilePath(projectName);
+
+      // config file for project specs
       const configFilePath =
         await this.filePathService.getProjectConfigFilePath(projectName);
-      this.setSsettings(settingsFilePath, projectSettings);
-      this.setSsettings(configFilePath, []);
+
+      this.fileService.writeJsonFile(projectMetadataPath, projectMetaData);
+      this.fileService.writeJsonFile(configFilePath, []);
+      this.fileService.writeJsonFile(settingsFilePath, projectSettings);
     } catch (error) {
       Logger.error(error.message, 'ProjectInitializationService.initProject');
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -68,9 +95,5 @@ export class ProjectInitializationService {
         testName
       );
     this.folderService.createFolder(eventFolder);
-  }
-
-  setSsettings(settingsFilePath: string, settings: any) {
-    this.fileService.writeJsonFile(settingsFilePath, settings);
   }
 }
