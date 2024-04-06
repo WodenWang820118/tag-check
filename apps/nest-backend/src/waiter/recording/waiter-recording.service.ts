@@ -3,6 +3,7 @@ import { FolderService } from '../../os/folder/folder.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
+import { RecordingDto } from '../../dto/recording.dto';
 
 @Injectable()
 export class WaiterRecordingService {
@@ -21,7 +22,7 @@ export class WaiterRecordingService {
         await this.folderPathService.getRecordingFolderPath(projectSlug)
       );
 
-      const recordings = await Promise.all(
+      const recordings: RecordingDto = (await Promise.all(
         folderNames.map(async (fileName) => {
           return await this.fileService.readJsonFile(
             await this.filePathService.getRecordingFilePath(
@@ -30,7 +31,8 @@ export class WaiterRecordingService {
             )
           );
         })
-      );
+      )) as any;
+
       return {
         projectSlug: projectSlug,
         recordings: recordings,

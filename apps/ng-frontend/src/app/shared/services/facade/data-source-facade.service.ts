@@ -5,7 +5,7 @@ import { ProjectDataSourceService } from '../project-data-source/project-data-so
 import { combineLatest, switchMap, EMPTY, tap, map } from 'rxjs';
 import { ReportService } from '../api/report/report.service';
 import { SelectionModel } from '@angular/cdk/collections';
-import { IReportDetails } from '../../models/report.interface';
+import { IReportDetails } from '@utils';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';

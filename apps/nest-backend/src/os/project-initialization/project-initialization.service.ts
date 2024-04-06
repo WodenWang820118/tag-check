@@ -3,6 +3,8 @@ import { FolderService } from '../folder/folder.service';
 import { FileService } from '../file/file.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
+import { ProjectInfoDto } from '../../dto/project-info.dto';
+import { SettingDto } from '../../dto/setting.dto';
 
 @Injectable()
 export class ProjectInitializationService {
@@ -31,8 +33,7 @@ export class ProjectInitializationService {
         await this.folderPathService.getProjectConfigFolderPath(projectName)
       );
 
-      // TODO: Refactor this to use a DTO
-      const projectMetaData = {
+      const projectMetaData: ProjectInfoDto = {
         version: '1.0.0',
         rootProject: `${rootProjectPath}`,
         projectName: `${projectName}`,
@@ -42,7 +43,7 @@ export class ProjectInitializationService {
         googleSpreadsheetLink: `${settings.googleSpreadsheetLink}`,
       };
 
-      const projectSettings = {
+      const projectSettings: SettingDto = {
         ...projectMetaData,
         headless: false,
         gtm: {

@@ -3,8 +3,8 @@ import { DataLayerService } from '../api/datalayer/datalayer.service';
 import { GtmOperatorService } from '../api/gtm-operator/gtm-operator.service';
 import { switchMap, BehaviorSubject, take } from 'rxjs';
 import { InspectEventDto } from '../../../modules/project/components/report-table/utils';
-import { IInspectEvent } from '../../models/inspectData.interface';
-import { IReportDetails } from '../../models/report.interface';
+import { EventInspectionPreset } from '@utils';
+import { IReportDetails } from '@utils';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ProjectDataSourceService } from '../project-data-source/project-data-source.service';
@@ -40,7 +40,9 @@ export class TestRunningFacadeService {
         take(1),
         switchMap((project) => {
           const headless = project.settings.headless;
-          const inspectEventDto: IInspectEvent = new InspectEventDto(project);
+          const inspectEventDto: EventInspectionPreset = new InspectEventDto(
+            project
+          );
           // change the play button to a spinner
           this.isRunningTestSubject.next(true);
           this.eventRunningTestSubject.next(eventName);

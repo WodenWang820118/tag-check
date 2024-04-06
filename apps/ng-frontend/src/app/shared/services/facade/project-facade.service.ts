@@ -3,8 +3,7 @@ import { combineLatest, map, switchMap, tap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { SettingsService } from '../api/settings/settings.service';
 import { SpecService } from '../api/spec/spec.service';
-import { Spec } from '../../models/spec.interface';
-import { Recording } from '../../models/recording.interface';
+import { Spec, Recording } from '@utils';
 import { RecordingService } from '../api/recording/recording.service';
 
 @Injectable({

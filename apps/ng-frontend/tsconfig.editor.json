@@ -1,6 +1,14 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts",
+    "../../libs/utils/src/lib/interfaces/setting.interface.ts",
+    "../../libs/utils/src/lib/interfaces/project.interface.ts",
+    "../../libs/utils/src/lib/interfaces/configuration.interface.ts",
+    "../../libs/utils/src/lib/interfaces/recording.interface.ts",
+    "../../libs/utils/src/lib/interfaces/report.interface.ts",
+    "../../libs/utils/src/lib/interfaces/spec.interface.ts"
+  ],
   "compilerOptions": {
     "types": ["jest", "node"]
   }

@@ -10,7 +10,7 @@ import {
   handleSetViewport,
   handleWaitForElement,
 } from './step-executor-utils';
-import { InspectEventDto } from '../../dto/inspect-event.dto';
+import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 
 @Injectable()
 export class StepExecutor {
@@ -26,7 +26,7 @@ export class StepExecutor {
     testName: string,
     state: any,
     isLastStep: boolean,
-    application?: InspectEventDto['application']
+    application?: EventInspectionPresetDto['application']
   ) {
     const randomDelay = 3000 + Math.floor(Math.random() * 2000);
     const handler = this.handlers[step.type];

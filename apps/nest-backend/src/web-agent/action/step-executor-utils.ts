@@ -2,7 +2,7 @@ import { Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { sleep } from './action-utils';
 import { getFirstSelector } from './handlers/utils';
-import { InspectEventDto } from '../../dto/inspect-event.dto';
+import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 
 export async function handleKeyboardAction(
   page: Page,
@@ -44,7 +44,7 @@ export async function handleNavigate(
   page: Page,
   step: any,
   state: any,
-  application: InspectEventDto['application']
+  application: EventInspectionPresetDto['application']
 ) {
   try {
     await page.goto(step.url);
