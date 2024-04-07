@@ -11,7 +11,7 @@ import {
 } from '@angular/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { EMPTY, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
-import { IReportDetails } from '../../../../../../../../libs/utils/src/lib/interfaces/report.interface';
+import { IReportDetails } from '@utils';
 import { ActivatedRoute, Params, RouterModule } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
