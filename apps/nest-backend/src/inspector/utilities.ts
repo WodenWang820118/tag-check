@@ -1,41 +1,14 @@
 import { HttpException, HttpStatus, Logger } from '@nestjs/common';
-import { BaseDataLayerEvent, StrictDataLayerEvent } from '@utils';
+import {
+  BaseDataLayerEvent,
+  StrictDataLayerEvent,
+  ValidationResult,
+} from '@utils';
+import { ValidationResultDto } from '../dto/validation-result.dto';
 
 export enum ValidationStrategyType {
   ECOMMERCE = 'ecommerce',
   OLDGA4EVENTS = 'oldGA4Events',
-}
-
-export function collectKeys(obj: any, currentPath = '', keys: string[] = []) {
-  for (const key of Object.keys(obj)) {
-    const newPath = currentPath ? `${currentPath}.${key}` : key;
-    if (typeof obj[key] === 'object' && obj[key] !== null) {
-      if (Array.isArray(obj[key])) {
-        for (let i = 0; i < obj[key].length; i++) {
-          const arrayPath = `${newPath}[${i}]`;
-          collectKeys(obj[key][i], arrayPath, keys);
-        }
-      } else {
-        collectKeys(obj[key], newPath, keys);
-      }
-    } else {
-      keys.push(newPath);
-    }
-  }
-  return keys;
-}
-
-export function compareKeys(specKeys: string[], implKeys: string[]) {
-  if (specKeys.length === 0) return [];
-  const missingKeys = [];
-
-  for (const key of specKeys) {
-    if (!implKeys.includes(key)) {
-      missingKeys.push(key);
-    }
-  }
-
-  return missingKeys;
 }
 
 export function determineStrategy(spec: StrictDataLayerEvent) {
@@ -50,4 +23,72 @@ export function determineStrategy(spec: StrictDataLayerEvent) {
     Logger.error(errorMessage, 'Utilities.determineStrategy');
     throw new HttpException(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
   }
+}
+
+export function validateKeyValues(
+  dataLayerSpec: StrictDataLayerEvent,
+  dataLayer: BaseDataLayerEvent | StrictDataLayerEvent
+): ValidationResult {
+  for (const key in dataLayerSpec) {
+    if (!(key in dataLayer)) {
+      return new ValidationResultDto(
+        false,
+        `Key "${key}" is not present in the dataLayer`,
+        dataLayerSpec,
+        dataLayer
+      );
+    }
+
+    const eventValue = dataLayer[key];
+    const specValue = dataLayerSpec[key];
+
+    if (typeof specValue === 'string') {
+      if (specValue.startsWith('$')) {
+        // Condition 1: Plain string starts with "$". Only checks the key.
+        continue; // Move to the next key
+      } else if (specValue.startsWith('/') && specValue.endsWith('/')) {
+        // Condition 2: Regex literal within the string. Check whether the regex matches.
+        if (typeof eventValue !== 'string') {
+          return new ValidationResultDto(
+            false,
+            `Value for key "${key}" is not a string as expected`,
+            dataLayerSpec,
+            dataLayer
+          );
+        }
+
+        const regex = new RegExp(specValue.slice(1, -1));
+        if (!regex.test(eventValue)) {
+          return new ValidationResultDto(
+            false,
+            `Value for key "${key}" does not match the regex pattern`,
+            dataLayerSpec,
+            dataLayer
+          );
+        }
+      } else {
+        // Condition 3: Plain string with static value. Checks whether the value equals.
+        if (specValue !== eventValue) {
+          return new ValidationResultDto(
+            false,
+            `Value for key "${key}" does not match the expected value`,
+            dataLayerSpec,
+            dataLayer
+          );
+        }
+      }
+    } else if (typeof specValue === 'number') {
+      // If the spec value is a number, compare it directly
+      if (specValue !== eventValue) {
+        return new ValidationResultDto(
+          false,
+          `Value for key "${key}" does not match the expected value`,
+          dataLayerSpec,
+          dataLayer
+        );
+      }
+    }
+  }
+
+  return new ValidationResultDto(true, 'Valid', dataLayerSpec, dataLayer);
 }
