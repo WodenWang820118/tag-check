@@ -1,0 +1,100 @@
+.xlsx-sidenav {
+  &__sidenav {
+    width: 80%;
+
+    &__content {
+      background-color: rgba(217, 217, 222, 0.307);
+      padding: 0 5rem;
+      padding-bottom: 10rem;
+      // overflow: hidden;
+
+      &__cards {
+        margin: 3rem 0;
+        display: flex;
+        gap: 2rem;
+
+        &__card {
+          flex: 1 1 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+      }
+    }
+  }
+
+  &__spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 3rem;
+
+    &__title {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 2rem;
+
+      .mat-icon {
+        color: #dcdcdc;
+      }
+
+      u {
+        text-decoration-color: #dcdcdc;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 8px;
+      }
+    }
+  }
+
+  &__form {
+    margin-bottom: 1rem;
+
+    &__field {
+      display: flex;
+      flex-direction: column;
+      min-width: 200px;
+      max-width: 40%;
+
+      &__header {
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 1.3rem;
+      }
+
+      select, input {
+        padding: 7px;
+        border: 1.5px solid #c5cbd4;
+        border-radius: 5px;
+      }
+
+      .mat-icon {
+        transform: scale(0.7);
+      }
+
+      .mat-mdc-outlined-button.mat-mdc-button-base {
+        height: 40px !important;
+      }
+    }
+  }
+
+  .mat-drawer-inner-container {
+    overflow: hidden;
+  }
+
+  .mat-mdc-card {
+    border-radius: 10px;
+    box-shadow: 0 0 0 1px #dadce0;
+  }
+}

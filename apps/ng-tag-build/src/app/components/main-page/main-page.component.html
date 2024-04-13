@@ -1,0 +1,35 @@
+<div class="main-page">
+  <div class="main-page__title">
+    <h1>Google Tag Manager Config Generator</h1>
+  </div>
+
+  <div class="main-page__board">
+    <div class="main-page__board__item main-page__editor">
+      <app-editor
+        content="{{ exampleInputJson | json }}"
+        [editorExtension]="'inputJson'"
+      />
+    </div>
+    <div class="main-page__board__item">
+      <app-functional-card />
+    </div>
+    <div class="main-page__board__item main-page__editor">
+      <app-editor [editorExtension]="'outputJson'" />
+    </div>
+  </div>
+  <mat-sidenav-container>
+    <app-xlsx-sidenav-form></app-xlsx-sidenav-form>
+  </mat-sidenav-container>
+  @defer (on viewport) {
+  <div class="main-page__article">
+    <app-article />
+  </div>
+  } @placeholder {
+  <div></div>
+  }
+</div>
+@defer (on viewport) {
+<app-footer></app-footer>
+} @placeholder {
+<div></div>
+}

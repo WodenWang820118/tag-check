@@ -16,6 +16,11 @@
 
 [Feedback and Contribution](#feedback-and-contribution)
 
+// TODO: migration steps
+// 1. Same version of Angular
+// 2. Use the same tsconfig.json
+// 3. Install the same version of the dependencies
+
 # Overview
 
 This desktop application automates the GTM (Google Tag Manager) container review process and the production analytics deployment validation. It streamlines the quality assurance process by providing:

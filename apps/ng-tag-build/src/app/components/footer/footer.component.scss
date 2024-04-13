@@ -1,0 +1,10 @@
+@import '../../../styles.scss';
+
+.footer {
+  background-color: $back-dark;
+  color: $text-light;
+
+  &__container {
+    padding: 3rem 10rem;
+  }
+}

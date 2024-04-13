@@ -1,1 +1,29 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'sass/main.scss';
+:root {
+  --screen-tablet1: #{$screen-tablet1};
+  --screen-tablet2: #{$screen-tablet2};
+  --screen-tablet3: #{$screen-tablet3};
+}
+
+.mdc-button.mat-success,
+.mat-mdc-stroked-button.mat-success {
+  color: #155724 !important;
+}
+
+.mat-mdc-unelevated-button.mat-success:hover,
+.mat-mdc-raised-button.mat-success:hover {
+  color: #f0fff3 !important;
+  background-color: #1b742f !important;
+}
+
+.mat-mdc-unelevated-button:not(:disabled, :hover).mat-success,
+.mat-mdc-raised-button.mat-success,
+.mat-mdc-fab.mat-success,
+.mat-mdc-mini-fab.mat-success {
+  color: #f0fff3 !important;
+  background-color: #155724 !important;
+}
+
+.mat-mdc-icon-button.mat-success {
+  color: #155724 !important;
+}

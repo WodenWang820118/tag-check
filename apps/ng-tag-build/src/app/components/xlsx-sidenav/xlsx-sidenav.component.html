@@ -1,0 +1,249 @@
+<div class="xlsx-sidenav">
+  <mat-sidenav
+    class="xlsx-sidenav__sidenav"
+    opened="false"
+    #sidenav
+    mode="side"
+    position="end"
+    autoFocus="true"
+    fixedInViewport="true"
+    fixedTopGap="0"
+    fixedBottomGap="0"
+  >
+    <div class="xlsx-sidenav__header">
+      <div class="xlsx-sidenav__header__title">
+        <mat-icon (click)="sidenav.toggle(); onAction('close')"
+          >highlight_off</mat-icon
+        >
+        <div>
+          <u>{{ fileName$ | async }}</u>
+        </div>
+      </div>
+      <div>
+        @if (!(xlsxFacadeService.getIsPreviewing() | async)) {
+        <button
+          mat-raised-button
+          (click)="sidenav.toggle(); onAction('save')"
+          color="primary"
+        >
+          Save
+        </button>
+        } @if (xlsxFacadeService.getIsPreviewing() | async) {
+        <button mat-raised-button (click)="onAction('preview')" color="warn">
+          Preview
+        </button>
+        }
+      </div>
+    </div>
+    @if (loading) {
+    <mat-progress-spinner
+      mode="indeterminate"
+      class="xlsx-sidenav__spinner"
+    ></mat-progress-spinner>
+    } @else {
+
+    <mat-sidenav-content class="xlsx-sidenav__sidenav__content">
+      <div class="xlsx-sidenav__sidenav__content__cards">
+        <mat-card
+          class="mat-elevation-z8 xlsx-sidenav__sidenav__content__cards__card"
+        >
+          <mat-card-content>
+            <form [formGroup]="form" class="xlsx-sidenav__form">
+              <div class="xlsx-sidenav__form__field">
+                <div class="xlsx-sidenav__form__field__header">
+                  <label>Worksheet Name</label>
+                  <mat-icon
+                    matSuffix
+                    matTooltip="Select the worksheet that contains the data"
+                    >help_outline</mat-icon
+                  >
+                </div>
+                <select
+                  formControlName="worksheetNames"
+                  (change)="switchToSelectedSheet($event)"
+                >
+                  @for (worksheetName of worksheetNames$ | async; track
+                  worksheetName) {
+                  <option>
+                    {{ worksheetName }}
+                  </option>
+                  }
+                </select>
+              </div>
+              <div class="xlsx-sidenav__form__field">
+                <div class="xlsx-sidenav__form__field__header">
+                  <label>Data Column Name</label>
+                  <mat-icon matSuffix matTooltip="Select the Data Column Name"
+                    >help_outline</mat-icon
+                  >
+                </div>
+                <input type="text" formControlName="dataColumnName" />
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+        @if (!(xlsxFacadeService.getIsPreviewing() | async)) {
+
+        <mat-card
+          class="mat-elevation-z8 xlsx-sidenav__sidenav__content__cards__card"
+        >
+          <mat-card-content>
+            <app-progress-spinner
+              [numTotalTags]="numTotalTags$ | async"
+              [numParsedTags]="numParsedTags$ | async"
+            ></app-progress-spinner>
+          </mat-card-content>
+        </mat-card>
+
+        }
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 2rem">
+        <mat-card>
+          <div>
+            <mat-card-content
+              #scrollContainer
+              id="scrollContainer"
+              style="
+                overflow: scroll;
+                min-height: 30vh;
+                height: auto;
+                max-height: 50vh;
+              "
+            >
+              <app-custom-mat-table
+                [displayedColumns$]="displayedColumns$"
+                [displayedDataSource$]="displayedDataSource$"
+              ></app-custom-mat-table>
+            </mat-card-content>
+          </div>
+        </mat-card>
+        @if (hasProcessedFailedEvents$ | async) { @if (displayedFailedEvents$ |
+        async; as dataSource) {
+        <mat-card>
+          <mat-card-content>
+            <table mat-table [dataSource]="dataSource">
+              <ng-container matColumnDef="failedEvents">
+                <th mat-header-cell *matHeaderCellDef>Failed Events</th>
+                <td mat-cell *matCellDef="let element">
+                  {{ element["failedEvents"] }}
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="displayedFailedColumns"></tr>
+              <tr
+                mat-row
+                *matRowDef="let row; columns: displayedFailedColumns"
+              ></tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+        } }
+      </div>
+    </mat-sidenav-content>
+
+    }
+    <ng-template #content>
+      <mat-sidenav-content class="xlsx-sidenav__sidenav__content">
+        <div class="xlsx-sidenav__sidenav__content__cards">
+          <mat-card
+            class="mat-elevation-z8 xlsx-sidenav__sidenav__content__cards__card"
+          >
+            <mat-card-content>
+              <form [formGroup]="form" class="xlsx-sidenav__form">
+                <div class="xlsx-sidenav__form__field">
+                  <div class="xlsx-sidenav__form__field__header">
+                    <label>Worksheet Name</label>
+                    <mat-icon
+                      matSuffix
+                      matTooltip="Select the worksheet that contains the data"
+                      >help_outline</mat-icon
+                    >
+                  </div>
+                  <select
+                    formControlName="worksheetNames"
+                    (change)="switchToSelectedSheet($event)"
+                  >
+                    @for (worksheetName of worksheetNames$ | async; track
+                    worksheetName) {
+                    <option>
+                      {{ worksheetName }}
+                    </option>
+                    }
+                  </select>
+                </div>
+                <div class="xlsx-sidenav__form__field">
+                  <div class="xlsx-sidenav__form__field__header">
+                    <label>Data Column Name</label>
+                    <mat-icon matSuffix matTooltip="Select the Data Column Name"
+                      >help_outline</mat-icon
+                    >
+                  </div>
+                  <input type="text" formControlName="dataColumnName" />
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+          @if (!(xlsxFacadeService.getIsPreviewing() | async)) {
+
+          <mat-card
+            class="mat-elevation-z8 xlsx-sidenav__sidenav__content__cards__card"
+          >
+            <mat-card-content>
+              <app-progress-spinner
+                [numTotalTags]="numTotalTags$ | async"
+                [numParsedTags]="numParsedTags$ | async"
+              ></app-progress-spinner>
+            </mat-card-content>
+          </mat-card>
+
+          }
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 2rem">
+          <mat-card>
+            <div>
+              <mat-card-content
+                #scrollContainer
+                id="scrollContainer"
+                style="
+                  overflow: scroll;
+                  min-height: 30vh;
+                  height: auto;
+                  max-height: 50vh;
+                "
+              >
+                <app-custom-mat-table
+                  [displayedColumns$]="displayedColumns$"
+                  [displayedDataSource$]="displayedDataSource$"
+                ></app-custom-mat-table>
+              </mat-card-content>
+            </div>
+          </mat-card>
+          @if (hasProcessedFailedEvents$ | async) { @if (displayedFailedEvents$
+          | async; as dataSource) {
+          <mat-card>
+            <mat-card-content>
+              <table mat-table [dataSource]="dataSource">
+                <ng-container matColumnDef="failedEvents">
+                  <th mat-header-cell *matHeaderCellDef>Failed Events</th>
+                  <td mat-cell *matCellDef="let element">
+                    {{ element["failedEvents"] }}
+                  </td>
+                </ng-container>
+                <tr
+                  mat-header-row
+                  *matHeaderRowDef="displayedFailedColumns"
+                ></tr>
+                <tr
+                  mat-row
+                  *matRowDef="let row; columns: displayedFailedColumns"
+                ></tr>
+              </table>
+            </mat-card-content>
+          </mat-card>
+          } }
+        </div>
+      </mat-sidenav-content>
+    </ng-template>
+  </mat-sidenav>
+</div>
