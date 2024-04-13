@@ -2,9 +2,7 @@ import { Injectable } from '@angular/core';
 import { DataLayerService } from '../api/datalayer/datalayer.service';
 import { GtmOperatorService } from '../api/gtm-operator/gtm-operator.service';
 import { switchMap, BehaviorSubject, take } from 'rxjs';
-import { InspectEventDto } from '../../../modules/project/components/report-table/utils';
-import { EventInspectionPreset } from '@utils';
-import { IReportDetails } from '@utils';
+import { IReportDetails, EventInspectionPresetDto } from '@utils';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ProjectDataSourceService } from '../project-data-source/project-data-source.service';
@@ -40,9 +38,7 @@ export class TestRunningFacadeService {
         take(1),
         switchMap((project) => {
           const headless = project.settings.headless;
-          const inspectEventDto: EventInspectionPreset = new InspectEventDto(
-            project
-          );
+          const inspectEventDto = new EventInspectionPresetDto(project);
           // change the play button to a spinner
           this.isRunningTestSubject.next(true);
           this.eventRunningTestSubject.next(eventName);

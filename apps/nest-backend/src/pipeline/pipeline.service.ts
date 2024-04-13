@@ -1,11 +1,10 @@
 import { XlsxReportSingleEventService } from './../os/xlsx-report/xlsx-report-single-event.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
-import { getCurrentTimestamp } from '@utils';
+import { OutputValidationResult, getCurrentTimestamp } from '@utils';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
 import { AbstractDatalayerReportService } from '../os/abstract-datalayer-report/abstract-datalayer-report.service';
-import { OutputValidationResult } from '@utils';
 @Injectable()
 export class PipelineService {
   constructor(
@@ -57,6 +56,7 @@ export class PipelineService {
       );
 
       const outputValidationResult: OutputValidationResult = {
+        eventName: testName,
         passed: result.dataLayerResult.passed,
         requestPassed: result.requestCheckResult.passed,
         rawRequest: result.rawRequest,
@@ -66,6 +66,7 @@ export class PipelineService {
         dataLayer: result.dataLayerResult.dataLayer,
         dataLayerSpec: result.dataLayerResult.dataLayerSpec,
         destinationUrl: result.destinationUrl,
+        completedTime: new Date(),
       };
 
       await this.abstractDatalayerReportService.writeSingleAbstractTestResultJson(
