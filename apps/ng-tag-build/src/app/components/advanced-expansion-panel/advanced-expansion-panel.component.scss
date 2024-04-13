@@ -1,0 +1,42 @@
+ .advanced {
+   caret-color: transparent; // hide contenteditable caret
+
+   &__tags {
+     display: flex;
+     flex-direction: column;
+   }
+
+   .mdc-form-field>label {
+     font-size: 1.3rem;
+   }
+
+   .mat-expansion-panel-header {
+     height: 48px !important;
+   }
+
+   .mat-expansion-panel {
+     .mat-expansion-indicator {
+       transition: transform 0.3s ease;
+
+       &::after {
+         transform: rotate(-45deg);
+       }
+     }
+
+     &.mat-expanded {
+       .mat-expansion-indicator {
+         transform: rotate(90deg) !important;
+       }
+     }
+
+     .mat-expansion-panel-header-title {
+       flex-grow: 2;
+     }
+
+      .mat-expansion-panel-header-description {
+        display: flex;
+        justify-content: flex-end;
+        flex-grow: 1;
+      }
+   }
+ }
