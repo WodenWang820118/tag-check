@@ -4,7 +4,6 @@ import { FolderService } from '../../os/folder/folder.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
-import { statSync } from 'fs';
 import { OutputValidationResult } from '@utils';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 
@@ -65,14 +64,7 @@ export class WaiterReportService {
       const report: OutputValidationResult =
         this.fileService.readJsonFile(filePath);
 
-      const completedTime = statSync(filePath).mtime;
-      const reportContent = {
-        eventName: eventName,
-        ...report,
-        completedTime,
-      };
-
-      return reportContent;
+      return report;
     } catch (error) {
       Logger.log(error.message, 'WaiterReportService.buildReport');
       throw new HttpException(
