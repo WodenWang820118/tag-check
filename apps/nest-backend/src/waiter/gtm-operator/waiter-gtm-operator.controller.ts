@@ -1,8 +1,7 @@
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Body, Controller, Logger, Param, Post, Query } from '@nestjs/common';
 import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
-import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
-import { ValidationResult } from '@utils';
+import { ValidationResult, EventInspectionPresetDto } from '@utils';
 import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
 
 @Controller('datalayer')

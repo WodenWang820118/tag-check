@@ -64,6 +64,7 @@ export interface RequestValidationResult {
 }
 
 export interface OutputValidationResult {
+  eventName: string;
   passed: boolean;
   requestPassed: boolean;
   rawRequest: string;
@@ -73,6 +74,7 @@ export interface OutputValidationResult {
   dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
   destinationUrl: string;
+  completedTime: Date;
 }
 
 export interface ValidationStrategy {

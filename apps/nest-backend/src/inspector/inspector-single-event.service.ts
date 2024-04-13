@@ -1,8 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import {
-  BaseDataLayerEvent,
-  ValidationResult,
-} from '@utils';
+import { BaseDataLayerEvent, ValidationResult } from '@utils';
 import { FileService } from '../os/file/file.service';
 import { FilePathService } from '../os/path/file-path/file-path.service';
 import { WebAgentService } from '../web-agent/web-agent.service';
@@ -10,7 +7,6 @@ import { RequestProcessorService } from '../request-processor/request-processor.
 import { Credentials, Page } from 'puppeteer';
 import { InspectorUtilsService } from './inspector-utils.service';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
-
 @Injectable()
 export class InspectorSingleEventService {
   constructor(

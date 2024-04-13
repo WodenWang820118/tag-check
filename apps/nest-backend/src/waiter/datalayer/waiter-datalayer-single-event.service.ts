@@ -3,7 +3,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import puppeteer, { Credentials } from 'puppeteer';
 import { BROWSER_ARGS } from '../../configs/project.config';
 import { PipelineService } from '../../pipeline/pipeline.service';
-// import { IInspectEventDto } from '@utils';
 @Injectable()
 export class WaiterDataLayerSingleEventService {
   constructor(private pipelineService: PipelineService) {}
