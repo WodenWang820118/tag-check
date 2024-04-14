@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@tag-check/spec-parser": ["./libs/data-access/src/index.ts"],
-      "@utils": ["./libs/utils/src/index.ts"]
+      "@utils": ["./libs/utils/src/index.ts"],
+      "ui": ["libs/ui/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
