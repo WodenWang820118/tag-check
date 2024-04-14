@@ -11,7 +11,13 @@
       />
     </div>
     <div class="main-page__board__item">
-      <app-functional-card />
+      <!-- TODO: re-organize the template -->
+      <app-functional-card>
+        <app-upload-action
+          class="functional-card__actions__item"
+          (uploadClick)="onUpload()"
+        ></app-upload-action>
+      </app-functional-card>
     </div>
     <div class="main-page__board__item main-page__editor">
       <app-editor [editorExtension]="'outputJson'" />

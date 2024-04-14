@@ -12,7 +12,6 @@ import { containerName, gtmId, tagManagerUrl } from './test-data';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConversionSuccessDialogComponent } from '../conversion-success-dialog/conversion-success-dialog.component';
-import { FileUploadDialogComponent } from '../file-upload-dialog/file-upload-dialog.component';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
 import { preprocessInput } from '../../services/converter/utilities/utilities';
 import { SharedModule } from '../../shared.module';
@@ -123,13 +122,6 @@ export class FunctionalCardComponent implements OnDestroy {
     });
   }
 
-  onUpload() {
-    this.openFileUploadDialog();
-    window.dataLayer.push({
-      event: 'btn_upload_click',
-    });
-  }
-
   openDialog(data: any) {
     this.dialog.open(ErrorDialogComponent, {
       data: {
@@ -142,10 +134,6 @@ export class FunctionalCardComponent implements OnDestroy {
     this.dialog.open(ConversionSuccessDialogComponent, {
       data: configuration,
     });
-  }
-
-  openFileUploadDialog() {
-    this.dialog.open(FileUploadDialogComponent);
   }
 
   get tagManagerUrl() {
