@@ -1,0 +1,27 @@
+@import '../../styles.scss';
+
+.main-page {
+  padding: 0 10rem 3rem;
+
+  &__title {
+    text-align: center;
+    margin: 2rem 0;
+  }
+
+  &__board {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: 4rem;
+    margin-bottom: 3rem;
+    &__item {
+      flex-grow: 1;
+    }
+  }
+
+  &__editor {
+    border: 1px solid $border-color;
+  }
+}
