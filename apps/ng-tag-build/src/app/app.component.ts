@@ -1,16 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
-import { MainPageComponent } from './components/main-page/main-page.component';
-
+import { TagBuildAppComponent } from '@ui';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [MainPageComponent],
+  imports: [TagBuildAppComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  title = 'gtm-config-generator';
+  title = 'Tag Build';
   constructor(private metaService: Meta) {}
 
   ngOnInit(): void {
@@ -22,12 +21,12 @@ export class AppComponent implements OnInit {
       {
         name: 'description',
         content:
-          'Automate your GTM configuration process effortlessly with our GTM Config Generator, ensuring accurate and optimized JSON file creation. Ideal for digital marketers and SEO experts, our tool streamlines tag management, reducing errors and enhancing productivity by focusing on data analysis over technicalities.',
+          'Automate your GTM configuration process effortlessly with our GTM Tag Build, ensuring accurate and optimized JSON file creation. Ideal for digital marketers and SEO experts, our tool streamlines tag management, reducing errors and enhancing productivity by focusing on data analysis over technicalities.',
       },
       {
         name: 'keywords',
         content:
-          'GTM, Config Generator, JSON, SEO, Digital Marketing, Web Development, Tag Management, Data Analysis, Productivity, Optimization',
+          'GTM, Tag Build, JSON, SEO, Digital Marketing, Web Development, Tag Management, Data Analysis, Productivity, Optimization',
       },
       {
         property: 'og:title',
@@ -37,7 +36,7 @@ export class AppComponent implements OnInit {
       {
         property: 'og:description',
         content:
-          'Automate your GTM configuration process effortlessly with our GTM Config Generator, ensuring accurate and optimized JSON file creation. Ideal for digital marketers and SEO experts, our tool streamlines tag management, reducing errors and enhancing productivity by focusing on data analysis over technicalities.',
+          'Automate your GTM configuration process effortlessly with our GTM Tag Build, ensuring accurate and optimized JSON file creation. Ideal for digital marketers and SEO experts, our tool streamlines tag management, reducing errors and enhancing productivity by focusing on data analysis over technicalities.',
       },
       {
         property: 'og:url',
@@ -47,17 +46,18 @@ export class AppComponent implements OnInit {
       {
         property: 'twitter:title',
         content:
-          'Effortless GTM Configuration and Management with Our JSON Generator Tool',
+          'Effortless GTM Configuration and Management with Our JSON Building Tool',
       },
       {
         property: 'twitter:description',
         content:
-          'Automate your GTM configuration process effortlessly with our GTM Config Generator, ensuring accurate and optimized JSON file creation. Ideal for digital marketers and SEO experts, our tool streamlines tag management, reducing errors and enhancing productivity by focusing on data analysis over technicalities.',
+          'Automate your GTM configuration process effortlessly with our GTM Tag Build, ensuring accurate and optimized JSON file creation. Ideal for digital marketers and SEO experts, our tool streamlines tag management, reducing errors and enhancing productivity by focusing on data analysis over technicalities.',
       },
     ]);
   }
 }
 
+// TODO: refactor web worker
 if (typeof Worker !== 'undefined') {
   // Create a new
   const worker = new Worker(new URL('./app.worker', import.meta.url));
