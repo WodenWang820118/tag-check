@@ -7,9 +7,21 @@ const { existsSync } = require('fs');
 ('use strict');
 
 function startBackend() {
-  const serverPath = isDev
-    ? path.join(__dirname, 'dist', 'apps', 'nest-backend', 'main.js')
-    : path.join(process.resourcesPath, 'main.js');
+  let serverPath = path.join(process.resourcesPath, 'main.js');
+
+  if (!existsSync(serverPath)) {
+    serverPath = path.join(
+      __dirname,
+      'dist',
+      'apps',
+      'nest-backend',
+      'main.js'
+    );
+  }
+
+  if (!existsSync(serverPath)) {
+    throw new Error('Backend server not found');
+  }
 
   const serverProcess = spawn('node', [serverPath]);
 
