@@ -16,8 +16,11 @@
     "mock-backend": "concurrently \"npm run mock-project-backend\" \"npm run mock-recording-backend\" \"npm run mock-configurations-backend\" \"npm run mock-specs-backend\" \"npm run mock-reports-backend\" \"npm run mock-settings-backend\"",
     "build-backend": "nx build nest-backend",
     "ng-frontend": "nx serve ng-frontend",
+    "ng-tag-build": "nx serve ng-tag-build",
     "prod-ng-frontend": "nx serve ng-frontend --prod",
+    "prod-ng-tag-build": "nx serve ng-tag-build --prod",
     "build-ng-frontend": "nx build ng-frontend --configuration production --base-href ./",
+    "build-ng-tag-build": "nx build ng-tag-build --configuration production",
     "start-ng-electron": "cross-env-shell NODE_ENV=ng-frontend \"npm run build-ng-frontend && electron .\"",
     "ng-dev-app": "concurrently \"npm run ng-frontend\" \"npm run backend\"",
     "ng-mock-app": "concurrently \"run mock-backend\" \"npm run ng-frontend\"",
@@ -124,6 +127,7 @@
     "sqlite3": "^5.1.6",
     "tslib": "^2.3.0",
     "unzipper": "^0.10.14",
-    "zone.js": "~0.14.3"
+    "zone.js": "~0.14.3",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
   }
 }
