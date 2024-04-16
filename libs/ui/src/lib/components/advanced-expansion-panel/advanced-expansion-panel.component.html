@@ -35,8 +35,8 @@
         <mat-panel-description
           ><mat-icon
             matSuffix
-            matTooltip="Google Tag Name comes with a default measurement ID.
-            You can use an existing measurement ID or leave it empty create a new one."
+            matTooltip="Google Tag has a default name, but you can change it.
+            You can use an existing measurement ID or leave it empty"
             >help_outline</mat-icon
           ></mat-panel-description
         >
@@ -47,11 +47,11 @@
           [formGroup]="setupForm"
           style="display: flex; flex-direction: column"
         >
-          <mat-form-field>
+          <mat-form-field appearance="outline">
             <mat-label>Google Tag Name</mat-label>
             <input matInput formControlName="googleTagName" />
           </mat-form-field>
-          <mat-form-field>
+          <mat-form-field appearance="outline">
             <mat-label>Use Existing Measurement ID</mat-label>
             <input matInput formControlName="useExistingMesurementId" />
           </mat-form-field>

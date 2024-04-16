@@ -1,4 +1,4 @@
-import { NestedObject } from '../../../interfaces/gtm-config-generator';
+import { NestedObject } from '../../../interfaces/tag-build.interface';
 
 /**
  * A function to get all paths from the root to each leaf node in a nested object.

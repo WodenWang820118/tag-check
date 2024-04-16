@@ -17,6 +17,11 @@ const routes: Routes = [
         component: ReportViewComponent,
       },
       {
+        path: 'tag-build',
+        loadChildren: () =>
+          import('../tag-build/tag-build.module').then((m) => m.TagBuildModule),
+      },
+      {
         path: 'settings',
         component: SettingsViewComponent,
       },

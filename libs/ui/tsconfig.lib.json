@@ -5,6 +5,7 @@
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
+    "composite": true,
     "types": []
   },
   "exclude": [
@@ -13,5 +14,5 @@
     "jest.config.ts",
     "src/**/*.test.ts"
   ],
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "../../apps/ng-frontend/src/app/index.d.ts"]
 }

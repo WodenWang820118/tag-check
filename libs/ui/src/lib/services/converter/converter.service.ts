@@ -5,7 +5,7 @@ import {
   GtmConfigGenerator,
   Tag,
   Trigger,
-} from '../../interfaces/gtm-config-generator';
+} from '../../interfaces/tag-build.interface';
 import { formatSingleEventParameters } from './utilities/parameter-formatting-utils';
 import { TagManager } from './gtm-json-manager/managers/tag-manager';
 import { TriggerManager } from './gtm-json-manager/managers/trigger-manager';

@@ -1,7 +1,7 @@
 import {
   Trigger,
   TriggerConfig,
-} from '../../../../interfaces/gtm-config-generator';
+} from '../../../../interfaces/tag-build.interface';
 import { createVideoTrigger } from './video-trigger';
 import { createScrollTrigger } from './scroll-trigger';
 import { createTrigger } from './event-trigger';
