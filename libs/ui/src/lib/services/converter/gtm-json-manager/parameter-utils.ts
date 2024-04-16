@@ -2,7 +2,7 @@ import {
   Parameter,
   ParameterMap,
   TriggerConfig,
-} from '../../../interfaces/gtm-config-generator';
+} from '../../../interfaces/tag-build.interface';
 
 export function createListParameter(
   key: string,

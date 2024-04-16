@@ -2,7 +2,7 @@ import {
   Tag,
   TagConfig,
   TriggerConfig,
-} from '../../../../interfaces/gtm-config-generator';
+} from '../../../../interfaces/tag-build.interface';
 import {
   createTemplateParameter,
   createListParameter,

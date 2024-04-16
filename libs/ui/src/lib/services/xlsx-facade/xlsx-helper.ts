@@ -1,4 +1,4 @@
-import { DataRow } from '../../interfaces/gtm-config-generator';
+import { DataRow } from '../../interfaces/tag-build.interface';
 import { fixJsonString } from '../converter/utilities/json-string-utils';
 
 export const unfixedableJsonString: Set<string> = new Set();

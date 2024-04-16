@@ -9,7 +9,7 @@ import {
 import { EditorService } from '../editor/editor.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
-import { DataRow } from '../../interfaces/gtm-config-generator';
+import { DataRow } from '../../interfaces/tag-build.interface';
 
 @Injectable({
   providedIn: 'root',

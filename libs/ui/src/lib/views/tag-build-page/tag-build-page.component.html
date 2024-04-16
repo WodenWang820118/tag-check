@@ -1,0 +1,22 @@
+<div class="main-page">
+  <div class="main-page__title">
+    <h1>Tag Build</h1>
+  </div>
+
+  <div class="main-page__board">
+    <div class="main-page__board__item main-page__editor">
+      @if (projectSpecs !== null) {
+      <lib-editor
+        content="{{ projectSpecs.specs | json }}"
+        [editorExtension]="'inputJson'"
+      />
+      }
+    </div>
+    <div class="main-page__board__item">
+      <lib-functional-card> </lib-functional-card>
+    </div>
+    <div class="main-page__board__item main-page__editor">
+      <lib-editor [editorExtension]="'outputJson'" />
+    </div>
+  </div>
+</div>
