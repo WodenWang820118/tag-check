@@ -81,7 +81,7 @@ export class EditorService {
       editorView.dispatch({
         changes: {
           from: 0,
-          insert: '[]',
+          insert: content ? content : '[]',
           to: editorView.state.doc.length,
         },
       });

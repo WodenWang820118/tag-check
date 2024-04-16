@@ -4,6 +4,7 @@ import {
   Input,
   ViewChild,
   ChangeDetectionStrategy,
+  AfterViewInit,
 } from '@angular/core';
 import {
   EditorExtension,
@@ -17,7 +18,7 @@ import {
   template: `<div id="cm-editor" #editor></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditorComponent {
+export class EditorComponent implements AfterViewInit {
   @Input() editorExtension: EditorExtension = 'inputJson';
   @Input() content = '';
   @ViewChild('editor') editorElement!: ElementRef<HTMLDivElement>;

@@ -3,7 +3,7 @@ import {
   ViewEncapsulation,
   AfterViewInit,
   ViewChild,
-  OnInit,
+  OnDestroy,
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
@@ -24,16 +24,17 @@ import { EditorView } from 'codemirror';
   styleUrls: ['./advanced-expansion-panel.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class AdvancedExpansionPanelComponent implements AfterViewInit {
+export class AdvancedExpansionPanelComponent
+  implements AfterViewInit, OnDestroy
+{
   form: FormGroup = this.fb.group({
     includeVideoTag: [false],
     includeScrollTag: [false],
     includeItemScopedVariables: [false],
   });
 
-  // TODO: if using existing measurement id, then disable the googleTagName input field
   setupForm: FormGroup = this.fb.group({
-    googleTagName: [''],
+    googleTagName: ['GA4 Configuration Tag'],
     useExistingMesurementId: [''],
   });
 
@@ -121,7 +122,7 @@ export class AdvancedExpansionPanelComponent implements AfterViewInit {
 
     try {
       const jsonString = editor.state.doc.toString();
-      let json = JSON.parse(jsonString);
+      const json = JSON.parse(jsonString);
       const updatedJson = this.editorFacadeService.updateJsonBasedOnForm(
         json,
         form

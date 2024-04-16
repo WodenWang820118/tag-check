@@ -1,4 +1,4 @@
-import { TriggerConfig } from '../../../../interfaces/gtm-config-generator';
+import { TriggerConfig } from '../../../../interfaces/tag-build.interface';
 import { isIncludeVideo } from '../../utilities/event-utils';
 
 export function videoTrigger({
