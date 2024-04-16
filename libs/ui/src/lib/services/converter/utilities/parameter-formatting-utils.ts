@@ -1,4 +1,4 @@
-import { Parameter } from '../../../interfaces/gtm-config-generator';
+import { Parameter } from '../../../interfaces/tag-build.interface';
 
 /**
  * Formats an object into an array of key-value pairs, where each key is treated as a name and each value as a value.

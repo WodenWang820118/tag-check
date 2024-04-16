@@ -84,6 +84,12 @@ export class SideNavListComponent implements OnInit, OnDestroy {
             title: 'Settings',
             link: `settings`,
           });
+
+          this.items.push({
+            icon: 'build',
+            title: 'Build',
+            link: `tag-build`,
+          });
         })
       )
       .subscribe();

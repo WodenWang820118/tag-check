@@ -1,4 +1,4 @@
-import { VariableConfig } from '../../../../interfaces/gtm-config-generator';
+import { VariableConfig } from '../../../../interfaces/tag-build.interface';
 
 export function scrollBuiltInVariable({
   accountId,

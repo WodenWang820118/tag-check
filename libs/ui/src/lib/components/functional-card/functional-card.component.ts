@@ -5,7 +5,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { ConverterService } from '../../services/converter/converter.service';
-import { Subject, combineLatest, take, takeUntil, tap } from 'rxjs';
+import { Subject, combineLatest, take, tap } from 'rxjs';
 import { Validators } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
 import { containerName, gtmId, tagManagerUrl } from './test-data';
@@ -29,7 +29,10 @@ import { SetupConstructorService } from '../../services/setup-constructor/setup-
 export class FunctionalCardComponent implements OnDestroy {
   @ViewChild('accordionContainer')
   accordionContainer!: AdvancedExpansionPanelComponent;
+
   private destroy$ = new Subject<void>();
+  private dataLayer: any[];
+
   form = this.fb.group({
     tagManagerUrl: [tagManagerUrl, Validators.required],
     containerName: [containerName, Validators.required],
@@ -42,7 +45,9 @@ export class FunctionalCardComponent implements OnDestroy {
     public dialog: MatDialog,
     public editorFacadeService: EditorFacadeService,
     private setupConstructorService: SetupConstructorService
-  ) {}
+  ) {
+    this.dataLayer = (window as any).dataLayer || [];
+  }
 
   convertCode() {
     this.accordionContainer.accordion.closeAll();
@@ -54,7 +59,6 @@ export class FunctionalCardComponent implements OnDestroy {
     ])
       .pipe(
         take(1),
-        takeUntil(this.destroy$),
         tap(
           ([
             inputJsonEditor,
@@ -117,7 +121,7 @@ export class FunctionalCardComponent implements OnDestroy {
     this.editorFacadeService.setOutputJsonContent(result);
     this.openSuccessConversionDialog(result);
 
-    window.dataLayer.push({
+    this.dataLayer.push({
       event: 'btn_convert_click',
     });
   }

@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 
 import { read, utils } from 'xlsx';
-import { DataRow } from './interfaces/gtm-config-generator';
+import { DataRow } from './interfaces/tag-build.interface';
 
 addEventListener('message', (event) => {
   const { cmd, action, data } = event.data;
@@ -9,7 +9,7 @@ addEventListener('message', (event) => {
     case 'readXlsx': {
       const workbook = read(data, { type: 'array' });
       const sheetNames = workbook.SheetNames;
-      let jsonData = utils.sheet_to_json(workbook.Sheets[sheetNames[0]], {
+      const jsonData = utils.sheet_to_json(workbook.Sheets[sheetNames[0]], {
         defval: '',
       }); // default to first sheet
       postMessage({
@@ -22,7 +22,7 @@ addEventListener('message', (event) => {
     }
     case 'switchSheet': {
       const { data, name } = event.data;
-      let jsonData = getSheetData(data, name);
+      const jsonData = getSheetData(data, name);
       postMessage({ action: `${action}`, jsonData });
       break;
     }

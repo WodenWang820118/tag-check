@@ -1,4 +1,4 @@
-import { Trigger } from '../../../../interfaces/gtm-config-generator';
+import { Trigger } from '../../../../interfaces/tag-build.interface';
 import { isBuiltInEvent } from '../../utilities/event-utils';
 
 export class TriggerManager {
