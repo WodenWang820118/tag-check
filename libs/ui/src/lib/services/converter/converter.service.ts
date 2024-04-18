@@ -30,7 +30,7 @@ export class ConverterService {
     googleTagName: string,
     measurementId: string,
     gtmConfigGenerator: GtmConfigGenerator,
-    includeItemScopedVariabled = false
+    includeItemScopedVariable = false
   ) {
     try {
       const specs = this.parseAllSpecs(gtmConfigGenerator.specs);
@@ -60,7 +60,7 @@ export class ConverterService {
       const triggers = this.triggerManager.getTriggers();
       const tags = this.tagManager.getTags();
       const dataLayers = this.dataLayerManager.getDataLayers(
-        includeItemScopedVariabled
+        includeItemScopedVariable
       );
       console.log('dataLayers: ', dataLayers);
       return exportGtmJSON(
