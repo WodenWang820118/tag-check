@@ -5,6 +5,7 @@ import {
   AfterViewInit,
   ViewChild,
   OnDestroy,
+  OnInit,
 } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
@@ -39,7 +40,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   encapsulation: ViewEncapsulation.None,
 })
 export class AdvancedExpansionPanelComponent
-  implements AfterViewInit, OnDestroy
+  implements OnInit, AfterViewInit, OnDestroy
 {
   form: FormGroup = this.fb.group({
     includeVideoTag: [false],
@@ -48,7 +49,7 @@ export class AdvancedExpansionPanelComponent
   });
 
   setupForm: FormGroup = this.fb.group({
-    googleTagName: ['GA4 Configuration Tag'],
+    googleTagName: [''],
     useExistingMesurementId: [''],
   });
 
@@ -63,9 +64,13 @@ export class AdvancedExpansionPanelComponent
     private setupConstructorService: SetupConstructorService
   ) {}
 
-  ngAfterViewInit() {
+  ngOnInit() {
     this.onFormChange();
     this.onSetupFormChange();
+  }
+
+  ngAfterViewInit() {
+    this.setupForm.controls['googleTagName'].setValue('GA4 Configuration Tag');
   }
 
   ngOnDestroy(): void {
@@ -98,7 +103,6 @@ export class AdvancedExpansionPanelComponent
       .subscribe();
   }
 
-  // TODO: handle control value changes one by one
   onSetupFormChange() {
     this.setupForm.controls['googleTagName'].valueChanges
       .pipe(
