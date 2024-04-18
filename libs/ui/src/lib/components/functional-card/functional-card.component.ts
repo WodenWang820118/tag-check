@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common';
 import {
   Component,
   OnDestroy,
@@ -6,22 +7,20 @@ import {
 } from '@angular/core';
 import { ConverterService } from '../../services/converter/converter.service';
 import { Subject, combineLatest, take, tap } from 'rxjs';
-import { Validators } from '@angular/forms';
-import { FormBuilder } from '@angular/forms';
 import { containerName, gtmId, tagManagerUrl } from './test-data';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConversionSuccessDialogComponent } from '../conversion-success-dialog/conversion-success-dialog.component';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
 import { preprocessInput } from '../../services/converter/utilities/utilities';
-import { SharedModule } from '../../shared.module';
 import { EditorFacadeService } from '../../services/editor-facade/editor-facade.service';
 import { SetupConstructorService } from '../../services/setup-constructor/setup-constructor.service';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'lib-functional-card',
   standalone: true,
-  imports: [SharedModule, AdvancedExpansionPanelComponent],
+  imports: [AsyncPipe, MatButtonModule, AdvancedExpansionPanelComponent],
   templateUrl: './functional-card.component.html',
   styleUrls: ['./functional-card.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -33,15 +32,8 @@ export class FunctionalCardComponent implements OnDestroy {
   private destroy$ = new Subject<void>();
   private dataLayer: any[];
 
-  form = this.fb.group({
-    tagManagerUrl: [tagManagerUrl, Validators.required],
-    containerName: [containerName, Validators.required],
-    gtmId: [gtmId, Validators.required],
-  });
-
   constructor(
     private converterService: ConverterService,
-    private fb: FormBuilder,
     public dialog: MatDialog,
     public editorFacadeService: EditorFacadeService,
     private setupConstructorService: SetupConstructorService
@@ -92,21 +84,14 @@ export class FunctionalCardComponent implements OnDestroy {
     measurementId: string,
     includeItemScopedVariables: boolean
   ) {
-    if (!this.tagManagerUrl || !this.containerName || !this.gtmId) {
-      this.dialog.open(ErrorDialogComponent, {
-        data: {
-          message: 'Please fill in all required fields',
-        },
-      });
-      throw new Error('Please fill in all required fields');
-    }
+    // TODO: refactor
 
     this.editorFacadeService.setInputJsonContent(JSON.parse(json));
     const gtmConfigGenerator = this.setupConstructorService.generateGtmConfig(
       json,
-      this.tagManagerUrl,
-      this.containerName,
-      this.gtmId
+      tagManagerUrl,
+      containerName,
+      gtmId
     );
     const result = this.converterService.convert(
       googleTagName,
@@ -140,17 +125,17 @@ export class FunctionalCardComponent implements OnDestroy {
     });
   }
 
-  get tagManagerUrl() {
-    return this.form.controls.tagManagerUrl.value;
-  }
+  // get tagManagerUrl() {
+  //   return this.form.controls.tagManagerUrl.value;
+  // }
 
-  get containerName() {
-    return this.form.controls.containerName.value;
-  }
+  // get containerName() {
+  //   return this.form.controls.containerName.value;
+  // }
 
-  get gtmId() {
-    return this.form.controls.gtmId.value;
-  }
+  // get gtmId() {
+  //   return this.form.controls.gtmId.value;
+  // }
 
   ngOnDestroy() {
     this.destroy$.next();

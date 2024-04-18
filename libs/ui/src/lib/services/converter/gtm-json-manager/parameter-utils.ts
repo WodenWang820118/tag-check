@@ -1,8 +1,4 @@
-import {
-  Parameter,
-  ParameterMap,
-  TriggerConfig,
-} from '../../../interfaces/tag-build.interface';
+import { Parameter, ParameterMap, TriggerConfig } from '@utils';
 
 export function createListParameter(
   key: string,

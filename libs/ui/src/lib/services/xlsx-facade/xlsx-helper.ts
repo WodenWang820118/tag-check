@@ -1,4 +1,4 @@
-import { DataRow } from '../../interfaces/tag-build.interface';
+import { DataRow } from '@utils';
 import { fixJsonString } from '../converter/utilities/json-string-utils';
 
 export const unfixedableJsonString: Set<string> = new Set();

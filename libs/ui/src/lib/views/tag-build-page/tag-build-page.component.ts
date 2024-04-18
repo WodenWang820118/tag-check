@@ -1,16 +1,27 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { EditorComponent } from '../../components/editor/editor.component';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { FunctionalCardComponent } from '../../components/functional-card/functional-card.component';
-import { SharedModule } from '../../shared.module';
 import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectSpec } from '@utils';
-
+import { CommonModule } from '@angular/common';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { ArticleComponent } from '../../components/article/article.component';
+import { FileUploadDialogComponent } from '../../components/file-upload-dialog/file-upload-dialog.component';
+import { FooterComponent } from '../../components/footer/footer.component';
+import { UploadActionComponent } from '../../components/upload-action/upload-action.component';
 @Component({
   selector: 'lib-tag-build-page',
   standalone: true,
   imports: [
-    SharedModule,
+    CommonModule,
+    MatSidenavModule,
+    FunctionalCardComponent,
+    ArticleComponent,
+    FooterComponent,
+    UploadActionComponent,
+    FileUploadDialogComponent,
+    ErrorDialogComponent,
     EditorComponent,
     FunctionalCardComponent,
     ErrorDialogComponent,

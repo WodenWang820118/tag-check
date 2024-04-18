@@ -1,11 +1,7 @@
 import { DataLayerManager } from './utilities/data-layer-utils';
 import { Injectable } from '@angular/core';
 import { exportGtmJSON } from './utilities/configuration-utilities';
-import {
-  GtmConfigGenerator,
-  Tag,
-  Trigger,
-} from '../../interfaces/tag-build.interface';
+import { GtmConfigGenerator, Tag, Trigger } from '@utils';
 import { formatSingleEventParameters } from './utilities/parameter-formatting-utils';
 import { TagManager } from './gtm-json-manager/managers/tag-manager';
 import { TriggerManager } from './gtm-json-manager/managers/trigger-manager';

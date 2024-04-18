@@ -14,7 +14,6 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "ES2022",
-    "module": "ES2020",
     "useDefineForClassFields": false,
     "lib": ["ESNext", "dom"]
   },

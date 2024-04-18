@@ -20,7 +20,9 @@
     "prod-ng-frontend": "nx serve ng-frontend --prod",
     "prod-ng-tag-build": "nx serve ng-tag-build --prod",
     "build-ng-frontend": "nx build ng-frontend --configuration production --base-href ./",
-    "build-ng-tag-build": "nx build ng-tag-build --configuration production",
+    "bundle-ng-frontend-report": "nx build ng-frontend --configuration production --source-map && source-map-explorer dist/apps/ng-frontend/browser/*.js",
+    "build-ng-tag-build": "nx build ng-tag-build --configuration production --optimization",
+    "bundle-ng-tag-build-report": "nx build ng-tag-build --configuration production --source-map && source-map-explorer dist/apps/ng-tag-build/browser/*.js",
     "start-ng-electron": "cross-env-shell NODE_ENV=ng-frontend \"npm run build-ng-frontend && electron .\"",
     "ng-dev-app": "concurrently \"npm run ng-frontend\" \"npm run backend\"",
     "ng-mock-app": "concurrently \"run mock-backend\" \"npm run ng-frontend\"",
@@ -83,9 +85,11 @@
     "nodemon": "^3.1.0",
     "nx": "17.2.8",
     "prettier": "^2.6.2",
+    "source-map-explorer": "^2.5.3",
     "ts-jest": "^29.1.0",
     "ts-node": "10.9.1",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "webpack-merge": "^5.10.0"
   },
   "dependencies": {
     "@angular/animations": "~17.1.0",
@@ -116,7 +120,7 @@
     "concurrently": "^8.2.2",
     "electron-is-dev": "^2.0.0",
     "electron-squirrel-startup": "^1.0.0",
-    "exceljs": "^4.3.0",
+    "exceljs": "^4.4.0",
     "json-server": "^0.17.4",
     "nestjs-spelunker": "^1.1.5",
     "puppeteer": "^22.6.1",

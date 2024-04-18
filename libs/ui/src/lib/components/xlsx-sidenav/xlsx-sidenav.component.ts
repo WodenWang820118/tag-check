@@ -1,3 +1,5 @@
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   AfterViewInit,
   Component,
@@ -5,7 +7,7 @@ import {
   OnDestroy,
   ViewChild,
 } from '@angular/core';
-import { MatSidenav } from '@angular/material/sidenav';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { EventBusService } from '../../services/event-bus/event-bus.service';
 import {
   Observable,
@@ -19,16 +21,34 @@ import {
   timer,
 } from 'rxjs';
 import { ViewEncapsulation } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ProgressSpinnerComponent } from '../progress-spinner/progress-spinner.component';
 import { CustomMatTableComponent } from '../custom-mat-table/custom-mat-table.component';
 import { XlsxProcessFacade } from '../../services/xlsx-facade/xlsx-facade.service';
-import { SharedModule } from '../../shared.module';
+import { MatIconModule } from '@angular/material/icon';
+import { AsyncPipe } from '@angular/common';
+import { MatTableModule } from '@angular/material/table';
 
 @Component({
   selector: 'lib-xlsx-sidenav-form',
   standalone: true,
-  imports: [ProgressSpinnerComponent, CustomMatTableComponent, SharedModule],
+  imports: [
+    AsyncPipe,
+    MatSidenavModule,
+    MatProgressSpinnerModule,
+    MatCardModule,
+    MatTableModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatIconModule,
+    ProgressSpinnerComponent,
+    CustomMatTableComponent,
+  ],
   templateUrl: `./xlsx-sidenav.component.html`,
   styleUrls: ['./xlsx-sidenav.component.scss'],
   encapsulation: ViewEncapsulation.None,

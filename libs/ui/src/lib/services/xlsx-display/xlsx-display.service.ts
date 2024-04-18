@@ -6,10 +6,10 @@ import {
   filterNonEmptyData,
   unfixedableJsonString,
 } from '../xlsx-facade/xlsx-helper';
-import { EditorService } from '../editor/editor.service';
+import { EditorService } from '../../services/editor/editor.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
-import { DataRow } from '../../interfaces/tag-build.interface';
+import { DataRow } from '@utils';
 
 @Injectable({
   providedIn: 'root',

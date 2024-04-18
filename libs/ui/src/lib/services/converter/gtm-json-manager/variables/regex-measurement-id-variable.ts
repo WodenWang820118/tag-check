@@ -1,4 +1,4 @@
-import { VariableConfig } from '../../../../interfaces/tag-build.interface';
+import { VariableConfig } from '@utils';
 import {
   createBooleanParameter,
   createTemplateParameter,

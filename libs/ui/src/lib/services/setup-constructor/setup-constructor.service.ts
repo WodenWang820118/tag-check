@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { GtmConfigGenerator } from '../../interfaces/tag-build.interface';
+import { GtmConfigGenerator } from '@utils';
 import { extractAccountAndContainerId } from '../converter/utilities/utilities';
 
 @Injectable({

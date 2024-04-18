@@ -1,3 +1,4 @@
+import { MatFormFieldModule } from '@angular/material/form-field';
 import {
   Component,
   ViewEncapsulation,
@@ -5,21 +6,34 @@ import {
   ViewChild,
   OnDestroy,
 } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
 import { tap, combineLatest, take, Subject, takeUntil } from 'rxjs';
-import { SharedModule } from '../../shared.module';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { EditorFacadeService } from '../../services/editor-facade/editor-facade.service';
 import { SetupConstructorService } from '../../services/setup-constructor/setup-constructor.service';
-import { MatAccordion } from '@angular/material/expansion';
+import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
 import { EditorView } from 'codemirror';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'lib-advanced-expansion-panel',
   standalone: true,
-  imports: [SharedModule, ErrorDialogComponent],
+  imports: [
+    MatExpansionModule,
+    MatFormFieldModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatCheckboxModule,
+    ErrorDialogComponent,
+    MatInputModule,
+    MatIconModule,
+    MatTooltipModule,
+  ],
   templateUrl: './advanced-expansion-panel.component.html',
   styleUrls: ['./advanced-expansion-panel.component.scss'],
   encapsulation: ViewEncapsulation.None,

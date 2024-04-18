@@ -1,10 +1,4 @@
-import {
-  Tag,
-  TagConfig,
-  Trigger,
-  TriggerConfig,
-  VariableConfig,
-} from '../../../interfaces/tag-build.interface';
+import { Tag, TagConfig, Trigger, TriggerConfig, VariableConfig } from '@utils';
 import { TagManager } from '../gtm-json-manager/managers/tag-manager';
 import { VariableManger } from '../gtm-json-manager/managers/variable-manager';
 import { getTriggers } from '../gtm-json-manager/triggers/trigger-utilities';
