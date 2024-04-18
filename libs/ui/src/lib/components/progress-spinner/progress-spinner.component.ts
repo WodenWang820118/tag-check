@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { SharedModule } from '../../shared.module';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 enum ProgressSpinnerColor {
   primary = 'primary',
@@ -10,7 +10,7 @@ enum ProgressSpinnerColor {
 @Component({
   selector: 'lib-progress-spinner',
   standalone: true,
-  imports: [SharedModule],
+  imports: [MatProgressSpinnerModule],
   template: `
     <div class="progress">
       <div class="progress__state">

@@ -1,8 +1,4 @@
-import {
-  Tag,
-  TagConfig,
-  TriggerConfig,
-} from '../../../../interfaces/tag-build.interface';
+import { Tag, TagConfig, TriggerConfig } from '@utils';
 import {
   createTemplateParameter,
   createListParameter,

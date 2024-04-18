@@ -21,9 +21,7 @@ export class EditorService {
 
   contentSubjects = {
     inputJson: new BehaviorSubject(`Placeholder content for JSON editor`),
-    outputJson: new BehaviorSubject(
-      `The output GTM config results will be here`
-    ),
+    outputJson: new BehaviorSubject(``),
   };
 
   editorSubjects = {

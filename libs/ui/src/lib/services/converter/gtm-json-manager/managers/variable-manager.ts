@@ -1,4 +1,4 @@
-import { VariableConfig } from '../../../../interfaces/tag-build.interface';
+import { VariableConfig } from '@utils';
 import { isIncludeScroll, isIncludeVideo } from '../../utilities/event-utils';
 import { createVariable } from '../variables/data-layer-variable';
 import { createRegexMeasurementIdVariable } from '../variables/regex-measurement-id-variable';

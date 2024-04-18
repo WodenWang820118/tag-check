@@ -1,4 +1,4 @@
-import { TriggerConfig } from '../../../../interfaces/tag-build.interface';
+import { TriggerConfig } from '@utils';
 import { createTemplateParameter } from '../parameter-utils';
 
 export function createTrigger(
