@@ -7,10 +7,6 @@ import { Component } from '@angular/core';
     <div class="footer__container">
       <p class="text-muted">
         Created by:
-        <a href="https://www.linkedin.com/in/brandon-pardede/" target="_blank">
-          Brandon Pardede</a
-        >
-        and
         <a href="https://www.linkedin.com/in/guan-xin-wang/" target="_blank"
           >Guan Xin Wang</a
         >
@@ -23,12 +19,12 @@ import { Component } from '@angular/core';
       </p>
       <p class="text-muted">
         <a
-          href="https://github.com/WodenWang820118/gtm-config-generator"
+          href="https://github.com/WodenWang820118/tag-check/tree/tag-build-release"
           target="_blank"
           >View on GitHub</a
         >
       </p>
-      <p class="text-muted">Last updated on: 2024-01-13</p>
+      <p class="text-muted">Last updated on: 2024-04-18</p>
     </div>
   </footer> `,
   styleUrls: ['./footer.component.scss'],

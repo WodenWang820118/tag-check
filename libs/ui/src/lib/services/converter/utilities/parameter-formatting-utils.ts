@@ -9,7 +9,9 @@ import { Parameter } from '@utils';
 export function formatParameters(params: Record<string, string>): Parameter[] {
   return Object.keys(params).map((key) => {
     const value = Array.isArray(params[key]) ? key : params[key].slice(1);
-    return { key: key, value: value, type: '' };
+    // use only key for both name and value
+    // because the value has other usage in the app
+    return { key: key, value: key, type: '' };
   });
 }
 
