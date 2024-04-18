@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { JsonPipe } from '@angular/common';
 import { Component } from '@angular/core';
 
 @Component({
@@ -32,7 +32,7 @@ import { Component } from '@angular/core';
     </div>
   </div> `,
   styles: [],
-  imports: [CommonModule],
+  imports: [JsonPipe],
 })
 export class ArticleComponent {
   exampleInput = [

@@ -1,7 +1,4 @@
-import {
-  TagConfig,
-  TriggerConfig,
-} from '../../../../interfaces/tag-build.interface';
+import { TagConfig, TriggerConfig } from '@utils';
 import { isIncludeScroll } from '../../utilities/event-utils';
 import {
   createBooleanParameter,

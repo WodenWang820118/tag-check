@@ -1,12 +1,13 @@
+import { AsyncPipe, JsonPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { XlsxProcessService } from '../../services/xlsx-process/xlsx-process.service';
-import { SharedModule } from '../../shared.module';
+import { MatTableModule } from '@angular/material/table';
 
 @Component({
   selector: 'lib-custom-mat-table',
   standalone: true,
-  imports: [SharedModule],
+  imports: [AsyncPipe, JsonPipe, MatTableModule],
   template: `
     @if (displayedDataSource$ | async; as dataSource) {
 

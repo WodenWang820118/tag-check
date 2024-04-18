@@ -1,10 +1,4 @@
-import {
-  Parameter,
-  Tag,
-  TagConfig,
-  Trigger,
-  TriggerConfig,
-} from '../../../../interfaces/tag-build.interface';
+import { Parameter, Tag, TagConfig, Trigger, TriggerConfig } from '@utils';
 import { isBuiltInEvent } from '../../utilities/event-utils';
 import { createTag } from '../tags/event-tag';
 import { createGA4Configuration } from '../tags/ga4-configuration-tag';

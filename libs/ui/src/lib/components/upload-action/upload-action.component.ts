@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { SharedModule } from '../../shared.module';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'lib-upload-action',
   standalone: true,
-  imports: [SharedModule],
+  imports: [MatButtonModule],
   template: `
     <button
       mat-stroked-button

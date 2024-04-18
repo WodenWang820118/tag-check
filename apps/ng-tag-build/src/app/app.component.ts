@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
-import { TagBuildAppComponent } from '@ui';
+import { RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [TagBuildAppComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })

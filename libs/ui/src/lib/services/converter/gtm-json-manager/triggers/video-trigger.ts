@@ -1,4 +1,4 @@
-import { TriggerConfig } from '../../../../interfaces/tag-build.interface';
+import { TriggerConfig } from '@utils';
 import { isIncludeVideo } from '../../utilities/event-utils';
 
 export function videoTrigger({

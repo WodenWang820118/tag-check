@@ -20,7 +20,10 @@
           "apps/ng-tag-build/src/favicon.ico",
           "apps/ng-tag-build/src/assets"
         ],
-        "styles": ["@angular/material/prebuilt-themes/indigo-pink.css"],
+        "styles": [
+          "@angular/material/prebuilt-themes/indigo-pink.css",
+          "apps/ng-tag-build/src/styles.scss"
+        ],
         "scripts": []
       },
       "configurations": {

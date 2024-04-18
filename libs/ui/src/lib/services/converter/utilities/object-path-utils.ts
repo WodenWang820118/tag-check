@@ -1,4 +1,4 @@
-import { NestedObject } from '../../../interfaces/tag-build.interface';
+import { NestedObject } from '@utils';
 
 /**
  * A function to get all paths from the root to each leaf node in a nested object.

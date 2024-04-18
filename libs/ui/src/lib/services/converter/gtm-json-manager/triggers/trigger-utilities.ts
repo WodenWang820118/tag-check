@@ -1,7 +1,4 @@
-import {
-  Trigger,
-  TriggerConfig,
-} from '../../../../interfaces/tag-build.interface';
+import { Trigger, TriggerConfig } from '@utils';
 import { createVideoTrigger } from './video-trigger';
 import { createScrollTrigger } from './scroll-trigger';
 import { createTrigger } from './event-trigger';
