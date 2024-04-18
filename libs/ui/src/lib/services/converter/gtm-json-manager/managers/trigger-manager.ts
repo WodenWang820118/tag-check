@@ -1,4 +1,4 @@
-import { Trigger } from '../../../../interfaces/tag-build.interface';
+import { Trigger } from '@utils';
 import { isBuiltInEvent } from '../../utilities/event-utils';
 
 export class TriggerManager {

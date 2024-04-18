@@ -1,4 +1,4 @@
-import { TagConfig } from '../../../../interfaces/tag-build.interface';
+import { TagConfig } from '@utils';
 import {
   createBooleanParameter,
   createTemplateParameter,

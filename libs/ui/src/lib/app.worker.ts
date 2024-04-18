@@ -1,41 +1,41 @@
 /// <reference lib="webworker" />
 
-import { read, utils } from 'xlsx';
-import { DataRow } from './interfaces/tag-build.interface';
-
+// import { read, utils } from 'xlsx';
+import { DataRow } from '@utils';
+// TODO: refactor to use exceljs
 addEventListener('message', (event) => {
   const { cmd, action, data } = event.data;
   switch (action) {
     case 'readXlsx': {
-      const workbook = read(data, { type: 'array' });
-      const sheetNames = workbook.SheetNames;
-      const jsonData = utils.sheet_to_json(workbook.Sheets[sheetNames[0]], {
-        defval: '',
-      }); // default to first sheet
-      postMessage({
-        action: `${action}`,
-        workbook,
-        sheetNames,
-        jsonData,
-      });
+      // const workbook = read(data, { type: 'array' });
+      // const sheetNames = workbook.SheetNames;
+      // const jsonData = utils.sheet_to_json(workbook.Sheets[sheetNames[0]], {
+      //   defval: '',
+      // }); // default to first sheet
+      // postMessage({
+      //   action: `${action}`,
+      //   workbook,
+      //   sheetNames,
+      //   jsonData,
+      // });
       break;
     }
     case 'switchSheet': {
       const { data, name } = event.data;
-      const jsonData = getSheetData(data, name);
-      postMessage({ action: `${action}`, jsonData });
+      // const jsonData = getSheetData(data, name);
+      // postMessage({ action: `${action}`, jsonData });
       break;
     }
     case 'extractSpecs': {
       const { data, name } = event.data;
-      const jsonData = extractSpecs(data, name);
-      postMessage({ action: `${action}`, jsonData });
+      // const jsonData = extractSpecs(data, name);
+      // postMessage({ action: `${action}`, jsonData });
       break;
     }
     case 'previewData': {
       const { data, name } = event.data;
-      const jsonData = extractSpecs(data, name);
-      postMessage({ action: `${action}`, jsonData });
+      // const jsonData = extractSpecs(data, name);
+      // postMessage({ action: `${action}`, jsonData });
       break;
     }
     default: {
@@ -56,47 +56,47 @@ function getSheetData(workbook: any, sheetName: string): string[] {
   return [];
 }
 
-function extractSpecs(data: DataRow[], specTitle: string): DataRow[] {
-  let columnIndex: number | null = null;
+// function extractSpecs(data: DataRow[], specTitle: string): DataRow[] {
+//   let columnIndex: number | null = null;
 
-  for (const row of data) {
-    const foundIndexKey = Object.keys(row).findIndex(
-      (key) => key === specTitle
-    );
-    const foundIndex = Object.values(row).findIndex(
-      (value) => value === specTitle
-    );
+//   for (const row of data) {
+//     const foundIndexKey = Object.keys(row).findIndex(
+//       (key) => key === specTitle
+//     );
+//     const foundIndex = Object.values(row).findIndex(
+//       (value) => value === specTitle
+//     );
 
-    if (foundIndexKey !== -1) {
-      return extractSpecsByColumnIndex(data, foundIndexKey);
-    }
+//     if (foundIndexKey !== -1) {
+//       return extractSpecsByColumnIndex(data, foundIndexKey);
+//     }
 
-    if (foundIndex !== -1) {
-      columnIndex = foundIndex;
-      break;
-    }
-  }
+//     if (foundIndex !== -1) {
+//       columnIndex = foundIndex;
+//       break;
+//     }
+//   }
 
-  if (columnIndex === null) {
-    return [];
-  }
+//   if (columnIndex === null) {
+//     return [];
+//   }
 
-  return extractSpecsByColumnIndex(data, columnIndex);
-}
+//   return extractSpecsByColumnIndex(data, columnIndex);
+// }
 
-function extractSpecsByColumnIndex(
-  data: DataRow[],
-  columnIndex: number
-): DataRow[] {
-  const specs: DataRow[] = [];
+// function extractSpecsByColumnIndex(
+//   data: DataRow[],
+//   columnIndex: number
+// ): DataRow[] {
+//   const specs: DataRow[] = [];
 
-  for (const row of data) {
-    const key = Object.keys(row)[columnIndex];
-    const value = row[key];
-    if (value) {
-      specs.push({ [key]: value });
-    }
-  }
+//   for (const row of data) {
+//     const key = Object.keys(row)[columnIndex];
+//     const value = row[key];
+//     if (value) {
+//       specs.push({ [key]: value });
+//     }
+//   }
 
-  return specs;
-}
+//   return specs;
+// }

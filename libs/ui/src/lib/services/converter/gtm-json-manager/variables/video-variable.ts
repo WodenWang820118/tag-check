@@ -1,4 +1,4 @@
-import { VariableConfig } from '../../../../interfaces/tag-build.interface';
+import { VariableConfig } from '@utils';
 
 export function videoBuiltInVariable({
   accountId,

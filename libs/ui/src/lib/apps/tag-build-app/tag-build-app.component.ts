@@ -4,17 +4,19 @@ import { FunctionalCardComponent } from '../../components/functional-card/functi
 import { ArticleComponent } from '../../components/article/article.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { XlsxSidenavComponent } from '../../components/xlsx-sidenav/xlsx-sidenav.component';
-import { SharedModule } from '../../shared.module';
 import { FileUploadDialogComponent } from '../../components/file-upload-dialog/file-upload-dialog.component';
 import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UploadActionComponent } from '../../components/upload-action/upload-action.component';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { JsonPipe } from '@angular/common';
 
 @Component({
   selector: 'lib-tag-build-app',
   standalone: true,
   imports: [
-    SharedModule,
+    JsonPipe,
+    MatSidenavModule,
     EditorComponent,
     FunctionalCardComponent,
     ArticleComponent,
@@ -28,7 +30,7 @@ import { UploadActionComponent } from '../../components/upload-action/upload-act
   styleUrls: ['./tag-build-app.component.scss'],
 })
 export class TagBuildAppComponent {
-  exampleInputJson = ['Please input your JSON data here'];
+  exampleInputJson = [];
 
   constructor(private dialog: MatDialog) {}
   onUpload() {

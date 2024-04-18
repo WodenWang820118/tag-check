@@ -2,7 +2,6 @@
   <div class="main-page__title">
     <h1>Tag Build</h1>
   </div>
-
   <div class="main-page__board">
     <div class="main-page__board__item main-page__editor">
       <lib-editor
@@ -22,10 +21,13 @@
       <lib-editor [editorExtension]="'outputJson'" />
     </div>
   </div>
+  @defer (on viewport) {
   <mat-sidenav-container>
     <lib-xlsx-sidenav-form></lib-xlsx-sidenav-form>
   </mat-sidenav-container>
-  @defer (on viewport) {
+  } @placeholder {
+  <div></div>
+  } @defer (on viewport) {
   <div class="main-page__article">
     <lib-article />
   </div>
