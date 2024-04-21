@@ -32,6 +32,22 @@ export class WaiterReportController {
   }
 
   @ApiOperation({
+    summary: 'get report folder names',
+    description:
+      'Get all report folder names for a project. The project is identified by the projectSlug.',
+  })
+  @ApiParam({
+    name: 'projectSlug',
+    description: 'The name of the project to which the event belongs.',
+  })
+  @Get(':projectSlug/names')
+  async getProjectEventReportNames(@Param('projectSlug') projectSlug: string) {
+    return await this.waiterReportService.getProjectEventReportFolderNames(
+      projectSlug
+    );
+  }
+
+  @ApiOperation({
     summary: 'update project report',
     description:
       'Update a report for a project. The project is identified by the projectSlug. The report is identified by the eventName.',

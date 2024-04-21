@@ -50,6 +50,18 @@ export class WaiterRecordingService {
     }
   }
 
+  async getProjectRecordingNames(projectSlug: string) {
+    try {
+      const fileNames = this.folderService.getJsonFilesFromDir(
+        await this.folderPathService.getRecordingFolderPath(projectSlug)
+      );
+      return fileNames.map((fileName) => fileName.replace('.json', ''));
+    } catch (error) {
+      Logger.error(error.message, 'ProjectService.getProjectRecordings');
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   async getRecordingDetails(projectSlug: string, recordingId: string) {
     try {
       const content = await this.fileService.readJsonFile(

@@ -21,6 +21,12 @@ export class RecordingService {
     );
   }
 
+  getProjectRecordingNames(projectSlug: string) {
+    return this.http.get<string[]>(
+      `${environment.recordingApiUrl}/${projectSlug}/names`
+    );
+  }
+
   getRecordingDetails(projectSlug: string, eventId: string) {
     if (!eventId || !projectSlug) return of({} as ProjectRecording);
     return this.http.get<ProjectRecording>(
