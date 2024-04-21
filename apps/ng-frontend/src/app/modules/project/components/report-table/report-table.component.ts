@@ -58,7 +58,13 @@ import { ProjectFacadeService } from './../../../../shared/services/facade/proje
   styleUrls: ['./report-table.component.scss'],
 })
 export class ReportTableComponent implements AfterViewInit, OnDestroy {
-  columnsToDisplay = ['eventName', 'passed', 'requestPassed', 'completedTime'];
+  columnsToDisplay = [
+    'testName',
+    'eventName',
+    'passed',
+    'requestPassed',
+    'completedTime',
+  ];
   columnsToDisplayWithExpand = ['select', ...this.columnsToDisplay, 'expand'];
   expandedElement: Report | null = null;
   testDataSource!: MatTableDataSource<IReportDetails>;
@@ -149,13 +155,13 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
       );
   }
 
-  runTest(eventName: string) {
+  runTest(eventId: string) {
     this.route.params
       .pipe(
         take(1),
         tap((params: Params) => {
           this.testRunningFacadeService.runTest(
-            eventName,
+            eventId,
             params['projectSlug'],
             this.testDataSource
           );

@@ -1,22 +1,26 @@
 import { XlsxReportSingleEventService } from './../os/xlsx-report/xlsx-report-single-event.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
-import { OutputValidationResult, getCurrentTimestamp } from '@utils';
+import {
+  OutputValidationResult,
+  extractEventNameFromId,
+  getCurrentTimestamp,
+} from '@utils';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
-import { AbstractDatalayerReportService } from '../os/abstract-datalayer-report/abstract-datalayer-report.service';
+import { AbstractReportService } from '../os/abstract-report/abstract-report.service';
 @Injectable()
 export class PipelineService {
   constructor(
     private inspectorSingleEventService: InspectorSingleEventService,
     private xlsxReportSingleEventService: XlsxReportSingleEventService,
-    private abstractDatalayerReportService: AbstractDatalayerReportService
+    private abstractReportService: AbstractReportService
   ) {}
 
   async singleEventInspectionRecipe(
     page: Page,
     projectName: string,
-    testName: string,
+    eventId: string,
     headless: string,
     measurementId?: string,
     credentials?: Credentials,
@@ -26,7 +30,7 @@ export class PipelineService {
       const result = await this.inspectorSingleEventService.inspectDataLayer(
         page,
         projectName,
-        testName,
+        eventId,
         headless,
         measurementId,
         credentials,
@@ -48,15 +52,17 @@ export class PipelineService {
 
       const timestamp = getCurrentTimestamp();
       await this.xlsxReportSingleEventService.writeXlsxFile(
-        `QA_report_single_${testName}_${timestamp}.xlsx`,
+        `QA_report_single_${eventId}_${timestamp}.xlsx`,
         'Sheet1',
         data,
-        testName,
+        eventId,
         projectName
       );
 
+      const eventName = extractEventNameFromId(eventId);
+
       const outputValidationResult: OutputValidationResult = {
-        eventName: testName,
+        eventName: eventName,
         passed: result.dataLayerResult.passed,
         requestPassed: result.requestCheckResult.passed,
         rawRequest: result.rawRequest,
@@ -69,9 +75,9 @@ export class PipelineService {
         completedTime: new Date(),
       };
 
-      await this.abstractDatalayerReportService.writeSingleAbstractTestResultJson(
+      await this.abstractReportService.writeSingleAbstractTestResultJson(
         projectName,
-        testName,
+        eventId,
         outputValidationResult
       );
       return data;

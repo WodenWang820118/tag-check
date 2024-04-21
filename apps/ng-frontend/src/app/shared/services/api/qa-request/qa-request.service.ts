@@ -11,7 +11,7 @@ export class QaRequestService {
 
   runDataLayerWithRequestCheck(
     projectSlug: string,
-    eventName: string,
+    eventId: string,
     measurementId: string,
     headless?: boolean,
     eventInspectionPreset?: EventInspectionPreset,
@@ -25,7 +25,7 @@ export class QaRequestService {
     if (password) queryParams.push(`password=${password}`);
     const queryString = queryParams.length ? '?' + queryParams.join('&') : '';
     return this.http.post(
-      `${environment.dataLayerApiUrl}/${projectSlug}/${eventName}${queryString}`,
+      `${environment.dataLayerApiUrl}/${projectSlug}/${eventId}${queryString}`,
       eventInspectionPreset
     );
   }

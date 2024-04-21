@@ -48,6 +48,7 @@ export class InspectorGroupEventsService {
       const operationBatch = operations.slice(i, i + concurrency);
 
       const batchPromises = operationBatch.map(async (operation) => {
+        // TODO: Refactor this to use a eventId instead of a testName
         const testName = operation.replace('.json', '');
         try {
           const page = await incognitoContext.newPage();

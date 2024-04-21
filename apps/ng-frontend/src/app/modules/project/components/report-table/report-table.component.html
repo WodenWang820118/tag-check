@@ -20,21 +20,25 @@
         </mat-checkbox>
       </td>
     </ng-container>
-    <ng-container matColumnDef="eventName">
-      <th mat-header-cell *matHeaderCellDef>Event</th>
+    <ng-container matColumnDef="testName">
+      <th mat-header-cell *matHeaderCellDef>Test Name</th>
       <td mat-cell *matCellDef="let element">
         <a
           style="text-decoration: none"
-          [routerLink]="['./', element.eventName]"
-          (click)="dataSourceFacadeService.setReportDetails(element.eventName)"
+          [routerLink]="['./', element.eventId]"
+          (click)="dataSourceFacadeService.setReportDetails(element.eventId)"
           matBadge="bookmark_border"
-          [matBadgeHidden]="
-            !preventNavigationEvents.includes(element.eventName)
-          "
+          [matBadgeHidden]="!preventNavigationEvents.includes(element.eventId)"
           matBadgeOverlap="false"
         >
-          {{ element.eventName }}
+          {{ element.testName }}
         </a>
+      </td>
+    </ng-container>
+    <ng-container matColumnDef="eventName">
+      <th mat-header-cell *matHeaderCellDef>Event</th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.eventName }}
       </td>
     </ng-container>
 
@@ -94,7 +98,7 @@
         </button> -->
         @if ((testRunningFacadeService.isRunningTest$ | async) &&
         (testRunningFacadeService.eventRunningTest$ | async) ===
-        element.eventName) {
+        element.eventId) {
         <mat-progress-spinner
           class="spinner"
           color="primary"
@@ -106,7 +110,7 @@
         <button
           mat-icon-button
           aria-label="run test"
-          (click)="runTest(element.eventName); $event.stopPropagation()"
+          (click)="runTest(element.eventId); $event.stopPropagation()"
         >
           <mat-icon>play_arrow</mat-icon>
         </button>

@@ -11,7 +11,7 @@ export class DataLayerService {
 
   runDataLayerInspection(
     projectSlug: string,
-    eventName: string,
+    eventId: string,
     headless?: boolean,
     eventInspectionPreset?: EventInspectionPreset,
     username?: string,
@@ -24,7 +24,7 @@ export class DataLayerService {
     const queryString = queryParams.length ? '?' + queryParams.join('&') : '';
 
     return this.http.post(
-      `${environment.dataLayerApiUrl}/${projectSlug}/${eventName}${queryString}`,
+      `${environment.dataLayerApiUrl}/${projectSlug}/${eventId}${queryString}`,
       eventInspectionPreset
     );
   }

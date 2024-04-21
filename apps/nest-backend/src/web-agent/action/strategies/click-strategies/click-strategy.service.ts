@@ -13,7 +13,7 @@ export class ClickStrategyService {
   async clickElement(
     page: Page,
     projectName: string,
-    title: string,
+    eventId: string,
     selector: string,
     selectorType: string,
     useNormalClick: boolean,
@@ -25,7 +25,7 @@ export class ClickStrategyService {
         return await this.attemptClick(
           page,
           projectName,
-          title,
+          eventId,
           selector,
           selectorType,
           this.pageClickService.operate,
@@ -35,7 +35,7 @@ export class ClickStrategyService {
         return await this.attemptClick(
           page,
           projectName,
-          title,
+          eventId,
           selector,
           selectorType,
           this.evaluateClickService.operate,
@@ -53,13 +53,13 @@ export class ClickStrategyService {
   async attemptClick(
     page: Page,
     projectName: string,
-    title: string,
+    eventId: string,
     selector: string,
     selectorType: string,
     clickMethod: (
       page: Page,
       projectName: string,
-      title: string,
+      eventId: string,
       selector: string,
       selectorType: string,
       timeout: number
@@ -75,7 +75,7 @@ export class ClickStrategyService {
       serviceInstance,
       page,
       projectName,
-      title,
+      eventId,
       selector,
       selectorType,
       timeout
@@ -94,7 +94,7 @@ export class ClickStrategyService {
           : this.pageClickService,
         page,
         projectName,
-        title,
+        eventId,
         selector,
         selectorType,
         timeout

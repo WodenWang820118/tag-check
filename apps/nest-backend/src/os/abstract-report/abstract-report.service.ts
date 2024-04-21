@@ -1,14 +1,14 @@
 import { FolderService } from '../folder/folder.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { OutputValidationResult } from '@utils';
+import { IReportDetails, OutputValidationResult } from '@utils';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
-import { existsSync, mkdir, statSync, writeFileSync } from 'fs';
+import { existsSync, mkdir, statSync } from 'fs';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 import { FileService } from '../file/file.service';
 
 @Injectable()
-export class AbstractDatalayerReportService {
+export class AbstractReportService {
   constructor(
     private folderPathService: FolderPathService,
     private folderService: FolderService,
@@ -18,24 +18,25 @@ export class AbstractDatalayerReportService {
 
   async writeSingleAbstractTestResultJson(
     projectSlug: string,
-    eventName: string,
+    eventId: string,
     data: OutputValidationResult
   ) {
     try {
       const folderPath =
         await this.folderPathService.getInspectionEventFolderPath(
           projectSlug,
-          eventName
+          `${eventId}`
         );
 
       const abstractPath =
         await this.filePathService.getInspectionResultFilePath(
           projectSlug,
-          eventName,
+          `${eventId}`,
           ABSTRACT_REPORT_FILE_NAME
         );
+
       if (!existsSync(folderPath)) {
-        mkdir(folderPath, { recursive: true }, (err) => {
+        mkdir(`${folderPath}`, { recursive: true }, (err) => {
           if (err) {
             Logger.error(
               err.message,
@@ -47,9 +48,14 @@ export class AbstractDatalayerReportService {
             );
           }
         });
+        this.fileService.writeJsonFile(abstractPath, data);
+      } else {
+        const report = this.fileService.readJsonFile(
+          abstractPath
+        ) as IReportDetails;
+        const updatedReport = { ...report, ...data };
+        this.fileService.writeJsonFile(abstractPath, updatedReport);
       }
-
-      writeFileSync(abstractPath, JSON.stringify(data, null, 2));
     } catch (error) {
       Logger.error(
         error.message,
@@ -84,7 +90,8 @@ export class AbstractDatalayerReportService {
               name,
               ABSTRACT_REPORT_FILE_NAME
             );
-          writeFileSync(abstractFilePath, JSON.stringify(data, null, 2));
+          // writeFileSync(abstractFilePath, JSON.stringify(data, null, 2));
+          this.fileService.writeJsonFile(abstractFilePath, dataPiece);
         }
       }
     }
@@ -92,13 +99,13 @@ export class AbstractDatalayerReportService {
 
   async deleteSingleAbstractTestResultFolder(
     projectSlug: string,
-    eventName: string
+    eventId: string
   ) {
     try {
       const folderPath =
         await this.folderPathService.getInspectionEventFolderPath(
           projectSlug,
-          eventName
+          eventId
         );
 
       if (!existsSync(folderPath)) {

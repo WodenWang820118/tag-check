@@ -11,7 +11,7 @@ export class GtmOperatorService {
 
   runInspectionViaGtm(
     projectSlug: string,
-    eventName: string,
+    eventId: string,
     gtmUrl: string,
     headless?: boolean,
     eventInspectionPreset?: EventInspectionPreset,
@@ -30,7 +30,7 @@ export class GtmOperatorService {
     const queryString = queryParams.join('&');
 
     return this.http.post(
-      `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventName}?${queryString}`,
+      `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventId}?${queryString}`,
       eventInspectionPreset
     );
   }

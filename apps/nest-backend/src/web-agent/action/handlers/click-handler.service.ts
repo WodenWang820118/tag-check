@@ -7,6 +7,7 @@ import { ProjectService } from '../../../os/project/project.service';
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
 import { FilePathService } from '../../../os/path/file-path/file-path.service';
 import { FileService } from '../../../os/file/file.service';
+import { extractEventNameFromId } from '@utils';
 @Injectable()
 export class ClickHandler implements ActionHandler {
   constructor(
@@ -20,7 +21,7 @@ export class ClickHandler implements ActionHandler {
   async handle(
     page: Page,
     projectName: string,
-    title: string,
+    eventId: string,
     step: any,
     isLastStep: boolean
   ): Promise<void> {
@@ -42,7 +43,7 @@ export class ClickHandler implements ActionHandler {
       // } catch (error) {
       //   Logger.error(error.mssage, 'Utilities.scrollIntoViewIfNeeded');
       // }
-
+      const title = extractEventNameFromId(eventId);
       if (
         step.type === 'click' &&
         preventNavigationEvents.includes(title) &&
@@ -54,7 +55,7 @@ export class ClickHandler implements ActionHandler {
         await this.clickElement(
           page,
           projectName,
-          title,
+          eventId,
           getFirstSelector(selector),
           5000,
           preventNavigation
@@ -77,14 +78,14 @@ export class ClickHandler implements ActionHandler {
   async clickElement(
     page: Page,
     projectName: string,
-    title: string,
+    eventId: string,
     selector: string,
     timeout = 3000,
     preventNavigation: boolean
   ): Promise<boolean> {
     const operationPath = await this.filePathService.getOperationFilePath(
       projectName,
-      title
+      eventId
     );
 
     const domain = new URL(
@@ -115,7 +116,7 @@ export class ClickHandler implements ActionHandler {
       return await this.clickStrategyService.clickElement(
         page,
         projectName,
-        title,
+        eventId,
         selector,
         getSelectorType(selector),
         useNormalClick,

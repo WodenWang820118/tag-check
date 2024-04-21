@@ -30,8 +30,11 @@ export class ProjectFacadeService {
   }
 
   // TODO: Big O(n^2) - can be optimized
+  // TODO: need to consider the case where there are multiple recordings for the same event
   initializeRecordingStatus(specs: Spec[], recordings: Recording[]) {
     this.hasRecordingMap.clear();
+    console.log('specs', specs);
+    console.log('recordings', recordings);
     specs.forEach((spec) => {
       this.hasRecordingMap.set(
         spec.event,
@@ -40,6 +43,7 @@ export class ProjectFacadeService {
     });
   }
 
+  // TODO: need to consider the case where there are multiple recordings for the same event
   hasRecording(eventName: string): boolean {
     return this.hasRecordingMap.get(eventName) || false;
   }

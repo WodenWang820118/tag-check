@@ -11,6 +11,7 @@ export * from './lib/interfaces/tag-build.interface';
 
 // DTOs
 export * from './lib/dtos/event-inspect-preset.dto';
+export * from './lib/dtos/report-details.dto';
 
 // Functions
 export * from './lib/functions/utils';

@@ -10,7 +10,7 @@ export class WebAgentService {
   async executeAndGetDataLayer(
     page: Page,
     projectName: string,
-    testName: string,
+    eventId: string,
     credentials?: Credentials,
     application?: EventInspectionPresetDto['application']
   ) {
@@ -18,7 +18,7 @@ export class WebAgentService {
       await this.webAgentUtilsService.performTest(
         page,
         projectName,
-        testName,
+        eventId,
         false,
         null,
         credentials,

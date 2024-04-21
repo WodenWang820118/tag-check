@@ -7,7 +7,7 @@ export class PageChangeService implements ChangeOperation {
   async operate(
     page: Page,
     projectName: string,
-    title: string,
+    eventId: string,
     selector: string,
     selectorType: string,
     value?: string,
