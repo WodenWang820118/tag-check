@@ -58,14 +58,8 @@ export class WaiterRecordingService {
           `${recordingId}.json`
         )
       );
-      // TODO: to align the usage with the json-server's mock backend
-      // but there might be a better way to do this
-      return [
-        {
-          projecSlug: projectSlug,
-          recordings: [content] || [],
-        },
-      ];
+
+      return content;
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
@@ -76,14 +70,14 @@ export class WaiterRecordingService {
     }
   }
 
-  async addRecording(projectSlug: string, eventName: string, recording: any) {
+  async addRecording(projectSlug: string, eventId: string, recording: any) {
     try {
       const recordingPath = await this.filePathService.getRecordingFilePath(
         projectSlug,
-        `${eventName}.json`
+        `${eventId}.json`
       );
 
-      await this.fileService.writeJsonFile(recordingPath, recording.data);
+      this.fileService.writeJsonFile(recordingPath, recording.data);
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;

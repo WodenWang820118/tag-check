@@ -30,7 +30,7 @@ const routes: Routes = [
         component: NewReportViewComponent,
       },
       {
-        path: ':eventName',
+        path: ':eventId',
         component: DetailViewComponent,
       },
     ],

@@ -30,29 +30,29 @@ export class WaiterRecordingController {
     description: 'The name of the project to which the event belongs.',
   })
   @ApiParam({
-    name: 'eventName',
+    name: 'eventId',
     description: 'The name of the event to which the recording belongs.',
   })
-  @Get(':projectSlug/:eventName')
+  @Get(':projectSlug/:eventId')
   async getRecordingDetails(
     @Param('projectSlug') projectSlug: string,
-    @Param('eventName') eventName: string
+    @Param('eventId') eventId: string
   ) {
     return await this.waiterRecordingService.getRecordingDetails(
       projectSlug,
-      eventName
+      eventId
     );
   }
 
-  @Post(':projectSlug/:eventName')
+  @Post(':projectSlug/:eventId')
   async addRecording(
     @Param('projectSlug') projectSlug: string,
-    @Param('eventName') eventName: string,
+    @Param('eventId') eventId: string,
     @Body() recording: any
   ) {
     return await this.waiterRecordingService.addRecording(
       projectSlug,
-      eventName,
+      eventId,
       recording
     );
   }

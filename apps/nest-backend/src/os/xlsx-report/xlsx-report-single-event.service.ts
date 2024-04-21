@@ -3,10 +3,14 @@ import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { readFileSync } from 'fs';
 import path from 'path';
 import * as ExcelJS from 'exceljs';
+import { FilePathService } from '../path/file-path/file-path.service';
 
 @Injectable()
 export class XlsxReportSingleEventService {
-  constructor(private folderPathService: FolderPathService) {}
+  constructor(
+    private folderPathService: FolderPathService,
+    private filePathService: FilePathService
+  ) {}
   async writeXlsxFile(
     fileName: string,
     sheetName: string,
@@ -23,7 +27,7 @@ export class XlsxReportSingleEventService {
           rawRequest: any;
           destinationUrl: any;
         },
-    testName?: string,
+    eventId: string,
     projectName?: string
   ) {
     try {
@@ -32,7 +36,7 @@ export class XlsxReportSingleEventService {
       const eventSavingFolder =
         await this.folderPathService.getInspectionEventFolderPath(
           projectName,
-          testName
+          eventId
         );
       worksheet.columns = [
         { header: 'DataLayer Result', key: 'dataLayerResult', width: 50 },
@@ -41,9 +45,12 @@ export class XlsxReportSingleEventService {
         { header: 'Destination URL', key: 'destinationUrl', width: 50 },
       ];
       // single test
-      if (testName) {
+      if (eventId) {
         try {
-          const file = path.join(eventSavingFolder, `${testName}.png`);
+          const file = await this.filePathService.getImageFilePath(
+            projectName,
+            eventId
+          );
           const imageId = workbook.addImage({
             buffer: readFileSync(file),
             extension: 'png',

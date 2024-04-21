@@ -32,9 +32,14 @@ export class DataSourceFacadeService {
         const slug = params['projectSlug'];
         return this.reportService.getProjectReports(slug).pipe(
           map((project) => {
+            const injectReports = project.reports.sort((a, b) => {
+              if (a.eventName < b.eventName) return -1;
+              if (a.eventName > b.eventName) return 1;
+              return 0;
+            });
             if (project) {
               const testDataSource = this.initializeDataSource(
-                project.reports,
+                injectReports,
                 paginator,
                 sort
               );
@@ -121,7 +126,7 @@ export class DataSourceFacadeService {
     return testDataSource;
   }
 
-  setReportDetails(eventName: string) {
+  setReportDetails(eventId: string) {
     this.route.params
       .pipe(
         switchMap((params) => {
@@ -130,9 +135,7 @@ export class DataSourceFacadeService {
             tap((project) => {
               if (project) {
                 const reports = project.reports;
-                const report = reports.find(
-                  (item) => item.eventName === eventName
-                );
+                const report = reports.find((item) => item.eventId === eventId);
                 this.reportDetailsService.setReportDetails(report);
               }
             })

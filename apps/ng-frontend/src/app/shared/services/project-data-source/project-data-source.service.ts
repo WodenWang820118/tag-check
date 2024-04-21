@@ -1,5 +1,5 @@
 import { DataSource } from '@angular/cdk/collections';
-import { IReportDetails } from '../../../../../../../libs/utils/src/lib/interfaces/report.interface';
+import { IReportDetails } from '@utils';
 import { Observable, ReplaySubject } from 'rxjs';
 import { Injectable } from '@angular/core';
 

@@ -2,13 +2,13 @@ import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Body, Controller, Logger, Param, Post, Query } from '@nestjs/common';
 import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
 import { ValidationResult, EventInspectionPresetDto } from '@utils';
-import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
+import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
 
 @Controller('datalayer')
 export class WaiterGtmOperatorController {
   constructor(
     private waiterGtmOperatorService: WaiterGtmOperatorService,
-    private abstractDatalayerRerportService: AbstractDatalayerReportService
+    private abstractRerportService: AbstractReportService
   ) {}
 
   @ApiOperation({
@@ -76,7 +76,7 @@ export class WaiterGtmOperatorController {
     Logger.log(results, 'waiter.inspectSingleEventViaGtm');
 
     const abstractReport =
-      await this.abstractDatalayerRerportService.getSingleAbstractTestResultJson(
+      await this.abstractRerportService.getSingleAbstractTestResultJson(
         projectSlug,
         eventName
       );

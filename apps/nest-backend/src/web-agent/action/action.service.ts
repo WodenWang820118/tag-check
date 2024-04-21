@@ -8,6 +8,8 @@ import { ClickHandler } from './handlers/click-handler.service';
 import { ChangeHandler } from './handlers/change-handler.service';
 import { HoverHandler } from './handlers/hover-handler.service';
 import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
+import { FileService } from '../../os/file/file.service';
+import { FilePathService } from '../../os/path/file-path/file-path.service';
 
 @Injectable()
 export class ActionService {
@@ -18,7 +20,9 @@ export class ActionService {
     private changeHandler: ChangeHandler,
     private clickHandler: ClickHandler,
     private hoverHandler: HoverHandler,
-    private requestInterceptor: RequestInterceptor
+    private requestInterceptor: RequestInterceptor,
+    private fileService: FileService,
+    private filePathService: FilePathService
   ) {
     this.stepExecutor = new StepExecutor(
       {
@@ -33,16 +37,15 @@ export class ActionService {
   async performOperation(
     page: Page,
     projectName: string,
-    operation: any,
+    eventId: string,
     application?: EventInspectionPresetDto['application']
   ) {
+    const operation = await this.fileService.readJsonFile(
+      await this.filePathService.getOperationFilePath(projectName, eventId)
+    );
     if (!operation || !operation.steps) return;
 
-    await this.requestInterceptor.setupInterception(
-      page,
-      projectName,
-      operation
-    );
+    await this.requestInterceptor.setupInterception(page, projectName, eventId);
     let isLastStep = false;
     for (let i = 0; i < operation.steps.length; i++) {
       const step = operation.steps[i];
@@ -62,7 +65,7 @@ export class ActionService {
         page,
         step,
         projectName,
-        operation.title,
+        eventId,
         state,
         isLastStep,
         application

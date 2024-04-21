@@ -1,41 +1,27 @@
 import { HttpException, Injectable, Logger } from '@nestjs/common';
-import { FileService } from '../os/file/file.service';
-import { FilePathService } from '../os/path/file-path/file-path.service';
-import { ProjectInitializationService } from '../os/project-initialization/project-initialization.service';
 import { ActionService } from './action/action.service';
 import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
 import { Page, Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
+import { extractEventNameFromId } from '@utils';
 
 @Injectable()
 export class WebAgentUtilsService {
   constructor(
     private actionService: ActionService,
-    private dataLayerService: DataLayerService,
-    private fileService: FileService,
-    private filePathService: FilePathService,
-    private projectInitializationService: ProjectInitializationService
+    private dataLayerService: DataLayerService
   ) {}
 
   async performTest(
     page: Page,
     projectName: string,
-    testName: string,
+    eventId: string,
     captureRequest?: boolean,
     measurementId?: string,
     credentials?: Credentials,
     application?: EventInspectionPresetDto['application']
   ) {
-    // 1) gather all necessary data and initialize the test
-    await this.projectInitializationService.initInspectionEventSavingFolder(
-      projectName,
-      testName
-    );
-    await this.dataLayerService.initSelfDataLayer(projectName, testName);
-
-    const operation = await this.fileService.readJsonFile(
-      await this.filePathService.getOperationFilePath(projectName, testName)
-    );
+    await this.dataLayerService.initSelfDataLayer(projectName, eventId);
 
     if (credentials) {
       await page.authenticate({
@@ -45,13 +31,13 @@ export class WebAgentUtilsService {
     }
 
     let eventRequest: string = null;
-
+    const eventName = extractEventNameFromId(eventId);
     // 2) capture the request if needed
     if (captureRequest) {
       Logger.log('capturing request', 'WebAgentUtils.performTest');
       page.on('request', (interceptedRequest) => {
         if (
-          interceptedRequest.url().includes(`en=${testName}`) &&
+          interceptedRequest.url().includes(`en=${eventName}`) &&
           interceptedRequest.url().includes(`tid=${measurementId}`)
         ) {
           Logger.log(
@@ -74,7 +60,7 @@ export class WebAgentUtilsService {
       await this.actionService.performOperation(
         page,
         projectName,
-        operation,
+        eventId,
         application
       );
       // await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -89,11 +75,11 @@ export class WebAgentUtilsService {
       await this.dataLayerService.updateSelfDataLayer(
         page,
         projectName,
-        testName
+        eventId
       );
       const dataLayer = await this.dataLayerService.getMyDataLayer(
         projectName,
-        testName
+        eventId
       );
 
       const destinationUrl = page.url();

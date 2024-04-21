@@ -23,7 +23,7 @@ export class StepExecutor {
     page: Page,
     step: any,
     projectName: string,
-    testName: string,
+    eventId: string,
     state: any,
     isLastStep: boolean,
     application?: EventInspectionPresetDto['application']
@@ -51,7 +51,7 @@ export class StepExecutor {
         await handleKeyboardAction(
           page,
           projectName,
-          testName,
+          eventId,
           isLastStep,
           randomDelay
         );
@@ -62,7 +62,7 @@ export class StepExecutor {
             page,
             step,
             projectName,
-            testName,
+            eventId,
             isLastStep,
             randomDelay
           );
@@ -77,7 +77,7 @@ export class StepExecutor {
     page: Page,
     step: any,
     projectName: string,
-    testName: string,
+    eventId: string,
     isLastStep: boolean,
     delay: number
   ) {
@@ -85,15 +85,11 @@ export class StepExecutor {
     await this.handlers[step.type].handle(
       page,
       projectName,
-      testName,
+      eventId,
       step,
       isLastStep
     );
     await handleNavigationIfNeeded(page, isLastStep);
-    await this.dataLayerService.updateSelfDataLayer(
-      page,
-      projectName,
-      testName
-    );
+    await this.dataLayerService.updateSelfDataLayer(page, projectName, eventId);
   }
 }

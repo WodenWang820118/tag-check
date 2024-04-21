@@ -1,4 +1,4 @@
-import { Injectable, Logger, HttpException } from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { FolderPathService } from '../folder-path/folder-path.service';
 import {
@@ -9,7 +9,9 @@ import {
   META_DATA,
 } from '../../../configs/project.config';
 import path from 'path';
-
+import { extractEventNameFromId } from '@utils';
+import { existsSync } from 'fs';
+// TODO: if it is needed to catch the path not found error or let it be thrown in the upper level?
 @Injectable()
 export class FilePathService {
   constructor(
@@ -17,12 +19,12 @@ export class FilePathService {
     private folderPathService: FolderPathService
   ) {}
 
-  async getOperationFilePath(projectSlug: string, testName: string) {
+  async getOperationFilePath(projectSlug: string, eventId: string) {
     try {
       const filePath = await this.pathUtilsService.buildFilePath(
         projectSlug,
         RECORDING_FOLDER,
-        `${testName}.json`
+        `${eventId}.json`
       );
       return filePath;
     } catch (error) {
@@ -81,12 +83,12 @@ export class FilePathService {
     }
   }
 
-  async getCacheFilePath(projectSlug: string, operation: string) {
+  async getCacheFilePath(projectSlug: string, eventId: string) {
     try {
       return path.join(
         await this.folderPathService.getReportSavingFolderPath(projectSlug),
-        operation.replace('.json', ''),
-        `${operation.replace('.json', '')} - result cache.json`
+        eventId,
+        `${extractEventNameFromId(eventId)} - result cache.json`
       );
     } catch (error) {
       Logger.error(error.message, 'FilePathService.getCacheFilePath');
@@ -94,13 +96,16 @@ export class FilePathService {
     }
   }
 
-  async getImageFilePath(projectSlug: string, testName: string) {
+  async getImageFilePath(projectSlug: string, eventId: string) {
     try {
       const imageSavingFolder = path.join(
         await this.folderPathService.getReportSavingFolderPath(projectSlug),
-        testName
+        eventId
       );
-      return path.join(imageSavingFolder, `${testName}.png`);
+      return path.join(
+        imageSavingFolder,
+        `${extractEventNameFromId(eventId)}.png`
+      );
     } catch (error) {
       Logger.error(error.message, 'FilePathService.getImagePath');
       throw new HttpException(error.message, 500);
@@ -109,13 +114,13 @@ export class FilePathService {
 
   async getInspectionResultFilePath(
     projectSlug: string,
-    eventName: string,
+    eventId: string,
     fileName: string
   ) {
     try {
       return path.join(
         await this.folderPathService.getInspectionResultFolderPath(projectSlug),
-        eventName,
+        eventId,
         fileName
       );
     } catch (error) {
@@ -127,16 +132,35 @@ export class FilePathService {
     }
   }
 
-  async getRecordingFilePath(projectSlug: string, testName: string) {
-    try {
-      return await this.pathUtilsService.buildFilePath(
-        projectSlug,
-        RECORDING_FOLDER,
-        testName
+  async getRecordingFilePath(projectSlug: string, eventId: string) {
+    const recordingPath = await this.pathUtilsService.buildFilePath(
+      projectSlug,
+      RECORDING_FOLDER,
+      eventId
+    );
+
+    return recordingPath;
+  }
+
+  async getMyDataLayerFilePath(projectSlug: string, eventId: string) {
+    const resultFolder = await this.folderPathService.getReportSavingFolderPath(
+      projectSlug
+    );
+
+    const eventName = extractEventNameFromId(eventId);
+    const myDataLayerFile = path.join(
+      resultFolder,
+      eventId,
+      `${eventName} - myDataLayer.json`
+    );
+
+    if (!existsSync(myDataLayerFile)) {
+      throw new HttpException(
+        'My data layer file does not exist',
+        HttpStatus.NOT_FOUND
       );
-    } catch (error) {
-      Logger.error(error.message, 'FolderPathService.getRecordingFilePath');
-      throw new HttpException(error.message, 500);
     }
+
+    return myDataLayerFile;
   }
 }

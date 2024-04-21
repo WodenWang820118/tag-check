@@ -13,7 +13,7 @@ export class HoverStrategyService {
   async hoverElement(
     page: Page,
     projectName: string,
-    title: string,
+    eventId: string,
     selector: string,
     selectorType: string,
     timeout = 10000
@@ -22,7 +22,7 @@ export class HoverStrategyService {
       return await this.attemptHover(
         page,
         projectName,
-        title,
+        eventId,
         selector,
         selectorType,
         this.pageHoverService.operate,
@@ -39,13 +39,13 @@ export class HoverStrategyService {
   async attemptHover(
     page: Page,
     projectName: string,
-    title: string,
+    eventId: string,
     selector: string,
     selectorType: string,
     hoverMethod: (
       page: Page,
       projectName: string,
-      title: string,
+      eventId: string,
       selector: string,
       selectorType: string,
       timeout: number
@@ -63,7 +63,7 @@ export class HoverStrategyService {
       serviceInstance,
       page,
       projectName,
-      title,
+      eventId,
       selector,
       selectorType,
       timeout
@@ -82,7 +82,7 @@ export class HoverStrategyService {
           : this.pageHoverService,
         page,
         projectName,
-        title,
+        eventId,
         selector,
         selectorType,
         timeout

@@ -7,7 +7,7 @@ export class PageClickService implements ClickOperation {
   async operate(
     page: Page,
     projectName: string,
-    title: string,
+    eventId: string,
     selector: string,
     selectorType: string,
     timeout = 5000

@@ -3,8 +3,8 @@ import { FileService } from '../../os/file/file.service';
 import { FolderService } from '../../os/folder/folder.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
-import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
-import { OutputValidationResult } from '@utils';
+import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
+import { IReportDetails } from '@utils';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class WaiterReportService {
     private filePathService: FilePathService,
     private folderService: FolderService,
     private folderPathService: FolderPathService,
-    private abstractDatalayerReportService: AbstractDatalayerReportService
+    private abstractReportService: AbstractReportService
   ) {}
 
   async getProjectEventReports(projectSlug: string) {
@@ -51,20 +51,22 @@ export class WaiterReportService {
 
   async buildEventReport(
     projectSlug: string,
-    eventName: string,
+    folderName: string,
     fileName: string
   ) {
     try {
       const filePath = await this.filePathService.getInspectionResultFilePath(
         projectSlug,
-        eventName,
+        folderName,
         fileName
       );
 
-      const report: OutputValidationResult =
-        this.fileService.readJsonFile(filePath);
+      const report: IReportDetails = this.fileService.readJsonFile(filePath);
 
-      return report;
+      return {
+        ...report,
+        eventId: folderName,
+      };
     } catch (error) {
       Logger.log(error.message, 'WaiterReportService.buildReport');
       throw new HttpException(
@@ -74,19 +76,26 @@ export class WaiterReportService {
     }
   }
 
-  // TODO: haven't been tested
-  async updateReport(projectSlug: string, report: any) {
-    await this.abstractDatalayerReportService.writeSingleAbstractTestResultJson(
+  async updateReport(
+    projectSlug: string,
+    eventId: string,
+    report: IReportDetails
+  ) {
+    await this.abstractReportService.writeSingleAbstractTestResultJson(
       projectSlug,
-      report.eventName,
+      eventId,
       report
     );
   }
 
-  async addReport(projectSlug: string, report: any) {
-    await this.abstractDatalayerReportService.writeSingleAbstractTestResultJson(
+  async addReport(
+    projectSlug: string,
+    eventId: string,
+    report: IReportDetails
+  ) {
+    await this.abstractReportService.writeSingleAbstractTestResultJson(
       projectSlug,
-      report.eventName,
+      eventId,
       report
     );
   }
@@ -95,10 +104,10 @@ export class WaiterReportService {
     return await this.fileService.getEventReport(projectSlug, eventName);
   }
 
-  async deleteReport(projectSlug: string, eventName: string) {
-    await this.abstractDatalayerReportService.deleteSingleAbstractTestResultFolder(
+  async deleteReport(projectSlug: string, eventId: string) {
+    await this.abstractReportService.deleteSingleAbstractTestResultFolder(
       projectSlug,
-      eventName
+      eventId
     );
   }
 }

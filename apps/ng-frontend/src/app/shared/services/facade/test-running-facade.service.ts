@@ -28,7 +28,7 @@ export class TestRunningFacadeService {
   ) {}
 
   runTest(
-    eventName: string,
+    eventId: string,
     projectSlug: string,
     testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
   ) {
@@ -41,7 +41,7 @@ export class TestRunningFacadeService {
           const inspectEventDto = new EventInspectionPresetDto(project);
           // change the play button to a spinner
           this.isRunningTestSubject.next(true);
-          this.eventRunningTestSubject.next(eventName);
+          this.eventRunningTestSubject.next(eventId);
 
           if (
             project.settings.gtm.isAccompanyMode ||
@@ -53,7 +53,7 @@ export class TestRunningFacadeService {
               : undefined;
             return this.gtmOperatorService.runInspectionViaGtm(
               projectSlug,
-              eventName,
+              eventId,
               project.settings.gtm.gtmPreviewModeUrl,
               headless,
               inspectEventDto,
@@ -66,7 +66,7 @@ export class TestRunningFacadeService {
           if (project.settings.gtm.isRequestCheck) {
             return this.qaRequestService.runDataLayerWithRequestCheck(
               projectSlug,
-              eventName,
+              eventId,
               project.settings.measurementId,
               headless,
               inspectEventDto,
@@ -77,7 +77,7 @@ export class TestRunningFacadeService {
 
           return this.dataLayerService.runDataLayerInspection(
             projectSlug,
-            eventName,
+            eventId,
             headless,
             inspectEventDto,
             project.settings.authentication.username,
