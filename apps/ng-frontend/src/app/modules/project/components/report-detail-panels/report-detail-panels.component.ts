@@ -17,7 +17,7 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { IReportDetails } from '../../../../../../../../libs/utils/src/lib/interfaces/report.interface';
+import { extractEventNameFromId, IReportDetails } from '@utils';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -75,20 +75,20 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
     const projectSlug$ =
       this.route.parent?.params.pipe(map((params) => params['projectSlug'])) ||
       of('');
-    const eventName$ = this.route.params.pipe(
-      map((params) => params['eventName'])
-    );
+    const eventId$ = this.route.params.pipe(map((params) => params['eventId']));
 
     // Combine projectSlug and eventName streams for use in spec$ and recording$ initializations
-    combineLatest([projectSlug$, eventName$])
+    combineLatest([projectSlug$, eventId$])
       .pipe(
         takeUntil(this.destroy$),
-        tap(([projectSlug, eventName]) => {
-          if (projectSlug && eventName) {
+        tap(([projectSlug, eventId]) => {
+          if (projectSlug && eventId) {
+            // extract the eventName from the route params with regex
+            const eventName = extractEventNameFromId(eventId);
             this.spec$ = this.specService.getSpec(projectSlug, eventName);
             this.recording$ = this.recordingService.getRecordingDetails(
               projectSlug,
-              eventName
+              eventId
             );
           }
         })
@@ -186,15 +186,15 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
     ])
       .pipe(
         takeUntil(this.destroy$),
-        map(([parentParams, parames, recordingEditor]) => {
+        map(([parentParams, params, recordingEditor]) => {
           const projectSlug = parentParams['projectSlug'];
-          const eventName = parames['eventName'];
+          const eventId = params['eventId'];
           const recordingContent = recordingEditor.state.doc.toString();
 
           if (parentParams && projectSlug) {
             return {
               projectSlug,
-              eventName,
+              eventId,
               recordingContent,
             };
           } else {
@@ -208,11 +208,11 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
             );
           }
         }),
-        mergeMap(({ projectSlug, eventName, recordingContent }) => {
+        mergeMap(({ projectSlug, eventId, recordingContent }) => {
           this.editorService.setContent('recordingJson', recordingContent);
           return this.recordingService.addRecording(
             projectSlug,
-            eventName,
+            eventId,
             recordingContent
           );
         })

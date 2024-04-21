@@ -26,10 +26,10 @@ import { ProjectDataSourceService } from '../../../../shared/services/project-da
 import { EditorComponent } from '../../../../shared/components/editor/editor.component';
 import { EditorService } from '../../../../shared/services/editor/editor.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
-import { ReportDetails } from './report-details';
-import { IReportDetails } from '@utils';
+import { ReportDetailsDto, IReportDetails } from '@utils';
 import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { v4 as uuidv4 } from 'uuid';
 
 @Component({
   selector: 'app-new-report-view',
@@ -58,6 +58,7 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
 
   reportForm = this.fb.group({
     projectSlug: ['', Validators.required],
+    testName: ['', Validators.required],
   });
 
   private destroy$ = new Subject<void>();
@@ -141,16 +142,30 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         map(([specEditor, recordingEditor]) => {
+          if (
+            !this.reportForm.controls['testName'].value ||
+            !this.reportForm.controls['projectSlug'].value
+          )
+            return {} as any;
+
           const specContent = specEditor.state.doc.toString();
           const recordingContent = recordingEditor.state.doc.toString();
-          const projectSlug = this.reportForm.get('projectSlug')?.value;
+          const projectSlug = this.reportForm.controls['projectSlug'].value;
+          const testName = this.reportForm.controls['testName'].value;
+          const eventId = uuidv4();
 
           if (specContent && projectSlug) {
-            const eventName = JSON.parse(specContent).event;
-            const reportDetails: IReportDetails = new ReportDetails(eventName);
+            const eventName = JSON.parse(specContent).event as string;
+
+            const reportDetails: IReportDetails = new ReportDetailsDto(
+              eventId,
+              testName,
+              eventName
+            );
 
             return {
               projectSlug,
+              eventId,
               eventName,
               specContent,
               recordingContent,
@@ -168,17 +183,22 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
         mergeMap(
           ({
             projectSlug,
+            eventId,
             eventName,
             specContent,
             recordingContent,
             reportDetails,
           }) =>
             forkJoin([
-              this.reportService.addReport(projectSlug, reportDetails),
+              this.reportService.addReport(
+                projectSlug,
+                `${eventName}_${eventId}`,
+                reportDetails
+              ),
               this.recordingService.addRecording(
                 projectSlug,
-                eventName,
-                recordingContent
+                `${eventName}_${eventId}`,
+                recordingContent as string
               ),
               this.specService.addSpec(projectSlug, specContent),
             ]).pipe(

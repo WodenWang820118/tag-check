@@ -14,7 +14,7 @@ export class ChangeHandler implements ActionHandler {
   async handle(
     page: Page,
     projectName: string,
-    title: string,
+    eventId: string,
     step: any,
     isLastStep: boolean,
     timeout = 3000
@@ -28,7 +28,7 @@ export class ChangeHandler implements ActionHandler {
           await this.changeElement(
             page,
             projectName,
-            title,
+            eventId,
             getFirstSelector(selector),
             value,
             timeout
@@ -48,7 +48,7 @@ export class ChangeHandler implements ActionHandler {
   async changeElement(
     page: Page,
     projectName: string,
-    title: string,
+    eventId: string,
     selector: string,
     value: string,
     timeout?: number
@@ -57,7 +57,7 @@ export class ChangeHandler implements ActionHandler {
       return await this.changeStrategyService.changeElement(
         page,
         projectName,
-        title,
+        eventId,
         selector,
         getSelectorType(selector),
         value,

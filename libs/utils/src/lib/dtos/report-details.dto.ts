@@ -1,7 +1,12 @@
-import { BaseDataLayerEvent, StrictDataLayerEvent } from '@utils';
+import {
+  BaseDataLayerEvent,
+  StrictDataLayerEvent,
+} from '../interfaces/data-layer.interface';
 
-export class ReportDetails {
+export class ReportDetailsDto {
   position = 0;
+  eventId: string;
+  testName: string;
   eventName: string;
   passed = false;
   requestPassed = false;
@@ -12,8 +17,11 @@ export class ReportDetails {
   reformedDataLayer = {} as BaseDataLayerEvent | StrictDataLayerEvent;
   rawRequest = '';
   message = '';
+  destinationUrl = '';
 
-  constructor(eventName: string) {
+  constructor(eventId: string, testName: string, eventName: string) {
+    this.eventId = eventId;
+    this.testName = testName;
     this.eventName = eventName;
   }
 }

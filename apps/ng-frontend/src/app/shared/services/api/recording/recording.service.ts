@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Subject, map, of } from 'rxjs';
+import { BehaviorSubject, Subject, of } from 'rxjs';
 import { ProjectRecording } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
@@ -21,32 +21,21 @@ export class RecordingService {
     );
   }
 
-  getRecordingDetails(projectSlug: string, eventName: string) {
-    if (!eventName || !projectSlug) return of({} as ProjectRecording);
-    return this.http
-      .get<ProjectRecording>(`${environment.recordingApiUrl}/${projectSlug}`)
-      .pipe(
-        map((projectRecordings: ProjectRecording) => {
-          if (projectRecordings) {
-            for (const recording of projectRecordings.recordings) {
-              if (recording.title === eventName) {
-                return recording;
-              }
-            }
-          }
-          return {} as ProjectRecording;
-        })
-      );
+  getRecordingDetails(projectSlug: string, eventId: string) {
+    if (!eventId || !projectSlug) return of({} as ProjectRecording);
+    return this.http.get<ProjectRecording>(
+      `${environment.recordingApiUrl}/${projectSlug}/${eventId}`
+    );
   }
 
-  addRecording(projectSlug: string, eventName: string, content: string) {
+  addRecording(projectSlug: string, eventId: string, content: string) {
     const jsonContent = JSON.parse(content);
     console.log('Project Slug', projectSlug);
-    console.log('Event Name', eventName);
+    console.log('Event Id', eventId);
     console.log('Recording', jsonContent);
 
     return this.http.post(
-      `${environment.recordingApiUrl}/${projectSlug}/${eventName}`,
+      `${environment.recordingApiUrl}/${projectSlug}/${eventId}`,
       {
         data: jsonContent,
       }

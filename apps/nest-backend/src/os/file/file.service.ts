@@ -11,9 +11,6 @@ import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { join } from 'path';
 
-/**
- * Service responsible for file operations such as reading JSON files, retrieving file paths, and handling reports.
- */
 @Injectable()
 export class FileService {
   constructor(
@@ -81,14 +78,14 @@ export class FileService {
     }
   }
 
-  async writeJsonFile(filePath: string, content: any) {
+  writeJsonFile(filePath: string, content: any) {
     writeFileSync(filePath, JSON.stringify(content, null, 2));
   }
 
-  async writeCacheFile(projectSlug: string, operation: string, data: any) {
+  async writeCacheFile(projectSlug: string, eventId: string, data: any) {
     const cachePath = await this.filePathService.getCacheFilePath(
       projectSlug,
-      operation
+      eventId
     );
     this.writeJsonFile(cachePath, data);
   }

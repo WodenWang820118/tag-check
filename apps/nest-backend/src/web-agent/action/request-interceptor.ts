@@ -1,12 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
+import { extractEventNameFromId } from '@utils';
 
 @Injectable()
 export class RequestInterceptor {
   constructor(private dataLayerService: DataLayerService) {}
 
-  async setupInterception(page: Page, projectName: string, operation: any) {
+  async setupInterception(page: Page, projectName: string, eventId: string) {
     // Logic for setting request interception and handling requests
     await page.setRequestInterception(true);
     page.on('request', async (request) => {
@@ -27,7 +28,7 @@ export class RequestInterceptor {
         this.dataLayerService.updateSelfDataLayerAlgorithm(
           latestDataLayer,
           projectName,
-          operation.title
+          extractEventNameFromId(eventId)
         );
         await request.continue();
       } else {

@@ -9,7 +9,7 @@ export class WaiterDataLayerSingleEventService {
 
   async inspectSingleEvent(
     projectName: string,
-    testName: string,
+    eventId: string,
     headless: string,
     measurementId?: string,
     credentials?: Credentials,
@@ -28,7 +28,7 @@ export class WaiterDataLayerSingleEventService {
     return this.pipelineService.singleEventInspectionRecipe(
       page,
       projectName,
-      testName,
+      eventId,
       headless,
       measurementId,
       credentials,
