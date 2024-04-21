@@ -21,6 +21,22 @@ export class WaiterRecordingController {
   }
 
   @ApiOperation({
+    summary: 'get project recording names',
+    description:
+      'Get all recording names for a project. The project is identified by the projectSlug.',
+  })
+  @ApiParam({
+    name: 'projectSlug',
+    description: 'The name of the project to which the event belongs.',
+  })
+  @Get(':projectSlug/names')
+  async getProjectRecordingNames(@Param('projectSlug') projectSlug: string) {
+    return await this.waiterRecordingService.getProjectRecordingNames(
+      projectSlug
+    );
+  }
+
+  @ApiOperation({
     summary: 'get specific recording details',
     description:
       'Get the details of a specific recording. The project is identified by the projectSlug and the recording by the eventName.',

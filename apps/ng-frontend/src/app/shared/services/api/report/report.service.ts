@@ -26,6 +26,12 @@ export class ReportService {
     );
   }
 
+  getProjectReportNames(projectSlug: string) {
+    return this.http.get<string[]>(
+      `${environment.reportApiUrl}/${projectSlug}/names`
+    );
+  }
+
   updateReport(projectSlug: string, report: ProjectReport) {
     if (!projectSlug || !report) return of({} as ProjectReport);
     return this.http.put<ProjectReport>(
