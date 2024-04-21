@@ -70,6 +70,7 @@
     "@types/jest": "^29.4.0",
     "@types/multer": "^1.4.11",
     "@types/node": "18.16.9",
+    "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "6.9.1",
     "@typescript-eslint/parser": "6.9.1",
     "cross-env": "^7.0.3",
@@ -131,7 +132,8 @@
     "sqlite3": "^5.1.6",
     "tslib": "^2.3.0",
     "unzipper": "^0.10.14",
-    "zone.js": "~0.14.3",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz"
+    "uuid": "^9.0.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz",
+    "zone.js": "~0.14.3"
   }
 }

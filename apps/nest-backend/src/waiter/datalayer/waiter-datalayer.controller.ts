@@ -15,14 +15,14 @@ import {
 import { WaiterDataLayerSingleEventService } from './waiter-datalayer-single-event.service';
 import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 import { ValidationResult } from '@utils';
-import { AbstractDatalayerReportService } from '../../os/abstract-datalayer-report/abstract-datalayer-report.service';
+import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
 
 @Controller('datalayer')
 export class WaiterDataLayerController {
   constructor(
     private waiterDataLayerGroupEventsService: WaiterDataLayerGroupEventsService,
     private waiterDataLayerSingleEventService: WaiterDataLayerSingleEventService,
-    private abstractDatalayerReportService: AbstractDatalayerReportService
+    private abstractReportService: AbstractReportService
   ) {}
 
   @ApiOperation({
@@ -36,8 +36,8 @@ export class WaiterDataLayerController {
     description: 'The name of the project to which the event belongs.',
   })
   @ApiParam({
-    name: 'eventName',
-    description: 'The name of the test associated with the event.',
+    name: 'eventId',
+    description: 'The event Id of the test associated with the event.',
   })
   @ApiQuery({
     name: 'headless',
@@ -60,10 +60,10 @@ export class WaiterDataLayerController {
     description: 'Optional password for authentication purposes.',
   })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
-  @Post('/:projectSlug/:eventName')
+  @Post('/:projectSlug/:eventId')
   async inspectSingleEvent(
     @Param('projectSlug') projectSlug: string,
-    @Param('eventName') eventName: string,
+    @Param('eventId') eventId: string,
     @Query('headless') headless: string,
     @Query('measurementId') measurementId?: string,
     @Query('username') username?: string,
@@ -78,7 +78,7 @@ export class WaiterDataLayerController {
         destinationUrl: string;
       }[] = await this.waiterDataLayerSingleEventService.inspectSingleEvent(
         projectSlug,
-        eventName,
+        eventId,
         headless,
         measurementId,
         {
@@ -90,9 +90,9 @@ export class WaiterDataLayerController {
       Logger.log(results, 'waiter.inspectSingleEvent');
 
       const abstractReport =
-        await this.abstractDatalayerReportService.getSingleAbstractTestResultJson(
+        await this.abstractReportService.getSingleAbstractTestResultJson(
           projectSlug,
-          eventName
+          eventId
         );
       return [abstractReport];
     } catch (error) {

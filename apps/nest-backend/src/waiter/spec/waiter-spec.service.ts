@@ -34,16 +34,30 @@ export class WaiterSpecService {
     };
   }
 
-  async addSpec(projectSlug: string, spec: any) {
+  async addSpec(
+    projectSlug: string,
+    spec: { event: string; [key: string]: any }
+  ) {
     try {
-      const allSpecs = [
-        ...(await this.fileService.readJsonFile(
-          await this.filePathService.getProjectConfigFilePath(projectSlug)
-        )),
-        spec.data,
-      ];
+      // check if the spec already exists
+      const specs = await this.fileService.readJsonFile(
+        await this.filePathService.getProjectConfigFilePath(projectSlug)
+      );
 
-      await this.fileService.writeJsonFile(
+      const existingSpec = specs.find(
+        (s: { event: string }) => s.event === spec.data.event
+      );
+
+      if (existingSpec) {
+        return {
+          projectSlug: projectSlug,
+          specs: specs,
+        };
+      }
+
+      const allSpecs = [...specs, spec.data];
+
+      this.fileService.writeJsonFile(
         await this.filePathService.getProjectConfigFilePath(projectSlug),
         allSpecs
       );
@@ -58,13 +72,17 @@ export class WaiterSpecService {
     }
   }
 
-  async updateSpec(projectSlug: string, eventName: string, spec: any) {
+  async updateSpec(
+    projectSlug: string,
+    eventName: string,
+    spec: { event: string; [key: string]: any }
+  ) {
     try {
       const allSpecs = await this.fileService.readJsonFile(
         await this.filePathService.getProjectConfigFilePath(projectSlug)
       );
 
-      const updatedSpecs = allSpecs.map((s: any) => {
+      const updatedSpecs = allSpecs.map((s: { event: string }) => {
         if (s.event === eventName) {
           return spec.data;
         }

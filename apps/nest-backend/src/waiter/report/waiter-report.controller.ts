@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { WaiterReportService } from './waiter-report.service';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { IReportDetails } from '@utils';
 
 @Controller('reports')
 export class WaiterReportController {
@@ -30,7 +31,6 @@ export class WaiterReportController {
     return await this.waiterReportService.getProjectEventReports(projectSlug);
   }
 
-  // TODO: haven't been tested
   @ApiOperation({
     summary: 'update project report',
     description:
@@ -40,17 +40,26 @@ export class WaiterReportController {
     name: 'projectSlug',
     description: 'The name of the project to which the event belongs.',
   })
+  @ApiParam({
+    name: 'eventId',
+    description: 'The name of the test associated with the event.',
+  })
   @ApiBody({
     description: 'The report to be updated.',
     type: Object,
   })
-  @Put(':projectSlug')
+  @Put(':projectSlug/:eventId')
   async updateReport(
     @Param('projectSlug') projectSlug: string,
-    @Body() report: any
+    @Param('eventId') eventId: string,
+    @Body() report: IReportDetails
   ) {
     Logger.log('updateReport', report);
-    return await this.waiterReportService.updateReport(projectSlug, report);
+    return await this.waiterReportService.updateReport(
+      projectSlug,
+      eventId,
+      report
+    );
   }
 
   @ApiOperation({
@@ -62,16 +71,26 @@ export class WaiterReportController {
     name: 'projectSlug',
     description: 'The name of the project to which the event belongs.',
   })
+  @ApiParam({
+    name: 'eventId',
+    description: 'The name of the test associated with the event.',
+  })
   @ApiBody({
     description: 'The report to be added.',
     type: Object,
   })
-  @Post(':projectSlug')
+  @Post(':projectSlug/:eventId')
   async addReport(
     @Param('projectSlug') projectSlug: string,
-    @Body() report: any
+    @Param('eventId') eventId: string,
+    @Body() report: IReportDetails
   ) {
-    return await this.waiterReportService.addReport(projectSlug, report);
+    Logger.log(eventId, 'eventId');
+    return await this.waiterReportService.addReport(
+      projectSlug,
+      eventId,
+      report
+    );
   }
 
   @ApiOperation({
@@ -115,14 +134,14 @@ export class WaiterReportController {
     description: 'The name of the project to which the event belongs.',
   })
   @ApiParam({
-    name: 'eventName',
+    name: 'eventId',
     description: 'The name of the test associated with the event.',
   })
-  @Delete(':projectSlug/:eventName')
+  @Delete(':projectSlug/:eventId')
   async deleteReport(
     @Param('projectSlug') projectSlug: string,
-    @Param('eventName') report: any
+    @Param('eventId') eventId: string
   ) {
-    return await this.waiterReportService.deleteReport(projectSlug, report);
+    return await this.waiterReportService.deleteReport(projectSlug, eventId);
   }
 }

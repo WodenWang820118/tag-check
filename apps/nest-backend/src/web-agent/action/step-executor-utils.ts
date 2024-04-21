@@ -7,12 +7,12 @@ import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto'
 export async function handleKeyboardAction(
   page: Page,
   projectName: string,
-  testName: string,
+  eventId: string,
   isLastStep: boolean,
   delay: number
 ) {
   await this.handleNavigationIfNeeded(page, isLastStep, delay);
-  await this.dataLayerService.updateSelfDataLayer(page, projectName, testName);
+  await this.dataLayerService.updateSelfDataLayer(page, projectName, eventId);
 }
 
 export async function handleNavigationIfNeeded(

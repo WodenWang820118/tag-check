@@ -89,11 +89,11 @@ export class ProjectInitializationService {
     }
   }
 
-  async initInspectionEventSavingFolder(projectName: string, testName: string) {
+  async initInspectionEventSavingFolder(projectName: string, eventId: string) {
     const eventFolder =
       await this.folderPathService.getInspectionEventFolderPath(
         projectName,
-        testName
+        eventId
       );
     this.folderService.createFolder(eventFolder);
   }

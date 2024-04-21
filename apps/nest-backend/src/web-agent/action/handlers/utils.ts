@@ -4,7 +4,7 @@ export interface ActionHandler {
   handle(
     page: Page,
     projectName: string,
-    title: string,
+    eventId: string,
     step: any,
     isLastStep: boolean
   ): Promise<void>;

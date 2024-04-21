@@ -34,9 +34,13 @@ export class ReportService {
     );
   }
 
-  addReport(projectSlug: string, reportDetails: IReportDetails) {
+  addReport(
+    projectSlug: string,
+    eventId: string,
+    reportDetails: IReportDetails
+  ) {
     return this.http.post<ProjectReport>(
-      `${environment.reportApiUrl}/${projectSlug}`,
+      `${environment.reportApiUrl}/${projectSlug}/${eventId}`,
       reportDetails
     );
   }
@@ -81,7 +85,7 @@ export class ReportService {
   deleteReports(projectSlug: string, reports: IReportDetails[]) {
     const tasks = reports.map((report) =>
       this.http.delete<ProjectReport>(
-        `${environment.reportApiUrl}/${projectSlug}/${report.eventName}`
+        `${environment.reportApiUrl}/${projectSlug}/${report.eventId}`
       )
     );
     return forkJoin(tasks); // Waits for all DELETE operations to complete.
