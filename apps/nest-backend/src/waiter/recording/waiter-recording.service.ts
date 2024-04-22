@@ -4,6 +4,7 @@ import { FolderPathService } from '../../os/path/folder-path/folder-path.service
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { RecordingDto } from '../../dto/recording.dto';
+import { Recording } from '@utils';
 
 @Injectable()
 export class WaiterRecordingService {
@@ -82,19 +83,44 @@ export class WaiterRecordingService {
     }
   }
 
-  async addRecording(projectSlug: string, eventId: string, recording: any) {
+  async addRecording(
+    projectSlug: string,
+    eventId: string,
+    recording: Recording
+  ) {
     try {
       const recordingPath = await this.filePathService.getRecordingFilePath(
         projectSlug,
         `${eventId}.json`
       );
 
-      this.fileService.writeJsonFile(recordingPath, recording.data);
+      this.fileService.writeJsonFile(recordingPath, recording);
     } catch (error) {
       if (error instanceof HttpException) {
         throw error;
       }
       Logger.error(error.message, 'WaiterRecordingService.addRecording');
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async updateRecording(
+    projectSlug: string,
+    eventId: string,
+    recording: Recording
+  ) {
+    try {
+      const recordingPath = await this.filePathService.getRecordingFilePath(
+        projectSlug,
+        `${eventId}.json`
+      );
+
+      this.fileService.writeJsonFile(recordingPath, recording);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      Logger.error(error.message, 'WaiterRecordingService.updateRecording');
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

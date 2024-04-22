@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Subject, of } from 'rxjs';
-import { ProjectRecording } from '@utils';
+import { ProjectRecording, Recording } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
@@ -28,9 +28,18 @@ export class RecordingService {
   }
 
   getRecordingDetails(projectSlug: string, eventId: string) {
-    if (!eventId || !projectSlug) return of({} as ProjectRecording);
-    return this.http.get<ProjectRecording>(
+    if (!eventId || !projectSlug) return of({} as Recording);
+    return this.http.get<Recording>(
       `${environment.recordingApiUrl}/${projectSlug}/${eventId}`
+    );
+  }
+
+  updateRecording(projectSlug: string, eventId: string, recording: string) {
+    const jsonRecording = JSON.parse(recording);
+    if (!eventId || !projectSlug || !recording) return of({} as Recording);
+    return this.http.put<Recording>(
+      `${environment.recordingApiUrl}/${projectSlug}/${eventId}`,
+      jsonRecording
     );
   }
 
@@ -40,11 +49,9 @@ export class RecordingService {
     console.log('Event Id', eventId);
     console.log('Recording', jsonContent);
 
-    return this.http.post(
+    return this.http.post<Recording>(
       `${environment.recordingApiUrl}/${projectSlug}/${eventId}`,
-      {
-        data: jsonContent,
-      }
+      jsonContent
     );
   }
 }

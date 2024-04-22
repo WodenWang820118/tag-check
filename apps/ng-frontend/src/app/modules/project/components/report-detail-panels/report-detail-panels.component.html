@@ -66,13 +66,22 @@
         </mat-panel-description>
       </mat-expansion-panel-header>
       <mat-panel-description>
-        @if (recordingEditMode) {
+        @if(recordingEditMode && (this.reportService.fileContent$ | async) !==
+        null) {
+        <!-- upload condition -->
+        <app-editor
+          [editorExtension]="'recordingJson'"
+          [content]="this.reportService.fileContent$ | async | json"
+        ></app-editor>
+        } @else if (recordingEditMode) {
+        <!-- pure editting -->
         <app-editor
           [editorExtension]="'recordingJson'"
           [content]="recording$ | async | json"
           [editMode]="true"
         ></app-editor>
         } @else {
+        <!-- otherwise, showing the info -->
         <pre class="json">{{ recording$ | async | json }}</pre>
         }
       </mat-panel-description>

@@ -28,10 +28,7 @@ export class WaiterSpecService {
     const spec = allSpecs.find(
       (spec: { event: string }) => spec.event === eventName
     );
-    return {
-      projectSlug: projectSlug,
-      specs: [spec],
-    };
+    return spec;
   }
 
   async addSpec(

@@ -14,10 +14,16 @@ import {
   map,
   mergeMap,
   of,
+  take,
   takeUntil,
   tap,
 } from 'rxjs';
-import { extractEventNameFromId, IReportDetails } from '@utils';
+import {
+  extractEventNameFromId,
+  IReportDetails,
+  Recording,
+  Spec,
+} from '@utils';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -50,8 +56,8 @@ import { Dialog } from '@angular/cdk/dialog';
 export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
   @Input() eventName!: string | undefined;
   @Input() reportDetails$!: Observable<IReportDetails | undefined>;
-  recording$!: Observable<any>;
-  spec$!: Observable<any>;
+  recording$!: Observable<Recording>;
+  spec$!: Observable<Spec>;
   destroy$ = new Subject<void>();
   specEdit = false;
   recordingEdit = false;
@@ -61,7 +67,7 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
   constructor(
     private recordingService: RecordingService,
     private specService: SpecService,
-    private reportService: ReportService,
+    public reportService: ReportService,
     private route: ActivatedRoute,
     private editorService: EditorService,
     private dialog: Dialog
@@ -124,7 +130,7 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
 
       this.reportService.fileContent$
         .pipe(
-          takeUntil(this.destroy$),
+          take(1),
           tap((data) => {
             if (data) {
               this.editorService.setContent(
@@ -145,7 +151,7 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
       this.editorService.editor$.specJsonEditor,
     ])
       .pipe(
-        takeUntil(this.destroy$),
+        take(1),
         map(([parentParams, params, specEditor]) => {
           const specContent = specEditor.state.doc.toString();
           const eventName = params['eventName'];
@@ -185,7 +191,7 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
       this.editorService.editor$.recordingJsonEditor,
     ])
       .pipe(
-        takeUntil(this.destroy$),
+        take(1),
         map(([parentParams, params, recordingEditor]) => {
           const projectSlug = parentParams['projectSlug'];
           const eventId = params['eventId'];
@@ -210,7 +216,7 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
         }),
         mergeMap(({ projectSlug, eventId, recordingContent }) => {
           this.editorService.setContent('recordingJson', recordingContent);
-          return this.recordingService.addRecording(
+          return this.recordingService.updateRecording(
             projectSlug,
             eventId,
             recordingContent
