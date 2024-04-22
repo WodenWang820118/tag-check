@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Subject, map } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { ProjectSpec, Spec } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
@@ -24,13 +24,9 @@ export class SpecService {
   }
 
   getSpec(projectSlug: string, eventName: string) {
-    return this.http
-      .get<ProjectSpec>(`${environment.specApiUrl}/${projectSlug}`)
-      .pipe(
-        map((project) => {
-          return project.specs.find((spec) => spec.event === eventName);
-        })
-      );
+    return this.http.get<Spec>(
+      `${environment.specApiUrl}/${projectSlug}/${eventName}`
+    );
   }
 
   addSpec(projectSlug: string, content: string) {

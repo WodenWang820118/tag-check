@@ -2,9 +2,8 @@ import { Injectable } from '@angular/core';
 import { combineLatest, map, switchMap, tap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { SettingsService } from '../api/settings/settings.service';
-import { SpecService } from '../api/spec/spec.service';
-import { Spec, Recording } from '@utils';
 import { RecordingService } from '../api/recording/recording.service';
+import { ReportService } from '../api/report/report.service';
 
 @Injectable({
   providedIn: 'root',
@@ -14,38 +13,36 @@ export class ProjectFacadeService {
   constructor(
     private route: ActivatedRoute,
     private settingsService: SettingsService,
-    private specsService: SpecService,
+    private reportService: ReportService,
     private recordingService: RecordingService
   ) {}
 
   observeProjectRecordingStatus(projectSlug: string) {
     return combineLatest([
-      this.specsService.getProjectSpec(projectSlug),
-      this.recordingService.getProjectRecordings(projectSlug),
+      this.reportService.getProjectReportNames(projectSlug),
+      this.recordingService.getProjectRecordingNames(projectSlug),
     ]).pipe(
-      tap(([specs, recordings]) => {
-        this.initializeRecordingStatus(specs.specs, recordings.recordings);
+      tap(([reportNames, recordingNames]) => {
+        this.initializeRecordingStatus(reportNames, recordingNames);
       })
     );
   }
 
   // TODO: Big O(n^2) - can be optimized
-  // TODO: need to consider the case where there are multiple recordings for the same event
-  initializeRecordingStatus(specs: Spec[], recordings: Recording[]) {
+  initializeRecordingStatus(reportNames: string[], recordingNames: string[]) {
     this.hasRecordingMap.clear();
-    console.log('specs', specs);
-    console.log('recordings', recordings);
-    specs.forEach((spec) => {
+    // console.log('reports', reportNames);
+    // console.log('recordings', recordingNames);
+    reportNames.forEach((reportName) => {
       this.hasRecordingMap.set(
-        spec.event,
-        recordings.some((r) => r.title === spec.event)
+        reportName,
+        recordingNames.some((recordingName) => recordingName === reportName)
       );
     });
   }
 
-  // TODO: need to consider the case where there are multiple recordings for the same event
-  hasRecording(eventName: string): boolean {
-    return this.hasRecordingMap.get(eventName) || false;
+  hasRecording(eventId: string): boolean {
+    return this.hasRecordingMap.get(eventId) || false;
   }
 
   observeNavigationEvents() {

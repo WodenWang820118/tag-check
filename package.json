@@ -19,7 +19,7 @@
     "ng-tag-build": "nx serve ng-tag-build",
     "prod-ng-frontend": "nx serve ng-frontend --prod",
     "prod-ng-tag-build": "nx serve ng-tag-build --prod",
-    "build-ng-frontend": "nx build ng-frontend --configuration production --base-href ./",
+    "build-ng-frontend": "nx build ng-frontend --configuration production --optimization --base-href ./",
     "bundle-ng-frontend-report": "nx build ng-frontend --configuration production --source-map && source-map-explorer dist/apps/ng-frontend/browser/*.js",
     "build-ng-tag-build": "nx build ng-tag-build --configuration production --optimization",
     "bundle-ng-tag-build-report": "nx build ng-tag-build --configuration production --source-map && source-map-explorer dist/apps/ng-tag-build/browser/*.js",

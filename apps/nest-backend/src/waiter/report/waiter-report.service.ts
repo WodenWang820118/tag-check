@@ -20,7 +20,7 @@ export class WaiterReportService {
   async getProjectEventReports(projectSlug: string) {
     try {
       const reportsPromise = (
-        await this.getEventReportFolderNames(projectSlug)
+        await this.getProjectEventReportFolderNames(projectSlug)
       ).map(async (folderName) => {
         return await this.buildEventReport(
           projectSlug,
@@ -43,7 +43,7 @@ export class WaiterReportService {
     }
   }
 
-  async getEventReportFolderNames(projectSlug: string) {
+  async getProjectEventReportFolderNames(projectSlug: string) {
     return this.folderService.readFolderFileNames(
       await this.folderPathService.getInspectionResultFolderPath(projectSlug)
     );
