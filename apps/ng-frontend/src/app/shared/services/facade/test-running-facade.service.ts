@@ -90,7 +90,7 @@ export class TestRunningFacadeService {
         // update the report details
         const updatedEvent: IReportDetails = (res as any)[0];
         testDataSource.data = testDataSource.data.map((item) => {
-          if (item.eventName === updatedEvent.eventName) {
+          if (item.eventId === updatedEvent.eventId) {
             return updatedEvent;
           }
           return item;
