@@ -106,7 +106,7 @@
           diameter="30"
         >
         </mat-progress-spinner>
-        } @else { @if (projectFacadeService.hasRecording(element.eventName)) {
+        } @else { @if (projectFacadeService.hasRecording(element.eventId)) {
         <button
           mat-icon-button
           aria-label="run test"
@@ -118,8 +118,8 @@
         <button
           mat-icon-button
           aria-label="add recording"
-          [routerLink]="['./', element.eventName]"
-          (click)="dataSourceFacadeService.setReportDetails(element.eventName)"
+          [routerLink]="['./', element.eventId]"
+          (click)="dataSourceFacadeService.setReportDetails(element.eventId)"
           matTooltipPosition="above"
           matTooltip="Please add recording to run test"
         >
