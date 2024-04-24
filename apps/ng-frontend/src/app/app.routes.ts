@@ -7,7 +7,7 @@ export const appRoutes: Route[] = [
       import('./modules/entry/entry.module').then((m) => m.EntryModule),
   },
   {
-    path: 'help-center',
+    path: 'topics',
     loadChildren: () =>
       import('./modules/help-center/help-center.module').then(
         (m) => m.HelpCenterModule
