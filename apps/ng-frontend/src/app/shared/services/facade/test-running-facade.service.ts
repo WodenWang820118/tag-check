@@ -9,9 +9,7 @@ import { ProjectDataSourceService } from '../project-data-source/project-data-so
 import { QaRequestService } from '../api/qa-request/qa-request.service';
 import { SettingsService } from '../api/settings/settings.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class TestRunningFacadeService {
   isRunningTestSubject = new BehaviorSubject<boolean>(false);
   eventRunningTestSubject = new BehaviorSubject<string>('');
