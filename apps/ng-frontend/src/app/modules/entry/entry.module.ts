@@ -5,7 +5,7 @@ import { EntryComponent } from './entry.component';
 import { HomeViewComponent } from './views/home-view/home-view.component';
 import { InitProjectViewComponent } from './views/init-project-view/init-project-view.component';
 
-const routes: Routes = [
+const ENTRY_ROUTES: Routes = [
   {
     path: 'init-project',
     component: InitProjectViewComponent,
@@ -17,7 +17,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [EntryComponent, CommonModule, RouterModule.forChild(routes)],
+  imports: [EntryComponent, CommonModule, RouterModule.forChild(ENTRY_ROUTES)],
   exports: [RouterModule],
 })
 export class EntryModule {}

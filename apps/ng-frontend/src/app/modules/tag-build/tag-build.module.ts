@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { TagBuildViewComponent } from './views/tag-build-view.component';
 import { RouterModule, Routes } from '@angular/router';
 
-const routes: Routes = [
+const TAG_BUILD_ROUTES: Routes = [
   {
     path: '',
     component: TagBuildViewComponent,
@@ -11,7 +11,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [CommonModule, RouterModule.forChild(routes)],
+  imports: [CommonModule, RouterModule.forChild(TAG_BUILD_ROUTES)],
   exports: [RouterModule],
 })
 export class TagBuildModule {}

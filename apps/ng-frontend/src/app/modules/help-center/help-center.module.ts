@@ -5,7 +5,7 @@ import { HelpCenterComponent } from './views/help-center-view.component';
 import { MainContentComponent } from './components/main-content/main-content.component';
 import { MarkdownModule } from 'ngx-markdown';
 
-const routes: Routes = [
+const HELP_CENTER_ROUTES: Routes = [
   {
     path: '',
     component: HelpCenterComponent,
@@ -21,7 +21,7 @@ const routes: Routes = [
 @NgModule({
   imports: [
     CommonModule,
-    RouterModule.forChild(routes),
+    RouterModule.forChild(HELP_CENTER_ROUTES),
     MarkdownModule.forRoot(),
   ],
   exports: [RouterModule],

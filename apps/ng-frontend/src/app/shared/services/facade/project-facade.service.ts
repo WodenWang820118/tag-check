@@ -5,9 +5,7 @@ import { SettingsService } from '../api/settings/settings.service';
 import { RecordingService } from '../api/recording/recording.service';
 import { ReportService } from '../api/report/report.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class ProjectFacadeService {
   private hasRecordingMap: Map<string, boolean> = new Map();
   constructor(

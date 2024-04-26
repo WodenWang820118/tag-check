@@ -7,7 +7,7 @@ import { NewReportViewComponent } from './views/new-report-view/new-report-view.
 import { SettingsViewComponent } from './views/settings-view/settings-view.component';
 import { ReportViewComponent } from './views/report-view/report-view.component';
 
-const routes: Routes = [
+const PROJECT_ROUTES: Routes = [
   {
     path: '',
     component: ProjectViewComponent,
@@ -38,7 +38,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [CommonModule, RouterModule.forChild(routes)],
+  imports: [CommonModule, RouterModule.forChild(PROJECT_ROUTES)],
   exports: [RouterModule],
 })
 export class ProjectModule {}
