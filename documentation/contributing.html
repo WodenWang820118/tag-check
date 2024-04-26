@@ -1,0 +1,219 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>ng-frontend</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+	   <link rel="stylesheet" href="./styles/style.css">
+        <link rel="stylesheet" href="./styles/dark.css">
+        <link rel="stylesheet" href="./styles/material.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avaoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-block d-sm-none">
+            <a href="./" class="navbar-brand">ng-frontend</a>
+            <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="hidden-xs menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content getting-started">
+                   <div class="content-data">
+
+<h1>Contributing to TagCheck</h1>
+<p>Thank you for your interest in contributing to this project! We welcome contributions from the community.</p>
+<h1>Table of Contents</h1>
+<p><a href="#code-of-conduct">Code of Conduct</a>
+<a href="#architecture">Architecture</a></p>
+<ul>
+<li><a href="#repository-structure">Repository Structure</a></li>
+<li><a href="#integration-with-electron">Integration with Electron</a></li>
+<li><a href="#ci/cd-pipeline">CI/CD Pipeline</a></li>
+<li><a href="#monorepo-advantages">Monorepo Advantages</a></li>
+<li><a href="#future-considerations">Future Considerations</a></li>
+</ul>
+<p><a href="#code-style">Code Style</a>
+<a href="#issue-tracker">Issue Tracker</a>
+<a href="#license">License</a>
+<a href="#contact">Contact</a></p>
+<h2>Code of Conduct</h2>
+<p>We expect all contributors to adhere to our <a href="./CODE_OF_CONDUCT.md">Code of Conduct</a>. Please review it before making any contributions.</p>
+<h2>Architecture</h2>
+<h3>Repository Structure</h3>
+<p>The project is structured into two primary components: the frontend and the backend. The frontend is developed using Angular and is contained within the <code>ng-frontend</code> directory. Conversely, the backend, built with NestJS, resides in the <code>nest-backend</code> directory. This separation facilitates clear delineation and management of the two core aspects of the application.</p>
+<h3>Integration with Electron</h3>
+<p>To facilitate a uniform user experience across various operating systems, the application will be encapsulated within an Electron shell for distribution. This approach enables the app to function seamlessly on Windows, macOS, and Linux, catering to a diverse user base that includes testers, marketers, and developers who need to verify Google Tags on their websites. By leveraging Electron, the application avoids the necessity for separate server hosting for its frontend and backend, thereby optimizing cost-efficiency.</p>
+<p>The Electron configuration is centralized in two key files:</p>
+<ul>
+<li><code>main.js</code>: Serves as the entry point for the Electron app, orchestrating the main process.</li>
+<li><code>forge.config.js</code>: Contains configuration settings for Electron Forge, which aids in packaging and distributing the application.</li>
+</ul>
+<h3>CI/CD Pipeline</h3>
+<p>The project currently lacks a CI/CD pipeline, but establishing one is a forthcoming enhancement to ensure continuous integration and delivery. Utilizing <a href="https://github.com/marketplace/actions/electron-builder-action">GitHub Actions</a>, the project will automate its build and deployment processes. The CI/CD configuration will be delineated in the <code>.github/workflows</code> directory, ensuring that the application remains in a consistently deployable state.</p>
+<h3>Monorepo Advantages</h3>
+<p>Adopting a monorepo structure simplifies dependency management and streamlines development workflows. This cohesive approach enables the team to maintain a unified codebase for both frontend and backend, promoting easier code sharing and modularization.</p>
+<h3>Future Considerations</h3>
+<p>As the project evolves, additional considerations will include enhancing the Electron app&#39;s security posture, optimizing its performance, and possibly extending its functionality. Monitoring and addressing the specific needs of the target user groups will be pivotal in guiding these enhancements.</p>
+<h2>Code Style</h2>
+<p>Both Angular and NestJS have their own code style guidelines with ESLint and Prettier configurations. Please ensure that your code follows these guidelines before submitting a pull request for better review and merging process.</p>
+<h2>Issue Tracker</h2>
+<p>If you encounter any issues or have suggestions for improvements, please open an issue on the GitHub issues. Be sure to provide as much detail as possible to help us understand and address the problem.</p>
+<h2>License</h2>
+<p>By contributing to this project, you agree that your contributions will be licensed under the <a href="./LICENSE">project&#39;s license</a>.</p>
+<h2>Contact</h2>
+<p>If you have any questions or need further assistance, feel free to reach out to the GitHub discussions. We are happy to help you with any questions you may have.</p>
+<p>Happy coding!</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 0;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'getting-started';
+            var COMPODOC_CURRENT_PAGE_URL = 'contributing.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="./js/libs/custom-elements.min.js"></script>
+       <script src="./js/libs/lit-html.js"></script>
+
+       <script src="./js/menu-wc.js" defer></script>
+       <script nomodule src="./js/menu-wc_es5.js" defer></script>
+
+       <script src="./js/libs/bootstrap-native.js"></script>
+
+       <script src="./js/libs/es6-shim.min.js"></script>
+       <script src="./js/libs/EventDispatcher.js"></script>
+       <script src="./js/libs/promise.min.js"></script>
+       <script src="./js/libs/zepto.min.js"></script>
+
+       <script src="./js/compodoc.js"></script>
+
+       <script src="./js/tabs.js"></script>
+       <script src="./js/menu.js"></script>
+       <script src="./js/libs/clipboard.min.js"></script>
+       <script src="./js/libs/prism.js"></script>
+       <script src="./js/sourceCode.js"></script>
+          <script src="./js/search/search.js"></script>
+          <script src="./js/search/lunr.min.js"></script>
+          <script src="./js/search/search-lunr.js"></script>
+          <script src="./js/search/search_index.js"></script>
+       <script src="./js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

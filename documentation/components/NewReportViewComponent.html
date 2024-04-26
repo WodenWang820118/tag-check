@@ -1,0 +1,1190 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>ng-frontend</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+        <link rel="stylesheet" href="../styles/material.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avaoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-block d-sm-none">
+            <a href="../" class="navbar-brand">ng-frontend</a>
+            <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="hidden-xs menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content component">
+                   <div class="content-data">
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Components</li>
+  <li class="breadcrumb-item"
+  >
+  NewReportViewComponent</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" class="nav-link"
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+        <li class="nav-item">
+            <a href="#templateData" class="nav-link"
+                role="tab" id="templateData-tab" data-bs-toggle="tab" data-link="template">Template</a>
+        </li>
+        <li class="nav-item">
+            <a href="#styleData" class="nav-link"
+                role="tab" id="styleData-tab" data-bs-toggle="tab" data-link="style">Styles</a>
+        </li>
+        <li class="nav-item">
+            <a href="#tree" class="nav-link"
+                role="tab" id="tree-tab" data-bs-toggle="tab" data-link="dom-tree">DOM Tree</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info"><p class="comment">
+    <h3>File</h3>
+</p>
+<p class="comment">
+    <code>apps/ng-frontend/src/app/modules/project/views/new-report-view/new-report-view.component.ts</code>
+</p>
+
+
+
+
+    <p class="comment">
+        <h3>Implements</h3>
+    </p>
+    <p class="comment">
+                <code>OnInit</code>
+                <code>OnDestroy</code>
+    </p>
+
+
+<section data-compodoc="block-metadata">
+    <h3>Metadata</h3>
+    <table class="table table-sm table-hover metadata">
+        <tbody>
+
+
+
+
+
+
+
+
+
+
+
+
+            <tr>
+                <td class="col-md-3">selector</td>
+                <td class="col-md-9"><code>app-new-report-view</code></td>
+            </tr>
+
+            <tr>
+                <td class="col-md-3">standalone</td>
+                <td class="col-md-9"><code>true</code></td>
+            </tr>
+
+            <tr>
+                <td class="col-md-3">imports</td>
+                <td class="col-md-9">
+                            <code>CommonModule</code>
+                            <code>MatFormFieldModule</code>
+                            <code>FormsModule</code>
+                            <code>ReactiveFormsModule</code>
+                            <code>MatInputModule</code>
+                            <code>MatButtonModule</code>
+                            <code>RouterModule</code>
+                                <code><a href="../components/EditorComponent.html" target="_self" >EditorComponent</a></code>
+                                <code><a href="../components/ErrorDialogComponent.html" target="_self" >ErrorDialogComponent</a></code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-3">styleUrls</td>
+                <td class="col-md-9"><code>./new-report-view.component.scss</code></td>
+            </tr>
+
+
+
+            <tr>
+                <td class="col-md-3">templateUrl</td>
+                <td class="col-md-9"><code>./new-report-view.component.html</code></td>
+            </tr>
+
+
+
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+    <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Properties</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier">Private</span>
+                                <a href="#destroy$" >destroy$</a>
+                            </li>
+                            <li>
+                                <a href="#exampleInputJson" >exampleInputJson</a>
+                            </li>
+                            <li>
+                                <a href="#reportForm" >reportForm</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                <a href="#cancel" >cancel</a>
+                            </li>
+                            <li>
+                                <a href="#ngOnDestroy" >ngOnDestroy</a>
+                            </li>
+                            <li>
+                                <a href="#ngOnInit" >ngOnInit</a>
+                            </li>
+                            <li>
+                                <a href="#onFileSelected" >onFileSelected</a>
+                            </li>
+                            <li>
+                                <a href="#setEditorContent" >setEditorContent</a>
+                            </li>
+                            <li>
+                                <a href="#uploadReport" >uploadReport</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+    <section data-compodoc="block-constructor">
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor(fb: FormBuilder, route: ActivatedRoute, recordingService: <a href="../injectables/RecordingService.html" target="_self">RecordingService</a>, reportService: <a href="../injectables/ReportService.html" target="_self">ReportService</a>, specService: <a href="../injectables/SpecService.html" target="_self">SpecService</a>, location: Location, projectDataSourceService: <a href="../injectables/ProjectDataSourceService.html" target="_self">ProjectDataSourceService</a>, editorService: <a href="../injectables/EditorService.html" target="_self">EditorService</a>, dialog: MatDialog)</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="64" class="link-to-prism">apps/ng-frontend/src/app/modules/project/views/new-report-view/new-report-view.component.ts:64</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                            <div>
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>fb</td>
+                                                  
+                                                        <td>
+                                                                    <code>FormBuilder</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>route</td>
+                                                  
+                                                        <td>
+                                                                    <code>ActivatedRoute</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>recordingService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/RecordingService.html" target="_self" >RecordingService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>reportService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/ReportService.html" target="_self" >ReportService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>specService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/SpecService.html" target="_self" >SpecService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>location</td>
+                                                  
+                                                        <td>
+                                                                    <code>Location</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>projectDataSourceService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/ProjectDataSourceService.html" target="_self" >ProjectDataSourceService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>editorService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/EditorService.html" target="_self" >EditorService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>dialog</td>
+                                                  
+                                                        <td>
+                                                                    <code>MatDialog</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
+
+
+
+
+
+    <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="cancel"></a>
+                    <span class="name">
+                        <span ><b>cancel</b></span>
+                        <a href="#cancel"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>cancel()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="93"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/views/new-report-view/new-report-view.component.ts:93</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="ngOnDestroy"></a>
+                    <span class="name">
+                        <span ><b>ngOnDestroy</b></span>
+                        <a href="#ngOnDestroy"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>ngOnDestroy()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="231"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/views/new-report-view/new-report-view.component.ts:231</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="ngOnInit"></a>
+                    <span class="name">
+                        <span ><b>ngOnInit</b></span>
+                        <a href="#ngOnInit"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>ngOnInit()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="78"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/views/new-report-view/new-report-view.component.ts:78</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="onFileSelected"></a>
+                    <span class="name">
+                        <span ><b>onFileSelected</b></span>
+                        <a href="#onFileSelected"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>onFileSelected(event: Event)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="97"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/views/new-report-view/new-report-view.component.ts:97</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>event</td>
+                                            <td>
+                                                        <code>Event</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="setEditorContent"></a>
+                    <span class="name">
+                        <span ><b>setEditorContent</b></span>
+                        <a href="#setEditorContent"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>setEditorContent()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="119"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/views/new-report-view/new-report-view.component.ts:119</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="uploadReport"></a>
+                    <span class="name">
+                        <span ><b>uploadReport</b></span>
+                        <a href="#uploadReport"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>uploadReport()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="137"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/views/new-report-view/new-report-view.component.ts:137</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+    <section data-compodoc="block-properties">
+    
+    <h3 id="inputs">
+        Properties
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="destroy$"></a>
+                    <span class="name">
+                            <span class="modifier">Private</span>
+                        <span ><b>destroy$</b></span>
+                        <a href="#destroy$"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>new Subject&lt;void&gt;()</code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="64" class="link-to-prism">apps/ng-frontend/src/app/modules/project/views/new-report-view/new-report-view.component.ts:64</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="exampleInputJson"></a>
+                    <span class="name">
+                        <span ><b>exampleInputJson</b></span>
+                        <a href="#exampleInputJson"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>JSON.stringify({
+    event: &#x27;page_view&#x27;,
+    page_path: &#x27;$page_path&#x27;,
+    page_title: &#x27;$page_title&#x27;,
+    page_location: &#x27;$page_location&#x27;,
+  })</code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="52" class="link-to-prism">apps/ng-frontend/src/app/modules/project/views/new-report-view/new-report-view.component.ts:52</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="reportForm"></a>
+                    <span class="name">
+                        <span ><b>reportForm</b></span>
+                        <a href="#reportForm"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>this.fb.group({
+    projectSlug: [&#x27;&#x27;, Validators.required],
+    testName: [&#x27;&#x27;, Validators.required],
+  })</code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="59" class="link-to-prism">apps/ng-frontend/src/app/modules/project/views/new-report-view/new-report-view.component.ts:59</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+</section>
+
+</div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Component, OnDestroy, OnInit } from &#x27;@angular/core&#x27;;
+import { CommonModule, Location } from &#x27;@angular/common&#x27;;
+import {
+  Subject,
+  combineLatest,
+  forkJoin,
+  map,
+  mergeMap,
+  take,
+  takeUntil,
+  tap,
+} from &#x27;rxjs&#x27;;
+import { MatFormFieldModule } from &#x27;@angular/material/form-field&#x27;;
+import {
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from &#x27;@angular/forms&#x27;;
+import { MatInputModule } from &#x27;@angular/material/input&#x27;;
+import { ActivatedRoute, RouterModule } from &#x27;@angular/router&#x27;;
+import { MatButtonModule } from &#x27;@angular/material/button&#x27;;
+import { RecordingService } from &#x27;../../../../shared/services/api/recording/recording.service&#x27;;
+import { ReportService } from &#x27;../../../../shared/services/api/report/report.service&#x27;;
+import { ProjectDataSourceService } from &#x27;../../../../shared/services/project-data-source/project-data-source.service&#x27;;
+import { EditorComponent } from &#x27;../../../../shared/components/editor/editor.component&#x27;;
+import { EditorService } from &#x27;../../../../shared/services/editor/editor.service&#x27;;
+import { SpecService } from &#x27;../../../../shared/services/api/spec/spec.service&#x27;;
+import { ReportDetailsDto, IReportDetails } from &#x27;@utils&#x27;;
+import { ErrorDialogComponent } from &#x27;../../../../shared/components/error-dialog/error-dialog.component&#x27;;
+import { MatDialog } from &#x27;@angular/material/dialog&#x27;;
+import { v4 as uuidv4 } from &#x27;uuid&#x27;;
+
+@Component({
+  selector: &#x27;app-new-report-view&#x27;,
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatFormFieldModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatInputModule,
+    MatButtonModule,
+    RouterModule,
+    EditorComponent,
+    ErrorDialogComponent,
+  ],
+  templateUrl: &#x27;./new-report-view.component.html&#x27;,
+  styleUrls: [&#x27;./new-report-view.component.scss&#x27;],
+})
+export class NewReportViewComponent implements OnInit, OnDestroy {
+  exampleInputJson &#x3D; JSON.stringify({
+    event: &#x27;page_view&#x27;,
+    page_path: &#x27;$page_path&#x27;,
+    page_title: &#x27;$page_title&#x27;,
+    page_location: &#x27;$page_location&#x27;,
+  });
+
+  reportForm &#x3D; this.fb.group({
+    projectSlug: [&#x27;&#x27;, Validators.required],
+    testName: [&#x27;&#x27;, Validators.required],
+  });
+
+  private destroy$ &#x3D; new Subject&lt;void&gt;();
+
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private recordingService: RecordingService,
+    private reportService: ReportService,
+    private specService: SpecService,
+    private location: Location,
+    private projectDataSourceService: ProjectDataSourceService,
+    private editorService: EditorService,
+    private dialog: MatDialog
+  ) {}
+
+  ngOnInit() {
+    this.route.parent?.params
+      .pipe(
+        takeUntil(this.destroy$),
+        tap((params) &#x3D;&gt; {
+          const projectSlug &#x3D; params[&#x27;projectSlug&#x27;];
+          if (projectSlug) {
+            this.reportForm.controls.projectSlug.setValue(projectSlug);
+            this.reportForm.controls.projectSlug.disable();
+          }
+        })
+      )
+      .subscribe();
+  }
+
+  cancel() {
+    this.location.back();
+  }
+
+  onFileSelected(event: Event) {
+    const target &#x3D; event.target as HTMLInputElement;
+    const file: File | null &#x3D; target.files?.[0] || null;
+    if (file) {
+      this.reportService.readJsonFileContent(file);
+
+      this.reportService.fileContent$
+        .pipe(
+          takeUntil(this.destroy$),
+          tap((data) &#x3D;&gt; {
+            if (data) {
+              this.editorService.setContent(
+                &#x27;recordingJson&#x27;,
+                JSON.stringify(data)
+              );
+            }
+          })
+        )
+        .subscribe();
+    }
+  }
+
+  setEditorContent() {
+    combineLatest([
+      this.editorService.editor$.specJsonEditor,
+      this.editorService.editor$.recordingJsonEditor,
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        tap(([specEditor, recordingEditor]) &#x3D;&gt; {
+          const specContent &#x3D; specEditor.state.doc.toString();
+          const recordingContent &#x3D; recordingEditor.state.doc.toString();
+
+          this.editorService.setContent(&#x27;specJson&#x27;, specContent);
+          this.editorService.setContent(&#x27;recordingJson&#x27;, recordingContent);
+        })
+      )
+      .subscribe();
+  }
+
+  uploadReport() {
+    combineLatest([
+      this.editorService.editor$.specJsonEditor,
+      this.editorService.editor$.recordingJsonEditor,
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        map(([specEditor, recordingEditor]) &#x3D;&gt; {
+          if (
+            !this.reportForm.controls[&#x27;testName&#x27;].value ||
+            !this.reportForm.controls[&#x27;projectSlug&#x27;].value
+          )
+            return {} as any;
+
+          const specContent &#x3D; specEditor.state.doc.toString();
+          const recordingContent &#x3D; recordingEditor.state.doc.toString();
+          const projectSlug &#x3D; this.reportForm.controls[&#x27;projectSlug&#x27;].value;
+          const testName &#x3D; this.reportForm.controls[&#x27;testName&#x27;].value;
+          const eventId &#x3D; uuidv4();
+
+          if (specContent &amp;&amp; projectSlug) {
+            const eventName &#x3D; JSON.parse(specContent).event as string;
+
+            const reportDetails: IReportDetails &#x3D; new ReportDetailsDto(
+              eventId,
+              testName,
+              eventName
+            );
+
+            return {
+              projectSlug,
+              eventId,
+              eventName,
+              specContent,
+              recordingContent,
+              reportDetails,
+            };
+          } else {
+            this.dialog.open(ErrorDialogComponent, {
+              data: {
+                message: &#x27;Spec content is required and cannot be empty.&#x27;,
+              },
+            });
+            throw new Error(&#x27;Spec content is required and cannot be empty.&#x27;);
+          }
+        }),
+        mergeMap(
+          ({
+            projectSlug,
+            eventId,
+            eventName,
+            specContent,
+            recordingContent,
+            reportDetails,
+          }) &#x3D;&gt;
+            forkJoin([
+              this.reportService.addReport(
+                projectSlug,
+                &#x60;${eventName}_${eventId}&#x60;,
+                reportDetails
+              ),
+              this.recordingService.addRecording(
+                projectSlug,
+                &#x60;${eventName}_${eventId}&#x60;,
+                recordingContent as string
+              ),
+              this.specService.addSpec(projectSlug, specContent),
+            ]).pipe(
+              tap(() &#x3D;&gt; {
+                this.projectDataSourceService
+                  .connect()
+                  .pipe(
+                    take(1),
+                    tap((data) &#x3D;&gt; {
+                      this.projectDataSourceService.setData([
+                        ...data,
+                        reportDetails,
+                      ]);
+                    })
+                  )
+                  .subscribe();
+              })
+            )
+        )
+      )
+      .subscribe({
+        next: () &#x3D;&gt; {
+          console.log(&#x27;Report and all related data successfully uploaded&#x27;);
+          this.location.back();
+        },
+        error: (err) &#x3D;&gt; console.error(&#x27;Error uploading report:&#x27;, err),
+      });
+  }
+
+  ngOnDestroy() {
+    console.log(&#x27;Unsubscribing from new-report-view&#x27;);
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+}
+</code></pre>
+    </div>
+
+    <div class="tab-pane fade " id="templateData">
+        <pre class="line-numbers"><code class="language-html">&lt;div class&#x3D;&quot;new-report&quot;&gt;
+  &lt;form
+    class&#x3D;&quot;new-report__form&quot;
+    [formGroup]&#x3D;&quot;reportForm&quot;
+    (ngSubmit)&#x3D;&quot;setEditorContent(); uploadReport()&quot;
+  &gt;
+    &lt;mat-form-field class&#x3D;&quot;new-report__form__field&quot; appearance&#x3D;&quot;outline&quot;&gt;
+      &lt;mat-label&gt;Project Slug&lt;/mat-label&gt;
+      &lt;input matInput formControlName&#x3D;&quot;projectSlug&quot; /&gt;
+    &lt;/mat-form-field&gt;
+    &lt;mat-form-field class&#x3D;&quot;new-report__form_field&quot; appearance&#x3D;&quot;outline&quot;&gt;
+      &lt;mat-label&gt;Test Name&lt;/mat-label&gt;
+      &lt;input matInput formControlName&#x3D;&quot;testName&quot; /&gt;
+    &lt;/mat-form-field&gt;
+    &lt;app-editor
+      class&#x3D;&quot;new-report__form__field&quot;
+      [content]&#x3D;&quot;exampleInputJson&quot;
+      [editorExtension]&#x3D;&quot;&#x27;specJson&#x27;&quot;
+    &gt;&lt;/app-editor&gt;
+    &lt;app-editor
+      class&#x3D;&quot;new-report__form__field&quot;
+      [content]&#x3D;&quot;&#x27;{}&#x27;&quot;
+      [editorExtension]&#x3D;&quot;&#x27;recordingJson&#x27;&quot;
+    &gt;&lt;/app-editor&gt;
+    &lt;button
+      type&#x3D;&quot;button&quot;
+      mat-raised-button
+      style&#x3D;&quot;margin-bottom: 1rem&quot;
+      (click)&#x3D;&quot;fileInput.click()&quot;
+    &gt;
+      Upload
+    &lt;/button&gt;
+    &lt;input hidden (change)&#x3D;&quot;onFileSelected($event)&quot; #fileInput type&#x3D;&quot;file&quot; /&gt;
+    &lt;div class&#x3D;&quot;new-report__form__actions&quot;&gt;
+      &lt;button type&#x3D;&quot;button&quot; mat-raised-button (click)&#x3D;&quot;cancel()&quot;&gt;Cancel&lt;/button&gt;
+      &lt;button type&#x3D;&quot;submit&quot; mat-raised-button color&#x3D;&quot;primary&quot;&gt;Submit&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/form&gt;
+&lt;/div&gt;
+</code></pre>
+    </div>
+
+    <div class="tab-pane fade " id="styleData">
+                <p class="comment">
+                    <code>./new-report-view.component.scss</code>
+                </p>
+                <pre class="line-numbers"><code class="language-scss">.new-report {
+  padding: 2rem 10rem;
+
+  &amp;__form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+
+    &amp;__actions {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      gap: 1rem;
+    }
+  }
+}</code></pre>
+    </div>
+
+    <div class="tab-pane fade " id="tree">
+        <div id="tree-container"></div>
+        <div class="tree-legend">
+            <div class="title">
+                <b>Legend</b>
+            </div>
+            <div>
+                <div class="color htmlelement"></div><span>Html element</span>
+            </div>
+            <div>
+                <div class="color component"></div><span>Component</span>
+            </div>
+            <div>
+                <div class="color directive"></div><span>Html element with directive</span>
+            </div>
+        </div>
+    </div>
+
+    
+</div>
+
+<script src="../js/libs/vis.min.js"></script>
+<script src="../js/libs/htmlparser.js"></script>
+<script src="../js/libs/deep-iterator.js"></script>
+<script>
+        var COMPONENT_TEMPLATE = '<div><div class="new-report">  <form    class="new-report__form"    [formGroup]="reportForm"    (ngSubmit)="setEditorContent(); uploadReport()"  >    <mat-form-field class="new-report__form__field" appearance="outline">      <mat-label>Project Slug</mat-label>      <input matInput formControlName="projectSlug" />    </mat-form-field>    <mat-form-field class="new-report__form_field" appearance="outline">      <mat-label>Test Name</mat-label>      <input matInput formControlName="testName" />    </mat-form-field>    <app-editor      class="new-report__form__field"      [content]="exampleInputJson"      [editorExtension]="\'specJson\'"    ></app-editor>    <app-editor      class="new-report__form__field"      [content]="\'{}\'"      [editorExtension]="\'recordingJson\'"    ></app-editor>    <button      type="button"      mat-raised-button      style="margin-bottom: 1rem"      (click)="fileInput.click()"    >      Upload    </button>    <input hidden (change)="onFileSelected($event)" #fileInput type="file" />    <div class="new-report__form__actions">      <button type="button" mat-raised-button (click)="cancel()">Cancel</button>      <button type="submit" mat-raised-button color="primary">Submit</button>    </div>  </form></div></div>'
+    var COMPONENTS = [{'name': 'AppComponent', 'selector': 'app-root'},{'name': 'ApplicationFormComponent', 'selector': 'app-application-form'},{'name': 'AuthenticationFormComponent', 'selector': 'app-authentication-form'},{'name': 'BrowserFormComponent', 'selector': 'app-browser-form'},{'name': 'DetailViewComponent', 'selector': 'app-detail-view'},{'name': 'EditorComponent', 'selector': 'app-editor'},{'name': 'EntryComponent', 'selector': 'app-entry'},{'name': 'ErrorDialogComponent', 'selector': 'app-error-dialog'},{'name': 'GtmFormComponent', 'selector': 'app-gtm-form'},{'name': 'HelpCenterComponent', 'selector': 'app-help-center-view'},{'name': 'HomeViewComponent', 'selector': 'app-home-view'},{'name': 'InitProjectFormComponent', 'selector': 'app-init-project-form'},{'name': 'InitProjectViewComponent', 'selector': 'app-init-project-view'},{'name': 'MainContentComponent', 'selector': 'app-contents'},{'name': 'NewReportViewComponent', 'selector': 'app-new-report-view'},{'name': 'ProjectInfoFormComponent', 'selector': 'app-project-info-form'},{'name': 'ProjectIoFormComponent', 'selector': 'app-project-io-form'},{'name': 'ProjectItemComponent', 'selector': 'app-project-item'},{'name': 'ProjectListComponent', 'selector': 'app-project-list'},{'name': 'ProjectViewComponent', 'selector': 'app-project-view'},{'name': 'ReportDetailPanelsComponent', 'selector': 'app-report-datail-panels'},{'name': 'ReportTableComponent', 'selector': 'app-report-table'},{'name': 'ReportTableToolbarComponent', 'selector': 'app-report-table-toolbar'},{'name': 'ReportViewComponent', 'selector': 'app-project-view'},{'name': 'RootFormComponent', 'selector': 'app-root-form'},{'name': 'SettingsViewComponent', 'selector': 'app-project-view'},{'name': 'SideBarComponent', 'selector': 'app-side-bar'},{'name': 'SideNavListComponent', 'selector': 'app-side-nav-list'},{'name': 'SnackBarComponent', 'selector': ''},{'name': 'TagBuildViewComponent', 'selector': 'app-tag-build-view'},{'name': 'ToolbarComponent', 'selector': 'app-toolbar'}];
+    var DIRECTIVES = [];
+    var ACTUAL_COMPONENT = {'name': 'NewReportViewComponent'};
+</script>
+<script src="../js/tree.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'component';
+            var COMPODOC_CURRENT_PAGE_URL = 'NewReportViewComponent.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>
