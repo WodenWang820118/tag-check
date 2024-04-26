@@ -11,9 +11,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { ReportDetailsService } from '../report-details/report-details.service';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class DataSourceFacadeService {
   constructor(
     private route: ActivatedRoute,

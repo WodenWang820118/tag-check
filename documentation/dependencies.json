@@ -1,0 +1,621 @@
+[
+  {
+    "name": "EntryModule",
+    "file": "modules/entry/entry.module.ts",
+    "providers": [],
+    "declarations": [],
+    "imports": [
+      {
+        "name": "EntryComponent"
+      },
+      {
+        "name": "CommonModule"
+      },
+      {
+        "ns": "RouterModule",
+        "name": "RouterModule.forChild(args)"
+      }
+    ],
+    "exports": [
+      {
+        "name": "RouterModule"
+      }
+    ],
+    "bootstrap": [],
+    "__raw": [
+      {
+        "pos": 563,
+        "end": 637,
+        "flags": 0,
+        "modifierFlagsCache": 0,
+        "transformFlags": 0,
+        "kind": 303,
+        "name": {
+          "pos": 563,
+          "end": 574,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 80,
+          "escapedText": "imports"
+        },
+        "initializer": {
+          "pos": 575,
+          "end": 637,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 209,
+          "elements": [
+            {
+              "pos": 577,
+              "end": 591,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 80,
+              "escapedText": "EntryComponent"
+            },
+            {
+              "pos": 592,
+              "end": 605,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 80,
+              "escapedText": "CommonModule"
+            },
+            {
+              "pos": 606,
+              "end": 636,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 213,
+              "expression": {
+                "pos": 606,
+                "end": 628,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": 211,
+                "expression": {
+                  "pos": 606,
+                  "end": 619,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "RouterModule"
+                },
+                "name": {
+                  "pos": 620,
+                  "end": 628,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "forChild"
+                }
+              },
+              "arguments": [
+                {
+                  "pos": 629,
+                  "end": 635,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "routes"
+                }
+              ]
+            }
+          ],
+          "multiLine": false
+        }
+      },
+      {
+        "pos": 638,
+        "end": 665,
+        "flags": 0,
+        "modifierFlagsCache": 0,
+        "transformFlags": 0,
+        "kind": 303,
+        "name": {
+          "pos": 638,
+          "end": 649,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 80,
+          "escapedText": "exports"
+        },
+        "initializer": {
+          "pos": 650,
+          "end": 665,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 209,
+          "elements": [
+            {
+              "pos": 652,
+              "end": 664,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 80,
+              "escapedText": "RouterModule"
+            }
+          ],
+          "multiLine": false
+        }
+      }
+    ]
+  },
+  {
+    "name": "HelpCenterModule",
+    "file": "modules/help-center/help-center.module.ts",
+    "providers": [],
+    "declarations": [],
+    "imports": [
+      {
+        "name": "CommonModule"
+      },
+      {
+        "ns": "RouterModule",
+        "name": "RouterModule.forChild(args)"
+      },
+      {
+        "ns": "MarkdownModule",
+        "name": "MarkdownModule.forRoot()"
+      }
+    ],
+    "exports": [
+      {
+        "name": "RouterModule"
+      }
+    ],
+    "bootstrap": [],
+    "__raw": [
+      {
+        "pos": 580,
+        "end": 685,
+        "flags": 0,
+        "modifierFlagsCache": 0,
+        "transformFlags": 0,
+        "kind": 303,
+        "name": {
+          "pos": 580,
+          "end": 591,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 80,
+          "escapedText": "imports"
+        },
+        "initializer": {
+          "pos": 592,
+          "end": 685,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 209,
+          "elements": [
+            {
+              "pos": 594,
+              "end": 612,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 80,
+              "escapedText": "CommonModule"
+            },
+            {
+              "pos": 613,
+              "end": 648,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 213,
+              "expression": {
+                "pos": 613,
+                "end": 640,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": 211,
+                "expression": {
+                  "pos": 613,
+                  "end": 631,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "RouterModule"
+                },
+                "name": {
+                  "pos": 632,
+                  "end": 640,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "forChild"
+                }
+              },
+              "arguments": [
+                {
+                  "pos": 641,
+                  "end": 647,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "routes"
+                }
+              ]
+            },
+            {
+              "pos": 649,
+              "end": 679,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 213,
+              "expression": {
+                "pos": 649,
+                "end": 677,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": 211,
+                "expression": {
+                  "pos": 649,
+                  "end": 669,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "MarkdownModule"
+                },
+                "name": {
+                  "pos": 670,
+                  "end": 677,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "forRoot"
+                }
+              },
+              "arguments": []
+            }
+          ],
+          "multiLine": true
+        }
+      },
+      {
+        "pos": 686,
+        "end": 713,
+        "flags": 0,
+        "modifierFlagsCache": 0,
+        "transformFlags": 0,
+        "kind": 303,
+        "name": {
+          "pos": 686,
+          "end": 697,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 80,
+          "escapedText": "exports"
+        },
+        "initializer": {
+          "pos": 698,
+          "end": 713,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 209,
+          "elements": [
+            {
+              "pos": 700,
+              "end": 712,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 80,
+              "escapedText": "RouterModule"
+            }
+          ],
+          "multiLine": false
+        }
+      }
+    ]
+  },
+  {
+    "name": "ProjectModule",
+    "file": "modules/project/project.module.ts",
+    "providers": [],
+    "declarations": [],
+    "imports": [
+      {
+        "name": "CommonModule"
+      },
+      {
+        "ns": "RouterModule",
+        "name": "RouterModule.forChild(args)"
+      }
+    ],
+    "exports": [
+      {
+        "name": "RouterModule"
+      }
+    ],
+    "bootstrap": [],
+    "__raw": [
+      {
+        "pos": 1218,
+        "end": 1276,
+        "flags": 0,
+        "modifierFlagsCache": 0,
+        "transformFlags": 0,
+        "kind": 303,
+        "name": {
+          "pos": 1218,
+          "end": 1229,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 80,
+          "escapedText": "imports"
+        },
+        "initializer": {
+          "pos": 1230,
+          "end": 1276,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 209,
+          "elements": [
+            {
+              "pos": 1232,
+              "end": 1244,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 80,
+              "escapedText": "CommonModule"
+            },
+            {
+              "pos": 1245,
+              "end": 1275,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 213,
+              "expression": {
+                "pos": 1245,
+                "end": 1267,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": 211,
+                "expression": {
+                  "pos": 1245,
+                  "end": 1258,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "RouterModule"
+                },
+                "name": {
+                  "pos": 1259,
+                  "end": 1267,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "forChild"
+                }
+              },
+              "arguments": [
+                {
+                  "pos": 1268,
+                  "end": 1274,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "routes"
+                }
+              ]
+            }
+          ],
+          "multiLine": false
+        }
+      },
+      {
+        "pos": 1277,
+        "end": 1304,
+        "flags": 0,
+        "modifierFlagsCache": 0,
+        "transformFlags": 0,
+        "kind": 303,
+        "name": {
+          "pos": 1277,
+          "end": 1288,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 80,
+          "escapedText": "exports"
+        },
+        "initializer": {
+          "pos": 1289,
+          "end": 1304,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 209,
+          "elements": [
+            {
+              "pos": 1291,
+              "end": 1303,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 80,
+              "escapedText": "RouterModule"
+            }
+          ],
+          "multiLine": false
+        }
+      }
+    ]
+  },
+  {
+    "name": "TagBuildModule",
+    "file": "modules/tag-build/tag-build.module.ts",
+    "providers": [],
+    "declarations": [],
+    "imports": [
+      {
+        "name": "CommonModule"
+      },
+      {
+        "ns": "RouterModule",
+        "name": "RouterModule.forChild(args)"
+      }
+    ],
+    "exports": [
+      {
+        "name": "RouterModule"
+      }
+    ],
+    "bootstrap": [],
+    "__raw": [
+      {
+        "pos": 334,
+        "end": 392,
+        "flags": 0,
+        "modifierFlagsCache": 0,
+        "transformFlags": 0,
+        "kind": 303,
+        "name": {
+          "pos": 334,
+          "end": 345,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 80,
+          "escapedText": "imports"
+        },
+        "initializer": {
+          "pos": 346,
+          "end": 392,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 209,
+          "elements": [
+            {
+              "pos": 348,
+              "end": 360,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 80,
+              "escapedText": "CommonModule"
+            },
+            {
+              "pos": 361,
+              "end": 391,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 213,
+              "expression": {
+                "pos": 361,
+                "end": 383,
+                "flags": 0,
+                "modifierFlagsCache": 0,
+                "transformFlags": 0,
+                "kind": 211,
+                "expression": {
+                  "pos": 361,
+                  "end": 374,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "RouterModule"
+                },
+                "name": {
+                  "pos": 375,
+                  "end": 383,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "forChild"
+                }
+              },
+              "arguments": [
+                {
+                  "pos": 384,
+                  "end": 390,
+                  "flags": 0,
+                  "modifierFlagsCache": 0,
+                  "transformFlags": 0,
+                  "kind": 80,
+                  "escapedText": "routes"
+                }
+              ]
+            }
+          ],
+          "multiLine": false
+        }
+      },
+      {
+        "pos": 393,
+        "end": 420,
+        "flags": 0,
+        "modifierFlagsCache": 0,
+        "transformFlags": 0,
+        "kind": 303,
+        "name": {
+          "pos": 393,
+          "end": 404,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 80,
+          "escapedText": "exports"
+        },
+        "initializer": {
+          "pos": 405,
+          "end": 420,
+          "flags": 0,
+          "modifierFlagsCache": 0,
+          "transformFlags": 0,
+          "kind": 209,
+          "elements": [
+            {
+              "pos": 407,
+              "end": 419,
+              "flags": 0,
+              "modifierFlagsCache": 0,
+              "transformFlags": 0,
+              "kind": 80,
+              "escapedText": "RouterModule"
+            }
+          ],
+          "multiLine": false
+        }
+      }
+    ]
+  }
+]

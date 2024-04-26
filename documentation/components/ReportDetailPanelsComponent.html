@@ -1,0 +1,1749 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>ng-frontend</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+	   <link rel="stylesheet" href="../styles/style.css">
+        <link rel="stylesheet" href="../styles/dark.css">
+        <link rel="stylesheet" href="../styles/material.css">
+    </head>
+    <body>
+          <script>
+               // Blocking script to avaoid flickering dark mode
+               // Dark mode toggle button
+               var useDark = window.matchMedia('(prefers-color-scheme: dark)');
+               var darkModeState = useDark.matches;
+               var $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               var $darkModeToggles = document.querySelectorAll('.dark-mode-switch');
+               var darkModeStateLocal = localStorage.getItem('compodoc_darkmode-state');
+
+               function checkToggle(check) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].checked = check;
+                    }
+               }
+
+               function toggleDarkMode(state) {
+                    if (window.localStorage) {
+                         localStorage.setItem('compodoc_darkmode-state', state);
+                    }
+
+                    checkToggle(state);
+
+                    const hasClass = document.body.classList.contains('dark');
+
+                    if (state) {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.add('dark');
+                         }
+                         if (!hasClass) {
+                              document.body.classList.add('dark');
+                         }
+                    } else {
+                         for (var i = 0; i < $darkModeToggles.length; i++) {
+                              $darkModeToggles[i].classList.remove('dark');
+                         }
+                         if (hasClass) {
+                              document.body.classList.remove('dark');
+                         }
+                    }
+               }
+
+               useDark.addEventListener('change', function (evt) {
+                    toggleDarkMode(evt.matches);
+               });
+               if (darkModeStateLocal) {
+                    darkModeState = darkModeStateLocal === 'true';
+               }
+               toggleDarkMode(darkModeState);
+          </script>
+
+        <div class="navbar navbar-default navbar-fixed-top d-block d-sm-none">
+            <a href="../" class="navbar-brand">ng-frontend</a>
+            <button type="button" class="btn btn-default btn-menu ion-ios-menu" id="btn-menu"></button>
+        </div>
+
+        <div class="xs-menu menu" id="mobile-menu">
+                <div id="book-search-input" role="search"><input type="text" placeholder="Type to search"></div>            <compodoc-menu></compodoc-menu>
+        </div>
+
+        <div class="container-fluid main">
+           <div class="row main">
+               <div class="hidden-xs menu">
+                   <compodoc-menu mode="normal"></compodoc-menu>
+               </div>
+               <!-- START CONTENT -->
+               <div class="content component">
+                   <div class="content-data">
+
+
+
+
+<ol class="breadcrumb">
+  <li class="breadcrumb-item">Components</li>
+  <li class="breadcrumb-item"
+  >
+  ReportDetailPanelsComponent</li>
+</ol>
+
+<ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a href="#info" class="nav-link active"
+                role="tab" id="info-tab" data-bs-toggle="tab" data-link="info">Info</a>
+        </li>
+        <li class="nav-item">
+            <a href="#source" class="nav-link"
+                role="tab" id="source-tab" data-bs-toggle="tab" data-link="source">Source</a>
+        </li>
+        <li class="nav-item">
+            <a href="#templateData" class="nav-link"
+                role="tab" id="templateData-tab" data-bs-toggle="tab" data-link="template">Template</a>
+        </li>
+        <li class="nav-item">
+            <a href="#styleData" class="nav-link"
+                role="tab" id="styleData-tab" data-bs-toggle="tab" data-link="style">Styles</a>
+        </li>
+        <li class="nav-item">
+            <a href="#tree" class="nav-link"
+                role="tab" id="tree-tab" data-bs-toggle="tab" data-link="dom-tree">DOM Tree</a>
+        </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade active in" id="info"><p class="comment">
+    <h3>File</h3>
+</p>
+<p class="comment">
+    <code>apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts</code>
+</p>
+
+
+
+
+    <p class="comment">
+        <h3>Implements</h3>
+    </p>
+    <p class="comment">
+                <code>OnInit</code>
+                <code>OnDestroy</code>
+    </p>
+
+
+<section data-compodoc="block-metadata">
+    <h3>Metadata</h3>
+    <table class="table table-sm table-hover metadata">
+        <tbody>
+
+
+            <tr>
+                <td class="col-md-3">encapsulation</td>
+                <td class="col-md-9"><code>ViewEncapsulation.None</code></td>
+            </tr>
+
+
+
+
+
+
+
+
+
+
+            <tr>
+                <td class="col-md-3">selector</td>
+                <td class="col-md-9"><code>app-report-datail-panels</code></td>
+            </tr>
+
+            <tr>
+                <td class="col-md-3">standalone</td>
+                <td class="col-md-9"><code>true</code></td>
+            </tr>
+
+            <tr>
+                <td class="col-md-3">imports</td>
+                <td class="col-md-9">
+                            <code>CommonModule</code>
+                            <code>MatIconModule</code>
+                            <code>MatExpansionModule</code>
+                            <code>MatFormFieldModule</code>
+                            <code>MatTooltipModule</code>
+                                <code><a href="../components/EditorComponent.html" target="_self" >EditorComponent</a></code>
+                            <code>MatButtonModule</code>
+                                <code><a href="../components/ErrorDialogComponent.html" target="_self" >ErrorDialogComponent</a></code>
+                </td>
+            </tr>
+
+            <tr>
+                <td class="col-md-3">styleUrls</td>
+                <td class="col-md-9"><code>./report-detail-panels.component.scss</code></td>
+            </tr>
+
+
+
+            <tr>
+                <td class="col-md-3">templateUrl</td>
+                <td class="col-md-9"><code>./report-detail-panels.component.html</code></td>
+            </tr>
+
+
+
+
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+    <section data-compodoc="block-index">
+    <h3 id="index">Index</h3>
+    <table class="table table-sm table-bordered index-table">
+        <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Properties</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                <a href="#destroy$" >destroy$</a>
+                            </li>
+                            <li>
+                                <a href="#recording$" >recording$</a>
+                            </li>
+                            <li>
+                                <a href="#recordingEdit" >recordingEdit</a>
+                            </li>
+                            <li>
+                                <a href="#recordingEditMode" >recordingEditMode</a>
+                            </li>
+                            <li>
+                                    <span class="modifier">Public</span>
+                                <a href="#reportService" >reportService</a>
+                            </li>
+                            <li>
+                                <a href="#spec$" >spec$</a>
+                            </li>
+                            <li>
+                                <a href="#specEdit" >specEdit</a>
+                            </li>
+                            <li>
+                                <a href="#specEditMode" >specEditMode</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Methods</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                    <span class="modifier">Private</span>
+                                <a href="#initializeDataStreams" >initializeDataStreams</a>
+                            </li>
+                            <li>
+                                <a href="#ngOnDestroy" >ngOnDestroy</a>
+                            </li>
+                            <li>
+                                <a href="#ngOnInit" >ngOnInit</a>
+                            </li>
+                            <li>
+                                <a href="#onDownload" >onDownload</a>
+                            </li>
+                            <li>
+                                <a href="#onFileSelected" >onFileSelected</a>
+                            </li>
+                            <li>
+                                <a href="#onRecordingUpdate" >onRecordingUpdate</a>
+                            </li>
+                            <li>
+                                <a href="#onSpecUpdate" >onSpecUpdate</a>
+                            </li>
+                            <li>
+                                <a href="#switchRecordingEdit" >switchRecordingEdit</a>
+                            </li>
+                            <li>
+                                <a href="#switchRecordingEditMode" >switchRecordingEditMode</a>
+                            </li>
+                            <li>
+                                <a href="#switchSpecEdit" >switchSpecEdit</a>
+                            </li>
+                            <li>
+                                <a href="#switchSpecEditMode" >switchSpecEditMode</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                        <h6><b>Inputs</b></h6>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <ul class="index-list">
+                            <li>
+                                <a href="#eventName" >eventName</a>
+                            </li>
+                            <li>
+                                <a href="#reportDetails$" >reportDetails$</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+
+
+
+
+        </tbody>
+    </table>
+</section>
+
+    <section data-compodoc="block-constructor">
+    <h3 id="constructor">Constructor</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+<code>constructor(recordingService: <a href="../injectables/RecordingService.html" target="_self">RecordingService</a>, specService: <a href="../injectables/SpecService.html" target="_self">SpecService</a>, reportService: <a href="../injectables/ReportService.html" target="_self">ReportService</a>, route: ActivatedRoute, editorService: <a href="../injectables/EditorService.html" target="_self">EditorService</a>, dialog: Dialog)</code>
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="65" class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:65</a></div>
+                            </td>
+                        </tr>
+
+                <tr>
+                    <td class="col-md-4">
+                            <div>
+                                    <b>Parameters :</b>
+                                    <table class="params">
+                                        <thead>
+                                            <tr>
+                                                <td>Name</td>
+                                                    <td>Type</td>
+                                                <td>Optional</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                        <td>recordingService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/RecordingService.html" target="_self" >RecordingService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>specService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/SpecService.html" target="_self" >SpecService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>reportService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/ReportService.html" target="_self" >ReportService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>route</td>
+                                                  
+                                                        <td>
+                                                                    <code>ActivatedRoute</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>editorService</td>
+                                                  
+                                                        <td>
+                                                                        <code><a href="../injectables/EditorService.html" target="_self" >EditorService</a></code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                        <td>dialog</td>
+                                                  
+                                                        <td>
+                                                                    <code>Dialog</code>
+                                                        </td>
+                                                  
+                                                    <td>
+                                                            No
+                                                    </td>
+                                                    
+                                                </tr>
+                                        </tbody>
+                                    </table>
+                            </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</section>
+
+    <section data-compodoc="block-inputs">
+    <h3 id="inputs">Inputs</h3>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="eventName"></a>
+                        <b>eventName</b>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>    <code>string | undefined</code>
+
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-2" colspan="2">
+                                    <div class="io-line">Defined in <a href="" data-line="57" class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:57</a></div>
+                            </td>
+                        </tr>
+            </tbody>
+        </table>
+        <table class="table table-sm table-bordered">
+            <tbody>
+                <tr>
+                    <td class="col-md-4">
+                        <a name="reportDetails$"></a>
+                        <b>reportDetails$</b>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>    <code>Observable&lt;IReportDetails | undefined&gt;</code>
+
+                    </td>
+                </tr>
+                        <tr>
+                            <td class="col-md-2" colspan="2">
+                                    <div class="io-line">Defined in <a href="" data-line="58" class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:58</a></div>
+                            </td>
+                        </tr>
+            </tbody>
+        </table>
+</section>
+
+
+
+    <section data-compodoc="block-methods">
+    
+    <h3 id="methods">
+        Methods
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="initializeDataStreams"></a>
+                    <span class="name">
+                            <span class="modifier">Private</span>
+                        <span ><b>initializeDataStreams</b></span>
+                        <a href="#initializeDataStreams"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+                        <span class="modifier-icon icon ion-ios-reset"></span>
+                    <code>initializeDataStreams()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="80"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:80</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="ngOnDestroy"></a>
+                    <span class="name">
+                        <span ><b>ngOnDestroy</b></span>
+                        <a href="#ngOnDestroy"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>ngOnDestroy()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="255"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:255</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="ngOnInit"></a>
+                    <span class="name">
+                        <span ><b>ngOnInit</b></span>
+                        <a href="#ngOnInit"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>ngOnInit()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="76"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:76</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="onDownload"></a>
+                    <span class="name">
+                        <span ><b>onDownload</b></span>
+                        <a href="#onDownload"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>onDownload()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="229"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:229</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="onFileSelected"></a>
+                    <span class="name">
+                        <span ><b>onFileSelected</b></span>
+                        <a href="#onFileSelected"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>onFileSelected(event: Event)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="125"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:125</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>event</td>
+                                            <td>
+                                                        <code>Event</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="onRecordingUpdate"></a>
+                    <span class="name">
+                        <span ><b>onRecordingUpdate</b></span>
+                        <a href="#onRecordingUpdate"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>onRecordingUpdate()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="187"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:187</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="onSpecUpdate"></a>
+                    <span class="name">
+                        <span ><b>onSpecUpdate</b></span>
+                        <a href="#onSpecUpdate"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>onSpecUpdate()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="147"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:147</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="switchRecordingEdit"></a>
+                    <span class="name">
+                        <span ><b>switchRecordingEdit</b></span>
+                        <a href="#switchRecordingEdit"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>switchRecordingEdit()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="121"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:121</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="switchRecordingEditMode"></a>
+                    <span class="name">
+                        <span ><b>switchRecordingEditMode</b></span>
+                        <a href="#switchRecordingEditMode"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>switchRecordingEditMode(event: Event)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="111"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:111</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>event</td>
+                                            <td>
+                                                        <code>Event</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="switchSpecEdit"></a>
+                    <span class="name">
+                        <span ><b>switchSpecEdit</b></span>
+                        <a href="#switchSpecEdit"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>switchSpecEdit()</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="117"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:117</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="switchSpecEditMode"></a>
+                    <span class="name">
+                        <span ><b>switchSpecEditMode</b></span>
+                        <a href="#switchSpecEditMode"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="col-md-4">
+<code>switchSpecEditMode(event: Event)</code>
+                </td>
+            </tr>
+
+
+                    <tr>
+                        <td class="col-md-4">
+                            <div class="io-line">Defined in <a href="" data-line="105"
+                                    class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:105</a></div>
+                        </td>
+                    </tr>
+
+
+            <tr>
+                <td class="col-md-4">
+
+                            <div class="io-description">
+                                <b>Parameters :</b>
+                                
+                                <table class="params">
+                                    <thead>
+                                        <tr>
+                                            <td>Name</td>
+                                                <td>Type</td>
+                                            <td>Optional</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                                <td>event</td>
+                                            <td>
+                                                        <code>Event</code>
+                                            </td>
+
+                                            <td>
+                                                    No
+                                            </td>
+
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        <div class="io-description">
+                            <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
+
+                        </div>
+                            <div class="io-description">
+                                
+                            </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+    <section data-compodoc="block-properties">
+    
+    <h3 id="inputs">
+        Properties
+    </h3>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="destroy$"></a>
+                    <span class="name">
+                        <span ><b>destroy$</b></span>
+                        <a href="#destroy$"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>new Subject&lt;void&gt;()</code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="61" class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:61</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="recording$"></a>
+                    <span class="name">
+                        <span ><b>recording$</b></span>
+                        <a href="#recording$"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>    <code>Observable&lt;Recording&gt;</code>
+
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="59" class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:59</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="recordingEdit"></a>
+                    <span class="name">
+                        <span ><b>recordingEdit</b></span>
+                        <a href="#recordingEdit"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>false</code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="63" class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:63</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="recordingEditMode"></a>
+                    <span class="name">
+                        <span ><b>recordingEditMode</b></span>
+                        <a href="#recordingEditMode"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>false</code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="65" class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:65</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="reportService"></a>
+                    <span class="name">
+                            <span class="modifier">Public</span>
+                        <span ><b>reportService</b></span>
+                        <a href="#reportService"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>        <code><a href="../injectables/ReportService.html" target="_self" >ReportService</a></code>
+
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="70" class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:70</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="spec$"></a>
+                    <span class="name">
+                        <span ><b>spec$</b></span>
+                        <a href="#spec$"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Type : </i>    <code>Observable&lt;Spec&gt;</code>
+
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="60" class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:60</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="specEdit"></a>
+                    <span class="name">
+                        <span ><b>specEdit</b></span>
+                        <a href="#specEdit"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>false</code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="62" class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:62</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+    <table class="table table-sm table-bordered">
+        <tbody>
+            <tr>
+                <td class="col-md-4">
+                    <a name="specEditMode"></a>
+                    <span class="name">
+                        <span ><b>specEditMode</b></span>
+                        <a href="#specEditMode"><span class="icon ion-ios-link"></span></a>
+                    </span>
+                </td>
+            </tr>
+                <tr>
+                    <td class="col-md-4">
+                        <i>Default value : </i><code>false</code>
+                    </td>
+                </tr>
+                    <tr>
+                        <td class="col-md-4">
+                                <div class="io-line">Defined in <a href="" data-line="64" class="link-to-prism">apps/ng-frontend/src/app/modules/project/components/report-detail-panels/report-detail-panels.component.ts:64</a></div>
+                        </td>
+                    </tr>
+
+
+        </tbody>
+    </table>
+</section>
+
+</div>
+
+
+    <div class="tab-pane fade  tab-source-code" id="source">
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { CommonModule } from &#x27;@angular/common&#x27;;
+import {
+  Component,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewEncapsulation,
+} from &#x27;@angular/core&#x27;;
+import { MatIconModule } from &#x27;@angular/material/icon&#x27;;
+import {
+  Observable,
+  Subject,
+  combineLatest,
+  map,
+  mergeMap,
+  of,
+  take,
+  takeUntil,
+  tap,
+} from &#x27;rxjs&#x27;;
+import {
+  extractEventNameFromId,
+  IReportDetails,
+  Recording,
+  Spec,
+} from &#x27;@utils&#x27;;
+import { MatExpansionModule } from &#x27;@angular/material/expansion&#x27;;
+import { RecordingService } from &#x27;../../../../shared/services/api/recording/recording.service&#x27;;
+import { MatFormFieldModule } from &#x27;@angular/material/form-field&#x27;;
+import { MatTooltipModule } from &#x27;@angular/material/tooltip&#x27;;
+import { ActivatedRoute } from &#x27;@angular/router&#x27;;
+import { SpecService } from &#x27;../../../../shared/services/api/spec/spec.service&#x27;;
+import { ReportService } from &#x27;../../../../shared/services/api/report/report.service&#x27;;
+import { EditorComponent } from &#x27;../../../../shared/components/editor/editor.component&#x27;;
+import { MatButtonModule } from &#x27;@angular/material/button&#x27;;
+import { EditorService } from &#x27;../../../../shared/services/editor/editor.service&#x27;;
+import { ErrorDialogComponent } from &#x27;../../../../shared/components/error-dialog/error-dialog.component&#x27;;
+import { Dialog } from &#x27;@angular/cdk/dialog&#x27;;
+@Component({
+  selector: &#x27;app-report-datail-panels&#x27;,
+  standalone: true,
+  imports: [
+    CommonModule,
+    MatIconModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatTooltipModule,
+    EditorComponent,
+    MatButtonModule,
+    ErrorDialogComponent,
+  ],
+  templateUrl: &#x27;./report-detail-panels.component.html&#x27;,
+  styleUrls: [&#x27;./report-detail-panels.component.scss&#x27;],
+  encapsulation: ViewEncapsulation.None,
+})
+export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
+  @Input() eventName!: string | undefined;
+  @Input() reportDetails$!: Observable&lt;IReportDetails | undefined&gt;;
+  recording$!: Observable&lt;Recording&gt;;
+  spec$!: Observable&lt;Spec&gt;;
+  destroy$ &#x3D; new Subject&lt;void&gt;();
+  specEdit &#x3D; false;
+  recordingEdit &#x3D; false;
+  specEditMode &#x3D; false;
+  recordingEditMode &#x3D; false;
+
+  constructor(
+    private recordingService: RecordingService,
+    private specService: SpecService,
+    public reportService: ReportService,
+    private route: ActivatedRoute,
+    private editorService: EditorService,
+    private dialog: Dialog
+  ) {}
+
+  ngOnInit() {
+    this.initializeDataStreams();
+  }
+
+  private initializeDataStreams() {
+    const projectSlug$ &#x3D;
+      this.route.parent?.params.pipe(map((params) &#x3D;&gt; params[&#x27;projectSlug&#x27;])) ||
+      of(&#x27;&#x27;);
+    const eventId$ &#x3D; this.route.params.pipe(map((params) &#x3D;&gt; params[&#x27;eventId&#x27;]));
+
+    // Combine projectSlug and eventName streams for use in spec$ and recording$ initializations
+    combineLatest([projectSlug$, eventId$])
+      .pipe(
+        takeUntil(this.destroy$),
+        tap(([projectSlug, eventId]) &#x3D;&gt; {
+          if (projectSlug &amp;&amp; eventId) {
+            // extract the eventName from the route params with regex
+            const eventName &#x3D; extractEventNameFromId(eventId);
+            this.spec$ &#x3D; this.specService.getSpec(projectSlug, eventName);
+            this.recording$ &#x3D; this.recordingService.getRecordingDetails(
+              projectSlug,
+              eventId
+            );
+          }
+        })
+      )
+      .subscribe();
+  }
+
+  switchSpecEditMode(event: Event) {
+    event.stopPropagation();
+
+    this.specEditMode &#x3D; !this.specEditMode;
+  }
+
+  switchRecordingEditMode(event: Event) {
+    event.stopPropagation();
+
+    this.recordingEditMode &#x3D; !this.recordingEditMode;
+  }
+
+  switchSpecEdit() {
+    this.specEdit &#x3D; !this.specEdit;
+  }
+
+  switchRecordingEdit() {
+    this.recordingEdit &#x3D; !this.recordingEdit;
+  }
+
+  onFileSelected(event: Event) {
+    const target &#x3D; event.target as HTMLInputElement;
+    const file: File | null &#x3D; target.files?.[0] || null;
+    if (file) {
+      this.reportService.readJsonFileContent(file);
+
+      this.reportService.fileContent$
+        .pipe(
+          take(1),
+          tap((data) &#x3D;&gt; {
+            if (data) {
+              this.editorService.setContent(
+                &#x27;recordingJson&#x27;,
+                JSON.stringify(data)
+              );
+            }
+          })
+        )
+        .subscribe();
+    }
+  }
+
+  onSpecUpdate() {
+    combineLatest([
+      this.route.parent?.params || of({ projectSlug: &#x27;&#x27; }),
+      this.route.params,
+      this.editorService.editor$.specJsonEditor,
+    ])
+      .pipe(
+        take(1),
+        map(([parentParams, params, specEditor]) &#x3D;&gt; {
+          const specContent &#x3D; specEditor.state.doc.toString();
+          const eventName &#x3D; params[&#x27;eventName&#x27;];
+          const projectSlug &#x3D; parentParams[&#x27;projectSlug&#x27;];
+
+          if (specContent &amp;&amp; projectSlug) {
+            return {
+              projectSlug,
+              eventName,
+              specContent,
+            };
+          } else {
+            this.dialog.open(ErrorDialogComponent, {
+              data: {
+                message: &#x27;Spec content is required and cannot be empty.&#x27;,
+              },
+            });
+            throw new Error(&#x27;Spec content is required and cannot be empty.&#x27;);
+          }
+        }),
+        mergeMap(({ projectSlug, eventName, specContent }) &#x3D;&gt; {
+          this.editorService.setContent(&#x27;specJson&#x27;, specContent);
+          return this.specService.updateSpec(
+            projectSlug,
+            eventName,
+            specContent
+          );
+        })
+      )
+      .subscribe();
+  }
+
+  onRecordingUpdate() {
+    combineLatest([
+      this.route.parent?.params || of({ projectSlug: &#x27;&#x27; }),
+      this.route.params,
+      this.editorService.editor$.recordingJsonEditor,
+    ])
+      .pipe(
+        take(1),
+        map(([parentParams, params, recordingEditor]) &#x3D;&gt; {
+          const projectSlug &#x3D; parentParams[&#x27;projectSlug&#x27;];
+          const eventId &#x3D; params[&#x27;eventId&#x27;];
+          const recordingContent &#x3D; recordingEditor.state.doc.toString();
+
+          if (parentParams &amp;&amp; projectSlug) {
+            return {
+              projectSlug,
+              eventId,
+              recordingContent,
+            };
+          } else {
+            this.dialog.open(ErrorDialogComponent, {
+              data: {
+                message: &#x27;Recording content is required and cannot be empty.&#x27;,
+              },
+            });
+            throw new Error(
+              &#x27;Recording content is required and cannot be empty.&#x27;
+            );
+          }
+        }),
+        mergeMap(({ projectSlug, eventId, recordingContent }) &#x3D;&gt; {
+          this.editorService.setContent(&#x27;recordingJson&#x27;, recordingContent);
+          return this.recordingService.updateRecording(
+            projectSlug,
+            eventId,
+            recordingContent
+          );
+        })
+      )
+      .subscribe();
+  }
+
+  onDownload() {
+    combineLatest([
+      this.route.parent?.params || of({ projectSlug: &#x27;&#x27; }),
+      this.route.params,
+    ])
+      .pipe(
+        takeUntil(this.destroy$),
+        tap(([parentParams, params]) &#x3D;&gt; {
+          const projectSlug &#x3D; parentParams[&#x27;projectSlug&#x27;];
+          const eventName &#x3D; params[&#x27;eventName&#x27;];
+
+          if (projectSlug &amp;&amp; eventName) {
+            return this.reportService.downloadFile(projectSlug, eventName);
+          } else {
+            this.dialog.open(ErrorDialogComponent, {
+              data: {
+                message: &#x27;Project slug and event name are required.&#x27;,
+              },
+            });
+            throw new Error(&#x27;Project slug and event name are required.&#x27;);
+          }
+        })
+      )
+      .subscribe();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+}
+</code></pre>
+    </div>
+
+    <div class="tab-pane fade " id="templateData">
+        <pre class="line-numbers"><code class="language-html">&lt;div class&#x3D;&quot;test-detail-panels&quot;&gt;
+  &lt;mat-accordion class&#x3D;&quot;.example-headers-align&quot; multi&gt;
+    &lt;mat-expansion-panel
+      hideToggle
+      (opened)&#x3D;&quot;switchSpecEdit()&quot;
+      (closed)&#x3D;&quot;switchSpecEdit()&quot;
+    &gt;
+      &lt;mat-expansion-panel-header&gt;
+        &lt;mat-panel-title&gt; DataLayer Spec &lt;/mat-panel-title&gt;
+        &lt;mat-panel-description&gt;
+          @if (specEdit &amp;&amp; !specEditMode) {
+          &lt;mat-icon (click)&#x3D;&quot;switchSpecEditMode($event)&quot;&gt;edit&lt;/mat-icon&gt;
+          }
+        &lt;/mat-panel-description&gt;
+      &lt;/mat-expansion-panel-header&gt;
+      &lt;mat-panel-description&gt;
+        @if (specEditMode) {
+        &lt;app-editor
+          [editorExtension]&#x3D;&quot;&#x27;specJson&#x27;&quot;
+          [content]&#x3D;&quot;spec$ | async | json&quot;
+          [editMode]&#x3D;&quot;true&quot;
+        &gt;&lt;/app-editor&gt;
+        } @else {
+        &lt;pre class&#x3D;&quot;json&quot;&gt;{{ spec$ | async | json }}&lt;/pre&gt;
+        }
+      &lt;/mat-panel-description&gt;
+      @if (specEditMode) {
+      &lt;mat-action-row&gt;
+        &lt;button
+          mat-raised-button
+          color&#x3D;&quot;primary&quot;
+          (click)&#x3D;&quot;onSpecUpdate(); switchSpecEditMode($event)&quot;
+        &gt;
+          Save
+        &lt;/button&gt;
+        &lt;button
+          mat-raised-button
+          color&#x3D;&quot;warn&quot;
+          (click)&#x3D;&quot;switchSpecEditMode($event)&quot;
+        &gt;
+          Cancel
+        &lt;/button&gt;
+      &lt;/mat-action-row&gt;
+      }
+    &lt;/mat-expansion-panel&gt;
+
+    &lt;mat-expansion-panel
+      hideToggle
+      (opened)&#x3D;&quot;switchRecordingEdit()&quot;
+      (closed)&#x3D;&quot;switchRecordingEdit()&quot;
+    &gt;
+      &lt;mat-expansion-panel-header&gt;
+        &lt;mat-panel-title&gt; Chrome Recording &lt;/mat-panel-title&gt;
+        &lt;mat-panel-description&gt;
+          @if (recordingEdit &amp;&amp; !recordingEditMode) {
+          &lt;mat-icon matTooltip&#x3D;&quot;Edit&quot; (click)&#x3D;&quot;switchRecordingEditMode($event)&quot;
+            &gt;edit&lt;/mat-icon
+          &gt;
+          &lt;input
+            hidden
+            (change)&#x3D;&quot;onFileSelected($event)&quot;
+            #fileInput
+            type&#x3D;&quot;file&quot;
+          /&gt;
+          }
+        &lt;/mat-panel-description&gt;
+      &lt;/mat-expansion-panel-header&gt;
+      &lt;mat-panel-description&gt;
+        @if(recordingEditMode &amp;&amp; (this.reportService.fileContent$ | async) !&#x3D;&#x3D;
+        null) {
+        &lt;!-- upload condition --&gt;
+        &lt;app-editor
+          [editorExtension]&#x3D;&quot;&#x27;recordingJson&#x27;&quot;
+          [content]&#x3D;&quot;this.reportService.fileContent$ | async | json&quot;
+        &gt;&lt;/app-editor&gt;
+        } @else if (recordingEditMode) {
+        &lt;!-- pure editting --&gt;
+        &lt;app-editor
+          [editorExtension]&#x3D;&quot;&#x27;recordingJson&#x27;&quot;
+          [content]&#x3D;&quot;recording$ | async | json&quot;
+          [editMode]&#x3D;&quot;true&quot;
+        &gt;&lt;/app-editor&gt;
+        } @else {
+        &lt;!-- otherwise, showing the info --&gt;
+        &lt;pre class&#x3D;&quot;json&quot;&gt;{{ recording$ | async | json }}&lt;/pre&gt;
+        }
+      &lt;/mat-panel-description&gt;
+      @if (recordingEditMode) {
+      &lt;mat-action-row&gt;
+        &lt;button mat-raised-button color&#x3D;&quot;primary&quot; (click)&#x3D;&quot;fileInput.click()&quot;&gt;
+          Upload
+        &lt;/button&gt;
+        &lt;input
+          hidden
+          (change)&#x3D;&quot;onFileSelected($event)&quot;
+          #fileInput
+          type&#x3D;&quot;file&quot;
+        /&gt;
+        &lt;button
+          mat-raised-button
+          color&#x3D;&quot;primary&quot;
+          (click)&#x3D;&quot;onRecordingUpdate(); switchRecordingEditMode($event)&quot;
+        &gt;
+          Save
+        &lt;/button&gt;
+        &lt;button
+          mat-raised-button
+          color&#x3D;&quot;warn&quot;
+          (click)&#x3D;&quot;switchRecordingEditMode($event)&quot;
+        &gt;
+          Cancel
+        &lt;/button&gt;
+      &lt;/mat-action-row&gt;
+      }
+    &lt;/mat-expansion-panel&gt;
+
+    &lt;mat-expansion-panel hideToggle&gt;
+      &lt;mat-expansion-panel-header&gt;
+        &lt;mat-panel-title&gt; Raw Request &lt;/mat-panel-title&gt;
+      &lt;/mat-expansion-panel-header&gt;
+      &lt;mat-panel-description&gt;
+        &lt;p&gt;{{ (reportDetails$ | async)?.rawRequest }}&lt;/p&gt;
+      &lt;/mat-panel-description&gt;
+    &lt;/mat-expansion-panel&gt;
+
+    &lt;mat-expansion-panel hideToggle&gt;
+      &lt;mat-expansion-panel-header&gt;
+        &lt;mat-panel-title&gt; Request Data Layer &lt;/mat-panel-title&gt;
+      &lt;/mat-expansion-panel-header&gt;
+      &lt;mat-panel-description&gt;
+        &lt;pre class&#x3D;&quot;json&quot;&gt;{{
+          (reportDetails$ | async)?.reformedDataLayer | json
+        }}&lt;/pre&gt;
+      &lt;/mat-panel-description&gt;
+    &lt;/mat-expansion-panel&gt;
+
+    &lt;mat-expansion-panel hideToggle&gt;
+      &lt;mat-expansion-panel-header&gt;
+        &lt;mat-panel-title&gt; Data Layer &lt;/mat-panel-title&gt;
+      &lt;/mat-expansion-panel-header&gt;
+      &lt;mat-panel-description&gt;
+        &lt;pre class&#x3D;&quot;json&quot;&gt;{{ (reportDetails$ | async)?.dataLayer | json }}&lt;/pre&gt;
+      &lt;/mat-panel-description&gt;
+      &lt;!-- &lt;mat-action-row
+        &gt;&lt;button mat-raised-button color&#x3D;&quot;success&quot; (click)&#x3D;&quot;onDownload()&quot;&gt;
+          Download
+        &lt;/button&gt;&lt;/mat-action-row
+      &gt; --&gt;
+    &lt;/mat-expansion-panel&gt;
+  &lt;/mat-accordion&gt;
+&lt;/div&gt;
+</code></pre>
+    </div>
+
+    <div class="tab-pane fade " id="styleData">
+                <p class="comment">
+                    <code>./report-detail-panels.component.scss</code>
+                </p>
+                <pre class="line-numbers"><code class="language-scss">.json {
+  overflow: auto;
+}
+
+.example-headers-align {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mat-expansion-panel-header-description {
+  align-items: center;
+  gap: 1rem;
+}
+</code></pre>
+    </div>
+
+    <div class="tab-pane fade " id="tree">
+        <div id="tree-container"></div>
+        <div class="tree-legend">
+            <div class="title">
+                <b>Legend</b>
+            </div>
+            <div>
+                <div class="color htmlelement"></div><span>Html element</span>
+            </div>
+            <div>
+                <div class="color component"></div><span>Component</span>
+            </div>
+            <div>
+                <div class="color directive"></div><span>Html element with directive</span>
+            </div>
+        </div>
+    </div>
+
+    
+</div>
+
+<script src="../js/libs/vis.min.js"></script>
+<script src="../js/libs/htmlparser.js"></script>
+<script src="../js/libs/deep-iterator.js"></script>
+<script>
+        var COMPONENT_TEMPLATE = '<div><div class="test-detail-panels">  <mat-accordion class=".example-headers-align" multi>    <mat-expansion-panel      hideToggle      (opened)="switchSpecEdit()"      (closed)="switchSpecEdit()"    >      <mat-expansion-panel-header>        <mat-panel-title> DataLayer Spec </mat-panel-title>        <mat-panel-description>          @if (specEdit && !specEditMode) {          <mat-icon (click)="switchSpecEditMode($event)">edit</mat-icon>          }        </mat-panel-description>      </mat-expansion-panel-header>      <mat-panel-description>        @if (specEditMode) {        <app-editor          [editorExtension]="\'specJson\'"          [content]="spec$ | async | json"          [editMode]="true"        ></app-editor>        } @else {        <pre class="json">{{ spec$ | async | json }}</pre>        }      </mat-panel-description>      @if (specEditMode) {      <mat-action-row>        <button          mat-raised-button          color="primary"          (click)="onSpecUpdate(); switchSpecEditMode($event)"        >          Save        </button>        <button          mat-raised-button          color="warn"          (click)="switchSpecEditMode($event)"        >          Cancel        </button>      </mat-action-row>      }    </mat-expansion-panel>    <mat-expansion-panel      hideToggle      (opened)="switchRecordingEdit()"      (closed)="switchRecordingEdit()"    >      <mat-expansion-panel-header>        <mat-panel-title> Chrome Recording </mat-panel-title>        <mat-panel-description>          @if (recordingEdit && !recordingEditMode) {          <mat-icon matTooltip="Edit" (click)="switchRecordingEditMode($event)"            >edit</mat-icon          >          <input            hidden            (change)="onFileSelected($event)"            #fileInput            type="file"          />          }        </mat-panel-description>      </mat-expansion-panel-header>      <mat-panel-description>        @if(recordingEditMode && (this.reportService.fileContent$ | async) !==        null) {        <!-- upload condition -->        <app-editor          [editorExtension]="\'recordingJson\'"          [content]="this.reportService.fileContent$ | async | json"        ></app-editor>        } @else if (recordingEditMode) {        <!-- pure editting -->        <app-editor          [editorExtension]="\'recordingJson\'"          [content]="recording$ | async | json"          [editMode]="true"        ></app-editor>        } @else {        <!-- otherwise, showing the info -->        <pre class="json">{{ recording$ | async | json }}</pre>        }      </mat-panel-description>      @if (recordingEditMode) {      <mat-action-row>        <button mat-raised-button color="primary" (click)="fileInput.click()">          Upload        </button>        <input          hidden          (change)="onFileSelected($event)"          #fileInput          type="file"        />        <button          mat-raised-button          color="primary"          (click)="onRecordingUpdate(); switchRecordingEditMode($event)"        >          Save        </button>        <button          mat-raised-button          color="warn"          (click)="switchRecordingEditMode($event)"        >          Cancel        </button>      </mat-action-row>      }    </mat-expansion-panel>    <mat-expansion-panel hideToggle>      <mat-expansion-panel-header>        <mat-panel-title> Raw Request </mat-panel-title>      </mat-expansion-panel-header>      <mat-panel-description>        <p>{{ (reportDetails$ | async)?.rawRequest }}</p>      </mat-panel-description>    </mat-expansion-panel>    <mat-expansion-panel hideToggle>      <mat-expansion-panel-header>        <mat-panel-title> Request Data Layer </mat-panel-title>      </mat-expansion-panel-header>      <mat-panel-description>        <pre class="json">{{          (reportDetails$ | async)?.reformedDataLayer | json        }}</pre>      </mat-panel-description>    </mat-expansion-panel>    <mat-expansion-panel hideToggle>      <mat-expansion-panel-header>        <mat-panel-title> Data Layer </mat-panel-title>      </mat-expansion-panel-header>      <mat-panel-description>        <pre class="json">{{ (reportDetails$ | async)?.dataLayer | json }}</pre>      </mat-panel-description>      <!-- <mat-action-row        ><button mat-raised-button color="success" (click)="onDownload()">          Download        </button></mat-action-row      > -->    </mat-expansion-panel>  </mat-accordion></div></div>'
+    var COMPONENTS = [{'name': 'AppComponent', 'selector': 'app-root'},{'name': 'ApplicationFormComponent', 'selector': 'app-application-form'},{'name': 'AuthenticationFormComponent', 'selector': 'app-authentication-form'},{'name': 'BrowserFormComponent', 'selector': 'app-browser-form'},{'name': 'DetailViewComponent', 'selector': 'app-detail-view'},{'name': 'EditorComponent', 'selector': 'app-editor'},{'name': 'EntryComponent', 'selector': 'app-entry'},{'name': 'ErrorDialogComponent', 'selector': 'app-error-dialog'},{'name': 'GtmFormComponent', 'selector': 'app-gtm-form'},{'name': 'HelpCenterComponent', 'selector': 'app-help-center-view'},{'name': 'HomeViewComponent', 'selector': 'app-home-view'},{'name': 'InitProjectFormComponent', 'selector': 'app-init-project-form'},{'name': 'InitProjectViewComponent', 'selector': 'app-init-project-view'},{'name': 'MainContentComponent', 'selector': 'app-contents'},{'name': 'NewReportViewComponent', 'selector': 'app-new-report-view'},{'name': 'ProjectInfoFormComponent', 'selector': 'app-project-info-form'},{'name': 'ProjectIoFormComponent', 'selector': 'app-project-io-form'},{'name': 'ProjectItemComponent', 'selector': 'app-project-item'},{'name': 'ProjectListComponent', 'selector': 'app-project-list'},{'name': 'ProjectViewComponent', 'selector': 'app-project-view'},{'name': 'ReportDetailPanelsComponent', 'selector': 'app-report-datail-panels'},{'name': 'ReportTableComponent', 'selector': 'app-report-table'},{'name': 'ReportTableToolbarComponent', 'selector': 'app-report-table-toolbar'},{'name': 'ReportViewComponent', 'selector': 'app-project-view'},{'name': 'RootFormComponent', 'selector': 'app-root-form'},{'name': 'SettingsViewComponent', 'selector': 'app-project-view'},{'name': 'SideBarComponent', 'selector': 'app-side-bar'},{'name': 'SideNavListComponent', 'selector': 'app-side-nav-list'},{'name': 'SnackBarComponent', 'selector': ''},{'name': 'TagBuildViewComponent', 'selector': 'app-tag-build-view'},{'name': 'ToolbarComponent', 'selector': 'app-toolbar'}];
+    var DIRECTIVES = [];
+    var ACTUAL_COMPONENT = {'name': 'ReportDetailPanelsComponent'};
+</script>
+<script src="../js/tree.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                   </div><div class="search-results">
+    <div class="has-results">
+        <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+        <ul class="search-results-list"></ul>
+    </div>
+    <div class="no-results">
+        <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+    </div>
+</div>
+</div>
+               <!-- END CONTENT -->
+           </div>
+       </div>
+
+          <label class="dark-mode-switch">
+               <input type="checkbox">
+               <span class="slider">
+                    <svg class="slider-icon" viewBox="0 0 24 24" fill="none" height="20" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                    </svg>
+               </span>
+          </label>
+
+       <script>
+            var COMPODOC_CURRENT_PAGE_DEPTH = 1;
+            var COMPODOC_CURRENT_PAGE_CONTEXT = 'component';
+            var COMPODOC_CURRENT_PAGE_URL = 'ReportDetailPanelsComponent.html';
+            var MAX_SEARCH_RESULTS = 15;
+       </script>
+
+       <script>
+               $darkModeToggleSwitchers = document.querySelectorAll('.dark-mode-switch input');
+               checkToggle(darkModeState);
+               if ($darkModeToggleSwitchers.length > 0) {
+                    for (var i = 0; i < $darkModeToggleSwitchers.length; i++) {
+                         $darkModeToggleSwitchers[i].addEventListener('change', function (event) {
+                              darkModeState = !darkModeState;
+                              toggleDarkMode(darkModeState);
+                         });
+                    }
+               }
+          </script>
+
+       <script src="../js/libs/custom-elements.min.js"></script>
+       <script src="../js/libs/lit-html.js"></script>
+
+       <script src="../js/menu-wc.js" defer></script>
+       <script nomodule src="../js/menu-wc_es5.js" defer></script>
+
+       <script src="../js/libs/bootstrap-native.js"></script>
+
+       <script src="../js/libs/es6-shim.min.js"></script>
+       <script src="../js/libs/EventDispatcher.js"></script>
+       <script src="../js/libs/promise.min.js"></script>
+       <script src="../js/libs/zepto.min.js"></script>
+
+       <script src="../js/compodoc.js"></script>
+
+       <script src="../js/tabs.js"></script>
+       <script src="../js/menu.js"></script>
+       <script src="../js/libs/clipboard.min.js"></script>
+       <script src="../js/libs/prism.js"></script>
+       <script src="../js/sourceCode.js"></script>
+          <script src="../js/search/search.js"></script>
+          <script src="../js/search/lunr.min.js"></script>
+          <script src="../js/search/search-lunr.js"></script>
+          <script src="../js/search/search_index.js"></script>
+       <script src="../js/lazy-load-graphs.js"></script>
+
+
+    </body>
+</html>

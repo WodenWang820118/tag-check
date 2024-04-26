@@ -30,7 +30,9 @@
     "ng-app": "concurrently \"http-server ./dist/apps/ng-frontend/browser -p 5000 --cors\" \"node ./dist/apps/nest-backend/main.js\"",
     "packager-ng": "cross-env-shell NODE_ENV=ng-frontend \"npm run build-ng && electron-forge package\"",
     "start": "electron-forge start",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "compodoc-ng-frontend": "npx compodoc -p apps/ng-frontend/tsconfig.doc.json -n \"ng-frontend\" --theme material -s",
+    "ngd-ng-frontend": "npx ngd -p apps/ng-frontend/tsconfig.doc.json -o"
   },
   "private": true,
   "devDependencies": {
@@ -93,6 +95,7 @@
     "webpack-merge": "^5.10.0"
   },
   "dependencies": {
+    "-": "^0.0.1",
     "@angular/animations": "~17.1.0",
     "@angular/cdk": "~17.1.2",
     "@angular/common": "~17.1.0",
@@ -104,6 +107,7 @@
     "@angular/platform-browser-dynamic": "~17.1.0",
     "@angular/router": "~17.1.0",
     "@codemirror/lang-json": "^6.0.1",
+    "@compodoc/compodoc": "^1.1.24",
     "@nestjs/axios": "^3.0.0",
     "@nestjs/common": "^10.0.2",
     "@nestjs/config": "^3.1.1",
@@ -129,6 +133,7 @@
     "puppeteer": "^22.6.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
+    "save-dev": "^0.0.1-security",
     "sequelize": "^6.35.2",
     "sequelize-typescript": "^2.1.6",
     "sqlite3": "^5.1.6",
