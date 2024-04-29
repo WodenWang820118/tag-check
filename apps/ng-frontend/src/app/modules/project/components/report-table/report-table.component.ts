@@ -2,13 +2,6 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
-import {
-  animate,
-  state,
-  style,
-  transition,
-  trigger,
-} from '@angular/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { EMPTY, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
 import { IReportDetails } from '@utils';
@@ -44,16 +37,6 @@ import { ProjectFacadeService } from './../../../../shared/services/facade/proje
     DataSourceFacadeService,
     TestRunningFacadeService,
   ],
-  animations: [
-    trigger('detailExpand', [
-      state('collapsed,void', style({ height: '0px', minHeight: '0' })),
-      state('expanded', style({ height: '*' })),
-      transition(
-        'expanded <=> collapsed',
-        animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')
-      ),
-    ]),
-  ],
   templateUrl: './report-table.component.html',
   styleUrls: ['./report-table.component.scss'],
 })
@@ -65,7 +48,7 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
     'requestPassed',
     'completedTime',
   ];
-  columnsToDisplayWithExpand = ['select', ...this.columnsToDisplay, 'expand'];
+  columnsToDisplayWithExpand = ['select', ...this.columnsToDisplay, 'actions'];
   expandedElement: Report | null = null;
   testDataSource!: MatTableDataSource<IReportDetails>;
   selection = new SelectionModel<IReportDetails>(true, []);
