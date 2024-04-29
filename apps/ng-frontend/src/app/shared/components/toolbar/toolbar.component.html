@@ -2,6 +2,15 @@
   <mat-toolbar-row>
     <span [routerLink]="['/']" style="cursor: pointer">TagCheck</span>
     <span class="example-spacer"></span>
-    <span [routerLink]="['/topics']" style="cursor: pointer">Help Center</span>
+    <button mat-icon-button [matMenuTriggerFor]="globalSetting">
+      <mat-icon>settings</mat-icon>
+    </button>
+    <button mat-icon-button [routerLink]="['/topics']" style="cursor: pointer">
+      <mat-icon>help_outline</mat-icon>
+    </button>
   </mat-toolbar-row>
 </mat-toolbar>
+
+<mat-menu #globalSetting="matMenu">
+  <button mat-menu-item [routerLink]="['/global-settings']">Settings</button>
+</mat-menu>
