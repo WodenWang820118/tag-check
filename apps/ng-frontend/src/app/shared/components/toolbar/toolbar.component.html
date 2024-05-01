@@ -1,5 +1,10 @@
 <mat-toolbar>
   <mat-toolbar-row>
+    @if (this.snav) {
+    <button mat-icon-button (click)="snav.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    }
     <span [routerLink]="['/']" style="cursor: pointer">TagCheck</span>
     <span class="example-spacer"></span>
     <button mat-icon-button [matMenuTriggerFor]="globalSetting">

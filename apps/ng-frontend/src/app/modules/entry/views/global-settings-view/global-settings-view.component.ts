@@ -15,6 +15,7 @@ import { RootFormComponent } from '../../../../shared/components/root-form/root-
   styles: `
     .global-settings {
       padding: 5rem 10rem;
+      justify-content: center;
       display: flex;
       height: 100%;
     }

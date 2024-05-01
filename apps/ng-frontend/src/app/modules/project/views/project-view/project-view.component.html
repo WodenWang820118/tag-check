@@ -1,13 +1,12 @@
 <div class="project-view">
   <app-toolbar
     [title]="(project$ | async)?.settings?.projectName"
+    [snav]="snav"
   ></app-toolbar>
-  <mat-sidenav-container
-    class="project-view__sidenav-container"
-    [hasBackdrop]="false"
-  >
+
+  <mat-sidenav-container class="project-view__sidenav-container">
     <mat-sidenav #snav opened [mode]="'over'" fixedTopGap="56">
-      <app-side-nav-list></app-side-nav-list>
+      <app-side-nav-list [snav]="snav"></app-side-nav-list>
     </mat-sidenav>
 
     <mat-sidenav-content>

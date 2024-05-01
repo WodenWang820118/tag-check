@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSidenav } from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-toolbar',
@@ -22,4 +23,5 @@ import { MatMenuModule } from '@angular/material/menu';
 })
 export class ToolbarComponent {
   @Input() title!: string | undefined;
+  @Input() snav!: MatSidenav | undefined;
 }

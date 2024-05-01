@@ -6,7 +6,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { Observable, Subject, takeUntil, tap } from 'rxjs';
-import { ProjectSetting, ProjectInfo } from '@utils';
+import { ProjectSetting } from '@utils';
 import { ReportTableComponent } from '../../components/report-table/report-table.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -37,7 +37,6 @@ import { SettingsService } from '../../../../shared/services/api/settings/settin
 })
 export class ProjectViewComponent implements OnInit, OnDestroy {
   project$!: Observable<ProjectSetting>;
-  projects$!: Observable<ProjectInfo[]>;
   destroy$ = new Subject<void>();
   hover = false;
 
@@ -59,8 +58,6 @@ export class ProjectViewComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe();
-
-    this.projects$ = this.projectInfoService.getProjects();
   }
 
   switchHover() {
