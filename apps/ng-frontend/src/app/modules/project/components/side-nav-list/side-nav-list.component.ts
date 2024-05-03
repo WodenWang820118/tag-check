@@ -74,6 +74,7 @@ export class SideNavListComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         tap((params) => {
+          this.items = []; // reset items
           const projectSlug = params['projectSlug'];
           this.items.push({
             icon: 'home',
