@@ -6,6 +6,25 @@
     </button>
     }
     <span [routerLink]="['/']" style="cursor: pointer">TagCheck</span>
+
+    @if (this.snav && this.settings && this.projects) {
+    <mat-form-field
+      appearance="outline"
+      style="margin-left: 1rem; margin-top: 20px"
+    >
+      <mat-label>Project</mat-label>
+      <mat-select
+        [(value)]="this.settings.projectSlug"
+        (valueChange)="this.onChangeProject($event)"
+      >
+        @for (project of projects; track project.projectSlug) {
+        <mat-option [value]="project.projectSlug">{{
+          project.projectName
+        }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    }
     <span class="example-spacer"></span>
     <button mat-icon-button [matMenuTriggerFor]="globalSetting">
       <mat-icon>settings</mat-icon>
