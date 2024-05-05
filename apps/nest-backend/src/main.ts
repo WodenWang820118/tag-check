@@ -21,11 +21,14 @@ async function bootstrap() {
           from.module.name === 'ConfigHostModule' ||
           from.module.name === 'LoggerModule' ||
           to.module.name === 'ConfigHostModule' ||
-          to.module.name === 'LoggerModule'
+          to.module.name === 'LoggerModule' ||
+          to.module.name === 'SequelizeModule' ||
+          to.module.name === 'SequelizeCoreModule' ||
+          to.module.name === 'ConfigModule'
         )
     )
     .map(({ from, to }) => `${from.module.name}-->${to.module.name}`);
-  // console.log(`graph TD\n\t${mermaidEdges.join('\n\t')}`);
+  console.log(`graph TD\n\t${mermaidEdges.join('\n\t')}`);
 
   // 2. Copy and paste the log content in "https://mermaid.live/"
 

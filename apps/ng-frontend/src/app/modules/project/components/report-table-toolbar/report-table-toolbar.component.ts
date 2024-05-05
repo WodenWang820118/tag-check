@@ -11,6 +11,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ProjectDataSourceService } from '../../../../shared/services/project-data-source/project-data-source.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  MatButtonToggleChange,
+  MatButtonToggleModule,
+} from '@angular/material/button-toggle';
 
 @Component({
   selector: 'app-report-table-toolbar',
@@ -28,12 +32,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     MatFormFieldModule,
     FormsModule,
     ReactiveFormsModule,
+    MatButtonToggleModule,
   ],
   templateUrl: './report-table-toolbar.component.html',
   styleUrls: ['./report-table-toolbar.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
 export class ReportTableToolbarComponent implements OnDestroy {
+  isSearchVisible = false;
   destroy$ = new Subject<void>();
   constructor(private dataSourceService: ProjectDataSourceService) {}
 
@@ -48,6 +54,13 @@ export class ReportTableToolbarComponent implements OnDestroy {
 
   preventNavigationSelected() {
     this.dataSourceService.preventNavigationSelected();
+  }
+
+  onToggleChange(event: MatButtonToggleChange) {
+    console.log(event.value);
+    if (event.value === 'search') {
+      this.isSearchVisible = !this.isSearchVisible;
+    }
   }
 
   ngOnDestroy() {
