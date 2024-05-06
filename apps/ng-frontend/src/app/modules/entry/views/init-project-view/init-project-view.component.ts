@@ -1,36 +1,13 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { InitProjectFormComponent } from '../../components/init-project-form/init-project-form.component';
-import {
-  FormBuilder,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { FormBuilder, Validators } from '@angular/forms';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
-import { MatCardModule } from '@angular/material/card';
 import { Subject, takeUntil, tap } from 'rxjs';
-import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { RootFormComponent } from '../../../../shared/components/root-form/root-form.component';
 
 @Component({
   selector: 'app-init-project-view',
   standalone: true,
-  imports: [
-    CommonModule,
-    InitProjectFormComponent,
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatCardModule,
-    MatButtonModule,
-    MatTooltipModule,
-    RootFormComponent,
-  ],
+  imports: [InitProjectFormComponent],
   templateUrl: `./init-project-view.component.html`,
   styles: `
     .init-project {

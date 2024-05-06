@@ -1,14 +1,16 @@
 import {
   Component,
+  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
+  Output,
   ViewEncapsulation,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subject, takeUntil, tap } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
@@ -20,44 +22,22 @@ import { MatSidenav } from '@angular/material/sidenav';
   selector: 'app-side-nav-list',
   standalone: true,
   imports: [
-    CommonModule,
+    NgIf,
     MatListModule,
     MatIconModule,
-    RouterModule,
+    RouterLink,
     MatMenuModule,
     OverlayModule,
     OverlayComponent,
     MatButtonModule,
   ],
   templateUrl: './side-nav-list.component.html',
-  styles: `
-    .sub-list-item {
-      height: 30px !important;
-    }
-
-    .sub-list-item .mat-mdc-list-item-title {
-      font-size: 14px !important;
-    }
-
-    .mat-list-item-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 4rem;
-    }
-
-    .spacer {
-      flex: 1 1 0;
-    }
-
-    .btn-chevron {
-      scale: 0.7;
-    }
-  `,
+  styleUrls: ['./side-nav-list.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
 export class SideNavListComponent implements OnInit, OnDestroy {
   @Input() snav!: MatSidenav;
+  @Output() menuClick = new EventEmitter();
   items: {
     icon: string;
     title: string;
@@ -108,6 +88,10 @@ export class SideNavListComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe();
+  }
+
+  onMenuClick() {
+    this.menuClick.emit();
   }
 
   ngOnDestroy() {

@@ -1,35 +1,14 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { EMPTY, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSelectModule } from '@angular/material/select';
-import { MatOptionModule } from '@angular/material/core';
-import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
 
 @Component({
   selector: 'app-project-io-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatTooltipModule,
-    ReactiveFormsModule,
-    FormsModule,
-    MatSelectModule,
-    MatOptionModule,
-  ],
+  imports: [MatButtonModule, MatCardModule],
   templateUrl: './project-io-form.component.html',
   styleUrls: ['./project-io-form.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -38,8 +17,6 @@ export class ProjectIoFormComponent implements OnDestroy {
   destroy$ = new Subject<void>();
 
   constructor(
-    private fb: FormBuilder,
-    private settingsService: SettingsService,
     private route: ActivatedRoute,
     private projectIoService: ProjectIoService
   ) {}

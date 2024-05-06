@@ -1,12 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { ProjectInfo } from '@utils';
 
 @Component({
   selector: 'app-project-item',
   standalone: true,
-  imports: [CommonModule, MatCardModule],
+  imports: [MatCardModule],
   template: `
     <div class="project-item">
       <mat-card appearance="outlined">

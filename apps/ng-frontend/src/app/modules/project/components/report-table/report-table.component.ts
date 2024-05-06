@@ -1,11 +1,11 @@
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
 import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { EMPTY, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
 import { IReportDetails } from '@utils';
-import { ActivatedRoute, Params, RouterModule } from '@angular/router';
+import { ActivatedRoute, Params, RouterLink } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
@@ -21,11 +21,13 @@ import { ProjectFacadeService } from './../../../../shared/services/facade/proje
   selector: 'app-report-table',
   standalone: true,
   imports: [
-    CommonModule,
+    AsyncPipe,
+    DatePipe,
+    NgClass,
     MatTableModule,
     MatIconModule,
     MatButtonModule,
-    RouterModule,
+    RouterLink,
     MatPaginatorModule,
     MatInputModule,
     MatCheckboxModule,

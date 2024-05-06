@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { ToolbarComponent } from './shared/components/toolbar/toolbar.component';
 
 @Component({
   standalone: true,
-  imports: [RouterModule, ToolbarComponent],
+  imports: [RouterOutlet, ToolbarComponent],
   selector: 'app-root',
   template: `
     <app-toolbar></app-toolbar>
@@ -12,5 +12,5 @@ import { ToolbarComponent } from './shared/components/toolbar/toolbar.component'
   `,
 })
 export class AppComponent {
-  title = 'ng-frontend';
+  title = 'Tag Check';
 }

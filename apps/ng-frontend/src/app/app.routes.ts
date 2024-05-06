@@ -2,20 +2,18 @@ import { Route } from '@angular/router';
 
 export const APP_ROUTES: Route[] = [
   {
-    path: '',
-    loadChildren: () =>
-      import('./modules/entry/entry.module').then((m) => m.EntryModule),
-  },
-  {
     path: 'topics',
     loadChildren: () =>
-      import('./modules/help-center/help-center.module').then(
-        (m) => m.HelpCenterModule
-      ),
+      import('./modules/help-center/routes').then((m) => m.HELP_CENTER_ROUTES),
   },
   {
     path: 'projects/:projectSlug',
     loadChildren: () =>
-      import('./modules/project/project.module').then((m) => m.ProjectModule),
+      import('./modules/project/routes').then((m) => m.PROJECT_ROUTES),
+  },
+  {
+    path: '',
+    loadChildren: () =>
+      import('./modules/entry/routes').then((m) => m.ENTRY_ROUTES),
   },
 ];
