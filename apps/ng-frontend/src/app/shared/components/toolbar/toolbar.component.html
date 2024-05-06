@@ -7,7 +7,8 @@
     }
     <span [routerLink]="['/']" style="cursor: pointer">TagCheck</span>
 
-    @if (this.snav && this.settings && this.projects) {
+    @defer (when this.snav && this.settings && this.projects) { @if (this.snav
+    && this.settings && this.projects) {
     <mat-form-field
       appearance="outline"
       style="margin-left: 1rem; margin-top: 20px"
@@ -24,7 +25,7 @@
         }
       </mat-select>
     </mat-form-field>
-    }
+    } }
     <span class="example-spacer"></span>
     <button mat-icon-button [matMenuTriggerFor]="globalSetting">
       <mat-icon>settings</mat-icon>
