@@ -1,6 +1,6 @@
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ProjectItemComponent } from '../project-item/project-item.component';
 import { MatCardModule } from '@angular/material/card';
 import { Observable } from 'rxjs';
@@ -9,12 +9,13 @@ import { ProjectInfo } from '@utils';
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [CommonModule, ProjectItemComponent, MatCardModule, RouterModule],
+  imports: [AsyncPipe, ProjectItemComponent, MatCardModule, RouterLink],
   template: `
     <div class="project-list">
       <div class="project-list__items">
         <div class="project-list__new" [routerLink]="['init-project']">
           <!-- TODO: icons and message to prompt user to create a new project -->
+          <!-- TODO: upload project feature -->
           <mat-card>
             <mat-card-header>
               <mat-card-title>New Project</mat-card-title>

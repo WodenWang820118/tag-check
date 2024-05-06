@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
+import { Location } from '@angular/common';
 import {
   Subject,
   combineLatest,
@@ -18,7 +18,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
@@ -35,13 +35,11 @@ import { v4 as uuidv4 } from 'uuid';
   selector: 'app-new-report-view',
   standalone: true,
   imports: [
-    CommonModule,
     MatFormFieldModule,
     FormsModule,
     ReactiveFormsModule,
     MatInputModule,
     MatButtonModule,
-    RouterModule,
     EditorComponent,
     ErrorDialogComponent,
   ],

@@ -1,7 +1,7 @@
 <div class="side-nav-list">
   <mat-nav-list>
     @for (item of items; track item.icon) { @if (item.title !== 'Settings') {
-    <mat-list-item [routerLink]="item.link">
+    <mat-list-item [routerLink]="item.link" (click)="onMenuClick()">
       <div class="mat-list-item-content">
         <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
         <span>{{ item.title }}</span>
@@ -27,19 +27,39 @@
     </mat-list-item>
     <app-overlay [trigger]="trigger" [isOpen]="isOpen">
       <mat-nav-list class="mat-elevation-z8" style="background-color: white">
-        <mat-list-item class="sub-list-item">
+        <mat-list-item
+          class="sub-list-item"
+          [routerLink]="['./', 'project-info']"
+          (click)="isOpen = false; onMenuClick()"
+        >
           <div matListItemTitle>Project Information</div>
         </mat-list-item>
-        <mat-list-item class="sub-list-item">
+        <mat-list-item
+          class="sub-list-item"
+          [routerLink]="['./', 'pre-loading-values']"
+          (click)="isOpen = false; onMenuClick()"
+        >
           <div matListItemTitle>Preloading Values</div>
         </mat-list-item>
-        <mat-list-item class="sub-list-item">
+        <mat-list-item
+          class="sub-list-item"
+          [routerLink]="['./', 'authentication']"
+          (click)="isOpen = false; onMenuClick()"
+        >
           <div matListItemTitle>Authentication</div>
         </mat-list-item>
-        <mat-list-item class="sub-list-item">
+        <mat-list-item
+          class="sub-list-item"
+          [routerLink]="['./', 'gtm']"
+          (click)="isOpen = false; onMenuClick()"
+        >
           <div matListItemTitle>GTM Mode</div>
         </mat-list-item>
-        <mat-list-item class="sub-list-item">
+        <mat-list-item
+          class="sub-list-item"
+          [routerLink]="['./', 'advanced-browser-settings']"
+          (click)="isOpen = false; onMenuClick()"
+        >
           <div matListItemTitle>Advanced Browser</div>
         </mat-list-item>
       </mat-nav-list>

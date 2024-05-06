@@ -1,8 +1,7 @@
 import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatListModule } from '@angular/material/list';
+import { NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,13 +19,11 @@ import {
   selector: 'app-report-table-toolbar',
   standalone: true,
   imports: [
-    CommonModule,
-    MatListModule,
+    NgIf,
+    RouterLink,
     MatIconModule,
-    RouterModule,
     MatToolbarModule,
     MatButtonModule,
-    RouterModule,
     MatTooltipModule,
     MatInputModule,
     MatFormFieldModule,

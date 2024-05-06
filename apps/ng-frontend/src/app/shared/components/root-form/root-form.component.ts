@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -7,20 +6,17 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfigurationService } from '../../services/api/configuration/configuration.service';
 
 @Component({
   selector: 'app-root-form',
   standalone: true,
   imports: [
-    CommonModule,
     MatIconModule,
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatTooltipModule,
     ReactiveFormsModule,
     FormsModule,
   ],
@@ -40,13 +36,7 @@ import { ConfigurationService } from '../../services/api/configuration/configura
             <input matInput placeholder="D:\\projects" formControlName="name" />
           </mat-form-field>
           <mat-card-actions align="end" style="gap: 1rem">
-            <button
-              mat-raised-button
-              color="warn"
-              matTooltip="Reset and configure new root path"
-              [matTooltipPosition]="'below'"
-              (click)="onResetRoot()"
-            >
+            <button mat-raised-button color="warn" (click)="onResetRoot()">
               Reset
             </button>
             <button mat-raised-button color="primary" (click)="onFormSubmit()">

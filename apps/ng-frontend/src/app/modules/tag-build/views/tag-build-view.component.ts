@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { Observable, of, Subject, switchMap, takeUntil } from 'rxjs';
 import { TagBuildPageComponent } from '@ui';
@@ -9,7 +9,7 @@ import { SpecService } from '../../../shared/services/api/spec/spec.service';
 @Component({
   selector: 'app-tag-build-view',
   standalone: true,
-  imports: [CommonModule, TagBuildPageComponent],
+  imports: [AsyncPipe, TagBuildPageComponent],
   template: `<lib-tag-build-page
     [projectSpecs]="projectSpec$ | async"
   ></lib-tag-build-page>`,

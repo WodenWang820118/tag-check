@@ -1,10 +1,10 @@
 import { ProjectInfo, Setting } from '@utils';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenav } from '@angular/material/sidenav';
 import { MatSelectModule } from '@angular/material/select';
@@ -13,11 +13,11 @@ import { MatSelectModule } from '@angular/material/select';
   selector: 'app-toolbar',
   standalone: true,
   imports: [
-    CommonModule,
+    NgIf,
     MatToolbarModule,
     MatIconModule,
     MatButtonModule,
-    RouterModule,
+    RouterLink,
     MatMenuModule,
     MatSelectModule,
   ],

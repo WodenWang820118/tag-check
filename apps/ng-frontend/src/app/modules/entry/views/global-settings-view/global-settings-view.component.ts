@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RootFormComponent } from '../../../../shared/components/root-form/root-form.component';
 
 @Component({
   selector: 'app-global-settings-view',
   standalone: true,
-  imports: [CommonModule, RootFormComponent],
+  imports: [RootFormComponent],
   template: `
     <div class="global-settings">
       <!-- TODO: the root form doesn't get the current root folder -->

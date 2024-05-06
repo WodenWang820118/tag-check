@@ -1,5 +1,4 @@
-import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Component, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { MatTreeNestedDataSource, MatTreeModule } from '@angular/material/tree';
@@ -11,13 +10,7 @@ import { TopicNode, TREE_DATA } from '../../tree-data';
 @Component({
   selector: 'app-side-bar',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatTreeModule,
-    MatIconModule,
-    MatButtonModule,
-    RouterModule,
-  ],
+  imports: [MatTreeModule, MatIconModule, MatButtonModule, RouterLink],
   templateUrl: 'side-bar.component.html',
   styleUrls: ['side-bar.component.scss'],
 })
