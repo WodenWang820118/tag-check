@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import {
   ReactiveFormsModule,
@@ -11,9 +11,8 @@ import {
 
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
 import { EMPTY, Subject, switchMap, takeUntil, tap } from 'rxjs';
@@ -25,15 +24,14 @@ import { InstantErrorStateMatcher } from './helper';
   selector: 'app-init-project-form',
   standalone: true,
   imports: [
-    CommonModule,
+    NgIf,
     MatCardModule,
     ReactiveFormsModule,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
     MatButtonModule,
-    RouterModule,
+    RouterLink,
     ErrorDialogComponent,
   ],
   templateUrl: `./init-project-form.component.html`,
@@ -41,7 +39,6 @@ import { InstantErrorStateMatcher } from './helper';
 })
 export class InitProjectFormComponent implements OnInit, OnDestroy {
   projectForm: FormGroup;
-  testType = ['Data layer checker'];
   allowedSymbolsPattern = /^[a-zA-Z0-9-!'",\s]+$/;
   validProjectNameMatcher: InstantErrorStateMatcher;
 

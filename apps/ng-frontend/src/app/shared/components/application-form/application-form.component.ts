@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,10 +15,7 @@ import {
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-import {
-  CookieData,
-  LocalStorageData,
-} from '../../../../../../../libs/utils/src/lib/interfaces/setting.interface';
+import { CookieData, LocalStorageData } from '@utils';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
 
@@ -26,7 +23,7 @@ import { ActivatedRoute } from '@angular/router';
   selector: 'app-application-form',
   standalone: true,
   imports: [
-    CommonModule,
+    NgIf,
     MatIconModule,
     MatButtonModule,
     MatCardModule,
