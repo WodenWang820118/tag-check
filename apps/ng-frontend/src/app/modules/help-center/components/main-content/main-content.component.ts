@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, tap } from 'rxjs';
@@ -7,7 +6,7 @@ import { MarkdownModule } from 'ngx-markdown';
 @Component({
   selector: 'app-contents',
   standalone: true,
-  imports: [CommonModule, MarkdownModule],
+  imports: [MarkdownModule],
   template: `<markdown [src]="fileName"></markdown> `,
   styles: [``],
 })

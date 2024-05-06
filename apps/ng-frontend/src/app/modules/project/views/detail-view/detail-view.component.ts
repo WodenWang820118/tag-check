@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, NgIf } from '@angular/common';
 import {
   Observable,
   Subscription,
@@ -20,7 +20,8 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'app-detail-view',
   standalone: true,
   imports: [
-    CommonModule,
+    AsyncPipe,
+    NgIf,
     ReportDetailPanelsComponent,
     BlobToUrlPipe,
     MatIconModule,

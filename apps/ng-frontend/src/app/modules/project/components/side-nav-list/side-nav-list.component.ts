@@ -1,68 +1,51 @@
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewEncapsulation,
+} from '@angular/core';
+import { NgIf } from '@angular/common';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subject, takeUntil, tap } from 'rxjs';
+import { MatMenuModule } from '@angular/material/menu';
+import { OverlayModule } from '@angular/cdk/overlay';
+import { OverlayComponent } from '../overlay/overlay.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSidenav } from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-side-nav-list',
   standalone: true,
-  imports: [CommonModule, MatListModule, MatIconModule, RouterModule],
-  template: `
-    <div class="side-nav-list">
-      <mat-nav-list>
-        @for (item of items; track item.icon) {
-        <a
-          mat-list-item
-          [routerLink]="item.link"
-          (mouseover)="switchHover()"
-          (mouseout)="switchHover()"
-        >
-          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-          <div matListItemTitle [ngClass]="hover ? 'display' : 'hidden'">
-            {{ item.title }}
-          </div>
-          <div matListItemLine [ngClass]="hover ? 'display' : 'hidden'">
-            {{ item.subTitle }}
-          </div>
-        </a>
-        }
-      </mat-nav-list>
-    </div>
-  `,
-  styles: `
-    /* Initial state: hidden */
-    .hidden {
-      display: none !important; /* Ensures the element takes up no space when not hovered */
-    }
-
-    /* Hover state: visible */
-    .display {
-      display: inline; /* Makes the element take up space and be visible */
-      padding-right: 30px;
-    }
-
-    /* Adjustments for the list item and side nav list for animation */
-    .mdc-list-item {
-      padding-left: 5px !important;
-      padding-right: 0 !important;
-    }
-
-    .mdc-list {
-      transition: width 1s ease;
-    }
-  `,
+  imports: [
+    NgIf,
+    MatListModule,
+    MatIconModule,
+    RouterLink,
+    MatMenuModule,
+    OverlayModule,
+    OverlayComponent,
+    MatButtonModule,
+  ],
+  templateUrl: './side-nav-list.component.html',
+  styleUrls: ['./side-nav-list.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
 export class SideNavListComponent implements OnInit, OnDestroy {
+  @Input() snav!: MatSidenav;
+  @Output() menuClick = new EventEmitter();
   items: {
     icon: string;
     title: string;
     link: string;
     subTitle?: string;
   }[] = [];
-  hover = false;
+
+  isOpen = false;
   destroy$ = new Subject<void>();
   constructor(private route: ActivatedRoute) {}
 
@@ -71,10 +54,11 @@ export class SideNavListComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         tap((params) => {
+          this.items = []; // reset items
           const projectSlug = params['projectSlug'];
           this.items.push({
             icon: 'home',
-            title: 'Home',
+            title: 'Tests',
             link: `./`,
             subTitle: projectSlug,
           });
@@ -87,16 +71,27 @@ export class SideNavListComponent implements OnInit, OnDestroy {
 
           this.items.push({
             icon: 'build',
-            title: 'Build',
+            title: 'TagBuild',
             link: `tag-build`,
           });
         })
       )
       .subscribe();
+
+    this.snav.openedChange
+      .pipe(
+        takeUntil(this.destroy$),
+        tap((isOpen) => {
+          if (isOpen === false) {
+            this.isOpen = false;
+          }
+        })
+      )
+      .subscribe();
   }
 
-  switchHover() {
-    this.hover = !this.hover;
+  onMenuClick() {
+    this.menuClick.emit();
   }
 
   ngOnDestroy() {

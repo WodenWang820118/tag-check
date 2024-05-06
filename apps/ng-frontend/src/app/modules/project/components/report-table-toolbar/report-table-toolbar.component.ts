@@ -1,8 +1,7 @@
 import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { MatListModule } from '@angular/material/list';
+import { NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,29 +10,33 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ProjectDataSourceService } from '../../../../shared/services/project-data-source/project-data-source.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  MatButtonToggleChange,
+  MatButtonToggleModule,
+} from '@angular/material/button-toggle';
 
 @Component({
   selector: 'app-report-table-toolbar',
   standalone: true,
   imports: [
-    CommonModule,
-    MatListModule,
+    NgIf,
+    RouterLink,
     MatIconModule,
-    RouterModule,
     MatToolbarModule,
     MatButtonModule,
-    RouterModule,
     MatTooltipModule,
     MatInputModule,
     MatFormFieldModule,
     FormsModule,
     ReactiveFormsModule,
+    MatButtonToggleModule,
   ],
   templateUrl: './report-table-toolbar.component.html',
   styleUrls: ['./report-table-toolbar.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
 export class ReportTableToolbarComponent implements OnDestroy {
+  isSearchVisible = false;
   destroy$ = new Subject<void>();
   constructor(private dataSourceService: ProjectDataSourceService) {}
 
@@ -48,6 +51,13 @@ export class ReportTableToolbarComponent implements OnDestroy {
 
   preventNavigationSelected() {
     this.dataSourceService.preventNavigationSelected();
+  }
+
+  onToggleChange(event: MatButtonToggleChange) {
+    console.log(event.value);
+    if (event.value === 'search') {
+      this.isSearchVisible = !this.isSearchVisible;
+    }
   }
 
   ngOnDestroy() {

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,29 +13,21 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSelectModule } from '@angular/material/select';
-import { MatOptionModule } from '@angular/material/core';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-browser-form',
   standalone: true,
   imports: [
-    CommonModule,
+    NgIf,
     MatIconModule,
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatTooltipModule,
     ReactiveFormsModule,
     FormsModule,
-    MatSelectModule,
-    MatOptionModule,
-    MatCheckboxModule,
   ],
   templateUrl: `./browser-form.component.html`,
   styleUrls: ['./browser-form.component.scss'],

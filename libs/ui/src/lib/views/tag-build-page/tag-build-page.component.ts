@@ -4,8 +4,7 @@ import { FunctionalCardComponent } from '../../components/functional-card/functi
 import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ProjectSpec } from '@utils';
-import { CommonModule } from '@angular/common';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { JsonPipe, NgIf } from '@angular/common';
 import { ArticleComponent } from '../../components/article/article.component';
 import { FileUploadDialogComponent } from '../../components/file-upload-dialog/file-upload-dialog.component';
 import { FooterComponent } from '../../components/footer/footer.component';
@@ -14,16 +13,14 @@ import { UploadActionComponent } from '../../components/upload-action/upload-act
   selector: 'lib-tag-build-page',
   standalone: true,
   imports: [
-    CommonModule,
-    MatSidenavModule,
+    NgIf,
+    JsonPipe,
     FunctionalCardComponent,
     ArticleComponent,
     FooterComponent,
     UploadActionComponent,
     FileUploadDialogComponent,
-    ErrorDialogComponent,
     EditorComponent,
-    FunctionalCardComponent,
     ErrorDialogComponent,
   ],
   templateUrl: './tag-build-page.component.html',

@@ -1,13 +1,12 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
-import { MainContentComponent } from '../components/main-content/main-content.component';
 import { SideBarComponent } from '../components/side-bar/side-bar.component';
-import { RouterModule } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
+
 @Component({
   selector: 'app-help-center-view',
   standalone: true,
-  imports: [CommonModule, MainContentComponent, SideBarComponent, RouterModule],
+  imports: [SideBarComponent, RouterOutlet],
   template: `
     <div class="help-center">
       <app-side-bar class="sidebar"></app-side-bar>
@@ -37,7 +36,7 @@ import { RouterModule } from '@angular/router';
     `,
   ],
 })
-export class HelpCenterComponent implements OnDestroy {
+export class HelpCenterViewComponent implements OnDestroy {
   destroy$ = new Subject<void>();
 
   constructor() {}

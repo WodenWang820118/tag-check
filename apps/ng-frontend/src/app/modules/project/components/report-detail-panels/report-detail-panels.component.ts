@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { AsyncPipe, JsonPipe, NgIf } from '@angular/common';
 import {
   Component,
   Input,
@@ -26,7 +26,6 @@ import {
 } from '@utils';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
@@ -40,10 +39,11 @@ import { Dialog } from '@angular/cdk/dialog';
   selector: 'app-report-datail-panels',
   standalone: true,
   imports: [
-    CommonModule,
+    AsyncPipe,
+    NgIf,
+    JsonPipe,
     MatIconModule,
     MatExpansionModule,
-    MatFormFieldModule,
     MatTooltipModule,
     EditorComponent,
     MatButtonModule,
