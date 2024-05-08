@@ -15,6 +15,7 @@ import {
 import { MatInputModule } from '@angular/material/input';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-browser-form',
@@ -28,6 +29,7 @@ import { ActivatedRoute } from '@angular/router';
     MatInputModule,
     ReactiveFormsModule,
     FormsModule,
+    MatCheckboxModule,
   ],
   templateUrl: `./browser-form.component.html`,
   styleUrls: ['./browser-form.component.scss'],

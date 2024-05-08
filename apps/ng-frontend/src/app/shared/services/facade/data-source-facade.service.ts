@@ -62,13 +62,13 @@ export class DataSourceFacadeService {
           // reset the prevent navigation stream
           this.projectDataSourceService.setPreventNavigationStream(false);
           // delete the selected reports
-          const eventNames = selection.selected.map((item) => item.eventName);
+          const eventIds = selection.selected.map((item) => item.eventId);
           selection.clear();
           return this.settingsService.updateSettings(
             projectSlug,
             'preventNavigationEvents',
             {
-              preventNavigationEvents: eventNames,
+              preventNavigationEvents: eventIds,
             }
           );
         }
