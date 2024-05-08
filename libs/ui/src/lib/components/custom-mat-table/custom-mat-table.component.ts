@@ -1,7 +1,7 @@
 import { AsyncPipe, JsonPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { XlsxProcessService } from '../../services/xlsx-process/xlsx-process.service';
+import { XlsxProcessService } from '@data-access';
 import { MatTableModule } from '@angular/material/table';
 
 @Component({

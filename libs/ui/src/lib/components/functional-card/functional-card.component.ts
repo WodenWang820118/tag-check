@@ -5,16 +5,18 @@ import {
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
-import { ConverterService } from '../../services/converter/converter.service';
+import {
+  ConverterService,
+  EditorFacadeService,
+  SetupConstructorService,
+  preprocessInput,
+} from '@data-access';
 import { Subject, combineLatest, take, tap } from 'rxjs';
 import { containerName, gtmId, tagManagerUrl } from './test-data';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConversionSuccessDialogComponent } from '../conversion-success-dialog/conversion-success-dialog.component';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
-import { preprocessInput } from '../../services/converter/utilities/utilities';
-import { EditorFacadeService } from '../../services/editor-facade/editor-facade.service';
-import { SetupConstructorService } from '../../services/setup-constructor/setup-constructor.service';
 import { MatButtonModule } from '@angular/material/button';
 
 @Component({
