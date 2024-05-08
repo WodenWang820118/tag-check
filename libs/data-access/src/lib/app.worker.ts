@@ -45,16 +45,16 @@ addEventListener('message', (event) => {
   }
 });
 
-function getSheetData(workbook: any, sheetName: string): string[] {
-  for (let i = 0; i < workbook.SheetNames.length; i++) {
-    if (workbook.SheetNames[i] === sheetName) {
-      const worksheet = workbook.Sheets[workbook.SheetNames[i]];
-      const jsonData = utils.sheet_to_json<any>(worksheet, { defval: '' });
-      return jsonData;
-    }
-  }
-  return [];
-}
+// function getSheetData(workbook: any, sheetName: string): string[] {
+//   for (let i = 0; i < workbook.SheetNames.length; i++) {
+//     if (workbook.SheetNames[i] === sheetName) {
+//       const worksheet = workbook.Sheets[workbook.SheetNames[i]];
+//       const jsonData = utils.sheet_to_json<any>(worksheet, { defval: '' });
+//       return jsonData;
+//     }
+//   }
+//   return [];
+// }
 
 // function extractSpecs(data: DataRow[], specTitle: string): DataRow[] {
 //   let columnIndex: number | null = null;

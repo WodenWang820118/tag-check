@@ -8,7 +8,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
-import { EventBusService } from '../../services/event-bus/event-bus.service';
+import { EventBusService, XlsxProcessFacade } from '@data-access';
 import {
   Observable,
   Subject,
@@ -29,7 +29,6 @@ import {
 } from '@angular/forms';
 import { ProgressSpinnerComponent } from '../progress-spinner/progress-spinner.component';
 import { CustomMatTableComponent } from '../custom-mat-table/custom-mat-table.component';
-import { XlsxProcessFacade } from '../../services/xlsx-facade/xlsx-facade.service';
 import { MatIconModule } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
