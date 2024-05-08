@@ -2,8 +2,7 @@ import { Component } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { BehaviorSubject, tap } from 'rxjs';
-import { EventBusService } from '../../services/event-bus/event-bus.service';
-import { EditorFacadeService } from '../../services/editor-facade/editor-facade.service';
+import { EventBusService, EditorFacadeService } from '@data-access';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 

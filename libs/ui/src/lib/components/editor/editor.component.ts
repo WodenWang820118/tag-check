@@ -6,10 +6,7 @@ import {
   ChangeDetectionStrategy,
   AfterViewInit,
 } from '@angular/core';
-import {
-  EditorExtension,
-  EditorService,
-} from '../../services/editor/editor.service';
+import { EditorExtension, EditorService } from '@data-access';
 
 @Component({
   selector: 'lib-editor',

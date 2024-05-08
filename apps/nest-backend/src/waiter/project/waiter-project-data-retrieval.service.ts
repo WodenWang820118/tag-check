@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { ProjectService } from '../../os/project/project.service';
 import { FileService } from '../../os/file/file.service';
-import { SpecParser } from '@tag-check/spec-parser';
 import { ImageService } from '../../os/image/image.service';
 
 @Injectable()
 export class WaiterProjectDataRetrievalService {
-  specParser: SpecParser = new SpecParser();
-
   constructor(
     private fileService: FileService,
     private projectService: ProjectService,
