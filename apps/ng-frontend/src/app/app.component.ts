@@ -7,7 +7,11 @@ import { ToolbarComponent } from './shared/components/toolbar/toolbar.component'
   imports: [RouterOutlet, ToolbarComponent],
   selector: 'app-root',
   template: `
+    @defer(on immediate) {
     <app-toolbar></app-toolbar>
+    } @loading {
+    <div style="height: 60px"></div>
+    }
     <router-outlet></router-outlet>
   `,
 })

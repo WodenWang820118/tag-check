@@ -1,3 +1,4 @@
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { ProjectInfo, Setting } from '@utils';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgIf } from '@angular/common';
@@ -20,6 +21,7 @@ import { MatSelectModule } from '@angular/material/select';
     RouterLink,
     MatMenuModule,
     MatSelectModule,
+    MatFormFieldModule,
   ],
   templateUrl: './toolbar.component.html',
   styleUrl: './toolbar.component.scss',
