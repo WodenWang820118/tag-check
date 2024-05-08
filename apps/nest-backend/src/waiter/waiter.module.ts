@@ -17,7 +17,6 @@ import { WaiterSpecController } from './spec/waiter-spec.controller';
 import { WaiterReportController } from './report/waiter-report.controller';
 import { WaiterDataLayerController } from './datalayer/waiter-datalayer.controller';
 import { WaiterGtmOperatorController } from './gtm-operator/waiter-gtm-operator.controller';
-import { WaiterSpecParserController } from './spec-parser/waiter-gtm-spec-parser.controller';
 import { WaiterConfigurationController } from './configuration/waiter-configuration.controller';
 import { WaiterSettingsController } from './settings/waiter-settings.controller';
 import { WaiterProjectIoController } from './project-io/waiter-project-io.controller';
@@ -26,7 +25,6 @@ import { WaiterProjectIoController } from './project-io/waiter-project-io.contro
 import { WaiterDataLayerGroupEventsService } from './datalayer/waiter-datalayer-group-events.service';
 import { WaiterDataLayerSingleEventService } from './datalayer/waiter-datalayer-single-event.service';
 import { WaiterGtmOperatorService } from './gtm-operator/waiter-gtm-operator.service';
-import { WaiterGtmSpecParserService } from './spec-parser/waiter-gtm-spec-parser.service';
 import { WaiterProjectDataRetrievalService } from './project/waiter-project-data-retrieval.service';
 import { WaiterProjectWorkFlowService } from './project/waiter-project-workflow.service';
 import { WaiterSpecService } from './spec/waiter-spec.service';
@@ -40,7 +38,6 @@ const waiterServices = [
   WaiterDataLayerGroupEventsService,
   WaiterDataLayerSingleEventService,
   WaiterGtmOperatorService,
-  WaiterGtmSpecParserService,
   WaiterProjectDataRetrievalService,
   WaiterProjectWorkFlowService,
   WaiterSpecService,
@@ -66,7 +63,6 @@ const waiterServices = [
     WaiterProjectDataRetrievalController,
     WaiterDataLayerController,
     WaiterGtmOperatorController,
-    WaiterSpecParserController,
     WaiterRecordingController,
     WaiterSpecController,
     WaiterReportController,

@@ -8,7 +8,7 @@ import {
 } from '../xlsx-facade/xlsx-helper';
 import { EditorService } from '../../services/editor/editor.service';
 import { MatDialog } from '@angular/material/dialog';
-import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
+import { ErrorDialogComponent } from '@ui';
 import { DataRow } from '@utils';
 
 @Injectable({
