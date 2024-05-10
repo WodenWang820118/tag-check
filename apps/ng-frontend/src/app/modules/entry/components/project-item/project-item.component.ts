@@ -11,6 +11,7 @@ import { ProjectInfo } from '@utils';
       <mat-card appearance="outlined">
         <mat-card-header>
           <mat-card-title>{{ project.projectName }}</mat-card-title>
+          <mat-card-subtitle>{{ project.projectSlug }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
           <p>{{ project.projectDescription }}</p>
@@ -18,7 +19,11 @@ import { ProjectInfo } from '@utils';
       </mat-card>
     </div>
   `,
-  styles: ``,
+  styles: `
+    .mat-mdc-card {
+      height: 200px;
+    }
+  `,
 })
 export class ProjectItemComponent {
   @Input() project!: ProjectInfo;

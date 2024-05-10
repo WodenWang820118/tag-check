@@ -15,32 +15,32 @@ export class ProjectInitializationService {
     private filePathService: FilePathService
   ) {}
 
-  async initProject(projectName: string, settings: any) {
+  async initProject(projectSlug: string, settings: any) {
     try {
       const rootProjectPath =
         await this.folderPathService.getRootProjectFolderPath();
       const projectRoot = await this.folderPathService.getProjectFolderPath(
-        projectName
+        projectSlug
       );
       this.folderService.createFolder(projectRoot);
       this.folderService.createFolder(
-        await this.folderPathService.getRecordingFolderPath(projectName)
+        await this.folderPathService.getRecordingFolderPath(projectSlug)
       );
       this.folderService.createFolder(
-        await this.folderPathService.getInspectionResultFolderPath(projectName)
+        await this.folderPathService.getInspectionResultFolderPath(projectSlug)
       );
       this.folderService.createFolder(
-        await this.folderPathService.getProjectConfigFolderPath(projectName)
+        await this.folderPathService.getProjectConfigFolderPath(projectSlug)
       );
 
       const projectMetaData: ProjectInfoDto = {
         version: '1.0.0',
         rootProject: `${rootProjectPath}`,
-        projectName: `${projectName}`,
-        projectDescription: `${settings.projectDescription}`,
+        projectName: `${settings.projectName}`,
+        projectDescription: `${settings.projectDescription}` || '',
         projectSlug: `${settings.projectSlug}`,
-        measurementId: `${settings.measurementId}`,
-        googleSpreadsheetLink: `${settings.googleSpreadsheetLink}`,
+        measurementId: `${settings.measurementId}` || '',
+        googleSpreadsheetLink: `${settings.googleSpreadsheetLink}` || '',
       };
 
       const projectSettings: SettingDto = {
@@ -70,15 +70,15 @@ export class ProjectInitializationService {
 
       // settings file for complex settings
       const settingsFilePath =
-        await this.filePathService.getProjectSettingFilePath(projectName);
+        await this.filePathService.getProjectSettingFilePath(projectSlug);
 
       // metadata file for project brief information
       const projectMetadataPath =
-        await this.filePathService.getProjectMetaDataFilePath(projectName);
+        await this.filePathService.getProjectMetaDataFilePath(projectSlug);
 
       // config file for project specs
       const configFilePath =
-        await this.filePathService.getProjectConfigFilePath(projectName);
+        await this.filePathService.getProjectConfigFilePath(projectSlug);
 
       this.fileService.writeJsonFile(projectMetadataPath, projectMetaData);
       this.fileService.writeJsonFile(configFilePath, []);
