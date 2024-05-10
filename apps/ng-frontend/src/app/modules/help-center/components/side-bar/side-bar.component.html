@@ -6,8 +6,7 @@
     <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
       <div>
         <a
-          [routerLink]="['/topics', node.name]"
-          (click)="onNodeClick(node.name)"
+          (click)="treeNodeService.navigateToNode(node)"
           style="cursor: pointer"
         >
           {{ node.name }}
