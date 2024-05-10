@@ -18,7 +18,7 @@ import { ProjectInfo } from '@utils';
   styles: `
     .home {
     &__projects {
-      padding: 2rem 10rem;
+      padding: 2rem 40rem;
     }
   }
   `,

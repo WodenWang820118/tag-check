@@ -37,6 +37,10 @@ import { ProjectInfo } from '@utils';
     </div>
   `,
   styles: `
+    .mat-mdc-card {
+      height: 200px;
+    }
+
     .project-list {
       &__new {
         cursor: pointer;

@@ -32,9 +32,7 @@ export class ProjectInfoService {
 
     return this.http.post(
       `${environment.projectApiUrl}/init-project/${settings.projectSlug}`,
-      {
-        project,
-      }
+      project
     );
   }
 
