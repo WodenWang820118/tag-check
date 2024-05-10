@@ -1,0 +1,23 @@
+.help-center {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  grid-gap: 20px;
+  height: 100%;
+}
+
+.sidebar {
+  background-color: #f0f0f0;
+  padding: 20px;
+}
+
+.main-content-container {
+  background-color: #fff;
+  padding: 20px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  padding: 0 10rem;
+}
