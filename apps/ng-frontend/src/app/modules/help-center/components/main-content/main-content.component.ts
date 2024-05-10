@@ -7,8 +7,18 @@ import { MarkdownModule } from 'ngx-markdown';
   selector: 'app-contents',
   standalone: true,
   imports: [MarkdownModule],
-  template: `<markdown [src]="fileName"></markdown> `,
-  styles: [``],
+  template: `
+    <div class="main-content">
+      <markdown [src]="fileName"></markdown>
+    </div>
+  `,
+  styles: [
+    `
+      .main-content {
+        padding: 0 15rem;
+      }
+    `,
+  ],
 })
 export class MainContentComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
@@ -20,7 +30,6 @@ export class MainContentComponent implements OnInit, OnDestroy {
     this.route.params
       .pipe(
         tap((param) => {
-          console.log(param);
           const name = param['name'].toLowerCase();
           this.fileName = `assets/markdown/${name}.md`;
         })
