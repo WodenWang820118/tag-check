@@ -15,7 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
 import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
-import { EMPTY, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { EMPTY, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
 import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { InstantErrorStateMatcher } from './helper';
@@ -114,7 +114,7 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
     this.configurationService
       .getConfiguration('rootProjectPath')
       .pipe(
-        takeUntil(this.destroy$),
+        take(1),
         tap((rootProjectPath) => {
           if (!rootProjectPath || this.isEmptyObject(rootProjectPath)) {
             this.dialog.open(ErrorDialogComponent, {
