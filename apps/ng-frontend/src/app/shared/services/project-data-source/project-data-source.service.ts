@@ -1,6 +1,6 @@
 import { DataSource } from '@angular/cdk/collections';
 import { IReportDetails } from '@utils';
-import { Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { Injectable } from '@angular/core';
 
 @Injectable({
@@ -9,7 +9,7 @@ import { Injectable } from '@angular/core';
 export class ProjectDataSourceService extends DataSource<IReportDetails> {
   private _dataStream = new ReplaySubject<IReportDetails[]>();
   private _filterStream = new ReplaySubject<string>();
-  private _deletedStream = new ReplaySubject<boolean>();
+  private _deletedStream = new BehaviorSubject<boolean>(false);
   private _preventNavigationStream = new ReplaySubject<boolean>();
 
   constructor() {
