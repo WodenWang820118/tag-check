@@ -2,7 +2,15 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SettingsService } from '../api/settings/settings.service';
 import { ProjectDataSourceService } from '../project-data-source/project-data-source.service';
-import { combineLatest, switchMap, EMPTY, tap, map } from 'rxjs';
+import {
+  combineLatest,
+  switchMap,
+  EMPTY,
+  tap,
+  map,
+  mergeMap,
+  take,
+} from 'rxjs';
 import { ReportService } from '../api/report/report.service';
 import { SelectionModel } from '@angular/cdk/collections';
 import { IReportDetails } from '@utils';
@@ -10,6 +18,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { ReportDetailsService } from '../report-details/report-details.service';
+import { InformationDialogComponent } from '../../components/information-dialog/information-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Injectable()
 export class DataSourceFacadeService {
@@ -18,7 +28,8 @@ export class DataSourceFacadeService {
     private projectDataSourceService: ProjectDataSourceService,
     private reportService: ReportService,
     private reportDetailsService: ReportDetailsService,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
+    private dialog: MatDialog
   ) {}
 
   observeProject(paginator: MatPaginator, sort: MatSort) {
@@ -85,10 +96,31 @@ export class DataSourceFacadeService {
       this.route.params,
       this.projectDataSourceService.getDeletedStream(),
     ]).pipe(
-      switchMap(([params, value]) => {
-        const projectSlug = params['projectSlug'];
+      mergeMap(([params, value]) => {
+        // after report deletion the reset deleted stream ensures that no further deletion occurs
+        // so that the dialog is not opened again
+        if (value === false) return EMPTY;
 
-        if (value === true) {
+        const dialogRef = this.dialog.open(InformationDialogComponent, {
+          data: {
+            title: 'Delete Reports',
+            contents: 'Are you sure you want to delete the selected reports?',
+            action: 'Delete',
+            actionColor: 'warn',
+            consent: false,
+          },
+        });
+
+        return dialogRef.afterClosed().pipe(
+          take(1),
+          map((result) => {
+            return { params, dialogResult: result };
+          })
+        );
+      }),
+      switchMap(({ params, dialogResult }) => {
+        const projectSlug = params['projectSlug'];
+        if (dialogResult === true) {
           console.log('delete selected in the report table component');
           // reset the deleted stream
           this.projectDataSourceService.setDeletedStream(false);
@@ -98,6 +130,7 @@ export class DataSourceFacadeService {
           );
           testDataSource.data = remainingReports;
           this.projectDataSourceService.setData(remainingReports);
+
           return this.reportService.deleteReports(
             projectSlug,
             selection.selected
