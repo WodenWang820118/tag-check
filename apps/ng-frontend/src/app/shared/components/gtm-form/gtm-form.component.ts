@@ -67,19 +67,19 @@ export class GtmFormComponent implements OnInit, OnDestroy {
           const qaRequestCheck = project.settings.gtm['isRequestCheck'];
           const measumentId = project.settings['measurementId'];
 
-          if (measumentId) {
-            this.previewModeForm.controls['isRequestCheck'].enable();
-          } else {
-            this.previewModeForm.controls['isRequestCheck'].disable();
-            this.previewModeForm.controls['isRequestCheck'].setValue(false);
-          }
-
           this.previewModeForm.patchValue({
             url: previewModeUrl,
             isAccompanyMode: isAccompanyMode,
             isRequestCheck: qaRequestCheck,
             tagManagerUrl: tagManagerUrl,
           });
+
+          if (measumentId) {
+            this.previewModeForm.controls['isRequestCheck'].enable();
+          } else {
+            this.previewModeForm.controls['isRequestCheck'].disable();
+            this.previewModeForm.controls['isRequestCheck'].setValue(false);
+          }
         })
       )
       .subscribe();
