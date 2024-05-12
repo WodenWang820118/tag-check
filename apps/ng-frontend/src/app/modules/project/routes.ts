@@ -56,6 +56,13 @@ export const PROJECT_ROUTES: Routes = [
           ).then((m) => m.BrowserFormComponent),
       },
       {
+        path: 'project-io',
+        loadComponent: () =>
+          import(
+            '../../shared/components/project-io-form/project-io-form.component'
+          ).then((m) => m.ProjectIoFormComponent),
+      },
+      {
         path: 'new-report',
         loadComponent: () =>
           import('./views/new-report-view/new-report-view.component').then(

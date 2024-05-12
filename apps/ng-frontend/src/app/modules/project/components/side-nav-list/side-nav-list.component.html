@@ -62,6 +62,13 @@
         >
           <div matListItemTitle>Advanced Browser</div>
         </mat-list-item>
+        <mat-list-item
+          class="sub-list-item"
+          [routerLink]="['./', 'project-io']"
+          (click)="isOpen = false; onMenuClick()"
+        >
+          <div matListItemTitle>Project IO</div>
+        </mat-list-item>
       </mat-nav-list>
     </app-overlay>
   </mat-nav-list>
