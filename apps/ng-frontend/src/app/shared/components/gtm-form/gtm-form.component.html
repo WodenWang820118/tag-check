@@ -1,10 +1,8 @@
 <div class="settings">
   <mat-card class="gtm-preview-mode-form__card">
     <mat-card-header>
-      <mat-card-title>GTM Preview Mode</mat-card-title>
-      <mat-card-subtitle
-        >Set the URL for the GTM preview mode</mat-card-subtitle
-      >
+      <mat-card-title>Google Tag Manager</mat-card-title>
+      <mat-card-subtitle>Settings for the GTM preview mode</mat-card-subtitle>
     </mat-card-header>
     <br />
     <mat-card-content>
@@ -12,9 +10,11 @@
         <!-- users can use the accompany mode and the request check at the same time -->
         <div class="gtm-preview-mode-form__field">
           <mat-checkbox formControlName="isAccompanyMode"
-            >Activate Accompany Mode</mat-checkbox
+            >Activate Accompanied Mode</mat-checkbox
           >
-          <mat-checkbox formControlName="isRequestCheck"
+          <mat-checkbox
+            formControlName="isRequestCheck"
+            matTooltip="Please provide a measurement ID to enable this feature."
             >Activate Request Check</mat-checkbox
           >
         </div>

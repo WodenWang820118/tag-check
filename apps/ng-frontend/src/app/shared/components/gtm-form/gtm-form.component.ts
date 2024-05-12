@@ -16,6 +16,7 @@ import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTooltipModule } from '@angular/material/tooltip';
 @Component({
   selector: 'app-gtm-form',
   standalone: true,
@@ -30,6 +31,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     ReactiveFormsModule,
     MatCardModule,
     MatCheckboxModule,
+    MatTooltipModule,
   ],
   templateUrl: './gtm-form.component.html',
   styleUrls: ['./gtm-form.component.scss'],
@@ -41,7 +43,7 @@ export class GtmFormComponent implements OnInit, OnDestroy {
     url: [''],
     tagManagerUrl: [''],
     isAccompanyMode: [false],
-    isRequestCheck: [false],
+    isRequestCheck: new FormControl({ value: false, disabled: true }),
   });
 
   constructor(
@@ -63,6 +65,11 @@ export class GtmFormComponent implements OnInit, OnDestroy {
           const isAccompanyMode = project.settings.gtm['isAccompanyMode'];
           const tagManagerUrl = project.settings.gtm['tagManagerUrl'];
           const qaRequestCheck = project.settings.gtm['isRequestCheck'];
+          const measumentId = project.settings['measurementId'];
+
+          if (measumentId) {
+            this.previewModeForm.controls['isRequestCheck'].enable();
+          }
 
           this.previewModeForm.patchValue({
             url: previewModeUrl,
