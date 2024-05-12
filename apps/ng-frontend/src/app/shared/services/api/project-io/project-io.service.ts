@@ -31,4 +31,10 @@ export class ProjectIoService {
     console.log('formData', formData.get('file'));
     return this.http.post(`${environment.projectApiUrl}/import`, formData);
   }
+
+  deleteProject(projectSlug: string) {
+    return this.http.delete(
+      `${environment.projectApiUrl}/delete/${projectSlug}`
+    );
+  }
 }

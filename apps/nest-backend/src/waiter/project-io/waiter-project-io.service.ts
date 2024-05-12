@@ -69,4 +69,10 @@ export class WaiterProjectIoService {
       outputFolderPath
     );
   }
+
+  async deleteProject(projectSlug: string) {
+    this.folderService.deleteFolder(
+      await this.folderPathService.getProjectFolderPath(projectSlug)
+    );
+  }
 }

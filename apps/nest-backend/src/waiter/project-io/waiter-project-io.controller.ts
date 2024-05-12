@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   HttpException,
   HttpStatus,
@@ -66,5 +67,10 @@ export class WaiterProjectIoController {
       Logger.error(error.message, 'WaiterProjectIoController.importProject');
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  @Delete('delete/:projectSlug')
+  async deleteProject(@Param('projectSlug') projectSlug: string) {
+    return await this.waiterProjectIoService.deleteProject(projectSlug);
   }
 }
