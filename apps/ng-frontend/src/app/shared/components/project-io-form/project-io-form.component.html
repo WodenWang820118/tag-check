@@ -2,17 +2,15 @@
   <mat-card appearance="outlined">
     <mat-card-header>
       <mat-card-title>Project I/O</mat-card-title>
-      <mat-card-subtitle
-        >Export, import or delete the project</mat-card-subtitle
-      >
+      <mat-card-subtitle>Export or delete the project</mat-card-subtitle>
     </mat-card-header>
     <mat-card-actions align="start" style="gap: 1rem">
       <button mat-raised-button (click)="exportProject()">
-        Download Project
+        Export Project
       </button>
-      <button mat-raised-button (click)="fileInput.click()">Upload</button>
-      <input hidden (change)="importProject($event)" #fileInput type="file" />
-      <!-- TODO: delete project -->
+      <button mat-raised-button color="warn" (click)="deleteProject()">
+        Delete Project
+      </button>
     </mat-card-actions>
   </mat-card>
 </div>
