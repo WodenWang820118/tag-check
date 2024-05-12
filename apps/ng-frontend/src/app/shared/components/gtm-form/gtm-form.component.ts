@@ -69,6 +69,9 @@ export class GtmFormComponent implements OnInit, OnDestroy {
 
           if (measumentId) {
             this.previewModeForm.controls['isRequestCheck'].enable();
+          } else {
+            this.previewModeForm.controls['isRequestCheck'].disable();
+            this.previewModeForm.controls['isRequestCheck'].setValue(false);
           }
 
           this.previewModeForm.patchValue({
