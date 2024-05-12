@@ -1,14 +1,25 @@
 import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { EMPTY, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
+import {
+  EMPTY,
+  map,
+  mergeMap,
+  Subject,
+  switchMap,
+  take,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
+import { InformationDialogComponent } from '../information-dialog/information-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-project-io-form',
   standalone: true,
-  imports: [MatButtonModule, MatCardModule],
+  imports: [MatButtonModule, MatCardModule, InformationDialogComponent],
   templateUrl: './project-io-form.component.html',
   styleUrls: ['./project-io-form.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -18,7 +29,9 @@ export class ProjectIoFormComponent implements OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private projectIoService: ProjectIoService
+    private projectIoService: ProjectIoService,
+    private dialog: MatDialog,
+    private router: Router
   ) {}
 
   exportProject() {
@@ -36,20 +49,35 @@ export class ProjectIoFormComponent implements OnDestroy {
       .subscribe();
   }
 
-  importProject(event: Event) {
+  deleteProject() {
     this.route.parent?.params
       .pipe(
         take(1),
-        switchMap((params) => {
-          const projectSlug = params['projectSlug'];
-          const target = event.target as HTMLInputElement;
-          const file: File | null = target.files?.[0] || null;
+        mergeMap((params) => {
+          const dialogRef = this.dialog.open(InformationDialogComponent, {
+            data: {
+              title: 'Delete project',
+              message: 'Are you sure you want to delete this project?',
+              action: 'Delete',
+            },
+          });
 
-          if (projectSlug && file) {
-            console.log('file', file);
-            return this.projectIoService.importProject(file);
+          return dialogRef.afterClosed().pipe(
+            take(1),
+            map((result) => {
+              return { params, dialogResult: result };
+            })
+          );
+        }),
+        switchMap(({ params, dialogResult }) => {
+          const projectSlug = params['projectSlug'];
+          if (dialogResult && projectSlug) {
+            return this.projectIoService.deleteProject(projectSlug);
           }
           return EMPTY;
+        }),
+        tap(() => {
+          this.router.navigate(['/']);
         })
       )
       .subscribe();
