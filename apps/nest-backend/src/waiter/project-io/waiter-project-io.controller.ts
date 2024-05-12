@@ -62,7 +62,7 @@ export class WaiterProjectIoController {
         file.path,
         rootProjectPath
       );
-      return response.status(200).send('Project imported successfully');
+      return response;
     } catch (error) {
       Logger.error(error.message, 'WaiterProjectIoController.importProject');
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
