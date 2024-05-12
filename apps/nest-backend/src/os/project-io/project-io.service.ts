@@ -49,9 +49,25 @@ export class ProjectIoService {
   ): Promise<void> {
     try {
       const outputPath = `${outputFolderPath}/${projectSlug}`;
-      return createReadStream(zipFilePath)
-        .pipe(unzipper.Extract({ path: outputPath }))
-        .promise();
+      const stream = createReadStream(zipFilePath).pipe(
+        unzipper.Extract({ path: outputPath })
+      );
+
+      return new Promise((resolve, reject) => {
+        stream.on('error', (error) => {
+          Logger.error(error.message);
+          reject(
+            new HttpException(
+              'Failed to unzip project',
+              HttpStatus.INTERNAL_SERVER_ERROR
+            )
+          );
+        });
+
+        stream.on('close', () => {
+          resolve();
+        });
+      });
     } catch (error) {
       Logger.error(error.message);
       throw new HttpException(

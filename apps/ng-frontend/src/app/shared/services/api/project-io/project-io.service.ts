@@ -29,7 +29,10 @@ export class ProjectIoService {
 
     formData.append('file', file); // 'file' is the field name you'll access on the server
     console.log('formData', formData.get('file'));
-    return this.http.post(`${environment.projectApiUrl}/import`, formData);
+    return this.http.post(`${environment.projectApiUrl}/import`, formData, {
+      reportProgress: true,
+      observe: 'events',
+    });
   }
 
   deleteProject(projectSlug: string) {
