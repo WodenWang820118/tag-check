@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, catchError, of } from 'rxjs';
 import { Configuration } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
@@ -17,23 +17,44 @@ export class ConfigurationService {
   constructor(private http: HttpClient) {}
 
   getConfigurations() {
-    return this.http.get<Configuration[]>(environment.configurationApiUrl);
+    return this.http.get<Configuration[]>(environment.configurationApiUrl).pipe(
+      catchError((error) => {
+        console.error(error);
+        return of([]);
+      })
+    );
   }
 
   getConfiguration(name: string) {
-    return this.http.get<Configuration>(
-      `${environment.configurationApiUrl}/${name}`
-    );
+    return this.http
+      .get<Configuration>(`${environment.configurationApiUrl}/${name}`)
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
   }
 
   resetConfiguration(name: string) {
-    return this.http.delete(`${environment.configurationApiUrl}/reset/${name}`);
+    return this.http
+      .delete(`${environment.configurationApiUrl}/reset/${name}`)
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
   }
 
   createConfiguration(configuration: Configuration) {
-    return this.http.post(
-      `${environment.configurationApiUrl}/create`,
-      configuration
-    );
+    return this.http
+      .post(`${environment.configurationApiUrl}/create`, configuration)
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
   }
 }

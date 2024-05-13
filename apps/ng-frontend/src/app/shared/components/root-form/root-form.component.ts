@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject, takeUntil, tap } from 'rxjs';
+import { catchError, Subject, take, takeUntil, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -83,6 +83,10 @@ export class RootFormComponent implements AfterViewInit, OnDestroy {
               this.rootForm.disable();
             }
           }
+        }),
+        catchError((err) => {
+          console.error(err);
+          return [];
         })
       )
       .subscribe();
@@ -92,10 +96,14 @@ export class RootFormComponent implements AfterViewInit, OnDestroy {
     this.configurationService
       .resetConfiguration('rootProjectPath')
       .pipe(
-        takeUntil(this.destroy$),
+        take(1),
         tap(() => {
           this.rootForm.reset();
           this.rootForm.enable();
+        }),
+        catchError((err) => {
+          console.error(err);
+          return [];
         })
       )
       .subscribe();
@@ -112,9 +120,13 @@ export class RootFormComponent implements AfterViewInit, OnDestroy {
         value: value,
       })
       .pipe(
-        takeUntil(this.destroy$),
+        take(1),
         tap((res) => {
           this.rootForm.disable();
+        }),
+        catchError((err) => {
+          console.error(err);
+          return [];
         })
       )
       .subscribe();

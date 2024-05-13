@@ -7,7 +7,6 @@ import { RootFormComponent } from '../../../../shared/components/root-form/root-
   imports: [RootFormComponent],
   template: `
     <div class="global-settings">
-      <!-- TODO: the root form doesn't get the current root folder -->
       <app-root-form></app-root-form>
     </div>
   `,

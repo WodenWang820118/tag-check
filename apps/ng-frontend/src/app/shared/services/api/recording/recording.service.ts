@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, Subject, catchError, of } from 'rxjs';
 import { ProjectRecording, Recording } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
@@ -16,31 +16,55 @@ export class RecordingService {
   constructor(private http: HttpClient) {}
 
   getProjectRecordings(projectSlug: string) {
-    return this.http.get<ProjectRecording>(
-      `${environment.recordingApiUrl}/${projectSlug}`
-    );
+    return this.http
+      .get<ProjectRecording>(`${environment.recordingApiUrl}/${projectSlug}`)
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
   }
 
   getProjectRecordingNames(projectSlug: string) {
-    return this.http.get<string[]>(
-      `${environment.recordingApiUrl}/${projectSlug}/names`
-    );
+    return this.http
+      .get<string[]>(`${environment.recordingApiUrl}/${projectSlug}/names`)
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of([]);
+        })
+      );
   }
 
   getRecordingDetails(projectSlug: string, eventId: string) {
     if (!eventId || !projectSlug) return of({} as Recording);
-    return this.http.get<Recording>(
-      `${environment.recordingApiUrl}/${projectSlug}/${eventId}`
-    );
+    return this.http
+      .get<Recording>(
+        `${environment.recordingApiUrl}/${projectSlug}/${eventId}`
+      )
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
   }
 
   updateRecording(projectSlug: string, eventId: string, recording: string) {
     const jsonRecording = JSON.parse(recording);
     if (!eventId || !projectSlug || !recording) return of({} as Recording);
-    return this.http.put<Recording>(
-      `${environment.recordingApiUrl}/${projectSlug}/${eventId}`,
-      jsonRecording
-    );
+    return this.http
+      .put<Recording>(
+        `${environment.recordingApiUrl}/${projectSlug}/${eventId}`,
+        jsonRecording
+      )
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
   }
 
   addRecording(projectSlug: string, eventId: string, content: string) {
@@ -49,9 +73,16 @@ export class RecordingService {
     console.log('Event Id', eventId);
     console.log('Recording', jsonContent);
 
-    return this.http.post<Recording>(
-      `${environment.recordingApiUrl}/${projectSlug}/${eventId}`,
-      jsonContent
-    );
+    return this.http
+      .post<Recording>(
+        `${environment.recordingApiUrl}/${projectSlug}/${eventId}`,
+        jsonContent
+      )
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
   }
 }

@@ -10,6 +10,8 @@ import {
   map,
   mergeMap,
   take,
+  catchError,
+  of,
 } from 'rxjs';
 import { ReportService } from '../api/report/report.service';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -41,6 +43,7 @@ export class DataSourceFacadeService {
         const slug = params['projectSlug'];
         return this.reportService.getProjectReports(slug).pipe(
           map((project) => {
+            if (!project) return null;
             const injectReports = project.reports.sort((a, b) => {
               if (a.eventName < b.eventName) return -1;
               if (a.eventName > b.eventName) return 1;
@@ -56,6 +59,10 @@ export class DataSourceFacadeService {
             } else {
               return null;
             }
+          }),
+          catchError((error) => {
+            console.error(error);
+            return of(null);
           })
         );
       })
@@ -84,6 +91,10 @@ export class DataSourceFacadeService {
           );
         }
         return EMPTY;
+      }),
+      catchError((error) => {
+        console.error(error);
+        return of(null);
       })
     );
   }
@@ -99,24 +110,26 @@ export class DataSourceFacadeService {
       mergeMap(([params, value]) => {
         // after report deletion the reset deleted stream ensures that no further deletion occurs
         // so that the dialog is not opened again
-        if (value === false) return EMPTY;
+        if (value === false) {
+          return of({ params, dialogResult: false });
+        } else {
+          const dialogRef = this.dialog.open(InformationDialogComponent, {
+            data: {
+              title: 'Delete Reports',
+              contents: 'Are you sure you want to delete the selected reports?',
+              action: 'Delete',
+              actionColor: 'warn',
+              consent: false,
+            },
+          });
 
-        const dialogRef = this.dialog.open(InformationDialogComponent, {
-          data: {
-            title: 'Delete Reports',
-            contents: 'Are you sure you want to delete the selected reports?',
-            action: 'Delete',
-            actionColor: 'warn',
-            consent: false,
-          },
-        });
-
-        return dialogRef.afterClosed().pipe(
-          take(1),
-          map((result) => {
-            return { params, dialogResult: result };
-          })
-        );
+          return dialogRef.afterClosed().pipe(
+            take(1),
+            map((result) => {
+              return { params, dialogResult: result };
+            })
+          );
+        }
       }),
       switchMap(({ params, dialogResult }) => {
         const projectSlug = params['projectSlug'];
@@ -140,6 +153,10 @@ export class DataSourceFacadeService {
       }),
       tap(() => {
         selection.clear();
+      }),
+      catchError((error) => {
+        console.error(error);
+        return of(null);
       })
     );
   }
@@ -149,12 +166,17 @@ export class DataSourceFacadeService {
     paginator: MatPaginator,
     sort: MatSort
   ) {
-    const testDataSource = new MatTableDataSource(reports);
-    // Make sure to set paginator and sort after view init
-    testDataSource.paginator = paginator;
-    testDataSource.sort = sort;
-    this.projectDataSourceService.setData(reports);
-    return testDataSource;
+    try {
+      const testDataSource = new MatTableDataSource(reports);
+      // Make sure to set paginator and sort after view init
+      testDataSource.paginator = paginator;
+      testDataSource.sort = sort;
+      this.projectDataSourceService.setData(reports);
+      return testDataSource;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }
 
   setReportDetails(eventId: string) {
@@ -171,6 +193,10 @@ export class DataSourceFacadeService {
               }
             })
           );
+        }),
+        catchError((error) => {
+          console.error(error);
+          return of(null);
         })
       )
       .subscribe();
@@ -180,6 +206,10 @@ export class DataSourceFacadeService {
     return this.projectDataSourceService.getFilterStream().pipe(
       map((filter) => {
         return filter;
+      }),
+      catchError((error) => {
+        console.error(error);
+        return of('');
       })
     );
   }
