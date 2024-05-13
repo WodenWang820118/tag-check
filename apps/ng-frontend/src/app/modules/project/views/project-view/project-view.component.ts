@@ -2,7 +2,15 @@ import { AsyncPipe } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
-import { Observable, Subject, take, takeUntil, tap, timer } from 'rxjs';
+import {
+  catchError,
+  Observable,
+  Subject,
+  take,
+  takeUntil,
+  tap,
+  timer,
+} from 'rxjs';
 import { ProjectInfo, ProjectSetting } from '@utils';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
@@ -24,7 +32,7 @@ import { SettingsService } from '../../../../shared/services/api/settings/settin
   encapsulation: ViewEncapsulation.None,
 })
 export class ProjectViewComponent implements OnInit, OnDestroy {
-  project$!: Observable<ProjectSetting>;
+  project$!: Observable<ProjectSetting | null>;
   projectInfo!: ProjectInfo[];
   destroy$ = new Subject<void>();
 
@@ -44,6 +52,10 @@ export class ProjectViewComponent implements OnInit, OnDestroy {
           this.project$ = this.settingsService.switchToProject(
             params['projectSlug']
           );
+        }),
+        catchError((err) => {
+          console.error(err);
+          return [];
         })
       )
       .subscribe();
@@ -54,6 +66,10 @@ export class ProjectViewComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         tap((projects) => {
           this.projectInfo = projects;
+        }),
+        catchError((error) => {
+          console.error('Error: ', error);
+          return [];
         })
       )
       .subscribe();

@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject, switchMap, take, takeUntil, tap } from 'rxjs';
+import { catchError, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -55,6 +55,10 @@ export class AuthenticationFormComponent implements OnInit, OnDestroy {
               password: settings.authentication.password,
             });
           }
+        }),
+        catchError((err) => {
+          console.error(err);
+          return [];
         })
       )
       .subscribe();
@@ -73,6 +77,10 @@ export class AuthenticationFormComponent implements OnInit, OnDestroy {
             'authentication',
             this.authenticationForm.value
           );
+        }),
+        catchError((err) => {
+          console.error(err);
+          return [];
         })
       )
       .subscribe();

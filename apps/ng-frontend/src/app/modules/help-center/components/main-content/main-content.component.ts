@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subject, tap } from 'rxjs';
+import { catchError, Subject, tap } from 'rxjs';
 import { MarkdownModule } from 'ngx-markdown';
 
 @Component({
@@ -32,6 +32,12 @@ export class MainContentComponent implements OnInit, OnDestroy {
         tap((param) => {
           const name = param['name'].toLowerCase();
           this.fileName = `assets/markdown/${name}.md`;
+        }),
+        catchError((error) => {
+          // TODO: 404 page
+          console.error('Error: ', error);
+          this.fileName = 'assets/markdown/404.md';
+          return error;
         })
       )
       .subscribe();

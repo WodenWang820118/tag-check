@@ -3,7 +3,7 @@ import { Component, OnDestroy, ViewEncapsulation, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { catchError, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import {
@@ -100,7 +100,7 @@ export class GtmFormComponent implements OnInit, OnDestroy {
   onSubmit() {
     this.route.parent?.params
       .pipe(
-        takeUntil(this.destroy$),
+        take(1),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           console.log(this.previewModeForm.value);
@@ -110,6 +110,10 @@ export class GtmFormComponent implements OnInit, OnDestroy {
             isRequestCheck: this.previewModeForm.value.isRequestCheck,
             tagManagerUrl: this.previewModeForm.value.tagManagerUrl,
           });
+        }),
+        catchError((err) => {
+          console.error(err);
+          return [];
         })
       )
       .subscribe();

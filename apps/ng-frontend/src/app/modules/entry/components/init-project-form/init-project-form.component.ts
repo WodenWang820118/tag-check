@@ -15,7 +15,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
 import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
-import { EMPTY, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
+import {
+  catchError,
+  EMPTY,
+  Subject,
+  switchMap,
+  take,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { InstantErrorStateMatcher } from './helper';
@@ -92,6 +100,10 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
           this.projectForm.controls['projectSlug'].setValue(
             formattedValue + '-' + fourRandomChars
           );
+        }),
+        catchError((error) => {
+          console.error('Error observing project name changes:', error);
+          return EMPTY;
         })
       )
       .subscribe();
@@ -147,6 +159,10 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
               this.projectForm.value
             );
           }
+        }),
+        catchError((error) => {
+          console.error('Error initializing project:', error);
+          return EMPTY;
         })
       )
       .subscribe({
@@ -155,10 +171,6 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
             '/projects',
             this.projectForm.value['projectSlug'],
           ]);
-        },
-        error: (error) => {
-          // Handle any errors here
-          console.error('Error initializing project:', error);
         },
       });
   }

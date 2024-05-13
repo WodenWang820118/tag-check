@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { combineLatest, map, switchMap, tap } from 'rxjs';
+import { catchError, combineLatest, map, switchMap, tap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { SettingsService } from '../api/settings/settings.service';
 import { RecordingService } from '../api/recording/recording.service';
@@ -22,6 +22,10 @@ export class ProjectFacadeService {
     ]).pipe(
       tap(([reportNames, recordingNames]) => {
         this.initializeRecordingStatus(reportNames, recordingNames);
+      }),
+      catchError((error) => {
+        console.error(error);
+        return [];
       })
     );
   }
@@ -29,8 +33,6 @@ export class ProjectFacadeService {
   // TODO: Big O(n^2) - can be optimized
   initializeRecordingStatus(reportNames: string[], recordingNames: string[]) {
     this.hasRecordingMap.clear();
-    // console.log('reports', reportNames);
-    // console.log('recordings', recordingNames);
     reportNames.forEach((reportName) => {
       this.hasRecordingMap.set(
         reportName,
@@ -51,6 +53,10 @@ export class ProjectFacadeService {
       }),
       map((project) => {
         return project.settings['preventNavigationEvents'];
+      }),
+      catchError((error) => {
+        console.error(error);
+        return [];
       })
     );
   }

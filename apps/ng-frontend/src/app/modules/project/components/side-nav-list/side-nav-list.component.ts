@@ -11,7 +11,7 @@ import { NgIf } from '@angular/common';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Subject, takeUntil, tap } from 'rxjs';
+import { catchError, Subject, takeUntil, tap } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { OverlayComponent } from '../overlay/overlay.component';
@@ -85,6 +85,10 @@ export class SideNavListComponent implements OnInit, OnDestroy {
           if (isOpen === false) {
             this.isOpen = false;
           }
+        }),
+        catchError((error) => {
+          console.error('Error: ', error);
+          return error;
         })
       )
       .subscribe();

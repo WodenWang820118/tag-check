@@ -41,6 +41,7 @@ export class InitProjectViewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // TODO: could be removed since the business logic is not here anymore
     this.configurationService
       .getConfiguration('rootProjectPath')
       .pipe(
