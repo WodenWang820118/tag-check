@@ -1,7 +1,7 @@
 import { MatCardModule } from '@angular/material/card';
 import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { Subject } from 'rxjs';
+import { catchError, Subject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
 
@@ -37,13 +37,23 @@ export class ProjectImportComponent implements OnDestroy {
     const file: File | null = target.files?.[0] || null;
     if (file) {
       console.log('file', file);
-      this.projectIoService.importProject(file).subscribe((event) => {
-        // TODO: progress bar
-        console.log('event', event);
-        if (event.type === 1) {
-          this.router.navigate(['/']);
-        }
-      });
+      this.projectIoService
+        .importProject(file)
+        .pipe(
+          catchError((err) => {
+            console.error(err);
+            return [];
+          })
+        )
+        .subscribe((event) => {
+          // TODO: progress bar
+          if (event) {
+            console.log('event', event);
+            if (event.type === 1) {
+              this.router.navigate(['/']);
+            }
+          }
+        });
     }
   }
 

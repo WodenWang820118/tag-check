@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { EventInspectionPreset } from '@utils';
+import { catchError, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -29,9 +30,16 @@ export class GtmOperatorService {
 
     const queryString = queryParams.join('&');
 
-    return this.http.post(
-      `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventId}?${queryString}`,
-      eventInspectionPreset
-    );
+    return this.http
+      .post(
+        `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventId}?${queryString}`,
+        eventInspectionPreset
+      )
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
   }
 }

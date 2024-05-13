@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { catchError, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -59,6 +59,10 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
               googleSpreadsheetLink: settings.googleSpreadsheetLink,
             });
           }
+        }),
+        catchError((err) => {
+          console.error(err);
+          return [];
         })
       )
       .subscribe();
@@ -67,7 +71,7 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
   onSubmit() {
     this.route.parent?.params
       .pipe(
-        takeUntil(this.destroy$),
+        take(1),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           console.log(this.projectInfoForm.value);
@@ -77,6 +81,10 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
             'others',
             this.projectInfoForm.value
           );
+        }),
+        catchError((err) => {
+          console.error(err);
+          return [];
         })
       )
       .subscribe();
