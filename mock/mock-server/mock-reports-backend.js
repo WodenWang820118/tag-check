@@ -7,6 +7,23 @@ const port = 3004;
 // Enable CORS for all routes
 app.use(cors());
 
+app.get('/reports/:projectSlug/names', (req, res) => {
+  try {
+    const data = fs.readFileSync('./mock/mock-db/db-reports.json');
+    const json = JSON.parse(data);
+    const project = json['reports'].filter(
+      (report) => report.projectSlug === req.params.projectSlug
+    )[0];
+
+    const results = project.reports.map((report) => report.eventId);
+
+    res.setHeader('Content-Type', 'application/json');
+    res.send(results);
+  } catch (err) {
+    res.status(500).send('Error reading data file');
+  }
+});
+
 app.get('/reports/:projectSlug', (req, res) => {
   try {
     const data = fs.readFileSync('./mock/mock-db/db-reports.json');
@@ -23,7 +40,7 @@ app.get('/reports/:projectSlug', (req, res) => {
 
     const results = reports.map((report) => {
       return {
-        eventName: report.dataLayer.event,
+        eventName: report.eventName,
         ...report,
         completedTime,
       };
