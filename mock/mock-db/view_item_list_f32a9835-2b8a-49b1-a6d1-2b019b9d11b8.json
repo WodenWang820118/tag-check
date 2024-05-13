@@ -1,0 +1,36 @@
+{
+  "title": "view_item_list",
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 1108,
+      "height": 695,
+      "deviceScaleFactor": 1,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": false
+    },
+    {
+      "type": "navigate",
+      "url": "https://gtm-integration-sample.netlify.app/",
+      "assertedEvents": [
+        {
+          "type": "navigation",
+          "url": "https://gtm-integration-sample.netlify.app/",
+          "title": "Ng GTM Integration App"
+        }
+      ]
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "li:nth-of-type(2) > a"
+        ]
+      ],
+      "offsetY": 23,
+      "offsetX": 71.61248779296875
+    }
+  ]
+}

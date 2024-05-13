@@ -19,7 +19,7 @@ export class WaiterProjectDataRetrievalService {
     return await this.projectService.getProjectMetadata(projectSlug);
   }
 
-  async readImage(projectName: string, testName: string) {
-    return await this.imageService.readImage(projectName, testName);
+  async readImage(projectName: string, eventId: string) {
+    return await this.imageService.readImage(projectName, eventId);
   }
 }

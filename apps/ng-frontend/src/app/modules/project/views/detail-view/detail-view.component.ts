@@ -70,7 +70,7 @@ export class DetailViewComponent implements OnInit, OnDestroy {
           if (params && parentParams) {
             this.image$ = this.imageService.getImage(
               parentParams['projectSlug'],
-              params['eventName']
+              params['eventId']
             );
           }
         })

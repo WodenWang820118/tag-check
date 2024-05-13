@@ -19,15 +19,15 @@ export class WaiterProjectDataRetrievalController {
     name: 'testName',
     description: 'The name of the test associated with the event.',
   })
-  @Get('/images/:projectSlug/:eventName')
+  @Get('/images/:projectSlug/:eventId')
   @Header('Content-Type', 'image/png')
   async readImage(
     @Param('projectSlug') projectSlug: string,
-    @Param('eventName') eventName: string
+    @Param('eventId') eventId: string
   ) {
     return await this.waiterProjectDataRetrievalService.readImage(
       projectSlug,
-      eventName
+      eventId
     );
   }
 
