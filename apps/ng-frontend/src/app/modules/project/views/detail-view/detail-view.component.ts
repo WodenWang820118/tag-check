@@ -3,6 +3,7 @@ import { AsyncPipe, NgIf } from '@angular/common';
 import {
   Observable,
   Subscription,
+  catchError,
   combineLatest,
   of,
   tap,
@@ -31,7 +32,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class DetailViewComponent implements OnInit, OnDestroy {
   reportDetails$!: Observable<IReportDetails | undefined>;
-  image$!: Observable<Blob> | Observable<null>;
+  image$!: Observable<Blob | null>;
   subscriptions: Subscription[] = [];
 
   constructor(
@@ -42,6 +43,7 @@ export class DetailViewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    // TODO: avaoid manual subscription and unsubscription
     this.reportDetails$ = this.reportDetailsService.reportDetails$;
     const reportDetailsSubscription = this.reportDetails$
       .pipe(
@@ -57,6 +59,10 @@ export class DetailViewComponent implements OnInit, OnDestroy {
                 }
               })
             ),
+        }),
+        catchError((error) => {
+          console.error('Error: ', error);
+          return of(null);
         })
       )
       .subscribe();
@@ -73,6 +79,10 @@ export class DetailViewComponent implements OnInit, OnDestroy {
               params['eventId']
             );
           }
+        }),
+        catchError((error) => {
+          console.error('Error: ', error);
+          return of(null);
         })
       )
       .subscribe();

@@ -2,7 +2,7 @@ import { NgIf } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { catchError, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
@@ -64,6 +64,10 @@ export class BrowserFormComponent implements OnInit, OnDestroy {
             project.settings.headless
           );
           this.loadInitialData();
+        }),
+        catchError((err) => {
+          console.error(err);
+          return [];
         })
       )
       .subscribe();
@@ -126,6 +130,10 @@ export class BrowserFormComponent implements OnInit, OnDestroy {
             headless,
             browser,
           });
+        }),
+        catchError((error) => {
+          console.error('Error: ', error);
+          return error;
         })
       )
       .subscribe();

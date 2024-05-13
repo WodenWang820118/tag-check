@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import {
   Observable,
   Subject,
+  catchError,
   combineLatest,
   map,
   mergeMap,
@@ -56,8 +57,8 @@ import { Dialog } from '@angular/cdk/dialog';
 export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
   @Input() eventName!: string | undefined;
   @Input() reportDetails$!: Observable<IReportDetails | undefined>;
-  recording$!: Observable<Recording>;
-  spec$!: Observable<Spec>;
+  recording$!: Observable<Recording | null>;
+  spec$!: Observable<Spec | null>;
   destroy$ = new Subject<void>();
   specEdit = false;
   recordingEdit = false;
@@ -97,6 +98,10 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
               eventId
             );
           }
+        }),
+        catchError((error) => {
+          console.error('Error: ', error);
+          return error;
         })
       )
       .subscribe();
@@ -138,6 +143,10 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
                 JSON.stringify(data)
               );
             }
+          }),
+          catchError((error) => {
+            console.error('Error reading file content: ', error);
+            return error;
           })
         )
         .subscribe();
@@ -179,6 +188,10 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
             eventName,
             specContent
           );
+        }),
+        catchError((error) => {
+          console.error('Error updating spec: ', error);
+          return error;
         })
       )
       .subscribe();
@@ -221,6 +234,10 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
             eventId,
             recordingContent
           );
+        }),
+        catchError((error) => {
+          console.error('Error updating recording: ', error);
+          return error;
         })
       )
       .subscribe();
@@ -232,7 +249,7 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
       this.route.params,
     ])
       .pipe(
-        takeUntil(this.destroy$),
+        take(1),
         tap(([parentParams, params]) => {
           const projectSlug = parentParams['projectSlug'];
           const eventName = params['eventName'];
@@ -247,6 +264,10 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
             });
             throw new Error('Project slug and event name are required.');
           }
+        }),
+        catchError((error) => {
+          console.error('Error downloading file: ', error);
+          return error;
         })
       )
       .subscribe();

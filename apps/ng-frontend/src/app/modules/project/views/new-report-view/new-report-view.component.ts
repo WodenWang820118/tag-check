@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import {
   Subject,
+  catchError,
   combineLatest,
   forkJoin,
   map,
@@ -138,7 +139,7 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
       this.editorService.editor$.recordingJsonEditor,
     ])
       .pipe(
-        takeUntil(this.destroy$),
+        take(1),
         map(([specEditor, recordingEditor]) => {
           if (
             !this.reportForm.controls['testName'].value ||
@@ -210,12 +211,23 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
                         ...data,
                         reportDetails,
                       ]);
+                    }),
+                    catchError((error) => {
+                      console.error(
+                        'Error updating project data source:',
+                        error
+                      );
+                      return error;
                     })
                   )
                   .subscribe();
               })
             )
-        )
+        ),
+        catchError((error) => {
+          console.error('Error uploading report:', error);
+          return error;
+        })
       )
       .subscribe({
         next: () => {

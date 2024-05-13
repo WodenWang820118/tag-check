@@ -100,6 +100,7 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         tap((projectSetting) => {
+          if (!projectSetting) return;
           this.preventNavigationEvents =
             projectSetting.settings.preventNavigationEvents;
         })

@@ -1,13 +1,13 @@
 import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {
+  catchError,
   EMPTY,
   map,
   mergeMap,
   Subject,
   switchMap,
   take,
-  takeUntil,
   tap,
 } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
@@ -37,12 +37,16 @@ export class ProjectIoFormComponent implements OnDestroy {
   exportProject() {
     this.route.parent?.params
       .pipe(
-        takeUntil(this.destroy$),
+        take(1),
         tap((params) => {
           const projectSlug = params['projectSlug'];
           if (projectSlug) {
             this.projectIoService.exportProject(projectSlug);
           }
+          return EMPTY;
+        }),
+        catchError((err) => {
+          console.error(err);
           return EMPTY;
         })
       )
@@ -78,6 +82,10 @@ export class ProjectIoFormComponent implements OnDestroy {
         }),
         tap(() => {
           this.router.navigate(['/']);
+        }),
+        catchError((err) => {
+          console.error(err);
+          return EMPTY;
         })
       )
       .subscribe();

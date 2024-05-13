@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Subject, forkJoin, of } from 'rxjs';
+import { BehaviorSubject, Subject, catchError, forkJoin, of } from 'rxjs';
 import { ProjectReport, IReportDetails } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
@@ -17,27 +17,46 @@ export class ReportService {
   constructor(private http: HttpClient) {}
 
   getReports() {
-    return this.http.get<Report[]>(environment.reportApiUrl);
+    return this.http.get<Report[]>(environment.reportApiUrl).pipe(
+      catchError((error) => {
+        console.error(error);
+        return of([]);
+      })
+    );
   }
 
   getProjectReports(projectSlug: string) {
-    return this.http.get<ProjectReport>(
-      `${environment.reportApiUrl}/${projectSlug}`
-    );
+    return this.http
+      .get<ProjectReport>(`${environment.reportApiUrl}/${projectSlug}`)
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
   }
 
   getProjectReportNames(projectSlug: string) {
-    return this.http.get<string[]>(
-      `${environment.reportApiUrl}/${projectSlug}/names`
-    );
+    return this.http
+      .get<string[]>(`${environment.reportApiUrl}/${projectSlug}/names`)
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of([]);
+        })
+      );
   }
 
   updateReport(projectSlug: string, report: ProjectReport) {
     if (!projectSlug || !report) return of({} as ProjectReport);
-    return this.http.put<ProjectReport>(
-      `${environment.reportApiUrl}/${projectSlug}`,
-      report
-    );
+    return this.http
+      .put<ProjectReport>(`${environment.reportApiUrl}/${projectSlug}`, report)
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
   }
 
   addReport(
@@ -45,10 +64,17 @@ export class ReportService {
     eventId: string,
     reportDetails: IReportDetails
   ) {
-    return this.http.post<ProjectReport>(
-      `${environment.reportApiUrl}/${projectSlug}/${eventId}`,
-      reportDetails
-    );
+    return this.http
+      .post<ProjectReport>(
+        `${environment.reportApiUrl}/${projectSlug}/${eventId}`,
+        reportDetails
+      )
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
   }
 
   readJsonFileContent(file: File): void {
@@ -77,22 +103,37 @@ export class ReportService {
       .get(`${environment.reportApiUrl}/xlsx/${projectSlug}/${eventName}`, {
         responseType: 'blob',
       })
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      )
       .subscribe((blob) => {
-        // Create a new Blob object using the response data of the file
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `${projectSlug}_${eventName}.xlsx`; // A default filename if none is specified by headers
-        a.click();
+        if (blob) {
+          // Create a new Blob object using the response data of the file
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `${projectSlug}_${eventName}.xlsx`; // A default filename if none is specified by headers
+          a.click();
 
-        URL.revokeObjectURL(a.href);
+          URL.revokeObjectURL(a.href);
+        }
       });
   }
 
   deleteReports(projectSlug: string, reports: IReportDetails[]) {
     const tasks = reports.map((report) =>
-      this.http.delete<ProjectReport>(
-        `${environment.reportApiUrl}/${projectSlug}/${report.eventId}`
-      )
+      this.http
+        .delete<ProjectReport>(
+          `${environment.reportApiUrl}/${projectSlug}/${report.eventId}`
+        )
+        .pipe(
+          catchError((error) => {
+            console.error(error);
+            return of(null);
+          })
+        )
     );
     return forkJoin(tasks); // Waits for all DELETE operations to complete.
   }

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DataLayerService } from '../api/datalayer/datalayer.service';
 import { GtmOperatorService } from '../api/gtm-operator/gtm-operator.service';
-import { switchMap, BehaviorSubject, take } from 'rxjs';
+import { switchMap, BehaviorSubject, take, catchError } from 'rxjs';
 import { IReportDetails, EventInspectionPresetDto } from '@utils';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -81,6 +81,12 @@ export class TestRunningFacadeService {
             project.settings.authentication.username,
             project.settings.authentication.password
           );
+        }),
+        catchError((error) => {
+          console.error(error);
+          this.isRunningTestSubject.next(false);
+          this.eventRunningTestSubject.next('');
+          return [];
         })
       )
       .subscribe((res) => {
