@@ -19,13 +19,13 @@ export class ImageService {
     private filePathService: FilePathService
   ) {}
 
-  async readImage(projectSlug: string, testName: string) {
+  async readImage(projectSlug: string, eventId: string) {
     try {
       const imageSavingFolder = join(
         await this.folderPathService.getReportSavingFolderPath(projectSlug),
-        testName
+        eventId
       );
-      const imagePath = join(imageSavingFolder, `${testName}.png`);
+      const imagePath = join(imageSavingFolder, `${eventId}.png`);
 
       if (!existsSync(imagePath)) {
         Logger.log('File not found', 'SharedService.readImage');

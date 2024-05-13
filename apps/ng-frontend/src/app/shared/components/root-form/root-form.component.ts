@@ -1,4 +1,9 @@
-import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnDestroy,
+  ViewEncapsulation,
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Subject, takeUntil, tap } from 'rxjs';
@@ -50,7 +55,7 @@ import { ConfigurationService } from '../../services/api/configuration/configura
   styles: [''],
   encapsulation: ViewEncapsulation.None,
 })
-export class RootFormComponent implements OnDestroy {
+export class RootFormComponent implements AfterViewInit, OnDestroy {
   destroy$ = new Subject<void>();
 
   rootForm = this.fb.group({
@@ -61,6 +66,27 @@ export class RootFormComponent implements OnDestroy {
     private fb: FormBuilder,
     private configurationService: ConfigurationService
   ) {}
+
+  ngAfterViewInit(): void {
+    this.observeRootConfiguration();
+  }
+
+  observeRootConfiguration() {
+    this.configurationService
+      .getConfiguration('rootProjectPath')
+      .pipe(
+        takeUntil(this.destroy$),
+        tap((res) => {
+          if (res) {
+            if (res.value) {
+              this.rootForm.controls.name.setValue(res.value);
+              this.rootForm.disable();
+            }
+          }
+        })
+      )
+      .subscribe();
+  }
 
   onResetRoot() {
     this.configurationService
@@ -88,7 +114,6 @@ export class RootFormComponent implements OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         tap((res) => {
-          console.log('res', res);
           this.rootForm.disable();
         })
       )
