@@ -2,14 +2,14 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const app = express();
-const port = 3000;
+const port = 3002;
 
 // Enable CORS for all routes
 app.use(cors());
 
-app.get('/projects', (req, res) => {
+app.get('/configurations', (req, res) => {
   try {
-    const data = fs.readFileSync('./mock/mock-db/project.json');
+    const data = fs.readFileSync('./mock/mock-db/db-configurations.json');
     const json = JSON.parse(data);
     res.setHeader('Content-Type', 'application/json');
     res.send(json);
@@ -18,12 +18,15 @@ app.get('/projects', (req, res) => {
   }
 });
 
-app.get('/projects/ng_gtm_integration_sample', (req, res) => {
+app.get('/configurations/:name', (req, res) => {
   try {
-    const data = fs.readFileSync('./mock/mock-db/settings.json');
+    const data = fs.readFileSync('./mock/mock-db/db-configurations.json');
     const json = JSON.parse(data);
+    const configuration = json.configurations.find(
+      (config) => config.name === req.params.name
+    );
     res.setHeader('Content-Type', 'application/json');
-    res.send(json);
+    res.send(configuration);
   } catch (err) {
     res.status(500).send('Error reading data file');
   }
