@@ -5,6 +5,7 @@ const { spawn } = require('child_process');
 const { existsSync } = require('fs');
 
 ('use strict');
+if (require('electron-squirrel-startup')) app.quit();
 
 function startBackend() {
   let serverPath = path.join(process.resourcesPath, 'main.js');
