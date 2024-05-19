@@ -11,11 +11,14 @@ if (process.env.NODE_ENV === 'ng-frontend') {
     makers: [
       {
         name: '@electron-forge/maker-squirrel',
-        config: {},
+        config: {
+          certificateFile: './cert.pfx',
+          certificatePassword: process.env.CERTIFICATE_PASSWORD,
+        },
       },
       {
         name: '@electron-forge/maker-zip',
-        platforms: ['darwin'],
+        platforms: ['win32'],
       },
       {
         name: '@electron-forge/maker-deb',
@@ -32,5 +35,10 @@ if (process.env.NODE_ENV === 'ng-frontend') {
         config: {},
       },
     ],
+    hooks: {
+      postStart: async (forgeConfig, appProcess) => {
+        console.log(`Spawned child pid: ${appProcess.pid}`);
+      },
+    },
   };
 }
