@@ -16,6 +16,13 @@
 
 [Feedback and Contribution](#feedback-and-contribution)
 
+// progress
+// add a default project folder within the Electron resources folder
+// add a default database sqlite3 file within the Electron resources folder
+// insert the table schema into the sqlite3 file
+// set the storage path with environment variables
+// FIXME: the backend doesn't start with the Electron app, localhost: 80
+
 # Overview
 
 This desktop application automates the GTM (Google Tag Manager) container review process and the production analytics deployment validation. It streamlines the quality assurance process by providing:
@@ -41,15 +48,15 @@ npm install
 For development
 
 ```bash
-npm run ng-frontend
+npm run dev-front
 ```
 
 ## Backend (Nest.js)
 
-Use the following command for backend development with a mock server:
+Use the following command for backend development with a development server:
 
 ```bash
-npm run mock-backend
+npm run dev-back
 ```
 
 # Build and Production
@@ -59,7 +66,7 @@ npm run mock-backend
 For production usage
 
 ```bash
-npm run prod-ng-frontend
+npm run prod-front
 ```
 
 ## Backend (Nest.js)
@@ -67,7 +74,7 @@ npm run prod-ng-frontend
 For production usage
 
 ```bash
-npm run backend
+npm run prod-back
 ```
 
 ## Build
@@ -75,7 +82,7 @@ npm run backend
 Compile the application with:
 
 ```bash
-npm run build-ng
+npm run build
 ```
 
 Which will build the Angular app with the production backend.
@@ -92,7 +99,7 @@ Please refer to `package.json` for more scripts.
 Please run the command to build the Electron app:
 
 ```bash
-npm run package-ng
+npm run package
 ```
 
 The output will be in the `out` folder.
