@@ -53,6 +53,17 @@
               "with": "apps/ng-frontend/src/environments/environment.development.ts"
             }
           ]
+        },
+        "mock": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/ng-frontend/src/environments/environment.ts",
+              "with": "apps/ng-frontend/src/environments/environment.mock.ts"
+            }
+          ]
         }
       },
       "defaultConfiguration": "production"
@@ -65,6 +76,24 @@
         },
         "development": {
           "buildTarget": "ng-frontend:build:development"
+        },
+        "mock": {
+          "buildTarget": "ng-frontend:build:mock"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "mock": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "development": {
+          "buildTarget": "ng-frontend:build:development",
+          "fileReplacements": [
+            {
+              "replace": "apps/ng-frontend/src/environments/environment.ts",
+              "with": "apps/ng-frontend/src/environments/environment.development.ts"
+            }
+          ]
         }
       },
       "defaultConfiguration": "development"

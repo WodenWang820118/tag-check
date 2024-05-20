@@ -1,4 +1,9 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { ConfigurationService } from '../../../configuration/configuration.service';
 import {
@@ -7,13 +12,37 @@ import {
   RESULT_FOLDER,
 } from '../../../configs/project.config';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { join } from 'path';
 
 @Injectable()
-export class FolderPathService {
+export class FolderPathService implements OnModuleInit {
   constructor(
     private pathUtilsService: PathUtilsService,
     private configurationService: ConfigurationService
   ) {}
+  // TODO: allow developers to set the root project path
+  async onModuleInit() {
+    try {
+      return await this.configurationService.getRootProjectPath();
+    } catch (error) {
+      let rootProjectPath: string;
+      if (process.env.NODE_ENV === 'dev') {
+        rootProjectPath = join('D:', 'projects');
+      } else if (process.env.NODE_ENV === 'staging') {
+        rootProjectPath = process.env.ROOT_PROJECT_PATH;
+      }
+      // the production environment is set in the electron main process
+      await this.configurationService.create({
+        id: uuidv4(),
+        title: 'rootProjectPath',
+        description: '',
+        value: rootProjectPath,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+  }
 
   async getRootProjectFolderPath() {
     try {
