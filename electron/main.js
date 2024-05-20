@@ -1,6 +1,9 @@
 const { app, BrowserWindow } = require('electron');
 const { getDatabase } = require('./database');
-const { createRootFolder, getRootBackendFolderPath } = require('./utils');
+const {
+  createProjectSavingRootFolder,
+  getProjectSavingRootFolder,
+} = require('./utils');
 const { startBackend } = require('./backend');
 const { createWindow } = require('./frontend');
 const { v4: uuidv4 } = require('uuid');
@@ -9,7 +12,7 @@ const { v4: uuidv4 } = require('uuid');
 if (require('electron-squirrel-startup')) app.quit();
 
 app.whenReady().then(() => {
-  createRootFolder();
+  createProjectSavingRootFolder();
   const db = getDatabase();
   db.serialize(() => {
     db.run(
@@ -30,7 +33,7 @@ app.whenReady().then(() => {
       uuidv4(),
       'rootProjectPath',
       'Root folder for projects',
-      getRootBackendFolderPath(),
+      getProjectSavingRootFolder(),
       new Date(),
       new Date()
     );

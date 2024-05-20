@@ -22,7 +22,7 @@ function getDataBasePath() {
   }
 }
 
-function createRootFolder() {
+function createProjectSavingRootFolder() {
   const rootFolder = path.join(
     getRootBackendFolderPath(),
     'tag_check_projects'
@@ -30,6 +30,10 @@ function createRootFolder() {
   if (!existsSync(rootFolder)) {
     fs.mkdirSync(rootFolder);
   }
+}
+
+function getProjectSavingRootFolder() {
+  return path.join(getRootBackendFolderPath(), 'tag_check_projects');
 }
 
 function getProductionFrontendPath() {
@@ -68,7 +72,8 @@ function getDevFrontendPath() {
 module.exports = {
   getRootBackendFolderPath,
   getDataBasePath,
-  createRootFolder,
+  createProjectSavingRootFolder,
+  getProjectSavingRootFolder,
   getProductionFrontendPath,
   getDevFrontendPath,
 };
