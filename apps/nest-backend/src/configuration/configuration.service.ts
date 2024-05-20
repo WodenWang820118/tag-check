@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateConfigurationDto } from './dto/create-configuration.dto';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
 import { Configuration } from './entities/configuration.entity';
@@ -23,18 +23,18 @@ export class ConfigurationService {
     return await this.configurationRepository.findAll();
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     return await this.configurationRepository.findOne({ where: { id: id } });
   }
 
-  async update(id: number, updateConfigurationDto: UpdateConfigurationDto) {
+  async update(id: string, updateConfigurationDto: UpdateConfigurationDto) {
     return await this.configurationRepository.update(
       { value: updateConfigurationDto.value },
       { where: { id: id } }
     );
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     return await this.configurationRepository.destroy({ where: { id: id } });
   }
 

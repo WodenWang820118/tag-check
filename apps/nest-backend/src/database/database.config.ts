@@ -1,32 +1,43 @@
+import { Logger } from '@nestjs/common';
 import { SequelizeModuleOptions } from '@nestjs/sequelize';
-import path from 'path';
+import { existsSync } from 'fs';
+import { join } from 'path';
+import { cwd } from 'process';
+import { SequelizeOptions } from 'sequelize-typescript';
 
-let storagePath: string;
+function getDatabaseConfig(): Partial<
+  {
+    name?: string;
+    retryAttempts?: number;
+    retryDelay?: number;
+    autoLoadModels?: boolean;
+    synchronize?: boolean;
+    uri?: string;
+  } & Partial<SequelizeOptions>
+> {
+  let storagePath: string;
 
-console.log(process.env.NODE_ENV);
+  if (process.env.NODE_ENV === 'dev') {
+    storagePath = join(cwd(), '.db', 'data.sqlite3');
+  } else if (process.env.NODE_ENV === 'staging' || !process.env.NODE_ENV) {
+    storagePath = process.env.DATABASE_PATH;
+  }
 
-let isDevelopment = process.env.NODE_ENV === 'development';
-let isProduction = process.env.NODE_ENV === 'production';
+  if (!existsSync(storagePath)) {
+    Logger.log(
+      `Database file not found at ${storagePath}. Creating a new one...`
+    );
+    storagePath = join(cwd(), '.db', 'data.sqlite3');
+  }
 
-if (!isDevelopment && !isProduction) {
-  console.log('In the Electron app.');
-  isDevelopment = true;
-  isProduction = false;
+  Logger.log(storagePath, 'Database file path:');
+
+  return {
+    dialect: 'sqlite',
+    storage: storagePath,
+    autoLoadModels: true,
+    synchronize: true,
+  };
 }
 
-// use process.resourcesPath to get the path to the resources folder
-// https://js.electronforge.io/interfaces/_electron_forge_shared_types.InternalOptions.Options.html#extraResource
-if (isDevelopment) {
-  storagePath = '.db/data.sqlite3';
-} else {
-  storagePath = path.join((process as any).resourcesPath, 'data.sqlite3');
-}
-
-console.log('storagePath', storagePath);
-
-export const dataBaseConfig: SequelizeModuleOptions = {
-  dialect: 'sqlite',
-  storage: storagePath,
-  autoLoadModels: true,
-  synchronize: true,
-};
+export const dataBaseConfig: SequelizeModuleOptions = getDatabaseConfig();

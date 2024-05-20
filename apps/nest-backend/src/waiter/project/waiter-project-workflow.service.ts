@@ -6,6 +6,7 @@ import {
   CONFIG_ROOT_PATH,
   CONFIG_CURRENT_PROJECT_PATH,
 } from '../../configs/project.config';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class WaiterProjectWorkFlowService {
@@ -25,9 +26,12 @@ export class WaiterProjectWorkFlowService {
           'WaiterProjectWorkFlowService'
         );
         return await this.configurationService.create({
+          id: uuidv4(),
           title: 'rootProjectPath',
           description: 'The root project path',
           value: rootProjectPath,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
       }
 
@@ -48,9 +52,12 @@ export class WaiterProjectWorkFlowService {
     } catch (error) {
       mkdirSync(rootProjectPath, { recursive: true });
       await this.configurationService.create({
+        id: uuidv4(),
         title: 'rootProjectPath',
         description: 'The root project path',
         value: rootProjectPath,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       Logger.log(
         'Set root project folder path!',
@@ -90,9 +97,12 @@ export class WaiterProjectWorkFlowService {
         );
 
         await this.configurationService.create({
+          id: uuidv4(),
           title: 'currentProjectPath',
           description: 'The current project path',
           value: projectName,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
 
         await this.projectInitializationService.initProject(
@@ -134,9 +144,12 @@ export class WaiterProjectWorkFlowService {
         );
 
         return this.configurationService.create({
+          id: uuidv4(),
           title: 'currentProjectPath',
           description: 'The current project path',
           value: projectName,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
       }
     } catch (error) {
