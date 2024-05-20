@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigurationService } from '../../configuration/configuration.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class WaiterConfigurationService {
@@ -21,9 +22,12 @@ export class WaiterConfigurationService {
 
   async createConfiguration(name: string, value: string) {
     return await this.configurationService.create({
+      id: uuidv4(),
       title: name,
       description: '',
       value: value,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
   }
 }

@@ -43,7 +43,7 @@ export class ProjectService {
       const projectsAll = await Promise.all(projectSettingsPromises);
 
       // Logger.log(projectsAll, 'ProjectService.getProjects');
-      return projectsAll;
+      return projectsAll || [];
     } catch (error) {
       Logger.error(error.message, 'ProjectService.getProjects');
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
