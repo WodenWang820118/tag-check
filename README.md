@@ -16,13 +16,6 @@
 
 [Feedback and Contribution](#feedback-and-contribution)
 
-// progress
-// add a default project folder within the Electron resources folder
-// add a default database sqlite3 file within the Electron resources folder
-// insert the table schema into the sqlite3 file
-// set the storage path with environment variables
-// FIXME: the backend doesn't start with the Electron app, localhost: 80
-
 # Overview
 
 This desktop application automates the GTM (Google Tag Manager) container review process and the production analytics deployment validation. It streamlines the quality assurance process by providing:
