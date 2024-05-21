@@ -15,6 +15,7 @@ app.whenReady().then(() => {
   createProjectSavingRootFolder();
   const db = getDatabase();
   db.serialize(() => {
+    // Create table statement remains unchanged
     db.run(
       'CREATE TABLE IF NOT EXISTS configurations (\
         id TEXT PRIMARY KEY, \
@@ -25,19 +26,44 @@ app.whenReady().then(() => {
         updatedAt DATE);'
     );
 
-    const insertStmt = db.prepare(
-      'INSERT OR REPLACE INTO configurations \
-      (id, title, description, value, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?);'
+    // Prepare a statement to select the rootProjectPath configuration
+    const selectStmt = db.prepare(
+      'SELECT * FROM configurations WHERE title =?;'
     );
-    insertStmt.run(
-      uuidv4(),
-      'rootProjectPath',
-      'Root folder for projects',
-      getProjectSavingRootFolder(),
-      new Date(),
-      new Date()
-    );
-    insertStmt.finalize();
+    let configExists = false;
+    let configId;
+
+    selectStmt.get('rootProjectPath', (err, row) => {
+      if (row) {
+        configExists = true;
+        configId = row.id;
+      }
+
+      // Depending on whether the configuration exists, prepare the appropriate SQL statement
+      const sql = configExists
+        ? 'UPDATE configurations SET value =?, updatedAt =? WHERE id =?;'
+        : 'INSERT INTO configurations (id, title, description, value, createdAt, updatedAt) VALUES (?,?,?,?,?,?);';
+
+      const stmt = db.prepare(sql);
+
+      // Bind values appropriately
+      if (configExists) {
+        stmt.run(getProjectSavingRootFolder(), new Date(), configId);
+      } else {
+        stmt.run(
+          uuidv4(),
+          'rootProjectPath',
+          'Root folder for projects',
+          getProjectSavingRootFolder(),
+          new Date(),
+          new Date()
+        );
+      }
+
+      stmt.finalize();
+    });
+
+    selectStmt.finalize();
   });
   startBackend();
   createWindow();
