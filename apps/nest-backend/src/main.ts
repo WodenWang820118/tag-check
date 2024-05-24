@@ -3,7 +3,8 @@ import { AppModule } from './app.module';
 import { SpelunkerModule } from 'nestjs-spelunker';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './all-exceptions-filter';
-import { Logger } from '@nestjs/common';
+import { HttpException, Logger } from '@nestjs/common';
+import { activatePort } from './configs/project.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -42,16 +43,6 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  if (process.env.NODE_ENV === 'dev') {
-    Logger.log('Listening on port 8080');
-    await app.listen(8080);
-  } else if (process.env.NODE_ENV === 'staging') {
-    Logger.log('Listening on port 3000');
-    await app.listen(5000);
-  } else {
-    // not specified will be production
-    Logger.log('Listening on port 80');
-    await app.listen(80);
-  }
+  await activatePort(app);
 }
 bootstrap();

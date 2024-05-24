@@ -79,6 +79,9 @@
         },
         "mock": {
           "buildTarget": "ng-frontend:build:mock"
+        },
+        "staging": {
+          "buildTarget": "ng-frontend:build:staging"
         }
       },
       "defaultConfiguration": "development"
@@ -92,6 +95,21 @@
             {
               "replace": "apps/ng-frontend/src/environments/environment.ts",
               "with": "apps/ng-frontend/src/environments/environment.development.ts"
+            }
+          ]
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "staging": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "development": {
+          "buildTarget": "ng-frontend:build:development",
+          "fileReplacements": [
+            {
+              "replace": "apps/ng-frontend/src/environments/environment.ts",
+              "with": "apps/ng-frontend/src/environments/environment.staging.ts"
             }
           ]
         }
