@@ -1,0 +1,36 @@
+const { spawn } = require('child_process');
+const path = require('path');
+
+// Helper function to run a command and return a promise
+const runCommand = (command, args, options) => {
+  return new Promise((resolve, reject) => {
+    const process = spawn(command, args, options);
+
+    process.on('close', (code) => {
+      if (code !== 0) {
+        reject(new Error(`${command} failed with code ${code}`));
+      } else {
+        resolve();
+      }
+    });
+
+    process.on('error', (err) => {
+      reject(err);
+    });
+  });
+};
+
+(async () => {
+  try {
+    // Run npm install in the specified directory
+    await runCommand('npm', ['install', '&&', 'npm', 'install', 'sqlite3'], {
+      cwd: path.join(__dirname, 'dist/apps/nest-backend'),
+      stdio: 'inherit',
+      shell: true,
+    });
+
+    console.log('npm install completed successfully');
+  } catch (err) {
+    console.error(`Error: ${err.message}`);
+  }
+})();
