@@ -1,11 +1,12 @@
-const { spawn } = require('child_process');
-
 module.exports = {
   packagerConfig: {
     asar: true,
     extraResource: [
       './dist/apps/ng-frontend',
       './dist/apps/nest-backend/main.js',
+      './dist/apps/nest-backend/package.json',
+      './dist/apps/nest-backend/package-lock.json',
+      './dist/apps/nest-backend/node_modules', // Include node_modules
     ],
   },
   rebuildConfig: {},
