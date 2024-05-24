@@ -8,12 +8,13 @@ import { PathUtilsService } from '../path-utils/path-utils.service';
 import { ConfigurationService } from '../../../configuration/configuration.service';
 import {
   CONFIG_FOLDER,
+  CONFIG_ROOT_PATH,
+  getRootProjectPath,
   RECORDING_FOLDER,
   RESULT_FOLDER,
 } from '../../../configs/project.config';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { join } from 'path';
 
 @Injectable()
 export class FolderPathService implements OnModuleInit {
@@ -21,23 +22,25 @@ export class FolderPathService implements OnModuleInit {
     private pathUtilsService: PathUtilsService,
     private configurationService: ConfigurationService
   ) {}
-  // TODO: allow developers to set the root project path
+
   async onModuleInit() {
     try {
-      return await this.configurationService.getRootProjectPath();
-    } catch (error) {
-      let rootProjectPath: string;
-      if (process.env.NODE_ENV === 'dev') {
-        rootProjectPath = join('D:', 'projects');
-      } else if (process.env.NODE_ENV === 'staging') {
-        rootProjectPath = process.env.ROOT_PROJECT_PATH;
+      if (!(await this.configurationService.getRootProjectPath())) {
+        await this.configurationService.create({
+          id: uuidv4(),
+          title: CONFIG_ROOT_PATH,
+          description: '',
+          value: getRootProjectPath(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
       }
-      // the production environment is set in the electron main process
+    } catch (error) {
       await this.configurationService.create({
         id: uuidv4(),
-        title: 'rootProjectPath',
+        title: CONFIG_ROOT_PATH,
         description: '',
-        value: rootProjectPath,
+        value: getRootProjectPath(),
         createdAt: new Date(),
         updatedAt: new Date(),
       });
