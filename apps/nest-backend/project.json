@@ -14,7 +14,6 @@
         "outputPath": "dist/apps/nest-backend",
         "main": "apps/nest-backend/src/main.ts",
         "tsConfig": "apps/nest-backend/tsconfig.app.json",
-        "isolatedConfig": true,
         "generatePackageJson": true,
         "webpackConfig": "apps/nest-backend/webpack.config.js"
       },
