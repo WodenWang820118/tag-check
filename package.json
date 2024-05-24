@@ -26,7 +26,7 @@
     "build-staging": "npm run build-staging-front && npm run build-staging-back",
     "build-prod-front": "nx build ng-frontend --configuration production --optimization --base-href ./",
     "build-prod-back": "cross-env-shell NODE_ENV=prod \"nx build nest-backend\"",
-    "build-prod": "npm run build-prod-front && npm run build-prod-back",
+    "build-prod": "npm run build-prod-front && npm run build-prod-back && node hooks.js",
     "build-tag-build": "nx build ng-tag-build --configuration production --optimization",
     "make": "cross-env-shell NODE_ENV=prod \"npm run build-prod && electron-forge make\"",
     "package": "cross-env-shell NODE_ENV=prod \"npm run build-prod && electron-forge package\"",
@@ -47,12 +47,7 @@
     "mock-settings-back": "nodemon mock/mock-server/mock-settings-backend.js",
     "documentation": "-----------------documentation-----------------",
     "compodoc": "npx compodoc -p apps/ng-frontend/tsconfig.doc.json -n \"ng-frontend\" --theme material -s",
-    "ngd": "npx ngd -p apps/ng-frontend/tsconfig.doc.json -o",
-    "experimental": "-----------------experimental-----------------",
-    "build-back-prep": "node --experimental-sea-config backend-config.json",
-    "copy-node-exe": "node -e \"require('fs').copyFileSync(process.execPath, 'backend.exe')\"",
-    "build-back-inject": "postject backend.exe NODE_SEA_BLOB backend-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2",
-    "build-back-exe": "npm run build-prod-back && npm run build-back-prep && npm run copy-node-exe && npm run build-back-inject"
+    "ngd": "npx ngd -p apps/ng-frontend/tsconfig.doc.json -o"
   },
   "private": true,
   "devDependencies": {

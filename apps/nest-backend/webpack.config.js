@@ -5,23 +5,5 @@ const path = require('path');
 module.exports = composePlugins(withNx(), (config) => {
   // Update the webpack config as needed here.
   // e.g. `config.plugins.push(new MyPlugin())`
-  config.entry = './src/main.ts';
-  config.output = {
-    path: path.resolve(__dirname, '../../dist/apps/nest-backend'),
-    filename: 'main.js',
-  };
-  config.resolve = {
-    extensions: ['.ts', '.js'],
-  };
-  config.module = {
-    rules: [
-      {
-        test: /\.ts$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
-      },
-    ],
-  };
-  config.target = 'node';
   return config;
 });
