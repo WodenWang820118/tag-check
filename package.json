@@ -44,10 +44,7 @@
     "mock-configurations-back": "nodemon mock/mock-server/mock-configurations-backend.js",
     "mock-specs-back": "nodemon mock/mock-server/mock-specs-backend.js",
     "mock-reports-back": "nodemon mock/mock-server/mock-reports-backend.js",
-    "mock-settings-back": "nodemon mock/mock-server/mock-settings-backend.js",
-    "documentation": "-----------------documentation-----------------",
-    "compodoc": "npx compodoc -p apps/ng-frontend/tsconfig.doc.json -n \"ng-frontend\" --theme material -s",
-    "ngd": "npx ngd -p apps/ng-frontend/tsconfig.doc.json -o"
+    "mock-settings-back": "nodemon mock/mock-server/mock-settings-backend.js"
   },
   "private": true,
   "devDependencies": {
@@ -61,7 +58,6 @@
     "@angular/compiler-cli": "17.3.8",
     "@angular/language-service": "17.3.8",
     "@angular/material": "17.3.8",
-    "@compodoc/compodoc": "^1.1.24",
     "@electron-forge/cli": "^7.4.0",
     "@electron-forge/maker-deb": "^7.4.0",
     "@electron-forge/maker-rpm": "^7.4.0",
