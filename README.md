@@ -16,6 +16,10 @@
 
 [Feedback and Contribution](#feedback-and-contribution)
 
+// TODO: backend in the main.ts causes the application not-opened
+// backend port is correct
+// database path value is correctly written in the data.sqlite3
+
 # Overview
 
 This desktop application automates the GTM (Google Tag Manager) container review process and the production analytics deployment validation. It streamlines the quality assurance process by providing:
@@ -50,6 +54,22 @@ Use the following command for backend development with a development server:
 
 ```bash
 npm run dev-back
+```
+
+You may need to remove the `.db/data.sqlite3` to re-init the cached data.
+
+## Electron
+
+Use the following command for Electron development with a development server:
+
+```bash
+npm run dev-electron
+```
+
+Use the following command for Electron development with a staging server:
+
+```bash
+npm run staging-electron
 ```
 
 # Build and Production
@@ -96,6 +116,16 @@ npm run package
 ```
 
 The output will be in the `out` folder.
+
+## Make
+
+Please run the command:
+
+```bash
+npm run make
+```
+
+It will generate a Windows x32/x64 zip and a squirrel.exe file.
 
 # Feedback and Contribution
 

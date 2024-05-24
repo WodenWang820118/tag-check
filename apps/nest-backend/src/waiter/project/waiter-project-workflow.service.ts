@@ -27,7 +27,7 @@ export class WaiterProjectWorkFlowService {
         );
         return await this.configurationService.create({
           id: uuidv4(),
-          title: 'rootProjectPath',
+          title: CONFIG_ROOT_PATH,
           description: 'The root project path',
           value: rootProjectPath,
           createdAt: new Date(),
@@ -45,15 +45,17 @@ export class WaiterProjectWorkFlowService {
           'WaiterProjectWorkFlowService'
         );
         return this.configurationService.update(existingConfig.id, {
-          title: 'rootProjectPath',
+          title: CONFIG_ROOT_PATH,
           value: rootProjectPath,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
       }
     } catch (error) {
       mkdirSync(rootProjectPath, { recursive: true });
       await this.configurationService.create({
         id: uuidv4(),
-        title: 'rootProjectPath',
+        title: CONFIG_ROOT_PATH,
         description: 'The root project path',
         value: rootProjectPath,
         createdAt: new Date(),
@@ -83,8 +85,9 @@ export class WaiterProjectWorkFlowService {
         );
 
         await this.configurationService.update(existingConfig.id, {
-          title: 'currentProjectPath',
+          title: CONFIG_CURRENT_PROJECT_PATH,
           value: projectName,
+          updatedAt: new Date(),
         });
         await this.projectInitializationService.initProject(
           projectName,
@@ -98,7 +101,7 @@ export class WaiterProjectWorkFlowService {
 
         await this.configurationService.create({
           id: uuidv4(),
-          title: 'currentProjectPath',
+          title: CONFIG_CURRENT_PROJECT_PATH,
           description: 'The current project path',
           value: projectName,
           createdAt: new Date(),

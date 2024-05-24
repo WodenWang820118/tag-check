@@ -1,3 +1,5 @@
+const { spawn } = require('child_process');
+
 module.exports = {
   packagerConfig: {
     asar: true,

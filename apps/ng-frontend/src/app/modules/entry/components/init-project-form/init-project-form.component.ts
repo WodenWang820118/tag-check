@@ -149,6 +149,7 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
             // Throw an error or return EMPTY to stop the observable chain if configuration is not valid
             return EMPTY;
           } else {
+            console.log('root project path: ', rootProjectPath.value);
             console.log('project form value: ', this.projectForm.value);
             console.log(
               'project slug: ',

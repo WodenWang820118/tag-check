@@ -3,6 +3,10 @@ import { CreateConfigurationDto } from './dto/create-configuration.dto';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
 import { Configuration } from './entities/configuration.entity';
 import { InjectModel } from '@nestjs/sequelize';
+import {
+  CONFIG_CURRENT_PROJECT_PATH,
+  CONFIG_ROOT_PATH,
+} from '../configs/project.config';
 
 @Injectable()
 export class ConfigurationService {
@@ -47,7 +51,7 @@ export class ConfigurationService {
   async getRootProjectPath(): Promise<string> {
     return await this.configurationRepository
       .findOne({
-        where: { title: 'rootProjectPath' },
+        where: { title: CONFIG_ROOT_PATH },
       })
       .then((res) => {
         return res.getDataValue('value');
@@ -57,7 +61,7 @@ export class ConfigurationService {
   async getCurrentProjectPath(): Promise<string> {
     return await this.configurationRepository
       .findOne({
-        where: { title: 'currentProjectPath' },
+        where: { title: CONFIG_CURRENT_PROJECT_PATH },
       })
       .then((res) => {
         return res.getDataValue('value');
