@@ -2,50 +2,22 @@ import {
   HttpException,
   Injectable,
   Logger,
-  OnModuleInit,
 } from '@nestjs/common';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { ConfigurationService } from '../../../configuration/configuration.service';
 import {
   CONFIG_FOLDER,
-  CONFIG_ROOT_PATH,
-  getRootProjectPath,
   RECORDING_FOLDER,
   RESULT_FOLDER,
 } from '../../../configs/project.config';
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
-export class FolderPathService implements OnModuleInit {
+export class FolderPathService {
   constructor(
     private pathUtilsService: PathUtilsService,
     private configurationService: ConfigurationService
   ) {}
-
-  async onModuleInit() {
-    try {
-      if (!(await this.configurationService.getRootProjectPath())) {
-        await this.configurationService.create({
-          id: uuidv4(),
-          title: CONFIG_ROOT_PATH,
-          description: '',
-          value: getRootProjectPath(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        });
-      }
-    } catch (error) {
-      await this.configurationService.create({
-        id: uuidv4(),
-        title: CONFIG_ROOT_PATH,
-        description: '',
-        value: getRootProjectPath(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-    }
-  }
 
   async getRootProjectFolderPath() {
     try {
