@@ -16,10 +16,6 @@
 
 [Feedback and Contribution](#feedback-and-contribution)
 
-// TODO: backend in the main.ts causes the application not-opened
-// backend port is correct
-// database path value is correctly written in the data.sqlite3
-
 # Overview
 
 This desktop application automates the GTM (Google Tag Manager) container review process and the production analytics deployment validation. It streamlines the quality assurance process by providing:
@@ -125,7 +121,7 @@ Please run the command:
 npm run make
 ```
 
-It will generate a Windows x32/x64 zip and a squirrel.exe file.
+It will generate a Windows x32/x64 zip file.
 
 # Feedback and Contribution
 

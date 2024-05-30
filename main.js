@@ -1,8 +1,8 @@
+'use strict';
 // electron
 const { app, BrowserWindow } = require('electron');
-const isDev = require('electron-is-dev');
 // child_process
-const { spawn } = require('child_process');
+const { fork } = require('child_process');
 // os module
 const path = require('path');
 const fs = require('fs');
@@ -12,12 +12,11 @@ const sqlite3 = require('sqlite3').verbose();
 // uuid module
 const { v4: uuidv4 } = require('uuid');
 
-('use strict');
-if (require('electron-squirrel-startup')) app.quit();
 const ROOT_PROJECT_NAME = 'tag_check_projects';
 const ROOT_DATABASE_NAME = 'data.sqlite3';
 
 // utils
+let server;
 
 function getRootBackendFolderPath() {
   switch (process.env.NODE_ENV) {
@@ -97,8 +96,9 @@ function getDevFrontendPath() {
 // backend
 
 function startBackend() {
-  let serverPath, env, serverProcess;
+  let env;
   const rootBackendFolderPath = getRootBackendFolderPath();
+  const serverPath = path.join(rootBackendFolderPath, 'main.js');
   const commonEnv = {
     ...process.env,
     ROOT_PROJECT_PATH: path.join(rootBackendFolderPath, ROOT_PROJECT_NAME),
@@ -107,7 +107,6 @@ function startBackend() {
 
   switch (process.env.NODE_ENV) {
     case 'dev':
-      serverPath = path.join(rootBackendFolderPath, 'main.js');
       env = {
         ...commonEnv,
         NODE_ENV: 'dev',
@@ -119,64 +118,47 @@ function startBackend() {
       };
       break;
     case 'staging':
-      serverPath = path.join(rootBackendFolderPath, 'main.js');
       env = {
         ...commonEnv,
         NODE_ENV: 'staging',
       };
       break;
     case 'prod':
-      serverPath = path.join(rootBackendFolderPath, 'main.js');
       env = {
         ...commonEnv,
         NODE_ENV: 'prod',
       };
       break;
     default:
-      serverPath = path.join(rootBackendFolderPath, 'main.js');
       env = {
         ...commonEnv,
         NODE_ENV: 'prod',
       };
       break;
   }
+  return fork(serverPath, { env });
+}
 
-  try {
-    serverProcess = spawn('node', [serverPath], { env });
-
-    writePath(path.join(rootBackendFolderPath, 'serverPath.txt'), serverPath);
-    writePath(
-      path.join(rootBackendFolderPath, 'serverEnv.txt'),
-      JSON.stringify(env)
-    );
-
-    serverProcess.stdout.on('data', (data) => {
-      if (data) {
-        console.log(`Backend: ${data}`);
+async function checkIfPortIsOpen(urls, maxAttempts = 10) {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    for (const url of urls) {
+      try {
+        const response = await (await fetch(url)).json();
+        console.log('response', response);
+        // depending on the response, you may need to adjust the condition
+        if (!response) {
+          throw new Error('Server not ready');
+        }
+        return true; // Port is open
+      } catch (error) {
+        console.log(`Attempt ${attempt}: Waiting for server to start...`);
       }
-    });
-
-    serverProcess.stderr.on('data', (data) => {
-      if (data) {
-        writePath(path.join(rootBackendFolderPath, 'serverErrorLog.txt'), data);
-        console.error(`Backend Error: ${data}`);
-      }
-    });
-
-    serverProcess.on('close', (code) => {
-      writePath(
-        path.join(rootBackendFolderPath, 'serverCloseLog.txt'),
-        `Process exited with code ${code}`
-      );
-      console.log(`Backend process exited with code ${code}`);
-    });
-  } catch (error) {
-    console.error(`Failed to start the backend process: ${error.message}`);
-    writePath(
-      path.join(rootBackendFolderPath, 'serverErrorLog.txt'),
-      error.message
-    );
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second before retrying
   }
+  throw new Error(
+    `Failed to connect to the server after ${maxAttempts} attempts`
+  );
 }
 
 // database
@@ -202,19 +184,18 @@ function createWindow() {
     },
   });
 
-  if (isDev) {
-    console.log('isDev', isDev);
-    const devFrontendPath = getDevFrontendPath();
-    mainWindow.loadFile(devFrontendPath);
-    mainWindow.webContents.openDevTools(); // Open DevTools in development
-  } else {
-    try {
-      const entryPath = getProductionFrontendPath();
+  try {
+    const entryPath = getProductionFrontendPath();
+    if (!existsSync(entryPath)) {
+      const devFrontendPath = getDevFrontendPath();
+      mainWindow.loadFile(devFrontendPath);
+      mainWindow.webContents.openDevTools();
+    } else {
       mainWindow.loadFile(entryPath);
-      mainWindow.webContents.openDevTools(); // Open DevTools in development
-    } catch (e) {
-      console.error(e);
+      mainWindow.webContents.openDevTools();
     }
+  } catch (e) {
+    console.error(e);
   }
 }
 
@@ -274,9 +255,44 @@ app.whenReady().then(async () => {
 
     selectStmt.finalize();
   });
-  startBackend(); // method is called
-  await new Promise((resolve) => setTimeout(resolve, 3000));
-  createWindow();
+
+  server = startBackend();
+  server.once('spawn', async () => {
+    const urls = [
+      'http://localhost:8080',
+      'http://localhost:5000',
+      'http://localhost:80',
+    ];
+    try {
+      if (await checkIfPortIsOpen(urls, 30)) createWindow();
+    } catch (error) {
+      console.error(error.message);
+      writePath(
+        path.join(getRootBackendFolderPath(), 'portErrorLog.txt'),
+        error.message
+      );
+    }
+  });
+
+  server.on('message', (message) => {
+    console.log(`Message from child: ${message}`);
+  });
+
+  server.on('error', (error) => {
+    console.error(`Error from child: ${error}`);
+    writePath(
+      path.join(getRootBackendFolderPath(), 'childErrorLog.txt'),
+      error.message
+    );
+  });
+
+  server.on('exit', (code, signal) => {
+    console.log(`Child exited with code ${code} and signal ${signal}`);
+    writePath(
+      path.join(getRootBackendFolderPath(), 'childExitLog.txt'),
+      `Child exited with code ${code} and signal ${signal}`
+    );
+  });
 });
 
 app.on('window-all-closed', () => {
@@ -285,8 +301,36 @@ app.on('window-all-closed', () => {
   }
 });
 
+app.on('before-quit', async () => {
+  // Perform any necessary cleanup here
+  console.log('App is about to quit. Performing cleanup...');
+  // Ensure all background processes are terminated
+  // Ensure all background processes are terminated
+  if (server) {
+    server.kill();
+  }
+
+  // Close any open connections
+  const db = getDatabase();
+  db.close((err) => {
+    if (err) {
+      console.error('Error closing the database:', err.message);
+    } else {
+      console.log('Database connection closed.');
+    }
+  });
+
+  // Wait for all asynchronous operations to complete
+  await new Promise((resolve) => {
+    setTimeout(resolve, 1000); // Adjust the timeout as needed
+  });
+
+  // Quit the app
+  app.quit();
+});
+
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
+    // createWindow();
   }
 });

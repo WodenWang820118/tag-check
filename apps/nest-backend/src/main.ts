@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { LazyModuleLoader, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SpelunkerModule } from 'nestjs-spelunker';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -8,6 +8,10 @@ import { activatePort } from './configs/project.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const lazyModuleLoader = app.get(LazyModuleLoader);
+  const { WaiterModule } = await import('./waiter/waiter.module');
+  await lazyModuleLoader.load(() => WaiterModule);
+
   app.enableCors();
   // Handle uncaught exceptions
   app.useGlobalFilters(new AllExceptionsFilter());
@@ -45,4 +49,5 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
   await activatePort(app);
 }
+
 bootstrap();
