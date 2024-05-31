@@ -1,9 +1,8 @@
 import { LazyModuleLoader, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { SpelunkerModule } from 'nestjs-spelunker';
+// import { SpelunkerModule } from 'nestjs-spelunker';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './all-exceptions-filter';
-import { HttpException, Logger } from '@nestjs/common';
 import { activatePort } from './configs/project.config';
 
 async function bootstrap() {
