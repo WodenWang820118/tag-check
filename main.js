@@ -305,7 +305,6 @@ app.on('before-quit', async () => {
   // Perform any necessary cleanup here
   console.log('App is about to quit. Performing cleanup...');
   // Ensure all background processes are terminated
-  // Ensure all background processes are terminated
   if (server) {
     server.kill();
   }
@@ -327,10 +326,4 @@ app.on('before-quit', async () => {
 
   // Quit the app
   app.quit();
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    // createWindow();
-  }
 });
