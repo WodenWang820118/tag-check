@@ -139,22 +139,20 @@ function startBackend() {
   return fork(serverPath, { env });
 }
 
-async function checkIfPortIsOpen(urls, maxAttempts = 10) {
+async function checkIfPortIsOpen(urls, maxAttempts = 20, timeout = 2000) {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     for (const url of urls) {
       try {
-        const response = await (await fetch(url)).json();
-        console.log('response', response);
-        // depending on the response, you may need to adjust the condition
-        if (!response) {
-          throw new Error('Server not ready');
+        const response = await fetch(url);
+        if (response) {
+          console.log('Server is ready');
+          return true; // Port is open
         }
-        return true; // Port is open
       } catch (error) {
         console.log(`Attempt ${attempt}: Waiting for server to start...`);
       }
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second before retrying
+    await new Promise((resolve) => setTimeout(resolve, timeout)); // Wait for 2 seconds before retrying
   }
   throw new Error(
     `Failed to connect to the server after ${maxAttempts} attempts`
@@ -264,7 +262,7 @@ app.whenReady().then(async () => {
       'http://localhost:80',
     ];
     try {
-      if (await checkIfPortIsOpen(urls, 30)) createWindow();
+      if (await checkIfPortIsOpen(urls, 20, 2000)) createWindow();
     } catch (error) {
       console.error(error.message);
       writePath(
