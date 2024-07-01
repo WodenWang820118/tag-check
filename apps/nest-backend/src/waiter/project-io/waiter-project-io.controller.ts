@@ -54,7 +54,7 @@ export class WaiterProjectIoController {
     try {
       Logger.log('called importProject');
       Logger.log('file', file);
-      Logger.log('file', file.path);
+      Logger.log('file.path', file.path);
       const rootProjectPath =
         await this.configurationSerivce.getRootProjectPath();
       await this.waiterProjectIoService.importProject(
