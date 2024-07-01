@@ -1,7 +1,7 @@
 import { MatCardModule } from '@angular/material/card';
 import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { catchError, Subject } from 'rxjs';
+import { catchError, Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
 
@@ -37,7 +37,7 @@ export class ProjectImportComponent implements OnDestroy {
     const file: File | null = target.files?.[0] || null;
     if (file) {
       console.log('file', file);
-      this.projectIoService
+      return this.projectIoService
         .importProject(file)
         .pipe(
           catchError((err) => {
@@ -50,11 +50,14 @@ export class ProjectImportComponent implements OnDestroy {
           if (event) {
             console.log('event', event);
             if (event.type === 1) {
-              this.router.navigate(['/']);
+              this.router.navigate(['/']).then(() => {
+                window.location.reload();
+              });
             }
           }
         });
     }
+    return new Subscription();
   }
 
   ngOnDestroy(): void {
