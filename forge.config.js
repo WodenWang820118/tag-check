@@ -1,7 +1,6 @@
 module.exports = {
   packagerConfig: {
     asar: true,
-    unpack: '**/node_modules/puppeteer/.local-chromium/**/*',
     extraResource: [
       './dist/apps/ng-frontend',
       './dist/apps/nest-backend/main.js',

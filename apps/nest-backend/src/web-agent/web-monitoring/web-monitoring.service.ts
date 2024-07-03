@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import puppeteer, { Page } from 'puppeteer';
+import { Injectable, Logger } from '@nestjs/common';
+import { Page } from 'puppeteer';
 import { RequestService } from './request/request.service';
 import { BROWSER_ARGS } from '../../configs/project.config';
 
@@ -43,9 +43,15 @@ export class WebMonitoringService {
    * @returns A Promise resolving to an array of GTM IDs
    */
   async detectGtm(url: string) {
-    const browser = await puppeteer.launch({
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const PCR = require('puppeteer-chromium-resolver');
+    const options = {};
+    const stats = await PCR(options);
+    Logger.log(stats, 'WebMonitoringService.detectGtm: stats');
+    const browser = await stats.puppeteer.launch({
       headless: true,
       args: BROWSER_ARGS,
+      executablePath: stats.executablePath,
     });
 
     try {
