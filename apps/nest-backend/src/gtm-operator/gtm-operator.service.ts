@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import puppeteer, { Credentials, Page } from 'puppeteer';
+import { Credentials, Page } from 'puppeteer';
 import { BROWSER_ARGS } from '../configs/project.config';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { sleep } from '../web-agent/action/action-utils';
@@ -24,7 +24,12 @@ export class GtmOperatorService {
     eventInspectionPresetDto?: EventInspectionPresetDto
   ) {
     // set the defaultViewport to null to use maximum viewport size
-    const browser = await puppeteer.launch({
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const PCR = require('puppeteer-chromium-resolver');
+    const options = {};
+    const stats = PCR.getStats(options);
+    Logger.log(stats, 'GtmOperatorService.inspectSingleEventViaGtm: stats');
+    const browser = await stats.puppeteer.launch({
       headless: headless === 'true' ? true : false,
       devtools: measurementId ? true : false,
       defaultViewport: null,
@@ -32,6 +37,7 @@ export class GtmOperatorService {
       ignoreHTTPSErrors: true,
       // the window size may impact the examination result
       args: eventInspectionPresetDto.puppeteerArgs || BROWSER_ARGS,
+      executablePath: stats.executablePath,
     });
 
     const incognitoContext = await browser.createBrowserContext();
