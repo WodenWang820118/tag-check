@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import puppeteer, { Credentials, Page } from 'puppeteer';
+import { Injectable, Logger } from '@nestjs/common';
+import { Credentials, Page } from 'puppeteer';
 import { BROWSER_ARGS } from '../configs/project.config';
 import { WebAgentUtilsService } from './web-agent-utils.service';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
@@ -31,9 +31,15 @@ export class WebAgentService {
   }
 
   async fetchDataLayer(url: string, credentials?: Credentials) {
-    const browser = await puppeteer.launch({
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const PCR = require('puppeteer-chromium-resolver');
+    const options = {};
+    const stats = await PCR(options);
+    Logger.log(stats, 'WebAgentService.fetchDataLayer: stats');
+    const browser = await stats.puppeteer.launch({
       headless: true,
       args: BROWSER_ARGS,
+      executablePath: stats.executablePath,
     });
 
     const [page] = await browser.pages();
