@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ProjectListComponent } from '../../components/project-list/project-list.component';
 import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { ProjectInfo } from '@utils';
 
 @Component({
@@ -23,9 +23,13 @@ import { ProjectInfo } from '@utils';
   }
   `,
 })
-export class HomeViewComponent {
-  projects$: Observable<ProjectInfo[]>;
-  constructor(private projectInfoService: ProjectInfoService) {
+export class HomeViewComponent implements OnInit {
+  projects$!: Observable<ProjectInfo[]>;
+  destroy$ = new Subject<void>();
+  constructor(private projectInfoService: ProjectInfoService) {}
+
+  ngOnInit(): void {
+    console.log('HomeViewComponent initialized');
     this.projects$ = this.projectInfoService.getProjects();
   }
 }
