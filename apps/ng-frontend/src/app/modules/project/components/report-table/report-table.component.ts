@@ -156,6 +156,11 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
       .subscribe();
   }
 
+  selectSingleRow(row: IReportDetails) {
+    this.selection.toggle(row);
+    this.selection.select(row);
+  }
+
   /** Whether the number of selected elements matches the total number of rows. */
   isAllSelected() {
     if (!this.testDataSource) {

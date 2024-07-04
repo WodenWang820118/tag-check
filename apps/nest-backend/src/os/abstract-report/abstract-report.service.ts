@@ -2,7 +2,7 @@ import { FolderService } from '../folder/folder.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { IReportDetails, OutputValidationResult } from '@utils';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
-import { existsSync, mkdir, statSync } from 'fs';
+import { existsSync, mkdirSync, statSync } from 'fs';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 import { FileService } from '../file/file.service';
@@ -36,18 +36,10 @@ export class AbstractReportService {
         );
 
       if (!existsSync(folderPath)) {
-        mkdir(`${folderPath}`, { recursive: true }, (err) => {
-          if (err) {
-            Logger.error(
-              err.message,
-              'AbstractReportService.writeSingleAbstractTestResultJson'
-            );
-            throw new HttpException(
-              'Failed to write report',
-              HttpStatus.INTERNAL_SERVER_ERROR
-            );
-          }
-        });
+        mkdirSync(`${folderPath}`, { recursive: true });
+      }
+
+      if (!existsSync(abstractPath)) {
         this.fileService.writeJsonFile(abstractPath, data);
       } else {
         const report = this.fileService.readJsonFile(
@@ -62,7 +54,7 @@ export class AbstractReportService {
         'AbstractReportService.writeSingleAbstractTestResultJson'
       );
       throw new HttpException(
-        'Failed to write report',
+        'AbstractReportService.writeSingleAbstractTestResultJson',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }

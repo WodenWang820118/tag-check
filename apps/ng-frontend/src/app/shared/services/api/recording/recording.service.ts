@@ -72,7 +72,8 @@ export class RecordingService {
     console.log('Project Slug', projectSlug);
     console.log('Event Id', eventId);
     console.log('Recording', jsonContent);
-
+    if (!eventId || !projectSlug || this.isEmptyObject(jsonContent))
+      return of(null);
     return this.http
       .post<Recording>(
         `${environment.recordingApiUrl}/${projectSlug}/${eventId}`,
@@ -84,5 +85,32 @@ export class RecordingService {
           return of(null);
         })
       );
+  }
+
+  private isEmptyObject(value: unknown): boolean {
+    if (value === null || value === undefined) {
+      return true;
+    }
+
+    if (typeof value !== 'object') {
+      return false;
+    }
+
+    if (Array.isArray(value)) {
+      return value.length === 0;
+    }
+
+    if (value instanceof Date) {
+      return false;
+    }
+
+    if (value instanceof Set || value instanceof Map) {
+      return value.size === 0;
+    }
+
+    return (
+      Object.keys(value as object).length === 0 &&
+      Object.getOwnPropertySymbols(value as object).length === 0
+    );
   }
 }

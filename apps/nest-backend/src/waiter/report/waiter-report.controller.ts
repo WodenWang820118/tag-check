@@ -101,7 +101,6 @@ export class WaiterReportController {
     @Param('eventId') eventId: string,
     @Body() report: IReportDetails
   ) {
-    Logger.log(eventId, 'eventId');
     return await this.waiterReportService.addReport(
       projectSlug,
       eventId,
