@@ -50,9 +50,7 @@ export class ProjectImportComponent implements OnDestroy {
           if (event) {
             console.log('event', event);
             if (event.type === 1) {
-              this.router.navigate(['/']).then(() => {
-                window.location.reload();
-              });
+              this.router.navigate(['/']);
             }
           }
         });
