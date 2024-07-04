@@ -30,14 +30,11 @@ export class ProjectFacadeService {
     );
   }
 
-  // TODO: Big O(n^2) - can be optimized
   initializeRecordingStatus(reportNames: string[], recordingNames: string[]) {
     this.hasRecordingMap.clear();
+    const recordingSet = new Set(recordingNames);
     reportNames.forEach((reportName) => {
-      this.hasRecordingMap.set(
-        reportName,
-        recordingNames.some((recordingName) => recordingName === reportName)
-      );
+      this.hasRecordingMap.set(reportName, recordingSet.has(reportName));
     });
   }
 
