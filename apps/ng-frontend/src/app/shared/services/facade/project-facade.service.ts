@@ -32,10 +32,12 @@ export class ProjectFacadeService {
 
   initializeRecordingStatus(reportNames: string[], recordingNames: string[]) {
     this.hasRecordingMap.clear();
-    const recordingSet = new Set(recordingNames);
-    reportNames.forEach((reportName) => {
-      this.hasRecordingMap.set(reportName, recordingSet.has(reportName));
-    });
+    const reportSet = new Set(reportNames);
+    for (const recordingName of recordingNames) {
+      if (reportSet.has(recordingName)) {
+        this.hasRecordingMap.set(recordingName, true);
+      }
+    }
   }
 
   hasRecording(eventId: string): boolean {

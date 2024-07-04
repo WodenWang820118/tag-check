@@ -70,12 +70,13 @@ export class DataSourceFacadeService {
   }
 
   observePreventNavigationSelected(selection: SelectionModel<IReportDetails>) {
-    if (selection.isEmpty()) return of(null);
     return combineLatest([
       this.route.params,
       this.projectDataSourceService.getPreventNavigationStream(),
+      selection.changed,
     ]).pipe(
-      switchMap(([params, value]) => {
+      switchMap(([params, value, selectionChanges]) => {
+        if (selectionChanges.added.length === 0) return of(null);
         const projectSlug = params['projectSlug'];
         if (value === true) {
           // reset the prevent navigation stream
@@ -104,14 +105,16 @@ export class DataSourceFacadeService {
     selection: SelectionModel<IReportDetails>,
     testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
   ) {
-    if (selection.isEmpty()) return of(null);
     return combineLatest([
       this.route.params,
       this.projectDataSourceService.getDeletedStream(),
+      selection.changed,
     ]).pipe(
-      mergeMap(([params, value]) => {
+      mergeMap(([params, value, selectionChanges]) => {
         // after report deletion the reset deleted stream ensures that no further deletion occurs
         // so that the dialog is not opened again
+        if (selectionChanges.added.length === 0)
+          return of({ params, dialogResult: false });
         if (value === false) {
           return of({ params, dialogResult: false });
         } else {

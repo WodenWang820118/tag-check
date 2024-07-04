@@ -13,7 +13,7 @@
       <td mat-cell *matCellDef="let row">
         <mat-checkbox
           (click)="$event.stopPropagation()"
-          (change)="$event ? selection.toggle(row) : null"
+          (change)="$event ? selectSingleRow(row) : null"
           [checked]="selection.isSelected(row)"
           [aria-label]="checkboxLabel(row)"
         >
