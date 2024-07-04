@@ -70,6 +70,7 @@ export class DataSourceFacadeService {
   }
 
   observePreventNavigationSelected(selection: SelectionModel<IReportDetails>) {
+    if (selection.isEmpty()) return of(null);
     return combineLatest([
       this.route.params,
       this.projectDataSourceService.getPreventNavigationStream(),
@@ -103,6 +104,7 @@ export class DataSourceFacadeService {
     selection: SelectionModel<IReportDetails>,
     testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
   ) {
+    if (selection.isEmpty()) return of(null);
     return combineLatest([
       this.route.params,
       this.projectDataSourceService.getDeletedStream(),
