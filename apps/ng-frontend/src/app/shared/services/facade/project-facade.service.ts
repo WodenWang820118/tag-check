@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { SettingsService } from '../api/settings/settings.service';
 import { RecordingService } from '../api/recording/recording.service';
 import { ReportService } from '../api/report/report.service';
+import { Recording } from '@utils';
 
 @Injectable()
 export class ProjectFacadeService {
@@ -18,10 +19,14 @@ export class ProjectFacadeService {
   observeProjectRecordingStatus(projectSlug: string) {
     return combineLatest([
       this.reportService.getProjectReportNames(projectSlug),
-      this.recordingService.getProjectRecordingNames(projectSlug),
+      this.recordingService.getProjectRecordings(projectSlug),
     ]).pipe(
-      tap(([reportNames, recordingNames]) => {
-        this.initializeRecordingStatus(reportNames, recordingNames);
+      tap(([reportNames, projectRecording]) => {
+        if (!reportNames || !projectRecording) return;
+        this.initializeRecordingStatus(
+          reportNames,
+          projectRecording.recordings
+        );
       }),
       catchError((error) => {
         console.error(error);
@@ -30,13 +35,15 @@ export class ProjectFacadeService {
     );
   }
 
-  initializeRecordingStatus(reportNames: string[], recordingNames: string[]) {
+  initializeRecordingStatus(
+    reportNames: string[],
+    recordings: Record<string, Recording>
+  ) {
     this.hasRecordingMap.clear();
     const reportSet = new Set(reportNames);
-    for (const recordingName of recordingNames) {
-      if (reportSet.has(recordingName)) {
-        this.hasRecordingMap.set(recordingName, true);
-      }
+    for (const [key, value] of Object.entries(recordings)) {
+      if (!reportSet.has(key)) continue;
+      this.hasRecordingMap.set(key, value.steps.length > 0);
     }
   }
 

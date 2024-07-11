@@ -1,9 +1,9 @@
 export interface ProjectRecording {
   projectSlug: string;
-  recordings: Recording[];
+  recordings: Record<string, Recording>;
 }
 
 export interface Recording {
   title: string;
-  steps: any[];
+  steps: Record<string, any>[];
 }

@@ -29,6 +29,7 @@
         <button
           mat-raised-button
           color="primary"
+          [disabled]="editorService.isJsonSyntaxError$ | async"
           (click)="onSpecUpdate(); switchSpecEditMode($event)"
         >
           Save
@@ -82,8 +83,13 @@
         ></app-editor>
         } @else {
         <!-- otherwise, showing the info -->
-        <pre class="json">{{ recording$ | async | json }}</pre>
-        }
+        @if (recording$ | async) {
+        <ng-container>
+          <pre class="json">{{ recording$ | async | json }}</pre>
+        </ng-container>
+        } @else {
+        <p>No recording found</p>
+        } }
       </mat-panel-description>
       @if (recordingEditMode) {
       <mat-action-row>
@@ -99,6 +105,7 @@
         <button
           mat-raised-button
           color="primary"
+          [disabled]="editorService.isJsonSyntaxError$ | async"
           (click)="onRecordingUpdate(); switchRecordingEditMode($event)"
         >
           Save
