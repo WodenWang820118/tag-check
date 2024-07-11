@@ -42,7 +42,7 @@ export class ReportService {
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of([]);
+          return of(null);
         })
       );
   }

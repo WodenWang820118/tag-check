@@ -29,7 +29,6 @@ export class HomeViewComponent implements OnInit {
   constructor(private projectInfoService: ProjectInfoService) {}
 
   ngOnInit(): void {
-    console.log('HomeViewComponent initialized');
     this.projects$ = this.projectInfoService.getProjects();
   }
 }
