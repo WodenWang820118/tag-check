@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Subject, catchError, of } from 'rxjs';
 import { ProjectRecording, Recording } from '@utils';
 import { environment } from '../../../../../environments/environment';
+import { UtilsService } from '../../utils/utils.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,7 @@ export class RecordingService {
   );
   recording$ = this.recordingSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private utilsService: UtilsService) {}
 
   getProjectRecordings(projectSlug: string) {
     return this.http
@@ -72,7 +73,11 @@ export class RecordingService {
     console.log('Project Slug', projectSlug);
     console.log('Event Id', eventId);
     console.log('Recording', jsonContent);
-    if (!eventId || !projectSlug || this.isEmptyObject(jsonContent))
+    if (
+      !eventId ||
+      !projectSlug ||
+      this.utilsService.isEmptyObject(jsonContent)
+    )
       return of(null);
     return this.http
       .post<Recording>(
@@ -85,32 +90,5 @@ export class RecordingService {
           return of(null);
         })
       );
-  }
-
-  private isEmptyObject(value: unknown): boolean {
-    if (value === null || value === undefined) {
-      return true;
-    }
-
-    if (typeof value !== 'object') {
-      return false;
-    }
-
-    if (Array.isArray(value)) {
-      return value.length === 0;
-    }
-
-    if (value instanceof Date) {
-      return false;
-    }
-
-    if (value instanceof Set || value instanceof Map) {
-      return value.size === 0;
-    }
-
-    return (
-      Object.keys(value as object).length === 0 &&
-      Object.getOwnPropertySymbols(value as object).length === 0
-    );
   }
 }

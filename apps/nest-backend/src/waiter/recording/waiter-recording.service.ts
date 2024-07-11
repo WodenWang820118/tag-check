@@ -23,20 +23,27 @@ export class WaiterRecordingService {
         await this.folderPathService.getRecordingFolderPath(projectSlug)
       );
 
-      const recordings: RecordingDto = (await Promise.all(
+      const recordings = await Promise.all(
         folderNames.map(async (fileName) => {
-          return await this.fileService.readJsonFile(
+          const recordingContent = await this.fileService.readJsonFile(
             await this.filePathService.getRecordingFilePath(
               projectSlug,
               fileName
             )
           );
+          const key = fileName.replace('.json', '');
+          return { [key]: recordingContent };
         })
-      )) as any;
+      );
+
+      const flattenedRecordings: Record<string, RecordingDto> =
+        recordings.reduce((acc, recording) => {
+          return { ...acc, ...recording };
+        }, {});
 
       return {
         projectSlug: projectSlug,
-        recordings: recordings,
+        recordings: flattenedRecordings,
       };
     } catch (error) {
       if (error instanceof HttpException) {

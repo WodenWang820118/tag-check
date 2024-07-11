@@ -13,8 +13,8 @@ import {
   catchError,
   combineLatest,
   map,
-  mergeMap,
   of,
+  switchMap,
   take,
   takeUntil,
   tap,
@@ -35,7 +35,8 @@ import { EditorComponent } from '../../../../shared/components/editor/editor.com
 import { MatButtonModule } from '@angular/material/button';
 import { EditorService } from '../../../../shared/services/editor/editor.service';
 import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
-import { Dialog } from '@angular/cdk/dialog';
+import { MatDialog } from '@angular/material/dialog';
+import { UtilsService } from '../../../../shared/services/utils/utils.service';
 @Component({
   selector: 'app-report-datail-panels',
   standalone: true,
@@ -70,8 +71,9 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
     private specService: SpecService,
     public reportService: ReportService,
     private route: ActivatedRoute,
-    private editorService: EditorService,
-    private dialog: Dialog
+    public editorService: EditorService,
+    private dialog: MatDialog,
+    private utilsService: UtilsService
   ) {}
 
   ngOnInit() {
@@ -161,37 +163,31 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
     ])
       .pipe(
         take(1),
-        map(([parentParams, params, specEditor]) => {
-          const specContent = specEditor.state.doc.toString();
-          const eventName = params['eventName'];
+        switchMap(([parentParams, params, specEditor]) => {
           const projectSlug = parentParams['projectSlug'];
+          const eventName = params['eventName'];
+          const specContent = specEditor.state.doc.toString();
 
-          if (specContent && projectSlug) {
-            return {
+          if (
+            projectSlug &&
+            eventName &&
+            !this.utilsService.isEmptyObject(JSON.parse(specContent))
+          ) {
+            return this.specService.updateSpec(
               projectSlug,
               eventName,
-              specContent,
-            };
+              specContent
+            );
           } else {
-            this.dialog.open(ErrorDialogComponent, {
-              data: {
-                message: 'Spec content is required and cannot be empty.',
-              },
-            });
-            throw new Error('Spec content is required and cannot be empty.');
+            return this.showErrorDialog(
+              'Spec content is required and cannot be empty.'
+            );
           }
         }),
-        mergeMap(({ projectSlug, eventName, specContent }) => {
-          this.editorService.setContent('specJson', specContent);
-          return this.specService.updateSpec(
-            projectSlug,
-            eventName,
-            specContent
+        catchError(() => {
+          return this.showErrorDialog(
+            'Spec content is required and cannot be empty.'
           );
-        }),
-        catchError((error) => {
-          console.error('Error updating spec: ', error);
-          return error;
         })
       )
       .subscribe();
@@ -205,40 +201,32 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
     ])
       .pipe(
         take(1),
-        map(([parentParams, params, recordingEditor]) => {
+        switchMap(([parentParams, params, recordingEditor]) => {
           const projectSlug = parentParams['projectSlug'];
           const eventId = params['eventId'];
           const recordingContent = recordingEditor.state.doc.toString();
 
-          if (parentParams && projectSlug) {
-            return {
+          if (
+            parentParams &&
+            projectSlug &&
+            !this.utilsService.isEmptyObject(JSON.parse(recordingContent))
+          ) {
+            return this.recordingService.updateRecording(
               projectSlug,
               eventId,
-              recordingContent,
-            };
+              recordingContent
+            );
           } else {
-            this.dialog.open(ErrorDialogComponent, {
-              data: {
-                message: 'Recording content is required and cannot be empty.',
-              },
-            });
-            throw new Error(
+            return this.showErrorDialog(
               'Recording content is required and cannot be empty.'
             );
           }
         }),
-        mergeMap(({ projectSlug, eventId, recordingContent }) => {
-          this.editorService.setContent('recordingJson', recordingContent);
-          return this.recordingService.updateRecording(
-            projectSlug,
-            eventId,
-            recordingContent
-          );
-        }),
-        catchError((error) => {
-          console.error('Error updating recording: ', error);
-          return error;
-        })
+        catchError(() =>
+          this.showErrorDialog(
+            'Recording content is required and cannot be empty.'
+          )
+        )
       )
       .subscribe();
   }
@@ -271,6 +259,15 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe();
+  }
+
+  private showErrorDialog(message: string): Observable<null> {
+    this.dialog.open(ErrorDialogComponent, {
+      data: {
+        message: message,
+      },
+    });
+    return of(null);
   }
 
   ngOnDestroy() {
