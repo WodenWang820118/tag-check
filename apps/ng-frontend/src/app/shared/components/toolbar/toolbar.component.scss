@@ -1,3 +1,21 @@
+@use '@angular/material' as mat;
+
 .example-spacer {
   flex: 1 1 auto;
+}
+
+.mat-button-toggle-group-appearance-standard {
+  border: none !important;
+  border-radius: 50% !important;
+}
+
+.filter {
+  flex-direction: row !important;
+}
+
+.filter-container {
+  @include mat.form-field-density(-4);
+  @include mat.input-density(-4);
+  @include mat.button-density(-4);
+  @include mat.icon-button-density(-4);
 }
