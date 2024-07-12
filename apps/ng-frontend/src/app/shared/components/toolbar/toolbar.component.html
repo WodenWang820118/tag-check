@@ -27,9 +27,36 @@
     </mat-form-field>
     } }
     <span class="example-spacer"></span>
-    <button mat-icon-button [matMenuTriggerFor]="globalSetting">
-      <mat-icon>settings</mat-icon>
-    </button>
+    @if (isHomeView) { @if (!isSearchVisible) {
+    <mat-button-toggle-group
+      #group="matButtonToggleGroup"
+      (change)="onToggleChange($event)"
+    >
+      <mat-button-toggle value="search" aria-label="search project">
+        <mat-icon>search</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+    } @if (isSearchVisible) {
+    <div class="filter-container">
+      <mat-form-field appearance="outline" class="filter">
+        <input
+          matInput
+          (keyup)="applyFilter($event)"
+          #input
+          class="filter__input"
+        />
+        <button
+          matSuffix
+          mat-icon-button
+          aria-label="Clear"
+          (click)="closeSearch()"
+          class="filter__clear"
+        >
+          <mat-icon class="filter__icon">close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+    } }
     <button mat-icon-button [routerLink]="['/topics']" style="cursor: pointer">
       <mat-icon>help_outline</mat-icon>
     </button>
