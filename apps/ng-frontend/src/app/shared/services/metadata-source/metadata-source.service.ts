@@ -13,14 +13,12 @@ export class MetadataSourceService extends DataSource<ProjectInfo> {
 
   constructor(private projectInforService: ProjectInfoService) {
     super();
-    this.initMetadata();
   }
 
   initMetadata() {
     this.projectInforService
       .getProjects()
       .pipe(
-        take(1),
         tap((projects) => {
           this.setData(projects);
         })

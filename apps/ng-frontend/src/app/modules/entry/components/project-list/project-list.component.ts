@@ -102,6 +102,7 @@ export class ProjectListComponent implements AfterViewInit, OnDestroy {
     this.metadataSourceService
       .getData()
       .pipe(
+        takeUntil(this.destroy$),
         tap((projects) => {
           if (!projects) return;
           this.dataSource = new MatTableDataSource<ProjectInfo>(projects);
