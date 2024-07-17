@@ -82,7 +82,7 @@
       </th>
       <td mat-cell *matCellDef="let element">
         <!-- running a test -->
-        @if ((testRunningFacadeService.isRunningTest$ | async)) { @if
+        @if ((testRunningFacadeService.isRunningTest$ | async) === true) { @if
         ((testRunningFacadeService.eventRunningTest$ | async) ===
         element.eventId) {
         <mat-progress-spinner

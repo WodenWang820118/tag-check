@@ -1,5 +1,14 @@
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { Body, Controller, Logger, Param, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpException,
+  HttpStatus,
+  Logger,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
 import { ValidationResult, EventInspectionPresetDto } from '@utils';
 import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
@@ -81,5 +90,25 @@ export class WaiterGtmOperatorController {
         eventName
       );
     return [abstractReport];
+  }
+
+  @Post('stop-operation')
+  @ApiOperation({
+    summary: 'Stops the current operation',
+    description:
+      'This endpoint stops the current operation and returns the results of the operation.',
+  })
+  @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
+  stopOperation() {
+    try {
+      this.waiterGtmOperatorService.stopOperation();
+      return { message: 'Operation stopped successfully' };
+    } catch (error) {
+      Logger.error(error, 'waiter.stopOperation');
+      throw new HttpException(
+        'Failed to stop operation',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 }

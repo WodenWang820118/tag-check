@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Credentials, Page } from 'puppeteer';
+import { Browser, Credentials, Page } from 'puppeteer';
 import { BROWSER_ARGS } from '../configs/project.config';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { sleep } from '../web-agent/action/action-utils';
@@ -14,6 +14,10 @@ import { PipelineService } from '../pipeline/pipeline.service';
 @Injectable()
 export class GtmOperatorService {
   constructor(private pipelineService: PipelineService) {}
+  private abortController: AbortController | null = null;
+  private currentBrowser: Browser | null = null;
+  private currentPage: Page | null = null;
+
   async inspectSingleEventViaGtm(
     gtmUrl: string,
     projectName: string,
@@ -23,54 +27,77 @@ export class GtmOperatorService {
     credentials?: Credentials,
     eventInspectionPresetDto?: EventInspectionPresetDto
   ) {
+    this.abortController = new AbortController();
+    const { signal } = this.abortController;
     // set the defaultViewport to null to use maximum viewport size
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
-    const stats = PCR.getStats(options);
-    Logger.log(stats, 'GtmOperatorService.inspectSingleEventViaGtm: stats');
-    const browser = await stats.puppeteer.launch({
-      headless: headless === 'true' ? true : false,
-      devtools: measurementId ? true : false,
-      defaultViewport: null,
-      timeout: 30000,
-      ignoreHTTPSErrors: true,
-      // the window size may impact the examination result
-      args: eventInspectionPresetDto.puppeteerArgs || BROWSER_ARGS,
-      executablePath: stats.executablePath,
-    });
+    const stats = await PCR.getStats(options);
+    try {
+      this.currentBrowser = await stats.puppeteer.launch({
+        headless: headless === 'true' ? true : false,
+        devtools: measurementId ? true : false,
+        defaultViewport: null,
+        timeout: 30000,
+        ignoreHTTPSErrors: true,
+        // the window size may impact the examination result
+        args: eventInspectionPresetDto.puppeteerArgs || BROWSER_ARGS,
+        executablePath: stats.executablePath,
+        signal: signal,
+      });
 
-    const incognitoContext = await browser.createBrowserContext();
-    const websiteUrl = this.extractBaseUrlFromGtmUrl(gtmUrl);
-    const page = await incognitoContext.newPage();
-    await this.operateGtmPreviewMode(page, gtmUrl);
-    await sleep(1000);
-    // Close the initial blank page for cleaner operations
-    const pages = await browser.pages();
-    for (const subPage of pages) {
-      if (subPage.url() === 'about:blank') {
-        await subPage.close();
+      const incognitoContext = await this.currentBrowser.createBrowserContext();
+      const websiteUrl = this.extractBaseUrlFromGtmUrl(gtmUrl);
+      const page = await incognitoContext.newPage();
+      await this.operateGtmPreviewMode(page, gtmUrl);
+      await sleep(1000);
+      // Close the initial blank page for cleaner operations
+      const pages = await this.currentBrowser.pages();
+      for (const subPage of pages) {
+        if (subPage.url() === 'about:blank') {
+          await subPage.close();
+        }
       }
+      // 5) Wait for the page to completely load
+      await sleep(1000);
+
+      const target = await this.currentBrowser.waitForTarget((target) =>
+        target.url().includes(new URL(websiteUrl).origin)
+      );
+
+      // TODO: Using the preview mode cannot intercept the network requests
+      this.currentPage = await target.page();
+      await sleep(1000);
+
+      // Set up an abort listener
+      signal.addEventListener(
+        'abort',
+        async () => {
+          await this.cleanup();
+        },
+        { once: true }
+      );
+
+      return this.pipelineService.singleEventInspectionRecipe(
+        this.currentPage,
+        projectName,
+        testName,
+        headless,
+        measurementId,
+        credentials,
+        eventInspectionPresetDto
+      );
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        Logger.log('Operation was aborted', 'waiter.GtmOperatorService');
+      } else {
+        Logger.error(error, 'waiter.GtmOperatorService');
+      }
+      throw error;
+    } finally {
+      await this.cleanup();
     }
-    // 5) Wait for the page to completely load
-    await sleep(1000);
-
-    const target = await browser.waitForTarget((target) =>
-      target.url().includes(new URL(websiteUrl).origin)
-    );
-
-    // TODO: Using the preview mode cannot intercept the network requests
-    const testingPage = await target.page();
-    await sleep(1000);
-    return this.pipelineService.singleEventInspectionRecipe(
-      testingPage,
-      projectName,
-      testName,
-      headless,
-      measurementId,
-      credentials,
-      eventInspectionPresetDto
-    );
   }
 
   async operateGtmPreviewMode(page: Page, gtmUrl: string) {
@@ -106,5 +133,29 @@ export class GtmOperatorService {
     }
 
     return null;
+  }
+
+  stopOperation() {
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+  }
+
+  private async cleanup() {
+    Logger.log('Cleaning up resources', 'gtmOperatorService');
+    if (this.currentBrowser) {
+      try {
+        // Close all pages
+        const pages = await this.currentBrowser.pages();
+        await Promise.all(pages.map((page) => page.close()));
+        await this.currentBrowser.close();
+      } catch (err) {
+        Logger.error(err, 'Error during cleanup');
+      } finally {
+        this.currentBrowser = null;
+        this.currentPage = null;
+        this.abortController = null;
+      }
+    }
   }
 }
