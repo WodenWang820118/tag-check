@@ -7,7 +7,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class ProjectDataSourceService extends DataSource<IReportDetails> {
-  private _dataStream = new ReplaySubject<IReportDetails[]>();
+  private _dataStream = new BehaviorSubject<IReportDetails[]>([]);
   private _filterStream = new ReplaySubject<string>();
   private _deletedStream = new BehaviorSubject<boolean>(false);
   private _preventNavigationStream = new ReplaySubject<boolean>();

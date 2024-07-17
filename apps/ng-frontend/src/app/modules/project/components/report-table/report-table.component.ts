@@ -145,15 +145,19 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
     this.route.params
       .pipe(
         take(1),
-        tap((params: Params) => {
-          this.testRunningFacadeService.runTest(
+        switchMap((params: Params) => {
+          return this.testRunningFacadeService.runTest(
             eventId,
             params['projectSlug'],
             this.testDataSource
           );
         })
       )
-      .subscribe();
+      .subscribe((updatedData) => {
+        if (updatedData) {
+          this.testDataSource.data = [...updatedData.data];
+        }
+      });
   }
 
   selectSingleRow(row: IReportDetails) {
