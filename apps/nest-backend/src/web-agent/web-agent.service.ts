@@ -1,11 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Credentials, Page } from 'puppeteer';
+import { Browser, Credentials, Page } from 'puppeteer';
 import { BROWSER_ARGS } from '../configs/project.config';
 import { WebAgentUtilsService } from './web-agent-utils.service';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 @Injectable()
 export class WebAgentService {
   constructor(private webAgentUtilsService: WebAgentUtilsService) {}
+  private currentBrowser: Browser | null = null;
+  private currentPage: Page | null = null;
+  private abortController: AbortController | null = null;
 
   async executeAndGetDataLayer(
     page: Page,
@@ -30,7 +33,10 @@ export class WebAgentService {
     };
   }
 
+  // TODO: might remove the following method and its usages
   async fetchDataLayer(url: string, credentials?: Credentials) {
+    this.abortController = new AbortController();
+    const { signal } = this.abortController;
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
@@ -40,9 +46,19 @@ export class WebAgentService {
       headless: true,
       args: BROWSER_ARGS,
       executablePath: stats.executablePath,
+      signal: signal,
     });
 
     const [page] = await browser.pages();
+
+    // Set up an abort listener
+    signal.addEventListener(
+      'abort',
+      async () => {
+        await this.cleanup();
+      },
+      { once: true }
+    );
 
     if (credentials) {
       await page.authenticate({
@@ -85,5 +101,29 @@ export class WebAgentService {
       eventRequest,
       destinationUrl,
     };
+  }
+
+  stopOperation() {
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+  }
+
+  private async cleanup() {
+    Logger.log('Cleaning up resources', 'gtmOperatorService');
+    if (this.currentBrowser) {
+      try {
+        // Close all pages
+        const pages = await this.currentBrowser.pages();
+        await Promise.all(pages.map((page) => page.close()));
+        await this.currentBrowser.close();
+      } catch (err) {
+        Logger.error(err, 'Error during cleanup');
+      } finally {
+        this.currentBrowser = null;
+        this.currentPage = null;
+        this.abortController = null;
+      }
+    }
   }
 }

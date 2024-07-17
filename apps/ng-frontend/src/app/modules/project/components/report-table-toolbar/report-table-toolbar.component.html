@@ -29,6 +29,16 @@
   >
     <mat-icon>bookmark_border</mat-icon>
   </button>
+  <button
+    mat-icon-button
+    class="icon"
+    matTooltip="Mark to stop operation for this event"
+    matTooltipPosition="above"
+    aria-label="Stop operation"
+    (click)="stopOperation()"
+  >
+    <mat-icon>cancel</mat-icon>
+  </button>
   <div class="spacer"></div>
   @if (!isSearchVisible) {
   <mat-button-toggle-group
