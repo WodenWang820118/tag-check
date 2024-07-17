@@ -132,4 +132,24 @@ export class WaiterDataLayerController {
       Number(concurrency)
     );
   }
+
+  @Post('stop-operation')
+  @ApiOperation({
+    summary: 'Stops the current operation',
+    description:
+      'This endpoint stops the current operation and returns the results of the operation.',
+  })
+  @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
+  stopOperation() {
+    try {
+      this.waiterDataLayerSingleEventService.stopOperation();
+      return { message: 'Operation stopped successfully' };
+    } catch (error) {
+      Logger.error(error, 'waiter.stopOperation');
+      throw new HttpException(
+        'Failed to stop operation',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 }
