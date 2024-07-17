@@ -10,7 +10,6 @@ import {
   forkJoin,
   Observable,
   of,
-  tap,
   map,
 } from 'rxjs';
 import {
@@ -45,21 +44,18 @@ export class TestRunningFacadeService {
     projectSlug: string,
     testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
   ) {
-    return this.settingsService
-      .getProjectSettings(projectSlug)
-      .pipe(
-        take(1),
-        switchMap((project) =>
-          this.chooseAndRunTest(eventId, projectSlug, project)
-        ),
-        tap((res) => this.updateReportDetails(res, testDataSource)),
-        catchError((error) => this.handleError(error)),
-        finalize(() => {
-          this.isRunningTestSubject.next(false);
-          this.eventRunningTestSubject.next('');
-        })
-      )
-      .subscribe();
+    return this.settingsService.getProjectSettings(projectSlug).pipe(
+      take(1),
+      switchMap((project) =>
+        this.chooseAndRunTest(eventId, projectSlug, project)
+      ),
+      map((res) => this.updateReportDetails(res, testDataSource)),
+      catchError((error) => this.handleError(error)),
+      finalize(() => {
+        this.isRunningTestSubject.next(false);
+        this.eventRunningTestSubject.next('');
+      })
+    );
   }
 
   chooseAndRunTest(
@@ -150,13 +146,19 @@ export class TestRunningFacadeService {
   private updateReportDetails(
     res: any,
     testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
-  ): void {
-    console.log('res', res);
-    const updatedEvent: IReportDetails = res[0];
-    testDataSource.data = testDataSource.data.map((item) =>
-      item.eventId === updatedEvent.eventId ? updatedEvent : item
+  ) {
+    if (!res) return;
+    console.log('res', res[0]);
+    // TODO: maybe return a consistent eventId from the backend
+    const updatedEvent: IReportDetails = {
+      ...res[0],
+      eventId: `${res[0].eventName}_${res[0].eventId}`,
+    };
+    testDataSource.data = testDataSource.data.map((event) =>
+      event.eventId === updatedEvent.eventId ? updatedEvent : event
     );
     this.projectDataSourceService.setData(testDataSource.data);
+    return testDataSource;
   }
 
   private handleError(error: any): Observable<never> {

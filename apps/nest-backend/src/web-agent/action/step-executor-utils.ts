@@ -48,6 +48,7 @@ export async function handleNavigate(
 ) {
   try {
     await page.goto(step.url);
+    const finalUrl = page.url();
 
     await sleep(1000); // Necessary delay for the website to update
     // pre-load the application localStorage if any
@@ -80,7 +81,12 @@ export async function handleNavigate(
     // try to skip the overlay or popups
     if (state.isFirstNavigation) {
       // only reload the landing page, trying to skip the overlay
-      await page.reload();
+      // Reload the page with the final URL to apply localStorage and cookies
+      Logger.log(
+        `Reload the page with the final URL ${finalUrl}`,
+        'StepExecutor.handleNavigate'
+      );
+      await page.goto(finalUrl);
       await sleep(1000); // Necessary delay for the website to update
       state.isFirstNavigation = false;
     }
