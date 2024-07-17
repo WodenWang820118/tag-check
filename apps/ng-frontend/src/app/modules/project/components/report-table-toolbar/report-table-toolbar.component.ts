@@ -2,7 +2,7 @@ import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
-import { Subject } from 'rxjs';
+import { catchError, Subject, takeUntil } from 'rxjs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -14,6 +14,7 @@ import {
   MatButtonToggleChange,
   MatButtonToggleModule,
 } from '@angular/material/button-toggle';
+import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 
 @Component({
   selector: 'app-report-table-toolbar',
@@ -38,7 +39,10 @@ import {
 export class ReportTableToolbarComponent implements OnDestroy {
   isSearchVisible = false;
   destroy$ = new Subject<void>();
-  constructor(private dataSourceService: ProjectDataSourceService) {}
+  constructor(
+    private dataSourceService: ProjectDataSourceService,
+    private testRunningFacade: TestRunningFacadeService
+  ) {}
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -58,6 +62,19 @@ export class ReportTableToolbarComponent implements OnDestroy {
     if (event.value === 'search') {
       this.isSearchVisible = !this.isSearchVisible;
     }
+  }
+
+  stopOperation() {
+    this.testRunningFacade
+      .stopOperation()
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError((error) => {
+          console.error('Error stopping operation:', error);
+          throw error;
+        })
+      )
+      .subscribe();
   }
 
   ngOnDestroy() {

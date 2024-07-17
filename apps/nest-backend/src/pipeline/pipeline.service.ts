@@ -80,10 +80,15 @@ export class PipelineService {
         eventId,
         outputValidationResult
       );
+
+      await page.close();
       return data;
     } catch (error) {
-      Logger.log(error.message, 'PipelineService.singleEventInspectionRecipe');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error.message,
+        'PipelineService.singleEventInspectionRecipe'
+      );
+      // throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

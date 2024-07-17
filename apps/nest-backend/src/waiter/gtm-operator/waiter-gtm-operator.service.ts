@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { GtmOperatorService } from '../../gtm-operator/gtm-operator.service';
 import { Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
@@ -24,5 +24,10 @@ export class WaiterGtmOperatorService {
       credentials,
       eventInspectionPresetDto
     );
+  }
+
+  stopOperation() {
+    Logger.log('Operation stopped', 'WaiterGtmOperatorService');
+    return this.gtmOperatorService.stopOperation();
   }
 }

@@ -1,15 +1,30 @@
 import { Injectable } from '@angular/core';
 import { DataLayerService } from '../api/datalayer/datalayer.service';
 import { GtmOperatorService } from '../api/gtm-operator/gtm-operator.service';
-import { switchMap, BehaviorSubject, take, catchError } from 'rxjs';
-import { IReportDetails, EventInspectionPresetDto } from '@utils';
+import {
+  switchMap,
+  BehaviorSubject,
+  take,
+  catchError,
+  finalize,
+  forkJoin,
+  Observable,
+  of,
+  tap,
+  map,
+} from 'rxjs';
+import {
+  IReportDetails,
+  EventInspectionPresetDto,
+  ProjectSetting,
+} from '@utils';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ProjectDataSourceService } from '../project-data-source/project-data-source.service';
 import { QaRequestService } from '../api/qa-request/qa-request.service';
 import { SettingsService } from '../api/settings/settings.service';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class TestRunningFacadeService {
   isRunningTestSubject = new BehaviorSubject<boolean>(false);
   eventRunningTestSubject = new BehaviorSubject<string>('');
@@ -34,75 +49,118 @@ export class TestRunningFacadeService {
       .getProjectSettings(projectSlug)
       .pipe(
         take(1),
-        switchMap((project) => {
-          const headless = project.settings.headless;
-          const inspectEventDto = new EventInspectionPresetDto(project);
-          // change the play button to a spinner
-          this.isRunningTestSubject.next(true);
-          this.eventRunningTestSubject.next(eventId);
-
-          if (
-            project.settings.gtm.isAccompanyMode ||
-            (project.settings.gtm.isAccompanyMode &&
-              project.settings.gtm.isRequestCheck)
-          ) {
-            const measurementId = project.settings.gtm.isRequestCheck
-              ? project.settings.measurementId
-              : undefined;
-            return this.gtmOperatorService.runInspectionViaGtm(
-              projectSlug,
-              eventId,
-              project.settings.gtm.gtmPreviewModeUrl,
-              headless,
-              inspectEventDto,
-              measurementId,
-              project.settings.authentication.username,
-              project.settings.authentication.password
-            );
-          }
-
-          if (project.settings.gtm.isRequestCheck) {
-            return this.qaRequestService.runDataLayerWithRequestCheck(
-              projectSlug,
-              eventId,
-              project.settings.measurementId,
-              headless,
-              inspectEventDto,
-              project.settings.authentication.username,
-              project.settings.authentication.password
-            );
-          }
-
-          return this.dataLayerService.runDataLayerInspection(
-            projectSlug,
-            eventId,
-            headless,
-            inspectEventDto,
-            project.settings.authentication.username,
-            project.settings.authentication.password
-          );
-        }),
-        catchError((error) => {
-          console.error(error);
+        switchMap((project) =>
+          this.chooseAndRunTest(eventId, projectSlug, project)
+        ),
+        tap((res) => this.updateReportDetails(res, testDataSource)),
+        catchError((error) => this.handleError(error)),
+        finalize(() => {
           this.isRunningTestSubject.next(false);
           this.eventRunningTestSubject.next('');
-          return [];
         })
       )
-      .subscribe((res) => {
-        console.log('res', res);
-        // update the report details
-        const updatedEvent: IReportDetails = (res as any)[0];
-        testDataSource.data = testDataSource.data.map((item) => {
-          if (item.eventId === updatedEvent.eventId) {
-            return updatedEvent;
-          }
-          return item;
-        });
+      .subscribe();
+  }
 
-        this.projectDataSourceService.setData(testDataSource.data);
+  chooseAndRunTest(
+    eventId: string,
+    projectSlug: string,
+    project: ProjectSetting
+  ) {
+    const headless = project.settings.headless;
+    const inspectEventDto = new EventInspectionPresetDto(project);
+    // change the play button to a spinner
+    this.isRunningTestSubject.next(true);
+    this.eventRunningTestSubject.next(eventId);
+
+    if (
+      project.settings.gtm.isAccompanyMode ||
+      (project.settings.gtm.isAccompanyMode &&
+        project.settings.gtm.isRequestCheck)
+    ) {
+      const measurementId = project.settings.gtm.isRequestCheck
+        ? project.settings.measurementId
+        : undefined;
+      return this.gtmOperatorService.runInspectionViaGtm(
+        projectSlug,
+        eventId,
+        project.settings.gtm.gtmPreviewModeUrl,
+        headless,
+        inspectEventDto,
+        measurementId,
+        project.settings.authentication.username,
+        project.settings.authentication.password
+      );
+    }
+
+    if (project.settings.gtm.isRequestCheck) {
+      return this.qaRequestService.runDataLayerWithRequestCheck(
+        projectSlug,
+        eventId,
+        project.settings.measurementId,
+        headless,
+        inspectEventDto,
+        project.settings.authentication.username,
+        project.settings.authentication.password
+      );
+    }
+
+    return this.dataLayerService.runDataLayerInspection(
+      projectSlug,
+      eventId,
+      headless,
+      inspectEventDto,
+      project.settings.authentication.username,
+      project.settings.authentication.password
+    );
+  }
+
+  stopOperation(): Observable<any> {
+    console.log('Stop operation from the test running facade');
+
+    return forkJoin({
+      dataLayer: this.dataLayerService.stopOperation().pipe(
+        catchError((error) => {
+          console.error('Error stopping DataLayer operation:', error);
+          return of(null);
+        })
+      ),
+      gtmOperator: this.gtmOperatorService.stopOperation().pipe(
+        catchError((error) => {
+          console.error('Error stopping GTM Operator operation:', error);
+          return of(null);
+        })
+      ),
+      qaRequest: this.qaRequestService.stopOperation().pipe(
+        catchError((error) => {
+          console.error('Error stopping QA Request operation:', error);
+          return of(null);
+        })
+      ),
+    }).pipe(
+      map((res) => res),
+      finalize(() => {
+        console.log('Stop operation completed, setting isRunningTest to false');
         this.isRunningTestSubject.next(false);
         this.eventRunningTestSubject.next('');
-      });
+      })
+    );
+  }
+
+  private updateReportDetails(
+    res: any,
+    testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
+  ): void {
+    console.log('res', res);
+    const updatedEvent: IReportDetails = res[0];
+    testDataSource.data = testDataSource.data.map((item) =>
+      item.eventId === updatedEvent.eventId ? updatedEvent : item
+    );
+    this.projectDataSourceService.setData(testDataSource.data);
+  }
+
+  private handleError(error: any): Observable<never> {
+    console.error('Error in test operation:', error);
+    return of();
   }
 }

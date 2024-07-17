@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { EventInspectionPreset } from '@utils';
-import { catchError, of } from 'rxjs';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -34,6 +34,18 @@ export class QaRequestService {
         catchError((error) => {
           console.error(error);
           return of(null);
+        })
+      );
+  }
+
+  stopOperation(): Observable<string> {
+    return this.http
+      .post<string>(`${environment.dataLayerApiUrl}/stop-operation`, {})
+      .pipe(
+        map((message) => message),
+        catchError((error) => {
+          console.error('Error stopping operation:', error);
+          throw error;
         })
       );
   }
