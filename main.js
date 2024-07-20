@@ -17,6 +17,8 @@ const ROOT_DATABASE_NAME = 'data.sqlite3';
 
 // utils
 let server;
+let restartAttempts = 0;
+let maxRestartAttempts = 5;
 
 function getRootBackendFolderPath() {
   switch (process.env.NODE_ENV) {
@@ -137,6 +139,30 @@ function startBackend() {
       break;
   }
   return fork(serverPath, { env });
+}
+
+function restartBackend() {
+  if (restartAttempts < maxRestartAttempts) {
+    restartAttempts++;
+    console.log(`Attempting to restart backend (Attempt ${restartAttempts})`);
+    setTimeout(() => {
+      startBackend();
+    }, 3000); // Wait for 5 seconds before restarting
+  } else {
+    console.error('Max restart attempts reached. Backend service is down.');
+    // Here you might want to implement some notification mechanism
+    // to alert the development team about the persistent issue
+    writePath(
+      path.join(getRootBackendFolderPath(), 'restartErrorLog.txt'),
+      'Max restart attempts reached. Backend service is down.'
+    );
+  }
+}
+
+function stopBackend(process) {
+  if (process) {
+    process.kill();
+  }
 }
 
 async function checkIfPortIsOpen(urls, maxAttempts = 20, timeout = 2000) {
@@ -277,15 +303,19 @@ app.whenReady().then(async () => {
   });
 
   server.on('error', (error) => {
-    console.error(`Error from child: ${error}`);
     writePath(
       path.join(getRootBackendFolderPath(), 'childErrorLog.txt'),
       error.message
     );
+    stopBackend(server);
   });
 
   server.on('exit', (code, signal) => {
     console.log(`Child exited with code ${code} and signal ${signal}`);
+    console.log(`Backend process exited with code ${code}`);
+    if (code !== 0) {
+      restartBackend();
+    }
     writePath(
       path.join(getRootBackendFolderPath(), 'childExitLog.txt'),
       `Child exited with code ${code} and signal ${signal}`
