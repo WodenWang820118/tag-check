@@ -146,8 +146,12 @@ function restartBackend() {
     restartAttempts++;
     console.log(`Attempting to restart backend (Attempt ${restartAttempts})`);
     setTimeout(() => {
+      writePath(
+        path.join(getRootBackendFolderPath(), 'restartLog.txt'),
+        'Ready to restart the backend.'
+      );
       startBackend();
-    }, 3000); // Wait for 5 seconds before restarting
+    }, 1000); // Wait for 5 seconds before restarting
   } else {
     console.error('Max restart attempts reached. Backend service is down.');
     // Here you might want to implement some notification mechanism
@@ -170,8 +174,14 @@ async function checkIfPortIsOpen(urls, maxAttempts = 20, timeout = 2000) {
     for (const url of urls) {
       try {
         const response = await fetch(url);
+
         if (response) {
           console.log('Server is ready');
+          writePath(
+            path.join(getRootBackendFolderPath(), 'portLog.txt'),
+            `Response from ${url}: ${response.status}`
+          );
+          console.log(`Response from ${url}: ${response.status}`);
           return true; // Port is open
         }
       } catch (error) {
@@ -312,14 +322,12 @@ app.whenReady().then(async () => {
 
   server.on('exit', (code, signal) => {
     console.log(`Child exited with code ${code} and signal ${signal}`);
-    console.log(`Backend process exited with code ${code}`);
-    if (code !== 0) {
-      restartBackend();
-    }
     writePath(
       path.join(getRootBackendFolderPath(), 'childExitLog.txt'),
       `Child exited with code ${code} and signal ${signal}`
     );
+
+    if (signal !== 'SIGTERM') restartBackend();
   });
 });
 
