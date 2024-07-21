@@ -37,7 +37,10 @@ export class EventInspectionPipelineService {
         eventInspectionPresetDto.application
       );
 
-      Logger.log('DataLayer inspected', 'waiter.inspectSingleEvent');
+      Logger.log(
+        'DataLayer inspected',
+        'EventInspectionPipelineService.singleEventInspectionRecipe'
+      );
 
       const data = [
         {
@@ -48,7 +51,10 @@ export class EventInspectionPipelineService {
         },
       ];
 
-      Logger.log('Data constructed', 'waiter.inspectSingleEvent');
+      Logger.log(
+        'Data constructed',
+        'EventInspectionPipelineService.singleEventInspectionRecipe'
+      );
 
       const timestamp = getCurrentTimestamp();
       await this.projectXlsxReportService.writeXlsxFile(
@@ -80,13 +86,13 @@ export class EventInspectionPipelineService {
         eventId,
         outputValidationResult
       );
-
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
       await page.close();
       return data;
     } catch (error) {
       Logger.error(
         error.message,
-        'PipelineService.singleEventInspectionRecipe'
+        'EventInspectionPipelineService.singleEventInspectionRecipe'
       );
       // throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
