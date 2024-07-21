@@ -1,4 +1,4 @@
-import { XlsxReportSingleEventService } from './../os/xlsx-report/xlsx-report-single-event.service';
+import { XlsxReportSingleEventService } from '../os/xlsx-report/xlsx-report-single-event.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
 import {
@@ -10,7 +10,7 @@ import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
 import { AbstractReportService } from '../os/abstract-report/abstract-report.service';
 @Injectable()
-export class PipelineService {
+export class EventInspectionPipelineService {
   constructor(
     private inspectorSingleEventService: InspectorSingleEventService,
     private xlsxReportSingleEventService: XlsxReportSingleEventService,
