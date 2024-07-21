@@ -1,12 +1,10 @@
 import { Controller, Get, Header, Param, Query } from '@nestjs/common';
-import { WaiterProjectDataRetrievalService } from './waiter-project-data-retrieval.service';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ProjectMetadataService } from '../../project-agent/project-metadata/project-metadata.service';
 
 @Controller('projects')
 export class WaiterProjectDataRetrievalController {
-  constructor(
-    private waiterProjectDataRetrievalService: WaiterProjectDataRetrievalService
-  ) {}
+  constructor(private projectMetadataService: ProjectMetadataService) {}
 
   @ApiOperation({
     summary: 'read an image from a specifc project',
@@ -25,10 +23,7 @@ export class WaiterProjectDataRetrievalController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
   ) {
-    return await this.waiterProjectDataRetrievalService.readImage(
-      projectSlug,
-      eventId
-    );
+    return await this.projectMetadataService.readImage(projectSlug, eventId);
   }
 
   @ApiOperation({
@@ -36,8 +31,6 @@ export class WaiterProjectDataRetrievalController {
   })
   @Get(':projectSlug')
   async getProject(@Param('projectSlug') projectSlug: string) {
-    return await this.waiterProjectDataRetrievalService.getProjectMetadata(
-      projectSlug
-    );
+    return await this.projectMetadataService.getProjectMetadata(projectSlug);
   }
 }

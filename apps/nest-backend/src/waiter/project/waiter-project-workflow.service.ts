@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigurationService } from '../../configuration/configuration.service';
-import { ProjectInitializationService } from '../../os/project-initialization/project-initialization.service';
+import { ProjectInitializationService } from '../../project-agent/project-initialization/project-initialization.service';
 import { mkdirSync } from 'fs';
 import {
   CONFIG_ROOT_PATH,

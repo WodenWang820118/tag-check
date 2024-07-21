@@ -11,15 +11,15 @@ import { ClickStrategyService } from '../strategies/click-strategies/click-strat
 
 const handlers = [ChangeHandler, ClickHandler, HoverHandler];
 
-const strategies = [
+const strategyModules = [
   ChangeStrategyModule,
   ClickStrategyModule,
   HoverStrategyModule,
 ];
 
 @Module({
-  imports: [UtilitiesModule, OsModule, ...strategies],
+  imports: [UtilitiesModule, OsModule, ...strategyModules],
   providers: [...handlers, ClickStrategyService],
-  exports: [...handlers],
+  exports: [...handlers, ...strategyModules, OsModule],
 })
 export class HandlerModule {}

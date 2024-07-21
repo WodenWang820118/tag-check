@@ -3,7 +3,7 @@ import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 // TODO: refactor
 @Injectable()
-export class WaiterSettingsService {
+export class ProjectSettingService {
   constructor(
     private fileService: FileService,
     private filePathService: FilePathService

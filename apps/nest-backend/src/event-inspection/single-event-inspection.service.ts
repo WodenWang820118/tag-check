@@ -1,11 +1,13 @@
-import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 import { Injectable, Logger } from '@nestjs/common';
 import { Browser, Credentials, Page } from 'puppeteer';
-import { BROWSER_ARGS } from '../../configs/project.config';
-import { PipelineService } from '../../pipeline/pipeline.service';
+import { EventInspectionPresetDto } from '@utils';
+import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
+import { BROWSER_ARGS } from '../configs/project.config';
 @Injectable()
-export class WaiterDataLayerSingleEventService {
-  constructor(private pipelineService: PipelineService) {}
+export class SingleEventInspectionService {
+  constructor(
+    private eventInspectionPipelineService: EventInspectionPipelineService
+  ) {}
   private abortController: AbortController | null = null;
   private currentBrowser: Browser | null = null;
   private currentPage: Page | null = null;
@@ -47,7 +49,7 @@ export class WaiterDataLayerSingleEventService {
         { once: true }
       );
 
-      return await this.pipelineService.singleEventInspectionRecipe(
+      return await this.eventInspectionPipelineService.singleEventInspectionRecipe(
         this.currentPage,
         projectName,
         eventId,

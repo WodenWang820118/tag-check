@@ -3,18 +3,18 @@ import { FileService } from '../../os/file/file.service';
 import { FolderService } from '../../os/folder/folder.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
-import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
 import { IReportDetails } from '@utils';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
+import { ProjectAbstractReportService } from '../project-abstract-report/project-abstract-report.service';
 
 @Injectable()
-export class WaiterReportService {
+export class ProjectReportService {
   constructor(
     private fileService: FileService,
     private filePathService: FilePathService,
     private folderService: FolderService,
     private folderPathService: FolderPathService,
-    private abstractReportService: AbstractReportService
+    private projectAbstractReportService: ProjectAbstractReportService
   ) {}
 
   async getProjectEventReports(projectSlug: string) {
@@ -81,7 +81,7 @@ export class WaiterReportService {
     eventId: string,
     report: IReportDetails
   ) {
-    await this.abstractReportService.writeSingleAbstractTestResultJson(
+    await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
       projectSlug,
       eventId,
       report
@@ -93,7 +93,7 @@ export class WaiterReportService {
     eventId: string,
     report: IReportDetails
   ) {
-    await this.abstractReportService.writeSingleAbstractTestResultJson(
+    await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
       projectSlug,
       eventId,
       report
@@ -105,7 +105,7 @@ export class WaiterReportService {
   }
 
   async deleteReport(projectSlug: string, eventId: string) {
-    await this.abstractReportService.deleteSingleAbstractTestResultFolder(
+    await this.projectAbstractReportService.deleteSingleAbstractTestResultFolder(
       projectSlug,
       eventId
     );
