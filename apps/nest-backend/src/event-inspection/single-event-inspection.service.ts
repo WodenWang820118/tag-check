@@ -1,10 +1,10 @@
-import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 import { Injectable, Logger } from '@nestjs/common';
 import { Browser, Credentials, Page } from 'puppeteer';
-import { BROWSER_ARGS } from '../../configs/project.config';
-import { EventInspectionPipelineService } from '../../event-inspection-pipeline/event-inspection-pipeline.service';
+import { EventInspectionPresetDto } from '@utils';
+import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
+import { BROWSER_ARGS } from '../configs/project.config';
 @Injectable()
-export class WaiterDataLayerSingleEventService {
+export class SingleEventInspectionService {
   constructor(
     private eventInspectionPipelineService: EventInspectionPipelineService
   ) {}

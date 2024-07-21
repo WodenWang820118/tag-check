@@ -5,14 +5,13 @@ import { FileModule } from '../file/file.module';
 import { FileService } from '../file/file.service';
 import { XlsxReportSingleEventService } from './xlsx-report-single-event.service';
 
-const services = [
-  XlsxReportGroupEventsService,
-  XlsxReportSingleEventService,
-  FileService,
-];
 @Module({
   imports: [PathModule, FileModule],
-  providers: [...services],
-  exports: [...services],
+  providers: [
+    XlsxReportGroupEventsService,
+    XlsxReportSingleEventService,
+    FileService,
+  ],
+  exports: [XlsxReportGroupEventsService, XlsxReportSingleEventService],
 })
 export class XlsxReportModule {}
