@@ -1,5 +1,4 @@
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { WaiterDataLayerGroupEventsService } from './waiter-datalayer-group-events.service';
 import {
   Body,
   Controller,
@@ -12,17 +11,16 @@ import {
   Query,
   ValidationPipe,
 } from '@nestjs/common';
-import { WaiterDataLayerSingleEventService } from './waiter-datalayer-single-event.service';
 import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 import { ValidationResult } from '@utils';
 import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
+import { WaiterEventInspectionService } from './waiter-event-inspection.service';
 
 @Controller('datalayer')
 export class WaiterDataLayerController {
   constructor(
-    private waiterDataLayerGroupEventsService: WaiterDataLayerGroupEventsService,
-    private waiterDataLayerSingleEventService: WaiterDataLayerSingleEventService,
-    private abstractReportService: AbstractReportService
+    private abstractReportService: AbstractReportService,
+    private waiterEventInspectionService: WaiterEventInspectionService
   ) {}
 
   @ApiOperation({
@@ -76,7 +74,7 @@ export class WaiterDataLayerController {
         rawRequest: string;
         requestCheckResult: ValidationResult;
         destinationUrl: string;
-      }[] = await this.waiterDataLayerSingleEventService.inspectSingleEvent(
+      }[] = await this.waiterEventInspectionService.inspectSingleEvent(
         projectSlug,
         eventId,
         headless,
@@ -121,7 +119,7 @@ export class WaiterDataLayerController {
     @Query('password') password?: string,
     @Query('concurrency') concurrency = 2
   ) {
-    return await this.waiterDataLayerGroupEventsService.inspectProject(
+    return await this.waiterEventInspectionService.inspectProject(
       projectSlug,
       headless,
       measurementId,
@@ -142,7 +140,7 @@ export class WaiterDataLayerController {
   @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
   stopOperation() {
     try {
-      this.waiterDataLayerSingleEventService.stopOperation();
+      this.waiterEventInspectionService.stopOperation();
       return { message: 'Operation stopped successfully' };
     } catch (error) {
       Logger.error(error, 'waiter.stopOperation');
