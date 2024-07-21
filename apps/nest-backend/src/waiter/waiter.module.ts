@@ -7,7 +7,7 @@ import { WebAgentModule } from '../web-agent/web-agent.module';
 import { InspectorModule } from '../inspector/inspector.module';
 import { GtmOperatorModule } from '../gtm-operator/gtm-operator.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
-import { PipelineModule } from '../pipeline/pipeline.module';
+import { EventInspectionPipelineModule } from '../event-inspection-pipeline/event-inspection-pipeline.module';
 
 // controllers
 import { WaiterProjectWorkFlowController } from './project/waiter-project-workflow.controller';
@@ -56,7 +56,7 @@ const waiterServices = [
     InspectorModule,
     GtmOperatorModule,
     ConfigurationModule,
-    PipelineModule,
+    EventInspectionPipelineModule,
   ],
   controllers: [
     WaiterProjectWorkFlowController,
