@@ -36,7 +36,10 @@ export class SingleEventInspectionService {
         executablePath: stats.executablePath,
         signal: signal,
       });
-      Logger.log('Browser launched', 'waiter.inspectSingleEvent');
+      Logger.log(
+        'Browser launched',
+        'SingleEventInspectionService.inspectSingleEvent'
+      );
 
       this.currentPage = (await this.currentBrowser.pages())[0];
 
@@ -60,9 +63,12 @@ export class SingleEventInspectionService {
       );
     } catch (error) {
       if (error.name === 'AbortError') {
-        Logger.log('Operation was aborted', 'waiter.inspectSingleEvent');
+        Logger.log(
+          'Operation was aborted',
+          'SingleEventInspectionService.inspectSingleEvent'
+        );
       } else {
-        Logger.error(error, 'waiter.inspectSingleEvent');
+        Logger.error(error, 'SingleEventInspectionService.inspectSingleEvent');
       }
       await this.cleanup();
       throw error;
@@ -70,14 +76,20 @@ export class SingleEventInspectionService {
   }
 
   stopOperation() {
-    Logger.log('Operation stopped', 'waiter.inspectSingleEvent');
+    Logger.log(
+      'Operation stopped',
+      'SingleEventInspectionService.inspectSingleEvent'
+    );
     if (this.abortController) {
       this.abortController.abort();
     }
   }
 
   private async cleanup() {
-    Logger.log('Cleaning up resources', 'waiter.inspectSingleEvent');
+    Logger.log(
+      'Cleaning up resources',
+      'SingleEventInspectionService.inspectSingleEvent'
+    );
     if (this.currentPage) {
       await this.currentPage
         .close()

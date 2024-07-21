@@ -53,7 +53,7 @@ export class ProjectIoFacadeService {
         throw error;
       }
 
-      Logger.error(error.message, 'WaiterProjectIoService.exportProject');
+      Logger.error(error.message, 'ProjectIoFacadeService.exportProject');
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
