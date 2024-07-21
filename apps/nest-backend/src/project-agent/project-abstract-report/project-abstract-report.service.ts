@@ -1,14 +1,14 @@
-import { FolderService } from '../folder/folder.service';
+import { FolderService } from '../../os/folder/folder.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { IReportDetails, OutputValidationResult } from '@utils';
-import { FolderPathService } from '../path/folder-path/folder-path.service';
+import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { existsSync, mkdirSync, statSync } from 'fs';
-import { FilePathService } from '../path/file-path/file-path.service';
+import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
-import { FileService } from '../file/file.service';
+import { FileService } from '../../os/file/file.service';
 
 @Injectable()
-export class AbstractReportService {
+export class ProjectAbstractReportService {
   constructor(
     private folderPathService: FolderPathService,
     private folderService: FolderService,

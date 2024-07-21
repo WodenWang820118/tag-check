@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { WaiterProjectWorkFlowService } from './waiter-project-workflow.service';
-import { ProjectMetadataService } from '../../project-metadata/project-metadata.service';
+import { ProjectMetadataService } from '../../project-agent/project-metadata/project-metadata.service';
 
 @Controller('projects')
 export class WaiterProjectWorkFlowController {

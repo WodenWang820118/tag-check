@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
-import { WaiterSpecService } from './waiter-spec.service';
 import { ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ProjectSpecService } from '../../project-agent/project-spec/project-spec.service';
 
 @Controller('specs')
 export class WaiterSpecController {
-  constructor(private waiterSpecService: WaiterSpecService) {}
+  constructor(private projectSpecService: ProjectSpecService) {}
 
   @ApiOperation({
     summary: 'get project specs',
@@ -17,7 +17,7 @@ export class WaiterSpecController {
   })
   @Get(':projectSlug')
   async getProjectSpecs(@Param('projectSlug') projectSlug: string) {
-    return await this.waiterSpecService.getProjectSpecs(projectSlug);
+    return await this.projectSpecService.getProjectSpecs(projectSlug);
   }
 
   @ApiOperation({
@@ -38,7 +38,7 @@ export class WaiterSpecController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventName') eventName: string
   ) {
-    return await this.waiterSpecService.getSpec(projectSlug, eventName);
+    return await this.projectSpecService.getSpec(projectSlug, eventName);
   }
 
   @ApiOperation({
@@ -67,7 +67,7 @@ export class WaiterSpecController {
   })
   @Post(':projectSlug')
   async addSpec(@Param('projectSlug') projectSlug: string, @Body() spec: any) {
-    return await this.waiterSpecService.addSpec(projectSlug, spec);
+    return await this.projectSpecService.addSpec(projectSlug, spec);
   }
 
   @ApiOperation({
@@ -100,7 +100,7 @@ export class WaiterSpecController {
     @Param('eventName') eventName: string,
     @Body() spec: any
   ) {
-    return await this.waiterSpecService.updateSpec(
+    return await this.projectSpecService.updateSpec(
       projectSlug,
       eventName,
       spec

@@ -2,10 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Browser, Credentials } from 'puppeteer';
 import { getCurrentTimestamp } from '@utils';
 import { BROWSER_ARGS } from '../configs/project.config';
-import { AbstractReportService } from '../os/abstract-report/abstract-report.service';
 import { InspectorGroupEventsService } from '../inspector/inspector-group-events.service';
 import { XlsxReportGroupEventsService } from '../os/xlsx-report/xlsx-report-group-events.service';
 import { FileService } from '../os/file/file.service';
+import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
 
 @Injectable()
 export class GroupEventsInspectionService {
@@ -16,7 +16,7 @@ export class GroupEventsInspectionService {
     private fileService: FileService,
     private xlsxReportGroupEventsService: XlsxReportGroupEventsService,
     private inspectorGroupEventsService: InspectorGroupEventsService,
-    private abstractReportService: AbstractReportService
+    private projectAbstractReportService: ProjectAbstractReportService
   ) {}
 
   async inspectProject(
@@ -96,7 +96,7 @@ export class GroupEventsInspectionService {
     );
 
     // TODO: 3.4 report to each test
-    await this.abstractReportService.writeProjectAbstractTestRsultJson(
+    await this.projectAbstractReportService.writeProjectAbstractTestRsultJson(
       projectName,
       data.map((item) => item.dataLayerResult)
     );

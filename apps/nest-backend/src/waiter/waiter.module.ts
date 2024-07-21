@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 
 // other modules
-import { OsModule } from '../os/os.module';
-import { ProjectMetadataModule } from '../project-metadata/project-metadata.module';
 import { GtmOperatorModule } from '../gtm-operator/gtm-operator.module';
 import { ConfigurationModule } from '../configuration/configuration.module';
 import { EventInspectionModule } from './../event-inspection/event-inspection.module';
+import { ProjectAgentModule } from '../project-agent/project-agent.module';
 
 // controllers
 import { WaiterProjectWorkFlowController } from './project/waiter-project-workflow.controller';
@@ -21,34 +20,21 @@ import { WaiterProjectIoController } from './project-io/waiter-project-io.contro
 
 // services
 import { WaiterEventInspectionService } from './datalayer/waiter-event-inspection.service';
-import { WaiterGtmOperatorService } from './gtm-operator/waiter-gtm-operator.service';
-import { ProjectMetadataService } from '../project-metadata/project-metadata.service';
+import { ProjectMetadataService } from '../project-agent/project-metadata/project-metadata.service';
 import { WaiterProjectWorkFlowService } from './project/waiter-project-workflow.service';
-import { WaiterSpecService } from './spec/waiter-spec.service';
-import { WaiterReportService } from './report/waiter-report.service';
-import { WaiterRecordingService } from './recording/waiter-recording.service';
 import { WaiterConfigurationService } from './configuration/waiter-configuration.service';
-import { WaiterSettingsService } from './settings/waiter-settings.service';
-import { WaiterProjectIoService } from './project-io/waiter-project-io.service';
 
 const waiterServices = [
   WaiterEventInspectionService,
-  WaiterGtmOperatorService,
   ProjectMetadataService,
   WaiterProjectWorkFlowService,
-  WaiterSpecService,
-  WaiterReportService,
-  WaiterRecordingService,
   WaiterConfigurationService,
-  WaiterSettingsService,
-  WaiterProjectIoService,
 ];
 
 @Module({
   imports: [
-    ProjectMetadataModule,
+    ProjectAgentModule,
     EventInspectionModule,
-    OsModule,
     GtmOperatorModule,
     ConfigurationModule,
   ],

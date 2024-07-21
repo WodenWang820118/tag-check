@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { FolderService } from '../folder/folder.service';
-import { FileService } from '../file/file.service';
-import { FolderPathService } from '../path/folder-path/folder-path.service';
-import { FilePathService } from '../path/file-path/file-path.service';
+import { FolderService } from '../../os/folder/folder.service';
+import { FileService } from '../../os/file/file.service';
+import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
+import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { ProjectInfoDto } from '../../dto/project-info.dto';
 import { SettingDto } from '../../dto/setting.dto';
 

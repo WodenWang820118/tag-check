@@ -13,13 +13,13 @@ import {
 } from '@nestjs/common';
 import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 import { ValidationResult } from '@utils';
-import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
 import { WaiterEventInspectionService } from './waiter-event-inspection.service';
+import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
 
 @Controller('datalayer')
 export class WaiterDataLayerController {
   constructor(
-    private abstractReportService: AbstractReportService,
+    private projectAbstractReportService: ProjectAbstractReportService,
     private waiterEventInspectionService: WaiterEventInspectionService
   ) {}
 
@@ -88,7 +88,7 @@ export class WaiterDataLayerController {
       Logger.log(results, 'waiter.inspectSingleEvent');
 
       const abstractReport =
-        await this.abstractReportService.getSingleAbstractTestResultJson(
+        await this.projectAbstractReportService.getSingleAbstractTestResultJson(
           projectSlug,
           eventId
         );

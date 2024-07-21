@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { ProjectService } from '../os/project/project.service';
-import { FileService } from '../os/file/file.service';
-import { ImageService } from '../os/image/image.service';
+import { ProjectService } from '../../os/project/project.service';
+import { ImageService } from '../../os/image/image.service';
 
 @Injectable()
 export class ProjectMetadataService {
   constructor(
-    private fileService: FileService,
     private projectService: ProjectService,
     private imageService: ImageService
   ) {}
