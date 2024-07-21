@@ -12,7 +12,7 @@ import { createReadStream, existsSync, mkdirSync } from 'fs';
 import { FolderService } from '../../os/folder/folder.service';
 
 @Injectable()
-export class WaiterProjectIoService {
+export class ProjectIoFacadeService {
   constructor(
     private projectIoService: ProjectIoService,
     private folderPathService: FolderPathService,

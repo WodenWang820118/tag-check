@@ -7,7 +7,7 @@ import { FolderModule } from '../folder/folder.module';
 import { FolderService } from '../folder/folder.service';
 
 @Module({
-  imports: [ConfigurationModule, PathModule, FolderModule],
+  imports: [PathModule, FolderModule, ConfigurationModule],
   providers: [FileService, ConfigurationService, FolderService],
   exports: [FileService],
 })

@@ -1,19 +1,22 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InspectorGroupEventsService } from '../../inspector/inspector-group-events.service';
-import { XlsxReportGroupEventsService } from '../../os/xlsx-report/xlsx-report-group-events.service';
-import { Credentials } from 'puppeteer';
+import { Browser, Credentials } from 'puppeteer';
 import { getCurrentTimestamp } from '@utils';
-import { FileService } from '../../os/file/file.service';
-import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
-import { BROWSER_ARGS } from '../../configs/project.config';
+import { BROWSER_ARGS } from '../configs/project.config';
+import { InspectorGroupEventsService } from '../inspector/inspector-group-events.service';
+import { XlsxReportGroupEventsService } from '../os/xlsx-report/xlsx-report-group-events.service';
+import { FileService } from '../os/file/file.service';
+import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
 
 @Injectable()
-export class WaiterDataLayerGroupEventsService {
+export class GroupEventsInspectionService {
+  private abortController: AbortController | null = null;
+  private currentBrowser: Browser | null = null;
+
   constructor(
     private fileService: FileService,
     private xlsxReportGroupEventsService: XlsxReportGroupEventsService,
     private inspectorGroupEventsService: InspectorGroupEventsService,
-    private abstractReportService: AbstractReportService
+    private projectAbstractReportService: ProjectAbstractReportService
   ) {}
 
   async inspectProject(
@@ -24,6 +27,8 @@ export class WaiterDataLayerGroupEventsService {
     concurrency?: number
   ) {
     // 3.1) inspect both dataLayer and the request sent to GA4
+    this.abortController = new AbortController();
+    const { signal } = this.abortController;
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
@@ -32,21 +37,31 @@ export class WaiterDataLayerGroupEventsService {
       stats,
       'WaiterDataLayerGroupEventsService.inspectProject: stats'
     );
-    const browser = await stats.puppeteer
+    this.currentBrowser = await stats.puppeteer
       .launch({
         headless: headless === 'true' ? true : false,
         defaultViewport: null,
         ignoreHTTPSErrors: true,
         args: BROWSER_ARGS,
         executablePath: stats.executablePath,
+        signal: signal,
       })
       .catch(function (error) {
         console.error(error);
       });
 
+    // Set up an abort listener
+    signal.addEventListener(
+      'abort',
+      async () => {
+        await this.cleanup();
+      },
+      { once: true }
+    );
+
     const result =
       await this.inspectorGroupEventsService.inspectProjectDataLayer(
-        browser,
+        this.currentBrowser,
         projectName,
         headless,
         measurementId,
@@ -81,7 +96,7 @@ export class WaiterDataLayerGroupEventsService {
     );
 
     // TODO: 3.4 report to each test
-    await this.abstractReportService.writeProjectAbstractTestRsultJson(
+    await this.projectAbstractReportService.writeProjectAbstractTestRsultJson(
       projectName,
       data.map((item) => item.dataLayerResult)
     );
@@ -89,5 +104,22 @@ export class WaiterDataLayerGroupEventsService {
     Logger.log('All tests are done!', 'WaiterService.inspectProject');
     Logger.log('Browser is closed!', 'WaiterService.inspectProject');
     return data;
+  }
+
+  stopOperation() {
+    Logger.log('Operation stopped', 'waiter.inspectSingleEvent');
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+  }
+
+  private async cleanup() {
+    Logger.log('Cleaning up resources', 'waiter.inspectSingleEvent');
+    if (this.currentBrowser) {
+      await this.currentBrowser
+        .close()
+        .catch((err) => Logger.error(err, 'Error closing browser'));
+      this.currentBrowser = null;
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { XlsxReportSingleEventService } from './../os/xlsx-report/xlsx-report-single-event.service';
+import { ProjectXlsxReportService } from './../project-agent/project-xlsx-report/project-xlsx-report.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
 import {
@@ -8,13 +8,13 @@ import {
 } from '@utils';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
-import { AbstractReportService } from '../os/abstract-report/abstract-report.service';
+import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
 @Injectable()
-export class PipelineService {
+export class EventInspectionPipelineService {
   constructor(
     private inspectorSingleEventService: InspectorSingleEventService,
-    private xlsxReportSingleEventService: XlsxReportSingleEventService,
-    private abstractReportService: AbstractReportService
+    private projectXlsxReportService: ProjectXlsxReportService,
+    private projectAbstractReportService: ProjectAbstractReportService
   ) {}
 
   async singleEventInspectionRecipe(
@@ -51,7 +51,7 @@ export class PipelineService {
       Logger.log('Data constructed', 'waiter.inspectSingleEvent');
 
       const timestamp = getCurrentTimestamp();
-      await this.xlsxReportSingleEventService.writeXlsxFile(
+      await this.projectXlsxReportService.writeXlsxFile(
         `QA_report_single_${eventId}_${timestamp}.xlsx`,
         'Sheet1',
         data,
@@ -75,7 +75,7 @@ export class PipelineService {
         completedTime: new Date(),
       };
 
-      await this.abstractReportService.writeSingleAbstractTestResultJson(
+      await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
         projectName,
         eventId,
         outputValidationResult

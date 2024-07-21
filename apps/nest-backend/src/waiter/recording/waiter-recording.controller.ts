@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
-import { WaiterRecordingService } from './waiter-recording.service';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { Recording } from '@utils';
+import { ProjectRecordingService } from '../../project-agent/project-recording/project-recording.service';
 
 @Controller('recordings')
 export class WaiterRecordingController {
-  constructor(private waiterRecordingService: WaiterRecordingService) {}
+  constructor(private projectRecordingService: ProjectRecordingService) {}
 
   @ApiOperation({
     summary: 'get project recordings',
@@ -18,7 +18,7 @@ export class WaiterRecordingController {
   })
   @Get(':projectSlug')
   async getProjectRecordings(@Param('projectSlug') projectSlug: string) {
-    return await this.waiterRecordingService.getProjectRecordings(projectSlug);
+    return await this.projectRecordingService.getProjectRecordings(projectSlug);
   }
 
   @ApiOperation({
@@ -32,7 +32,7 @@ export class WaiterRecordingController {
   })
   @Get(':projectSlug/names')
   async getProjectRecordingNames(@Param('projectSlug') projectSlug: string) {
-    return await this.waiterRecordingService.getProjectRecordingNames(
+    return await this.projectRecordingService.getProjectRecordingNames(
       projectSlug
     );
   }
@@ -55,7 +55,7 @@ export class WaiterRecordingController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
   ) {
-    return await this.waiterRecordingService.getRecordingDetails(
+    return await this.projectRecordingService.getRecordingDetails(
       projectSlug,
       eventId
     );
@@ -83,7 +83,7 @@ export class WaiterRecordingController {
     @Param('eventId') eventId: string,
     @Body() recording: Recording
   ) {
-    return await this.waiterRecordingService.addRecording(
+    return await this.projectRecordingService.addRecording(
       projectSlug,
       eventId,
       recording
@@ -112,7 +112,7 @@ export class WaiterRecordingController {
     @Param('eventId') eventId: string,
     @Body() recording: Recording
   ) {
-    return await this.waiterRecordingService.updateRecording(
+    return await this.projectRecordingService.updateRecording(
       projectSlug,
       eventId,
       recording

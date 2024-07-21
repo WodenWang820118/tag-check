@@ -8,7 +8,7 @@ import { FolderService } from '../folder/folder.service';
 
 @Module({
   imports: [PathModule, FileModule, FolderModule],
-  providers: [ProjectService, FileService, FolderService],
+  providers: [FileService, FolderService, ProjectService],
   exports: [ProjectService],
 })
 export class ProjectModule {}

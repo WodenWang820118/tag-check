@@ -1,5 +1,4 @@
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { WaiterProjectDataRetrievalService } from './waiter-project-data-retrieval.service';
 import {
   Body,
   Controller,
@@ -10,11 +9,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { WaiterProjectWorkFlowService } from './waiter-project-workflow.service';
+import { ProjectMetadataService } from '../../project-agent/project-metadata/project-metadata.service';
 
 @Controller('projects')
 export class WaiterProjectWorkFlowController {
   constructor(
-    private waiterProjectDataRetrievalService: WaiterProjectDataRetrievalService,
+    private projectMetadataService: ProjectMetadataService,
     private waiterProjectWorkflowService: WaiterProjectWorkFlowService
   ) {}
 
@@ -82,6 +82,6 @@ export class WaiterProjectWorkFlowController {
   })
   @Get()
   async getProjects() {
-    return await this.waiterProjectDataRetrievalService.getProjectsMetadata();
+    return await this.projectMetadataService.getProjectsMetadata();
   }
 }

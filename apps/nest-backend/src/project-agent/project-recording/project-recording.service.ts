@@ -7,7 +7,7 @@ import { RecordingDto } from '../../dto/recording.dto';
 import { Recording } from '@utils';
 
 @Injectable()
-export class WaiterRecordingService {
+export class ProjectRecordingService {
   constructor(
     private fileService: FileService,
     private filePathService: FilePathService,

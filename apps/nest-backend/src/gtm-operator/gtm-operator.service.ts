@@ -3,7 +3,7 @@ import { Browser, Credentials, Page } from 'puppeteer';
 import { BROWSER_ARGS } from '../configs/project.config';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { sleep } from '../web-agent/action/action-utils';
-import { PipelineService } from '../pipeline/pipeline.service';
+import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
 
 /**
  * A service for interacting with Google Tag Manager (GTM) via Puppeteer.
@@ -13,7 +13,9 @@ import { PipelineService } from '../pipeline/pipeline.service';
  */
 @Injectable()
 export class GtmOperatorService {
-  constructor(private pipelineService: PipelineService) {}
+  constructor(
+    private eventInspectionPipelineService: EventInspectionPipelineService
+  ) {}
   private abortController: AbortController | null = null;
   private currentBrowser: Browser | null = null;
   private currentPage: Page | null = null;
@@ -79,7 +81,7 @@ export class GtmOperatorService {
         { once: true }
       );
 
-      return this.pipelineService.singleEventInspectionRecipe(
+      return this.eventInspectionPipelineService.singleEventInspectionRecipe(
         this.currentPage,
         projectName,
         testName,

@@ -9,13 +9,13 @@ import {
   Header,
   Delete,
 } from '@nestjs/common';
-import { WaiterReportService } from './waiter-report.service';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { IReportDetails } from '@utils';
+import { ProjectReportService } from '../../project-agent/project-report/project-report.service';
 
 @Controller('reports')
 export class WaiterReportController {
-  constructor(private waiterReportService: WaiterReportService) {}
+  constructor(private projectReportService: ProjectReportService) {}
 
   @ApiOperation({
     summary: 'get project reports',
@@ -28,7 +28,7 @@ export class WaiterReportController {
   })
   @Get(':projectSlug')
   async getProjectEventReports(@Param('projectSlug') projectSlug: string) {
-    return await this.waiterReportService.getProjectEventReports(projectSlug);
+    return await this.projectReportService.getProjectEventReports(projectSlug);
   }
 
   @ApiOperation({
@@ -42,7 +42,7 @@ export class WaiterReportController {
   })
   @Get(':projectSlug/names')
   async getProjectEventReportNames(@Param('projectSlug') projectSlug: string) {
-    return await this.waiterReportService.getProjectEventReportFolderNames(
+    return await this.projectReportService.getProjectEventReportFolderNames(
       projectSlug
     );
   }
@@ -71,7 +71,7 @@ export class WaiterReportController {
     @Body() report: IReportDetails
   ) {
     Logger.log('updateReport', report);
-    return await this.waiterReportService.updateReport(
+    return await this.projectReportService.updateReport(
       projectSlug,
       eventId,
       report
@@ -101,7 +101,7 @@ export class WaiterReportController {
     @Param('eventId') eventId: string,
     @Body() report: IReportDetails
   ) {
-    return await this.waiterReportService.addReport(
+    return await this.projectReportService.addReport(
       projectSlug,
       eventId,
       report
@@ -132,7 +132,7 @@ export class WaiterReportController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventName') eventName: string
   ) {
-    return await this.waiterReportService.downloadXlsxReport(
+    return await this.projectReportService.downloadXlsxReport(
       projectSlug,
       eventName
     );
@@ -157,6 +157,6 @@ export class WaiterReportController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
   ) {
-    return await this.waiterReportService.deleteReport(projectSlug, eventId);
+    return await this.projectReportService.deleteReport(projectSlug, eventId);
   }
 }
