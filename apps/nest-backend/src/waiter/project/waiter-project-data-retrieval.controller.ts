@@ -1,6 +1,6 @@
 import { Controller, Get, Header, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { ProjectMetadataService } from '../../project-metadata/project-metadata.service';
+import { ProjectMetadataService } from '../../project-agent/project-metadata/project-metadata.service';
 
 @Controller('projects')
 export class WaiterProjectDataRetrievalController {

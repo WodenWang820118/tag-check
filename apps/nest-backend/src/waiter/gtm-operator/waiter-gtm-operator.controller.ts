@@ -9,15 +9,15 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { WaiterGtmOperatorService } from './waiter-gtm-operator.service';
 import { ValidationResult, EventInspectionPresetDto } from '@utils';
-import { AbstractReportService } from '../../os/abstract-report/abstract-report.service';
+import { GtmOperatorService } from '../../gtm-operator/gtm-operator.service';
+import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
 
 @Controller('datalayer')
 export class WaiterGtmOperatorController {
   constructor(
-    private waiterGtmOperatorService: WaiterGtmOperatorService,
-    private abstractRerportService: AbstractReportService
+    private gtmOperatorService: GtmOperatorService,
+    private projectAbstractReportService: ProjectAbstractReportService
   ) {}
 
   @ApiOperation({
@@ -69,7 +69,7 @@ export class WaiterGtmOperatorController {
       rawRequest: string;
       requestCheckResult: ValidationResult;
       destinationUrl: string;
-    }[] = await this.waiterGtmOperatorService.inspectSingleEventViaGtm(
+    }[] = await this.gtmOperatorService.inspectSingleEventViaGtm(
       gtmUrl,
       projectSlug,
       eventName,
@@ -85,7 +85,7 @@ export class WaiterGtmOperatorController {
     Logger.log(results, 'waiter.inspectSingleEventViaGtm');
 
     const abstractReport =
-      await this.abstractRerportService.getSingleAbstractTestResultJson(
+      await this.projectAbstractReportService.getSingleAbstractTestResultJson(
         projectSlug,
         eventName
       );
@@ -101,7 +101,7 @@ export class WaiterGtmOperatorController {
   @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
   stopOperation() {
     try {
-      this.waiterGtmOperatorService.stopOperation();
+      this.gtmOperatorService.stopOperation();
       return { message: 'Operation stopped successfully' };
     } catch (error) {
       Logger.error(error, 'waiter.stopOperation');

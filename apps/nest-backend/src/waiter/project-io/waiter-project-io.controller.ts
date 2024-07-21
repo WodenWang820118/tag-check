@@ -11,22 +11,22 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { WaiterProjectIoService } from './waiter-project-io.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { Express, Response } from 'express';
 import { ConfigurationService } from '../../configuration/configuration.service';
+import { ProjectIoFacadeService } from '../../project-agent/project-io-facade/project-io-facade.service';
 
 @Controller('projects')
 export class WaiterProjectIoController {
   constructor(
-    private waiterProjectIoService: WaiterProjectIoService,
+    private projectIoFacadeService: ProjectIoFacadeService,
     private configurationSerivce: ConfigurationService
   ) {}
 
   @Get('export/:projectSlug')
   async exportProject(@Param('projectSlug') projectSlug: string) {
-    return await this.waiterProjectIoService.exportProject(projectSlug);
+    return await this.projectIoFacadeService.exportProject(projectSlug);
   }
 
   @Post('import')
@@ -57,7 +57,7 @@ export class WaiterProjectIoController {
       Logger.log('file.path', file.path);
       const rootProjectPath =
         await this.configurationSerivce.getRootProjectPath();
-      await this.waiterProjectIoService.importProject(
+      await this.projectIoFacadeService.importProject(
         file.originalname.split('.')[0],
         file.path,
         rootProjectPath
@@ -71,6 +71,6 @@ export class WaiterProjectIoController {
 
   @Delete('delete/:projectSlug')
   async deleteProject(@Param('projectSlug') projectSlug: string) {
-    return await this.waiterProjectIoService.deleteProject(projectSlug);
+    return await this.projectIoFacadeService.deleteProject(projectSlug);
   }
 }

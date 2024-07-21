@@ -1,12 +1,14 @@
 import { Module } from '@nestjs/common';
 import { EventInspectionPipelineService } from './event-inspection-pipeline.service';
 import { InspectorModule } from '../inspector/inspector.module';
-import { XlsxReportModule } from '../os/xlsx-report/xlsx-report.module';
-import { AbstractReportModule } from '../os/abstract-report/abstract-report.module';
-
+import { ProjectAgentModule } from '../project-agent/project-agent.module';
 @Module({
-  imports: [InspectorModule, XlsxReportModule, AbstractReportModule],
+  imports: [InspectorModule, ProjectAgentModule],
   providers: [EventInspectionPipelineService],
-  exports: [EventInspectionPipelineService],
+  exports: [
+    EventInspectionPipelineService,
+    InspectorModule,
+    ProjectAgentModule,
+  ],
 })
 export class EventInspectionPipelineModule {}
