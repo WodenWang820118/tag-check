@@ -82,7 +82,7 @@ export class WaiterGtmOperatorController {
       eventInspectionPresetDto
     );
 
-    Logger.log(results, 'waiter.inspectSingleEventViaGtm');
+    Logger.log(results, 'WaiterGtmOperatorController.inspectSingleEventViaGtm');
 
     const abstractReport =
       await this.projectAbstractReportService.getSingleAbstractTestResultJson(

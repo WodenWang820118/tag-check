@@ -51,10 +51,10 @@ export class ProjectAbstractReportService {
     } catch (error) {
       Logger.error(
         error.message,
-        'AbstractReportService.writeSingleAbstractTestResultJson'
+        'ProjectAbstractReportService.writeSingleAbstractTestResultJson'
       );
       throw new HttpException(
-        'AbstractReportService.writeSingleAbstractTestResultJson',
+        'ProjectAbstractReportService.writeSingleAbstractTestResultJson',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
@@ -112,7 +112,7 @@ export class ProjectAbstractReportService {
 
       Logger.log(
         error.message,
-        'AbstractReportService.deleteSingleAbstractTestResultFolder'
+        'ProjectAbstractReportService.deleteSingleAbstractTestResultFolder'
       );
       throw new HttpException(
         'Failed to delete report',
@@ -150,7 +150,7 @@ export class ProjectAbstractReportService {
 
       Logger.error(
         error.message,
-        'AbstractReportService.getSingleAbstractTestResultJson'
+        'ProjectAbstractReportService.getSingleAbstractTestResultJson'
       );
       throw new HttpException('Failed to read report', HttpStatus.BAD_REQUEST);
     }

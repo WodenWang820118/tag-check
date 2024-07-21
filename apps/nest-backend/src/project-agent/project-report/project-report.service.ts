@@ -68,7 +68,7 @@ export class ProjectReportService {
         eventId: folderName,
       };
     } catch (error) {
-      Logger.log(error.message, 'WaiterReportService.buildReport');
+      Logger.log(error.message, 'ProjectReportService.buildReport');
       throw new HttpException(
         'Failed to build report',
         HttpStatus.INTERNAL_SERVER_ERROR

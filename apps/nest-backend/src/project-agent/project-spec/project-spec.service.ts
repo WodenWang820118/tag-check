@@ -64,7 +64,7 @@ export class ProjectSpecService {
         specs: allSpecs,
       };
     } catch (error) {
-      Logger.error(error.message, 'WaiterSpecService.addSpec');
+      Logger.error(error.message, 'ProjectSpecService.addSpec');
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

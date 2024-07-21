@@ -52,7 +52,7 @@ export class ProjectRecordingService {
 
       Logger.error(
         error.message,
-        'WaiterRecordingService.getProjectRecordings'
+        'ProjectRecordingService.getProjectRecordings'
       );
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -65,7 +65,10 @@ export class ProjectRecordingService {
       );
       return fileNames.map((fileName) => fileName.replace('.json', ''));
     } catch (error) {
-      Logger.error(error.message, 'ProjectService.getProjectRecordings');
+      Logger.error(
+        error.message,
+        'ProjectRecordingService.getProjectRecordings'
+      );
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -85,7 +88,10 @@ export class ProjectRecordingService {
         throw error;
       }
 
-      Logger.error(error.message, 'WaiterRecordingService.getRecordingDetails');
+      Logger.error(
+        error.message,
+        'ProjectRecordingService.getRecordingDetails'
+      );
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -106,7 +112,7 @@ export class ProjectRecordingService {
       if (error instanceof HttpException) {
         throw error;
       }
-      Logger.error(error.message, 'WaiterRecordingService.addRecording');
+      Logger.error(error.message, 'ProjectRecordingService.addRecording');
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -127,7 +133,7 @@ export class ProjectRecordingService {
       if (error instanceof HttpException) {
         throw error;
       }
-      Logger.error(error.message, 'WaiterRecordingService.updateRecording');
+      Logger.error(error.message, 'ProjectRecordingService.updateRecording');
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

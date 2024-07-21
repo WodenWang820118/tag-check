@@ -23,7 +23,7 @@ export class WaiterProjectWorkFlowService {
       if (configurations.length === 0) {
         Logger.log(
           'Creating initial root project folder path',
-          'WaiterProjectWorkFlowService'
+          'WaiterProjectWorkFlowService.setRootProjectFolder'
         );
         return await this.configurationService.create({
           id: uuidv4(),

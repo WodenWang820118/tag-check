@@ -92,20 +92,21 @@ export class GtmOperatorService {
       );
     } catch (error) {
       if (error.name === 'AbortError') {
-        Logger.log('Operation was aborted', 'waiter.GtmOperatorService');
+        Logger.log(
+          'Operation was aborted',
+          'GtmOperatorService.inspectSingleEventViaGtm'
+        );
       } else {
-        Logger.error(error, 'waiter.GtmOperatorService');
+        Logger.error(error, 'GtmOperatorService.inspectSingleEventViaGtm');
       }
       throw error;
-    } finally {
-      await this.cleanup();
     }
   }
 
   async operateGtmPreviewMode(page: Page, gtmUrl: string) {
     Logger.log(
       'Operating GTM preview mode',
-      'gtm-operator.operateGtmPreviewMode'
+      'GtmOperatorService.operateGtmPreviewMode'
     );
 
     await page.goto(gtmUrl, { waitUntil: 'networkidle2' });
@@ -144,7 +145,7 @@ export class GtmOperatorService {
   }
 
   private async cleanup() {
-    Logger.log('Cleaning up resources', 'gtmOperatorService');
+    Logger.log('Cleaning up resources', 'GtmOperatorService.cleanup');
     if (this.currentBrowser) {
       try {
         // Close all pages
