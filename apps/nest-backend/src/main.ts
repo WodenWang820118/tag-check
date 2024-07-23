@@ -29,8 +29,7 @@ async function bootstrap() {
   //         to.module.name === 'LoggerModule' ||
   //         to.module.name === 'SequelizeModule' ||
   //         to.module.name === 'SequelizeCoreModule' ||
-  //         to.module.name === 'ConfigModule' ||
-  //         to.module.name === 'ConfigurationModule'
+  //         to.module.name === 'ConfigModule'
   //       )
   //   )
   //   .map(({ from, to }) => `${from.module.name}-->${to.module.name}`);

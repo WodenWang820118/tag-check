@@ -4,14 +4,13 @@ import { PathUtilsService } from '../path-utils/path-utils.service';
 import { FilePathService } from './file-path.service';
 import { FolderPathModule } from '../folder-path/folder-path.module';
 import { FolderPathService } from '../folder-path/folder-path.service';
-import { ConfigurationModule } from '../../../configuration/configuration.module';
 
-const modules = [PathUtilsModule, FolderPathModule, ConfigurationModule];
+const modules = [FolderPathModule, PathUtilsModule];
 const services = [FilePathService, PathUtilsService, FolderPathService];
 
 @Module({
   imports: [...modules],
   providers: [...services],
-  exports: [...modules, ...services],
+  exports: [...services],
 })
 export class FilePathModule {}

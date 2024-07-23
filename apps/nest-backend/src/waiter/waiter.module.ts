@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 
 // other modules
 import { GtmOperatorModule } from '../gtm-operator/gtm-operator.module';
-import { ConfigurationModule } from '../configuration/configuration.module';
 import { EventInspectionModule } from './../event-inspection/event-inspection.module';
 import { ProjectAgentModule } from '../project-agent/project-agent.module';
 
@@ -20,24 +19,17 @@ import { WaiterProjectIoController } from './project-io/waiter-project-io.contro
 
 // services
 import { WaiterEventInspectionService } from './datalayer/waiter-event-inspection.service';
-import { ProjectMetadataService } from '../project-agent/project-metadata/project-metadata.service';
 import { WaiterProjectWorkFlowService } from './project/waiter-project-workflow.service';
 import { WaiterConfigurationService } from './configuration/waiter-configuration.service';
 
 const waiterServices = [
   WaiterEventInspectionService,
-  ProjectMetadataService,
   WaiterProjectWorkFlowService,
   WaiterConfigurationService,
 ];
 
 @Module({
-  imports: [
-    ProjectAgentModule,
-    EventInspectionModule,
-    GtmOperatorModule,
-    ConfigurationModule,
-  ],
+  imports: [ProjectAgentModule, EventInspectionModule, GtmOperatorModule],
   controllers: [
     WaiterProjectWorkFlowController,
     WaiterProjectDataRetrievalController,
