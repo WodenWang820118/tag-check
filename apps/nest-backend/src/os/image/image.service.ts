@@ -5,19 +5,13 @@ import {
   Logger,
   StreamableFile,
 } from '@nestjs/common';
-import { FolderService } from '../folder/folder.service';
-import { FilePathService } from '../path/file-path/file-path.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { existsSync, createReadStream } from 'fs';
 import { join } from 'path';
 
 @Injectable()
 export class ImageService {
-  constructor(
-    private folderService: FolderService,
-    private folderPathService: FolderPathService,
-    private filePathService: FilePathService
-  ) {}
+  constructor(private folderPathService: FolderPathService) {}
 
   async readImage(projectSlug: string, eventId: string) {
     try {
