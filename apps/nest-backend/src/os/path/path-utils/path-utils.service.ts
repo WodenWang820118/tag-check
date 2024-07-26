@@ -30,11 +30,21 @@ export class PathUtilsService {
     }
   }
 
-  async getRootProjectFolderPath() {
+  async buildFolderPath(projectSlug: string, folderName: string) {
     try {
-      return await this.configurationService.getRootProjectPath();
+      const dbRootProjectPath =
+        await this.configurationService.getRootProjectPath();
+
+      const outputPath = path.join(dbRootProjectPath, projectSlug, folderName);
+      Logger.log(
+        'folder path ',
+        outputPath,
+        'PathUtilsService.buildFolderPath'
+      );
+
+      return outputPath;
     } catch (error) {
-      Logger.error(error.message, 'PathUtilsService.getRootProjectPath');
+      Logger.error(error, 'PathUtilsService.buildFolderPath');
       throw new HttpException(error.message, 500);
     }
   }

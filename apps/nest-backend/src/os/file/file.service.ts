@@ -30,8 +30,9 @@ export class FileService {
 
   async getOperationJsonByProject(projectSlug: string) {
     try {
-      const dirPath =
-        await this.folderPathService.getOperationJsonPathByProject(projectSlug);
+      const dirPath = await this.folderPathService.getRecordingFolderPath(
+        projectSlug
+      );
       const jsonFiles = this.folderService.getJsonFilesFromDir(dirPath);
       return jsonFiles.filter((file) => {
         file.endsWith('.json');

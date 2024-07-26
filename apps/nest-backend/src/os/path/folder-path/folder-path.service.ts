@@ -5,15 +5,19 @@ import {
   RECORDING_FOLDER,
   RESULT_FOLDER,
 } from '../../../configs/project.config';
-import path from 'path';
+import { join } from 'path';
+import { ConfigurationService } from '../../../configuration/configuration.service';
 
 @Injectable()
 export class FolderPathService {
-  constructor(private pathUtilsService: PathUtilsService) {}
+  constructor(
+    private pathUtilsService: PathUtilsService,
+    private configurationService: ConfigurationService
+  ) {}
 
   async getRootProjectFolderPath() {
     try {
-      return await this.pathUtilsService.getRootProjectFolderPath();
+      return await this.configurationService.getRootProjectPath();
     } catch (error) {
       Logger.error(error.message, 'FolderPathService.getRootProjectPath');
       throw new HttpException(error.message, 500);
@@ -22,40 +26,19 @@ export class FolderPathService {
 
   async getReportSavingFolderPath(projectSlug: string) {
     try {
-      const dbRootProjectPath = await this.getRootProjectFolderPath();
-      const folderPath = path.join(
-        dbRootProjectPath,
+      return await this.pathUtilsService.buildFolderPath(
         projectSlug,
         RESULT_FOLDER
       );
-      return folderPath;
     } catch (error) {
       Logger.error(error.message, 'FolderService.getReportSavingFolder');
       throw new HttpException(error.messege, 500);
     }
   }
 
-  async getOperationJsonPathByProject(projectSlug: string) {
-    try {
-      const folderPath = await this.pathUtilsService.buildFilePath(
-        projectSlug,
-        RECORDING_FOLDER
-      );
-      return folderPath;
-    } catch (error) {
-      Logger.error(
-        error.message,
-        'FolderPathService.getOperationJsonPathByProject'
-      );
-    }
-  }
-
   async getProjectFolderPath(projectSlug: string) {
     try {
-      const rootProjectPath =
-        await this.pathUtilsService.getRootProjectFolderPath();
-      const folderPath = path.join(rootProjectPath, projectSlug);
-      return folderPath;
+      return await this.pathUtilsService.buildFolderPath(projectSlug, '');
     } catch (error) {
       Logger.error(error.message, 'FolderPathService.getProjectFolderPath');
       throw new HttpException(error.message, 500);
@@ -64,15 +47,10 @@ export class FolderPathService {
 
   async getRecordingFolderPath(projectSlug: string) {
     try {
-      const dbRootProjectPath =
-        await this.pathUtilsService.getRootProjectFolderPath();
-
-      const folderPath = path.join(
-        dbRootProjectPath,
+      return await this.pathUtilsService.buildFolderPath(
         projectSlug,
         RECORDING_FOLDER
       );
-      return folderPath;
     } catch (error) {
       Logger.error(error, 'FolderPathService.getRecordingFolderPath');
       throw new HttpException(error, 500);
@@ -81,7 +59,7 @@ export class FolderPathService {
 
   async getProjectConfigFolderPath(projectSlug: string) {
     try {
-      const folderPath = await this.pathUtilsService.buildFilePath(
+      const folderPath = await this.pathUtilsService.buildFolderPath(
         projectSlug,
         CONFIG_FOLDER
       );
@@ -94,12 +72,10 @@ export class FolderPathService {
 
   async getInspectionEventFolderPath(projectSlug: string, eventId: string) {
     try {
-      const folderPath = await this.pathUtilsService.buildFilePath(
+      return await this.pathUtilsService.buildFolderPath(
         projectSlug,
-        RESULT_FOLDER,
-        eventId
+        join(RESULT_FOLDER, eventId)
       );
-      return folderPath;
     } catch (error) {
       Logger.error(
         error.message,
