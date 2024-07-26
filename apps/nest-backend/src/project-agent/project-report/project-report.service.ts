@@ -22,11 +22,7 @@ export class ProjectReportService {
       const reportsPromise = (
         await this.getProjectEventReportFolderNames(projectSlug)
       ).map(async (folderName) => {
-        return await this.buildEventReport(
-          projectSlug,
-          folderName,
-          ABSTRACT_REPORT_FILE_NAME
-        );
+        return await this.buildEventReport(projectSlug, folderName);
       });
 
       const reports = await Promise.all(reportsPromise);
@@ -45,20 +41,15 @@ export class ProjectReportService {
 
   async getProjectEventReportFolderNames(projectSlug: string) {
     return this.folderService.readFolderFileNames(
-      await this.folderPathService.getInspectionResultFolderPath(projectSlug)
+      await this.folderPathService.getReportSavingFolderPath(projectSlug)
     );
   }
 
-  async buildEventReport(
-    projectSlug: string,
-    folderName: string,
-    fileName: string
-  ) {
+  async buildEventReport(projectSlug: string, folderName: string) {
     try {
       const filePath = await this.filePathService.getInspectionResultFilePath(
         projectSlug,
-        folderName,
-        fileName
+        folderName
       );
 
       const report: IReportDetails = this.fileService.readJsonFile(filePath);
@@ -100,8 +91,8 @@ export class ProjectReportService {
     );
   }
 
-  async downloadXlsxReport(projectSlug: string, eventName: string) {
-    return await this.fileService.getEventReport(projectSlug, eventName);
+  async downloadXlsxReport(projectSlug: string, eventId: string) {
+    return await this.fileService.getEventReport(projectSlug, eventId);
   }
 
   async deleteReport(projectSlug: string, eventId: string) {

@@ -21,11 +21,20 @@ export class PathUtilsService {
         folderName,
         fileName || ''
       );
-      Logger.log('file path ', outputPath, 'FileService.buildFilePath');
+      Logger.log('file path ', outputPath, 'PathUtilsService.buildFilePath');
 
       return outputPath;
     } catch (error) {
-      Logger.error(error, 'FileService.buildFilePath');
+      Logger.error(error, 'PathUtilsService.buildFilePath');
+      throw new HttpException(error.message, 500);
+    }
+  }
+
+  async getRootProjectFolderPath() {
+    try {
+      return await this.configurationService.getRootProjectPath();
+    } catch (error) {
+      Logger.error(error.message, 'PathUtilsService.getRootProjectPath');
       throw new HttpException(error.message, 500);
     }
   }
