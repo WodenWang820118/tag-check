@@ -7,6 +7,7 @@ import {
   RECORDING_FOLDER,
   SETTINGS,
   META_DATA,
+  ABSTRACT_REPORT_FILE_NAME,
 } from '../../../configs/project.config';
 import path from 'path';
 import { extractEventNameFromId } from '@utils';
@@ -72,11 +73,15 @@ export class FilePathService {
     }
   }
 
-  async getReportFilePath(projectSlug: string, reportName: string) {
+  async getReportFilePath(
+    projectSlug: string,
+    eventId: string,
+    reportName: string
+  ) {
     try {
       const reportSavingFolder =
         await this.folderPathService.getReportSavingFolderPath(projectSlug);
-      return path.join(reportSavingFolder, `${reportName}`);
+      return path.join(reportSavingFolder, eventId, `${reportName}`);
     } catch (error) {
       Logger.error(error.message, 'FilePathService.getReportFilePath');
       throw new HttpException(error.message, 500);
@@ -112,16 +117,12 @@ export class FilePathService {
     }
   }
 
-  async getInspectionResultFilePath(
-    projectSlug: string,
-    eventId: string,
-    fileName: string
-  ) {
+  async getInspectionResultFilePath(projectSlug: string, eventId: string) {
     try {
       return path.join(
-        await this.folderPathService.getInspectionResultFolderPath(projectSlug),
+        await this.folderPathService.getReportSavingFolderPath(projectSlug),
         eventId,
-        fileName
+        ABSTRACT_REPORT_FILE_NAME
       );
     } catch (error) {
       Logger.error(
