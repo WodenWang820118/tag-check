@@ -8,6 +8,7 @@ import {
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { existsSync, createReadStream } from 'fs';
 import { join } from 'path';
+import { extractEventNameFromId } from '@utils';
 
 @Injectable()
 export class ImageService {
@@ -15,11 +16,14 @@ export class ImageService {
 
   async readImage(projectSlug: string, eventId: string) {
     try {
-      const imageSavingFolder = join(
-        await this.folderPathService.getReportSavingFolderPath(projectSlug),
-        eventId
-      );
-      const imagePath = join(imageSavingFolder, `${eventId}.png`);
+      const imageSavingFolder =
+        await this.folderPathService.getInspectionEventFolderPath(
+          projectSlug,
+          eventId
+        );
+
+      const fileName = extractEventNameFromId(eventId);
+      const imagePath = join(imageSavingFolder, `${fileName}.png`);
 
       if (!existsSync(imagePath)) {
         Logger.log('File not found', 'SharedService.readImage');
