@@ -27,7 +27,7 @@ export class ProjectInitializationService {
         await this.folderPathService.getRecordingFolderPath(projectSlug)
       );
       this.folderService.createFolder(
-        await this.folderPathService.getInspectionResultFolderPath(projectSlug)
+        await this.folderPathService.getReportSavingFolderPath(projectSlug)
       );
       this.folderService.createFolder(
         await this.folderPathService.getProjectConfigFolderPath(projectSlug)

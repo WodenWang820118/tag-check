@@ -115,14 +115,14 @@ export class WaiterReportController {
       If multiple reports are found, it will return an array of report names.',
   })
   @ApiParam({
-    name: 'projectName',
+    name: 'projectSlug',
     description: 'The name of the project to which the event belongs.',
   })
   @ApiParam({
-    name: 'eventName',
-    description: 'The name of the test associated with the event.',
+    name: 'eventId',
+    description: 'The id of the test associated with the event.',
   })
-  @Get('xlsx/:projectSlug/:eventName')
+  @Get('xlsx/:projectSlug/:eventId')
   @Header(
     'Content-Type',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
@@ -130,11 +130,11 @@ export class WaiterReportController {
   @Header('Content-Disposition', 'attachment; filename="report.xlsx"')
   async downloadXlsxReport(
     @Param('projectSlug') projectSlug: string,
-    @Param('eventName') eventName: string
+    @Param('eventId') eventId: string
   ) {
     return await this.projectReportService.downloadXlsxReport(
       projectSlug,
-      eventName
+      eventId
     );
   }
 

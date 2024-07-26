@@ -42,14 +42,15 @@ export class FileService {
     }
   }
 
-  async getEventReport(projectSlug: string, eventName: string) {
+  // TODO: refactor; there might be multiple files
+  async getEventReport(projectSlug: string, eventId: string) {
     try {
       const inspectionResultPath =
         await this.folderPathService.getInspectionEventFolderPath(
           projectSlug,
-          eventName
+          eventId
         );
-      const regex = new RegExp(`${eventName}.*\\.xlsx$`, 'i');
+      const regex = new RegExp(`${eventId}.*\\.xlsx$`, 'i');
       const files =
         this.folderService.readFolderFileNames(inspectionResultPath);
       Logger.log(`Files: ${files}`);
@@ -64,10 +65,11 @@ export class FileService {
     }
   }
 
-  async readReport(projectSlug: string, reportName: string) {
+  async readReport(projectSlug: string, eventId: string, reportName: string) {
     try {
       const reportPath = await this.filePathService.getReportFilePath(
         projectSlug,
+        eventId,
         reportName
       );
 
