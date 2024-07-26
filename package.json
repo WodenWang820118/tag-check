@@ -44,7 +44,10 @@
     "mock-configurations-back": "nodemon mock/mock-server/mock-configurations-backend.js",
     "mock-specs-back": "nodemon mock/mock-server/mock-specs-backend.js",
     "mock-reports-back": "nodemon mock/mock-server/mock-reports-backend.js",
-    "mock-settings-back": "nodemon mock/mock-server/mock-settings-backend.js"
+    "mock-settings-back": "nodemon mock/mock-server/mock-settings-backend.js",
+    "testing": "-----------------all testing scripts-----------------",
+    "test:cov": "vitest run --coverage",
+    "test": "vitest run"
   },
   "private": true,
   "devDependencies": {
@@ -88,7 +91,7 @@
     "@schematics/angular": "17.3.7",
     "@swc-node/register": "1.8.0",
     "@swc/cli": "0.3.12",
-    "@swc/core": "^1.4.13",
+    "@swc/core": "^1.7.1",
     "@swc/helpers": "^0.5.11",
     "@types/jest": "^29.4.0",
     "@types/multer": "^1.4.11",
@@ -96,6 +99,7 @@
     "@types/uuid": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "7.3.0",
     "@typescript-eslint/parser": "7.3.0",
+    "@vitest/coverage-v8": "^2.0.4",
     "codemirror": "^6.0.1",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
@@ -118,6 +122,8 @@
     "ts-jest": "^29.1.0",
     "ts-node": "10.9.1",
     "typescript": "5.4.5",
+    "unplugin-swc": "^1.5.1",
+    "vitest": "^2.0.4",
     "webpack-merge": "^5.10.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.0/xlsx-0.20.0.tgz",
     "zone.js": "~0.14.3"

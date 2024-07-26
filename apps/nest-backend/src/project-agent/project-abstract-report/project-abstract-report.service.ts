@@ -31,8 +31,7 @@ export class ProjectAbstractReportService {
       const abstractPath =
         await this.filePathService.getInspectionResultFilePath(
           projectSlug,
-          `${eventId}`,
-          ABSTRACT_REPORT_FILE_NAME
+          `${eventId}`
         );
 
       if (!existsSync(folderPath)) {
@@ -66,7 +65,7 @@ export class ProjectAbstractReportService {
     data: OutputValidationResult[]
   ) {
     const resultFolderPath =
-      await this.folderPathService.getInspectionResultFolderPath(projectName);
+      await this.folderPathService.getReportSavingFolderPath(projectName);
 
     const eventFolderNames = this.folderService
       .readFolderFiles(resultFolderPath)
@@ -79,8 +78,7 @@ export class ProjectAbstractReportService {
           const abstractFilePath =
             await this.filePathService.getInspectionResultFilePath(
               projectName,
-              name,
-              ABSTRACT_REPORT_FILE_NAME
+              name
             );
           // writeFileSync(abstractFilePath, JSON.stringify(data, null, 2));
           this.fileService.writeJsonFile(abstractFilePath, dataPiece);
@@ -128,8 +126,7 @@ export class ProjectAbstractReportService {
     try {
       const filePath = await this.filePathService.getInspectionResultFilePath(
         projectSlug,
-        eventName,
-        ABSTRACT_REPORT_FILE_NAME
+        eventName
       );
 
       if (!existsSync(filePath)) {
