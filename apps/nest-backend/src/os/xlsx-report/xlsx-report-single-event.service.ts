@@ -72,16 +72,12 @@ export class XlsxReportSingleEventService {
         for (let i = 0; i < dataContent.length; i++) {
           // get existing image after the test
           try {
-            const eventName =
-              dataContent[i]['dataLayerResult']['dataLayerSpec']['event'];
-            const eventSavingFolder =
-              await this.folderPathService.getInspectionEventFolderPath(
-                projectName,
-                eventName
-              );
-            const imagePath = path.join(eventSavingFolder, `${eventName}.png`);
+            const file = await this.filePathService.getImageFilePath(
+              projectName,
+              eventId
+            );
             const imageId = workbook.addImage({
-              buffer: readFileSync(imagePath),
+              buffer: readFileSync(file),
               extension: 'png',
             });
             worksheet.addImage(imageId, {

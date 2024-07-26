@@ -28,6 +28,7 @@ export class FileService {
     }
   }
 
+  // get all json files in the project folder
   async getOperationJsonByProject(projectSlug: string) {
     try {
       const dirPath = await this.folderPathService.getRecordingFolderPath(
