@@ -1,13 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ProjectService } from '../../os/project/project.service';
-import { ImageService } from '../../os/image/image.service';
 
 @Injectable()
 export class ProjectMetadataService {
-  constructor(
-    private projectService: ProjectService,
-    private imageService: ImageService
-  ) {}
+  constructor(private projectService: ProjectService) {}
 
   async getProjectsMetadata() {
     return await this.projectService.getProjectsMetadata();
@@ -15,9 +11,5 @@ export class ProjectMetadataService {
 
   async getProjectMetadata(projectSlug: string) {
     return await this.projectService.getProjectMetadata(projectSlug);
-  }
-
-  async readImage(projectName: string, eventId: string) {
-    return await this.imageService.readImage(projectName, eventId);
   }
 }
