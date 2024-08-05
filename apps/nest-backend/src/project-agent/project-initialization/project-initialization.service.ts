@@ -15,7 +15,7 @@ export class ProjectInitializationService {
     private filePathService: FilePathService
   ) {}
 
-  async initProject(projectSlug: string, settings: any) {
+  async initProject(projectSlug: string, settings: Partial<ProjectInfoDto>) {
     try {
       const rootProjectPath =
         await this.folderPathService.getRootProjectFolderPath();

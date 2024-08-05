@@ -18,7 +18,7 @@ describe('FolderPathService', () => {
   let rootProjectPath: string;
 
   beforeEach(async () => {
-    rootProjectPath = 'D:\\software development\\tag-check\\tag_check_projects';
+    rootProjectPath = join('..', '..', '..', '..', '..', 'tag_check_projects');
 
     const moduleRef = await Test.createTestingModule({
       providers: [FolderPathService],
