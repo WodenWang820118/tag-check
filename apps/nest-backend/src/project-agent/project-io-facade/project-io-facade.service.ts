@@ -27,9 +27,9 @@ export class ProjectIoFacadeService {
         projectSlug
       );
 
-      if (!existsSync(projectPath) || !existsSync(projectPath)) {
+      if (!existsSync(projectPath)) {
         throw new HttpException(
-          `Project with slug ${projectSlug} not found`,
+          `Project with slug ${projectSlug} not found; absolute path: ${projectPath}`,
           HttpStatus.NOT_FOUND
         );
       }
