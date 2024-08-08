@@ -14,6 +14,12 @@ export class FolderService {
     return readdirSync(folderPath);
   }
 
+  readFolder(folderPath: string) {
+    return readdirSync(folderPath, {
+      withFileTypes: true,
+    }).filter((dirent) => dirent.isDirectory());
+  }
+
   createFolder(folderPath: string) {
     if (!existsSync(folderPath)) {
       mkdirSync(folderPath);
