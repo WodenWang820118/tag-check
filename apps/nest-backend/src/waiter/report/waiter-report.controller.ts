@@ -12,10 +12,14 @@ import {
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { IReportDetails } from '@utils';
 import { ProjectReportService } from '../../project-agent/project-report/project-report.service';
+import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
 
 @Controller('reports')
 export class WaiterReportController {
-  constructor(private projectReportService: ProjectReportService) {}
+  constructor(
+    private projectReportService: ProjectReportService,
+    private projectAbstractReportService: ProjectAbstractReportService
+  ) {}
 
   @ApiOperation({
     summary: 'get project reports',
@@ -71,7 +75,7 @@ export class WaiterReportController {
     @Body() report: IReportDetails
   ) {
     Logger.log('updateReport', report);
-    return await this.projectReportService.updateReport(
+    return await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
       projectSlug,
       eventId,
       report
@@ -101,7 +105,7 @@ export class WaiterReportController {
     @Param('eventId') eventId: string,
     @Body() report: IReportDetails
   ) {
-    return await this.projectReportService.addReport(
+    return await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
       projectSlug,
       eventId,
       report
@@ -157,6 +161,9 @@ export class WaiterReportController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
   ) {
-    return await this.projectReportService.deleteReport(projectSlug, eventId);
+    return await this.projectAbstractReportService.deleteSingleAbstractTestResultFolder(
+      projectSlug,
+      eventId
+    );
   }
 }

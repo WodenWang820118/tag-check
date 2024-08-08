@@ -1,6 +1,7 @@
 import { Controller, Get, Param, Put, Body, Logger } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { ProjectSettingService } from '../../project-agent/project-setting/project-setting.service';
+import { Setting } from '@utils';
 
 @Controller('settings')
 export class WaiterSettingsController {
@@ -42,7 +43,7 @@ export class WaiterSettingsController {
   async updateProjectSettings(
     @Param('projectSlug') projectSlug: string,
     @Param('section') section: string,
-    @Body() settings: any
+    @Body() settings: Partial<Setting>
   ) {
     const updatedSettings =
       await this.projectSettingService.updateProjectSettings(

@@ -4,8 +4,6 @@ import { FolderService } from '../../os/folder/folder.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { IReportDetails } from '@utils';
-import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
-import { ProjectAbstractReportService } from '../project-abstract-report/project-abstract-report.service';
 
 @Injectable()
 export class ProjectReportService {
@@ -13,8 +11,7 @@ export class ProjectReportService {
     private fileService: FileService,
     private filePathService: FilePathService,
     private folderService: FolderService,
-    private folderPathService: FolderPathService,
-    private projectAbstractReportService: ProjectAbstractReportService
+    private folderPathService: FolderPathService
   ) {}
 
   async getProjectEventReports(projectSlug: string) {
@@ -45,18 +42,18 @@ export class ProjectReportService {
     );
   }
 
-  async buildEventReport(projectSlug: string, folderName: string) {
+  async buildEventReport(projectSlug: string, eventId: string) {
     try {
       const filePath = await this.filePathService.getInspectionResultFilePath(
         projectSlug,
-        folderName
+        eventId
       );
 
       const report: IReportDetails = this.fileService.readJsonFile(filePath);
 
       return {
         ...report,
-        eventId: folderName,
+        eventId: eventId,
       };
     } catch (error) {
       Logger.log(error.message, 'ProjectReportService.buildReport');
@@ -67,38 +64,7 @@ export class ProjectReportService {
     }
   }
 
-  async updateReport(
-    projectSlug: string,
-    eventId: string,
-    report: IReportDetails
-  ) {
-    await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
-      projectSlug,
-      eventId,
-      report
-    );
-  }
-
-  async addReport(
-    projectSlug: string,
-    eventId: string,
-    report: IReportDetails
-  ) {
-    await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
-      projectSlug,
-      eventId,
-      report
-    );
-  }
-
   async downloadXlsxReport(projectSlug: string, eventId: string) {
     return await this.fileService.getEventReport(projectSlug, eventId);
-  }
-
-  async deleteReport(projectSlug: string, eventId: string) {
-    await this.projectAbstractReportService.deleteSingleAbstractTestResultFolder(
-      projectSlug,
-      eventId
-    );
   }
 }

@@ -17,6 +17,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { Setting } from '@utils';
 @Component({
   selector: 'app-gtm-form',
   standalone: true,
@@ -104,12 +105,21 @@ export class GtmFormComponent implements OnInit, OnDestroy {
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           console.log(this.previewModeForm.value);
-          return this.settingsService.updateSettings(projectSlug, 'gtm', {
-            gtmPreviewModeUrl: this.previewModeForm.value.url,
-            isAccompanyMode: this.previewModeForm.value.isAccompanyMode,
-            isRequestCheck: this.previewModeForm.value.isRequestCheck,
-            tagManagerUrl: this.previewModeForm.value.tagManagerUrl,
-          });
+          const settings: Partial<Setting> = {
+            gtm: {
+              gtmPreviewModeUrl: this.previewModeForm.value.url as string,
+              isAccompanyMode: this.previewModeForm.value
+                .isAccompanyMode as boolean,
+              isRequestCheck: this.previewModeForm.value
+                .isRequestCheck as boolean,
+              tagManagerUrl: this.previewModeForm.value.tagManagerUrl as string,
+            },
+          };
+          return this.settingsService.updateSettings(
+            projectSlug,
+            'gtm',
+            settings
+          );
         }),
         catchError((err) => {
           console.error(err);

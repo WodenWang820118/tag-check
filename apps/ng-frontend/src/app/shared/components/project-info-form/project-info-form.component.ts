@@ -8,6 +8,7 @@ import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
+import { Setting } from '@utils';
 
 @Component({
   selector: 'app-project-info-form',
@@ -76,10 +77,19 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
           const projectSlug = params['projectSlug'];
           console.log(this.projectInfoForm.value);
           console.log(projectSlug);
+
+          const settings: Partial<Setting> = {
+            projectName: this.projectInfoForm.value.projectName as string,
+            measurementId: this.projectInfoForm.value.measurementId as string,
+            projectDescription: this.projectInfoForm.value
+              .projectDescription as string,
+            googleSpreadsheetLink: this.projectInfoForm.value
+              .googleSpreadsheetLink as string,
+          };
           return this.settingsService.updateSettings(
             projectSlug,
             'others',
-            this.projectInfoForm.value
+            settings
           );
         }),
         catchError((err) => {
