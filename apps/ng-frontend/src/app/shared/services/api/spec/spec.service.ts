@@ -44,13 +44,12 @@ export class SpecService {
       );
   }
 
-  addSpec(projectSlug: string, content: string) {
-    const jsonContent = JSON.parse(content);
+  addSpec(projectSlug: string, content: Spec) {
+    console.log('Content', content);
     console.log('Project Slug', projectSlug);
-    console.log('Spec', jsonContent);
     return this.http
       .post(`${environment.specApiUrl}/${projectSlug}`, {
-        data: jsonContent,
+        ...content,
       })
       .pipe(
         catchError((error) => {
@@ -60,11 +59,10 @@ export class SpecService {
       );
   }
 
-  updateSpec(projectSlug: string, eventName: string, content: string) {
-    const jsonContent = JSON.parse(content);
+  updateSpec(projectSlug: string, eventName: string, content: Spec) {
     return this.http
       .put(`${environment.specApiUrl}/${projectSlug}/${eventName}`, {
-        data: jsonContent,
+        ...content,
       })
       .pipe(
         catchError((error) => {

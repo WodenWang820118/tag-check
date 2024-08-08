@@ -36,7 +36,6 @@ describe('FolderImageServiceService', () => {
 
   it('should read image', async () => {
     // it turns out to be a integration test to test the image reading
-    // TODO: the root project path should be at the root directory of the project
     const rootProjectPath = join(__dirname, '..', '..', '..', '..', '..');
     const projectSlug = 'ng_gtm_integration_sample';
     const eventId = 'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff';

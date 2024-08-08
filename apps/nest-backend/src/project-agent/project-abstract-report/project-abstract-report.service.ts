@@ -4,7 +4,6 @@ import { IReportDetails, OutputValidationResult } from '@utils';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { existsSync, mkdirSync, statSync } from 'fs';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
-import { ABSTRACT_REPORT_FILE_NAME } from '../../configs/project.config';
 import { FileService } from '../../os/file/file.service';
 
 @Injectable()
@@ -119,24 +118,24 @@ export class ProjectAbstractReportService {
     }
   }
 
-  async getSingleAbstractTestResultJson(
-    projectSlug: string,
-    eventName: string
-  ) {
+  async getSingleAbstractTestResultJson(projectSlug: string, eventId: string) {
     try {
       const filePath = await this.filePathService.getInspectionResultFilePath(
         projectSlug,
-        eventName
+        eventId
       );
 
       if (!existsSync(filePath)) {
-        throw new HttpException('Report not found', HttpStatus.NOT_FOUND);
+        throw new HttpException(
+          `Report not found: ${filePath}`,
+          HttpStatus.NOT_FOUND
+        );
       }
 
       const completedTime = statSync(filePath).mtime;
 
       return {
-        eventName: eventName,
+        eventName: eventId,
         ...this.fileService.readJsonFile(filePath),
         completedTime,
       };

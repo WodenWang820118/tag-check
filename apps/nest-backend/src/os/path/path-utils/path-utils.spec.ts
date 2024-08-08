@@ -6,12 +6,13 @@ import { join } from 'path';
 
 const moduleMocker = new ModuleMocker(global);
 
-describe('FilePathUtilsService', () => {
+describe('PathUtilsService', () => {
   let service: PathUtilsService;
+  let configrationService: ConfigurationService;
   let rootProjectPath: string;
 
   beforeEach(async () => {
-    rootProjectPath = 'D:\\software development\\tag-check\\tag_check_projects';
+    rootProjectPath = join('..', '..', '..', '..', '..', 'tag_check_projects');
 
     const moduleRef = await Test.createTestingModule({
       providers: [PathUtilsService],
@@ -34,6 +35,8 @@ describe('FilePathUtilsService', () => {
       .compile();
 
     service = moduleRef.get<PathUtilsService>(PathUtilsService);
+    configrationService =
+      moduleRef.get<ConfigurationService>(ConfigurationService);
   });
 
   it('should be defined', () => {
@@ -49,6 +52,7 @@ describe('FilePathUtilsService', () => {
       folderName,
       fileName
     );
+    expect(configrationService.getRootProjectPath).toHaveBeenCalled();
     expect(result).toBe(
       join(rootProjectPath, projectName, folderName, fileName)
     );

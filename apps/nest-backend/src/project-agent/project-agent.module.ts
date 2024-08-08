@@ -21,6 +21,8 @@ import { ProjectReportService } from './project-report/project-report.service';
 import { ProjectSettingService } from './project-setting/project-setting.service';
 import { ProjectSpecService } from './project-spec/project-spec.service';
 import { ProjectXlsxReportService } from './project-xlsx-report/project-xlsx-report.service';
+import { ProjectImageModule } from './project-image/project-image.module';
+import { ProjectImageService } from './project-image/project-image.service';
 
 const modules = [
   ProjectMetadataModule,
@@ -32,6 +34,7 @@ const modules = [
   ProjectIoFacadeModule,
   ProjectAbstractReportModule,
   ProjectXlsxRportModule,
+  ProjectImageModule,
 ];
 
 const services = [
@@ -44,6 +47,7 @@ const services = [
   ProjectSettingService,
   ProjectSpecService,
   ProjectXlsxReportService,
+  ProjectImageService,
 ];
 
 @Module({

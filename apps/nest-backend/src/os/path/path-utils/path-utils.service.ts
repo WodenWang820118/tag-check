@@ -9,7 +9,7 @@ export class PathUtilsService {
   async buildFilePath(
     projectName: string,
     folderName: string,
-    fileName?: string
+    fileName: string
   ) {
     try {
       const dbRootProjectPath =
