@@ -8,4 +8,5 @@ export const environment = {
   imageApiUrl: 'http://localhost:8080/projects/images',
   dataLayerApiUrl: 'http://localhost:8080/datalayer',
   settingsApiUrl: 'http://localhost:8080/settings',
+  fileReportApiUrl: 'http://localhost:8080/file-reports',
 };

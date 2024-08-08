@@ -21,6 +21,13 @@ export const PROJECT_ROUTES: Routes = [
           import('../tag-build/routes').then((m) => m.TAG_BUILD_ROUTES),
       },
       {
+        path: 'buckets',
+        loadComponent: () =>
+          import('./views/buckets-view/buckets-view.component').then(
+            (m) => m.BucketsViewComponent
+          ),
+      },
+      {
         path: 'project-info',
         loadComponent: () =>
           import(

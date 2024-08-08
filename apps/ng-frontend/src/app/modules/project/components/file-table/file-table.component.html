@@ -1,0 +1,50 @@
+<div class="report-table">
+  <table mat-table [dataSource]="dataSource" multiTemplateDataRows matSort>
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox
+          (change)="$event ? toggleAllRows() : null"
+          [checked]="selection.hasValue() && isAllSelected()"
+          [indeterminate]="selection.hasValue() && !isAllSelected()"
+          [aria-label]="checkboxLabel()"
+        >
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let row">
+        <mat-checkbox
+          (click)="$event.stopPropagation()"
+          (change)="$event ? selectSingleRow(row) : null"
+          [checked]="selection.isSelected(row)"
+          [aria-label]="checkboxLabel(row)"
+        >
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let element">
+        <p>{{ element.name }}</p>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="lastModified">
+      <th mat-header-cell *matHeaderCellDef>Date</th>
+      <td mat-cell *matCellDef="let element">
+        <p>{{ element.lastModified | date : 'medium' }}</p>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columns"></tr>
+
+    <tr
+      mat-row
+      *matRowDef="let element; columns: columns"
+      class="element-row"
+    ></tr>
+  </table>
+  <mat-paginator
+    [pageSizeOptions]="[7, 10, 25, 100]"
+    aria-label="Select page of tests"
+  ></mat-paginator>
+</div>

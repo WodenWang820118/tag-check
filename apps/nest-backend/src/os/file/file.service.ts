@@ -5,7 +5,7 @@ import {
   Logger,
   StreamableFile,
 } from '@nestjs/common';
-import { createReadStream, readFileSync, writeFileSync } from 'fs';
+import { createReadStream, readFileSync, rmSync, writeFileSync } from 'fs';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
@@ -92,5 +92,14 @@ export class FileService {
       eventId
     );
     this.writeJsonFile(cachePath, data);
+  }
+
+  deleteFile(filePath: string) {
+    try {
+      rmSync(filePath);
+    } catch (error) {
+      Logger.error(error.message, 'FileService.deleteFile');
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }
