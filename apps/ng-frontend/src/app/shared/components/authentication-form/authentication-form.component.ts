@@ -8,6 +8,7 @@ import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
+import { Setting } from '@utils';
 
 @Component({
   selector: 'app-authentication-form',
@@ -72,10 +73,18 @@ export class AuthenticationFormComponent implements OnInit, OnDestroy {
           const projectSlug = params['projectSlug'];
           console.log(this.authenticationForm.value);
           console.log(projectSlug);
+
+          const settings: Partial<Setting> = {
+            authentication: {
+              username: this.authenticationForm.value.username as string,
+              password: this.authenticationForm.value.password as string,
+            },
+          };
+
           return this.settingsService.updateSettings(
             projectSlug,
             'authentication',
-            this.authenticationForm.value
+            settings
           );
         }),
         catchError((err) => {
