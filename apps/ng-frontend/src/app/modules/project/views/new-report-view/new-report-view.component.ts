@@ -199,7 +199,7 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
                 `${eventName}_${eventId}`,
                 recordingContent as string
               ),
-              this.specService.addSpec(projectSlug, specContent),
+              this.specService.addSpec(projectSlug, JSON.parse(specContent)),
             ]).pipe(
               tap(() => {
                 this.projectDataSourceService
