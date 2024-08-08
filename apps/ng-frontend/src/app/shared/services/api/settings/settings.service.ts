@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { ProjectSetting } from '@utils';
+import { ProjectSetting, Setting } from '@utils';
 import { BehaviorSubject, catchError, of, Subject, tap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '../../../components/snackbar/snackbar.components';
@@ -36,7 +36,11 @@ export class SettingsService {
       );
   }
 
-  updateSettings(projectSlug: string, section: string, settings: any) {
+  updateSettings(
+    projectSlug: string,
+    section: string,
+    settings: Partial<Setting>
+  ) {
     if (!projectSlug || !settings) return of({} as ProjectSetting);
     return this.http
       .put<ProjectSetting>(

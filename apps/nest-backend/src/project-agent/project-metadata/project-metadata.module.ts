@@ -5,6 +5,6 @@ import { ProjectMetadataService } from './project-metadata.service';
 @Module({
   imports: [OsModule],
   providers: [ProjectMetadataService],
-  exports: [ProjectMetadataService, OsModule],
+  exports: [ProjectMetadataService],
 })
 export class ProjectMetadataModule {}

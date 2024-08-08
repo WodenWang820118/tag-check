@@ -165,7 +165,7 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
         take(1),
         switchMap(([parentParams, params, specEditor]) => {
           const projectSlug = parentParams['projectSlug'];
-          const eventName = params['eventName'];
+          const eventName = extractEventNameFromId(params['eventId']);
           const specContent = specEditor.state.doc.toString();
 
           if (
@@ -176,7 +176,7 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
             return this.specService.updateSpec(
               projectSlug,
               eventName,
-              specContent
+              JSON.parse(specContent)
             );
           } else {
             return this.showErrorDialog(

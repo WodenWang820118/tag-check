@@ -15,7 +15,7 @@ import {
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-import { CookieData, LocalStorageData } from '@utils';
+import { CookieData, LocalStorageData, Setting } from '@utils';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
 
@@ -146,10 +146,27 @@ export class ApplicationFormComponent implements OnInit, OnDestroy {
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           if (projectSlug) {
+            const settings: Partial<Setting> = {
+              application: {
+                localStorage: {
+                  data: this.localStorageFormArrayValue.map((item) => ({
+                    key: item.value.key,
+                    value: item.value.value,
+                  })),
+                },
+                cookie: {
+                  data: this.cookieFormArrayValue.map((item) => ({
+                    key: item.value.key,
+                    value: item.value.value,
+                  })),
+                },
+              },
+            };
+
             return this.settingsService.updateSettings(
               projectSlug,
               'application',
-              this.applicationForm.value
+              settings
             );
           }
           return EMPTY;

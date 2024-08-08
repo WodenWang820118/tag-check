@@ -73,12 +73,12 @@ export class ProjectRecordingService {
     }
   }
 
-  async getRecordingDetails(projectSlug: string, recordingId: string) {
+  async getRecordingDetails(projectSlug: string, eventId: string) {
     try {
       const content = await this.fileService.readJsonFile(
         await this.filePathService.getRecordingFilePath(
           projectSlug,
-          `${recordingId}.json`
+          `${eventId}.json`
         )
       );
 

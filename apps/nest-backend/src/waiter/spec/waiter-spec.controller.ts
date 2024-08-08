@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
 import { ProjectSpecService } from '../../project-agent/project-spec/project-spec.service';
+import { Spec } from '@utils';
 
 @Controller('specs')
 export class WaiterSpecController {
@@ -66,7 +67,7 @@ export class WaiterSpecController {
     },
   })
   @Post(':projectSlug')
-  async addSpec(@Param('projectSlug') projectSlug: string, @Body() spec: any) {
+  async addSpec(@Param('projectSlug') projectSlug: string, @Body() spec: Spec) {
     return await this.projectSpecService.addSpec(projectSlug, spec);
   }
 
@@ -98,7 +99,7 @@ export class WaiterSpecController {
   async updateSpec(
     @Param('projectSlug') projectSlug: string,
     @Param('eventName') eventName: string,
-    @Body() spec: any
+    @Body() spec: Spec
   ) {
     return await this.projectSpecService.updateSpec(
       projectSlug,
