@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Component } from '@angular/core';
 import { FileTableComponent } from '../../components/file-table/file-table.component';
 import { FileTableToolbarComponent } from '../../components/file-table-toolbar/file-table-toolbar.component';
 
@@ -27,15 +26,4 @@ import { FileTableToolbarComponent } from '../../components/file-table-toolbar/f
 
   `,
 })
-export class BucketsViewComponent implements OnInit, OnDestroy {
-  destroy$ = new Subject<void>();
-
-  ngOnInit() {
-    console.log('BucketsViewComponent');
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-}
+export class BucketsViewComponent {}

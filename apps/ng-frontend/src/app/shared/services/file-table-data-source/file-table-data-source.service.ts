@@ -10,6 +10,7 @@ export class FileTableDataSourceService extends DataSource<FileReport> {
   private _dataStream = new BehaviorSubject<FileReport[]>([]);
   private _filterStream = new ReplaySubject<string>();
   private _deletedStream = new BehaviorSubject<boolean>(false);
+  private _downloadStream = new BehaviorSubject<boolean>(false);
 
   constructor() {
     super();
@@ -47,5 +48,17 @@ export class FileTableDataSourceService extends DataSource<FileReport> {
 
   getDeletedStream(): Observable<boolean> {
     return this._deletedStream;
+  }
+
+  setDownloadStream(download: boolean) {
+    this._downloadStream.next(download);
+  }
+
+  downloadSelected() {
+    this.setDownloadStream(true);
+  }
+
+  getDownloadStream(): Observable<boolean> {
+    return this._downloadStream;
   }
 }

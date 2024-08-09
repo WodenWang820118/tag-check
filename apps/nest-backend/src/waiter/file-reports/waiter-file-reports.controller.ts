@@ -1,4 +1,13 @@
-import { Controller, Delete, Get, Logger, Param, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Logger,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ProjectFileReportService } from '../../project-agent/project-file-report/project-file-report.service';
 
 @Controller('file-reports')
@@ -20,5 +29,12 @@ export class WaiterFileReportsController {
   @Get(':projectSlug')
   async getReportFiles(@Param('projectSlug') projectSlug: string) {
     return this.projectFileReportService.getReportFolderFiles(projectSlug);
+  }
+
+  @Post('/download')
+  async downloadReportFiles(@Body() body: { filePaths: string[] }) {
+    return await this.projectFileReportService.downloadReportFiles(
+      body.filePaths
+    );
   }
 }
