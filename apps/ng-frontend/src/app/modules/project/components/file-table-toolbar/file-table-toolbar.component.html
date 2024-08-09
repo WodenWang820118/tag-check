@@ -9,6 +9,17 @@
   >
     <mat-icon>delete_outline</mat-icon>
   </button>
+  <button
+    mat-icon-button
+    class="icon"
+    matTooltip="Download"
+    matTooltipPosition="above"
+    aria-label="Download"
+    (click)="downloadSelected()"
+  >
+    <mat-icon>download</mat-icon>
+  </button>
+
   <div class="spacer"></div>
   @if (!isSearchVisible) {
   <mat-button-toggle-group

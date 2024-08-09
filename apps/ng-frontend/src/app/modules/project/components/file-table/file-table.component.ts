@@ -1,7 +1,7 @@
 import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
-import { map, of, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { forkJoin, map, of, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -36,7 +36,6 @@ export class FileTableComponent implements OnDestroy {
   columns: string[] = ['select', 'name', 'lastModified'];
   destroy$ = new Subject<void>();
 
-  // TODO: batch download
   constructor(
     private fileTableDataSourceFacadeService: FileTableDataSourceFacadeService
   ) {
@@ -46,7 +45,6 @@ export class FileTableComponent implements OnDestroy {
         takeUntil(this.destroy$),
         map((data) => {
           if (data) {
-            console.log(data);
             this.dataSource = new MatTableDataSource(data);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
@@ -58,11 +56,19 @@ export class FileTableComponent implements OnDestroy {
           if (!data) {
             return of(null);
           }
-          // ensure the this.dataSource has the data
-          return this.fileTableDataSourceFacadeService.observeTableDelete(
-            this.selection,
-            this.dataSource
-          );
+          // after the data is loaded, we can observe the delete and download actions
+          return forkJoin({
+            deleteResult:
+              this.fileTableDataSourceFacadeService.observeTableDelete(
+                this.selection,
+                this.dataSource
+              ),
+            downloadResult:
+              this.fileTableDataSourceFacadeService.observeDownload(
+                this.selection,
+                this.dataSource
+              ),
+          });
         })
       )
       .subscribe();

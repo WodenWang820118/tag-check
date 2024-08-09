@@ -42,4 +42,20 @@ export class FileReportService {
 
     return forkJoin(tasks);
   }
+
+  downloadFileReports(fileReport: FileReport[]) {
+    const paths = fileReport.map((file) => file.path);
+    const body = { filePaths: paths };
+
+    return this.http
+      .post(`${environment.fileReportApiUrl}/download`, body, {
+        responseType: 'blob',
+      })
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
+  }
 }

@@ -121,4 +121,76 @@ export class FileTableDataSourceFacadeService {
       })
     );
   }
+
+  observeDownload(
+    selection: SelectionModel<FileReport>,
+    dataSource: MatTableDataSource<FileReport, MatPaginator>
+  ) {
+    if (!this.route.parent || !dataSource) {
+      return of(null);
+    }
+
+    return combineLatest([
+      this.route.parent.params,
+      this.fileTableDataSourceService.getDownloadStream(),
+      selection.changed,
+    ]).pipe(
+      switchMap(([params, download, selectionChanges]) => {
+        if (selectionChanges.added.length === 0)
+          return of({ params, dialogResult: false });
+        if (download === false) {
+          return of({ params, dialogResult: false });
+        } else {
+          const dialogRef = this.dialog.open(InformationDialogComponent, {
+            data: {
+              title: 'Download Reports',
+              contents:
+                'Are you sure you want to download the selected reports?',
+              action: 'Download',
+              actionColor: 'primary',
+              consent: false,
+            },
+          });
+
+          return dialogRef.afterClosed().pipe(
+            take(1),
+            map((result) => {
+              return { params, dialogResult: result };
+            })
+          );
+        }
+      }),
+      switchMap(({ params, dialogResult }) => {
+        if (dialogResult === true) {
+          console.log('download selected in the report table component');
+          this.fileTableDataSourceService.setDownloadStream(false);
+          return this.fileReportService
+            .downloadFileReports(selection.selected)
+            .pipe(
+              tap((blob) => {
+                if (!blob) {
+                  return;
+                }
+                const fileName = 'report.zip'; // You can generate a dynamic name if needed
+                selection.clear();
+                this.saveFile(blob, fileName);
+              }),
+              catchError((error) => {
+                console.error(error);
+                return of(null);
+              })
+            );
+        }
+        return of(null);
+      })
+    );
+  }
+
+  private saveFile(blob: Blob, fileName: string) {
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+    window.URL.revokeObjectURL(link.href);
+  }
 }

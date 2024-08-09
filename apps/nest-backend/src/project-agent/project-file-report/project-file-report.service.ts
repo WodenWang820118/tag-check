@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, StreamableFile } from '@nestjs/common';
 import { FileService } from '../../os/file/file.service';
 import { FolderService } from '../../os/folder/folder.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { join } from 'path';
-import { statSync } from 'fs';
+import { createReadStream, mkdirSync, statSync } from 'fs';
 
 @Injectable()
 export class ProjectFileReportService {
@@ -65,5 +65,26 @@ export class ProjectFileReportService {
       this.fileService.deleteFile(file);
     });
     return this.getReportFolders(projectSlug);
+  }
+
+  async downloadReportFiles(files: string[]) {
+    // Create a temporary folder to store the compressed zip file
+    // This folder will be deleted after the file is downloaded
+    const projectRootFolder =
+      await this.folderPathService.getRootProjectFolderPath();
+    const tempFolder = join(projectRootFolder, 'temp');
+    mkdirSync(tempFolder, { recursive: true });
+
+    const reportZipFile = join(tempFolder, `report.zip`);
+
+    await this.fileService.downloadFiles(files, reportZipFile);
+    const fileStream = createReadStream(reportZipFile);
+
+    fileStream.on('close', () => {
+      // Wait for the stream to close before deleting the folder
+      this.folderService.deleteFolder(tempFolder);
+    });
+
+    return new StreamableFile(fileStream);
   }
 }

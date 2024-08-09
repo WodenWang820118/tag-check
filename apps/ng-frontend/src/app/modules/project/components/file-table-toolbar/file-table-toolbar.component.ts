@@ -47,4 +47,8 @@ export class FileTableToolbarComponent {
       this.isSearchVisible = !this.isSearchVisible;
     }
   }
+
+  downloadSelected() {
+    this.fileTableDataSourceService.downloadSelected();
+  }
 }

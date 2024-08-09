@@ -38,7 +38,7 @@ export class FolderService {
 
   deleteFolder(folderPath: string) {
     try {
-      rmSync(folderPath, { recursive: true });
+      rmSync(folderPath, { recursive: true, force: true });
     } catch (error) {
       Logger.error(error.message, 'FolderService.deleteFolder');
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
