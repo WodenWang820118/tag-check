@@ -14,6 +14,12 @@ export class FolderService {
     return readdirSync(folderPath);
   }
 
+  readFolder(folderPath: string) {
+    return readdirSync(folderPath, {
+      withFileTypes: true,
+    }).filter((dirent) => dirent.isDirectory());
+  }
+
   createFolder(folderPath: string) {
     if (!existsSync(folderPath)) {
       mkdirSync(folderPath);
@@ -32,7 +38,7 @@ export class FolderService {
 
   deleteFolder(folderPath: string) {
     try {
-      rmSync(folderPath, { recursive: true });
+      rmSync(folderPath, { recursive: true, force: true });
     } catch (error) {
       Logger.error(error.message, 'FolderService.deleteFolder');
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
