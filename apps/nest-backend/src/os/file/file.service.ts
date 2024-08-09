@@ -5,11 +5,18 @@ import {
   Logger,
   StreamableFile,
 } from '@nestjs/common';
-import { createReadStream, readFileSync, writeFileSync } from 'fs';
+import {
+  createReadStream,
+  createWriteStream,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'fs';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { join } from 'path';
+import archiver from 'archiver';
 
 @Injectable()
 export class FileService {
@@ -67,6 +74,43 @@ export class FileService {
     }
   }
 
+  downloadFile(filePath: string) {
+    try {
+      return new StreamableFile(createReadStream(filePath));
+    } catch (error) {
+      Logger.error(error.message, 'FileService.downloadReport');
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async downloadFiles(filePaths: string[], outputFilePath: string) {
+    const output = createWriteStream(outputFilePath);
+    const archive = archiver('zip', {});
+
+    output.on('close', () => {
+      console.log(
+        `Archive created successfully. Total bytes: ${archive.pointer()}`
+      );
+    });
+
+    archive.on('warning', (err) => {
+      console.warn('Archive warning:', err);
+    });
+
+    archive.on('error', (err) => {
+      console.error('Archive error:', err);
+    });
+
+    filePaths.forEach((filePath) => {
+      const fileName = filePath.split('\\').at(-1);
+      archive.append(createReadStream(filePath), { name: fileName });
+    });
+
+    archive.pipe(output);
+    // Must await the archive.finalize() to ensure the archive is fully written
+    await archive.finalize();
+  }
+
   async readReport(projectSlug: string, eventId: string, reportName: string) {
     try {
       const reportPath = await this.filePathService.getReportFilePath(
@@ -92,5 +136,14 @@ export class FileService {
       eventId
     );
     this.writeJsonFile(cachePath, data);
+  }
+
+  deleteFile(filePath: string) {
+    try {
+      rmSync(filePath);
+    } catch (error) {
+      Logger.error(error.message, 'FileService.deleteFile');
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

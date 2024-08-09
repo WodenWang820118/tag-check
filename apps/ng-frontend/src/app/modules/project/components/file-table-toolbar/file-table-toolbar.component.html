@@ -1,0 +1,44 @@
+<mat-toolbar class="file-table-toolbar mat-elevation-z8">
+  <button
+    mat-icon-button
+    class="icon"
+    matTooltip="Delete"
+    matTooltipPosition="above"
+    aria-label="Delete"
+    (click)="deleteSelected()"
+  >
+    <mat-icon>delete_outline</mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    class="icon"
+    matTooltip="Download"
+    matTooltipPosition="above"
+    aria-label="Download"
+    (click)="downloadSelected()"
+  >
+    <mat-icon>download</mat-icon>
+  </button>
+
+  <div class="spacer"></div>
+  @if (!isSearchVisible) {
+  <mat-button-toggle-group
+    #group="matButtonToggleGroup"
+    (change)="onToggleChange($event)"
+  >
+    <mat-button-toggle value="search" aria-label="search event">
+      <mat-icon>search</mat-icon>
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+  } @if (isSearchVisible) {
+  <mat-form-field appearance="outline" class="filter">
+    <mat-label>Filter</mat-label>
+    <input
+      matInput
+      (keyup)="applyFilter($event)"
+      placeholder="add_to_cart"
+      #input
+    />
+  </mat-form-field>
+  }
+</mat-toolbar>
