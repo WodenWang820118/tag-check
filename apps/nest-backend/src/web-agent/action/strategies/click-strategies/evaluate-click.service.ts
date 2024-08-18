@@ -30,7 +30,10 @@ export class EvaluateClickService implements ClickOperation {
       ]);
       return true;
     } catch (error) {
-      Logger.error(error.message, 'EvaluteClickService.operate');
+      Logger.error(
+        error,
+        `${EvaluateClickService.name}.${EvaluateClickService.prototype.operate.name}`
+      );
       return false;
     }
   }

@@ -84,8 +84,11 @@ export class ProjectInitializationService {
       this.fileService.writeJsonFile(configFilePath, []);
       this.fileService.writeJsonFile(settingsFilePath, projectSettings);
     } catch (error) {
-      Logger.error(error.message, 'ProjectInitializationService.initProject');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${ProjectInitializationService.name}.${ProjectInitializationService.prototype.initProject.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

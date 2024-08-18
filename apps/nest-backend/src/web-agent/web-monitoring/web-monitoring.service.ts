@@ -47,7 +47,6 @@ export class WebMonitoringService {
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
     const stats = await PCR(options);
-    Logger.log(stats, 'WebMonitoringService.detectGtm: stats');
     const browser = await stats.puppeteer.launch({
       headless: true,
       args: BROWSER_ARGS,
@@ -76,7 +75,10 @@ export class WebMonitoringService {
       await page.goto(url);
       await page.reload({ waitUntil: 'networkidle2' });
     } catch (error) {
-      console.error('Error while navigating:', error);
+      Logger.error(
+        error,
+        `${WebMonitoringService.name}.${WebMonitoringService.prototype.getAllRequests.name}`
+      );
       throw error;
     }
     return await this.requestService.stopRequestCapture(page);

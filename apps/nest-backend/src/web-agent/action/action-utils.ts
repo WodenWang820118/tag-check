@@ -48,7 +48,7 @@ export function getSelectorType(selector: string) {
       return SelectorType.CLASS;
     }
   } catch (error) {
-    Logger.error(error.message, 'SelectorSymbol');
+    Logger.error(error, 'SelectorSymbol');
   }
 }
 

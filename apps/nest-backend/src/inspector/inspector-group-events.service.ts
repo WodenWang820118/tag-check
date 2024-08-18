@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import {
   EcommerceEventValidationStrategy,
   OldGA4EventsValidationStrategy,
@@ -73,14 +73,14 @@ export class InspectorGroupEventsService {
           await page.close();
           return result;
         } catch (error) {
-          Logger.error(error.message, 'inspector.inspectProjectDataLayer');
-          await this.fileService.writeCacheFile(
-            projectName,
-            operation,
-            error.message
+          Logger.error(
+            error,
+            InspectorGroupEventsService.name +
+              InspectorGroupEventsService.prototype.inspectProjectDataLayer.name
           );
+          await this.fileService.writeCacheFile(projectName, operation, error);
           await incognitoContext.close();
-          return { error: error.message };
+          return { error: error };
         }
       });
       // Wait for the batch to complete
@@ -128,7 +128,7 @@ export class InspectorGroupEventsService {
           };
       }
     } catch (error) {
-      throw new HttpException(`${error.message}`, 500);
+      throw new HttpException(`${error}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

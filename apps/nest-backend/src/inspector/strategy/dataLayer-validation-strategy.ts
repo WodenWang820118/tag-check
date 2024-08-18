@@ -24,8 +24,9 @@ export class EcommerceEventValidationStrategy implements ValidationStrategy {
       // If the event is found according to the spec, check the flag
       if (eventObj.event === dataLayerSpec.event) {
         if (!this.ecommerceReset) {
-          console.log(
-            `Error: ecommerce must be reset before firing ${dataLayerSpec.event}.`
+          Logger.warn(
+            `ecommerce must be reset before firing ${dataLayerSpec.event}.`,
+            `${EcommerceEventValidationStrategy.name}.${EcommerceEventValidationStrategy.prototype.validateDataLayer.name}`
           );
           return new ValidationResultDto(
             false,

@@ -38,7 +38,7 @@ export class SingleEventInspectionService {
       });
       Logger.log(
         'Browser launched',
-        'SingleEventInspectionService.inspectSingleEvent'
+        `${SingleEventInspectionService.name}.${SingleEventInspectionService.prototype.inspectSingleEvent.name}`
       );
 
       this.currentPage = (await this.currentBrowser.pages())[0];
@@ -63,12 +63,15 @@ export class SingleEventInspectionService {
       );
     } catch (error) {
       if (error.name === 'AbortError') {
-        Logger.log(
+        Logger.error(
           'Operation was aborted',
-          'SingleEventInspectionService.inspectSingleEvent'
+          `${SingleEventInspectionService.name}.${SingleEventInspectionService.prototype.inspectSingleEvent.name}`
         );
       } else {
-        Logger.error(error, 'SingleEventInspectionService.inspectSingleEvent');
+        Logger.error(
+          error,
+          `${SingleEventInspectionService.name}.${SingleEventInspectionService.prototype.inspectSingleEvent.name}`
+        );
       }
       await this.cleanup();
       throw error;
@@ -78,7 +81,7 @@ export class SingleEventInspectionService {
   stopOperation() {
     Logger.log(
       'Operation stopped',
-      'SingleEventInspectionService.inspectSingleEvent'
+      `${SingleEventInspectionService.name}.${SingleEventInspectionService.prototype.stopOperation.name}`
     );
     if (this.abortController) {
       this.abortController.abort();
@@ -88,18 +91,28 @@ export class SingleEventInspectionService {
   private async cleanup() {
     Logger.log(
       'Cleaning up resources',
-      'SingleEventInspectionService.inspectSingleEvent'
+      `${SingleEventInspectionService.name}.${SingleEventInspectionService.prototype.stopOperation.name}`
     );
     if (this.currentPage) {
       await this.currentPage
         .close()
-        .catch((err) => Logger.error(err, 'Error closing page'));
+        .catch((err) =>
+          Logger.error(
+            'Error closing page' + err,
+            `${SingleEventInspectionService.name}.${SingleEventInspectionService.prototype.stopOperation.name}`
+          )
+        );
       this.currentPage = null;
     }
     if (this.currentBrowser) {
       await this.currentBrowser
         .close()
-        .catch((err) => Logger.error(err, 'Error closing browser'));
+        .catch((err) =>
+          Logger.error(
+            'Error closing browser' + err,
+            `${SingleEventInspectionService.name}.${SingleEventInspectionService.prototype.stopOperation.name}`
+          )
+        );
       this.currentBrowser = null;
     }
   }

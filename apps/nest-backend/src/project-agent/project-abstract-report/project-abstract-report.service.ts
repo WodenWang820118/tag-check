@@ -48,13 +48,12 @@ export class ProjectAbstractReportService {
       }
     } catch (error) {
       Logger.error(
-        error.message,
-        'ProjectAbstractReportService.writeSingleAbstractTestResultJson'
+        error,
+        ProjectAbstractReportService.name +
+          ProjectAbstractReportService.prototype
+            .writeProjectAbstractTestRsultJson.name
       );
-      throw new HttpException(
-        'ProjectAbstractReportService.writeSingleAbstractTestResultJson',
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -98,18 +97,30 @@ export class ProjectAbstractReportService {
         );
 
       if (!existsSync(folderPath)) {
-        throw new HttpException('Report not found', HttpStatus.NOT_FOUND);
+        throw new HttpException(
+          `Report not found: ${folderPath}`,
+          HttpStatus.NOT_FOUND
+        );
       }
 
       this.folderService.deleteFolder(folderPath);
     } catch (error) {
       if (error instanceof HttpException) {
-        throw error;
+        Logger.error(
+          error,
+          `${ProjectAbstractReportService.name}.${ProjectAbstractReportService.prototype.deleteSingleAbstractTestResultFolder.name}`
+        );
+        throw new HttpException(
+          'Failed to delete report',
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
       }
 
-      Logger.log(
-        error.message,
-        'ProjectAbstractReportService.deleteSingleAbstractTestResultFolder'
+      Logger.error(
+        error,
+        ProjectAbstractReportService.name +
+          ProjectAbstractReportService.prototype
+            .deleteSingleAbstractTestResultFolder.name
       );
       throw new HttpException(
         'Failed to delete report',
@@ -145,8 +156,8 @@ export class ProjectAbstractReportService {
       }
 
       Logger.error(
-        error.message,
-        'ProjectAbstractReportService.getSingleAbstractTestResultJson'
+        error,
+        `${ProjectAbstractReportService.name}.${ProjectAbstractReportService.prototype.getSingleAbstractTestResultJson.name}`
       );
       throw new HttpException('Failed to read report', HttpStatus.BAD_REQUEST);
     }

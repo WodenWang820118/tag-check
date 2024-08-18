@@ -33,10 +33,6 @@ export class GroupEventsInspectionService {
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
     const stats = await PCR(options);
-    Logger.log(
-      stats,
-      'WaiterDataLayerGroupEventsService.inspectProject: stats'
-    );
     this.currentBrowser = await stats.puppeteer
       .launch({
         headless: headless === 'true' ? true : false,
@@ -101,24 +97,41 @@ export class GroupEventsInspectionService {
       data.map((item) => item.dataLayerResult)
     );
 
-    Logger.log('All tests are done!', 'WaiterService.inspectProject');
-    Logger.log('Browser is closed!', 'WaiterService.inspectProject');
+    Logger.log(
+      'All tests are done!',
+      `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.inspectProject.name}`
+    );
+    Logger.log(
+      'Browser is closed!',
+      `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.inspectProject.name}`
+    );
     return data;
   }
 
   stopOperation() {
-    Logger.log('Operation stopped', 'waiter.inspectSingleEvent');
+    Logger.log(
+      'Operation stopped',
+      `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.stopOperation.name}`
+    );
     if (this.abortController) {
       this.abortController.abort();
     }
   }
 
   private async cleanup() {
-    Logger.log('Cleaning up resources', 'waiter.inspectSingleEvent');
+    Logger.log(
+      'Cleaning up resources',
+      `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.cleanup.name}`
+    );
     if (this.currentBrowser) {
       await this.currentBrowser
         .close()
-        .catch((err) => Logger.error(err, 'Error closing browser'));
+        .catch((err) =>
+          Logger.error(
+            err,
+            `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.cleanup.name}`
+          )
+        );
       this.currentBrowser = null;
     }
   }

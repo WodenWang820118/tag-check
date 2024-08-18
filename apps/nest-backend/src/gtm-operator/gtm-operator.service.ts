@@ -81,7 +81,7 @@ export class GtmOperatorService {
         { once: true }
       );
 
-      return this.eventInspectionPipelineService.singleEventInspectionRecipe(
+      return await this.eventInspectionPipelineService.singleEventInspectionRecipe(
         this.currentPage,
         projectName,
         testName,
@@ -92,12 +92,15 @@ export class GtmOperatorService {
       );
     } catch (error) {
       if (error.name === 'AbortError') {
-        Logger.log(
+        Logger.error(
           'Operation was aborted',
-          'GtmOperatorService.inspectSingleEventViaGtm'
+          `${GtmOperatorService.name}.${GtmOperatorService.prototype.inspectSingleEventViaGtm.name}`
         );
       } else {
-        Logger.error(error, 'GtmOperatorService.inspectSingleEventViaGtm');
+        Logger.error(
+          error,
+          `${GtmOperatorService.name}.${GtmOperatorService.prototype.inspectSingleEventViaGtm.name}`
+        );
       }
       throw error;
     }
@@ -106,7 +109,7 @@ export class GtmOperatorService {
   async operateGtmPreviewMode(page: Page, gtmUrl: string) {
     Logger.log(
       'Operating GTM preview mode',
-      'GtmOperatorService.operateGtmPreviewMode'
+      `${GtmOperatorService.name}.${GtmOperatorService.prototype.operateGtmPreviewMode.name}`
     );
 
     await page.goto(gtmUrl, { waitUntil: 'networkidle2' });
@@ -129,8 +132,8 @@ export class GtmOperatorService {
     if (encodedUrl) {
       const decodedUrl = decodeURIComponent(encodedUrl);
       Logger.log(
-        new URL(decodedUrl).toString(),
-        'GtmOperatorService.extractBaseUrlFromGtmUrl: decodedUrl'
+        `Decoded URL: ${new URL(decodedUrl).toString()}`,
+        `${GtmOperatorService.name}.${GtmOperatorService.prototype.extractBaseUrlFromGtmUrl.name}`
       );
       return new URL(decodedUrl).toString();
     }
@@ -145,7 +148,10 @@ export class GtmOperatorService {
   }
 
   private async cleanup() {
-    Logger.log('Cleaning up resources', 'GtmOperatorService.cleanup');
+    Logger.log(
+      'Cleaning up resources',
+      `${GtmOperatorService.name}.${GtmOperatorService.prototype.cleanup.name}`
+    );
     if (this.currentBrowser) {
       try {
         // Close all pages
@@ -153,7 +159,10 @@ export class GtmOperatorService {
         await Promise.all(pages.map((page) => page.close()));
         await this.currentBrowser.close();
       } catch (err) {
-        Logger.error(err, 'Error during cleanup');
+        Logger.error(
+          'Error during cleanup' + err,
+          `${GtmOperatorService.name}.${GtmOperatorService.prototype.cleanup.name}`
+        );
       } finally {
         this.currentBrowser = null;
         this.currentPage = null;

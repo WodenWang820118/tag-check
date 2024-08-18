@@ -29,7 +29,10 @@ export class EvaluateHoverService {
       ]);
       return true;
     } catch (error) {
-      Logger.error(error.message, 'EvaluateHoverService.operate');
+      Logger.error(
+        error,
+        `${EvaluateHoverService.name}.${EvaluateHoverService.prototype.operate.name}`
+      );
       return false;
     }
   }

@@ -35,7 +35,7 @@ export class ProjectSettingService {
       return updatedSettings;
     } catch (error) {
       Logger.error('Error updating settings', error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -79,8 +79,11 @@ export class ProjectSettingService {
         },
       }));
     } catch (error) {
-      Logger.error('Error updating settings', error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        'Error updating settings: ' + error,
+        `${ProjectSettingService.name}.${ProjectSettingService.prototype.updateAuthenticationSettings.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -119,22 +122,26 @@ export class ProjectSettingService {
         };
       });
     } catch (error) {
-      Logger.error('Error updating settings', error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        'Error updating settings: ' + error,
+        `${ProjectSettingService.name}.${ProjectSettingService.prototype.updatePreventNavigationEvents.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
   async updateGtmSettings(projectSlug: string, settings: Partial<Setting>) {
-    Logger.log('Updating GTM settings');
-    Logger.log(settings);
     try {
       return this.updateSettings(projectSlug, (currentSettings) => ({
         ...currentSettings,
         ...settings,
       }));
     } catch (error) {
-      Logger.error('Error updating settings', error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        'Error updating settings: ' + error,
+        `${ProjectSettingService.name}.${ProjectSettingService.prototype.updateGtmSettings.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -145,8 +152,11 @@ export class ProjectSettingService {
         ...settings,
       }));
     } catch (error) {
-      Logger.error('Error updating settings', error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        'Error updating settings: ' + error,
+        `${ProjectSettingService.name}.${ProjectSettingService.prototype.updateGeneralSettings.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -163,8 +173,11 @@ export class ProjectSettingService {
         browser: settingBox.browser,
       }));
     } catch (error) {
-      Logger.error('Error updating settings', error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        'Error updating settings: ' + error,
+        `${ProjectSettingService.name}.${ProjectSettingService.prototype.updateBrowserSettings.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -193,8 +206,11 @@ export class ProjectSettingService {
         },
       }));
     } catch (error) {
-      Logger.error('Error updating settings', error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        'Error updating settings: ' + error,
+        `${ProjectSettingService.name}.${ProjectSettingService.prototype.updateApplicationSettings.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

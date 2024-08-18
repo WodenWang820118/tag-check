@@ -1,4 +1,4 @@
-import { Injectable, Logger, HttpException } from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { getSelectorType } from '../action-utils';
 import { ActionHandler, getFirstSelector } from './utils';
@@ -33,12 +33,15 @@ export class HoverHandler implements ActionHandler {
           hoveredSuccessfully = true;
           Logger.log(
             getFirstSelector(selectorArray),
-            'HoverHandler.handleHover'
+            `${HoverHandler.name}.${HoverHandler.prototype.handle.name}`
           );
           break; // Exit the loop as soon as one selector works
         }
       } catch (error) {
-        Logger.error(error.message, 'HoverHandler.handleHover');
+        Logger.error(
+          error,
+          `${HoverHandler.name}.${HoverHandler.prototype.handle.name}`
+        );
       }
     }
 
@@ -46,7 +49,7 @@ export class HoverHandler implements ActionHandler {
       // early exit
       throw new HttpException(
         `Failed to hover. None of the selectors worked for action ${step.target}`,
-        500
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
@@ -68,7 +71,10 @@ export class HoverHandler implements ActionHandler {
         timeout
       );
     } catch (error) {
-      Logger.error(error.message, 'HoverHandler.hoverElement');
+      Logger.error(
+        error,
+        `${HoverHandler.name}.${HoverHandler.prototype.hoverElement.name}`
+      );
     }
   }
 }

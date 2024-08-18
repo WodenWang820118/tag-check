@@ -58,7 +58,7 @@ export class ActionService {
 
       Logger.log(
         `Performing step ${i + 1} of ${operation.steps.length}`,
-        'ActionService.performOperation'
+        `${ActionService.name}.${ActionService.prototype.performOperation.name}`
       );
 
       await this.stepExecutor.executeStep(
@@ -74,7 +74,7 @@ export class ActionService {
 
     Logger.log(
       'Operation performed successfully',
-      'ActionService.performOperation'
+      `${ActionService.name}.${ActionService.prototype.performOperation.name}`
     );
   }
 }

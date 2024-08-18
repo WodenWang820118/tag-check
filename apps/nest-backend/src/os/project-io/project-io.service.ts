@@ -11,15 +11,20 @@ export class ProjectIoService {
   ): Promise<void> {
     try {
       Logger.log(
-        `Compressing project at ${projectFolderPath} to ${outputPath}`
+        `Compressing project at ${projectFolderPath} to ${outputPath}`,
+        ProjectIoService.name + ProjectIoService.prototype.compressProject.name
       );
       const output = createWriteStream(outputPath);
       const archive = archiver('zip', {
         zlib: { level: 9 },
       });
 
-      archive.on('error', function (err) {
-        Logger.log(err);
+      archive.on('error', function (err: any) {
+        Logger.log(
+          err,
+          ProjectIoService.name +
+            ProjectIoService.prototype.compressProject.name
+        );
         throw new HttpException(
           'Failed to compress project',
           HttpStatus.BAD_REQUEST
@@ -34,7 +39,10 @@ export class ProjectIoService {
         throw error;
       }
 
-      Logger.error(error.message);
+      Logger.error(
+        error,
+        ProjectIoService.name + ProjectIoService.prototype.compressProject.name
+      );
       throw new HttpException(
         'Failed to compress project',
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -54,8 +62,11 @@ export class ProjectIoService {
       );
 
       return new Promise((resolve, reject) => {
-        stream.on('error', (error) => {
-          Logger.error(error.message);
+        stream.on('error', (error: any) => {
+          Logger.error(
+            error,
+            `${ProjectIoService.name}.${ProjectIoService.prototype.unzipProject.name}`
+          );
           reject(
             new HttpException(
               'Failed to unzip project',
@@ -69,7 +80,10 @@ export class ProjectIoService {
         });
       });
     } catch (error) {
-      Logger.error(error.message);
+      Logger.error(
+        error,
+        `${ProjectIoService.name}.${ProjectIoService.prototype.unzipProject.name}`
+      );
       throw new HttpException(
         'Failed to unzip project',
         HttpStatus.INTERNAL_SERVER_ERROR

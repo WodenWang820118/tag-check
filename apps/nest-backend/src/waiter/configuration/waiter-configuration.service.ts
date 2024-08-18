@@ -13,7 +13,7 @@ export class WaiterConfigurationService {
     const value = (await this.configurationService.findAll()).find(
       (item) => item.title === name
     )?.value;
-    return { value } || {}; // Wrap the value in an object
+    return { value }; // Wrap the value in an object
   }
 
   async resetConfiguration(name: string) {

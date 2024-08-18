@@ -1,8 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import {
-  StrictDataLayerEvent,
-  ValidationStrategy,
-} from '@utils';
+import { StrictDataLayerEvent, ValidationStrategy } from '@utils';
 import {
   EcommerceEventValidationStrategy,
   OldGA4EventsValidationStrategy,
@@ -51,7 +48,7 @@ export class InspectorUtilsService {
           };
       }
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

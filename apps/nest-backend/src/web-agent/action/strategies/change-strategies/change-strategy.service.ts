@@ -32,9 +32,9 @@ export class ChangeStrategyService implements ChangeStrategy {
         timeout
       );
     } catch (error) {
-      Logger.log(
-        `Error: ${error.message}`,
-        'ChangeStrategyService.changeElement'
+      Logger.error(
+        error,
+        `${ChangeStrategyService.name}.${ChangeStrategyService.prototype.changeElement.name}`
       );
     }
   }

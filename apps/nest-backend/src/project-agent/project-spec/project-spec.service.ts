@@ -85,7 +85,7 @@ export class ProjectSpecService {
   }
 
   private handleError(error: Error, methodName: string): never {
-    Logger.error(`${error.message}`, `ProjectSpecService.${methodName}`);
-    throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    Logger.error(`${error}`, `${ProjectSpecService.name}.${methodName}`);
+    throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

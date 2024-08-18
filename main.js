@@ -300,10 +300,10 @@ app.whenReady().then(async () => {
     try {
       if (await checkIfPortIsOpen(urls, 20, 2000)) createWindow();
     } catch (error) {
-      console.error(error.message);
+      console.error(error);
       writePath(
         path.join(getRootBackendFolderPath(), 'portErrorLog.txt'),
-        error.message
+        error
       );
     }
   });
@@ -315,7 +315,7 @@ app.whenReady().then(async () => {
   server.on('error', (error) => {
     writePath(
       path.join(getRootBackendFolderPath(), 'childErrorLog.txt'),
-      error.message
+      error
     );
     stopBackend(server);
   });

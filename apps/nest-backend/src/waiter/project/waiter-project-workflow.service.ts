@@ -23,7 +23,7 @@ export class WaiterProjectWorkFlowService {
       if (configurations.length === 0) {
         Logger.log(
           'Creating initial root project folder path',
-          'WaiterProjectWorkFlowService.setRootProjectFolder'
+          `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setRootProjectFolder.name}`
         );
         return await this.configurationService.create({
           id: uuidv4(),
@@ -42,7 +42,7 @@ export class WaiterProjectWorkFlowService {
       if (existingConfig) {
         Logger.log(
           'Updating existing root project folder path',
-          'WaiterProjectWorkFlowService'
+          `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setRootProjectFolder.name}`
         );
         return this.configurationService.update(existingConfig.id, {
           title: CONFIG_ROOT_PATH,
@@ -63,7 +63,7 @@ export class WaiterProjectWorkFlowService {
       });
       Logger.log(
         'Set root project folder path!',
-        'WaiterProjectWorkFlowService.setRootProjectFolder'
+        `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setRootProjectFolder.name}`
       );
     }
   }
@@ -81,7 +81,7 @@ export class WaiterProjectWorkFlowService {
       if (existingConfig) {
         Logger.log(
           'Current project folder existed! Update current project folder path',
-          'WaiterProjectWorkFlowService.setProject'
+          `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setProject.name}`
         );
 
         await this.configurationService.update(existingConfig.id, {
@@ -114,8 +114,11 @@ export class WaiterProjectWorkFlowService {
         );
       }
     } catch (error) {
-      Logger.error(error, 'WaiterService.setProject');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.initProject.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -133,7 +136,7 @@ export class WaiterProjectWorkFlowService {
       if (existingConfig) {
         Logger.log(
           'Current project folder existed! Update current project folder path',
-          'WaiterProjectWorkFlowService.setProject'
+          `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setProject.name}`
         );
 
         return this.configurationService.update(existingConfig.id, {
@@ -143,7 +146,7 @@ export class WaiterProjectWorkFlowService {
       } else {
         Logger.log(
           'Current project folder not existed! Create current project folder path',
-          'WaiterProjectWorkFlowService.setProject'
+          `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setProject.name}`
         );
 
         return this.configurationService.create({
@@ -156,8 +159,11 @@ export class WaiterProjectWorkFlowService {
         });
       }
     } catch (error) {
-      Logger.error(error, 'WaiterProjectWorkFlowService.setProject');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setProject.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

@@ -31,8 +31,11 @@ export class FolderService {
       const files = readdirSync(dirPath);
       return files.filter((file) => path.extname(file) === '.json');
     } catch (error) {
-      Logger.error(error.message, 'FolderService.getJsonFilesFromDir');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        FolderService.name + FolderService.prototype.getJsonFilesFromDir.name
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -40,8 +43,11 @@ export class FolderService {
     try {
       rmSync(folderPath, { recursive: true, force: true });
     } catch (error) {
-      Logger.error(error.message, 'FolderService.deleteFolder');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        FolderService.name + FolderService.prototype.deleteFolder.name
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
