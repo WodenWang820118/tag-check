@@ -52,9 +52,18 @@ export class WaiterProjectIoController {
     @Res() response: Response
   ) {
     try {
-      Logger.log('called importProject');
-      Logger.log('file', file);
-      Logger.log('file.path', file.path);
+      Logger.log(
+        'called importProject',
+        `${WaiterProjectIoController.name}.${WaiterProjectIoController.prototype.importProject.name}`
+      );
+      Logger.log(
+        'file: ' + file,
+        `${WaiterProjectIoController.name}.${WaiterProjectIoController.prototype.importProject.name}`
+      );
+      Logger.log(
+        'file.path: ' + file.path,
+        `${WaiterProjectIoController.name}.${WaiterProjectIoController.prototype.importProject.name}`
+      );
       const rootProjectPath =
         await this.configurationSerivce.getRootProjectPath();
       await this.projectIoFacadeService.importProject(
@@ -64,8 +73,11 @@ export class WaiterProjectIoController {
       );
       return response;
     } catch (error) {
-      Logger.error(error.message, 'WaiterProjectIoController.importProject');
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      Logger.error(
+        error,
+        `${WaiterProjectIoController.name}.${WaiterProjectIoController.prototype.importProject.name}`
+      );
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
 

@@ -21,7 +21,10 @@ export class RequestInterceptor {
         // small delay will cause the dataLayer to be different
         // it's unknown why, but instead of using webMonitoringService.updateSelfDataLayer
         // we use updateSelfDataLayerAlgorithm to update the dataLayer manually
-        Logger.log(request.url(), 'RequestInterceptor');
+        Logger.log(
+          request.url(),
+          `${RequestInterceptor.name}.${RequestInterceptor.prototype.setupInterception.name}`
+        );
         const latestDataLayer = await page.evaluate(() => {
           return window.dataLayer;
         });

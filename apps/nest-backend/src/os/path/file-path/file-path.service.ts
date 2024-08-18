@@ -29,8 +29,11 @@ export class FilePathService {
       );
       return filePath;
     } catch (error) {
-      Logger.error(error.message, 'FilePathService.getOperationPath');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${FilePathService.name}.${FilePathService.prototype.getOperationFilePath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -42,8 +45,11 @@ export class FilePathService {
         SPECS
       );
     } catch (error) {
-      Logger.error(error.message, 'FilePathService.getProjectConfigPath');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${FilePathService.name}.${FilePathService.prototype.getProjectConfigFilePath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -55,8 +61,11 @@ export class FilePathService {
         SETTINGS
       );
     } catch (error) {
-      Logger.error(error.message, 'FilePathService.getProjectSettingPath');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${FilePathService.name}.${FilePathService.prototype.getProjectSettingFilePath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -68,8 +77,11 @@ export class FilePathService {
         META_DATA
       );
     } catch (error) {
-      Logger.error(error.message, 'FilePathService.getProjectSettingPath');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${FilePathService.name}.${FilePathService.prototype.getProjectMetaDataFilePath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -83,8 +95,11 @@ export class FilePathService {
         await this.folderPathService.getReportSavingFolderPath(projectSlug);
       return path.join(reportSavingFolder, eventId, `${reportName}`);
     } catch (error) {
-      Logger.error(error.message, 'FilePathService.getReportFilePath');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${FilePathService.name}.${FilePathService.prototype.getReportFilePath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -96,8 +111,11 @@ export class FilePathService {
         `${extractEventNameFromId(eventId)} - result cache.json`
       );
     } catch (error) {
-      Logger.error(error.message, 'FilePathService.getCacheFilePath');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${FilePathService.name}.${FilePathService.prototype.getCacheFilePath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -112,8 +130,11 @@ export class FilePathService {
         `${extractEventNameFromId(eventId)}.png`
       );
     } catch (error) {
-      Logger.error(error.message, 'FilePathService.getImagePath');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${FilePathService.name}.${FilePathService.prototype.getImageFilePath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -126,10 +147,10 @@ export class FilePathService {
       );
     } catch (error) {
       Logger.error(
-        error.message,
-        'FilePathService.getInspectionResultFilePath'
+        error,
+        `${FilePathService.name}.${FilePathService.prototype.getInspectionResultFilePath.name}`
       );
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

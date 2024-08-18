@@ -19,7 +19,10 @@ export class ClickStrategyService {
     useNormalClick: boolean,
     timeout = 10000
   ): Promise<boolean> {
-    Logger.log(`selector: ${selector}`, 'ClickStrategyService.clickElement');
+    Logger.log(
+      `selector: ${selector}`,
+      `${ClickStrategyService.name}.${ClickStrategyService.prototype.clickElement.name}`
+    );
     try {
       if (useNormalClick) {
         return await this.attemptClick(
@@ -43,9 +46,9 @@ export class ClickStrategyService {
         );
       }
     } catch (error) {
-      Logger.log(
-        `Failed to click element with selector: ${selector}`,
-        'CSSClickStrategy.clickElement'
+      Logger.error(
+        error,
+        `${ClickStrategyService.name}.${ClickStrategyService.prototype.clickElement.name}`
       );
     }
   }

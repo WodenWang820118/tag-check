@@ -50,11 +50,14 @@ export class ProjectIoFacadeService {
       return new StreamableFile(fileStream);
     } catch (error) {
       if (error instanceof HttpException) {
-        throw error;
+        Logger.error(
+          error,
+          `${ProjectIoFacadeService.name}.${ProjectIoFacadeService.prototype.exportProject.name}`
+        );
+        throw new HttpException(error, HttpStatus.BAD_REQUEST);
       }
 
-      Logger.error(error.message, 'ProjectIoFacadeService.exportProject');
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      throw error;
     }
   }
 

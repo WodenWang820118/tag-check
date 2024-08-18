@@ -30,8 +30,11 @@ export class FileService {
     try {
       return JSON.parse(readFileSync(`${filePath}`, 'utf8'));
     } catch (error) {
-      Logger.error(error.message, 'FileService.readJsonFile');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${FileService.name}.${FileService.prototype.readJsonFile.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -46,8 +49,11 @@ export class FileService {
         file.endsWith('.json');
       });
     } catch (error) {
-      Logger.error(error.message, 'FileService.getOperationJsonByProject');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${FileService.name}.${FileService.prototype.getOperationJsonByProject.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -62,15 +68,21 @@ export class FileService {
       const regex = new RegExp(`${eventId}.*\\.xlsx$`, 'i');
       const files =
         this.folderService.readFolderFileNames(inspectionResultPath);
-      Logger.log(`Files: ${files}`);
+      Logger.log(
+        `Files: ${files}`,
+        `${FileService.name}.${FileService.prototype.getEventReport.name}`
+      );
       const filteredFiles = files.filter((file) => regex.test(file));
 
       const filePath = join(inspectionResultPath, filteredFiles[0]);
 
       return new StreamableFile(createReadStream(filePath));
     } catch (error) {
-      Logger.error(error.message, 'FileService.getEventReport');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${FileService.name}.${FileService.prototype.getEventReport.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -78,8 +90,11 @@ export class FileService {
     try {
       return new StreamableFile(createReadStream(filePath));
     } catch (error) {
-      Logger.error(error.message, 'FileService.downloadReport');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${FileService.name}.${FileService.prototype.downloadFile.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -88,17 +103,24 @@ export class FileService {
     const archive = archiver('zip', {});
 
     output.on('close', () => {
-      console.log(
-        `Archive created successfully. Total bytes: ${archive.pointer()}`
+      Logger.log(
+        `Archive created successfully. Total bytes: ${archive.pointer()}`,
+        `${FileService.name}.${FileService.prototype.downloadFiles.name}`
       );
     });
 
-    archive.on('warning', (err) => {
-      console.warn('Archive warning:', err);
+    archive.on('warning', (err: any) => {
+      Logger.warn(
+        'Archive warning: ' + err,
+        `${FileService.name}.${FileService.prototype.downloadFiles.name}`
+      );
     });
 
-    archive.on('error', (err) => {
-      console.error('Archive error:', err);
+    archive.on('error', (err: any) => {
+      Logger.error(
+        'Archive error: ' + err,
+        `${FileService.name}.${FileService.prototype.downloadFiles.name}`
+      );
     });
 
     filePaths.forEach((filePath) => {
@@ -121,8 +143,11 @@ export class FileService {
 
       return new StreamableFile(createReadStream(reportPath));
     } catch (error) {
-      Logger.error(error.message, 'FileService.readReport');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${FileService.name}.${FileService.prototype.readReport.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -142,8 +167,11 @@ export class FileService {
     try {
       rmSync(filePath);
     } catch (error) {
-      Logger.error(error.message, 'FileService.deleteFile');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${FileService.name}.${FileService.prototype.deleteFile.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

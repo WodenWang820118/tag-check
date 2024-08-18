@@ -60,9 +60,13 @@ export class XlsxReportSingleEventService {
             ext: { width: 100, height: 50 },
           });
         } catch (error) {
-          Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
+          Logger.error(
+            error,
+            XlsxReportSingleEventService.name +
+              XlsxReportSingleEventService.prototype.writeXlsxFile.name
+          );
           throw new HttpException(
-            `An error occurred while writing an image: ${error.message}`,
+            `An error occurred while writing an image: ${error}`,
             HttpStatus.INTERNAL_SERVER_ERROR
           );
         }
@@ -86,14 +90,18 @@ export class XlsxReportSingleEventService {
             });
           } catch (error) {
             if (error instanceof HttpException) {
+              Logger.error(
+                error,
+                `${XlsxReportSingleEventService.name}.${XlsxReportSingleEventService.prototype.writeXlsxFile.name}`
+              );
               throw error;
             }
 
-            Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
-            throw new HttpException(
-              error.message,
-              HttpStatus.INTERNAL_SERVER_ERROR
+            Logger.error(
+              error,
+              `${XlsxReportSingleEventService.name}.${XlsxReportSingleEventService.prototype.writeXlsxFile.name}`
             );
+            throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
           }
         }
       }
@@ -106,8 +114,11 @@ export class XlsxReportSingleEventService {
       }
       await workbook.xlsx.writeFile(filePath);
     } catch (error) {
-      Logger.error(error.message, 'XlsxReportService.writeXlsxFile');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${XlsxReportSingleEventService.name}.${XlsxReportSingleEventService.prototype.writeXlsxFile.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

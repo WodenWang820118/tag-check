@@ -43,7 +43,10 @@ export class DataLayerService {
       });
       await this.updateSelfDataLayerAlgorithm(dataLayer, projectName, eventId);
     } catch (error) {
-      Logger.error(error.message, 'DataLayerService.updateSelfDataLayer'); // Log the actual error message for debugging.
+      Logger.error(
+        error,
+        `${DataLayerService.name}.${DataLayerService.prototype.updateSelfDataLayer.name}`
+      ); // Log the actual error message for debugging.
     }
   }
 
@@ -81,7 +84,10 @@ export class DataLayerService {
 
       this.fileService.writeJsonFile(myDataLayerFile, myDataLayer);
     } catch (error) {
-      Logger.error(`Error while updating self data layer: ${error.message}`);
+      Logger.error(
+        error,
+        `${DataLayerService.name}.${DataLayerService.prototype.updateSelfDataLayerAlgorithm.name}`
+      ); // Log the actual error message for debugging.
     }
   }
 

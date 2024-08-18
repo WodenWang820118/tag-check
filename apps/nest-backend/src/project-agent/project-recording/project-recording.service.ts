@@ -47,14 +47,14 @@ export class ProjectRecordingService {
       };
     } catch (error) {
       if (error instanceof HttpException) {
-        throw error;
+        Logger.error(
+          error,
+          `${ProjectRecordingService.name}.${ProjectRecordingService.prototype.getProjectRecordings.name}`
+        );
+        throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
       }
 
-      Logger.error(
-        error.message,
-        'ProjectRecordingService.getProjectRecordings'
-      );
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw error;
     }
   }
 
@@ -65,11 +65,8 @@ export class ProjectRecordingService {
       );
       return fileNames.map((fileName) => fileName.replace('.json', ''));
     } catch (error) {
-      Logger.error(
-        error.message,
-        'ProjectRecordingService.getProjectRecordings'
-      );
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(error, 'ProjectRecordingService.getProjectRecordings');
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -88,11 +85,8 @@ export class ProjectRecordingService {
         throw error;
       }
 
-      Logger.error(
-        error.message,
-        'ProjectRecordingService.getRecordingDetails'
-      );
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(error, 'ProjectRecordingService.getRecordingDetails');
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -110,10 +104,13 @@ export class ProjectRecordingService {
       this.fileService.writeJsonFile(recordingPath, recording);
     } catch (error) {
       if (error instanceof HttpException) {
-        throw error;
+        Logger.error(
+          error,
+          `${ProjectRecordingService.name}.${ProjectRecordingService.prototype.addRecording.name}`
+        );
+        throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
       }
-      Logger.error(error.message, 'ProjectRecordingService.addRecording');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw error;
     }
   }
 
@@ -131,10 +128,13 @@ export class ProjectRecordingService {
       this.fileService.writeJsonFile(recordingPath, recording);
     } catch (error) {
       if (error instanceof HttpException) {
-        throw error;
+        Logger.error(
+          error,
+          `${ProjectRecordingService.name}.${ProjectRecordingService.prototype.updateRecording.name}`
+        );
+        throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
       }
-      Logger.error(error.message, 'ProjectRecordingService.updateRecording');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw error;
     }
   }
 }

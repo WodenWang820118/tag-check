@@ -27,7 +27,10 @@ export async function handleNavigationIfNeeded(
         timeout: delay,
       });
     } catch (error) {
-      Logger.log('No navigation needed', 'StepExecutor.executeStep');
+      Logger.log(
+        'No navigation needed',
+        `${this.name}.handleNavigationIfNeeded`
+      );
     }
   }
   await sleep(1000); // Necessary delay for the website to update
@@ -56,12 +59,15 @@ export async function handleNavigate(
       await page.evaluate((appLocalStorage) => {
         for (const setting of appLocalStorage.data) {
           // Correctly access the value property of each setting object
-          console.log(setting, 'StepExecutor.handleNavigate - setting');
+          Logger.log(setting, `${this.name}`); // Assuming you have a way to log from here
           const value =
             typeof setting.value === 'object'
               ? JSON.stringify(setting.value)
               : setting.value;
-          console.log(`Setting localStorage ${setting.key}=${value}`); // Assuming you have a way to log from here
+          Logger.log(
+            `Setting localStorage ${setting.key}=${value}`,
+            `${this.name}`
+          ); // Assuming you have a way to log from here
           localStorage.setItem(setting.key, value);
         }
       }, application.localStorage); // Pass application.localStorage as an argument to the evaluate function
@@ -84,15 +90,15 @@ export async function handleNavigate(
       // Reload the page with the final URL to apply localStorage and cookies
       Logger.log(
         `Reload the page with the final URL ${finalUrl}`,
-        'StepExecutor.handleNavigate'
+        `${this.name}`
       );
       await page.goto(finalUrl);
       await sleep(1000); // Necessary delay for the website to update
       state.isFirstNavigation = false;
     }
   } catch (error) {
-    Logger.error(error.message, 'StepExecutor.handleNavigate');
-    throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    Logger.error(error, `${this.name}.handleNavigate`);
+    throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -114,19 +120,13 @@ export async function handleWaitForElement(
         }),
       ]);
 
-      Logger.log(`${selector} exists`, 'StepExecutor.handleWaitForElement');
+      Logger.log(`${selector} exists`, `${this.name}`);
       return;
     } catch (error) {
-      Logger.error(
-        `${selector} does not exist`,
-        'StepExecutor.handleWaitForElement'
-      );
+      Logger.error(`${selector} does not exist`, `${this.name}`);
       // close the page if stop processing
       await page.close();
-      throw new HttpException(
-        `${error.message}, Stop processing.`,
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

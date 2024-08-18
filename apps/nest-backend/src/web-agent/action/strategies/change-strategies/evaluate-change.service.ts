@@ -39,7 +39,10 @@ export class EvaluateChangeService implements ChangeOperation {
       ]);
       return true;
     } catch (error) {
-      Logger.error(error.message, 'EvaluateChangeService.operate');
+      Logger.error(
+        error,
+        `${EvaluateChangeService.name}.${EvaluateChangeService.prototype.operate.name}`
+      );
       return false;
     }
   }

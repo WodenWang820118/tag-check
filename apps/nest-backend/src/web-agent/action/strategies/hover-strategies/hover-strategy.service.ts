@@ -29,9 +29,9 @@ export class HoverStrategyService {
         timeout
       );
     } catch (error) {
-      Logger.log(
-        `Failed to hover element with selector: ${selector}`,
-        'HoverStrategyService'
+      Logger.error(
+        error,
+        `${HoverStrategyService.name}.${HoverStrategyService.prototype.hoverElement.name}`
       );
     }
   }
@@ -52,7 +52,10 @@ export class HoverStrategyService {
     ) => Promise<boolean>,
     timeout = 10000
   ): Promise<boolean> {
-    Logger.log(`selector: ${selector}`, 'HoverStrategyService.attemptHover');
+    Logger.log(
+      `selector: ${selector}`,
+      `${HoverStrategyService.name}.${HoverStrategyService.prototype.hoverElement.name}`
+    );
 
     const serviceInstance =
       hoverMethod === this.pageHoverService.operate

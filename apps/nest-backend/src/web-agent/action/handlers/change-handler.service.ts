@@ -1,4 +1,4 @@
-import { Injectable, HttpException, Logger } from '@nestjs/common';
+import { Injectable, HttpException, Logger, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { getSelectorType } from '../action-utils';
 import { ActionHandler, getFirstSelector } from './utils';
@@ -38,8 +38,8 @@ export class ChangeHandler implements ActionHandler {
         }
       } catch (error) {
         throw new HttpException(
-          `Failed to change value with selector ${selector}. Reason: ${error.message}`,
-          500
+          `Failed to change value with selector ${selector}. Reason: ${error}`,
+          HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
     }
@@ -64,7 +64,10 @@ export class ChangeHandler implements ActionHandler {
         timeout
       );
     } catch (error) {
-      Logger.error(error.message, 'ChangeHandler.changeElement');
+      Logger.error(
+        error,
+        `${ChangeHandler.name}.${ChangeHandler.prototype.changeElement.name}`
+      );
     }
   }
 }

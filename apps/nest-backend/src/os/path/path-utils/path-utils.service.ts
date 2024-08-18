@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import path from 'path';
 import { ConfigurationService } from '../../../configuration/configuration.service';
 
@@ -21,12 +21,18 @@ export class PathUtilsService {
         folderName,
         fileName || ''
       );
-      Logger.log('file path ', outputPath, 'PathUtilsService.buildFilePath');
+      Logger.log(
+        'file pathL ' + outputPath,
+        `${PathUtilsService.name}.${PathUtilsService.prototype.buildFilePath.name}`
+      );
 
       return outputPath;
     } catch (error) {
-      Logger.error(error, 'PathUtilsService.buildFilePath');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${PathUtilsService.name}.${PathUtilsService.prototype.buildFilePath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -37,15 +43,17 @@ export class PathUtilsService {
 
       const outputPath = path.join(dbRootProjectPath, projectSlug, folderName);
       Logger.log(
-        'folder path ',
-        outputPath,
-        'PathUtilsService.buildFolderPath'
+        'folder path: ' + outputPath,
+        `${PathUtilsService.name}.${PathUtilsService.prototype.buildFolderPath.name}`
       );
 
       return outputPath;
     } catch (error) {
-      Logger.error(error, 'PathUtilsService.buildFolderPath');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${PathUtilsService.name}.${PathUtilsService.prototype.buildFolderPath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ActionService } from './action/action.service';
 import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
 import { Page, Credentials } from 'puppeteer';
@@ -34,22 +34,25 @@ export class WebAgentUtilsService {
     const eventName = extractEventNameFromId(eventId);
     // 2) capture the request if needed
     if (captureRequest) {
-      Logger.log('capturing request', 'WebAgentUtils.performTest');
+      Logger.log(
+        'Capturing request',
+        `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
+      );
       page.on('request', (interceptedRequest) => {
         if (
           interceptedRequest.url().includes(`en=${eventName}`) &&
           interceptedRequest.url().includes(`tid=${measurementId}`)
         ) {
           Logger.log(
-            interceptedRequest.url(),
-            'WebAgentUtils.performTest: request captured'
+            `Request captured: ${interceptedRequest.url()}`,
+            `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
           );
           eventRequest = interceptedRequest.url();
           page.off('request');
         } else {
           Logger.log(
-            interceptedRequest.url(),
-            'WebAgentUtils.performTest: monitoring request'
+            `Request not captured: ${interceptedRequest.url()}`,
+            `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
           );
         }
       });
@@ -70,7 +73,10 @@ export class WebAgentUtilsService {
           timeout: 10000,
         });
       } catch (error) {
-        Logger.log('no navigation needed', 'WebAgentUtils.performTest');
+        Logger.log(
+          'No navigation needed',
+          `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
+        );
       }
       await this.dataLayerService.updateSelfDataLayer(
         page,
@@ -84,15 +90,21 @@ export class WebAgentUtilsService {
 
       const destinationUrl = page.url();
 
-      Logger.log('test completed', 'WebAgentUtils.performTest');
+      Logger.log(
+        'Test completed',
+        `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
+      );
       return {
         dataLayer,
         eventRequest,
         destinationUrl,
       };
     } catch (error) {
-      Logger.error(error.message, 'WebAgent.performTest');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
+      );
+      HttpStatus.INTERNAL_SERVER_ERROR;
     }
   }
 }

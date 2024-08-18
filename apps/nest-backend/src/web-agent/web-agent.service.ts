@@ -41,7 +41,6 @@ export class WebAgentService {
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
     const stats = await PCR(options);
-    Logger.log(stats, 'WebAgentService.fetchDataLayer: stats');
     const browser = await stats.puppeteer.launch({
       headless: true,
       args: BROWSER_ARGS,
@@ -110,7 +109,10 @@ export class WebAgentService {
   }
 
   private async cleanup() {
-    Logger.log('Cleaning up resources', 'gtmOperatorService');
+    Logger.log(
+      'Cleaning up resources',
+      `${WebAgentService.name}.${WebAgentService.prototype.cleanup.name}`
+    );
     if (this.currentBrowser) {
       try {
         // Close all pages
@@ -118,7 +120,10 @@ export class WebAgentService {
         await Promise.all(pages.map((page) => page.close()));
         await this.currentBrowser.close();
       } catch (err) {
-        Logger.error(err, 'Error during cleanup');
+        Logger.error(
+          err,
+          `${WebAgentService.name}.${WebAgentService.prototype.cleanup.name}`
+        );
       } finally {
         this.currentBrowser = null;
         this.currentPage = null;

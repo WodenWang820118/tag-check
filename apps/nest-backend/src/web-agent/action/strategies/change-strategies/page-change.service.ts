@@ -23,7 +23,10 @@ export class PageChangeService implements ChangeOperation {
 
       if (isSelect) {
         // If it's a select element, use page.select() to change its value
-        Logger.log('Select an element', 'PageChangeStrategy.operate');
+        Logger.log(
+          'Select an element',
+          `${PageChangeService.name}.${PageChangeService.prototype.operate.name}`
+        );
         await Promise.race([
           page.select(selector, value),
           new Promise((_, reject) =>
@@ -32,7 +35,10 @@ export class PageChangeService implements ChangeOperation {
         ]);
       } else {
         // Otherwise, use page.type() to type the value
-        Logger.log('Typing the input element', 'PageChangeStrategy.operate');
+        Logger.log(
+          'Typing the input element',
+          `${PageChangeService.name}.${PageChangeService.prototype.operate.name}`
+        );
         await Promise.race([
           page.type(selector, value),
           new Promise((_, reject) =>
@@ -43,7 +49,10 @@ export class PageChangeService implements ChangeOperation {
 
       return true;
     } catch (error) {
-      Logger.error(error.message, 'PageChangeService.operate');
+      Logger.error(
+        error,
+        `${PageChangeService.name}.${PageChangeService.prototype.operate.name}`
+      );
       return false;
     }
   }

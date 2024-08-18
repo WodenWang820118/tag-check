@@ -74,7 +74,10 @@ export class WaiterReportController {
     @Param('eventId') eventId: string,
     @Body() report: IReportDetails
   ) {
-    Logger.log('updateReport', report);
+    Logger.log(
+      'updateReport: ' + report,
+      `${WaiterReportController.name}.${WaiterReportController.prototype.updateReport.name}`
+    );
     return await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
       projectSlug,
       eventId,

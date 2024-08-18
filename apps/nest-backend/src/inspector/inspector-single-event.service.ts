@@ -74,13 +74,13 @@ export class InspectorSingleEventService {
 
           Logger.log(
             dataLayerResult,
-            'InspectorSingleEventService.inspectDataLayer'
+            `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
           );
 
           const destinationUrl = result.destinationUrl;
           Logger.log(
             destinationUrl,
-            'InspectorSingleEventService.inspectDataLayer'
+            `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
           );
           await this.fileService.writeCacheFile(projectName, eventId, result);
           await page.screenshot({
@@ -90,7 +90,7 @@ export class InspectorSingleEventService {
           if (headless === 'true') await page.close();
           Logger.log(
             'Browser is closed!',
-            'InspectorSingleEventService.inspectDataLayer'
+            `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
           );
           return {
             dataLayerResult,
@@ -150,10 +150,11 @@ export class InspectorSingleEventService {
       }
     } catch (error) {
       Logger.error(
-        error.message,
-        'InspectorSingleEventService.inspectDataLayer'
+        error,
+        InspectorSingleEventService.name +
+          InspectorSingleEventService.prototype.inspectDataLayer.name
       );
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

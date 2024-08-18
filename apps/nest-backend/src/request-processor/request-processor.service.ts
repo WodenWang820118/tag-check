@@ -101,7 +101,10 @@ export class RequestProcessorService {
       delete updatedDataLayer.currency;
     }
 
-    Logger.log(updatedDataLayer, 'recomposeGA4ECEvent: dataLayer');
+    Logger.log(
+      `recomposeGA4ECEvent-dataLayer${updatedDataLayer}`,
+      `${RequestProcessorService.name}.${RequestProcessorService.prototype.recomposeGA4ECEvent.name}`
+    );
     return updatedDataLayer;
   }
 

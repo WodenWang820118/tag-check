@@ -28,7 +28,10 @@ export class ProjectReportService {
         reports: reports,
       };
     } catch (error) {
-      Logger.error(error);
+      Logger.error(
+        error,
+        `${ProjectReportService.name}.${ProjectReportService.prototype.getProjectEventReports.name}`
+      );
       throw new HttpException(
         'Failed to get project event reports',
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -56,7 +59,10 @@ export class ProjectReportService {
         eventId: eventId,
       };
     } catch (error) {
-      Logger.log(error.message, 'ProjectReportService.buildReport');
+      Logger.error(
+        error,
+        `${ProjectReportService.name}.${ProjectReportService.prototype.buildEventReport.name}`
+      );
       throw new HttpException(
         'Failed to build report',
         HttpStatus.INTERNAL_SERVER_ERROR

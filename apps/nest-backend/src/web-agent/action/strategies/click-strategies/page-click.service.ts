@@ -21,7 +21,7 @@ export class PageClickService implements ClickOperation {
       ]);
       return true;
     } catch (error) {
-      Logger.error(error.message, 'PageClickService.operate');
+      Logger.error(error, 'PageClickService.operate');
       return false;
     }
   }

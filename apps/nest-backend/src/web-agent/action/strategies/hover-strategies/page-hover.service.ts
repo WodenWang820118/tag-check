@@ -20,7 +20,10 @@ export class PageHoverService {
       ]);
       return true;
     } catch (error) {
-      Logger.error(error.message, 'PageHoverService.operate');
+      Logger.error(
+        error,
+        `${PageHoverService.name}.${PageHoverService.prototype.operate.name}`
+      );
       return false;
     }
   }

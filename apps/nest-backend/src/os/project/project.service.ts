@@ -19,8 +19,11 @@ export class ProjectService {
         await this.filePathService.getProjectSettingFilePath(projectSlug);
       return this.fileService.readJsonFile(settingsFilePath);
     } catch (error) {
-      Logger.error(error.message, 'ProjectService.getProjectSettings');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${ProjectService.name}.${ProjectService.prototype.getProjectSettings.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -45,8 +48,11 @@ export class ProjectService {
       // Logger.log(projectsAll, 'ProjectService.getProjects');
       return projectsAll || [];
     } catch (error) {
-      Logger.error(error.message, 'ProjectService.getProjects');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${ProjectService.name}.${ProjectService.prototype.getProjectsMetadata.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -65,8 +71,11 @@ export class ProjectService {
       );
       return metaData;
     } catch (error) {
-      Logger.error(error.message, 'ProjectService.getProject');
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      Logger.error(
+        error,
+        `${ProjectService.name}.${ProjectService.prototype.getProjectMetadata.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

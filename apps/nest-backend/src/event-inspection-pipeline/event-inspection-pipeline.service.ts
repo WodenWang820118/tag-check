@@ -39,7 +39,7 @@ export class EventInspectionPipelineService {
 
       Logger.log(
         'DataLayer inspected',
-        'EventInspectionPipelineService.singleEventInspectionRecipe'
+        `${EventInspectionPipelineService.name}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
 
       const data = [
@@ -53,7 +53,7 @@ export class EventInspectionPipelineService {
 
       Logger.log(
         'Data constructed',
-        'EventInspectionPipelineService.singleEventInspectionRecipe'
+        `${EventInspectionPipelineService.name}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
 
       const timestamp = getCurrentTimestamp();
@@ -91,10 +91,10 @@ export class EventInspectionPipelineService {
       return data;
     } catch (error) {
       Logger.error(
-        error.message,
-        'EventInspectionPipelineService.singleEventInspectionRecipe'
+        error,
+        `${EventInspectionPipelineService}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
-      // throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      // throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

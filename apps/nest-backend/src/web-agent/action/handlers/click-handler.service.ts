@@ -1,4 +1,4 @@
-import { Injectable, Logger, HttpException } from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { UtilitiesService } from '../../utilities/utilities.service';
 import { getSelectorType } from '../action-utils';
@@ -62,7 +62,10 @@ export class ClickHandler implements ActionHandler {
         )
       ) {
         clickedSuccessfully = true;
-        Logger.log(getFirstSelector(selector), 'ClickHandler.handle');
+        Logger.log(
+          getFirstSelector(selector),
+          `${ClickHandler.name}.${ClickHandler.prototype.handle.name}`
+        );
         break; // Exit the loop as soon as one selector works
       }
     }
@@ -70,7 +73,7 @@ export class ClickHandler implements ActionHandler {
     if (!clickedSuccessfully) {
       throw new HttpException(
         `Failed to click. None of the selectors worked for action ${step.target}`,
-        500
+        HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
@@ -95,7 +98,10 @@ export class ClickHandler implements ActionHandler {
     try {
       await page.waitForNavigation({ timeout: 3000 });
     } catch (error) {
-      Logger.log('No navigation needed', 'ClickHandler.clickElement');
+      Logger.log(
+        'No navigation needed',
+        `${ClickHandler.name}.${ClickHandler.prototype.clickElement.name}`
+      );
     }
 
     await page.waitForSelector(selector, { timeout, visible: true });
@@ -123,12 +129,18 @@ export class ClickHandler implements ActionHandler {
         timeout
       );
     } catch (error) {
-      Logger.error(error.message, 'ClickHandler.clickElement');
+      Logger.error(
+        error,
+        `${ClickHandler.name}.${ClickHandler.prototype.clickElement.name}`
+      );
     }
   }
 
   private async preventNavigationOnElement(page: Page, selector: string) {
-    Logger.log(selector, 'ClickHandler.preventNavigationOnElement');
+    Logger.log(
+      selector,
+      `${ClickHandler.name}.${ClickHandler.prototype.preventNavigationOnElement.name}`
+    );
     await page.evaluate((sel) => {
       const isDescendant = (parent, child) => {
         let node = child.parentNode;

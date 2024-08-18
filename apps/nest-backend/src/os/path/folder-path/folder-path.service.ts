@@ -1,4 +1,4 @@
-import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import {
   CONFIG_FOLDER,
@@ -19,8 +19,11 @@ export class FolderPathService {
     try {
       return await this.configurationService.getRootProjectPath();
     } catch (error) {
-      Logger.error(error.message, 'FolderPathService.getRootProjectPath');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${FolderPathService.name}.${FolderPathService.prototype.getRootProjectFolderPath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -31,8 +34,11 @@ export class FolderPathService {
         RESULT_FOLDER
       );
     } catch (error) {
-      Logger.error(error.message, 'FolderService.getReportSavingFolder');
-      throw new HttpException(error.messege, 500);
+      Logger.error(
+        error,
+        `${FolderPathService.name}.${FolderPathService.prototype.getReportSavingFolderPath.name}`
+      );
+      throw new HttpException(error.messege, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -40,8 +46,11 @@ export class FolderPathService {
     try {
       return await this.pathUtilsService.buildFolderPath(projectSlug, '');
     } catch (error) {
-      Logger.error(error.message, 'FolderPathService.getProjectFolderPath');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${FolderPathService.name}.${FolderPathService.prototype.getProjectFolderPath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -52,8 +61,11 @@ export class FolderPathService {
         RECORDING_FOLDER
       );
     } catch (error) {
-      Logger.error(error, 'FolderPathService.getRecordingFolderPath');
-      throw new HttpException(error, 500);
+      Logger.error(
+        error,
+        `${FolderPathService.name}.${FolderPathService.prototype.getRecordingFolderPath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -65,8 +77,11 @@ export class FolderPathService {
       );
       return folderPath;
     } catch (error) {
-      Logger.error(error.message, 'FolderPathService.getProjectConfigPath');
-      throw new HttpException(error.message, 500);
+      Logger.error(
+        error,
+        `${FolderPathService.name}.${FolderPathService.prototype.getProjectConfigFolderPath.name}`
+      );
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -78,10 +93,10 @@ export class FolderPathService {
       );
     } catch (error) {
       Logger.error(
-        error.message,
-        'FolderPathService.getInspectionEventFolderPath'
+        error,
+        `${FolderPathService.name}.${FolderPathService.prototype.getInspectionEventFolderPath.name}`
       );
-      throw new HttpException(error.message, 500);
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
