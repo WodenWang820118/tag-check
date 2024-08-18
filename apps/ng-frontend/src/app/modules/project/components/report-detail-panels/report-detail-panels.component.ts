@@ -37,6 +37,8 @@ import { EditorService } from '../../../../shared/services/editor/editor.service
 import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 @Component({
   selector: 'app-report-datail-panels',
   standalone: true,
@@ -50,6 +52,8 @@ import { UtilsService } from '../../../../shared/services/utils/utils.service';
     EditorComponent,
     MatButtonModule,
     ErrorDialogComponent,
+    MatFormFieldModule,
+    MatInputModule,
   ],
   templateUrl: './report-detail-panels.component.html',
   styleUrls: ['./report-detail-panels.component.scss'],
