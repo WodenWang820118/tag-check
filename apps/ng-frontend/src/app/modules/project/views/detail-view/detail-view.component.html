@@ -1,13 +1,20 @@
 <div class="detail">
   <div class="detail__header">
-    <h1>{{ (reportDetails$ | async)?.eventName }}</h1>
+    <div class="detail__header__row">
+      <button mat-icon-button (click)="goBack()">
+        <mat-icon>keyboard_arrow_left</mat-icon>
+      </button>
+      <h1 style="padding-top: 7px">
+        {{ (reportDetails$ | async)?.eventName }}
+      </h1>
+    </div>
     <div class="detail__status">
       <h2>Status:</h2>
       <mat-icon>{{
         (reportDetails$ | async)?.passed ? 'check_circle' : 'cancel'
       }}</mat-icon>
+      <p>{{ (reportDetails$ | async)?.completedTime }}</p>
     </div>
-    <p>{{ (reportDetails$ | async)?.completedTime }}</p>
   </div>
   <div class="detail__content">
     <div class="detail__images">
