@@ -5,17 +5,23 @@
 
   &__header {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
-    gap: 2rem;
+    align-items: flex-start;
+
+    &__row {
+      display: flex;
+      flex-direction: row;
+      gap: 1rem;
+      align-items: stretch;
+    }
   }
 
   &__status {
     display: flex;
     flex-direction: row;
     gap: 1rem;
-    align-items: stretch;
+    align-items: baseline;
   }
 
   &__content {
@@ -35,5 +41,9 @@
     &__item {
       max-width: 40vw;
     }
+  }
+
+  .mat-icon {
+    transform: scale(1.2);
   }
 }
