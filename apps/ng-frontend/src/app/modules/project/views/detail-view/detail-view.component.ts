@@ -16,6 +16,7 @@ import { IReportDetails } from '@utils';
 import { ImageService } from '../../../../shared/services/api/image/image.service';
 import { BlobToUrlPipe } from '../../../../shared/pipes/blob-to-url-pipe';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-detail-view',
@@ -26,6 +27,7 @@ import { MatIconModule } from '@angular/material/icon';
     ReportDetailPanelsComponent,
     BlobToUrlPipe,
     MatIconModule,
+    MatButtonModule,
   ],
   templateUrl: './detail-view.component.html',
   styleUrls: ['./detail-view.component.scss'],
@@ -89,6 +91,10 @@ export class DetailViewComponent implements OnInit, OnDestroy {
 
     this.subscriptions.push(reportDetailsSubscription);
     this.subscriptions.push(imageSubscription);
+  }
+
+  goBack() {
+    this.router.navigate(['../'], { relativeTo: this.route });
   }
 
   ngOnDestroy() {
