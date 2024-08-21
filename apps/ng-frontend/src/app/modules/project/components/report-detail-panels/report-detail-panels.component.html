@@ -12,7 +12,13 @@
           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
           @if (specEdit && !specEditMode) {
-          <mat-icon (click)="switchSpecEditMode($event)">edit</mat-icon>
+          <button
+            mat-mini-fab
+            color="primary edit"
+            (click)="switchSpecEditMode($event); $event.stopPropagation()"
+          >
+            <mat-icon class="icon-contrast" matTooltip="Edit">edit</mat-icon>
+          </button>
           }
         </mat-panel-description>
       </mat-expansion-panel-header>
@@ -39,7 +45,7 @@
         </button>
         <button
           mat-raised-button
-          color="warn"
+          class="remark"
           (click)="switchSpecEditMode($event)"
         >
           Cancel
@@ -60,9 +66,13 @@
           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
           @if (recordingEdit && !recordingEditMode) {
-          <mat-icon matTooltip="Edit" (click)="switchRecordingEditMode($event)"
-            >edit</mat-icon
+          <button
+            mat-mini-fab
+            color="primary edit"
+            (click)="switchRecordingEditMode($event); $event.stopPropagation()"
           >
+            <mat-icon class="icon-contrast" matTooltip="Edit">edit</mat-icon>
+          </button>
           <input
             hidden
             (change)="onFileSelected($event)"
@@ -118,7 +128,7 @@
         </button>
         <button
           mat-raised-button
-          color="warn"
+          class="remark"
           (click)="switchRecordingEditMode($event)"
         >
           Cancel

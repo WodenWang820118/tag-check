@@ -32,6 +32,8 @@ import { MetadataSourceService } from '../../../../shared/services/metadata-sour
         <mat-card-content>
           @if (project.projectDescription) {
           <p>{{ project.projectDescription }}</p>
+          <br />
+          <br />
           } @else {
           <br />
           <br />
@@ -44,10 +46,13 @@ import { MetadataSourceService } from '../../../../shared/services/metadata-sour
             mat-button
             [routerLink]="['/projects', project.projectSlug]"
             [state]="{ slug: project.projectSlug }"
+            color="primary"
           >
             View
           </button>
-          <button mat-button (click)="deleteProject()">DELETE</button>
+          <button mat-button (click)="deleteProject()" color="warn">
+            DELETE
+          </button>
         </mat-card-actions>
       </mat-card>
     </div>
@@ -55,7 +60,6 @@ import { MetadataSourceService } from '../../../../shared/services/metadata-sour
   styles: `
     .mat-mdc-card {
       height: 200px;
-      width: 500px;
     }
   `,
 })

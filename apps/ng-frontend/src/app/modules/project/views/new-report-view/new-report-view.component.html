@@ -32,7 +32,9 @@
     </button>
     <input hidden (change)="onFileSelected($event)" #fileInput type="file" />
     <div class="new-report__form__actions">
-      <button type="button" mat-raised-button (click)="cancel()">Cancel</button>
+      <button type="button" mat-raised-button (click)="cancel()" class="remark">
+        Cancel
+      </button>
       <button type="submit" mat-raised-button color="primary">Submit</button>
     </div>
   </form>
