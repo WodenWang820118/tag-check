@@ -28,42 +28,42 @@ export const PROJECT_ROUTES: Routes = [
           ),
       },
       {
-        path: 'project-info',
+        path: 'settings/project-info',
         loadComponent: () =>
           import(
             '../../shared/components/project-info-form/project-info-form.component'
           ).then((m) => m.ProjectInfoFormComponent),
       },
       {
-        path: 'pre-loading-values',
+        path: 'settings/pre-loading-values',
         loadComponent: () =>
           import(
             '../../shared/components/application-form/application-form.component'
           ).then((m) => m.ApplicationFormComponent),
       },
       {
-        path: 'authentication',
+        path: 'settings/authentication',
         loadComponent: () =>
           import(
             '../../shared/components/authentication-form/authentication-form.component'
           ).then((m) => m.AuthenticationFormComponent),
       },
       {
-        path: 'gtm',
+        path: 'settings/gtm',
         loadComponent: () =>
           import('../../shared/components/gtm-form/gtm-form.component').then(
             (m) => m.GtmFormComponent
           ),
       },
       {
-        path: 'advanced-browser-settings',
+        path: 'settings/advanced-browser-settings',
         loadComponent: () =>
           import(
             '../../shared/components/browser-form/browser-form.component'
           ).then((m) => m.BrowserFormComponent),
       },
       {
-        path: 'project-io',
+        path: 'settings/project-io',
         loadComponent: () =>
           import(
             '../../shared/components/project-io-form/project-io-form.component'

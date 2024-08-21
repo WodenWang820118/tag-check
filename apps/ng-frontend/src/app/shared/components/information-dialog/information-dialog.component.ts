@@ -7,12 +7,14 @@ import { MatDialogModule } from '@angular/material/dialog';
   standalone: true,
   imports: [MatDialogModule, MatButtonModule],
   template: `<div class="error-dialog">
-    <h1 mat-dialog-title>{{ data.title }}</h1>
+    <h1 mat-dialog-title class="secondary">{{ data.title }}</h1>
     <div mat-dialog-content>
       <p>{{ data.contents }}</p>
     </div>
     <mat-dialog-actions>
-      <button mat-raised-button (click)="onNoClick()">Cancel</button>
+      <button mat-raised-button class="remark" (click)="onNoClick()">
+        Cancel
+      </button>
       <button
         mat-raised-button
         [color]="data.actionColor || 'warn'"
