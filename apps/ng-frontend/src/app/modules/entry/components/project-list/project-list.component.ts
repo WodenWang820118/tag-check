@@ -47,13 +47,11 @@ import { MetadataSourceFacadeService } from '../../../../shared/services/facade/
         ></app-project-item>
         }
       </div>
-      @if ((dataSourceLength | async) ?? 0 > 5) {
       <app-paginator
         #paginatorComponent
         [pageSize]="5"
         [length]="this.dataSourceLength | async"
       ></app-paginator>
-      }
     </div>
   `,
   styles: `
