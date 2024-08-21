@@ -1,7 +1,13 @@
 <div class="side-nav-list">
   <mat-nav-list>
     @for (item of items; track item.icon) { @if (item.title !== 'Settings') {
-    <mat-list-item [routerLink]="item.link" (click)="onMenuClick()">
+    <mat-list-item
+      tabindex="-1"
+      [routerLink]="item.link"
+      [routerLinkActive]="['secondary']"
+      [routerLinkActiveOptions]="{ exact: true }"
+      (click)="onMenuClick()"
+    >
       <div class="mat-list-item-content">
         <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
         <span>{{ item.title }}</span>
@@ -9,11 +15,15 @@
       </div>
     </mat-list-item>
     } }
-    <mat-list-item>
+    <mat-list-item
+      tabindex="-1"
+      [ngClass]="{ secondary: selectedParent === 'Settings' }"
+    >
       <div class="mat-list-item-content">
         <mat-icon matListItemIcon>settings</mat-icon>
         <span>Settings</span>
         <button
+          tabindex="-1"
           class="btn-chevron"
           mat-icon-button
           (click)="isOpen = !isOpen"
@@ -27,45 +37,52 @@
     </mat-list-item>
     <app-overlay [trigger]="trigger" [isOpen]="isOpen">
       <mat-nav-list class="mat-elevation-z8" style="background-color: white">
+        <!-- TODO: use @for with a list -->
         <mat-list-item
           class="sub-list-item"
-          [routerLink]="['./', 'project-info']"
-          (click)="isOpen = false; onMenuClick()"
+          [routerLink]="['./', 'settings', 'project-info']"
+          [routerLinkActive]="['secondary']"
+          (click)="isOpen = false; onSubItemClick('Settings')"
         >
           <div matListItemTitle>Project Information</div>
         </mat-list-item>
         <mat-list-item
           class="sub-list-item"
-          [routerLink]="['./', 'pre-loading-values']"
-          (click)="isOpen = false; onMenuClick()"
+          [routerLink]="['./', 'settings', 'pre-loading-values']"
+          [routerLinkActive]="['secondary']"
+          (click)="isOpen = false; onSubItemClick('Settings')"
         >
           <div matListItemTitle>Preloading Values</div>
         </mat-list-item>
         <mat-list-item
           class="sub-list-item"
-          [routerLink]="['./', 'authentication']"
-          (click)="isOpen = false; onMenuClick()"
+          [routerLink]="['./', 'settings', 'authentication']"
+          [routerLinkActive]="['secondary']"
+          (click)="isOpen = false; onSubItemClick('Settings')"
         >
           <div matListItemTitle>Authentication</div>
         </mat-list-item>
         <mat-list-item
           class="sub-list-item"
-          [routerLink]="['./', 'gtm']"
-          (click)="isOpen = false; onMenuClick()"
+          [routerLink]="['./', 'settings', 'gtm']"
+          [routerLinkActive]="['secondary']"
+          (click)="isOpen = false; onSubItemClick('Settings')"
         >
           <div matListItemTitle>Google Tag Manager</div>
         </mat-list-item>
         <mat-list-item
           class="sub-list-item"
-          [routerLink]="['./', 'advanced-browser-settings']"
-          (click)="isOpen = false; onMenuClick()"
+          [routerLink]="['./', 'settings', 'advanced-browser-settings']"
+          [routerLinkActive]="['secondary']"
+          (click)="isOpen = false; onSubItemClick('Settings')"
         >
           <div matListItemTitle>Advanced Browser</div>
         </mat-list-item>
         <mat-list-item
           class="sub-list-item"
-          [routerLink]="['./', 'project-io']"
-          (click)="isOpen = false; onMenuClick()"
+          [routerLink]="['./', 'settings', 'project-io']"
+          [routerLinkActive]="['secondary']"
+          (click)="isOpen = false; onSubItemClick('Settings')"
         >
           <div matListItemTitle>Project IO</div>
         </mat-list-item>
