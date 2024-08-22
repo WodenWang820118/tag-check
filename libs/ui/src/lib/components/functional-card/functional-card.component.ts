@@ -1,10 +1,12 @@
 import { AsyncPipe } from '@angular/common';
 import {
   Component,
+  Input,
   OnDestroy,
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
+// FIXME: Circular dependency
 import {
   ConverterService,
   EditorFacadeService,
@@ -31,6 +33,7 @@ export class FunctionalCardComponent implements OnDestroy {
   @ViewChild('accordionContainer')
   accordionContainer!: AdvancedExpansionPanelComponent;
 
+  @Input() color = 'primary';
   private destroy$ = new Subject<void>();
   private dataLayer: any[];
 
