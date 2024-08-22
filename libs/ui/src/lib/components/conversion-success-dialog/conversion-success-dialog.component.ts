@@ -13,7 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
   imports: [MatButtonModule, MatDialogModule, MatIconModule],
   template: `
     <div class="conversion-success"></div>
-    <h2 mat-dialog-title>Conversion Successful</h2>
+    <h2 mat-dialog-title class="secondary">Conversion Successful</h2>
     <mat-dialog-content class="conversion-success__options">
       <div class="conversion-success__options__option">
         <button mat-stroked-button (click)="onDownload()">
@@ -52,10 +52,10 @@ export class ConversionSuccessDialogComponent {
   onDownload() {
     const json = JSON.stringify(this.configuration, null, 2);
     // Create a Blob from the JSON string
-    let blob = new Blob([json], { type: 'application/json' }),
+    const blob = new Blob([json], { type: 'application/json' }),
       url = URL.createObjectURL(blob);
     // Create a link and programmatically click it
-    let a = document.createElement('a');
+    const a = document.createElement('a');
     a.href = url;
     a.download = 'data.json'; // or any other name you want
     a.click(); // this will start download
