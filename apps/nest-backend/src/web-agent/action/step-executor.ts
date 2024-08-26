@@ -34,12 +34,24 @@ export class StepExecutor {
     switch (step.type) {
       case BrowserAction.SETVIEWPORT:
         await handleSetViewport(page, step);
+        Logger.log(
+          'Handle Viewport Successfully',
+          `${StepExecutor.name}.${StepExecutor.prototype.executeStep.name}`
+        );
         break;
       case BrowserAction.NAVIGATE:
         await handleNavigate(page, step, state, application);
+        Logger.log(
+          'Handle Navigation Successfully',
+          `${StepExecutor.name}.${StepExecutor.prototype.executeStep.name}`
+        );
         break;
       case BrowserAction.WAITFORELEMENT:
         await handleWaitForElement(page, step, step.timeout || 10000);
+        Logger.log(
+          'Handle Wait for element Successfully',
+          `${StepExecutor.name}.${StepExecutor.prototype.executeStep.name}`
+        );
         break;
       case BrowserAction.KEYDOWN:
         Logger.log(`${step.type} ${step.key}`, 'StepExecutor.executeStep');
@@ -65,6 +77,10 @@ export class StepExecutor {
             eventId,
             isLastStep,
             randomDelay
+          );
+          Logger.log(
+            'Handle Default Action Successfully',
+            `${StepExecutor.name}.${StepExecutor.prototype.executeStep.name}`
           );
         } else {
           Logger.warn(`Unknown action type: ${step.type}`);

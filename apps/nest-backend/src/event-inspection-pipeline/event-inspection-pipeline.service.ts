@@ -52,20 +52,22 @@ export class EventInspectionPipelineService {
       ];
 
       Logger.log(
-        'Data constructed',
+        `Data constructed: ${data}`,
         `${EventInspectionPipelineService.name}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
 
       const timestamp = getCurrentTimestamp();
+      const eventName = extractEventNameFromId(eventId);
+      const dataLayerPassed = result.dataLayerResult.passed;
+      const requestPassed = result.requestCheckResult.passed;
+
       await this.projectXlsxReportService.writeXlsxFile(
-        `QA_report_single_${eventId}_${timestamp}.xlsx`,
+        `${eventName}_${dataLayerPassed}_${requestPassed}_${timestamp}.xlsx`,
         'Sheet1',
         data,
         eventId,
         projectName
       );
-
-      const eventName = extractEventNameFromId(eventId);
 
       const outputValidationResult: OutputValidationResult = {
         eventName: eventName,
@@ -86,15 +88,13 @@ export class EventInspectionPipelineService {
         eventId,
         outputValidationResult
       );
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
-      await page.close();
       return data;
     } catch (error) {
       Logger.error(
         error,
         `${EventInspectionPipelineService}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
-      // throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

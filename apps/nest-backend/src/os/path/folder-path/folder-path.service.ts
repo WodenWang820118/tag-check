@@ -38,7 +38,7 @@ export class FolderPathService {
         error,
         `${FolderPathService.name}.${FolderPathService.prototype.getReportSavingFolderPath.name}`
       );
-      throw new HttpException(error.messege, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

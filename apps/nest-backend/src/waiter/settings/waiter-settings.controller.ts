@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Put, Body, Logger } from '@nestjs/common';
+import { Controller, Get, Param, Put, Body } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { ProjectSettingService } from '../../project-agent/project-setting/project-setting.service';
 import { Setting } from '@utils';

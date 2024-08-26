@@ -62,8 +62,7 @@ export class XlsxReportSingleEventService {
         } catch (error) {
           Logger.error(
             error,
-            XlsxReportSingleEventService.name +
-              XlsxReportSingleEventService.prototype.writeXlsxFile.name
+            `${XlsxReportSingleEventService.name}.${XlsxReportSingleEventService.prototype.writeXlsxFile.name}`
           );
           throw new HttpException(
             `An error occurred while writing an image: ${error}`,
