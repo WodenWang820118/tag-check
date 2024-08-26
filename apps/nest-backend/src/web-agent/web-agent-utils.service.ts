@@ -73,7 +73,7 @@ export class WebAgentUtilsService {
           timeout: 10000,
         });
       } catch (error) {
-        Logger.log(
+        Logger.error(
           'No navigation needed',
           `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
         );
@@ -104,7 +104,7 @@ export class WebAgentUtilsService {
         error,
         `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
       );
-      HttpStatus.INTERNAL_SERVER_ERROR;
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
