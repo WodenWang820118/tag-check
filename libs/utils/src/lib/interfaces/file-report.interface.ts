@@ -2,5 +2,7 @@ export interface FileReport {
   name: string;
   path: string;
   position: number;
-  date: Date;
+  lastModified: Date;
+  dataLayerState: boolean;
+  requestState: boolean;
 }

@@ -19,7 +19,6 @@ $primary-theme: mat.define-light-theme(
       warn: var.$warn,
     ),
     typography: var.$typography,
-    density: -2,
   )
 );
 

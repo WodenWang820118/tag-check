@@ -1,11 +1,7 @@
 import { ProjectXlsxReportService } from './../project-agent/project-xlsx-report/project-xlsx-report.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
-import {
-  OutputValidationResult,
-  extractEventNameFromId,
-  getCurrentTimestamp,
-} from '@utils';
+import { OutputValidationResult, extractEventNameFromId } from '@utils';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
@@ -56,13 +52,13 @@ export class EventInspectionPipelineService {
         `${EventInspectionPipelineService.name}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
 
-      const timestamp = getCurrentTimestamp();
+      const timestamp = new Date().getTime();
       const eventName = extractEventNameFromId(eventId);
       const dataLayerPassed = result.dataLayerResult.passed;
       const requestPassed = result.requestCheckResult.passed;
 
       await this.projectXlsxReportService.writeXlsxFile(
-        `${eventName}_${dataLayerPassed}_${requestPassed}_${timestamp}.xlsx`,
+        `${eventName} ${dataLayerPassed} ${requestPassed} ${timestamp}.xlsx`,
         'Sheet1',
         data,
         eventId,

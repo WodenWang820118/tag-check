@@ -24,11 +24,13 @@ export async function handleNavigationIfNeeded(
   if (isLastStep) {
     try {
       await page.waitForNavigation({
-        waitUntil: 'networkidle2',
         timeout: delay,
       });
     } catch (error) {
-      throw new Error(error);
+      // throw error will stop the whole process
+      console.log(
+        'pure function handleNavigationIfNeeded: No Navigation needed'
+      );
     }
   }
   await sleep(1000); // Necessary delay for the website to update
@@ -101,7 +103,7 @@ export async function handleWaitForElement(
       // but sometimes it's not necessary, so we do race
       const fistSelector = getFirstSelector(selector);
       await Promise.race([
-        page.waitForNavigation({ waitUntil: 'networkidle2', timeout }),
+        page.waitForNavigation({ waitUntil: 'load', timeout }),
         page.waitForSelector(fistSelector, {
           visible: step.visible ? true : false,
           timeout: timeout,

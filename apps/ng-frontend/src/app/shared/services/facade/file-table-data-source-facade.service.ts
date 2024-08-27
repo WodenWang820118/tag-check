@@ -30,7 +30,9 @@ export class FileTableDataSourceFacadeService {
         return this.fileReportService.getFileReports(projectSlug).pipe(
           tap((data) => {
             if (data) {
-              this.fileTableDataSourceService.setData(data);
+              this.fileTableDataSourceService.setData(
+                this.preprocessData(data)
+              );
             }
           }),
           catchError((error) => {
@@ -38,6 +40,14 @@ export class FileTableDataSourceFacadeService {
             return of(null);
           })
         );
+      })
+    );
+  }
+
+  observeDataSource() {
+    return this.initDataSource().pipe(
+      switchMap(() => {
+        return this.fileTableDataSourceService.getData();
       })
     );
   }
@@ -192,5 +202,22 @@ export class FileTableDataSourceFacadeService {
     link.download = fileName;
     link.click();
     window.URL.revokeObjectURL(link.href);
+  }
+
+  preprocessData(data: FileReport[]) {
+    return data.map((item, index) => {
+      const segments = item.name.split(' ');
+      const eventName = segments[0];
+      const dataLayerState = segments[1] === 'true' ? true : false;
+      const requestState = segments[2] === 'true' ? true : false;
+      return {
+        position: index,
+        name: eventName,
+        path: item.path,
+        dataLayerState: dataLayerState,
+        requestState: requestState,
+        lastModified: item.lastModified,
+      };
+    });
   }
 }

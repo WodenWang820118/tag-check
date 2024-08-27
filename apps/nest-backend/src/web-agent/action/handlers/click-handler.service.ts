@@ -99,7 +99,7 @@ export class ClickHandler implements ActionHandler {
       await page.waitForNavigation({ timeout: 3000 });
     } catch (error) {
       Logger.log(
-        'No navigation needed',
+        'No Navigation Needed',
         `${ClickHandler.name}.${ClickHandler.prototype.clickElement.name}`
       );
     }

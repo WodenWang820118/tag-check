@@ -69,12 +69,12 @@ export class WebAgentUtilsService {
       // await new Promise((resolve) => setTimeout(resolve, 1000));
       try {
         await page.waitForNavigation({
-          waitUntil: 'networkidle2',
-          timeout: 10000,
+          waitUntil: 'networkidle0',
+          timeout: 5000,
         });
       } catch (error) {
         Logger.error(
-          'No navigation needed',
+          'No Navigation Needed',
           `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
         );
       }
