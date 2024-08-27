@@ -72,11 +72,6 @@ export class InspectorSingleEventService {
             expectedObj
           );
 
-          Logger.log(
-            dataLayerResult,
-            `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
-          );
-
           const destinationUrl = result.destinationUrl;
           Logger.log(
             destinationUrl,
