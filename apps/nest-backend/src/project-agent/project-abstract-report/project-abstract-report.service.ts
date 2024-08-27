@@ -49,9 +49,7 @@ export class ProjectAbstractReportService {
     } catch (error) {
       Logger.error(
         error,
-        ProjectAbstractReportService.name +
-          ProjectAbstractReportService.prototype
-            .writeProjectAbstractTestRsultJson.name
+        `${ProjectAbstractReportService.name}.${ProjectAbstractReportService.prototype.writeSingleAbstractTestResultJson.name}`
       );
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
