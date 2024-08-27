@@ -72,11 +72,6 @@ export class InspectorSingleEventService {
             expectedObj
           );
 
-          Logger.log(
-            dataLayerResult,
-            `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
-          );
-
           const destinationUrl = result.destinationUrl;
           Logger.log(
             destinationUrl,
@@ -151,8 +146,7 @@ export class InspectorSingleEventService {
     } catch (error) {
       Logger.error(
         error,
-        InspectorSingleEventService.name +
-          InspectorSingleEventService.prototype.inspectDataLayer.name
+        `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
       );
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }

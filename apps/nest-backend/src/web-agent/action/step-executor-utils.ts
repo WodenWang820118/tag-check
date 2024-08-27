@@ -1,8 +1,9 @@
-import { Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { sleep } from './action-utils';
 import { getFirstSelector } from './handlers/utils';
 import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
+
+// Cannot use @nestjs/common in pure functions
 
 export async function handleKeyboardAction(
   page: Page,
@@ -23,13 +24,12 @@ export async function handleNavigationIfNeeded(
   if (isLastStep) {
     try {
       await page.waitForNavigation({
-        waitUntil: 'networkidle2',
         timeout: delay,
       });
     } catch (error) {
-      Logger.log(
-        'No navigation needed',
-        `${this.name}.handleNavigationIfNeeded`
+      // throw error will stop the whole process
+      console.log(
+        'pure function handleNavigationIfNeeded: No Navigation needed'
       );
     }
   }
@@ -59,15 +59,10 @@ export async function handleNavigate(
       await page.evaluate((appLocalStorage) => {
         for (const setting of appLocalStorage.data) {
           // Correctly access the value property of each setting object
-          Logger.log(setting, `${this.name}`); // Assuming you have a way to log from here
           const value =
             typeof setting.value === 'object'
               ? JSON.stringify(setting.value)
               : setting.value;
-          Logger.log(
-            `Setting localStorage ${setting.key}=${value}`,
-            `${this.name}`
-          ); // Assuming you have a way to log from here
           localStorage.setItem(setting.key, value);
         }
       }, application.localStorage); // Pass application.localStorage as an argument to the evaluate function
@@ -88,17 +83,12 @@ export async function handleNavigate(
     if (state.isFirstNavigation) {
       // only reload the landing page, trying to skip the overlay
       // Reload the page with the final URL to apply localStorage and cookies
-      Logger.log(
-        `Reload the page with the final URL ${finalUrl}`,
-        `${this.name}`
-      );
       await page.goto(finalUrl);
       await sleep(1000); // Necessary delay for the website to update
       state.isFirstNavigation = false;
     }
   } catch (error) {
-    Logger.error(error, `${this.name}.handleNavigate`);
-    throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    throw new Error(error);
   }
 }
 
@@ -113,20 +103,18 @@ export async function handleWaitForElement(
       // but sometimes it's not necessary, so we do race
       const fistSelector = getFirstSelector(selector);
       await Promise.race([
-        page.waitForNavigation({ waitUntil: 'networkidle2', timeout }),
+        page.waitForNavigation({ waitUntil: 'load', timeout }),
         page.waitForSelector(fistSelector, {
           visible: step.visible ? true : false,
           timeout: timeout,
         }),
       ]);
 
-      Logger.log(`${selector} exists`, `${this.name}`);
+      // Logger.log(`${selector} exists`, `handleWaitForElement`);
       return;
     } catch (error) {
-      Logger.error(`${selector} does not exist`, `${this.name}`);
-      // close the page if stop processing
       await page.close();
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new Error(error);
     }
   }
 }

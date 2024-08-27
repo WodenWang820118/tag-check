@@ -85,7 +85,10 @@ export class WaiterDataLayerController {
         },
         eventInspectionPresetDto
       );
-      Logger.log(results, 'waiter.inspectSingleEvent');
+      Logger.log(
+        results,
+        `${WaiterDataLayerController.name}.${WaiterDataLayerController.prototype.inspectSingleEvent.name}`
+      );
 
       const abstractReport =
         await this.projectAbstractReportService.getSingleAbstractTestResultJson(
@@ -98,7 +101,10 @@ export class WaiterDataLayerController {
         throw error;
       }
 
-      Logger.error(error, 'waiter.inspectSingleEvent');
+      Logger.error(
+        error,
+        `${WaiterDataLayerController.name}.${WaiterDataLayerController.prototype.inspectSingleEvent.name}`
+      );
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -143,7 +149,10 @@ export class WaiterDataLayerController {
       this.waiterEventInspectionService.stopOperation();
       return { message: 'Operation stopped successfully' };
     } catch (error) {
-      Logger.error(error, 'waiter.stopOperation');
+      Logger.error(
+        error,
+        `${WaiterDataLayerController.name}.${WaiterDataLayerController.prototype.stopOperation.name}`
+      );
       throw new HttpException(
         'Failed to stop operation',
         HttpStatus.INTERNAL_SERVER_ERROR

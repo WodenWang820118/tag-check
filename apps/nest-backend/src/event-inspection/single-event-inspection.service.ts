@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Browser, Credentials, Page } from 'puppeteer';
 import { EventInspectionPresetDto } from '@utils';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
@@ -74,7 +74,7 @@ export class SingleEventInspectionService {
         );
       }
       await this.cleanup();
-      throw error;
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

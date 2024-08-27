@@ -69,12 +69,12 @@ export class WebAgentUtilsService {
       // await new Promise((resolve) => setTimeout(resolve, 1000));
       try {
         await page.waitForNavigation({
-          waitUntil: 'networkidle2',
-          timeout: 10000,
+          waitUntil: 'networkidle0',
+          timeout: 5000,
         });
       } catch (error) {
-        Logger.log(
-          'No navigation needed',
+        Logger.error(
+          'No Navigation Needed',
           `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
         );
       }
@@ -104,7 +104,7 @@ export class WebAgentUtilsService {
         error,
         `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
       );
-      HttpStatus.INTERNAL_SERVER_ERROR;
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

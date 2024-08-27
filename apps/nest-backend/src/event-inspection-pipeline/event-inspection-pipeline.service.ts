@@ -1,11 +1,7 @@
 import { ProjectXlsxReportService } from './../project-agent/project-xlsx-report/project-xlsx-report.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
-import {
-  OutputValidationResult,
-  extractEventNameFromId,
-  getCurrentTimestamp,
-} from '@utils';
+import { OutputValidationResult, extractEventNameFromId } from '@utils';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
@@ -52,20 +48,22 @@ export class EventInspectionPipelineService {
       ];
 
       Logger.log(
-        'Data constructed',
+        `Data constructed: ${data}`,
         `${EventInspectionPipelineService.name}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
 
-      const timestamp = getCurrentTimestamp();
+      const timestamp = new Date().getTime();
+      const eventName = extractEventNameFromId(eventId);
+      const dataLayerPassed = result.dataLayerResult.passed;
+      const requestPassed = result.requestCheckResult.passed;
+
       await this.projectXlsxReportService.writeXlsxFile(
-        `QA_report_single_${eventId}_${timestamp}.xlsx`,
+        `${eventName} ${dataLayerPassed} ${requestPassed} ${timestamp}.xlsx`,
         'Sheet1',
         data,
         eventId,
         projectName
       );
-
-      const eventName = extractEventNameFromId(eventId);
 
       const outputValidationResult: OutputValidationResult = {
         eventName: eventName,
@@ -86,15 +84,13 @@ export class EventInspectionPipelineService {
         eventId,
         outputValidationResult
       );
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
-      await page.close();
       return data;
     } catch (error) {
       Logger.error(
         error,
         `${EventInspectionPipelineService}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
-      // throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

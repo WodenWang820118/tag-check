@@ -1,15 +1,16 @@
 import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
-import { forkJoin, map, of, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { forkJoin, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
-import { DatePipe } from '@angular/common';
-import { MatSort } from '@angular/material/sort';
+import { DatePipe, NgClass } from '@angular/common';
+import { MatSort, Sort } from '@angular/material/sort';
 import { FileReport } from '@utils';
 import { MatInputModule } from '@angular/material/input';
 import { FileTableDataSourceFacadeService } from '../../../../shared/services/facade/file-table-data-source-facade.service';
+import { MatSortModule } from '@angular/material/sort';
 
 @Component({
   selector: 'app-file-table',
@@ -21,42 +22,42 @@ import { FileTableDataSourceFacadeService } from '../../../../shared/services/fa
     MatCheckboxModule,
     DatePipe,
     MatInputModule,
+    NgClass,
+    MatSortModule,
   ],
   providers: [FileTableDataSourceFacadeService],
   templateUrl: './file-table.component.html',
-  styles: `
-
-  `,
+  styleUrls: ['./file-table.component.scss'],
 })
 export class FileTableComponent implements OnDestroy {
   selection = new SelectionModel<FileReport>(true, []);
   dataSource!: MatTableDataSource<FileReport>;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  columns: string[] = ['select', 'name', 'lastModified'];
+  columns: string[] = [
+    'select',
+    'name',
+    'dataLayerState',
+    'requestState',
+    'lastModified',
+  ];
   destroy$ = new Subject<void>();
 
   constructor(
     private fileTableDataSourceFacadeService: FileTableDataSourceFacadeService
   ) {
     this.fileTableDataSourceFacadeService
-      .initDataSource()
+      .observeDataSource()
       .pipe(
         takeUntil(this.destroy$),
-        map((data) => {
+        tap((data) => {
           if (data) {
             this.dataSource = new MatTableDataSource(data);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
-            return data;
           }
-          return [];
         }),
-        switchMap((data) => {
-          if (!data) {
-            return of(null);
-          }
-          // after the data is loaded, we can observe the delete and download actions
+        switchMap(() => {
           return forkJoin({
             deleteResult:
               this.fileTableDataSourceFacadeService.observeTableDelete(
@@ -82,6 +83,42 @@ export class FileTableComponent implements OnDestroy {
         })
       )
       .subscribe();
+  }
+
+  sortData(sort: Sort) {
+    const data = this.dataSource.data.slice();
+    if (!sort.active || sort.direction === '') {
+      this.dataSource.data = data;
+      return;
+    }
+
+    this.dataSource.data = data.sort((a, b) => {
+      const isAsc = sort.direction === 'asc';
+      switch (sort.active) {
+        case 'name':
+          return this.compare(a.name, b.name, isAsc);
+        case 'dataLayerState':
+          return this.compare(a.dataLayerState, b.dataLayerState, isAsc);
+        case 'requestState':
+          return this.compare(a.requestState, b.requestState, isAsc);
+        case 'lastModified':
+          return this.compare(
+            new Date(a.lastModified).getTime(),
+            new Date(b.lastModified).getTime(),
+            isAsc
+          );
+        default:
+          return 0;
+      }
+    });
+  }
+
+  compare(
+    a: number | string | boolean | Date,
+    b: number | string | boolean | Date,
+    isAsc: boolean
+  ) {
+    return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
   }
 
   selectSingleRow(row: FileReport) {
