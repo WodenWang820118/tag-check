@@ -73,5 +73,17 @@
       "unitTestRunner": "jest"
     }
   },
-  "nxCloudAccessToken": "NDI3YTMyYjQtYjRlMi00Zjc4LWFiMjktYmM4ZDQ4Y2I2NWRkfHJlYWQtd3JpdGU="
+  "nxCloudAccessToken": "NDI3YTMyYjQtYjRlMi00Zjc4LWFiMjktYmM4ZDQ4Y2I2NWRkfHJlYWQtd3JpdGU=",
+  "plugins": [
+    {
+      "plugin": "@nx/vite/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "testTargetName": "test",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview",
+        "serveStaticTargetName": "serve-static"
+      }
+    }
+  ]
 }
