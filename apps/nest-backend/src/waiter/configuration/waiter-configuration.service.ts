@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigurationService } from '../../configuration/configuration.service';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -10,10 +10,18 @@ export class WaiterConfigurationService {
   }
 
   async getConfiguration(name: string) {
-    const value = (await this.configurationService.findAll()).find(
-      (item) => item.title === name
-    )?.value;
-    return { value }; // Wrap the value in an object
+    console.log(`Fetching configuration for: ${name}`);
+    const configuration = await this.configurationService.findOneByName(name);
+    console.log(`Configuration:`, configuration);
+    if (!configuration) {
+      throw new NotFoundException(`Configuration '${name}' not found`);
+    }
+    const value = configuration.getDataValue('value');
+    Logger.log(
+      `Configuration value: ${value}`,
+      `${WaiterConfigurationService.name}.${this.getConfiguration.name}`
+    );
+    return { value };
   }
 
   async resetConfiguration(name: string) {
