@@ -1,0 +1,18 @@
+{
+  "title": "view_promotion",
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 1237,
+      "height": 945,
+      "deviceScaleFactor": 1,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": false
+    },
+    {
+      "type": "navigate",
+      "url": "https://gtm-integration-sample.netlify.app/"
+    }
+  ]
+}

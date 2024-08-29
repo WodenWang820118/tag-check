@@ -33,6 +33,7 @@ const DEFAULT_DATABASE_PATH = 'data.sqlite3';
 // the DATABASE_PATH and ROOT_PROJECT_PATH is set in the electron main process
 
 export function getDatabasePath(): string {
+  let databasePath = join('..', '..', '..', '..', '.db', DEFAULT_DATABASE_PATH);
   try {
     switch (process.env.NODE_ENV) {
       case 'dev':
@@ -40,6 +41,19 @@ export function getDatabasePath(): string {
       case 'staging':
         return join(cwd(), '.db', DEFAULT_DATABASE_PATH);
       case 'prod':
+        return process.env.DATABASE_PATH;
+      case 'test':
+        process.env.DATABASE_PATH = join(
+          __dirname,
+          '..',
+          '..',
+          '..',
+          '..',
+          '.db',
+          DEFAULT_DATABASE_PATH
+        );
+
+        Logger.log(process.env.DATABASE_PATH, 'DATABASE_PATH');
         return process.env.DATABASE_PATH;
       default:
         Logger.warn(
@@ -49,14 +63,21 @@ export function getDatabasePath(): string {
             DEFAULT_DATABASE_PATH
           )}`
         );
-        return join(process.env.DATABASE_PATH, '.db', DEFAULT_DATABASE_PATH);
+        databasePath = join(
+          process.env.DATABASE_PATH,
+          '.db',
+          DEFAULT_DATABASE_PATH
+        );
+        return databasePath;
     }
   } catch (error) {
-    Logger.error('Error getting the database path', error);
-    throw new HttpException(
-      'Error getting the database path',
-      HttpStatus.INTERNAL_SERVER_ERROR
-    );
+    Logger.error(error, 'Error getting the database path');
+    Logger.error(`${databasePath}`, 'Database path');
+    return join(cwd(), '.db', DEFAULT_DATABASE_PATH);
+    // throw new HttpException(
+    //   'Error getting the database path',
+    //   HttpStatus.INTERNAL_SERVER_ERROR
+    // );
   }
 }
 
@@ -67,6 +88,17 @@ export function getRootProjectPath(): string {
         return join(cwd(), DEFAULT_PROJECT_PATH);
       case 'staging':
         return join(cwd(), DEFAULT_PROJECT_PATH);
+      case 'test':
+        process.env.ROOT_PROJECT_PATH = join(
+          __dirname,
+          '..',
+          '..',
+          '..',
+          '..',
+          DEFAULT_PROJECT_PATH
+        );
+        Logger.log(process.env.ROOT_PROJECT_PATH, 'ROOT_PROJECT_PATH');
+        return process.env.ROOT_PROJECT_PATH;
       case 'prod':
         return join(process.env.ROOT_PROJECT_PATH, DEFAULT_PROJECT_PATH);
       default:
@@ -97,6 +129,10 @@ export async function activatePort(app: INestApplication<any>) {
       case 'staging':
         Logger.log('Listening on port 5000');
         await app.listen(process.env.PORT || 5000);
+        break;
+      case 'test':
+        Logger.log('Listening on port 8080');
+        await app.listen(process.env.PORT || 8080);
         break;
       case 'prod':
         Logger.log('Listening on port 80');

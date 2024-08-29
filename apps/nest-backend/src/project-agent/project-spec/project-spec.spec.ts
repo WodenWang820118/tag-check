@@ -4,6 +4,7 @@ import { ProjectSpecService } from './project-spec.service';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { Spec } from '@utils';
+import { describe, beforeEach, it, expect, vi } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -19,14 +20,14 @@ describe('ProjectSpecService', () => {
       .useMocker((token) => {
         if (token === FileService) {
           return {
-            readJsonFile: jest.fn(),
-            writeJsonFile: jest.fn(),
+            readJsonFile: vi.fn(),
+            writeJsonFile: vi.fn(),
           };
         }
 
         if (token === FilePathService) {
           return {
-            getProjectConfigFilePath: jest.fn(() => 'filePath'),
+            getProjectConfigFilePath: vi.fn(() => 'filePath'),
           };
         }
 
@@ -52,7 +53,7 @@ describe('ProjectSpecService', () => {
   it('should get project specs', async () => {
     const projectSlug = 'projectSlug';
     const content = [{ event: 'eventName' }];
-    const readFileSpy = jest
+    const readFileSpy = vi
       .spyOn(fileService, 'readJsonFile')
       .mockReturnValue(content);
     const result = await service.getProjectSpecs(projectSlug);
@@ -72,9 +73,7 @@ describe('ProjectSpecService', () => {
     const projectSlug = 'projectSlug';
     const eventName = 'eventName';
     const content = [{ event: 'eventName' }];
-    const spy = jest
-      .spyOn(fileService, 'readJsonFile')
-      .mockReturnValue(content);
+    const spy = vi.spyOn(fileService, 'readJsonFile').mockReturnValue(content);
     const result = await service.getSpec(projectSlug, eventName);
 
     expect(result).toEqual(content[0]);
@@ -88,10 +87,10 @@ describe('ProjectSpecService', () => {
     const projectSlug = 'projectSlug';
     const spec = { event: 'eventName' };
     const content: Spec[] = [{ event: 'existingEvent' }];
-    const readSpy = jest
+    const readSpy = vi
       .spyOn(fileService, 'readJsonFile')
       .mockReturnValue(content);
-    const writeSpy = jest.spyOn(fileService, 'writeJsonFile');
+    const writeSpy = vi.spyOn(fileService, 'writeJsonFile');
     const result = await service.addSpec(projectSlug, spec);
     const expectedSpec = [...content, spec];
 
@@ -115,10 +114,10 @@ describe('ProjectSpecService', () => {
     const eventName = 'existingEvent';
     const spec = { event: 'eventName' };
     const content: Spec[] = [{ event: 'existingEvent' }];
-    const readSpy = jest
+    const readSpy = vi
       .spyOn(fileService, 'readJsonFile')
       .mockReturnValue(content);
-    const writeSpy = jest.spyOn(fileService, 'writeJsonFile');
+    const writeSpy = vi.spyOn(fileService, 'writeJsonFile');
     const result = await service.updateSpec(projectSlug, eventName, spec);
     const expectedSpec = [{ event: 'eventName' }];
 

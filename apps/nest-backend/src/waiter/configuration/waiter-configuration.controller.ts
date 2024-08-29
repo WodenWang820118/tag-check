@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { WaiterConfigurationService } from './waiter-configuration.service';
 
 @Controller('configurations')
@@ -12,7 +22,21 @@ export class WaiterConfigurationController {
 
   @Get(':name')
   async getConfiguration(@Param('name') name: string) {
-    return await this.waiterConfigurationService.getConfiguration(name);
+    try {
+      const result = await this.waiterConfigurationService.getConfiguration(
+        name
+      );
+      console.log(`Result:`, result);
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      // Handle other types of errors
+      throw new InternalServerErrorException(
+        'An error occurred while fetching the configuration'
+      );
+    }
   }
 
   @Delete('reset/:name')

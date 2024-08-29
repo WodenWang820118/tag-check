@@ -7,6 +7,7 @@ import { FolderService } from '../../os/folder/folder.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { FileService } from '../../os/file/file.service';
 import { RECORDING_FOLDER } from '../../configs/project.config';
+import { describe, beforeEach, it, expect, vi } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -36,28 +37,28 @@ describe('ProjectRecordingService', () => {
       .useMocker((token) => {
         if (token === FilePathService) {
           return {
-            getRecordingFilePath: jest.fn(() => ''),
+            getRecordingFilePath: vi.fn(() => ''),
           };
         }
 
         if (token === FileService) {
           return {
-            readJsonFile: jest.fn(() => ({})),
-            writeJsonFile: jest.fn(),
+            readJsonFile: vi.fn(() => ({})),
+            writeJsonFile: vi.fn(),
           };
         }
         if (token === FolderPathService) {
           return {
-            getRootProjectFolderPath: jest.fn(() => rootProjectPath),
-            getProjectFolderPath: jest.fn(() => projectPath),
-            getRecordingFolderPath: jest.fn().mockResolvedValue(recordingPath),
+            getRootProjectFolderPath: vi.fn(() => rootProjectPath),
+            getProjectFolderPath: vi.fn(() => projectPath),
+            getRecordingFolderPath: vi.fn().mockResolvedValue(recordingPath),
           };
         }
 
         if (token === FolderService) {
           return {
-            getJsonFilesFromDir: jest.fn(() => []),
-            deleteFolder: jest.fn(),
+            getJsonFilesFromDir: vi.fn(() => []),
+            deleteFolder: vi.fn(),
           };
         }
 

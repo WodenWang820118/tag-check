@@ -1,18 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateConfigurationDto } from './dto/create-configuration.dto';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
 import { Configuration } from './entities/configuration.entity';
 import { InjectModel } from '@nestjs/sequelize';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
   CONFIG_CURRENT_PROJECT_PATH,
   CONFIG_ROOT_PATH,
 } from '../configs/project.config';
+import { Repository } from 'sequelize-typescript';
 
 @Injectable()
 export class ConfigurationService {
   constructor(
-    @InjectModel(Configuration)
-    private configurationRepository: typeof Configuration
+    @InjectRepository(Configuration)
+    private configurationRepository: Repository<Configuration>
   ) {}
 
   async create(
@@ -29,6 +31,12 @@ export class ConfigurationService {
 
   async findOne(id: string) {
     return await this.configurationRepository.findOne({ where: { id: id } });
+  }
+
+  async findOneByName(name: string) {
+    return await this.configurationRepository.findOne({
+      where: { title: name },
+    });
   }
 
   async update(id: string, updateConfigurationDto: UpdateConfigurationDto) {

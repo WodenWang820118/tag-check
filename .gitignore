@@ -41,4 +41,9 @@ testem.log
 Thumbs.db
 .env
 .angular
-/tag_check_projects
+# Ignore everything in tag_check_projects
+/tag_check_projects/*
+
+# But don't ignore ng_gtm_integration_sample
+!/tag_check_projects/ng_gtm_integration_sample/
+

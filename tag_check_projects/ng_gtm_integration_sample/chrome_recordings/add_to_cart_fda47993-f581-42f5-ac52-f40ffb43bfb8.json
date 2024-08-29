@@ -1,0 +1,32 @@
+{
+  "title": "add_to_cart",
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 1737,
+      "height": 1100,
+      "deviceScaleFactor": 1,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": false
+    },
+    {
+      "type": "navigate",
+      "url": "https://gtm-integration-sample.netlify.app/"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [["div.active img"]],
+      "offsetY": 44.42852783203125,
+      "offsetX": 344.60711669921875
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [["app-details button"]],
+      "offsetY": 22.705322265625,
+      "offsetX": 67.1070556640625
+    }
+  ]
+}

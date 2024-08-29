@@ -1,0 +1,45 @@
+{
+  "position": 0,
+  "passed": true,
+  "completedTime": "2024-05-12T21:20:58.528Z",
+  "dataLayerSpec": {
+    "event": "begin_checkout",
+    "ecommerce": {
+      "value": "$value",
+      "currency": "$currency",
+      "items": [
+        {
+          "item_id": "$item_id",
+          "item_name": "$item_name",
+          "item_category": "$item_category",
+          "price": "$price",
+          "quantity": "$quantity"
+        }
+      ]
+    }
+  },
+  "dataLayer": {
+    "event": "begin_checkout",
+    "ecommerce": {
+      "value": 799,
+      "currency": "USD",
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_category": "Switzerland",
+          "quantity": 1,
+          "price": 799
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 47
+  },
+  "rawRequest": null,
+  "message": "Valid",
+  "destinationUrl": "https://gtm-integration-sample.netlify.app/checkout",
+  "eventId": "725270c3-6fed-4d5c-b3e4-9c8a3b3b2d20",
+  "testName": "Standard",
+  "eventName": "begin_checkout",
+  "requestPassed": false
+}

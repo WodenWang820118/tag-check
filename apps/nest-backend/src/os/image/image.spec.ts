@@ -4,6 +4,7 @@ import { ImageService } from './image.service';
 import { StreamableFile } from '@nestjs/common';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { join } from 'path';
+import { describe, beforeEach, expect, vi } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -47,9 +48,10 @@ describe('FolderImageServiceService', () => {
       eventId
     );
 
-    jest
-      .spyOn(folderPathService, 'getInspectionEventFolderPath')
-      .mockResolvedValue(imageSavingFolderPath);
+    vi.spyOn(
+      folderPathService,
+      'getInspectionEventFolderPath'
+    ).mockResolvedValue(imageSavingFolderPath);
 
     const result = await service.readImage(projectSlug, eventId);
 

@@ -16,6 +16,7 @@ import {
 } from '../../configs/project.config';
 import { ProjectInfoDto } from '../../dto/project-info.dto';
 import { existsSync, rmdirSync } from 'fs';
+import { describe, beforeEach, it, expect, vi } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
 const rootProject = join(
@@ -89,33 +90,33 @@ describe('ProjectInitializationService', () => {
   it('should initialize project', async () => {
     if (existsSync(initailzedProject))
       rmdirSync(initailzedProject, { recursive: true });
-    const rootProjectPath = jest
+    const rootProjectPath = vi
       .spyOn(folderPathService, 'getRootProjectFolderPath')
       .mockResolvedValue(rootProject);
-    const projectRoot = jest
+    const projectRoot = vi
       .spyOn(folderPathService, 'getProjectFolderPath')
       .mockResolvedValue(initailzedProject);
-    const createFolder = jest.spyOn(folderService, 'createFolder');
-    const recordingFolderPath = jest
+    const createFolder = vi.spyOn(folderService, 'createFolder');
+    const recordingFolderPath = vi
       .spyOn(folderPathService, 'getRecordingFolderPath')
       .mockResolvedValue(recordingFolder);
-    const reportSavingFolderPath = jest
+    const reportSavingFolderPath = vi
       .spyOn(folderPathService, 'getReportSavingFolderPath')
       .mockResolvedValue(reportSavingFolder);
-    const projectConfigFolderPath = jest
+    const projectConfigFolderPath = vi
       .spyOn(folderPathService, 'getProjectConfigFolderPath')
       .mockResolvedValue(projectConfigFolder);
 
-    const settingsFilePath = jest
+    const settingsFilePath = vi
       .spyOn(filePathService, 'getProjectSettingFilePath')
       .mockResolvedValue(settingsFile);
-    const metadataFilePath = jest
+    const metadataFilePath = vi
       .spyOn(filePathService, 'getProjectMetaDataFilePath')
       .mockResolvedValue(metadataFile);
-    const configFilePath = jest
+    const configFilePath = vi
       .spyOn(filePathService, 'getProjectConfigFilePath')
       .mockResolvedValue(configFile);
-    const writeJsonFile = jest.spyOn(fileService, 'writeJsonFile');
+    const writeJsonFile = vi.spyOn(fileService, 'writeJsonFile');
 
     await service.initProject('projectSlug', settings);
 
@@ -133,10 +134,10 @@ describe('ProjectInitializationService', () => {
 
   it('should create event folder', async () => {
     if (existsSync(eventFolder)) rmdirSync(eventFolder, { recursive: true });
-    const eventFolderPath = jest
+    const eventFolderPath = vi
       .spyOn(folderPathService, 'getInspectionEventFolderPath')
       .mockResolvedValue(eventFolder);
-    const createFolder = jest.spyOn(folderService, 'createFolder');
+    const createFolder = vi.spyOn(folderService, 'createFolder');
 
     await service.initInspectionEventSavingFolder('newProject', 'eventId');
 
