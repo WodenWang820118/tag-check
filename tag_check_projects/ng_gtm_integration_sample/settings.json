@@ -1,0 +1,60 @@
+{
+  "version": "1.0.0",
+  "rootProject": "D:/projects",
+  "projectName": "ng gtm integration sample",
+  "projectDescription": "",
+  "projectSlug": "ng_gtm_integration_sample",
+  "measurementId": "GTM-NBMX2DWS",
+  "googleSpreadsheetLink": "",
+  "headless": true,
+  "gtm": {
+    "gtmPreviewModeUrl": "https://tagassistant.google.com/#/?id=GTM-NBMX2DWS&url=https%3A%2F%2Fgtm-integration-sample.netlify.app%2F&source=TAG_MANAGER&gtm_auth=dWGYVg8mXuHHNyA2tt55zg&gtm_preview=env-3",
+    "isAccompanyMode": false,
+    "isRequestCheck": false,
+    "tagManagerUrl": "https://tagmanager.google.com/?utm_source=marketingplatform.google.com&utm_medium=et&utm_campaign=marketingplatform.google.com%2Fabout%2Ftag-manager%2F#/container/accounts/6140708819/containers/168785492/workspaces/28"
+  },
+  "preventNavigationEvents": [
+    "add_to_cart_9bd16720-16e3-4cc1-97c8-dfce66d6648a",
+    "add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff",
+    "add_shipping_info_bcbd3ee9-e258-442b-baf3-f85a5dfb9904"
+  ],
+  "authentication": {
+    "username": "",
+    "password": ""
+  },
+  "application": {
+    "localStorage": {
+      "data": [
+        {
+          "key": "consentPreferences",
+          "value": {
+            "ad_storage": true,
+            "analytics_storage": true,
+            "ad_user_data": true,
+            "ad_personalization": false
+          }
+        },
+        {
+          "key": "consent",
+          "value": true
+        }
+      ]
+    },
+    "cookie": {
+      "data": []
+    }
+  },
+  "browser": [
+    "--window-size=1440,900",
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-accelerated-2d-canvas",
+    "--disable-gpu",
+    "--incognito"
+  ],
+  "isAccompanyMode": true,
+  "isRequestCheck": true,
+  "tagManagerUrl": "https://tagmanager.google.com/?utm_source=marketingplatform.google.com&utm_medium=et&utm_campaign=marketingplatform.google.com%2Fabout%2Ftag-manager%2F#/container/accounts/6140708819/containers/168785492/workspaces/28",
+  "gtmPreviewModeUrl": "https://tagassistant.google.com/#/?id=GTM-NBMX2DWS&url=https%3A%2F%2Fgtm-integration-sample.netlify.app%2F&source=TAG_MANAGER&gtm_auth=dWGYVg8mXuHHNyA2tt55zg&gtm_preview=env-3"
+}

@@ -1,0 +1,45 @@
+{
+  "position": 0,
+  "passed": true,
+  "completedTime": "2024-07-17T09:16:24.683Z",
+  "dataLayerSpec": {
+    "event": "refund",
+    "ecommerce": {
+      "transaction_id": "$transaction_id",
+      "value": "$value",
+      "items": [
+        {
+          "item_id": "$item_id",
+          "item_name": "$item_name",
+          "item_category": "$item_category",
+          "price": "$price",
+          "quantity": "$quantity"
+        }
+      ]
+    }
+  },
+  "dataLayer": {
+    "event": "refund",
+    "ecommerce": {
+      "currency": "USD",
+      "transaction_id": "gtm-transaction-id-1234",
+      "value": 799,
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_category": "Switzerland",
+          "quantity": 1,
+          "price": 799
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 76
+  },
+  "rawRequest": "",
+  "message": "Valid",
+  "destinationUrl": "https://gtm-integration-sample.netlify.app/home",
+  "eventId": "b2fc5b94-2174-40e3-9330-6464e4fba7f3",
+  "testName": "Standard",
+  "eventName": "refund"
+}

@@ -8,6 +8,7 @@ import {
   EcommerceEventValidationStrategy,
   OldGA4EventsValidationStrategy,
 } from './dataLayer-validation-strategy';
+import { describe, beforeEach, it, expect } from 'vitest';
 
 describe('ValidationStrategy', () => {
   describe('EcommerceEventValidationStrategy', () => {

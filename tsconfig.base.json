@@ -16,8 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@data-access": ["./libs/data-access/src/index.ts"],
-      "@utils": ["./libs/utils/src/index.ts"],
-      "@ui": ["libs/ui/src/index.ts"]
+      "@ui": ["libs/ui/src/index.ts"],
+      "@utils": ["libs/utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

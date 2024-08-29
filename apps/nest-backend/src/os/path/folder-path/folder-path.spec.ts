@@ -10,6 +10,7 @@ import {
   RESULT_FOLDER,
 } from '../../../configs/project.config';
 import { ConfigurationService } from '../../../configuration/configuration.service';
+import { describe, beforeEach, expect, vi } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -26,7 +27,7 @@ describe('FolderPathService', () => {
       .useMocker((token) => {
         if (token === PathUtilsService) {
           return {
-            buildFilePath: jest.fn(
+            buildFilePath: vi.fn(
               async (
                 projectSlug: string,
                 folderName: string,
@@ -50,7 +51,6 @@ describe('FolderPathService', () => {
                     join(rootProjectPath, projectSlug, '', META_DATA)
                   );
                 } else {
-                  console.log('fileName', fileName);
                   return await Promise.resolve(
                     join(
                       rootProjectPath,
@@ -62,10 +62,8 @@ describe('FolderPathService', () => {
                 }
               }
             ),
-            getRootProjectFolderPath: jest
-              .fn()
-              .mockReturnValue(rootProjectPath),
-            buildFolderPath: jest.fn(
+            getRootProjectFolderPath: vi.fn().mockReturnValue(rootProjectPath),
+            buildFolderPath: vi.fn(
               async (projectSlug: string, folderName: string) => {
                 return await Promise.resolve(
                   join(rootProjectPath, projectSlug, folderName)
@@ -77,7 +75,7 @@ describe('FolderPathService', () => {
 
         if (token === ConfigurationService) {
           return {
-            getRootProjectPath: jest.fn().mockReturnValue(rootProjectPath),
+            getRootProjectPath: vi.fn().mockReturnValue(rootProjectPath),
           };
         }
 

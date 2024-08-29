@@ -4,6 +4,7 @@ import { ProjectSettingService } from './project-setting.service';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { Setting } from '@utils';
+import { describe, beforeEach, it, expect, vi } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -19,14 +20,14 @@ describe('ProjectSettingService', () => {
       .useMocker((token) => {
         if (token === FileService) {
           return {
-            readJsonFile: jest.fn(),
-            writeJsonFile: jest.fn(),
+            readJsonFile: vi.fn(),
+            writeJsonFile: vi.fn(),
           };
         }
 
         if (token === FilePathService) {
           return {
-            getProjectSettingFilePath: jest.fn(),
+            getProjectSettingFilePath: vi.fn(),
           };
         }
 
@@ -52,10 +53,10 @@ describe('ProjectSettingService', () => {
   it('should get project settings', async () => {
     const projectSlug = 'projectSlug';
     const content = { key: 'value' };
-    const readJsonFileSpy = jest
+    const readJsonFileSpy = vi
       .spyOn(fileService, 'readJsonFile')
       .mockReturnValue(content);
-    const getProjectSettingFilePathSpy = jest
+    const getProjectSettingFilePathSpy = vi
       .spyOn(filePathService, 'getProjectSettingFilePath')
       .mockResolvedValue('filePath');
 
@@ -72,17 +73,15 @@ describe('ProjectSettingService', () => {
   it('should update project settings', async () => {
     const projectSlug = 'projectSlug';
     const partialSettings = { key: 'value' };
-    const updateFn = jest.fn().mockReturnValue(partialSettings);
+    const updateFn = vi.fn().mockReturnValue(partialSettings);
     const filePath = 'filePath';
-    const readJsonFileSpy = jest
+    const readJsonFileSpy = vi
       .spyOn(fileService, 'readJsonFile')
       .mockReturnValue(partialSettings);
-    const getProjectSettingFilePathSpy = jest
+    const getProjectSettingFilePathSpy = vi
       .spyOn(filePathService, 'getProjectSettingFilePath')
       .mockResolvedValue(filePath);
-    const writeJsonFileSpy = jest
-      .spyOn(fileService, 'writeJsonFile')
-      .mockImplementation();
+    const writeJsonFileSpy = vi.spyOn(fileService, 'writeJsonFile');
 
     const result = await service.updateSettings(projectSlug, updateFn);
 
@@ -96,7 +95,7 @@ describe('ProjectSettingService', () => {
     const projectSlug = 'test-project';
 
     it('should call updateApplicationSettings for application section', async () => {
-      const spy = jest.spyOn(service, 'updateApplicationSettings');
+      const spy = vi.spyOn(service, 'updateApplicationSettings');
       const partialSettings: Partial<Setting> = {
         application: {
           localStorage: {
@@ -130,7 +129,7 @@ describe('ProjectSettingService', () => {
     });
 
     it('should call updateBrowserSettings for browser section', async () => {
-      const spy = jest.spyOn(service, 'updateBrowserSettings');
+      const spy = vi.spyOn(service, 'updateBrowserSettings');
       const partialSettings: Partial<Setting> = {
         browser: [
           '--window-size=1440,900',
@@ -153,7 +152,7 @@ describe('ProjectSettingService', () => {
     });
 
     it('should call updateGtmSettings for gtm section', async () => {
-      const spy = jest.spyOn(service, 'updateGtmSettings');
+      const spy = vi.spyOn(service, 'updateGtmSettings');
       const partialSettings: Partial<Setting> = {
         gtm: {
           isAccompanyMode: true,
@@ -164,7 +163,6 @@ describe('ProjectSettingService', () => {
             'https://tagassistant.google.com/#/?id=GTM-NBMX2DWS&url=https%3A%2F%2Fgtm-integration-sample.netlify.app%2F&source=TAG_MANAGER&gtm_auth=dWGYVg8mXuHHNyA2tt55zg&gtm_preview=env-3',
         },
       };
-      console.log(partialSettings.gtm);
 
       await service.updateProjectSettings(projectSlug, 'gtm', partialSettings);
 
@@ -172,7 +170,7 @@ describe('ProjectSettingService', () => {
     });
 
     it('should call updatePreventNavigationEvents for preventNavigationEvents section', async () => {
-      const spy = jest
+      const spy = vi
         .spyOn(service, 'updateSettings')
         .mockImplementation(
           async (
@@ -197,7 +195,7 @@ describe('ProjectSettingService', () => {
     });
 
     it('should call updateAuthenticationSettings for authentication section', async () => {
-      const spy = jest.spyOn(service, 'updateAuthenticationSettings');
+      const spy = vi.spyOn(service, 'updateAuthenticationSettings');
       const partialSettings = {
         authentication: { username: 'user', password: 'pass' },
       };
@@ -212,7 +210,7 @@ describe('ProjectSettingService', () => {
     });
 
     it('should call updateGeneralSettings for others section', async () => {
-      const spy = jest.spyOn(service, 'updateGeneralSettings');
+      const spy = vi.spyOn(service, 'updateGeneralSettings');
       const partialSettings: Partial<Setting> = { headless: true };
 
       await service.updateProjectSettings(
@@ -239,12 +237,10 @@ describe('ProjectSettingService', () => {
     const projectSlug = 'new-project';
     const settings = { key: 'value' } as any;
     const filePath = 'filePath';
-    const getProjectSettingFilePathSpy = jest
+    const getProjectSettingFilePathSpy = vi
       .spyOn(filePathService, 'getProjectSettingFilePath')
       .mockResolvedValue(filePath);
-    const writeJsonFileSpy = jest
-      .spyOn(fileService, 'writeJsonFile')
-      .mockImplementation();
+    const writeJsonFileSpy = vi.spyOn(fileService, 'writeJsonFile');
 
     const result = await service.createProjectSettings(projectSlug, settings);
 
