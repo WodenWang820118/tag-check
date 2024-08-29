@@ -10,9 +10,7 @@ export class WaiterConfigurationService {
   }
 
   async getConfiguration(name: string) {
-    console.log(`Fetching configuration for: ${name}`);
     const configuration = await this.configurationService.findOneByName(name);
-    console.log(`Configuration:`, configuration);
     if (!configuration) {
       throw new NotFoundException(`Configuration '${name}' not found`);
     }

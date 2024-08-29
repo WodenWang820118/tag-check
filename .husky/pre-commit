@@ -1,2 +1,2 @@
-# Run your e2e tests
 npm run test:e2e
+npm run test-back:unit

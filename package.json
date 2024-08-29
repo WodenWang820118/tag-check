@@ -49,8 +49,8 @@
     "test:cov": "vitest run --coverage",
     "test": "vitest run",
     "prepare": "husky",
-    "TODO": "husky should run unit tests as well",
-    "test:e2e": "vitest run ./apps/nest-backend/test/app.e2e-spec.ts"
+    "test:e2e": "vitest run ./apps/nest-backend/test/app.e2e-spec.ts",
+    "test-back:unit": "vitest --root=apps/nest-backend --exclude=**/test/*e2e-spec.ts --watch=false"
   },
   "private": true,
   "devDependencies": {

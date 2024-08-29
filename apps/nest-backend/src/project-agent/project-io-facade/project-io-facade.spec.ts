@@ -7,15 +7,16 @@ import { FolderPathService } from '../../os/path/folder-path/folder-path.service
 import { FolderService } from '../../os/folder/folder.service';
 import { ProjectIoService } from '../../os/project-io/project-io.service';
 import { createReadStream, existsSync, mkdirSync } from 'fs';
+import { describe, beforeEach, it, expect, vi } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  existsSync: jest.fn(() => true),
-  mkdirSync: jest.fn(() => ({})),
-  createReadStream: jest.fn(() => {
+vi.mock('fs', () => ({
+  // ...jest.requireActual('fs'),
+  existsSync: vi.fn(() => true),
+  mkdirSync: vi.fn(() => ({})),
+  createReadStream: vi.fn(() => {
     return {
-      on: jest.fn((event, cb) => {
+      on: vi.fn((event, cb) => {
         if (event === 'close') {
           cb();
         }
@@ -50,20 +51,20 @@ describe('ProjectIoFacadeService', () => {
       .useMocker((token) => {
         if (token === FolderPathService) {
           return {
-            getRootProjectFolderPath: jest.fn(() => rootProjectPath),
-            getProjectFolderPath: jest.fn(() => projectPath),
+            getRootProjectFolderPath: vi.fn(() => rootProjectPath),
+            getProjectFolderPath: vi.fn(() => projectPath),
           };
         }
 
         if (token === FolderService) {
           return {
-            deleteFolder: jest.fn(),
+            deleteFolder: vi.fn(),
           };
         }
 
         if (token === ProjectIoService) {
           return {
-            compressProject: jest.fn(),
+            compressProject: vi.fn(),
           };
         }
 

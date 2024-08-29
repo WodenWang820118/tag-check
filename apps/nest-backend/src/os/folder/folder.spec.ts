@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { FolderService } from './folder.service';
-import { Dirent } from 'fs';
+import { describe, beforeEach, it, expect } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
 

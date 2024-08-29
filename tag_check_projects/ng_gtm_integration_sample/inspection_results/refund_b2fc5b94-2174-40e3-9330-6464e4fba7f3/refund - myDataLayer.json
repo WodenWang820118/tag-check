@@ -1,0 +1,250 @@
+[
+  {
+    "gtm.start": 1721207704590,
+    "event": "gtm.js",
+    "gtm.uniqueEventId": 1
+  },
+  {
+    "event": "gtm.dom",
+    "gtm.uniqueEventId": 4
+  },
+  {
+    "event": "componentsLoaded",
+    "gtm.uniqueEventId": 5
+  },
+  {
+    "event": "gtm.load",
+    "gtm.uniqueEventId": 6
+  },
+  {
+    "event": "gtm.triggerGroup",
+    "gtm.triggers": "168785492_202",
+    "gtm.uniqueEventId": 20
+  },
+  {
+    "event": "gtm.historyChange",
+    "gtm.historyChangeSource": "pushState",
+    "gtm.oldUrlFragment": "",
+    "gtm.newUrlFragment": "",
+    "gtm.oldHistoryState": {
+      "navigationId": 5
+    },
+    "gtm.newHistoryState": {
+      "navigationId": 6
+    },
+    "gtm.oldUrl": "https://gtm-integration-sample.netlify.app/transaction/thankyou",
+    "gtm.newUrl": "https://gtm-integration-sample.netlify.app/home",
+    "gtm.uniqueEventId": 79
+  },
+  {
+    "event": "page_view",
+    "page_path": "/home",
+    "page_title": "Home",
+    "page_location": "https://gtm-integration-sample.netlify.app/home",
+    "gtm.uniqueEventId": 82
+  },
+  {
+    "ecommerce": null
+  },
+  {
+    "event": "view_promotion",
+    "ecommerce": {
+      "promotion_id": "city001",
+      "promotion_name": "Switzerland",
+      "creative_name": "travel_slide",
+      "creative_slot": "featured_attributor",
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland"
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 14
+  },
+  {
+    "event": "update_consent",
+    "ad_storage": "granted",
+    "analytics_storage": "granted",
+    "ad_user_data": "granted",
+    "ad_personalization": "denied",
+    "gtm.uniqueEventId": 85
+  },
+  {
+    "event": "select_promotion",
+    "ecommerce": {
+      "promotion_id": "city001",
+      "promotion_name": "Switzerland",
+      "creative_name": "travel_slide",
+      "creative_slot": "featured_attributor",
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland"
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 21
+  },
+  {
+    "event": "view_item",
+    "ecommerce": {
+      "currency": "USD",
+      "value": 799,
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_category": "Switzerland",
+          "price": 799,
+          "quantity": 1
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 24
+  },
+  {
+    "event": "select_item",
+    "ecommerce": {
+      "currency": "USD",
+      "value": 799,
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_category": "Switzerland",
+          "price": 799,
+          "quantity": 1
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 27
+  },
+  {
+    "event": "add_to_cart",
+    "ecommerce": {
+      "value": 799,
+      "currency": "USD",
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_list_name": "destinations",
+          "item_category": "Switzerland",
+          "quantity": 1,
+          "price": 799
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 36
+  },
+  {
+    "event": "view_cart",
+    "ecommerce": {
+      "currency": "USD",
+      "value": 799,
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_category": "Switzerland",
+          "quantity": 1,
+          "price": 799
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 39
+  },
+  {
+    "event": "begin_checkout",
+    "ecommerce": {
+      "value": 799,
+      "currency": "USD",
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_category": "Switzerland",
+          "quantity": 1,
+          "price": 799
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 51
+  },
+  {
+    "event": "CustomScroll",
+    "customScrollPercent": 100,
+    "gtm.uniqueEventId": 63
+  },
+  {
+    "event": "add_shipping_info",
+    "ecommerce": {
+      "value": 799,
+      "currency": "USD",
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_category": "Switzerland",
+          "quantity": 1,
+          "price": 799
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 60
+  },
+  {
+    "event": "add_payment_info",
+    "ecommerce": {
+      "value": 799,
+      "currency": "USD",
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_category": "Switzerland",
+          "quantity": 1,
+          "price": 799
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 64
+  },
+  {
+    "event": "purchase",
+    "ecommerce": {
+      "currency": "USD",
+      "transaction_id": "76423d08-7ecc-4237-8150-e103abb8b8c0",
+      "value": 799,
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_category": "Switzerland",
+          "quantity": 1,
+          "price": 799
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 70
+  },
+  {
+    "event": "refund",
+    "ecommerce": {
+      "currency": "USD",
+      "transaction_id": "gtm-transaction-id-1234",
+      "value": 799,
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_category": "Switzerland",
+          "quantity": 1,
+          "price": 799
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 76
+  }
+]

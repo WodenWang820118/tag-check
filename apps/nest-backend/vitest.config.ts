@@ -10,7 +10,7 @@ export default defineConfig({
       '**/*.{test,spec,e2e-spec}.?(c|m)[jt]s?(x)',
       './test/**/*.e2e-spec.ts',
     ],
-    reporters: ['default'],
+    reporters: ['verbose'],
     testTimeout: 120000,
   },
   plugins: [

@@ -1,0 +1,16 @@
+{
+  "position": 0,
+  "passed": false,
+  "requestPassed": false,
+  "incorrectInfo": [],
+  "completedTime": "2024-04-21T06:07:00.585Z",
+  "dataLayerSpec": {},
+  "dataLayer": {},
+  "reformedDataLayer": {},
+  "rawRequest": "",
+  "message": "",
+  "destinationUrl": "",
+  "eventId": "296edee3-0e12-4307-9ea6-cbb6dd176e75",
+  "testName": "Standard",
+  "eventName": "view_item"
+}

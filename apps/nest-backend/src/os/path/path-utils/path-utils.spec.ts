@@ -3,6 +3,7 @@ import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { ConfigurationService } from '../../../configuration/configuration.service';
 import { join } from 'path';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -20,7 +21,7 @@ describe('PathUtilsService', () => {
       .useMocker((token) => {
         if (token === ConfigurationService) {
           return {
-            getRootProjectPath: jest.fn().mockReturnValue(rootProjectPath),
+            getRootProjectPath: vi.fn().mockReturnValue(rootProjectPath),
           };
         }
 

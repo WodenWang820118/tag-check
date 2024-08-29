@@ -12,6 +12,7 @@ import {
   RECORDING_FOLDER,
   RESULT_FOLDER,
 } from '../../../configs/project.config';
+import { describe, beforeEach, expect, vi } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -28,7 +29,7 @@ describe('FilePathService', () => {
       .useMocker((token) => {
         if (token === PathUtilsService) {
           return {
-            buildFilePath: jest.fn(
+            buildFilePath: vi.fn(
               async (
                 projectSlug: string,
                 folderName: string,
@@ -52,7 +53,6 @@ describe('FilePathService', () => {
                     join(rootProjectPath, projectSlug, '', META_DATA)
                   );
                 } else {
-                  console.log('fileName', fileName);
                   return await Promise.resolve(
                     join(
                       rootProjectPath,
@@ -64,19 +64,19 @@ describe('FilePathService', () => {
                 }
               }
             ),
-            getRootProjectPath: jest.fn().mockReturnValue(rootProjectPath),
+            getRootProjectPath: vi.fn().mockReturnValue(rootProjectPath),
           };
         }
 
         if (token === ConfigurationService) {
           return {
-            getRootProjectPath: jest.fn().mockReturnValue(rootProjectPath),
+            getRootProjectPath: vi.fn().mockReturnValue(rootProjectPath),
           };
         }
 
         if (token === FolderPathService) {
           return {
-            getReportSavingFolderPath: jest.fn(async (projectSlug: string) => {
+            getReportSavingFolderPath: vi.fn(async (projectSlug: string) => {
               return await Promise.resolve(
                 join(rootProjectPath, projectSlug, RESULT_FOLDER)
               );
