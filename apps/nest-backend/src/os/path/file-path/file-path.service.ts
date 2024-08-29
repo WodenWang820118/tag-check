@@ -11,8 +11,6 @@ import {
 } from '../../../configs/project.config';
 import path from 'path';
 import { extractEventNameFromId } from '@utils';
-import { existsSync } from 'fs';
-// TODO: if it is needed to catch the path not found error or let it be thrown in the upper level?
 @Injectable()
 export class FilePathService {
   constructor(
@@ -175,13 +173,6 @@ export class FilePathService {
       eventId,
       `${eventName} - myDataLayer.json`
     );
-
-    if (!existsSync(myDataLayerFile)) {
-      throw new HttpException(
-        'My data layer file does not exist',
-        HttpStatus.NOT_FOUND
-      );
-    }
 
     return myDataLayerFile;
   }

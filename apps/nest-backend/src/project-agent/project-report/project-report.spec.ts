@@ -7,6 +7,7 @@ import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { FileService } from '../../os/file/file.service';
 import { RECORDING_FOLDER } from '../../configs/project.config';
 import { join } from 'path';
+import { describe, beforeEach, it, expect, vi } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -38,23 +39,23 @@ describe('ProjectReportService', () => {
       .useMocker((token) => {
         if (token === FilePathService) {
           return {
-            getRecordingFilePath: jest.fn(() => ''),
-            getInspectionResultFilePath: jest.fn(() => ''),
+            getRecordingFilePath: vi.fn(() => ''),
+            getInspectionResultFilePath: vi.fn(() => ''),
           };
         }
 
         if (token === FileService) {
           return {
-            readJsonFile: jest.fn(() => ({})),
-            writeJsonFile: jest.fn(),
+            readJsonFile: vi.fn(() => ({})),
+            writeJsonFile: vi.fn(),
           };
         }
         if (token === FolderPathService) {
           return {
-            getRootProjectFolderPath: jest.fn(() => rootProjectPath),
-            getProjectFolderPath: jest.fn(() => projectPath),
-            getRecordingFolderPath: jest.fn().mockResolvedValue(recordingPath),
-            getReportSavingFolderPath: jest
+            getRootProjectFolderPath: vi.fn(() => rootProjectPath),
+            getProjectFolderPath: vi.fn(() => projectPath),
+            getRecordingFolderPath: vi.fn().mockResolvedValue(recordingPath),
+            getReportSavingFolderPath: vi
               .fn()
               .mockResolvedValue(reportSavingFolderPath),
           };
@@ -62,9 +63,9 @@ describe('ProjectReportService', () => {
 
         if (token === FolderService) {
           return {
-            readFolderFileNames: jest.fn(() => []),
-            getJsonFilesFromDir: jest.fn(() => []),
-            deleteFolder: jest.fn(),
+            readFolderFileNames: vi.fn(() => []),
+            getJsonFilesFromDir: vi.fn(() => []),
+            deleteFolder: vi.fn(),
           };
         }
 
@@ -90,7 +91,7 @@ describe('ProjectReportService', () => {
   });
 
   it('should get project event reports', async () => {
-    const getProjectEventReportFolderNamesSpy = jest.spyOn(
+    const getProjectEventReportFolderNamesSpy = vi.spyOn(
       service,
       'getProjectEventReportFolderNames'
     );

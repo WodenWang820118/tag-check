@@ -5,6 +5,7 @@ import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { join } from 'path';
 import { existsSync, rmSync } from 'fs';
+import { describe, beforeEach, it, expect, vi } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -49,10 +50,16 @@ describe('XlsxReportSingleEventService', () => {
     const mockEventId = 'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff';
     const mockProjectName = 'ng_gtm_integration_sample';
 
-    const eventSavingFolder = jest
+    const eventSavingFolder = vi
       .spyOn(folderPathService, 'getInspectionEventFolderPath')
       .mockResolvedValue(
         join(
+          __dirname,
+          '..',
+          '..',
+          '..',
+          '..',
+          '..',
           'tag_check_projects',
           mockProjectName,
           'inspection_results',
@@ -60,10 +67,16 @@ describe('XlsxReportSingleEventService', () => {
         )
       );
 
-    const getImageFilePath = jest
+    const getImageFilePath = vi
       .spyOn(filePathService, 'getImageFilePath')
       .mockResolvedValue(
         join(
+          __dirname,
+          '..',
+          '..',
+          '..',
+          '..',
+          '..',
           'tag_check_projects',
           mockProjectName,
           'inspection_results',
@@ -95,6 +108,12 @@ describe('XlsxReportSingleEventService', () => {
 
     // Verify that the file was created
     const expectedFilePath = join(
+      __dirname,
+      '..',
+      '..',
+      '..',
+      '..',
+      '..',
       'tag_check_projects',
       mockProjectName,
       'inspection_results',

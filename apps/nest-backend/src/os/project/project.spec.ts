@@ -6,6 +6,7 @@ import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { Dirent } from 'fs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -19,13 +20,13 @@ describe('ProjectService', () => {
       .useMocker((token) => {
         if (token === FileService) {
           return {
-            readJsonFile: jest.fn().mockResolvedValue({ test: 'test' }),
+            readJsonFile: vi.fn().mockResolvedValue({ test: 'test' }),
           };
         }
 
         if (token === FolderService) {
           return {
-            readFolderFiles: jest.fn().mockReturnValue([
+            readFolderFiles: vi.fn().mockReturnValue([
               {
                 name: 'test',
                 parentPath: 'test',
@@ -44,14 +45,14 @@ describe('ProjectService', () => {
 
         if (token === FolderPathService) {
           return {
-            getRootProjectFolderPath: jest.fn().mockResolvedValue('root'),
+            getRootProjectFolderPath: vi.fn().mockResolvedValue('root'),
           };
         }
 
         if (token === FilePathService) {
           return {
-            getProjectSettingFilePath: jest.fn().mockResolvedValue('settings'),
-            getProjectMetaDataFilePath: jest.fn().mockResolvedValue('metadata'),
+            getProjectSettingFilePath: vi.fn().mockResolvedValue('settings'),
+            getProjectMetaDataFilePath: vi.fn().mockResolvedValue('metadata'),
           };
         }
 

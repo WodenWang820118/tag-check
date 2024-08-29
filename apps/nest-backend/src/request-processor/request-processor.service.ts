@@ -28,11 +28,8 @@ export class RequestProcessorService {
       } else if (key.startsWith('epn.')) {
         const customKey = key.split('.')[1];
         dataLayer[customKey] = val;
-      } else if (key.startsWith('cu')) {
+      } else if (key === 'cu') {
         dataLayer['currency'] = val;
-      } else {
-        // ignore other parameters
-        continue;
       }
     }
     return dataLayer;
