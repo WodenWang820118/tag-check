@@ -15,7 +15,7 @@
         "main": "apps/nest-backend/src/main.ts",
         "tsConfig": "apps/nest-backend/tsconfig.app.json",
         "generatePackageJson": true,
-        "webpackConfig": "apps/nest-backend/webpack.config.js"
+        "webpackConfig": "apps/nest-backend/webpack.config.cjs"
       },
       "configurations": {
         "development": {},
