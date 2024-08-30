@@ -1,10 +1,11 @@
 {
   "name": "tag-check",
   "version": "1.0.0",
-  "main": "main.js",
+  "main": "main.cjs",
   "author": "Guan Xin Wang",
   "description": "A tool to check the data layer of a website",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "development": "-------------all development scripts-------------",
     "dev-front": "nx serve ng-frontend",
@@ -26,7 +27,7 @@
     "build-staging": "npm run build-staging-front && npm run build-staging-back",
     "build-prod-front": "nx build ng-frontend --configuration production --optimization --base-href ./",
     "build-prod-back": "cross-env-shell NODE_ENV=prod \"nx build nest-backend\"",
-    "build-prod": "npm run build-prod-front && npm run build-prod-back && node hooks.js",
+    "build-prod": "npm run build-prod-front && npm run build-prod-back && node hooks.cjs",
     "build-tag-build": "nx build ng-tag-build --configuration production --optimization",
     "make": "cross-env-shell NODE_ENV=prod \"npm run build-prod && electron-forge make\"",
     "package": "cross-env-shell NODE_ENV=prod \"npm run build-prod && electron-forge package\"",
