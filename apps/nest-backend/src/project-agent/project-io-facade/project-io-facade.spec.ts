@@ -1,5 +1,4 @@
 import { Test } from '@nestjs/testing';
-import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { ProjectIoFacadeService } from './project-io-facade.service';
 import { join } from 'path';
 import { StreamableFile } from '@nestjs/common';
@@ -9,9 +8,7 @@ import { ProjectIoService } from '../../os/project-io/project-io.service';
 import { createReadStream, existsSync, mkdirSync } from 'fs';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 
-const moduleMocker = new ModuleMocker(global);
 vi.mock('fs', () => ({
-  // ...jest.requireActual('fs'),
   existsSync: vi.fn(() => true),
   mkdirSync: vi.fn(() => ({})),
   createReadStream: vi.fn(() => {
@@ -69,11 +66,7 @@ describe('ProjectIoFacadeService', () => {
         }
 
         if (typeof token === 'function') {
-          const mockMetadata = moduleMocker.getMetadata(
-            token
-          ) as MockFunctionMetadata<any, any>;
-          const Mock = moduleMocker.generateFromMetadata(mockMetadata);
-          return new Mock();
+          return vi.fn();
         }
       })
       .compile();

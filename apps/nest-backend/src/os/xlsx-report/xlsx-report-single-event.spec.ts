@@ -1,13 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { XlsxReportSingleEventService } from './xlsx-report-single-event.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { join } from 'path';
 import { existsSync, rmSync } from 'fs';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
-
-const moduleMocker = new ModuleMocker(global);
 
 describe('XlsxReportSingleEventService', () => {
   let service: XlsxReportSingleEventService;
@@ -24,11 +21,7 @@ describe('XlsxReportSingleEventService', () => {
     })
       .useMocker((token) => {
         if (typeof token === 'function') {
-          const mockMetadata = moduleMocker.getMetadata(
-            token
-          ) as MockFunctionMetadata<any, any>;
-          const Mock = moduleMocker.generateFromMetadata(mockMetadata);
-          return new Mock();
+          return vi.fn();
         }
       })
       .compile();

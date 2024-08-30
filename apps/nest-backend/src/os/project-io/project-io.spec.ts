@@ -1,9 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { ProjectIoService } from './project-io.service';
-import { describe, beforeEach, it, expect } from 'vitest';
-
-const moduleMocker = new ModuleMocker(global);
+import { describe, beforeEach, it, expect, vi } from 'vitest';
 
 describe('ProjectIoService', () => {
   let service: ProjectIoService;
@@ -14,11 +11,7 @@ describe('ProjectIoService', () => {
     })
       .useMocker((token) => {
         if (typeof token === 'function') {
-          const mockMetadata = moduleMocker.getMetadata(
-            token
-          ) as MockFunctionMetadata<any, any>;
-          const Mock = moduleMocker.generateFromMetadata(mockMetadata);
-          return new Mock();
+          return vi.fn();
         }
       })
       .compile();
