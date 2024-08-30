@@ -1,5 +1,4 @@
 import { Test } from '@nestjs/testing';
-import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { ProjectAbstractReportService } from './project-abstract-report.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { FolderService } from '../../os/folder/folder.service';
@@ -9,7 +8,6 @@ import * as fs from 'fs';
 import { join } from 'path';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 
-const moduleMocker = new ModuleMocker(global);
 vi.mock('fs', () => ({
   readFileSync: vi.fn(() => '{}'),
   existsSync: vi.fn(),
@@ -94,11 +92,7 @@ describe('ProjectAbstractReportService', () => {
     })
       .useMocker((token) => {
         if (typeof token === 'function') {
-          const mockMetadata = moduleMocker.getMetadata(
-            token
-          ) as MockFunctionMetadata<any, any>;
-          const Mock = moduleMocker.generateFromMetadata(mockMetadata);
-          return new Mock();
+          return vi.fn();
         }
       })
       .compile();
@@ -191,7 +185,6 @@ describe('ProjectAbstractReportService', () => {
       projectSlug,
       eventId
     );
-    console.warn(`RESULT: ` + result);
     expect(abstractPath).toHaveBeenCalledWith(projectSlug, eventId);
     expect(existsSync).toHaveBeenCalledWith(filePath);
     expect(readJsonFile).toHaveBeenCalledWith(filePath);
