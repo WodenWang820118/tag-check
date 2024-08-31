@@ -1,5 +1,4 @@
 import { Test } from '@nestjs/testing';
-import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { join } from 'path';
 import { FolderPathService } from './folder-path.service';
@@ -11,8 +10,6 @@ import {
 } from '../../../configs/project.config';
 import { ConfigurationService } from '../../../configuration/configuration.service';
 import { describe, beforeEach, expect, vi } from 'vitest';
-
-const moduleMocker = new ModuleMocker(global);
 
 describe('FolderPathService', () => {
   let service: FolderPathService;
@@ -80,11 +77,7 @@ describe('FolderPathService', () => {
         }
 
         if (typeof token === 'function') {
-          const mockMetadata = moduleMocker.getMetadata(
-            token
-          ) as MockFunctionMetadata<any, any>;
-          const Mock = moduleMocker.generateFromMetadata(mockMetadata);
-          return new Mock();
+          return vi.fn();
         }
       })
       .compile();
