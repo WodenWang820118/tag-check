@@ -15,7 +15,8 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DataSourceFacadeService } from '../../../../shared/services/facade/data-source-facade.service';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
-import { ProjectFacadeService } from './../../../../shared/services/facade/project-facade.service';
+import { ProjectFacadeService } from '../../../../shared/services/facade/project-facade.service';
+import { WebSocketService } from '../../../../shared/services/web-socket/web-socket.service';
 
 @Component({
   selector: 'app-report-table',
@@ -65,7 +66,8 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
     public projectFacadeService: ProjectFacadeService,
     public dataSourceFacadeService: DataSourceFacadeService,
     public testRunningFacadeService: TestRunningFacadeService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private webSocketService: WebSocketService
   ) {}
 
   ngAfterViewInit() {
