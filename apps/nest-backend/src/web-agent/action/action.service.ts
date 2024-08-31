@@ -10,6 +10,7 @@ import { HoverHandler } from './handlers/hover-handler.service';
 import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
+import { EventsGatewayService } from '../../events-gateway/events-gateway.service';
 
 @Injectable()
 export class ActionService {
@@ -22,7 +23,8 @@ export class ActionService {
     private hoverHandler: HoverHandler,
     private requestInterceptor: RequestInterceptor,
     private fileService: FileService,
-    private filePathService: FilePathService
+    private filePathService: FilePathService,
+    private eventsGatewayService: EventsGatewayService
   ) {
     this.stepExecutor = new StepExecutor(
       {
@@ -47,6 +49,8 @@ export class ActionService {
 
     await this.requestInterceptor.setupInterception(page, projectName, eventId);
     let isLastStep = false;
+    const lastStep = operation.steps.length;
+
     for (let i = 0; i < operation.steps.length; i++) {
       const step = operation.steps[i];
 
@@ -57,9 +61,11 @@ export class ActionService {
       };
 
       Logger.log(
-        `Performing step ${i + 1} of ${operation.steps.length}`,
+        `Performing step ${i + 1} of ${lastStep}`,
         `${ActionService.name}.${ActionService.prototype.performOperation.name}`
       );
+
+      this.eventsGatewayService.sendProgressUpdate(lastStep, i + 1); // Send progress update
 
       await this.stepExecutor.executeStep(
         page,
