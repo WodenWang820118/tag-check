@@ -1,12 +1,9 @@
 import { Test } from '@nestjs/testing';
-import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { ImageService } from './image.service';
 import { StreamableFile } from '@nestjs/common';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { join } from 'path';
 import { describe, beforeEach, expect, vi } from 'vitest';
-
-const moduleMocker = new ModuleMocker(global);
 
 describe('FolderImageServiceService', () => {
   let service: ImageService;
@@ -18,11 +15,7 @@ describe('FolderImageServiceService', () => {
     })
       .useMocker((token) => {
         if (typeof token === 'function') {
-          const mockMetadata = moduleMocker.getMetadata(
-            token
-          ) as MockFunctionMetadata<any, any>;
-          const Mock = moduleMocker.generateFromMetadata(mockMetadata);
-          return new Mock();
+          return vi.fn();
         }
       })
       .compile();

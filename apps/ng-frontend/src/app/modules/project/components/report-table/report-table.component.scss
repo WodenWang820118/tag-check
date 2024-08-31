@@ -1,7 +1,6 @@
 .report-table {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
 
   &__header {
     display: flex;
@@ -32,7 +31,7 @@ table {
 }
 
 .mat-badge-content {
-  font-family: 'Material Icons'
+  font-family: 'Material Icons';
 }
 
 .spinner {

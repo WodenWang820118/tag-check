@@ -1,10 +1,7 @@
 import { Test } from '@nestjs/testing';
-import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { FileService } from './file.service';
 import { StreamableFile } from '@nestjs/common';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-
-const moduleMocker = new ModuleMocker(global);
 
 describe('FileService', () => {
   let service: FileService;
@@ -14,11 +11,7 @@ describe('FileService', () => {
     })
       .useMocker((token) => {
         if (typeof token === 'function') {
-          const mockMetadata = moduleMocker.getMetadata(
-            token
-          ) as MockFunctionMetadata<any, any>;
-          const Mock = moduleMocker.generateFromMetadata(mockMetadata);
-          return new Mock();
+          return vi.fn();
         }
       })
       .compile();

@@ -12,10 +12,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatBadgeModule } from '@angular/material/badge';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DataSourceFacadeService } from '../../../../shared/services/facade/data-source-facade.service';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
-import { ProjectFacadeService } from './../../../../shared/services/facade/project-facade.service';
+import { ProjectFacadeService } from '../../../../shared/services/facade/project-facade.service';
+import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-chart.component';
 
 @Component({
   selector: 'app-report-table',
@@ -32,7 +32,7 @@ import { ProjectFacadeService } from './../../../../shared/services/facade/proje
     MatInputModule,
     MatCheckboxModule,
     MatBadgeModule,
-    MatProgressSpinnerModule,
+    ProgressPieChartComponent,
   ],
   providers: [
     ProjectFacadeService,

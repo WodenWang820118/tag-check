@@ -11,7 +11,11 @@ async function bootstrap() {
   const { WaiterModule } = await import('./waiter/waiter.module');
   await lazyModuleLoader.load(() => WaiterModule);
 
-  app.enableCors();
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+  });
   // Handle uncaught exceptions
   app.useGlobalFilters(new AllExceptionsFilter());
   // 1. Generate the tree as text
