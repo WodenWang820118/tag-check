@@ -21,21 +21,21 @@ import { Logger } from '@nestjs/common';
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   },
 })
-export class EventsGateway
+export class EventsGatewayService
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer() server: Server;
 
   afterInit(socket: Server) {
-    Logger.log('WebSocket Gateway initialized', `${EventsGateway.name}`);
+    Logger.log('WebSocket Gateway initialized', `${EventsGatewayService.name}`);
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    Logger.log('Client connected', `${EventsGateway.name}`);
+    Logger.log('Client connected', `${EventsGatewayService.name}`);
   }
 
   handleDisconnect(client: Socket) {
-    Logger.log('Client disconnected', `${EventsGateway.name}`);
+    Logger.log('Client disconnected', `${EventsGatewayService.name}`);
   }
 
   @SubscribeMessage('events')
@@ -43,12 +43,15 @@ export class EventsGateway
     @MessageBody() data: string,
     @ConnectedSocket() client: Socket
   ): string {
-    Logger.log(`Received message: ${data}`, `${EventsGateway.name}`);
-    this.sendToAll('events', 'Hello from server');
+    Logger.log(`Received message: ${data}`, `${EventsGatewayService.name}`);
     return data;
   }
 
   sendToAll(event: string, message: any) {
     this.server.emit(event, message);
+  }
+
+  sendProgressUpdate(totalSteps: number, currentStep: number) {
+    this.server.emit('progressUpdate', { totalSteps, currentStep });
   }
 }

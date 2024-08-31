@@ -12,11 +12,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatBadgeModule } from '@angular/material/badge';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DataSourceFacadeService } from '../../../../shared/services/facade/data-source-facade.service';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { ProjectFacadeService } from '../../../../shared/services/facade/project-facade.service';
-import { WebSocketService } from '../../../../shared/services/web-socket/web-socket.service';
+import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-chart.component';
 
 @Component({
   selector: 'app-report-table',
@@ -33,7 +32,7 @@ import { WebSocketService } from '../../../../shared/services/web-socket/web-soc
     MatInputModule,
     MatCheckboxModule,
     MatBadgeModule,
-    MatProgressSpinnerModule,
+    ProgressPieChartComponent,
   ],
   providers: [
     ProjectFacadeService,
@@ -66,8 +65,7 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
     public projectFacadeService: ProjectFacadeService,
     public dataSourceFacadeService: DataSourceFacadeService,
     public testRunningFacadeService: TestRunningFacadeService,
-    private route: ActivatedRoute,
-    private webSocketService: WebSocketService
+    private route: ActivatedRoute
   ) {}
 
   ngAfterViewInit() {

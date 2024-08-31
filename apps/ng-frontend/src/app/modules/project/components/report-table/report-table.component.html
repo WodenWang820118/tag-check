@@ -85,13 +85,9 @@
         @if ((testRunningFacadeService.isRunningTest$ | async) === true) { @if
         ((testRunningFacadeService.eventRunningTest$ | async) ===
         element.eventId) {
-        <mat-progress-spinner
-          class="spinner"
-          color="primary"
-          mode="indeterminate"
-          diameter="30"
-        >
-        </mat-progress-spinner>
+        <div style="padding-left: 10px">
+          <app-progress-pie-chart></app-progress-pie-chart>
+        </div>
         } @else if ((testRunningFacadeService.eventRunningTest$ | async) !==
         element.eventId) {
         <!-- other buttons should be disabled when running a test -->
