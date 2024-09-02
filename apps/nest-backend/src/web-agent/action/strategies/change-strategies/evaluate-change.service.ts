@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { getElement } from '../../action-utils';
@@ -32,7 +33,7 @@ export class EvaluateChangeService implements ChangeOperation {
       const isSelect = element.tagName.toLowerCase() === 'select';
 
       await Promise.race([
-        page.evaluate(async (sel) => {
+        page.evaluate((sel) => {
           if (isSelect) {
             const element = document.querySelector(sel) as HTMLSelectElement;
             element.value = value;

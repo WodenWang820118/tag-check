@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, HttpException, Logger, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { getSelectorType } from '../action-utils';

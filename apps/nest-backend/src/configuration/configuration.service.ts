@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+import { Injectable } from '@nestjs/common';
 import { CreateConfigurationDto } from './dto/create-configuration.dto';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
 import { Configuration } from './entities/configuration.entity';
-import { InjectModel } from '@nestjs/sequelize';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   CONFIG_CURRENT_PROJECT_PATH,

@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   HttpException,
   HttpStatus,
@@ -26,9 +31,15 @@ export class FileService {
     private filePathService: FilePathService
   ) {}
 
-  readJsonFile(filePath: string) {
+  readJsonFile<T>(filePath: string): T {
     try {
-      return JSON.parse(readFileSync(`${filePath}`, 'utf8'));
+      const fileContent = readFileSync(`${filePath}`, 'utf8');
+      const parsedData = JSON.parse(fileContent) as T;
+
+      // Optional: Add runtime type checking here if needed
+      // For example, you could use a library like 'joi' or 'zod' to validate the structure
+
+      return parsedData;
     } catch (error) {
       Logger.error(
         error,

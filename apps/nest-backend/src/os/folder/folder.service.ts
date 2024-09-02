@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
-import path from 'path';
+import { extname } from 'path';
 
 @Injectable()
 export class FolderService {
@@ -29,7 +29,7 @@ export class FolderService {
   getJsonFilesFromDir(dirPath: string) {
     try {
       const files = readdirSync(dirPath);
-      return files.filter((file) => path.extname(file) === '.json');
+      return files.filter((file) => extname(file) === '.json');
     } catch (error) {
       Logger.error(
         error,

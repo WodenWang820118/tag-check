@@ -9,7 +9,7 @@ import {
   META_DATA,
   ABSTRACT_REPORT_FILE_NAME,
 } from '../../../configs/project.config';
-import path from 'path';
+import { join } from 'path';
 import { extractEventNameFromId } from '@utils';
 @Injectable()
 export class FilePathService {
@@ -91,7 +91,7 @@ export class FilePathService {
     try {
       const reportSavingFolder =
         await this.folderPathService.getReportSavingFolderPath(projectSlug);
-      return path.join(reportSavingFolder, eventId, `${reportName}`);
+      return join(reportSavingFolder, eventId, `${reportName}`);
     } catch (error) {
       Logger.error(
         error,
@@ -103,7 +103,7 @@ export class FilePathService {
 
   async getCacheFilePath(projectSlug: string, eventId: string) {
     try {
-      return path.join(
+      return join(
         await this.folderPathService.getReportSavingFolderPath(projectSlug),
         eventId,
         `${extractEventNameFromId(eventId)} - result cache.json`
@@ -119,14 +119,11 @@ export class FilePathService {
 
   async getImageFilePath(projectSlug: string, eventId: string) {
     try {
-      const imageSavingFolder = path.join(
+      const imageSavingFolder = join(
         await this.folderPathService.getReportSavingFolderPath(projectSlug),
         eventId
       );
-      return path.join(
-        imageSavingFolder,
-        `${extractEventNameFromId(eventId)}.png`
-      );
+      return join(imageSavingFolder, `${extractEventNameFromId(eventId)}.png`);
     } catch (error) {
       Logger.error(
         error,
@@ -138,7 +135,7 @@ export class FilePathService {
 
   async getInspectionResultFilePath(projectSlug: string, eventId: string) {
     try {
-      return path.join(
+      return join(
         await this.folderPathService.getReportSavingFolderPath(projectSlug),
         eventId,
         ABSTRACT_REPORT_FILE_NAME
@@ -168,7 +165,7 @@ export class FilePathService {
     );
 
     const eventName = extractEventNameFromId(eventId);
-    const myDataLayerFile = path.join(
+    const myDataLayerFile = join(
       resultFolder,
       eventId,
       `${eventName} - myDataLayer.json`

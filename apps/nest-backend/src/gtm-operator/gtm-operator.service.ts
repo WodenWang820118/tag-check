@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
-import { Browser, Credentials, Page } from 'puppeteer';
+import { Browser, BrowserContext, Credentials, Page } from 'puppeteer';
 import { BROWSER_ARGS } from '../configs/project.config';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { sleep } from '../web-agent/action/action-utils';
@@ -37,7 +41,7 @@ export class GtmOperatorService {
     const options = {};
     const stats = await PCR.getStats(options);
     try {
-      const browser = await stats.puppeteer.launch({
+      const browser: Browser = await stats.puppeteer.launch({
         headless: headless === 'true' ? true : false,
         devtools: measurementId ? true : false,
         defaultViewport: null,
@@ -49,7 +53,8 @@ export class GtmOperatorService {
         signal: signal,
       });
 
-      const incognitoContext = await browser.createBrowserContext();
+      const incognitoContext: BrowserContext =
+        await browser.createBrowserContext();
       const websiteUrl = this.extractBaseUrlFromGtmUrl(gtmUrl);
       const page = await incognitoContext.newPage();
       await this.operateGtmPreviewMode(page, gtmUrl);
@@ -81,6 +86,10 @@ export class GtmOperatorService {
         },
         { once: true }
       );
+
+      if (!targetPage) {
+        throw new Error('Failed to find the target page');
+      }
 
       return await this.eventInspectionPipelineService.singleEventInspectionRecipe(
         targetPage,

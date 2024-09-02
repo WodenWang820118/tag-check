@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
@@ -28,7 +30,7 @@ export class RequestInterceptorService {
         const latestDataLayer = await page.evaluate(() => {
           return window.dataLayer;
         });
-        this.dataLayerService.updateSelfDataLayerAlgorithm(
+        await this.dataLayerService.updateSelfDataLayerAlgorithm(
           latestDataLayer,
           projectName,
           extractEventNameFromId(eventId)

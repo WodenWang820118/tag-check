@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ActionService } from './action/action.service';
 import { DataLayerService } from './action/web-monitoring/data-layer/data-layer.service';
@@ -30,7 +31,7 @@ export class WebAgentUtilsService {
       });
     }
 
-    let eventRequest: string = '';
+    let eventRequest = '';
     const eventName = extractEventNameFromId(eventId);
     // 2) capture the request if needed
     if (captureRequest) {

@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import path from 'path';
+import { join } from 'path';
 import { ConfigurationService } from '../../../configuration/configuration.service';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class PathUtilsService {
       const dbRootProjectPath =
         await this.configurationService.getRootProjectPath();
 
-      const outputPath = path.join(
+      const outputPath = join(
         dbRootProjectPath,
         projectName,
         folderName,
@@ -41,7 +41,7 @@ export class PathUtilsService {
       const dbRootProjectPath =
         await this.configurationService.getRootProjectPath();
 
-      const outputPath = path.join(dbRootProjectPath, projectSlug, folderName);
+      const outputPath = join(dbRootProjectPath, projectSlug, folderName);
       Logger.log(
         'folder path: ' + outputPath,
         `${PathUtilsService.name}.${PathUtilsService.prototype.buildFolderPath.name}`

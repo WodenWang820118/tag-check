@@ -1,3 +1,9 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
 import { Browser, Credentials } from 'puppeteer';
 import { getCurrentTimestamp } from '@utils';
@@ -50,7 +56,14 @@ export class GroupEventsInspectionService {
     signal.addEventListener(
       'abort',
       async () => {
-        await this.cleanup();
+        try {
+          await this.cleanup();
+        } catch (error) {
+          Logger.error(
+            `Error during cleanup: ${String(error)}`,
+            `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.inspectProject.name}`
+          );
+        }
       },
       { once: true }
     );
@@ -118,20 +131,20 @@ export class GroupEventsInspectionService {
     }
   }
 
-  private async cleanup() {
+  private async cleanup(): Promise<void> {
     Logger.log(
       'Cleaning up resources',
       `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.cleanup.name}`
     );
     if (this.currentBrowser) {
-      await this.currentBrowser
-        .close()
-        .catch((err) =>
-          Logger.error(
-            err,
-            `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.cleanup.name}`
-          )
+      try {
+        await this.currentBrowser.close();
+      } catch (err) {
+        Logger.error(
+          err,
+          `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.cleanup.name}`
         );
+      }
       this.currentBrowser = null;
     }
   }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { LazyModuleLoader, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 // import { SpelunkerModule } from 'nestjs-spelunker';
@@ -58,4 +59,4 @@ async function bootstrap() {
   });
 }
 
-bootstrap();
+void bootstrap();

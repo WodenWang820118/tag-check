@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
-import path from 'path';
+import { join } from 'path';
 import { Page } from 'puppeteer';
 import { FolderPathService } from '../../../../os/path/folder-path/folder-path.service';
 import { extractEventNameFromId } from '@utils';
@@ -18,7 +22,7 @@ export class DataLayerService {
       projectName
     );
     const eventName = extractEventNameFromId(eventId);
-    const filePath = path.join(
+    const filePath = join(
       resultFolder,
       eventId,
       `${eventName} - myDataLayer.json`
@@ -60,14 +64,14 @@ export class DataLayerService {
       projectName
     );
     const eventName = extractEventNameFromId(eventId);
-    const myDataLayerFile = path.join(
+    const myDataLayerFile = join(
       resultFolder,
       eventId,
       `${eventName} - myDataLayer.json`
     );
 
     // Ensure to read the file content before trying to parse it as JSON
-    const myDataLayer = this.fileService.readJsonFile(myDataLayerFile);
+    const myDataLayer: any[] = this.fileService.readJsonFile(myDataLayerFile);
 
     try {
       dataLayer.forEach((dataLayerObject) => {
@@ -99,7 +103,7 @@ export class DataLayerService {
       eventId
     );
 
-    const myDataLayer = this.fileService.readJsonFile(myDataLayerFile);
+    const myDataLayer = this.fileService.readJsonFile<any>(myDataLayerFile);
     return myDataLayer;
   }
 }

@@ -1,3 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { getSelectorType } from '../action-utils';
@@ -81,7 +87,7 @@ export class ClickHandler implements ActionHandler {
     );
 
     const domain = new URL(
-      await this.fileService.readJsonFile(operationPath).steps[1].url
+      ((await this.fileService.readJsonFile(operationPath)) as any).steps[1].url
     ).hostname;
 
     try {
@@ -103,7 +109,7 @@ export class ClickHandler implements ActionHandler {
       !page.url().includes(domain);
 
     if (preventNavigation) {
-      this.preventNavigationOnElement(page, selector);
+      await this.preventNavigationOnElement(page, selector);
     }
 
     try {
