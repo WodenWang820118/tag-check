@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Page, ScreenRecorder } from 'puppeteer';
+import { Page } from 'puppeteer';
 import { BrowserAction, sleep } from '../action-utils';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
 import { ACTION_HANDLERS, ActionHandler } from '..//handlers/utils';
@@ -8,8 +8,6 @@ import { EventInspectionPresetDto } from '../../../dto/event-inspection-preset.d
 
 @Injectable()
 export class StepExecutorService {
-  recorder!: ScreenRecorder;
-
   constructor(
     @Inject(ACTION_HANDLERS) private handlers: { [key: string]: ActionHandler },
     private dataLayerService: DataLayerService,
@@ -42,6 +40,7 @@ export class StepExecutorService {
           state,
           application
         );
+
         Logger.log(
           'Handle Navigation Successfully',
           `${StepExecutorService.name}.${StepExecutorService.prototype.executeStep.name}`

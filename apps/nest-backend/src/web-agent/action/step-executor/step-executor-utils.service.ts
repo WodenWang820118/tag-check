@@ -1,4 +1,4 @@
-import { Page, ScreenRecorder } from 'puppeteer';
+import { Page } from 'puppeteer';
 import { sleep } from '../action-utils';
 import { getFirstSelector } from '../handlers/utils';
 import { EventInspectionPresetDto } from '../../../dto/event-inspection-preset.dto';
@@ -7,8 +7,6 @@ import { DataLayerService } from '../../action/web-monitoring/data-layer/data-la
 
 @Injectable()
 export class StepExecutorUtilsService {
-  recorder!: ScreenRecorder;
-
   constructor(private dataLayerService: DataLayerService) {}
   async handleKeyboardAction(
     page: Page,
@@ -89,7 +87,6 @@ export class StepExecutorUtilsService {
         // only reload the landing page, trying to skip the overlay
         // Reload the page with the final URL to apply localStorage and cookies
         await page.goto(finalUrl);
-        await sleep(1000); // Necessary delay for the website to update
         state.isFirstNavigation = false;
       }
     } catch (error) {

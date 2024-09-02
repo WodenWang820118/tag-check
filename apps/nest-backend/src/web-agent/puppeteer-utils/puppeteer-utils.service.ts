@@ -5,35 +5,38 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
 import { join } from 'path';
-import { Page, Browser, ScreenRecorder } from 'puppeteer';
+import { Page, Browser, ScreenRecorder, Credentials } from 'puppeteer';
 import { BROWSER_ARGS } from '../../configs/project.config';
 
 @Injectable()
 export class PuppeteerUtilsService {
   private abortController: AbortController | null = null;
+  private recorder: ScreenRecorder | null = null;
 
   async startBrowser(
+    projectSlug: string,
+    eventId: string,
     headless: string,
-    eventInspectionPresetDto: EventInspectionPresetDto,
-    measurementId?: string
+    measurementId: string,
+    credentails: Credentials,
+    eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     const abortController = new AbortController();
     const { signal } = abortController;
     this.abortController = abortController;
+    // will need to specify the defaultViewport; otherwise, cannot screencast the video
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
     const stats = await PCR(options);
     const browser: Browser = await stats.puppeteer.launch({
       headless: headless === 'true' ? true : false,
-      defaultViewport: null,
       devtools: measurementId ? true : false,
       acceptInsecureCerts: true,
       args: eventInspectionPresetDto.puppeteerArgs || BROWSER_ARGS,
       executablePath: stats.executablePath,
       signal: signal,
-      protocol: 'cdp',
-      protocolTimeout: 30000,
+      defaultViewport: { width: 1920, height: 1080 },
     });
     Logger.log(
       'Browser launched',
@@ -81,6 +84,10 @@ export class PuppeteerUtilsService {
   }
 
   async startRecorder(page: Page, folderPath: string): Promise<ScreenRecorder> {
+    Logger.log(
+      `Recorder started`,
+      `${PuppeteerUtilsService.name}.${PuppeteerUtilsService.prototype.startRecorder.name}`
+    );
     const recordingPath = join(folderPath, 'recording');
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const ffmpegPath = require('ffmpeg-static');
@@ -88,7 +95,18 @@ export class PuppeteerUtilsService {
       ffmpegPath: ffmpegPath,
       path: `${recordingPath}.webm`,
     });
+    this.recorder = recorder;
     return recorder;
+  }
+
+  async stopRecorder() {
+    Logger.log(
+      'Recorder stopped',
+      `${PuppeteerUtilsService.name}.${PuppeteerUtilsService.prototype.stopRecorder.name}`
+    );
+    if (this.recorder) {
+      await this.recorder.stop();
+    }
   }
 
   stopOperation() {

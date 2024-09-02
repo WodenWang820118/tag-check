@@ -10,8 +10,6 @@ import { HoverHandler } from '../handlers/hover-handler.service';
 import { ACTION_HANDLERS } from '../handlers/utils';
 import { BrowserAction } from '../action-utils';
 
-const handlers = [ChangeHandler, ClickHandler, HoverHandler];
-
 @Module({
   imports: [DataLayerModule, HandlerModule],
   providers: [
