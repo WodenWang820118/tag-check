@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import path from 'path';
 import { Page } from 'puppeteer';
-import { FolderPathService } from '../../../os/path/folder-path/folder-path.service';
+import { FolderPathService } from '../../../../os/path/folder-path/folder-path.service';
 import { extractEventNameFromId } from '@utils';
-import { FileService } from '../../../os/file/file.service';
-import { FilePathService } from '../../../os/path/file-path/file-path.service';
+import { FileService } from '../../../../os/file/file.service';
+import { FilePathService } from '../../../../os/path/file-path/file-path.service';
 @Injectable()
 export class DataLayerService {
   constructor(

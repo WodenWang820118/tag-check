@@ -82,7 +82,7 @@ export class InspectorSingleEventService {
             path: imageSavingFolder,
           });
 
-          if (headless === 'true') await page.close();
+          if (headless === 'false') await page.close();
           Logger.log(
             'Browser is closed!',
             `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`

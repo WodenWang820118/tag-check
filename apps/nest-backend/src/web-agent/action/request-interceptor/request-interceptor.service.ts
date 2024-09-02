@@ -4,7 +4,7 @@ import { DataLayerService } from '../web-monitoring/data-layer/data-layer.servic
 import { extractEventNameFromId } from '@utils';
 
 @Injectable()
-export class RequestInterceptor {
+export class RequestInterceptorService {
   constructor(private dataLayerService: DataLayerService) {}
 
   async setupInterception(page: Page, projectName: string, eventId: string) {
@@ -23,7 +23,7 @@ export class RequestInterceptor {
         // we use updateSelfDataLayerAlgorithm to update the dataLayer manually
         Logger.log(
           request.url(),
-          `${RequestInterceptor.name}.${RequestInterceptor.prototype.setupInterception.name}`
+          `${RequestInterceptorService.name}.${RequestInterceptorService.prototype.setupInterception.name}`
         );
         const latestDataLayer = await page.evaluate(() => {
           return window.dataLayer;

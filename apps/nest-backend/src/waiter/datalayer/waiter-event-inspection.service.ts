@@ -3,12 +3,14 @@ import { SingleEventInspectionService } from '../../event-inspection/single-even
 import { GroupEventsInspectionService } from '../../event-inspection/group-events-inspection.service';
 import { Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '@utils';
+import { PuppeteerUtilsService } from '../../web-agent/puppeteer-utils/puppeteer-utils.service';
 
 @Injectable()
 export class WaiterEventInspectionService {
   constructor(
     private singleEventInspectionService: SingleEventInspectionService,
-    private groupEventsInspection: GroupEventsInspectionService
+    private groupEventsInspection: GroupEventsInspectionService,
+    private puppeteerUtilsService: PuppeteerUtilsService
   ) {}
 
   async inspectSingleEvent(
@@ -47,7 +49,7 @@ export class WaiterEventInspectionService {
 
   // TODO: might need to separate the cleanup logic
   stopOperation() {
-    this.singleEventInspectionService.stopOperation();
+    this.puppeteerUtilsService.stopOperation();
     this.groupEventsInspection.stopOperation();
   }
 }
