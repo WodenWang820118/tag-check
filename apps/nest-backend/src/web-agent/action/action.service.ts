@@ -24,7 +24,7 @@ export class ActionService {
     application: EventInspectionPresetDto['application']
   ) {
     try {
-      const operation = this.fileService.readJsonFile(
+      const operation: { steps: any[] } = this.fileService.readJsonFile(
         await this.filePathService.getOperationFilePath(projectName, eventId)
       );
       if (!operation || !operation.steps) return;

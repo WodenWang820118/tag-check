@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Injectable, Logger } from '@nestjs/common';
 import { EvaluateChangeService } from './evaluate-change.service';
 import { PageChangeService } from './page-change.service';

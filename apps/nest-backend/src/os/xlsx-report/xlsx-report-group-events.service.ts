@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { FileService } from '../file/file.service';
@@ -24,7 +26,7 @@ export class XlsxReportGroupEventsService {
         projectName,
         operation
       );
-      const cache = this.fileService.readJsonFile(cachePath);
+      const cache = this.fileService.readJsonFile<any>(cachePath);
       data.push(cache);
     }
 

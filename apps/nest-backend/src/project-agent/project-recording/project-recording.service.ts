@@ -23,9 +23,9 @@ export class ProjectRecordingService {
         await this.folderPathService.getRecordingFolderPath(projectSlug)
       );
 
-      const recordings = await Promise.all(
+      const recordings: Record<string, RecordingDto>[] = await Promise.all(
         folderNames.map(async (fileName) => {
-          const recordingContent = await this.fileService.readJsonFile(
+          const recordingContent = this.fileService.readJsonFile<RecordingDto>(
             await this.filePathService.getRecordingFilePath(
               projectSlug,
               fileName
@@ -38,7 +38,9 @@ export class ProjectRecordingService {
 
       const flattenedRecordings: Record<string, RecordingDto> =
         recordings.reduce((acc, recording) => {
-          return { ...acc, ...recording };
+          const key = Object.keys(recording)[0];
+          acc[key] = { ...recording[key], ...recording };
+          return acc;
         }, {});
 
       return {

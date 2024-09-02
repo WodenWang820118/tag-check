@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import {
   BaseDataLayerEvent,
@@ -36,7 +40,7 @@ export class InspectorSingleEventService {
       const specsPath = await this.filePathService.getProjectConfigFilePath(
         projectName
       );
-      const specs = await this.fileService.readJsonFile(specsPath);
+      const specs = await this.fileService.readJsonFile<any>(specsPath);
       const imageSavingFolder = await this.filePathService.getImageFilePath(
         projectName,
         eventId

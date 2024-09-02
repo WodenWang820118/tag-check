@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
-import { Page } from 'puppeteer';
+import { Browser, Page } from 'puppeteer';
 import { RequestService } from './request/request.service';
 import { BROWSER_ARGS } from '../../../configs/project.config';
 
@@ -47,7 +50,7 @@ export class WebMonitoringService {
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
     const stats = await PCR(options);
-    const browser = await stats.puppeteer.launch({
+    const browser: Browser = await stats.puppeteer.launch({
       headless: true,
       args: BROWSER_ARGS,
       executablePath: stats.executablePath,

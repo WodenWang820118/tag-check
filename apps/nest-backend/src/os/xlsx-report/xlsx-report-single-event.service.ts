@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { readFileSync } from 'fs';
-import path from 'path';
+import { join } from 'path';
 import * as ExcelJS from 'exceljs';
 import { FilePathService } from '../path/file-path/file-path.service';
 
@@ -107,7 +109,7 @@ export class XlsxReportSingleEventService {
           }
         }
       }
-      const filePath = path.join(eventSavingFolder, fileName);
+      const filePath = join(eventSavingFolder, fileName);
       if (Array.isArray(data)) {
         worksheet.addRows(data);
         await workbook.xlsx.writeFile(filePath);

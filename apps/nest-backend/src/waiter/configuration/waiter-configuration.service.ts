@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigurationService } from '../../configuration/configuration.service';
 import { v4 as uuidv4 } from 'uuid';

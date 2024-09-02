@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
 import { WebAgentUtilsService } from './web-agent-utils.service';

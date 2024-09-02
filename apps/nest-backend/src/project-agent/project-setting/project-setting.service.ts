@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
@@ -29,7 +30,7 @@ export class ProjectSettingService {
       const filePath = await this.filePathService.getProjectSettingFilePath(
         projectSlug
       );
-      const currentSettings = this.fileService.readJsonFile(filePath);
+      const currentSettings: Setting = this.fileService.readJsonFile(filePath);
       const updatedSettings = updateFn(currentSettings);
       this.fileService.writeJsonFile(filePath, updatedSettings);
       return updatedSettings;
@@ -94,7 +95,11 @@ export class ProjectSettingService {
     try {
       return this.updateSettings(projectSlug, (currentSettings) => {
         const preventNavigationEvents = currentSettings.preventNavigationEvents;
-        const newEvents = partialSettings.preventNavigationEvents as string[];
+        const newEvents = partialSettings.preventNavigationEvents;
+
+        if (!newEvents) {
+          return currentSettings;
+        }
 
         // Create a copy of the current preventNavigationEvents to modify
         let newSettings: string[] = [...preventNavigationEvents];
@@ -169,8 +174,8 @@ export class ProjectSettingService {
     try {
       return this.updateSettings(projectSlug, (currentSettings) => ({
         ...currentSettings,
-        headless: settingBox.headless as boolean,
-        browser: settingBox.browser as string[],
+        headless: Boolean(settingBox.headless),
+        browser: settingBox.browser || [],
       }));
     } catch (error) {
       Logger.error(

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { ElementHandle, Page } from 'puppeteer';
 
 export interface HoverStrategy {
