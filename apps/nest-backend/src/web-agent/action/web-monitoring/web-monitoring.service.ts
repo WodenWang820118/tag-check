@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { RequestService } from './request/request.service';
-import { BROWSER_ARGS } from '../../configs/project.config';
+import { BROWSER_ARGS } from '../../../configs/project.config';
 
 @Injectable()
 export class WebMonitoringService {

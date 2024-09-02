@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ActionService } from './action/action.service';
-import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
+import { DataLayerService } from './action/web-monitoring/data-layer/data-layer.service';
 import { Page, Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { extractEventNameFromId } from '@utils';
@@ -73,7 +73,7 @@ export class WebAgentUtilsService {
           timeout: 5000,
         });
       } catch (error) {
-        Logger.error(
+        Logger.log(
           'No Navigation Needed',
           `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
         );
