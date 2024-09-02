@@ -21,10 +21,10 @@ export class ActionService {
     page: Page,
     projectName: string,
     eventId: string,
-    application?: EventInspectionPresetDto['application']
+    application: EventInspectionPresetDto['application']
   ) {
     try {
-      const operation = await this.fileService.readJsonFile(
+      const operation = this.fileService.readJsonFile(
         await this.filePathService.getOperationFilePath(projectName, eventId)
       );
       if (!operation || !operation.steps) return;

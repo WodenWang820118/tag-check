@@ -31,7 +31,7 @@ export class FilePathService {
         error,
         `${FilePathService.name}.${FilePathService.prototype.getOperationFilePath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -47,7 +47,7 @@ export class FilePathService {
         error,
         `${FilePathService.name}.${FilePathService.prototype.getProjectConfigFilePath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -63,7 +63,7 @@ export class FilePathService {
         error,
         `${FilePathService.name}.${FilePathService.prototype.getProjectSettingFilePath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -79,7 +79,7 @@ export class FilePathService {
         error,
         `${FilePathService.name}.${FilePathService.prototype.getProjectMetaDataFilePath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -97,7 +97,7 @@ export class FilePathService {
         error,
         `${FilePathService.name}.${FilePathService.prototype.getReportFilePath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -113,7 +113,7 @@ export class FilePathService {
         error,
         `${FilePathService.name}.${FilePathService.prototype.getCacheFilePath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -132,7 +132,7 @@ export class FilePathService {
         error,
         `${FilePathService.name}.${FilePathService.prototype.getImageFilePath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -148,7 +148,7 @@ export class FilePathService {
         error,
         `${FilePathService.name}.${FilePathService.prototype.getInspectionResultFilePath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

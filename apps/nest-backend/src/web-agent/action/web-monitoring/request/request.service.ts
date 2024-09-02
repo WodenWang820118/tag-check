@@ -11,7 +11,11 @@ export class RequestService {
     await page.setRequestInterception(true);
     await page.setUserAgent(USER_AGENT);
 
-    const requestHandler = async (request) => {
+    const requestHandler = async (request: {
+      isInterceptResolutionHandled: () => any;
+      url: () => string;
+      continue: () => any;
+    }) => {
       if (request.isInterceptResolutionHandled()) return;
       this.requests.push(request.url());
       await request.continue();

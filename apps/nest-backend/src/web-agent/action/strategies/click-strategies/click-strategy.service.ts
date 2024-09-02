@@ -18,7 +18,7 @@ export class ClickStrategyService {
     selectorType: string,
     useNormalClick: boolean,
     timeout = 10000
-  ): Promise<boolean> {
+  ): Promise<boolean | undefined> {
     Logger.log(
       `selector: ${selector}`,
       `${ClickStrategyService.name}.${ClickStrategyService.prototype.clickElement.name}`

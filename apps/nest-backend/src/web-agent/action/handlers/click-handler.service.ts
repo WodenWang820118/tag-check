@@ -1,6 +1,5 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { UtilitiesService } from '../../utilities/utilities.service';
 import { getSelectorType } from '../action-utils';
 import { ActionHandler, getFirstSelector } from './utils';
 import { ProjectService } from '../../../os/project/project.service';
@@ -11,7 +10,6 @@ import { extractEventNameFromId } from '@utils';
 @Injectable()
 export class ClickHandler implements ActionHandler {
   constructor(
-    private utilitiesService: UtilitiesService,
     private projectService: ProjectService,
     private fileService: FileService,
     private filePathService: FilePathService,
@@ -34,15 +32,6 @@ export class ClickHandler implements ActionHandler {
     let preventNavigation = false;
 
     for (const selector of step.selectors) {
-      // try {
-      //   await this.utilitiesService.scrollIntoViewIfNeeded(
-      //     Array.isArray(selector) ? selector : [selector],
-      //     page,
-      //     500
-      //   );
-      // } catch (error) {
-      //   Logger.error(error.mssage, 'Utilities.scrollIntoViewIfNeeded');
-      // }
       const title = extractEventNameFromId(eventId);
       if (
         step.type === 'click' &&
@@ -85,7 +74,7 @@ export class ClickHandler implements ActionHandler {
     selector: string,
     timeout = 3000,
     preventNavigation: boolean
-  ): Promise<boolean> {
+  ): Promise<boolean | undefined> {
     const operationPath = await this.filePathService.getOperationFilePath(
       projectName,
       eventId
@@ -119,12 +108,19 @@ export class ClickHandler implements ActionHandler {
 
     try {
       // low timeout may cause the click to fail
+      const selectorType = getSelectorType(selector);
+      if (!selectorType) {
+        throw new HttpException(
+          `Selector type not found for selector ${selector}`,
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
       return await this.clickStrategyService.clickElement(
         page,
         projectName,
         eventId,
         selector,
-        getSelectorType(selector),
+        selectorType,
         useNormalClick,
         timeout
       );
@@ -136,15 +132,20 @@ export class ClickHandler implements ActionHandler {
     }
   }
 
+  eventTargetToNode(eventTarget: EventTarget): Node {
+    return eventTarget as any; // Note: This is a type assertion and should be used cautiously
+  }
+
   private async preventNavigationOnElement(page: Page, selector: string) {
     Logger.log(
       selector,
       `${ClickHandler.name}.${ClickHandler.prototype.preventNavigationOnElement.name}`
     );
+
     await page.evaluate((sel) => {
-      const isDescendant = (parent, child) => {
-        let node = child.parentNode;
-        while (node != null) {
+      const isDescendant = (parent: Node, child: Node | null) => {
+        let node = child?.parentNode;
+        while (node !== null && node?.nodeType === Node.ELEMENT_NODE) {
           if (node === parent) {
             return true;
           }
@@ -159,7 +160,10 @@ export class ClickHandler implements ActionHandler {
           elem.addEventListener('click', (e) => {
             const target = e.target;
             // Check if the target is the element itself or a descendant of the element
-            if (target === elem || isDescendant(elem, target)) {
+            if (
+              this.eventTargetToNode(target as any) === elem ||
+              isDescendant(elem, target as any)
+            ) {
               e.preventDefault();
             }
           })

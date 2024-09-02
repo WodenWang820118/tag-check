@@ -15,6 +15,14 @@ export class EvaluateChangeService implements ChangeOperation {
     timeout = 5000
   ): Promise<boolean> {
     // TODO: verifiy this
+    if (!value) {
+      Logger.error(
+        'Value is required to change the element',
+        `${EvaluateChangeService.name}.${EvaluateChangeService.prototype.operate.name}`
+      );
+      return false;
+    }
+
     try {
       const element = (await getElement(
         page,

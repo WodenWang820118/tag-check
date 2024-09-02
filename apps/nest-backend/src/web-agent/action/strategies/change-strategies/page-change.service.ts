@@ -16,6 +16,14 @@ export class PageChangeService implements ChangeOperation {
     try {
       // TODO: verifiy this
       // Check if the element is a select element
+      if (!value) {
+        Logger.error(
+          'Value is required to change the element',
+          `${PageChangeService.name}.${PageChangeService.prototype.operate.name}`
+        );
+        return false;
+      }
+
       const isSelect = await page.evaluate((selector) => {
         const element = document.querySelector(selector);
         return element && element.tagName.toLowerCase() === 'select';

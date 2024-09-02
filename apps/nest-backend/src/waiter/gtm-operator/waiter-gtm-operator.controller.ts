@@ -58,11 +58,11 @@ export class WaiterGtmOperatorController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventName') eventName: string,
     @Query('gtmUrl') gtmUrl: string,
-    @Query('headless') headless?: string,
-    @Query('measurementId') measurementId?: string,
-    @Query('username') username?: string,
-    @Query('password') password?: string,
-    @Body() eventInspectionPresetDto?: EventInspectionPresetDto
+    @Query('headless') headless: string,
+    @Query('username') username: string,
+    @Query('password') password: string,
+    @Query('measurementId') measurementId: string,
+    @Body() eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     const results: {
       dataLayerResult: ValidationResult;

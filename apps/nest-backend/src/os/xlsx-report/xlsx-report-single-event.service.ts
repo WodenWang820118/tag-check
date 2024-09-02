@@ -28,14 +28,14 @@ export class XlsxReportSingleEventService {
           destinationUrl: any;
         },
     eventId: string,
-    projectName?: string
+    projectSlug: string
   ) {
     try {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet(sheetName);
       const eventSavingFolder =
         await this.folderPathService.getInspectionEventFolderPath(
-          projectName,
+          projectSlug,
           eventId
         );
       worksheet.columns = [
@@ -48,7 +48,7 @@ export class XlsxReportSingleEventService {
       if (eventId) {
         try {
           const file = await this.filePathService.getImageFilePath(
-            projectName,
+            projectSlug,
             eventId
           );
           const imageId = workbook.addImage({
@@ -69,14 +69,14 @@ export class XlsxReportSingleEventService {
             HttpStatus.INTERNAL_SERVER_ERROR
           );
         }
-      } else if (projectName) {
+      } else if (projectSlug) {
         // all tests
         const dataContent = JSON.parse(JSON.stringify(data));
         for (let i = 0; i < dataContent.length; i++) {
           // get existing image after the test
           try {
             const file = await this.filePathService.getImageFilePath(
-              projectName,
+              projectSlug,
               eventId
             );
             const imageId = workbook.addImage({
@@ -100,7 +100,10 @@ export class XlsxReportSingleEventService {
               error,
               `${XlsxReportSingleEventService.name}.${XlsxReportSingleEventService.prototype.writeXlsxFile.name}`
             );
-            throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(
+              String(error),
+              HttpStatus.INTERNAL_SERVER_ERROR
+            );
           }
         }
       }
@@ -117,7 +120,7 @@ export class XlsxReportSingleEventService {
         error,
         `${XlsxReportSingleEventService.name}.${XlsxReportSingleEventService.prototype.writeXlsxFile.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

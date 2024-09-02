@@ -77,7 +77,7 @@ export class WaiterProjectIoController {
         error,
         `${WaiterProjectIoController.name}.${WaiterProjectIoController.prototype.importProject.name}`
       );
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
     }
   }
 

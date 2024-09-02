@@ -13,7 +13,7 @@ export enum ValidationStrategyType {
 
 export function determineStrategy(spec: StrictDataLayerEvent) {
   try {
-    if (spec.event[ValidationStrategyType.ECOMMERCE]) {
+    if (isNumericKeysObject([ValidationStrategyType.ECOMMERCE])) {
       return ValidationStrategyType.ECOMMERCE;
     } else {
       return ValidationStrategyType.OLDGA4EVENTS;
@@ -91,4 +91,12 @@ export function validateKeyValues(
   }
 
   return new ValidationResultDto(true, 'Valid', dataLayerSpec, dataLayer);
+}
+
+function isNumericKeysObject(obj: unknown): obj is Record<number, unknown> {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    Object.keys(obj).every(Number.isInteger)
+  );
 }

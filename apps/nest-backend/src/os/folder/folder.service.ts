@@ -33,9 +33,9 @@ export class FolderService {
     } catch (error) {
       Logger.error(
         error,
-        FolderService.name + FolderService.prototype.getJsonFilesFromDir.name
+        `${FolderService.name}.${FolderService.prototype.getJsonFilesFromDir.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -45,9 +45,9 @@ export class FolderService {
     } catch (error) {
       Logger.error(
         error,
-        FolderService.name + FolderService.prototype.deleteFolder.name
+        `${FolderService.name}.${FolderService.prototype.deleteFolder.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

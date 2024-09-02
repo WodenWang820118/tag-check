@@ -35,7 +35,7 @@ export class ProjectSettingService {
       return updatedSettings;
     } catch (error) {
       Logger.error('Error updating settings', error);
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -83,7 +83,7 @@ export class ProjectSettingService {
         'Error updating settings: ' + error,
         `${ProjectSettingService.name}.${ProjectSettingService.prototype.updateAuthenticationSettings.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -94,7 +94,7 @@ export class ProjectSettingService {
     try {
       return this.updateSettings(projectSlug, (currentSettings) => {
         const preventNavigationEvents = currentSettings.preventNavigationEvents;
-        const newEvents = partialSettings.preventNavigationEvents;
+        const newEvents = partialSettings.preventNavigationEvents as string[];
 
         // Create a copy of the current preventNavigationEvents to modify
         let newSettings: string[] = [...preventNavigationEvents];
@@ -126,7 +126,7 @@ export class ProjectSettingService {
         'Error updating settings: ' + error,
         `${ProjectSettingService.name}.${ProjectSettingService.prototype.updatePreventNavigationEvents.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -141,7 +141,7 @@ export class ProjectSettingService {
         'Error updating settings: ' + error,
         `${ProjectSettingService.name}.${ProjectSettingService.prototype.updateGtmSettings.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -156,7 +156,7 @@ export class ProjectSettingService {
         'Error updating settings: ' + error,
         `${ProjectSettingService.name}.${ProjectSettingService.prototype.updateGeneralSettings.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -169,15 +169,15 @@ export class ProjectSettingService {
     try {
       return this.updateSettings(projectSlug, (currentSettings) => ({
         ...currentSettings,
-        headless: settingBox.headless,
-        browser: settingBox.browser,
+        headless: settingBox.headless as boolean,
+        browser: settingBox.browser as string[],
       }));
     } catch (error) {
       Logger.error(
         'Error updating settings: ' + error,
         `${ProjectSettingService.name}.${ProjectSettingService.prototype.updateBrowserSettings.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -186,13 +186,13 @@ export class ProjectSettingService {
     settings: Partial<Setting>
   ) {
     try {
-      const localStorageData = settings.application.localStorage.data.map(
+      const localStorageData = settings?.application?.localStorage.data.map(
         (item: LocalStorageData) => ({
           key: item.key,
           value: JSON.parse(item.value),
         })
       );
-      const cookieData = settings.application.cookie.data.map(
+      const cookieData = settings?.application?.cookie.data.map(
         (item: CookieData) => ({
           key: item.key,
           value: JSON.parse(item.value),
@@ -201,8 +201,8 @@ export class ProjectSettingService {
       return this.updateSettings(projectSlug, (currentSettings) => ({
         ...currentSettings,
         application: {
-          localStorage: { data: localStorageData },
-          cookie: { data: cookieData },
+          localStorage: { data: localStorageData as LocalStorageData[] },
+          cookie: { data: cookieData as CookieData[] },
         },
       }));
     } catch (error) {
@@ -210,7 +210,7 @@ export class ProjectSettingService {
         'Error updating settings: ' + error,
         `${ProjectSettingService.name}.${ProjectSettingService.prototype.updateApplicationSettings.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

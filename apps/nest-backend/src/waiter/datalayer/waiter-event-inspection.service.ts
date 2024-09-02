@@ -17,9 +17,9 @@ export class WaiterEventInspectionService {
     projectName: string,
     eventId: string,
     headless: string,
-    measurementId?: string,
-    credentials?: Credentials,
-    eventInspectionPresetDto?: EventInspectionPresetDto
+    measurementId: string,
+    credentials: Credentials,
+    eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     return await this.singleEventInspectionService.inspectSingleEvent(
       projectName,
@@ -34,8 +34,8 @@ export class WaiterEventInspectionService {
   async inspectProject(
     projectName: string,
     headless: string,
-    measurementId?: string,
-    credentials?: Credentials,
+    measurementId: string,
+    credentials: Credentials,
     concurrency?: number
   ) {
     return await this.groupEventsInspection.inspectProject(

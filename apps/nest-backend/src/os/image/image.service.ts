@@ -54,7 +54,7 @@ export class ImageService {
         error,
         `${ImageService.name}.${ImageService.prototype.readImage.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

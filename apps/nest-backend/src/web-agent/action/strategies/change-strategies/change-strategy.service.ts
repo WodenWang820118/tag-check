@@ -21,6 +21,14 @@ export class ChangeStrategyService implements ChangeStrategy {
     timeout = 10000
   ): Promise<boolean> {
     try {
+      if (!value) {
+        Logger.error(
+          'Value is required to change the element',
+          `${ChangeStrategyService.name}.${ChangeStrategyService.prototype.changeElement.name}`
+        );
+        return false;
+      }
+
       return await this.attemptChange(
         page,
         projectName,
@@ -36,6 +44,7 @@ export class ChangeStrategyService implements ChangeStrategy {
         error,
         `${ChangeStrategyService.name}.${ChangeStrategyService.prototype.changeElement.name}`
       );
+      return false;
     }
   }
 

@@ -62,7 +62,7 @@ export class ConfigurationService {
         where: { title: CONFIG_ROOT_PATH },
       })
       .then((res) => {
-        return res.getDataValue('value');
+        return res?.getDataValue('value');
       });
   }
 
@@ -72,7 +72,7 @@ export class ConfigurationService {
         where: { title: CONFIG_CURRENT_PROJECT_PATH },
       })
       .then((res) => {
-        return res.getDataValue('value');
+        return res?.getDataValue('value');
       });
   }
 }

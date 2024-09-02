@@ -71,9 +71,11 @@ export class DataLayerService {
 
     try {
       dataLayer.forEach((dataLayerObject) => {
-        const existingIndex = myDataLayer.findIndex((myDataLayerObject) => {
-          return myDataLayerObject.event === dataLayerObject.event;
-        });
+        const existingIndex = myDataLayer.findIndex(
+          (myDataLayerObject: { event: any }) => {
+            return myDataLayerObject.event === dataLayerObject.event;
+          }
+        );
 
         if (existingIndex === -1) {
           myDataLayer.push(dataLayerObject);

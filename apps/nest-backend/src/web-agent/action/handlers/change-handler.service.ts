@@ -52,14 +52,22 @@ export class ChangeHandler implements ActionHandler {
     selector: string,
     value: string,
     timeout?: number
-  ): Promise<boolean> {
+  ): Promise<boolean | undefined> {
     try {
+      const selectorType = getSelectorType(selector);
+      if (!selectorType) {
+        Logger.error(
+          'Selector type is required to change the element',
+          `${ChangeHandler.name}.${ChangeHandler.prototype.changeElement.name}`
+        );
+        return false;
+      }
       return await this.changeStrategyService.changeElement(
         page,
         projectName,
         eventId,
         selector,
-        getSelectorType(selector),
+        selectorType,
         value,
         timeout
       );

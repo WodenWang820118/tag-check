@@ -41,7 +41,7 @@ export class XlsxReportGroupEventsService {
       fileName,
       sheetName,
       result,
-      undefined,
+      'all',
       projectName
     );
   }
