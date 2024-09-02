@@ -66,7 +66,7 @@ export class ProjectRecordingService {
       return fileNames.map((fileName) => fileName.replace('.json', ''));
     } catch (error) {
       Logger.error(error, 'ProjectRecordingService.getProjectRecordings');
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -86,7 +86,7 @@ export class ProjectRecordingService {
       }
 
       Logger.error(error, 'ProjectRecordingService.getRecordingDetails');
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

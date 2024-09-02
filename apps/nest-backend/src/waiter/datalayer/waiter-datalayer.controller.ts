@@ -63,10 +63,10 @@ export class WaiterDataLayerController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
     @Query('headless') headless: string,
-    @Query('measurementId') measurementId?: string,
-    @Query('username') username?: string,
-    @Query('password') password?: string,
-    @Body(ValidationPipe) eventInspectionPresetDto?: EventInspectionPresetDto
+    @Query('username') username: string,
+    @Query('password') password: string,
+    @Query('measurementId') measurementId: string,
+    @Body(ValidationPipe) eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     try {
       const results: {
@@ -105,7 +105,7 @@ export class WaiterDataLayerController {
         error,
         `${WaiterDataLayerController.name}.${WaiterDataLayerController.prototype.inspectSingleEvent.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -121,8 +121,8 @@ export class WaiterDataLayerController {
     @Param('projectSlug') projectSlug: string,
     @Query('headless') headless: string,
     @Query('measurementId') measurementId: string,
-    @Query('username') username?: string,
-    @Query('password') password?: string,
+    @Query('username') username: string,
+    @Query('password') password: string,
     @Query('concurrency') concurrency = 2
   ) {
     return await this.waiterEventInspectionService.inspectProject(

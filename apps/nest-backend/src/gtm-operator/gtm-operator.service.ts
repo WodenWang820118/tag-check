@@ -25,9 +25,9 @@ export class GtmOperatorService {
     projectName: string,
     testName: string,
     headless: string,
-    measurementId?: string,
-    credentials?: Credentials,
-    eventInspectionPresetDto?: EventInspectionPresetDto
+    measurementId: string,
+    credentials: Credentials,
+    eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     this.abortController = new AbortController();
     const { signal } = this.abortController;
@@ -37,25 +37,25 @@ export class GtmOperatorService {
     const options = {};
     const stats = await PCR.getStats(options);
     try {
-      this.currentBrowser = await stats.puppeteer.launch({
+      const browser = await stats.puppeteer.launch({
         headless: headless === 'true' ? true : false,
         devtools: measurementId ? true : false,
         defaultViewport: null,
         timeout: 30000,
         ignoreHTTPSErrors: true,
         // the window size may impact the examination result
-        args: eventInspectionPresetDto.puppeteerArgs || BROWSER_ARGS,
+        args: eventInspectionPresetDto?.puppeteerArgs || BROWSER_ARGS,
         executablePath: stats.executablePath,
         signal: signal,
       });
 
-      const incognitoContext = await this.currentBrowser.createBrowserContext();
+      const incognitoContext = await browser.createBrowserContext();
       const websiteUrl = this.extractBaseUrlFromGtmUrl(gtmUrl);
       const page = await incognitoContext.newPage();
       await this.operateGtmPreviewMode(page, gtmUrl);
       await sleep(1000);
       // Close the initial blank page for cleaner operations
-      const pages = await this.currentBrowser.pages();
+      const pages = await browser.pages();
       for (const subPage of pages) {
         if (subPage.url() === 'about:blank') {
           await subPage.close();
@@ -64,12 +64,13 @@ export class GtmOperatorService {
       // 5) Wait for the page to completely load
       await sleep(1000);
 
-      const target = await this.currentBrowser.waitForTarget((target) =>
-        target.url().includes(new URL(websiteUrl).origin)
+      const target = await browser.waitForTarget(
+        (target: { url: () => string | string[] }) =>
+          target.url().includes(new URL(websiteUrl).origin)
       );
 
       // TODO: Using the preview mode cannot intercept the network requests
-      this.currentPage = await target.page();
+      const targetPage = await target.page();
       await sleep(1000);
 
       // Set up an abort listener
@@ -82,7 +83,7 @@ export class GtmOperatorService {
       );
 
       return await this.eventInspectionPipelineService.singleEventInspectionRecipe(
-        this.currentPage,
+        targetPage,
         projectName,
         testName,
         headless,
@@ -91,17 +92,10 @@ export class GtmOperatorService {
         eventInspectionPresetDto
       );
     } catch (error) {
-      if (error.name === 'AbortError') {
-        Logger.error(
-          'Operation was aborted',
-          `${GtmOperatorService.name}.${GtmOperatorService.prototype.inspectSingleEventViaGtm.name}`
-        );
-      } else {
-        Logger.error(
-          error,
-          `${GtmOperatorService.name}.${GtmOperatorService.prototype.inspectSingleEventViaGtm.name}`
-        );
-      }
+      Logger.error(
+        error,
+        `${GtmOperatorService.name}.${GtmOperatorService.prototype.inspectSingleEventViaGtm.name}`
+      );
       throw error;
     }
   }
@@ -138,7 +132,7 @@ export class GtmOperatorService {
       return new URL(decodedUrl).toString();
     }
 
-    return null;
+    return '';
   }
 
   stopOperation() {

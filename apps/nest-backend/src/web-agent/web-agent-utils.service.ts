@@ -16,10 +16,10 @@ export class WebAgentUtilsService {
     page: Page,
     projectName: string,
     eventId: string,
-    captureRequest?: boolean,
-    measurementId?: string,
-    credentials?: Credentials,
-    application?: EventInspectionPresetDto['application']
+    captureRequest: boolean,
+    measurementId: string,
+    credentials: Credentials,
+    application: EventInspectionPresetDto['application']
   ) {
     await this.dataLayerService.initSelfDataLayer(projectName, eventId);
 
@@ -30,7 +30,7 @@ export class WebAgentUtilsService {
       });
     }
 
-    let eventRequest: string = null;
+    let eventRequest: string = '';
     const eventName = extractEventNameFromId(eventId);
     // 2) capture the request if needed
     if (captureRequest) {
@@ -104,7 +104,7 @@ export class WebAgentUtilsService {
         error,
         `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

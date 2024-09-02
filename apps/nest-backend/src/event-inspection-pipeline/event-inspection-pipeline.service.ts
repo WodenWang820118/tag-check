@@ -18,9 +18,9 @@ export class EventInspectionPipelineService {
     projectName: string,
     eventId: string,
     headless: string,
-    measurementId?: string,
-    credentials?: Credentials,
-    eventInspectionPresetDto?: EventInspectionPresetDto
+    measurementId: string,
+    credentials: Credentials,
+    eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     try {
       const result = await this.inspectorSingleEventService.inspectDataLayer(
@@ -30,7 +30,7 @@ export class EventInspectionPipelineService {
         headless,
         measurementId,
         credentials,
-        eventInspectionPresetDto.application
+        eventInspectionPresetDto?.application
       );
 
       Logger.log(
@@ -90,7 +90,7 @@ export class EventInspectionPipelineService {
         error,
         `${EventInspectionPipelineService}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

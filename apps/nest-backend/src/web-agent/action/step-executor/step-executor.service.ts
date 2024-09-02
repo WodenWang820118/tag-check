@@ -8,7 +8,7 @@ import { EventInspectionPresetDto } from '../../../dto/event-inspection-preset.d
 
 @Injectable()
 export class StepExecutorService {
-  recorder: ScreenRecorder;
+  recorder!: ScreenRecorder;
 
   constructor(
     @Inject(ACTION_HANDLERS) private handlers: { [key: string]: ActionHandler },
@@ -23,10 +23,9 @@ export class StepExecutorService {
     eventId: string,
     state: any,
     isLastStep: boolean,
-    application?: EventInspectionPresetDto['application']
+    application: EventInspectionPresetDto['application']
   ) {
     const randomDelay = 3000 + Math.floor(Math.random() * 2000);
-    const handler = this.handlers[step.type];
 
     switch (step.type) {
       case BrowserAction.SETVIEWPORT:

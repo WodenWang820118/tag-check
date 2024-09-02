@@ -23,7 +23,7 @@ export class FolderPathService {
         error,
         `${FolderPathService.name}.${FolderPathService.prototype.getRootProjectFolderPath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -38,7 +38,7 @@ export class FolderPathService {
         error,
         `${FolderPathService.name}.${FolderPathService.prototype.getReportSavingFolderPath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -50,7 +50,7 @@ export class FolderPathService {
         error,
         `${FolderPathService.name}.${FolderPathService.prototype.getProjectFolderPath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -65,7 +65,7 @@ export class FolderPathService {
         error,
         `${FolderPathService.name}.${FolderPathService.prototype.getRecordingFolderPath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -81,7 +81,7 @@ export class FolderPathService {
         error,
         `${FolderPathService.name}.${FolderPathService.prototype.getProjectConfigFolderPath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -96,7 +96,7 @@ export class FolderPathService {
         error,
         `${FolderPathService.name}.${FolderPathService.prototype.getInspectionEventFolderPath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

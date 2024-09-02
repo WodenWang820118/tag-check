@@ -68,6 +68,14 @@ export async function getElement(
       return document.querySelector(selector);
     case 'aria': {
       const match = selector.match(/aria\/(aria-\w+)\/(.+)/);
+      if (!match) {
+        Logger.error(
+          `Invalid ARIA selector: ${selector}`,
+          'evaluate.selectorFunctions'
+        );
+        return null;
+      }
+
       const ariaAttribute = match[1];
       const ariaValue = match[2];
       const constructedSelector = `[${ariaAttribute}="${ariaValue}"]`;
@@ -111,10 +119,15 @@ export function isElementHandle(obj: any): obj is ElementHandle<Element> {
   );
 }
 
-function getElementByText(searchText) {
+function getElementByText(searchText: string) {
   const allElements = document.querySelectorAll('*');
+
   for (const element of Array.from(allElements)) {
-    if (element.textContent.trim() === searchText) {
+    if (
+      element.nodeType === Node.TEXT_NODE &&
+      element.textContent &&
+      element.textContent.trim() === searchText
+    ) {
       return element;
     }
   }

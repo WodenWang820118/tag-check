@@ -60,14 +60,21 @@ export class HoverHandler implements ActionHandler {
     title: string,
     selector: string,
     timeout = 10000
-  ): Promise<boolean> {
+  ): Promise<boolean | undefined> {
     try {
+      const selectorType = getSelectorType(selector);
+      if (!selectorType) {
+        throw new HttpException(
+          `Selector type not found for selector ${selector}`,
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
       return await this.hoverStrategyService.hoverElement(
         page,
         projectName,
         title,
         selector,
-        getSelectorType(selector),
+        selectorType,
         timeout
       );
     } catch (error) {

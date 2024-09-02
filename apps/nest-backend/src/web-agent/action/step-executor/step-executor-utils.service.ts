@@ -7,7 +7,7 @@ import { DataLayerService } from '../../action/web-monitoring/data-layer/data-la
 
 @Injectable()
 export class StepExecutorUtilsService {
-  recorder: ScreenRecorder;
+  recorder!: ScreenRecorder;
 
   constructor(private dataLayerService: DataLayerService) {}
   async handleKeyboardAction(
@@ -93,7 +93,7 @@ export class StepExecutorUtilsService {
         state.isFirstNavigation = false;
       }
     } catch (error) {
-      throw new Error(error);
+      throw new Error(String(error));
     }
   }
 
@@ -115,7 +115,7 @@ export class StepExecutorUtilsService {
         return;
       } catch (error) {
         await page.close();
-        throw new Error(error);
+        throw new Error(String(error));
       }
     }
   }

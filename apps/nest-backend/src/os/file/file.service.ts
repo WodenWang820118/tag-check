@@ -34,7 +34,7 @@ export class FileService {
         error,
         `${FileService.name}.${FileService.prototype.readJsonFile.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -53,7 +53,7 @@ export class FileService {
         error,
         `${FileService.name}.${FileService.prototype.getOperationJsonByProject.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -82,7 +82,7 @@ export class FileService {
         error,
         `${FileService.name}.${FileService.prototype.getEventReport.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -94,7 +94,7 @@ export class FileService {
         error,
         `${FileService.name}.${FileService.prototype.downloadFile.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -125,6 +125,12 @@ export class FileService {
 
     filePaths.forEach((filePath) => {
       const fileName = filePath.split('\\').at(-1);
+      if (!fileName) {
+        throw new HttpException(
+          'File name not found',
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
       archive.append(createReadStream(filePath), { name: fileName });
     });
 
@@ -147,7 +153,7 @@ export class FileService {
         error,
         `${FileService.name}.${FileService.prototype.readReport.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -171,7 +177,7 @@ export class FileService {
         error,
         `${FileService.name}.${FileService.prototype.deleteFile.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

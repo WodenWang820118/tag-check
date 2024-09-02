@@ -41,7 +41,7 @@ export class ProjectSpecService {
 
       await this.writeSpecsFile(projectSlug, specs);
       return { projectSlug, specs };
-    } catch (error) {
+    } catch (error: any) {
       this.handleError(error, 'addSpec');
     }
   }
@@ -56,7 +56,7 @@ export class ProjectSpecService {
       const updatedSpecs = specs.map((s) => (s.event === eventName ? spec : s));
       await this.writeSpecsFile(projectSlug, updatedSpecs);
       return { projectSlug, specs: updatedSpecs };
-    } catch (error) {
+    } catch (error: any) {
       this.handleError(error, 'updateSpec');
     }
   }

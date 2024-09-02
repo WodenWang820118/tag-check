@@ -17,13 +17,13 @@ export class SingleEventInspectionService {
     projectSlug: string,
     eventId: string,
     headless: string,
-    measurementId?: string,
-    credentials?: Credentials,
-    eventInspectionPresetDto?: EventInspectionPresetDto
+    measurementId: string,
+    credentials: Credentials,
+    eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
       headless,
-      eventInspectionPresetDto,
+      eventInspectionPresetDto as any,
       measurementId
     );
     try {
@@ -52,19 +52,12 @@ export class SingleEventInspectionService {
       // await recorder.stop();
       return data;
     } catch (error) {
-      if (error.name === 'AbortError') {
-        Logger.error(
-          'Operation was aborted',
-          `${SingleEventInspectionService.name}.${SingleEventInspectionService.prototype.inspectSingleEvent.name}`
-        );
-      } else {
-        Logger.error(
-          error,
-          `${SingleEventInspectionService.name}.${SingleEventInspectionService.prototype.inspectSingleEvent.name}`
-        );
-      }
+      Logger.error(
+        error,
+        `${SingleEventInspectionService.name}.${SingleEventInspectionService.prototype.inspectSingleEvent.name}`
+      );
       await this.puppeteerUtilsService.cleanup(browser, page);
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

@@ -27,9 +27,9 @@ export class InspectorSingleEventService {
     projectName: string,
     eventId: string,
     headless: string,
-    measurementId?: string,
-    credentials?: Credentials,
-    application?: EventInspectionPresetDto['application']
+    measurementId: string,
+    credentials: Credentials,
+    application: EventInspectionPresetDto['application']
   ) {
     try {
       // 1. Get the project spec from the local file system
@@ -82,7 +82,7 @@ export class InspectorSingleEventService {
             path: imageSavingFolder,
           });
 
-          if (headless === 'false') await page.close();
+          if (headless === 'true') await page.close();
           Logger.log(
             'Browser is closed!',
             `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
@@ -148,7 +148,7 @@ export class InspectorSingleEventService {
         error,
         `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

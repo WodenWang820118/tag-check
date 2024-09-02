@@ -118,7 +118,7 @@ export class WaiterProjectWorkFlowService {
         error,
         `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.initProject.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -163,7 +163,7 @@ export class WaiterProjectWorkFlowService {
         error,
         `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setProject.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

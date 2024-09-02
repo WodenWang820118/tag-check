@@ -30,9 +30,9 @@ export class InspectorGroupEventsService {
   async inspectProjectDataLayer(
     browser: Browser,
     projectName: string,
-    headless?: string,
-    measurementId?: string,
-    credentials?: Credentials,
+    headless: string,
+    measurementId: string,
+    credentials: Credentials,
     concurrency?: number
   ) {
     // deal with invalid concurrency
@@ -42,7 +42,7 @@ export class InspectorGroupEventsService {
       projectName
     );
 
-    const results = [];
+    const results: any[] = [];
     for (let i = 0; i < operations.length; i += concurrency) {
       const incognitoContext = await browser.createBrowserContext();
       const operationBatch = operations.slice(i, i + concurrency);
@@ -59,7 +59,8 @@ export class InspectorGroupEventsService {
               testName,
               headless,
               measurementId,
-              credentials
+              credentials,
+              '' as any
             );
           await this.fileService.writeCacheFile(projectName, operation, result);
           const imageSavingFolder = await this.filePathService.getImageFilePath(

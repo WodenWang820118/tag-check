@@ -22,8 +22,8 @@ export class GroupEventsInspectionService {
   async inspectProject(
     projectName: string,
     headless: string,
-    measurementId?: string,
-    credentials?: Credentials,
+    measurementId: string,
+    credentials: Credentials,
     concurrency?: number
   ) {
     // 3.1) inspect both dataLayer and the request sent to GA4
@@ -33,7 +33,7 @@ export class GroupEventsInspectionService {
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
     const stats = await PCR(options);
-    this.currentBrowser = await stats.puppeteer
+    const browser = await stats.puppeteer
       .launch({
         headless: headless === 'true' ? true : false,
         defaultViewport: null,
@@ -42,7 +42,7 @@ export class GroupEventsInspectionService {
         executablePath: stats.executablePath,
         signal: signal,
       })
-      .catch(function (error) {
+      .catch(function (error: any) {
         console.error(error);
       });
 
@@ -54,10 +54,10 @@ export class GroupEventsInspectionService {
       },
       { once: true }
     );
-
+    this.currentBrowser = browser;
     const result =
       await this.inspectorGroupEventsService.inspectProjectDataLayer(
-        this.currentBrowser,
+        browser,
         projectName,
         headless,
         measurementId,

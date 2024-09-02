@@ -32,7 +32,7 @@ export class PathUtilsService {
         error,
         `${PathUtilsService.name}.${PathUtilsService.prototype.buildFilePath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -53,7 +53,7 @@ export class PathUtilsService {
         error,
         `${PathUtilsService.name}.${PathUtilsService.prototype.buildFolderPath.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

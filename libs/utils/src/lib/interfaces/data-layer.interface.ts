@@ -18,6 +18,7 @@ export interface BaseItem {
   location_id?: string;
   price?: number;
   quantity?: number;
+  [key: string]: any;
 }
 
 export interface BaseECommerce {

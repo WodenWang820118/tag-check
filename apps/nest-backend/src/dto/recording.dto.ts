@@ -3,8 +3,8 @@ import { Recording } from '@utils';
 
 export class RecordingDto implements Recording {
   @ApiProperty()
-  title: string;
+  title!: string;
 
   @ApiProperty()
-  steps: any[];
+  steps!: any[];
 }
