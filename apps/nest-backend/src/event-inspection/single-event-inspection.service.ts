@@ -4,6 +4,7 @@ import { EventInspectionPresetDto } from '@utils';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
 import { FolderPathService } from '../os/path/folder-path/folder-path.service';
 import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
+import { join } from 'path';
 
 @Injectable()
 export class SingleEventInspectionService {
@@ -22,22 +23,24 @@ export class SingleEventInspectionService {
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
+      projectSlug,
+      eventId,
       headless,
-      eventInspectionPresetDto as any,
-      measurementId
+      measurementId,
+      credentials,
+      eventInspectionPresetDto
     );
+
+    const folder = await this.folderPathService.getInspectionEventFolderPath(
+      projectSlug,
+      eventId
+    );
+    const recordingPath = join(folder);
+    await this.puppeteerUtilsService.startRecorder(page, recordingPath);
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     try {
-      const folder = await this.folderPathService.getInspectionEventFolderPath(
-        projectSlug,
-        eventId
-      );
-
-      // FIXME: Still buggy
-      // const recorder = await this.puppeteerUtilsService.startRecorder(
-      //   page,
-      //   folder
-      // );
-
       const data =
         await this.eventInspectionPipelineService.singleEventInspectionRecipe(
           page,
@@ -49,7 +52,7 @@ export class SingleEventInspectionService {
           eventInspectionPresetDto
         );
 
-      // await recorder.stop();
+      await browser.close();
       return data;
     } catch (error) {
       Logger.error(

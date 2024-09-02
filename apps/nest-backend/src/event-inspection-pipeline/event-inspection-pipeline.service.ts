@@ -31,7 +31,7 @@ export class EventInspectionPipelineService {
         headless,
         measurementId,
         credentials,
-        eventInspectionPresetDto?.application
+        eventInspectionPresetDto.application
       );
 
       Logger.log(

@@ -40,7 +40,7 @@ export class InspectorSingleEventService {
       const specsPath = await this.filePathService.getProjectConfigFilePath(
         projectName
       );
-      const specs = await this.fileService.readJsonFile<any>(specsPath);
+      const specs = this.fileService.readJsonFile<any>(specsPath);
       const imageSavingFolder = await this.filePathService.getImageFilePath(
         projectName,
         eventId
@@ -85,8 +85,8 @@ export class InspectorSingleEventService {
           await page.screenshot({
             path: imageSavingFolder,
           });
-
-          if (headless === 'true') await page.close();
+          // allow the screencast video to be finalized
+          await new Promise((resolve) => setTimeout(resolve, 5000));
           Logger.log(
             'Browser is closed!',
             `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
@@ -136,8 +136,8 @@ export class InspectorSingleEventService {
           await page.screenshot({
             path: imageSavingFolder,
           });
-
-          if (headless === 'true') await page.close();
+          // allow the screencast video to be finalized
+          await new Promise((resolve) => setTimeout(resolve, 5000));
 
           return {
             dataLayerResult,
