@@ -49,7 +49,7 @@ export class EventInspectionPipelineService {
       ];
 
       Logger.log(
-        `Data constructed: ${data}`,
+        `Data constructed: ${JSON.stringify(data, null, 2)}`,
         `${EventInspectionPipelineService.name}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
 

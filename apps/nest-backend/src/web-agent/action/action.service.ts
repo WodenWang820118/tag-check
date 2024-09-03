@@ -19,19 +19,19 @@ export class ActionService {
 
   async performOperation(
     page: Page,
-    projectName: string,
+    projectSlug: string,
     eventId: string,
     application: EventInspectionPresetDto['application']
   ) {
     try {
       const operation: { steps: any[] } = this.fileService.readJsonFile(
-        await this.filePathService.getOperationFilePath(projectName, eventId)
+        await this.filePathService.getOperationFilePath(projectSlug, eventId)
       );
       if (!operation || !operation.steps) return;
 
       await this.requestInterceptorService.setupInterception(
         page,
-        projectName,
+        projectSlug,
         eventId
       );
       let isLastStep = false;
@@ -56,7 +56,7 @@ export class ActionService {
         await this.stepExecutorService.executeStep(
           page,
           step,
-          projectName,
+          projectSlug,
           eventId,
           state,
           isLastStep,

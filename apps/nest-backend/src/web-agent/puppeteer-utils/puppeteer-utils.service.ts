@@ -91,6 +91,7 @@ export class PuppeteerUtilsService {
     const recordingPath = join(folderPath, 'recording');
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const ffmpegPath = require('ffmpeg-static');
+    await page.bringToFront();
     const recorder = await page.screencast({
       ffmpegPath: ffmpegPath,
       path: `${recordingPath}.webm`,

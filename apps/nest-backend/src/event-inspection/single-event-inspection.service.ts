@@ -4,7 +4,6 @@ import { EventInspectionPresetDto } from '@utils';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
 import { FolderPathService } from '../os/path/folder-path/folder-path.service';
 import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
-import { join } from 'path';
 
 @Injectable()
 export class SingleEventInspectionService {
@@ -35,9 +34,8 @@ export class SingleEventInspectionService {
       projectSlug,
       eventId
     );
-    const recordingPath = join(folder);
-    await this.puppeteerUtilsService.startRecorder(page, recordingPath);
 
+    await this.puppeteerUtilsService.startRecorder(page, folder);
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     try {
