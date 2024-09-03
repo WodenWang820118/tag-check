@@ -15,14 +15,14 @@ export class WebAgentUtilsService {
 
   async performTest(
     page: Page,
-    projectName: string,
+    projectSlug: string,
     eventId: string,
     captureRequest: boolean,
     measurementId: string,
     credentials: Credentials,
     application: EventInspectionPresetDto['application']
   ) {
-    await this.dataLayerService.initSelfDataLayer(projectName, eventId);
+    await this.dataLayerService.initSelfDataLayer(projectSlug, eventId);
 
     if (credentials) {
       await page.authenticate({
@@ -51,7 +51,7 @@ export class WebAgentUtilsService {
           eventRequest = interceptedRequest.url();
           page.off('request');
         } else {
-          Logger.log(
+          Logger.warn(
             `Request not captured: ${interceptedRequest.url()}`,
             `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
           );
@@ -63,7 +63,7 @@ export class WebAgentUtilsService {
     try {
       await this.actionService.performOperation(
         page,
-        projectName,
+        projectSlug,
         eventId,
         application
       );
@@ -81,11 +81,11 @@ export class WebAgentUtilsService {
       }
       await this.dataLayerService.updateSelfDataLayer(
         page,
-        projectName,
+        projectSlug,
         eventId
       );
       const dataLayer = await this.dataLayerService.getMyDataLayer(
-        projectName,
+        projectSlug,
         eventId
       );
 

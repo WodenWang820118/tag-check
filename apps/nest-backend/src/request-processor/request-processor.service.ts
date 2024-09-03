@@ -103,7 +103,7 @@ export class RequestProcessorService {
     }
 
     Logger.log(
-      `recomposeGA4ECEvent-dataLayer${updatedDataLayer}`,
+      `recomposeGA4ECEvent-dataLayer${JSON.stringify(updatedDataLayer)}`,
       `${RequestProcessorService.name}.${RequestProcessorService.prototype.recomposeGA4ECEvent.name}`
     );
     return updatedDataLayer;

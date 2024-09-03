@@ -12,6 +12,7 @@ export class WebAgentService {
     page: Page,
     projectName: string,
     eventId: string,
+    measurementId: string,
     credentials: Credentials,
     application: EventInspectionPresetDto['application']
   ) {
@@ -21,7 +22,7 @@ export class WebAgentService {
         projectName,
         eventId,
         false,
-        '',
+        measurementId,
         credentials,
         application
       );
@@ -33,8 +34,8 @@ export class WebAgentService {
 
   async executeAndGetDataLayerAndRequest(
     page: Page,
-    projectName: string,
-    testName: string,
+    projectSlug: string,
+    eventId: string,
     measurementId: string,
     credentials: Credentials,
     application: EventInspectionPresetDto['application']
@@ -42,8 +43,8 @@ export class WebAgentService {
     const { dataLayer, eventRequest, destinationUrl } =
       await this.webAgentUtilsService.performTest(
         page,
-        projectName,
-        testName,
+        projectSlug,
+        eventId,
         true,
         measurementId,
         credentials,
