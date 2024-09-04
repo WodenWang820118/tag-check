@@ -146,9 +146,9 @@ export class WaiterDataLayerController {
       'This endpoint stops the current operation and returns the results of the operation.',
   })
   @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
-  stopOperation() {
+  async stopOperation() {
     try {
-      this.waiterEventInspectionService.stopOperation();
+      await this.waiterEventInspectionService.stopOperation();
       return { message: 'Operation stopped successfully' };
     } catch (error) {
       Logger.error(

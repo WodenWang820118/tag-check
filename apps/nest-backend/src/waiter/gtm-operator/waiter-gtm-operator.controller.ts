@@ -94,16 +94,16 @@ export class WaiterGtmOperatorController {
     return [abstractReport];
   }
 
-  @Post('stop-operation')
+  @Post('stop-gtm-operation')
   @ApiOperation({
     summary: 'Stops the current operation',
     description:
       'This endpoint stops the current operation and returns the results of the operation.',
   })
   @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
-  stopOperation() {
+  async stopOperation() {
     try {
-      this.gtmOperatorService.stopOperation();
+      await this.gtmOperatorService.stopOperation();
       return { message: 'Operation stopped successfully' };
     } catch (error) {
       Logger.error(error, 'waiter.stopOperation');

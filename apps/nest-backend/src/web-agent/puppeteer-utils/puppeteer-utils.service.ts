@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-misused-promises */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
@@ -10,7 +10,6 @@ import { BROWSER_ARGS } from '../../configs/project.config';
 
 @Injectable()
 export class PuppeteerUtilsService {
-  private abortController: AbortController | null = null;
   private recorder: ScreenRecorder | null = null;
 
   async startBrowser(
@@ -18,65 +17,86 @@ export class PuppeteerUtilsService {
     eventId: string,
     headless: string,
     measurementId: string,
-    credentails: Credentials,
-    eventInspectionPresetDto: EventInspectionPresetDto
+    credentials: Credentials,
+    eventInspectionPresetDto: EventInspectionPresetDto,
+    signal: AbortSignal
   ) {
-    const abortController = new AbortController();
-    const { signal } = abortController;
-    this.abortController = abortController;
-    // will need to specify the defaultViewport; otherwise, cannot screencast the video
+    Logger.log(
+      `Signal: ${JSON.stringify(signal, null, 2)}`,
+      `${PuppeteerUtilsService.name}.${this.startBrowser.name}`
+    );
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
     const stats = await PCR(options);
     const browser: Browser = await stats.puppeteer.launch({
       headless: headless === 'true' ? true : false,
-      devtools: measurementId ? true : false,
+      devtools: !!measurementId,
       acceptInsecureCerts: true,
       args: eventInspectionPresetDto.puppeteerArgs || BROWSER_ARGS,
       executablePath: stats.executablePath,
-      signal: signal,
       defaultViewport: { width: 1920, height: 1080 },
+      signal: signal,
     });
+
     Logger.log(
       'Browser launched',
-      `${PuppeteerUtilsService.name}.${PuppeteerUtilsService.prototype.startBrowser.name}`
+      `${PuppeteerUtilsService.name}.${this.startBrowser.name}`
     );
 
-    const pages: Page[] = await browser.pages();
+    const pages = await browser.pages();
     const page = pages[0];
-    // Set up an abort listener
-    signal.addEventListener(
-      'abort',
-      async () => {
+    try {
+      // Set up an abort listener
+      signal.addEventListener('abort', async () => {
+        Logger.log(
+          'Received the abort signal',
+          `${PuppeteerUtilsService.name}.${this.startBrowser.name}`
+        );
         await this.cleanup(browser, page);
-      },
-      { once: true }
-    );
-    return { browser, page, abortController };
+      });
+
+      return {
+        browser: browser,
+        page: page,
+      };
+    } catch (error) {
+      Logger.error(
+        `Error starting browser: ${error}`,
+        `${PuppeteerUtilsService.name}.${this.startBrowser.name}`
+      );
+      await this.cleanup(browser, page);
+      throw error;
+    }
   }
 
   async cleanup(browser: Browser, page: Page) {
     Logger.log(
       'Cleaning up resources',
-      `${PuppeteerUtilsService.name}.${PuppeteerUtilsService.prototype.cleanup.name}`
+      `${PuppeteerUtilsService.name}.${this.cleanup.name}`
     );
+
+    if (this.recorder) {
+      await this.stopRecorder();
+    }
+
     if (page) {
       await page
         .close()
         .catch((err) =>
           Logger.error(
-            'Error closing page' + err,
+            `Error closing page: ${err}`,
             `${PuppeteerUtilsService.name}.${PuppeteerUtilsService.prototype.cleanup.name}`
           )
         );
     }
+
     if (browser) {
       await browser
         .close()
         .catch((err) =>
           Logger.error(
-            'Error closing browser' + err,
+            `Error closing browser: ${err}`,
             `${PuppeteerUtilsService.name}.${PuppeteerUtilsService.prototype.cleanup.name}`
           )
         );
@@ -92,12 +112,11 @@ export class PuppeteerUtilsService {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const ffmpegPath = require('ffmpeg-static');
     await page.bringToFront();
-    const recorder = await page.screencast({
+    this.recorder = await page.screencast({
       ffmpegPath: ffmpegPath,
       path: `${recordingPath}.webm`,
     });
-    this.recorder = recorder;
-    return recorder;
+    return this.recorder;
   }
 
   async stopRecorder() {
@@ -107,16 +126,7 @@ export class PuppeteerUtilsService {
     );
     if (this.recorder) {
       await this.recorder.stop();
-    }
-  }
-
-  stopOperation() {
-    Logger.log(
-      'Operation stopped',
-      `${PuppeteerUtilsService.name}.${PuppeteerUtilsService.prototype.stopOperation.name}`
-    );
-    if (this.abortController) {
-      this.abortController.abort();
+      this.recorder = null;
     }
   }
 }

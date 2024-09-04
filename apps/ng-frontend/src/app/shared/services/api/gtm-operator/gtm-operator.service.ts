@@ -45,7 +45,7 @@ export class GtmOperatorService {
 
   stopOperation(): Observable<string> {
     return this.http
-      .post<string>(`${environment.dataLayerApiUrl}/stop-operation`, {})
+      .post<string>(`${environment.dataLayerApiUrl}/stop-gtm-operation`, {})
       .pipe(
         map((message) => message),
         catchError((error) => {
