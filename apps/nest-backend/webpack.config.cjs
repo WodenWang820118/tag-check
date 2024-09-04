@@ -13,7 +13,7 @@ module.exports = composePlugins(withNx(), (config) => {
     sentryWebpackPlugin({
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: 'guan-xin-wang',
-      project: 'tag-check-y6',
+      project: 'tag-check-nestjs',
     })
   );
   return config;
