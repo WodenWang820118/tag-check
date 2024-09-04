@@ -10,6 +10,7 @@ export * from './lib/interfaces/data-layer.interface';
 export * from './lib/interfaces/tag-build.interface';
 export * from './lib/interfaces/topic-node.interface';
 export * from './lib/interfaces/file-report.interface';
+export * from './lib/interfaces/carousel-item.interface';
 
 // DTOs
 export * from './lib/dtos/event-inspect-preset.dto';

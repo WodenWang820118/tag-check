@@ -1,0 +1,21 @@
+<div class="carousel" *ngIf="items$ | async as items">
+  <div class="carousel-container">
+    @for (item of items; track item; let i = $index) {
+    <div class="carousel-item" [class.active]="i === currentIndex">
+      @switch (item.type) { @case ('image') {
+      <img
+        [src]="item.url"
+        [alt]="item.alt || ''"
+        class="detail__images__item"
+      />
+      } @case ('video') {
+      <video controls>
+        <source [src]="item.url" type="video/webm" />
+      </video>
+      } }
+    </div>
+    }
+  </div>
+  <button class="carousel-control prev" (click)="previous()">&#10094;</button>
+  <button class="carousel-control next" (click)="next()">&#10095;</button>
+</div>
