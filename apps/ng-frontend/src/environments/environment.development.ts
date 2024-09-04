@@ -9,4 +9,5 @@ export const environment = {
   dataLayerApiUrl: 'http://localhost:8080/datalayer',
   settingsApiUrl: 'http://localhost:8080/settings',
   fileReportApiUrl: 'http://localhost:8080/file-reports',
+  videoApiUrl: 'http://localhost:8080/videos',
 };
