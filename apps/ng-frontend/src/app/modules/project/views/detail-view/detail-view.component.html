@@ -18,12 +18,7 @@
   </div>
   <div class="detail__content">
     <div class="detail__images">
-      <img
-        class="detail__images__item"
-        *ngIf="image$ | async as imageBlob"
-        [src]="imageBlob | blobToUrl"
-        alt="Loaded image"
-      />
+      <app-carousel [items$]="carouselItems$"></app-carousel>
     </div>
     <div class="detail__panels">
       <app-report-datail-panels
