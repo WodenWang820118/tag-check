@@ -44,15 +44,14 @@ For development
 npm run dev-front
 ```
 
-## Backend (Nest.js)
+## Backend (NestJS)
 
-Use the following command for backend development with a development server:
+Please remove the Sentry plugin within the `.\apps\nest-backend\webpack.config.cjs` before running the development server. Then
+use the following command for backend development with a development server:
 
 ```bash
 npm run dev-back
 ```
-
-You may need to remove the `.db/data.sqlite3` to re-init the cached data.
 
 ## Electron
 

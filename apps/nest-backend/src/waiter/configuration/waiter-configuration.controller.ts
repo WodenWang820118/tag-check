@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   InternalServerErrorException,
-  Logger,
   NotFoundException,
   Param,
   Post,
@@ -14,6 +13,11 @@ import { WaiterConfigurationService } from './waiter-configuration.service';
 @Controller('configurations')
 export class WaiterConfigurationController {
   constructor(private waiterConfigurationService: WaiterConfigurationService) {}
+
+  @Get('/debug-sentry')
+  getError() {
+    throw new Error('My first Sentry error!');
+  }
 
   @Get()
   async getConfigurations() {
