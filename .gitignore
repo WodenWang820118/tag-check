@@ -47,3 +47,6 @@ Thumbs.db
 # But don't ignore ng_gtm_integration_sample
 !/tag_check_projects/ng_gtm_integration_sample/
 
+
+# Sentry Config File
+.sentryclirc
