@@ -17,6 +17,7 @@ import { WaiterConfigurationController } from './configuration/waiter-configurat
 import { WaiterSettingsController } from './settings/waiter-settings.controller';
 import { WaiterProjectIoController } from './project-io/waiter-project-io.controller';
 import { WaiterFileReportsController } from './file-reports/waiter-file-reports.controller';
+import { WaiterVideosController } from './videos/videos.controller';
 
 // services
 import { WaiterEventInspectionService } from './datalayer/waiter-event-inspection.service';
@@ -44,6 +45,7 @@ const waiterServices = [
     WaiterSettingsController,
     WaiterProjectIoController,
     WaiterFileReportsController,
+    WaiterVideosController,
   ],
   providers: [...waiterServices, PuppeteerUtilsService],
 })
