@@ -1,22 +1,28 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AsyncPipe, NgIf } from '@angular/common';
 import {
+  BehaviorSubject,
   Observable,
-  Subscription,
+  Subject,
   catchError,
   combineLatest,
+  map,
   of,
+  pipe,
+  takeUntil,
   tap,
   timeout,
 } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReportDetailsService } from '../../../../shared/services/report-details/report-details.service';
 import { ReportDetailPanelsComponent } from '../../components/report-detail-panels/report-detail-panels.component';
-import { IReportDetails } from '@utils';
+import { CarouselItem, IReportDetails } from '@utils';
 import { ImageService } from '../../../../shared/services/api/image/image.service';
 import { BlobToUrlPipe } from '../../../../shared/pipes/blob-to-url-pipe';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { VideosService } from '../../../../shared/services/api/videos/videos.service';
+import { CarouselComponent } from '../../../../shared/components/carousel/carousel.component';
 
 @Component({
   selector: 'app-detail-view',
@@ -28,6 +34,7 @@ import { MatButtonModule } from '@angular/material/button';
     BlobToUrlPipe,
     MatIconModule,
     MatButtonModule,
+    CarouselComponent,
   ],
   templateUrl: './detail-view.component.html',
   styleUrls: ['./detail-view.component.scss'],
@@ -35,20 +42,25 @@ import { MatButtonModule } from '@angular/material/button';
 export class DetailViewComponent implements OnInit, OnDestroy {
   reportDetails$!: Observable<IReportDetails | undefined>;
   image$!: Observable<Blob | null>;
-  subscriptions: Subscription[] = [];
+  video$!: Observable<Blob | null>;
+  private carouselItemsSubject = new BehaviorSubject<CarouselItem[]>([]);
+  carouselItems$: Observable<CarouselItem[]> =
+    this.carouselItemsSubject.asObservable();
+  destroy$ = new Subject<void>();
 
   constructor(
     public reportDetailsService: ReportDetailsService,
     private imageService: ImageService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private videosService: VideosService
   ) {}
 
   ngOnInit(): void {
-    // TODO: avaoid manual subscription and unsubscription
     this.reportDetails$ = this.reportDetailsService.reportDetails$;
-    const reportDetailsSubscription = this.reportDetails$
+    this.reportDetails$
       .pipe(
+        takeUntil(this.destroy$),
         timeout({
           each: 500,
           with: () =>
@@ -69,14 +81,20 @@ export class DetailViewComponent implements OnInit, OnDestroy {
       )
       .subscribe();
 
-    const imageSubscription = combineLatest([
+    combineLatest([
       this.route.params,
       this.route.parent?.params || of({ projectSlug: '' }),
     ])
       .pipe(
+        takeUntil(this.destroy$),
         tap(([params, parentParams]) => {
           if (params && parentParams) {
             this.image$ = this.imageService.getImage(
+              parentParams['projectSlug'],
+              params['eventId']
+            );
+
+            this.video$ = this.videosService.getVideo(
               parentParams['projectSlug'],
               params['eventId']
             );
@@ -89,8 +107,26 @@ export class DetailViewComponent implements OnInit, OnDestroy {
       )
       .subscribe();
 
-    this.subscriptions.push(reportDetailsSubscription);
-    this.subscriptions.push(imageSubscription);
+    combineLatest([this.image$, this.video$])
+      .pipe(
+        map(([imageBlob, videoBlob]) => {
+          const items: CarouselItem[] = [];
+          if (imageBlob !== null) {
+            items.push({
+              type: 'image',
+              url: new BlobToUrlPipe().transform(imageBlob) || '',
+            });
+          }
+          if (videoBlob) {
+            items.push({
+              type: 'video',
+              url: new BlobToUrlPipe().transform(videoBlob) || '',
+            });
+          }
+          return items;
+        })
+      )
+      .subscribe((items) => this.carouselItemsSubject.next(items));
   }
 
   goBack() {
@@ -98,8 +134,7 @@ export class DetailViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.subscriptions.forEach((subscription) => {
-      subscription.unsubscribe();
-    });
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
