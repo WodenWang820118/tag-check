@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './all-exceptions-filter';
 import { activatePort } from './configs/project.config';
+import './instrument.mjs';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
