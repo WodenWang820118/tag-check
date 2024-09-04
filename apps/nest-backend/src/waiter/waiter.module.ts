@@ -23,7 +23,6 @@ import { WaiterVideosController } from './videos/videos.controller';
 import { WaiterEventInspectionService } from './datalayer/waiter-event-inspection.service';
 import { WaiterProjectWorkFlowService } from './project/waiter-project-workflow.service';
 import { WaiterConfigurationService } from './configuration/waiter-configuration.service';
-import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
 
 const waiterServices = [
   WaiterEventInspectionService,
@@ -47,6 +46,6 @@ const waiterServices = [
     WaiterFileReportsController,
     WaiterVideosController,
   ],
-  providers: [...waiterServices, PuppeteerUtilsService],
+  providers: [...waiterServices],
 })
 export class WaiterModule {}

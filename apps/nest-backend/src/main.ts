@@ -3,7 +3,6 @@ import { LazyModuleLoader, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 // import { SpelunkerModule } from 'nestjs-spelunker';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AllExceptionsFilter } from './all-exceptions-filter';
 import { activatePort } from './configs/project.config';
 import './instrument.mjs';
 
@@ -19,7 +18,6 @@ async function bootstrap() {
     preflightContinue: false,
   });
   // Handle uncaught exceptions
-  app.useGlobalFilters(new AllExceptionsFilter());
   // 1. Generate the tree as text
   // const tree = SpelunkerModule.explore(app);
   // const root = SpelunkerModule.graph(tree);

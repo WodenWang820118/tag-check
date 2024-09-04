@@ -1,16 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { SingleEventInspectionService } from '../../event-inspection/single-event-inspection.service';
 import { GroupEventsInspectionService } from '../../event-inspection/group-events-inspection.service';
 import { Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '@utils';
-import { PuppeteerUtilsService } from '../../web-agent/puppeteer-utils/puppeteer-utils.service';
 
 @Injectable()
 export class WaiterEventInspectionService {
   constructor(
     private singleEventInspectionService: SingleEventInspectionService,
-    private groupEventsInspection: GroupEventsInspectionService,
-    private puppeteerUtilsService: PuppeteerUtilsService
+    private groupEventsInspection: GroupEventsInspectionService
   ) {}
 
   async inspectSingleEvent(
@@ -48,8 +46,14 @@ export class WaiterEventInspectionService {
   }
 
   // TODO: might need to separate the cleanup logic
-  stopOperation() {
-    this.puppeteerUtilsService.stopOperation();
+  async stopOperation() {
+    Logger.log(
+      'Stopping the operation',
+      `${WaiterEventInspectionService.name}.${this.stopOperation.name}`
+    );
+    // Wait for a short time to ensure the operation has started
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    this.singleEventInspectionService.abort();
     this.groupEventsInspection.stopOperation();
   }
 }

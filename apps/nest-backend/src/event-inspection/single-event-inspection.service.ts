@@ -1,17 +1,24 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials } from 'puppeteer';
-import { EventInspectionPresetDto } from '@utils';
+import { EventInspectionPresetDto, ValidationResult } from '@utils';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
 import { FolderPathService } from '../os/path/folder-path/folder-path.service';
 import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
 
 @Injectable()
 export class SingleEventInspectionService {
+  abortController: AbortController | null = null;
+
   constructor(
     private eventInspectionPipelineService: EventInspectionPipelineService,
     private folderPathService: FolderPathService,
     private puppeteerUtilsService: PuppeteerUtilsService
   ) {}
+
+  initializeAbortController() {
+    this.abortController = new AbortController();
+  }
 
   async inspectSingleEvent(
     projectSlug: string,
@@ -21,13 +28,22 @@ export class SingleEventInspectionService {
     credentials: Credentials,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
+    this.initializeAbortController();
+    if (!this.abortController) {
+      throw new HttpException(
+        'Abort controller is not initialized',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
       projectSlug,
       eventId,
       headless,
       measurementId,
       credentials,
-      eventInspectionPresetDto
+      eventInspectionPresetDto,
+      this.abortController.signal
     );
 
     const folder = await this.folderPathService.getInspectionEventFolderPath(
@@ -59,6 +75,16 @@ export class SingleEventInspectionService {
       );
       await this.puppeteerUtilsService.cleanup(browser, page);
       throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  abort() {
+    if (this.abortController) {
+      Logger.log(
+        `Aborting the operation`,
+        `${SingleEventInspectionService.name}.${this.abort.name}`
+      );
+      this.abortController.abort();
     }
   }
 }

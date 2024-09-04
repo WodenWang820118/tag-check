@@ -44,8 +44,8 @@ export class ProgressPieChartComponent implements AfterViewInit, OnDestroy {
         takeUntil(this.destroyed$),
         tap(([currentStep, totalSteps]) => {
           if (currentStep > 0 && totalSteps > 0) {
-            console.log('currentStep', currentStep);
-            console.log('totalSteps', totalSteps);
+            // console.log('currentStep', currentStep);
+            // console.log('totalSteps', totalSteps);
             this.currentStep = currentStep;
             this.totalSteps = totalSteps;
 
@@ -73,7 +73,6 @@ export class ProgressPieChartComponent implements AfterViewInit, OnDestroy {
   createChart() {
     Chart.register(PieController, ArcElement, Tooltip, Legend);
     const ctx = this.chartRef.nativeElement.getContext('2d');
-    console.log('this.totalSteps', this.totalSteps);
     const data: ChartData = {
       labels: Array.from(
         { length: this.totalSteps },

@@ -12,11 +12,16 @@ import { FolderPathService } from '../os/path/folder-path/folder-path.service';
 
 @Injectable()
 export class GtmOperatorService {
+  abortController: AbortController | null = null;
   constructor(
     private eventInspectionPipelineService: EventInspectionPipelineService,
     private puppeteerUtilsService: PuppeteerUtilsService,
     private folderPathService: FolderPathService
   ) {}
+
+  initializeAbortController() {
+    this.abortController = new AbortController();
+  }
 
   async inspectSingleEventViaGtm(
     gtmUrl: string,
@@ -27,16 +32,23 @@ export class GtmOperatorService {
     credentials: Credentials,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
+    this.initializeAbortController();
+    if (!this.abortController) {
+      throw new HttpException(
+        'Abort controller is not initialized',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
       projectSlug,
       eventId,
       headless,
       measurementId,
       credentials,
-      eventInspectionPresetDto
+      eventInspectionPresetDto,
+      this.abortController.signal
     );
-    const context = await browser.createBrowserContext();
-    const contextPage = await context.newPage();
+
     const websiteUrl = this.extractBaseUrlFromGtmUrl(gtmUrl);
     const folder = await this.folderPathService.getInspectionEventFolderPath(
       projectSlug,
@@ -44,11 +56,9 @@ export class GtmOperatorService {
     );
 
     await this.operateGtmPreviewMode(page, gtmUrl);
-    // await this.operateGtmPreviewMode(contextPage, gtmUrl);
     await sleep(1000);
 
     const pages = await browser.pages();
-    // const pages = await context.pages();
     for (const subPage of pages) {
       if (subPage.url() === 'about:blank') {
         await subPage.close();
@@ -101,7 +111,7 @@ export class GtmOperatorService {
       );
 
       // await this.puppeteerUtilsService.cleanup(browser, page);
-      await this.puppeteerUtilsService.cleanup(browser, contextPage);
+      await this.puppeteerUtilsService.cleanup(browser, page);
       throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -141,7 +151,14 @@ export class GtmOperatorService {
     return '';
   }
 
-  stopOperation() {
-    this.puppeteerUtilsService.stopOperation();
+  async stopOperation() {
+    Logger.log(
+      'Stopping operation GTM operator',
+      `${GtmOperatorService.name}.${GtmOperatorService.prototype.stopOperation.name}`
+    );
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    if (this.abortController) {
+      this.abortController.abort();
+    }
   }
 }
