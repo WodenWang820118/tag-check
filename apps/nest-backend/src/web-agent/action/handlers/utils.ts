@@ -10,6 +10,8 @@ export interface ActionHandler {
   ): Promise<void>;
 }
 
+export const ACTION_HANDLERS = 'ACTION_HANDLERS';
+
 export function getFirstSelector(selectorGroup: string | string[]): string {
   return Array.isArray(selectorGroup) ? selectorGroup[0] : selectorGroup;
 }

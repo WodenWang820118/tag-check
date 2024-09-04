@@ -41,7 +41,7 @@ export function getDatabasePath(): string {
       case 'staging':
         return join(cwd(), '.db', DEFAULT_DATABASE_PATH);
       case 'prod':
-        return process.env.DATABASE_PATH;
+        return process.env.DATABASE_PATH || databasePath;
       case 'test':
         process.env.DATABASE_PATH = join(
           __dirname,
@@ -58,13 +58,13 @@ export function getDatabasePath(): string {
       default:
         Logger.warn(
           `No NODE_ENV set. Defaulting to production database path: ${join(
-            process.env.DATABASE_PATH,
+            process.env.DATABASE_PATH as string,
             '.db',
             DEFAULT_DATABASE_PATH
           )}`
         );
         databasePath = join(
-          process.env.DATABASE_PATH,
+          process.env.DATABASE_PATH as string,
           '.db',
           DEFAULT_DATABASE_PATH
         );
@@ -100,15 +100,21 @@ export function getRootProjectPath(): string {
         Logger.log(process.env.ROOT_PROJECT_PATH, 'ROOT_PROJECT_PATH');
         return process.env.ROOT_PROJECT_PATH;
       case 'prod':
-        return join(process.env.ROOT_PROJECT_PATH, DEFAULT_PROJECT_PATH);
+        return join(
+          process.env.ROOT_PROJECT_PATH as string,
+          DEFAULT_PROJECT_PATH
+        );
       default:
         Logger.warn(
           `No NODE_ENV set. Defaulting to production database path: ${join(
-            process.env.ROOT_PROJECT_PATH,
+            process.env.ROOT_PROJECT_PATH as string,
             DEFAULT_PROJECT_PATH
           )}`
         );
-        return join(process.env.ROOT_PROJECT_PATH, DEFAULT_PROJECT_PATH);
+        return join(
+          process.env.ROOT_PROJECT_PATH as string,
+          DEFAULT_PROJECT_PATH
+        );
     }
   } catch (error) {
     Logger.error('Error getting the root project path', error);
@@ -141,7 +147,7 @@ export async function activatePort(app: INestApplication<any>) {
       default:
         Logger.warn(
           `No NODE_ENV set. Defaulting to production database path: ${join(
-            process.env.ROOT_PROJECT_PATH,
+            process.env.ROOT_PROJECT_PATH as string,
             DEFAULT_PROJECT_PATH
           )}`
         );

@@ -1,10 +1,4 @@
-import {
-  Column,
-  Table,
-  Model,
-  PrimaryKey,
-  AllowNull,
-} from 'sequelize-typescript';
+import { Column, Table, Model, PrimaryKey } from 'sequelize-typescript';
 
 @Table({ tableName: 'configurations' })
 export class Configuration extends Model {

@@ -1,11 +1,25 @@
 {
   "root": true,
   "ignorePatterns": ["**/*"],
-  "plugins": ["@nx"],
+  "plugins": ["@nx", "@typescript-eslint"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.base.json",
+    "sourceType": "module"
+  },
+  "extends": [
+    "plugin:@nx/typescript",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
   "overrides": [
     {
       "files": ["*.ts", "*.tsx", "*.js", "*.jsx"],
       "rules": {
+        "@typescript-eslint/no-floating-promises": [
+          "error",
+          { "ignoreVoid": true }
+        ],
         "@nx/enforce-module-boundaries": [
           "error",
           {

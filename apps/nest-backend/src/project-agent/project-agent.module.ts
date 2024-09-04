@@ -11,6 +11,7 @@ import { ProjectSettingModule } from './project-setting/project-setting.module';
 import { ProjectSpecModule } from './project-spec/project-spec.module';
 import { ProjectXlsxRportModule } from './project-xlsx-report/project-xlsx-report.module';
 import { ProjectFileReportModule } from './project-file-report/project-file-report.module';
+import { ProjectVideoModule } from './project-video/project-video.module';
 
 // services
 import { ProjectAbstractReportService } from './project-abstract-report/project-abstract-report.service';
@@ -25,6 +26,7 @@ import { ProjectXlsxReportService } from './project-xlsx-report/project-xlsx-rep
 import { ProjectImageModule } from './project-image/project-image.module';
 import { ProjectImageService } from './project-image/project-image.service';
 import { ProjectFileReportService } from './project-file-report/project-file-report.service';
+import { ProjectVideoService } from './project-video/project-video.service';
 
 const modules = [
   ProjectMetadataModule,
@@ -38,6 +40,7 @@ const modules = [
   ProjectXlsxRportModule,
   ProjectImageModule,
   ProjectFileReportModule,
+  ProjectVideoModule,
 ];
 
 const services = [
@@ -52,6 +55,7 @@ const services = [
   ProjectXlsxReportService,
   ProjectImageService,
   ProjectFileReportService,
+  ProjectVideoService,
 ];
 
 @Module({

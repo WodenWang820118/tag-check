@@ -3,23 +3,23 @@ import { ProjectInfo } from '@utils';
 
 export class ProjectInfoDto implements ProjectInfo {
   @ApiProperty()
-  projectSlug: string;
+  projectSlug!: string;
 
   @ApiProperty()
-  projectName: string;
+  projectName!: string;
 
   @ApiProperty()
-  projectDescription: string;
+  projectDescription!: string;
 
   @ApiProperty()
-  measurementId: string;
+  measurementId!: string;
 
   @ApiProperty()
-  googleSpreadsheetLink: string;
+  googleSpreadsheetLink!: string;
 
   @ApiProperty()
-  version: string;
+  version!: string;
 
   @ApiProperty()
-  rootProject: string;
+  rootProject!: string;
 }

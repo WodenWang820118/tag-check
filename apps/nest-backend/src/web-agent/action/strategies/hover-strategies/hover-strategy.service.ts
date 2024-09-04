@@ -17,7 +17,7 @@ export class HoverStrategyService {
     selector: string,
     selectorType: string,
     timeout = 10000
-  ): Promise<boolean> {
+  ): Promise<boolean | undefined> {
     try {
       return await this.attemptHover(
         page,

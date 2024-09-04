@@ -1,3 +1,9 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
 import { Browser, Credentials } from 'puppeteer';
 import { getCurrentTimestamp } from '@utils';
@@ -22,8 +28,8 @@ export class GroupEventsInspectionService {
   async inspectProject(
     projectName: string,
     headless: string,
-    measurementId?: string,
-    credentials?: Credentials,
+    measurementId: string,
+    credentials: Credentials,
     concurrency?: number
   ) {
     // 3.1) inspect both dataLayer and the request sent to GA4
@@ -33,7 +39,7 @@ export class GroupEventsInspectionService {
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
     const stats = await PCR(options);
-    this.currentBrowser = await stats.puppeteer
+    const browser = await stats.puppeteer
       .launch({
         headless: headless === 'true' ? true : false,
         defaultViewport: null,
@@ -42,7 +48,7 @@ export class GroupEventsInspectionService {
         executablePath: stats.executablePath,
         signal: signal,
       })
-      .catch(function (error) {
+      .catch(function (error: any) {
         console.error(error);
       });
 
@@ -50,14 +56,21 @@ export class GroupEventsInspectionService {
     signal.addEventListener(
       'abort',
       async () => {
-        await this.cleanup();
+        try {
+          await this.cleanup();
+        } catch (error) {
+          Logger.error(
+            `Error during cleanup: ${String(error)}`,
+            `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.inspectProject.name}`
+          );
+        }
       },
       { once: true }
     );
-
+    this.currentBrowser = browser;
     const result =
       await this.inspectorGroupEventsService.inspectProjectDataLayer(
-        this.currentBrowser,
+        browser,
         projectName,
         headless,
         measurementId,
@@ -118,20 +131,20 @@ export class GroupEventsInspectionService {
     }
   }
 
-  private async cleanup() {
+  private async cleanup(): Promise<void> {
     Logger.log(
       'Cleaning up resources',
       `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.cleanup.name}`
     );
     if (this.currentBrowser) {
-      await this.currentBrowser
-        .close()
-        .catch((err) =>
-          Logger.error(
-            err,
-            `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.cleanup.name}`
-          )
+      try {
+        await this.currentBrowser.close();
+      } catch (err) {
+        Logger.error(
+          err,
+          `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.cleanup.name}`
         );
+      }
       this.currentBrowser = null;
     }
   }

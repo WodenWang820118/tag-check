@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { FolderService } from '../../os/folder/folder.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { IReportDetails, OutputValidationResult } from '@utils';
@@ -40,9 +41,8 @@ export class ProjectAbstractReportService {
       if (!existsSync(abstractPath)) {
         this.fileService.writeJsonFile(abstractPath, data);
       } else {
-        const report = this.fileService.readJsonFile(
-          abstractPath
-        ) as IReportDetails;
+        const report =
+          this.fileService.readJsonFile<IReportDetails>(abstractPath);
         const updatedReport = { ...report, ...data };
         this.fileService.writeJsonFile(abstractPath, updatedReport);
       }
@@ -51,7 +51,7 @@ export class ProjectAbstractReportService {
         error,
         `${ProjectAbstractReportService.name}.${ProjectAbstractReportService.prototype.writeSingleAbstractTestResultJson.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -145,7 +145,7 @@ export class ProjectAbstractReportService {
 
       return {
         eventName: eventId,
-        ...this.fileService.readJsonFile(filePath),
+        ...this.fileService.readJsonFile<any>(filePath),
         completedTime,
       };
     } catch (error) {

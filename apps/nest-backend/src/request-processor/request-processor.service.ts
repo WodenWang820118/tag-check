@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable, Logger } from '@nestjs/common';
 import { BaseItem } from '@utils';
 import { parse, URLSearchParams } from 'url';
@@ -99,7 +103,7 @@ export class RequestProcessorService {
     }
 
     Logger.log(
-      `recomposeGA4ECEvent-dataLayer${updatedDataLayer}`,
+      `recomposeGA4ECEvent-dataLayer${JSON.stringify(updatedDataLayer)}`,
       `${RequestProcessorService.name}.${RequestProcessorService.prototype.recomposeGA4ECEvent.name}`
     );
     return updatedDataLayer;

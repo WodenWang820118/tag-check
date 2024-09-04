@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { ProjectXlsxReportService } from './../project-agent/project-xlsx-report/project-xlsx-report.service';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
@@ -18,9 +19,9 @@ export class EventInspectionPipelineService {
     projectName: string,
     eventId: string,
     headless: string,
-    measurementId?: string,
-    credentials?: Credentials,
-    eventInspectionPresetDto?: EventInspectionPresetDto
+    measurementId: string,
+    credentials: Credentials,
+    eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     try {
       const result = await this.inspectorSingleEventService.inspectDataLayer(
@@ -48,7 +49,7 @@ export class EventInspectionPipelineService {
       ];
 
       Logger.log(
-        `Data constructed: ${data}`,
+        `Data constructed: ${JSON.stringify(data, null, 2)}`,
         `${EventInspectionPipelineService.name}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
 
@@ -90,7 +91,7 @@ export class EventInspectionPipelineService {
         error,
         `${EventInspectionPipelineService}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

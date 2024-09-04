@@ -75,7 +75,7 @@ export class WaiterReportController {
     @Body() report: IReportDetails
   ) {
     Logger.log(
-      'updateReport: ' + report,
+      `updateReport: ${JSON.stringify(report, null, 2)}`,
       `${WaiterReportController.name}.${WaiterReportController.prototype.updateReport.name}`
     );
     return await this.projectAbstractReportService.writeSingleAbstractTestResultJson(

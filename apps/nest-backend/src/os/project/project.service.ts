@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../file/file.service';
 import { FolderService } from '../folder/folder.service';
@@ -23,7 +26,7 @@ export class ProjectService {
         error,
         `${ProjectService.name}.${ProjectService.prototype.getProjectSettings.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -52,7 +55,7 @@ export class ProjectService {
         error,
         `${ProjectService.name}.${ProjectService.prototype.getProjectsMetadata.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -65,7 +68,9 @@ export class ProjectService {
         .filter((dirent) => dirent.isDirectory())
         .map((dirent) => dirent.name);
 
-      const project = projectNames.find((name) => name === projectSlug);
+      const project = projectNames.find(
+        (name) => name === projectSlug
+      ) as string;
       const metaData = await this.fileService.readJsonFile(
         await this.filePathService.getProjectMetaDataFilePath(project)
       );
@@ -75,7 +80,7 @@ export class ProjectService {
         error,
         `${ProjectService.name}.${ProjectService.prototype.getProjectMetadata.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

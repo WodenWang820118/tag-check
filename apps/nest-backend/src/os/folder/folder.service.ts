@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
-import path from 'path';
+import { extname } from 'path';
 
 @Injectable()
 export class FolderService {
@@ -29,13 +29,13 @@ export class FolderService {
   getJsonFilesFromDir(dirPath: string) {
     try {
       const files = readdirSync(dirPath);
-      return files.filter((file) => path.extname(file) === '.json');
+      return files.filter((file) => extname(file) === '.json');
     } catch (error) {
       Logger.error(
         error,
-        FolderService.name + FolderService.prototype.getJsonFilesFromDir.name
+        `${FolderService.name}.${FolderService.prototype.getJsonFilesFromDir.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -45,9 +45,9 @@ export class FolderService {
     } catch (error) {
       Logger.error(
         error,
-        FolderService.name + FolderService.prototype.deleteFolder.name
+        `${FolderService.name}.${FolderService.prototype.deleteFolder.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

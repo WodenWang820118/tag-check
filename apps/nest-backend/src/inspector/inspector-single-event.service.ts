@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import {
   BaseDataLayerEvent,
@@ -24,21 +28,21 @@ export class InspectorSingleEventService {
   // inspect one event
   async inspectDataLayer(
     page: Page,
-    projectName: string,
+    projectSlug: string,
     eventId: string,
     headless: string,
-    measurementId?: string,
-    credentials?: Credentials,
-    application?: EventInspectionPresetDto['application']
+    measurementId: string,
+    credentials: Credentials,
+    application: EventInspectionPresetDto['application']
   ) {
     try {
       // 1. Get the project spec from the local file system
       const specsPath = await this.filePathService.getProjectConfigFilePath(
-        projectName
+        projectSlug
       );
-      const specs = await this.fileService.readJsonFile(specsPath);
+      const specs = this.fileService.readJsonFile<any>(specsPath);
       const imageSavingFolder = await this.filePathService.getImageFilePath(
-        projectName,
+        projectSlug,
         eventId
       );
 
@@ -55,11 +59,16 @@ export class InspectorSingleEventService {
       // switch the measurementId to determine whether to grab requests
 
       switch (measurementId) {
-        case undefined: {
+        case '': {
+          Logger.log(
+            `MeasurementId is empty`,
+            `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
+          );
           const result = await this.webAgentService.executeAndGetDataLayer(
             page,
-            projectName,
+            projectSlug,
             eventId,
+            measurementId,
             credentials,
             application
           );
@@ -77,16 +86,12 @@ export class InspectorSingleEventService {
             destinationUrl,
             `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
           );
-          await this.fileService.writeCacheFile(projectName, eventId, result);
+          await this.fileService.writeCacheFile(projectSlug, eventId, result);
           await page.screenshot({
             path: imageSavingFolder,
           });
-
-          if (headless === 'true') await page.close();
-          Logger.log(
-            'Browser is closed!',
-            `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
-          );
+          // allow the screencast video to be finalized
+          await new Promise((resolve) => setTimeout(resolve, 5000));
           return {
             dataLayerResult,
             destinationUrl,
@@ -98,7 +103,7 @@ export class InspectorSingleEventService {
           const result =
             await this.webAgentService.executeAndGetDataLayerAndRequest(
               page,
-              projectName,
+              projectSlug,
               eventId,
               measurementId,
               credentials,
@@ -128,12 +133,12 @@ export class InspectorSingleEventService {
             );
 
           const destinationUrl = result.destinationUrl;
-          await this.fileService.writeCacheFile(projectName, eventId, result);
+          await this.fileService.writeCacheFile(projectSlug, eventId, result);
           await page.screenshot({
             path: imageSavingFolder,
           });
-
-          if (headless === 'true') await page.close();
+          // allow the screencast video to be finalized
+          await new Promise((resolve) => setTimeout(resolve, 5000));
 
           return {
             dataLayerResult,
@@ -148,7 +153,7 @@ export class InspectorSingleEventService {
         error,
         `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

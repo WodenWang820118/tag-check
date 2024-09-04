@@ -1,12 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
-import { StepExecutor } from './step-executor';
-import { RequestInterceptor } from './request-interceptor';
-import { BrowserAction } from './action-utils';
-import { ClickHandler } from './handlers/click-handler.service';
-import { ChangeHandler } from './handlers/change-handler.service';
-import { HoverHandler } from './handlers/hover-handler.service';
+import { StepExecutorService } from './step-executor/step-executor.service';
+import { RequestInterceptorService } from './request-interceptor/request-interceptor.service';
 import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
@@ -14,73 +9,70 @@ import { EventsGatewayService } from '../../events-gateway/events-gateway.servic
 
 @Injectable()
 export class ActionService {
-  private stepExecutor: StepExecutor;
-
   constructor(
-    private dataLayerService: DataLayerService,
-    private changeHandler: ChangeHandler,
-    private clickHandler: ClickHandler,
-    private hoverHandler: HoverHandler,
-    private requestInterceptor: RequestInterceptor,
+    private requestInterceptorService: RequestInterceptorService,
     private fileService: FileService,
     private filePathService: FilePathService,
-    private eventsGatewayService: EventsGatewayService
-  ) {
-    this.stepExecutor = new StepExecutor(
-      {
-        [BrowserAction.CLICK]: this.clickHandler,
-        [BrowserAction.CHANGE]: this.changeHandler,
-        [BrowserAction.HOVER]: this.hoverHandler,
-      },
-      this.dataLayerService
-    );
-  }
+    private eventsGatewayService: EventsGatewayService,
+    private stepExecutorService: StepExecutorService
+  ) {}
 
   async performOperation(
     page: Page,
-    projectName: string,
+    projectSlug: string,
     eventId: string,
-    application?: EventInspectionPresetDto['application']
+    application: EventInspectionPresetDto['application']
   ) {
-    const operation = await this.fileService.readJsonFile(
-      await this.filePathService.getOperationFilePath(projectName, eventId)
-    );
-    if (!operation || !operation.steps) return;
+    try {
+      const operation: { steps: any[] } = this.fileService.readJsonFile(
+        await this.filePathService.getOperationFilePath(projectSlug, eventId)
+      );
+      if (!operation || !operation.steps) return;
 
-    await this.requestInterceptor.setupInterception(page, projectName, eventId);
-    let isLastStep = false;
-    const lastStep = operation.steps.length;
+      await this.requestInterceptorService.setupInterception(
+        page,
+        projectSlug,
+        eventId
+      );
+      let isLastStep = false;
+      const lastStep = operation.steps.length;
 
-    for (let i = 0; i < operation.steps.length; i++) {
-      const step = operation.steps[i];
+      for (let i = 0; i < operation.steps.length; i++) {
+        const step = operation.steps[i];
 
-      if (i === operation.steps.length - 1) isLastStep = true;
+        if (i === operation.steps.length - 1) isLastStep = true;
 
-      const state = {
-        isFirstNavigation: true,
-      };
+        const state = {
+          isFirstNavigation: true,
+        };
+
+        Logger.log(
+          `Performing step ${i + 1} of ${lastStep}`,
+          `${ActionService.name}.${ActionService.prototype.performOperation.name}`
+        );
+
+        this.eventsGatewayService.sendProgressUpdate(lastStep, i + 1); // Send progress update
+
+        await this.stepExecutorService.executeStep(
+          page,
+          step,
+          projectSlug,
+          eventId,
+          state,
+          isLastStep,
+          application
+        );
+      }
 
       Logger.log(
-        `Performing step ${i + 1} of ${lastStep}`,
+        'Operation performed successfully',
         `${ActionService.name}.${ActionService.prototype.performOperation.name}`
       );
-
-      this.eventsGatewayService.sendProgressUpdate(lastStep, i + 1); // Send progress update
-
-      await this.stepExecutor.executeStep(
-        page,
-        step,
-        projectName,
-        eventId,
-        state,
-        isLastStep,
-        application
+    } catch (error) {
+      Logger.error(
+        error,
+        `${ActionService.name}.${ActionService.prototype.performOperation.name}`
       );
     }
-
-    Logger.log(
-      'Operation performed successfully',
-      `${ActionService.name}.${ActionService.prototype.performOperation.name}`
-    );
   }
 }
