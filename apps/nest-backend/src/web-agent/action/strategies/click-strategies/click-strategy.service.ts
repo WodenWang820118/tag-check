@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { PageClickService } from './page-click.service';
@@ -18,7 +21,7 @@ export class ClickStrategyService {
     selectorType: string,
     useNormalClick: boolean,
     timeout = 10000
-  ): Promise<boolean> {
+  ): Promise<boolean | undefined> {
     Logger.log(
       `selector: ${selector}`,
       `${ClickStrategyService.name}.${ClickStrategyService.prototype.clickElement.name}`

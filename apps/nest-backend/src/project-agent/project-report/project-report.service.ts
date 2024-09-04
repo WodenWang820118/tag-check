@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../../os/file/file.service';
 import { FolderService } from '../../os/folder/folder.service';

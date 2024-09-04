@@ -20,7 +20,7 @@ export class EvaluateHoverService {
       )) as HTMLElement;
 
       await Promise.race([
-        page.evaluate(async (sel) => {
+        page.evaluate((sel) => {
           element?.focus();
         }, selector),
         new Promise((_, reject) =>

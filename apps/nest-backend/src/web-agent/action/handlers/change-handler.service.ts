@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, HttpException, Logger, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { getSelectorType } from '../action-utils';
@@ -52,14 +55,22 @@ export class ChangeHandler implements ActionHandler {
     selector: string,
     value: string,
     timeout?: number
-  ): Promise<boolean> {
+  ): Promise<boolean | undefined> {
     try {
+      const selectorType = getSelectorType(selector);
+      if (!selectorType) {
+        Logger.error(
+          'Selector type is required to change the element',
+          `${ChangeHandler.name}.${ChangeHandler.prototype.changeElement.name}`
+        );
+        return false;
+      }
       return await this.changeStrategyService.changeElement(
         page,
         projectName,
         eventId,
         selector,
-        getSelectorType(selector),
+        selectorType,
         value,
         timeout
       );

@@ -4,43 +4,43 @@ import { IsArray } from 'class-validator';
 
 export class SettingDto implements Setting {
   @ApiProperty()
-  rootProject: string;
+  rootProject!: string;
 
   @ApiProperty()
-  projectName: string;
+  projectName!: string;
 
   @ApiProperty()
-  projectDescription: string;
+  projectDescription!: string;
 
   @ApiProperty()
-  measurementId: string;
+  measurementId!: string;
 
   @ApiProperty()
-  projectSlug: string;
+  projectSlug!: string;
 
   @ApiProperty()
-  googleSpreadsheetLink: string;
+  googleSpreadsheetLink!: string;
 
   @ApiProperty()
-  gtm: Gtm;
+  gtm!: Gtm;
 
   @ApiProperty()
-  version: string;
-
-  @ApiProperty()
-  @IsArray()
-  preventNavigationEvents: string[];
-
-  @ApiProperty()
-  application: Application;
+  version!: string;
 
   @ApiProperty()
   @IsArray()
-  browser: string[];
+  preventNavigationEvents!: string[];
 
   @ApiProperty()
-  headless: boolean;
+  application!: Application;
 
   @ApiProperty()
-  authentication: Authentication;
+  @IsArray()
+  browser!: string[];
+
+  @ApiProperty()
+  headless!: boolean;
+
+  @ApiProperty()
+  authentication!: Authentication;
 }

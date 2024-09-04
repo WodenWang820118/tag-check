@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
@@ -41,7 +43,7 @@ export class ProjectSpecService {
 
       await this.writeSpecsFile(projectSlug, specs);
       return { projectSlug, specs };
-    } catch (error) {
+    } catch (error: any) {
       this.handleError(error, 'addSpec');
     }
   }
@@ -56,7 +58,7 @@ export class ProjectSpecService {
       const updatedSpecs = specs.map((s) => (s.event === eventName ? spec : s));
       await this.writeSpecsFile(projectSlug, updatedSpecs);
       return { projectSlug, specs: updatedSpecs };
-    } catch (error) {
+    } catch (error: any) {
       this.handleError(error, 'updateSpec');
     }
   }
@@ -85,7 +87,10 @@ export class ProjectSpecService {
   }
 
   private handleError(error: Error, methodName: string): never {
-    Logger.error(`${error}`, `${ProjectSpecService.name}.${methodName}`);
+    Logger.error(
+      `${String(error)}`,
+      `${ProjectSpecService.name}.${methodName}`
+    );
     throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

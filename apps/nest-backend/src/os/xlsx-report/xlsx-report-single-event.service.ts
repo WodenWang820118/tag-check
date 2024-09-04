@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { readFileSync } from 'fs';
-import path from 'path';
+import { join } from 'path';
 import * as ExcelJS from 'exceljs';
 import { FilePathService } from '../path/file-path/file-path.service';
 
@@ -28,14 +30,14 @@ export class XlsxReportSingleEventService {
           destinationUrl: any;
         },
     eventId: string,
-    projectName?: string
+    projectSlug: string
   ) {
     try {
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet(sheetName);
       const eventSavingFolder =
         await this.folderPathService.getInspectionEventFolderPath(
-          projectName,
+          projectSlug,
           eventId
         );
       worksheet.columns = [
@@ -48,7 +50,7 @@ export class XlsxReportSingleEventService {
       if (eventId) {
         try {
           const file = await this.filePathService.getImageFilePath(
-            projectName,
+            projectSlug,
             eventId
           );
           const imageId = workbook.addImage({
@@ -69,14 +71,14 @@ export class XlsxReportSingleEventService {
             HttpStatus.INTERNAL_SERVER_ERROR
           );
         }
-      } else if (projectName) {
+      } else if (projectSlug) {
         // all tests
         const dataContent = JSON.parse(JSON.stringify(data));
         for (let i = 0; i < dataContent.length; i++) {
           // get existing image after the test
           try {
             const file = await this.filePathService.getImageFilePath(
-              projectName,
+              projectSlug,
               eventId
             );
             const imageId = workbook.addImage({
@@ -100,11 +102,14 @@ export class XlsxReportSingleEventService {
               error,
               `${XlsxReportSingleEventService.name}.${XlsxReportSingleEventService.prototype.writeXlsxFile.name}`
             );
-            throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(
+              String(error),
+              HttpStatus.INTERNAL_SERVER_ERROR
+            );
           }
         }
       }
-      const filePath = path.join(eventSavingFolder, fileName);
+      const filePath = join(eventSavingFolder, fileName);
       if (Array.isArray(data)) {
         worksheet.addRows(data);
         await workbook.xlsx.writeFile(filePath);
@@ -117,7 +122,7 @@ export class XlsxReportSingleEventService {
         error,
         `${XlsxReportSingleEventService.name}.${XlsxReportSingleEventService.prototype.writeXlsxFile.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

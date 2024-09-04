@@ -5,29 +5,29 @@ import { IsArray, ValidateNested } from 'class-validator';
 // Create a new DTO for localStorage
 export class LocalStorageDto {
   @IsArray()
-  data: LocalStorageData[];
+  data!: LocalStorageData[];
 }
 
 // Create a new DTO for cookie
 export class CookieDto {
   @IsArray()
-  data: CookieData[];
+  data!: CookieData[];
 }
 
 export class ApplicationDto {
   @ValidateNested()
-  localStorage: LocalStorageDto;
+  localStorage!: LocalStorageDto;
 
   @ValidateNested()
-  cookie: CookieDto;
+  cookie!: CookieDto;
 }
 
 export class EventInspectionPresetDto implements EventInspectionPreset {
   @ValidateNested()
   @ApiProperty()
-  application: ApplicationDto;
+  application!: ApplicationDto;
 
   @ApiProperty()
   @IsArray()
-  puppeteerArgs: string[]; // An array of strings for Puppeteer arguments
+  puppeteerArgs!: string[]; // An array of strings for Puppeteer arguments
 }

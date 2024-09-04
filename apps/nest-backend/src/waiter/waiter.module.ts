@@ -17,11 +17,13 @@ import { WaiterConfigurationController } from './configuration/waiter-configurat
 import { WaiterSettingsController } from './settings/waiter-settings.controller';
 import { WaiterProjectIoController } from './project-io/waiter-project-io.controller';
 import { WaiterFileReportsController } from './file-reports/waiter-file-reports.controller';
+import { WaiterVideosController } from './videos/videos.controller';
 
 // services
 import { WaiterEventInspectionService } from './datalayer/waiter-event-inspection.service';
 import { WaiterProjectWorkFlowService } from './project/waiter-project-workflow.service';
 import { WaiterConfigurationService } from './configuration/waiter-configuration.service';
+import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
 
 const waiterServices = [
   WaiterEventInspectionService,
@@ -43,7 +45,8 @@ const waiterServices = [
     WaiterSettingsController,
     WaiterProjectIoController,
     WaiterFileReportsController,
+    WaiterVideosController,
   ],
-  providers: [...waiterServices],
+  providers: [...waiterServices, PuppeteerUtilsService],
 })
 export class WaiterModule {}

@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ActionService } from './action/action.service';
-import { DataLayerService } from './web-monitoring/data-layer/data-layer.service';
+import { DataLayerService } from './action/web-monitoring/data-layer/data-layer.service';
 import { Page, Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { extractEventNameFromId } from '@utils';
@@ -14,14 +15,14 @@ export class WebAgentUtilsService {
 
   async performTest(
     page: Page,
-    projectName: string,
+    projectSlug: string,
     eventId: string,
-    captureRequest?: boolean,
-    measurementId?: string,
-    credentials?: Credentials,
-    application?: EventInspectionPresetDto['application']
+    captureRequest: boolean,
+    measurementId: string,
+    credentials: Credentials,
+    application: EventInspectionPresetDto['application']
   ) {
-    await this.dataLayerService.initSelfDataLayer(projectName, eventId);
+    await this.dataLayerService.initSelfDataLayer(projectSlug, eventId);
 
     if (credentials) {
       await page.authenticate({
@@ -30,7 +31,7 @@ export class WebAgentUtilsService {
       });
     }
 
-    let eventRequest: string = null;
+    let eventRequest = '';
     const eventName = extractEventNameFromId(eventId);
     // 2) capture the request if needed
     if (captureRequest) {
@@ -50,7 +51,7 @@ export class WebAgentUtilsService {
           eventRequest = interceptedRequest.url();
           page.off('request');
         } else {
-          Logger.log(
+          Logger.warn(
             `Request not captured: ${interceptedRequest.url()}`,
             `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
           );
@@ -62,7 +63,7 @@ export class WebAgentUtilsService {
     try {
       await this.actionService.performOperation(
         page,
-        projectName,
+        projectSlug,
         eventId,
         application
       );
@@ -73,18 +74,18 @@ export class WebAgentUtilsService {
           timeout: 5000,
         });
       } catch (error) {
-        Logger.error(
+        Logger.log(
           'No Navigation Needed',
           `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
         );
       }
       await this.dataLayerService.updateSelfDataLayer(
         page,
-        projectName,
+        projectSlug,
         eventId
       );
       const dataLayer = await this.dataLayerService.getMyDataLayer(
-        projectName,
+        projectSlug,
         eventId
       );
 
@@ -104,7 +105,7 @@ export class WebAgentUtilsService {
         error,
         `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
       );
-      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
