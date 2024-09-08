@@ -36,7 +36,13 @@ app.whenReady().then(async () => {
     } catch (error) {
       console.error(error);
       fileUtils.writePath(
-        join(pathUtils.getRootBackendFolderPath(), 'portErrorLog.txt'),
+        join(
+          pathUtils.getRootBackendFolderPath(
+            environmentUtils.getEnvironment(),
+            process.resourcesPath
+          ),
+          'portErrorLog.txt'
+        ),
         error
       );
     }
@@ -73,7 +79,8 @@ app.whenReady().then(async () => {
       `Child exited with code ${code} and signal ${signal}`
     );
 
-    if (signal !== 'SIGTERM') backend.restartBackend(process.resourcesPath);
+    if (signal !== 'SIGTERM')
+      backend.restartBackend(process.env, process.resourcesPath);
   });
 });
 

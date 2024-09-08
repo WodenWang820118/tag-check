@@ -56,7 +56,7 @@ function startBackend(existedEnv, resourcesPath) {
   return fork(serverPath, { env });
 }
 
-function restartBackend(resourcesPath) {
+function restartBackend(env, resourcesPath) {
   if (restartAttempts < maxRestartAttempts) {
     restartAttempts++;
     console.log(`Attempting to restart backend (Attempt ${restartAttempts})`);
@@ -71,7 +71,7 @@ function restartBackend(resourcesPath) {
         ),
         'Ready to restart the backend.'
       );
-      startBackend();
+      startBackend(env, resourcesPath);
     }, 1000); // Wait for 5 seconds before restarting
   } else {
     console.error('Max restart attempts reached. Backend service is down.');
