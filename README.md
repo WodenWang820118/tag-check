@@ -29,7 +29,7 @@ Upcoming features include enhanced UI/UX, request interception, report consolida
 
 # Development
 
-Please run
+The project uses the v22.8.0 LTS version for development. Please run
 
 ```bash
 npm install
@@ -120,7 +120,7 @@ Please run the command:
 npm run make
 ```
 
-It will generate a Windows x32/x64 zip file.
+It will generate a Windows x32/x64 zip file. Please note the node v8 4GB RAM heap_size_limit might be insufficient. Therefore, please use bash and run `export NODE_OPTIONS="--max-old-space-size=8192"` to use 8GB RAM for manuall build.
 
 # Feedback and Contribution
 
