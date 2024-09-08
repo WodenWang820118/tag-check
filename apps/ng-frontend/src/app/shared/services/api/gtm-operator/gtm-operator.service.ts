@@ -24,7 +24,8 @@ export class GtmOperatorService {
     const encodedGtmUrl = encodeURIComponent(gtmUrl);
     const queryParams = [`gtmUrl=${encodedGtmUrl}`];
 
-    if (headless !== undefined) queryParams.push(`headless=${headless}`);
+    // GTM operator should be always headful
+    if (headless !== undefined) queryParams.push(`headless=${false}`);
     if (measurmentId) queryParams.push(`measurementId=${measurmentId}`);
     if (username) queryParams.push(`username=${encodeURIComponent(username)}`);
     if (password) queryParams.push(`password=${encodeURIComponent(password)}`);
