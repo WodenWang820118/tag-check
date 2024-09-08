@@ -17,9 +17,9 @@ export class WebAgentUtilsService {
     page: Page,
     projectSlug: string,
     eventId: string,
-    captureRequest: boolean,
     measurementId: string,
     credentials: Credentials,
+    captureRequest: boolean,
     application: EventInspectionPresetDto['application']
   ) {
     await this.dataLayerService.initSelfDataLayer(projectSlug, eventId);

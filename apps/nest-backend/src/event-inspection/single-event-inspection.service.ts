@@ -26,6 +26,7 @@ export class SingleEventInspectionService {
     headless: string,
     measurementId: string,
     credentials: Credentials,
+    captureRequest: string,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     this.initializeAbortController();
@@ -63,6 +64,7 @@ export class SingleEventInspectionService {
           headless,
           measurementId,
           credentials,
+          captureRequest,
           eventInspectionPresetDto
         );
 

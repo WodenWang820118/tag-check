@@ -17,6 +17,7 @@ export class WaiterEventInspectionService {
     headless: string,
     measurementId: string,
     credentials: Credentials,
+    captureRequest: string,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     return await this.singleEventInspectionService.inspectSingleEvent(
@@ -25,6 +26,7 @@ export class WaiterEventInspectionService {
       headless,
       measurementId,
       credentials,
+      captureRequest,
       eventInspectionPresetDto
     );
   }
@@ -34,6 +36,7 @@ export class WaiterEventInspectionService {
     headless: string,
     measurementId: string,
     credentials: Credentials,
+    captureRequest: string,
     concurrency?: number
   ) {
     return await this.groupEventsInspection.inspectProject(
@@ -41,6 +44,7 @@ export class WaiterEventInspectionService {
       headless,
       measurementId,
       credentials,
+      captureRequest,
       concurrency
     );
   }

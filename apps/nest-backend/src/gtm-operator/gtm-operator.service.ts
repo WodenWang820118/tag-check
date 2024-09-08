@@ -30,6 +30,7 @@ export class GtmOperatorService {
     headless: string,
     measurementId: string,
     credentials: Credentials,
+    captureRequest: string,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     this.initializeAbortController();
@@ -99,6 +100,7 @@ export class GtmOperatorService {
           headless,
           measurementId,
           credentials,
+          captureRequest,
           eventInspectionPresetDto
         );
       await new Promise((resolve) => setTimeout(resolve, 2000));

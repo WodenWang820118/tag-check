@@ -14,6 +14,7 @@ export class WebAgentService {
     eventId: string,
     measurementId: string,
     credentials: Credentials,
+    captureRequest: string,
     application: EventInspectionPresetDto['application']
   ) {
     const { dataLayer, destinationUrl } =
@@ -21,9 +22,9 @@ export class WebAgentService {
         page,
         projectName,
         eventId,
-        false,
         measurementId,
         credentials,
+        Boolean(captureRequest),
         application
       );
     return {
@@ -38,6 +39,7 @@ export class WebAgentService {
     eventId: string,
     measurementId: string,
     credentials: Credentials,
+    captureRequest: string,
     application: EventInspectionPresetDto['application']
   ) {
     const { dataLayer, eventRequest, destinationUrl } =
@@ -45,9 +47,9 @@ export class WebAgentService {
         page,
         projectSlug,
         eventId,
-        true,
         measurementId,
         credentials,
+        Boolean(captureRequest),
         application
       );
     return {

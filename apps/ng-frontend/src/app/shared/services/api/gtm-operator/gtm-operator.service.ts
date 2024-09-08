@@ -18,7 +18,8 @@ export class GtmOperatorService {
     eventInspectionPreset?: EventInspectionPreset,
     measurmentId?: string,
     username?: string,
-    password?: string
+    password?: string,
+    captureRequest?: boolean
   ) {
     const encodedGtmUrl = encodeURIComponent(gtmUrl);
     const queryParams = [`gtmUrl=${encodedGtmUrl}`];
@@ -27,6 +28,7 @@ export class GtmOperatorService {
     if (measurmentId) queryParams.push(`measurementId=${measurmentId}`);
     if (username) queryParams.push(`username=${encodeURIComponent(username)}`);
     if (password) queryParams.push(`password=${encodeURIComponent(password)}`);
+    if (captureRequest) queryParams.push(`captureRequest=${captureRequest}`);
 
     const queryString = queryParams.join('&');
 

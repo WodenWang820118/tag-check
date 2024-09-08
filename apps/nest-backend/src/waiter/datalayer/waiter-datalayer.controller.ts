@@ -68,6 +68,7 @@ export class WaiterDataLayerController {
     @Query('username') username: string,
     @Query('password') password: string,
     @Query('measurementId') measurementId: string,
+    @Query('captureRequest') captureRequest: string,
     @Body(ValidationPipe) eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     try {
@@ -85,6 +86,7 @@ export class WaiterDataLayerController {
           username,
           password,
         },
+        captureRequest,
         eventInspectionPresetDto
       );
       Logger.log(
@@ -125,6 +127,7 @@ export class WaiterDataLayerController {
     @Query('measurementId') measurementId: string,
     @Query('username') username: string,
     @Query('password') password: string,
+    @Query('captureRequest') captureRequest: string,
     @Query('concurrency') concurrency = 2
   ) {
     return await this.waiterEventInspectionService.inspectProject(
@@ -135,6 +138,7 @@ export class WaiterDataLayerController {
         username,
         password,
       },
+      captureRequest,
       Number(concurrency)
     );
   }

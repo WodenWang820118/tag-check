@@ -86,7 +86,8 @@ export class TestRunningFacadeService {
         inspectEventDto,
         measurementId,
         project.settings.authentication.username,
-        project.settings.authentication.password
+        project.settings.authentication.password,
+        project.settings.gtm.isRequestCheck
       );
     }
 

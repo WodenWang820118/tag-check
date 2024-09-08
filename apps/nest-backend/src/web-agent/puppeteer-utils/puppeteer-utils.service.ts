@@ -21,10 +21,6 @@ export class PuppeteerUtilsService {
     eventInspectionPresetDto: EventInspectionPresetDto,
     signal: AbortSignal
   ) {
-    Logger.log(
-      `Signal: ${JSON.stringify(signal, null, 2)}`,
-      `${PuppeteerUtilsService.name}.${this.startBrowser.name}`
-    );
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
