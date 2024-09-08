@@ -21,6 +21,7 @@ export class EventInspectionPipelineService {
     headless: string,
     measurementId: string,
     credentials: Credentials,
+    captureRequest: string,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     try {
@@ -31,6 +32,7 @@ export class EventInspectionPipelineService {
         headless,
         measurementId,
         credentials,
+        captureRequest,
         eventInspectionPresetDto.application
       );
 

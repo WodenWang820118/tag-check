@@ -33,6 +33,7 @@ export class InspectorSingleEventService {
     headless: string,
     measurementId: string,
     credentials: Credentials,
+    captureRequest: string,
     application: EventInspectionPresetDto['application']
   ) {
     try {
@@ -58,8 +59,8 @@ export class InspectorSingleEventService {
       // 2. Execute the recording script and get the result
       // switch the measurementId to determine whether to grab requests
 
-      switch (measurementId) {
-        case '': {
+      switch (captureRequest) {
+        case 'false': {
           Logger.log(
             `MeasurementId is empty`,
             `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
@@ -70,6 +71,7 @@ export class InspectorSingleEventService {
             eventId,
             measurementId,
             credentials,
+            captureRequest,
             application
           );
 
@@ -107,6 +109,7 @@ export class InspectorSingleEventService {
               eventId,
               measurementId,
               credentials,
+              captureRequest,
               application
             );
 

@@ -30,6 +30,7 @@ export class GroupEventsInspectionService {
     headless: string,
     measurementId: string,
     credentials: Credentials,
+    captureRequest: string,
     concurrency?: number
   ) {
     // 3.1) inspect both dataLayer and the request sent to GA4
@@ -75,6 +76,7 @@ export class GroupEventsInspectionService {
         headless,
         measurementId,
         credentials,
+        captureRequest,
         concurrency
       );
 

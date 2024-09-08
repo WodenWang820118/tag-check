@@ -64,6 +64,7 @@ export class WaiterGtmOperatorController {
     @Query('username') username: string,
     @Query('password') password: string,
     @Query('measurementId') measurementId: string,
+    @Query('captureRequest') captureRequest: string,
     @Body() eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     const results: {
@@ -75,12 +76,13 @@ export class WaiterGtmOperatorController {
       gtmUrl,
       projectSlug,
       eventName,
-      headless,
+      'false',
       measurementId,
       {
         username,
         password,
       },
+      captureRequest,
       eventInspectionPresetDto
     );
 

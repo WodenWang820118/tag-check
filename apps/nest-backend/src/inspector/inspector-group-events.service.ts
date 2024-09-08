@@ -36,6 +36,7 @@ export class InspectorGroupEventsService {
     headless: string,
     measurementId: string,
     credentials: Credentials,
+    captureRequest: string,
     concurrency?: number
   ) {
     // deal with invalid concurrency
@@ -63,6 +64,7 @@ export class InspectorGroupEventsService {
               headless,
               measurementId,
               credentials,
+              captureRequest,
               '' as any
             );
           await this.fileService.writeCacheFile(projectName, operation, result);
