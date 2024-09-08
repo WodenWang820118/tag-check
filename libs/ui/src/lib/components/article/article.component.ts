@@ -5,7 +5,9 @@ import { Component } from '@angular/core';
   selector: 'lib-article',
   standalone: true,
   template: `<div class="article">
-    <div class="article__purpose">
+    <div class="article__purpose"></div>
+    <div class="article__usage">
+      <h1>Usage</h1>
       <p>
         Tag Build aims to save users' time and increase their productivity by
         automating the GTM (Google Tag Manager) configuration process. This is
@@ -13,9 +15,6 @@ import { Component } from '@angular/core';
         experts who need to manage and track multiple website tags, enabling
         them to focus more on data analysis rather than tag implementations.
       </p>
-    </div>
-    <div class="article__usage">
-      <h1>Usage</h1>
       <p>The expected input is an array of objects:</p>
       <pre>{{ exampleInput | json }}</pre>
       <div></div>

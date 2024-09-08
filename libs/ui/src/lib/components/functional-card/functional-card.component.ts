@@ -1,4 +1,4 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgStyle } from '@angular/common';
 import {
   Component,
   Input,
@@ -6,7 +6,6 @@ import {
   ViewChild,
   ViewEncapsulation,
 } from '@angular/core';
-// FIXME: Circular dependency
 import {
   ConverterService,
   EditorFacadeService,
@@ -24,7 +23,12 @@ import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'lib-functional-card',
   standalone: true,
-  imports: [AsyncPipe, MatButtonModule, AdvancedExpansionPanelComponent],
+  imports: [
+    NgStyle,
+    AsyncPipe,
+    MatButtonModule,
+    AdvancedExpansionPanelComponent,
+  ],
   templateUrl: './functional-card.component.html',
   styleUrls: ['./functional-card.component.scss'],
   encapsulation: ViewEncapsulation.None,
