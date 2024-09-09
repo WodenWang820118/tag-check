@@ -1,4 +1,5 @@
 @use '@angular/material' as mat;
+@use '../../../../variables.scss' as var;
 
 .spacer {
   flex: 1 1 auto;
@@ -23,4 +24,15 @@
   @include mat.input-density(-4);
   @include mat.button-density(-4);
   @include mat.icon-button-density(-4);
+}
+
+:host {
+  .mat-mdc-form-field.mat-mdc-form-field-type-mat-select {
+    --mdc-outlined-text-field-outline-color: var.$rebark;
+    --mdc-outlined-text-field-hover-outline-color: var.$rebark;
+    --mdc-outlined-text-field-focus-outline-color: var.$rebark;
+    --mdc-outlined-text-field-focus-label-text-color: var.$rebark;
+    --mat-select-enabled-trigger-text-color: var.$rebark;
+    --mat-select-enabled-arrow-color: var.$rebark;
+  }
 }

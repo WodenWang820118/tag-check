@@ -6,7 +6,6 @@ import {
   EventEmitter,
   Input,
   Output,
-  ViewEncapsulation,
 } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -41,7 +40,6 @@ import { tap } from 'rxjs';
   ],
   templateUrl: './toolbar.component.html',
   styleUrl: './toolbar.component.scss',
-  encapsulation: ViewEncapsulation.None,
 })
 export class ToolbarComponent implements AfterViewInit {
   @Input() settings!: Setting | undefined;
