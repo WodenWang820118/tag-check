@@ -35,6 +35,10 @@ export class WebAgentUtilsService {
 
     // 2) capture the request if needed
     if (captureRequest) {
+      Logger.log(
+        `Setting up interception`,
+        `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
+      );
       await this.requestInterceptorService.setupInterception(
         page,
         projectSlug,
