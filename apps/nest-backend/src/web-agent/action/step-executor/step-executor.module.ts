@@ -32,6 +32,6 @@ import { BrowserAction } from '../action-utils';
       inject: [ClickHandler, ChangeHandler, HoverHandler],
     },
   ],
-  exports: [StepExecutorService, StepExecutorUtilsService],
+  exports: [StepExecutorService, StepExecutorUtilsService, HandlerModule],
 })
 export class StepExecutorModule {}

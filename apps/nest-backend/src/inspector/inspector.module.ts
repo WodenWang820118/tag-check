@@ -16,6 +16,6 @@ const services = [
 @Module({
   imports: [WebAgentModule, RequestProcessorModule, ProjectAgentModule],
   providers: [...services],
-  exports: [...services],
+  exports: [...services, ProjectAgentModule],
 })
 export class InspectorModule {}

@@ -11,7 +11,6 @@ import { RequestInterceptorService } from './request-interceptor/request-interce
 
 const modules = [
   WebMonitoringModule,
-  HandlerModule,
   EventsGatewayModule,
   StepExecutorModule,
   RequestInterceptorModule,
