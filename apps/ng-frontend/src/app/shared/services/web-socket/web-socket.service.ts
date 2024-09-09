@@ -10,7 +10,7 @@ export class WebSocketService {
   private connectionStatus = new BehaviorSubject<boolean>(false);
 
   constructor() {
-    this.socket = io('http://localhost:81/events', {
+    this.socket = io('http://localhost:7001/events', {
       withCredentials: true,
       transports: ['websocket', 'polling'],
     });

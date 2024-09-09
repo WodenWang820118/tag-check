@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import {
   HttpException,
   HttpStatus,
@@ -129,20 +130,20 @@ export async function activatePort(app: INestApplication<any>) {
   try {
     switch (process.env.NODE_ENV) {
       case 'dev':
-        Logger.log('Listening on port 8080');
-        await app.listen(process.env.PORT || 8080);
+        Logger.log('Listening on port 7070');
+        await app.listen(process.env.PORT || 7070);
         break;
       case 'staging':
-        Logger.log('Listening on port 5000');
-        await app.listen(process.env.PORT || 5000);
+        Logger.log('Listening on port 6060');
+        await app.listen(process.env.PORT || 6060);
         break;
       case 'test':
-        Logger.log('Listening on port 8080');
-        await app.listen(process.env.PORT || 8080);
+        Logger.log('Listening on port 6060');
+        await app.listen(process.env.PORT || 6060);
         break;
       case 'prod':
-        Logger.log('Listening on port 80');
-        await app.listen(process.env.PORT || 80);
+        Logger.log('Listening on port 7000');
+        await app.listen(process.env.PORT || 7000);
         break;
       default:
         Logger.warn(

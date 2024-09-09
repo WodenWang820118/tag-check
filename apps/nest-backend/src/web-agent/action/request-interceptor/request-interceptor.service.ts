@@ -31,6 +31,10 @@ export class RequestInterceptorService {
     await page.setRequestInterception(true);
     page.on('request', async (request) => {
       const requestUrl = request.url();
+      Logger.warn(
+        `Request: ${requestUrl}`,
+        `${RequestInterceptorService.name}.${RequestInterceptorService.prototype.setupInterception.name}`
+      );
       if (this.isMatchingGa4Request(requestUrl, eventName, measurementId)) {
         Logger.log(
           `Request captured: ${request.url()}`,

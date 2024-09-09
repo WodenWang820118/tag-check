@@ -12,7 +12,7 @@ import { Socket } from 'dgram';
 import { Server } from 'http';
 import { Logger } from '@nestjs/common';
 
-@WebSocketGateway(81, {
+@WebSocketGateway(7001, {
   transports: ['websocket'],
   namespace: 'events',
   cors: {
