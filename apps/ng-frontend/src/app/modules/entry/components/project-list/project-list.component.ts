@@ -6,7 +6,7 @@ import {
   OnDestroy,
   ViewChild,
 } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgIf } from '@angular/common';
 import { ProjectItemComponent } from '../project-item/project-item.component';
 import { MatCardModule } from '@angular/material/card';
 import { BehaviorSubject, Observable, Subject, takeUntil, tap } from 'rxjs';
@@ -21,6 +21,7 @@ import { MetadataSourceFacadeService } from '../../../../shared/services/facade/
   standalone: true,
   imports: [
     AsyncPipe,
+    NgIf,
     ProjectItemComponent,
     MatCardModule,
     RouterLink,
@@ -50,7 +51,8 @@ import { MetadataSourceFacadeService } from '../../../../shared/services/facade/
       <app-paginator
         #paginatorComponent
         [pageSize]="5"
-        [length]="this.dataSourceLength | async"
+        [length]="dataSourceLength$ | async"
+        [hidden]="hidePaginator"
       ></app-paginator>
     </div>
   `,
@@ -91,6 +93,8 @@ export class ProjectListComponent implements AfterViewInit, OnDestroy {
   paginatorComponent!: PaginatorComponent;
   displayedProjects!: Observable<ProjectInfo[]>;
   dataSourceLength = new BehaviorSubject<number>(0);
+  dataSourceLength$ = this.dataSourceLength.asObservable();
+  hidePaginator = true;
   destroy$ = new Subject<void>();
 
   constructor(
@@ -108,8 +112,8 @@ export class ProjectListComponent implements AfterViewInit, OnDestroy {
           if (!projects) return;
           this.dataSource = new MatTableDataSource<ProjectInfo>(projects);
           this.displayedProjects = this.dataSource.connect();
-          this.dataSource.paginator = this.paginatorComponent.paginator;
           this.dataSourceLength.next(projects.length);
+          this.dataSource.paginator = this.paginatorComponent.paginator;
           this.cdr.detectChanges();
         })
       )
@@ -121,6 +125,15 @@ export class ProjectListComponent implements AfterViewInit, OnDestroy {
         takeUntil(this.destroy$),
         tap((filter) => {
           this.dataSource.filter = filter;
+        })
+      )
+      .subscribe();
+
+    this.dataSourceLength$
+      .pipe(
+        takeUntil(this.destroy$),
+        tap((length) => {
+          this.hidePaginator = length <= 5;
         })
       )
       .subscribe();
