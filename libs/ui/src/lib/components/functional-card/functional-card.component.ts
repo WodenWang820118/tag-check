@@ -52,6 +52,8 @@ export class FunctionalCardComponent implements OnDestroy {
 
   convertCode() {
     this.accordionContainer.accordion.closeAll();
+    this.scrollToBottom();
+
     combineLatest([
       this.editorFacadeService.getInputJsonContent(),
       this.setupConstructorService.getGoogleTagName(),
@@ -85,6 +87,24 @@ export class FunctionalCardComponent implements OnDestroy {
         )
       )
       .subscribe();
+  }
+
+  scrollToBottom() {
+    try {
+      // TODO: refactor
+      const element = document.querySelector('.mat-drawer-content');
+      if (element) {
+        if (element.scrollHeight === element.clientHeight) {
+          return;
+        }
+        element.scrollTo({
+          top: element.scrollHeight - element.clientHeight,
+          behavior: 'smooth',
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   performConversion(
