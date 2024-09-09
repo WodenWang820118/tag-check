@@ -1,7 +1,16 @@
 import { MatCardModule } from '@angular/material/card';
 import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { catchError, EMPTY, filter, Subject, tap } from 'rxjs';
+import {
+  catchError,
+  EMPTY,
+  filter,
+  map,
+  shareReplay,
+  Subject,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
 import { HttpEventType } from '@angular/common/http';
@@ -36,10 +45,13 @@ export class ProjectImportComponent implements OnDestroy {
   importProject(event: Event) {
     const target = event.target as HTMLInputElement;
     const file: File | null = target.files?.[0] || null;
-    return this.projectIoService
+    const progress$ = this.projectIoService
       .importProject(file)
+      .pipe(shareReplay(1));
+
+    progress$
       .pipe(
-        tap((event) => {
+        map((event) => {
           if (event.type === HttpEventType.UploadProgress) {
             const progress = Math.round(
               (100 * event.loaded) / (event.total || 1)
@@ -47,17 +59,22 @@ export class ProjectImportComponent implements OnDestroy {
             console.log(`Event Type: ${event.type}`);
             console.log(`Upload progress: ${progress}%`);
             // TODO: Update progress bar here
+            return progress;
           }
+          return EMPTY;
         }),
-        filter((event) => event.type === 1),
-        tap(async (event) => {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          await this.router.navigate(['./']);
+        tap(async (progress) => {
+          if (progress && progress === 100) {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            console.log('Progress:', progress);
+            await this.router.navigate(['./']);
+          }
         }),
         catchError((err) => {
           console.error(err);
           return EMPTY;
-        })
+        }),
+        takeUntil(this.destroy$)
       )
       .subscribe();
   }
