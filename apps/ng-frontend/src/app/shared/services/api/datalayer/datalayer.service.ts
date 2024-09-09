@@ -16,12 +16,14 @@ export class DataLayerService {
     headless?: boolean,
     eventInspectionPreset?: EventInspectionPreset,
     username?: string,
-    password?: string
+    password?: string,
+    captureRequest?: boolean
   ) {
     const queryParams = [];
     if (headless !== undefined) queryParams.push(`headless=${headless}`);
     if (username) queryParams.push(`username=${username}`);
     if (password) queryParams.push(`password=${password}`);
+    if (captureRequest) queryParams.push(`captureRequest=${captureRequest}`);
     const queryString = queryParams.length ? '?' + queryParams.join('&') : '';
 
     return this.http
