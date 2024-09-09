@@ -1,5 +1,4 @@
 @use '@angular/material' as mat;
-@use '../../../../variables.scss' as var;
 
 .spacer {
   flex: 1 1 auto;
@@ -28,11 +27,11 @@
 
 :host {
   .mat-mdc-form-field.mat-mdc-form-field-type-mat-select {
-    --mdc-outlined-text-field-outline-color: var.$rebark;
-    --mdc-outlined-text-field-hover-outline-color: var.$rebark;
-    --mdc-outlined-text-field-focus-outline-color: var.$rebark;
-    --mdc-outlined-text-field-focus-label-text-color: var.$rebark;
-    --mat-select-enabled-trigger-text-color: var.$rebark;
-    --mat-select-enabled-arrow-color: var.$rebark;
+    --mdc-outlined-text-field-outline-color: white;
+    --mdc-outlined-text-field-hover-outline-color: white;
+    --mdc-outlined-text-field-focus-outline-color: white;
+    --mdc-outlined-text-field-focus-label-text-color: white;
+    --mat-select-enabled-trigger-text-color: white;
+    --mat-select-enabled-arrow-color: white;
   }
 }
