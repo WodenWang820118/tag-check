@@ -12,6 +12,7 @@ const frontend = require('./main-process/frontend.cjs');
 let server;
 
 app.whenReady().then(async () => {
+  const loadingWindow = frontend.createLoadingWindow();
   fileUtils.createProjectSavingRootFolder(
     pathUtils.getRootBackendFolderPath(
       environmentUtils.getEnvironment(),
@@ -32,7 +33,10 @@ app.whenReady().then(async () => {
         2000,
         process.resourcesPath
       );
-      if (portOpen) frontend.createWindow(process.resourcesPath);
+      if (portOpen) {
+        loadingWindow.close();
+        frontend.createWindow(process.resourcesPath);
+      }
     } catch (error) {
       console.error(error);
       fileUtils.writePath(
