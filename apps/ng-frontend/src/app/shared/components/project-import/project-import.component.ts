@@ -1,9 +1,10 @@
 import { MatCardModule } from '@angular/material/card';
 import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { catchError, Subject, Subscription } from 'rxjs';
+import { catchError, EMPTY, filter, Subject, tap } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
+import { HttpEventType } from '@angular/common/http';
 
 @Component({
   selector: 'app-project-import',
@@ -35,27 +36,30 @@ export class ProjectImportComponent implements OnDestroy {
   importProject(event: Event) {
     const target = event.target as HTMLInputElement;
     const file: File | null = target.files?.[0] || null;
-    if (file) {
-      console.log('file', file);
-      return this.projectIoService
-        .importProject(file)
-        .pipe(
-          catchError((err) => {
-            console.error(err);
-            return [];
-          })
-        )
-        .subscribe((event) => {
-          // TODO: progress bar
-          if (event) {
-            console.log('event', event);
-            if (event.type === 1) {
-              this.router.navigate(['/']);
-            }
+    return this.projectIoService
+      .importProject(file)
+      .pipe(
+        tap((event) => {
+          if (event.type === HttpEventType.UploadProgress) {
+            const progress = Math.round(
+              (100 * event.loaded) / (event.total || 1)
+            );
+            console.log(`Event Type: ${event.type}`);
+            console.log(`Upload progress: ${progress}%`);
+            // TODO: Update progress bar here
           }
-        });
-    }
-    return new Subscription();
+        }),
+        filter((event) => event.type === 1),
+        tap(async (event) => {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          await this.router.navigate(['./']);
+        }),
+        catchError((err) => {
+          console.error(err);
+          return EMPTY;
+        })
+      )
+      .subscribe();
   }
 
   ngOnDestroy(): void {

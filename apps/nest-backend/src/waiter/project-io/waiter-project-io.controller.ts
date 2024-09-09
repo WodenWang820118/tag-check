@@ -57,7 +57,7 @@ export class WaiterProjectIoController {
         `${WaiterProjectIoController.name}.${WaiterProjectIoController.prototype.importProject.name}`
       );
       Logger.log(
-        'file: ' + file,
+        'file: ' + JSON.stringify(file, null, 2),
         `${WaiterProjectIoController.name}.${WaiterProjectIoController.prototype.importProject.name}`
       );
       Logger.log(
