@@ -134,9 +134,9 @@ export class ProgressPieChartComponent implements AfterViewInit, OnDestroy {
         .backgroundColor as string[];
       for (let i = 0; i < this.totalSteps; i++) {
         if (i < this.currentStep - 1) {
-          newBackgroundColors[i] = '#4caf50'; // Completed step
+          newBackgroundColors[i] = '#009688'; // Completed step
         } else if (i === this.currentStep - 1) {
-          newBackgroundColors[i] = '#2196f3'; // Current step
+          newBackgroundColors[i] = '#FFCA28'; // Current step
         } else {
           newBackgroundColors[i] = '#e0e0e0'; // Future step
         }
