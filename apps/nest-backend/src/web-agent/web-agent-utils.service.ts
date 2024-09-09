@@ -4,13 +4,15 @@ import { ActionService } from './action/action.service';
 import { DataLayerService } from './action/web-monitoring/data-layer/data-layer.service';
 import { Page, Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
-import { extractEventNameFromId } from '@utils';
+import { RequestInterceptorService } from './action/request-interceptor/request-interceptor.service';
+import { firstValueFrom, map, take } from 'rxjs';
 
 @Injectable()
 export class WebAgentUtilsService {
   constructor(
     private actionService: ActionService,
-    private dataLayerService: DataLayerService
+    private dataLayerService: DataLayerService,
+    private requestInterceptorService: RequestInterceptorService
   ) {}
 
   async performTest(
@@ -31,32 +33,14 @@ export class WebAgentUtilsService {
       });
     }
 
-    let eventRequest = '';
-    const eventName = extractEventNameFromId(eventId);
     // 2) capture the request if needed
     if (captureRequest) {
-      Logger.log(
-        'Capturing request',
-        `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
+      await this.requestInterceptorService.setupInterception(
+        page,
+        projectSlug,
+        eventId,
+        measurementId
       );
-      page.on('request', (interceptedRequest) => {
-        if (
-          interceptedRequest.url().includes(`en=${eventName}`) &&
-          interceptedRequest.url().includes(`tid=${measurementId}`)
-        ) {
-          Logger.log(
-            `Request captured: ${interceptedRequest.url()}`,
-            `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
-          );
-          eventRequest = interceptedRequest.url();
-          page.off('request');
-        } else {
-          Logger.warn(
-            `Request not captured: ${interceptedRequest.url()}`,
-            `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
-          );
-        }
-      });
     }
 
     // 3) perform the test operation
@@ -67,7 +51,20 @@ export class WebAgentUtilsService {
         eventId,
         application
       );
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const eventRequest = await firstValueFrom(
+        this.requestInterceptorService.getRawRequest().pipe(
+          take(1),
+          map((request) => {
+            Logger.log(
+              `Request captured in web-agent: ${request}`,
+              'WebAgentUtilsService.performTest'
+            );
+            return request;
+          })
+        )
+      );
+
       try {
         await page.waitForNavigation({
           waitUntil: 'networkidle0',
@@ -95,6 +92,7 @@ export class WebAgentUtilsService {
         'Test completed',
         `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
       );
+
       return {
         dataLayer,
         eventRequest,

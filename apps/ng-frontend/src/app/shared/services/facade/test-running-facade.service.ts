@@ -70,11 +70,7 @@ export class TestRunningFacadeService {
     this.isRunningTestSubject.next(true);
     this.eventRunningTestSubject.next(eventId);
 
-    if (
-      project.settings.gtm.isAccompanyMode ||
-      (project.settings.gtm.isAccompanyMode &&
-        project.settings.gtm.isRequestCheck)
-    ) {
+    if (project.settings.gtm.isAccompanyMode) {
       const measurementId = project.settings.gtm.isRequestCheck
         ? project.settings.measurementId
         : undefined;
@@ -92,6 +88,7 @@ export class TestRunningFacadeService {
     }
 
     if (project.settings.gtm.isRequestCheck) {
+      console.log('Running data layer with request check');
       return this.qaRequestService.runDataLayerWithRequestCheck(
         projectSlug,
         eventId,
@@ -99,17 +96,19 @@ export class TestRunningFacadeService {
         headless,
         inspectEventDto,
         project.settings.authentication.username,
-        project.settings.authentication.password
+        project.settings.authentication.password,
+        project.settings.gtm.isRequestCheck
       );
     }
-
+    console.log('Running data layer without request check');
     return this.dataLayerService.runDataLayerInspection(
       projectSlug,
       eventId,
       headless,
       inspectEventDto,
       project.settings.authentication.username,
-      project.settings.authentication.password
+      project.settings.authentication.password,
+      project.settings.gtm.isRequestCheck
     );
   }
 

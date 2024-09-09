@@ -1,127 +1,111 @@
-# Table of Contents
+# GTM Container Review and Analytics Validation Tool
 
-[Overview](#overview)
+## Table of Contents
 
-[Development](#development)
+- [Overview](#overview)
+- [Features](#features)
+- [Development](#development)
+  - [Prerequisites](#prerequisites)
+  - [Frontend (Angular)](#frontend-angular)
+  - [Backend (NestJS)](#backend-nestjs)
+  - [Electron](#electron)
+- [Build and Production](#build-and-production)
+  - [Frontend](#frontend)
+  - [Backend](#backend)
+  - [Build](#build)
+  - [Package](#package)
+  - [Make](#make)
+- [Feedback and Contribution](#feedback-and-contribution)
 
-- [Frontend (Angular)](#frontend-angular)
-- [Backend (Nest.js)](#backend-nestjs)
+## Overview
 
-[Build and Production](#build-and-production)
+This desktop application automates the Google Tag Manager (GTM) container review process and production analytics deployment validation. It streamlines the quality assurance process by providing:
 
-- [Frontend (Angular)](#frontend-angular-1)
-- [Backend (Nest.js)](#backend-nestjs-1)
-- [Build](#build)
-- [Package](#package)
+1. **GTM Container Review**: Load GTM preview mode, run Chrome recorder, and generate dataLayer correctness reports. Users can review tag configurations through GTM preview mode.
+2. **Production Analytics Validation**: Validate analytics on the production website, ensuring dataLayer accuracy.
 
-[Feedback and Contribution](#feedback-and-contribution)
+Designed for QA, development, and analytics teams, this free standalone tool leverages Angular, NestJS, and Electron.
 
-# Overview
+## Features
 
-This desktop application automates the GTM (Google Tag Manager) container review process and the production analytics deployment validation. It streamlines the quality assurance process by providing:
+- **Unified JSON Format**: Generate GTM-compatible JSON files and run different recorded tests using a consistent specification.
+- **Video Recording**: The entire process is recorded as a .webm video.
+- **GTM Accompanied Mode**: Observe unpublished tags within GTM using a shareable link and the website's landing page.
+- **Request Capture**: Efficiently capture and validate tags automatically. Captured requests are recomposed to data layer object for validation.
+- **XLSX Report**: Test results are encapsulated in an XLSX report, including:
+  - Data layer
+  - Raw captured requests
+  - Reconstructed data layer based on raw captured requests
+  - Screenshots of event triggers
+- **Project Transfer**: Archive projects as .zip files for import into other users' applications.
 
-1. **GTM Container Review**: The tool can load the GTM preview mode according to the workspace, run the Chrome recorder, and generate a report on dataLayer correctness. Users can review the tag configuration through the GTM preview mode as well.
-2. **Production Analytics Validation**: It validates analytics on the production website, ensuring dataLayer accuracy.
+## Development
 
-Designed for QA, development, and analytics teams, this free standalone tool leverages Angular 17, Nest.js, and Electron.
+This project uses NodeJS v22.8.0 LTS for development.
 
-Upcoming features include enhanced UI/UX, request interception, report consolidation, and improved project import/export capabilities.
+### Prerequisites
 
-# Development
-
-The project uses the v22.8.0 LTS version for development. Please run
+Install dependencies:
 
 ```bash
 npm install
-
 ```
 
-## Frontend (Angular)
+### Frontend (Angular)
 
-For development
+For development:
 
 ```bash
 npm run dev-front
 ```
 
-## Backend (NestJS)
+### Backend (NestJS)
 
-Please remove the Sentry plugin within the `.\apps\nest-backend\webpack.config.cjs` before running the development server. Then
-use the following command for backend development with a development server:
+For development:
 
 ```bash
 npm run dev-back
 ```
 
-## Electron
+### Electron
 
-Use the following command for Electron development with a development server:
+For Electron development with a development server:
 
 ```bash
 npm run dev-electron
 ```
 
-Use the following command for Electron development with a staging server:
+### Build
 
-```bash
-npm run staging-electron
-```
-
-# Build and Production
-
-## Frontend (Angular)
-
-For production usage
-
-```bash
-npm run prod-front
-```
-
-## Backend (Nest.js)
-
-For production usage
-
-```bash
-npm run prod-back
-```
-
-## Build
-
-Compile the application with:
+Compile the application:
 
 ```bash
 npm run build
 ```
 
-Which will build the Angular app with the production backend.
-
-The output folder will be by default `dist/apps`. There will be two apps:
+Output folders (in `dist/apps`):
 
 - `ng-frontend`
 - `nest-backend`
 
-Please refer to `package.json` for more scripts.
+### Package
 
-## Package
-
-Please run the command to build the Electron app:
+Build the Electron app:
 
 ```bash
 npm run package
 ```
 
-The output will be in the `out` folder.
+Output will be in the `out` folder.
 
-## Make
+### Make
 
-Please run the command:
+Generate a Windows x32/x64 zip file:
 
 ```bash
 npm run make
 ```
 
-It will generate a Windows x32/x64 zip file. Please note the node v8 4GB RAM heap_size_limit might be insufficient. Therefore, please use bash and run `export NODE_OPTIONS="--max-old-space-size=8192"` to use 8GB RAM for manuall build.
+## Feedback and Contribution
 
-# Feedback and Contribution
-
-We welcome your feedback and contributions! If you have suggestions or encounter issues, please file them in the issues section. For those interested in contributing, check out the contribution guidelines (drafting).
+We welcome your feedback and contributions! If you have suggestions or encounter issues, please file them in the issues section. For those interested in contributing, check out our contribution guidelines (coming soon).

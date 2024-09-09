@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { StepExecutorService } from './step-executor/step-executor.service';
-import { RequestInterceptorService } from './request-interceptor/request-interceptor.service';
 import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
@@ -10,7 +10,6 @@ import { EventsGatewayService } from '../../events-gateway/events-gateway.servic
 @Injectable()
 export class ActionService {
   constructor(
-    private requestInterceptorService: RequestInterceptorService,
     private fileService: FileService,
     private filePathService: FilePathService,
     private eventsGatewayService: EventsGatewayService,
@@ -29,11 +28,6 @@ export class ActionService {
       );
       if (!operation || !operation.steps) return;
 
-      await this.requestInterceptorService.setupInterception(
-        page,
-        projectSlug,
-        eventId
-      );
       let isLastStep = false;
       const lastStep = operation.steps.length;
 
