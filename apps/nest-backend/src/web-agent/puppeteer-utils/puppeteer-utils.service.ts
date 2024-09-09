@@ -7,10 +7,14 @@ import { EventInspectionPresetDto } from '@utils';
 import { join } from 'path';
 import { Page, Browser, ScreenRecorder, Credentials } from 'puppeteer';
 import { BROWSER_ARGS } from '../../configs/project.config';
+import { FilePathService } from '../../os/path/file-path/file-path.service';
+import { readFileSync } from 'fs';
 
 @Injectable()
 export class PuppeteerUtilsService {
   private recorder: ScreenRecorder | null = null;
+
+  constructor(private filePathService: FilePathService) {}
 
   async startBrowser(
     projectSlug: string,
@@ -21,6 +25,23 @@ export class PuppeteerUtilsService {
     eventInspectionPresetDto: EventInspectionPresetDto,
     signal: AbortSignal
   ) {
+    const operationPath = await this.filePathService.getOperationFilePath(
+      projectSlug,
+      eventId
+    );
+    const operationContent = JSON.parse(readFileSync(operationPath, 'utf8'));
+    const viewportStep = operationContent.steps.find(
+      (step: { type: string }) => step.type === 'setViewport'
+    );
+    const viewportHeight = viewportStep.height;
+    const viewportWidth = viewportStep.width;
+    Logger.log(`Viewport: ${viewportWidth}x${viewportHeight}`);
+    // TODO: cannot customize viewport
+    const defaultViewport = {
+      width: Number(viewportWidth),
+      height: Number(viewportHeight),
+    };
+
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
@@ -31,7 +52,7 @@ export class PuppeteerUtilsService {
       acceptInsecureCerts: true,
       args: eventInspectionPresetDto.puppeteerArgs || BROWSER_ARGS,
       executablePath: stats.executablePath,
-      defaultViewport: { width: 1920, height: 1080 },
+      defaultViewport: { width: 1400, height: 900 },
       signal: signal,
     });
 

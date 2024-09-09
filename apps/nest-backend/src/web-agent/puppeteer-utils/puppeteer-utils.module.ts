@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { PuppeteerUtilsService } from './puppeteer-utils.service';
-
+import { FilePathService } from '../../os/path/file-path/file-path.service';
+import { OsModule } from '../../os/os.module';
 @Module({
-  imports: [],
-  providers: [PuppeteerUtilsService],
+  imports: [OsModule],
+  providers: [PuppeteerUtilsService, FilePathService],
   exports: [PuppeteerUtilsService],
 })
 export class PuppeteerUtilsModule {}
