@@ -1,6 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { Component } from '@angular/core';
-import { SideBarComponent } from '../components/side-bar/sidebar.component';
+import { SideBarComponent } from '../components/sidebar/sidebar.component';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
