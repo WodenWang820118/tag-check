@@ -8,6 +8,8 @@ import { Router } from '@angular/router';
   providedIn: 'root',
 })
 export class TreeNodeService {
+  private readonly CACHE_KEY = 'currentTreeNode';
+
   currentNode: Subject<TopicNode> = new BehaviorSubject<TopicNode>({
     id: 0,
     name: '',
@@ -19,16 +21,29 @@ export class TreeNodeService {
 
   constructor(private router: Router) {
     this.buildNodeIndex(TREE_DATA);
+    this.initializeFromCache();
+  }
+
+  private initializeFromCache(): void {
+    const cachedNode = localStorage.getItem(this.CACHE_KEY);
+    if (cachedNode) {
+      try {
+        const parsedNode: TopicNode = JSON.parse(cachedNode);
+        this.navigateToNode(parsedNode);
+      } catch (error) {
+        console.error('Error parsing cached node:', error);
+        localStorage.removeItem(this.CACHE_KEY);
+      }
+    }
   }
 
   getSelectedTitle(nodeName: string) {
-    // convert the node name to lowercase and replace spaces with hyphens
     return nodeName.toLowerCase().replace(/ /g, '-');
   }
 
   navigateToNode(node: TopicNode) {
     this.setCurrentNode(node);
-    this.router.navigate(['topics', this.getSelectedTitle(node.name)]);
+    this.router.navigate(['topics', this.getSelectedTitle(node.name)], {});
   }
 
   searchNodeByName(nodes: TopicNode[], nodeName: string): TopicNode | null {
@@ -50,8 +65,11 @@ export class TreeNodeService {
     return this.nodeIndex.get(id) || null;
   }
 
-  setCurrentNode(node: TopicNode) {
+  setCurrentNode(node: TopicNode, cache: boolean = true) {
     this.currentNode.next(node);
+    if (cache) {
+      localStorage.setItem(this.CACHE_KEY, JSON.stringify(node));
+    }
   }
 
   getCurrentNode() {
@@ -73,8 +91,10 @@ export class TreeNodeService {
   }
 
   getMaxId(): number {
-    // there are nodes are having the same id as -1, indicating that they have children
-    // after building index, the size will always be greater than the max id + 1
     return this.nodeIndex.size - 1;
+  }
+
+  clearCache(): void {
+    localStorage.removeItem(this.CACHE_KEY);
   }
 }

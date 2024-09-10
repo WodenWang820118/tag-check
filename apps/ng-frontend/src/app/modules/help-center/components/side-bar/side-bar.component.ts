@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { MatTreeNestedDataSource, MatTreeModule } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,7 +15,7 @@ import { TreeNodeService } from '../../../../shared/services/tree-node/tree-node
   templateUrl: 'side-bar.component.html',
   styleUrls: ['side-bar.component.scss'],
 })
-export class SideBarComponent implements OnInit, OnDestroy {
+export class SideBarComponent implements OnDestroy {
   destroy$ = new Subject<void>();
   treeControl = new NestedTreeControl<TopicNode>((node) => node.children);
   dataSource = new MatTreeNestedDataSource<TopicNode>();
@@ -27,12 +27,6 @@ export class SideBarComponent implements OnInit, OnDestroy {
 
   hasChild = (_: number, node: TopicNode) =>
     !!node.children && node.children.length > 0;
-
-  ngOnInit(): void {
-    // the landing page should be the first topic in the tree
-    const landingPageNode = TREE_DATA[0];
-    this.treeNodeService.navigateToNode(landingPageNode);
-  }
 
   ngOnDestroy() {
     this.destroy$.next();
