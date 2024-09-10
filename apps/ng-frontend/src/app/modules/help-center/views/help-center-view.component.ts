@@ -1,6 +1,6 @@
 import { AsyncPipe } from '@angular/common';
 import { Component } from '@angular/core';
-import { SideBarComponent } from '../components/side-bar/side-bar.component';
+import { SideBarComponent } from '../components/side-bar/sidebar.component';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
@@ -9,7 +9,7 @@ import { RouterOutlet } from '@angular/router';
   imports: [AsyncPipe, SideBarComponent, RouterOutlet],
   template: `
     <div class="help-center">
-      <app-side-bar class="sidebar"></app-side-bar>
+      <app-sidebar class="sidebar"></app-sidebar>
       <div class="main-content-container">
         <router-outlet></router-outlet>
       </div>

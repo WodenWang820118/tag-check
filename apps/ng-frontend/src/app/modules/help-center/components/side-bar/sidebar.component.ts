@@ -9,11 +9,11 @@ import { TopicNode } from '@utils';
 import { TreeNodeService } from '../../../../shared/services/tree-node/tree-node.service';
 
 @Component({
-  selector: 'app-side-bar',
+  selector: 'app-sidebar',
   standalone: true,
   imports: [MatTreeModule, MatIconModule, MatButtonModule],
-  templateUrl: 'side-bar.component.html',
-  styleUrls: ['side-bar.component.scss'],
+  templateUrl: 'sidebar.component.html',
+  styleUrls: ['sidebar.component.scss'],
 })
 export class SideBarComponent implements OnDestroy {
   destroy$ = new Subject<void>();
