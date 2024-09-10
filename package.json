@@ -126,6 +126,7 @@
     "jsdom": "~22.1.0",
     "jsonc-eslint-parser": "^2.1.0",
     "lint-staged": "^15.2.9",
+    "marked": "^12.0.0",
     "nestjs-spelunker": "^1.3.0",
     "ngx-markdown": "^17.2.1",
     "nodemon": "^3.1.0",
@@ -166,6 +167,7 @@
     "sequelize": "^6.35.2",
     "sequelize-typescript": "^2.1.6",
     "tag-check": "file:",
+    "typeorm": "^0.3.20",
     "unzipper": "^0.10.14",
     "uuid": "^9.0.1"
   }
