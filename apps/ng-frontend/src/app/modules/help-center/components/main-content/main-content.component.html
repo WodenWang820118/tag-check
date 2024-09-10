@@ -1,7 +1,8 @@
-<div class="help-center">
-  <app-side-bar class="sidebar"></app-side-bar>
-  <div class="main-content-container">
-    <router-outlet></router-outlet>
+<div class="container">
+  <div class="container__col1">
+    <div class="main-content">
+      <markdown [src]="fileName" (ready)="onMarkdownReady()"></markdown>
+    </div>
     <div class="actions">
       @if (this.currentNode$| async) { @if (currentNodeId > 1 && currentNodeId <
       treeNodeService.getMaxId()) {
@@ -15,5 +16,15 @@
       <div></div>
       } }
     </div>
+  </div>
+
+  <div class="toc">
+    <ul>
+      @for(heading of toc; track heading.id) {
+      <li>
+        <a (click)="scrollToSection(heading.id)">{{ heading.text }}</a>
+      </li>
+      }
+    </ul>
   </div>
 </div>
