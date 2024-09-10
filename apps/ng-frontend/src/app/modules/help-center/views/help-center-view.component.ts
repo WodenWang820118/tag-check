@@ -1,7 +1,8 @@
 import { AsyncPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SideBarComponent } from '../components/sidebar/sidebar.component';
 import { RouterOutlet } from '@angular/router';
+import { TreeNodeService } from '../../../shared/services/tree-node/tree-node.service';
 
 @Component({
   selector: 'app-help-center-view',
@@ -35,4 +36,14 @@ import { RouterOutlet } from '@angular/router';
     `,
   ],
 })
-export class HelpCenterViewComponent {}
+export class HelpCenterViewComponent implements OnInit, OnDestroy {
+  constructor(private treeNodeService: TreeNodeService) {}
+
+  ngOnInit(): void {
+    this.treeNodeService.initializeTreeNodes();
+  }
+
+  ngOnDestroy(): void {
+    this.treeNodeService.resetCurrentNode();
+  }
+}

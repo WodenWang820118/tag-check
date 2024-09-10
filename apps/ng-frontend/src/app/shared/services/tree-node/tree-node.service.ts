@@ -10,21 +10,18 @@ import { Router } from '@angular/router';
 export class TreeNodeService {
   private readonly CACHE_KEY = 'currentTreeNode';
 
-  currentNode: Subject<TopicNode> = new BehaviorSubject<TopicNode>({
-    id: 0,
-    name: '',
-    children: [],
-  });
+  currentNode: Subject<TopicNode> = new BehaviorSubject<TopicNode>(
+    TREE_DATA[0]
+  );
 
   currentNode$ = this.currentNode.asObservable();
   private nodeIndex: Map<number, TopicNode> = new Map();
 
   constructor(private router: Router) {
     this.buildNodeIndex(TREE_DATA);
-    this.initializeFromCache();
   }
 
-  private initializeFromCache(): void {
+  initializeTreeNodes(): void {
     const cachedNode = localStorage.getItem(this.CACHE_KEY);
     if (cachedNode) {
       try {
@@ -33,17 +30,40 @@ export class TreeNodeService {
       } catch (error) {
         console.error('Error parsing cached node:', error);
         localStorage.removeItem(this.CACHE_KEY);
+        this.navigateToInitialNode();
       }
+    } else {
+      this.navigateToInitialNode();
     }
   }
 
-  getSelectedTitle(nodeName: string) {
-    return nodeName.toLowerCase().replace(/ /g, '-');
+  private navigateToInitialNode(): void {
+    const initialNode = this.searchNodeById(1) || TREE_DATA[0];
+    if (initialNode) {
+      this.navigateToNode(initialNode);
+    } else {
+      console.error('No initial node found');
+    }
   }
 
   navigateToNode(node: TopicNode) {
     this.setCurrentNode(node);
-    this.router.navigate(['topics', this.getSelectedTitle(node.name)], {});
+    const url = ['topics', this.getSelectedTitle(node.name)];
+    console.log('Navigating to URL:', url);
+    this.router.navigate(url).then(
+      (success) => {
+        if (!success) {
+          console.error('Navigation failed');
+        }
+      },
+      (error) => {
+        console.error('Navigation error:', error);
+      }
+    );
+  }
+
+  getSelectedTitle(nodeName: string) {
+    return nodeName.toLowerCase().replace(/ /g, '-');
   }
 
   searchNodeByName(nodes: TopicNode[], nodeName: string): TopicNode | null {
@@ -65,11 +85,14 @@ export class TreeNodeService {
     return this.nodeIndex.get(id) || null;
   }
 
-  setCurrentNode(node: TopicNode, cache: boolean = true) {
+  setCurrentNode(node: TopicNode) {
     this.currentNode.next(node);
-    if (cache) {
-      localStorage.setItem(this.CACHE_KEY, JSON.stringify(node));
-    }
+    localStorage.setItem(this.CACHE_KEY, JSON.stringify(node));
+  }
+
+  resetCurrentNode() {
+    this.currentNode.next(TREE_DATA[0]);
+    localStorage.removeItem(this.CACHE_KEY);
   }
 
   getCurrentNode() {
