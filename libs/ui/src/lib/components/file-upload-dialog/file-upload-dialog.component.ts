@@ -24,18 +24,6 @@ import { MatIconModule } from '@angular/material/icon';
           type="file"
         />
       </div>
-      <div class="file-upload-dialog__actions__action">
-        <button type="button" mat-button (click)="fileInput.click()">
-          <mat-icon>cloud_upload</mat-icon>
-          Upload XLSX File
-        </button>
-        <input
-          hidden
-          (change)="onFileSelected($event)"
-          #fileInput
-          type="file"
-        />
-      </div>
     </mat-dialog-content>
   </div>`,
   styles: [
