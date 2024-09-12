@@ -41,18 +41,14 @@ Designed for QA, development, and analytics teams, this free standalone tool lev
 
 ## Development
 
-This project uses NodeJS v22.8.0 LTS for development.
+This project uses NodeJS v22.8.0 for development.
 
 ### Prerequisites
 
 Install dependencies:
 
 ```bash
-npm install -g yarn
-```
-
-```bash
-yarn
+npm install
 ```
 
 ### Frontend (Angular)
@@ -60,7 +56,7 @@ yarn
 For development:
 
 ```bash
-yarn run dev-front
+npm run dev-front
 ```
 
 ### Backend (NestJS)
@@ -68,7 +64,7 @@ yarn run dev-front
 For development:
 
 ```bash
-yarn run dev-back
+npm run dev-back
 ```
 
 ### Electron
@@ -76,7 +72,7 @@ yarn run dev-back
 For Electron development with a development server:
 
 ```bash
-yarn run dev-electron
+npm run dev-electron
 ```
 
 ### Build
@@ -84,7 +80,7 @@ yarn run dev-electron
 Compile the application:
 
 ```bash
-yarn run build
+npm run build
 ```
 
 Output folders (in `dist/apps`):
@@ -97,7 +93,7 @@ Output folders (in `dist/apps`):
 Build the Electron app:
 
 ```bash
-yarn run package
+npm run package
 ```
 
 Output will be in the `out` folder.
@@ -107,7 +103,7 @@ Output will be in the `out` folder.
 Generate a Windows x32/x64 zip file:
 
 ```bash
-yarn run make
+npm run make
 ```
 
 ## Feedback and Contribution

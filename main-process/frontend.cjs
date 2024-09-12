@@ -1,15 +1,22 @@
 'use strict';
-const { BrowserWindow } = require('electron');
+const { BrowserWindow, app } = require('electron');
 const pathUtils = require('./path-utils.cjs');
 const { existsSync } = require('fs');
 const { join } = require('path');
 
+let loadingWindow = null;
+
 function createLoadingWindow() {
+  if (loadingWindow) {
+    console.log('Loading window already exists');
+    return loadingWindow;
+  }
+
   try {
-    const loadingWindow = new BrowserWindow({
+    loadingWindow = new BrowserWindow({
       width: 400,
       height: 200,
-      frame: false,
+      // frame: false,
       // transparent: true,
       alwaysOnTop: true,
       webPreferences: {
@@ -17,11 +24,17 @@ function createLoadingWindow() {
       },
     });
 
-    loadingWindow.loadFile(join(__dirname, './loading.html'));
+    loadingWindow.loadFile(join(__dirname, 'loading.html'));
     loadingWindow.center();
+
+    loadingWindow.on('closed', () => {
+      loadingWindow = null;
+    });
+
     return loadingWindow;
   } catch (error) {
-    console.error(error);
+    console.error('Error creating loading window:', error);
+    return null;
   }
 }
 
@@ -42,7 +55,6 @@ function createWindow(resourcesPath) {
       mainWindow.webContents.openDevTools();
     } else {
       mainWindow.loadFile(entryPath);
-      mainWindow.webContents.openDevTools();
     }
   } catch (e) {
     console.error(e);

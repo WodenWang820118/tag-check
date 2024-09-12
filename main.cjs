@@ -9,10 +9,10 @@ const backend = require('./main-process/backend.cjs');
 const database = require('./main-process/database.cjs');
 const frontend = require('./main-process/frontend.cjs');
 
+let loadingWindow = null;
 let server;
 
-app.whenReady().then(async () => {
-  const loadingWindow = frontend.createLoadingWindow();
+app.whenReady().then(() => {
   fileUtils.createProjectSavingRootFolder(
     pathUtils.getRootBackendFolderPath(
       environmentUtils.getEnvironment(),
@@ -24,6 +24,7 @@ app.whenReady().then(async () => {
 
   database.initTables(db, process.resourcesPath);
   server = backend.startBackend(process.env, process.resourcesPath);
+  loadingWindow = frontend.createLoadingWindow();
   server.once('spawn', async () => {
     try {
       let portOpen = false;

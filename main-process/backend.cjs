@@ -1,5 +1,6 @@
 'use strict';
 const { fork } = require('child_process');
+// const { utilityProcess } = require('electron');
 const { join } = require('path');
 const pathUtils = require('./path-utils.cjs');
 const fileUtils = require('./file-utils.cjs');
@@ -53,6 +54,7 @@ function startBackend(existedEnv, resourcesPath) {
       };
       break;
   }
+  // return utilityProcess.fork(serverPath, { env });
   return fork(serverPath, { env });
 }
 
@@ -110,7 +112,9 @@ async function checkIfPortIsOpen(
       try {
         console.log(`Attempt ${attempt}: Trying to fetch ${url}`);
         const response = await fetch(url);
-
+        console.log(
+          `Attempt ${attempt}: Response from ${url}: ${response.status}`
+        );
         if (response) {
           console.log('Server is ready');
           fileUtils.writePath(
