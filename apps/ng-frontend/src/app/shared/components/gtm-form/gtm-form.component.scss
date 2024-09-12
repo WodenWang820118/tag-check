@@ -1,6 +1,10 @@
 @use '@angular/material' as mat;
 
-$theme: mat.define-light-theme((density: -4));
+$theme: mat.m2-define-light-theme(
+  (
+    density: -4,
+  )
+);
 
 .gtm-preview-mode-form {
   display: flex;
