@@ -1,5 +1,6 @@
 'use strict';
-const { existsSync, mkdirSync, writeFileSync } = require('fs');
+const { existsSync, mkdirSync, appendFileSync } = require('fs');
+const { join } = require('path');
 
 function createProjectSavingRootFolder(folderPath) {
   if (!existsSync(folderPath)) {
@@ -7,8 +8,16 @@ function createProjectSavingRootFolder(folderPath) {
   }
 }
 
-function writePath(filePath, content) {
-  writeFileSync(filePath, content, 'utf8');
+function logToFile(path, message, type = 'info') {
+  const logPath = join(path, `${type}.log`);
+  const timestamp = new Date().toISOString();
+  const logMessage = `${timestamp} - ${type.toUpperCase()}: ${message}\n`;
+
+  try {
+    appendFileSync(logPath, logMessage);
+  } catch (error) {
+    console.error('Failed to write to log file:', error);
+  }
 }
 
 function fileExists(filePath) {
@@ -17,6 +26,6 @@ function fileExists(filePath) {
 
 module.exports = {
   createProjectSavingRootFolder,
-  writePath,
+  logToFile,
   fileExists,
 };

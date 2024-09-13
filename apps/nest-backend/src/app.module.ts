@@ -6,12 +6,14 @@ import { SequelizeModule } from '@nestjs/sequelize';
 // import { SentryModule } from '@sentry/nestjs/setup';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './all-exceptions-filter';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     WaiterModule,
     SequelizeModule.forRoot(dataBaseConfig),
+    HealthModule,
     // SentryModule.forRoot(),
   ],
   controllers: [],

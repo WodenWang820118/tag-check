@@ -1,4 +1,5 @@
 'use strict';
+const { ChildProcess } = require('child_process');
 const { app } = require('electron');
 const { join } = require('path');
 const constants = require('./main-process/constants.cjs');
@@ -9,10 +10,21 @@ const backend = require('./main-process/backend.cjs');
 const database = require('./main-process/database.cjs');
 const frontend = require('./main-process/frontend.cjs');
 
-let loadingWindow = null;
+/**
+ * @type {ChildProcess}
+ */
 let server;
+app.commandLine.appendSwitch('disable-gpu');
+app.commandLine.appendSwitch('use-gl', 'desktop');
 
 app.whenReady().then(() => {
+  const logFilePath = join(
+    pathUtils.getRootBackendFolderPath(
+      environmentUtils.getEnvironment(),
+      process.resourcesPath
+    )
+  );
+
   fileUtils.createProjectSavingRootFolder(
     pathUtils.getRootBackendFolderPath(
       environmentUtils.getEnvironment(),
@@ -23,33 +35,25 @@ app.whenReady().then(() => {
   const db = database.getDatabase(process.resourcesPath);
 
   database.initTables(db, process.resourcesPath);
-  server = backend.startBackend(process.env, process.resourcesPath);
-  loadingWindow = frontend.createLoadingWindow();
+  server = backend.startBackend(process.resourcesPath);
+  const loadingWindow = frontend.createLoadingWindow();
   server.once('spawn', async () => {
     try {
-      let portOpen = false;
-      portOpen = await backend.checkIfPortIsOpen(
-        constants.URLs,
-        20,
-        2000,
-        process.resourcesPath
-      );
-      if (portOpen) {
+      if (
+        await backend.checkIfPortIsOpen(
+          constants.URLs,
+          20,
+          2000,
+          process.resourcesPath,
+          loadingWindow
+        )
+      ) {
         loadingWindow.close();
         frontend.createWindow(process.resourcesPath);
       }
     } catch (error) {
       console.error(error);
-      fileUtils.writePath(
-        join(
-          pathUtils.getRootBackendFolderPath(
-            environmentUtils.getEnvironment(),
-            process.resourcesPath
-          ),
-          'portErrorLog.txt'
-        ),
-        error
-      );
+      fileUtils.logToFile(logFilePath, error.toString(), 'error');
     }
   });
 
@@ -58,34 +62,19 @@ app.whenReady().then(() => {
   });
 
   server.on('error', (error) => {
-    fileUtils.writePath(
-      join(
-        pathUtils.getRootBackendFolderPath(
-          environmentUtils.getEnvironment(),
-          process.resourcesPath
-        ),
-        'childErrorLog.txt'
-      ),
-      error
-    );
+    fileUtils.logToFile(logFilePath, error.toString(), 'error');
     backend.stopBackend(server);
   });
 
   server.on('exit', (code, signal) => {
     console.log(`Child exited with code ${code} and signal ${signal}`);
-    fileUtils.writePath(
-      join(
-        pathUtils.getRootBackendFolderPath(
-          environmentUtils.getEnvironment(),
-          process.resourcesPath
-        ),
-        'childExitLog.txt'
-      ),
-      `Child exited with code ${code} and signal ${signal}`
+    fileUtils.logToFile(
+      logFilePath,
+      `Child exited with code ${code} and signal ${signal}`,
+      'info'
     );
 
-    if (signal !== 'SIGTERM')
-      backend.restartBackend(process.env, process.resourcesPath);
+    if (signal !== 'SIGTERM') backend.restartBackend(process.resourcesPath);
   });
 });
 
@@ -104,10 +93,9 @@ app.on('before-quit', async () => {
   }
 
   // Close any open connections
-  const db = database.getDatabase(process.resourcesPath);
   db.close((err) => {
     if (err) {
-      console.error('Error closing the database:', err.message);
+      console.error('Error closing the database:', err.toString());
     } else {
       console.log('Database connection closed.');
     }

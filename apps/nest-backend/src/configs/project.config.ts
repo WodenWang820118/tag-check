@@ -126,6 +126,7 @@ export function getRootProjectPath(): string {
   }
 }
 
+// TODO: configure port number effectively for both frontend and backend
 export async function activatePort(app: INestApplication<any>) {
   try {
     switch (process.env.NODE_ENV) {
@@ -142,8 +143,8 @@ export async function activatePort(app: INestApplication<any>) {
         await app.listen(process.env.PORT || 6060);
         break;
       case 'prod':
-        Logger.log('Listening on port 7000');
-        await app.listen(process.env.PORT || 7000);
+        Logger.log('Listening on port 7001');
+        await app.listen(process.env.PORT || 7001);
         break;
       default:
         Logger.warn(
@@ -152,7 +153,7 @@ export async function activatePort(app: INestApplication<any>) {
             DEFAULT_PROJECT_PATH
           )}`
         );
-        await app.listen(process.env.PORT || 80);
+        await app.listen(process.env.PORT || 7001);
         break;
     }
   } catch (error) {

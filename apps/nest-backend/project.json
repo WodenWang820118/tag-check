@@ -25,7 +25,6 @@
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
-      "port": 8080,
       "options": {
         "buildTarget": "nest-backend:build"
       },

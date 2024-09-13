@@ -2,16 +2,23 @@
 const sqlite3 = require('sqlite3').verbose();
 const pathUtils = require('./path-utils.cjs');
 const environmentUtils = require('./environment-utils.cjs');
+const fileUtils = require('./file-utils.cjs');
 const { v4: uuidv4 } = require('uuid');
 
 function getDatabase(resourcesPath) {
+  const logFilePath = pathUtils.getRootBackendFolderPath(
+    environmentUtils.getEnvironment(),
+    resourcesPath
+  );
   const db = new sqlite3.Database(
     pathUtils.getDataBasePath(environmentUtils.getEnvironment(), resourcesPath),
     (err) => {
       if (err) {
         console.error(err.message);
+        fileUtils.logToFile(logFilePath, err.message, 'error');
       }
       console.log('Connected to the database.');
+      fileUtils.logToFile(logFilePath, 'Connected to the database.', 'info');
     }
   );
   return db;

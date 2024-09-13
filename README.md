@@ -48,7 +48,11 @@ This project uses NodeJS v22.8.0 for development.
 Install dependencies:
 
 ```bash
-npm install
+npm install -g pnpm
+```
+
+```bash
+pnpm install
 ```
 
 ### Frontend (Angular)
@@ -56,7 +60,7 @@ npm install
 For development:
 
 ```bash
-npm run dev-front
+pnpm run dev-front
 ```
 
 ### Backend (NestJS)
@@ -64,7 +68,7 @@ npm run dev-front
 For development:
 
 ```bash
-npm run dev-back
+pnpm run dev-back
 ```
 
 ### Electron
@@ -72,7 +76,7 @@ npm run dev-back
 For Electron development with a development server:
 
 ```bash
-npm run dev-electron
+pnpm run dev-electron
 ```
 
 ### Build
@@ -80,7 +84,7 @@ npm run dev-electron
 Compile the application:
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 Output folders (in `dist/apps`):
@@ -93,7 +97,7 @@ Output folders (in `dist/apps`):
 Build the Electron app:
 
 ```bash
-npm run package
+pnpm run package
 ```
 
 Output will be in the `out` folder.
@@ -103,7 +107,7 @@ Output will be in the `out` folder.
 Generate a Windows x32/x64 zip file:
 
 ```bash
-npm run make
+pnpm run make
 ```
 
 ## Feedback and Contribution
