@@ -3,6 +3,7 @@
 This desktop application automates the GTM (Google Tag Manager) container review process and the production analytics deployment validation. It streamlines the quality assurance process by providing:
 
 ## Features
+- The tool use a consistent JSON fomatted GTM specification and generate GTM compatible JSON file to be uploaded.
 - The tool run the Chrome recorder JSON formatted file, and generate a report on dataLayer and captured requests correctness.
 - Users can review the tag configuration through the GTM preview mode as well by using the sharable link.
 - It validates analytics on the production website, ensuring dataLayer and request accuracy.
