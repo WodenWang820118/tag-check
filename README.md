@@ -3,13 +3,13 @@
 This desktop application automates the GTM (Google Tag Manager) container review process and the production analytics deployment validation. It streamlines the quality assurance process by providing:
 
 ## Features
-- The tool use a consistent JSON fomatted GTM specification and generate GTM compatible JSON file to be uploaded.
-- The tool run the Chrome recorder JSON formatted file, and generate a report on dataLayer and captured requests correctness.
+- The tool uses a consistent JSON fomatted GTM specification and generates GTM compatible JSON files to be uploaded.
+- The tool runs the Chrome recorder JSON formatted file, and generates a report on dataLayer and captured requests correctness.
 - Users can review the tag configuration through the GTM preview mode as well by using the sharable link.
 - It validates analytics on the production website, ensuring dataLayer and request accuracy.
 - It records the testing process as `webm` video and provide the screenshot as validation proof.
 - It provides the downloadable files to be delivered.
-- It can export and import projects; allow projects to be shared to others.
+- It can export and import projects, allow projects to be shared to others.
 
 The product is designed for QA, development, and analytics teams by leveraging Angular, NestJS, and Electron.
 
