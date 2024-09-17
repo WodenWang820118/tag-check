@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Page } from 'puppeteer';
 import { sleep } from '../action-utils';
 import { getFirstSelector } from '../handlers/utils';
 import { EventInspectionPresetDto } from '../../../dto/event-inspection-preset.dto';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DataLayerService } from '../../action/web-monitoring/data-layer/data-layer.service';
+import { USER_AGENT } from '../../../configs/project.config';
 
 @Injectable()
 export class StepExecutorUtilsService {
@@ -23,74 +27,41 @@ export class StepExecutorUtilsService {
     page: Page,
     isLastStep: boolean,
     delay = 10000
-  ) {
+  ): Promise<void> {
     if (isLastStep) {
       try {
-        await page.waitForNavigation({
-          timeout: delay,
-        });
+        await page.waitForNavigation({ timeout: delay });
       } catch (error) {
-        // throw error will stop the whole process
-        console.log(
-          'pure function handleNavigationIfNeeded: No Navigation needed'
+        Logger.log(
+          'No Navigation needed',
+          `${StepExecutorUtilsService.name}.${StepExecutorUtilsService.prototype.handleNavigationIfNeeded.name}`
         );
       }
+      await sleep(1000);
     }
-    await sleep(1000); // Necessary delay for the website to update
   }
 
-  async handleSetViewport(page: Page, step: any) {
-    await page.setViewport({
-      width: step.width,
-      height: step.height,
-    });
+  async handleSetViewport(page: Page, step: any): Promise<void> {
+    await page.setViewport({ width: step.width, height: step.height });
   }
 
   async handleNavigate(
     page: Page,
     step: any,
     state: any,
+    isLastStep: boolean,
     application: EventInspectionPresetDto['application']
-  ) {
+  ): Promise<void> {
     try {
-      await page.goto(step.url);
-      const finalUrl = page.url();
-
-      await sleep(1000); // Necessary delay for the website to update
-      // pre-load the application localStorage if any
-      if (application && application.localStorage) {
-        await page.evaluate((appLocalStorage) => {
-          for (const setting of appLocalStorage.data) {
-            // Correctly access the value property of each setting object
-            const value =
-              typeof setting.value === 'object'
-                ? JSON.stringify(setting.value)
-                : setting.value;
-            localStorage.setItem(setting.key, value);
-          }
-        }, application.localStorage); // Pass application.localStorage as an argument to the evaluate function
-      }
-
-      // pre-load the application cookies if any
-      if (application.cookie && application.cookie.data) {
-        const cookies = application.cookie.data.map((cookie) => ({
-          name: cookie.key.toString(),
-          value: cookie.value.toString(),
-        }));
-
-        await page.setCookie(...cookies);
-      }
-
-      // then reload the page to make sure the localStorage and cookies are set
-      // try to skip the overlay or popups
       if (state.isFirstNavigation) {
-        // only reload the landing page, trying to skip the overlay
-        // Reload the page with the final URL to apply localStorage and cookies
-        await page.goto(finalUrl);
-        state.isFirstNavigation = false;
+        await page.setUserAgent(USER_AGENT);
+        await this.handleFirstNavigation(page, step, state, application);
+      } else {
+        await page.goto(step.url, { waitUntil: 'networkidle2' });
       }
+      await this.handleNavigationIfNeeded(page, isLastStep, 2000);
     } catch (error) {
-      throw new Error(String(error));
+      throw new Error(`Navigation failed: ${JSON.stringify(error, null, 2)}`);
     }
   }
 
@@ -99,21 +70,84 @@ export class StepExecutorUtilsService {
       try {
         // sometimes SSR may send multiple SPA pages, so it's necessary to wait for navigation
         // but sometimes it's not necessary, so we do race
-        const fistSelector = getFirstSelector(selector);
+        const firstSelector = getFirstSelector(selector);
         await Promise.race([
           page.waitForNavigation({ waitUntil: 'load', timeout }),
-          page.waitForSelector(fistSelector, {
+          page.waitForSelector(firstSelector, {
             visible: step.visible ? true : false,
             timeout: timeout,
           }),
         ]);
-
-        // Logger.log(`${selector} exists`, `handleWaitForElement`);
         return;
       } catch (error) {
-        await page.close();
-        throw new Error(String(error));
+        Logger.error(
+          `Failed to find selector: ${selector}`,
+          `${StepExecutorUtilsService.name}.${StepExecutorUtilsService.prototype.handleWaitForElement.name}`
+        );
       }
+    }
+    await page.close();
+    throw new Error('Failed to find any of the specified selectors');
+  }
+
+  private async verifyLocalStorageAndCookies(page: Page): Promise<void> {
+    const finalCheck = await page.evaluate(() => {
+      const localStorageData =
+        localStorage.getItem('consentPreferences') || '{}';
+      const cookiesData = document.cookie;
+      const parsedLocalStorage = JSON.parse(localStorageData);
+      return { parsedLocalStorage, cookiesData };
+    });
+
+    Logger.log(
+      `Final check: ${JSON.stringify(finalCheck, null, 2)}`,
+      `${StepExecutorUtilsService.name}.${StepExecutorUtilsService.prototype.verifyLocalStorageAndCookies.name}`
+    );
+  }
+
+  private async handleFirstNavigation(
+    page: Page,
+    step: any,
+    state: any,
+    application: EventInspectionPresetDto['application']
+  ): Promise<void> {
+    await this.setLocalStorage(page, application);
+    await this.setCookies(page, application);
+    await page.goto(step.url, { waitUntil: 'networkidle2' });
+    await sleep(2000);
+    await page.reload({ waitUntil: 'networkidle2' });
+    await this.verifyLocalStorageAndCookies(page);
+    state.isFirstNavigation = false;
+  }
+
+  private async setLocalStorage(
+    page: Page,
+    application: EventInspectionPresetDto['application']
+  ): Promise<void> {
+    if (application?.localStorage) {
+      await page.evaluateOnNewDocument((appLocalStorage) => {
+        for (const setting of appLocalStorage.data) {
+          let value = setting.value;
+          if (typeof value === 'object') {
+            value = JSON.stringify(value);
+          }
+          localStorage.setItem(setting.key, value);
+        }
+      }, application.localStorage);
+    }
+  }
+
+  private async setCookies(
+    page: Page,
+    application: EventInspectionPresetDto['application']
+  ): Promise<void> {
+    if (application.cookie?.data) {
+      const cookies = application.cookie.data.map((cookie) => ({
+        name: cookie.key.toString(),
+        value: cookie.value.toString(),
+        // Add domain, path, etc. if needed
+      }));
+      await page.setCookie(...cookies);
     }
   }
 }

@@ -1,46 +1,41 @@
 {
   "dataLayer": [
     {
-      "gtm.start": 1724733744031,
-      "event": "gtm.js",
-      "gtm.uniqueEventId": 1
+      "gtm.start": 1726587433424,
+      "event": "gtm.js"
     },
     {
-      "event": "gtm.dom",
-      "gtm.uniqueEventId": 4
+      "event": "gtm.dom"
     },
     {
-      "event": "componentsLoaded",
-      "gtm.uniqueEventId": 5
+      "event": "componentsLoaded"
     },
     {
-      "event": "gtm.load",
-      "gtm.uniqueEventId": 6
+      "event": "gtm.load"
     },
     {
       "event": "gtm.triggerGroup",
-      "gtm.triggers": "168785492_202",
-      "gtm.uniqueEventId": 20
+      "gtm.triggers": "168785492_202"
     },
     {
       "event": "gtm.historyChange",
       "gtm.historyChangeSource": "replaceState",
       "gtm.oldUrlFragment": "",
       "gtm.newUrlFragment": "",
-      "gtm.oldHistoryState": null,
+      "gtm.oldHistoryState": {
+        "navigationId": 1
+      },
       "gtm.newHistoryState": {
         "navigationId": 1
       },
-      "gtm.oldUrl": "https://gtm-integration-sample.netlify.app/",
-      "gtm.newUrl": "https://gtm-integration-sample.netlify.app/home",
-      "gtm.uniqueEventId": 8
+      "gtm.oldUrl": "https://gtm-integration-sample.netlify.app/home",
+      "gtm.newUrl": "https://gtm-integration-sample.netlify.app/home"
     },
     {
       "event": "page_view",
-      "page_path": "/",
+      "page_path": "/home",
       "page_title": "Home",
-      "page_location": "https://gtm-integration-sample.netlify.app/home",
-      "gtm.uniqueEventId": 11
+      "page_location": "https://gtm-integration-sample.netlify.app/home"
     },
     {
       "ecommerce": null
@@ -58,17 +53,16 @@
             "item_name": "Switzerland"
           }
         ]
-      },
-      "gtm.uniqueEventId": 14
+      }
     },
     {
       "event": "update_consent",
       "ad_storage": "granted",
       "analytics_storage": "granted",
       "ad_user_data": "granted",
-      "ad_personalization": "denied",
-      "gtm.uniqueEventId": 17
+      "ad_personalization": "denied"
     }
   ],
+  "eventRequest": "https://www.google-analytics.com/g/collect?v=2&tid=G-8HK542DQMG&gtm=45je4990v9171567282z89168785492za200zb9168785492&_p=1726587419210&gcs=G100&gcd=13p3p3p3p7l1&npa=1&dma_cps=-&dma=0&tag_exp=0&cid=1684210779.1726587421&ul=en-us&sr=2195x1235&uaa=&uab=&uafvl=&uamb=0&uam=&uap=&uapv=&uaw=0&are=1&frm=0&pscdl=denied&ngs=1&_s=1&dr=&dl=https%3A%2F%2Fgtm-integration-sample.netlify.app%2Fhome&dp=%2F&dt=Home&sid=1726587421&sct=1&seg=0&en=page_view&_fv=1&_nsi=1&_ss=1&ep.debug_mode=false&tfd=2992",
   "destinationUrl": "https://gtm-integration-sample.netlify.app/home"
 }

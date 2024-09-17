@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ActionService } from './action/action.service';
@@ -5,7 +7,7 @@ import { DataLayerService } from './action/web-monitoring/data-layer/data-layer.
 import { Page, Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { RequestInterceptorService } from './action/request-interceptor/request-interceptor.service';
-import { firstValueFrom, map, take } from 'rxjs';
+import { catchError, firstValueFrom, map } from 'rxjs';
 
 @Injectable()
 export class WebAgentUtilsService {
@@ -58,13 +60,26 @@ export class WebAgentUtilsService {
 
       const eventRequest = await firstValueFrom(
         this.requestInterceptorService.getRawRequest().pipe(
-          take(1),
           map((request) => {
-            Logger.log(
-              `Request captured in web-agent: ${request}`,
-              'WebAgentUtilsService.performTest'
+            if (request) {
+              Logger.log(
+                `Request captured in web-agent: ${request}`,
+                'WebAgentUtilsService.performTest'
+              );
+              return request;
+            }
+            Logger.error(
+              'No request captured',
+              `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
             );
-            return request;
+            return '';
+          }),
+          catchError((error) => {
+            Logger.error(
+              error,
+              `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
+            );
+            return '';
           })
         )
       );
@@ -85,10 +100,22 @@ export class WebAgentUtilsService {
         projectSlug,
         eventId
       );
-      const dataLayer = await this.dataLayerService.getMyDataLayer(
+      const dataLayer: any[] = await this.dataLayerService.getMyDataLayer(
         projectSlug,
         eventId
       );
+
+      // Remove the uniqueEventId added by GTM from the dataLayer
+      try {
+        for (const event of dataLayer) {
+          delete event['gtm.uniqueEventId'];
+        }
+      } catch (error) {
+        Logger.error(
+          JSON.stringify(error, null, 2),
+          `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
+        );
+      }
 
       const destinationUrl = page.url();
 

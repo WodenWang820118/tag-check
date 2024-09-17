@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { BrowserAction, sleep } from '../action-utils';
@@ -38,6 +40,7 @@ export class StepExecutorService {
           page,
           step,
           state,
+          isLastStep,
           application
         );
 

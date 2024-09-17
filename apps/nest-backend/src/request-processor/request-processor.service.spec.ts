@@ -106,7 +106,6 @@ describe('RequestProcessorService', () => {
         event: 'add_to_cart',
         creative_name: 'travel_slide',
         creative_slot: 'featured_attributor',
-        debug_mode: 'false',
         promotion_id: 'city001',
         promotion_name: 'Switzerland',
         ecommerce: {

@@ -7,6 +7,10 @@
   align-items: center;
 }
 
+.mat-expansion-panel-content {
+  overflow: auto !important;
+}
+
 .mat-expansion-panel-header-description {
   align-items: center;
   gap: 1rem;
