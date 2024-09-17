@@ -4,13 +4,13 @@
   "projectName": "ng gtm integration sample",
   "projectDescription": "",
   "projectSlug": "ng_gtm_integration_sample",
-  "measurementId": "GTM-NBMX2DWS",
+  "measurementId": "G-8HK542DQMG",
   "googleSpreadsheetLink": "",
   "headless": true,
   "gtm": {
     "gtmPreviewModeUrl": "https://tagassistant.google.com/#/?id=GTM-NBMX2DWS&url=https%3A%2F%2Fgtm-integration-sample.netlify.app%2F&source=TAG_MANAGER&gtm_auth=dWGYVg8mXuHHNyA2tt55zg&gtm_preview=env-3",
     "isAccompanyMode": false,
-    "isRequestCheck": false,
+    "isRequestCheck": true,
     "tagManagerUrl": "https://tagmanager.google.com/?utm_source=marketingplatform.google.com&utm_medium=et&utm_campaign=marketingplatform.google.com%2Fabout%2Ftag-manager%2F#/container/accounts/6140708819/containers/168785492/workspaces/28"
   },
   "preventNavigationEvents": [

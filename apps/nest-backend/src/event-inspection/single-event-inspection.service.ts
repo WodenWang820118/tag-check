@@ -67,7 +67,7 @@ export class SingleEventInspectionService {
           captureRequest,
           eventInspectionPresetDto
         );
-
+      // await this.puppeteerUtilsService.stopRecorder(); // testing purposes
       await browser.close();
       return data;
     } catch (error) {

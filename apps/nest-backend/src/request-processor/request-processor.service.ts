@@ -9,6 +9,7 @@ import { standardParameterMap } from './utilities';
 
 @Injectable()
 export class RequestProcessorService {
+  private excludedEventParams = ['debug_mode'];
   decodeUrl(url: string): string {
     return decodeURIComponent(url);
   }
@@ -26,11 +27,13 @@ export class RequestProcessorService {
     const queryParams = new URLSearchParams(queryString);
     for (const [key, val] of queryParams.entries()) {
       // Process custom parameters
-      if (key.startsWith('ep.')) {
-        const customKey = key.split('.')[1];
+      const customKey = key.split('.')[1];
+      if (
+        key.startsWith('ep.') &&
+        !this.excludedEventParams.includes(customKey)
+      ) {
         dataLayer[customKey] = val;
       } else if (key.startsWith('epn.')) {
-        const customKey = key.split('.')[1];
         dataLayer[customKey] = val;
       } else if (key === 'cu') {
         dataLayer['currency'] = val;

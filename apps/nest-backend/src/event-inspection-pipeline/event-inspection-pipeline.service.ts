@@ -50,11 +50,6 @@ export class EventInspectionPipelineService {
         },
       ];
 
-      Logger.log(
-        `Data constructed: ${JSON.stringify(data, null, 2)}`,
-        `${EventInspectionPipelineService.name}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
-      );
-
       const timestamp = new Date().getTime();
       const eventName = extractEventNameFromId(eventId);
       const dataLayerPassed = result.dataLayerResult.passed;
@@ -90,7 +85,7 @@ export class EventInspectionPipelineService {
       return data;
     } catch (error) {
       Logger.error(
-        error,
+        JSON.stringify(error, null, 2),
         `${EventInspectionPipelineService}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
       throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
