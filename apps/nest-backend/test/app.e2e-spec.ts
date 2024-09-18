@@ -24,7 +24,7 @@ describe('App (e2e)', () => {
     await app.init();
   });
 
-  describe('Configuration (GET)', () => {
+  describe('Configuration', () => {
     it('should get all configurations', async () => {
       const response = await request(app.getHttpServer()).get(
         '/configurations'
@@ -42,7 +42,7 @@ describe('App (e2e)', () => {
     });
   });
 
-  describe('Data Layer (POST)', () => {
+  describe('Data Layer', () => {
     it('should return dataLayer examination result', async () => {
       const response = await request(app.getHttpServer())
         .post(
@@ -88,13 +88,74 @@ describe('App (e2e)', () => {
     });
   });
 
-  describe('Recordings (GET)', () => {
+  describe('Recordings', () => {
     it('should get recordings according to the projectSlug', async () => {
       const response = await request(app.getHttpServer()).get(
         '/recordings/ng_gtm_integration_sample'
       );
       expect(response.status).toBe(200);
       // expect(response).toEqual(0);
+    });
+  });
+
+  describe('File Reports', () => {
+    it('should get all file reports according to the projectSlug', async () => {
+      const response = await request(app.getHttpServer()).get(
+        '/file-reports/ng_gtm_integration_sample'
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.body).toBeDefined();
+    });
+  });
+
+  describe('Project', () => {
+    it('should get all projects metadata', async () => {
+      const response = await request(app.getHttpServer()).get(
+        '/projects/ng_gtm_integration_sample'
+      );
+      expect(response.status).toBe(200);
+      expect(response.body).toBeDefined();
+    });
+  });
+
+  describe('Reports', () => {
+    it('should get all reports for a project', async () => {
+      const response = await request(app.getHttpServer()).get(
+        '/reports/ng_gtm_integration_sample'
+      );
+      expect(response.status).toBe(200);
+      expect(response.body).toBeDefined();
+    });
+  });
+
+  describe('Settings', () => {
+    it('should get project settings according to the projectSlug', async () => {
+      const response = await request(app.getHttpServer()).get(
+        '/settings/ng_gtm_integration_sample'
+      );
+      expect(response.status).toBe(200);
+      expect(response.body).toBeDefined();
+    });
+  });
+
+  describe('Specs', () => {
+    it('should get all specs according to the projectSlug', async () => {
+      const response = await request(app.getHttpServer()).get(
+        '/specs/ng_gtm_integration_sample'
+      );
+      expect(response.status).toBe(200);
+      expect(response.body).toBeDefined();
+    });
+  });
+
+  describe('Videos', () => {
+    it('should get video according to the projectSlug and eventId', async () => {
+      const response = await request(app.getHttpServer()).get(
+        '/videos/ng_gtm_integration_sample/page_view_54aab8c1-b641-49b9-9ad9-dad029fb1bec'
+      );
+      expect(response.status).toBe(200);
+      expect(response.body).toBeDefined();
     });
   });
 

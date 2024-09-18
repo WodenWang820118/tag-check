@@ -112,6 +112,10 @@ Generate a Windows x32/x64 zip file:
 pnpm run make
 ```
 
+### Actual project and end-to-end tests
+
+Please refer `tag_check_projects` folder where manages projects under the root direcetory. The `ng_gtm_integration_sample` project within is utilized for end-to-end tests for both backend and frontend. Moreover, the project is also used for development purposes.
+
 ## Feedback and Contribution
 
 We welcome your feedback and contributions! If you have suggestions or encounter issues, please file them in the issues section. For those interested in contributing, check out our contribution guidelines (coming soon).
