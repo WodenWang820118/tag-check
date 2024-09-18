@@ -17,6 +17,8 @@
   - [Make](#make)
 - [Feedback and Contribution](#feedback-and-contribution)
 
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=security_rating)](https://sonarcloud.io/dashboard?id=WodenWang820118_tag-check) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=bugs)](https://sonarcloud.io/dashboard?id=WodenWang820118_tag-check) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=code_smells)](https://sonarcloud.io/dashboard?id=WodenWang820118_tag-check) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=WodenWang820118_tag-check) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=ncloc)](https://sonarcloud.io/dashboard?id=WodenWang820118_tag-check)
+
 ## Overview
 
 This desktop application automates the Google Tag Manager (GTM) container review process and production analytics deployment validation. It streamlines the quality assurance process by providing:
