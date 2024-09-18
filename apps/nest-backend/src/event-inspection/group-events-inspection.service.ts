@@ -7,11 +7,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Browser, Credentials } from 'puppeteer';
 import { getCurrentTimestamp } from '@utils';
-import { BROWSER_ARGS } from '../configs/project.config';
 import { InspectorGroupEventsService } from '../inspector/inspector-group-events.service';
 import { XlsxReportGroupEventsService } from '../os/xlsx-report/xlsx-report-group-events.service';
 import { FileService } from '../os/file/file.service';
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
+import { ConfigsService } from '../configs/configs.service';
 
 @Injectable()
 export class GroupEventsInspectionService {
@@ -22,7 +22,8 @@ export class GroupEventsInspectionService {
     private fileService: FileService,
     private xlsxReportGroupEventsService: XlsxReportGroupEventsService,
     private inspectorGroupEventsService: InspectorGroupEventsService,
-    private projectAbstractReportService: ProjectAbstractReportService
+    private projectAbstractReportService: ProjectAbstractReportService,
+    private configsService: ConfigsService
   ) {}
 
   async inspectProject(
@@ -45,7 +46,7 @@ export class GroupEventsInspectionService {
         headless: headless === 'true' ? true : false,
         defaultViewport: null,
         ignoreHTTPSErrors: true,
-        args: BROWSER_ARGS,
+        args: this.configsService.getBROWSER_ARGS(),
         executablePath: stats.executablePath,
         signal: signal,
       })

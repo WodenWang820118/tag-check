@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test } from '@nestjs/testing';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { FolderService } from '../../os/folder/folder.service';
@@ -5,44 +6,10 @@ import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { FileService } from '../../os/file/file.service';
 import { ProjectInitializationService } from './project-initialization.service';
 import { join } from 'path';
-import {
-  CONFIG_FOLDER,
-  META_DATA,
-  RECORDING_FOLDER,
-  RESULT_FOLDER,
-  SETTINGS,
-  SPECS,
-} from '../../configs/project.config';
 import { ProjectInfoDto } from '../../dto/project-info.dto';
 import { existsSync, rmdirSync } from 'fs';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
-
-const rootProject = join(
-  __dirname,
-  '..',
-  '..',
-  '..',
-  '..',
-  '..',
-  'tag_check_projects'
-);
-const initailzedProject = join(rootProject, 'newProject');
-const recordingFolder = join(initailzedProject, RECORDING_FOLDER);
-const reportSavingFolder = join(initailzedProject, RESULT_FOLDER);
-const projectConfigFolder = join(initailzedProject, CONFIG_FOLDER);
-const settings: ProjectInfoDto = {
-  version: '1.0.0',
-  rootProject: rootProject,
-  projectName: 'projectName',
-  projectDescription: 'projectDescription',
-  projectSlug: 'projectSlug',
-  measurementId: 'measurementId',
-  googleSpreadsheetLink: 'googleSpreadsheetLink',
-};
-const settingsFile = join(initailzedProject, SETTINGS);
-const metadataFile = join(initailzedProject, META_DATA);
-const configFile = join(projectConfigFolder, SPECS);
-const eventFolder = join(reportSavingFolder, 'eventId');
+import { ConfigsService } from '../../configs/configs.service';
 
 describe('ProjectInitializationService', () => {
   let service: ProjectInitializationService;
@@ -50,6 +17,17 @@ describe('ProjectInitializationService', () => {
   let folderService: FolderService;
   let filePathService: FilePathService;
   let fileService: FileService;
+  let configsService: ConfigsService;
+  let rootProject: string;
+  let initializedProject: string;
+  let recordingFolder: string;
+  let reportSavingFolder: string;
+  let projectConfigFolder: string;
+  let settings: ProjectInfoDto;
+  let settingsFile: string;
+  let metadataFile: string;
+  let configFile: string;
+  let eventFolder: string;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -59,6 +37,7 @@ describe('ProjectInitializationService', () => {
         FolderService,
         FilePathService,
         FileService,
+        ConfigsService,
       ],
     })
       .useMocker((token) => {
@@ -75,6 +54,43 @@ describe('ProjectInitializationService', () => {
     folderService = moduleRef.get<FolderService>(FolderService);
     filePathService = moduleRef.get<FilePathService>(FilePathService);
     fileService = moduleRef.get<FileService>(FileService);
+    configsService = moduleRef.get<ConfigsService>(ConfigsService);
+
+    rootProject = join(
+      __dirname,
+      '..',
+      '..',
+      '..',
+      '..',
+      '..',
+      'tag_check_projects'
+    );
+    initializedProject = join(rootProject, 'newProject');
+    recordingFolder = join(
+      initializedProject,
+      configsService.getRECORDING_FOLDER()
+    );
+    reportSavingFolder = join(
+      initializedProject,
+      configsService.getRESULT_FOLDER()
+    );
+    projectConfigFolder = join(
+      initializedProject,
+      configsService.getCONFIG_FOLDER()
+    );
+    settings = {
+      version: '1.0.0',
+      rootProject: rootProject,
+      projectName: 'projectName',
+      projectDescription: 'projectDescription',
+      projectSlug: 'projectSlug',
+      measurementId: 'measurementId',
+      googleSpreadsheetLink: 'googleSpreadsheetLink',
+    };
+    settingsFile = join(initializedProject, configsService.getSETTINGS());
+    metadataFile = join(initializedProject, configsService.getMETA_DATA());
+    configFile = join(projectConfigFolder, configsService.getSPECS());
+    eventFolder = join(reportSavingFolder, 'eventId');
   });
 
   it('should be defined', () => {
@@ -82,14 +98,14 @@ describe('ProjectInitializationService', () => {
   });
 
   it('should initialize project', async () => {
-    if (existsSync(initailzedProject))
-      rmdirSync(initailzedProject, { recursive: true });
+    if (existsSync(initializedProject))
+      rmdirSync(initializedProject, { recursive: true });
     const rootProjectPath = vi
       .spyOn(folderPathService, 'getRootProjectFolderPath')
       .mockResolvedValue(rootProject);
     const projectRoot = vi
       .spyOn(folderPathService, 'getProjectFolderPath')
-      .mockResolvedValue(initailzedProject);
+      .mockResolvedValue(initializedProject);
     const createFolder = vi.spyOn(folderService, 'createFolder');
     const recordingFolderPath = vi
       .spyOn(folderPathService, 'getRecordingFolderPath')

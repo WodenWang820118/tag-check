@@ -1,28 +1,23 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { FolderPathService } from '../folder-path/folder-path.service';
-import {
-  SPECS,
-  CONFIG_FOLDER,
-  RECORDING_FOLDER,
-  SETTINGS,
-  META_DATA,
-  ABSTRACT_REPORT_FILE_NAME,
-} from '../../../configs/project.config';
 import { join } from 'path';
 import { extractEventNameFromId } from '@utils';
+import { ConfigsService } from '../../../configs/configs.service';
+
 @Injectable()
 export class FilePathService {
   constructor(
     private pathUtilsService: PathUtilsService,
-    private folderPathService: FolderPathService
+    private folderPathService: FolderPathService,
+    private configsService: ConfigsService
   ) {}
 
   async getOperationFilePath(projectSlug: string, eventId: string) {
     try {
       const filePath = await this.pathUtilsService.buildFilePath(
         projectSlug,
-        RECORDING_FOLDER,
+        this.configsService.getRECORDING_FOLDER(),
         `${eventId}.json`
       );
       return filePath;
@@ -39,8 +34,8 @@ export class FilePathService {
     try {
       return await this.pathUtilsService.buildFilePath(
         projectSlug,
-        CONFIG_FOLDER,
-        SPECS
+        this.configsService.getCONFIG_FOLDER(),
+        this.configsService.getSPECS()
       );
     } catch (error) {
       Logger.error(
@@ -56,7 +51,7 @@ export class FilePathService {
       return await this.pathUtilsService.buildFilePath(
         projectSlug,
         '',
-        SETTINGS
+        this.configsService.getSETTINGS()
       );
     } catch (error) {
       Logger.error(
@@ -72,7 +67,7 @@ export class FilePathService {
       return await this.pathUtilsService.buildFilePath(
         projectSlug,
         '',
-        META_DATA
+        this.configsService.getMETA_DATA()
       );
     } catch (error) {
       Logger.error(
@@ -138,7 +133,7 @@ export class FilePathService {
       return join(
         await this.folderPathService.getReportSavingFolderPath(projectSlug),
         eventId,
-        ABSTRACT_REPORT_FILE_NAME
+        this.configsService.getABSTRACT_REPORT_FILE_NAME()
       );
     } catch (error) {
       Logger.error(
@@ -152,7 +147,7 @@ export class FilePathService {
   async getRecordingFilePath(projectSlug: string, eventId: string) {
     const recordingPath = await this.pathUtilsService.buildFilePath(
       projectSlug,
-      RECORDING_FOLDER,
+      this.configsService.getRECORDING_FOLDER(),
       eventId
     );
 

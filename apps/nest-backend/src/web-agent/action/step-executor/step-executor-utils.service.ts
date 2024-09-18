@@ -7,11 +7,14 @@ import { getFirstSelector } from '../handlers/utils';
 import { EventInspectionPresetDto } from '../../../dto/event-inspection-preset.dto';
 import { Injectable, Logger } from '@nestjs/common';
 import { DataLayerService } from '../../action/web-monitoring/data-layer/data-layer.service';
-import { USER_AGENT } from '../../../configs/project.config';
+import { ConfigsService } from '../../../configs/configs.service';
 
 @Injectable()
 export class StepExecutorUtilsService {
-  constructor(private dataLayerService: DataLayerService) {}
+  constructor(
+    private dataLayerService: DataLayerService,
+    private configsService: ConfigsService
+  ) {}
   async handleKeyboardAction(
     page: Page,
     projectName: string,
@@ -54,7 +57,7 @@ export class StepExecutorUtilsService {
   ): Promise<void> {
     try {
       if (state.isFirstNavigation) {
-        await page.setUserAgent(USER_AGENT);
+        await page.setUserAgent(this.configsService.getUSER_AGENT());
         await this.handleFirstNavigation(page, step, state, application);
       } else {
         await page.goto(step.url, { waitUntil: 'networkidle2' });

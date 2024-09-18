@@ -4,24 +4,19 @@ import { PathUtilsService } from '../path-utils/path-utils.service';
 import { ConfigurationService } from '../../../configuration/configuration.service';
 import { FolderPathService } from '../folder-path/folder-path.service';
 import { join } from 'path';
-import {
-  ABSTRACT_REPORT_FILE_NAME,
-  CONFIG_FOLDER,
-  META_DATA,
-  RECORDING_FOLDER,
-  RESULT_FOLDER,
-} from '../../../configs/project.config';
 import { describe, beforeEach, expect, vi } from 'vitest';
+import { ConfigsService } from '../../../configs/configs.service';
 
 describe('FilePathService', () => {
   let service: FilePathService;
+  let configsService: ConfigsService;
   let rootProjectPath: string;
 
   beforeEach(async () => {
     rootProjectPath = join('..', '..', '..', '..', '..', 'tag_check_projects');
 
     const moduleRef = await Test.createTestingModule({
-      providers: [FilePathService],
+      providers: [FilePathService, ConfigsService],
     })
       .useMocker((token) => {
         if (token === PathUtilsService) {
@@ -37,7 +32,7 @@ describe('FilePathService', () => {
                     join(
                       rootProjectPath,
                       projectSlug,
-                      CONFIG_FOLDER,
+                      configsService.getCONFIG_FOLDER(),
                       'spec.json'
                     )
                   );
@@ -45,16 +40,21 @@ describe('FilePathService', () => {
                   return await Promise.resolve(
                     join(rootProjectPath, projectSlug, 'settings.json')
                   );
-                } else if (fileName === META_DATA) {
+                } else if (fileName === configsService.getMETA_DATA()) {
                   return await Promise.resolve(
-                    join(rootProjectPath, projectSlug, '', META_DATA)
+                    join(
+                      rootProjectPath,
+                      projectSlug,
+                      '',
+                      configsService.getMETA_DATA()
+                    )
                   );
                 } else {
                   return await Promise.resolve(
                     join(
                       rootProjectPath,
                       projectSlug,
-                      RECORDING_FOLDER,
+                      configsService.getRECORDING_FOLDER(),
                       fileName
                     )
                   );
@@ -75,7 +75,11 @@ describe('FilePathService', () => {
           return {
             getReportSavingFolderPath: vi.fn(async (projectSlug: string) => {
               return await Promise.resolve(
-                join(rootProjectPath, projectSlug, RESULT_FOLDER)
+                join(
+                  rootProjectPath,
+                  projectSlug,
+                  configsService.getRESULT_FOLDER()
+                )
               );
             }),
           };
@@ -88,6 +92,7 @@ describe('FilePathService', () => {
       .compile();
 
     service = moduleRef.get<FilePathService>(FilePathService);
+    configsService = moduleRef.get<ConfigsService>(ConfigsService);
   });
 
   it('should be defined', () => {
@@ -132,7 +137,11 @@ describe('FilePathService', () => {
       'ng_gtm_integration_sample'
     );
     expect(actualPath).toBe(
-      join(rootProjectPath, 'ng_gtm_integration_sample', META_DATA)
+      join(
+        rootProjectPath,
+        'ng_gtm_integration_sample',
+        configsService.getMETA_DATA()
+      )
     );
   });
 
@@ -146,7 +155,7 @@ describe('FilePathService', () => {
       join(
         rootProjectPath,
         'ng_gtm_integration_sample',
-        RESULT_FOLDER,
+        configsService.getRESULT_FOLDER(),
         'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff',
         'QA_report_single_add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff_2024-07-15_114529.xlsx'
       )
@@ -162,7 +171,7 @@ describe('FilePathService', () => {
       join(
         rootProjectPath,
         'ng_gtm_integration_sample',
-        RESULT_FOLDER,
+        configsService.getRESULT_FOLDER(),
         'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff',
         'add_payment_info - result cache.json'
       )
@@ -178,7 +187,7 @@ describe('FilePathService', () => {
       join(
         rootProjectPath,
         'ng_gtm_integration_sample',
-        RESULT_FOLDER,
+        configsService.getRESULT_FOLDER(),
         'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff',
         'add_payment_info.png'
       )
@@ -194,9 +203,9 @@ describe('FilePathService', () => {
       join(
         rootProjectPath,
         'ng_gtm_integration_sample',
-        RESULT_FOLDER,
+        configsService.getRESULT_FOLDER(),
         'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff',
-        ABSTRACT_REPORT_FILE_NAME
+        configsService.getABSTRACT_REPORT_FILE_NAME()
       )
     );
   });
@@ -210,7 +219,7 @@ describe('FilePathService', () => {
       join(
         rootProjectPath,
         'ng_gtm_integration_sample',
-        RECORDING_FOLDER,
+        configsService.getRECORDING_FOLDER(),
         'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff'
       )
     );
@@ -225,7 +234,7 @@ describe('FilePathService', () => {
       join(
         rootProjectPath,
         'ng_gtm_integration_sample',
-        RESULT_FOLDER,
+        configsService.getRESULT_FOLDER(),
         'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff',
         'add_payment_info - myDataLayer.json'
       )

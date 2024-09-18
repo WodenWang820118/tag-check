@@ -2,24 +2,20 @@ import { Test } from '@nestjs/testing';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { join } from 'path';
 import { FolderPathService } from './folder-path.service';
-import {
-  CONFIG_FOLDER,
-  META_DATA,
-  RECORDING_FOLDER,
-  RESULT_FOLDER,
-} from '../../../configs/project.config';
 import { ConfigurationService } from '../../../configuration/configuration.service';
 import { describe, beforeEach, expect, vi } from 'vitest';
+import { ConfigsService } from '../../../configs/configs.service';
 
 describe('FolderPathService', () => {
   let service: FolderPathService;
+  let configsService: ConfigsService;
   let rootProjectPath: string;
 
   beforeEach(async () => {
     rootProjectPath = join('..', '..', '..', '..', '..', 'tag_check_projects');
 
     const moduleRef = await Test.createTestingModule({
-      providers: [FolderPathService],
+      providers: [FolderPathService, ConfigsService],
     })
       .useMocker((token) => {
         if (token === PathUtilsService) {
@@ -35,7 +31,7 @@ describe('FolderPathService', () => {
                     join(
                       rootProjectPath,
                       projectSlug,
-                      CONFIG_FOLDER,
+                      configsService.getCONFIG_FOLDER(),
                       'spec.json'
                     )
                   );
@@ -43,16 +39,21 @@ describe('FolderPathService', () => {
                   return await Promise.resolve(
                     join(rootProjectPath, projectSlug, 'settings.json')
                   );
-                } else if (fileName === META_DATA) {
+                } else if (fileName === configsService.getMETA_DATA()) {
                   return await Promise.resolve(
-                    join(rootProjectPath, projectSlug, '', META_DATA)
+                    join(
+                      rootProjectPath,
+                      projectSlug,
+                      '',
+                      configsService.getMETA_DATA()
+                    )
                   );
                 } else {
                   return await Promise.resolve(
                     join(
                       rootProjectPath,
                       projectSlug,
-                      RECORDING_FOLDER,
+                      configsService.getRECORDING_FOLDER(),
                       fileName
                     )
                   );
@@ -83,6 +84,7 @@ describe('FolderPathService', () => {
       .compile();
 
     service = moduleRef.get<FolderPathService>(FolderPathService);
+    configsService = moduleRef.get<ConfigsService>(ConfigsService);
   });
 
   it('should be defined', () => {
@@ -97,7 +99,9 @@ describe('FolderPathService', () => {
   it('should get report saving folder path', async () => {
     const projectSlug = 'test-project';
     const result = await service.getReportSavingFolderPath(projectSlug);
-    expect(result).toBe(join(rootProjectPath, projectSlug, RESULT_FOLDER));
+    expect(result).toBe(
+      join(rootProjectPath, projectSlug, configsService.getRESULT_FOLDER())
+    );
   });
 
   it('should get project folder path', async () => {
@@ -109,13 +113,17 @@ describe('FolderPathService', () => {
   it('should get recording folder path', async () => {
     const projectSlug = 'test-project';
     const result = await service.getRecordingFolderPath(projectSlug);
-    expect(result).toBe(join(rootProjectPath, projectSlug, RECORDING_FOLDER));
+    expect(result).toBe(
+      join(rootProjectPath, projectSlug, configsService.getRECORDING_FOLDER())
+    );
   });
 
   it('should get project config folder path', async () => {
     const projectSlug = 'test-project';
     const result = await service.getProjectConfigFolderPath(projectSlug);
-    expect(result).toBe(join(rootProjectPath, projectSlug, CONFIG_FOLDER));
+    expect(result).toBe(
+      join(rootProjectPath, projectSlug, configsService.getCONFIG_FOLDER())
+    );
   });
 
   it('should get the inspection event folder path', async () => {
@@ -126,7 +134,12 @@ describe('FolderPathService', () => {
       eventId
     );
     expect(result).toBe(
-      join(rootProjectPath, projectSlug, RESULT_FOLDER, eventId)
+      join(
+        rootProjectPath,
+        projectSlug,
+        configsService.getRESULT_FOLDER(),
+        eventId
+      )
     );
   });
 });

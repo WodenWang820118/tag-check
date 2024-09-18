@@ -3,14 +3,16 @@ import { LazyModuleLoader, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 // import { SpelunkerModule } from 'nestjs-spelunker';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { activatePort } from './configs/project.config';
-import './instrument.mjs';
+import { ConfigsService } from './configs/configs.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const lazyModuleLoader = app.get(LazyModuleLoader);
   const { WaiterModule } = await import('./waiter/waiter.module');
+
   await lazyModuleLoader.load(() => WaiterModule);
+
+  const configsService = app.get(ConfigsService);
 
   app.enableCors({
     origin: '*',
@@ -50,7 +52,7 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  await activatePort(app);
+  await configsService.activatePort(app);
 
   process.on('SIGTERM', async () => {
     await app.close();

@@ -1,2 +1,2 @@
-npm run test:e2e
-npm run test-back:unit
+pnpm run test:e2e
+pnpm run test-back:unit

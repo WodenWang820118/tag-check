@@ -1,18 +1,15 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { PathUtilsService } from '../path-utils/path-utils.service';
-import {
-  CONFIG_FOLDER,
-  RECORDING_FOLDER,
-  RESULT_FOLDER,
-} from '../../../configs/project.config';
 import { join } from 'path';
 import { ConfigurationService } from '../../../configuration/configuration.service';
+import { ConfigsService } from '../../../configs/configs.service';
 
 @Injectable()
 export class FolderPathService {
   constructor(
     private pathUtilsService: PathUtilsService,
-    private configurationService: ConfigurationService
+    private configurationService: ConfigurationService,
+    private configsService: ConfigsService
   ) {}
 
   async getRootProjectFolderPath() {
@@ -31,7 +28,7 @@ export class FolderPathService {
     try {
       return await this.pathUtilsService.buildFolderPath(
         projectSlug,
-        RESULT_FOLDER
+        this.configsService.getRESULT_FOLDER()
       );
     } catch (error) {
       Logger.error(
@@ -58,7 +55,7 @@ export class FolderPathService {
     try {
       return await this.pathUtilsService.buildFolderPath(
         projectSlug,
-        RECORDING_FOLDER
+        this.configsService.getRECORDING_FOLDER()
       );
     } catch (error) {
       Logger.error(
@@ -73,7 +70,7 @@ export class FolderPathService {
     try {
       const folderPath = await this.pathUtilsService.buildFolderPath(
         projectSlug,
-        CONFIG_FOLDER
+        this.configsService.getCONFIG_FOLDER()
       );
       return folderPath;
     } catch (error) {
@@ -89,7 +86,7 @@ export class FolderPathService {
     try {
       return await this.pathUtilsService.buildFolderPath(
         projectSlug,
-        join(RESULT_FOLDER, eventId)
+        join(this.configsService.getRESULT_FOLDER(), eventId)
       );
     } catch (error) {
       Logger.error(

@@ -3,17 +3,15 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigurationService } from '../../configuration/configuration.service';
 import { ProjectInitializationService } from '../../project-agent/project-initialization/project-initialization.service';
 import { mkdirSync } from 'fs';
-import {
-  CONFIG_ROOT_PATH,
-  CONFIG_CURRENT_PROJECT_PATH,
-} from '../../configs/project.config';
 import { v4 as uuidv4 } from 'uuid';
+import { ConfigsService } from '../../configs/configs.service';
 
 @Injectable()
 export class WaiterProjectWorkFlowService {
   constructor(
     private configurationService: ConfigurationService,
-    private projectInitializationService: ProjectInitializationService
+    private projectInitializationService: ProjectInitializationService,
+    private configsService: ConfigsService
   ) {}
 
   // 1)
@@ -28,7 +26,7 @@ export class WaiterProjectWorkFlowService {
         );
         return await this.configurationService.create({
           id: uuidv4(),
-          title: CONFIG_ROOT_PATH,
+          title: this.configsService.getCONFIG_ROOT_PATH(),
           description: 'The root project path',
           value: rootProjectPath,
           createdAt: new Date(),
@@ -37,7 +35,7 @@ export class WaiterProjectWorkFlowService {
       }
 
       const existingConfig = configurations.find(
-        (item) => item.title === CONFIG_ROOT_PATH
+        (item) => item.title === this.configsService.getCONFIG_ROOT_PATH()
       );
 
       if (existingConfig) {
@@ -46,7 +44,7 @@ export class WaiterProjectWorkFlowService {
           `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setRootProjectFolder.name}`
         );
         return this.configurationService.update(existingConfig.id, {
-          title: CONFIG_ROOT_PATH,
+          title: this.configsService.getCONFIG_ROOT_PATH(),
           value: rootProjectPath,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -56,7 +54,7 @@ export class WaiterProjectWorkFlowService {
       mkdirSync(rootProjectPath, { recursive: true });
       await this.configurationService.create({
         id: uuidv4(),
-        title: CONFIG_ROOT_PATH,
+        title: this.configsService.getCONFIG_ROOT_PATH(),
         description: 'The root project path',
         value: rootProjectPath,
         createdAt: new Date(),
@@ -75,7 +73,8 @@ export class WaiterProjectWorkFlowService {
       // 1) check if project settings exists
       const configurations = await this.configurationService.findAll();
       const existingConfig = configurations.find(
-        (item) => item.title === CONFIG_CURRENT_PROJECT_PATH
+        (item) =>
+          item.title === this.configsService.getCONFIG_CURRENT_PROJECT_PATH()
       );
 
       // 2) if exists, update it
@@ -86,7 +85,7 @@ export class WaiterProjectWorkFlowService {
         );
 
         await this.configurationService.update(existingConfig.id, {
-          title: CONFIG_CURRENT_PROJECT_PATH,
+          title: this.configsService.getCONFIG_CURRENT_PROJECT_PATH(),
           value: projectName,
           updatedAt: new Date(),
         });
@@ -102,7 +101,7 @@ export class WaiterProjectWorkFlowService {
 
         await this.configurationService.create({
           id: uuidv4(),
-          title: CONFIG_CURRENT_PROJECT_PATH,
+          title: this.configsService.getCONFIG_CURRENT_PROJECT_PATH(),
           description: 'The current project path',
           value: projectName,
           createdAt: new Date(),
@@ -130,7 +129,7 @@ export class WaiterProjectWorkFlowService {
 
       const existingConfig = configurations.find(
         (item) =>
-          item.title === CONFIG_CURRENT_PROJECT_PATH &&
+          item.title === this.configsService.getCONFIG_CURRENT_PROJECT_PATH() &&
           item.value !== projectName
       );
 
