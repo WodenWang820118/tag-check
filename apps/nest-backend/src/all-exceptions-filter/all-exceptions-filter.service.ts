@@ -3,14 +3,16 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
+  Injectable,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { firestore } from './firebase/firebase-firestore';
 import { addDoc, collection } from 'firebase/firestore';
-import { ERROR_COLLECTION } from './firebase/firebase-config';
+import { FirebaseService } from '../firebase/firebase.service';
 
 @Catch()
+@Injectable()
 export class AllExceptionsFilter implements ExceptionFilter {
+  constructor(private firebaseService: FirebaseService) {}
   async catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -40,7 +42,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     status: number
   ) {
     try {
-      const errorsCollection = collection(firestore, ERROR_COLLECTION);
+      const errorsCollection = collection(
+        this.firebaseService.getFirestore(),
+        this.firebaseService.getErrorCollectionName()
+      );
       await addDoc(errorsCollection, {
         timestamp: new Date(),
         exception:

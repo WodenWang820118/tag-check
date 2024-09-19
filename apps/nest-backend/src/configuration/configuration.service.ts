@@ -4,17 +4,15 @@ import { CreateConfigurationDto } from './dto/create-configuration.dto';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
 import { Configuration } from './entities/configuration.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  CONFIG_CURRENT_PROJECT_PATH,
-  CONFIG_ROOT_PATH,
-} from '../configs/project.config';
 import { Repository } from 'sequelize-typescript';
+import { ConfigsService } from '../configs/configs.service';
 
 @Injectable()
 export class ConfigurationService {
   constructor(
     @InjectRepository(Configuration)
-    private configurationRepository: Repository<Configuration>
+    private configurationRepository: Repository<Configuration>,
+    private configsService: ConfigsService
   ) {}
 
   async create(
@@ -59,7 +57,7 @@ export class ConfigurationService {
   async getRootProjectPath(): Promise<string> {
     return await this.configurationRepository
       .findOne({
-        where: { title: CONFIG_ROOT_PATH },
+        where: { title: this.configsService.getCONFIG_ROOT_PATH() },
       })
       .then((res) => {
         return res?.getDataValue('value');
@@ -69,7 +67,7 @@ export class ConfigurationService {
   async getCurrentProjectPath(): Promise<string> {
     return await this.configurationRepository
       .findOne({
-        where: { title: CONFIG_CURRENT_PROJECT_PATH },
+        where: { title: this.configsService.getCONFIG_CURRENT_PROJECT_PATH() },
       })
       .then((res) => {
         return res?.getDataValue('value');

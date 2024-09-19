@@ -1,16 +1,19 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { Injectable } from '@nestjs/common';
-import { USER_AGENT } from '../../../../configs/project.config';
+import { ConfigsService } from '../../../../configs/configs.service';
 import { Page } from 'puppeteer';
 
 @Injectable()
 export class RequestService {
   private requests: string[] = [];
+
+  constructor(private configsService: ConfigsService) {}
+
   async initializeRequestCapture(page: Page): Promise<void> {
     this.requests = []; // Reset the request list
 
     await page.setRequestInterception(true);
-    await page.setUserAgent(USER_AGENT);
+    await page.setUserAgent(this.configsService.getUSER_AGENT());
 
     const requestHandler = async (request: {
       isInterceptResolutionHandled: () => any;

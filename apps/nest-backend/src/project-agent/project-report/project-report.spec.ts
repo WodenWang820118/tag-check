@@ -4,9 +4,9 @@ import { FolderPathService } from '../../os/path/folder-path/folder-path.service
 import { FolderService } from '../../os/folder/folder.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { FileService } from '../../os/file/file.service';
-import { RECORDING_FOLDER } from '../../configs/project.config';
 import { join } from 'path';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
+import { ConfigsService } from '../../configs/configs.service';
 
 describe('ProjectReportService', () => {
   let service: ProjectReportService;
@@ -14,24 +14,17 @@ describe('ProjectReportService', () => {
   let filePathService: FilePathService;
   let folderService: FolderService;
   let folderPathService: FolderPathService;
-  const rootProjectPath = join(
-    '..',
-    '..',
-    '..',
-    '..',
-    '..',
-    'tag_check_projects'
-  );
-
-  const projectSlug = 'ng_gtm_integration_sample';
-  const projectPath = join(rootProjectPath, projectSlug);
-  const recordingPath = join(projectPath, RECORDING_FOLDER);
-  const eventId = 'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff';
-  const reportSavingFolderPath = join(recordingPath, eventId);
+  let configsService: ConfigsService;
+  let rootProjectPath: string;
+  let projectPath: string;
+  let recordingPath: string;
+  let projectSlug: string;
+  let eventId: string;
+  let reportSavingFolderPath: string;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [ProjectReportService],
+      providers: [ProjectReportService, ConfigsService],
     })
       .useMocker((token) => {
         if (token === FilePathService) {
@@ -77,6 +70,14 @@ describe('ProjectReportService', () => {
     filePathService = moduleRef.get<FilePathService>(FilePathService);
     folderService = moduleRef.get<FolderService>(FolderService);
     folderPathService = moduleRef.get<FolderPathService>(FolderPathService);
+    configsService = moduleRef.get<ConfigsService>(ConfigsService);
+
+    rootProjectPath = join('..', '..', '..', '..', '..', 'tag_check_projects');
+    projectSlug = 'ng_gtm_integration_sample';
+    projectPath = join(rootProjectPath, projectSlug);
+    recordingPath = join(projectPath, configsService.getRECORDING_FOLDER());
+    eventId = 'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff';
+    reportSavingFolderPath = join(recordingPath, eventId);
   });
 
   it('should be defined', () => {

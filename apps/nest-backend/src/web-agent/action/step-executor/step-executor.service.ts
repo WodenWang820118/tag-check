@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { BrowserAction, sleep } from '../action-utils';
+import { BrowserAction } from '../action-utils';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
 import { ACTION_HANDLERS, ActionHandler } from '..//handlers/utils';
 import { StepExecutorUtilsService } from './step-executor-utils.service';
@@ -100,7 +100,7 @@ export class StepExecutorService {
     isLastStep: boolean,
     delay: number
   ) {
-    await sleep(delay);
+    await new Promise((resolve) => setTimeout(resolve, delay));
     if (
       this.handlers[step.type] &&
       typeof this.handlers[step.type].handle === 'function'

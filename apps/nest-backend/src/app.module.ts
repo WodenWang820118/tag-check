@@ -1,20 +1,27 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { WaiterModule } from './waiter/waiter.module';
-import { dataBaseConfig } from './database/database.config';
 import { SequelizeModule } from '@nestjs/sequelize';
-// import { SentryModule } from '@sentry/nestjs/setup';
 import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionsFilter } from './all-exceptions-filter';
+import { AllExceptionsFilterModule } from './all-exceptions-filter/all-exceptions.filter.module';
+import { AllExceptionsFilter } from './all-exceptions-filter/all-exceptions-filter.service';
 import { HealthModule } from './health/health.module';
+import { DatabaseConfigService } from './database/database.service';
+import { DatabaseConfigModule } from './database/database.module';
 
 @Module({
   imports: [
+    DatabaseConfigModule,
+    AllExceptionsFilterModule,
     ConfigModule.forRoot(),
     WaiterModule,
-    SequelizeModule.forRoot(dataBaseConfig),
+    SequelizeModule.forRootAsync({
+      imports: [DatabaseConfigModule],
+      useFactory: (databaseConfigService: DatabaseConfigService) =>
+        databaseConfigService.getDatabaseConfig(),
+      inject: [DatabaseConfigService],
+    }),
     HealthModule,
-    // SentryModule.forRoot(),
   ],
   controllers: [],
   providers: [

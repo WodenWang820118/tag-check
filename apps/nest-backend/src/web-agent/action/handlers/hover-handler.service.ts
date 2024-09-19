@@ -2,13 +2,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { getSelectorType } from '../action-utils';
 import { ActionHandler, getFirstSelector } from './utils';
 import { HoverStrategyService } from '../strategies/hover-strategies/hover-strategy.service';
+import { ActionUtilsService } from '../action-utils/action-utils.service';
 
 @Injectable()
 export class HoverHandler implements ActionHandler {
-  constructor(private hoverStrategyService: HoverStrategyService) {}
+  constructor(
+    private hoverStrategyService: HoverStrategyService,
+    private actionUtilsService: ActionUtilsService
+  ) {}
 
   // TODO: may need to follow the click handler logic
   // to switch between page service and evaluate service under different domains
@@ -64,7 +67,7 @@ export class HoverHandler implements ActionHandler {
     timeout = 10000
   ): Promise<boolean | undefined> {
     try {
-      const selectorType = getSelectorType(selector);
+      const selectorType = this.actionUtilsService.getSelectorType(selector);
       if (!selectorType) {
         throw new HttpException(
           `Selector type not found for selector ${selector}`,

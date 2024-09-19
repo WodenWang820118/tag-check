@@ -4,11 +4,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Browser, Page } from 'puppeteer';
 import { RequestService } from './request/request.service';
-import { BROWSER_ARGS } from '../../../configs/project.config';
+import { ConfigsService } from '../../../configs/configs.service';
 
 @Injectable()
 export class WebMonitoringService {
-  constructor(private requestService: RequestService) {}
+  constructor(
+    private requestService: RequestService,
+    private configsService: ConfigsService
+  ) {}
 
   /**
    * Retrieves the Google Click ID (GCLID) values from an array of request URLs
@@ -52,7 +55,7 @@ export class WebMonitoringService {
     const stats = await PCR(options);
     const browser: Browser = await stats.puppeteer.launch({
       headless: true,
-      args: BROWSER_ARGS,
+      args: this.configsService.getBROWSER_ARGS(),
       executablePath: stats.executablePath,
     });
 

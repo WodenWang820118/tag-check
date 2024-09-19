@@ -2,20 +2,56 @@ import {
   BaseDataLayerEvent,
   StrictDataLayerEvent,
   ValidationResult,
-  ValidationStrategy,
 } from '@utils';
-import {
-  EcommerceEventValidationStrategy,
-  OldGA4EventsValidationStrategy,
-} from './dataLayer-validation-strategy';
-import { describe, beforeEach, it, expect } from 'vitest';
+import { EcommerceEventValidationStrategy } from './ecommerce-event-validation-strategy.service';
+import { OldGA4EventsValidationStrategy } from './old-ga4-events-validation-strategy.service';
+import { describe, beforeEach, it, expect, vi } from 'vitest';
+import { Test } from '@nestjs/testing/test';
+import { STRATEGY_TYPE, ValidationStrategyType } from '../utils';
+import { InspectorUtilsService } from '../inspector-utils.service';
+import { DataLayerValidationUtilsService } from './data-layer-validation-utils.service';
 
 describe('ValidationStrategy', () => {
   describe('EcommerceEventValidationStrategy', () => {
-    let strategy: ValidationStrategy;
+    let ecommerceEventValidationStrategy: EcommerceEventValidationStrategy;
 
-    beforeEach(() => {
-      strategy = new EcommerceEventValidationStrategy();
+    beforeEach(async () => {
+      const moduleRef = await Test.createTestingModule({
+        providers: [
+          EcommerceEventValidationStrategy,
+          {
+            provide: STRATEGY_TYPE,
+            useFactory: (
+              ecommerceEventValidationStrategy: EcommerceEventValidationStrategy,
+              oldGA4EventsValidationStrategy: OldGA4EventsValidationStrategy
+            ) => {
+              return {
+                [ValidationStrategyType.ECOMMERCE]:
+                  ecommerceEventValidationStrategy,
+                [ValidationStrategyType.OLDGA4EVENTS]:
+                  oldGA4EventsValidationStrategy,
+              };
+            },
+            inject: [
+              EcommerceEventValidationStrategy,
+              OldGA4EventsValidationStrategy,
+            ],
+          },
+          InspectorUtilsService,
+          DataLayerValidationUtilsService,
+        ],
+      })
+        .useMocker((token) => {
+          if (typeof token === 'function') {
+            return vi.fn();
+          }
+        })
+        .compile();
+
+      ecommerceEventValidationStrategy =
+        moduleRef.get<EcommerceEventValidationStrategy>(
+          EcommerceEventValidationStrategy
+        );
     });
 
     describe('validateDataLayer', () => {
@@ -79,7 +115,10 @@ describe('ValidationStrategy', () => {
       it.each(tests)(
         '$description',
         ({ dataLayer, dataLayerSpec, expectedResult }) => {
-          const result = strategy.validateDataLayer(dataLayer, dataLayerSpec);
+          const result = ecommerceEventValidationStrategy.validateDataLayer(
+            dataLayer,
+            dataLayerSpec
+          );
           expect(result.passed).toBe(expectedResult.passed);
           expect(result.message).toBe(expectedResult.message);
         }
@@ -121,7 +160,10 @@ describe('ValidationStrategy', () => {
             ],
           },
         };
-        const result = strategy.validateDataLayer(dataLayer, spec);
+        const result = ecommerceEventValidationStrategy.validateDataLayer(
+          dataLayer,
+          spec
+        );
 
         expect(result.passed).toBe(false);
         expect(result.message).toBe(
@@ -132,10 +174,44 @@ describe('ValidationStrategy', () => {
   });
 
   describe('OldGA4EventsValidationStrategy', () => {
-    let strategy: ValidationStrategy;
+    let oldGA4EventsValidationStrategy: OldGA4EventsValidationStrategy;
 
-    beforeEach(() => {
-      strategy = new OldGA4EventsValidationStrategy();
+    beforeEach(async () => {
+      const moduleRef = await Test.createTestingModule({
+        providers: [
+          OldGA4EventsValidationStrategy,
+          {
+            provide: STRATEGY_TYPE,
+            useFactory: (
+              ecommerceEventValidationStrategy: EcommerceEventValidationStrategy,
+              oldGA4EventsValidationStrategy: OldGA4EventsValidationStrategy
+            ) => {
+              return {
+                [ValidationStrategyType.ECOMMERCE]:
+                  ecommerceEventValidationStrategy,
+                [ValidationStrategyType.OLDGA4EVENTS]:
+                  oldGA4EventsValidationStrategy,
+              };
+            },
+            inject: [
+              EcommerceEventValidationStrategy,
+              OldGA4EventsValidationStrategy,
+            ],
+          },
+          InspectorUtilsService,
+          DataLayerValidationUtilsService,
+        ],
+      })
+        .useMocker((token) => {
+          if (typeof token === 'function') {
+            return vi.fn();
+          }
+        })
+        .compile();
+      oldGA4EventsValidationStrategy =
+        moduleRef.get<OldGA4EventsValidationStrategy>(
+          OldGA4EventsValidationStrategy
+        );
     });
 
     it('should pass for generate_lead event with all keys', () => {
@@ -147,7 +223,10 @@ describe('ValidationStrategy', () => {
         value: 10,
         currency: 'USD',
       };
-      const result = strategy.validateDataLayer(dataLayer, spec);
+      const result = oldGA4EventsValidationStrategy.validateDataLayer(
+        dataLayer,
+        spec
+      );
 
       expect(result.passed).toBe(true);
       expect(result.message).toBe('Valid');
@@ -156,7 +235,10 @@ describe('ValidationStrategy', () => {
     it('should fail for login event without method key', () => {
       const dataLayer: StrictDataLayerEvent[] = [{ event: 'login' }];
       const spec: StrictDataLayerEvent = { event: 'login', method: 'Google' };
-      const result = strategy.validateDataLayer(dataLayer, spec);
+      const result = oldGA4EventsValidationStrategy.validateDataLayer(
+        dataLayer,
+        spec
+      );
 
       expect(result.passed).toBe(false);
       expect(result.message).toBe(

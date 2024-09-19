@@ -6,15 +6,18 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
 import { join } from 'path';
 import { Page, Browser, ScreenRecorder, Credentials } from 'puppeteer';
-import { BROWSER_ARGS } from '../../configs/project.config';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { readFileSync } from 'fs';
+import { ConfigsService } from '../../configs/configs.service';
 
 @Injectable()
 export class PuppeteerUtilsService {
   private recorder: ScreenRecorder | null = null;
 
-  constructor(private filePathService: FilePathService) {}
+  constructor(
+    private filePathService: FilePathService,
+    private configsService: ConfigsService
+  ) {}
 
   async startBrowser(
     projectSlug: string,
@@ -50,7 +53,9 @@ export class PuppeteerUtilsService {
       headless: headless === 'true' ? true : false,
       devtools: !!measurementId,
       acceptInsecureCerts: true,
-      args: eventInspectionPresetDto.puppeteerArgs || BROWSER_ARGS,
+      args:
+        eventInspectionPresetDto.puppeteerArgs ||
+        this.configsService.getBROWSER_ARGS(),
       executablePath: stats.executablePath,
       defaultViewport: { width: 1400, height: 900 },
       signal: signal,

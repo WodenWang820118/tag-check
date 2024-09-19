@@ -1,34 +1,31 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import {
-  EcommerceEventValidationStrategy,
-  OldGA4EventsValidationStrategy,
-} from './strategy/dataLayer-validation-strategy';
-import { ValidationStrategyType, determineStrategy } from './utilities';
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import { STRATEGY_TYPE, ValidationStrategyType } from './utils';
 import { StrictDataLayerEvent, ValidationStrategy } from '@utils';
 import { Browser, Credentials } from 'puppeteer';
 import { FileService } from '../os/file/file.service';
 import { FilePathService } from '../os/path/file-path/file-path.service';
 import { InspectorSingleEventService } from './inspector-single-event.service';
+import { InspectorUtilsService } from './inspector-utils.service';
 
 @Injectable()
 export class InspectorGroupEventsService {
-  private validationStrategies: { [key: string]: ValidationStrategy };
-
   constructor(
     private fileService: FileService,
     private filePathService: FilePathService,
-    private inspectorSingleEventService: InspectorSingleEventService
-  ) {
-    this.validationStrategies = {
-      [ValidationStrategyType.ECOMMERCE]:
-        new EcommerceEventValidationStrategy(),
-      [ValidationStrategyType.OLDGA4EVENTS]:
-        new OldGA4EventsValidationStrategy(),
-    };
-  }
+    private inspectorSingleEventService: InspectorSingleEventService,
+    private inspectorUtilsService: InspectorUtilsService,
+    @Inject(STRATEGY_TYPE)
+    private strategy: { [key: string]: ValidationStrategy }
+  ) {}
 
   async inspectProjectDataLayer(
     browser: Browser,
@@ -112,20 +109,13 @@ export class InspectorGroupEventsService {
     dataLayer: StrictDataLayerEvent[],
     spec: StrictDataLayerEvent
   ) {
-    const strategyType = determineStrategy(spec);
+    const strategyType = this.inspectorUtilsService.determineStrategy();
 
     try {
       switch (strategyType) {
         case ValidationStrategyType.ECOMMERCE:
-          return this.validationStrategies[strategyType].validateDataLayer(
-            dataLayer,
-            spec
-          );
         case ValidationStrategyType.OLDGA4EVENTS:
-          return this.validationStrategies[strategyType].validateDataLayer(
-            dataLayer,
-            spec
-          );
+          return this.strategy[strategyType].validateDataLayer(dataLayer, spec);
         default:
           return {
             passed: false,
