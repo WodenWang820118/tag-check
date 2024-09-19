@@ -1,23 +1,19 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { StrictDataLayerEvent, ValidationStrategy } from '@utils';
 import {
-  EcommerceEventValidationStrategy,
-  OldGA4EventsValidationStrategy,
-} from './strategy/dataLayer-validation-strategy';
-import { ValidationStrategyType, determineStrategy } from './utilities';
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import { StrictDataLayerEvent, ValidationStrategy } from '@utils';
+import { STRATEGY_TYPE, ValidationStrategyType } from './utils';
 
 @Injectable()
 export class InspectorUtilsService {
-  private validationStrategies: { [key: string]: ValidationStrategy };
-
-  constructor() {
-    this.validationStrategies = {
-      [ValidationStrategyType.ECOMMERCE]:
-        new EcommerceEventValidationStrategy(),
-      [ValidationStrategyType.OLDGA4EVENTS]:
-        new OldGA4EventsValidationStrategy(),
-    };
-  }
+  constructor(
+    @Inject(STRATEGY_TYPE)
+    private strategy: { [key: string]: ValidationStrategy }
+  ) {}
 
   // return true if the dataLayer is correct
   // return missing keys if the dataLayer is partially correct
@@ -26,20 +22,13 @@ export class InspectorUtilsService {
     dataLayer: StrictDataLayerEvent[],
     spec: StrictDataLayerEvent
   ) {
-    const strategyType = determineStrategy(spec);
+    const strategyType = this.determineStrategy();
 
     try {
       switch (strategyType) {
         case ValidationStrategyType.ECOMMERCE:
-          return this.validationStrategies[strategyType].validateDataLayer(
-            dataLayer,
-            spec
-          );
         case ValidationStrategyType.OLDGA4EVENTS:
-          return this.validationStrategies[strategyType].validateDataLayer(
-            dataLayer,
-            spec
-          );
+          return this.strategy[strategyType].validateDataLayer(dataLayer, spec);
         default:
           return {
             passed: false,
@@ -50,5 +39,27 @@ export class InspectorUtilsService {
     } catch (error) {
       throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  determineStrategy() {
+    try {
+      if (this.isNumericKeysObject([ValidationStrategyType.ECOMMERCE])) {
+        return ValidationStrategyType.ECOMMERCE;
+      } else {
+        return ValidationStrategyType.OLDGA4EVENTS;
+      }
+    } catch (error) {
+      const errorMessage = `There is no spec available for determining strategy.`;
+      Logger.error(errorMessage, 'Utilities.determineStrategy');
+      throw new HttpException(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  isNumericKeysObject(obj: unknown): obj is Record<number, unknown> {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      Object.keys(obj).every(Number.isInteger)
+    );
   }
 }

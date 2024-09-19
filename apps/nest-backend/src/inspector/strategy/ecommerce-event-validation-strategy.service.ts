@@ -4,10 +4,15 @@ import {
   ValidationStrategy,
 } from '@utils';
 import { ValidationResultDto } from '../../dto/validation-result.dto';
-import { Logger } from '@nestjs/common';
-import { validateKeyValues } from '../utilities';
+import { Injectable, Logger } from '@nestjs/common';
+import { DataLayerValidationUtilsService } from './data-layer-validation-utils.service';
 
+@Injectable()
 export class EcommerceEventValidationStrategy implements ValidationStrategy {
+  constructor(
+    private dataLayerValidationUtilsService: DataLayerValidationUtilsService
+  ) {}
+
   ecommerceReset = false;
   validateDataLayer(
     dataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[],
@@ -34,26 +39,10 @@ export class EcommerceEventValidationStrategy implements ValidationStrategy {
             dataLayerSpec
           );
         }
-        return validateKeyValues(dataLayerSpec, eventObj);
-      }
-    }
-
-    return new ValidationResultDto(
-      false,
-      `Event not found: ${dataLayerSpec.event}`,
-      dataLayerSpec
-    );
-  }
-}
-
-export class OldGA4EventsValidationStrategy {
-  validateDataLayer(
-    dataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[],
-    dataLayerSpec: StrictDataLayerEvent
-  ) {
-    for (const eventObj of dataLayer) {
-      if (eventObj.event === dataLayerSpec.event) {
-        return validateKeyValues(dataLayerSpec, eventObj);
+        return this.dataLayerValidationUtilsService.validateKeyValues(
+          dataLayerSpec,
+          eventObj
+        );
       }
     }
 

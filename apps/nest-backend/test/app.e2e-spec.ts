@@ -48,7 +48,7 @@ describe('App (e2e)', () => {
         .post(
           '/datalayer/ng_gtm_integration_sample/add_to_cart_fda47993-f581-42f5-ac52-f40ffb43bfb8'
         )
-        .query({ headless: 'true', measurementId: 'GTM-NBMX2DWS' })
+        .query({ headless: 'true', measurementId: 'G-8HK542DQMG' })
         .send({
           application: {
             localStorage: {
