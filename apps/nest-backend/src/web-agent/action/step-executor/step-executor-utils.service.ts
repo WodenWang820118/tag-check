@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Page } from 'puppeteer';
-import { sleep } from '../action-utils';
 import { getFirstSelector } from '../handlers/utils';
 import { EventInspectionPresetDto } from '../../../dto/event-inspection-preset.dto';
 import { Injectable, Logger } from '@nestjs/common';
@@ -40,7 +39,7 @@ export class StepExecutorUtilsService {
           `${StepExecutorUtilsService.name}.${StepExecutorUtilsService.prototype.handleNavigationIfNeeded.name}`
         );
       }
-      await sleep(1000);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
 
@@ -117,7 +116,7 @@ export class StepExecutorUtilsService {
     await this.setLocalStorage(page, application);
     await this.setCookies(page, application);
     await page.goto(step.url, { waitUntil: 'networkidle2' });
-    await sleep(2000);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     await page.reload({ waitUntil: 'networkidle2' });
     await this.verifyLocalStorageAndCookies(page);
     state.isFirstNavigation = false;

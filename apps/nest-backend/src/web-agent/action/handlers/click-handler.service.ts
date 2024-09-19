@@ -6,20 +6,21 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { getSelectorType } from '../action-utils';
 import { ActionHandler, getFirstSelector } from './utils';
 import { ProjectService } from '../../../os/project/project.service';
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
 import { FilePathService } from '../../../os/path/file-path/file-path.service';
 import { FileService } from '../../../os/file/file.service';
 import { extractEventNameFromId } from '@utils';
+import { ActionUtilsService } from '../action-utils/action-utils.service';
 @Injectable()
 export class ClickHandler implements ActionHandler {
   constructor(
     private projectService: ProjectService,
     private fileService: FileService,
     private filePathService: FilePathService,
-    private clickStrategyService: ClickStrategyService
+    private clickStrategyService: ClickStrategyService,
+    private actionUtilsService: ActionUtilsService
   ) {}
 
   async handle(
@@ -114,7 +115,7 @@ export class ClickHandler implements ActionHandler {
 
     try {
       // low timeout may cause the click to fail
-      const selectorType = getSelectorType(selector);
+      const selectorType = this.actionUtilsService.getSelectorType(selector);
       if (!selectorType) {
         throw new HttpException(
           `Selector type not found for selector ${selector}`,

@@ -1,9 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { getElement } from '../../action-utils';
+import { ActionUtilsService } from '../../action-utils/action-utils.service';
 
 @Injectable()
 export class EvaluateHoverService {
+  constructor(private actionUtilsService: ActionUtilsService) {}
   async operate(
     page: Page,
     projectName: string,
@@ -13,7 +14,7 @@ export class EvaluateHoverService {
     timeout = 5000
   ): Promise<boolean> {
     try {
-      const element = (await getElement(
+      const element = (await this.actionUtilsService.getElement(
         page,
         selectorType,
         selector

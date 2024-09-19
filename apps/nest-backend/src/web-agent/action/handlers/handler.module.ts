@@ -7,6 +7,7 @@ import { ClickStrategyModule } from '../strategies/click-strategies/click-strate
 import { HoverStrategyModule } from '../strategies/hover-strategies/hover-strategy.module';
 import { OsModule } from '../../../os/os.module';
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
+import { ActionUtilsModule } from '../action-utils/action-utils.module';
 
 const handlers = [ChangeHandler, ClickHandler, HoverHandler];
 
@@ -17,7 +18,7 @@ const strategyModules = [
 ];
 
 @Module({
-  imports: [OsModule, ...strategyModules],
+  imports: [OsModule, ActionUtilsModule, ...strategyModules],
   providers: [...handlers, ClickStrategyService],
   exports: [...handlers, ...strategyModules, OsModule],
 })

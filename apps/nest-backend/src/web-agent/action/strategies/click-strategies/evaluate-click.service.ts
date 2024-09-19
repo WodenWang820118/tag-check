@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { getElement } from '../../action-utils';
 import { ClickOperation } from './utils';
+import { ActionUtilsService } from '../../action-utils/action-utils.service';
 
 @Injectable()
 export class EvaluateClickService implements ClickOperation {
+  constructor(private actionUtilsService: ActionUtilsService) {}
   async operate(
     page: Page,
     projectName: string,
@@ -14,14 +15,14 @@ export class EvaluateClickService implements ClickOperation {
     timeout = 5000
   ): Promise<boolean> {
     try {
-      const element = (await getElement(
+      const element = (await this.actionUtilsService.getElement(
         page,
         selectorType,
         selector
       )) as HTMLElement;
 
       await Promise.race([
-        page.evaluate(async (sel) => {
+        page.evaluate((sel) => {
           element?.click();
         }, selector),
         new Promise((_, reject) =>

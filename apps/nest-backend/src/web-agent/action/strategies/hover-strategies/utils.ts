@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { ElementHandle, Page } from 'puppeteer';
+import { Page } from 'puppeteer';
 
 export interface HoverStrategy {
   hoverElement(
@@ -7,10 +6,4 @@ export interface HoverStrategy {
     selector: string,
     timeout?: number
   ): Promise<boolean>;
-}
-
-export function isElementHandle(obj: any): obj is ElementHandle<Element> {
-  return (
-    obj && typeof obj.click === 'function' && typeof obj.focus === 'function'
-  );
 }

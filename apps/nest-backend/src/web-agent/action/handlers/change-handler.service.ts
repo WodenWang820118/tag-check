@@ -3,13 +3,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, HttpException, Logger, HttpStatus } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { getSelectorType } from '../action-utils';
 import { ActionHandler, getFirstSelector } from './utils';
 import { ChangeStrategyService } from '../strategies/change-strategies/change-strategy.service';
+import { ActionUtilsService } from './../action-utils/action-utils.service';
 
 @Injectable()
 export class ChangeHandler implements ActionHandler {
-  constructor(private changeStrategyService: ChangeStrategyService) {}
+  constructor(
+    private changeStrategyService: ChangeStrategyService,
+    private actionUtilsService: ActionUtilsService
+  ) {}
 
   // TODO: may need to follow the click handler logic
   // to switch between page service and evaluate service under different domains
@@ -57,7 +60,7 @@ export class ChangeHandler implements ActionHandler {
     timeout?: number
   ): Promise<boolean | undefined> {
     try {
-      const selectorType = getSelectorType(selector);
+      const selectorType = this.actionUtilsService.getSelectorType(selector);
       if (!selectorType) {
         Logger.error(
           'Selector type is required to change the element',

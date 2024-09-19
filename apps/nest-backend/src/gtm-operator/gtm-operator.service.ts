@@ -5,7 +5,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
-import { sleep } from '../web-agent/action/action-utils';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
 import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
 import { FolderPathService } from '../os/path/folder-path/folder-path.service';
@@ -57,7 +56,7 @@ export class GtmOperatorService {
     );
 
     await this.operateGtmPreviewMode(page, gtmUrl);
-    await sleep(1000);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const pages = await browser.pages();
     for (const subPage of pages) {

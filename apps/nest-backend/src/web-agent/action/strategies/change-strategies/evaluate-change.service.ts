@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { getElement } from '../../action-utils';
 import { ChangeOperation } from './utils';
+import { ActionUtilsService } from '../../action-utils/action-utils.service';
 
 @Injectable()
 export class EvaluateChangeService implements ChangeOperation {
+  constructor(private actionUtilsService: ActionUtilsService) {}
   async operate(
     page: Page,
     projectName: string,
@@ -25,7 +26,7 @@ export class EvaluateChangeService implements ChangeOperation {
     }
 
     try {
-      const element = (await getElement(
+      const element = (await this.actionUtilsService.getElement(
         page,
         selectorType,
         selector
