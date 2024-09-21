@@ -13,6 +13,7 @@ import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { IReportDetails } from '@utils';
 import { ProjectReportService } from '../../project-agent/project-report/project-report.service';
 import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
+import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('reports')
 export class WaiterReportController {
@@ -69,6 +70,7 @@ export class WaiterReportController {
     type: Object,
   })
   @Put(':projectSlug/:eventId')
+  @Log()
   async updateReport(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
@@ -103,6 +105,7 @@ export class WaiterReportController {
     type: Object,
   })
   @Post(':projectSlug/:eventId')
+  @Log()
   async addReport(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
@@ -135,6 +138,7 @@ export class WaiterReportController {
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
   )
   @Header('Content-Disposition', 'attachment; filename="report.xlsx"')
+  @Log()
   async downloadXlsxReport(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
@@ -160,6 +164,7 @@ export class WaiterReportController {
     description: 'The name of the test associated with the event.',
   })
   @Delete(':projectSlug/:eventId')
+  @Log()
   async deleteReport(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string

@@ -14,6 +14,7 @@ export class EcommerceEventValidationStrategy implements ValidationStrategy {
   ) {}
 
   ecommerceReset = false;
+
   validateDataLayer(
     dataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[],
     dataLayerSpec: StrictDataLayerEvent

@@ -12,6 +12,7 @@ import { XlsxReportGroupEventsService } from '../os/xlsx-report/xlsx-report-grou
 import { FileService } from '../os/file/file.service';
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
 import { ConfigsService } from '../configs/configs.service';
+import { Log } from '../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class GroupEventsInspectionService {
@@ -26,6 +27,7 @@ export class GroupEventsInspectionService {
     private configsService: ConfigsService
   ) {}
 
+  @Log()
   async inspectProject(
     projectName: string,
     headless: string,
@@ -112,33 +114,18 @@ export class GroupEventsInspectionService {
       projectName,
       data.map((item) => item.dataLayerResult)
     );
-
-    Logger.log(
-      'All tests are done!',
-      `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.inspectProject.name}`
-    );
-    Logger.log(
-      'Browser is closed!',
-      `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.inspectProject.name}`
-    );
     return data;
   }
 
+  @Log()
   stopOperation() {
-    Logger.log(
-      'Operation stopped',
-      `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.stopOperation.name}`
-    );
     if (this.abortController) {
       this.abortController.abort();
     }
   }
 
+  @Log('Cleaning up resources')
   private async cleanup(): Promise<void> {
-    Logger.log(
-      'Cleaning up resources',
-      `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.cleanup.name}`
-    );
     if (this.currentBrowser) {
       try {
         await this.currentBrowser.close();

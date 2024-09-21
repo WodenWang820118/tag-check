@@ -2,6 +2,7 @@ import { Controller, Get, Param, Put, Body } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { ProjectSettingService } from '../../project-agent/project-setting/project-setting.service';
 import { Setting } from '@utils';
+import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('settings')
 export class WaiterSettingsController {
@@ -17,6 +18,7 @@ export class WaiterSettingsController {
     description: 'The name of the project to which the event belongs.',
   })
   @Get(':projectSlug')
+  @Log()
   async getProjectSettings(@Param('projectSlug') projectSlug: string) {
     return await this.projectSettingService.getProjectSettings(projectSlug);
   }
@@ -40,6 +42,7 @@ export class WaiterSettingsController {
     type: Object,
   })
   @Put(':projectSlug/sections/:section')
+  @Log()
   async updateProjectSettings(
     @Param('projectSlug') projectSlug: string,
     @Param('section') section: string,

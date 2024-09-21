@@ -8,6 +8,7 @@ import { Page, Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { RequestInterceptorService } from './action/request-interceptor/request-interceptor.service';
 import { catchError, firstValueFrom, map } from 'rxjs';
+import { Log } from '../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class WebAgentUtilsService {
@@ -17,6 +18,7 @@ export class WebAgentUtilsService {
     private requestInterceptorService: RequestInterceptorService
   ) {}
 
+  @Log()
   async performTest(
     page: Page,
     projectSlug: string,

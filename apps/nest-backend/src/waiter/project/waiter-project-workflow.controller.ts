@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { WaiterProjectWorkFlowService } from './waiter-project-workflow.service';
 import { ProjectMetadataService } from '../../project-agent/project-metadata/project-metadata.service';
+import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('projects')
 export class WaiterProjectWorkFlowController {
@@ -54,12 +55,11 @@ export class WaiterProjectWorkFlowController {
     type: Object,
   })
   @Post('/init-project/:projectSlug')
+  @Log()
   async initProject(
     @Param('projectSlug') projectSlug: string,
     @Body() settings: any
   ) {
-    Logger.log('projectSlug', projectSlug);
-    Logger.log('init-project', settings);
     await this.waiterProjectWorkflowService.initProject(projectSlug, settings);
   }
 
@@ -73,6 +73,7 @@ export class WaiterProjectWorkFlowController {
     description: 'The name of the project to which the event belongs.',
   })
   @Get('/set-project')
+  @Log()
   async setProject(@Query('projectName') projectName: string) {
     await this.waiterProjectWorkflowService.setProject(projectName);
   }
@@ -81,6 +82,7 @@ export class WaiterProjectWorkFlowController {
     summary: 'read all projects metadata',
   })
   @Get()
+  @Log()
   async getProjects() {
     return await this.projectMetadataService.getProjectsMetadata();
   }

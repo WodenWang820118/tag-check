@@ -8,6 +8,8 @@ import { AllExceptionsFilter } from './all-exceptions-filter/all-exceptions-filt
 import { HealthModule } from './health/health.module';
 import { DatabaseConfigService } from './database/database.service';
 import { DatabaseConfigModule } from './database/database.module';
+import { LoggingInterceptorModule } from './logging-interceptor/logging-interceptor.module';
+import { LoggingInterceptor } from './logging-interceptor/logging-interceptor.service';
 
 @Module({
   imports: [
@@ -22,12 +24,17 @@ import { DatabaseConfigModule } from './database/database.module';
       inject: [DatabaseConfigService],
     }),
     HealthModule,
+    LoggingInterceptorModule,
   ],
   controllers: [],
   providers: [
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,
+    },
+    {
+      provide: 'APP_INTERCEPTOR',
+      useClass: LoggingInterceptor,
     },
   ],
 })
