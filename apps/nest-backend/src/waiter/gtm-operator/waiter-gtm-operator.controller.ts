@@ -69,12 +69,7 @@ export class WaiterGtmOperatorController {
     @Query('captureRequest') captureRequest: string,
     @Body() eventInspectionPresetDto: EventInspectionPresetDto
   ) {
-    const results: {
-      dataLayerResult: ValidationResult;
-      rawRequest: string;
-      requestCheckResult: ValidationResult;
-      destinationUrl: string;
-    }[] = await this.gtmOperatorService.inspectSingleEventViaGtm(
+    await this.gtmOperatorService.inspectSingleEventViaGtm(
       gtmUrl,
       projectSlug,
       eventName,

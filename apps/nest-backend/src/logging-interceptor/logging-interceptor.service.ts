@@ -9,10 +9,10 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  Logger,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { Logger } from '@nestjs/common';
 
 export function Log(message?: string): MethodDecorator {
   return function (
@@ -37,7 +37,7 @@ export function Log(message?: string): MethodDecorator {
       Logger.log(`${logMessage}`, logContext);
       const start = Date.now();
 
-      let result: Promise<any>;
+      let result;
       try {
         result = originalMethod.apply(this, args);
 

@@ -74,12 +74,7 @@ export class WaiterDataLayerController {
     @Body(ValidationPipe) eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     try {
-      const results: {
-        dataLayerResult: ValidationResult;
-        rawRequest: string;
-        requestCheckResult: ValidationResult;
-        destinationUrl: string;
-      }[] = await this.waiterEventInspectionService.inspectSingleEvent(
+      await this.waiterEventInspectionService.inspectSingleEvent(
         projectSlug,
         eventId,
         headless,

@@ -1,13 +1,5 @@
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import {
-  Body,
-  Controller,
-  Get,
-  Logger,
-  Param,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { WaiterProjectWorkFlowService } from './waiter-project-workflow.service';
 import { ProjectMetadataService } from '../../project-agent/project-metadata/project-metadata.service';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
