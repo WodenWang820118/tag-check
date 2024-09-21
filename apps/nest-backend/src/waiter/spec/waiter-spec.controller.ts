@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
 import { ProjectSpecService } from '../../project-agent/project-spec/project-spec.service';
 import { Spec } from '@utils';
+import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('specs')
 export class WaiterSpecController {
@@ -17,6 +18,7 @@ export class WaiterSpecController {
     description: 'The name of the project to which the event belongs.',
   })
   @Get(':projectSlug')
+  @Log()
   async getProjectSpecs(@Param('projectSlug') projectSlug: string) {
     return await this.projectSpecService.getProjectSpecs(projectSlug);
   }
@@ -35,6 +37,7 @@ export class WaiterSpecController {
     description: 'The name of the event to which the recording belongs.',
   })
   @Get(':projectSlug/:eventName')
+  @Log()
   async getSpec(
     @Param('projectSlug') projectSlug: string,
     @Param('eventName') eventName: string
@@ -67,6 +70,7 @@ export class WaiterSpecController {
     },
   })
   @Post(':projectSlug')
+  @Log()
   async addSpec(@Param('projectSlug') projectSlug: string, @Body() spec: Spec) {
     return await this.projectSpecService.addSpec(projectSlug, spec);
   }
@@ -96,6 +100,7 @@ export class WaiterSpecController {
     },
   })
   @Put(':projectSlug/:eventName')
+  @Log()
   async updateSpec(
     @Param('projectSlug') projectSlug: string,
     @Param('eventName') eventName: string,

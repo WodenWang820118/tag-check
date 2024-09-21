@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { join } from 'path';
 import { cwd } from 'process';
+import { Log } from '../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class ConfigsService {
@@ -34,7 +35,6 @@ export class ConfigsService {
   private DEFAULT_DATABASE_PATH = 'data.sqlite3';
 
   // the DATABASE_PATH and ROOT_PROJECT_PATH is set in the electron main process
-
   getDatabasePath(): string {
     const defaultDatabasePath = join(cwd(), '.db', this.DEFAULT_DATABASE_PATH);
     try {

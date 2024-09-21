@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { Recording } from '@utils';
 import { ProjectRecordingService } from '../../project-agent/project-recording/project-recording.service';
+import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('recordings')
 export class WaiterRecordingController {
@@ -31,6 +32,7 @@ export class WaiterRecordingController {
     description: 'The name of the project to which the event belongs.',
   })
   @Get(':projectSlug/names')
+  @Log()
   async getProjectRecordingNames(@Param('projectSlug') projectSlug: string) {
     return await this.projectRecordingService.getProjectRecordingNames(
       projectSlug
@@ -51,6 +53,7 @@ export class WaiterRecordingController {
     description: 'The name of the event to which the recording belongs.',
   })
   @Get(':projectSlug/:eventId')
+  @Log()
   async getRecordingDetails(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
@@ -78,6 +81,7 @@ export class WaiterRecordingController {
     description: 'The recording to be added to the event.',
   })
   @Post(':projectSlug/:eventId')
+  @Log()
   async addRecording(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
@@ -107,6 +111,7 @@ export class WaiterRecordingController {
     description: 'The updated recording.',
   })
   @Put(':projectSlug/:eventId')
+  @Log()
   async updateRecording(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,

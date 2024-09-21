@@ -8,6 +8,7 @@ import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
 import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
 import { FolderPathService } from '../os/path/folder-path/folder-path.service';
+import { Log } from '../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class GtmOperatorService {
@@ -117,12 +118,8 @@ export class GtmOperatorService {
     }
   }
 
+  @Log()
   async operateGtmPreviewMode(page: Page, gtmUrl: string) {
-    Logger.log(
-      'Operating GTM preview mode',
-      `${GtmOperatorService.name}.${GtmOperatorService.prototype.operateGtmPreviewMode.name}`
-    );
-
     await page.goto(gtmUrl, { waitUntil: 'networkidle2' });
     await page.$('#include-debug-param').then((el) => el?.click());
 
@@ -134,6 +131,7 @@ export class GtmOperatorService {
     await page.$(btnSelector).then((el) => el?.click());
   }
 
+  @Log()
   extractBaseUrlFromGtmUrl(gtmUrl: string) {
     const url = new URL(gtmUrl);
     const fragment = url.hash.substring(1); // Remove the '#' character
@@ -142,21 +140,14 @@ export class GtmOperatorService {
 
     if (encodedUrl) {
       const decodedUrl = decodeURIComponent(encodedUrl);
-      Logger.log(
-        `Decoded URL: ${new URL(decodedUrl).toString()}`,
-        `${GtmOperatorService.name}.${GtmOperatorService.prototype.extractBaseUrlFromGtmUrl.name}`
-      );
       return new URL(decodedUrl).toString();
     }
 
     return '';
   }
 
+  @Log()
   async stopOperation() {
-    Logger.log(
-      'Stopping operation GTM operator',
-      `${GtmOperatorService.name}.${GtmOperatorService.prototype.stopOperation.name}`
-    );
     await new Promise((resolve) => setTimeout(resolve, 100));
     if (this.abortController) {
       this.abortController.abort();

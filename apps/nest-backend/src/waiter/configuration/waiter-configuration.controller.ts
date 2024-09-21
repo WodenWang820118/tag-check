@@ -9,6 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { WaiterConfigurationService } from './waiter-configuration.service';
+import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('configurations')
 export class WaiterConfigurationController {
@@ -25,12 +26,12 @@ export class WaiterConfigurationController {
   }
 
   @Get(':name')
+  @Log()
   async getConfiguration(@Param('name') name: string) {
     try {
       const result = await this.waiterConfigurationService.getConfiguration(
         name
       );
-      console.log(`Result:`, result);
       return result;
     } catch (error) {
       if (error instanceof NotFoundException) {

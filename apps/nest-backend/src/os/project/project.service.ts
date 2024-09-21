@@ -6,6 +6,7 @@ import { FileService } from '../file/file.service';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
+import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class ProjectService {
@@ -16,6 +17,7 @@ export class ProjectService {
     private filePathService: FilePathService
   ) {}
 
+  @Log()
   async getProjectSettings(projectSlug: string) {
     try {
       const settingsFilePath =
@@ -30,6 +32,7 @@ export class ProjectService {
     }
   }
 
+  @Log()
   async getProjectsMetadata() {
     try {
       const projectRoot =
@@ -39,7 +42,6 @@ export class ProjectService {
         .filter((dirent) => dirent.isDirectory())
         .map((dirent) => dirent.name);
 
-      // Logger.log(projects, 'ProjectService.getProjects');
       // Map each project to a promise of its settings
       const projectSettingsPromises = projects.map(async (project) => {
         return this.getProjectMetadata(project);
@@ -48,7 +50,6 @@ export class ProjectService {
       // Resolve all promises before returning
       const projectsAll = await Promise.all(projectSettingsPromises);
 
-      // Logger.log(projectsAll, 'ProjectService.getProjects');
       return projectsAll || [];
     } catch (error) {
       Logger.error(

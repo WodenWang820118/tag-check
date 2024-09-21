@@ -6,6 +6,7 @@ import { OutputValidationResult, extractEventNameFromId } from '@utils';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
+import { Log } from '../logging-interceptor/logging-interceptor.service';
 @Injectable()
 export class EventInspectionPipelineService {
   constructor(
@@ -14,6 +15,7 @@ export class EventInspectionPipelineService {
     private projectAbstractReportService: ProjectAbstractReportService
   ) {}
 
+  @Log()
   async singleEventInspectionRecipe(
     page: Page,
     projectName: string,
@@ -34,11 +36,6 @@ export class EventInspectionPipelineService {
         credentials,
         captureRequest,
         eventInspectionPresetDto.application
-      );
-
-      Logger.log(
-        'DataLayer inspected',
-        `${EventInspectionPipelineService.name}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
       );
 
       const data = [

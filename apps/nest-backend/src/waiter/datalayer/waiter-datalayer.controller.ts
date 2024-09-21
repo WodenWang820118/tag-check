@@ -17,6 +17,7 @@ import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto'
 import { ValidationResult } from '@utils';
 import { WaiterEventInspectionService } from './waiter-event-inspection.service';
 import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
+import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('datalayer')
 export class WaiterDataLayerController {
@@ -61,6 +62,7 @@ export class WaiterDataLayerController {
   })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
   @Post('/:projectSlug/:eventId')
+  @Log()
   async inspectSingleEvent(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
@@ -89,10 +91,6 @@ export class WaiterDataLayerController {
         captureRequest,
         eventInspectionPresetDto
       );
-      Logger.log(
-        results,
-        `${WaiterDataLayerController.name}.${WaiterDataLayerController.prototype.inspectSingleEvent.name}`
-      );
 
       const abstractReport =
         await this.projectAbstractReportService.getSingleAbstractTestResultJson(
@@ -113,14 +111,15 @@ export class WaiterDataLayerController {
     }
   }
 
-  @Get(':projectSlug')
   @ApiOperation({
     summary: 'Inspects a project dataLayer',
     description:
       'This endpoint inspects an entire project and returns dataLayer object,\
-      and the comparison result written to an xlsx file. Please see the \
-      inspectSingleEvent endpoint for more parameters details.',
+    and the comparison result written to an xlsx file. Please see the \
+    inspectSingleEvent endpoint for more parameters details.',
   })
+  @Get(':projectSlug')
+  @Log()
   async inspectProject(
     @Param('projectSlug') projectSlug: string,
     @Query('headless') headless: string,
@@ -143,13 +142,14 @@ export class WaiterDataLayerController {
     );
   }
 
-  @Post('stop-operation')
   @ApiOperation({
     summary: 'Stops the current operation',
     description:
       'This endpoint stops the current operation and returns the results of the operation.',
   })
   @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
+  @Post('stop-operation')
+  @Log()
   async stopOperation() {
     try {
       await this.waiterEventInspectionService.stopOperation();

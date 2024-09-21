@@ -5,6 +5,7 @@ import { ProjectInitializationService } from '../../project-agent/project-initia
 import { mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigsService } from '../../configs/configs.service';
+import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class WaiterProjectWorkFlowService {
@@ -15,15 +16,12 @@ export class WaiterProjectWorkFlowService {
   ) {}
 
   // 1)
+  @Log()
   async setRootProjectFolder(rootProjectPath: string) {
     try {
       const configurations = await this.configurationService.findAll();
       mkdirSync(rootProjectPath, { recursive: true });
       if (configurations.length === 0) {
-        Logger.log(
-          'Creating initial root project folder path',
-          `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setRootProjectFolder.name}`
-        );
         return await this.configurationService.create({
           id: uuidv4(),
           title: this.configsService.getCONFIG_ROOT_PATH(),
@@ -39,10 +37,6 @@ export class WaiterProjectWorkFlowService {
       );
 
       if (existingConfig) {
-        Logger.log(
-          'Updating existing root project folder path',
-          `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setRootProjectFolder.name}`
-        );
         return this.configurationService.update(existingConfig.id, {
           title: this.configsService.getCONFIG_ROOT_PATH(),
           value: rootProjectPath,
@@ -60,14 +54,11 @@ export class WaiterProjectWorkFlowService {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-      Logger.log(
-        'Set root project folder path!',
-        `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setRootProjectFolder.name}`
-      );
     }
   }
 
   // 2) init project if not exists
+  @Log()
   async initProject(projectName: string, settings: any) {
     try {
       // 1) check if project settings exists
@@ -79,11 +70,6 @@ export class WaiterProjectWorkFlowService {
 
       // 2) if exists, update it
       if (existingConfig) {
-        Logger.log(
-          'Current project folder existed! Update current project folder path',
-          `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setProject.name}`
-        );
-
         await this.configurationService.update(existingConfig.id, {
           title: this.configsService.getCONFIG_CURRENT_PROJECT_PATH(),
           value: projectName,
@@ -94,11 +80,6 @@ export class WaiterProjectWorkFlowService {
           settings
         );
       } else {
-        Logger.log(
-          'Current project folder not existed! Create current project folder path',
-          'WaiterProjectWorkFlowService.setProject'
-        );
-
         await this.configurationService.create({
           id: uuidv4(),
           title: this.configsService.getCONFIG_CURRENT_PROJECT_PATH(),
@@ -123,6 +104,7 @@ export class WaiterProjectWorkFlowService {
   }
 
   // 2) select project if exists
+  @Log()
   async setProject(projectName: string) {
     try {
       const configurations = await this.configurationService.findAll();
@@ -134,21 +116,11 @@ export class WaiterProjectWorkFlowService {
       );
 
       if (existingConfig) {
-        Logger.log(
-          'Current project folder existed! Update current project folder path',
-          `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setProject.name}`
-        );
-
         return this.configurationService.update(existingConfig.id, {
           title: 'currentProjectPath',
           value: projectName,
         });
       } else {
-        Logger.log(
-          'Current project folder not existed! Create current project folder path',
-          `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setProject.name}`
-        );
-
         return this.configurationService.create({
           id: uuidv4(),
           title: 'currentProjectPath',

@@ -14,6 +14,7 @@ import {
 import { ValidationResult, EventInspectionPresetDto } from '@utils';
 import { GtmOperatorService } from '../../gtm-operator/gtm-operator.service';
 import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
+import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('datalayer')
 export class WaiterGtmOperatorController {
@@ -56,6 +57,7 @@ export class WaiterGtmOperatorController {
   })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
   @Post('/gtm-operator/:projectSlug/:eventName')
+  @Log()
   async inspectSingleEventViaGtm(
     @Param('projectSlug') projectSlug: string,
     @Param('eventName') eventName: string,
@@ -86,8 +88,6 @@ export class WaiterGtmOperatorController {
       eventInspectionPresetDto
     );
 
-    Logger.log(results, 'WaiterGtmOperatorController.inspectSingleEventViaGtm');
-
     const abstractReport =
       await this.projectAbstractReportService.getSingleAbstractTestResultJson(
         projectSlug,
@@ -103,6 +103,7 @@ export class WaiterGtmOperatorController {
       'This endpoint stops the current operation and returns the results of the operation.',
   })
   @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
+  @Log()
   async stopOperation() {
     try {
       await this.gtmOperatorService.stopOperation();

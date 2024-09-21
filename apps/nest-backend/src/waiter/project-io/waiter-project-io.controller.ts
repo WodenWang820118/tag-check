@@ -16,6 +16,7 @@ import { diskStorage } from 'multer';
 import { Express, Response } from 'express';
 import { ConfigurationService } from '../../configuration/configuration.service';
 import { ProjectIoFacadeService } from '../../project-agent/project-io-facade/project-io-facade.service';
+import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('projects')
 export class WaiterProjectIoController {
@@ -47,23 +48,12 @@ export class WaiterProjectIoController {
       },
     })
   )
+  @Log()
   async importProject(
     @UploadedFile() file: Express.Multer.File,
     @Res() response: Response
   ) {
     try {
-      Logger.log(
-        'called importProject',
-        `${WaiterProjectIoController.name}.${WaiterProjectIoController.prototype.importProject.name}`
-      );
-      Logger.log(
-        'file: ' + JSON.stringify(file, null, 2),
-        `${WaiterProjectIoController.name}.${WaiterProjectIoController.prototype.importProject.name}`
-      );
-      Logger.log(
-        'file.path: ' + file.path,
-        `${WaiterProjectIoController.name}.${WaiterProjectIoController.prototype.importProject.name}`
-      );
       const rootProjectPath =
         await this.configurationSerivce.getRootProjectPath();
       await this.projectIoFacadeService.importProject(
