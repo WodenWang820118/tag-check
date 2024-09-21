@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { join } from 'path';
 import { cwd } from 'process';
-import { Log } from '../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class ConfigsService {
@@ -93,7 +92,7 @@ export class ConfigsService {
           Logger.log(process.env.ROOT_PROJECT_PATH, 'ROOT_PROJECT_PATH');
           return process.env.ROOT_PROJECT_PATH;
         case 'prod':
-          if (process.env.ROOT_PROJECT_PATH && process.env.ROOT_PROJECT_PATH) {
+          if (process.env.ROOT_PROJECT_PATH && this.DEFAULT_PROJECT_PATH) {
             return join(
               process.env.ROOT_PROJECT_PATH,
               this.DEFAULT_PROJECT_PATH
@@ -101,7 +100,7 @@ export class ConfigsService {
           }
           return defaultProjectPath;
         default: {
-          if (process.env.ROOT_PROJECT_PATH && process.env.ROOT_PROJECT_PATH) {
+          if (process.env.ROOT_PROJECT_PATH && this.DEFAULT_PROJECT_PATH) {
             Logger.warn(
               `No NODE_ENV set. Defaulting to production database path: ${join(
                 process.env.ROOT_PROJECT_PATH,
@@ -137,9 +136,6 @@ export class ConfigsService {
           await app.listen(process.env.PORT || 7070);
           break;
         case 'staging':
-          Logger.log('Listening on port 6060');
-          await app.listen(process.env.PORT || 6060);
-          break;
         case 'test':
           Logger.log('Listening on port 6060');
           await app.listen(process.env.PORT || 6060);
@@ -149,7 +145,7 @@ export class ConfigsService {
           await app.listen(process.env.PORT || 7001);
           break;
         default:
-          if (process.env.ROOT_PROJECT_PATH && process.env.ROOT_PROJECT_PATH) {
+          if (process.env.ROOT_PROJECT_PATH && this.DEFAULT_PROJECT_PATH) {
             Logger.warn(
               `No NODE_ENV set. Defaulting to production database path: ${join(
                 process.env.ROOT_PROJECT_PATH,

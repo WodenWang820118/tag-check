@@ -11,6 +11,7 @@ import {
 import { Socket } from 'dgram';
 import { Server } from 'http';
 import { Log } from '../logging-interceptor/logging-interceptor.service';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway(7002, {
   transports: ['websocket'],
@@ -26,14 +27,26 @@ export class EventsGatewayService
 {
   @WebSocketServer() server!: Server;
 
-  @Log('WebSocket Gateway initialized')
-  afterInit(socket: Server) {}
+  afterInit(socket: Server) {
+    Logger.log(
+      `The socket has been initialized`,
+      `${EventsGatewayService.name}.${EventsGatewayService.prototype.afterInit.name}`
+    );
+  }
 
-  @Log('Client connected')
-  handleConnection(client: Socket, ...args: any[]) {}
+  handleConnection(client: Socket, ...args: any[]) {
+    Logger.log(
+      `Handle connection`,
+      `${EventsGatewayService.name}.${EventsGatewayService.prototype.afterInit.name}`
+    );
+  }
 
-  @Log('Client disconnected')
-  handleDisconnect(client: Socket) {}
+  handleDisconnect(client: Socket) {
+    Logger.log(
+      `Handle disconnection`,
+      `${EventsGatewayService.name}.${EventsGatewayService.prototype.afterInit.name}`
+    );
+  }
 
   @SubscribeMessage('events')
   @Log()
