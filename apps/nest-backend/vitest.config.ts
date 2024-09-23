@@ -12,6 +12,15 @@ export default defineConfig({
     ],
     reporters: ['verbose'],
     testTimeout: 120000,
+    coverage: {
+      enabled: true,
+      reportsDirectory: '../../coverage/apps/nest-backend',
+      provider: 'v8',
+      reporter: ['lcov'],
+    },
+  },
+  esbuild: {
+    target: 'es2020',
   },
   plugins: [
     nxViteTsPaths(),

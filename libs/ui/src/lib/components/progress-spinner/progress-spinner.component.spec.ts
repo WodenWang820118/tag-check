@@ -8,7 +8,7 @@ describe('ProgressSpinnerComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ProgressSpinnerComponent]
+      imports: [ProgressSpinnerComponent],
     });
     fixture = TestBed.createComponent(ProgressSpinnerComponent);
     component = fixture.componentInstance;

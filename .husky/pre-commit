@@ -1,2 +1,2 @@
-pnpm run test:e2e
-pnpm run test-back:unit
+pnpm run test:cov
+node merge-coverage.cjs
