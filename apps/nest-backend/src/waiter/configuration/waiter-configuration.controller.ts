@@ -16,6 +16,7 @@ export class WaiterConfigurationController {
   constructor(private waiterConfigurationService: WaiterConfigurationService) {}
 
   @Get('/debug-sentry')
+  @Log()
   getError() {
     throw new Error('My first Sentry error!');
   }

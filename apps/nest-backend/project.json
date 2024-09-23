@@ -45,7 +45,7 @@
       "executor": "@nx/vite:test",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/nest-backend/jest.config.ts",
+        "jestConfig": "apps/nest-backend/vitest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {
