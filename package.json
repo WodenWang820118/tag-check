@@ -48,7 +48,7 @@
     "mock-reports-back": "nodemon mock/mock-server/mock-reports-backend.js",
     "mock-settings-back": "nodemon mock/mock-server/mock-settings-backend.js",
     "testing": "-----------------all testing scripts-----------------",
-    "test:cov": "nx run-many --all --target=test --parallel=6 --ci --coverage",
+    "test:cov": "nx run-many --all --target=test --parallel=6 --ci --coverage && node ./merge-coverage.cjs",
     "test": "vitest run",
     "prepare": "husky",
     "test:e2e": "vitest run ./apps/nest-backend/test/app.e2e-spec.ts",
