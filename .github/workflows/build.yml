@@ -14,7 +14,7 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: Install dependencies
-        run: npm install pnpm && pnpm install
+        run: npm i -g pnpm && pnpm install
       - name: Test and coverage
         run: pnpm run test:cov && node merge-coverage.cjs
       - name: Upload coverage report
