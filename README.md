@@ -1,6 +1,6 @@
 # TagCheck
 ## Overview
-This desktop application automates the GTM (Google Tag Manager) container review process and the production analytics deployment validation. It streamlines the quality assurance process by providing:
+This desktop application automates the GTM (Google Tag Manager) container review process and the production analytics deployment validation.
 
 ## Features
 - The tool uses a consistent JSON fomatted GTM specification and generates GTM compatible JSON files to be uploaded.
