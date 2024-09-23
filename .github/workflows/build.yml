@@ -18,7 +18,7 @@ jobs:
       - name: Test and coverage
         run: pnpm run test:cov && node merge-coverage.cjs
       - name: Upload coverage report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-report
           path: coverage/lcov.info
