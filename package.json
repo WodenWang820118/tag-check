@@ -52,7 +52,7 @@
     "test-back:cov": "vitest --coverage --root=apps/nest-backend --exclude=**/test/*e2e-spec.ts --watch=false",
     "test": "vitest run",
     "prepare": "husky",
-    "test:e2e": "vitest run ./apps/nest-backend/test/app.e2e-spec.ts",
+    "test:e2e": "vitest --root=apps/nest-backend --watch=false",
     "test-back:unit": "vitest --root=apps/nest-backend --exclude=**/test/*e2e-spec.ts --watch=false",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org guan-xin-wang --project tag-check ./dist/apps/ng-frontend/browser && sentry-cli sourcemaps upload --org guan-xin-wang --project tag-check ./dist/apps/ng-frontend/browser"
   },
