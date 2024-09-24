@@ -48,10 +48,11 @@
     "mock-reports-back": "nodemon mock/mock-server/mock-reports-backend.js",
     "mock-settings-back": "nodemon mock/mock-server/mock-settings-backend.js",
     "testing": "-----------------all testing scripts-----------------",
-    "test:cov": "nx run-many --all --target=test --parallel=6 --ci --coverage",
+    "test:cov": "nx run-many --target=test --parallel=6 --coverage --verbose --exclude=**/nest-backend && pnpm run test-back:cov && node ./merge-coverage.cjs",
+    "test-back:cov": "vitest --coverage --root=apps/nest-backend --exclude=**/test/*e2e-spec.ts --watch=false",
     "test": "vitest run",
     "prepare": "husky",
-    "test:e2e": "vitest run ./apps/nest-backend/test/app.e2e-spec.ts",
+    "test:e2e": "vitest --root=apps/nest-backend --watch=false",
     "test-back:unit": "vitest --root=apps/nest-backend --exclude=**/test/*e2e-spec.ts --watch=false",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org guan-xin-wang --project tag-check ./dist/apps/ng-frontend/browser && sentry-cli sourcemaps upload --org guan-xin-wang --project tag-check ./dist/apps/ng-frontend/browser"
   },
