@@ -18,6 +18,9 @@ jobs:
       - name: Test and coverage
         run: pnpm run test:cov
         shell: bash
+      - name: Test backend coverage
+        run: pnpm run test-back:cov
+        shell: bash
       - name: 'Run script'
         run: node ${{ github.action_path }}/merge-coverage.cjs
         shell: bash
