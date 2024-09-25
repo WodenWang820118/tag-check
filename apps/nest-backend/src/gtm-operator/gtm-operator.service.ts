@@ -73,13 +73,10 @@ export class GtmOperatorService {
 
     const url = new URL(target.url());
     const origin = url.origin;
-    Logger.log(`${url.origin}`, 'Target URL');
     const targetPage = await target.asPage(); // for using the screencast error-free
-
     if (!targetPage) {
       throw new Error('Failed to find the target page');
     }
-
     try {
       // let users to record it to navigate the target page
       // it's valid to use the url.origin to ensure the screencast recorder work as expected
@@ -131,7 +128,6 @@ export class GtmOperatorService {
     await page.$(btnSelector).then((el) => el?.click());
   }
 
-  @Log()
   extractBaseUrlFromGtmUrl(gtmUrl: string) {
     const url = new URL(gtmUrl);
     const fragment = url.hash.substring(1); // Remove the '#' character
