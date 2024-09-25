@@ -1,4 +1,4 @@
-# Objective
+# Objectives
 
 The objective of this project is to let users create and manage their own Google Tag Manager (GTM) tag audit projects. The user can create a project, add tags to it, and then run an audit on the tags. The audit will check if the tags are used in the correct context and if they are used at all. The user can then review the audit results and make changes to the tags if necessary.
 
@@ -13,4 +13,6 @@ The audit will check if the tags are used in the correct context and if they are
 Failure reasons can include:
 
 - The tag is not firing at all
-- The tag is firing, but with incorrect parameters
+- The tag is firing, but with incorrect/misplaced parameters
+
+TagCheck enables you to audit the project with automation.
