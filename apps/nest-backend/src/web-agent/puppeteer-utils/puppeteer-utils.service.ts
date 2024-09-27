@@ -20,7 +20,6 @@ export class PuppeteerUtilsService {
     private configsService: ConfigsService
   ) {}
 
-  @Log()
   async startBrowser(
     projectSlug: string,
     eventId: string,

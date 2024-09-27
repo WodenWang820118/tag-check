@@ -18,7 +18,6 @@ export class WebAgentUtilsService {
     private requestInterceptorService: RequestInterceptorService
   ) {}
 
-  @Log()
   async performTest(
     page: Page,
     projectSlug: string,
