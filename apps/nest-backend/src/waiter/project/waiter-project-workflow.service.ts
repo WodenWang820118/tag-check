@@ -5,7 +5,6 @@ import { ProjectInitializationService } from '../../project-agent/project-initia
 import { mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigsService } from '../../configs/configs.service';
-import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class WaiterProjectWorkFlowService {
@@ -16,7 +15,6 @@ export class WaiterProjectWorkFlowService {
   ) {}
 
   // 1)
-  @Log()
   async setRootProjectFolder(rootProjectPath: string) {
     try {
       const configurations = await this.configurationService.findAll();
@@ -58,7 +56,6 @@ export class WaiterProjectWorkFlowService {
   }
 
   // 2) init project if not exists
-  @Log()
   async initProject(projectName: string, settings: any) {
     try {
       // 1) check if project settings exists
@@ -104,7 +101,6 @@ export class WaiterProjectWorkFlowService {
   }
 
   // 2) select project if exists
-  @Log()
   async setProject(projectName: string) {
     try {
       const configurations = await this.configurationService.findAll();

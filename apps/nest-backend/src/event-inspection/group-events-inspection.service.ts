@@ -27,7 +27,6 @@ export class GroupEventsInspectionService {
     private configsService: ConfigsService
   ) {}
 
-  @Log()
   async inspectProject(
     projectName: string,
     headless: string,

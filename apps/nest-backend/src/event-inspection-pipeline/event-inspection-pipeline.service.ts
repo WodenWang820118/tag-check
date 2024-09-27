@@ -15,7 +15,6 @@ export class EventInspectionPipelineService {
     private projectAbstractReportService: ProjectAbstractReportService
   ) {}
 
-  @Log()
   async singleEventInspectionRecipe(
     page: Page,
     projectName: string,
