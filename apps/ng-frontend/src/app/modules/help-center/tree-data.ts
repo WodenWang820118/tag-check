@@ -22,6 +22,6 @@ export const TREE_DATA: TopicNode[] = [
   {
     name: 'Settings',
     id: -1,
-    children: [{ name: 'setting-details', id: 7 }],
+    children: [{ name: 'Setting Details', id: 7 }],
   },
 ];
