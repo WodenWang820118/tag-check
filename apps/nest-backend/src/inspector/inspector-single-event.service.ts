@@ -91,6 +91,7 @@ export class InspectorSingleEventService {
           await this.fileService.writeCacheFile(projectSlug, eventId, result);
           await page.screenshot({
             path: imageSavingFolder,
+            fullPage: true,
           });
           // allow the screencast video to be finalized
           await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -139,6 +140,7 @@ export class InspectorSingleEventService {
           await this.fileService.writeCacheFile(projectSlug, eventId, result);
           await page.screenshot({
             path: imageSavingFolder,
+            fullPage: true,
           });
           // allow the screencast video to be finalized
           await new Promise((resolve) => setTimeout(resolve, 5000));
