@@ -72,6 +72,7 @@ export class InspectorGroupEventsService {
 
           await page.screenshot({
             path: imageSavingFolder,
+            fullPage: true,
           });
           await page.close();
           return result;
