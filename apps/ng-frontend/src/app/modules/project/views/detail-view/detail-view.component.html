@@ -13,7 +13,16 @@
       <mat-icon>{{
         (reportDetails$ | async)?.passed ? 'check_circle' : 'cancel'
       }}</mat-icon>
-      <p>{{ (reportDetails$ | async)?.completedTime }}</p>
+      <p>{{ (reportDetails$ | async)?.completedTime | date : 'medium' }}</p>
+      <div>
+        <button
+          mat-icon-button
+          [routerLink]="['..', 'buckets']"
+          [queryParams]="{ event: (reportDetails$ | async)?.eventName }"
+        >
+          <mat-icon>history</mat-icon>
+        </button>
+      </div>
     </div>
   </div>
   <div class="detail__content">

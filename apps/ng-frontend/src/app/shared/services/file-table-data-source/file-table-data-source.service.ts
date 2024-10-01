@@ -8,7 +8,7 @@ import { Injectable } from '@angular/core';
 })
 export class FileTableDataSourceService extends DataSource<FileReport> {
   private _dataStream = new BehaviorSubject<FileReport[]>([]);
-  private _filterStream = new ReplaySubject<string>();
+  private _filterStream = new BehaviorSubject<string>('');
   private _deletedStream = new BehaviorSubject<boolean>(false);
   private _downloadStream = new BehaviorSubject<boolean>(false);
 

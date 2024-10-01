@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { forkJoin, Subject, switchMap, takeUntil, tap } from 'rxjs';
@@ -29,7 +29,7 @@ import { MatSortModule } from '@angular/material/sort';
   templateUrl: './file-table.component.html',
   styleUrls: ['./file-table.component.scss'],
 })
-export class FileTableComponent implements OnDestroy {
+export class FileTableComponent implements AfterViewInit, OnDestroy {
   selection = new SelectionModel<FileReport>(true, []);
   dataSource!: MatTableDataSource<FileReport>;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -45,7 +45,9 @@ export class FileTableComponent implements OnDestroy {
 
   constructor(
     private fileTableDataSourceFacadeService: FileTableDataSourceFacadeService
-  ) {
+  ) {}
+
+  ngAfterViewInit(): void {
     this.fileTableDataSourceFacadeService
       .observeDataSource()
       .pipe(
@@ -69,17 +71,18 @@ export class FileTableComponent implements OnDestroy {
                 this.selection,
                 this.dataSource
               ),
+            observeTableFilter: this.fileTableDataSourceFacadeService
+              .observeTableFilter()
+              .pipe(
+                takeUntil(this.destroy$),
+                tap((filter) => {
+                  if (!this.dataSource) {
+                    return;
+                  }
+                  this.dataSource.filter = filter;
+                })
+              ),
           });
-        })
-      )
-      .subscribe();
-
-    this.fileTableDataSourceFacadeService
-      .observeTableFilter()
-      .pipe(
-        takeUntil(this.destroy$),
-        tap((filter) => {
-          this.dataSource.filter = filter;
         })
       )
       .subscribe();

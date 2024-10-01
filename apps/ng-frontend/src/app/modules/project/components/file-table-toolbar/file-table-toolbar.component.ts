@@ -1,4 +1,12 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  ViewEncapsulation,
+  AfterViewInit,
+  ElementRef,
+  OnDestroy,
+  ChangeDetectorRef,
+} from '@angular/core';
 import {
   MatButtonToggleChange,
   MatButtonToggleModule,
@@ -11,6 +19,16 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ActivatedRoute } from '@angular/router';
+import {
+  tap,
+  takeUntil,
+  Subject,
+  BehaviorSubject,
+  map,
+  catchError,
+  of,
+} from 'rxjs';
 
 @Component({
   selector: 'app-file-table-toolbar',
@@ -30,17 +48,44 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   styleUrls: ['./file-table-toolbar.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class FileTableToolbarComponent {
+export class FileTableToolbarComponent implements AfterViewInit, OnDestroy {
   isSearchVisible = false;
+  destroy$ = new Subject<void>();
 
-  constructor(private fileTableDataSourceService: FileTableDataSourceService) {}
+  @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
+
+  constructor(
+    private fileTableDataSourceService: FileTableDataSourceService,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngAfterViewInit() {
+    this.initializeFilterValue()
+      .pipe(
+        takeUntil(this.destroy$),
+        tap((value) => {
+          if (value) {
+            this.showSearch();
+            this.setSearchInputValue(value);
+            this.triggerApplyFilter();
+          }
+        })
+      )
+      .subscribe();
+  }
+
   applyFilter(event: Event) {
+    console.log('event', event);
     const filterValue = (event.target as HTMLInputElement).value;
+    console.log('filter value in applyFilter', filterValue);
     this.fileTableDataSourceService.setFilter(filterValue);
   }
+
   deleteSelected() {
     this.fileTableDataSourceService.deleteSelected();
   }
+
   onToggleChange(event: MatButtonToggleChange) {
     console.log(event.value);
     if (event.value === 'search') {
@@ -50,5 +95,59 @@ export class FileTableToolbarComponent {
 
   downloadSelected() {
     this.fileTableDataSourceService.downloadSelected();
+  }
+
+  private initializeFilterValue() {
+    return this.route.queryParams.pipe(
+      takeUntil(this.destroy$),
+      map((params) => {
+        const eventName: string = params['event'];
+        if (eventName) {
+          console.log('event name in the toolbar', eventName);
+          return eventName;
+        }
+        return '';
+      }),
+      catchError((error) => {
+        console.error(error);
+        return of('');
+      })
+    );
+  }
+
+  private setSearchInputValue(value: string) {
+    if (this.searchInput && this.searchInput.nativeElement) {
+      this.searchInput.nativeElement.value = value;
+      this.cdr.detectChanges(); // avoid RuntimeError: NG0100: ExpressionChangedAfterItHasBeenCheckedError
+    }
+  }
+
+  private showSearch() {
+    this.isSearchVisible = true;
+    this.cdr.detectChanges(); // avoid RuntimeError: NG0100: ExpressionChangedAfterItHasBeenCheckedError
+  }
+
+  private triggerApplyFilter() {
+    console.log('trigger apply filter');
+    if (this.searchInput && this.searchInput.nativeElement) {
+      const event = new KeyboardEvent('keyup', {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+      });
+      this.searchInput.nativeElement.dispatchEvent(event);
+    }
+  }
+
+  private resetSearch(): void {
+    this.setSearchInputValue('');
+    this.fileTableDataSourceService.setFilter('');
+    this.triggerApplyFilter();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.resetSearch();
   }
 }
