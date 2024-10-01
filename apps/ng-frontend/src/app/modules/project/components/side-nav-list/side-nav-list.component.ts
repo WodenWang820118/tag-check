@@ -12,10 +12,12 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import {
   ActivatedRoute,
+  IsActiveMatchOptions,
   NavigationEnd,
   Router,
   RouterLink,
   RouterLinkActive,
+  UrlSegment,
 } from '@angular/router';
 import { catchError, filter, Subject, takeUntil, tap } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
@@ -44,6 +46,12 @@ import { MatSidenav } from '@angular/material/sidenav';
   encapsulation: ViewEncapsulation.None,
 })
 export class SideNavListComponent implements OnInit, OnDestroy {
+  routerLinkActiveOptions: IsActiveMatchOptions = {
+    paths: 'exact',
+    queryParams: 'ignored',
+    matrixParams: 'ignored',
+    fragment: 'ignored',
+  };
   selectedParent: string | null = null;
   @Input() snav!: MatSidenav;
   @Output() menuClick = new EventEmitter();

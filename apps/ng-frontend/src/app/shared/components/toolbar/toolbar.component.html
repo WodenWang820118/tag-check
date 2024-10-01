@@ -43,11 +43,7 @@
     </mat-button-toggle-group>
     } @if (isSearchVisible) {
     <div class="filter-container">
-      <mat-form-field
-        appearance="outline"
-        color="primary"
-        class="filter remark"
-      >
+      <mat-form-field appearance="outline" class="filter">
         <input
           matInput
           (keyup)="applyFilter($event)"

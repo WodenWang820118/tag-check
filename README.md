@@ -1,7 +1,5 @@
 # GTM Container Review and Analytics Validation Tool
 
-// TODO: combine lcov.info to SonarCloud
-
 ## Table of Contents
 
 - [Overview](#overview)

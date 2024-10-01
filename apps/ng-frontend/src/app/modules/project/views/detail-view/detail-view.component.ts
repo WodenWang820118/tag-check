@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
 import {
   BehaviorSubject,
   Observable,
@@ -13,7 +13,7 @@ import {
   tap,
   timeout,
 } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReportDetailsService } from '../../../../shared/services/report-details/report-details.service';
 import { ReportDetailPanelsComponent } from '../../components/report-detail-panels/report-detail-panels.component';
 import { CarouselItem, IReportDetails } from '@utils';
@@ -35,6 +35,8 @@ import { CarouselComponent } from '../../../../shared/components/carousel/carous
     MatIconModule,
     MatButtonModule,
     CarouselComponent,
+    DatePipe,
+    RouterLink,
   ],
   templateUrl: './detail-view.component.html',
   styleUrls: ['./detail-view.component.scss'],
