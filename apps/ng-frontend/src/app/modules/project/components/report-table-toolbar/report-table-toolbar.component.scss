@@ -1,3 +1,5 @@
+@use '@angular/material' as mat;
+
 .spacer {
   flex: 1 1 auto;
 }
@@ -13,4 +15,10 @@
 
 .filter {
   flex-direction: row !important;
+}
+
+.mat-mdc-form-field {
+  border-radius: 5px;
+  @include mat.form-field-density(-4);
+  @include mat.select-density(-4);
 }
