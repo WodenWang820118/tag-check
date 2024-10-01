@@ -5,7 +5,7 @@
       tabindex="-1"
       [routerLink]="item.link"
       [routerLinkActive]="['secondary']"
-      [routerLinkActiveOptions]="{ exact: true }"
+      [routerLinkActiveOptions]="routerLinkActiveOptions"
       (click)="onMenuClick()"
     >
       <div class="mat-list-item-content">
