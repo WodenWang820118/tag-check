@@ -26,6 +26,7 @@ export class WaiterProjectIoController {
   ) {}
 
   @Get('export/:projectSlug')
+  @Log()
   async exportProject(@Param('projectSlug') projectSlug: string) {
     return await this.projectIoFacadeService.exportProject(projectSlug);
   }

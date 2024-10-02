@@ -23,6 +23,7 @@ export class WaiterProjectWorkFlowController {
   })
   @ApiResponse({ status: 200, description: 'Create a application root folder' })
   @Get('/set-root-project-folder')
+  @Log()
   async setRootProjectFolder(
     @Query('rootProjectPath') rootProjectPath: string
   ) {

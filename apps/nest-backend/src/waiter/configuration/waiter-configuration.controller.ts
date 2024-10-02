@@ -22,6 +22,7 @@ export class WaiterConfigurationController {
   }
 
   @Get()
+  @Log()
   async getConfigurations() {
     return await this.waiterConfigurationService.getConfigurations();
   }

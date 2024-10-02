@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { FolderService } from '../../os/folder/folder.service';
 import { FileService } from '../../os/file/file.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
@@ -9,87 +9,97 @@ import { SettingDto } from '../../dto/setting.dto';
 @Injectable()
 export class ProjectInitializationService {
   constructor(
-    private folderService: FolderService,
-    private fileService: FileService,
-    private folderPathService: FolderPathService,
-    private filePathService: FilePathService
+    private readonly folderService: FolderService,
+    private readonly fileService: FileService,
+    private readonly folderPathService: FolderPathService,
+    private readonly filePathService: FilePathService
   ) {}
 
   async initProject(projectSlug: string, settings: Partial<ProjectInfoDto>) {
-    try {
-      const rootProjectPath =
-        await this.folderPathService.getRootProjectFolderPath();
-      const projectRoot = await this.folderPathService.getProjectFolderPath(
-        projectSlug
-      );
-      this.folderService.createFolder(projectRoot);
-      this.folderService.createFolder(
-        await this.folderPathService.getRecordingFolderPath(projectSlug)
-      );
-      this.folderService.createFolder(
-        await this.folderPathService.getReportSavingFolderPath(projectSlug)
-      );
-      this.folderService.createFolder(
-        await this.folderPathService.getProjectConfigFolderPath(projectSlug)
-      );
+    await this.createProjectFolders(projectSlug);
+    const projectMetaData: ProjectInfoDto = await this.createProjectMetaData(
+      settings
+    );
+    const projectSettings: SettingDto =
+      this.createProjectSettings(projectMetaData);
+    await this.writeProjectFiles(projectSlug, projectMetaData, projectSettings);
+  }
 
-      const projectMetaData: ProjectInfoDto = {
-        version: '1.0.0',
-        rootProject: `${rootProjectPath}`,
-        projectName: `${settings.projectName}`,
-        projectDescription: `${settings.projectDescription}` || '',
-        projectSlug: `${settings.projectSlug}`,
-        measurementId: `${settings.measurementId}` || '',
-        googleSpreadsheetLink: `${settings.googleSpreadsheetLink}` || '',
-      };
+  private async createProjectFolders(projectSlug: string) {
+    const projectRoot = await this.folderPathService.getProjectFolderPath(
+      projectSlug
+    );
+    this.folderService.createFolder(projectRoot);
+    this.folderService.createFolder(
+      await this.folderPathService.getRecordingFolderPath(projectSlug)
+    );
+    this.folderService.createFolder(
+      await this.folderPathService.getReportSavingFolderPath(projectSlug)
+    );
+    this.folderService.createFolder(
+      await this.folderPathService.getProjectConfigFolderPath(projectSlug)
+    );
+  }
 
-      const projectSettings: SettingDto = {
-        ...projectMetaData,
-        headless: false,
-        gtm: {
-          isAccompanyMode: false,
-          isRequestCheck: false,
-          tagManagerUrl: '',
-          gtmPreviewModeUrl: '',
+  private async createProjectMetaData(
+    settings: Partial<ProjectInfoDto>
+  ): Promise<ProjectInfoDto> {
+    const rootProjectPath =
+      await this.folderPathService.getRootProjectFolderPath();
+    return {
+      version: '1.0.0',
+      rootProject: rootProjectPath,
+      projectName: settings.projectName || '',
+      projectDescription: settings.projectDescription || '',
+      projectSlug: settings.projectSlug || '',
+      measurementId: settings.measurementId || '',
+      googleSpreadsheetLink: settings.googleSpreadsheetLink || '',
+    };
+  }
+
+  private createProjectSettings(projectMetaData: ProjectInfoDto): SettingDto {
+    return {
+      ...projectMetaData,
+      headless: false,
+      gtm: {
+        isAccompanyMode: false,
+        isRequestCheck: false,
+        tagManagerUrl: '',
+        gtmPreviewModeUrl: '',
+      },
+      preventNavigationEvents: [],
+      authentication: {
+        username: '',
+        password: '',
+      },
+      application: {
+        localStorage: {
+          data: [],
         },
-        preventNavigationEvents: [],
-        authentication: {
-          username: '',
-          password: '',
+        cookie: {
+          data: [],
         },
-        application: {
-          localStorage: {
-            data: [],
-          },
-          cookie: {
-            data: [],
-          },
-        },
-        browser: [],
-      };
+      },
+      browser: [],
+    };
+  }
 
-      // settings file for complex settings
-      const settingsFilePath =
-        await this.filePathService.getProjectSettingFilePath(projectSlug);
+  private async writeProjectFiles(
+    projectSlug: string,
+    metadata: ProjectInfoDto,
+    settings: SettingDto
+  ) {
+    const settingsFilePath =
+      await this.filePathService.getProjectSettingFilePath(projectSlug);
+    const projectMetadataPath =
+      await this.filePathService.getProjectMetaDataFilePath(projectSlug);
+    const configFilePath = await this.filePathService.getProjectConfigFilePath(
+      projectSlug
+    );
 
-      // metadata file for project brief information
-      const projectMetadataPath =
-        await this.filePathService.getProjectMetaDataFilePath(projectSlug);
-
-      // config file for project specs
-      const configFilePath =
-        await this.filePathService.getProjectConfigFilePath(projectSlug);
-
-      this.fileService.writeJsonFile(projectMetadataPath, projectMetaData);
-      this.fileService.writeJsonFile(configFilePath, []);
-      this.fileService.writeJsonFile(settingsFilePath, projectSettings);
-    } catch (error) {
-      Logger.error(
-        error,
-        `${ProjectInitializationService.name}.${ProjectInitializationService.prototype.initProject.name}`
-      );
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    this.fileService.writeJsonFile(projectMetadataPath, metadata);
+    this.fileService.writeJsonFile(configFilePath, []);
+    this.fileService.writeJsonFile(settingsFilePath, settings);
   }
 
   async initInspectionEventSavingFolder(projectName: string, eventId: string) {

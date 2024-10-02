@@ -1,6 +1,5 @@
 import {
-  HttpException,
-  HttpStatus,
+  BadRequestException,
   Injectable,
   Logger,
   StreamableFile,
@@ -8,57 +7,38 @@ import {
 import { ProjectIoService } from '../../os/project-io/project-io.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { join } from 'path';
-import { createReadStream, existsSync, mkdirSync } from 'fs';
+import { createReadStream, mkdirSync } from 'fs';
 import { FolderService } from '../../os/folder/folder.service';
 
 @Injectable()
 export class ProjectIoFacadeService {
+  private logger = new Logger(ProjectIoFacadeService.name);
   constructor(
-    private projectIoService: ProjectIoService,
-    private folderPathService: FolderPathService,
-    private folderService: FolderService
+    private readonly projectIoService: ProjectIoService,
+    private readonly folderPathService: FolderPathService,
+    private readonly folderService: FolderService
   ) {}
 
   async exportProject(projectSlug: string) {
-    try {
-      const projectRootFolderPath =
-        await this.folderPathService.getRootProjectFolderPath();
-      const projectPath = await this.folderPathService.getProjectFolderPath(
-        projectSlug
-      );
-
-      if (!existsSync(projectPath)) {
-        throw new HttpException(
-          `Project with slug ${projectSlug} not found; absolute path: ${projectPath}`,
-          HttpStatus.NOT_FOUND
-        );
-      }
-
-      const tempFolder = join(projectRootFolderPath, 'temp');
-      mkdirSync(tempFolder, { recursive: true });
-
-      const projectZipPath = join(tempFolder, `${projectSlug}.zip`);
-
-      await this.projectIoService.compressProject(projectPath, projectZipPath);
-      const fileStream = createReadStream(projectZipPath);
-
-      fileStream.on('close', () => {
-        // Wait for the stream to close before deleting the folder
-        this.folderService.deleteFolder(tempFolder);
-      });
-
-      return new StreamableFile(fileStream);
-    } catch (error) {
-      if (error instanceof HttpException) {
-        Logger.error(
-          error,
-          `${ProjectIoFacadeService.name}.${ProjectIoFacadeService.prototype.exportProject.name}`
-        );
-        throw new HttpException(error, HttpStatus.BAD_REQUEST);
-      }
-
-      throw error;
+    if (!projectSlug) {
+      throw new BadRequestException('Project slug is required');
     }
+    const projectPath = await this.folderPathService.getProjectFolderPath(
+      projectSlug
+    );
+    const tempFolder = await this.createTempFolder();
+    const projectZipPath = join(tempFolder, `${projectSlug}.zip`);
+
+    await this.projectIoService.compressProject(projectPath, projectZipPath);
+    const fileStream = createReadStream(projectZipPath);
+
+    fileStream.on('close', () => {
+      // Wait for the stream to close before deleting the folder
+      this.folderService.deleteFolder(tempFolder);
+      this.cleanupTempFolder(tempFolder);
+    });
+
+    return new StreamableFile(fileStream);
   }
 
   async importProject(
@@ -77,5 +57,21 @@ export class ProjectIoFacadeService {
     this.folderService.deleteFolder(
       await this.folderPathService.getProjectFolderPath(projectSlug)
     );
+  }
+
+  private async createTempFolder(): Promise<string> {
+    const projectRootFolderPath =
+      await this.folderPathService.getRootProjectFolderPath();
+    const tempFolder = join(projectRootFolderPath, 'temp');
+    mkdirSync(tempFolder, { recursive: true });
+    return tempFolder;
+  }
+
+  private cleanupTempFolder(tempFolder: string) {
+    try {
+      this.folderService.deleteFolder(tempFolder);
+    } catch (error) {
+      this.logger.error(`Error cleaning up temp folder`);
+    }
   }
 }

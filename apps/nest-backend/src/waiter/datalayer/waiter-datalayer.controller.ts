@@ -14,7 +14,6 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
-import { ValidationResult } from '@utils';
 import { WaiterEventInspectionService } from './waiter-event-inspection.service';
 import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';

@@ -32,6 +32,7 @@ export class WaiterReportController {
     description: 'The name of the project to which the event belongs.',
   })
   @Get(':projectSlug')
+  @Log()
   async getProjectEventReports(@Param('projectSlug') projectSlug: string) {
     return await this.projectReportService.getProjectEventReports(projectSlug);
   }

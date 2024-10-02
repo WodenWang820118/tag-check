@@ -18,6 +18,7 @@ export class WaiterRecordingController {
     description: 'The name of the project to which the event belongs.',
   })
   @Get(':projectSlug')
+  @Log()
   async getProjectRecordings(@Param('projectSlug') projectSlug: string) {
     return await this.projectRecordingService.getProjectRecordings(projectSlug);
   }

@@ -10,10 +10,10 @@ import { FileService } from '../../os/file/file.service';
 @Injectable()
 export class ProjectAbstractReportService {
   constructor(
-    private folderPathService: FolderPathService,
-    private folderService: FolderService,
-    private filePathService: FilePathService,
-    private fileService: FileService
+    private readonly folderPathService: FolderPathService,
+    private readonly folderService: FolderService,
+    private readonly filePathService: FilePathService,
+    private readonly fileService: FileService
   ) {}
 
   async writeSingleAbstractTestResultJson(
