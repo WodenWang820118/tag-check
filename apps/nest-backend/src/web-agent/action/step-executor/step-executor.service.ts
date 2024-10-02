@@ -4,11 +4,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 enum BrowserAction {
-  SETVIEWPORT = 'SETVIEWPORT',
-  NAVIGATE = 'NAVIGATE',
-  WAITFORELEMENT = 'WAITFORELEMENT',
-  KEYDOWN = 'KEYDOWN',
-  KEYUP = 'KEYUP',
+  SETVIEWPORT = 'setViewport',
+  NAVIGATE = 'navigate',
+  WAITFORELEMENT = 'waitForElement',
+  KEYDOWN = 'keydown',
+  KEYUP = 'kkeyup',
 }
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
 import { ACTION_HANDLERS, ActionHandler } from '..//handlers/utils';

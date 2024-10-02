@@ -62,7 +62,7 @@ export class StepExecutorUtilsService {
     await this.handleNavigationIfNeeded(page, isLastStep, 2000);
   }
 
-  async handleWaitForElement(page: Page, step: any, timeout: number) {
+  async handleWaitForElement(page: Page, step: Step, timeout: number) {
     for (const selector of step.selectors) {
       try {
         // sometimes SSR may send multiple SPA pages, so it's necessary to wait for navigation

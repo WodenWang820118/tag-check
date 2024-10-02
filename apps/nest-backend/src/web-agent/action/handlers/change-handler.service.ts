@@ -11,6 +11,7 @@ import { Page } from 'puppeteer';
 import { ActionHandler, getFirstSelector } from './utils';
 import { ChangeStrategyService } from '../strategies/change-strategies/change-strategy.service';
 import { ActionUtilsService } from './../action-utils/action-utils.service';
+import { Step } from '@utils';
 
 @Injectable()
 export class ChangeHandler implements ActionHandler {
@@ -27,7 +28,7 @@ export class ChangeHandler implements ActionHandler {
     page: Page,
     projectName: string,
     eventId: string,
-    step: any,
+    step: Step,
     isLastStep: boolean,
     timeout = 3000
   ): Promise<void> {
