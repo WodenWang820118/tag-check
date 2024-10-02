@@ -4,6 +4,7 @@ import {
   ArgumentsHost,
   HttpException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { addDoc, collection } from 'firebase/firestore';
@@ -17,13 +18,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const status =
-      exception instanceof HttpException ? exception.getStatus() : 500;
+    let status: number;
+    let errorMessage: string | object;
 
-    const errorMessage =
-      exception instanceof HttpException
-        ? exception.getResponse()
-        : 'Internal Server Error';
+    if (
+      exception instanceof HttpException ||
+      exception instanceof NotFoundException
+    ) {
+      status = exception.getStatus();
+      errorMessage = exception.getResponse();
+    } else {
+      status = 500;
+      errorMessage = 'Internal Server Error';
+    }
 
     // Log the error to Firebase
     await this.logErrorToFirebase(exception, request, status);

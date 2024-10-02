@@ -61,6 +61,9 @@ export class ConfigurationService {
       })
       .then((res) => {
         return res?.getDataValue('value');
+      })
+      .catch((err) => {
+        return err;
       });
   }
 
@@ -71,6 +74,9 @@ export class ConfigurationService {
       })
       .then((res) => {
         return res?.getDataValue('value');
+      })
+      .catch((err) => {
+        return err;
       });
   }
 }

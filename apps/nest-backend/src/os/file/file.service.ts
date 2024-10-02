@@ -1,3 +1,4 @@
+import { existsSync } from 'fs';
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -8,6 +9,7 @@ import {
   HttpStatus,
   Injectable,
   Logger,
+  NotFoundException,
   StreamableFile,
 } from '@nestjs/common';
 import {
@@ -32,81 +34,48 @@ export class FileService {
   ) {}
 
   readJsonFile<T>(filePath: string): T {
-    try {
-      const fileContent = readFileSync(`${filePath}`, 'utf8');
-      const parsedData = JSON.parse(fileContent) as T;
-
-      // Optional: Add runtime type checking here if needed
-      // For example, you could use a library like 'joi' or 'zod' to validate the structure
-
-      return parsedData;
-    } catch (error) {
-      Logger.error(
-        error,
-        `${FileService.name}.${FileService.prototype.readJsonFile.name}`
-      );
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+    if (!existsSync(filePath)) {
+      throw new NotFoundException('File not found');
     }
+
+    const fileContent = readFileSync(`${filePath}`, 'utf8');
+    const parsedData = JSON.parse(fileContent) as T;
+    return parsedData;
   }
 
   // get all json files in the project folder
   async getOperationJsonByProject(projectSlug: string) {
-    try {
-      const dirPath = await this.folderPathService.getRecordingFolderPath(
-        projectSlug
-      );
-      const jsonFiles = this.folderService.getJsonFilesFromDir(dirPath);
-      return jsonFiles.filter((file) => {
-        file.endsWith('.json');
-      });
-    } catch (error) {
-      Logger.error(
-        error,
-        `${FileService.name}.${FileService.prototype.getOperationJsonByProject.name}`
-      );
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+    const dirPath = await this.folderPathService.getRecordingFolderPath(
+      projectSlug
+    );
+    const jsonFiles = this.folderService
+      .getJsonFilesFromDir(dirPath)
+      .filter((file) => file.endsWith('.json'));
+
+    if (!jsonFiles) {
+      throw new NotFoundException('No JSON files found');
     }
+
+    return jsonFiles;
   }
 
   // TODO: refactor; there might be multiple files
   async getEventReport(projectSlug: string, eventId: string) {
-    try {
-      const inspectionResultPath =
-        await this.folderPathService.getInspectionEventFolderPath(
-          projectSlug,
-          eventId
-        );
-      const regex = new RegExp(`${eventId}.*\\.xlsx$`, 'i');
-      const files =
-        this.folderService.readFolderFileNames(inspectionResultPath);
-      Logger.log(
-        `Files: ${files}`,
-        `${FileService.name}.${FileService.prototype.getEventReport.name}`
+    const inspectionResultPath =
+      await this.folderPathService.getInspectionEventFolderPath(
+        projectSlug,
+        eventId
       );
-      const filteredFiles = files.filter((file) => regex.test(file));
+    const regex = new RegExp(`${eventId}.*\\.xlsx$`, 'i');
+    const files = this.folderService.readFolderFileNames(inspectionResultPath);
 
-      const filePath = join(inspectionResultPath, filteredFiles[0]);
-
-      return new StreamableFile(createReadStream(filePath));
-    } catch (error) {
-      Logger.error(
-        error,
-        `${FileService.name}.${FileService.prototype.getEventReport.name}`
-      );
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    const filteredFiles = files.filter((file) => regex.test(file));
+    const filePath = join(inspectionResultPath, filteredFiles[0]);
+    return new StreamableFile(createReadStream(filePath));
   }
 
   downloadFile(filePath: string) {
-    try {
-      return new StreamableFile(createReadStream(filePath));
-    } catch (error) {
-      Logger.error(
-        error,
-        `${FileService.name}.${FileService.prototype.downloadFile.name}`
-      );
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return new StreamableFile(createReadStream(filePath));
   }
 
   async downloadFiles(filePaths: string[], outputFilePath: string) {
@@ -151,21 +120,17 @@ export class FileService {
   }
 
   async readReport(projectSlug: string, eventId: string, reportName: string) {
-    try {
-      const reportPath = await this.filePathService.getReportFilePath(
-        projectSlug,
-        eventId,
-        reportName
-      );
+    const reportPath = await this.filePathService.getReportFilePath(
+      projectSlug,
+      eventId,
+      reportName
+    );
 
-      return new StreamableFile(createReadStream(reportPath));
-    } catch (error) {
-      Logger.error(
-        error,
-        `${FileService.name}.${FileService.prototype.readReport.name}`
-      );
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+    if (!existsSync(reportPath)) {
+      throw new NotFoundException('Report not found');
     }
+
+    return new StreamableFile(createReadStream(reportPath));
   }
 
   writeJsonFile(filePath: string, content: any) {
@@ -181,14 +146,6 @@ export class FileService {
   }
 
   deleteFile(filePath: string) {
-    try {
-      rmSync(filePath);
-    } catch (error) {
-      Logger.error(
-        error,
-        `${FileService.name}.${FileService.prototype.deleteFile.name}`
-      );
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    rmSync(filePath);
   }
 }

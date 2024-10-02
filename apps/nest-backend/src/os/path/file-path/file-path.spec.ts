@@ -7,6 +7,11 @@ import { join } from 'path';
 import { describe, beforeEach, expect, vi } from 'vitest';
 import { ConfigsService } from '../../../configs/configs.service';
 
+// Mock the entire fs module
+vi.mock('fs', () => ({
+  existsSync: vi.fn().mockReturnValue(true),
+}));
+
 describe('FilePathService', () => {
   let service: FilePathService;
   let configsService: ConfigsService;
