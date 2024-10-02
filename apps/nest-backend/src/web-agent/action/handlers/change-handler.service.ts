@@ -1,7 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable, HttpException, Logger, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { ActionHandler, getFirstSelector } from './utils';
 import { ChangeStrategyService } from '../strategies/change-strategies/change-strategy.service';
@@ -10,8 +15,8 @@ import { ActionUtilsService } from './../action-utils/action-utils.service';
 @Injectable()
 export class ChangeHandler implements ActionHandler {
   constructor(
-    private changeStrategyService: ChangeStrategyService,
-    private actionUtilsService: ActionUtilsService
+    private readonly changeStrategyService: ChangeStrategyService,
+    private readonly actionUtilsService: ActionUtilsService
   ) {}
 
   // TODO: may need to follow the click handler logic
@@ -43,10 +48,12 @@ export class ChangeHandler implements ActionHandler {
           break;
         }
       } catch (error) {
-        throw new HttpException(
-          `Failed to change value with selector ${selector}. Reason: ${error}`,
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
+        if (error instanceof NotFoundException) {
+          throw error;
+        }
+        if (error instanceof InternalServerErrorException) {
+          throw error;
+        }
       }
     }
   }
@@ -58,17 +65,13 @@ export class ChangeHandler implements ActionHandler {
     selector: string,
     value: string,
     timeout?: number
-  ): Promise<boolean | undefined> {
+  ): Promise<boolean> {
     try {
       const selectorType = this.actionUtilsService.getSelectorType(selector);
       if (!selectorType) {
-        Logger.error(
-          'Selector type is required to change the element',
-          `${ChangeHandler.name}.${ChangeHandler.prototype.changeElement.name}`
-        );
-        return false;
+        throw new Error('Invalid selector type');
       }
-      return await this.changeStrategyService.changeElement(
+      const result = await this.changeStrategyService.changeElement(
         page,
         projectName,
         eventId,
@@ -77,10 +80,22 @@ export class ChangeHandler implements ActionHandler {
         value,
         timeout
       );
+      if (!result) {
+        throw new NotFoundException(
+          `Element with selector ${selector} not found`
+        );
+      }
+      return result;
     } catch (error) {
       Logger.error(
         error,
         `${ChangeHandler.name}.${ChangeHandler.prototype.changeElement.name}`
+      );
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to change element with selector ${selector}. Reason: ${error}`
       );
     }
   }

@@ -3,6 +3,7 @@ import { Page } from 'puppeteer';
 
 @Injectable()
 export class PageHoverService {
+  private readonly logger = new Logger(PageHoverService.name);
   async operate(
     page: Page,
     projectName: string,
@@ -20,9 +21,8 @@ export class PageHoverService {
       ]);
       return true;
     } catch (error) {
-      Logger.error(
-        error,
-        `${PageHoverService.name}.${PageHoverService.prototype.operate.name}`
+      this.logger.error(
+        `Failed to hover on element with selector "${selector}": ${error}`
       );
       return false;
     }

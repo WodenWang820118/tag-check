@@ -4,6 +4,7 @@ import { ClickOperation } from './utils';
 
 @Injectable()
 export class PageClickService implements ClickOperation {
+  private readonly logger = new Logger(PageClickService.name);
   async operate(
     page: Page,
     projectName: string,
@@ -21,7 +22,9 @@ export class PageClickService implements ClickOperation {
       ]);
       return true;
     } catch (error) {
-      Logger.error(error, 'PageClickService.operate');
+      this.logger.error(
+        `Failed to click on element with selector "${selector}": ${error}`
+      );
       return false;
     }
   }

@@ -6,6 +6,7 @@ import { ActionUtilsService } from '../../action-utils/action-utils.service';
 
 @Injectable()
 export class EvaluateChangeService implements ChangeOperation {
+  private readonly logger = new Logger(EvaluateChangeService.name);
   constructor(private actionUtilsService: ActionUtilsService) {}
   async operate(
     page: Page,
@@ -18,10 +19,7 @@ export class EvaluateChangeService implements ChangeOperation {
   ): Promise<boolean> {
     // TODO: verifiy this
     if (!value) {
-      Logger.error(
-        'Value is required to change the element',
-        `${EvaluateChangeService.name}.${EvaluateChangeService.prototype.operate.name}`
-      );
+      this.logger.error('Value is required to change the element');
       return false;
     }
 
@@ -49,9 +47,8 @@ export class EvaluateChangeService implements ChangeOperation {
       ]);
       return true;
     } catch (error) {
-      Logger.error(
-        error,
-        `${EvaluateChangeService.name}.${EvaluateChangeService.prototype.operate.name}`
+      this.logger.error(
+        `Failed to change element with selector "${selector}": ${error}`
       );
       return false;
     }

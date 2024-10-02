@@ -12,7 +12,6 @@ import { XlsxReportGroupEventsService } from '../os/xlsx-report/xlsx-report-grou
 import { FileService } from '../os/file/file.service';
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
 import { ConfigsService } from '../configs/configs.service';
-import { Log } from '../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class GroupEventsInspectionService {
@@ -116,14 +115,12 @@ export class GroupEventsInspectionService {
     return data;
   }
 
-  @Log()
   stopOperation() {
     if (this.abortController) {
       this.abortController.abort();
     }
   }
 
-  @Log('Cleaning up resources')
   private async cleanup(): Promise<void> {
     if (this.currentBrowser) {
       try {

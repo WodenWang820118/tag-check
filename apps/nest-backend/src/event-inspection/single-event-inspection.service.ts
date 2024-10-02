@@ -5,7 +5,6 @@ import { EventInspectionPresetDto } from '@utils';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
 import { FolderPathService } from '../os/path/folder-path/folder-path.service';
 import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
-import { Log } from '../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class SingleEventInspectionService {
@@ -81,7 +80,6 @@ export class SingleEventInspectionService {
     }
   }
 
-  @Log()
   abort() {
     if (this.abortController) {
       this.abortController.abort();

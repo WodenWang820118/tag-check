@@ -6,6 +6,7 @@ import { FileService } from '../file/file.service';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
+import { Setting } from '@utils';
 
 @Injectable()
 export class ProjectService {
@@ -19,7 +20,7 @@ export class ProjectService {
   async getProjectSettings(projectSlug: string) {
     const settingsFilePath =
       await this.filePathService.getProjectSettingFilePath(projectSlug);
-    return this.fileService.readJsonFile(settingsFilePath);
+    return this.fileService.readJsonFile<Setting>(settingsFilePath);
   }
 
   async getProjectsMetadata() {
