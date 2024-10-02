@@ -8,13 +8,13 @@ import archiver from 'archiver';
 
 @Injectable()
 export class ProjectIoService {
+  private readonly logger = new Logger(ProjectIoService.name);
   async compressProject(
     projectFolderPath: string,
     outputPath: string
   ): Promise<void> {
-    Logger.log(
-      `Compressing project at ${projectFolderPath} to ${outputPath}`,
-      ProjectIoService.name + ProjectIoService.prototype.compressProject.name
+    this.logger.log(
+      `Compressing project at ${projectFolderPath} to ${outputPath}`
     );
     const output = createWriteStream(outputPath);
     const archive = archiver('zip', {
@@ -48,12 +48,10 @@ export class ProjectIoService {
         readStream.pipe(extractStream).on('close', resolve).on('error', reject);
       });
     } catch (error) {
-      Logger.error(
+      this.logger.error(
         `Failed to unzip project ${projectSlug}: ${
           error instanceof Error ? error.message : 'Unknown error'
-        }`,
-        error instanceof Error ? error.stack : undefined,
-        `${ProjectIoService.name}.${this.unzipProject.name}`
+        }`
       );
       throw new HttpException(
         'Failed to unzip project',

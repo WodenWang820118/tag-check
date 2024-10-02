@@ -3,8 +3,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
-  HttpException,
-  HttpStatus,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -17,6 +15,7 @@ import { FolderPathService } from '../os/path/folder-path/folder-path.service';
 
 @Injectable()
 export class GtmOperatorService {
+  private readonly logger = new Logger(GtmOperatorService.name);
   abortController: AbortController | null = null;
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
@@ -108,15 +107,11 @@ export class GtmOperatorService {
       await recorder.stop();
       return data;
     } catch (error) {
-      Logger.error(
-        error,
-        `${GtmOperatorService.name}.${GtmOperatorService.prototype.inspectSingleEventViaGtm.name}`
-      );
+      this.logger.error(error);
 
       await this.puppeteerUtilsService.cleanup(browser, page);
-      throw new HttpException(
-        'Failed to perform GTM validation',
-        HttpStatus.INTERNAL_SERVER_ERROR
+      throw new InternalServerErrorException(
+        'Failed to perform GTM validation'
       );
     }
   }

@@ -20,6 +20,8 @@ import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('datalayer')
 export class WaiterDataLayerController {
+  private readonly logger = new Logger(WaiterDataLayerController.name);
+
   constructor(
     private projectAbstractReportService: ProjectAbstractReportService,
     private waiterEventInspectionService: WaiterEventInspectionService
@@ -97,10 +99,7 @@ export class WaiterDataLayerController {
         throw error;
       }
 
-      Logger.error(
-        error,
-        `${WaiterDataLayerController.name}.${WaiterDataLayerController.prototype.inspectSingleEvent.name}`
-      );
+      this.logger.error(error);
       throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -149,10 +148,7 @@ export class WaiterDataLayerController {
       await this.waiterEventInspectionService.stopOperation();
       return { message: 'Operation stopped successfully' };
     } catch (error) {
-      Logger.error(
-        error,
-        `${WaiterDataLayerController.name}.${WaiterDataLayerController.prototype.stopOperation.name}`
-      );
+      this.logger.error(error);
       throw new HttpException(
         'Failed to stop operation',
         HttpStatus.INTERNAL_SERVER_ERROR

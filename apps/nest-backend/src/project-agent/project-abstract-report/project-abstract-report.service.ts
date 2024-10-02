@@ -1,6 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { FolderService } from '../../os/folder/folder.service';
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { IReportDetails, OutputValidationResult } from '@utils';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { existsSync, mkdirSync, statSync } from 'fs';
@@ -9,6 +16,7 @@ import { FileService } from '../../os/file/file.service';
 
 @Injectable()
 export class ProjectAbstractReportService {
+  private readonly logger = new Logger(ProjectAbstractReportService.name);
   constructor(
     private readonly folderPathService: FolderPathService,
     private readonly folderService: FolderService,
@@ -47,11 +55,8 @@ export class ProjectAbstractReportService {
         this.fileService.writeJsonFile(abstractPath, updatedReport);
       }
     } catch (error) {
-      Logger.error(
-        error,
-        `${ProjectAbstractReportService.name}.${ProjectAbstractReportService.prototype.writeSingleAbstractTestResultJson.name}`
-      );
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+      this.logger.error(error);
+      throw new InternalServerErrorException('Failed to write report');
     }
   }
 
@@ -95,31 +100,17 @@ export class ProjectAbstractReportService {
         );
 
       if (!existsSync(folderPath)) {
-        throw new HttpException(
-          `Report not found: ${folderPath}`,
-          HttpStatus.NOT_FOUND
-        );
+        throw new NotFoundException(`Report not found: ${folderPath}`);
       }
 
       this.folderService.deleteFolder(folderPath);
     } catch (error) {
-      if (error instanceof HttpException) {
-        Logger.error(
-          error,
-          `${ProjectAbstractReportService.name}.${ProjectAbstractReportService.prototype.deleteSingleAbstractTestResultFolder.name}`
-        );
-        throw new HttpException(
-          'Failed to delete report',
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
+      if (error instanceof NotFoundException) {
+        this.logger.error(error);
+        throw error;
       }
 
-      Logger.error(
-        error,
-        ProjectAbstractReportService.name +
-          ProjectAbstractReportService.prototype
-            .deleteSingleAbstractTestResultFolder.name
-      );
+      this.logger.error(error);
       throw new HttpException(
         'Failed to delete report',
         HttpStatus.INTERNAL_SERVER_ERROR
@@ -135,10 +126,7 @@ export class ProjectAbstractReportService {
       );
 
       if (!existsSync(filePath)) {
-        throw new HttpException(
-          `Report not found: ${filePath}`,
-          HttpStatus.NOT_FOUND
-        );
+        throw new NotFoundException(`Report not found: ${filePath}`);
       }
 
       const completedTime = statSync(filePath).mtime;
@@ -149,14 +137,11 @@ export class ProjectAbstractReportService {
         completedTime,
       };
     } catch (error) {
-      if (error instanceof HttpException) {
+      if (error instanceof NotFoundException) {
         throw error;
       }
 
-      Logger.error(
-        error,
-        `${ProjectAbstractReportService.name}.${ProjectAbstractReportService.prototype.getSingleAbstractTestResultJson.name}`
-      );
+      this.logger.error(error);
       throw new HttpException('Failed to read report', HttpStatus.BAD_REQUEST);
     }
   }

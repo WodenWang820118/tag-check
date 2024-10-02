@@ -11,8 +11,8 @@ import { FilePathService } from '../path/file-path/file-path.service';
 export class XlsxReportSingleEventService {
   private readonly logger = new Logger(XlsxReportSingleEventService.name);
   constructor(
-    private folderPathService: FolderPathService,
-    private filePathService: FilePathService
+    private readonly folderPathService: FolderPathService,
+    private readonly filePathService: FilePathService
   ) {}
   async writeXlsxFile(
     fileName: string,

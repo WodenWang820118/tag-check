@@ -7,9 +7,11 @@ import { EventInspectionPresetDto } from '../../../dto/event-inspection-preset.d
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DataLayerService } from '../../action/web-monitoring/data-layer/data-layer.service';
 import { ConfigsService } from '../../../configs/configs.service';
+import { Step } from '@utils';
 
 @Injectable()
 export class StepExecutorUtilsService {
+  private readonly logger = new Logger(StepExecutorUtilsService.name);
   constructor(
     private readonly dataLayerService: DataLayerService,
     private readonly configsService: ConfigsService
@@ -34,10 +36,7 @@ export class StepExecutorUtilsService {
       try {
         await page.waitForNavigation({ timeout: delay });
       } catch (error) {
-        Logger.log(
-          'No Navigation needed',
-          `${StepExecutorUtilsService.name}.${StepExecutorUtilsService.prototype.handleNavigationIfNeeded.name}`
-        );
+        this.logger.error(`No Navigation needed`);
       }
       await new Promise((resolve) => setTimeout(resolve, 2000));
     }
@@ -49,7 +48,7 @@ export class StepExecutorUtilsService {
 
   async handleNavigate(
     page: Page,
-    step: any,
+    step: Step,
     state: any,
     isLastStep: boolean,
     application: EventInspectionPresetDto['application']
@@ -78,10 +77,7 @@ export class StepExecutorUtilsService {
         ]);
         return;
       } catch (error) {
-        Logger.error(
-          `Failed to find selector: ${selector}`,
-          `${StepExecutorUtilsService.name}.${StepExecutorUtilsService.prototype.handleWaitForElement.name}`
-        );
+        this.logger.error(`Failed to find selector: ${selector}`);
       }
     }
     await page.close();
@@ -99,15 +95,12 @@ export class StepExecutorUtilsService {
       return { parsedLocalStorage, cookiesData };
     });
 
-    Logger.log(
-      `Final check: ${JSON.stringify(finalCheck, null, 2)}`,
-      `${StepExecutorUtilsService.name}.${StepExecutorUtilsService.prototype.verifyLocalStorageAndCookies.name}`
-    );
+    this.logger.log(`Final check: ${JSON.stringify(finalCheck, null, 2)}`);
   }
 
   private async handleFirstNavigation(
     page: Page,
-    step: any,
+    step: Step,
     state: any,
     application: EventInspectionPresetDto['application']
   ): Promise<void> {

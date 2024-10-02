@@ -15,6 +15,7 @@ import {
 
 @Injectable()
 export class RequestInterceptorService {
+  private readonly logger = new Logger(RequestInterceptorService.name);
   private rawRequest = new BehaviorSubject<string>('');
 
   constructor(private dataLayerService: DataLayerService) {}
@@ -35,10 +36,7 @@ export class RequestInterceptorService {
       const requestUrl = request.url();
 
       if (this.isMatchingGa4Request(requestUrl, eventName, measurementId)) {
-        Logger.log(
-          `Request captured: ${requestUrl}`,
-          `${RequestInterceptorService.name}.${RequestInterceptorService.prototype.setupInterception.name}`
-        );
+        this.logger.log(`Request captured: ${requestUrl}`);
         this.setRawRequest(requestUrl);
 
         try {
@@ -49,12 +47,12 @@ export class RequestInterceptorService {
             eventId
           );
         } catch (error) {
-          Logger.error(`Error updating data layer: ${error}`);
+          this.logger.error(`Error updating data layer: ${error}`);
         }
 
         await request.abort();
       } else {
-        Logger.warn(`Request: ${requestUrl}`);
+        this.logger.warn(`Request: ${requestUrl}`);
         await request.continue();
       }
     });
@@ -62,19 +60,17 @@ export class RequestInterceptorService {
     // Add response interception for more information
     page.on('response', async (response) => {
       const url = response.url();
-      const context = `${RequestInterceptorService.name}.${RequestInterceptorService.prototype.setupInterception.name}`;
       if (this.isMatchingGa4Request(url, eventName, measurementId)) {
-        Logger.log(`Intercepted GA4 response: ${url}`, context);
-        Logger.log(`Response status: ${response.status()}`, context);
-        Logger.log(
-          `Response headers: ${JSON.stringify(response.headers())}`,
-          context
+        this.logger.log(`Intercepted GA4 response: ${url}`);
+        this.logger.log(`Response status: ${response.status()}`);
+        this.logger.log(
+          `Response headers: ${JSON.stringify(response.headers())}`
         );
         try {
           const responseBody = await response.text();
-          Logger.log(`Response body: ${responseBody}`, context);
+          this.logger.log(`Response body: ${responseBody}`);
         } catch (error) {
-          Logger.error(`Error reading response body: ${error}`, context);
+          this.logger.error(`Error reading response body: ${error}`);
         }
       }
     });
@@ -108,10 +104,10 @@ export class RequestInterceptorService {
       first((request) => !!request),
       catchError((error) => {
         if (error instanceof TimeoutError) {
-          Logger.warn('Timeout occurred while waiting for raw request');
+          this.logger.warn('Timeout occurred while waiting for raw request');
           return of('');
         }
-        Logger.error(`Error getting raw request: ${error}`);
+        this.logger.error(`Error getting raw request: ${error}`);
         return of('');
       })
     );

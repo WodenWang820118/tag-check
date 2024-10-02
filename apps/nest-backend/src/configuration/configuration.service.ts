@@ -11,8 +11,8 @@ import { ConfigsService } from '../configs/configs.service';
 export class ConfigurationService {
   constructor(
     @InjectRepository(Configuration)
-    private configurationRepository: Repository<Configuration>,
-    private configsService: ConfigsService
+    private readonly configurationRepository: Repository<Configuration>,
+    private readonly configsService: ConfigsService
   ) {}
 
   async create(

@@ -9,6 +9,7 @@ import { DataLayerValidationUtilsService } from './data-layer-validation-utils.s
 
 @Injectable()
 export class EcommerceEventValidationStrategy implements ValidationStrategy {
+  private readonly logger = new Logger(EcommerceEventValidationStrategy.name);
   constructor(
     private dataLayerValidationUtilsService: DataLayerValidationUtilsService
   ) {}
@@ -24,15 +25,14 @@ export class EcommerceEventValidationStrategy implements ValidationStrategy {
       // Check if eventObj contains { ecommerce: null }
       if (eventObj.ecommerce === null) {
         this.ecommerceReset = true;
-        Logger.log(this.ecommerceReset, 'ecommerce');
+        this.logger.log(this.ecommerceReset);
       }
 
       // If the event is found according to the spec, check the flag
       if (eventObj.event === dataLayerSpec.event) {
         if (!this.ecommerceReset) {
-          Logger.warn(
-            `ecommerce must be reset before firing ${dataLayerSpec.event}.`,
-            `${EcommerceEventValidationStrategy.name}.${EcommerceEventValidationStrategy.prototype.validateDataLayer.name}`
+          this.logger.warn(
+            `ecommerce must be reset before firing ${dataLayerSpec.event}.`
           );
           return new ValidationResultDto(
             false,

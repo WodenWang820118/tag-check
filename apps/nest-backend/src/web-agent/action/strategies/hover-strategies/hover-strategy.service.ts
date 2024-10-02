@@ -56,10 +56,7 @@ export class HoverStrategyService {
     ) => Promise<boolean>,
     timeout = 10000
   ): Promise<boolean> {
-    Logger.log(
-      `selector: ${selector}`,
-      `${HoverStrategyService.name}.${HoverStrategyService.prototype.hoverElement.name}`
-    );
+    this.logger.log(`selector: ${selector}`);
 
     const serviceInstance =
       hoverMethod === this.pageHoverService.operate

@@ -7,8 +7,8 @@ import { Log } from '../../logging-interceptor/logging-interceptor.service';
 @Controller('projects')
 export class WaiterProjectDataRetrievalController {
   constructor(
-    private projectMetadataService: ProjectMetadataService,
-    private projectImageService: ProjectImageService
+    private readonly projectMetadataService: ProjectMetadataService,
+    private readonly projectImageService: ProjectImageService
   ) {}
 
   @ApiOperation({

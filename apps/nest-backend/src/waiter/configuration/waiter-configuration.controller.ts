@@ -15,7 +15,7 @@ import { Log } from '../../logging-interceptor/logging-interceptor.service';
 export class WaiterConfigurationController {
   constructor(private waiterConfigurationService: WaiterConfigurationService) {}
 
-  @Get('/debug-sentry')
+  @Get('/debug')
   @Log()
   getError() {
     throw new Error('My first Sentry error!');

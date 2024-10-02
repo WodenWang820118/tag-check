@@ -12,6 +12,7 @@ import { InspectorSingleEventService } from '../inspector/inspector-single-event
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
 @Injectable()
 export class EventInspectionPipelineService {
+  private readonly logger = new Logger(EventInspectionPipelineService.name);
   constructor(
     private readonly inspectorSingleEventService: InspectorSingleEventService,
     private readonly projectXlsxReportService: ProjectXlsxReportService,
@@ -56,10 +57,7 @@ export class EventInspectionPipelineService {
       );
       return data;
     } catch (error) {
-      Logger.error(
-        error,
-        `${EventInspectionPipelineService}.${EventInspectionPipelineService.prototype.singleEventInspectionRecipe.name}`
-      );
+      this.logger.error(error);
     }
   }
 

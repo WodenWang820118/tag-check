@@ -75,10 +75,7 @@ export class WebAgentUtilsService {
       const dataLayer = await this.getOptimizedDataLayer(projectSlug, eventId);
       const destinationUrl = page.url();
 
-      Logger.log(
-        'Test completed',
-        `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
-      );
+      this.logger.log('Test completed');
 
       return {
         dataLayer,
@@ -86,10 +83,7 @@ export class WebAgentUtilsService {
         destinationUrl,
       };
     } catch (error) {
-      Logger.error(
-        error,
-        `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
-      );
+      this.logger.error(`Failed to perform test: ${error}`);
       throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -126,23 +120,14 @@ export class WebAgentUtilsService {
       this.requestInterceptorService.getRawRequest().pipe(
         map((request) => {
           if (request) {
-            Logger.log(
-              `Request captured in web-agent: ${request}`,
-              'WebAgentUtilsService.performTest'
-            );
+            this.logger.log(`Request captured in web-agent: ${request}`);
             return request;
           }
-          Logger.error(
-            'No request captured',
-            `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
-          );
+          this.logger.error('No request captured');
           return '';
         }),
         catchError((error) => {
-          Logger.error(
-            error,
-            `${WebAgentUtilsService.name}.${WebAgentUtilsService.prototype.performTest.name}`
-          );
+          this.logger.error(`Failed to capture request: ${error}`);
           return '';
         })
       )

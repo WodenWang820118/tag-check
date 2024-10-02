@@ -5,6 +5,7 @@ import { Page, ElementHandle } from 'puppeteer';
 
 @Injectable()
 export class ActionUtilsService {
+  private readonly logger = new Logger(ActionUtilsService.name);
   getSelectorType(selector: string) {
     try {
       if (selector.startsWith(SelectorSymbol.CSSID)) {
@@ -23,7 +24,7 @@ export class ActionUtilsService {
         return SelectorType.CLASS;
       }
     } catch (error) {
-      Logger.error(error, 'SelectorSymbol');
+      this.logger.error(error);
     }
   }
 
@@ -40,10 +41,7 @@ export class ActionUtilsService {
       case 'aria': {
         const match = selector.match(/aria\/(aria-\w+)\/(.+)/);
         if (!match) {
-          Logger.error(
-            `Invalid ARIA selector: ${selector}`,
-            'evaluate.selectorFunctions'
-          );
+          this.logger.error(`Invalid ARIA selector: ${selector}`);
           return null;
         }
 
@@ -76,10 +74,7 @@ export class ActionUtilsService {
         return this.queryShadowDom(shadowHostSelector, shadowDomSelector);
       }
       default:
-        Logger.error(
-          `Unknown selector type: ${selectorType}`,
-          'evaluate.selectorFunctions'
-        );
+        this.logger.error(`Unknown selector type: ${selectorType}`);
         return null;
     }
   }

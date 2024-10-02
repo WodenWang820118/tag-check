@@ -14,6 +14,7 @@ import { ActionUtilsService } from './../action-utils/action-utils.service';
 
 @Injectable()
 export class ChangeHandler implements ActionHandler {
+  private readonly logger = new Logger(ChangeHandler.name);
   constructor(
     private readonly changeStrategyService: ChangeStrategyService,
     private readonly actionUtilsService: ActionUtilsService
@@ -87,9 +88,8 @@ export class ChangeHandler implements ActionHandler {
       }
       return result;
     } catch (error) {
-      Logger.error(
-        error,
-        `${ChangeHandler.name}.${ChangeHandler.prototype.changeElement.name}`
+      this.logger.error(
+        `Failed to change element with selector ${selector}. Reason: ${error}`
       );
       if (error instanceof NotFoundException) {
         throw error;

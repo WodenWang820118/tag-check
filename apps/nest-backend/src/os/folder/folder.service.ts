@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
 import { extname } from 'path';
 

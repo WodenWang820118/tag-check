@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  StreamableFile,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { existsSync, createReadStream } from 'fs';
 import { join } from 'path';

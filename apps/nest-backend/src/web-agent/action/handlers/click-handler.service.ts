@@ -6,12 +6,12 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { ActionHandler, getFirstSelector, OperationFile, Step } from './utils';
+import { ActionHandler, getFirstSelector } from './utils';
 import { ProjectService } from '../../../os/project/project.service';
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
 import { FilePathService } from '../../../os/path/file-path/file-path.service';
 import { FileService } from '../../../os/file/file.service';
-import { extractEventNameFromId } from '@utils';
+import { extractEventNameFromId, OperationFile, Step } from '@utils';
 import { ActionUtilsService } from '../action-utils/action-utils.service';
 
 @Injectable()

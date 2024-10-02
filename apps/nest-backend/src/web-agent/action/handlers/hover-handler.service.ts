@@ -8,9 +8,10 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { ActionHandler, getFirstSelector, Step } from './utils';
+import { ActionHandler, getFirstSelector } from './utils';
 import { HoverStrategyService } from '../strategies/hover-strategies/hover-strategy.service';
 import { ActionUtilsService } from '../action-utils/action-utils.service';
+import { Step } from '@utils';
 
 @Injectable()
 export class HoverHandler implements ActionHandler {

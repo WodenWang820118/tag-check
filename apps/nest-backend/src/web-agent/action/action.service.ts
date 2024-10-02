@@ -6,9 +6,11 @@ import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto'
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { EventsGatewayService } from '../../events-gateway/events-gateway.service';
+import { OperationFile } from '@utils';
 
 @Injectable()
 export class ActionService {
+  private readonly logger = new Logger(ActionService.name);
   constructor(
     private readonly fileService: FileService,
     private readonly filePathService: FilePathService,
@@ -22,7 +24,7 @@ export class ActionService {
     eventId: string,
     application: EventInspectionPresetDto['application']
   ) {
-    const operation: { steps: any[] } = this.fileService.readJsonFile(
+    const operation = this.fileService.readJsonFile<OperationFile>(
       await this.filePathService.getOperationFilePath(projectSlug, eventId)
     );
     if (!operation || !operation.steps) return;
@@ -39,11 +41,7 @@ export class ActionService {
         isFirstNavigation: true,
       };
 
-      Logger.log(
-        `Performing step ${i + 1} of ${lastStep}`,
-        `${ActionService.name}.${ActionService.prototype.performOperation.name}`
-      );
-
+      this.logger.log(`Performing step ${i + 1} of ${lastStep}`);
       this.eventsGatewayService.sendProgressUpdate(lastStep, i + 1); // Send progress update
 
       await this.stepExecutorService.executeStep(
@@ -56,10 +54,6 @@ export class ActionService {
         application
       );
     }
-
-    Logger.log(
-      'Operation performed successfully',
-      `${ActionService.name}.${ActionService.prototype.performOperation.name}`
-    );
+    this.logger.log('Operation performed successfully');
   }
 }

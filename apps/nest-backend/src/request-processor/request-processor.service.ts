@@ -9,6 +9,7 @@ import { standardParameterMap } from './utilities';
 
 @Injectable()
 export class RequestProcessorService {
+  private readonly logger = new Logger(RequestProcessorService.name);
   private excludedEventParams = ['debug_mode'];
   decodeUrl(url: string): string {
     return decodeURIComponent(url);
@@ -105,9 +106,8 @@ export class RequestProcessorService {
       delete updatedDataLayer.currency;
     }
 
-    Logger.log(
-      `recomposeGA4ECEvent-dataLayer${JSON.stringify(updatedDataLayer)}`,
-      `${RequestProcessorService.name}.${RequestProcessorService.prototype.recomposeGA4ECEvent.name}`
+    this.logger.log(
+      `recomposeGA4ECEvent-dataLayer${JSON.stringify(updatedDataLayer)}`
     );
     return updatedDataLayer;
   }

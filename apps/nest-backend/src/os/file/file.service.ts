@@ -27,6 +27,7 @@ import archiver from 'archiver';
 
 @Injectable()
 export class FileService {
+  private readonly logger = new Logger(FileService.name);
   constructor(
     private folderService: FolderService,
     private folderPathService: FolderPathService,
@@ -83,24 +84,17 @@ export class FileService {
     const archive = archiver('zip', {});
 
     output.on('close', () => {
-      Logger.log(
-        `Archive created successfully. Total bytes: ${archive.pointer()}`,
-        `${FileService.name}.${FileService.prototype.downloadFiles.name}`
+      this.logger.log(
+        `Archive created successfully. Total bytes: ${archive.pointer()}`
       );
     });
 
     archive.on('warning', (err: any) => {
-      Logger.warn(
-        'Archive warning: ' + err,
-        `${FileService.name}.${FileService.prototype.downloadFiles.name}`
-      );
+      this.logger.warn('Archive warning: ' + err);
     });
 
     archive.on('error', (err: any) => {
-      Logger.error(
-        'Archive error: ' + err,
-        `${FileService.name}.${FileService.prototype.downloadFiles.name}`
-      );
+      this.logger.error('Archive error: ' + err);
     });
 
     filePaths.forEach((filePath) => {

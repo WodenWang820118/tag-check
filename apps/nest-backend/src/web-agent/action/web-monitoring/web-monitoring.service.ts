@@ -8,9 +8,10 @@ import { ConfigsService } from '../../../configs/configs.service';
 
 @Injectable()
 export class WebMonitoringService {
+  private readonly logger = new Logger(WebMonitoringService.name);
   constructor(
-    private requestService: RequestService,
-    private configsService: ConfigsService
+    private readonly requestService: RequestService,
+    private readonly configsService: ConfigsService
   ) {}
 
   /**
@@ -81,10 +82,7 @@ export class WebMonitoringService {
       await page.goto(url);
       await page.reload({ waitUntil: 'networkidle2' });
     } catch (error) {
-      Logger.error(
-        error,
-        `${WebMonitoringService.name}.${WebMonitoringService.prototype.getAllRequests.name}`
-      );
+      this.logger.error(`Failed to get all requests: ${error}`);
       throw error;
     }
     return await this.requestService.stopRequestCapture(page);

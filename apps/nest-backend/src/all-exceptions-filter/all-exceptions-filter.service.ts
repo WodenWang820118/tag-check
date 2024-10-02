@@ -6,6 +6,7 @@ import {
   Injectable,
   NotFoundException,
   NotAcceptableException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { addDoc, collection } from 'firebase/firestore';
@@ -25,7 +26,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (
       exception instanceof HttpException ||
       exception instanceof NotFoundException ||
-      exception instanceof NotAcceptableException
+      exception instanceof NotAcceptableException ||
+      exception instanceof InternalServerErrorException
     ) {
       status = exception.getStatus();
       errorMessage = exception.getResponse();

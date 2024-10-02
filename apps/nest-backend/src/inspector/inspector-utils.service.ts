@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
 import { StrictDataLayerEvent, ValidationStrategy } from '@utils';
@@ -10,6 +11,7 @@ import { STRATEGY_TYPE, ValidationStrategyType } from './utils';
 
 @Injectable()
 export class InspectorUtilsService {
+  private readonly logger = new Logger(InspectorUtilsService.name);
   constructor(
     @Inject(STRATEGY_TYPE)
     private strategy: { [key: string]: ValidationStrategy }
@@ -50,8 +52,8 @@ export class InspectorUtilsService {
       }
     } catch (error) {
       const errorMessage = `There is no spec available for determining strategy.`;
-      Logger.error(errorMessage, 'Utilities.determineStrategy');
-      throw new HttpException(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+      this.logger.log(errorMessage);
+      throw new InternalServerErrorException(errorMessage);
     }
   }
 

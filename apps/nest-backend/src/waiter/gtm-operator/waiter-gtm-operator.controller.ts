@@ -11,13 +11,14 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ValidationResult, EventInspectionPresetDto } from '@utils';
+import { EventInspectionPresetDto } from '@utils';
 import { GtmOperatorService } from '../../gtm-operator/gtm-operator.service';
 import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('datalayer')
 export class WaiterGtmOperatorController {
+  private readonly logger = new Logger(WaiterGtmOperatorController.name);
   constructor(
     private gtmOperatorService: GtmOperatorService,
     private projectAbstractReportService: ProjectAbstractReportService
@@ -99,12 +100,12 @@ export class WaiterGtmOperatorController {
   })
   @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
   @Log()
-  async stopOperation() {
+  stopOperation() {
     try {
-      await this.gtmOperatorService.stopOperation();
+      this.gtmOperatorService.stopOperation();
       return { message: 'Operation stopped successfully' };
     } catch (error) {
-      Logger.error(error, 'waiter.stopOperation');
+      this.logger.error(error);
       throw new HttpException(
         'Failed to stop operation',
         HttpStatus.INTERNAL_SERVER_ERROR

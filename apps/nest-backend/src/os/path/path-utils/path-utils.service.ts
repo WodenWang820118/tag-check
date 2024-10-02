@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { join } from 'path';
 import { ConfigurationService } from '../../../configuration/configuration.service';
 @Injectable()

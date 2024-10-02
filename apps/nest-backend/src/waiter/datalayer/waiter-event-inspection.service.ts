@@ -6,6 +6,7 @@ import { EventInspectionPresetDto } from '@utils';
 
 @Injectable()
 export class WaiterEventInspectionService {
+  private readonly logger = new Logger(WaiterEventInspectionService.name);
   constructor(
     private singleEventInspectionService: SingleEventInspectionService,
     private groupEventsInspection: GroupEventsInspectionService
@@ -51,10 +52,7 @@ export class WaiterEventInspectionService {
 
   // TODO: might need to separate the cleanup logic
   async stopOperation() {
-    Logger.log(
-      'Stopping the operation',
-      `${WaiterEventInspectionService.name}.${this.stopOperation.name}`
-    );
+    this.logger.log('Stopping the operation');
     // Wait for a short time to ensure the operation has started
     await new Promise((resolve) => setTimeout(resolve, 100));
     this.singleEventInspectionService.abort();

@@ -7,6 +7,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   BaseDataLayerEvent,
   extractEventNameFromId,
+  Spec,
   StrictDataLayerEvent,
   ValidationResult,
 } from '@utils';
@@ -19,6 +20,7 @@ import { InspectorUtilsService } from './inspector-utils.service';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 @Injectable()
 export class InspectorSingleEventService {
+  private readonly logger = new Logger(InspectorSingleEventService.name);
   constructor(
     private readonly webAgentService: WebAgentService,
     private readonly fileService: FileService,
@@ -83,10 +85,7 @@ export class InspectorSingleEventService {
     expectedObj: StrictDataLayerEvent,
     imageSavingFolder: string
   ) {
-    Logger.log(
-      `MeasurementId is empty`,
-      `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
-    );
+    this.logger.log(`MeasurementId is empty`);
     const result = await this.webAgentService.executeAndGetDataLayer(
       page,
       projectSlug,
@@ -106,10 +105,7 @@ export class InspectorSingleEventService {
     );
 
     const destinationUrl = result.destinationUrl;
-    Logger.log(
-      destinationUrl,
-      `${InspectorSingleEventService.name}.${InspectorSingleEventService.prototype.inspectDataLayer.name}`
-    );
+    this.logger.log(`Destination URL: ${destinationUrl}`);
     await this.fileService.writeCacheFile(projectSlug, eventId, result);
     await page.screenshot({
       path: imageSavingFolder,
@@ -155,8 +151,6 @@ export class InspectorSingleEventService {
     );
 
     const rawRequest = result.eventRequest;
-
-    // TODO: Continue to test the request
     const recomposedRequest = this.requestProcessorService.recomposeGA4ECEvent(
       result.eventRequest
     );
@@ -191,11 +185,17 @@ export class InspectorSingleEventService {
   }
 
   private getExpectedObject(
-    specs: any[],
+    specs: Spec[],
     eventId: string
   ): StrictDataLayerEvent {
     const eventName = extractEventNameFromId(eventId);
-    return specs.find((spec: BaseDataLayerEvent) => spec.event === eventName);
+    const spec = specs.find(
+      (spec: BaseDataLayerEvent) => spec.event === eventName
+    );
+    if (!spec) {
+      throw new Error(`No spec found for event ${eventName}`);
+    }
+    return spec;
   }
 
   private async getImageSavingFolder(
