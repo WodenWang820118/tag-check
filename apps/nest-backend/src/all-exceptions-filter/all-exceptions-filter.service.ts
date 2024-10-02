@@ -5,6 +5,7 @@ import {
   HttpException,
   Injectable,
   NotFoundException,
+  NotAcceptableException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { addDoc, collection } from 'firebase/firestore';
@@ -13,7 +14,7 @@ import { FirebaseService } from '../firebase/firebase.service';
 @Catch()
 @Injectable()
 export class AllExceptionsFilter implements ExceptionFilter {
-  constructor(private firebaseService: FirebaseService) {}
+  constructor(private readonly firebaseService: FirebaseService) {}
   async catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -23,7 +24,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (
       exception instanceof HttpException ||
-      exception instanceof NotFoundException
+      exception instanceof NotFoundException ||
+      exception instanceof NotAcceptableException
     ) {
       status = exception.getStatus();
       errorMessage = exception.getResponse();

@@ -9,7 +9,6 @@ import { Page, Browser, ScreenRecorder, Credentials } from 'puppeteer';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { readFileSync } from 'fs';
 import { ConfigsService } from '../../configs/configs.service';
-import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class PuppeteerUtilsService {
@@ -88,7 +87,6 @@ export class PuppeteerUtilsService {
     }
   }
 
-  @Log('Clean up resources')
   async cleanup(browser: Browser, page: Page) {
     if (this.recorder) {
       await this.stopRecorder();
@@ -117,7 +115,6 @@ export class PuppeteerUtilsService {
     }
   }
 
-  @Log()
   async startRecorder(page: Page, folderPath: string): Promise<ScreenRecorder> {
     const recordingPath = join(folderPath, 'recording');
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -130,7 +127,6 @@ export class PuppeteerUtilsService {
     return this.recorder;
   }
 
-  @Log()
   async stopRecorder() {
     if (this.recorder) {
       await this.recorder.stop();

@@ -241,9 +241,7 @@ describe('ValidationStrategy', () => {
       );
 
       expect(result.passed).toBe(false);
-      expect(result.message).toBe(
-        `Key "method" is not present in the dataLayer`
-      );
+      expect(result.message).toBe(`Key "method" is missing in the data layer`);
     });
   });
 });

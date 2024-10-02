@@ -12,9 +12,9 @@ export class SingleEventInspectionService {
   abortController: AbortController | null = null;
 
   constructor(
-    private eventInspectionPipelineService: EventInspectionPipelineService,
-    private folderPathService: FolderPathService,
-    private puppeteerUtilsService: PuppeteerUtilsService
+    private readonly eventInspectionPipelineService: EventInspectionPipelineService,
+    private readonly folderPathService: FolderPathService,
+    private readonly puppeteerUtilsService: PuppeteerUtilsService
   ) {}
 
   initializeAbortController() {

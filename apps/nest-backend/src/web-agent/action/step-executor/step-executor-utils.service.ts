@@ -4,15 +4,15 @@
 import { Page } from 'puppeteer';
 import { getFirstSelector } from '../handlers/utils';
 import { EventInspectionPresetDto } from '../../../dto/event-inspection-preset.dto';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DataLayerService } from '../../action/web-monitoring/data-layer/data-layer.service';
 import { ConfigsService } from '../../../configs/configs.service';
 
 @Injectable()
 export class StepExecutorUtilsService {
   constructor(
-    private dataLayerService: DataLayerService,
-    private configsService: ConfigsService
+    private readonly dataLayerService: DataLayerService,
+    private readonly configsService: ConfigsService
   ) {}
   async handleKeyboardAction(
     page: Page,
@@ -54,17 +54,13 @@ export class StepExecutorUtilsService {
     isLastStep: boolean,
     application: EventInspectionPresetDto['application']
   ): Promise<void> {
-    try {
-      if (state.isFirstNavigation) {
-        await page.setUserAgent(this.configsService.getUSER_AGENT());
-        await this.handleFirstNavigation(page, step, state, application);
-      } else {
-        await page.goto(step.url, { waitUntil: 'networkidle2' });
-      }
-      await this.handleNavigationIfNeeded(page, isLastStep, 2000);
-    } catch (error) {
-      throw new Error(`Navigation failed: ${JSON.stringify(error, null, 2)}`);
+    if (state.isFirstNavigation) {
+      await page.setUserAgent(this.configsService.getUSER_AGENT());
+      await this.handleFirstNavigation(page, step, state, application);
+    } else {
+      await page.goto(step.url, { waitUntil: 'networkidle2' });
     }
+    await this.handleNavigationIfNeeded(page, isLastStep, 2000);
   }
 
   async handleWaitForElement(page: Page, step: any, timeout: number) {
@@ -89,7 +85,9 @@ export class StepExecutorUtilsService {
       }
     }
     await page.close();
-    throw new Error('Failed to find any of the specified selectors');
+    throw new NotFoundException(
+      'Failed to find any of the specified selectors'
+    );
   }
 
   private async verifyLocalStorageAndCookies(page: Page): Promise<void> {

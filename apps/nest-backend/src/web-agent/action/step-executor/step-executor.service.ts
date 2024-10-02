@@ -12,8 +12,8 @@ import { EventInspectionPresetDto } from '../../../dto/event-inspection-preset.d
 export class StepExecutorService {
   constructor(
     @Inject(ACTION_HANDLERS) private handlers: { [key: string]: ActionHandler },
-    private dataLayerService: DataLayerService,
-    private stepExecutorUtilsService: StepExecutorUtilsService
+    private readonly dataLayerService: DataLayerService,
+    private readonly stepExecutorUtilsService: StepExecutorUtilsService
   ) {}
 
   async executeStep(

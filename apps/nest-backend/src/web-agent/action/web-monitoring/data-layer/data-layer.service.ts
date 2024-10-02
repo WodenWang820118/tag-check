@@ -12,9 +12,9 @@ import { FilePathService } from '../../../../os/path/file-path/file-path.service
 @Injectable()
 export class DataLayerService {
   constructor(
-    private folderPathService: FolderPathService,
-    private fileService: FileService,
-    private filePathService: FilePathService
+    private readonly folderPathService: FolderPathService,
+    private readonly fileService: FileService,
+    private readonly filePathService: FilePathService
   ) {}
 
   async initSelfDataLayer(projectName: string, eventId: string) {
@@ -73,28 +73,21 @@ export class DataLayerService {
     // Ensure to read the file content before trying to parse it as JSON
     const myDataLayer: any[] = this.fileService.readJsonFile(myDataLayerFile);
 
-    try {
-      dataLayer.forEach((dataLayerObject) => {
-        const existingIndex = myDataLayer.findIndex(
-          (myDataLayerObject: { event: any }) => {
-            return myDataLayerObject.event === dataLayerObject.event;
-          }
-        );
-
-        if (existingIndex === -1) {
-          myDataLayer.push(dataLayerObject);
-        } else {
-          myDataLayer[existingIndex] = dataLayerObject;
+    dataLayer.forEach((dataLayerObject) => {
+      const existingIndex = myDataLayer.findIndex(
+        (myDataLayerObject: { event: any }) => {
+          return myDataLayerObject.event === dataLayerObject.event;
         }
-      });
+      );
 
-      this.fileService.writeJsonFile(myDataLayerFile, myDataLayer);
-    } catch (error) {
-      Logger.error(
-        error,
-        `${DataLayerService.name}.${DataLayerService.prototype.updateSelfDataLayerAlgorithm.name}`
-      ); // Log the actual error message for debugging.
-    }
+      if (existingIndex === -1) {
+        myDataLayer.push(dataLayerObject);
+      } else {
+        myDataLayer[existingIndex] = dataLayerObject;
+      }
+    });
+
+    this.fileService.writeJsonFile(myDataLayerFile, myDataLayer);
   }
 
   async getMyDataLayer(projectSlug: string, eventId: string) {
