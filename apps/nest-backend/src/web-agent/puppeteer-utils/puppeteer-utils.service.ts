@@ -7,12 +7,11 @@ import { EventInspectionPresetDto } from '@utils';
 import { join } from 'path';
 import { Page, Browser, ScreenRecorder, Credentials } from 'puppeteer';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
-import { readFileSync } from 'fs';
 import { ConfigsService } from '../../configs/configs.service';
-import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class PuppeteerUtilsService {
+  private readonly logger = new Logger(PuppeteerUtilsService.name);
   private recorder: ScreenRecorder | null = null;
 
   constructor(
@@ -29,23 +28,6 @@ export class PuppeteerUtilsService {
     eventInspectionPresetDto: EventInspectionPresetDto,
     signal: AbortSignal
   ) {
-    const operationPath = await this.filePathService.getOperationFilePath(
-      projectSlug,
-      eventId
-    );
-    const operationContent = JSON.parse(readFileSync(operationPath, 'utf8'));
-    const viewportStep = operationContent.steps.find(
-      (step: { type: string }) => step.type === 'setViewport'
-    );
-    const viewportHeight = viewportStep.height;
-    const viewportWidth = viewportStep.width;
-    Logger.log(`Viewport: ${viewportWidth}x${viewportHeight}`);
-    // TODO: cannot customize viewport
-    const defaultViewport = {
-      width: Number(viewportWidth),
-      height: Number(viewportHeight),
-    };
-
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
@@ -67,10 +49,7 @@ export class PuppeteerUtilsService {
     try {
       // Set up an abort listener
       signal.addEventListener('abort', async () => {
-        Logger.log(
-          'Received the abort signal',
-          `${PuppeteerUtilsService.name}.${this.startBrowser.name}`
-        );
+        this.logger.log('Received the abort signal');
         await this.cleanup(browser, page);
       });
 
@@ -79,16 +58,12 @@ export class PuppeteerUtilsService {
         page: page,
       };
     } catch (error) {
-      Logger.error(
-        `Error starting browser: ${error}`,
-        `${PuppeteerUtilsService.name}.${this.startBrowser.name}`
-      );
+      this.logger.error(`Error starting browser: ${error}`);
       await this.cleanup(browser, page);
       throw error;
     }
   }
 
-  @Log('Clean up resources')
   async cleanup(browser: Browser, page: Page) {
     if (this.recorder) {
       await this.stopRecorder();
@@ -97,27 +72,16 @@ export class PuppeteerUtilsService {
     if (page) {
       await page
         .close()
-        .catch((err) =>
-          Logger.error(
-            `Error closing page: ${err}`,
-            `${PuppeteerUtilsService.name}.${PuppeteerUtilsService.prototype.cleanup.name}`
-          )
-        );
+        .catch((err) => this.logger.error(`Error closing page: ${err}`));
     }
 
     if (browser) {
       await browser
         .close()
-        .catch((err) =>
-          Logger.error(
-            `Error closing browser: ${err}`,
-            `${PuppeteerUtilsService.name}.${PuppeteerUtilsService.prototype.cleanup.name}`
-          )
-        );
+        .catch((err) => this.logger.error(`Error closing browser: ${err}`));
     }
   }
 
-  @Log()
   async startRecorder(page: Page, folderPath: string): Promise<ScreenRecorder> {
     const recordingPath = join(folderPath, 'recording');
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -130,7 +94,6 @@ export class PuppeteerUtilsService {
     return this.recorder;
   }
 
-  @Log()
   async stopRecorder() {
     if (this.recorder) {
       await this.recorder.stop();

@@ -20,12 +20,14 @@ import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('projects')
 export class WaiterProjectIoController {
+  private readonly logger = new Logger(WaiterProjectIoController.name);
   constructor(
-    private projectIoFacadeService: ProjectIoFacadeService,
-    private configurationSerivce: ConfigurationService
+    private readonly projectIoFacadeService: ProjectIoFacadeService,
+    private readonly configurationSerivce: ConfigurationService
   ) {}
 
   @Get('export/:projectSlug')
+  @Log()
   async exportProject(@Param('projectSlug') projectSlug: string) {
     return await this.projectIoFacadeService.exportProject(projectSlug);
   }
@@ -63,10 +65,7 @@ export class WaiterProjectIoController {
       );
       return response;
     } catch (error) {
-      Logger.error(
-        error,
-        `${WaiterProjectIoController.name}.${WaiterProjectIoController.prototype.importProject.name}`
-      );
+      this.logger.error(error);
       throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
     }
   }

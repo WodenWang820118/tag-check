@@ -1,92 +1,99 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  HttpException,
+  HttpStatus,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { ActionHandler, getFirstSelector } from './utils';
 import { HoverStrategyService } from '../strategies/hover-strategies/hover-strategy.service';
 import { ActionUtilsService } from '../action-utils/action-utils.service';
+import { Step } from '@utils';
 
 @Injectable()
 export class HoverHandler implements ActionHandler {
+  private readonly logger = new Logger(HoverHandler.name);
   constructor(
-    private hoverStrategyService: HoverStrategyService,
-    private actionUtilsService: ActionUtilsService
+    private readonly hoverStrategyService: HoverStrategyService,
+    private readonly actionUtilsService: ActionUtilsService
   ) {}
-
-  // TODO: may need to follow the click handler logic
-  // to switch between page service and evaluate service under different domains
 
   async handle(
     page: Page,
     projectName: string,
-    title: string,
-    step: any,
+    eventId: string,
+    step: Step,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     isLastStep: boolean
   ): Promise<void> {
     let hoveredSuccessfully = false;
 
     for (const selectorArray of step.selectors) {
+      const selector = getFirstSelector(selectorArray);
       try {
-        if (
-          await this.hoverElement(
-            page,
-            projectName,
-            title,
-            getFirstSelector(selectorArray)
-          )
-        ) {
+        // Attempt to hover over the element with the given selector
+        const hovered = await this.hoverElement(
+          page,
+          projectName,
+          eventId,
+          selector
+        );
+        if (hovered) {
           hoveredSuccessfully = true;
-          Logger.log(
-            getFirstSelector(selectorArray),
-            `${HoverHandler.name}.${HoverHandler.prototype.handle.name}`
-          );
+          this.logger.log(`Hovered successfully using selector: ${selector}`);
           break; // Exit the loop as soon as one selector works
         }
       } catch (error) {
-        Logger.error(
-          error,
-          `${HoverHandler.name}.${HoverHandler.prototype.handle.name}`
+        this.logger.warn(
+          `Failed to hover using selector "${selector}": ${error}`
         );
       }
     }
 
     if (!hoveredSuccessfully) {
-      // early exit
-      throw new HttpException(
-        `Failed to hover. None of the selectors worked for action ${step.target}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+      throw new InternalServerErrorException(
+        `Failed to hover. None of the selectors worked for action "${step.target}"`
       );
     }
   }
 
-  async hoverElement(
+  private async hoverElement(
     page: Page,
     projectName: string,
-    title: string,
+    eventId: string,
     selector: string,
     timeout = 10000
-  ): Promise<boolean | undefined> {
+  ): Promise<boolean> {
     try {
+      // Wait for the selector to be visible on the page
+      await page.waitForSelector(selector, { timeout, visible: true });
+
       const selectorType = this.actionUtilsService.getSelectorType(selector);
       if (!selectorType) {
         throw new HttpException(
-          `Selector type not found for selector ${selector}`,
+          `Selector type not found for selector "${selector}"`,
           HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
-      return await this.hoverStrategyService.hoverElement(
+
+      // Call the hover strategy service to perform the hover action
+      const result = await this.hoverStrategyService.hoverElement(
         page,
         projectName,
-        title,
+        eventId,
         selector,
         selectorType,
         timeout
       );
+      return result;
     } catch (error) {
-      Logger.error(
-        error,
-        `${HoverHandler.name}.${HoverHandler.prototype.hoverElement.name}`
+      this.logger.error(
+        `Error hovering element with selector "${selector}": ${error}`
       );
+      return false;
     }
   }
 }

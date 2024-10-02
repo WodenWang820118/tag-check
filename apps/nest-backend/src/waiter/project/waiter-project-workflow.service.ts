@@ -8,10 +8,11 @@ import { ConfigsService } from '../../configs/configs.service';
 
 @Injectable()
 export class WaiterProjectWorkFlowService {
+  private readonly logger = new Logger(WaiterProjectWorkFlowService.name);
   constructor(
-    private configurationService: ConfigurationService,
-    private projectInitializationService: ProjectInitializationService,
-    private configsService: ConfigsService
+    private readonly configurationService: ConfigurationService,
+    private readonly projectInitializationService: ProjectInitializationService,
+    private readonly configsService: ConfigsService
   ) {}
 
   // 1)
@@ -92,10 +93,7 @@ export class WaiterProjectWorkFlowService {
         );
       }
     } catch (error) {
-      Logger.error(
-        error,
-        `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.initProject.name}`
-      );
+      this.logger.error(error);
       throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -127,10 +125,7 @@ export class WaiterProjectWorkFlowService {
         });
       }
     } catch (error) {
-      Logger.error(
-        error,
-        `${WaiterProjectWorkFlowService.name}.${WaiterProjectWorkFlowService.prototype.setProject.name}`
-      );
+      this.logger.error(error);
       throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

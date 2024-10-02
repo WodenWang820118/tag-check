@@ -8,9 +8,9 @@ import { XlsxReportSingleEventService } from './xlsx-report-single-event.service
 @Injectable()
 export class XlsxReportGroupEventsService {
   constructor(
-    private filePathService: FilePathService,
-    private fileService: FileService,
-    private xlsxReportSingleEventService: XlsxReportSingleEventService
+    private readonly filePathService: FilePathService,
+    private readonly fileService: FileService,
+    private readonly xlsxReportSingleEventService: XlsxReportSingleEventService
   ) {}
 
   async writeXlsxFileForAllTests(

@@ -1,120 +1,119 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  HttpException,
+  HttpStatus,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { ActionHandler, getFirstSelector } from './utils';
 import { ProjectService } from '../../../os/project/project.service';
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
 import { FilePathService } from '../../../os/path/file-path/file-path.service';
 import { FileService } from '../../../os/file/file.service';
-import { extractEventNameFromId } from '@utils';
+import { extractEventNameFromId, OperationFile, Step } from '@utils';
 import { ActionUtilsService } from '../action-utils/action-utils.service';
+
 @Injectable()
 export class ClickHandler implements ActionHandler {
+  private readonly logger = new Logger(ClickHandler.name);
   constructor(
-    private projectService: ProjectService,
-    private fileService: FileService,
-    private filePathService: FilePathService,
-    private clickStrategyService: ClickStrategyService,
-    private actionUtilsService: ActionUtilsService
+    private readonly projectService: ProjectService,
+    private readonly fileService: FileService,
+    private readonly filePathService: FilePathService,
+    private readonly clickStrategyService: ClickStrategyService,
+    private readonly actionUtilsService: ActionUtilsService
   ) {}
 
   async handle(
     page: Page,
-    projectName: string,
+    projectSlug: string,
     eventId: string,
-    step: any,
+    step: Step,
     isLastStep: boolean
   ): Promise<void> {
     // Logic of handleClick
     let clickedSuccessfully = false;
-    // TODO: typing issue
-    const preventNavigationEvents = (
-      (await this.projectService.getProjectSettings(projectName)) as any
-    ).preventNavigationEvents;
     let preventNavigation = false;
 
-    for (const selector of step.selectors) {
-      const title = extractEventNameFromId(eventId);
-      if (
-        step.type === 'click' &&
-        preventNavigationEvents.includes(title) &&
-        isLastStep
-      )
-        preventNavigation = true;
+    const projectSettings = await this.projectService.getProjectSettings(
+      projectSlug
+    );
+    const preventNavigationEvents =
+      projectSettings?.preventNavigationEvents || [];
+    const title = extractEventNameFromId(eventId);
+    preventNavigation =
+      step.type === 'click' &&
+      preventNavigationEvents.includes(title) &&
+      isLastStep;
 
-      if (
-        await this.clickElement(
+    for (const selector of step.selectors) {
+      const firstSelector = getFirstSelector(selector);
+      try {
+        const clicked = await this.clickElement(
           page,
-          projectName,
+          projectSlug,
           eventId,
-          getFirstSelector(selector),
+          firstSelector,
           5000,
           preventNavigation
-        )
-      ) {
-        clickedSuccessfully = true;
-        Logger.log(
-          getFirstSelector(selector),
-          `${ClickHandler.name}.${ClickHandler.prototype.handle.name}`
         );
-        break; // Exit the loop as soon as one selector works
+        if (clicked) {
+          clickedSuccessfully = true;
+          this.logger.log(
+            `Clicked successfully using selector: ${firstSelector}`
+          );
+          break; // Exit the loop as soon as one selector works
+        }
+      } catch (error) {
+        this.logger.warn(
+          `Failed to click using selector ${firstSelector}: ${error}`
+        );
       }
     }
 
     if (!clickedSuccessfully) {
-      throw new HttpException(
-        `Failed to click. None of the selectors worked for action ${step.target}`,
-        HttpStatus.INTERNAL_SERVER_ERROR
+      throw new InternalServerErrorException(
+        `Failed to click. None of the selectors worked for action ${step.target}`
       );
     }
   }
 
-  async clickElement(
+  private async clickElement(
     page: Page,
     projectName: string,
     eventId: string,
     selector: string,
     timeout = 3000,
     preventNavigation: boolean
-  ): Promise<boolean | undefined> {
+  ): Promise<boolean> {
+    // Retrieve operation file path and domain
     const operationPath = await this.filePathService.getOperationFilePath(
       projectName,
       eventId
     );
-
-    const domain = new URL(
-      ((await this.fileService.readJsonFile(operationPath)) as any).steps[1].url
-    ).hostname;
-
-    try {
-      await page.waitForNavigation({ timeout: 3000 });
-    } catch (error) {
-      Logger.log(
-        'No Navigation Needed',
-        `${ClickHandler.name}.${ClickHandler.prototype.clickElement.name}`
+    const operationFile =
+      this.fileService.readJsonFile<OperationFile>(operationPath);
+    const stepUrl = operationFile.steps[1]?.url;
+    if (!stepUrl) {
+      throw new InternalServerErrorException(
+        `URL not found in operation file for event ${eventId}`
       );
     }
+    const domain = new URL(stepUrl).hostname;
 
+    // Wait for the selector to be visible
     await page.waitForSelector(selector, { timeout, visible: true });
 
     // Determine the click method based on conditions
-    // only one page means checking datalayer; two pages mean checking with gtm preview mode
-    // if the current page is not the same as the domain, then it's a third-party gateway
-    const useNormalClick =
-      (await page.browserContext().pages()).length === 1 ||
-      !page.url().includes(domain);
+    const pages = await page.browserContext().pages();
+    const useNormalClick = pages.length === 1 || !page.url().includes(domain);
 
     if (preventNavigation) {
       await this.preventNavigationOnElement(page, selector);
     }
 
     try {
-      // low timeout may cause the click to fail
       const selectorType = this.actionUtilsService.getSelectorType(selector);
       if (!selectorType) {
         throw new HttpException(
@@ -122,7 +121,7 @@ export class ClickHandler implements ActionHandler {
           HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
-      return await this.clickStrategyService.clickElement(
+      const result = await this.clickStrategyService.clickElement(
         page,
         projectName,
         eventId,
@@ -131,28 +130,28 @@ export class ClickHandler implements ActionHandler {
         useNormalClick,
         timeout
       );
+      return result;
     } catch (error) {
-      Logger.error(
-        error,
-        `${ClickHandler.name}.${ClickHandler.prototype.clickElement.name}`
-      );
+      this.logger.error(error);
+      throw error; // Re-throw the error to be caught in the calling method
     }
   }
 
   eventTargetToNode(eventTarget: EventTarget): Node {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return
     return eventTarget as any; // Note: This is a type assertion and should be used cautiously
   }
 
-  private async preventNavigationOnElement(page: Page, selector: string) {
-    Logger.log(
-      selector,
-      `${ClickHandler.name}.${ClickHandler.prototype.preventNavigationOnElement.name}`
-    );
+  private async preventNavigationOnElement(
+    page: Page,
+    selector: string
+  ): Promise<void> {
+    this.logger.log(`Preventing navigation on selector: ${selector}`);
 
     await page.evaluate((sel) => {
-      const isDescendant = (parent: Node, child: Node | null) => {
-        let node = child?.parentNode;
-        while (node !== null && node?.nodeType === Node.ELEMENT_NODE) {
+      const isDescendant = (parent: Node, child: Node | null): boolean => {
+        let node = child;
+        while (node !== null) {
           if (node === parent) {
             return true;
           }
@@ -161,21 +160,16 @@ export class ClickHandler implements ActionHandler {
         return false;
       };
 
-      const elements = document.querySelectorAll(sel);
-      if (elements) {
-        elements.forEach((elem) =>
-          elem.addEventListener('click', (e) => {
-            const target = e.target;
-            // Check if the target is the element itself or a descendant of the element
-            if (
-              this.eventTargetToNode(target as any) === elem ||
-              isDescendant(elem, target as any)
-            ) {
-              e.preventDefault();
-            }
-          })
-        );
-      }
+      const elements = document.querySelectorAll<HTMLElement>(sel);
+      elements.forEach((elem) =>
+        elem.addEventListener('click', (e) => {
+          const target = e.target as Node;
+          // Check if the target is the element itself or a descendant of the element
+          if (target === elem || isDescendant(elem, target)) {
+            e.preventDefault();
+          }
+        })
+      );
     }, selector);
   }
 }

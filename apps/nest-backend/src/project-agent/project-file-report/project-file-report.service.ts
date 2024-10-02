@@ -8,9 +8,9 @@ import { createReadStream, mkdirSync, statSync } from 'fs';
 @Injectable()
 export class ProjectFileReportService {
   constructor(
-    private folderService: FolderService,
-    private folderPathService: FolderPathService,
-    private fileService: FileService
+    private readonly folderService: FolderService,
+    private readonly folderPathService: FolderPathService,
+    private readonly fileService: FileService
   ) {}
 
   async getReportFolders(projectSlug: string) {

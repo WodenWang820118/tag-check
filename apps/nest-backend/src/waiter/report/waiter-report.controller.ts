@@ -17,9 +17,10 @@ import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('reports')
 export class WaiterReportController {
+  private readonly logger = new Logger(WaiterReportController.name);
   constructor(
-    private projectReportService: ProjectReportService,
-    private projectAbstractReportService: ProjectAbstractReportService
+    private readonly projectReportService: ProjectReportService,
+    private readonly projectAbstractReportService: ProjectAbstractReportService
   ) {}
 
   @ApiOperation({
@@ -32,6 +33,7 @@ export class WaiterReportController {
     description: 'The name of the project to which the event belongs.',
   })
   @Get(':projectSlug')
+  @Log()
   async getProjectEventReports(@Param('projectSlug') projectSlug: string) {
     return await this.projectReportService.getProjectEventReports(projectSlug);
   }
@@ -76,10 +78,7 @@ export class WaiterReportController {
     @Param('eventId') eventId: string,
     @Body() report: IReportDetails
   ) {
-    Logger.log(
-      `updateReport: ${JSON.stringify(report, null, 2)}`,
-      `${WaiterReportController.name}.${WaiterReportController.prototype.updateReport.name}`
-    );
+    this.logger.log(`updateReport: ${JSON.stringify(report, null, 2)}`);
     return await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
       projectSlug,
       eventId,

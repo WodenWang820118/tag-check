@@ -8,49 +8,30 @@ import archiver from 'archiver';
 
 @Injectable()
 export class ProjectIoService {
+  private readonly logger = new Logger(ProjectIoService.name);
   async compressProject(
     projectFolderPath: string,
     outputPath: string
   ): Promise<void> {
-    try {
-      Logger.log(
-        `Compressing project at ${projectFolderPath} to ${outputPath}`,
-        ProjectIoService.name + ProjectIoService.prototype.compressProject.name
-      );
-      const output = createWriteStream(outputPath);
-      const archive = archiver('zip', {
-        zlib: { level: 9 },
-      });
+    this.logger.log(
+      `Compressing project at ${projectFolderPath} to ${outputPath}`
+    );
+    const output = createWriteStream(outputPath);
+    const archive = archiver('zip', {
+      zlib: { level: 9 },
+    });
 
-      archive.on('error', function (err: any) {
-        Logger.log(
-          err,
-          ProjectIoService.name +
-            ProjectIoService.prototype.compressProject.name
-        );
-        throw new HttpException(
-          'Failed to compress project',
-          HttpStatus.BAD_REQUEST
-        );
-      });
-
-      archive.pipe(output);
-      archive.directory(projectFolderPath, false);
-      await archive.finalize();
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-
-      Logger.error(
-        error,
-        ProjectIoService.name + ProjectIoService.prototype.compressProject.name
-      );
+    archive.pipe(output);
+    archive.directory(projectFolderPath, false);
+    await archive.finalize().catch((error) => {
       throw new HttpException(
-        'Failed to compress project',
+        {
+          message: 'Failed to compress project',
+          error: error,
+        },
         HttpStatus.INTERNAL_SERVER_ERROR
       );
-    }
+    });
   }
 
   async unzipProject(
@@ -58,39 +39,27 @@ export class ProjectIoService {
     zipFilePath: string,
     outputFolderPath: string
   ): Promise<void> {
+    const outputPath = `${outputFolderPath}/${projectSlug}`;
+    const readStream = createReadStream(zipFilePath);
+    const extractStream = unzipper.Extract({ path: outputPath });
+
     try {
-      const outputPath = `${outputFolderPath}/${projectSlug}`;
-      const stream = createReadStream(zipFilePath).pipe(
-        unzipper.Extract({ path: outputPath })
-      );
-
       return new Promise((resolve, reject) => {
-        stream.on('error', (error: any) => {
-          Logger.error(
-            error,
-            `${ProjectIoService.name}.${ProjectIoService.prototype.unzipProject.name}`
-          );
-          reject(
-            new HttpException(
-              'Failed to unzip project',
-              HttpStatus.INTERNAL_SERVER_ERROR
-            )
-          );
-        });
-
-        stream.on('close', () => {
-          resolve();
-        });
+        readStream.pipe(extractStream).on('close', resolve).on('error', reject);
       });
     } catch (error) {
-      Logger.error(
-        error,
-        `${ProjectIoService.name}.${ProjectIoService.prototype.unzipProject.name}`
+      this.logger.error(
+        `Failed to unzip project ${projectSlug}: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
       );
       throw new HttpException(
         'Failed to unzip project',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
+    } finally {
+      readStream.destroy();
+      extractStream.end();
     }
   }
 }

@@ -4,6 +4,7 @@ import { ChangeOperation } from './utils';
 
 @Injectable()
 export class PageChangeService implements ChangeOperation {
+  private readonly logger = new Logger(PageChangeService.name);
   async operate(
     page: Page,
     projectName: string,
@@ -17,10 +18,7 @@ export class PageChangeService implements ChangeOperation {
       // TODO: verifiy this
       // Check if the element is a select element
       if (!value) {
-        Logger.error(
-          'Value is required to change the element',
-          `${PageChangeService.name}.${PageChangeService.prototype.operate.name}`
-        );
+        this.logger.error('Value is required to change the element');
         return false;
       }
 
@@ -31,10 +29,7 @@ export class PageChangeService implements ChangeOperation {
 
       if (isSelect) {
         // If it's a select element, use page.select() to change its value
-        Logger.log(
-          'Select an element',
-          `${PageChangeService.name}.${PageChangeService.prototype.operate.name}`
-        );
+        this.logger.log('Selecting the select element');
         await Promise.race([
           page.select(selector, value),
           new Promise((_, reject) =>
@@ -42,11 +37,7 @@ export class PageChangeService implements ChangeOperation {
           ),
         ]);
       } else {
-        // Otherwise, use page.type() to type the value
-        Logger.log(
-          'Typing the input element',
-          `${PageChangeService.name}.${PageChangeService.prototype.operate.name}`
-        );
+        this.logger.log('Typing the input element');
         await Promise.race([
           page.type(selector, value),
           new Promise((_, reject) =>
@@ -57,9 +48,8 @@ export class PageChangeService implements ChangeOperation {
 
       return true;
     } catch (error) {
-      Logger.error(
-        error,
-        `${PageChangeService.name}.${PageChangeService.prototype.operate.name}`
+      this.logger.error(
+        `Failed to change element with selector "${selector}": ${error}`
       );
       return false;
     }

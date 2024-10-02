@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { FolderService } from '../../os/folder/folder.service';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { FileService } from '../../os/file/file.service';
@@ -9,87 +9,59 @@ import { Recording } from '@utils';
 @Injectable()
 export class ProjectRecordingService {
   constructor(
-    private fileService: FileService,
-    private filePathService: FilePathService,
-    private folderService: FolderService,
-    private folderPathService: FolderPathService
+    private readonly fileService: FileService,
+    private readonly filePathService: FilePathService,
+    private readonly folderService: FolderService,
+    private readonly folderPathService: FolderPathService
   ) {}
 
   // TODO: temporary solution to return the same structure as the json-server's mock backend
   // but there might be a better way to optimize the data structure
   async getProjectRecordings(projectSlug: string) {
-    try {
-      const folderNames = this.folderService.getJsonFilesFromDir(
-        await this.folderPathService.getRecordingFolderPath(projectSlug)
-      );
+    const folderNames = this.folderService.getJsonFilesFromDir(
+      await this.folderPathService.getRecordingFolderPath(projectSlug)
+    );
 
-      const recordings: Record<string, RecordingDto>[] = await Promise.all(
-        folderNames.map(async (fileName) => {
-          const recordingContent = this.fileService.readJsonFile<RecordingDto>(
-            await this.filePathService.getRecordingFilePath(
-              projectSlug,
-              fileName
-            )
-          );
-          const key = fileName.replace('.json', '');
-          return { [key]: recordingContent };
-        })
-      );
-
-      const flattenedRecordings: Record<string, RecordingDto> =
-        recordings.reduce((acc, recording) => {
-          const key = Object.keys(recording)[0];
-          acc[key] = { ...recording[key], ...recording };
-          return acc;
-        }, {});
-
-      return {
-        projectSlug: projectSlug,
-        recordings: flattenedRecordings,
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        Logger.error(
-          error,
-          `${ProjectRecordingService.name}.${ProjectRecordingService.prototype.getProjectRecordings.name}`
+    const recordings: Record<string, RecordingDto>[] = await Promise.all(
+      folderNames.map(async (fileName) => {
+        const recordingContent = this.fileService.readJsonFile<RecordingDto>(
+          await this.filePathService.getRecordingFilePath(projectSlug, fileName)
         );
-        throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
+        const key = fileName.replace('.json', '');
+        return { [key]: recordingContent };
+      })
+    );
 
-      throw error;
-    }
+    const flattenedRecordings: Record<string, RecordingDto> = recordings.reduce(
+      (acc, recording) => {
+        const key = Object.keys(recording)[0];
+        acc[key] = { ...recording[key], ...recording };
+        return acc;
+      },
+      {}
+    );
+
+    return {
+      projectSlug: projectSlug,
+      recordings: flattenedRecordings,
+    };
   }
 
   async getProjectRecordingNames(projectSlug: string) {
-    try {
-      const fileNames = this.folderService.getJsonFilesFromDir(
-        await this.folderPathService.getRecordingFolderPath(projectSlug)
-      );
-      return fileNames.map((fileName) => fileName.replace('.json', ''));
-    } catch (error) {
-      Logger.error(error, 'ProjectRecordingService.getProjectRecordings');
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    const fileNames = this.folderService.getJsonFilesFromDir(
+      await this.folderPathService.getRecordingFolderPath(projectSlug)
+    );
+    return fileNames.map((fileName) => fileName.replace('.json', ''));
   }
 
   async getRecordingDetails(projectSlug: string, eventId: string) {
-    try {
-      const content = await this.fileService.readJsonFile(
-        await this.filePathService.getRecordingFilePath(
-          projectSlug,
-          `${eventId}.json`
-        )
-      );
-
-      return content;
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-
-      Logger.error(error, 'ProjectRecordingService.getRecordingDetails');
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    const content = await this.fileService.readJsonFile(
+      await this.filePathService.getRecordingFilePath(
+        projectSlug,
+        `${eventId}.json`
+      )
+    );
+    return content;
   }
 
   async addRecording(
@@ -97,23 +69,11 @@ export class ProjectRecordingService {
     eventId: string,
     recording: Recording
   ) {
-    try {
-      const recordingPath = await this.filePathService.getRecordingFilePath(
-        projectSlug,
-        `${eventId}.json`
-      );
-
-      this.fileService.writeJsonFile(recordingPath, recording);
-    } catch (error) {
-      if (error instanceof HttpException) {
-        Logger.error(
-          error,
-          `${ProjectRecordingService.name}.${ProjectRecordingService.prototype.addRecording.name}`
-        );
-        throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-      throw error;
-    }
+    const recordingPath = await this.filePathService.getRecordingFilePath(
+      projectSlug,
+      `${eventId}.json`
+    );
+    this.fileService.writeJsonFile(recordingPath, recording);
   }
 
   async updateRecording(
@@ -121,22 +81,10 @@ export class ProjectRecordingService {
     eventId: string,
     recording: Recording
   ) {
-    try {
-      const recordingPath = await this.filePathService.getRecordingFilePath(
-        projectSlug,
-        `${eventId}.json`
-      );
-
-      this.fileService.writeJsonFile(recordingPath, recording);
-    } catch (error) {
-      if (error instanceof HttpException) {
-        Logger.error(
-          error,
-          `${ProjectRecordingService.name}.${ProjectRecordingService.prototype.updateRecording.name}`
-        );
-        throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-      throw error;
-    }
+    const recordingPath = await this.filePathService.getRecordingFilePath(
+      projectSlug,
+      `${eventId}.json`
+    );
+    this.fileService.writeJsonFile(recordingPath, recording);
   }
 }

@@ -4,7 +4,7 @@ import { ProjectService } from '../../os/project/project.service';
 
 @Injectable()
 export class ProjectMetadataService {
-  constructor(private projectService: ProjectService) {}
+  constructor(private readonly projectService: ProjectService) {}
 
   async getProjectsMetadata() {
     return await this.projectService.getProjectsMetadata();

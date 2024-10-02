@@ -25,27 +25,19 @@ import { Logger } from '@nestjs/common';
 export class EventsGatewayService
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
+  private readonly logger = new Logger(EventsGatewayService.name);
   @WebSocketServer() server!: Server;
 
   afterInit(socket: Server) {
-    Logger.log(
-      `The socket has been initialized`,
-      `${EventsGatewayService.name}.${EventsGatewayService.prototype.afterInit.name}`
-    );
+    this.logger.log('The socket has been initialized');
   }
 
   handleConnection(client: Socket, ...args: any[]) {
-    Logger.log(
-      `Handle connection`,
-      `${EventsGatewayService.name}.${EventsGatewayService.prototype.afterInit.name}`
-    );
+    this.logger.log('Handle connection');
   }
 
   handleDisconnect(client: Socket) {
-    Logger.log(
-      `Handle disconnection`,
-      `${EventsGatewayService.name}.${EventsGatewayService.prototype.afterInit.name}`
-    );
+    this.logger.log('Handle disconnect');
   }
 
   @SubscribeMessage('events')

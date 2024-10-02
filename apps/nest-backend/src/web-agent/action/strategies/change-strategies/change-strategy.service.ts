@@ -9,9 +9,10 @@ import { Page } from 'puppeteer';
 
 @Injectable()
 export class ChangeStrategyService implements ChangeStrategy {
+  private readonly logger = new Logger(ChangeStrategyService.name);
   constructor(
-    private pageChangeService: PageChangeService,
-    private evaluateChangeService: EvaluateChangeService
+    private readonly pageChangeService: PageChangeService,
+    private readonly evaluateChangeService: EvaluateChangeService
   ) {}
 
   async changeElement(
@@ -25,10 +26,7 @@ export class ChangeStrategyService implements ChangeStrategy {
   ): Promise<boolean> {
     try {
       if (!value) {
-        Logger.error(
-          'Value is required to change the element',
-          `${ChangeStrategyService.name}.${ChangeStrategyService.prototype.changeElement.name}`
-        );
+        this.logger.error('Value is required to change the element');
         return false;
       }
 
@@ -43,9 +41,8 @@ export class ChangeStrategyService implements ChangeStrategy {
         timeout
       );
     } catch (error) {
-      Logger.error(
-        error,
-        `${ChangeStrategyService.name}.${ChangeStrategyService.prototype.changeElement.name}`
+      this.logger.error(
+        `Failed to change element with selector "${selector}": ${error}`
       );
       return false;
     }

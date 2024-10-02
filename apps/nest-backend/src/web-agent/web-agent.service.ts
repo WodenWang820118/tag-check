@@ -6,7 +6,6 @@ import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 @Injectable()
 export class WebAgentService {
   constructor(private webAgentUtilsService: WebAgentUtilsService) {}
-  private abortController: AbortController | null = null;
 
   async executeAndGetDataLayer(
     page: Page,
@@ -57,11 +56,5 @@ export class WebAgentService {
       eventRequest,
       destinationUrl,
     };
-  }
-
-  stopOperation() {
-    if (this.abortController) {
-      this.abortController.abort();
-    }
   }
 }

@@ -5,6 +5,7 @@ import { ActionUtilsService } from '../../action-utils/action-utils.service';
 
 @Injectable()
 export class EvaluateClickService implements ClickOperation {
+  private readonly logger = new Logger(EvaluateClickService.name);
   constructor(private actionUtilsService: ActionUtilsService) {}
   async operate(
     page: Page,
@@ -31,9 +32,8 @@ export class EvaluateClickService implements ClickOperation {
       ]);
       return true;
     } catch (error) {
-      Logger.error(
-        error,
-        `${EvaluateClickService.name}.${EvaluateClickService.prototype.operate.name}`
+      this.logger.error(
+        `Failed to click on element with selector "${selector}": ${error}`
       );
       return false;
     }

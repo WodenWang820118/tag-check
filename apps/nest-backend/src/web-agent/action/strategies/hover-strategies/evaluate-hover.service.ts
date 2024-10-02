@@ -4,6 +4,7 @@ import { ActionUtilsService } from '../../action-utils/action-utils.service';
 
 @Injectable()
 export class EvaluateHoverService {
+  private readonly logger = new Logger(EvaluateHoverService.name);
   constructor(private actionUtilsService: ActionUtilsService) {}
   async operate(
     page: Page,
@@ -30,9 +31,8 @@ export class EvaluateHoverService {
       ]);
       return true;
     } catch (error) {
-      Logger.error(
-        error,
-        `${EvaluateHoverService.name}.${EvaluateHoverService.prototype.operate.name}`
+      this.logger.error(
+        `Failed to hover on element with selector "${selector}": ${error}`
       );
       return false;
     }

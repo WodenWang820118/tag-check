@@ -4,6 +4,9 @@ import {
   ArgumentsHost,
   HttpException,
   Injectable,
+  NotFoundException,
+  NotAcceptableException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { addDoc, collection } from 'firebase/firestore';
@@ -12,18 +15,26 @@ import { FirebaseService } from '../firebase/firebase.service';
 @Catch()
 @Injectable()
 export class AllExceptionsFilter implements ExceptionFilter {
-  constructor(private firebaseService: FirebaseService) {}
+  constructor(private readonly firebaseService: FirebaseService) {}
   async catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const status =
-      exception instanceof HttpException ? exception.getStatus() : 500;
+    let status: number;
+    let errorMessage: string | object;
 
-    const errorMessage =
-      exception instanceof HttpException
-        ? exception.getResponse()
-        : 'Internal Server Error';
+    if (
+      exception instanceof HttpException ||
+      exception instanceof NotFoundException ||
+      exception instanceof NotAcceptableException ||
+      exception instanceof InternalServerErrorException
+    ) {
+      status = exception.getStatus();
+      errorMessage = exception.getResponse();
+    } else {
+      status = 500;
+      errorMessage = 'Internal Server Error';
+    }
 
     // Log the error to Firebase
     await this.logErrorToFirebase(exception, request, status);

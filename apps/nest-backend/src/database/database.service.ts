@@ -4,7 +4,7 @@ import { ConfigsService } from '../configs/configs.service';
 
 @Injectable()
 export class DatabaseConfigService {
-  constructor(private configsService: ConfigsService) {}
+  constructor(private readonly configsService: ConfigsService) {}
 
   getDatabaseConfig(): Partial<
     {

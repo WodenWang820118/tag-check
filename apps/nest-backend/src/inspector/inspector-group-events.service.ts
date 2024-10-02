@@ -18,6 +18,7 @@ import { InspectorUtilsService } from './inspector-utils.service';
 
 @Injectable()
 export class InspectorGroupEventsService {
+  private readonly logger = new Logger(InspectorGroupEventsService.name);
   constructor(
     private fileService: FileService,
     private filePathService: FilePathService,
@@ -77,11 +78,7 @@ export class InspectorGroupEventsService {
           await page.close();
           return result;
         } catch (error) {
-          Logger.error(
-            error,
-            InspectorGroupEventsService.name +
-              InspectorGroupEventsService.prototype.inspectProjectDataLayer.name
-          );
+          this.logger.log(error);
           await this.fileService.writeCacheFile(projectName, operation, error);
           await incognitoContext.close();
           return { error: error };

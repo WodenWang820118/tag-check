@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class WaiterConfigurationService {
+  private readonly logger = new Logger(WaiterConfigurationService.name);
   constructor(private configurationService: ConfigurationService) {}
   async getConfigurations() {
     return await this.configurationService.findAll();
@@ -16,10 +17,7 @@ export class WaiterConfigurationService {
       throw new NotFoundException(`Configuration '${name}' not found`);
     }
     const value = configuration.getDataValue('value');
-    Logger.log(
-      `Configuration value: ${value}`,
-      `${WaiterConfigurationService.name}.${this.getConfiguration.name}`
-    );
+    this.logger.log(`Configuration value: ${value}`);
     return { value };
   }
 

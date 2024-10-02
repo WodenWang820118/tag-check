@@ -6,6 +6,11 @@ import { ConfigurationService } from '../../../configuration/configuration.servi
 import { describe, beforeEach, expect, vi } from 'vitest';
 import { ConfigsService } from '../../../configs/configs.service';
 
+// Mock the entire fs module
+vi.mock('fs', () => ({
+  existsSync: vi.fn().mockReturnValue(true),
+}));
+
 describe('FolderPathService', () => {
   let service: FolderPathService;
   let configsService: ConfigsService;

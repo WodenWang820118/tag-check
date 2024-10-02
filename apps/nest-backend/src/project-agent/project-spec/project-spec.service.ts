@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, NotAcceptableException } from '@nestjs/common';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { Spec } from '@utils';
@@ -8,8 +8,8 @@ import { Spec } from '@utils';
 @Injectable()
 export class ProjectSpecService {
   constructor(
-    private fileService: FileService,
-    private filePathService: FilePathService
+    private readonly fileService: FileService,
+    private readonly filePathService: FilePathService
   ) {}
 
   async getProjectSpecs(
@@ -31,21 +31,17 @@ export class ProjectSpecService {
     projectSlug: string,
     spec: Spec
   ): Promise<{ projectSlug: string; specs: Spec[] }> {
-    try {
-      const specs = await this.readSpecsFile(projectSlug);
-      const existingSpecIndex = specs.findIndex((s) => s.event === spec.event);
+    const specs = await this.readSpecsFile(projectSlug);
+    const existingSpecIndex = specs.findIndex((s) => s.event === spec.event);
 
-      if (existingSpecIndex !== -1) {
-        specs[existingSpecIndex] = spec;
-      } else {
-        specs.push(spec);
-      }
-
-      await this.writeSpecsFile(projectSlug, specs);
-      return { projectSlug, specs };
-    } catch (error: any) {
-      this.handleError(error, 'addSpec');
+    if (existingSpecIndex !== -1) {
+      specs[existingSpecIndex] = spec;
+    } else {
+      specs.push(spec);
     }
+
+    await this.writeSpecsFile(projectSlug, specs);
+    return { projectSlug, specs };
   }
 
   async updateSpec(
@@ -53,14 +49,10 @@ export class ProjectSpecService {
     eventName: string,
     spec: Spec
   ): Promise<{ projectSlug: string; specs: Spec[] }> {
-    try {
-      const specs = await this.readSpecsFile(projectSlug);
-      const updatedSpecs = specs.map((s) => (s.event === eventName ? spec : s));
-      await this.writeSpecsFile(projectSlug, updatedSpecs);
-      return { projectSlug, specs: updatedSpecs };
-    } catch (error: any) {
-      this.handleError(error, 'updateSpec');
-    }
+    const specs = await this.readSpecsFile(projectSlug);
+    const updatedSpecs = specs.map((s) => (s.event === eventName ? spec : s));
+    await this.writeSpecsFile(projectSlug, updatedSpecs);
+    return { projectSlug, specs: updatedSpecs };
   }
 
   private async readSpecsFile(projectSlug: string): Promise<Spec[]> {
@@ -70,7 +62,7 @@ export class ProjectSpecService {
     const specs = this.fileService.readJsonFile(filePath);
 
     if (!Array.isArray(specs)) {
-      throw new Error('Invalid configuration file format');
+      throw new NotAcceptableException('Invalid configuration file format');
     }
 
     return specs;
@@ -84,13 +76,5 @@ export class ProjectSpecService {
       projectSlug
     );
     this.fileService.writeJsonFile(filePath, specs);
-  }
-
-  private handleError(error: Error, methodName: string): never {
-    Logger.error(
-      `${String(error)}`,
-      `${ProjectSpecService.name}.${methodName}`
-    );
-    throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/unbound-method */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { PageHoverService } from './page-hover.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
@@ -5,6 +8,7 @@ import { EvaluateHoverService } from './evaluate-hover.service';
 
 @Injectable()
 export class HoverStrategyService {
+  private readonly logger = new Logger(HoverStrategyService.name);
   constructor(
     private pageHoverService: PageHoverService,
     private evaluteHoverService: EvaluateHoverService
@@ -17,7 +21,7 @@ export class HoverStrategyService {
     selector: string,
     selectorType: string,
     timeout = 10000
-  ): Promise<boolean | undefined> {
+  ): Promise<boolean> {
     try {
       return await this.attemptHover(
         page,
@@ -29,10 +33,10 @@ export class HoverStrategyService {
         timeout
       );
     } catch (error) {
-      Logger.error(
-        error,
-        `${HoverStrategyService.name}.${HoverStrategyService.prototype.hoverElement.name}`
+      this.logger.error(
+        `Failed to hover on element with selector "${selector}": ${error}`
       );
+      return false;
     }
   }
 
@@ -52,10 +56,7 @@ export class HoverStrategyService {
     ) => Promise<boolean>,
     timeout = 10000
   ): Promise<boolean> {
-    Logger.log(
-      `selector: ${selector}`,
-      `${HoverStrategyService.name}.${HoverStrategyService.prototype.hoverElement.name}`
-    );
+    this.logger.log(`selector: ${selector}`);
 
     const serviceInstance =
       hoverMethod === this.pageHoverService.operate

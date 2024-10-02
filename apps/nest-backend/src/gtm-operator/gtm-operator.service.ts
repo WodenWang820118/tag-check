@@ -2,21 +2,25 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
 import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
 import { FolderPathService } from '../os/path/folder-path/folder-path.service';
-import { Log } from '../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class GtmOperatorService {
+  private readonly logger = new Logger(GtmOperatorService.name);
   abortController: AbortController | null = null;
   constructor(
-    private eventInspectionPipelineService: EventInspectionPipelineService,
-    private puppeteerUtilsService: PuppeteerUtilsService,
-    private folderPathService: FolderPathService
+    private readonly eventInspectionPipelineService: EventInspectionPipelineService,
+    private readonly puppeteerUtilsService: PuppeteerUtilsService,
+    private readonly folderPathService: FolderPathService
   ) {}
 
   initializeAbortController() {
@@ -35,9 +39,8 @@ export class GtmOperatorService {
   ) {
     this.initializeAbortController();
     if (!this.abortController) {
-      throw new HttpException(
-        'Abort controller is not initialized',
-        HttpStatus.INTERNAL_SERVER_ERROR
+      throw new InternalServerErrorException(
+        'Abort controller is not initialized'
       );
     }
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
@@ -104,18 +107,15 @@ export class GtmOperatorService {
       await recorder.stop();
       return data;
     } catch (error) {
-      Logger.error(
-        error,
-        `${GtmOperatorService.name}.${GtmOperatorService.prototype.inspectSingleEventViaGtm.name}`
-      );
+      this.logger.error(error);
 
-      // await this.puppeteerUtilsService.cleanup(browser, page);
       await this.puppeteerUtilsService.cleanup(browser, page);
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new InternalServerErrorException(
+        'Failed to perform GTM validation'
+      );
     }
   }
 
-  @Log()
   async operateGtmPreviewMode(page: Page, gtmUrl: string) {
     await page.goto(gtmUrl, { waitUntil: 'networkidle2' });
     await page.$('#include-debug-param').then((el) => el?.click());
@@ -142,9 +142,7 @@ export class GtmOperatorService {
     return '';
   }
 
-  @Log()
-  async stopOperation() {
-    await new Promise((resolve) => setTimeout(resolve, 100));
+  stopOperation() {
     if (this.abortController) {
       this.abortController.abort();
     }

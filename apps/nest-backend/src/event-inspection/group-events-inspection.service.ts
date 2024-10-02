@@ -12,19 +12,19 @@ import { XlsxReportGroupEventsService } from '../os/xlsx-report/xlsx-report-grou
 import { FileService } from '../os/file/file.service';
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
 import { ConfigsService } from '../configs/configs.service';
-import { Log } from '../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class GroupEventsInspectionService {
+  private readonly logger = new Logger(GroupEventsInspectionService.name);
   private abortController: AbortController | null = null;
   private currentBrowser: Browser | null = null;
 
   constructor(
-    private fileService: FileService,
-    private xlsxReportGroupEventsService: XlsxReportGroupEventsService,
-    private inspectorGroupEventsService: InspectorGroupEventsService,
-    private projectAbstractReportService: ProjectAbstractReportService,
-    private configsService: ConfigsService
+    private readonly fileService: FileService,
+    private readonly xlsxReportGroupEventsService: XlsxReportGroupEventsService,
+    private readonly inspectorGroupEventsService: InspectorGroupEventsService,
+    private readonly projectAbstractReportService: ProjectAbstractReportService,
+    private readonly configsService: ConfigsService
   ) {}
 
   async inspectProject(
@@ -42,18 +42,14 @@ export class GroupEventsInspectionService {
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
     const stats = await PCR(options);
-    const browser = await stats.puppeteer
-      .launch({
-        headless: headless === 'true' ? true : false,
-        defaultViewport: null,
-        ignoreHTTPSErrors: true,
-        args: this.configsService.getBROWSER_ARGS(),
-        executablePath: stats.executablePath,
-        signal: signal,
-      })
-      .catch(function (error: any) {
-        console.error(error);
-      });
+    const browser = await stats.puppeteer.launch({
+      headless: headless === 'true' ? true : false,
+      defaultViewport: null,
+      ignoreHTTPSErrors: true,
+      args: this.configsService.getBROWSER_ARGS(),
+      executablePath: stats.executablePath,
+      signal: signal,
+    });
 
     // Set up an abort listener
     signal.addEventListener(
@@ -62,10 +58,7 @@ export class GroupEventsInspectionService {
         try {
           await this.cleanup();
         } catch (error) {
-          Logger.error(
-            `Error during cleanup: ${String(error)}`,
-            `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.inspectProject.name}`
-          );
+          this.logger.error(`Error during cleanup: ${error}`);
         }
       },
       { once: true }
@@ -116,24 +109,15 @@ export class GroupEventsInspectionService {
     return data;
   }
 
-  @Log()
   stopOperation() {
     if (this.abortController) {
       this.abortController.abort();
     }
   }
 
-  @Log('Cleaning up resources')
   private async cleanup(): Promise<void> {
     if (this.currentBrowser) {
-      try {
-        await this.currentBrowser.close();
-      } catch (err) {
-        Logger.error(
-          err,
-          `${GroupEventsInspectionService.name}.${GroupEventsInspectionService.prototype.cleanup.name}`
-        );
-      }
+      await this.currentBrowser.close();
       this.currentBrowser = null;
     }
   }

@@ -8,6 +8,7 @@ import { EvaluateClickService } from './evaluate-click.service';
 
 @Injectable()
 export class ClickStrategyService {
+  private readonly logger = new Logger(ClickStrategyService.name);
   constructor(
     private pageClickService: PageClickService,
     private evaluateClickService: EvaluateClickService
@@ -21,10 +22,11 @@ export class ClickStrategyService {
     selectorType: string,
     useNormalClick: boolean,
     timeout = 10000
-  ): Promise<boolean | undefined> {
-    Logger.log(
-      `selector: ${selector}`,
-      `${ClickStrategyService.name}.${ClickStrategyService.prototype.clickElement.name}`
+  ): Promise<boolean> {
+    this.logger.log(
+      `Attempting to click on element with selector "${selector}" using ${
+        useNormalClick ? 'page.click()' : 'element.click()'
+      }`
     );
     try {
       if (useNormalClick) {
@@ -49,10 +51,10 @@ export class ClickStrategyService {
         );
       }
     } catch (error) {
-      Logger.error(
-        error,
-        `${ClickStrategyService.name}.${ClickStrategyService.prototype.clickElement.name}`
+      this.logger.error(
+        `Failed to click on element with selector "${selector}": ${error}`
       );
+      return false;
     }
   }
 

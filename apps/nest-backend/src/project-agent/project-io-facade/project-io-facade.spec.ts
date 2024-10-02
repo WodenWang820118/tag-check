@@ -5,7 +5,7 @@ import { StreamableFile } from '@nestjs/common';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
 import { FolderService } from '../../os/folder/folder.service';
 import { ProjectIoService } from '../../os/project-io/project-io.service';
-import { createReadStream, existsSync, mkdirSync } from 'fs';
+import { createReadStream, mkdirSync } from 'fs';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 
 vi.mock('fs', () => ({
@@ -90,7 +90,6 @@ describe('ProjectIoFacadeService', () => {
     expect(folderPathService.getProjectFolderPath).toHaveBeenCalledWith(
       projectSlug
     );
-    expect(existsSync).toHaveBeenCalledWith(projectPath);
     expect(mkdirSync).toHaveBeenCalledWith(tempFolder, {
       recursive: true,
     });

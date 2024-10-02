@@ -1,53 +1,55 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
 import { extname } from 'path';
 
 @Injectable()
 export class FolderService {
   readFolderFiles(folderPath: string) {
+    if (!existsSync(folderPath)) {
+      throw new NotFoundException('Folder not found');
+    }
     return readdirSync(folderPath, {
       withFileTypes: true,
     });
   }
 
   readFolderFileNames(folderPath: string) {
+    if (!existsSync(folderPath)) {
+      throw new NotFoundException('Folder not found');
+    }
     return readdirSync(folderPath);
   }
 
   readFolder(folderPath: string) {
+    if (!existsSync(folderPath)) {
+      throw new NotFoundException('Folder not found');
+    }
     return readdirSync(folderPath, {
       withFileTypes: true,
     }).filter((dirent) => dirent.isDirectory());
   }
 
   createFolder(folderPath: string) {
-    if (!existsSync(folderPath)) {
-      mkdirSync(folderPath);
-    }
+    mkdirSync(folderPath);
   }
 
   getJsonFilesFromDir(dirPath: string) {
-    try {
-      const files = readdirSync(dirPath);
-      return files.filter((file) => extname(file) === '.json');
-    } catch (error) {
-      Logger.error(
-        error,
-        `${FolderService.name}.${FolderService.prototype.getJsonFilesFromDir.name}`
-      );
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+    if (!existsSync(dirPath)) {
+      throw new NotFoundException('Folder not found');
     }
+
+    const files = readdirSync(dirPath);
+    if (!files.length) {
+      throw new NotFoundException('No files found');
+    }
+
+    return files.filter((file) => extname(file) === '.json');
   }
 
   deleteFolder(folderPath: string) {
-    try {
-      rmSync(folderPath, { recursive: true, force: true });
-    } catch (error) {
-      Logger.error(
-        error,
-        `${FolderService.name}.${FolderService.prototype.deleteFolder.name}`
-      );
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+    if (!existsSync(folderPath)) {
+      throw new NotFoundException('Folder not found');
     }
+    rmSync(folderPath, { recursive: true, force: true });
   }
 }

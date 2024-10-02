@@ -9,9 +9,10 @@ import { FilePathService } from '../path/file-path/file-path.service';
 
 @Injectable()
 export class XlsxReportSingleEventService {
+  private readonly logger = new Logger(XlsxReportSingleEventService.name);
   constructor(
-    private folderPathService: FolderPathService,
-    private filePathService: FilePathService
+    private readonly folderPathService: FolderPathService,
+    private readonly filePathService: FilePathService
   ) {}
   async writeXlsxFile(
     fileName: string,
@@ -20,21 +21,22 @@ export class XlsxReportSingleEventService {
       | {
           dataLayerResult: any;
           requestCheckResult: any;
-          rawRequest: any;
-          destinationUrl: any;
+          rawRequest: string;
+          destinationUrl: string;
         }[]
       | {
           dataLayerResult: any;
           requestCheckResult: any;
-          rawRequest: any;
-          destinationUrl: any;
+          rawRequest: string;
+          destinationUrl: string;
         },
     eventId: string,
     projectSlug: string
   ) {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(sheetName);
+
     try {
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet(sheetName);
       const eventSavingFolder =
         await this.folderPathService.getInspectionEventFolderPath(
           projectSlug,
@@ -48,66 +50,20 @@ export class XlsxReportSingleEventService {
       ];
       // single test
       if (eventId) {
-        try {
-          const file = await this.filePathService.getImageFilePath(
-            projectSlug,
-            eventId
-          );
-          const imageId = workbook.addImage({
-            buffer: readFileSync(file),
-            extension: 'png',
-          });
-          worksheet.addImage(imageId, {
-            tl: { col: 2, row: 1 },
-            ext: { width: 100, height: 50 },
-          });
-        } catch (error) {
-          Logger.error(
-            error,
-            `${XlsxReportSingleEventService.name}.${XlsxReportSingleEventService.prototype.writeXlsxFile.name}`
-          );
-          throw new HttpException(
-            `An error occurred while writing an image: ${error}`,
-            HttpStatus.INTERNAL_SERVER_ERROR
-          );
-        }
+        await this.addImageToWorksheet(
+          workbook,
+          worksheet,
+          projectSlug,
+          eventId
+        );
       } else if (projectSlug) {
-        // all tests
-        const dataContent = JSON.parse(JSON.stringify(data));
-        for (let i = 0; i < dataContent.length; i++) {
-          // get existing image after the test
-          try {
-            const file = await this.filePathService.getImageFilePath(
-              projectSlug,
-              eventId
-            );
-            const imageId = workbook.addImage({
-              buffer: readFileSync(file),
-              extension: 'png',
-            });
-            worksheet.addImage(imageId, {
-              tl: { col: worksheet.columns.length, row: i + 1 },
-              ext: { width: 100, height: 50 },
-            });
-          } catch (error) {
-            if (error instanceof HttpException) {
-              Logger.error(
-                error,
-                `${XlsxReportSingleEventService.name}.${XlsxReportSingleEventService.prototype.writeXlsxFile.name}`
-              );
-              throw error;
-            }
-
-            Logger.error(
-              error,
-              `${XlsxReportSingleEventService.name}.${XlsxReportSingleEventService.prototype.writeXlsxFile.name}`
-            );
-            throw new HttpException(
-              String(error),
-              HttpStatus.INTERNAL_SERVER_ERROR
-            );
-          }
-        }
+        await this.addImagesForAllTests(
+          workbook,
+          worksheet,
+          data,
+          projectSlug,
+          eventId
+        );
       }
       const filePath = join(eventSavingFolder, fileName);
       if (Array.isArray(data)) {
@@ -118,11 +74,89 @@ export class XlsxReportSingleEventService {
       }
       await workbook.xlsx.writeFile(filePath);
     } catch (error) {
-      Logger.error(
-        error,
-        `${XlsxReportSingleEventService.name}.${XlsxReportSingleEventService.prototype.writeXlsxFile.name}`
-      );
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+      this.handleError(error, 'writeXlsxFile');
     }
+  }
+
+  private async addImageToWorksheet(
+    workbook: ExcelJS.Workbook,
+    worksheet: ExcelJS.Worksheet,
+    projectSlug: string,
+    eventId: string
+  ) {
+    try {
+      const file = await this.filePathService.getImageFilePath(
+        projectSlug,
+        eventId
+      );
+      const imageId = workbook.addImage({
+        buffer: readFileSync(file),
+        extension: 'png',
+      });
+      worksheet.addImage(imageId, {
+        tl: { col: 2, row: 1 },
+        ext: { width: 100, height: 50 },
+      });
+    } catch (error) {
+      this.handleError(error, 'An error occurred while writing an image');
+    }
+  }
+
+  private async addImagesForAllTests(
+    workbook: ExcelJS.Workbook,
+    worksheet: ExcelJS.Worksheet,
+    data:
+      | {
+          dataLayerResult: any;
+          requestCheckResult: any;
+          rawRequest: string;
+          destinationUrl: string;
+        }[]
+      | {
+          dataLayerResult: any;
+          requestCheckResult: any;
+          rawRequest: string;
+          destinationUrl: string;
+        },
+    projectSlug: string,
+    eventId: string
+  ) {
+    const dataContent = Array.isArray(data) ? data : [data];
+    for (let i = 0; i < dataContent.length; i++) {
+      try {
+        const file = await this.filePathService.getImageFilePath(
+          projectSlug,
+          eventId
+        );
+        const imageId = workbook.addImage({
+          buffer: readFileSync(file),
+          extension: 'png',
+        });
+        worksheet.addImage(imageId, {
+          tl: { col: worksheet.columns.length, row: i + 1 },
+          ext: { width: 100, height: 50 },
+        });
+      } catch (error) {
+        this.handleError(error, 'addImagesForAllTests');
+      }
+    }
+  }
+
+  private handleError(error: unknown, methodName: string) {
+    this.logger.error(
+      `Error in ${XlsxReportSingleEventService.name}.${methodName}: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+      error instanceof Error ? error.stack : undefined
+    );
+
+    if (error instanceof HttpException) {
+      throw error;
+    }
+
+    throw new HttpException(
+      'An error occurred while processing the Excel file',
+      HttpStatus.INTERNAL_SERVER_ERROR
+    );
   }
 }

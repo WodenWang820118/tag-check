@@ -1,20 +1,26 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '@utils';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
 import { FolderPathService } from '../os/path/folder-path/folder-path.service';
 import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
-import { Log } from '../logging-interceptor/logging-interceptor.service';
 
 @Injectable()
 export class SingleEventInspectionService {
+  private readonly logger = new Logger(SingleEventInspectionService.name);
   abortController: AbortController | null = null;
 
   constructor(
-    private eventInspectionPipelineService: EventInspectionPipelineService,
-    private folderPathService: FolderPathService,
-    private puppeteerUtilsService: PuppeteerUtilsService
+    private readonly eventInspectionPipelineService: EventInspectionPipelineService,
+    private readonly folderPathService: FolderPathService,
+    private readonly puppeteerUtilsService: PuppeteerUtilsService
   ) {}
 
   initializeAbortController() {
@@ -32,9 +38,8 @@ export class SingleEventInspectionService {
   ) {
     this.initializeAbortController();
     if (!this.abortController) {
-      throw new HttpException(
-        'Abort controller is not initialized',
-        HttpStatus.INTERNAL_SERVER_ERROR
+      throw new InternalServerErrorException(
+        'Abort controller is not initialized'
       );
     }
 
@@ -72,16 +77,12 @@ export class SingleEventInspectionService {
       await browser.close();
       return data;
     } catch (error) {
-      Logger.error(
-        error,
-        `${SingleEventInspectionService.name}.${SingleEventInspectionService.prototype.inspectSingleEvent.name}`
-      );
+      this.logger.error(error);
       await this.puppeteerUtilsService.cleanup(browser, page);
       throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  @Log()
   abort() {
     if (this.abortController) {
       this.abortController.abort();

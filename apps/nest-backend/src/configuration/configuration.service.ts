@@ -11,8 +11,8 @@ import { ConfigsService } from '../configs/configs.service';
 export class ConfigurationService {
   constructor(
     @InjectRepository(Configuration)
-    private configurationRepository: Repository<Configuration>,
-    private configsService: ConfigsService
+    private readonly configurationRepository: Repository<Configuration>,
+    private readonly configsService: ConfigsService
   ) {}
 
   async create(
@@ -61,6 +61,9 @@ export class ConfigurationService {
       })
       .then((res) => {
         return res?.getDataValue('value');
+      })
+      .catch((err) => {
+        return err;
       });
   }
 
@@ -71,6 +74,9 @@ export class ConfigurationService {
       })
       .then((res) => {
         return res?.getDataValue('value');
+      })
+      .catch((err) => {
+        return err;
       });
   }
 }
