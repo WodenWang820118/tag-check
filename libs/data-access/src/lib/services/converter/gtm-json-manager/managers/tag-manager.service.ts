@@ -1,11 +1,22 @@
 import { Parameter, Tag, TagConfig, Trigger, TriggerConfig } from '@utils';
-import { isBuiltInEvent } from '../../utilities/event-utils';
-import { createTag } from '../tags/event-tag';
-import { createGA4Configuration } from '../tags/ga4-configuration-tag';
-import { createScrollTag } from '../tags/scroll-tag';
-import { createVideoTag } from '../tags/video-tag';
+import { Injectable } from '@angular/core';
+import { EventTag } from '../tags/event-tag.service';
+import { GoogleTag } from '../tags/google-tag.service';
+import { ScrollTag } from '../tags/scroll-tag.service';
+import { VideoTag } from '../tags/video-tag.service';
+import { EventUtils } from '../../utils/event-utils.service';
 
+@Injectable({
+  providedIn: 'root',
+})
 export class TagManager {
+  constructor(
+    private eventTag: EventTag,
+    private googleTag: GoogleTag,
+    private scrollTag: ScrollTag,
+    private videoTag: VideoTag,
+    private eventUtils: EventUtils
+  ) {}
   tags: Tag[] = [];
 
   formatSingleTag(
@@ -13,7 +24,7 @@ export class TagManager {
     eventName: string,
     triggers: Trigger[]
   ) {
-    if (isBuiltInEvent(eventName)) {
+    if (this.eventUtils.isBuiltInEvent(eventName)) {
       return;
     }
     this.addTagIfNotExists(eventName, formattedParams, triggers);
@@ -49,7 +60,7 @@ export class TagManager {
   ): TagConfig[] {
     return [
       // config tag
-      createGA4Configuration(
+      this.googleTag.createGA4Configuration(
         googleTagName,
         measurementId,
         accountId,
@@ -57,7 +68,7 @@ export class TagManager {
       ),
       // normal tags
       ...tags.map((tag) => {
-        return createTag(
+        return this.eventTag.createTag(
           googleTagName,
           accountId,
           containerId,
@@ -67,8 +78,20 @@ export class TagManager {
         );
       }),
       // built-in tags. Currently only video and scroll
-      ...createVideoTag(googleTagName, accountId, containerId, data, triggers),
-      ...createScrollTag(googleTagName, accountId, containerId, data, triggers),
+      ...this.videoTag.createVideoTag(
+        googleTagName,
+        accountId,
+        containerId,
+        data,
+        triggers
+      ),
+      ...this.scrollTag.createScrollTag(
+        googleTagName,
+        accountId,
+        containerId,
+        data,
+        triggers
+      ),
     ].map((_data, index) => ({
       ..._data,
       tagId: (index + 1).toString(),

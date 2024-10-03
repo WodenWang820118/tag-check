@@ -1,7 +1,7 @@
-import { createTrigger } from './event-trigger';
-import { createScrollTrigger, scrollTriggers } from './scroll-trigger';
-import { getTriggers } from './trigger-utilities';
-import { videoTrigger } from './video-trigger';
+import { createTrigger } from './event-trigger.service';
+import { createScrollTrigger, scrollTriggers } from './scroll-trigger.service';
+import { getTriggers } from './trigger-utils.service';
+import { videoTrigger } from './video-trigger.service';
 
 jest.mock('../utilities/utilities', () => ({
   isIncludeVideo: jest.fn().mockReturnValue(true),

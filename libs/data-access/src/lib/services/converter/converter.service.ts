@@ -1,30 +1,29 @@
-import { DataLayerManager } from './utilities/data-layer-utils';
+import { DataLayerManager } from './utils/data-layer-utils.service';
 import { Injectable } from '@angular/core';
-import { exportGtmJSON } from './utilities/configuration-utilities';
 import { GtmConfigGenerator, Tag, Trigger } from '@utils';
-import { formatSingleEventParameters } from './utilities/parameter-formatting-utils';
-import { TagManager } from './gtm-json-manager/managers/tag-manager';
-import { TriggerManager } from './gtm-json-manager/managers/trigger-manager';
-import { getAllObjectPaths } from './utilities/object-path-utils';
+import { TagManager } from './gtm-json-manager/managers/tag-manager.service';
+import { TriggerManager } from './gtm-json-manager/managers/trigger-manager.service';
+import { ConfigurationUtils } from './utils/configuration-utils.service';
+import { ObjectPathUtils } from './utils/object-path-utils.service';
+import { ParameterFormattingUtils } from './utils/parameter-formatting-utils.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ConverterService {
   // dataLayers stores all variable paths from the input JSON
-  tagManager: TagManager;
-  triggerManager: TriggerManager;
-  dataLayerManager: DataLayerManager;
-  // dataLayers: string[] = [];
   triggers: Trigger[] = [];
   tags: Tag[] = [];
   measurementIdCustomJS = '';
 
-  constructor() {
-    this.tagManager = new TagManager();
-    this.triggerManager = new TriggerManager();
-    this.dataLayerManager = new DataLayerManager();
-  }
+  constructor(
+    private tagManager: TagManager,
+    private triggerManager: TriggerManager,
+    private dataLayerManager: DataLayerManager,
+    private configurationUtils: ConfigurationUtils,
+    private objectPathUtils: ObjectPathUtils,
+    private parameterFormattingUtils: ParameterFormattingUtils
+  ) {}
 
   convert(
     googleTagName: string,
@@ -40,9 +39,10 @@ export class ConverterService {
         const eventParameters = { ...spec }; // copy of spec
         delete eventParameters['event'];
 
-        const formattedParameters = formatSingleEventParameters(
-          JSON.stringify(eventParameters)
-        );
+        const formattedParameters =
+          this.parameterFormattingUtils.formatSingleEventParameters(
+            JSON.stringify(eventParameters)
+          );
 
         this.triggerManager.formatSingleTrigger(eventName);
         const triggers = this.triggerManager.getTriggers();
@@ -63,7 +63,7 @@ export class ConverterService {
         includeItemScopedVariable
       );
       console.log('dataLayers: ', dataLayers);
-      return exportGtmJSON(
+      return this.configurationUtils.exportGtmJSON(
         googleTagName,
         measurementId,
         formattedData,
@@ -101,7 +101,7 @@ export class ConverterService {
       const { event, ...Json } = parsedJSON;
 
       // the paths is for building data layer variables
-      const paths = getAllObjectPaths(Json);
+      const paths = this.objectPathUtils.getAllObjectPaths(Json);
       this.dataLayerManager.addDataLayer(paths);
 
       return parsedJSON;

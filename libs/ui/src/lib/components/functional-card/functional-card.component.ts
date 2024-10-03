@@ -10,7 +10,7 @@ import {
   ConverterService,
   EditorFacadeService,
   SetupConstructorService,
-  preprocessInput,
+  Utils,
 } from '@data-access';
 import { Subject, combineLatest, take, tap } from 'rxjs';
 import { containerName, gtmId, tagManagerUrl } from './test-data';
@@ -45,7 +45,8 @@ export class FunctionalCardComponent implements OnDestroy {
     private converterService: ConverterService,
     public dialog: MatDialog,
     public editorFacadeService: EditorFacadeService,
-    private setupConstructorService: SetupConstructorService
+    private setupConstructorService: SetupConstructorService,
+    private utils: Utils
   ) {
     this.dataLayer = (window as any).dataLayer || [];
   }
@@ -70,7 +71,7 @@ export class FunctionalCardComponent implements OnDestroy {
             includeItemScopedVariables,
           ]) => {
             try {
-              const json = preprocessInput(
+              const json = this.utils.preprocessInput(
                 inputJsonEditor.state.doc.toString()
               );
               this.performConversion(

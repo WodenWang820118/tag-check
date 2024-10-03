@@ -1,11 +1,16 @@
 import { Trigger } from '@utils';
-import { isBuiltInEvent } from '../../utilities/event-utils';
+import { EventUtils } from '../../utils/event-utils.service';
+import { Injectable } from '@angular/core';
 
+@Injectable({
+  providedIn: 'root',
+})
 export class TriggerManager {
+  constructor(private eventUtils: EventUtils) {}
   triggers: Trigger[] = [];
 
   formatSingleTrigger(eventName: string) {
-    if (isBuiltInEvent(eventName)) {
+    if (this.eventUtils.isBuiltInEvent(eventName)) {
       return;
     }
 

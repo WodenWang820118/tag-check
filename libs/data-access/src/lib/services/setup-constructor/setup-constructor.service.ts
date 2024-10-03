@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { GtmConfigGenerator } from '@utils';
-import { extractAccountAndContainerId } from '../converter/utilities/utilities';
+import { Utils } from '../converter/utils/utils.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SetupConstructorService {
+  constructor(private utils: Utils) {}
   googleTagName: BehaviorSubject<string> = new BehaviorSubject<string>('');
   measurementId: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
@@ -44,7 +45,7 @@ export class SetupConstructorService {
     gtmId: string
   ): GtmConfigGenerator {
     const { accountId, containerId } =
-      extractAccountAndContainerId(tagManagerUrl);
+      this.utils.extractAccountAndContainerId(tagManagerUrl);
 
     const gtmConfigGenerator: GtmConfigGenerator = {
       accountId: accountId,

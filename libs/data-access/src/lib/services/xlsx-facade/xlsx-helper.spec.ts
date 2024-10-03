@@ -1,8 +1,3 @@
-import {
-  filterGtmSpecsFromData,
-  convertSpecStringToObject,
-} from './xlsx-helper';
-
 describe('Helper Functions', () => {
   describe('filterGtmSpecsFromData', () => {
     it.each([
