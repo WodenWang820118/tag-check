@@ -1,18 +1,18 @@
 import { Tag, TagConfig, Trigger, TriggerConfig, VariableConfig } from '@utils';
-import { TagManager } from '../gtm-json-manager/managers/tag-manager.service';
-import { VariableManger } from '../gtm-json-manager/managers/variable-manager.service';
+import { TagManager } from './tag-manager.service';
+import { VariableManger } from './variable-manager.service';
 import { Injectable } from '@angular/core';
-import { TriggerUtils } from '../gtm-json-manager/triggers/trigger-utils.service';
-import { DateUtils } from './date-utils.service';
+import { DateUtils } from '../../utils/date-utils.service';
+import { TriggerManager } from './trigger-manager.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ConfigurationUtils {
+export class ConfigManager {
   constructor(
     private tagManager: TagManager,
     private variableManager: VariableManger,
-    private triggerUtils: TriggerUtils,
+    private triggerManager: TriggerManager,
     private dateUtils: DateUtils
   ) {}
   getGTMFinalConfiguration(
@@ -87,7 +87,7 @@ export class ConfigurationUtils {
       containerId,
       dataLayers
     );
-    const _triggers = this.triggerUtils.getTriggers(
+    const _triggers = this.triggerManager.getTriggerConfig(
       accountId,
       containerId,
       data,

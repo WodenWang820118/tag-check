@@ -10,16 +10,26 @@ export class ParameterUtils {
     dataLayers: string[],
     parameters: Parameter[]
   ): Parameter {
-    // TODO: mistery using dataLayers with the prefix 'ecommerce.'
+    console.log('dataLayers', dataLayers);
+    console.log('parameters', parameters);
+
+    // Filter out 'ecommerce' from dataLayers and create a Set for efficient lookup
+    const ecommerceDataLayers = new Set(
+      dataLayers.filter((layer) => layer.startsWith('ecommerce.'))
+    );
+
+    const list = parameters.map((param) => {
+      const ecommerceKey = `ecommerce.${param.key}`;
+      if (ecommerceDataLayers.has(ecommerceKey)) {
+        return this.createMapParameter(param.key, `{{DLV - ${ecommerceKey}}}`);
+      }
+      return this.createMapParameter(param.key, `{{DLV - ${param.value}}}`);
+    });
+
     return {
       type: 'LIST',
       key,
-      list: parameters.map((param: Parameter) => {
-        return this.createMapParameter(
-          param.key.trim(),
-          `{{DLV - ${param.value as string}}}`
-        );
-      }),
+      list,
     };
   }
 

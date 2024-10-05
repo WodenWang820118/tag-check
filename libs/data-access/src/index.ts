@@ -28,7 +28,6 @@ export * from './lib/services/converter/gtm-json-manager/tags/video-tag.service'
 export * from './lib/services/converter/gtm-json-manager/triggers/event-trigger.service';
 export * from './lib/services/converter/gtm-json-manager/triggers/scroll-trigger.service';
 export * from './lib/services/converter/gtm-json-manager/triggers/video-trigger.service';
-export * from './lib/services/converter/gtm-json-manager/triggers/trigger-utils.service';
 
 // variables
 export * from './lib/services/converter/gtm-json-manager/variables/custom-variable.service';

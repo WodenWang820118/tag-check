@@ -1,12 +1,20 @@
-import { Trigger } from '@utils';
+import { Trigger, TriggerConfig } from '@utils';
 import { EventUtils } from '../../utils/event-utils.service';
 import { Injectable } from '@angular/core';
+import { EventTrigger } from '../triggers/event-trigger.service';
+import { VideoTrigger } from '../triggers/video-trigger.service';
+import { scrollTrigger } from '../triggers/scroll-trigger.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TriggerManager {
-  constructor(private eventUtils: EventUtils) {}
+  constructor(
+    private eventTrigger: EventTrigger,
+    private videoTrigger: VideoTrigger,
+    private scrollTrigger: scrollTrigger,
+    private eventUtils: EventUtils
+  ) {}
   triggers: Trigger[] = [];
 
   formatSingleTrigger(eventName: string) {
@@ -28,5 +36,23 @@ export class TriggerManager {
 
   getTriggers() {
     return this.triggers;
+  }
+
+  getTriggerConfig(
+    accountId: string,
+    containerId: string,
+    data: Record<string, string>[],
+    triggers: Trigger[]
+  ): TriggerConfig[] {
+    return [
+      ...triggers.map(({ name: trigger }) => {
+        return this.eventTrigger.createTrigger(accountId, containerId, trigger);
+      }),
+      ...this.videoTrigger.createVideoTrigger(accountId, containerId, data),
+      ...this.scrollTrigger.createScrollTrigger(accountId, containerId, data),
+    ].map((_trigger, index) => ({
+      ..._trigger,
+      triggerId: (index + 1).toString(),
+    }));
   }
 }

@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { GtmConfigGenerator, Tag, Trigger } from '@utils';
 import { TagManager } from './gtm-json-manager/managers/tag-manager.service';
 import { TriggerManager } from './gtm-json-manager/managers/trigger-manager.service';
-import { ConfigurationUtils } from './utils/configuration-utils.service';
+import { ConfigManager } from './gtm-json-manager/managers/config-manager.service';
 import { ObjectPathUtils } from './utils/object-path-utils.service';
 import { ParameterFormattingUtils } from './utils/parameter-formatting-utils.service';
 
@@ -20,7 +20,7 @@ export class ConverterService {
     private tagManager: TagManager,
     private triggerManager: TriggerManager,
     private dataLayerManager: DataLayerManager,
-    private configurationUtils: ConfigurationUtils,
+    private configManager: ConfigManager,
     private objectPathUtils: ObjectPathUtils,
     private parameterFormattingUtils: ParameterFormattingUtils
   ) {}
@@ -63,7 +63,7 @@ export class ConverterService {
         includeItemScopedVariable
       );
       console.log('dataLayers: ', dataLayers);
-      return this.configurationUtils.exportGtmJSON(
+      return this.configManager.exportGtmJSON(
         googleTagName,
         measurementId,
         formattedData,

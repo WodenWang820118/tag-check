@@ -65,7 +65,7 @@ export interface VariableConfig {
   accountId: string;
   containerId: string;
   parameter?: Parameter[];
-  formatValue?: {};
+  formatValue?: object;
   variableId?: string;
   fingerprint?: string;
 }

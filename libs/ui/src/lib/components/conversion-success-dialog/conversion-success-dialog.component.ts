@@ -62,10 +62,6 @@ export class ConversionSuccessDialogComponent {
     // Clean up after the download to avoid memory leaks
     URL.revokeObjectURL(url);
     this.dialog.closeAll();
-
-    window.dataLayer.push({
-      event: 'btn_download_click',
-    });
   }
 
   onClipBoard() {

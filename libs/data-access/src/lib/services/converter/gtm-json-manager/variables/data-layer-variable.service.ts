@@ -12,6 +12,7 @@ export class DataLayerVariable {
     containerId: string,
     dataLayerName: string
   ): VariableConfig {
+    console.log('dataLayerName', dataLayerName);
     return {
       name: `DLV - ${dataLayerName.trim()}`,
       type: 'v',
