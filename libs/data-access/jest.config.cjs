@@ -1,9 +1,9 @@
-/* eslint-disable */
-export default {
-  displayName: 'ng-tag-build',
+module.exports = {
+  displayName: 'data-access',
   preset: '../../jest.preset.cjs',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../coverage/apps/ng-tag-build',
+  globals: {},
+  coverageDirectory: '../../coverage/libs/data-access',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

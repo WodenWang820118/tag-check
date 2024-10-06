@@ -1,10 +1,9 @@
-/* eslint-disable */
-export default {
+module.exports = {
   displayName: 'ui',
-  preset: '../../jest.preset.js',
+  preset: '../../jest.preset.cjs',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
+  globals: {},
   coverageDirectory: '../../coverage/libs/ui',
-  testEnvironment: 'jsdom',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

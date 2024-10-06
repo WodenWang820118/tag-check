@@ -8,13 +8,12 @@
     "composite": true,
     "declaration": true
   },
-  "files": ["src/test-setup.ts"],
+  "files": [],
   "include": [
-    "jest.config.ts",
+    "jest.config.cjs",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.d.ts",
-    "../../apps/ng-frontend/src/app/index.d.ts",
     "src/**/*.ts"
   ]
 }

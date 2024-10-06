@@ -17,3 +17,21 @@ export function extractEventNameFromId(eventId: string) {
   );
   return eventName;
 }
+
+export function createMock<T extends object>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type: new (...args: any[]) => T,
+  overrides?: Partial<T>
+): jest.Mocked<T> {
+  const mock = {} as jest.Mocked<T>;
+
+  Object.getOwnPropertyNames(type.prototype).forEach((methodName) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    const method = type.prototype[methodName as keyof T];
+    if (typeof method === 'function') {
+      (mock[methodName as keyof T] as unknown) = jest.fn();
+    }
+  });
+
+  return { ...mock, ...overrides };
+}
