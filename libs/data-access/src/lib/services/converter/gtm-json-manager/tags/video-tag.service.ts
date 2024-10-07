@@ -32,7 +32,7 @@ export class VideoTag {
             'eventName',
             'video_{{Video Status}}'
           ),
-          this.parameterUtils.createBuiltInListParameter('eventParameters', [
+          this.parameterUtils.createBuiltInListParameter('eventSettingsTable', [
             this.parameterUtils.createMapParameter(
               'video_current_time',
               '{{Video Current Time}}'
@@ -63,8 +63,8 @@ export class VideoTag {
             ),
           ]),
           this.parameterUtils.createTagReferenceParameter(
-            'measurementId',
-            configurationName
+            'measurementIdOverride',
+            '{{measurementId}}'
           ),
         ],
         fingerprint: '1690374452646',

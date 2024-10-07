@@ -45,8 +45,8 @@ export class ParameterUtils {
     return {
       type: 'MAP',
       map: [
-        this.createTemplateParameter('name', name),
-        this.createTemplateParameter('value', value),
+        this.createTemplateParameter('parameter', name),
+        this.createTemplateParameter('parameterValue', value),
       ],
     };
   }
