@@ -62,9 +62,9 @@ export class VideoTag {
               '{{Video Visible}}'
             ),
           ]),
-          this.parameterUtils.createTagReferenceParameter(
+          this.parameterUtils.createTemplateParameter(
             'measurementIdOverride',
-            '{{measurementId}}'
+            '{{Measurement ID}}'
           ),
         ],
         fingerprint: '1690374452646',

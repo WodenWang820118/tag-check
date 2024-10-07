@@ -226,9 +226,9 @@ describe('VideoTag', () => {
               ],
             },
             {
-              type: 'TAG_REFERENCE',
+              type: 'TEMPLATE',
               key: 'measurementIdOverride',
-              value: '{{measurementId}}',
+              value: '{{Measurement ID}}',
             },
           ],
           fingerprint: '1690374452646',
