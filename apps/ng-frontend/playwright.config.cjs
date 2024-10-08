@@ -1,10 +1,10 @@
-import { defineConfig, devices } from '@playwright/test';
-import { nxE2EPreset } from '@nx/playwright/preset';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { workspaceRoot } from '@nx/devkit';
+const { defineConfig, devices } = require('@playwright/test');
+const { nxE2EPreset } = require('@nx/playwright/preset');
+const { workspaceRoot } = require('@nx/devkit');
+const path = require('path');
 
 // For CI, you may want to set BASE_URL to the deployed application.
-const baseURL = process.env['BASE_URL'] || 'http://localhost:3000';
+const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
 
 /**
  * Read environment variables from file.
@@ -15,8 +15,8 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:3000';
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
-export default defineConfig({
-  ...nxE2EPreset(__filename, { testDir: './e2e' }),
+module.exports = defineConfig({
+  ...nxE2EPreset(__dirname, { testDir: './e2e' }),
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
@@ -24,28 +24,26 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  //   cwd: workspaceRoot,
-  // },
+  webServer: {
+    command: 'pnpm run dev-front',
+    url: 'http://locahost:4200',
+    reuseExistingServer: !process.env.CI,
+    cwd: workspaceRoot,
+  },
+  reporter: [['html', { outputFolder: 'dist/.playwright/apps/ng-frontend' }]],
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
-
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
-
     // Uncomment for mobile browsers support
     /* {
       name: 'Mobile Chrome',
@@ -55,7 +53,6 @@ export default defineConfig({
       name: 'Mobile Safari',
       use: { ...devices['iPhone 12'] },
     }, */
-
     // Uncomment for branded browsers
     /* {
       name: 'Microsoft Edge',
