@@ -1,15 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import {
-  convertSpecStringToObject,
-  filterGtmSpecsFromData,
-  filterNonEmptyData,
-  unfixedableJsonString,
-} from '../xlsx-facade/xlsx-helper';
 import { EditorService } from '../../services/editor/editor.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '@ui';
 import { DataRow } from '@utils';
+import { XlsxHelper } from '../xlsx-facade/xlsx-helper.service';
 
 @Injectable({
   providedIn: 'root',
@@ -24,20 +19,23 @@ export class XlsxDisplayService {
 
   constructor(
     private dialog: MatDialog,
-    private editorService: EditorService
+    private editorService: EditorService,
+    private xlsxHelper: XlsxHelper
   ) {}
 
   // TODO: data types
   handleReadXlsxAction(data: any): void {
     this.dataSource$.next(data.jsonData);
-    this.updateDisplayData(filterNonEmptyData(data.jsonData));
+    this.updateDisplayData(this.xlsxHelper.filterNonEmptyData(data.jsonData));
   }
 
   handleSwitchSheetAction(data: any) {
     this.dataSource$.next(data.jsonData);
-    this.displayedDataSource$.next(filterNonEmptyData(data.jsonData));
+    this.displayedDataSource$.next(
+      this.xlsxHelper.filterNonEmptyData(data.jsonData)
+    );
     this.displayedColumns$.next(
-      Object.keys(filterNonEmptyData(data.jsonData)[0])
+      Object.keys(this.xlsxHelper.filterNonEmptyData(data.jsonData)[0])
     );
   }
 
@@ -52,7 +50,7 @@ export class XlsxDisplayService {
       })
       .filter((event: any) => event.Spec.event !== null);
 
-    unfixedableJsonString.forEach((jsonString) => {
+    this.xlsxHelper.unfixedableJsonString.forEach((jsonString) => {
       failedEvents.push({
         failedEvents: jsonString,
       });
@@ -71,10 +69,10 @@ export class XlsxDisplayService {
   }
 
   processSpecs(data: DataRow[]): any[] {
-    const gtmSpecs = filterGtmSpecsFromData(data);
+    const gtmSpecs = this.xlsxHelper.filterGtmSpecsFromData(data);
     const cleanedGtmSpecs = gtmSpecs.map((spec) => {
       try {
-        return convertSpecStringToObject(spec);
+        return this.xlsxHelper.convertSpecStringToObject(spec);
       } catch (error) {
         this.dialog.open(ErrorDialogComponent, {
           data: {

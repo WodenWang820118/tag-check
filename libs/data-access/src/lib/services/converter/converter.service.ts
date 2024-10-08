@@ -1,30 +1,24 @@
-import { DataLayerManager } from './utilities/data-layer-utils';
-import { Injectable } from '@angular/core';
-import { exportGtmJSON } from './utilities/configuration-utilities';
-import { GtmConfigGenerator, Tag, Trigger } from '@utils';
-import { formatSingleEventParameters } from './utilities/parameter-formatting-utils';
-import { TagManager } from './gtm-json-manager/managers/tag-manager';
-import { TriggerManager } from './gtm-json-manager/managers/trigger-manager';
-import { getAllObjectPaths } from './utilities/object-path-utils';
+import { Injectable, ErrorHandler } from '@angular/core';
+import { GtmConfigGenerator, Tag, Trigger, Parameter } from '@utils';
+import { TagManager } from './gtm-json-manager/managers/tag-manager.service';
+import { TriggerManager } from './gtm-json-manager/managers/trigger-manager.service';
+import { ConfigManager } from './gtm-json-manager/managers/config-manager.service';
+import { Utils } from './utils/utils.service';
+import { EventParameterFormatter } from './utils/event-parameter-formatter.service';
+import { DataLayerUtils } from './utils/data-layer-utils.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ConverterService {
-  // dataLayers stores all variable paths from the input JSON
-  tagManager: TagManager;
-  triggerManager: TriggerManager;
-  dataLayerManager: DataLayerManager;
-  // dataLayers: string[] = [];
-  triggers: Trigger[] = [];
-  tags: Tag[] = [];
-  measurementIdCustomJS = '';
-
-  constructor() {
-    this.tagManager = new TagManager();
-    this.triggerManager = new TriggerManager();
-    this.dataLayerManager = new DataLayerManager();
-  }
+  constructor(
+    private tagManager: TagManager,
+    private triggerManager: TriggerManager,
+    private dataLayerUtils: DataLayerUtils,
+    private configManager: ConfigManager,
+    private utils: Utils,
+    private eventParameterFormatter: EventParameterFormatter
+  ) {}
 
   convert(
     googleTagName: string,
@@ -34,36 +28,15 @@ export class ConverterService {
   ) {
     try {
       const specs = this.parseAllSpecs(gtmConfigGenerator.specs);
-      const formattedData = specs.map((spec: { [x: string]: any }) => {
-        const eventName = spec['event'];
+      const formattedData = this.formatSpecs(specs);
 
-        const eventParameters = { ...spec }; // copy of spec
-        delete eventParameters['event'];
-
-        const formattedParameters = formatSingleEventParameters(
-          JSON.stringify(eventParameters)
-        );
-
-        this.triggerManager.formatSingleTrigger(eventName);
-        const triggers = this.triggerManager.getTriggers();
-
-        this.tagManager.formatSingleTag(
-          formattedParameters,
-          eventName,
-          triggers
-        );
-
-        return { formattedParameters, eventName };
-      });
-
-      // get all necesssary data for export
       const triggers = this.triggerManager.getTriggers();
       const tags = this.tagManager.getTags();
-      const dataLayers = this.dataLayerManager.getDataLayers(
+      const dataLayers = this.dataLayerUtils.getDataLayers(
         includeItemScopedVariable
       );
-      console.log('dataLayers: ', dataLayers);
-      return exportGtmJSON(
+
+      const result = this.configManager.exportGtmJSON(
         googleTagName,
         measurementId,
         formattedData,
@@ -75,41 +48,56 @@ export class ConverterService {
         dataLayers,
         triggers
       );
+      return result;
     } catch (error) {
-      console.error('error: ', error);
-      throw { error };
+      console.error('An error occurred in ConverterService:', error);
+      return null;
     }
   }
 
-  // ------------------------------------------------------------
-  // general utility
-  // ------------------------------------------------------------
+  private formatSpecs(
+    specs: Record<string, string>[]
+  ): { formattedParameters: Parameter[]; eventName: string }[] {
+    return specs.map((spec) => {
+      const eventName: string = spec['event'];
+      const eventParameters = { ...spec };
+      delete eventParameters['event'];
 
-  // data parsing
+      const formattedParameters =
+        this.eventParameterFormatter.formatSingleEventParameters(
+          JSON.stringify(eventParameters)
+        );
 
-  parseAllSpecs(inputString: string) {
-    const allSpecs = JSON.parse(inputString);
-    // Using 'map' to apply the 'parseSpec' function to each object in the 'allSpecs' array
-    // 'bind(this)' is used to ensure that 'this' inside 'parseSpec' refers to the class instance
-    // When passing a method like 'parseSpec' as a callback, the context of 'this' is lost
-    // Using 'bind(this)', the context is preserved and 'this' inside 'parseSpec' still refers to the class instance
-    return allSpecs.map(this.parseSpec.bind(this));
+      this.triggerManager.formatSingleTrigger(eventName);
+      const triggers = this.triggerManager.getTriggers();
+      this.tagManager.formatSingleTag(formattedParameters, eventName, triggers);
+
+      return { formattedParameters, eventName };
+    });
   }
 
-  parseSpec(parsedJSON: Record<string, string>) {
-    if (parsedJSON) {
-      const { event, ...Json } = parsedJSON;
-
-      // the paths is for building data layer variables
-      const paths = getAllObjectPaths(Json);
-      this.dataLayerManager.addDataLayer(paths);
-
-      return parsedJSON;
-    } else {
-      // If JSON parsing fails, throw an error.
+  private parseAllSpecs(inputString: string): Record<string, string>[] {
+    try {
+      const allSpecs = JSON.parse(inputString);
+      return allSpecs.map(this.parseSpec.bind(this));
+    } catch (error) {
+      console.error('Error parsing specs:', error);
       throw new Error(
         'Cannot parse JSON. Please revise the format to follow JSON structure rules'
       );
+    }
+  }
+
+  private parseSpec(
+    parsedJSON: Record<string, string>
+  ): Record<string, string> {
+    if (parsedJSON) {
+      const { event, ...json } = parsedJSON;
+      const paths = this.utils.getAllObjectPaths(json);
+      this.dataLayerUtils.addDataLayer(paths);
+      return parsedJSON;
+    } else {
+      throw new Error('Invalid spec format');
     }
   }
 }

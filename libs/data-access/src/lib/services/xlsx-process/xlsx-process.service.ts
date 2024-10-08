@@ -1,5 +1,13 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Subject, map, shareReplay, take, takeUntil, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Subject,
+  map,
+  shareReplay,
+  take,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { WebWorkerService } from '../../services/web-worker/web-worker.service';
 import { WorkbookService } from '../workbook/workbook.service';
 import { XlsxDisplayService } from '../xlsx-display/xlsx-display.service';
@@ -9,22 +17,33 @@ import { FileService } from '../file/file.service';
   providedIn: 'root',
 })
 export class XlsxProcessService implements OnDestroy {
-  workbook$ = this.workbookService.workbook$;
-  worksheetNames$ = this.workbookService.worksheetNames$;
-  fileName$ = this.workbookService.fileName$;
-  dataSource$ = this.xlsxDisplayService.dataSource$;
-  displayedDataSource$ = this.xlsxDisplayService.displayedDataSource$;
-  displayedColumns$ = this.xlsxDisplayService.displayedColumns$;
-  displayedFailedEvents$ = this.xlsxDisplayService.displayedFailedEvents$;
-  isRenderingJson$ = this.xlsxDisplayService.isRenderingJson$;
-  isPreviewing$ = this.xlsxDisplayService.isPreviewing$;
+  workbook$: BehaviorSubject<any>;
+  worksheetNames$: BehaviorSubject<string[]>;
+  fileName$: BehaviorSubject<string>;
+  dataSource$: BehaviorSubject<any[]>;
+  displayedDataSource$: BehaviorSubject<any[]>;
+  displayedColumns$: BehaviorSubject<string[]>;
+  displayedFailedEvents$: BehaviorSubject<string[]>;
+  isRenderingJson$: BehaviorSubject<boolean>;
+  isPreviewing$: BehaviorSubject<boolean>;
   private destroy$ = new Subject<void>();
   constructor(
     private webWorkerService: WebWorkerService,
     private workbookService: WorkbookService,
     private fileService: FileService,
     private xlsxDisplayService: XlsxDisplayService
-  ) {}
+  ) {
+    this.workbook$ = this.workbookService.workbook$;
+    this.worksheetNames$ = this.workbookService.worksheetNames$;
+    this.fileName$ = this.workbookService.fileName$;
+    this.dataSource$ = this.xlsxDisplayService.dataSource$;
+    this.displayedDataSource$ = this.xlsxDisplayService.displayedDataSource$;
+    this.displayedColumns$ = this.xlsxDisplayService.displayedColumns$;
+    this.displayedFailedEvents$ =
+      this.xlsxDisplayService.displayedFailedEvents$;
+    this.isRenderingJson$ = this.xlsxDisplayService.isRenderingJson$;
+    this.isPreviewing$ = this.xlsxDisplayService.isPreviewing$;
+  }
 
   async loadXlsxFile(file: File) {
     try {
