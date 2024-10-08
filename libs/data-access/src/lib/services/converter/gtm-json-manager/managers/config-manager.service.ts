@@ -1,9 +1,16 @@
-import { Tag, TagConfig, Trigger, TriggerConfig, VariableConfig } from '@utils';
+import {
+  Parameter,
+  Tag,
+  TagConfig,
+  Trigger,
+  TriggerConfig,
+  VariableConfig,
+} from '@utils';
 import { TagManager } from './tag-manager.service';
 import { VariableManger } from './variable-manager.service';
 import { Injectable } from '@angular/core';
-import { DateUtils } from '../../utils/date-utils.service';
 import { TriggerManager } from './trigger-manager.service';
+import { Utils } from '../../utils/utils.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +20,7 @@ export class ConfigManager {
     private tagManager: TagManager,
     private variableManager: VariableManger,
     private triggerManager: TriggerManager,
-    private dateUtils: DateUtils
+    private utils: Utils
   ) {}
   getGTMFinalConfiguration(
     accountId: string,
@@ -27,7 +34,7 @@ export class ConfigManager {
   ) {
     return {
       exportFormatVersion: 2,
-      exportTime: this.dateUtils.outputTime(),
+      exportTime: this.utils.outputTime(),
       containerVersion: {
         path: `accounts/${accountId}/containers/${containerId}/versions/0`,
         accountId: `${accountId}`,
@@ -73,7 +80,10 @@ export class ConfigManager {
   exportGtmJSON(
     googleTagName: string,
     measurementId: string,
-    data: Record<string, string>[],
+    data: {
+      formattedParameters: Parameter[];
+      eventName: string;
+    }[],
     accountId: string,
     containerId: string,
     containerName: string,
@@ -82,6 +92,7 @@ export class ConfigManager {
     dataLayers: string[],
     triggers: Trigger[]
   ) {
+    console.log('data: ', data);
     const _variable = this.variableManager.getVariables(
       accountId,
       containerId,

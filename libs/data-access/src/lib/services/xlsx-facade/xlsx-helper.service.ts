@@ -1,12 +1,12 @@
 import { DataRow } from '@utils';
 import { Injectable } from '@angular/core';
-import { JsonStringUtils } from '../converter/utils/json-string-utils.service';
+import { Utils } from '../converter/utils/utils.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class XlsxHelper {
-  constructor(private jsonString: JsonStringUtils) {}
+  constructor(private utils: Utils) {}
   unfixedableJsonString: Set<string> = new Set();
   filterGtmSpecsFromData(data: DataRow[]) {
     return data
@@ -44,7 +44,7 @@ export class XlsxHelper {
     } catch (error) {
       // If direct parsing fails, attempt to fix and parse again
       try {
-        return JSON.parse(this.jsonString.fixJsonString(jsonString));
+        return JSON.parse(this.utils.fixJsonString(jsonString));
       } catch (nestedError) {
         console.error('Failed to parse:', jsonString, nestedError);
         this.unfixedableJsonString.add(jsonString);

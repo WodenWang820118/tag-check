@@ -4,7 +4,7 @@ import { Parameter } from '@utils';
 @Injectable({
   providedIn: 'root',
 })
-export class ParameterFormattingUtils {
+export class EventParameterFormatter {
   /**
    * Formats an object into an array of key-value pairs, where each key is treated as a name and each value as a value.
    * The first character of each value is omitted.

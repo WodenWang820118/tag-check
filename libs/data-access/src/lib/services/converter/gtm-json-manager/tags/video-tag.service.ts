@@ -1,4 +1,4 @@
-import { TagConfig, TriggerConfig } from '@utils';
+import { Parameter, TagConfig, TriggerConfig } from '@utils';
 import { EventUtils } from '../../utils/event-utils.service';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../parameter-utils.service';
@@ -109,7 +109,10 @@ export class VideoTag {
     configurationName: string,
     accountId: string,
     containerId: string,
-    data: Record<string, string>[],
+    data: {
+      formattedParameters: Parameter[];
+      eventName: string;
+    }[],
     triggers: TriggerConfig[]
   ) {
     try {

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { VariableConfig } from '@utils';
+import { Parameter, VariableConfig } from '@utils';
 import { DataLayerVariable } from '../variables/data-layer-variable.service';
 import { RegexVariable } from '../variables/regex-variable.service';
 import { ScrollVariable } from '../variables/scroll-variable.service';
@@ -20,7 +20,10 @@ export class VariableManger {
   getBuiltInVariables(
     accountId: string,
     containerId: string,
-    data: Record<string, string>[]
+    data: {
+      formattedParameters: Parameter[];
+      eventName: string;
+    }[]
   ): VariableConfig[] {
     return [
       ...(this.eventUtils.isIncludeVideo(data)

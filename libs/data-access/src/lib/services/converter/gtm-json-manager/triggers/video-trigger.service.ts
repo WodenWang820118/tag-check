@@ -1,4 +1,4 @@
-import { TriggerConfig } from '@utils';
+import { Parameter, TriggerConfig } from '@utils';
 import { Injectable } from '@angular/core';
 import { EventUtils } from '../../utils/event-utils.service';
 
@@ -70,9 +70,14 @@ export class VideoTrigger {
   createVideoTrigger(
     accountId: string,
     containerId: string,
-    data: Record<string, string>[]
+    data: {
+      formattedParameters: Parameter[];
+      eventName: string;
+    }[]
   ): TriggerConfig[] {
     try {
+      console.log('Creating video trigger...');
+      console.log('data: ', data);
       if (this.eventUtils.isIncludeVideo(data)) {
         const _videoTrigger = this.videoTrigger({
           accountId,

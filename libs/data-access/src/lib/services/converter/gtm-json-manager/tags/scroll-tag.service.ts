@@ -1,4 +1,4 @@
-import { TagConfig, TriggerConfig } from '@utils';
+import { Parameter, TagConfig, TriggerConfig } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
@@ -57,7 +57,10 @@ export class ScrollTag {
     configurationName: string,
     accountId: string,
     containerId: string,
-    data: Record<string, string>[],
+    data: {
+      formattedParameters: Parameter[];
+      eventName: string;
+    }[],
     triggers: TriggerConfig[]
   ) {
     try {

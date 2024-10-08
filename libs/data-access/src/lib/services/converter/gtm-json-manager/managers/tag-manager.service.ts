@@ -53,7 +53,10 @@ export class TagManager {
     measurementId: string,
     accountId: string,
     containerId: string,
-    data: Record<string, string>[],
+    data: {
+      formattedParameters: Parameter[];
+      eventName: string;
+    }[],
     triggers: TriggerConfig[],
     tags: Tag[],
     dataLayers: string[]

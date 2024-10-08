@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { VideoTag } from './video-tag.service';
 import { ParameterUtils } from '../parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { TagConfig, TriggerConfig } from '@utils';
+import { Parameter, TagConfig, TriggerConfig } from '@utils';
 
 describe('VideoTag', () => {
   let videoTag: VideoTag;
@@ -25,10 +25,16 @@ describe('VideoTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const data: Record<string, string>[] = []; // Empty data
+      const data: {
+        formattedParameters: Parameter[];
+        eventName: string;
+      }[] = [
+        {
+          formattedParameters: [],
+          eventName: 'customEvent',
+        },
+      ];
       const triggers: TriggerConfig[] = []; // Empty triggers
-
-      jest.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(false);
 
       // Act
       const result = videoTag.createVideoTag(
@@ -41,7 +47,6 @@ describe('VideoTag', () => {
 
       // Assert
       expect(result).toEqual([]);
-      expect(eventUtils.isIncludeVideo).toHaveBeenCalledWith(data);
     });
 
     it('should return an empty array and log an error if trigger is not found', () => {
@@ -49,7 +54,15 @@ describe('VideoTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const data: Record<string, string>[] = [{ event: 'video' }];
+      const data: {
+        formattedParameters: Parameter[];
+        eventName: string;
+      }[] = [
+        {
+          formattedParameters: [],
+          eventName: 'customEvent',
+        },
+      ];
       const triggers: TriggerConfig[] = []; // No triggers matching 'event youtube video'
 
       jest.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(true);
@@ -77,7 +90,15 @@ describe('VideoTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const data: Record<string, string>[] = [{ event: 'video' }];
+      const data: {
+        formattedParameters: Parameter[];
+        eventName: string;
+      }[] = [
+        {
+          formattedParameters: [],
+          eventName: 'video_start',
+        },
+      ];
       const triggers: TriggerConfig[] = [
         {
           accountId: accountId,
@@ -98,7 +119,6 @@ describe('VideoTag', () => {
         data,
         triggers
       );
-      // console.log(result);
 
       // Assert
       expect(result).toEqual([

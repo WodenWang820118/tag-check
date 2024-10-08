@@ -1,9 +1,9 @@
-import { Trigger, TriggerConfig } from '@utils';
+import { Parameter, Trigger, TriggerConfig } from '@utils';
 import { EventUtils } from '../../utils/event-utils.service';
 import { Injectable } from '@angular/core';
 import { EventTrigger } from '../triggers/event-trigger.service';
 import { VideoTrigger } from '../triggers/video-trigger.service';
-import { scrollTrigger } from '../triggers/scroll-trigger.service';
+import { ScrollTrigger } from '../triggers/scroll-trigger.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +12,7 @@ export class TriggerManager {
   constructor(
     private eventTrigger: EventTrigger,
     private videoTrigger: VideoTrigger,
-    private scrollTrigger: scrollTrigger,
+    private scrollTrigger: ScrollTrigger,
     private eventUtils: EventUtils
   ) {}
   triggers: Trigger[] = [];
@@ -41,7 +41,10 @@ export class TriggerManager {
   getTriggerConfig(
     accountId: string,
     containerId: string,
-    data: Record<string, string>[],
+    data: {
+      formattedParameters: Parameter[];
+      eventName: string;
+    }[],
     triggers: Trigger[]
   ): TriggerConfig[] {
     return [

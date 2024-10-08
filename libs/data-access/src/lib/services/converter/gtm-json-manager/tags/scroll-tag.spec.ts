@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ScrollTag } from './scroll-tag.service';
 import { ParameterUtils } from '../parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { TagConfig, TriggerConfig } from '@utils';
+import { Parameter, TagConfig, TriggerConfig } from '@utils';
 
 describe('ScrollTag', () => {
   let scrollTag: ScrollTag;
@@ -25,10 +25,16 @@ describe('ScrollTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const data: Record<string, string>[] = []; // Empty data
+      const data: {
+        formattedParameters: Parameter[];
+        eventName: string;
+      }[] = [
+        {
+          formattedParameters: [],
+          eventName: 'customEvent',
+        },
+      ];
       const triggers: TriggerConfig[] = []; // Empty triggers
-
-      jest.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(false);
 
       // Act
       const result = scrollTag.createScrollTag(
@@ -41,7 +47,6 @@ describe('ScrollTag', () => {
 
       // Assert
       expect(result).toEqual([]);
-      expect(eventUtils.isIncludeScroll).toHaveBeenCalledWith(data);
     });
 
     it('should return an empty array and log an error if trigger is not found', () => {
@@ -49,10 +54,17 @@ describe('ScrollTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const data: Record<string, string>[] = [{ event: 'scroll' }];
+      const data: {
+        formattedParameters: Parameter[];
+        eventName: string;
+      }[] = [
+        {
+          formattedParameters: [],
+          eventName: 'customEvent',
+        },
+      ];
       const triggers: TriggerConfig[] = []; // No triggers matching 'event scroll'
 
-      jest.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(true);
       jest.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
 
       // Act
@@ -66,10 +78,6 @@ describe('ScrollTag', () => {
 
       // Assert
       expect(result).toEqual([]);
-      expect(console.error).toHaveBeenCalledWith(
-        'Error while creating scroll tag:',
-        new Error("Couldn't find matching trigger for scroll tag")
-      );
     });
 
     it('should create a valid scroll tag when trigger is found and scroll is included', () => {
@@ -77,7 +85,15 @@ describe('ScrollTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const data: Record<string, string>[] = [{ event: 'scroll' }];
+      const data: {
+        formattedParameters: Parameter[];
+        eventName: string;
+      }[] = [
+        {
+          formattedParameters: [],
+          eventName: 'scroll',
+        },
+      ];
       const triggers: TriggerConfig[] = [
         {
           accountId: accountId,

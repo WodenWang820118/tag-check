@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { TriggerConfig } from '@utils';
+import { Parameter, TriggerConfig } from '@utils';
 import { ParameterUtils } from '../parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class scrollTrigger {
+export class ScrollTrigger {
   constructor(
     private parameterUtils: ParameterUtils,
     private eventUtils: EventUtils
@@ -54,7 +54,10 @@ export class scrollTrigger {
   createScrollTrigger(
     accountId: string,
     containerId: string,
-    data: Record<string, string>[]
+    data: {
+      formattedParameters: Parameter[];
+      eventName: string;
+    }[]
   ): TriggerConfig[] {
     try {
       if (this.eventUtils.isIncludeScroll(data)) {
