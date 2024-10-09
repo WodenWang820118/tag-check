@@ -139,7 +139,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/ng-frontend/jest.config.ts",
+        "jestConfig": "apps/ng-frontend/jest.config.cjs",
         "passWithNoTests": true
       },
       "configurations": {
