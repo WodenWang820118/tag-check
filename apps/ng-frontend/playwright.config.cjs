@@ -1,7 +1,6 @@
 const { defineConfig, devices } = require('@playwright/test');
 const { nxE2EPreset } = require('@nx/playwright/preset');
 const { workspaceRoot } = require('@nx/devkit');
-const path = require('path');
 
 // For CI, you may want to set BASE_URL to the deployed application.
 const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
