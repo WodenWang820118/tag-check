@@ -15,7 +15,7 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-zip',
-      platforms: ['win32'],
+      platforms: ['darwin', 'linux', 'win32'],
     },
   ],
   plugins: [
@@ -34,5 +34,17 @@ module.exports = {
     //   [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
     //   [FuseV1Options.OnlyLoadAppFromAsar]: true,
     // }),
+  ],
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: {
+          owner: 'WodenWang820118',
+          name: 'tag-check',
+        },
+        prerelease: true,
+      },
+    },
   ],
 };

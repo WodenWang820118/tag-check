@@ -1,10 +1,14 @@
 {
   "name": "tag-check",
-  "version": "1.0.0",
+  "version": "v1.0.0-beta",
   "main": "main.cjs",
   "author": "Guan Xin Wang",
   "description": "A tool to check the data layer of a website",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WodenWang820118/tag-check.git"
+  },
   "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
@@ -57,7 +61,11 @@
     "prepare": "husky",
     "test:e2e": "vitest run apps/nest-backend/test/app.e2e-spec.ts --root=apps/nest-backend --watch=false",
     "test-back:unit": "vitest --root=apps/nest-backend --exclude=**/test/*e2e-spec.ts --watch=false",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org guan-xin-wang --project tag-check ./dist/apps/ng-frontend/browser && sentry-cli sourcemaps upload --org guan-xin-wang --project tag-check ./dist/apps/ng-frontend/browser"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org guan-xin-wang --project tag-check ./dist/apps/ng-frontend/browser && sentry-cli sourcemaps upload --org guan-xin-wang --project tag-check ./dist/apps/ng-frontend/browser",
+    "publishing": "-----------------publishing scripts-----------------",
+    "publish-local": "cross-env-shell NODE_ENV=prod \"pnpm run build-prod && electron-forge publish -- --from-dry-run\"",
+    "publish-dry": "cross-env-shell NODE_ENV=prod \"pnpm run build-prod && electron-forge publish -- --dry-run\"",
+    "publish": "cross-env-shell NODE_ENV=prod \"pnpm run build-prod && electron-forge publish\""
   },
   "private": true,
   "devDependencies": {
@@ -88,6 +96,7 @@
     "@electron-forge/maker-zip": "^7.4.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
     "@electron-forge/plugin-fuses": "^7.4.0",
+    "@electron-forge/publisher-github": "^7.5.0",
     "@electron/fuses": "^1.8.0",
     "@nestjs/mapped-types": "^2.0.5",
     "@nestjs/schematics": "^10.0.1",
@@ -184,6 +193,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "codemirror": "^6.0.1",
+    "electron-log": "^5.2.0",
     "electron-squirrel-startup": "^1.0.1",
     "exceljs": "^4.4.0",
     "express": "^4.21.0",
@@ -199,6 +209,7 @@
     "tslib": "^2.7.0",
     "typeorm": "^0.3.20",
     "unzipper": "^0.10.14",
+    "update-electron-app": "^3.0.0",
     "uuid": "^9.0.1"
   },
   "packageManager": "pnpm@9.10.0+sha512.73a29afa36a0d092ece5271de5177ecbf8318d454ecd701343131b8ebc0c1a91c487da46ab77c8e596d6acf1461e3594ced4becedf8921b074fbd8653ed7051c"
