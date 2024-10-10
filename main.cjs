@@ -9,6 +9,11 @@ const environmentUtils = require('./main-process/environment-utils.cjs');
 const backend = require('./main-process/backend.cjs');
 const database = require('./main-process/database.cjs');
 const frontend = require('./main-process/frontend.cjs');
+const { updateElectronApp } = require('update-electron-app');
+updateElectronApp({
+  updateInterval: '1 hour',
+  logger: require('electron-log'),
+}); // additional configuration options available
 
 /**
  * @type {ChildProcess}

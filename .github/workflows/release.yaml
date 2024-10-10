@@ -1,0 +1,31 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        node-version: ['20.x'] # LTS versions as of 2024
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PNPM
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install -g pnpm
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build Electron app
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: pnpm run publish # The electron-forge publish command will handle GitHub artifacts
+permissions:
+  packages: write
+  contents: write
