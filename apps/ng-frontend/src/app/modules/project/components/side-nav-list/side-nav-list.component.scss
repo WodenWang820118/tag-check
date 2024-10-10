@@ -1,0 +1,36 @@
+.sub-list-item {
+  height: 30px !important;
+}
+
+.sub-list-item .mat-mdc-list-item-title {
+  font-size: 14px !important;
+}
+
+.mat-list-item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4rem;
+}
+
+.spacer {
+  flex: 1 1 0;
+}
+
+.btn-chevron {
+  scale: 0.7;
+}
+
+.settings {
+  padding-left: 30rem;
+  padding-top: 5rem;
+  padding-right: 30rem;
+
+  &__browser {
+    max-width: 600px;
+  }
+}
+
+.mat-mdc-nav-list .mat-mdc-list-item {
+  border-radius: 0px 56px 56px 0px !important;
+}

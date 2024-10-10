@@ -1,0 +1,46 @@
+{
+  "title": "remove_from_cart",
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 1237,
+      "height": 945,
+      "deviceScaleFactor": 1,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": false
+    },
+    {
+      "type": "navigate",
+      "url": "https://gtm-integration-sample.netlify.app/"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [["div.active img"]],
+      "offsetY": 225,
+      "offsetX": 821.5
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [["app-details button"]],
+      "offsetY": 13.40625,
+      "offsetX": 56.765625
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": ["#navBasketItems"],
+      "offsetX": 48.359375,
+      "offsetY": 23
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": ["fa-icon.mx-2 path"],
+      "offsetX": 5.875,
+      "offsetY": 9
+    }
+  ]
+}

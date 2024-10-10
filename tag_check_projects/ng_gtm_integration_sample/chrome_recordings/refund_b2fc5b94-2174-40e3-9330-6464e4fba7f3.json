@@ -1,0 +1,74 @@
+{
+  "title": "refund",
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 1237,
+      "height": 945,
+      "deviceScaleFactor": 1,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": false
+    },
+    {
+      "type": "navigate",
+      "assertedEvents": [
+        {
+          "type": "navigation",
+          "url": "https://gtm-integration-sample.netlify.app/home",
+          "title": "Ng GTM Integration App"
+        }
+      ],
+      "url": "https://gtm-integration-sample.netlify.app/"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [["div.active img"]],
+      "offsetX": 821.5,
+      "offsetY": 225
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [["app-details button"]],
+      "offsetX": 56.765625,
+      "offsetY": 13.40625
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": ["#navBasketItems"],
+      "offsetX": 52.359375,
+      "offsetY": 18
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": ["app-basket a"],
+      "offsetX": 74.375,
+      "offsetY": 22
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": ["app-shipping-form button"],
+      "offsetX": 50.5,
+      "offsetY": 21.015625
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": ["app-payment-form button"],
+      "offsetX": 50.5,
+      "offsetY": 23.015625
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": ["#cancelOrder h4"],
+      "offsetX": 105.15625,
+      "offsetY": 12.609375
+    }
+  ]
+}

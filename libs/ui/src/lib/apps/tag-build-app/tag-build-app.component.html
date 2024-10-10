@@ -1,0 +1,42 @@
+<div class="main-page">
+  <div class="main-page__title">
+    <h1>Tag Build</h1>
+  </div>
+  <div class="main-page__board">
+    <div class="main-page__board__item main-page__editor">
+      <lib-editor
+        content="{{ exampleInputJson | json }}"
+        [editorExtension]="'inputJson'"
+      />
+    </div>
+    <div class="main-page__board__item">
+      <lib-functional-card>
+        <lib-upload-action
+          class="functional-card__actions__item"
+          (uploadClick)="onUpload()"
+        ></lib-upload-action>
+      </lib-functional-card>
+    </div>
+    <div class="main-page__board__item main-page__editor">
+      <lib-editor [editorExtension]="'outputJson'" />
+    </div>
+  </div>
+  @defer (on viewport) {
+  <mat-sidenav-container>
+    <lib-xlsx-sidenav-form></lib-xlsx-sidenav-form>
+  </mat-sidenav-container>
+  } @placeholder {
+  <div></div>
+  } @defer (on viewport) {
+  <div class="main-page__article">
+    <lib-article />
+  </div>
+  } @placeholder {
+  <div></div>
+  }
+</div>
+@defer (on viewport) {
+<lib-footer></lib-footer>
+} @placeholder {
+<div></div>
+}

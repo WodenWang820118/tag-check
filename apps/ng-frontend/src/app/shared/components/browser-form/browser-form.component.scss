@@ -1,0 +1,13 @@
+.browser-form {
+  width: 100%;
+
+  &__sub-form {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+  }
+
+  &__field {
+    width: 100%;
+  }
+}

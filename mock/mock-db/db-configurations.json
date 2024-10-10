@@ -1,0 +1,12 @@
+{
+  "configurations": [
+    {
+      "name": "rootProjectPath",
+      "value": "D:\\projects"
+    },
+    {
+      "name": "currentProject",
+      "value": "ng_gtm_integration_sample"
+    }
+  ]
+}

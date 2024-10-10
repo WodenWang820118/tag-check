@@ -1,0 +1,53 @@
+<div class="init-project-form">
+  <form #f="ngForm" [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>New Project</mat-card-title>
+        <mat-card-subtitle
+          >Please fill in the required information</mat-card-subtitle
+        >
+      </mat-card-header>
+      <br />
+      <mat-card-content>
+        <div style="display: flex; flex-direction: column; gap: 1rem">
+          <mat-form-field appearance="outline">
+            <mat-label>Project Name</mat-label>
+            <input
+              matInput
+              placeholder="Corporate Website Project"
+              formControlName="projectName"
+              [errorStateMatcher]="validProjectNameMatcher"
+            />
+            @if(projectForm.controls['projectName'].hasError('invalidCharacters'))
+            {
+            <mat-error
+              >Can only have: <strong>-!'",</strong> and spaces</mat-error
+            >
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Generated Project Slug</mat-label>
+            <input matInput formControlName="projectSlug" readonly />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Measurement ID</mat-label>
+            <input matInput formControlName="measurementId" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Project Description</mat-label>
+            <textarea matInput formControlName="projectDescription"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Google Spreadsheet Link</mat-label>
+            <input matInput formControlName="googleSpreadsheetLink" />
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions align="end" style="gap: 1rem">
+        <button mat-raised-button [routerLink]="['/']">Cancel</button>
+        <button mat-raised-button color="primary">Submit</button>
+      </mat-card-actions>
+    </mat-card>
+  </form>
+</div>

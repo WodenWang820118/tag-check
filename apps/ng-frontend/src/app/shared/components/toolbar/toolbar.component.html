@@ -1,0 +1,73 @@
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    @if (this.snav) {
+    <button mat-icon-button (click)="snav.toggle()">
+      <mat-icon>menu</mat-icon>
+    </button>
+    }
+    <span [routerLink]="['/']" style="cursor: pointer">TagCheck</span>
+
+    @defer (when this.snav && this.settings && this.projects) { @if (this.snav
+    && this.settings && this.projects) {
+    <mat-form-field
+      appearance="outline"
+      color="primary"
+      style="margin-left: 1rem; margin-top: 20px"
+    >
+      <mat-label>Project</mat-label>
+      <mat-select
+        [(value)]="this.settings.projectSlug"
+        (valueChange)="this.onChangeProject($event)"
+      >
+        @for (project of projects; track project.projectSlug) {
+        <mat-option [value]="project.projectSlug">{{
+          project.projectName
+        }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    } }
+    <span class="spacer"></span>
+    @if (isHomeView) { @if (!isSearchVisible) {
+    <mat-button-toggle-group
+      #group="matButtonToggleGroup"
+      (change)="onToggleChange($event)"
+    >
+      <mat-button-toggle
+        class="custom-mat-button-toggle"
+        value="search"
+        aria-label="search project"
+      >
+        <mat-icon>search</mat-icon>
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+    } @if (isSearchVisible) {
+    <div class="filter-container">
+      <mat-form-field appearance="outline" class="filter">
+        <input
+          matInput
+          (keyup)="applyFilter($event)"
+          #input
+          class="filter__input"
+        />
+        <button
+          matSuffix
+          mat-icon-button
+          aria-label="Clear"
+          (click)="closeSearch()"
+          class="filter__clear"
+        >
+          <mat-icon class="filter__icon">close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+    } }
+    <button mat-icon-button [routerLink]="['/topics']" style="cursor: pointer">
+      <mat-icon>help_outline</mat-icon>
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
+
+<mat-menu #globalSetting="matMenu" xPosition="before">
+  <button mat-menu-item [routerLink]="['/global-settings']">Settings</button>
+</mat-menu>

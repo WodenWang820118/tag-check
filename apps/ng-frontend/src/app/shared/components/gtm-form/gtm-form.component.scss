@@ -1,0 +1,19 @@
+@use '@angular/material' as mat;
+
+$theme: mat.m2-define-light-theme(
+  (
+    density: -4,
+  )
+);
+
+.gtm-preview-mode-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  &__field {
+    width: 100%;
+  }
+
+  @include mat.icon-button-theme($theme);
+}

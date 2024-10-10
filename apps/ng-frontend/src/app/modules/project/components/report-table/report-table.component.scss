@@ -1,0 +1,39 @@
+.report-table {
+  display: flex;
+  flex-direction: column;
+
+  &__header {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}
+
+table {
+  width: 100%;
+}
+
+// TODO: decide it based on the design
+.element-row td {
+  border-bottom-width: 0;
+}
+
+.json {
+  overflow: auto;
+}
+
+.true-status {
+  color: green;
+}
+
+.false-status {
+  color: red;
+}
+
+.mat-badge-content {
+  font-family: 'Material Icons';
+}
+
+.spinner {
+  margin-left: 10px;
+}

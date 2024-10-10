@@ -4,6 +4,7 @@
 dist
 tmp
 /out-tsc
+out
 
 # dependencies
 node_modules
@@ -16,6 +17,7 @@ node_modules
 *.launch
 .settings/
 *.sublime-workspace
+*nx
 
 # IDE - VSCode
 .vscode/*
@@ -37,3 +39,17 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+.env
+.angular
+# Ignore everything in tag_check_projects
+/tag_check_projects/*
+
+# But don't ignore ng_gtm_integration_sample
+!/tag_check_projects/ng_gtm_integration_sample/
+
+
+# Sentry Config File
+.sentryclirc
+
+# Sentry Config File
+.env.sentry-build-plugin

@@ -1,0 +1,42 @@
+{
+  "position": 0,
+  "passed": true,
+  "completedTime": "2024-07-17T11:44:05.786Z",
+  "dataLayerSpec": {
+    "event": "view_promotion",
+    "ecommerce": {
+      "creative_name": "$creative_name",
+      "creative_slot": "$creative_slot",
+      "promotion_id": "$promotion_id",
+      "promotion_name": "$promotion_name",
+      "items": [
+        {
+          "item_id": "$item_id",
+          "item_name": "$item_name"
+        }
+      ]
+    }
+  },
+  "dataLayer": {
+    "event": "view_promotion",
+    "ecommerce": {
+      "promotion_id": "city001",
+      "promotion_name": "Switzerland",
+      "creative_name": "travel_slide",
+      "creative_slot": "featured_attributor",
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland"
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 14
+  },
+  "rawRequest": "",
+  "message": "Valid",
+  "destinationUrl": "https://gtm-integration-sample.netlify.app/home",
+  "eventId": "5395af27-52fe-406f-976f-513e3db334a3",
+  "testName": "Standard",
+  "eventName": "view_promotion"
+}

@@ -1,0 +1,52 @@
+<div class="settings">
+  <mat-card class="gtm-preview-mode-form__card">
+    <mat-card-header>
+      <mat-card-title>Google Tag Manager</mat-card-title>
+      <mat-card-subtitle>Settings for the GTM preview mode</mat-card-subtitle>
+    </mat-card-header>
+    <br />
+    <mat-card-content>
+      <form [formGroup]="previewModeForm" class="gtm-preview-mode-form">
+        <!-- users can use the accompany mode and the request check at the same time -->
+        <div class="gtm-preview-mode-form__field">
+          <mat-checkbox formControlName="isAccompanyMode"
+            >Activate Accompanied Mode</mat-checkbox
+          >
+          <mat-checkbox
+            formControlName="isRequestCheck"
+            matTooltip="Please provide a measurement ID to enable this feature."
+            >Activate Request Check</mat-checkbox
+          >
+        </div>
+        <mat-form-field
+          class="gtm-preview-mode-form__field"
+          appearance="outline"
+        >
+          <mat-label>GTM URL</mat-label>
+          <input matInput formControlName="tagManagerUrl" />
+        </mat-form-field>
+        <div class="gtm-preview-mode-form__field gtm-preview-mode-form__row">
+          <mat-form-field appearance="outline" style="width: 100%">
+            <mat-label>Preview Mode URL</mat-label>
+            <input matInput formControlName="url" />
+            @if (urlValue) {
+            <button
+              matSuffix
+              mat-icon-button
+              aria-label="Clear"
+              (click)="onReset()"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+            }
+          </mat-form-field>
+        </div>
+      </form>
+    </mat-card-content>
+    <mat-card-actions align="end" style="gap: 1rem">
+      <button mat-raised-button color="primary" (click)="onSubmit()">
+        Save
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

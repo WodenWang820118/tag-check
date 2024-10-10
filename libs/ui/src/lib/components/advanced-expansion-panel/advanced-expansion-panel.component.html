@@ -1,0 +1,65 @@
+<div class="advanced">
+  <mat-accordion multi>
+    <mat-expansion-panel (opened)="onPanelOpened()" togglePosition="before">
+      <mat-expansion-panel-header [@.disabled]="true">
+        <mat-panel-title> Additional Built-in Tags/variables </mat-panel-title>
+      </mat-expansion-panel-header>
+      @defer (on viewport) {
+      <section class="advanced__tags">
+        <form [formGroup]="form">
+          <div style="display: flex; flex-direction: column">
+            <mat-checkbox formControlName="includeVideoTag"
+              >Include Video Tag</mat-checkbox
+            >
+            <mat-checkbox formControlName="includeScrollTag"
+              >Include Scroll Tag</mat-checkbox
+            >
+            <div style="display: flex; align-items: center; gap: 1rem">
+              <mat-checkbox formControlName="includeItemScopedVariables"
+                >Include item scoped variable</mat-checkbox
+              >
+              <mat-icon matSuffix matTooltip="e.g., items[0].name"
+                >help_outline</mat-icon
+              >
+            </div>
+          </div>
+        </form>
+      </section>
+      } @placeholder {
+      <div></div>
+      }
+    </mat-expansion-panel>
+    <mat-expansion-panel togglePosition="before">
+      <mat-expansion-panel-header [@.disabled]="true">
+        <mat-panel-title> Google Tag</mat-panel-title>
+        <mat-panel-description
+          ><mat-icon
+            matSuffix
+            matTooltip="Google Tag has a default name, but you can change it.
+            You can use an existing measurement ID or leave it empty"
+            >help_outline</mat-icon
+          ></mat-panel-description
+        >
+      </mat-expansion-panel-header>
+      @defer (on viewport) {
+      <section class="advanced__configuration-name">
+        <form
+          [formGroup]="setupForm"
+          style="display: flex; flex-direction: column"
+        >
+          <mat-form-field appearance="outline">
+            <mat-label>Google Tag Name</mat-label>
+            <input matInput formControlName="googleTagName" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Use Existing Measurement ID</mat-label>
+            <input matInput formControlName="useExistingMesurementId" />
+          </mat-form-field>
+        </form>
+      </section>
+      } @placeholder {
+      <div></div>
+      }
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

@@ -1,0 +1,149 @@
+@use '@angular/material' as mat;
+@include mat.core();
+
+// Define custom palettes
+$primary-palette: mat.m2-define-palette(
+  (
+    50: #e0f2f1,
+    100: #b2dfdb,
+    200: #80cbc4,
+    300: #4db6ac,
+    400: #26a69a,
+    500: #009688,
+    600: #00897b,
+    700: #00796b,
+    800: #00695c,
+    900: #004d40,
+    contrast: (
+      50: rgba(black, 0.87),
+      100: rgba(black, 0.87),
+      200: rgba(black, 0.87),
+      300: rgba(black, 0.87),
+      400: white,
+      500: white,
+      600: white,
+      700: white,
+      800: white,
+      900: white,
+    ),
+  )
+);
+
+$secondary-palette: mat.m2-define-palette(
+  (
+    50: #fff3e0,
+    100: #ffe0b2,
+    200: #ffcc80,
+    300: #ffb74d,
+    400: #ffa726,
+    500: #ffca28,
+    600: #fb8c00,
+    700: #f57c00,
+    800: #ef6c00,
+    900: #e65100,
+    contrast: (
+      50: rgba(black, 0.87),
+      100: rgba(black, 0.87),
+      200: rgba(black, 0.87),
+      300: rgba(black, 0.87),
+      400: rgba(black, 0.87),
+      500: rgba(black, 0.87),
+      600: white,
+      700: white,
+      800: white,
+      900: white,
+    ),
+  )
+);
+
+$remark-palette: mat.m2-define-palette(
+  (
+    50: #e8eaf6,
+    100: #c5cae9,
+    200: #9fa8da,
+    300: #7986cb,
+    400: #5c6bc0,
+    500: #cebcb3,
+    600: #3949ab,
+    700: #303f9f,
+    800: #283593,
+    900: #1a237e,
+    contrast: (
+      50: rgba(black, 0.87),
+      100: rgba(black, 0.87),
+      200: white,
+      300: white,
+      400: white,
+      500: white,
+      600: white,
+      700: white,
+      800: white,
+      900: white,
+    ),
+  )
+);
+
+$accent-palette: mat.m2-define-palette(
+  (
+    50: #e8eaf6,
+    100: #c5cae9,
+    200: #9fa8da,
+    300: #7986cb,
+    400: #5c6bc0,
+    500: #cebcb3,
+    600: #3949ab,
+    700: #303f9f,
+    800: #283593,
+    900: #1a237e,
+    contrast: (
+      50: rgba(black, 0.87),
+      100: rgba(black, 0.87),
+      200: white,
+      300: white,
+      400: white,
+      500: white,
+      600: white,
+      700: white,
+      800: white,
+      900: white,
+    ),
+  )
+);
+
+$warn-palette: mat.m2-define-palette(
+  (
+    50: #fbe9e7,
+    100: #ffccbc,
+    200: #ffab91,
+    300: #ff8a65,
+    400: #ff7043,
+    500: #ff5722,
+    600: #f4511e,
+    700: #e64a19,
+    800: #d84315,
+    900: #bf360c,
+    contrast: (
+      50: rgba(black, 0.87),
+      100: rgba(black, 0.87),
+      200: rgba(black, 0.87),
+      300: rgba(black, 0.87),
+      400: rgba(black, 0.87),
+      500: white,
+      600: white,
+      700: white,
+      800: white,
+      900: white,
+    ),
+  )
+);
+
+// the 500 represents the default hue for the theme
+$primary: mat.m2-define-palette($primary-palette, 500);
+$secondary: mat.m2-define-palette($secondary-palette, 500);
+$accent: mat.m2-define-palette($accent-palette, 500);
+$warn: mat.m2-define-palette($warn-palette, 500);
+$remark: mat.m2-define-palette($remark-palette, 500);
+
+$typography: mat.m2-define-typography-config(
+  $font-family: "Roboto, 'Helvetica Neue', sans-serif",
+);

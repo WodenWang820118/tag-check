@@ -1,0 +1,174 @@
+<div class="test-detail-panels">
+  <mat-accordion class=".example-headers-align" multi>
+    <mat-expansion-panel
+      hideToggle
+      (opened)="switchSpecEdit()"
+      (closed)="switchSpecEdit()"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title> Data Layer Spec </mat-panel-title>
+        <mat-panel-description>
+          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          @if (specEdit && !specEditMode) {
+          <button
+            mat-mini-fab
+            color="primary edit"
+            (click)="switchSpecEditMode($event); $event.stopPropagation()"
+          >
+            <mat-icon class="icon-contrast" matTooltip="Edit">edit</mat-icon>
+          </button>
+          }
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <mat-panel-description>
+        @if (specEditMode) {
+        <app-editor
+          [editorExtension]="'specJson'"
+          [content]="spec$ | async | json"
+          [editMode]="true"
+        ></app-editor>
+        } @else {
+        <pre class="json">{{ spec$ | async | json }}</pre>
+        }
+      </mat-panel-description>
+      @if (specEditMode) {
+      <mat-action-row>
+        <button
+          mat-raised-button
+          color="primary"
+          [disabled]="editorService.isJsonSyntaxError$ | async"
+          (click)="onSpecUpdate(); switchSpecEditMode($event)"
+        >
+          Save
+        </button>
+        <button
+          mat-raised-button
+          class="remark"
+          (click)="switchSpecEditMode($event)"
+        >
+          Cancel
+        </button>
+      </mat-action-row>
+      }
+    </mat-expansion-panel>
+
+    <mat-expansion-panel
+      hideToggle
+      (opened)="switchRecordingEdit()"
+      (closed)="switchRecordingEdit()"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title> Chrome Recording </mat-panel-title>
+        <mat-panel-description>
+          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+          @if (recordingEdit && !recordingEditMode) {
+          <button
+            mat-mini-fab
+            color="primary edit"
+            (click)="switchRecordingEditMode($event); $event.stopPropagation()"
+          >
+            <mat-icon class="icon-contrast" matTooltip="Edit">edit</mat-icon>
+          </button>
+          <input
+            hidden
+            (change)="onFileSelected($event)"
+            #fileInput
+            type="file"
+          />
+          }
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <mat-panel-description>
+        @if(recordingEditMode && (this.reportService.fileContent$ | async) !==
+        null) {
+        <!-- upload condition -->
+        <app-editor
+          [editorExtension]="'recordingJson'"
+          [content]="this.reportService.fileContent$ | async | json"
+        ></app-editor>
+        } @else if (recordingEditMode) {
+        <!-- pure editting -->
+        <app-editor
+          [editorExtension]="'recordingJson'"
+          [content]="recording$ | async | json"
+          [editMode]="true"
+        ></app-editor>
+        } @else {
+        <!-- otherwise, showing the info -->
+        @if (recording$ | async) {
+        <ng-container>
+          <pre class="json">{{ recording$ | async | json }}</pre>
+        </ng-container>
+        } @else {
+        <p>No recording found</p>
+        } }
+      </mat-panel-description>
+      @if (recordingEditMode) {
+      <mat-action-row>
+        <button mat-raised-button color="primary" (click)="fileInput.click()">
+          Upload
+        </button>
+        <input
+          hidden
+          (change)="onFileSelected($event)"
+          #fileInput
+          type="file"
+        />
+        <button
+          mat-raised-button
+          color="primary"
+          [disabled]="editorService.isJsonSyntaxError$ | async"
+          (click)="onRecordingUpdate(); switchRecordingEditMode($event)"
+        >
+          Save
+        </button>
+        <button
+          mat-raised-button
+          class="remark"
+          (click)="switchRecordingEditMode($event)"
+        >
+          Cancel
+        </button>
+      </mat-action-row>
+      }
+    </mat-expansion-panel>
+
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Raw Request </mat-panel-title>
+      </mat-expansion-panel-header>
+      <mat-panel-description>
+        <p>{{ (reportDetails$ | async)?.rawRequest }}</p>
+      </mat-panel-description>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Request Data Layer </mat-panel-title>
+      </mat-expansion-panel-header>
+      <mat-panel-description>
+        <pre class="json">{{
+          (reportDetails$ | async)?.reformedDataLayer | json
+        }}</pre>
+      </mat-panel-description>
+    </mat-expansion-panel>
+
+    <mat-expansion-panel hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title> Data Layer </mat-panel-title>
+      </mat-expansion-panel-header>
+      <mat-panel-description>
+        <pre class="json">{{ (reportDetails$ | async)?.dataLayer | json }}</pre>
+      </mat-panel-description>
+      <!-- <mat-action-row
+        ><button mat-raised-button color="success" (click)="onDownload()">
+          Download
+        </button></mat-action-row
+      > -->
+    </mat-expansion-panel>
+  </mat-accordion>
+</div>

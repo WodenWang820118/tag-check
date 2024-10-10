@@ -1,0 +1,39 @@
+<div class="detail">
+  <div class="detail__header">
+    <div class="detail__header__row">
+      <button mat-icon-button (click)="goBack()">
+        <mat-icon>keyboard_arrow_left</mat-icon>
+      </button>
+      <h1 style="padding-top: 7px">
+        {{ (reportDetails$ | async)?.eventName }}
+      </h1>
+    </div>
+    <div class="detail__status">
+      <h2>Status:</h2>
+      <mat-icon>{{
+        (reportDetails$ | async)?.passed ? 'check_circle' : 'cancel'
+      }}</mat-icon>
+      <p>{{ (reportDetails$ | async)?.completedTime | date : 'medium' }}</p>
+      <div>
+        <button
+          mat-icon-button
+          [routerLink]="['..', 'buckets']"
+          [queryParams]="{ event: (reportDetails$ | async)?.eventName }"
+        >
+          <mat-icon>history</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="detail__content">
+    <div class="detail__images">
+      <app-carousel [items$]="carouselItems$"></app-carousel>
+    </div>
+    <div class="detail__panels">
+      <app-report-datail-panels
+        [reportDetails$]="reportDetails$"
+        [eventName]="(reportDetails$ | async)?.eventName"
+      ></app-report-datail-panels>
+    </div>
+  </div>
+</div>

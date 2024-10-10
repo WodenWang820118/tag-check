@@ -1,0 +1,16 @@
+@use '@angular/material' as mat;
+
+.mat-button-toggle-group-appearance-standard {
+  border: none !important;
+  border-radius: 50% !important;
+}
+
+.mat-mdc-form-field {
+  border-radius: 5px;
+  @include mat.form-field-density(-4);
+  @include mat.select-density(-4);
+}
+
+.file-table-toolbar {
+  background-color: white;
+}

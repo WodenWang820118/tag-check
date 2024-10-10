@@ -1,0 +1,27 @@
+{
+  "position": 0,
+  "passed": true,
+  "completedTime": "2024-09-17T15:37:31.894Z",
+  "dataLayerSpec": {
+    "event": "page_view",
+    "page_path": "$page_path",
+    "page_title": "$page_title",
+    "page_location": "$page_location"
+  },
+  "rawRequest": "https://www.google-analytics.com/g/collect?v=2&tid=G-8HK542DQMG&gtm=45je4990v9171567282z89168785492za200zb9168785492&_p=1726587419210&gcs=G100&gcd=13p3p3p3p7l1&npa=1&dma_cps=-&dma=0&tag_exp=0&cid=1684210779.1726587421&ul=en-us&sr=2195x1235&uaa=&uab=&uafvl=&uamb=0&uam=&uap=&uapv=&uaw=0&are=1&frm=0&pscdl=denied&ngs=1&_s=1&dr=&dl=https%3A%2F%2Fgtm-integration-sample.netlify.app%2Fhome&dp=%2F&dt=Home&sid=1726587421&sct=1&seg=0&en=page_view&_fv=1&_nsi=1&_ss=1&ep.debug_mode=false&tfd=2992",
+  "message": "Valid",
+  "destinationUrl": "https://gtm-integration-sample.netlify.app/home",
+  "eventId": "54aab8c1-b641-49b9-9ad9-dad029fb1bec",
+  "testName": "page_view",
+  "eventName": "page_view",
+  "dataLayer": {
+    "event": "page_view",
+    "page_path": "/home",
+    "page_title": "Home",
+    "page_location": "https://gtm-integration-sample.netlify.app/home"
+  },
+  "requestPassed": false,
+  "reformedDataLayer": {
+    "event": "page_view"
+  }
+}

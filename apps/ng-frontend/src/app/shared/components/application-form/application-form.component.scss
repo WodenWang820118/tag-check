@@ -1,0 +1,14 @@
+.application-form {
+  width: 100%;
+
+  &__sub-form {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    padding: 0 8px;
+  }
+
+  &__field {
+    width: 100%;
+  }
+}
