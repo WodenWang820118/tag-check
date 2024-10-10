@@ -147,7 +147,7 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 
 ### E2E Testing and Electron Integration
 
-- Set up Playwright for E2E testing with Electron support.
+- [x] Set up Playwright for E2E testing with Electron support.
 - Define critical user journeys to test.
 - Write E2E tests covering:
   - User authentication flows

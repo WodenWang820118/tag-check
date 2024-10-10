@@ -1,4 +1,4 @@
-# GTM Container Review and Analytics Validation Tool
+# TagCheck (Beta)
 
 ## Table of Contents
 
