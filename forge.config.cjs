@@ -43,7 +43,7 @@ module.exports = {
           owner: 'WodenWang820118',
           name: 'tag-check',
         },
-        prerelease: true,
+        prerelease: false,
       },
     },
   ],
