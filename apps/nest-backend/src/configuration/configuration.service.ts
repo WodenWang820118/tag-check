@@ -1,19 +1,41 @@
+import { existsSync } from 'fs';
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { CreateConfigurationDto } from './dto/create-configuration.dto';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
 import { Configuration } from './entities/configuration.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'sequelize-typescript';
 import { ConfigsService } from '../configs/configs.service';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
-export class ConfigurationService {
+export class ConfigurationService implements OnModuleInit {
+  private logger = new Logger(ConfigurationService.name);
   constructor(
     @InjectRepository(Configuration)
     private readonly configurationRepository: Repository<Configuration>,
     private readonly configsService: ConfigsService
   ) {}
+
+  async onModuleInit() {
+    const rootPath = await this.configurationRepository.findOne({
+      where: { title: this.configsService.getCONFIG_ROOT_PATH() },
+    });
+    this.logger.log(rootPath);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    if (!rootPath || !existsSync(rootPath.getDataValue('value'))) {
+      const newRootPath = await this.create({
+        title: this.configsService.getCONFIG_ROOT_PATH(),
+        value: this.configsService.getROOT_PROJECT_PATH(),
+        id: '',
+        description: '',
+      });
+      this.logger.log('Created new root path configuration:', newRootPath);
+    } else {
+      this.logger.log('Valid root path configuration found');
+    }
+  }
 
   async create(
     createConfigurationDto: CreateConfigurationDto
