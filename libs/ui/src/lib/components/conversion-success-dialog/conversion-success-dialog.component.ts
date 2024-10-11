@@ -70,10 +70,6 @@ export class ConversionSuccessDialogComponent {
       () => {
         console.log('Async: Copying to clipboard was successful!');
         this.dialog.closeAll();
-
-        window.dataLayer.push({
-          event: 'btn_copy_click',
-        });
       },
       (err) => {
         console.error('Async: Could not copy text: ', err);

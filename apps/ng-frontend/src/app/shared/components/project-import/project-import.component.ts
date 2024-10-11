@@ -4,14 +4,13 @@ import { MatButtonModule } from '@angular/material/button';
 import {
   catchError,
   EMPTY,
-  filter,
   map,
   shareReplay,
   Subject,
   takeUntil,
   tap,
 } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
 import { HttpEventType } from '@angular/common/http';
 
@@ -37,7 +36,6 @@ export class ProjectImportComponent implements OnDestroy {
   destroy$ = new Subject<void>();
 
   constructor(
-    private route: ActivatedRoute,
     private projectIoService: ProjectIoService,
     private router: Router
   ) {}
