@@ -155,6 +155,55 @@
         "buildTarget": "ng-frontend:build",
         "staticFilePath": "dist/apps/ng-frontend/browser"
       }
+    },
+    "storybook": {
+      "executor": "@storybook/angular:start-storybook",
+      "options": {
+        "port": 4400,
+        "configDir": "apps/ng-frontend/.storybook",
+        "browserTarget": "ng-frontend:build",
+        "compodoc": false
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "build-storybook": {
+      "executor": "@storybook/angular:build-storybook",
+      "outputs": ["{options.outputDir}"],
+      "options": {
+        "outputDir": "dist/storybook/ng-frontend",
+        "configDir": "apps/ng-frontend/.storybook",
+        "browserTarget": "ng-frontend:build",
+        "compodoc": false
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "test-storybook": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "test-storybook -c apps/ng-frontend/.storybook --url=http://localhost:4400"
+      }
+    },
+    "static-storybook": {
+      "executor": "@nx/web:file-server",
+      "dependsOn": ["build-storybook"],
+      "options": {
+        "buildTarget": "ng-frontend:build-storybook",
+        "staticFilePath": "dist/storybook/ng-frontend",
+        "spa": true
+      },
+      "configurations": {
+        "ci": {
+          "buildTarget": "ng-frontend:build-storybook:ci"
+        }
+      }
     }
   }
 }

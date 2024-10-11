@@ -35,9 +35,6 @@ export class TagBuildAppComponent {
   constructor(private dialog: MatDialog) {}
   onUpload() {
     this.openFileUploadDialog();
-    window.dataLayer.push({
-      event: 'btn_upload_click',
-    });
   }
 
   openFileUploadDialog() {
