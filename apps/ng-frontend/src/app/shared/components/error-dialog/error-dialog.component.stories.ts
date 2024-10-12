@@ -13,9 +13,7 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { provideRouter } from '@angular/router';
 import { APP_ROUTES } from '../../../app.routes';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { inject } from '@angular/core';
 
-// FIXME: how to provide MAT_DIALOG_DATA?
 const meta: Meta<ErrorDialogComponent> = {
   component: ErrorDialogComponent,
   title: 'ErrorDialogComponent',
@@ -23,7 +21,12 @@ const meta: Meta<ErrorDialogComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [],
-      providers: [],
+      providers: [
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: { message: 'This is a test error message' },
+        },
+      ],
     }),
     applicationConfig({
       providers: [
