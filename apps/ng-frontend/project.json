@@ -18,7 +18,12 @@
         "inlineStyleLanguage": "scss",
         "assets": [
           "apps/ng-frontend/src/favicon.ico",
-          "apps/ng-frontend/src/assets"
+          "apps/ng-frontend/src/assets",
+          {
+            "input": "libs/utils/src/lib/shared-docs",
+            "glob": "**/*",
+            "output": "assets"
+          }
         ],
         "styles": [
           "@angular/material/prebuilt-themes/indigo-pink.css",

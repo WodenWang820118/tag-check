@@ -9,7 +9,6 @@
     "type": "git",
     "url": "git+https://github.com/WodenWang820118/tag-check.git"
   },
-  "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "development": "-------------all development scripts-------------",
