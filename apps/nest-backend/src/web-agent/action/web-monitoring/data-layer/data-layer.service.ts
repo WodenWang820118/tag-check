@@ -38,7 +38,7 @@ export class DataLayerService {
           Object.prototype.hasOwnProperty.call(window, 'dataLayer') &&
           Array.isArray(window.dataLayer) &&
           window.dataLayer.length > 0,
-        { timeout: 2000 }
+        { timeout: 5000 }
       );
 
       const dataLayer: any[] = await page.evaluate(() => {

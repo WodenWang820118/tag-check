@@ -1,12 +1,25 @@
 [
   {
-    "gtm.start": 1715641921910,
+    "gtm.start": 1728976213274,
     "event": "gtm.js",
     "gtm.uniqueEventId": 1
   },
   {
     "event": "gtm.dom",
     "gtm.uniqueEventId": 4
+  },
+  {
+    "event": "componentsLoaded",
+    "gtm.uniqueEventId": 5
+  },
+  {
+    "event": "gtm.load",
+    "gtm.uniqueEventId": 6
+  },
+  {
+    "event": "gtm.triggerGroup",
+    "gtm.triggers": "168785492_202",
+    "gtm.uniqueEventId": 20
   },
   {
     "event": "gtm.historyChange",
@@ -19,20 +32,16 @@
     "gtm.newHistoryState": {
       "navigationId": 4
     },
-    "gtm.oldUrl": "https://gtm-integration-sample.netlify.app/basket",
-    "gtm.newUrl": "https://gtm-integration-sample.netlify.app/checkout",
-    "gtm.uniqueEventId": 44
+    "gtm.oldUrl": "https://gtm-integration-sample.netlify.app/transaction/basket",
+    "gtm.newUrl": "https://gtm-integration-sample.netlify.app/transaction/checkout",
+    "gtm.uniqueEventId": 48
   },
   {
     "event": "page_view",
-    "page_path": "/checkout",
+    "page_path": "/transaction/checkout",
     "page_title": "Checkout",
-    "page_location": "https://gtm-integration-sample.netlify.app/checkout",
-    "gtm.uniqueEventId": 50
-  },
-  {
-    "event": "gtm.load",
-    "gtm.uniqueEventId": 11
+    "page_location": "https://gtm-integration-sample.netlify.app/transaction/checkout",
+    "gtm.uniqueEventId": 54
   },
   {
     "ecommerce": null
@@ -51,7 +60,7 @@
         }
       ]
     },
-    "gtm.uniqueEventId": 12
+    "gtm.uniqueEventId": 14
   },
   {
     "event": "update_consent",
@@ -59,16 +68,7 @@
     "analytics_storage": "granted",
     "ad_user_data": "granted",
     "ad_personalization": "denied",
-    "gtm.uniqueEventId": 15
-  },
-  {
-    "event": "componentsLoaded",
-    "gtm.uniqueEventId": 18
-  },
-  {
-    "event": "gtm.triggerGroup",
-    "gtm.triggers": "168785492_202,168785492_203",
-    "gtm.uniqueEventId": 19
+    "gtm.uniqueEventId": 17
   },
   {
     "event": "select_promotion",
@@ -84,7 +84,7 @@
         }
       ]
     },
-    "gtm.uniqueEventId": 20
+    "gtm.uniqueEventId": 21
   },
   {
     "event": "view_item",
@@ -101,7 +101,24 @@
         }
       ]
     },
-    "gtm.uniqueEventId": 23
+    "gtm.uniqueEventId": 24
+  },
+  {
+    "event": "select_item",
+    "ecommerce": {
+      "currency": "USD",
+      "value": 799,
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_category": "Switzerland",
+          "price": 799,
+          "quantity": 1
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 27
   },
   {
     "event": "add_to_cart",
@@ -119,7 +136,7 @@
         }
       ]
     },
-    "gtm.uniqueEventId": 32
+    "gtm.uniqueEventId": 36
   },
   {
     "event": "view_cart",
@@ -136,7 +153,7 @@
         }
       ]
     },
-    "gtm.uniqueEventId": 35
+    "gtm.uniqueEventId": 39
   },
   {
     "event": "begin_checkout",
@@ -153,7 +170,12 @@
         }
       ]
     },
-    "gtm.uniqueEventId": 47
+    "gtm.uniqueEventId": 51
+  },
+  {
+    "event": "CustomScroll",
+    "customScrollPercent": 75,
+    "gtm.uniqueEventId": 59
   },
   {
     "event": "add_shipping_info",
@@ -170,11 +192,6 @@
         }
       ]
     },
-    "gtm.uniqueEventId": 53
-  },
-  {
-    "event": "CustomScroll",
-    "customScrollPercent": 100,
-    "gtm.uniqueEventId": 59
+    "gtm.uniqueEventId": 60
   }
 ]

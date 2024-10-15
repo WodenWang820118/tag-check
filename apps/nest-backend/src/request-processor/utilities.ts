@@ -16,3 +16,9 @@ export const standardParameterMap: { [key: string]: string } = {
   li: 'item_list_id',
   ln: 'item_list_name',
 };
+
+export const standardPageParameterMap: { [key: string]: string } = {
+  dp: 'page_path',
+  dt: 'page_title',
+  dl: 'page_location',
+};

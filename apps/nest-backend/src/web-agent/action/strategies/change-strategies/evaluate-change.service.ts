@@ -24,25 +24,35 @@ export class EvaluateChangeService implements ChangeOperation {
     }
 
     try {
-      const element = (await this.actionUtilsService.getElement(
+      const element = await this.actionUtilsService.getElement(
         page,
         selectorType,
         selector
-      )) as HTMLElement;
-      const isSelect = element.tagName.toLowerCase() === 'select';
+      );
+
+      if (!element) {
+        this.logger.error(
+          `Failed to change element with selector "${selector}": Element not found`
+        );
+        return false;
+      }
+      const tagName = await element.evaluate((el) => el.tagName.toLowerCase());
 
       await Promise.race([
-        page.evaluate((sel) => {
-          if (isSelect) {
-            const element = document.querySelector(sel) as HTMLSelectElement;
-            element.value = value;
+        (async () => {
+          if (tagName === 'select') {
+            await element.select(value);
+          } else if (tagName === 'input' || tagName === 'textarea') {
+            await element.type(value);
           } else {
-            const element = document.querySelector(sel) as HTMLInputElement;
-            element.value = value;
+            throw new Error(`Unsupported element type: ${tagName}`);
           }
-        }, selector),
+        })(),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Timeout exceeded')), timeout)
+          setTimeout(
+            () => reject(new Error('Timeout exceeded Changing')),
+            timeout
+          )
         ),
       ]);
       return true;

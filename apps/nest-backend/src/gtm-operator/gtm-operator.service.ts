@@ -105,6 +105,9 @@ export class GtmOperatorService {
         );
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await recorder.stop();
+      const pages = await browser.pages();
+      await Promise.all(pages.map((page) => page.close()));
+      await browser.close();
       return data;
     } catch (error) {
       this.logger.error(error);

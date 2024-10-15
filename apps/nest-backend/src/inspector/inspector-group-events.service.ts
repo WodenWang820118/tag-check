@@ -1,3 +1,4 @@
+import { Page } from 'puppeteer';
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
@@ -75,7 +76,9 @@ export class InspectorGroupEventsService {
             path: imageSavingFolder,
             fullPage: true,
           });
-          await page.close();
+          const pages = await browser.pages();
+          await Promise.all(pages.map((page: Page) => page.close()));
+          await browser.close();
           return result;
         } catch (error) {
           this.logger.log(error);

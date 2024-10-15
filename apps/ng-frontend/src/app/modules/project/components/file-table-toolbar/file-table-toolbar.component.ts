@@ -20,15 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
-import {
-  tap,
-  takeUntil,
-  Subject,
-  BehaviorSubject,
-  map,
-  catchError,
-  of,
-} from 'rxjs';
+import { tap, takeUntil, Subject, map, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-file-table-toolbar',

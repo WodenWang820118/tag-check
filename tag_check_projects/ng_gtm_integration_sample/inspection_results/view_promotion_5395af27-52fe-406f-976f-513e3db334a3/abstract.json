@@ -1,7 +1,7 @@
 {
   "position": 0,
   "passed": true,
-  "completedTime": "2024-07-17T11:44:05.786Z",
+  "completedTime": "2024-10-15T11:36:05.058Z",
   "dataLayerSpec": {
     "event": "view_promotion",
     "ecommerce": {
@@ -30,13 +30,32 @@
           "item_name": "Switzerland"
         }
       ]
-    },
-    "gtm.uniqueEventId": 14
+    }
   },
-  "rawRequest": "",
+  "rawRequest": "https://www.google-analytics.com/g/collect?v=2&tid=G-8HK542DQMG&gtm=45je4a90v9171567282z89168785492za200zb9168785492&_p=1728992140877&gcs=G100&gcd=13p3p3p3p7l1&npa=1&dma_cps=-&dma=0&tag_exp=101686685&cid=1456417816.1728992143&ul=en-us&sr=1536x864&uaa=&uab=&uafvl=&uamb=0&uam=&uap=&uapv=&uaw=0&are=1&frm=0&pscdl=denied&ngs=1&_s=2&dr=&dl=&sid=1728992142&sct=1&seg=0&dt=Ng%20GTM%20Integration%20App&en=view_promotion&pr1=idcity001~nmSwitzerland&ep.debug_mode=false&ep.creative_name=travel_slide&ep.creative_slot=featured_attributor&ep.promotion_id=city001&ep.promotion_name=Switzerland&tfd=2681",
   "message": "Valid",
   "destinationUrl": "https://gtm-integration-sample.netlify.app/home",
   "eventId": "5395af27-52fe-406f-976f-513e3db334a3",
   "testName": "Standard",
-  "eventName": "view_promotion"
+  "eventName": "view_promotion",
+  "requestPassed": true,
+  "reformedDataLayer": {
+    "event": "view_promotion",
+    "page_location": "",
+    "page_title": "Ng GTM Integration App",
+    "creative_name": "travel_slide",
+    "creative_slot": "featured_attributor",
+    "promotion_id": "city001",
+    "promotion_name": "Switzerland",
+    "ecommerce": {
+      "value": "",
+      "currency": "",
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland"
+        }
+      ]
+    }
+  }
 }

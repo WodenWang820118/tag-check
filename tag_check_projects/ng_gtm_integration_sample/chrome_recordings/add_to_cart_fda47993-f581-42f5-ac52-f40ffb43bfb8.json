@@ -3,8 +3,8 @@
   "steps": [
     {
       "type": "setViewport",
-      "width": 1737,
-      "height": 1100,
+      "width": 1440,
+      "height": 900,
       "deviceScaleFactor": 1,
       "isMobile": false,
       "hasTouch": false,
@@ -24,7 +24,7 @@
     {
       "type": "click",
       "target": "main",
-      "selectors": [["app-details button"]],
+      "selectors": [["div.add2Cart > div > button"]],
       "offsetY": 22.705322265625,
       "offsetX": 67.1070556640625
     }

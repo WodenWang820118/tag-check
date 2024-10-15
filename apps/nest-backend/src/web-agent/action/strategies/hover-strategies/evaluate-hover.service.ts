@@ -15,15 +15,22 @@ export class EvaluateHoverService {
     timeout = 5000
   ): Promise<boolean> {
     try {
-      const element = (await this.actionUtilsService.getElement(
+      const element = await this.actionUtilsService.getElement(
         page,
         selectorType,
         selector
-      )) as HTMLElement;
+      );
+
+      if (!element) {
+        this.logger.error(
+          `Failed to hover on element with selector "${selector}": Element not found`
+        );
+        return false;
+      }
 
       await Promise.race([
-        page.evaluate((sel) => {
-          element?.focus();
+        page.evaluate(async () => {
+          await element.focus();
         }, selector),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Timeout exceeded')), timeout)

@@ -18,7 +18,12 @@
         "inlineStyleLanguage": "scss",
         "assets": [
           "apps/ng-frontend/src/favicon.ico",
-          "apps/ng-frontend/src/assets"
+          "apps/ng-frontend/src/assets",
+          {
+            "input": "libs/utils/src/lib/shared-docs",
+            "glob": "**/*",
+            "output": "assets"
+          }
         ],
         "styles": [
           "@angular/material/prebuilt-themes/indigo-pink.css",
@@ -154,6 +159,81 @@
       "options": {
         "buildTarget": "ng-frontend:build",
         "staticFilePath": "dist/apps/ng-frontend/browser"
+      }
+    },
+    "storybook": {
+      "executor": "@storybook/angular:start-storybook",
+      "options": {
+        "port": 4400,
+        "configDir": "apps/ng-frontend/.storybook",
+        "browserTarget": "ng-frontend:build",
+        "compodoc": false,
+        "assets": ["apps/ng-frontend/src/assets"],
+        "styles": [
+          "@angular/material/prebuilt-themes/indigo-pink.css",
+          "apps/ng-frontend/src/styles.scss",
+          "apps/ng-tag-build/src/styles.scss",
+          "node_modules/prismjs/themes/prism-okaidia.css",
+          "node_modules/prismjs/plugins/command-line/prism-command-line.css",
+          "@fontsource/roboto/300.css",
+          "@fontsource/roboto/400.css",
+          "@fontsource/roboto/500.css",
+          "@fontsource/roboto/700.css",
+          "@fontsource/material-icons"
+        ]
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "build-storybook": {
+      "executor": "@storybook/angular:build-storybook",
+      "outputs": ["{options.outputDir}"],
+      "options": {
+        "outputDir": "dist/storybook/ng-frontend",
+        "configDir": "apps/ng-frontend/.storybook",
+        "browserTarget": "ng-frontend:build",
+        "compodoc": false,
+        "assets": ["apps/ng-frontend/src/assets"],
+        "styles": [
+          "@angular/material/prebuilt-themes/indigo-pink.css",
+          "apps/ng-frontend/src/styles.scss",
+          "apps/ng-tag-build/src/styles.scss",
+          "node_modules/prismjs/themes/prism-okaidia.css",
+          "node_modules/prismjs/plugins/command-line/prism-command-line.css",
+          "@fontsource/roboto/300.css",
+          "@fontsource/roboto/400.css",
+          "@fontsource/roboto/500.css",
+          "@fontsource/roboto/700.css",
+          "@fontsource/material-icons"
+        ]
+      },
+      "configurations": {
+        "ci": {
+          "quiet": true
+        }
+      }
+    },
+    "test-storybook": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "test-storybook -c apps/ng-frontend/.storybook --url=http://localhost:4400"
+      }
+    },
+    "static-storybook": {
+      "executor": "@nx/web:file-server",
+      "dependsOn": ["build-storybook"],
+      "options": {
+        "buildTarget": "ng-frontend:build-storybook",
+        "staticFilePath": "dist/storybook/ng-frontend",
+        "spa": true
+      },
+      "configurations": {
+        "ci": {
+          "buildTarget": "ng-frontend:build-storybook:ci"
+        }
       }
     }
   }

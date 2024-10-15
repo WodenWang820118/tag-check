@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
-import { Browser, Credentials } from 'puppeteer';
+import { Browser, Credentials, Page } from 'puppeteer';
 import { getCurrentTimestamp } from '@utils';
 import { InspectorGroupEventsService } from '../inspector/inspector-group-events.service';
 import { XlsxReportGroupEventsService } from '../os/xlsx-report/xlsx-report-group-events.service';
@@ -106,6 +106,8 @@ export class GroupEventsInspectionService {
       projectName,
       data.map((item) => item.dataLayerResult)
     );
+    const pages = await browser.pages();
+    await Promise.all(pages.map((page: Page) => page.close()));
     return data;
   }
 

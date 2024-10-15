@@ -58,7 +58,10 @@ export class SingleEventInspectionService {
       eventId
     );
 
-    await this.puppeteerUtilsService.startRecorder(page, folder);
+    const recorder = await this.puppeteerUtilsService.startRecorder(
+      page,
+      folder
+    );
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     try {
@@ -73,7 +76,9 @@ export class SingleEventInspectionService {
           captureRequest,
           eventInspectionPresetDto
         );
-      // await this.puppeteerUtilsService.stopRecorder(); // testing purposes
+      await recorder.stop();
+      const pages = await browser.pages();
+      await Promise.all(pages.map((page) => page.close()));
       await browser.close();
       return data;
     } catch (error) {

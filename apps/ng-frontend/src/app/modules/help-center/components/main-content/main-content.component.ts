@@ -34,7 +34,7 @@ export class MainContentComponent implements OnInit {
       .pipe(
         map((param) => {
           const name = param['name'].toLowerCase();
-          this.fileName = `assets/markdown/${name}.md`;
+          this.fileName = `assets/${name}.md`;
           return this.fileName;
         }),
         switchMap((fileName) => this.markdownService.getSource(fileName)),
@@ -46,7 +46,7 @@ export class MainContentComponent implements OnInit {
         catchError((error) => {
           // TODO: 404 page
           console.error('Error: ', error);
-          this.fileName = 'assets/markdown/404.md';
+          this.fileName = 'assets/404.md';
           return error;
         })
       )

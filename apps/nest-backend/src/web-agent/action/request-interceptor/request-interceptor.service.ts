@@ -27,18 +27,20 @@ export class RequestInterceptorService {
     measurementId: string
   ) {
     const eventName = extractEventNameFromId(eventId);
-    await page.setRequestInterception(true);
     await page.setCacheEnabled(false);
+    await page.setBypassServiceWorker(true);
 
-    page.on('request', async (request) => {
-      if (request.isInterceptResolutionHandled()) return;
+    const cdp = await page.createCDPSession();
+    await cdp.send('Network.enable');
+    await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
+    await cdp.send('Network.setBypassServiceWorker', { bypass: true });
 
-      const requestUrl = request.url();
-
+    cdp.on('Network.requestWillBeSent', async (event) => {
+      const requestUrl = event.request.url;
       if (this.isMatchingGa4Request(requestUrl, eventName, measurementId)) {
-        this.logger.log(`Request captured: ${requestUrl}`);
+        this.logger.log(`Request captured using CDP: ${requestUrl}`);
         this.setRawRequest(requestUrl);
-
+        await cdp.send('Network.disable');
         try {
           const latestDataLayer = await page.evaluate(() => window.dataLayer);
           await this.dataLayerService.updateSelfDataLayerAlgorithm(
@@ -49,29 +51,8 @@ export class RequestInterceptorService {
         } catch (error) {
           this.logger.error(`Error updating data layer: ${error}`);
         }
-
-        await request.abort();
       } else {
-        this.logger.warn(`Request: ${requestUrl}`);
-        await request.continue();
-      }
-    });
-
-    // Add response interception for more information
-    page.on('response', async (response) => {
-      const url = response.url();
-      if (this.isMatchingGa4Request(url, eventName, measurementId)) {
-        this.logger.log(`Intercepted GA4 response: ${url}`);
-        this.logger.log(`Response status: ${response.status()}`);
-        this.logger.log(
-          `Response headers: ${JSON.stringify(response.headers())}`
-        );
-        try {
-          const responseBody = await response.text();
-          this.logger.log(`Response body: ${responseBody}`);
-        } catch (error) {
-          this.logger.error(`Error reading response body: ${error}`);
-        }
+        this.logger.warn(`CDP Request: ${requestUrl}`);
       }
     });
   }
@@ -100,7 +81,7 @@ export class RequestInterceptorService {
 
   getRawRequest() {
     return this.rawRequest.pipe(
-      timeout(10000),
+      timeout(15000),
       first((request) => !!request),
       catchError((error) => {
         if (error instanceof TimeoutError) {
@@ -111,5 +92,9 @@ export class RequestInterceptorService {
         return of('');
       })
     );
+  }
+
+  clearRawRequest() {
+    this.rawRequest.next('');
   }
 }

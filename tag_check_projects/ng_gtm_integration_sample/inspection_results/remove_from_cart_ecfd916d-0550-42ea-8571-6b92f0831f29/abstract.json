@@ -1,7 +1,7 @@
 {
   "position": 0,
   "passed": true,
-  "completedTime": "2024-07-17T09:05:55.108Z",
+  "completedTime": "2024-10-15T11:44:32.766Z",
   "dataLayerSpec": {
     "event": "remove_from_cart",
     "ecommerce": {
@@ -32,13 +32,13 @@
           "price": 799
         }
       ]
-    },
-    "gtm.uniqueEventId": 48
+    }
   },
   "rawRequest": "",
   "message": "Valid",
   "destinationUrl": "https://gtm-integration-sample.netlify.app/transaction/basket",
   "eventId": "ecfd916d-0550-42ea-8571-6b92f0831f29",
   "testName": "Standard",
-  "eventName": "remove_from_cart"
+  "eventName": "remove_from_cart",
+  "requestPassed": false
 }

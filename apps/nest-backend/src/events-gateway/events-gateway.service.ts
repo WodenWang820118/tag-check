@@ -10,7 +10,6 @@ import {
 } from '@nestjs/websockets';
 import { Socket } from 'dgram';
 import { Server } from 'http';
-import { Log } from '../logging-interceptor/logging-interceptor.service';
 import { Logger } from '@nestjs/common';
 
 @WebSocketGateway(7002, {
@@ -41,7 +40,6 @@ export class EventsGatewayService
   }
 
   @SubscribeMessage('events')
-  @Log()
   handleEvent(
     @MessageBody() data: string,
     @ConnectedSocket() client: Socket

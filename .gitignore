@@ -53,3 +53,10 @@ Thumbs.db
 
 # Sentry Config File
 .env.sentry-build-plugin
+
+
+storybook-static
+
+# Generated Docusaurus files
+.docusaurus/
+.cache-loader/
