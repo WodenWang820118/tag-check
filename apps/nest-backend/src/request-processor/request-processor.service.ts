@@ -5,7 +5,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BaseItem } from '@utils';
 import { parse, URLSearchParams } from 'url';
-import { standardParameterMap } from './utilities';
+import { standardPageParameterMap, standardParameterMap } from './utilities';
 
 @Injectable()
 export class RequestProcessorService {
@@ -38,6 +38,8 @@ export class RequestProcessorService {
         dataLayer[customKey] = val;
       } else if (key === 'cu') {
         dataLayer['currency'] = val;
+      } else if (key in standardPageParameterMap) {
+        dataLayer[standardPageParameterMap[key]] = val;
       }
     }
     return dataLayer;

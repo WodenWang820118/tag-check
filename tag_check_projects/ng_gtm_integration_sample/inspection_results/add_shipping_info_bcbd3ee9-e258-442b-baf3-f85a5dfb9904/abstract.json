@@ -1,7 +1,7 @@
 {
   "position": 0,
   "passed": true,
-  "completedTime": "2024-05-13T23:13:04.737Z",
+  "completedTime": "2024-10-15T07:10:55.705Z",
   "dataLayerSpec": {
     "event": "add_shipping_info",
     "ecommerce": {
@@ -32,13 +32,31 @@
           "price": 799
         }
       ]
-    },
-    "gtm.uniqueEventId": 53
+    }
   },
-  "rawRequest": "",
+  "rawRequest": "https://www.google-analytics.com/g/collect?v=2&tid=G-8HK542DQMG&gtm=45je4a90v9171567282z89168785492za200zb9168785492&_p=1728976213274&gcs=G111&gcd=13r3r3r3q7l1&npa=1&dma=0&tag_exp=101686685&cid=1861086536.1728976204&ul=en-us&sr=1536x864&uaa=&uab=&uafvl=&uamb=0&uam=&uap=&uapv=&uaw=0&are=1&frm=0&pscdl=&ngs=1&_s=6&dr=&dl=&cu=USD&sid=1728976203&sct=1&seg=1&dt=Ng%20GTM%20Integration%20App&en=add_shipping_info&pr1=idcity001~nmSwitzerland~caSwitzerland~qt1~pr799&ep.debug_mode=false&epn.value=799&_et=4415&tfd=30370",
   "message": "Valid",
-  "destinationUrl": "https://gtm-integration-sample.netlify.app/checkout",
+  "destinationUrl": "https://gtm-integration-sample.netlify.app/transaction/checkout",
   "eventId": "bcbd3ee9-e258-442b-baf3-f85a5dfb9904",
   "testName": "Standard",
-  "eventName": "add_shipping_info"
+  "eventName": "add_shipping_info",
+  "requestPassed": true,
+  "reformedDataLayer": {
+    "event": "add_shipping_info",
+    "page_location": "",
+    "page_title": "Ng GTM Integration App",
+    "ecommerce": {
+      "value": "799",
+      "currency": "USD",
+      "items": [
+        {
+          "item_id": "city001",
+          "item_name": "Switzerland",
+          "item_category": "Switzerland",
+          "quantity": "1",
+          "price": "799"
+        }
+      ]
+    }
+  }
 }

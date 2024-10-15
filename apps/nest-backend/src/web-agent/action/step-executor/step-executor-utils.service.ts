@@ -108,7 +108,7 @@ export class StepExecutorUtilsService {
     await this.setCookies(page, application);
     await page.goto(step.url, { waitUntil: 'networkidle2' });
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    await page.reload({ waitUntil: 'networkidle2' });
+    await page.goto(step.url, { waitUntil: 'networkidle2' });
     await this.verifyLocalStorageAndCookies(page);
     state.isFirstNavigation = false;
   }
