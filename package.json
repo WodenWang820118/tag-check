@@ -1,6 +1,6 @@
 {
   "name": "tag-check",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "main.cjs",
   "author": "Guan Xin Wang",
   "description": "A tool to check the data layer of a website",
