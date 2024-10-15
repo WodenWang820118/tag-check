@@ -1,26 +1,21 @@
 {
   "dataLayer": [
     {
-      "gtm.start": 1721207704590,
-      "event": "gtm.js",
-      "gtm.uniqueEventId": 1
+      "gtm.start": 1728992479470,
+      "event": "gtm.js"
     },
     {
-      "event": "gtm.dom",
-      "gtm.uniqueEventId": 4
+      "event": "gtm.dom"
     },
     {
-      "event": "componentsLoaded",
-      "gtm.uniqueEventId": 5
+      "event": "componentsLoaded"
     },
     {
-      "event": "gtm.load",
-      "gtm.uniqueEventId": 6
+      "event": "gtm.load"
     },
     {
       "event": "gtm.triggerGroup",
-      "gtm.triggers": "168785492_202",
-      "gtm.uniqueEventId": 20
+      "gtm.triggers": "168785492_202"
     },
     {
       "event": "gtm.historyChange",
@@ -34,15 +29,13 @@
         "navigationId": 6
       },
       "gtm.oldUrl": "https://gtm-integration-sample.netlify.app/transaction/thankyou",
-      "gtm.newUrl": "https://gtm-integration-sample.netlify.app/home",
-      "gtm.uniqueEventId": 79
+      "gtm.newUrl": "https://gtm-integration-sample.netlify.app/home"
     },
     {
       "event": "page_view",
       "page_path": "/home",
       "page_title": "Home",
-      "page_location": "https://gtm-integration-sample.netlify.app/home",
-      "gtm.uniqueEventId": 82
+      "page_location": "https://gtm-integration-sample.netlify.app/home"
     },
     {
       "ecommerce": null
@@ -60,16 +53,14 @@
             "item_name": "Switzerland"
           }
         ]
-      },
-      "gtm.uniqueEventId": 14
+      }
     },
     {
       "event": "update_consent",
       "ad_storage": "granted",
       "analytics_storage": "granted",
       "ad_user_data": "granted",
-      "ad_personalization": "denied",
-      "gtm.uniqueEventId": 85
+      "ad_personalization": "denied"
     },
     {
       "event": "select_promotion",
@@ -84,8 +75,7 @@
             "item_name": "Switzerland"
           }
         ]
-      },
-      "gtm.uniqueEventId": 21
+      }
     },
     {
       "event": "view_item",
@@ -101,8 +91,7 @@
             "quantity": 1
           }
         ]
-      },
-      "gtm.uniqueEventId": 24
+      }
     },
     {
       "event": "select_item",
@@ -118,8 +107,7 @@
             "quantity": 1
           }
         ]
-      },
-      "gtm.uniqueEventId": 27
+      }
     },
     {
       "event": "add_to_cart",
@@ -136,8 +124,7 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 36
+      }
     },
     {
       "event": "view_cart",
@@ -153,8 +140,7 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 39
+      }
     },
     {
       "event": "begin_checkout",
@@ -170,13 +156,11 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 51
+      }
     },
     {
       "event": "CustomScroll",
-      "customScrollPercent": 100,
-      "gtm.uniqueEventId": 63
+      "customScrollPercent": 100
     },
     {
       "event": "add_shipping_info",
@@ -192,8 +176,7 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 60
+      }
     },
     {
       "event": "add_payment_info",
@@ -209,14 +192,13 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 64
+      }
     },
     {
       "event": "purchase",
       "ecommerce": {
         "currency": "USD",
-        "transaction_id": "76423d08-7ecc-4237-8150-e103abb8b8c0",
+        "transaction_id": "18f0bed6-7a42-4bce-beaa-34471394cb10",
         "value": 799,
         "items": [
           {
@@ -227,8 +209,7 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 70
+      }
     },
     {
       "event": "refund",
@@ -245,9 +226,9 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 76
+      }
     }
   ],
+  "eventRequest": "",
   "destinationUrl": "https://gtm-integration-sample.netlify.app/home"
 }

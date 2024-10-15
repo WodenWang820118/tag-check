@@ -1,6 +1,6 @@
 [
   {
-    "gtm.start": 1721216631272,
+    "gtm.start": 1728992151550,
     "event": "gtm.js",
     "gtm.uniqueEventId": 1
   },
@@ -26,19 +26,17 @@
     "gtm.historyChangeSource": "replaceState",
     "gtm.oldUrlFragment": "",
     "gtm.newUrlFragment": "",
-    "gtm.oldHistoryState": {
-      "navigationId": 1
-    },
+    "gtm.oldHistoryState": null,
     "gtm.newHistoryState": {
       "navigationId": 1
     },
-    "gtm.oldUrl": "https://gtm-integration-sample.netlify.app/home",
+    "gtm.oldUrl": "https://gtm-integration-sample.netlify.app/",
     "gtm.newUrl": "https://gtm-integration-sample.netlify.app/home",
     "gtm.uniqueEventId": 8
   },
   {
     "event": "page_view",
-    "page_path": "/home",
+    "page_path": "/",
     "page_title": "Home",
     "page_location": "https://gtm-integration-sample.netlify.app/home",
     "gtm.uniqueEventId": 11

@@ -4,6 +4,7 @@
 
 - [Overview](#overview)
 - [Features](#features)
+- [Example](#example)
 - [Development](#development)
   - [Prerequisites](#prerequisites)
   - [Frontend (Angular)](#frontend-angular)
@@ -40,6 +41,10 @@ Designed for QA, development, and analytics teams, this free standalone tool lev
   - Reconstructed data layer based on raw captured requests
   - Screenshots of event triggers
 - **Project Transfer**: Archive projects as .zip files for import into other users' applications.
+
+## Example
+
+The example project is located at the `tag_check_projects` folder at the root directory. The `ng_gtm_integration_sample` project is utilized for end-to-end tests for both backend and frontend. Moreover, the project is also used for development purposes.
 
 ## Development
 

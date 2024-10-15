@@ -1,15 +1,43 @@
 {
   "position": 0,
-  "passed": false,
+  "passed": true,
   "requestPassed": false,
-  "incorrectInfo": [],
-  "completedTime": "2024-04-21T06:05:05.231Z",
-  "dataLayerSpec": {},
-  "dataLayer": {},
-  "reformedDataLayer": {},
+  "completedTime": "2024-10-15T11:39:20.871Z",
+  "dataLayerSpec": {
+    "event": "select_item",
+    "ecommerce": {
+      "value": "$value",
+      "currency": "$currency",
+      "items": [
+        {
+          "item_id": "$item_id",
+          "item_name": "$item_name",
+          "item_category": "$item_category",
+          "price": "$price",
+          "quantity": "$quantity"
+        }
+      ]
+    }
+  },
+  "dataLayer": {
+    "event": "select_item",
+    "ecommerce": {
+      "currency": "USD",
+      "value": 799,
+      "items": [
+        {
+          "item_id": "DTegA1B4OPyZuUqv5xQX",
+          "item_name": "Fuerteventura",
+          "item_category": "Fuerteventura",
+          "price": 799,
+          "quantity": 1
+        }
+      ]
+    }
+  },
   "rawRequest": "",
-  "message": "",
-  "destinationUrl": "",
+  "message": "Valid",
+  "destinationUrl": "https://gtm-integration-sample.netlify.app/product/details/DTegA1B4OPyZuUqv5xQX",
   "eventId": "e376ea37-98d9-4678-9f42-45e2f26c4d84",
   "testName": "Standard",
   "eventName": "select_item"
