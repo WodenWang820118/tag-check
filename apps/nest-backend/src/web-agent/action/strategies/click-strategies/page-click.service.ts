@@ -17,7 +17,10 @@ export class PageClickService implements ClickOperation {
       await Promise.race([
         page.click(selector, { delay: 100 }),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Timeout exceeded')), timeout)
+          setTimeout(
+            () => reject(new Error('Timeout exceeded Page Clicking')),
+            timeout
+          )
         ),
       ]);
       return true;

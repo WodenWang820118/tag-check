@@ -104,6 +104,8 @@ describe('RequestProcessorService', () => {
     it('should recompose GA4 EC Event', () => {
       const expected = {
         event: 'add_to_cart',
+        page_location: '',
+        page_title: 'Ng GTM Integration App',
         creative_name: 'travel_slide',
         creative_slot: 'featured_attributor',
         promotion_id: 'city001',
