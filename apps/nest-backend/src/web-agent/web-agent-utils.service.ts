@@ -132,6 +132,7 @@ export class WebAgentUtilsService {
         })
       )
     );
+    this.requestInterceptorService.clearRawRequest();
     return eventRequest;
   }
 

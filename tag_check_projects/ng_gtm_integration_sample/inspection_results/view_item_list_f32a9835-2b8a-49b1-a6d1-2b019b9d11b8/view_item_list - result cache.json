@@ -1,0 +1,89 @@
+{
+  "dataLayer": [
+    {
+      "gtm.start": 1728992760939,
+      "event": "gtm.js"
+    },
+    {
+      "event": "gtm.dom"
+    },
+    {
+      "event": "componentsLoaded"
+    },
+    {
+      "event": "gtm.load"
+    },
+    {
+      "event": "gtm.triggerGroup",
+      "gtm.triggers": "168785492_202"
+    },
+    {
+      "event": "gtm.historyChange",
+      "gtm.historyChangeSource": "pushState",
+      "gtm.oldUrlFragment": "",
+      "gtm.newUrlFragment": "",
+      "gtm.oldHistoryState": {
+        "navigationId": 1
+      },
+      "gtm.newHistoryState": {
+        "navigationId": 2
+      },
+      "gtm.oldUrl": "https://gtm-integration-sample.netlify.app/home",
+      "gtm.newUrl": "https://gtm-integration-sample.netlify.app/product/destinations"
+    },
+    {
+      "event": "page_view",
+      "page_path": "/product/destinations",
+      "page_title": "Destinations",
+      "page_location": "https://gtm-integration-sample.netlify.app/product/destinations"
+    },
+    {
+      "ecommerce": null
+    },
+    {
+      "event": "view_promotion",
+      "ecommerce": {
+        "promotion_id": "city001",
+        "promotion_name": "Switzerland",
+        "creative_name": "travel_slide",
+        "creative_slot": "featured_attributor",
+        "items": [
+          {
+            "item_id": "city001",
+            "item_name": "Switzerland"
+          }
+        ]
+      }
+    },
+    {
+      "event": "update_consent",
+      "ad_storage": "granted",
+      "analytics_storage": "granted",
+      "ad_user_data": "granted",
+      "ad_personalization": "denied"
+    },
+    {
+      "event": "view_item_list",
+      "ecommerce": {
+        "items": [
+          {
+            "item_id": "DTegA1B4OPyZuUqv5xQX",
+            "item_name": "Fuerteventura",
+            "item_category": "Fuerteventura",
+            "price": 799,
+            "quantity": 1
+          },
+          {
+            "item_id": "wYtBzUdBd1ZEk1iJmcin",
+            "item_name": "Lanzarote",
+            "item_category": "Lanzarote",
+            "price": 799,
+            "quantity": 1
+          }
+        ]
+      }
+    }
+  ],
+  "eventRequest": "",
+  "destinationUrl": "https://gtm-integration-sample.netlify.app/product/destinations"
+}

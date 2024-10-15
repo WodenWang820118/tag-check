@@ -1,7 +1,7 @@
 {
   "position": 0,
   "passed": true,
-  "completedTime": "2024-07-17T09:16:24.683Z",
+  "completedTime": "2024-10-15T11:42:33.789Z",
   "dataLayerSpec": {
     "event": "refund",
     "ecommerce": {
@@ -33,13 +33,13 @@
           "price": 799
         }
       ]
-    },
-    "gtm.uniqueEventId": 76
+    }
   },
   "rawRequest": "",
   "message": "Valid",
   "destinationUrl": "https://gtm-integration-sample.netlify.app/home",
   "eventId": "b2fc5b94-2174-40e3-9330-6464e4fba7f3",
   "testName": "Standard",
-  "eventName": "refund"
+  "eventName": "refund",
+  "requestPassed": false
 }

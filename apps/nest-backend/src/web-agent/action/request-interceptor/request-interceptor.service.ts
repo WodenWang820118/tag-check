@@ -93,4 +93,8 @@ export class RequestInterceptorService {
       })
     );
   }
+
+  clearRawRequest() {
+    this.rawRequest.next('');
+  }
 }

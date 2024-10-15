@@ -1,26 +1,21 @@
 {
   "dataLayer": [
     {
-      "gtm.start": 1721015059198,
-      "event": "gtm.js",
-      "gtm.uniqueEventId": 1
+      "gtm.start": 1728982499551,
+      "event": "gtm.js"
     },
     {
-      "event": "gtm.dom",
-      "gtm.uniqueEventId": 4
+      "event": "gtm.dom"
     },
     {
-      "event": "componentsLoaded",
-      "gtm.uniqueEventId": 5
+      "event": "componentsLoaded"
     },
     {
-      "event": "gtm.load",
-      "gtm.uniqueEventId": 6
+      "event": "gtm.load"
     },
     {
       "event": "gtm.triggerGroup",
-      "gtm.triggers": "168785492_202",
-      "gtm.uniqueEventId": 20
+      "gtm.triggers": "168785492_202"
     },
     {
       "event": "gtm.historyChange",
@@ -34,15 +29,13 @@
         "navigationId": 5
       },
       "gtm.oldUrl": "https://gtm-integration-sample.netlify.app/transaction/checkout",
-      "gtm.newUrl": "https://gtm-integration-sample.netlify.app/transaction/thankyou",
-      "gtm.uniqueEventId": 67
+      "gtm.newUrl": "https://gtm-integration-sample.netlify.app/transaction/thankyou"
     },
     {
       "event": "page_view",
       "page_path": "/transaction/thankyou",
       "page_title": "Thank You",
-      "page_location": "https://gtm-integration-sample.netlify.app/transaction/thankyou",
-      "gtm.uniqueEventId": 73
+      "page_location": "https://gtm-integration-sample.netlify.app/transaction/thankyou"
     },
     {
       "ecommerce": null
@@ -60,16 +53,14 @@
             "item_name": "Switzerland"
           }
         ]
-      },
-      "gtm.uniqueEventId": 14
+      }
     },
     {
       "event": "update_consent",
       "ad_storage": "granted",
       "analytics_storage": "granted",
       "ad_user_data": "granted",
-      "ad_personalization": "denied",
-      "gtm.uniqueEventId": 17
+      "ad_personalization": "denied"
     },
     {
       "event": "select_promotion",
@@ -84,8 +75,7 @@
             "item_name": "Switzerland"
           }
         ]
-      },
-      "gtm.uniqueEventId": 21
+      }
     },
     {
       "event": "view_item",
@@ -101,8 +91,7 @@
             "quantity": 1
           }
         ]
-      },
-      "gtm.uniqueEventId": 24
+      }
     },
     {
       "event": "select_item",
@@ -118,8 +107,7 @@
             "quantity": 1
           }
         ]
-      },
-      "gtm.uniqueEventId": 27
+      }
     },
     {
       "event": "add_to_cart",
@@ -136,8 +124,7 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 36
+      }
     },
     {
       "event": "view_cart",
@@ -153,8 +140,7 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 39
+      }
     },
     {
       "event": "begin_checkout",
@@ -170,13 +156,11 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 51
+      }
     },
     {
       "event": "CustomScroll",
-      "customScrollPercent": 100,
-      "gtm.uniqueEventId": 60
+      "customScrollPercent": 100
     },
     {
       "event": "add_shipping_info",
@@ -192,8 +176,7 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 61
+      }
     },
     {
       "event": "add_payment_info",
@@ -209,14 +192,13 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 64
+      }
     },
     {
       "event": "purchase",
       "ecommerce": {
         "currency": "USD",
-        "transaction_id": "4d8a35e6-8ce6-4c61-b937-67887350dd6a",
+        "transaction_id": "db5a3619-5d32-42a8-b2a0-981f99b86fa0",
         "value": 799,
         "items": [
           {
@@ -227,9 +209,9 @@
             "price": 799
           }
         ]
-      },
-      "gtm.uniqueEventId": 70
+      }
     }
   ],
+  "eventRequest": "https://www.google-analytics.com/g/collect?v=2&tid=G-8HK542DQMG&gtm=45je4a90v9171567282z89168785492za200zb9168785492&_p=1728982499551&gcs=G111&gcd=13r3r3r3q7l1&npa=1&dma=0&tag_exp=101686685&cid=954279270.1728982491&ul=en-us&sr=1536x864&uaa=&uab=&uafvl=&uamb=0&uam=&uap=&uapv=&uaw=0&are=1&frm=0&pscdl=&ngs=1&_s=7&dr=&dl=&cu=USD&sid=1728982491&sct=1&seg=1&dt=Ng%20GTM%20Integration%20App&en=add_payment_info&pr1=idcity001~nmSwitzerland~caSwitzerland~qt1~pr799&ep.debug_mode=false&epn.value=799&_et=5130&tfd=32038",
   "destinationUrl": "https://gtm-integration-sample.netlify.app/transaction/thankyou"
 }

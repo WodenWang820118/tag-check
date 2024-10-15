@@ -1,6 +1,6 @@
 [
   {
-    "gtm.start": 1721207876013,
+    "gtm.start": 1728992313396,
     "event": "gtm.js",
     "gtm.uniqueEventId": 1
   },
@@ -27,21 +27,21 @@
     "gtm.oldUrlFragment": "",
     "gtm.newUrlFragment": "",
     "gtm.oldHistoryState": {
-      "navigationId": 1
-    },
-    "gtm.newHistoryState": {
       "navigationId": 2
     },
-    "gtm.oldUrl": "https://gtm-integration-sample.netlify.app/home",
-    "gtm.newUrl": "https://gtm-integration-sample.netlify.app/product/destinations",
-    "gtm.uniqueEventId": 21
+    "gtm.newHistoryState": {
+      "navigationId": 3
+    },
+    "gtm.oldUrl": "https://gtm-integration-sample.netlify.app/product/destinations",
+    "gtm.newUrl": "https://gtm-integration-sample.netlify.app/product/details/DTegA1B4OPyZuUqv5xQX",
+    "gtm.uniqueEventId": 39
   },
   {
     "event": "page_view",
-    "page_path": "/product/destinations",
-    "page_title": "Destinations",
-    "page_location": "https://gtm-integration-sample.netlify.app/product/destinations",
-    "gtm.uniqueEventId": 24
+    "page_path": "/product/details/DTegA1B4OPyZuUqv5xQX",
+    "page_title": "Detail",
+    "page_location": "https://gtm-integration-sample.netlify.app/product/details/DTegA1B4OPyZuUqv5xQX",
+    "gtm.uniqueEventId": 42
   },
   {
     "ecommerce": null
@@ -69,5 +69,61 @@
     "ad_user_data": "granted",
     "ad_personalization": "denied",
     "gtm.uniqueEventId": 17
+  },
+  {
+    "event": "view_item_list",
+    "ecommerce": {
+      "items": [
+        {
+          "item_id": "DTegA1B4OPyZuUqv5xQX",
+          "item_name": "Fuerteventura",
+          "item_category": "Fuerteventura",
+          "price": 799,
+          "quantity": 1
+        },
+        {
+          "item_id": "wYtBzUdBd1ZEk1iJmcin",
+          "item_name": "Lanzarote",
+          "item_category": "Lanzarote",
+          "price": 799,
+          "quantity": 1
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 27
+  },
+  {
+    "event": "view_item",
+    "ecommerce": {
+      "currency": "USD",
+      "value": 799,
+      "items": [
+        {
+          "item_id": "DTegA1B4OPyZuUqv5xQX",
+          "item_name": "Fuerteventura",
+          "item_category": "Fuerteventura",
+          "price": 799,
+          "quantity": 1
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 30
+  },
+  {
+    "event": "select_item",
+    "ecommerce": {
+      "currency": "USD",
+      "value": 799,
+      "items": [
+        {
+          "item_id": "DTegA1B4OPyZuUqv5xQX",
+          "item_name": "Fuerteventura",
+          "item_category": "Fuerteventura",
+          "price": 799,
+          "quantity": 1
+        }
+      ]
+    },
+    "gtm.uniqueEventId": 36
   }
 ]
