@@ -93,6 +93,14 @@ For Storybook development:
 pnpm run storybook-front
 ```
 
+### Docusaurus
+
+For Docusaurus development:
+
+```bash
+pnpm run docusaurus-front
+```
+
 ## Build and Production
 
 ### Build

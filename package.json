@@ -1,6 +1,6 @@
 {
   "name": "tag-check",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "main.cjs",
   "author": "Guan Xin Wang",
   "description": "A tool to check the data layer of a website",
@@ -66,10 +66,11 @@
     "publish-dry": "cross-env-shell NODE_ENV=prod \"pnpm run build-prod && electron-forge publish -- --dry-run\"",
     "publish": "cross-env-shell NODE_ENV=prod \"pnpm run build-prod && electron-forge publish\"",
     "docusaurus": "-----------------docusaurus-----------------",
-    "ng-doc": "nx run ng-frontend-doc",
+    "docusaurus-front": "nx serve ng-frontend-doc",
+    "build-docusaurus": "nx build ng-frontend-doc",
     "storybook": "-----------------storybook-----------------",
     "storybook-front": "nx storybook ng-frontend",
-    "build-storybook": "nx run ng-frontend:build-storybook"
+    "build-storybook": "nx ng-frontend:build-storybook"
   },
   "private": true,
   "devDependencies": {
