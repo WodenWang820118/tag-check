@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { FileTableComponent } from './file-table.component';
 
-import { within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
+import { expect, fn, userEvent, within } from '@storybook/test';
 import { DatePipe, NgClass } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -51,14 +50,6 @@ const meta: Meta<FileTableComponent> = {
 export default meta;
 type Story = StoryObj<FileTableComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/file-table works!/gi)).toBeTruthy();
-  },
 };

@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { ToolbarComponent } from './toolbar.component';
 
-import { within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
+import { expect, fn, userEvent, within } from '@storybook/test';
 import { NgIf } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';

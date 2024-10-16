@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { HelpCenterViewComponent } from './help-center-view.component';
 
-import { within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
+import { expect, fn, userEvent, within } from '@storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -40,14 +39,6 @@ const meta: Meta<HelpCenterViewComponent> = {
 export default meta;
 type Story = StoryObj<HelpCenterViewComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/help-center-view works!/gi)).toBeTruthy();
-  },
 };
