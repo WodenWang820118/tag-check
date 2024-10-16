@@ -100,15 +100,6 @@
         "targetName": "e2e",
         "ciTargetName": "e2e-ci"
       }
-    },
-    {
-      "plugin": "@nx/storybook/plugin",
-      "options": {
-        "buildStorybookTargetName": "build-storybook",
-        "serveStorybookTargetName": "storybook",
-        "testStorybookTargetName": "test-storybook",
-        "staticStorybookTargetName": "static-storybook"
-      }
     }
   ]
 }

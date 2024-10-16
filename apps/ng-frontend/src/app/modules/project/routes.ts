@@ -11,9 +11,9 @@ export const PROJECT_ROUTES: Routes = [
       {
         path: '',
         loadComponent: () =>
-          import(
-            './components/report-big-table/report-big-table.component'
-          ).then((m) => m.ReportBigTableComponent),
+          import('./views/report-big-table/report-big-table.component').then(
+            (m) => m.ReportBigTableComponent
+          ),
       },
       {
         path: 'tag-build',
