@@ -21,7 +21,7 @@ import { MatTreeModule } from '@angular/material/tree';
 
 const meta: Meta<SideBarComponent> = {
   component: SideBarComponent,
-  title: 'SideBarComponent',
+  title: 'Modules/Help-center/Components/SideBarComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

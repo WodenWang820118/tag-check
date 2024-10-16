@@ -16,7 +16,7 @@ import { ProgressUpdateService } from '../../../../shared/services/progress-upda
 
 const meta: Meta<ProgressPieChartComponent> = {
   component: ProgressPieChartComponent,
-  title: 'ProgressPieChartComponent',
+  title: 'Modules/Project/Components/ProgressPieChartComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

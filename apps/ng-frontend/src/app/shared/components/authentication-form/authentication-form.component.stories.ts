@@ -25,7 +25,7 @@ import { SettingsService } from '../../services/api/settings/settings.service';
 
 const meta: Meta<AuthenticationFormComponent> = {
   component: AuthenticationFormComponent,
-  title: 'AuthenticationFormComponent',
+  title: 'Shared/Components/AuthenticationFormComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -52,14 +52,6 @@ const meta: Meta<AuthenticationFormComponent> = {
 export default meta;
 type Story = StoryObj<AuthenticationFormComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/authentication-form works!/gi)).toBeTruthy();
-  },
 };

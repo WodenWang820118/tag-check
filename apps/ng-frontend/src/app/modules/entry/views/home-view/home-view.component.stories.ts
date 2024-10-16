@@ -17,7 +17,7 @@ import { ProjectListComponent } from '../../components/project-list/project-list
 
 const meta: Meta<HomeViewComponent> = {
   component: HomeViewComponent,
-  title: 'HomeViewComponent',
+  title: 'Modules/Entry/Views/HomeViewComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

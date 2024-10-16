@@ -21,7 +21,7 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
 
 const meta: Meta<ProjectViewComponent> = {
   component: ProjectViewComponent,
-  title: 'ProjectViewComponent',
+  title: 'Modules/Project/Views/ProjectViewComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

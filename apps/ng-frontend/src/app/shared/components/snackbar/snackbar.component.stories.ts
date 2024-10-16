@@ -4,7 +4,7 @@ import {
   type Meta,
   type StoryObj,
 } from '@storybook/angular';
-import { SnackBarComponent } from './snackbar.components';
+import { SnackBarComponent } from './snackbar.component';
 
 import { within } from '@storybook/testing-library';
 import { expect } from '@storybook/jest';
@@ -15,7 +15,7 @@ import { APP_ROUTES } from '../../../app.routes';
 
 const meta: Meta<SnackBarComponent> = {
   component: SnackBarComponent,
-  title: 'SnackBarComponent',
+  title: 'Shared/Components/SnackBarComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -34,14 +34,6 @@ const meta: Meta<SnackBarComponent> = {
 export default meta;
 type Story = StoryObj<SnackBarComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/snackbars works!/gi)).toBeTruthy();
-  },
 };

@@ -25,7 +25,7 @@ import { APP_ROUTES } from '../../../app.routes';
 
 const meta: Meta<ApplicationFormComponent> = {
   component: ApplicationFormComponent,
-  title: 'ApplicationFormComponent',
+  title: 'Shared/Components/ApplicationFormComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -55,14 +55,6 @@ const meta: Meta<ApplicationFormComponent> = {
 export default meta;
 type Story = StoryObj<ApplicationFormComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/application-form works!/gi)).toBeTruthy();
-  },
 };

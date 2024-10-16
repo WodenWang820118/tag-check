@@ -1,7 +1,6 @@
 import {
   Component,
   ViewChild,
-  ViewEncapsulation,
   AfterViewInit,
   ElementRef,
   OnDestroy,
@@ -38,7 +37,6 @@ import { tap, takeUntil, Subject, map, catchError, of } from 'rxjs';
   ],
   templateUrl: './file-table-toolbar.component.html',
   styleUrls: ['./file-table-toolbar.component.scss'],
-  encapsulation: ViewEncapsulation.None,
 })
 export class FileTableToolbarComponent implements AfterViewInit, OnDestroy {
   isSearchVisible = false;

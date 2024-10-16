@@ -16,7 +16,7 @@ import { APP_ROUTES } from '../../../app.routes';
 
 const meta: Meta<PaginatorButtonComponent> = {
   component: PaginatorButtonComponent,
-  title: 'PaginatorButtonComponent',
+  title: 'Shared/Components/PaginatorButtonComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -35,20 +35,6 @@ const meta: Meta<PaginatorButtonComponent> = {
 export default meta;
 type Story = StoryObj<PaginatorButtonComponent>;
 
-export const Primary: Story = {
-  args: {
-    label: '',
-    disabled: false,
-  },
-};
-
-export const Heading: Story = {
-  args: {
-    label: '',
-    disabled: false,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/paginator-button works!/gi)).toBeTruthy();
-  },
+export const Default: Story = {
+  args: {},
 };

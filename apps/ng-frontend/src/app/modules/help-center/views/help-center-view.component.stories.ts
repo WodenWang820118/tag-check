@@ -20,7 +20,7 @@ import { SideBarComponent } from '../components/sidebar/sidebar.component';
 
 const meta: Meta<HelpCenterViewComponent> = {
   component: HelpCenterViewComponent,
-  title: 'HelpCenterViewComponent',
+  title: 'Modules/Help-center/Views/HelpCenterViewComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

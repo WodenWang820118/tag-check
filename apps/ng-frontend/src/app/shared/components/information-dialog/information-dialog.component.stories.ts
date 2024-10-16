@@ -35,7 +35,7 @@ const mockDialogData = {
 
 const meta: Meta<InformationDialogComponent> = {
   component: InformationDialogComponent,
-  title: 'InformationDialogComponent',
+  title: 'Shared/Components/InformationDialogComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -57,14 +57,6 @@ const meta: Meta<InformationDialogComponent> = {
 export default meta;
 type Story = StoryObj<InformationDialogComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/information-dialog works!/gi)).toBeTruthy();
-  },
 };

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { catchError, map, Observable, switchMap, take, tap } from 'rxjs';
 import { MarkdownModule } from 'ngx-markdown';
@@ -17,10 +17,9 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class MainContentComponent implements OnInit {
   currentNode$!: Observable<TopicNode>;
-  currentNodeId: number = 0;
-  fileName: string = '';
-  markdownContent: string = '';
-  toc: { id: string; text: string }[] = [];
+  @Input() currentNodeId: number = 0;
+  @Input() fileName: string = '';
+  @Input() toc: { id: string; text: string }[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -39,7 +38,6 @@ export class MainContentComponent implements OnInit {
         }),
         switchMap((fileName) => this.markdownService.getSource(fileName)),
         tap((content) => {
-          this.markdownContent = content;
           this.toc = [];
           this.generateTOC(content); // Generate TOC based on the content
         }),

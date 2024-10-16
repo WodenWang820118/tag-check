@@ -8,24 +8,43 @@ import { MainContentComponent } from './main-content.component';
 
 import { within } from '@storybook/testing-library';
 import { expect } from '@storybook/jest';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, ViewportScroller } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { MarkdownModule, MarkdownService } from 'ngx-markdown';
 import { TreeNodeService } from '../../../../shared/services/tree-node/tree-node.service';
 import { HELP_CENTER_ROUTES } from '../../routes';
 import { importProvidersFrom } from '@angular/core';
+import { of } from 'rxjs';
+
+const mockActivatedRoute = {
+  params: of({ name: 'test' }),
+};
+
+const mockMarkdownService = {
+  getSource: (fileName: string) =>
+    of('# Test Content\n## Section 1\nContent here'),
+};
+
+const mockViewportScroller = {
+  scrollToAnchor: () => {},
+};
 
 const meta: Meta<MainContentComponent> = {
   component: MainContentComponent,
-  title: 'MainContentComponent',
+  title: 'Modules/Help-center/Components/MainContentComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [AsyncPipe, MarkdownModule, MatButtonModule],
-      providers: [MarkdownService, TreeNodeService],
+      providers: [
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: MarkdownService, useValue: mockMarkdownService },
+        { provide: ViewportScroller, useValue: mockViewportScroller },
+        { provide: TreeNodeService },
+      ],
     }),
     applicationConfig({
       providers: [
@@ -36,18 +55,50 @@ const meta: Meta<MainContentComponent> = {
       ],
     }),
   ],
+  args: {
+    currentNodeId: 1,
+    fileName: 'assets/test.md',
+    toc: [
+      { id: 'test-content', text: 'Test Content' },
+      { id: 'section-1', text: 'Section 1' },
+    ],
+  },
+  argTypes: {
+    currentNodeId: { control: 'number' },
+    fileName: { control: 'text' },
+    toc: { control: 'object' },
+  },
 };
 export default meta;
 type Story = StoryObj<MainContentComponent>;
 
-export const Primary: Story = {
-  args: {},
-};
+export const Layout: Story = {
+  args: {
+    currentNodeId: 1,
+    fileName: 'assets/test.md',
+    toc: [
+      { id: 'test-content', text: 'Test Content' },
+      { id: 'section-1', text: 'Section 1' },
+    ],
+  },
+  argTypes: {
+    currentNodeId: { control: 'number' },
+    fileName: { control: 'text' },
+    toc: { control: 'object' },
+  },
 
-export const Heading: Story = {
-  args: {},
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(canvas.getByText(/main-content works!/gi)).toBeTruthy();
+    const nextBtn = canvas.getByText(/Next/);
+    // Initial state
+    expect(canvas.getByText(/Test Content/)).toBeTruthy();
+    expect(nextBtn).toBeTruthy();
+    expect(canvas.queryByText(/Previous/)).toBeFalsy();
+
+    // Click Next
+    nextBtn.click();
+    await new Promise((resolve) => setTimeout(resolve, 100)); // Small delay for update
+    expect(nextBtn).toBeTruthy();
+    expect(canvas.getByText(/Previous/)).toBeTruthy();
   },
 };

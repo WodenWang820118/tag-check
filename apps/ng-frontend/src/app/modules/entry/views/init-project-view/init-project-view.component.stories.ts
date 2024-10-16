@@ -19,7 +19,7 @@ import { ConfigurationService } from '../../../../shared/services/api/configurat
 
 const meta: Meta<InitProjectViewComponent> = {
   component: InitProjectViewComponent,
-  title: 'InitProjectViewComponent',
+  title: 'Modules/Entry/Views/InitProjectViewComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

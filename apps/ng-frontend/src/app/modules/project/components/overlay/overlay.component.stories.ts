@@ -17,7 +17,7 @@ import { OverlayModule } from '@angular/cdk/overlay';
 
 const meta: Meta<OverlayComponent> = {
   component: OverlayComponent,
-  title: 'OverlayComponent',
+  title: 'Modules/Project/Components/OverlayComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

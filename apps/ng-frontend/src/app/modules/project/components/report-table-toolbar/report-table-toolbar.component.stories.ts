@@ -26,7 +26,7 @@ import { ProjectDataSourceService } from '../../../../shared/services/project-da
 
 const meta: Meta<ReportTableToolbarComponent> = {
   component: ReportTableToolbarComponent,
-  title: 'ReportTableToolbarComponent',
+  title: 'Modules/Project/Components/ReportTableToolbarComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -61,10 +61,14 @@ export const Primary: Story = {
   args: {},
 };
 
-export const Heading: Story = {
+export const Searching: Story = {
   args: {},
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(canvas.getByText(/report-table-toolbar works!/gi)).toBeTruthy();
+    const buttonToggle = await canvas.findByText('search');
+
+    // Verify that the toggle exists
+    expect(buttonToggle).toBeTruthy();
+    buttonToggle.click();
   },
 };

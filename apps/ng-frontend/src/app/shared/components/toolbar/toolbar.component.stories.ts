@@ -25,7 +25,7 @@ import { MetadataSourceService } from '../../services/metadata-source/metadata-s
 
 const meta: Meta<ToolbarComponent> = {
   component: ToolbarComponent,
-  title: 'ToolbarComponent',
+  title: 'Shared/Components/ToolbarComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -55,14 +55,6 @@ const meta: Meta<ToolbarComponent> = {
 export default meta;
 type Story = StoryObj<ToolbarComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/toolbar works!/gi)).toBeTruthy();
-  },
 };

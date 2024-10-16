@@ -30,7 +30,7 @@ import { EditorComponent } from 'libs/ui/src/lib/components/editor/editor.compon
 
 const meta: Meta<ReportDetailPanelsComponent> = {
   component: ReportDetailPanelsComponent,
-  title: 'ReportDetailPanelsComponent',
+  title: 'Modules/Project/Components/ReportDetailPanelsComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

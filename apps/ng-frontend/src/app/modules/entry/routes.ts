@@ -9,13 +9,6 @@ export const ENTRY_ROUTES: Routes = [
       ),
   },
   {
-    path: 'global-settings',
-    loadComponent: () =>
-      import(
-        './views/global-settings-view/global-settings-view.component'
-      ).then((m) => m.GlobalSettingsViewComponent),
-  },
-  {
     path: '',
     loadComponent: () =>
       import('./views/home-view/home-view.component').then(

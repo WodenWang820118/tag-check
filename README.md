@@ -10,9 +10,8 @@
   - [Frontend (Angular)](#frontend-angular)
   - [Backend (NestJS)](#backend-nestjs)
   - [Electron](#electron)
+  - [Storybook](#storybook)
 - [Build and Production](#build-and-production)
-  - [Frontend](#frontend)
-  - [Backend](#backend)
   - [Build](#build)
   - [Package](#package)
   - [Make](#make)
@@ -86,12 +85,22 @@ For Electron development with a development server:
 pnpm run dev-electron
 ```
 
+### Storybook
+
+For Storybook development:
+
+```bash
+pnpm run storybook-front
+```
+
+## Build and Production
+
 ### Build
 
 Compile the application:
 
 ```bash
-pnpm run build
+pnpm run build-prod
 ```
 
 Output folders (in `dist/apps`):
@@ -111,7 +120,7 @@ Output will be in the `out` folder.
 
 ### Make
 
-Generate a Windows x32/x64 zip file:
+Generate a OS-based zip file:
 
 ```bash
 pnpm run make
