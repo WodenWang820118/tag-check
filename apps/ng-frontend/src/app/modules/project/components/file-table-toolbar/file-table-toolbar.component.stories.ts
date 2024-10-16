@@ -49,18 +49,29 @@ const meta: Meta<FileTableToolbarComponent> = {
       ],
     }),
   ],
+  args: {
+    isSearchVisible: false,
+  },
+  argTypes: {
+    isSearchVisible: { control: 'boolean' },
+  },
 };
 export default meta;
 type Story = StoryObj<FileTableToolbarComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
 };
 
-export const Heading: Story = {
+export const Searching: Story = {
   args: {},
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(canvas.getByText(/file-table-toolbar works!/gi)).toBeTruthy();
+    // Find the mat-button-toggle
+    const buttonToggle = await canvas.findByText('search');
+
+    // Verify that the toggle exists
+    expect(buttonToggle).toBeTruthy();
+    buttonToggle.click();
   },
 };
