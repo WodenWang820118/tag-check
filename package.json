@@ -119,7 +119,7 @@
     "@nx/nest": "20.0.0",
     "@nx/node": "20.0.0",
     "@nx/playwright": "20.0.0",
-    "@nx/storybook": "^20.0.0",
+    "@nx/storybook": "20.0.0",
     "@nx/vite": "20.0.0",
     "@nx/web": "20.0.0",
     "@nx/webpack": "20.0.0",

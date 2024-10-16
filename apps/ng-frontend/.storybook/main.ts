@@ -29,10 +29,10 @@ const config: StorybookConfig = {
 
     // Make whatever fine-grained changes you need
     // @ts-ignore
-    config.module.rules.push({
-      test: /\.scss$/,
-      use: ['style-loader', 'css-loader', 'sass-loader'],
-    });
+    // config.module.rules.push({
+    //   test: /\.scss$/,
+    //   use: ['style-loader', 'css-loader', 'sass-loader'],
+    // });
     return config;
   },
 };
