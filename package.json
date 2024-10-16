@@ -70,7 +70,7 @@
     "build-docusaurus": "nx build ng-frontend-doc",
     "storybook": "-----------------storybook-----------------",
     "storybook-front": "nx storybook ng-frontend",
-    "build-storybook": "nx ng-frontend:build-storybook"
+    "build-storybook": "nx run ng-frontend:build-storybook"
   },
   "private": true,
   "devDependencies": {
