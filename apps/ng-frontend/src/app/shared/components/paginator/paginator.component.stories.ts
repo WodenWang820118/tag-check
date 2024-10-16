@@ -19,7 +19,7 @@ import { StylePaginatorDirective } from '../../directives/style-paginator.direct
 
 const meta: Meta<PaginatorComponent> = {
   component: PaginatorComponent,
-  title: 'PaginatorComponent',
+  title: 'Shared/Components/PaginatorComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

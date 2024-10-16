@@ -20,7 +20,7 @@ import { importProvidersFrom } from '@angular/core';
 
 const meta: Meta<MainContentComponent> = {
   component: MainContentComponent,
-  title: 'MainContentComponent',
+  title: 'Modules/Help-center/Components/MainContentComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

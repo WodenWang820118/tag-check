@@ -17,7 +17,7 @@ import { ReportTableComponent } from '../report-table/report-table.component';
 
 const meta: Meta<ReportBigTableComponent> = {
   component: ReportBigTableComponent,
-  title: 'ReportBigTableComponent',
+  title: 'Modules/Project/Components/ReportBigTableComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

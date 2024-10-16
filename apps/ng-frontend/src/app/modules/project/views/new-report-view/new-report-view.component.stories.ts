@@ -27,7 +27,7 @@ import { EditorComponent } from 'libs/ui/src/lib/components/editor/editor.compon
 
 const meta: Meta<NewReportViewComponent> = {
   component: NewReportViewComponent,
-  title: 'NewReportViewComponent',
+  title: 'Modules/Project/Views/NewReportViewComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

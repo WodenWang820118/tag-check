@@ -22,7 +22,7 @@ import { ConfigurationService } from '../../services/api/configuration/configura
 
 const meta: Meta<RootFormComponent> = {
   component: RootFormComponent,
-  title: 'RootFormComponent',
+  title: 'Shared/Components/RootFormComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

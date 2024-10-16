@@ -16,7 +16,7 @@ import { RootFormComponent } from '../../../../shared/components/root-form/root-
 
 const meta: Meta<GlobalSettingsViewComponent> = {
   component: GlobalSettingsViewComponent,
-  title: 'GlobalSettingsViewComponent',
+  title: 'Modules/Entry/Views/GlobalSettingsViewComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

@@ -24,7 +24,7 @@ import { ReportDetailPanelsComponent } from '../../components/report-detail-pane
 
 const meta: Meta<DetailViewComponent> = {
   component: DetailViewComponent,
-  title: 'DetailViewComponent',
+  title: 'Modules/Project/Views/DetailViewComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

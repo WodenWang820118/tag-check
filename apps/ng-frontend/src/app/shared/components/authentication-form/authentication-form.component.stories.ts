@@ -25,7 +25,7 @@ import { SettingsService } from '../../services/api/settings/settings.service';
 
 const meta: Meta<AuthenticationFormComponent> = {
   component: AuthenticationFormComponent,
-  title: 'AuthenticationFormComponent',
+  title: 'Shared/Components/AuthenticationFormComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

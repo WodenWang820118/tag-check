@@ -17,7 +17,7 @@ import { FileTableComponent } from '../../components/file-table/file-table.compo
 
 const meta: Meta<BucketsViewComponent> = {
   component: BucketsViewComponent,
-  title: 'BucketsViewComponent',
+  title: 'Modules/Project/Views/BucketsViewComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

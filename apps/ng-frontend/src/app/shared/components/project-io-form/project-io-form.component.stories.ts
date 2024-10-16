@@ -19,7 +19,7 @@ import { InformationDialogComponent } from '../information-dialog/information-di
 
 const meta: Meta<ProjectIoFormComponent> = {
   component: ProjectIoFormComponent,
-  title: 'ProjectIoFormComponent',
+  title: 'Shared/Components/ProjectIoFormComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

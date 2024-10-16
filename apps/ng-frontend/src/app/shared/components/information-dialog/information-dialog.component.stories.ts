@@ -35,7 +35,7 @@ const mockDialogData = {
 
 const meta: Meta<InformationDialogComponent> = {
   component: InformationDialogComponent,
-  title: 'InformationDialogComponent',
+  title: 'Shared/Components/InformationDialogComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

@@ -24,7 +24,7 @@ import { SettingsService } from '../../services/api/settings/settings.service';
 
 const meta: Meta<BrowserFormComponent> = {
   component: BrowserFormComponent,
-  title: 'BrowserFormComponent',
+  title: 'Shared/Components/BrowserFormComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

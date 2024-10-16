@@ -24,7 +24,7 @@ import { FileTableDataSourceService } from '../../../../shared/services/file-tab
 
 const meta: Meta<FileTableToolbarComponent> = {
   component: FileTableToolbarComponent,
-  title: 'FileTableToolbarComponent',
+  title: 'Modules/Project/Components/FileTableToolbarComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

@@ -16,7 +16,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 const meta: Meta<ErrorDialogComponent> = {
   component: ErrorDialogComponent,
-  title: 'ErrorDialogComponent',
+  title: 'Shared/Components/ErrorDialogComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

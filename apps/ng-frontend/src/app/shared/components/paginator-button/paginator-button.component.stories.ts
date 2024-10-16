@@ -16,7 +16,7 @@ import { APP_ROUTES } from '../../../app.routes';
 
 const meta: Meta<PaginatorButtonComponent> = {
   component: PaginatorButtonComponent,
-  title: 'PaginatorButtonComponent',
+  title: 'Shared/Components/PaginatorButtonComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

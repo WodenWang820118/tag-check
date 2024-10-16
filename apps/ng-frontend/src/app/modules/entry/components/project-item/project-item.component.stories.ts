@@ -20,7 +20,7 @@ import { MetadataSourceService } from '../../../../shared/services/metadata-sour
 
 const meta: Meta<ProjectItemComponent> = {
   component: ProjectItemComponent,
-  title: 'ProjectItemComponent',
+  title: 'Modules/Entry/Components/ProjectItemComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

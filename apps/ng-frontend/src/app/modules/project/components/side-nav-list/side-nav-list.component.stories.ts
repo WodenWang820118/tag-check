@@ -22,7 +22,7 @@ import { OverlayComponent } from '../overlay/overlay.component';
 
 const meta: Meta<SideNavListComponent> = {
   component: SideNavListComponent,
-  title: 'SideNavListComponent',
+  title: 'Modules/Project/Components/SideNavListComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

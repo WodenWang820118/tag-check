@@ -26,7 +26,7 @@ import { ProjectDataSourceService } from '../../../../shared/services/project-da
 
 const meta: Meta<ReportTableToolbarComponent> = {
   component: ReportTableToolbarComponent,
-  title: 'ReportTableToolbarComponent',
+  title: 'Modules/Project/Components/ReportTableToolbarComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

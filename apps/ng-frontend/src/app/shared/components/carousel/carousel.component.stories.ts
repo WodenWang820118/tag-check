@@ -16,7 +16,7 @@ import { APP_ROUTES } from '../../../app.routes';
 
 const meta: Meta<CarouselComponent> = {
   component: CarouselComponent,
-  title: 'CarouselComponent',
+  title: 'Shared/Components/CarouselComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

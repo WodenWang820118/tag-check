@@ -15,7 +15,7 @@ import { APP_ROUTES } from '../../../app.routes';
 
 const meta: Meta<SnackBarComponent> = {
   component: SnackBarComponent,
-  title: 'SnackBarComponent',
+  title: 'Shared/Components/SnackBarComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

@@ -27,7 +27,7 @@ import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-ch
 
 const meta: Meta<ReportTableComponent> = {
   component: ReportTableComponent,
-  title: 'ReportTableComponent',
+  title: 'Modules/Project/Components/ReportTableComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

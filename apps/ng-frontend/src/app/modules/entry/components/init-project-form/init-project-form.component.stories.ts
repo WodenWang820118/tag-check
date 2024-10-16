@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { InitProjectFormComponent } from './init-project-form.component';
 
-import { within } from '@storybook/testing-library';
+import { waitFor, within } from '@storybook/testing-library';
 import { expect } from '@storybook/jest';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
@@ -25,7 +25,7 @@ import { ENTRY_ROUTES } from '../../../../modules/entry/routes';
 
 const meta: Meta<InitProjectFormComponent> = {
   component: InitProjectFormComponent,
-  title: 'InitProjectFormComponent',
+  title: 'Modules/Entry/Components/InitProjectFormComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -68,6 +68,32 @@ export const Heading: Story = {
   args: {},
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(canvas.getByText(/init-project-form works!/gi)).toBeTruthy();
+    expect(canvas.getByText(/New Project/gi)).toBeTruthy();
+  },
+};
+
+export const Form: Story = {
+  args: {},
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    expect(canvas.getByText(/Project Name/gi)).toBeTruthy();
+    expect(canvas.getByText(/Measurement ID/gi)).toBeTruthy();
+    expect(canvas.getByText(/Description/gi)).toBeTruthy();
+    expect(canvas.getByText(/Spreadsheet/gi)).toBeTruthy();
+  },
+};
+
+export const ErrorMessage: Story = {
+  args: {},
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const submitBtn = canvas.getByText(/Submit/gi);
+    expect(submitBtn).toBeTruthy();
+    submitBtn.click();
+
+    // TODO:  bad practice to access DOM directly
+    const errorDialog = document.querySelector('.error-dialog') as HTMLElement;
+    const errorText = await within(errorDialog).findByText(/Error/i);
+    expect(errorText).toBeTruthy();
   },
 };

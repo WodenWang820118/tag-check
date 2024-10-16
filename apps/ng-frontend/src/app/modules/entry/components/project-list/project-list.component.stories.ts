@@ -21,7 +21,7 @@ import { MetadataSourceFacadeService } from '../../../../shared/services/facade/
 
 const meta: Meta<ProjectListComponent> = {
   component: ProjectListComponent,
-  title: 'ProjectListComponent',
+  title: 'Modules/Entry/Components/ProjectListComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

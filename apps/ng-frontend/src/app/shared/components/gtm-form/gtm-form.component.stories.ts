@@ -26,7 +26,7 @@ import { SettingsService } from '../../services/api/settings/settings.service';
 
 const meta: Meta<GtmFormComponent> = {
   component: GtmFormComponent,
-  title: 'GtmFormComponent',
+  title: 'Shared/Components/GtmFormComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
