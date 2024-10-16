@@ -50,10 +50,10 @@ The unified spec simplifies the process of setting up tags in Google Tag Manager
 
 Tag Event Name: `page_view`
 
-| Event Parameter | Value                   |
-| --------------- | ----------------------- |
-| page_location   | {{DLV - page_location}} |
-| page_referrer   | {{DLV - page_referrer}} |
+| Event Parameter | Value                     |
+| --------------- | ------------------------- |
+| page_location   | `{{DLV - page_location}}` |
+| page_referrer   | `{{DLV - page_referrer}}` |
 
 | Trigger Name           | Trigger Type | Event name |
 | ---------------------- | ------------ | ---------- |
