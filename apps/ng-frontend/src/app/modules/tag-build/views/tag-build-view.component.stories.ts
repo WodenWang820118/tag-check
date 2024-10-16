@@ -19,7 +19,7 @@ import { TAG_BUILD_ROUTES } from '../routes';
 
 const meta: Meta<TagBuildViewComponent> = {
   component: TagBuildViewComponent,
-  title: 'TagBuildViewComponent',
+  title: 'Modules/Tag-build/Views/TagBuildViewComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

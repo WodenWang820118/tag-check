@@ -22,7 +22,7 @@ import { SettingsService } from '../../services/api/settings/settings.service';
 
 const meta: Meta<ProjectInfoFormComponent> = {
   component: ProjectInfoFormComponent,
-  title: 'ProjectInfoFormComponent',
+  title: 'Shared/Components/ProjectInfoFormComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -49,14 +49,6 @@ const meta: Meta<ProjectInfoFormComponent> = {
 export default meta;
 type Story = StoryObj<ProjectInfoFormComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/project-info-form works!/gi)).toBeTruthy();
-  },
 };

@@ -26,7 +26,7 @@ import { SettingsService } from '../../services/api/settings/settings.service';
 
 const meta: Meta<GtmFormComponent> = {
   component: GtmFormComponent,
-  title: 'GtmFormComponent',
+  title: 'Shared/Components/GtmFormComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -57,14 +57,6 @@ const meta: Meta<GtmFormComponent> = {
 export default meta;
 type Story = StoryObj<GtmFormComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/gtm-form works!/gi)).toBeTruthy();
-  },
 };

@@ -16,7 +16,7 @@ import { APP_ROUTES } from '../../../app.routes';
 
 const meta: Meta<CarouselComponent> = {
   component: CarouselComponent,
-  title: 'CarouselComponent',
+  title: 'Shared/Components/CarouselComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -35,14 +35,6 @@ const meta: Meta<CarouselComponent> = {
 export default meta;
 type Story = StoryObj<CarouselComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/carousel works!/gi)).toBeTruthy();
-  },
 };

@@ -16,7 +16,7 @@ import { APP_ROUTES } from '../../../app.routes';
 
 const meta: Meta<EditorComponent> = {
   component: EditorComponent,
-  title: 'EditorComponent',
+  title: 'Shared/Components/EditorComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

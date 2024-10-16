@@ -18,7 +18,7 @@ import { ProjectIoService } from '../../services/api/project-io/project-io.servi
 
 const meta: Meta<ProjectImportComponent> = {
   component: ProjectImportComponent,
-  title: 'ProjectImportComponent',
+  title: 'Shared/Components/ProjectImportComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -37,14 +37,6 @@ const meta: Meta<ProjectImportComponent> = {
 export default meta;
 type Story = StoryObj<ProjectImportComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/project-import works!/gi)).toBeTruthy();
-  },
 };

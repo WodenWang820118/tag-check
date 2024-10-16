@@ -7,10 +7,15 @@
 
 .mat-mdc-form-field {
   border-radius: 5px;
+  padding-top: 1.5rem;
   @include mat.form-field-density(-4);
   @include mat.select-density(-4);
 }
 
 .file-table-toolbar {
   background-color: white;
+}
+
+.spacer {
+  flex: 1 1 0;
 }

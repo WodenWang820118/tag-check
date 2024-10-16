@@ -24,7 +24,7 @@ import { SettingsService } from '../../services/api/settings/settings.service';
 
 const meta: Meta<BrowserFormComponent> = {
   component: BrowserFormComponent,
-  title: 'BrowserFormComponent',
+  title: 'Shared/Components/BrowserFormComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -53,14 +53,6 @@ const meta: Meta<BrowserFormComponent> = {
 export default meta;
 type Story = StoryObj<BrowserFormComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/browser-form works!/gi)).toBeTruthy();
-  },
 };

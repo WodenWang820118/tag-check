@@ -16,7 +16,7 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 const meta: Meta<ErrorDialogComponent> = {
   component: ErrorDialogComponent,
-  title: 'ErrorDialogComponent',
+  title: 'Shared/Components/ErrorDialogComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -40,14 +40,6 @@ const meta: Meta<ErrorDialogComponent> = {
 export default meta;
 type Story = StoryObj<ErrorDialogComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/error-dialog works!/gi)).toBeTruthy();
-  },
 };

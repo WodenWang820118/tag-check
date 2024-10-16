@@ -23,7 +23,7 @@ import { PROJECT_ROUTES } from '../../routes';
 
 const meta: Meta<FileTableComponent> = {
   component: FileTableComponent,
-  title: 'FileTableComponent',
+  title: 'Modules/Project/Components/FileTableComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook

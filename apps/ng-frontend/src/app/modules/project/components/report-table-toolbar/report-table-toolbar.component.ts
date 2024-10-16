@@ -1,4 +1,4 @@
-import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
@@ -34,7 +34,6 @@ import { TestRunningFacadeService } from '../../../../shared/services/facade/tes
   ],
   templateUrl: './report-table-toolbar.component.html',
   styleUrls: ['./report-table-toolbar.component.scss'],
-  encapsulation: ViewEncapsulation.None,
 })
 export class ReportTableToolbarComponent implements OnDestroy {
   isSearchVisible = false;

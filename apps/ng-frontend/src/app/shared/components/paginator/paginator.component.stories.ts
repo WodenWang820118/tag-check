@@ -19,7 +19,7 @@ import { StylePaginatorDirective } from '../../directives/style-paginator.direct
 
 const meta: Meta<PaginatorComponent> = {
   component: PaginatorComponent,
-  title: 'PaginatorComponent',
+  title: 'Shared/Components/PaginatorComponent',
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
@@ -43,20 +43,6 @@ const meta: Meta<PaginatorComponent> = {
 export default meta;
 type Story = StoryObj<PaginatorComponent>;
 
-export const Primary: Story = {
-  args: {
-    pageSize: 0,
-    pageSizeOptions: [5, 10, 25, 100],
-  },
-};
-
-export const Heading: Story = {
-  args: {
-    pageSize: 0,
-    pageSizeOptions: [5, 10, 25, 100],
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/paginator works!/gi)).toBeTruthy();
-  },
+export const Default: Story = {
+  args: {},
 };

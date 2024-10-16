@@ -4,7 +4,7 @@ import { environment } from '../../../../../environments/environment';
 import { ProjectSetting, Setting } from '@utils';
 import { BehaviorSubject, catchError, of, Subject, tap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { SnackBarComponent } from '../../../components/snackbar/snackbar.components';
+import { SnackBarComponent } from '../../../components/snackbar/snackbar.component';
 
 @Injectable({
   providedIn: 'root',
