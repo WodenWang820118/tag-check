@@ -61,10 +61,14 @@ export const Primary: Story = {
   args: {},
 };
 
-export const Heading: Story = {
+export const Searching: Story = {
   args: {},
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(canvas.getByText(/report-table-toolbar works!/gi)).toBeTruthy();
+    const buttonToggle = await canvas.findByText('search');
+
+    // Verify that the toggle exists
+    expect(buttonToggle).toBeTruthy();
+    buttonToggle.click();
   },
 };
