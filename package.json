@@ -1,6 +1,6 @@
 {
   "name": "tag-check",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "main": "main.cjs",
   "author": "Guan Xin Wang",
   "description": "A tool to check the data layer of a website",
@@ -68,7 +68,8 @@
     "docusaurus": "-----------------docusaurus-----------------",
     "ng-doc": "nx run ng-frontend-doc",
     "storybook": "-----------------storybook-----------------",
-    "storybook-front": "nx storybook ng-frontend"
+    "storybook-front": "nx storybook ng-frontend",
+    "build-storybook": "nx run ng-frontend:build-storybook"
   },
   "private": true,
   "devDependencies": {
