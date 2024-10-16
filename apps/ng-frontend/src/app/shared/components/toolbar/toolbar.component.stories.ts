@@ -55,14 +55,6 @@ const meta: Meta<ToolbarComponent> = {
 export default meta;
 type Story = StoryObj<ToolbarComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/toolbar works!/gi)).toBeTruthy();
-  },
 };

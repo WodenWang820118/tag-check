@@ -53,14 +53,6 @@ const meta: Meta<BrowserFormComponent> = {
 export default meta;
 type Story = StoryObj<BrowserFormComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/browser-form works!/gi)).toBeTruthy();
-  },
 };

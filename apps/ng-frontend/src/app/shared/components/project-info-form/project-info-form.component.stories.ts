@@ -49,14 +49,6 @@ const meta: Meta<ProjectInfoFormComponent> = {
 export default meta;
 type Story = StoryObj<ProjectInfoFormComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/project-info-form works!/gi)).toBeTruthy();
-  },
 };

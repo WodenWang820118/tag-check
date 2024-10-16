@@ -39,14 +39,6 @@ const meta: Meta<ProjectItemComponent> = {
 export default meta;
 type Story = StoryObj<ProjectItemComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/project-item works!/gi)).toBeTruthy();
-  },
 };

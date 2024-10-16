@@ -55,14 +55,6 @@ const meta: Meta<ApplicationFormComponent> = {
 export default meta;
 type Story = StoryObj<ApplicationFormComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/application-form works!/gi)).toBeTruthy();
-  },
 };

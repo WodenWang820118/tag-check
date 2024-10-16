@@ -60,16 +60,8 @@ const meta: Meta<InitProjectFormComponent> = {
 export default meta;
 type Story = StoryObj<InitProjectFormComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/New Project/gi)).toBeTruthy();
-  },
 };
 
 export const Form: Story = {

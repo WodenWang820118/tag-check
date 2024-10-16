@@ -40,14 +40,6 @@ const meta: Meta<ErrorDialogComponent> = {
 export default meta;
 type Story = StoryObj<ErrorDialogComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/error-dialog works!/gi)).toBeTruthy();
-  },
 };

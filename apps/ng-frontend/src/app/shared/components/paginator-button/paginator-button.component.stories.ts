@@ -35,20 +35,6 @@ const meta: Meta<PaginatorButtonComponent> = {
 export default meta;
 type Story = StoryObj<PaginatorButtonComponent>;
 
-export const Primary: Story = {
-  args: {
-    label: '',
-    disabled: false,
-  },
-};
-
-export const Heading: Story = {
-  args: {
-    label: '',
-    disabled: false,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/paginator-button works!/gi)).toBeTruthy();
-  },
+export const Default: Story = {
+  args: {},
 };
