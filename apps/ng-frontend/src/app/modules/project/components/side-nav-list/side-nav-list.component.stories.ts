@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { SideNavListComponent } from './side-nav-list.component';
 
-import { within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
+import { expect, fn, userEvent, within } from '@storybook/test';
 import { NgClass, NgIf } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
@@ -52,14 +51,6 @@ const meta: Meta<SideNavListComponent> = {
 export default meta;
 type Story = StoryObj<SideNavListComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/side-nav-list works!/gi)).toBeTruthy();
-  },
 };

@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { InitProjectViewComponent } from './init-project-view.component';
 
-import { within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
+import { expect, fn, userEvent, within } from '@storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
@@ -38,14 +37,6 @@ const meta: Meta<InitProjectViewComponent> = {
 export default meta;
 type Story = StoryObj<InitProjectViewComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/init-project-view works!/gi)).toBeTruthy();
-  },
 };

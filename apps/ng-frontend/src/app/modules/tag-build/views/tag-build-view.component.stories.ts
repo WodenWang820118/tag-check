@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { TagBuildViewComponent } from './tag-build-view.component';
 
-import { within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
+import { expect, fn, userEvent, within } from '@storybook/test';
 import { AsyncPipe } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -38,14 +37,6 @@ const meta: Meta<TagBuildViewComponent> = {
 export default meta;
 type Story = StoryObj<TagBuildViewComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/tag-build-view works!/gi)).toBeTruthy();
-  },
 };

@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { ReportTableToolbarComponent } from './report-table-toolbar.component';
 
-import { within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
+import { expect, fn, userEvent, within } from '@storybook/test';
 import { NgIf } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
@@ -57,7 +56,7 @@ const meta: Meta<ReportTableToolbarComponent> = {
 export default meta;
 type Story = StoryObj<ReportTableToolbarComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
 };
 

@@ -6,9 +6,7 @@ import {
 } from '@storybook/angular';
 import { AuthenticationFormComponent } from './authentication-form.component';
 
-import { within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
-import { NgIf } from '@angular/common';
+import { expect, fn, userEvent, within } from '@storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
