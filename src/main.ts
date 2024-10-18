@@ -29,12 +29,14 @@ app.whenReady().then(() => {
     )
   );
 
-  fileUtils.createProjectSavingRootFolder(
-    join(pathUtils.getRootBackendFolderPath(
-      environmentUtils.getEnvironment(),
-      process.resourcesPath
-    ), constants.ROOT_PROJECT_NAME)
-  );
+  const projectSavingForlder = join(pathUtils.getRootBackendFolderPath(
+    environmentUtils.getEnvironment(),
+    process.resourcesPath
+  ), constants.ROOT_PROJECT_NAME)
+
+  fileUtils.logToFile(logFilePath, `Project Saving Folder: ${projectSavingForlder}`, 'info');
+
+  fileUtils.createProjectSavingRootFolder(projectSavingForlder);
   db = database.getDatabase(process.resourcesPath);
 
   database.initTables(db, process.resourcesPath);
