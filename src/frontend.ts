@@ -5,8 +5,8 @@ import * as pathUtils from './path-utils';
 import * as fileUtils from './file-utils';
 import * as environmentUtils from './environment-utils';
 
-declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
-declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
+declare const MAIN_WINDOW_VITE_NAME: string;
 
 let loadingWindow: null | BrowserWindow = null;
 
@@ -26,12 +26,18 @@ function createLoadingWindow() {
       alwaysOnTop: true,
       webPreferences: {
         nodeIntegration: true,
-        preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+        preload: join(__dirname, 'preload.js'),
       },
     });
+    console.log('Loading window created');
+    console.log('MAIN_WINDOW_VITE_DEV_SERVER_URL:', MAIN_WINDOW_VITE_DEV_SERVER_URL);
+    console.log('ANOTHER MAIN_WINDOW_VITE_DEV_SERVER_URL:', join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+    if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+      loadingWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+    } else {
+      loadingWindow.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+    }
 
-    // loadingWindow.loadFile(join(__dirname, 'loading.html'));
-    loadingWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
     loadingWindow.center();
 
     loadingWindow.on('closed', () => {

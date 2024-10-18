@@ -1,4 +1,4 @@
-import sqlite3, { Database } from 'sqlite3';
+import { Database } from 'sqlite3';
 import * as pathUtils from './path-utils';
 import * as environmentUtils from './environment-utils';
 import * as fileUtils from './file-utils';
@@ -9,7 +9,7 @@ function getDatabase(resourcesPath: string) {
     environmentUtils.getEnvironment(),
     resourcesPath
   );
-  const db = new sqlite3.Database(
+  const db = new Database(
     pathUtils.getDataBasePath(environmentUtils.getEnvironment(), resourcesPath),
     (err) => {
       if (err) {
