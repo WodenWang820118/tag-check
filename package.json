@@ -1,6 +1,6 @@
 {
   "name": "tag-check",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "main": ".vite/build/main.js",
   "author": "Guan Xin Wang",
   "description": "A tool to check the data layer of a website",
