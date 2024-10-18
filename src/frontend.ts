@@ -1,16 +1,15 @@
-'use strict';
-const { BrowserWindow } = require('electron');
-const { existsSync } = require('fs');
-const { join } = require('path');
-const pathUtils = require('./path-utils.cjs');
-const fileUtils = require('./file-utils.cjs');
-const environmentUtils = require('./environment-utils.cjs');
+import { BrowserWindow } from 'electron';
+import { existsSync } from 'fs';
+import { join } from 'path';
+import * as pathUtils from './path-utils';
+import * as fileUtils from './file-utils';
+import * as environmentUtils from './environment-utils';
 
-let loadingWindow = null;
-/**
- *
- * @returns {BrowserWindow}
- */
+declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
+declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+
+let loadingWindow: null | BrowserWindow = null;
+
 function createLoadingWindow() {
   console.log('Creating loading window');
   if (loadingWindow) {
@@ -27,10 +26,12 @@ function createLoadingWindow() {
       alwaysOnTop: true,
       webPreferences: {
         nodeIntegration: true,
+        preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       },
     });
 
-    loadingWindow.loadFile(join(__dirname, 'loading.html'));
+    // loadingWindow.loadFile(join(__dirname, 'loading.html'));
+    loadingWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
     loadingWindow.center();
 
     loadingWindow.on('closed', () => {
@@ -52,13 +53,14 @@ function createLoadingWindow() {
   }
 }
 
-function createWindow(resourcesPath) {
+function createWindow(resourcesPath: string) {
   const mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
     alwaysOnTop: true,
     webPreferences: {
       nodeIntegration: true,
+      // preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
   });
 
@@ -75,6 +77,7 @@ function createWindow(resourcesPath) {
     if (!existsSync(entryPath)) {
       const devFrontendPath = pathUtils.getDevFrontendPath();
       mainWindow.loadFile(devFrontendPath);
+      // mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
       mainWindow.webContents.openDevTools();
     } else {
       mainWindow.loadFile(entryPath);
@@ -84,4 +87,4 @@ function createWindow(resourcesPath) {
   }
 }
 
-module.exports = { createLoadingWindow, createWindow };
+export { createLoadingWindow, createWindow };

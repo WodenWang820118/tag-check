@@ -47,7 +47,7 @@ The example project is located at the `tag_check_projects` folder at the root di
 
 ## Development
 
-This project uses NodeJS v22.8.0 for development.
+This project uses NodeJS v22.8.0 for development. If cannot compile, please run `nx reset` and `rm -rf .nx` to reset the project.
 
 ### Prerequisites
 

@@ -1,11 +1,10 @@
-'use strict';
-const sqlite3 = require('sqlite3').verbose();
-const pathUtils = require('./path-utils.cjs');
-const environmentUtils = require('./environment-utils.cjs');
-const fileUtils = require('./file-utils.cjs');
-const { v4: uuidv4 } = require('uuid');
+import sqlite3, { Database } from 'sqlite3';
+import * as pathUtils from './path-utils';
+import * as environmentUtils from './environment-utils';
+import * as fileUtils from './file-utils';
+import { v4 as uuidv4 } from 'uuid';
 
-function getDatabase(resourcesPath) {
+function getDatabase(resourcesPath: string) {
   const logFilePath = pathUtils.getRootBackendFolderPath(
     environmentUtils.getEnvironment(),
     resourcesPath
@@ -24,7 +23,7 @@ function getDatabase(resourcesPath) {
   return db;
 }
 
-function initTables(db, resourcesPath) {
+function initTables(db: Database, resourcesPath: string) {
   db.serialize(() => {
     // Create table statement remains unchanged
     db.run(
@@ -42,12 +41,12 @@ function initTables(db, resourcesPath) {
       'SELECT * FROM configurations WHERE title =?;'
     );
     let configExists = false;
-    let configId;
+    let configId: any;
 
     selectStmt.get('rootProjectPath', (err, row) => {
       if (row) {
         configExists = true;
-        configId = row.id;
+        configId = (row as any).id;
       }
 
       // Depending on whether the configuration exists, prepare the appropriate SQL statement
@@ -88,7 +87,4 @@ function initTables(db, resourcesPath) {
   });
 }
 
-module.exports = {
-  getDatabase,
-  initTables,
-};
+export { getDatabase, initTables };

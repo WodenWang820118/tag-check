@@ -1,24 +1,23 @@
-'use strict';
-const { ChildProcess } = require('child_process');
-const { app } = require('electron');
-const { join } = require('path');
-const constants = require('./main-process/constants.cjs');
-const pathUtils = require('./main-process/path-utils.cjs');
-const fileUtils = require('./main-process/file-utils.cjs');
-const environmentUtils = require('./main-process/environment-utils.cjs');
-const backend = require('./main-process/backend.cjs');
-const database = require('./main-process/database.cjs');
-const frontend = require('./main-process/frontend.cjs');
-const { updateElectronApp } = require('update-electron-app');
+import { ChildProcess } from 'child_process';
+import { app } from 'electron';
+import { join } from 'path';
+import * as constants from './constants';
+import * as pathUtils from './path-utils';
+import * as fileUtils from './file-utils';
+import * as environmentUtils from './environment-utils';
+import * as backend from './backend';
+import * as database from './database';
+import * as frontend from './frontend';
+import { updateElectronApp } from 'update-electron-app';
+import { Database } from 'sqlite3';
+
 updateElectronApp({
   updateInterval: '1 hour',
   logger: require('electron-log'),
 }); // additional configuration options available
 
-/**
- * @type {ChildProcess}
- */
-let server;
+let server: ChildProcess;
+let db: Database;
 app.commandLine.appendSwitch('disable-gpu');
 app.commandLine.appendSwitch('use-gl', 'desktop');
 
@@ -34,10 +33,9 @@ app.whenReady().then(() => {
     pathUtils.getRootBackendFolderPath(
       environmentUtils.getEnvironment(),
       process.resourcesPath
-    ),
-    constants.ROOT_PROJECT_NAME
+    )
   );
-  const db = database.getDatabase(process.resourcesPath);
+  db = database.getDatabase(process.resourcesPath);
 
   database.initTables(db, process.resourcesPath);
   server = backend.startBackend(process.resourcesPath);
@@ -53,7 +51,7 @@ app.whenReady().then(() => {
           loadingWindow
         )
       ) {
-        loadingWindow.close();
+        loadingWindow?.close();
         frontend.createWindow(process.resourcesPath);
       }
     } catch (error) {
