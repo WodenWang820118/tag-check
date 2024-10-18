@@ -1,15 +1,9 @@
 import { test, expect } from '@playwright/test';
 const { _electron: electron } = require('playwright');
 
-/**
- * @typedef {import('playwright').ElectronApplication} ElectronApplication
- * @typedef {import('playwright').Page} Page
- */
-
 test('should work', async () => {
   // Launch Electron app.
   test.setTimeout(120000);
-  /** @type {ElectronApplication} */
   const electronApp = await electron.launch({
     args: ['main.cjs'],
     env: {
@@ -28,7 +22,7 @@ test('should work', async () => {
   // Wait for the second window (main window)
   const mainWindow = await electronApp.waitForEvent('window', {
     timeout: 120000, // 60 seconds timeout for waiting for the main window
-    predicate: async (page) => {
+    predicate: async (page: any) => {
       const title = await page.title();
       return title !== 'Loading'; // Assuming the loading window has a title 'Loading'
     },

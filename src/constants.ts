@@ -6,8 +6,5 @@ const URLs = [
   'http://localhost:6060/health',
   'http://localhost:7001/health',
 ];
-module.exports = {
-  ROOT_PROJECT_NAME,
-  ROOT_DATABASE_NAME,
-  URLs,
-};
+
+export { ROOT_PROJECT_NAME, ROOT_DATABASE_NAME, URLs };
