@@ -1,12 +1,13 @@
-// import type { ForgeConfig } from '@electron-forge/shared-types';
-import { MakerSquirrel } from '@electron-forge/maker-squirrel';
-import { MakerDeb } from '@electron-forge/maker-deb';
-import { MakerRpm } from '@electron-forge/maker-rpm';
-import { FusesPlugin } from '@electron-forge/plugin-fuses';
-import { FuseV1Options, FuseVersion } from '@electron/fuses';
-import { MakerZIP } from '@electron-forge/maker-zip';
-import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
-import { VitePlugin } from '@electron-forge/plugin-vite';
+const { MakerSquirrel } = require('@electron-forge/maker-squirrel');
+const { MakerDeb } = require('@electron-forge/maker-deb');
+const { MakerRpm } = require('@electron-forge/maker-rpm');
+const { FusesPlugin } = require('@electron-forge/plugin-fuses');
+const { FuseV1Options, FuseVersion } = require('@electron/fuses');
+const { MakerZIP } = require('@electron-forge/maker-zip');
+const {
+  AutoUnpackNativesPlugin,
+} = require('@electron-forge/plugin-auto-unpack-natives');
+const { VitePlugin } = require('@electron-forge/plugin-vite');
 
 const config = {
   packagerConfig: {
@@ -76,4 +77,4 @@ const config = {
   ],
 };
 
-export default config;
+module.exports = config;
