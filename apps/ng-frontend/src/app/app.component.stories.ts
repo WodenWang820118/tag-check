@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { AppComponent } from './app.component';
 
-import { within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
+import { expect, fn, userEvent, within } from '@storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { RouterOutlet, provideRouter } from '@angular/router';

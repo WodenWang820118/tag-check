@@ -1,16 +1,15 @@
-'use strict';
-const { fork } = require('child_process');
-// const { utilityProcess } = require('electron');
-const { join } = require('path');
-const pathUtils = require('./path-utils.cjs');
-const fileUtils = require('./file-utils.cjs');
-const environmentUtils = require('./environment-utils.cjs');
-const constants = require('./constants.cjs');
+import { ChildProcess, fork } from 'child_process';
+import { join } from 'path';
+import * as pathUtils from './path-utils';
+import * as fileUtils from './file-utils';
+import * as environmentUtils from './environment-utils';
+import * as constants from './constants';
+import { BrowserWindow } from 'electron';
 
 let restartAttempts = 0;
-let maxRestartAttempts = 5;
+let maxRestartAttempts = 20;
 
-function startBackend(resourcesPath) {
+function startBackend(resourcesPath: string) {
   let env;
   const rootBackendFolderPath = pathUtils.getRootBackendFolderPath(
     environmentUtils.getEnvironment(),
@@ -29,21 +28,34 @@ function startBackend(resourcesPath) {
     DATABASE_PATH: join(rootBackendFolderPath, constants.ROOT_DATABASE_NAME),
   };
 
+  const devCommonEnv = {
+    ROOT_PROJECT_PATH: join(
+      rootBackendFolderPath,
+      '..',
+      '..',
+      '..',
+      constants.ROOT_PROJECT_NAME
+    ),
+    DATABASE_PATH: join(
+      rootBackendFolderPath,
+      '..',
+      '..',
+      '..',
+      '.db',
+      constants.ROOT_DATABASE_NAME
+    ),
+  };
+
   switch (environmentUtils.getEnvironment()) {
     case 'dev':
       env = {
-        ...commonEnv,
+        ...devCommonEnv,
         NODE_ENV: 'dev',
-        DATABASE_PATH: join(
-          rootBackendFolderPath,
-          '.db',
-          constants.ROOT_DATABASE_NAME
-        ),
       };
       break;
     case 'staging':
       env = {
-        ...commonEnv,
+        ...devCommonEnv,
         NODE_ENV: 'staging',
       };
       break;
@@ -76,7 +88,7 @@ function startBackend(resourcesPath) {
   return fork(serverPath, { env });
 }
 
-function restartBackend(resourcesPath) {
+function restartBackend(resourcesPath: string) {
   if (restartAttempts < maxRestartAttempts) {
     restartAttempts++;
     console.log(`Attempting to restart backend (Attempt ${restartAttempts})`);
@@ -92,7 +104,7 @@ function restartBackend(resourcesPath) {
         'info'
       );
       startBackend(resourcesPath);
-    }, 1000); // Wait for 5 seconds before restarting
+    }, 2000); // Wait for 2 seconds before restarting
   } else {
     console.error('Max restart attempts reached. Backend service is down.');
     // Here you might want to implement some notification mechanism
@@ -110,18 +122,18 @@ function restartBackend(resourcesPath) {
   }
 }
 
-function stopBackend(process) {
+function stopBackend(process: ChildProcess) {
   if (process) {
     process.kill();
   }
 }
 
 async function checkIfPortIsOpen(
-  urls,
+  urls: string[],
   maxAttempts = 20,
   timeout = 1000,
-  resourcesPath,
-  loadingWindow
+  resourcesPath: string,
+  loadingWindow: BrowserWindow
 ) {
   const logFilePath = join(
     pathUtils.getRootBackendFolderPath(
@@ -146,10 +158,6 @@ async function checkIfPortIsOpen(
         const response = await fetch(url);
 
         console.log('Response status:', response.status);
-        console.log(
-          'Response headers:',
-          JSON.stringify(Object.fromEntries(response.headers), null, 2)
-        );
 
         const responseData = await response.text();
         console.log('Response body:', responseData);
@@ -194,9 +202,4 @@ async function checkIfPortIsOpen(
   );
 }
 
-module.exports = {
-  startBackend,
-  restartBackend,
-  stopBackend,
-  checkIfPortIsOpen,
-};
+export { startBackend, restartBackend, stopBackend, checkIfPortIsOpen };

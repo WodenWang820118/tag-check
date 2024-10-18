@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { EditorComponent } from './editor.component';
 
-import { within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
+import { expect, fn, userEvent, within } from '@storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
@@ -35,20 +34,9 @@ const meta: Meta<EditorComponent> = {
 export default meta;
 type Story = StoryObj<EditorComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {
     content: '',
     editMode: false,
-  },
-};
-
-export const Heading: Story = {
-  args: {
-    content: '',
-    editMode: false,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/editor works!/gi)).toBeTruthy();
   },
 };

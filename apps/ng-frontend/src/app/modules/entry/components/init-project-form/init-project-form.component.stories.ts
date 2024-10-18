@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { InitProjectFormComponent } from './init-project-form.component';
 
-import { waitFor, within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
+import { expect, within } from '@storybook/test';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
 import { NgIf } from '@angular/common';

@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { FileTableToolbarComponent } from './file-table-toolbar.component';
 
-import { within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
+import { expect, fn, userEvent, within } from '@storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';

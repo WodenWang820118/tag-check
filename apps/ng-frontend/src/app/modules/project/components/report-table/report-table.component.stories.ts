@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { ReportTableComponent } from './report-table.component';
 
-import { within } from '@storybook/testing-library';
-import { expect } from '@storybook/jest';
+import { expect, fn, userEvent, within } from '@storybook/test';
 import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
@@ -63,14 +62,6 @@ const meta: Meta<ReportTableComponent> = {
 export default meta;
 type Story = StoryObj<ReportTableComponent>;
 
-export const Primary: Story = {
+export const Default: Story = {
   args: {},
-};
-
-export const Heading: Story = {
-  args: {},
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    expect(canvas.getByText(/report-table works!/gi)).toBeTruthy();
-  },
 };

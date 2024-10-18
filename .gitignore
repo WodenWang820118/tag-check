@@ -41,6 +41,8 @@ testem.log
 Thumbs.db
 .env
 .angular
+.webpack
+.vite
 # Ignore everything in tag_check_projects
 /tag_check_projects/*
 
