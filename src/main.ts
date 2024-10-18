@@ -30,10 +30,10 @@ app.whenReady().then(() => {
   );
 
   fileUtils.createProjectSavingRootFolder(
-    pathUtils.getRootBackendFolderPath(
+    join(pathUtils.getRootBackendFolderPath(
       environmentUtils.getEnvironment(),
       process.resourcesPath
-    )
+    ), constants.ROOT_PROJECT_NAME)
   );
   db = database.getDatabase(process.resourcesPath);
 
