@@ -2,12 +2,8 @@ import { existsSync, mkdirSync, appendFileSync } from 'fs';
 import { join } from 'path';
 
 function createProjectSavingRootFolder(folderPath: string) {
-  logToFile(folderPath, 'Checking project saving root folder...', 'info');
   if (!existsSync(folderPath)) {
     mkdirSync(folderPath, { recursive: true });
-    logToFile(folderPath, 'Creating project saving root folder...', 'info');
-  } else {
-    logToFile(folderPath, 'Project saving root folder exists.', 'info');
   }
 }
 
