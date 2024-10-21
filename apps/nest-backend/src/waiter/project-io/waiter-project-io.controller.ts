@@ -24,7 +24,7 @@ export class WaiterProjectIoController {
   constructor(
     private readonly projectIoFacadeService: ProjectIoFacadeService,
     private readonly configurationSerivce: ConfigurationService
-  ) {}
+  ) { }
 
   @Get('export/:projectSlug')
   @Log()
