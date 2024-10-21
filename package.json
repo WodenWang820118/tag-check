@@ -1,6 +1,6 @@
 {
   "name": "tag-check",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "main": ".vite/build/main.js",
   "author": "Guan Xin Wang",
   "description": "A tool to check the data layer of a website",
@@ -231,7 +231,7 @@
     "electron-log": "^5.2.0",
     "electron-squirrel-startup": "^1.0.1",
     "exceljs": "^4.4.0",
-    "express": "^4.21.0",
+    "express": "^5.0.0",
     "ffmpeg-static": "^5.2.0",
     "firebase": "^10.13.1",
     "multer": "1.4.5-lts.1",
