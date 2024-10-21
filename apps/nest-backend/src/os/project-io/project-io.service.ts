@@ -44,14 +44,23 @@ export class ProjectIoService {
     const extractStream = unzipper.Extract({ path: outputPath });
 
     try {
-      return new Promise((resolve, reject) => {
-        readStream.pipe(extractStream).on('close', resolve).on('error', reject);
+      await new Promise<void>((resolve, reject) => {
+        readStream
+          .pipe(extractStream)
+          .on('close', () => {
+            resolve();
+          })
+          .on('error', (err) => {
+            reject(err);
+          });
+
+        readStream.on('error', (err) => {
+          reject(err);
+        });
       });
     } catch (error) {
       this.logger.error(
-        `Failed to unzip project ${projectSlug}: ${
-          error instanceof Error ? error.message : 'Unknown error'
-        }`
+        `Failed to unzip project ${projectSlug}: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
       throw new HttpException(
         'Failed to unzip project',
