@@ -1,0 +1,18 @@
+.slide-sidenav {
+  width: 750px !important;
+  &__header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem;
+
+    &__title {
+      display: flex;
+      flex-direction: row;
+      gap: 1rem;
+      align-items: center;
+      font-size: larger;
+    }
+  }
+}

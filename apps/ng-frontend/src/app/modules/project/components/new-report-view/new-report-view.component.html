@@ -1,0 +1,48 @@
+<div class="new-report">
+  <form
+    class="new-report__form"
+    [formGroup]="reportForm"
+    (ngSubmit)="setEditorContent(); uploadReport()"
+  >
+    <mat-form-field class="new-report__form_field" appearance="outline">
+      <mat-label>Test Name</mat-label>
+      <input matInput formControlName="testName" />
+    </mat-form-field>
+    <div>
+      <h2>Specification</h2>
+      <app-editor
+        class="new-report__form__field"
+        [content]="exampleInputJson"
+        [editorExtension]="'specJson'"
+      ></app-editor>
+    </div>
+    <div>
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+        "
+      >
+        <h2>Chrome Recording</h2>
+        <button
+          type="button"
+          mat-stroked-button
+          style="margin-bottom: 1rem"
+          (click)="fileInput.click()"
+        >
+          Upload
+        </button>
+      </div>
+      <app-editor
+        class="new-report__form__field"
+        [content]="'{}'"
+        [editorExtension]="'recordingJson'"
+      ></app-editor>
+    </div>
+    <input hidden (change)="onFileSelected($event)" #fileInput type="file" />
+    <div class="new-report__form__actions">
+      <button type="submit" mat-raised-button color="primary">Submit</button>
+    </div>
+  </form>
+</div>

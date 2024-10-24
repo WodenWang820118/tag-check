@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
@@ -38,10 +38,11 @@ import { TestRunningFacadeService } from '../../../../shared/services/facade/tes
 export class ReportTableToolbarComponent implements OnDestroy {
   isSearchVisible = false;
   destroy$ = new Subject<void>();
+  @Output() add = new EventEmitter<void>();
   constructor(
     private dataSourceService: ProjectDataSourceService,
     private testRunningFacade: TestRunningFacadeService
-  ) {}
+  ) { }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -61,6 +62,10 @@ export class ReportTableToolbarComponent implements OnDestroy {
     if (event.value === 'search') {
       this.isSearchVisible = !this.isSearchVisible;
     }
+  }
+
+  emitAddEvent() {
+    this.add.emit();
   }
 
   stopOperation() {
