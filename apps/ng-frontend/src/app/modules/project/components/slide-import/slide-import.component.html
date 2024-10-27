@@ -11,7 +11,10 @@
 >
   <div class="slide-import-sidenav__header">
     <div class="slide-import-sidenav__header__title">
-      <button mat-icon-button (click)="importSidenav.toggle()">
+      <button
+        mat-icon-button
+        (click)="importSidenav.toggle(); uploadSpecService.resetImport()"
+      >
         <mat-icon>close</mat-icon>
       </button>
       <div>Import Report</div>

@@ -11,7 +11,10 @@
 >
   <div class="slide-sidenav__header">
     <div class="slide-sidenav__header__title">
-      <button mat-icon-button (click)="sidenav.toggle()">
+      <button
+        mat-icon-button
+        (click)="sidenav.toggle(); uploadSpecService.resetStart()"
+      >
         <mat-icon>close</mat-icon>
       </button>
       <div>Upload Report</div>

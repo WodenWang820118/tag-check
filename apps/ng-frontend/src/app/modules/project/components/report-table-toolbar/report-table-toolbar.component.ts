@@ -1,3 +1,4 @@
+import { UploadSpecService } from './../../../../shared/services/upload-spec/upload-spec.service';
 import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -38,10 +39,10 @@ import { TestRunningFacadeService } from '../../../../shared/services/facade/tes
 export class ReportTableToolbarComponent implements OnDestroy {
   isSearchVisible = false;
   destroy$ = new Subject<void>();
-  @Output() add = new EventEmitter<void>();
   constructor(
     private dataSourceService: ProjectDataSourceService,
-    private testRunningFacade: TestRunningFacadeService
+    private testRunningFacade: TestRunningFacadeService,
+    private uploadSpecService: UploadSpecService
   ) { }
 
   applyFilter(event: Event) {
@@ -64,10 +65,6 @@ export class ReportTableToolbarComponent implements OnDestroy {
     }
   }
 
-  emitAddEvent() {
-    this.add.emit();
-  }
-
   stopOperation() {
     this.testRunningFacade
       .stopOperation()
@@ -79,6 +76,10 @@ export class ReportTableToolbarComponent implements OnDestroy {
         })
       )
       .subscribe();
+  }
+
+  emitAddEvent() {
+    this.uploadSpecService.startUpload();
   }
 
   ngOnDestroy() {

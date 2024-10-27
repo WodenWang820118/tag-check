@@ -6,8 +6,13 @@ import { SlideImportComponent } from '../../components/slide-import/slide-import
 @Component({
   selector: 'app-report-big-table',
   standalone: true,
-  imports: [ReportTableComponent, ReportTableToolbarComponent, SlideUploadComponent, SlideImportComponent],
+  imports: [
+    ReportTableComponent,
+    ReportTableToolbarComponent,
+    SlideUploadComponent,
+    SlideImportComponent,
+  ],
   templateUrl: './report-big-table.component.html',
   styleUrls: ['./report-big-table.component.scss'],
 })
-export class ReportBigTableComponent { }
+export class ReportBigTableComponent {}

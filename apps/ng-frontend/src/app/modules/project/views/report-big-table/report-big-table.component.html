@@ -1,14 +1,6 @@
 <div class="report-view mat-elevation-z8">
-  <app-report-table-toolbar
-    (add)="sidenav.toggleSidenav()"
-  ></app-report-table-toolbar>
+  <app-report-table-toolbar></app-report-table-toolbar>
   <app-report-table></app-report-table>
-  <app-slide-sidenav
-    #sidenav
-    (openImportSidenav)="importSidenav.toggleSidenav()"
-  ></app-slide-sidenav>
-  <app-slide-import-sidenav
-    #importSidenav
-    (close)="importSidenav.toggleSidenav()"
-  ></app-slide-import-sidenav>
+  <app-slide-sidenav #slideSidenav></app-slide-sidenav>
+  <app-slide-import-sidenav #importSidenav></app-slide-import-sidenav>
 </div>

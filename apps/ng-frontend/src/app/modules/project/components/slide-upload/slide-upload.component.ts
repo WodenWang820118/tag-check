@@ -3,28 +3,21 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   AfterViewInit,
   Component,
-  EventEmitter,
-  Input,
+  effect,
   OnDestroy,
-  Output,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
-import {
-  Observable,
-  Subject,
-} from 'rxjs';
+import { Subject } from 'rxjs';
 import { ViewEncapsulation } from '@angular/core';
-import {
-  FormsModule,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ProgressSpinnerComponent, CustomMatTableComponent } from '@ui';
 import { MatIconModule } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
-import { NewReportViewComponent } from "../new-report-view/new-report-view.component";
+import { NewReportViewComponent } from '../new-report-view/new-report-view.component';
 import { MatButtonModule } from '@angular/material/button';
+import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 
 @Component({
   selector: 'app-slide-sidenav',
@@ -41,27 +34,31 @@ import { MatButtonModule } from '@angular/material/button';
     ProgressSpinnerComponent,
     CustomMatTableComponent,
     NewReportViewComponent,
-    MatButtonModule
+    MatButtonModule,
   ],
   templateUrl: `./slide-upload.component.html`,
   styleUrls: ['./slide-upload.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
 export class SlideUploadComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('sidenav') sidenav: MatSidenav | undefined;
-  @Input() isOpened = false;
-  @Output() openImportSidenav = new EventEmitter<void>();
+  sidenav = viewChild.required<MatSidenav>('sidenav');
 
   private destroy$ = new Subject<void>();
 
   loading = true;
 
-  constructor(
-  ) { }
+  constructor(public uploadSpecService: UploadSpecService) {
+    effect(() => {
+      if (this.uploadSpecService.isUploaded()) {
+        this.sidenav().toggle(false);
+      } else if (this.uploadSpecService.isStarted()) {
+        this.sidenav().toggle(true);
+      }
+    });
+  }
 
   ngAfterViewInit() {
-    if (!this.sidenav) return;
-    this.sidenav.toggle(this.isOpened);
+    this.sidenav().toggle(false);
   }
 
   ngOnDestroy() {
@@ -75,13 +72,11 @@ export class SlideUploadComponent implements AfterViewInit, OnDestroy {
   }
 
   private adjustBodyOverflow() {
-    if (!this.sidenav) return;
-    this.sidenav.toggle();
-    document.body.style.overflow = this.sidenav.opened ? 'hidden' : 'auto';
+    this.sidenav().toggle();
+    document.body.style.overflow = this.sidenav()?.opened ? 'hidden' : 'auto';
   }
 
   emitOpenImportSidenav() {
-    this.openImportSidenav.emit();
+    this.uploadSpecService.openImportSidenav();
   }
-
 }
