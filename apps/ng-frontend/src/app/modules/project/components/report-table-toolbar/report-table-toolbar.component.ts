@@ -1,4 +1,5 @@
-import { Component, OnDestroy } from '@angular/core';
+import { UploadSpecService } from './../../../../shared/services/upload-spec/upload-spec.service';
+import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
@@ -40,8 +41,9 @@ export class ReportTableToolbarComponent implements OnDestroy {
   destroy$ = new Subject<void>();
   constructor(
     private dataSourceService: ProjectDataSourceService,
-    private testRunningFacade: TestRunningFacadeService
-  ) {}
+    private testRunningFacade: TestRunningFacadeService,
+    private uploadSpecService: UploadSpecService
+  ) { }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -74,6 +76,10 @@ export class ReportTableToolbarComponent implements OnDestroy {
         })
       )
       .subscribe();
+  }
+
+  emitAddEvent() {
+    this.uploadSpecService.startUpload();
   }
 
   ngOnDestroy() {

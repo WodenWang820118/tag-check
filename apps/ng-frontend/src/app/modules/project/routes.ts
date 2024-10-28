@@ -70,13 +70,6 @@ export const PROJECT_ROUTES: Routes = [
           ).then((m) => m.ProjectIoFormComponent),
       },
       {
-        path: 'new-report',
-        loadComponent: () =>
-          import('./views/new-report-view/new-report-view.component').then(
-            (m) => m.NewReportViewComponent
-          ),
-      },
-      {
         path: ':eventId',
         loadComponent: () =>
           import('./views/detail-view/detail-view.component').then(

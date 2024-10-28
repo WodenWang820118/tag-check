@@ -1,0 +1,36 @@
+<mat-sidenav
+  class="slide-sidenav"
+  opened="false"
+  #sidenav
+  mode="side"
+  position="end"
+  autoFocus="true"
+  fixedInViewport="true"
+  fixedTopGap="0"
+  fixedBottomGap="0"
+>
+  <div class="slide-sidenav__header">
+    <div class="slide-sidenav__header__title">
+      <button
+        mat-icon-button
+        (click)="sidenav.toggle(); uploadSpecService.resetStart()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      <div>Upload Report</div>
+    </div>
+    <div class="slide-sidenav__header__upload-all">
+      <button
+        mat-stroked-button
+        color="primary"
+        (click)="emitOpenImportSidenav()"
+      >
+        Import
+      </button>
+    </div>
+  </div>
+  <hr />
+  <mat-sidenav-content>
+    <app-new-report-view></app-new-report-view>
+  </mat-sidenav-content>
+</mat-sidenav>

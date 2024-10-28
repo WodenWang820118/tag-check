@@ -16,6 +16,7 @@ import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
 import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
+import { NewReportViewComponent } from '../../components/new-report-view/new-report-view.component';
 
 @Component({
   selector: 'app-project-view',
@@ -26,6 +27,7 @@ import { SettingsService } from '../../../../shared/services/api/settings/settin
     MatSidenavModule,
     ToolbarComponent,
     SideNavListComponent,
+    NewReportViewComponent,
   ],
   templateUrl: './project-view.component.html',
   styleUrls: ['./project-view.component.scss'],
@@ -41,7 +43,7 @@ export class ProjectViewComponent implements OnInit, OnDestroy {
     public projectInfoService: ProjectInfoService,
     private settingsService: SettingsService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.route.params

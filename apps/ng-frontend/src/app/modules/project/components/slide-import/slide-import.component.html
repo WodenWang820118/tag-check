@@ -1,0 +1,29 @@
+<mat-sidenav
+  class="slide-import-sidenav"
+  opened="false"
+  #importSidenav
+  mode="side"
+  position="end"
+  autoFocus="true"
+  fixedInViewport="true"
+  fixedTopGap="0"
+  fixedBottomGap="0"
+>
+  <div class="slide-import-sidenav__header">
+    <div class="slide-import-sidenav__header__title">
+      <button
+        mat-icon-button
+        (click)="importSidenav.toggle(); uploadSpecService.resetImport()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      <div>Import Report</div>
+    </div>
+  </div>
+  <hr />
+  <mat-sidenav-content
+    style="padding-left: 4rem; padding-right: 4rem; padding-top: 2rem"
+  >
+    <app-upload-card></app-upload-card>
+  </mat-sidenav-content>
+</mat-sidenav>
