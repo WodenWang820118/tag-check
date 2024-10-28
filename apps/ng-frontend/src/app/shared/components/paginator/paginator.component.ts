@@ -1,17 +1,17 @@
 import {
-  ChangeDetectorRef,
   Component,
-  Input,
-  OnChanges,
-  SimpleChanges,
-  ViewChild,
-  ViewEncapsulation,
+  input,
+  model,
+  computed,
+  viewChild,
+  effect,
+  ViewEncapsulation
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {
   PageEvent,
   MatPaginatorModule,
-  MatPaginator,
+  MatPaginator
 } from '@angular/material/paginator';
 import { StylePaginatorDirective } from '../../directives/style-paginator.directive';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,21 +23,19 @@ import { MatIconModule } from '@angular/material/icon';
     MatButtonModule,
     MatPaginatorModule,
     StylePaginatorDirective,
-    MatIconModule,
+    MatIconModule
   ],
   template: `
     <mat-paginator
       #paginator
-      appStylePaginator
-      [showTotalPages]="2"
       (page)="handlePageEvent($event)"
-      [length]="length"
-      [pageSize]="pageSize"
-      [disabled]="disabled"
-      [showFirstLastButtons]="showFirstLastButtons"
-      [pageSizeOptions]="showPageSizeOptions ? pageSizeOptions : []"
-      [hidePageSize]="hidePageSize"
-      [pageIndex]="pageIndex"
+      [length]="length()"
+      [pageSize]="pageSize()"
+      [disabled]="disabled()"
+      [showFirstLastButtons]="showFirstLastButtons()"
+      [pageSizeOptions]="showPageSizeOptions() ? pageSizeOptions() : []"
+      [hidePageSize]="hidePageSize()"
+      [pageIndex]="pageIndex()"
       aria-label="Select page"
     >
     </mat-paginator>
@@ -56,52 +54,42 @@ import { MatIconModule } from '@angular/material/icon';
       .mat-mdc-icon-button[disabled] .mat-mdc-paginator-icon {
         fill: rgba(0, 0, 0, 0.2) !important;
       }
-    `,
+    `
   ],
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None
 })
-export class PaginatorComponent implements OnChanges {
-  @Input() length!: number | null;
-  @Input() pageSize!: number;
-  @Input() pageSizeOptions: number[] = [5, 10, 25, 100];
+export class PaginatorComponent {
+  // Inputs as signals
+  length = input<number>(0);
+  pageSize = input<number>(5);
+  pageSizeOptions = input<number[]>([5, 10, 25, 100]);
 
-  pageIndex = 0;
-  hidePageSize = true;
-  showPageSizeOptions = false;
-  showFirstLastButtons = false;
-  disabled = false;
-  pageEvent!: PageEvent;
+  // State signals
+  pageIndex = model<number>(0);
+  hidePageSize = input<boolean>(true);
+  showPageSizeOptions = input<boolean>(false);
+  showFirstLastButtons = input<boolean>(false);
+  disabled = input<boolean>(false);
 
-  @ViewChild('paginator', { static: true }) paginator!: MatPaginator;
+  // Paginator reference as signal
+  paginator = viewChild.required<MatPaginator>('paginator');
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  // Computed signals for derived state
+  currentPage = computed(() => this.pageIndex());
+
+  constructor() {
+    // Effect to handle paginator initialization
+    effect(() => {
+      const paginatorInstance = this.paginator();
+      if (paginatorInstance && this.length() !== null) {
+        paginatorInstance.length = this.length();
+        paginatorInstance.pageSize = this.pageSize();
+      }
+    });
+  }
 
   handlePageEvent(e: PageEvent) {
-    this.pageEvent = e;
-    this.length = e.length;
-    this.pageSize = e.pageSize;
-    this.pageIndex = e.pageIndex;
-  }
-
-  private triggerInitialPageEvent() {
-    // Create an initial PageEvent
-    if (this.length === 0 || !this.length) return;
-    const initialPageEvent: PageEvent = {
-      pageIndex: this.pageIndex,
-      pageSize: this.pageSize,
-      length: this.length,
-    };
-
-    // Trigger the handlePageEvent method
-    this.paginator.page.emit(initialPageEvent);
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['length'] || changes['pageSize']) {
-      setTimeout(() => {
-        this.triggerInitialPageEvent();
-        this.cdr.detectChanges();
-      });
-    }
+    // Update the page index model
+    this.pageIndex.set(e.pageIndex);
   }
 }

@@ -1,0 +1,29 @@
+<div class="project-list">
+  <div class="project-list__items">
+    <div class="project-list__new" [routerLink]="['init-project']">
+      <mat-card class="project-list__items__item">
+        <mat-card-header>
+          <mat-card-title>New Project</mat-card-title>
+          <mat-card-subtitle>Create a new automation</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p></p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    @for (item of displayedProjects() | async; track item.projectSlug) {
+      <app-project-item
+        class="project-list__items__item"
+        [project]="item"
+      ></app-project-item>
+    }
+  </div>
+  <mat-paginator
+    #paginator
+    [length]="dataSourceLength()"
+    [pageSize]="5"
+    [pageSizeOptions]="[5, 10, 25, 100]"
+    (page)="handlePageEvent($event)"
+    [hidePageSize]="true"
+  ></mat-paginator>
+</div>
