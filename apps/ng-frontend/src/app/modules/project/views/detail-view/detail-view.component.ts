@@ -11,7 +11,7 @@ import {
   pipe,
   takeUntil,
   tap,
-  timeout,
+  timeout
 } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReportDetailsService } from '../../../../shared/services/report-details/report-details.service';
@@ -36,10 +36,10 @@ import { CarouselComponent } from '../../../../shared/components/carousel/carous
     MatButtonModule,
     CarouselComponent,
     DatePipe,
-    RouterLink,
+    RouterLink
   ],
   templateUrl: './detail-view.component.html',
-  styleUrls: ['./detail-view.component.scss'],
+  styleUrls: ['./detail-view.component.scss']
 })
 export class DetailViewComponent implements OnInit, OnDestroy {
   reportDetails$!: Observable<IReportDetails | undefined>;
@@ -72,9 +72,10 @@ export class DetailViewComponent implements OnInit, OnDestroy {
                   this.router.navigate(['../'], { relativeTo: this.route });
                 } else {
                   console.log('Report details loaded');
+                  console.log(reportDetails);
                 }
               })
-            ),
+            )
         }),
         catchError((error) => {
           console.error('Error: ', error);
@@ -85,7 +86,7 @@ export class DetailViewComponent implements OnInit, OnDestroy {
 
     combineLatest([
       this.route.params,
-      this.route.parent?.params || of({ projectSlug: '' }),
+      this.route.parent?.params || of({ projectSlug: '' })
     ])
       .pipe(
         takeUntil(this.destroy$),
@@ -116,13 +117,13 @@ export class DetailViewComponent implements OnInit, OnDestroy {
           if (imageBlob !== null) {
             items.push({
               type: 'image',
-              url: new BlobToUrlPipe().transform(imageBlob) || '',
+              url: new BlobToUrlPipe().transform(imageBlob) || ''
             });
           }
           if (videoBlob) {
             items.push({
               type: 'video',
-              url: new BlobToUrlPipe().transform(videoBlob) || '',
+              url: new BlobToUrlPipe().transform(videoBlob) || ''
             });
           }
           return items;

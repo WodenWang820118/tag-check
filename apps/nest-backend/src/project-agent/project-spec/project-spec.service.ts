@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { Injectable, NotAcceptableException } from '@nestjs/common';
+import { Injectable, Logger, NotAcceptableException } from '@nestjs/common';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { Spec } from '@utils';
 
 @Injectable()
 export class ProjectSpecService {
+  private readonly logger = new Logger(ProjectSpecService.name);
   constructor(
     private readonly fileService: FileService,
     private readonly filePathService: FilePathService
@@ -56,9 +57,8 @@ export class ProjectSpecService {
   }
 
   private async readSpecsFile(projectSlug: string): Promise<Spec[]> {
-    const filePath = await this.filePathService.getProjectConfigFilePath(
-      projectSlug
-    );
+    const filePath =
+      await this.filePathService.getProjectConfigFilePath(projectSlug);
     const specs = this.fileService.readJsonFile(filePath);
 
     if (!Array.isArray(specs)) {
@@ -72,9 +72,8 @@ export class ProjectSpecService {
     projectSlug: string,
     specs: Spec[]
   ): Promise<void> {
-    const filePath = await this.filePathService.getProjectConfigFilePath(
-      projectSlug
-    );
+    const filePath =
+      await this.filePathService.getProjectConfigFilePath(projectSlug);
     this.fileService.writeJsonFile(filePath, specs);
   }
 }
