@@ -1,7 +1,7 @@
 <div class="report-table">
   <table
     mat-table
-    [dataSource]="dataSource"
+    [dataSource]="dataSource()"
     multiTemplateDataRows
     matSort
     (matSortChange)="sortData($event)"
@@ -10,8 +10,8 @@
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox
           (change)="$event ? toggleAllRows() : null"
-          [checked]="selection.hasValue() && isAllSelected()"
-          [indeterminate]="selection.hasValue() && !isAllSelected()"
+          [checked]="selection().hasValue() && isAllSelected()"
+          [indeterminate]="selection().hasValue() && !isAllSelected()"
           [aria-label]="checkboxLabel()"
         >
         </mat-checkbox>
@@ -20,7 +20,7 @@
         <mat-checkbox
           (click)="$event.stopPropagation()"
           (change)="$event ? selectSingleRow(row) : null"
-          [checked]="selection.isSelected(row)"
+          [checked]="selection().isSelected(row)"
           [aria-label]="checkboxLabel(row)"
         >
         </mat-checkbox>
@@ -65,7 +65,7 @@
     <ng-container matColumnDef="lastModified">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
       <td mat-cell *matCellDef="let element">
-        <p>{{ element.lastModified | date : 'medium' }}</p>
+        <p>{{ element.lastModified | date: 'medium' }}</p>
       </td>
     </ng-container>
 

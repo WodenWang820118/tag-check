@@ -11,7 +11,7 @@ import {
   mergeMap,
   take,
   catchError,
-  of,
+  of
 } from 'rxjs';
 import { ReportService } from '../api/report/report.service';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -73,7 +73,7 @@ export class DataSourceFacadeService {
     return combineLatest([
       this.route.params,
       this.projectDataSourceService.getPreventNavigationStream(),
-      selection.changed,
+      selection.changed
     ]).pipe(
       switchMap(([params, value, selectionChanges]) => {
         if (selectionChanges.added.length === 0) return of(null);
@@ -88,7 +88,7 @@ export class DataSourceFacadeService {
             projectSlug,
             'preventNavigationEvents',
             {
-              preventNavigationEvents: eventIds,
+              preventNavigationEvents: eventIds
             }
           );
         }
@@ -108,7 +108,7 @@ export class DataSourceFacadeService {
     return combineLatest([
       this.route.params,
       this.projectDataSourceService.getDeletedStream(),
-      selection.changed,
+      selection.changed
     ]).pipe(
       mergeMap(([params, value, selectionChanges]) => {
         // after report deletion the reset deleted stream ensures that no further deletion occurs
@@ -124,13 +124,14 @@ export class DataSourceFacadeService {
               contents: 'Are you sure you want to delete the selected reports?',
               action: 'Delete',
               actionColor: 'warn',
-              consent: false,
-            },
+              consent: false
+            }
           });
 
           return dialogRef.afterClosed().pipe(
             take(1),
             map((result) => {
+              this.projectDataSourceService.setDeletedStream(false);
               return { params, dialogResult: result };
             })
           );

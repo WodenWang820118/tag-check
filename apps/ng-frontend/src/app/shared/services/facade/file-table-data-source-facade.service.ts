@@ -68,6 +68,7 @@ export class FileTableDataSourceFacadeService {
     selection: SelectionModel<FileReport>,
     dataSource: MatTableDataSource<FileReport, MatPaginator>
   ) {
+    console.log('Triggered Deletion');
     if (!this.route.parent || !dataSource) {
       return of(null);
     }
@@ -75,11 +76,12 @@ export class FileTableDataSourceFacadeService {
     return combineLatest([
       this.route.parent.params,
       this.fileTableDataSourceService.getDeletedStream(),
-      selection.changed,
+      selection.changed
     ]).pipe(
       switchMap(([params, deleted, selectionChanges]) => {
-        if (selectionChanges.added.length === 0)
+        if (selectionChanges.added.length === 0) {
           return of({ params, dialogResult: false });
+        }
         if (deleted === false) {
           return of({ params, dialogResult: false });
         } else {
@@ -89,13 +91,17 @@ export class FileTableDataSourceFacadeService {
               contents: 'Are you sure you want to delete the selected reports?',
               action: 'Delete',
               actionColor: 'warn',
-              consent: false,
+              consent: false
             },
+            ariaLabel: 'Error Dialog',
+            role: 'dialog',
+            hasBackdrop: true,
+            disableClose: true
           });
-
           return dialogRef.afterClosed().pipe(
             take(1),
             map((result) => {
+              this.fileTableDataSourceService.setDeletedStream(false);
               return { params, dialogResult: result };
             })
           );
@@ -143,7 +149,7 @@ export class FileTableDataSourceFacadeService {
     return combineLatest([
       this.route.parent.params,
       this.fileTableDataSourceService.getDownloadStream(),
-      selection.changed,
+      selection.changed
     ]).pipe(
       switchMap(([params, download, selectionChanges]) => {
         if (selectionChanges.added.length === 0)
@@ -158,10 +164,10 @@ export class FileTableDataSourceFacadeService {
                 'Are you sure you want to download the selected reports?',
               action: 'Download',
               actionColor: 'primary',
-              consent: false,
-            },
+              consent: false
+            }
           });
-
+          this.fileTableDataSourceService.setDownloadStream(false);
           return dialogRef.afterClosed().pipe(
             take(1),
             map((result) => {
@@ -216,7 +222,7 @@ export class FileTableDataSourceFacadeService {
         path: item.path,
         dataLayerState: dataLayerState,
         requestState: requestState,
-        lastModified: item.lastModified,
+        lastModified: item.lastModified
       };
     });
   }
