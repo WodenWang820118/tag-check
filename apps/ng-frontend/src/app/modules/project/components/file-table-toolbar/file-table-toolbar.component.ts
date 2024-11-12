@@ -43,7 +43,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class FileTableToolbarComponent implements AfterViewInit, OnDestroy {
   isSearchVisible = signal(false);
   filterValue = signal('');
-  searchInput = viewChild.required<HTMLInputElement>('searchInput');
+  searchInput = viewChild<HTMLInputElement>('searchInput');
 
   constructor(
     private fileTableDataSourceService: FileTableDataSourceService,
@@ -117,20 +117,22 @@ export class FileTableToolbarComponent implements AfterViewInit, OnDestroy {
   }
 
   private setSearchInputValue(value: string) {
-    if (this.searchInput()) {
-      this.searchInput().value = value;
+    const input = this.searchInput();
+    if (input) {
+      input.value = value;
       this.filterValue.set(value);
     }
   }
 
   private triggerApplyFilter() {
-    if (this.searchInput()) {
+    const input = this.searchInput();
+    if (input) {
       const event = new KeyboardEvent('keyup', {
         bubbles: true,
         cancelable: true,
         composed: true
       });
-      this.searchInput().dispatchEvent(event);
+      input.dispatchEvent(event);
     }
   }
 
