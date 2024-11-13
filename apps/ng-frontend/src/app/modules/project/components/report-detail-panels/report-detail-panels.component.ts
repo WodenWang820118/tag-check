@@ -1,29 +1,12 @@
-import { AsyncPipe, JsonPipe, NgIf } from '@angular/common';
-import {
-  Component,
-  Input,
-  OnDestroy,
-  OnInit,
-  ViewEncapsulation,
-} from '@angular/core';
+import { AsyncPipe, JsonPipe } from '@angular/common';
+import { Component, computed, effect, input, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import {
-  Observable,
-  Subject,
-  catchError,
-  combineLatest,
-  map,
-  of,
-  switchMap,
-  take,
-  takeUntil,
-  tap,
-} from 'rxjs';
+import { catchError, firstValueFrom, map, of, take, tap } from 'rxjs';
 import {
   extractEventNameFromId,
   IReportDetails,
   Recording,
-  Spec,
+  Spec
 } from '@utils';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
@@ -37,38 +20,52 @@ import { EditorService } from '../../../../shared/services/editor/editor.service
 import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { toSignal } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-report-datail-panels',
   standalone: true,
   imports: [
     AsyncPipe,
-    NgIf,
     JsonPipe,
     MatIconModule,
     MatExpansionModule,
     MatTooltipModule,
     EditorComponent,
-    MatButtonModule,
-    ErrorDialogComponent,
-    MatFormFieldModule,
-    MatInputModule,
+    MatButtonModule
   ],
   templateUrl: './report-detail-panels.component.html',
-  styleUrls: ['./report-detail-panels.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  styleUrls: ['./report-detail-panels.component.scss']
 })
-export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
-  @Input() eventName!: string | undefined;
-  @Input() reportDetails$!: Observable<IReportDetails | undefined>;
-  recording$!: Observable<Recording | null>;
-  spec$!: Observable<Spec | null>;
-  destroy$ = new Subject<void>();
-  specEdit = false;
-  recordingEdit = false;
-  specEditMode = false;
-  recordingEditMode = false;
+export class ReportDetailPanelsComponent {
+  // Input signals
+  reportDetails = input<IReportDetails | undefined>(undefined);
+
+  // State signals
+  recording = signal<Recording | null>(null);
+  spec = signal<Spec | null>(null);
+  error = signal<string | null>(null);
+  loading = signal(false);
+
+  // Edit mode signals
+  specEdit = signal(false);
+  recordingEdit = signal(false);
+  specEditMode = signal(false);
+  recordingEditMode = signal(false);
+
+  // Route parameters as signals
+  private projectSlug = toSignal(
+    this.route.parent?.params.pipe(map((params) => params['projectSlug'])) ||
+      of('')
+  );
+  private routeEventId = toSignal(
+    this.route.params.pipe(map((params) => params['eventId']))
+  );
+
+  // Computed values
+  protected eventNameFromRoute = computed(() => {
+    const eventId = this.routeEventId();
+    return eventId ? extractEventNameFromId(eventId) : '';
+  });
 
   constructor(
     private recordingService: RecordingService,
@@ -78,59 +75,61 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
     public editorService: EditorService,
     private dialog: MatDialog,
     private utilsService: UtilsService
-  ) {}
-
-  ngOnInit() {
-    this.initializeDataStreams();
+  ) {
+    // Initialize data streams using effect
+    effect(
+      () => {
+        this.loadData();
+      },
+      {
+        allowSignalWrites: true
+      }
+    );
   }
 
-  private initializeDataStreams() {
-    const projectSlug$ =
-      this.route.parent?.params.pipe(map((params) => params['projectSlug'])) ||
-      of('');
-    const eventId$ = this.route.params.pipe(map((params) => params['eventId']));
+  private loadData() {
+    const slug = this.projectSlug();
+    const eventId = this.routeEventId();
 
-    // Combine projectSlug and eventName streams for use in spec$ and recording$ initializations
-    combineLatest([projectSlug$, eventId$])
-      .pipe(
-        takeUntil(this.destroy$),
-        tap(([projectSlug, eventId]) => {
-          if (projectSlug && eventId) {
-            // extract the eventName from the route params with regex
-            const eventName = extractEventNameFromId(eventId);
-            this.spec$ = this.specService.getSpec(projectSlug, eventName);
-            this.recording$ = this.recordingService.getRecordingDetails(
-              projectSlug,
-              eventId
-            );
-          }
-        }),
-        catchError((error) => {
-          console.error('Error: ', error);
-          return error;
-        })
-      )
-      .subscribe();
+    if (slug && eventId) {
+      const eventName = this.eventNameFromRoute();
+
+      // Load spec
+      this.specService
+        .getSpec(slug, eventName)
+        .pipe(take(1))
+        .subscribe((spec) => this.spec.set(spec));
+
+      // Load recording
+      this.recordingService
+        .getRecordingDetails(slug, eventId)
+        .pipe(take(1))
+        .subscribe((recording) => this.recording.set(recording));
+    }
   }
 
   switchSpecEditMode(event: Event) {
     event.stopPropagation();
 
-    this.specEditMode = !this.specEditMode;
+    // this.specEditMode = !this.specEditMode;
+    this.specEditMode.update((prev) => !prev);
   }
 
   switchRecordingEditMode(event: Event) {
     event.stopPropagation();
 
-    this.recordingEditMode = !this.recordingEditMode;
+    // this.recordingEditMode = !this.recordingEditMode;
+    this.recordingEditMode.update((prev) => !prev);
   }
 
   switchSpecEdit() {
-    this.specEdit = !this.specEdit;
+    // this.specEdit = !this.specEdit;
+    this.specEdit.update((prev) => !prev);
   }
 
   switchRecordingEdit() {
-    this.recordingEdit = !this.recordingEdit;
+    // this.recordingEdit = !this.recordingEdit;
+    this.recordingEdit.update((prev) => !prev);
   }
 
   onFileSelected(event: Event) {
@@ -159,123 +158,80 @@ export class ReportDetailPanelsComponent implements OnInit, OnDestroy {
     }
   }
 
-  onSpecUpdate() {
-    combineLatest([
-      this.route.parent?.params || of({ projectSlug: '' }),
-      this.route.params,
-      this.editorService.editor$.specJsonEditor,
-    ])
-      .pipe(
-        take(1),
-        switchMap(([parentParams, params, specEditor]) => {
-          const projectSlug = parentParams['projectSlug'];
-          const eventName = extractEventNameFromId(params['eventId']);
-          const specContent = specEditor.state.doc.toString();
+  async onSpecUpdate() {
+    const slug = this.projectSlug();
+    const eventName = this.eventNameFromRoute();
+    const editor = await firstValueFrom(
+      this.editorService.editor$.specJsonEditor
+    );
 
-          if (
-            projectSlug &&
-            eventName &&
-            !this.utilsService.isEmptyObject(JSON.parse(specContent))
-          ) {
-            return this.specService.updateSpec(
-              projectSlug,
-              eventName,
-              JSON.parse(specContent)
-            );
-          } else {
-            return this.showErrorDialog(
-              'Spec content is required and cannot be empty.'
-            );
-          }
-        }),
-        catchError(() => {
-          return this.showErrorDialog(
-            'Spec content is required and cannot be empty.'
-          );
-        })
-      )
-      .subscribe();
+    const specContent = editor.state.doc.toString();
+
+    try {
+      const parsedContent = JSON.parse(specContent);
+
+      if (
+        slug &&
+        eventName &&
+        !this.utilsService.isEmptyObject(parsedContent)
+      ) {
+        await firstValueFrom(
+          this.specService.updateSpec(slug, eventName, parsedContent)
+        );
+      } else {
+        this.showErrorDialog('Spec content is required and cannot be empty.');
+      }
+    } catch (err) {
+      this.showErrorDialog('Invalid spec content');
+    }
   }
 
-  onRecordingUpdate() {
-    combineLatest([
-      this.route.parent?.params || of({ projectSlug: '' }),
-      this.route.params,
-      this.editorService.editor$.recordingJsonEditor,
-    ])
-      .pipe(
-        take(1),
-        switchMap(([parentParams, params, recordingEditor]) => {
-          const projectSlug = parentParams['projectSlug'];
-          const eventId = params['eventId'];
-          const recordingContent = recordingEditor.state.doc.toString();
+  async onRecordingUpdate() {
+    const slug = this.projectSlug();
+    const eventName = this.eventNameFromRoute();
+    const editor = await firstValueFrom(
+      this.editorService.editor$.recordingJsonEditor
+    );
 
-          if (
-            parentParams &&
-            projectSlug &&
-            !this.utilsService.isEmptyObject(JSON.parse(recordingContent))
-          ) {
-            return this.recordingService.updateRecording(
-              projectSlug,
-              eventId,
-              recordingContent
-            );
-          } else {
-            return this.showErrorDialog(
-              'Recording content is required and cannot be empty.'
-            );
-          }
-        }),
-        catchError(() =>
-          this.showErrorDialog(
-            'Recording content is required and cannot be empty.'
-          )
-        )
-      )
-      .subscribe();
+    const recordingContent = editor.state.doc.toString();
+
+    try {
+      const parsedContent = JSON.parse(recordingContent);
+
+      if (
+        slug &&
+        eventName &&
+        !this.utilsService.isEmptyObject(parsedContent)
+      ) {
+        await firstValueFrom(
+          this.recordingService.updateRecording(slug, eventName, parsedContent)
+        );
+      } else {
+        this.showErrorDialog(
+          'Recording content is required and cannot be empty.'
+        );
+      }
+    } catch (err) {
+      this.showErrorDialog('Invalid recording content');
+    }
   }
 
   onDownload() {
-    combineLatest([
-      this.route.parent?.params || of({ projectSlug: '' }),
-      this.route.params,
-    ])
-      .pipe(
-        take(1),
-        tap(([parentParams, params]) => {
-          const projectSlug = parentParams['projectSlug'];
-          const eventName = params['eventName'];
+    const slug = this.projectSlug();
+    const eventName = this.eventNameFromRoute();
 
-          if (projectSlug && eventName) {
-            return this.reportService.downloadFile(projectSlug, eventName);
-          } else {
-            this.dialog.open(ErrorDialogComponent, {
-              data: {
-                message: 'Project slug and event name are required.',
-              },
-            });
-            throw new Error('Project slug and event name are required.');
-          }
-        }),
-        catchError((error) => {
-          console.error('Error downloading file: ', error);
-          return error;
-        })
-      )
-      .subscribe();
+    if (slug && eventName) {
+      this.reportService.downloadFile(slug, eventName);
+    } else {
+      this.showErrorDialog('Project slug and event name are required.');
+    }
   }
 
-  private showErrorDialog(message: string): Observable<null> {
+  private showErrorDialog(message: string) {
     this.dialog.open(ErrorDialogComponent, {
       data: {
-        message: message,
-      },
+        message: message
+      }
     });
-    return of(null);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
