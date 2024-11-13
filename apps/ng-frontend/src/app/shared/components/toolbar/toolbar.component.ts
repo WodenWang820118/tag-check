@@ -1,33 +1,30 @@
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ProjectInfo, Setting } from '@utils';
-import {
-  AfterViewInit,
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-} from '@angular/core';
-import { NgIf } from '@angular/common';
+import { Component, effect, input, model, output, signal } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  Router,
+  RouterLink
+} from '@angular/router';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenav } from '@angular/material/sidenav';
 import { MatSelectModule } from '@angular/material/select';
 import {
   MatButtonToggleChange,
-  MatButtonToggleModule,
+  MatButtonToggleModule
 } from '@angular/material/button-toggle';
 import { MetadataSourceService } from '../../services/metadata-source/metadata-source.service';
 import { MatInputModule } from '@angular/material/input';
-import { tap } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-toolbar',
   standalone: true,
   imports: [
-    NgIf,
     MatToolbarModule,
     MatIconModule,
     MatButtonModule,
@@ -36,57 +33,65 @@ import { tap } from 'rxjs';
     MatSelectModule,
     MatFormFieldModule,
     MatButtonToggleModule,
-    MatInputModule,
+    MatInputModule
   ],
   templateUrl: './toolbar.component.html',
-  styleUrl: './toolbar.component.scss',
+  styleUrl: './toolbar.component.scss'
 })
-export class ToolbarComponent implements AfterViewInit {
-  @Input() settings!: Setting | undefined;
-  @Input() snav!: MatSidenav | undefined;
-  @Input() projects!: ProjectInfo[] | null;
-  @Output() changeProject = new EventEmitter<string>();
-  isSearchVisible = false;
-  isHomeView = false;
+export class ToolbarComponent {
+  // Convert inputs to signal inputs
+  snav = input<MatSidenav | undefined>();
+  settings = input.required<Setting | undefined>();
+  projects = input.required<ProjectInfo[] | undefined>();
+  params = toSignal(this.route.params, {
+    initialValue: { projectSlug: '' }
+  });
+
+  // Convert output to signal-based model
+  selectedProject = model<string>(this.params().projectSlug);
+  changeProject = output<string>();
+
+  // Convert state to signals
+  isSearchVisible = signal(false);
+  isHomeView = signal(false);
 
   constructor(
     private metadataSourceService: MetadataSourceService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
+    // Handle navigation with effect
+    effect(
+      () => {
+        this.router.events.subscribe((event) => {
+          if (event instanceof NavigationEnd) {
+            this.isHomeView.set(event.url === '/');
+          }
+        });
+      },
+      {
+        allowSignalWrites: true
+      }
+    );
+  }
 
   onChangeProject(projectSlug: string) {
+    this.selectedProject.set(projectSlug);
     this.changeProject.emit(projectSlug);
   }
 
   onToggleChange(event: MatButtonToggleChange) {
-    // console.log(event.value);
     if (event.value === 'search') {
-      this.isSearchVisible = !this.isSearchVisible;
+      this.isSearchVisible.update((value) => !value);
     }
   }
 
   closeSearch() {
-    this.isSearchVisible = false;
+    this.isSearchVisible.set(false);
   }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.metadataSourceService.setFilter(filterValue);
-  }
-
-  ngAfterViewInit() {
-    this.router.events
-      .pipe(
-        tap((event) => {
-          if (event instanceof NavigationEnd) {
-            if (this.router.url === '/') {
-              this.isHomeView = true;
-            } else {
-              this.isHomeView = false;
-            }
-          }
-        })
-      )
-      .subscribe();
   }
 }
