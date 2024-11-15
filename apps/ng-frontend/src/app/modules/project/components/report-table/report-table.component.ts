@@ -10,7 +10,7 @@ import {
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { EMPTY, switchMap, take, tap, firstValueFrom } from 'rxjs';
+import { EMPTY, switchMap, take, tap, forkJoin } from 'rxjs';
 import { IReportDetails } from '@utils';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -109,55 +109,64 @@ export class ReportTableComponent implements AfterViewInit {
     }
   }
 
-  private async setupProjectObservation(
-    paginator: MatPaginator,
-    sort: MatSort
-  ) {
-    this.observeProject(paginator, sort)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe();
+  private setupProjectObservation(paginator: MatPaginator, sort: MatSort) {
+    const projectSource = this.dataSourceFacadeService
+      .observeProject(paginator, sort)
+      .pipe(
+        switchMap((dataSource) => {
+          if (!dataSource) return EMPTY;
+          this.testDataSource.set(dataSource);
+          return this.dataSourceFacadeService.observeDeleteSelected(
+            this.selection(),
+            this.testDataSource()
+          );
+        })
+      );
 
-    await this.observeProjectRecordingStatus();
+    const recordingStatus =
+      this.projectFacadeService.observeProjectRecordingStatus(
+        this.params().projectSlug
+      );
 
-    this.projectFacadeService
+    const navigationEvents = this.projectFacadeService
       .observeNavigationEvents()
       .pipe(
-        takeUntilDestroyed(this.destroyRef),
         tap((preventNavigationEvents) => {
           this.preventNavigationEvents.set(preventNavigationEvents);
         })
-      )
-      .subscribe();
+      );
 
-    this.dataSourceFacadeService
-      .observeTableFilter()
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        tap((filter) => {
-          this.testDataSource().filter = filter;
-        })
-      )
-      .subscribe();
+    const tableFilter = this.dataSourceFacadeService.observeTableFilter().pipe(
+      tap((filter) => {
+        this.testDataSource().filter = filter;
+      })
+    );
 
-    this.dataSourceFacadeService
+    const preventNavigation = this.dataSourceFacadeService
       .observePreventNavigationSelected(this.selection())
       .pipe(
-        takeUntilDestroyed(this.destroyRef),
         tap((projectSetting) => {
           if (!projectSetting) return;
           this.preventNavigationEvents.set(
             projectSetting.settings.preventNavigationEvents
           );
         })
-      )
+      );
+
+    forkJoin({
+      project: projectSource,
+      recordingStatus,
+      navigationEvents,
+      tableFilter,
+      preventNavigation
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
   }
 
-  async observeProjectRecordingStatus() {
-    await firstValueFrom(
-      this.projectFacadeService.observeProjectRecordingStatus(
-        this.params().projectSlug
-      )
+  observeProjectRecordingStatus() {
+    return this.projectFacadeService.observeProjectRecordingStatus(
+      this.params().projectSlug
     );
   }
 
