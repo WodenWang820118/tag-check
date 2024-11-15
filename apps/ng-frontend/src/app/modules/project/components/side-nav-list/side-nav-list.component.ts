@@ -1,13 +1,12 @@
 import {
   Component,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
   ViewEncapsulation,
+  input,
+  output,
+  signal,
+  effect
 } from '@angular/core';
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import {
@@ -16,10 +15,8 @@ import {
   NavigationEnd,
   Router,
   RouterLink,
-  RouterLinkActive,
-  UrlSegment,
+  RouterLinkActive
 } from '@angular/router';
-import { catchError, filter, Subject, takeUntil, tap } from 'rxjs';
 import { MatMenuModule } from '@angular/material/menu';
 import { OverlayModule } from '@angular/cdk/overlay';
 import { OverlayComponent } from '../overlay/overlay.component';
@@ -30,7 +27,6 @@ import { MatSidenav } from '@angular/material/sidenav';
   selector: 'app-side-nav-list',
   standalone: true,
   imports: [
-    NgIf,
     MatListModule,
     MatIconModule,
     RouterLink,
@@ -39,88 +35,121 @@ import { MatSidenav } from '@angular/material/sidenav';
     OverlayComponent,
     MatButtonModule,
     RouterLinkActive,
-    NgClass,
+    NgClass
   ],
   templateUrl: './side-nav-list.component.html',
   styleUrls: ['./side-nav-list.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None
 })
-export class SideNavListComponent implements OnInit, OnDestroy {
-  routerLinkActiveOptions: IsActiveMatchOptions = {
+export class SideNavListComponent {
+  snav = input.required<MatSidenav>();
+  menuClick = output<void>();
+  routerLinkActiveOptions = signal<IsActiveMatchOptions>({
     paths: 'exact',
     queryParams: 'ignored',
     matrixParams: 'ignored',
-    fragment: 'ignored',
-  };
-  selectedParent: string | null = null;
-  @Input() snav!: MatSidenav;
-  @Output() menuClick = new EventEmitter();
-  items: {
-    icon: string;
-    title: string;
-    link: string;
-    subTitle?: string;
-  }[] = [];
+    fragment: 'ignored'
+  });
 
-  isOpen = false;
-  destroy$ = new Subject<void>();
-  constructor(private route: ActivatedRoute, private router: Router) {
-    this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe(() => {
-        this.updateParentTitle();
+  selectedParent = signal<string | null>(null);
+  isOpen = signal(false);
+  items = signal<
+    {
+      icon: string;
+      title: string;
+      link: string;
+      subTitle?: string;
+    }[]
+  >([]);
+
+  settingsMenuItems = signal([
+    {
+      title: 'Project Information',
+      link: ['./', 'settings', 'project-info']
+    },
+    {
+      title: 'Preloading Values',
+      link: ['./', 'settings', 'pre-loading-values']
+    },
+    {
+      title: 'Authentication',
+      link: ['./', 'settings', 'authentication']
+    },
+    {
+      title: 'Google Tag Manager',
+      link: ['./', 'settings', 'gtm']
+    },
+    {
+      title: 'Advanced Browser',
+      link: ['./', 'settings', 'advanced-browser-settings']
+    },
+    {
+      title: 'Project IO',
+      link: ['./', 'settings', 'project-io']
+    }
+  ]);
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router
+  ) {
+    // Convert router subscription to effect
+    effect(() => {
+      this.router.events.subscribe((event) => {
+        if (event instanceof NavigationEnd) {
+          this.updateParentTitle();
+        }
       });
-  }
+    });
 
-  ngOnInit(): void {
-    this.route.params
-      .pipe(
-        takeUntil(this.destroy$),
-        tap((params) => {
-          this.items = []; // reset items
+    // Convert route params subscription to effect
+    effect(
+      () => {
+        this.route.params.subscribe((params) => {
           const projectSlug = params['projectSlug'];
-          this.items.push({
-            icon: 'home',
-            title: 'Tests',
-            link: `./`,
-            subTitle: projectSlug,
-          });
+          this.items.set([
+            {
+              icon: 'home',
+              title: 'Tests',
+              link: `./`,
+              subTitle: projectSlug
+            },
+            {
+              icon: 'build',
+              title: 'TagBuild',
+              link: `tag-build`
+            },
+            {
+              icon: 'folder_shared',
+              title: 'Reports',
+              link: `buckets`
+            },
+            {
+              icon: 'settings',
+              title: 'Settings',
+              link: `settings`
+            }
+          ]);
+        });
+      },
+      {
+        allowSignalWrites: true
+      }
+    );
 
-          this.items.push({
-            icon: 'build',
-            title: 'TagBuild',
-            link: `tag-build`,
-          });
-
-          this.items.push({
-            icon: 'folder_shared',
-            title: 'Reports',
-            link: `buckets`,
-          });
-
-          this.items.push({
-            icon: 'settings',
-            title: 'Settings',
-            link: `settings`,
-          });
-        })
-      )
-      .subscribe();
-
-    this.snav.openedChange
-      .pipe(
-        takeUntil(this.destroy$),
-        tap((isOpen) => {
+    // Convert snav subscription to effect
+    effect(
+      () => {
+        this.snav().openedChange.subscribe((isOpen) => {
           if (isOpen === false) {
-            this.isOpen = false;
+            this.isOpen.set(false);
           }
-        }),
-        catchError((error) => {
-          console.error('Error: ', error);
-          return error;
-        })
-      )
-      .subscribe();
+        });
+      },
+      {
+        allowSignalWrites: true
+      }
+    );
   }
 
   onMenuClick() {
@@ -130,23 +159,17 @@ export class SideNavListComponent implements OnInit, OnDestroy {
   private updateParentTitle() {
     const currentUrl = this.router.url;
     if (currentUrl.includes('/settings')) {
-      this.selectedParent = 'Settings';
+      this.selectedParent.set('Settings');
     } else if (currentUrl.includes('/other-parent')) {
-      this.selectedParent = 'OtherParent';
+      this.selectedParent.set('OtherParent');
     } else {
-      this.selectedParent = null;
+      this.selectedParent.set(null);
     }
   }
 
   onSubItemClick(parentTitle: string) {
-    this.selectedParent = parentTitle;
-    console.log('selectedParent: ', this.selectedParent);
-    this.isOpen = false;
+    this.selectedParent.set(parentTitle);
+    this.isOpen.set(false);
     this.onMenuClick();
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
