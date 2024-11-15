@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { ProjectInfo } from '@utils';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,7 +13,7 @@ import {
   tap,
   catchError,
   Observable,
-  forkJoin,
+  forkJoin
 } from 'rxjs';
 import { ProjectIoService } from '../../../../shared/services/api/project-io/project-io.service';
 import { MetadataSourceService } from '../../../../shared/services/metadata-source/metadata-source.service';
@@ -26,26 +26,26 @@ import { MetadataSourceService } from '../../../../shared/services/metadata-sour
     <div class="project-item">
       <mat-card>
         <mat-card-header>
-          <mat-card-title>{{ project.projectName }}</mat-card-title>
-          <mat-card-subtitle>{{ project.projectSlug }}</mat-card-subtitle>
+          <mat-card-title>{{ project().projectName }}</mat-card-title>
+          <mat-card-subtitle>{{ project().projectSlug }}</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          @if (project.projectDescription) {
-          <p>{{ project.projectDescription }}</p>
-          <br />
-          <br />
+          @if (project().projectDescription) {
+            <p>{{ project().projectDescription }}</p>
+            <br />
+            <br />
           } @else {
-          <br />
-          <br />
-          <br />
-          <br />
+            <br />
+            <br />
+            <br />
+            <br />
           }
         </mat-card-content>
         <mat-card-actions>
           <button
             mat-button
-            [routerLink]="['/projects', project.projectSlug]"
-            [state]="{ slug: project.projectSlug }"
+            [routerLink]="['/projects', project().projectSlug]"
+            [state]="{ slug: project().projectSlug }"
             color="primary"
           >
             View
@@ -61,10 +61,10 @@ import { MetadataSourceService } from '../../../../shared/services/metadata-sour
     .mat-mdc-card {
       height: 200px;
     }
-  `,
+  `
 })
 export class ProjectItemComponent {
-  @Input() project!: ProjectInfo;
+  project = input.required<ProjectInfo>();
   constructor(
     private dialog: MatDialog,
     private projectIoService: ProjectIoService,
@@ -76,8 +76,8 @@ export class ProjectItemComponent {
       data: {
         title: 'Delete project',
         message: 'Are you sure you want to delete this project?',
-        action: 'Delete',
-      },
+        action: 'Delete'
+      }
     });
 
     dialogRef
@@ -89,8 +89,8 @@ export class ProjectItemComponent {
             return forkJoin({
               metadataUpdate: this.updateMetadata(),
               projectDeletion: this.projectIoService.deleteProject(
-                this.project.projectSlug
-              ),
+                this.project().projectSlug
+              )
             });
           }
           return EMPTY;
@@ -108,7 +108,7 @@ export class ProjectItemComponent {
       take(1),
       map((data) =>
         data.filter(
-          (project) => project.projectSlug !== this.project.projectSlug
+          (project) => project.projectSlug !== this.project().projectSlug
         )
       ),
       tap((filteredData) => {

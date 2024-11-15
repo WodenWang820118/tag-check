@@ -1,146 +1,102 @@
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import {
   AfterViewInit,
-  ChangeDetectorRef,
+  ChangeDetectionStrategy,
   Component,
-  OnDestroy,
-  ViewChild,
+  computed,
+  model,
+  signal,
+  viewChild
 } from '@angular/core';
-import { AsyncPipe, NgIf } from '@angular/common';
 import { ProjectItemComponent } from '../project-item/project-item.component';
 import { MatCardModule } from '@angular/material/card';
-import { BehaviorSubject, Observable, Subject, takeUntil, tap } from 'rxjs';
-import { ProjectInfo } from '@utils';
-import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
-import { MatTableDataSource } from '@angular/material/table';
 import { MetadataSourceService } from '../../../../shared/services/metadata-source/metadata-source.service';
 import { MetadataSourceFacadeService } from '../../../../shared/services/facade/metadata-source-facade.service';
+import { map } from 'rxjs';
+import { MatTableDataSource } from '@angular/material/table';
+import { ProjectInfo } from '@utils';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-project-list',
   standalone: true,
   imports: [
-    AsyncPipe,
-    NgIf,
     ProjectItemComponent,
     MatCardModule,
     RouterLink,
-    PaginatorComponent,
+    MatPaginator,
+    AsyncPipe
   ],
-  template: `
-    <div class="project-list">
-      <div class="project-list__items">
-        <div class="project-list__new" [routerLink]="['init-project']">
-          <mat-card class="project-list__items__item">
-            <mat-card-header>
-              <mat-card-title>New Project</mat-card-title>
-              <mat-card-subtitle>Create a new automation</mat-card-subtitle>
-            </mat-card-header>
-            <mat-card-content>
-              <p></p>
-            </mat-card-content>
-          </mat-card>
-        </div>
-        @for (item of displayedProjects | async; track item.projectSlug) {
-        <app-project-item
-          class="project-list__items__item"
-          [project]="item"
-        ></app-project-item>
-        }
-      </div>
-      <app-paginator
-        #paginatorComponent
-        [pageSize]="5"
-        [length]="dataSourceLength$ | async"
-        [hidden]="hidePaginator"
-      ></app-paginator>
-    </div>
-  `,
-  styles: `
-    .mat-mdc-card {
-      height: 200px;
-      min-width: 400px;
-      max-width: 500px;
-    }
-
-    .project-list {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      &__new {
-        cursor: pointer;
-      }
-
-      &__items {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        margin-bottom: 10rem;
-        gap: 4rem;
-
-        &__item {
-          flex: 1 0 50%;
-        }
-      }
-    }
-  `,
+  templateUrl: './project-list.component.html',
+  styleUrls: ['./project-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProjectListComponent implements AfterViewInit, OnDestroy {
-  dataSource: MatTableDataSource<ProjectInfo> =
-    new MatTableDataSource<ProjectInfo>();
+export class ProjectListComponent implements AfterViewInit {
+  // Table
+  dataSource = new MatTableDataSource<ProjectInfo>();
 
-  @ViewChild('paginatorComponent', { static: true })
-  paginatorComponent!: PaginatorComponent;
-  displayedProjects!: Observable<ProjectInfo[]>;
-  dataSourceLength = new BehaviorSubject<number>(0);
-  dataSourceLength$ = this.dataSourceLength.asObservable();
-  hidePaginator = true;
-  destroy$ = new Subject<void>();
+  // Paginator reference
+  paginator = viewChild.required<MatPaginator>('paginator');
+
+  private filterSignal = toSignal(
+    this.metadataSourceFacadeService.observeTableFilter(),
+    { initialValue: '' }
+  );
+
+  private projectsSignal = signal<ProjectInfo[]>([]);
+
+  // Computed signals for derived state
+  dataSourceLength = computed(() => this.projectsSignal().length);
+  hidePaginator = computed(() => this.dataSourceLength() <= 5);
+
+  // Computed signal for filtered and paginated projects
+  displayedProjects = computed(() => {
+    const projects = this.projectsSignal();
+    const filter = this.filterSignal().toLowerCase();
+
+    // Update the data source with the current projects
+    this.dataSource.data = projects;
+
+    // Apply filter
+    if (filter) {
+      this.dataSource.filter = filter;
+    }
+
+    // Return the paginated and filtered data
+    return this.dataSource.connect();
+  });
+
+  pageIndex = model<number>(0);
 
   constructor(
     private metadataSourceService: MetadataSourceService,
-    private metadataSourceFacadeService: MetadataSourceFacadeService,
-    private cdr: ChangeDetectorRef
-  ) {}
-
-  ngAfterViewInit(): void {
-    this.metadataSourceService
-      .getData()
-      .pipe(
-        takeUntil(this.destroy$),
-        tap((projects) => {
-          if (!projects) return;
-          this.dataSource = new MatTableDataSource<ProjectInfo>(projects);
-          this.displayedProjects = this.dataSource.connect();
-          this.dataSourceLength.next(projects.length);
-          this.dataSource.paginator = this.paginatorComponent.paginator;
-          this.cdr.detectChanges();
-        })
-      )
-      .subscribe();
-
-    this.metadataSourceFacadeService
-      .observeTableFilter()
-      .pipe(
-        takeUntil(this.destroy$),
-        tap((filter) => {
-          this.dataSource.filter = filter;
-        })
-      )
-      .subscribe();
-
-    this.dataSourceLength$
-      .pipe(
-        takeUntil(this.destroy$),
-        tap((length) => {
-          this.hidePaginator = length <= 5;
-        })
-      )
-      .subscribe();
+    private metadataSourceFacadeService: MetadataSourceFacadeService
+  ) {
+    // Set up custom filter predicate
+    this.dataSource.filterPredicate = (data: ProjectInfo, filter: string) => {
+      return Object.values(data).some((value) =>
+        String(value).toLowerCase().includes(filter)
+      );
+    };
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  ngAfterViewInit() {
+    // Set the paginator
+    this.dataSource.paginator = this.paginator();
+
+    // Initialize the data
+    this.metadataSourceService
+      .getData()
+      .pipe(map((projects) => projects || []))
+      .subscribe((projects) => {
+        this.projectsSignal.set(projects);
+        this.dataSource.data = projects;
+      });
+  }
+
+  handlePageEvent(e: PageEvent) {
+    this.pageIndex.set(e.pageIndex);
   }
 }

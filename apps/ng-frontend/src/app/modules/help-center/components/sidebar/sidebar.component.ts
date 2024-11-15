@@ -1,5 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Component } from '@angular/core';
 import { MatTreeNestedDataSource, MatTreeModule } from '@angular/material/tree';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,13 +12,11 @@ import { TreeNodeService } from '../../../../shared/services/tree-node/tree-node
   standalone: true,
   imports: [MatTreeModule, MatIconModule, MatButtonModule],
   templateUrl: 'sidebar.component.html',
-  styleUrls: ['sidebar.component.scss'],
+  styleUrls: ['sidebar.component.scss']
 })
-export class SideBarComponent implements OnDestroy {
-  destroy$ = new Subject<void>();
+export class SideBarComponent {
   treeControl = new NestedTreeControl<TopicNode>((node) => node.children);
   dataSource = new MatTreeNestedDataSource<TopicNode>();
-  selectedNodeContent: string = '';
 
   constructor(public treeNodeService: TreeNodeService) {
     this.dataSource.data = TREE_DATA;
@@ -27,9 +24,4 @@ export class SideBarComponent implements OnDestroy {
 
   hasChild = (_: number, node: TopicNode) =>
     !!node.children && node.children.length > 0;
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
 }

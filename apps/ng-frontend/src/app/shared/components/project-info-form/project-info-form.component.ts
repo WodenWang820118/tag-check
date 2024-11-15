@@ -1,7 +1,7 @@
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, DestroyRef, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { catchError, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
+import { catchError, switchMap, take, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
 import { Setting } from '@utils';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-project-info-form',
@@ -20,32 +21,30 @@ import { Setting } from '@utils';
     MatFormFieldModule,
     MatInputModule,
     ReactiveFormsModule,
-    FormsModule,
+    FormsModule
   ],
   templateUrl: './project-info-form.component.html',
-  styleUrls: ['./project-info-form.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  styleUrls: ['./project-info-form.component.scss']
 })
-export class ProjectInfoFormComponent implements OnInit, OnDestroy {
-  destroy$ = new Subject<void>();
-
+export class ProjectInfoFormComponent implements OnInit {
   projectInfoForm = this.fb.group({
     projectName: [''],
     measurementId: [''],
     projectDescription: [''],
-    googleSpreadsheetLink: [''],
+    googleSpreadsheetLink: ['']
   });
 
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {
     this.route.parent?.params
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this.destroyRef),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           return this.settingsService.getProjectSettings(projectSlug);
@@ -57,7 +56,7 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
               projectName: settings.projectName,
               measurementId: settings.measurementId,
               projectDescription: settings.projectDescription,
-              googleSpreadsheetLink: settings.googleSpreadsheetLink,
+              googleSpreadsheetLink: settings.googleSpreadsheetLink
             });
           }
         }),
@@ -84,7 +83,7 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
             projectDescription: this.projectInfoForm.value
               .projectDescription as string,
             googleSpreadsheetLink: this.projectInfoForm.value
-              .googleSpreadsheetLink as string,
+              .googleSpreadsheetLink as string
           };
           return this.settingsService.updateSettings(
             projectSlug,
@@ -98,10 +97,5 @@ export class ProjectInfoFormComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

@@ -1,37 +1,59 @@
-import { Observable } from 'rxjs';
-import { AfterViewInit, Component, Input } from '@angular/core';
+import { Component, computed, input, signal } from '@angular/core';
 import { CarouselItem } from '@utils';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { BlobToUrlPipe } from '../../pipes/blob-to-url-pipe';
 
 @Component({
   selector: 'app-carousel',
   standalone: true,
-  imports: [NgIf, AsyncPipe],
-  templateUrl: `./carousel.component.html`,
-  styleUrls: ['./carousel.component.scss'],
+  templateUrl: './carousel.component.html',
+  styleUrls: ['./carousel.component.scss']
 })
-export class CarouselComponent implements AfterViewInit {
-  @Input() items$!: Observable<CarouselItem[]>;
-  currentIndex = 0;
+export class CarouselComponent {
+  imageBlob = input<Blob | null>(null);
+  videoBlob = input<Blob | null>(null);
 
-  ngAfterViewInit(): void {
-    console.log('CarouselComponent initialized');
-    console.log('Items:', this.items$);
-  }
+  readonly items = computed(() => {
+    const items: CarouselItem[] = [];
+    const imgBlob = this.imageBlob();
+    const vidBlob = this.videoBlob();
+
+    if (imgBlob !== null) {
+      items.push({
+        type: 'image',
+        url: new BlobToUrlPipe().transform(imgBlob) || ''
+      });
+    }
+
+    if (vidBlob !== null) {
+      items.push({
+        type: 'video',
+        url: new BlobToUrlPipe().transform(vidBlob) || ''
+      });
+    }
+
+    return items;
+  });
+
+  // Convert currentIndex to signal
+  currentIndex = signal(0);
 
   next(): void {
-    this.items$.subscribe((items) => {
-      this.currentIndex = (this.currentIndex + 1) % items.length;
-    });
+    const items = this.items();
+    if (!items?.length) return;
+
+    this.currentIndex.update((current) => (current + 1) % items.length);
   }
 
   previous(): void {
-    this.items$.subscribe((items) => {
-      this.currentIndex = (this.currentIndex - 1 + items.length) % items.length;
-    });
+    const items = this.items();
+    if (!items?.length) return;
+
+    this.currentIndex.update(
+      (current) => (current - 1 + items.length) % items.length
+    );
   }
 
   isActive(index: number): boolean {
-    return this.currentIndex === index;
+    return this.currentIndex() === index;
   }
 }

@@ -1,0 +1,26 @@
+.mat-mdc-card {
+  height: 200px;
+  min-width: 400px;
+  max-width: 500px;
+}
+
+.project-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  &__new {
+    cursor: pointer;
+  }
+
+  &__items {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 10rem;
+    gap: 4rem;
+
+    &__item {
+      flex: 1 0 50%;
+    }
+  }
+}

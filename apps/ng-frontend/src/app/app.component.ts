@@ -7,13 +7,13 @@ import { ToolbarComponent } from './shared/components/toolbar/toolbar.component'
   imports: [RouterOutlet, ToolbarComponent],
   selector: 'app-root',
   template: `
-    @defer(on immediate) {
-    <app-toolbar></app-toolbar>
+    @defer (on immediate) {
+      <app-toolbar [settings]="undefined" [projects]="undefined"></app-toolbar>
     } @loading {
-    <div style="height: 60px"></div>
+      <div style="height: 60px"></div>
     }
     <router-outlet></router-outlet>
-  `,
+  `
 })
 export class AppComponent {
   title = 'Tag Check';

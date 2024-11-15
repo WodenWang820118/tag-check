@@ -1,11 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, catchError, of, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError,
+  of,
+  Subject,
+  tap,
+  throwError
+} from 'rxjs';
 import { ProjectSpec, Spec } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class SpecService {
   currentSpec: Subject<Spec> = new BehaviorSubject({} as Spec);
@@ -45,16 +52,18 @@ export class SpecService {
   }
 
   addSpec(projectSlug: string, content: Spec) {
-    console.log('Content', content);
-    console.log('Project Slug', projectSlug);
     return this.http
-      .post(`${environment.specApiUrl}/${projectSlug}`, {
-        ...content,
+      .post<{
+        projectSlug: string;
+        specs: Spec[];
+      }>(`${environment.specApiUrl}/${projectSlug}`, {
+        ...content
       })
       .pipe(
         catchError((error) => {
-          console.error(error);
-          return of(null);
+          console.error('Error adding spec:', error);
+          // Throw the error instead of returning an empty result
+          return throwError(() => error);
         })
       );
   }
@@ -62,7 +71,7 @@ export class SpecService {
   updateSpec(projectSlug: string, eventName: string, content: Spec) {
     return this.http
       .put(`${environment.specApiUrl}/${projectSlug}/${eventName}`, {
-        ...content,
+        ...content
       })
       .pipe(
         catchError((error) => {

@@ -1,18 +1,11 @@
 import { MatCardModule } from '@angular/material/card';
-import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation, DestroyRef } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import {
-  catchError,
-  EMPTY,
-  map,
-  shareReplay,
-  Subject,
-  takeUntil,
-  tap,
-} from 'rxjs';
+import { catchError, EMPTY, map, shareReplay, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
 import { HttpEventType } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-project-import',
@@ -30,14 +23,13 @@ import { HttpEventType } from '@angular/common/http';
     </mat-card>
   `,
   styles: [``],
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None
 })
-export class ProjectImportComponent implements OnDestroy {
-  destroy$ = new Subject<void>();
-
+export class ProjectImportComponent {
   constructor(
     private projectIoService: ProjectIoService,
-    private router: Router
+    private router: Router,
+    private destroyRef: DestroyRef
   ) {}
 
   importProject(event: Event) {
@@ -49,6 +41,7 @@ export class ProjectImportComponent implements OnDestroy {
 
     progress$
       .pipe(
+        takeUntilDestroyed(this.destroyRef),
         map((event) => {
           if (event.type === HttpEventType.UploadProgress) {
             const progress = Math.round(
@@ -71,14 +64,8 @@ export class ProjectImportComponent implements OnDestroy {
         catchError((err) => {
           console.error(err);
           return EMPTY;
-        }),
-        takeUntil(this.destroy$)
+        })
       )
       .subscribe();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

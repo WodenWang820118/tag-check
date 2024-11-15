@@ -1,4 +1,10 @@
-import { Component, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  viewChild,
+  signal,
+  computed
+} from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { forkJoin, Subject, switchMap, takeUntil, tap } from 'rxjs';
@@ -11,6 +17,7 @@ import { FileReport } from '@utils';
 import { MatInputModule } from '@angular/material/input';
 import { FileTableDataSourceFacadeService } from '../../../../shared/services/facade/file-table-data-source-facade.service';
 import { MatSortModule } from '@angular/material/sort';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-file-table',
@@ -23,65 +30,93 @@ import { MatSortModule } from '@angular/material/sort';
     DatePipe,
     MatInputModule,
     NgClass,
-    MatSortModule,
+    MatSortModule
   ],
   providers: [FileTableDataSourceFacadeService],
   templateUrl: './file-table.component.html',
-  styleUrls: ['./file-table.component.scss'],
+  styleUrls: ['./file-table.component.scss']
 })
-export class FileTableComponent implements AfterViewInit, OnDestroy {
-  selection = new SelectionModel<FileReport>(true, []);
-  dataSource!: MatTableDataSource<FileReport>;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+export class FileTableComponent implements OnDestroy {
+  paginator = viewChild.required<MatPaginator>(MatPaginator);
+  sort = viewChild.required<MatSort>(MatSort);
   columns: string[] = [
     'select',
     'name',
     'dataLayerState',
     'requestState',
-    'lastModified',
+    'lastModified'
   ];
+  private readonly dataSignal = signal<FileReport[]>([]);
+  private readonly filterSignal = signal<string>('');
+  private readonly selectionSignal = signal<FileReport[]>([]);
+
+  // Computed signals for derived state
+  protected readonly filteredData = computed(() => {
+    const data = this.dataSignal();
+    const filter = this.filterSignal();
+
+    if (!data || !filter) return data;
+
+    return data.filter((item) =>
+      // Your filtering logic here
+      JSON.stringify(item).toLowerCase().includes(filter.toLowerCase())
+    );
+  });
+
+  // MatTableDataSource wrapper
+  protected readonly dataSource = computed(() => {
+    const data = this.filteredData();
+    if (!data) return new MatTableDataSource([] as FileReport[]);
+
+    const ds = new MatTableDataSource(data);
+    ds.paginator = this.paginator();
+    ds.sort = this.sort();
+    return ds;
+  });
+
+  // Selection handling
+  protected readonly selection = computed(() => {
+    return new SelectionModel<FileReport>(true, this.selectionSignal());
+  });
+
   destroy$ = new Subject<void>();
 
   constructor(
     private fileTableDataSourceFacadeService: FileTableDataSourceFacadeService
-  ) {}
-
-  ngAfterViewInit(): void {
+  ) {
+    // TODO: using effect will cause the following error:
+    // 1. block element regarding aria-hidden and inert
+    // 2. will need two steps to close the dialog
     this.fileTableDataSourceFacadeService
       .observeDataSource()
       .pipe(
         takeUntil(this.destroy$),
         tap((data) => {
-          if (data) {
-            this.dataSource = new MatTableDataSource(data);
-            this.dataSource.paginator = this.paginator;
-            this.dataSource.sort = this.sort;
-          }
+          this.dataSignal.set(data || []);
         }),
         switchMap(() => {
           return forkJoin({
             deleteResult:
               this.fileTableDataSourceFacadeService.observeTableDelete(
-                this.selection,
-                this.dataSource
+                this.selection(),
+                this.dataSource()
               ),
             downloadResult:
               this.fileTableDataSourceFacadeService.observeDownload(
-                this.selection,
-                this.dataSource
+                this.selection(),
+                this.dataSource()
               ),
             observeTableFilter: this.fileTableDataSourceFacadeService
               .observeTableFilter()
               .pipe(
                 takeUntil(this.destroy$),
                 tap((filter) => {
-                  if (!this.dataSource) {
+                  if (!this.dataSource()) {
                     return;
                   }
-                  this.dataSource.filter = filter;
+                  this.dataSource().filter = filter;
                 })
-              ),
+              )
           });
         })
       )
@@ -89,13 +124,13 @@ export class FileTableComponent implements AfterViewInit, OnDestroy {
   }
 
   sortData(sort: Sort) {
-    const data = this.dataSource.data.slice();
+    const data = this.dataSource().data.slice();
     if (!sort.active || sort.direction === '') {
-      this.dataSource.data = data;
+      this.dataSource().data = data;
       return;
     }
 
-    this.dataSource.data = data.sort((a, b) => {
+    this.dataSource().data = data.sort((a, b) => {
       const isAsc = sort.direction === 'asc';
       switch (sort.active) {
         case 'name':
@@ -125,33 +160,31 @@ export class FileTableComponent implements AfterViewInit, OnDestroy {
   }
 
   selectSingleRow(row: FileReport) {
-    this.selection.toggle(row);
-    this.selection.select(row);
+    this.selection().toggle(row);
+    this.selection().select(row);
   }
 
   getSelectedRows(): FileReport[] {
-    return this.selection.selected;
+    console.log('Selected rows:', this.selection().selected);
+    return this.selection().selected;
   }
 
   /** Whether the number of selected elements matches the total number of rows. */
   isAllSelected() {
-    if (!this.dataSource) {
-      return;
-    }
-
-    const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.data.length;
+    const numSelected = this.selection().selected.length;
+    const numRows = this.dataSource().data.length;
     return numSelected === numRows;
   }
 
   /** Selects all rows if they are not all selected; otherwise clear selection. */
   toggleAllRows() {
     if (this.isAllSelected()) {
-      this.selection.clear();
+      this.selection().clear();
       return;
     }
 
-    this.selection.select(...this.dataSource.data);
+    this.selection().select(...this.dataSource().data);
+    console.log('Selected rows:', this.selection().selected);
   }
 
   /** The label for the checkbox on the passed row */
@@ -159,10 +192,7 @@ export class FileTableComponent implements AfterViewInit, OnDestroy {
     if (!row) {
       return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
     }
-
-    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${
-      row.position + 1
-    }`;
+    return `${this.selection().isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
   }
 
   ngOnDestroy() {

@@ -1,8 +1,7 @@
-import { Component, OnDestroy } from '@angular/core';
-import { NgIf } from '@angular/common';
+import { UploadSpecService } from './../../../../shared/services/upload-spec/upload-spec.service';
+import { Component, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { RouterLink } from '@angular/router';
-import { catchError, Subject, takeUntil } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -12,7 +11,7 @@ import { ProjectDataSourceService } from '../../../../shared/services/project-da
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   MatButtonToggleChange,
-  MatButtonToggleModule,
+  MatButtonToggleModule
 } from '@angular/material/button-toggle';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 
@@ -20,8 +19,6 @@ import { TestRunningFacadeService } from '../../../../shared/services/facade/tes
   selector: 'app-report-table-toolbar',
   standalone: true,
   imports: [
-    NgIf,
-    RouterLink,
     MatIconModule,
     MatToolbarModule,
     MatButtonModule,
@@ -30,17 +27,19 @@ import { TestRunningFacadeService } from '../../../../shared/services/facade/tes
     MatFormFieldModule,
     FormsModule,
     ReactiveFormsModule,
-    MatButtonToggleModule,
+    MatButtonToggleModule
   ],
   templateUrl: './report-table-toolbar.component.html',
-  styleUrls: ['./report-table-toolbar.component.scss'],
+  styleUrls: ['./report-table-toolbar.component.scss']
 })
-export class ReportTableToolbarComponent implements OnDestroy {
-  isSearchVisible = false;
-  destroy$ = new Subject<void>();
+export class ReportTableToolbarComponent {
+  // Signals
+  isSearchVisible = signal(false);
+
   constructor(
     private dataSourceService: ProjectDataSourceService,
-    private testRunningFacade: TestRunningFacadeService
+    private testRunningFacade: TestRunningFacadeService,
+    private uploadSpecService: UploadSpecService
   ) {}
 
   applyFilter(event: Event) {
@@ -59,25 +58,15 @@ export class ReportTableToolbarComponent implements OnDestroy {
   onToggleChange(event: MatButtonToggleChange) {
     console.log(event.value);
     if (event.value === 'search') {
-      this.isSearchVisible = !this.isSearchVisible;
+      this.isSearchVisible.update((prev) => !prev);
     }
   }
 
-  stopOperation() {
-    this.testRunningFacade
-      .stopOperation()
-      .pipe(
-        takeUntil(this.destroy$),
-        catchError((error) => {
-          console.error('Error stopping operation:', error);
-          throw error;
-        })
-      )
-      .subscribe();
+  async stopOperation() {
+    await firstValueFrom(this.testRunningFacade.stopOperation());
   }
 
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
+  emitAddEvent() {
+    this.uploadSpecService.startUpload();
   }
 }

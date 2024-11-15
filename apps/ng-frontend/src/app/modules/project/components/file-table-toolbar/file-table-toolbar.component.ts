@@ -1,14 +1,15 @@
 import {
   Component,
-  ViewChild,
   AfterViewInit,
-  ElementRef,
   OnDestroy,
-  ChangeDetectorRef,
+  viewChild,
+  signal,
+  effect,
+  DestroyRef
 } from '@angular/core';
 import {
   MatButtonToggleChange,
-  MatButtonToggleModule,
+  MatButtonToggleModule
 } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,7 +20,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
-import { tap, takeUntil, Subject, map, catchError, of } from 'rxjs';
+import { tap, map, catchError, of } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-file-table-toolbar',
@@ -33,30 +35,40 @@ import { tap, takeUntil, Subject, map, catchError, of } from 'rxjs';
     MatFormFieldModule,
     FormsModule,
     ReactiveFormsModule,
-    MatButtonToggleModule,
+    MatButtonToggleModule
   ],
   templateUrl: './file-table-toolbar.component.html',
-  styleUrls: ['./file-table-toolbar.component.scss'],
+  styleUrls: ['./file-table-toolbar.component.scss']
 })
 export class FileTableToolbarComponent implements AfterViewInit, OnDestroy {
-  isSearchVisible = false;
-  destroy$ = new Subject<void>();
-
-  @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
+  isSearchVisible = signal(false);
+  filterValue = signal('');
+  searchInput = viewChild<HTMLInputElement>('searchInput');
 
   constructor(
     private fileTableDataSourceService: FileTableDataSourceService,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private destroyRef: DestroyRef
+  ) {
+    // Initialize filter value from route params
+    effect(() => {
+      this.initializeFilterValue();
+    });
+
+    // Effect for filter changes
+    effect(() => {
+      const currentFilter = this.filterValue();
+      this.fileTableDataSourceService.setFilter(currentFilter);
+    });
+  }
 
   ngAfterViewInit() {
     this.initializeFilterValue()
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this.destroyRef),
         tap((value) => {
           if (value) {
-            this.showSearch();
+            this.isSearchVisible.update(() => true);
             this.setSearchInputValue(value);
             this.triggerApplyFilter();
           }
@@ -77,9 +89,8 @@ export class FileTableToolbarComponent implements AfterViewInit, OnDestroy {
   }
 
   onToggleChange(event: MatButtonToggleChange) {
-    console.log(event.value);
     if (event.value === 'search') {
-      this.isSearchVisible = !this.isSearchVisible;
+      this.isSearchVisible.update((value) => !value);
     }
   }
 
@@ -89,7 +100,7 @@ export class FileTableToolbarComponent implements AfterViewInit, OnDestroy {
 
   private initializeFilterValue() {
     return this.route.queryParams.pipe(
-      takeUntil(this.destroy$),
+      takeUntilDestroyed(this.destroyRef),
       map((params) => {
         const eventName: string = params['event'];
         if (eventName) {
@@ -106,38 +117,31 @@ export class FileTableToolbarComponent implements AfterViewInit, OnDestroy {
   }
 
   private setSearchInputValue(value: string) {
-    if (this.searchInput && this.searchInput.nativeElement) {
-      this.searchInput.nativeElement.value = value;
-      this.cdr.detectChanges(); // avoid RuntimeError: NG0100: ExpressionChangedAfterItHasBeenCheckedError
+    const input = this.searchInput();
+    if (input) {
+      input.value = value;
+      this.filterValue.set(value);
     }
   }
 
-  private showSearch() {
-    this.isSearchVisible = true;
-    this.cdr.detectChanges(); // avoid RuntimeError: NG0100: ExpressionChangedAfterItHasBeenCheckedError
-  }
-
   private triggerApplyFilter() {
-    console.log('trigger apply filter');
-    if (this.searchInput && this.searchInput.nativeElement) {
+    const input = this.searchInput();
+    if (input) {
       const event = new KeyboardEvent('keyup', {
         bubbles: true,
         cancelable: true,
-        composed: true,
+        composed: true
       });
-      this.searchInput.nativeElement.dispatchEvent(event);
+      input.dispatchEvent(event);
     }
   }
 
   private resetSearch(): void {
     this.setSearchInputValue('');
-    this.fileTableDataSourceService.setFilter('');
-    this.triggerApplyFilter();
+    this.filterValue.set('');
   }
 
   ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
     this.resetSearch();
   }
 }

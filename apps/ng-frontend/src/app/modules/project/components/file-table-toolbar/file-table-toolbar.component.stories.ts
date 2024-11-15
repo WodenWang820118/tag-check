@@ -1,12 +1,13 @@
+import { signal } from '@angular/core';
 import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { FileTableToolbarComponent } from './file-table-toolbar.component';
 
-import { expect, fn, userEvent, within } from '@storybook/test';
+import { expect, within } from '@storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -36,30 +37,30 @@ const meta: Meta<FileTableToolbarComponent> = {
         MatFormFieldModule,
         FormsModule,
         ReactiveFormsModule,
-        MatButtonToggleModule,
+        MatButtonToggleModule
       ],
-      providers: [FileTableDataSourceService],
+      providers: [FileTableDataSourceService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(PROJECT_ROUTES),
-      ],
-    }),
+        provideRouter(PROJECT_ROUTES)
+      ]
+    })
   ],
   args: {
-    isSearchVisible: false,
+    isSearchVisible: signal(false)
   },
   argTypes: {
-    isSearchVisible: { control: 'boolean' },
-  },
+    isSearchVisible: { control: 'boolean' }
+  }
 };
 export default meta;
 type Story = StoryObj<FileTableToolbarComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };
 
 export const Searching: Story = {
@@ -72,5 +73,5 @@ export const Searching: Story = {
     // Verify that the toggle exists
     expect(buttonToggle).toBeTruthy();
     buttonToggle.click();
-  },
+  }
 };
