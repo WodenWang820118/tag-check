@@ -1,5 +1,12 @@
 import { NgIf } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnDestroy,
+  OnInit,
+  signal,
+  ViewEncapsulation
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { catchError, Subject, switchMap, takeUntil, tap } from 'rxjs';
@@ -10,18 +17,18 @@ import {
   FormBuilder,
   FormGroup,
   FormsModule,
-  ReactiveFormsModule,
+  ReactiveFormsModule
 } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-browser-form',
   standalone: true,
   imports: [
-    NgIf,
     MatIconModule,
     MatButtonModule,
     MatCardModule,
@@ -29,37 +36,37 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     MatInputModule,
     ReactiveFormsModule,
     FormsModule,
-    MatCheckboxModule,
+    MatCheckboxModule
   ],
   templateUrl: `./browser-form.component.html`,
   styleUrls: ['./browser-form.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None
 })
-export class BrowserFormComponent implements OnInit, OnDestroy {
+export class BrowserFormComponent implements OnInit {
   browserSettingsForm = this.fb.group({
     headless: [false],
-    settings: this.fb.array([]),
+    settings: this.fb.array([])
   });
 
-  browserSettings: string[] = [];
-  destroy$ = new Subject<void>();
+  browserSettings = signal<string[]>([]);
 
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private destroyRef: DestroyRef
   ) {}
 
   ngOnInit() {
     this.route.parent?.params
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this.destroyRef),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           return this.settingsService.getProjectSettings(projectSlug);
         }),
         tap((project) => {
-          this.browserSettings = project.settings.browser;
+          this.browserSettings.set(project.settings.browser);
           this.browserSettingsForm.controls['headless'].setValue(
             project.settings.headless
           );
@@ -81,7 +88,7 @@ export class BrowserFormComponent implements OnInit, OnDestroy {
     return Object.keys(this.browserSettingsFormFormArray.controls).map(
       (value) => {
         return {
-          value,
+          value
         };
       }
     );
@@ -97,7 +104,7 @@ export class BrowserFormComponent implements OnInit, OnDestroy {
   }
 
   getAllBrowserSettings(): string[] {
-    return this.browserSettings;
+    return this.browserSettings();
   }
 
   addBrowserSetting() {
@@ -110,7 +117,7 @@ export class BrowserFormComponent implements OnInit, OnDestroy {
 
   createSettingFormGroup(value: string): FormGroup {
     return this.fb.group({
-      value: [value],
+      value: [value]
     });
   }
 
@@ -123,12 +130,12 @@ export class BrowserFormComponent implements OnInit, OnDestroy {
 
     this.route.parent?.params
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this.destroyRef),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           return this.settingsService.updateSettings(projectSlug, 'browser', {
             headless,
-            browser,
+            browser
           });
         }),
         catchError((error) => {
@@ -137,10 +144,5 @@ export class BrowserFormComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

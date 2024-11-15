@@ -1,16 +1,14 @@
 import {
   Component,
   ElementRef,
-  Input,
-  ViewChild,
   ChangeDetectionStrategy,
-  AfterViewInit,
-  SimpleChanges,
-  OnChanges,
+  effect,
+  input,
+  viewChild
 } from '@angular/core';
 import {
   EditorExtension,
-  EditorService,
+  EditorService
 } from '../../services/editor/editor.service';
 
 @Component({
@@ -21,35 +19,41 @@ import {
       <div id="cm-editor" #editor></div>
     </div>
   `,
-  styles: [``],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditorComponent implements OnChanges, AfterViewInit {
-  @Input() editorExtension!: EditorExtension;
-  @Input() content!: string;
-  @Input() editMode = false;
-  @ViewChild('editor') editorElement!: ElementRef<HTMLDivElement>;
-  constructor(private readonly editorService: EditorService) {}
+export class EditorComponent {
+  editorExtension = input.required<EditorExtension>();
+  content = input.required<string>();
+  editMode = input<boolean>(false);
 
-  ngAfterViewInit() {
-    // the new report view
-    if (!this.editMode) {
-      this.initializeEditor();
-    }
-  }
+  private editor = viewChild<ElementRef<HTMLDivElement>>('editor');
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['content'] && !changes['content'].firstChange) {
-      this.initializeEditor();
-    }
+  constructor(private readonly editorService: EditorService) {
+    // Use effect to handle initialization and changes
+    effect(() => {
+      const editorElement = this.editor();
+      if (editorElement && !this.editMode()) {
+        this.initializeEditor();
+      }
+    });
+
+    // Handle content changes
+    effect(() => {
+      const content = this.content();
+      const editorElement = this.editor();
+      if (editorElement && content) {
+        this.initializeEditor();
+      }
+    });
   }
 
   private initializeEditor() {
-    if (this.editorElement) {
+    const editorElement = this.editor();
+    if (editorElement) {
       this.editorService.initEditorView(
-        this.editorExtension,
-        this.editorElement,
-        this.content
+        this.editorExtension(),
+        editorElement,
+        this.content()
       );
     }
   }
