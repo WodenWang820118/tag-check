@@ -1,92 +1,60 @@
-import { AsyncPipe } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
-import {
-  catchError,
-  Observable,
-  Subject,
-  take,
-  takeUntil,
-  tap,
-  timer,
-} from 'rxjs';
-import { ProjectInfo, ProjectSetting } from '@utils';
+import { timer } from 'rxjs';
+import { ProjectSetting } from '@utils';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
 import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
-import { NewReportViewComponent } from '../../components/new-report-view/new-report-view.component';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-project-view',
   standalone: true,
   imports: [
-    AsyncPipe,
     RouterOutlet,
     MatSidenavModule,
     ToolbarComponent,
-    SideNavListComponent,
-    NewReportViewComponent,
+    SideNavListComponent
   ],
   templateUrl: './project-view.component.html',
   styleUrls: ['./project-view.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None
 })
-export class ProjectViewComponent implements OnInit, OnDestroy {
-  project$!: Observable<ProjectSetting | null>;
-  projectInfo!: ProjectInfo[];
-  destroy$ = new Subject<void>();
+export class ProjectViewComponent {
+  // State signals
+  params = toSignal(this.route.params, {
+    initialValue: { projectSlug: '' }
+  });
+
+  project = toSignal(
+    this.settingsService.getProjectSettings(this.params().projectSlug),
+    {
+      initialValue: undefined
+    }
+  );
+  projectInfo = toSignal(this.projectInfoService.getProjects(), {
+    initialValue: []
+  });
+
+  // Convert project$ observable to signal
+  readonly currentProject = toSignal<ProjectSetting | null>(
+    this.settingsService.currentProject$,
+    { initialValue: null }
+  );
 
   constructor(
     private route: ActivatedRoute,
     public projectInfoService: ProjectInfoService,
     private settingsService: SettingsService,
     private router: Router
-  ) { }
-
-  ngOnInit(): void {
-    this.route.params
-      .pipe(
-        take(1),
-        tap((params) => {
-          // console.log(params);
-          this.project$ = this.settingsService.switchToProject(
-            params['projectSlug']
-          );
-        }),
-        catchError((err) => {
-          console.error(err);
-          return [];
-        })
-      )
-      .subscribe();
-
-    this.projectInfoService
-      .getProjects()
-      .pipe(
-        takeUntil(this.destroy$),
-        tap((projects) => {
-          this.projectInfo = projects;
-        }),
-        catchError((error) => {
-          console.error('Error: ', error);
-          return [];
-        })
-      )
-      .subscribe();
-  }
+  ) {}
 
   onChangeProject(projectSlug: string, snav: MatSidenav) {
-    this.project$ = this.settingsService.switchToProject(projectSlug);
     this.router.navigate(['/projects', projectSlug]);
     timer(700).subscribe(() => {
       snav.open();
     });
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

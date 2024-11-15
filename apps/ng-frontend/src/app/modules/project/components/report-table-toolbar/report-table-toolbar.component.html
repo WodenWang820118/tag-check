@@ -31,7 +31,7 @@
     <mat-icon>cancel</mat-icon>
   </button>
   <div class="spacer"></div>
-  @if (!isSearchVisible) {
+  @if (!isSearchVisible()) {
     <mat-button-toggle-group
       #group="matButtonToggleGroup"
       (change)="onToggleChange($event)"
@@ -41,7 +41,7 @@
       </mat-button-toggle>
     </mat-button-toggle-group>
   }
-  @if (isSearchVisible) {
+  @if (isSearchVisible()) {
     <mat-form-field appearance="outline" class="filter" color="primary">
       <mat-label>Filter</mat-label>
       <input

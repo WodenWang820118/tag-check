@@ -2,7 +2,7 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { MainContentComponent } from './main-content.component';
 
@@ -15,20 +15,20 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { MarkdownModule, MarkdownService } from 'ngx-markdown';
 import { TreeNodeService } from '../../../../shared/services/tree-node/tree-node.service';
 import { HELP_CENTER_ROUTES } from '../../routes';
-import { importProvidersFrom } from '@angular/core';
+import { importProvidersFrom, signal } from '@angular/core';
 import { of } from 'rxjs';
 
 const mockActivatedRoute = {
-  params: of({ name: 'test' }),
+  params: of({ name: 'test' })
 };
 
 const mockMarkdownService = {
   getSource: (fileName: string) =>
-    of('# Test Content\n## Section 1\nContent here'),
+    of('# Test Content\n## Section 1\nContent here')
 };
 
 const mockViewportScroller = {
-  scrollToAnchor: () => {},
+  scrollToAnchor: () => {}
 };
 
 const meta: Meta<MainContentComponent> = {
@@ -42,48 +42,48 @@ const meta: Meta<MainContentComponent> = {
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: MarkdownService, useValue: mockMarkdownService },
         { provide: ViewportScroller, useValue: mockViewportScroller },
-        { provide: TreeNodeService },
-      ],
+        { provide: TreeNodeService }
+      ]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
         provideRouter(HELP_CENTER_ROUTES),
-        importProvidersFrom(MarkdownModule.forRoot()),
-      ],
-    }),
+        importProvidersFrom(MarkdownModule.forRoot())
+      ]
+    })
   ],
   args: {
-    currentNodeId: 1,
-    fileName: 'assets/test.md',
-    toc: [
+    currentNodeId: signal(1),
+    fileName: signal('assets/test.md'),
+    toc: signal([
       { id: 'test-content', text: 'Test Content' },
-      { id: 'section-1', text: 'Section 1' },
-    ],
+      { id: 'section-1', text: 'Section 1' }
+    ])
   },
   argTypes: {
     currentNodeId: { control: 'number' },
     fileName: { control: 'text' },
-    toc: { control: 'object' },
-  },
+    toc: { control: 'object' }
+  }
 };
 export default meta;
 type Story = StoryObj<MainContentComponent>;
 
 export const Layout: Story = {
   args: {
-    currentNodeId: 1,
-    fileName: 'assets/test.md',
-    toc: [
+    currentNodeId: signal(1),
+    fileName: signal('assets/test.md'),
+    toc: signal([
       { id: 'test-content', text: 'Test Content' },
-      { id: 'section-1', text: 'Section 1' },
-    ],
+      { id: 'section-1', text: 'Section 1' }
+    ])
   },
   argTypes: {
     currentNodeId: { control: 'number' },
     fileName: { control: 'text' },
-    toc: { control: 'object' },
+    toc: { control: 'object' }
   },
 
   play: async ({ canvasElement }) => {
@@ -99,5 +99,5 @@ export const Layout: Story = {
     await new Promise((resolve) => setTimeout(resolve, 100)); // Small delay for update
     expect(nextBtn).toBeTruthy();
     expect(canvas.getByText(/Previous/)).toBeTruthy();
-  },
+  }
 };

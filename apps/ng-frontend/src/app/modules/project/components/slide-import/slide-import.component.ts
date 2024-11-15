@@ -1,80 +1,66 @@
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import {
-  AfterViewInit,
-  Component,
-  effect,
-  OnDestroy,
-  viewChild,
-} from '@angular/core';
+import { Component, effect, viewChild, signal, computed } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
-import { Subject } from 'rxjs';
 import { ViewEncapsulation } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ProgressSpinnerComponent, CustomMatTableComponent } from '@ui';
+import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { AsyncPipe } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
-import { NewReportViewComponent } from '../new-report-view/new-report-view.component';
-import { MatButtonModule } from '@angular/material/button';
 import { UploadCardComponent } from '../upload-card/upload-card.component';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-slide-import-sidenav',
   standalone: true,
   imports: [
-    AsyncPipe,
     MatSidenavModule,
     MatProgressSpinnerModule,
     MatCardModule,
-    MatTableModule,
-    FormsModule,
     ReactiveFormsModule,
     MatIconModule,
-    ProgressSpinnerComponent,
     MatButtonModule,
-    CustomMatTableComponent,
-    NewReportViewComponent,
-    UploadCardComponent,
+    UploadCardComponent
   ],
-  templateUrl: `./slide-import.component.html`,
+  templateUrl: './slide-import.component.html',
   styleUrls: ['./slide-import.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None
 })
-export class SlideImportComponent implements AfterViewInit, OnDestroy {
+export class SlideImportComponent {
+  // Convert viewChild to signal-based query
   importedSidenav = viewChild.required<MatSidenav>('importSidenav');
-  private destroy$ = new Subject<void>();
 
-  loading = true;
+  // Convert loading to signal
+  loading = signal(true);
+
+  // Computed signal for sidenav state
+  sidenavOpen = computed(() => {
+    if (this.uploadSpecService.isUploaded()) {
+      return false;
+    }
+    return this.uploadSpecService.isOpenImportSidenav();
+  });
+
   constructor(public uploadSpecService: UploadSpecService) {
+    // Effect for handling sidenav state changes
     effect(() => {
-      if (this.uploadSpecService.isUploaded()) {
-        this.importedSidenav().toggle(false);
-      } else if (this.uploadSpecService.isOpenImportSidenav()) {
-        this.importedSidenav().toggle(true);
+      const shouldOpen = this.sidenavOpen();
+      this.importedSidenav()?.toggle(shouldOpen);
+
+      // Update body overflow based on sidenav state
+      if (this.importedSidenav()) {
+        document.body.style.overflow = this.importedSidenav().opened
+          ? 'hidden'
+          : 'auto';
       }
     });
   }
 
-  ngAfterViewInit() {
-    this.importedSidenav().toggle(false);
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  // UI event handlers
+  // UI event handler
   toggleSidenav() {
-    this.adjustBodyOverflow();
-  }
-
-  private adjustBodyOverflow() {
-    this.importedSidenav().toggle();
-    document.body.style.overflow = this.importedSidenav().opened
-      ? 'hidden'
-      : 'auto';
+    const sidenav = this.importedSidenav();
+    if (sidenav) {
+      sidenav.toggle();
+      document.body.style.overflow = sidenav.opened ? 'hidden' : 'auto';
+    }
   }
 }

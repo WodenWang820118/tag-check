@@ -62,3 +62,6 @@ storybook-static
 # Generated Docusaurus files
 .docusaurus/
 .cache-loader/
+
+# Coverge files
+coverage/

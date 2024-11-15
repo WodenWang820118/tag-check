@@ -1,8 +1,7 @@
-import { NgIf } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, DestroyRef, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { catchError, EMPTY, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { catchError, EMPTY, switchMap, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
@@ -10,7 +9,7 @@ import {
   FormBuilder,
   FormGroup,
   FormsModule,
-  ReactiveFormsModule,
+  ReactiveFormsModule
 } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -18,12 +17,12 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { CookieData, LocalStorageData, Setting } from '@utils';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-application-form',
   standalone: true,
   imports: [
-    NgIf,
     MatIconModule,
     MatButtonModule,
     MatCardModule,
@@ -32,44 +31,42 @@ import { ActivatedRoute } from '@angular/router';
     MatTooltipModule,
     ReactiveFormsModule,
     FormsModule,
-    MatBadgeModule,
+    MatBadgeModule
   ],
   templateUrl: './application-form.component.html',
-  styleUrls: ['./application-form.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  styleUrls: ['./application-form.component.scss']
 })
-export class ApplicationFormComponent implements OnInit, OnDestroy {
-  destroy$ = new Subject<void>();
-
+export class ApplicationFormComponent implements OnInit {
   applicationForm = this.fb.group({
     localStorage: this.fb.array([] as LocalStorageData[]),
-    cookie: this.fb.array([] as CookieData[]),
+    cookie: this.fb.array([] as CookieData[])
   });
 
-  localStorageSettings: LocalStorageData[] = [];
-  cookieSettings: CookieData[] = [];
-
-  isEmptyLocalStorage = false;
-  isEmptyCookie = false;
+  localStorageSettings = signal<LocalStorageData[]>([]);
+  cookieSettings = signal<CookieData[]>([]);
+  isEmptyLocalStorage = signal(false);
+  isEmptyCookie = signal(false);
 
   constructor(
     private fb: FormBuilder,
     private settingsService: SettingsService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {
     this.route.parent?.params
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this.destroyRef),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           return this.settingsService.getProjectSettings(projectSlug);
         }),
         tap((project) => {
-          this.localStorageSettings =
-            project.settings.application.localStorage.data;
-          this.cookieSettings = project.settings.application.cookie.data;
+          this.localStorageSettings.set(
+            project.settings.application.localStorage.data
+          );
+          this.cookieSettings.set(project.settings.application.cookie.data);
           this.loadInitialData();
         }),
         catchError((err) => {
@@ -91,7 +88,7 @@ export class ApplicationFormComponent implements OnInit, OnDestroy {
     return Object.keys(this.localStorageFormArray.controls).map((key) => {
       return {
         key: key,
-        value: this.localStorageFormArray.controls[key as any].value,
+        value: this.localStorageFormArray.controls[key as any].value
       };
     });
   }
@@ -104,17 +101,19 @@ export class ApplicationFormComponent implements OnInit, OnDestroy {
     return Object.keys(this.cookieFormArray.controls).map((key) => {
       return {
         key: key,
-        value: this.cookieFormArray.controls[key as any].value,
+        value: this.cookieFormArray.controls[key as any].value
       };
     });
   }
 
   observeLocalStorageFormArray() {
     return this.localStorageFormArray.valueChanges.pipe(
-      takeUntil(this.destroy$),
+      takeUntilDestroyed(this.destroyRef),
       tap((value) => {
-        this.isEmptyLocalStorage = value.some(
-          (setting: LocalStorageData) => !setting.key || !setting.value
+        this.isEmptyLocalStorage.set(
+          value.some(
+            (setting: LocalStorageData) => !setting.key || !setting.value
+          )
         );
       }),
       catchError((error) => {
@@ -126,10 +125,10 @@ export class ApplicationFormComponent implements OnInit, OnDestroy {
 
   observeCookieFormArray() {
     return this.cookieFormArray.valueChanges.pipe(
-      takeUntil(this.destroy$),
+      takeUntilDestroyed(this.destroyRef),
       tap((value) => {
-        this.isEmptyCookie = value.some(
-          (setting: CookieData) => !setting.key || !setting.value
+        this.isEmptyCookie.set(
+          value.some((setting: CookieData) => !setting.key || !setting.value)
         );
       }),
       catchError((error) => {
@@ -142,7 +141,7 @@ export class ApplicationFormComponent implements OnInit, OnDestroy {
   onFormSubmit() {
     this.route.parent?.params
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this.destroyRef),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           if (projectSlug) {
@@ -151,16 +150,16 @@ export class ApplicationFormComponent implements OnInit, OnDestroy {
                 localStorage: {
                   data: this.localStorageFormArrayValue.map((item) => ({
                     key: item.value.key,
-                    value: item.value.value,
-                  })),
+                    value: item.value.value
+                  }))
                 },
                 cookie: {
                   data: this.cookieFormArrayValue.map((item) => ({
                     key: item.value.key,
-                    value: item.value.value,
-                  })),
-                },
-              },
+                    value: item.value.value
+                  }))
+                }
+              }
             };
 
             return this.settingsService.updateSettings(
@@ -206,16 +205,16 @@ export class ApplicationFormComponent implements OnInit, OnDestroy {
   createSettingFormGroup(key: string, value: string): FormGroup {
     return this.fb.group({
       key: [key],
-      value: [value],
+      value: [value]
     });
   }
 
   getAllSettingsFromCookies(): CookieData[] {
-    return this.cookieSettings;
+    return this.cookieSettings();
   }
 
   getAllSettingsFromLocalStorage(): LocalStorageData[] {
-    return this.localStorageSettings;
+    return this.localStorageSettings();
   }
 
   removeLocalStorageSetting(index: number) {
@@ -224,10 +223,5 @@ export class ApplicationFormComponent implements OnInit, OnDestroy {
 
   removeCookieSetting(index: number) {
     this.cookieFormArray.removeAt(index);
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

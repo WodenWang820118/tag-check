@@ -1,16 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, ViewEncapsulation, OnInit } from '@angular/core';
+import {
+  Component,
+  ViewEncapsulation,
+  OnInit,
+  DestroyRef
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { catchError, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
+import { catchError, switchMap, take, tap } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import {
   FormBuilder,
   FormControl,
   FormsModule,
-  ReactiveFormsModule,
+  ReactiveFormsModule
 } from '@angular/forms';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
@@ -18,6 +23,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Setting } from '@utils';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-gtm-form',
   standalone: true,
@@ -32,31 +38,31 @@ import { Setting } from '@utils';
     ReactiveFormsModule,
     MatCardModule,
     MatCheckboxModule,
-    MatTooltipModule,
+    MatTooltipModule
   ],
   templateUrl: './gtm-form.component.html',
   styleUrls: ['./gtm-form.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None
 })
-export class GtmFormComponent implements OnInit, OnDestroy {
-  destroy$ = new Subject<void>();
+export class GtmFormComponent implements OnInit {
   previewModeForm = this.fb.group({
     url: [''],
     tagManagerUrl: [''],
     isAccompanyMode: [false],
-    isRequestCheck: new FormControl({ value: false, disabled: true }),
+    isRequestCheck: new FormControl({ value: false, disabled: true })
   });
 
   constructor(
     private settingsService: SettingsService,
     private route: ActivatedRoute,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private destroyRef: DestroyRef
   ) {}
 
   ngOnInit() {
     this.route.parent?.params
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this.destroyRef),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           return this.settingsService.getProjectSettings(projectSlug);
@@ -72,7 +78,7 @@ export class GtmFormComponent implements OnInit, OnDestroy {
             url: previewModeUrl,
             isAccompanyMode: isAccompanyMode,
             isRequestCheck: qaRequestCheck,
-            tagManagerUrl: tagManagerUrl,
+            tagManagerUrl: tagManagerUrl
           });
 
           if (measumentId) {
@@ -112,8 +118,8 @@ export class GtmFormComponent implements OnInit, OnDestroy {
                 .isAccompanyMode as boolean,
               isRequestCheck: this.previewModeForm.value
                 .isRequestCheck as boolean,
-              tagManagerUrl: this.previewModeForm.value.tagManagerUrl as string,
-            },
+              tagManagerUrl: this.previewModeForm.value.tagManagerUrl as string
+            }
           };
           return this.settingsService.updateSettings(
             projectSlug,
@@ -127,10 +133,5 @@ export class GtmFormComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe();
-  }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

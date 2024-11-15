@@ -1,15 +1,6 @@
-import { Component, OnDestroy, ViewEncapsulation } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import {
-  catchError,
-  EMPTY,
-  map,
-  mergeMap,
-  Subject,
-  switchMap,
-  take,
-  tap,
-} from 'rxjs';
+import { catchError, EMPTY, map, mergeMap, switchMap, take, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
@@ -19,14 +10,12 @@ import { MatDialog } from '@angular/material/dialog';
 @Component({
   selector: 'app-project-io-form',
   standalone: true,
-  imports: [MatButtonModule, MatCardModule, InformationDialogComponent],
+  imports: [MatButtonModule, MatCardModule],
   templateUrl: './project-io-form.component.html',
   styleUrls: ['./project-io-form.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None
 })
-export class ProjectIoFormComponent implements OnDestroy {
-  destroy$ = new Subject<void>();
-
+export class ProjectIoFormComponent {
   constructor(
     private route: ActivatedRoute,
     private projectIoService: ProjectIoService,
@@ -62,8 +51,8 @@ export class ProjectIoFormComponent implements OnDestroy {
             data: {
               title: 'Delete project',
               message: 'Are you sure you want to delete this project?',
-              action: 'Delete',
-            },
+              action: 'Delete'
+            }
           });
 
           return dialogRef.afterClosed().pipe(
@@ -89,10 +78,5 @@ export class ProjectIoFormComponent implements OnDestroy {
         })
       )
       .subscribe();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

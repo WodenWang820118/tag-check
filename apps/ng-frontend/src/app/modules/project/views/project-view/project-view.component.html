@@ -1,8 +1,9 @@
 <div class="project-view">
+  <!-- receive the $event from the toolbar and switch the project -->
   <app-toolbar
-    [settings]="(project$ | async)?.settings"
+    [settings]="project()?.settings"
     [snav]="snav"
-    [projects]="this.projectInfo"
+    [projects]="projectInfo()"
     (changeProject)="snav.close(); onChangeProject($event, snav)"
   ></app-toolbar>
 
