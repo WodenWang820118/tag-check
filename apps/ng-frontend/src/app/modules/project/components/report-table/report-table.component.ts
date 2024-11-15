@@ -1,13 +1,20 @@
 import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
-import { AfterViewInit, Component, OnDestroy, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  DestroyRef,
+  signal,
+  viewChild
+} from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { EMPTY, Subject, switchMap, take, takeUntil, tap } from 'rxjs';
+import { EMPTY, switchMap, take, tap, firstValueFrom } from 'rxjs';
 import { IReportDetails } from '@utils';
-import { ActivatedRoute, Params, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -16,6 +23,7 @@ import { DataSourceFacadeService } from '../../../../shared/services/facade/data
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { ProjectFacadeService } from '../../../../shared/services/facade/project-facade.service';
 import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-chart.component';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-report-table',
@@ -25,6 +33,7 @@ import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-ch
     DatePipe,
     NgClass,
     MatTableModule,
+    MatSortModule,
     MatIconModule,
     MatButtonModule,
     RouterLink,
@@ -32,55 +41,90 @@ import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-ch
     MatInputModule,
     MatCheckboxModule,
     MatBadgeModule,
-    ProgressPieChartComponent,
+    ProgressPieChartComponent
   ],
   providers: [
     ProjectFacadeService,
     DataSourceFacadeService,
-    TestRunningFacadeService,
+    TestRunningFacadeService
   ],
   templateUrl: './report-table.component.html',
-  styleUrls: ['./report-table.component.scss'],
+  styleUrls: ['./report-table.component.scss']
 })
-export class ReportTableComponent implements AfterViewInit, OnDestroy {
-  columnsToDisplay = [
+export class ReportTableComponent implements AfterViewInit {
+  // State signals
+  readonly columnsToDisplay = signal([
     'testName',
     'eventName',
     'passed',
     'requestPassed',
-    'completedTime',
-  ];
-  columnsToDisplayWithExpand = ['select', ...this.columnsToDisplay, 'actions'];
-  expandedElement: Report | null = null;
-  testDataSource!: MatTableDataSource<IReportDetails>;
-  selection = new SelectionModel<IReportDetails>(true, []);
-  preventNavigationEvents: string[] = [];
+    'completedTime'
+  ]);
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  readonly columnsToDisplayWithExpand = signal([
+    'select',
+    ...this.columnsToDisplay(),
+    'actions'
+  ]);
 
-  destroy$ = new Subject<void>();
+  readonly expandedElement = signal<Report | null>(null);
+  readonly testDataSource = signal<MatTableDataSource<IReportDetails>>(
+    new MatTableDataSource()
+  );
+  readonly selection = signal(new SelectionModel<IReportDetails>(true, []));
+  readonly preventNavigationEvents = signal<string[]>([]);
+  private params = toSignal(this.route.params, {
+    initialValue: {
+      projectSlug: ''
+    }
+  });
+
+  // View children
+  private readonly paginator = viewChild<MatPaginator>(MatPaginator);
+  private readonly sort = viewChild<MatSort>(MatSort);
+
+  // Computed values
+  readonly isAllSelected = computed(() => {
+    const dataSource = this.testDataSource();
+    if (!dataSource) return false;
+
+    const numSelected = this.selection().selected.length;
+    const numRows = dataSource.data.length;
+    return numSelected === numRows;
+  });
 
   constructor(
     public projectFacadeService: ProjectFacadeService,
     public dataSourceFacadeService: DataSourceFacadeService,
     public testRunningFacadeService: TestRunningFacadeService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private destroyRef: DestroyRef
   ) {}
 
   ngAfterViewInit() {
-    this.observeProject().pipe(takeUntil(this.destroy$)).subscribe();
+    const paginator = this.paginator();
+    const sort = this.sort();
+    if (this.params().projectSlug && paginator && sort) {
+      this.setupProjectObservation(paginator, sort);
+    }
+  }
 
-    this.observeProjectRecordingStatus()
-      .pipe(takeUntil(this.destroy$))
+  private async setupProjectObservation(
+    paginator: MatPaginator,
+    sort: MatSort
+  ) {
+    this.observeProject(paginator, sort)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
+
+    await this.observeProjectRecordingStatus();
 
     this.projectFacadeService
       .observeNavigationEvents()
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this.destroyRef),
         tap((preventNavigationEvents) => {
-          this.preventNavigationEvents = preventNavigationEvents;
+          this.preventNavigationEvents.set(preventNavigationEvents);
         })
       )
       .subscribe();
@@ -88,103 +132,77 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
     this.dataSourceFacadeService
       .observeTableFilter()
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this.destroyRef),
         tap((filter) => {
-          this.testDataSource.filter = filter;
+          this.testDataSource().filter = filter;
         })
       )
       .subscribe();
 
     this.dataSourceFacadeService
-      .observePreventNavigationSelected(this.selection)
+      .observePreventNavigationSelected(this.selection())
       .pipe(
-        takeUntil(this.destroy$),
+        takeUntilDestroyed(this.destroyRef),
         tap((projectSetting) => {
           if (!projectSetting) return;
-          this.preventNavigationEvents =
-            projectSetting.settings.preventNavigationEvents;
+          this.preventNavigationEvents.set(
+            projectSetting.settings.preventNavigationEvents
+          );
         })
       )
       .subscribe();
   }
 
-  observeProjectRecordingStatus() {
-    return this.route.params.pipe(
-      takeUntil(this.destroy$),
-      switchMap((params: Params) =>
-        this.projectFacadeService.observeProjectRecordingStatus(
-          params['projectSlug']
-        )
+  async observeProjectRecordingStatus() {
+    await firstValueFrom(
+      this.projectFacadeService.observeProjectRecordingStatus(
+        this.params().projectSlug
       )
     );
   }
 
-  observeProject() {
-    return this.dataSourceFacadeService
-      .observeProject(this.paginator, this.sort)
-      .pipe(
-        takeUntil(this.destroy$),
-        switchMap(
-          (
-            dataSource: MatTableDataSource<IReportDetails, MatPaginator> | null
-          ) => {
-            if (dataSource) {
-              this.testDataSource = dataSource;
-              return this.dataSourceFacadeService.observeDeleteSelected(
-                this.selection,
-                this.testDataSource
-              );
-            }
-            return EMPTY;
+  observeProject(paginator: MatPaginator, sort: MatSort) {
+    return this.dataSourceFacadeService.observeProject(paginator, sort).pipe(
+      switchMap(
+        (dataSource: MatTableDataSource<IReportDetails, MatPaginator>) => {
+          if (dataSource) {
+            this.testDataSource.set(dataSource);
+            return this.dataSourceFacadeService.observeDeleteSelected(
+              this.selection(),
+              this.testDataSource()
+            );
           }
-        )
-      );
+          return EMPTY;
+        }
+      )
+    );
   }
 
   runTest(eventId: string) {
-    this.route.params
-      .pipe(
-        take(1),
-        switchMap((params: Params) => {
-          return this.testRunningFacadeService.runTest(
-            eventId,
-            params['projectSlug'],
-            this.testDataSource
-          );
-        })
-      )
+    this.testRunningFacadeService
+      .runTest(eventId, this.params().projectSlug, this.testDataSource())
+      .pipe(take(1))
       .subscribe((updatedData) => {
         if (updatedData) {
-          this.testDataSource.data = [...updatedData.data];
+          this.testDataSource().data = [...updatedData.data];
         }
       });
   }
 
   selectSingleRow(row: IReportDetails) {
-    this.selection.toggle(row);
-    this.selection.select(row);
-  }
-
-  /** Whether the number of selected elements matches the total number of rows. */
-  isAllSelected() {
-    if (!this.testDataSource) {
-      return;
-    }
-
-    const numSelected = this.selection.selected.length;
-    const numRows = this.testDataSource.data.length;
-    return numSelected === numRows;
+    this.selection().toggle(row);
+    this.selection().select(row);
   }
 
   /** Selects all rows if they are not all selected; otherwise clear selection. */
   toggleAllRows() {
     if (this.isAllSelected()) {
-      this.selection.clear();
+      this.selection().clear();
       return;
     }
 
-    this.selection.select(...this.testDataSource.data);
-    console.log('selected', this.selection.selected);
+    this.selection().select(...this.testDataSource().data);
+    console.log('selected', this.selection().selected);
   }
 
   /** The label for the checkbox on the passed row */
@@ -192,14 +210,8 @@ export class ReportTableComponent implements AfterViewInit, OnDestroy {
     if (!row) {
       return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
     }
-    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${
+    return `${this.selection().isSelected(row) ? 'deselect' : 'select'} row ${
       row.position + 1
     }`;
-  }
-
-  ngOnDestroy() {
-    console.log('destroying report-table');
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }
