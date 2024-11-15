@@ -18,7 +18,7 @@ export class ProjectSettingService {
 
     return {
       projectSlug,
-      settings: content,
+      settings: content
     };
   }
 
@@ -26,9 +26,8 @@ export class ProjectSettingService {
     projectSlug: string,
     updateFn: (currentSettings: Setting) => Setting
   ) {
-    const filePath = await this.filePathService.getProjectSettingFilePath(
-      projectSlug
-    );
+    const filePath =
+      await this.filePathService.getProjectSettingFilePath(projectSlug);
     const currentSettings: Setting = this.fileService.readJsonFile(filePath);
     const updatedSettings = updateFn(currentSettings);
     this.fileService.writeJsonFile(filePath, updatedSettings);
@@ -70,8 +69,8 @@ export class ProjectSettingService {
           currentSettings.authentication.username,
         password:
           settings.authentication?.password ||
-          currentSettings.authentication.password,
-      },
+          currentSettings.authentication.password
+      }
     }));
   }
 
@@ -109,7 +108,7 @@ export class ProjectSettingService {
 
       return {
         ...currentSettings,
-        preventNavigationEvents: newSettings,
+        preventNavigationEvents: newSettings
       };
     });
   }
@@ -117,14 +116,14 @@ export class ProjectSettingService {
   async updateGtmSettings(projectSlug: string, settings: Partial<Setting>) {
     return this.updateSettings(projectSlug, (currentSettings) => ({
       ...currentSettings,
-      ...settings,
+      ...settings
     }));
   }
 
   async updateGeneralSettings(projectSlug: string, settings: Partial<Setting>) {
     return this.updateSettings(projectSlug, (currentSettings) => ({
       ...currentSettings,
-      ...settings,
+      ...settings
     }));
   }
 
@@ -137,7 +136,7 @@ export class ProjectSettingService {
     return this.updateSettings(projectSlug, (currentSettings) => ({
       ...currentSettings,
       headless: Boolean(settingBox.headless),
-      browser: settingBox.browser || [],
+      browser: settingBox.browser || []
     }));
   }
 
@@ -145,31 +144,45 @@ export class ProjectSettingService {
     projectSlug: string,
     settings: Partial<Setting>
   ) {
-    const localStorageData = settings?.application?.localStorage.data.map(
+    // Helper function for safe parsing
+    const safeJsonParse = (value: string) => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return JSON.parse(value);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e) {
+        return value; // Return original value if parsing fails
+      }
+    };
+
+    // Safely parse localStorage data
+    const localStorageData = settings.application?.localStorage.data.map(
       (item: LocalStorageData) => ({
         key: item.key,
-        value: JSON.parse(item.value),
+        value: safeJsonParse(item.value)
       })
     );
-    const cookieData = settings?.application?.cookie.data.map(
+
+    // Safely parse cookie data
+    const cookieData = settings.application?.cookie.data.map(
       (item: CookieData) => ({
         key: item.key,
-        value: JSON.parse(item.value),
+        value: safeJsonParse(item.value)
       })
     );
+
     return this.updateSettings(projectSlug, (currentSettings) => ({
       ...currentSettings,
       application: {
         localStorage: { data: localStorageData as LocalStorageData[] },
-        cookie: { data: cookieData as CookieData[] },
-      },
+        cookie: { data: cookieData as CookieData[] }
+      }
     }));
   }
 
   async createProjectSettings(projectSlug: string, settings: Setting) {
-    const filePath = await this.filePathService.getProjectSettingFilePath(
-      projectSlug
-    );
+    const filePath =
+      await this.filePathService.getProjectSettingFilePath(projectSlug);
     this.fileService.writeJsonFile(filePath, settings);
     return settings;
   }
