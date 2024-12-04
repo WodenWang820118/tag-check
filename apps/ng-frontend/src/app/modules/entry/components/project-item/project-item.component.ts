@@ -60,6 +60,7 @@ import { MetadataSourceService } from '../../../../shared/services/metadata-sour
   styles: `
     .mat-mdc-card {
       height: 200px;
+      min-width: 300px;
     }
   `
 })

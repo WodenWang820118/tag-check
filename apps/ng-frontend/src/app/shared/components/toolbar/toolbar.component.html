@@ -31,18 +31,29 @@
     <span class="spacer"></span>
     @if (isHomeView()) {
       @if (!isSearchVisible()) {
-        <mat-button-toggle-group
-          #group="matButtonToggleGroup"
-          (change)="onToggleChange($event)"
+        <button
+          mat-icon-button
+          (click)="toggleSearch()"
+          style="cursor: pointer"
         >
-          <mat-button-toggle
-            class="custom-mat-button-toggle"
-            value="search"
-            aria-label="search project"
-          >
-            <mat-icon>search</mat-icon>
-          </mat-button-toggle>
-        </mat-button-toggle-group>
+          <mat-icon>search</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          [routerLink]="['/init-project']"
+          matTooltip="New Project"
+          style="cursor: pointer"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          [routerLink]="['/topics']"
+          matTooltip="Help Center"
+          style="cursor: pointer"
+        >
+          <mat-icon>help_outline</mat-icon>
+        </button>
       }
       @if (isSearchVisible()) {
         <div class="filter-container">
@@ -66,12 +77,5 @@
         </div>
       }
     }
-    <button mat-icon-button [routerLink]="['/topics']" style="cursor: pointer">
-      <mat-icon>help_outline</mat-icon>
-    </button>
   </mat-toolbar-row>
 </mat-toolbar>
-
-<mat-menu #globalSetting="matMenu" xPosition="before">
-  <button mat-menu-item [routerLink]="['/global-settings']">Settings</button>
-</mat-menu>

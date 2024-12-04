@@ -14,6 +14,18 @@
   border: none !important;
 }
 
+.mat-button-toggle-group {
+  border: none;
+}
+
+.mat-button-toggle {
+  border: none;
+}
+
+.mat-button-toggle-group .mat-button-toggle + .mat-button-toggle {
+  border-left: none;
+}
+
 .filter {
   flex-direction: row !important;
   background-color: white;
