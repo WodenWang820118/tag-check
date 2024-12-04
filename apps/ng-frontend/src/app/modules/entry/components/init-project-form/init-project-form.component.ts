@@ -1,12 +1,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { NgIf } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import {
   ReactiveFormsModule,
   FormsModule,
   FormGroup,
   FormBuilder,
-  Validators,
+  Validators
 } from '@angular/forms';
 
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -22,7 +21,7 @@ import {
   switchMap,
   take,
   takeUntil,
-  tap,
+  tap
 } from 'rxjs';
 import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -32,18 +31,16 @@ import { InstantErrorStateMatcher } from './helper';
   selector: 'app-init-project-form',
   standalone: true,
   imports: [
-    NgIf,
     MatCardModule,
     ReactiveFormsModule,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    RouterLink,
-    ErrorDialogComponent,
+    RouterLink
   ],
   templateUrl: `./init-project-form.component.html`,
-  styles: ``,
+  styles: ``
 })
 export class InitProjectFormComponent implements OnInit, OnDestroy {
   projectForm: FormGroup;
@@ -66,13 +63,13 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
           Validators.required,
           this.validProjectNameMatcher.allowedCharactersValidator(
             this.allowedSymbolsPattern
-          ),
-        ],
+          )
+        ]
       ],
       projectSlug: [''],
       measurementId: [''],
       projectDescription: [''],
-      googleSpreadsheetLink: [''],
+      googleSpreadsheetLink: ['']
     });
   }
 
@@ -117,8 +114,8 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
     if (this.projectForm.invalid) {
       this.dialog.open(ErrorDialogComponent, {
         data: {
-          message: 'Please fill in the required fields.',
-        },
+          message: 'Please fill in the required fields.'
+        }
       });
       return;
     }
@@ -131,8 +128,8 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
           if (!rootProjectPath || this.isEmptyObject(rootProjectPath)) {
             this.dialog.open(ErrorDialogComponent, {
               data: {
-                message: 'Please configure the root path first.',
-              },
+                message: 'Please configure the root path first.'
+              }
             });
             return EMPTY;
           } else {
@@ -143,8 +140,8 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
           if (!rootProjectPath || this.isEmptyObject(rootProjectPath)) {
             this.dialog.open(ErrorDialogComponent, {
               data: {
-                message: 'Please configure the root path first.',
-              },
+                message: 'Please configure the root path first.'
+              }
             });
             // Throw an error or return EMPTY to stop the observable chain if configuration is not valid
             return EMPTY;
@@ -170,9 +167,9 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
         next: () => {
           this.router.navigate([
             '/projects',
-            this.projectForm.value['projectSlug'],
+            this.projectForm.value['projectSlug']
           ]);
-        },
+        }
       });
   }
 
