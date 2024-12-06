@@ -24,7 +24,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 // TODO: Tackling Event Settings Variable (ESV) implementation
-// TODO: The list of Ecommerce parameters: They are ignored when enabling the Ecommerce feature
 
 @Component({
   selector: 'lib-advanced-expansion-panel',
