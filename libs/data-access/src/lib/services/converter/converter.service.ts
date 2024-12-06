@@ -1,5 +1,5 @@
-import { Injectable, ErrorHandler } from '@angular/core';
-import { GtmConfigGenerator, Tag, Trigger, Parameter } from '@utils';
+import { Injectable } from '@angular/core';
+import { GtmConfigGenerator, Parameter } from '@utils';
 import { TagManager } from './gtm-json-manager/managers/tag-manager.service';
 import { TriggerManager } from './gtm-json-manager/managers/trigger-manager.service';
 import { ConfigManager } from './gtm-json-manager/managers/config-manager.service';
@@ -8,7 +8,7 @@ import { EventParameterFormatter } from './utils/event-parameter-formatter.servi
 import { DataLayerUtils } from './utils/data-layer-utils.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ConverterService {
   constructor(
@@ -24,7 +24,8 @@ export class ConverterService {
     googleTagName: string,
     measurementId: string,
     gtmConfigGenerator: GtmConfigGenerator,
-    includeItemScopedVariable = false
+    includeItemScopedVariable = false,
+    isSendingEcommerceData: 'true' | 'false'
   ) {
     try {
       const specs = this.parseAllSpecs(gtmConfigGenerator.specs);
@@ -46,7 +47,8 @@ export class ConverterService {
         gtmConfigGenerator.gtmId,
         tags,
         dataLayers,
-        triggers
+        triggers,
+        isSendingEcommerceData
       );
       return result;
     } catch (error) {

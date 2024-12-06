@@ -1,10 +1,10 @@
 import {
   Component,
   ElementRef,
-  Input,
-  ViewChild,
+  input,
   ChangeDetectionStrategy,
-  AfterViewInit,
+  effect,
+  viewChild
 } from '@angular/core';
 import { EditorExtension, EditorService } from '@data-access';
 
@@ -13,19 +13,27 @@ import { EditorExtension, EditorService } from '@data-access';
   standalone: true,
   styles: [``],
   template: `<div id="cm-editor" #editor></div>`,
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditorComponent implements AfterViewInit {
-  @Input() editorExtension: EditorExtension = 'inputJson';
-  @Input() content = '';
-  @ViewChild('editor') editorElement!: ElementRef<HTMLDivElement>;
-  constructor(private readonly editorService: EditorService) {}
+export class EditorComponent {
+  editorExtension = input<EditorExtension>('inputJson');
+  content = input<string>('');
+  editorElement = viewChild<ElementRef<HTMLDivElement>>('editor');
 
-  ngAfterViewInit() {
-    this.editorService.initEditorView(
-      this.editorExtension,
-      this.editorElement,
-      this.content
-    );
+  constructor(private readonly editorService: EditorService) {
+    // Use effect to handle editor initialization
+    effect(() => {
+      // Get the current value of the editor element
+      const element = this.editorElement();
+
+      // Only initialize if element exists
+      if (element) {
+        this.editorService.initEditorView(
+          this.editorExtension(),
+          element,
+          this.content()
+        );
+      }
+    });
   }
 }

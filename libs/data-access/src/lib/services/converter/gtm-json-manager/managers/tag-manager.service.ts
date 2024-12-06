@@ -7,7 +7,7 @@ import { VideoTag } from '../tags/video-tag.service';
 import { EventUtils } from '../../utils/event-utils.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class TagManager {
   constructor(
@@ -39,7 +39,7 @@ export class TagManager {
       this.tags.push({
         name: eventName,
         parameters: formattedParams,
-        triggers: [triggers.find((trigger) => trigger.name === eventName)!],
+        triggers: [triggers.find((trigger) => trigger.name === eventName)!]
       });
     }
   }
@@ -59,7 +59,8 @@ export class TagManager {
     }[],
     triggers: TriggerConfig[],
     tags: Tag[],
-    dataLayers: string[]
+    dataLayers: string[],
+    isSendingEcommerceData: 'true' | 'false'
   ): TagConfig[] {
     return [
       // config tag
@@ -77,7 +78,8 @@ export class TagManager {
           containerId,
           tag,
           dataLayers,
-          triggers
+          triggers,
+          isSendingEcommerceData
         );
       }),
       // built-in tags. Currently only video and scroll
@@ -94,10 +96,10 @@ export class TagManager {
         containerId,
         data,
         triggers
-      ),
+      )
     ].map((_data, index) => ({
       ..._data,
-      tagId: (index + 1).toString(),
+      tagId: (index + 1).toString()
     }));
   }
 }

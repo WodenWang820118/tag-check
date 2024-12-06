@@ -4,7 +4,6 @@
       <mat-expansion-panel-header [@.disabled]="true">
         <mat-panel-title> Additional Built-in Tags/variables </mat-panel-title>
       </mat-expansion-panel-header>
-      @defer (on viewport) {
       <section class="advanced__tags">
         <form [formGroup]="form">
           <div style="display: flex; flex-direction: column">
@@ -25,9 +24,6 @@
           </div>
         </form>
       </section>
-      } @placeholder {
-      <div></div>
-      }
     </mat-expansion-panel>
     <mat-expansion-panel togglePosition="before">
       <mat-expansion-panel-header [@.disabled]="true">
@@ -41,7 +37,6 @@
           ></mat-panel-description
         >
       </mat-expansion-panel-header>
-      @defer (on viewport) {
       <section class="advanced__configuration-name">
         <form
           [formGroup]="setupForm"
@@ -57,9 +52,37 @@
           </mat-form-field>
         </form>
       </section>
-      } @placeholder {
-      <div></div>
-      }
+    </mat-expansion-panel>
+    <mat-expansion-panel togglePosition="before">
+      <mat-expansion-panel-header [@.disabled]="true">
+        <mat-panel-title
+          >Ecommerce data & Event Settings Variable</mat-panel-title
+        >
+        <mat-panel-description
+          ><mat-icon
+            matSuffix
+            matTooltip="Ecommerce data source is data layer by default"
+            >help_outline</mat-icon
+          ></mat-panel-description
+        >
+      </mat-expansion-panel-header>
+      <section class="advanced__configuration-name">
+        <form
+          [formGroup]="ecAndEsvForm"
+          style="display: flex; flex-direction: column"
+        >
+          <mat-checkbox formControlName="isSendingEcommerceData"
+            >Send Ecommerce Data</mat-checkbox
+          >
+          <mat-checkbox formControlName="isEsv"
+            >Add Event Setting Variable</mat-checkbox
+          >
+          @if (this.ecAndEsvForm.controls['isEsv'].value) {
+            <!-- <lib-editor></lib-editor> -->
+            <!-- TODO: General editor rather then input and output -->
+          }
+        </form>
+      </section>
     </mat-expansion-panel>
   </mat-accordion>
 </div>

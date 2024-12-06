@@ -1,15 +1,18 @@
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
   Component,
-  ViewEncapsulation,
   AfterViewInit,
-  ViewChild,
-  OnDestroy,
   OnInit,
+  DestroyRef,
+  viewChild,
+  ViewEncapsulation,
+  effect,
+  Signal
 } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
-import { tap, combineLatest, take, Subject, takeUntil } from 'rxjs';
+import { combineLatest, take, catchError, EMPTY, filter, map } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { EditorFacadeService, SetupConstructorService } from '@data-access';
@@ -20,6 +23,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+// TODO: Tackling Event Settings Variable (ESV) implementation
+// TODO: The list of Ecommerce parameters: They are ignored when enabling the Ecommerce feature
+
 @Component({
   selector: 'lib-advanced-expansion-panel',
   standalone: true,
@@ -29,112 +35,104 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     FormsModule,
     ReactiveFormsModule,
     MatCheckboxModule,
-    ErrorDialogComponent,
     MatInputModule,
     MatIconModule,
-    MatTooltipModule,
+    MatTooltipModule
   ],
   templateUrl: './advanced-expansion-panel.component.html',
   styleUrls: ['./advanced-expansion-panel.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None
 })
-export class AdvancedExpansionPanelComponent
-  implements OnInit, AfterViewInit, OnDestroy
-{
+export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
   form: FormGroup = this.fb.group({
     includeVideoTag: [false],
     includeScrollTag: [false],
-    includeItemScopedVariables: [false],
+    includeItemScopedVariables: [false]
   });
 
   setupForm: FormGroup = this.fb.group({
     googleTagName: [''],
-    useExistingMesurementId: [''],
+    useExistingMesurementId: ['']
   });
 
-  @ViewChild(MatAccordion) accordion!: MatAccordion;
+  ecAndEsvForm: FormGroup = this.fb.group({
+    isSendingEcommerceData: [false],
+    isEsv: [false],
+    esv: ['']
+  });
 
-  private destroy$ = new Subject<void>();
+  accordion = viewChild.required<MatAccordion>(MatAccordion);
+
+  private readonly setupFormChanges$: Signal<{
+    googleTagName: string;
+    useExistingMesurementId: string;
+  }> = toSignal(this.setupForm.valueChanges);
+  private readonly ecAndEsvFormChanges$: Signal<{
+    isSendingEcommerceData: boolean;
+    isEsv: boolean;
+    esv: string;
+  }> = toSignal(this.ecAndEsvForm.valueChanges);
 
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
     private editorFacadeService: EditorFacadeService,
-    private setupConstructorService: SetupConstructorService
-  ) {}
+    private setupConstructorService: SetupConstructorService,
+    private destroyRef: DestroyRef
+  ) {
+    // Setup form subscriptions using signals
+    effect(() => {
+      const setupFormValue = this.setupFormChanges$();
+      if (setupFormValue) {
+        this.setupConstructorService.setGoogleTagName(
+          setupFormValue.googleTagName
+        );
+        this.setupConstructorService.setMeasurementId(
+          setupFormValue.useExistingMesurementId
+        );
+      }
+    });
+
+    // EC and ESV form subscriptions using signals
+    effect(() => {
+      const ecAndEsvValue = this.ecAndEsvFormChanges$();
+      if (ecAndEsvValue) {
+        this.setupConstructorService.setIsSendingEcommerceData(
+          ecAndEsvValue.isSendingEcommerceData
+        );
+      }
+    });
+  }
 
   ngOnInit() {
-    this.onFormChange();
-    this.onSetupFormChange();
+    this.initializeFormSubscriptions(); // inspect the specification JSON and update the form
   }
 
   ngAfterViewInit() {
     this.setupForm.controls['googleTagName'].setValue('GA4 Configuration Tag');
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
-  // handle forms' observables
-
-  onFormChange() {
+  private initializeFormSubscriptions(): void {
+    // Handle main form changes
     combineLatest([
       this.editorFacadeService.getInputJsonContent(),
-      this.form.valueChanges,
+      this.form.valueChanges
     ])
       .pipe(
-        takeUntil(this.destroy$),
-        tap(
-          ([editor, form]: [
-            EditorView,
-            {
-              includeVideoTag: boolean;
-              includeScrollTag: boolean;
-              includeItemScopedVariables: boolean;
-            }
-          ]) => {
-            this.handleEditorAndFormChanges(editor, form);
-          }
-        )
-      )
-      .subscribe();
-  }
-
-  onSetupFormChange() {
-    this.setupForm.controls['googleTagName'].valueChanges
-      .pipe(
-        takeUntil(this.destroy$),
-        tap((googleTagName: string) => {
-          if (googleTagName) {
-            this.setupConstructorService.setGoogleTagName(googleTagName);
-          }
+        takeUntilDestroyed(this.destroyRef),
+        filter(([editor, form]) => !!editor && !!form),
+        map(([editor, form]) => ({ editor, form })),
+        catchError((error) => {
+          this.handleError('Error processing form changes', error);
+          return EMPTY;
         })
       )
-      .subscribe();
-
-    this.setupForm.controls['useExistingMesurementId'].valueChanges
-      .pipe(
-        tap((useExistingMeasurementId) => {
-          if (useExistingMeasurementId) {
-            this.setupConstructorService.setMeasurementId(
-              useExistingMeasurementId
-            );
-          }
-        })
-      )
-      .subscribe();
+      .subscribe(({ editor, form }) => {
+        this.handleEditorAndFormChanges(editor, form);
+      });
   }
 
-  handleEditorAndFormChanges(
-    editor: EditorView,
-    form: {
-      includeVideoTag: boolean;
-      includeScrollTag: boolean;
-      includeItemScopedVariables: boolean;
-    }
-  ) {
+  private handleEditorAndFormChanges(editor: EditorView, form: any): void {
     if (!editor.state.doc.toString() || !form) return;
 
     try {
@@ -144,42 +142,44 @@ export class AdvancedExpansionPanelComponent
         json,
         form
       );
+
       this.editorFacadeService.setInputJsonContent(updatedJson);
       this.setupConstructorService.setIncludeItemScopedVariables(
         form.includeItemScopedVariables
       );
     } catch (error) {
-      this.dialog.open(ErrorDialogComponent, {
-        data: {
-          message: 'Please check your JSON syntax.',
-        },
-      });
+      this.handleError('JSON parsing error', error);
     }
   }
 
-  onPanelOpened() {
-    // when open the panel, update the form value
+  onPanelOpened(): void {
     this.editorFacadeService
       .getInputJsonContent()
       .pipe(
         take(1),
-        takeUntil(this.destroy$),
-        tap((editor: EditorView) => {
-          const jsonString = editor.state.doc.toString();
-
-          if (jsonString) {
-            const json = JSON.parse(jsonString);
-
-            this.form.patchValue(
-              {
-                includeVideoTag: this.editorFacadeService.hasVideoTag(json),
-                includeScrollTag: this.editorFacadeService.hasScrollTag(json),
-              },
-              { emitEvent: false }
-            );
-          }
+        takeUntilDestroyed(this.destroyRef),
+        filter((editor) => !!editor?.state?.doc?.toString()),
+        map((editor) => JSON.parse(editor.state.doc.toString())),
+        catchError((error) => {
+          this.handleError('Error opening panel', error);
+          return EMPTY;
         })
       )
-      .subscribe();
+      .subscribe((json) => {
+        this.form.patchValue(
+          {
+            includeVideoTag: this.editorFacadeService.hasVideoTag(json),
+            includeScrollTag: this.editorFacadeService.hasScrollTag(json)
+          },
+          { emitEvent: false }
+        );
+      });
+  }
+
+  private handleError(message: string, error: any): void {
+    console.error(message, error);
+    this.dialog.open(ErrorDialogComponent, {
+      data: { message: 'Please check your JSON syntax.' }
+    });
   }
 }

@@ -9,7 +9,7 @@ describe('EventTag', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [EventTag, ParameterUtils],
+      providers: [EventTag, ParameterUtils]
     });
 
     eventTag = TestBed.inject(EventTag);
@@ -24,7 +24,7 @@ describe('EventTag', () => {
     const tag: Tag = {
       name: 'TestTag',
       parameters: [],
-      triggers: [],
+      triggers: []
     };
     const dataLayers = [];
     const triggers: TriggerConfig[] = [];
@@ -32,25 +32,25 @@ describe('EventTag', () => {
     jest.spyOn(parameterUtils, 'createBooleanParameter').mockReturnValue({
       type: 'BOOLEAN',
       key: 'sendEcommerceData',
-      value: 'false',
+      value: 'false'
     });
 
     jest.spyOn(parameterUtils, 'createTemplateParameter').mockReturnValue({
       type: 'TEMPLATE',
       key: 'eventName',
-      value: 'TestTag',
+      value: 'TestTag'
     });
 
     jest.spyOn(parameterUtils, 'createListParameter').mockReturnValue({
       type: 'LIST',
       key: 'eventParameters',
-      list: [],
+      list: []
     });
 
     jest.spyOn(parameterUtils, 'createTagReferenceParameter').mockReturnValue({
       type: 'TAG_REFERENCE',
       key: 'measurementId',
-      value: 'GoogleTag',
+      value: 'GoogleTag'
     });
 
     jest
@@ -64,7 +64,8 @@ describe('EventTag', () => {
       containerId,
       tag,
       dataLayers,
-      triggers
+      triggers,
+      'false'
     );
 
     // Assert
@@ -77,16 +78,16 @@ describe('EventTag', () => {
         { type: 'BOOLEAN', key: 'sendEcommerceData', value: 'false' },
         { type: 'TEMPLATE', key: 'eventName', value: 'TestTag' },
         { type: 'LIST', key: 'eventParameters', list: [] },
-        { type: 'TAG_REFERENCE', key: 'measurementId', value: 'GoogleTag' },
+        { type: 'TAG_REFERENCE', key: 'measurementId', value: 'GoogleTag' }
       ],
       firingTriggerId: [],
       tagFiringOption: 'ONCE_PER_EVENT',
       monitoringMetadata: {
-        type: 'MAP',
+        type: 'MAP'
       },
       consentSettings: {
-        consentStatus: 'NOT_SET',
-      },
+        consentStatus: 'NOT_SET'
+      }
     } as TagConfig);
 
     expect(parameterUtils.createBooleanParameter).toHaveBeenCalledWith(

@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../parameter-utils.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class EventTag {
   constructor(private parameterUtils: ParameterUtils) {}
@@ -13,7 +13,8 @@ export class EventTag {
     containerId: string,
     tag: Tag,
     dataLayers: string[],
-    triggers: TriggerConfig[]
+    triggers: TriggerConfig[],
+    sendEcommerceData: 'true' | 'false'
   ): TagConfig {
     return {
       name: `GA4 event - ${tag.name}`,
@@ -23,7 +24,7 @@ export class EventTag {
       parameter: [
         this.parameterUtils.createBooleanParameter(
           'sendEcommerceData',
-          'false'
+          sendEcommerceData
         ),
         this.parameterUtils.createTemplateParameter('eventName', tag.name),
         this.parameterUtils.createListParameter(
@@ -34,18 +35,18 @@ export class EventTag {
         this.parameterUtils.createTagReferenceParameter(
           'measurementId',
           googleTagName
-        ),
+        )
       ],
       firingTriggerId: tag.triggers.map((t) =>
         this.parameterUtils.findTriggerIdByEventName(t.name, triggers)
       ),
       tagFiringOption: 'ONCE_PER_EVENT',
       monitoringMetadata: {
-        type: 'MAP',
+        type: 'MAP'
       },
       consentSettings: {
-        consentStatus: 'NOT_SET',
-      },
+        consentStatus: 'NOT_SET'
+      }
     };
   }
 }

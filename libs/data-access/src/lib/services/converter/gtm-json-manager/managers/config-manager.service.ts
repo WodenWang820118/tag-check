@@ -4,7 +4,7 @@ import {
   TagConfig,
   Trigger,
   TriggerConfig,
-  VariableConfig,
+  VariableConfig
 } from '@utils';
 import { TagManager } from './tag-manager.service';
 import { VariableManger } from './variable-manager.service';
@@ -13,7 +13,7 @@ import { TriggerManager } from './trigger-manager.service';
 import { Utils } from '../../utils/utils.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ConfigManager {
   constructor(
@@ -63,17 +63,17 @@ export class ConfigManager {
             supportVariables: true,
             supportVersions: true,
             supportZones: true,
-            supportTransformations: false,
+            supportTransformations: false
           },
-          tagIds: [gtmId],
+          tagIds: [gtmId]
         },
         builtInVariable,
         variable: variables,
         trigger: triggers,
         tag: tags,
         fingerprint: '1690374452646',
-        tagManagerUrl: `https://tagmanager.google.com/#/versions/accounts/${accountId}/containers/${containerId}/versions/0?apiLink=version`,
-      },
+        tagManagerUrl: `https://tagmanager.google.com/#/versions/accounts/${accountId}/containers/${containerId}/versions/0?apiLink=version`
+      }
     };
   }
 
@@ -90,7 +90,8 @@ export class ConfigManager {
     gtmId: string,
     tags: Tag[],
     dataLayers: string[],
-    triggers: Trigger[]
+    triggers: Trigger[],
+    isSendingEcommerceData: 'true' | 'false'
   ) {
     console.log('data: ', data);
     const _variable = this.variableManager.getVariables(
@@ -112,7 +113,8 @@ export class ConfigManager {
       data,
       _triggers,
       tags,
-      dataLayers
+      dataLayers,
+      isSendingEcommerceData
     );
     const builtInVariable = this.variableManager.getBuiltInVariables(
       accountId,
