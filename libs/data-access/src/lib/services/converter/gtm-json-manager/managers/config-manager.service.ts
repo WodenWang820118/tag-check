@@ -91,14 +91,20 @@ export class ConfigManager {
     tags: Tag[],
     dataLayers: string[],
     triggers: Trigger[],
-    isSendingEcommerceData: 'true' | 'false'
+    isSendingEcommerceData: 'true' | 'false',
+    esvContent: {
+      name: string;
+      parameters: { [x: string]: string }[];
+    }[]
   ) {
-    console.log('data: ', data);
     const _variable = this.variableManager.getVariables(
       accountId,
       containerId,
-      dataLayers
+      data,
+      dataLayers,
+      esvContent
     );
+    console.log('variables', _variable);
     const _triggers = this.triggerManager.getTriggerConfig(
       accountId,
       containerId,
@@ -114,7 +120,8 @@ export class ConfigManager {
       _triggers,
       tags,
       dataLayers,
-      isSendingEcommerceData
+      isSendingEcommerceData,
+      esvContent
     );
     const builtInVariable = this.variableManager.getBuiltInVariables(
       accountId,

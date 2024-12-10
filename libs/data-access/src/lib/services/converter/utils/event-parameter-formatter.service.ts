@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Parameter } from '@utils';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class EventParameterFormatter {
   /**
@@ -16,7 +16,8 @@ export class EventParameterFormatter {
       const value = Array.isArray(params[key]) ? key : params[key].slice(1);
       // use only key for both name and value
       // because the value has other usage in the app
-      return { key: key, value: key, type: '' };
+      // the 'v' indicates the variable is a dataLayer variable
+      return { key: key, value: key, type: 'v' };
     });
   }
 

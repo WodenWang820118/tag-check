@@ -11,6 +11,7 @@ export * from './lib/services/xlsx-facade/xlsx-facade.service';
 export * from './lib/services/xlsx-process/xlsx-process.service';
 export * from './lib/services/converter/utils/utils.service';
 export * from './lib/app.worker';
+export * from './lib/services/esv-editor/esv-editor.service';
 
 // converter services
 // managers

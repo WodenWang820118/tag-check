@@ -7,7 +7,7 @@ import { VideoVariable } from '../variables/video-variable.service';
 import { EventUtils } from '../../utils/event-utils.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class VariableManger {
   constructor(
@@ -30,28 +30,40 @@ export class VariableManger {
         ? [
             ...this.videoVariable.videoBuiltInVariable({
               accountId,
-              containerId,
-            }),
+              containerId
+            })
           ]
         : []),
       ...(this.eventUtils.isIncludeScroll(data)
         ? [
             ...this.scrollVariable.scrollBuiltInVariable({
               accountId,
-              containerId,
-            }),
+              containerId
+            })
           ]
-        : []),
+        : [])
     ];
   }
 
   getVariables(
     accountId: string,
     containerId: string,
-    dataLayers: string[]
+    data: {
+      formattedParameters: Parameter[];
+      eventName: string;
+    }[],
+    dataLayers: string[],
+    esvConent: {
+      name: string;
+      parameters: { [x: string]: string }[];
+    }[]
   ): VariableConfig[] {
-    const variables = dataLayers.map((dL, i) => {
-      return this.dataLayerVariable.createVariable(accountId, containerId, dL);
+    const dataLayerVariables = dataLayers.map((dL, i) => {
+      return this.dataLayerVariable.createDataLayerVariable(
+        accountId,
+        containerId,
+        dL
+      );
     });
 
     const regexMeasurementIdVariable =
@@ -60,11 +72,21 @@ export class VariableManger {
         containerId
       );
 
-    variables.push(regexMeasurementIdVariable);
+    const eventSettingsVariable =
+      this.dataLayerVariable.createEventSettingsVariable(
+        accountId,
+        containerId,
+        data,
+        esvConent
+      );
 
-    return variables.map((data, index) => ({
+    return [
+      ...dataLayerVariables,
+      regexMeasurementIdVariable,
+      ...eventSettingsVariable
+    ].map((data, index) => ({
       ...data,
-      variableId: (index + 1).toString(),
+      variableId: (index + 1).toString()
     }));
   }
 }

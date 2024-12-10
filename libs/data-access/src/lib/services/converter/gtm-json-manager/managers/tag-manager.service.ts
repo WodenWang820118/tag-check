@@ -60,7 +60,11 @@ export class TagManager {
     triggers: TriggerConfig[],
     tags: Tag[],
     dataLayers: string[],
-    isSendingEcommerceData: 'true' | 'false'
+    isSendingEcommerceData: 'true' | 'false',
+    esvContent: {
+      name: string;
+      parameters: { [x: string]: string }[];
+    }[]
   ): TagConfig[] {
     return [
       // config tag
@@ -79,7 +83,8 @@ export class TagManager {
           tag,
           dataLayers,
           triggers,
-          isSendingEcommerceData
+          isSendingEcommerceData,
+          esvContent
         );
       }),
       // built-in tags. Currently only video and scroll

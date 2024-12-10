@@ -25,7 +25,11 @@ export class ConverterService {
     measurementId: string,
     gtmConfigGenerator: GtmConfigGenerator,
     includeItemScopedVariable = false,
-    isSendingEcommerceData: 'true' | 'false'
+    isSendingEcommerceData: 'true' | 'false',
+    esvContent: {
+      name: string;
+      parameters: { [x: string]: string }[];
+    }[]
   ) {
     try {
       const specs = this.parseAllSpecs(gtmConfigGenerator.specs);
@@ -48,7 +52,8 @@ export class ConverterService {
         tags,
         dataLayers,
         triggers,
-        isSendingEcommerceData
+        isSendingEcommerceData,
+        esvContent
       );
       return result;
     } catch (error) {

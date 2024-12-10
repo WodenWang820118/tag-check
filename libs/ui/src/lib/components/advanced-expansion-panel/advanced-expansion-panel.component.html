@@ -78,8 +78,10 @@
             >Add Event Setting Variable</mat-checkbox
           >
           @if (this.ecAndEsvForm.controls['isEsv'].value) {
-            <!-- <lib-editor></lib-editor> -->
-            <!-- TODO: General editor rather then input and output -->
+            <lib-general-editor
+              languageExtension="json"
+              [content]="this.ecAndEsvForm.controls['esv'].value"
+            ></lib-general-editor>
           }
         </form>
       </section>

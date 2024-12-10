@@ -58,6 +58,7 @@ describe('EventTag', () => {
       .mockReturnValue('triggerId');
 
     // Act
+    // TODO: reflect the esvContent
     const result = eventTag.createTag(
       eventTagName,
       accountId,
@@ -65,7 +66,13 @@ describe('EventTag', () => {
       tag,
       dataLayers,
       triggers,
-      'false'
+      'false',
+      [
+        {
+          name: 'GoogleTag',
+          parameters: []
+        }
+      ]
     );
 
     // Assert

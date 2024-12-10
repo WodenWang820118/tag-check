@@ -29,8 +29,13 @@ export class EventTag {
     tag: Tag,
     dataLayers: string[],
     triggers: TriggerConfig[],
-    isSendEcommerceData: 'true' | 'false'
+    isSendEcommerceData: 'true' | 'false',
+    esvContent: {
+      name: string;
+      parameters: { [x: string]: string }[];
+    }[]
   ): TagConfig {
+    // TODO: Handle esvContent (Event Settings Variables, the shared variables for the event)
     const processedData = this.processEcommerceData(
       dataLayers,
       tag,

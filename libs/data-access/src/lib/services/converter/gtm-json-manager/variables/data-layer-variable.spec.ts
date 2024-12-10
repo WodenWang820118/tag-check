@@ -8,7 +8,7 @@ describe('DataLayerVariable', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [DataLayerVariable, ParameterUtils],
+      providers: [DataLayerVariable, ParameterUtils]
     });
 
     service = TestBed.inject(DataLayerVariable);
@@ -25,7 +25,7 @@ describe('DataLayerVariable', () => {
       const containerId = 'test-container';
       const dataLayerName = ' testDataLayer ';
 
-      const result = service.createVariable(
+      const result = service.createDataLayerVariable(
         accountId,
         containerId,
         dataLayerName
@@ -39,8 +39,8 @@ describe('DataLayerVariable', () => {
         parameter: [
           { type: 'INTEGER', key: 'dataLayerVersion', value: '2' },
           { type: 'BOOLEAN', key: 'setDefaultValue', value: 'false' },
-          { type: 'TEMPLATE', key: 'name', value: 'testDataLayer' },
-        ],
+          { type: 'TEMPLATE', key: 'name', value: 'testDataLayer' }
+        ]
       });
     });
 
@@ -49,7 +49,7 @@ describe('DataLayerVariable', () => {
       const containerId = 'test-container';
       const dataLayerName = '  spacedDataLayer  ';
 
-      const result = service.createVariable(
+      const result = service.createDataLayerVariable(
         accountId,
         containerId,
         dataLayerName

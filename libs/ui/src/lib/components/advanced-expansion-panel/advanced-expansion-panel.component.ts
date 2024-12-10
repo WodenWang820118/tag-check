@@ -15,15 +15,18 @@ import { FormBuilder } from '@angular/forms';
 import { combineLatest, take, catchError, EMPTY, filter, map } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
-import { EditorFacadeService, SetupConstructorService } from '@data-access';
+import {
+  EditorFacadeService,
+  EsvEditorService,
+  SetupConstructorService
+} from '@data-access';
 import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
 import { EditorView } from 'codemirror';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-
-// TODO: Tackling Event Settings Variable (ESV) implementation
+import { GeneralEditorComponent } from '../general-editor/general-editor.component';
 
 @Component({
   selector: 'lib-advanced-expansion-panel',
@@ -36,7 +39,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatCheckboxModule,
     MatInputModule,
     MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
+    GeneralEditorComponent
   ],
   templateUrl: './advanced-expansion-panel.component.html',
   styleUrls: ['./advanced-expansion-panel.component.scss'],
@@ -56,7 +60,7 @@ export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
 
   ecAndEsvForm: FormGroup = this.fb.group({
     isSendingEcommerceData: [false],
-    isEsv: [false],
+    isEsv: [true],
     esv: ['']
   });
 
@@ -77,6 +81,7 @@ export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
     private dialog: MatDialog,
     private editorFacadeService: EditorFacadeService,
     private setupConstructorService: SetupConstructorService,
+    private esvEditorService: EsvEditorService,
     private destroyRef: DestroyRef
   ) {
     // Setup form subscriptions using signals
@@ -101,10 +106,33 @@ export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
         );
       }
     });
+
+    effect(() => {
+      const ecAndEsvValue = this.ecAndEsvFormChanges$();
+      if (ecAndEsvValue) {
+        this.esvEditorService.setEsvContent(ecAndEsvValue.esv);
+      }
+    });
   }
 
   ngOnInit() {
     this.initializeFormSubscriptions(); // inspect the specification JSON and update the form
+    const esvValue = JSON.stringify(
+      [
+        {
+          name: 'Google Tag G-8HK542DQMG Event Settings',
+          parameters: [
+            {
+              page_referrer: '{{page_referrer for G-8HK542DQMG Tags | String}}'
+            }
+          ]
+        }
+      ],
+      null,
+      2
+    );
+
+    this.ecAndEsvForm.patchValue({ esv: esvValue });
   }
 
   ngAfterViewInit() {

@@ -3,6 +3,7 @@ import { Component, input, viewChild, ViewEncapsulation } from '@angular/core';
 import {
   ConverterService,
   EditorFacadeService,
+  EsvEditorService,
   SetupConstructorService,
   Utils
 } from '@data-access';
@@ -33,6 +34,7 @@ export class FunctionalCardComponent {
     public dialog: MatDialog,
     public editorFacadeService: EditorFacadeService,
     private setupConstructorService: SetupConstructorService,
+    private esvEditorService: EsvEditorService,
     private utils: Utils
   ) {
     this.dataLayer = (window as any).dataLayer || [];
@@ -47,7 +49,8 @@ export class FunctionalCardComponent {
       this.setupConstructorService.getGoogleTagName(),
       this.setupConstructorService.getMeasurementId(),
       this.setupConstructorService.getIncludeItemScopedVariables(),
-      this.setupConstructorService.getIsSendingEcommerceData()
+      this.setupConstructorService.getIsSendingEcommerceData(),
+      this.esvEditorService.getEsvContent()
     ])
       .pipe(
         take(1),
@@ -57,18 +60,28 @@ export class FunctionalCardComponent {
             googleTagName,
             measurementId,
             includeItemScopedVariables,
-            isSendingEcommerceData
+            isSendingEcommerceData,
+            esvConent
           ]) => {
             try {
               const json = this.utils.preprocessInput(
                 inputJsonEditor.state.doc.toString()
               );
+
+              console.log('esvConent', esvConent);
+
+              const esvContent = JSON.parse(esvConent) as {
+                name: string;
+                parameters: { [x: string]: string }[];
+              }[];
+
               this.performConversion(
                 json,
                 googleTagName,
                 measurementId,
                 includeItemScopedVariables,
-                isSendingEcommerceData === true ? 'true' : 'false'
+                isSendingEcommerceData === true ? 'true' : 'false',
+                esvContent
               );
             } catch (error) {
               this.openDialog(error);
@@ -103,7 +116,11 @@ export class FunctionalCardComponent {
     googleTagName: string,
     measurementId: string,
     includeItemScopedVariables: boolean,
-    isSendingEcommerceData: 'true' | 'false'
+    isSendingEcommerceData: 'true' | 'false',
+    esvConent: {
+      name: string;
+      parameters: { [x: string]: string }[];
+    }[]
   ) {
     // TODO: refactor
 
@@ -119,7 +136,8 @@ export class FunctionalCardComponent {
       measurementId,
       gtmConfigGenerator,
       includeItemScopedVariables,
-      isSendingEcommerceData
+      isSendingEcommerceData,
+      esvConent
     );
     this.postConversion(result);
   }
