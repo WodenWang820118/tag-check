@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { GtmConfigGenerator } from '@utils';
-import { Utils } from '../converter/utils/utils.service';
+import { Utils } from '../gtm-json-converter/utils/utils.service';
 /**
  * Service to hold the form data to generate the GTM configuration.
  * Specifically, data is used in the functional card component.

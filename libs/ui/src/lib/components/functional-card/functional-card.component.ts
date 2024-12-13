@@ -1,9 +1,10 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, input, viewChild, ViewEncapsulation } from '@angular/core';
 import {
-  ConverterService,
+  TransformService,
   EditorFacadeService,
   EsvEditorService,
+  SpecExtractService,
   SetupConstructorService,
   Utils
 } from '@data-access';
@@ -30,12 +31,12 @@ export class FunctionalCardComponent {
   private dataLayer: any[];
 
   constructor(
-    private converterService: ConverterService,
+    private transformService: TransformService,
     public dialog: MatDialog,
     public editorFacadeService: EditorFacadeService,
     private setupConstructorService: SetupConstructorService,
     private esvEditorService: EsvEditorService,
-    private utils: Utils
+    private specExtractService: SpecExtractService
   ) {
     this.dataLayer = (window as any).dataLayer || [];
   }
@@ -64,7 +65,7 @@ export class FunctionalCardComponent {
             esvConent
           ]) => {
             try {
-              const json = this.utils.preprocessInput(
+              const json = this.specExtractService.preprocessInput(
                 inputJsonEditor.state.doc.toString()
               );
 
@@ -131,7 +132,7 @@ export class FunctionalCardComponent {
       containerName,
       gtmId
     );
-    const result = this.converterService.convert(
+    const result = this.transformService.convert(
       googleTagName,
       measurementId,
       gtmConfigGenerator,
