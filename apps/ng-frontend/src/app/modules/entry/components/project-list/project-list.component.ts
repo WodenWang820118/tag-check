@@ -1,5 +1,4 @@
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -22,13 +21,7 @@ import { AsyncPipe } from '@angular/common';
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [
-    ProjectItemComponent,
-    MatCardModule,
-    RouterLink,
-    MatPaginator,
-    AsyncPipe
-  ],
+  imports: [ProjectItemComponent, MatCardModule, MatPaginator, AsyncPipe],
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

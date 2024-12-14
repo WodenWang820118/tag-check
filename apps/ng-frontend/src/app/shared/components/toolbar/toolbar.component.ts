@@ -13,13 +13,10 @@ import {
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenav } from '@angular/material/sidenav';
 import { MatSelectModule } from '@angular/material/select';
-import {
-  MatButtonToggleChange,
-  MatButtonToggleModule
-} from '@angular/material/button-toggle';
 import { MetadataSourceService } from '../../services/metadata-source/metadata-source.service';
 import { MatInputModule } from '@angular/material/input';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-toolbar',
@@ -32,8 +29,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
     MatMenuModule,
     MatSelectModule,
     MatFormFieldModule,
-    MatButtonToggleModule,
-    MatInputModule
+    MatInputModule,
+    MatTooltipModule
   ],
   templateUrl: './toolbar.component.html',
   styleUrl: './toolbar.component.scss'
@@ -80,10 +77,8 @@ export class ToolbarComponent {
     this.changeProject.emit(projectSlug);
   }
 
-  onToggleChange(event: MatButtonToggleChange) {
-    if (event.value === 'search') {
-      this.isSearchVisible.update((value) => !value);
-    }
+  toggleSearch() {
+    this.isSearchVisible.update((value) => !value);
   }
 
   closeSearch() {

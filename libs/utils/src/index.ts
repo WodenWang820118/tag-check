@@ -12,6 +12,7 @@ export * from './lib/interfaces/topic-node.interface';
 export * from './lib/interfaces/file-report.interface';
 export * from './lib/interfaces/carousel-item.interface';
 export * from './lib/interfaces/action.interface';
+export * from './lib/interfaces/event-settings-variable.interface';
 
 // DTOs
 export * from './lib/dtos/event-inspect-preset.dto';

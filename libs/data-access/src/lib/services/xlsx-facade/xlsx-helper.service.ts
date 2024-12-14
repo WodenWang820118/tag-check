@@ -1,12 +1,12 @@
 import { DataRow } from '@utils';
 import { Injectable } from '@angular/core';
-import { Utils } from '../converter/utils/utils.service';
+import { SpecExtractService } from '../gtm-json-converter/extract/spec-extract.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class XlsxHelper {
-  constructor(private utils: Utils) {}
+  constructor(private specExtractService: SpecExtractService) {}
   unfixedableJsonString: Set<string> = new Set();
   filterGtmSpecsFromData(data: DataRow[]) {
     return data
@@ -29,7 +29,7 @@ export class XlsxHelper {
     const inputString = Object.values(spec)[0];
     // Match all occurrences of window.dataLayer.push(...)
     const matches = [
-      ...inputString.matchAll(/window\.dataLayer\.push\(([^)]+)\)/g),
+      ...inputString.matchAll(/window\.dataLayer\.push\(([^)]+)\)/g)
     ];
 
     // Check if the match has the string 'event: "view_item_list"'
@@ -44,7 +44,7 @@ export class XlsxHelper {
     } catch (error) {
       // If direct parsing fails, attempt to fix and parse again
       try {
-        return JSON.parse(this.utils.fixJsonString(jsonString));
+        return JSON.parse(this.specExtractService.fixJsonString(jsonString));
       } catch (nestedError) {
         console.error('Failed to parse:', jsonString, nestedError);
         this.unfixedableJsonString.add(jsonString);
