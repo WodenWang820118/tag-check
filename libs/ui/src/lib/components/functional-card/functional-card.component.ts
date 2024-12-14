@@ -1,58 +1,48 @@
-import { AsyncPipe, NgStyle } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
+import { Component, input, viewChild, ViewEncapsulation } from '@angular/core';
 import {
-  Component,
-  Input,
-  OnDestroy,
-  ViewChild,
-  ViewEncapsulation,
-} from '@angular/core';
-import {
-  ConverterService,
+  TransformService,
   EditorFacadeService,
-  SetupConstructorService,
-  Utils,
+  EsvEditorService,
+  SpecExtractService,
+  SetupConstructorService
 } from '@data-access';
-import { Subject, combineLatest, take, tap } from 'rxjs';
+import { combineLatest, take, tap } from 'rxjs';
 import { containerName, gtmId, tagManagerUrl } from './test-data';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConversionSuccessDialogComponent } from '../conversion-success-dialog/conversion-success-dialog.component';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
 import { MatButtonModule } from '@angular/material/button';
+import { Spec } from '@utils';
 
 @Component({
   selector: 'lib-functional-card',
   standalone: true,
-  imports: [
-    NgStyle,
-    AsyncPipe,
-    MatButtonModule,
-    AdvancedExpansionPanelComponent,
-  ],
+  imports: [AsyncPipe, MatButtonModule, AdvancedExpansionPanelComponent],
   templateUrl: './functional-card.component.html',
   styleUrls: ['./functional-card.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None
 })
-export class FunctionalCardComponent implements OnDestroy {
-  @ViewChild('accordionContainer')
-  accordionContainer!: AdvancedExpansionPanelComponent;
-
-  @Input() color = 'primary';
-  private destroy$ = new Subject<void>();
+export class FunctionalCardComponent {
+  accordionContainer =
+    viewChild.required<AdvancedExpansionPanelComponent>('accordionContainer');
+  color = input<string>('primary');
   private dataLayer: any[];
 
   constructor(
-    private converterService: ConverterService,
+    private transformService: TransformService,
     public dialog: MatDialog,
     public editorFacadeService: EditorFacadeService,
     private setupConstructorService: SetupConstructorService,
-    private utils: Utils
+    private esvEditorService: EsvEditorService,
+    private specExtractService: SpecExtractService
   ) {
     this.dataLayer = (window as any).dataLayer || [];
   }
 
   convertCode() {
-    this.accordionContainer.accordion.closeAll();
+    this.accordionContainer().accordion().closeAll();
     this.scrollToBottom();
 
     combineLatest([
@@ -60,6 +50,8 @@ export class FunctionalCardComponent implements OnDestroy {
       this.setupConstructorService.getGoogleTagName(),
       this.setupConstructorService.getMeasurementId(),
       this.setupConstructorService.getIncludeItemScopedVariables(),
+      this.setupConstructorService.getIsSendingEcommerceData(),
+      this.esvEditorService.getEsvContent()
     ])
       .pipe(
         take(1),
@@ -69,16 +61,28 @@ export class FunctionalCardComponent implements OnDestroy {
             googleTagName,
             measurementId,
             includeItemScopedVariables,
+            isSendingEcommerceData,
+            esvConent
           ]) => {
             try {
-              const json = this.utils.preprocessInput(
+              const json = this.specExtractService.preprocessInput(
                 inputJsonEditor.state.doc.toString()
               );
+
+              console.log('json', json);
+              console.log('esvConent', esvConent);
+
+              const esvContent = JSON.parse(esvConent) as {
+                name: string;
+                parameters: { [x: string]: string }[];
+              }[];
+
               this.performConversion(
                 json,
                 googleTagName,
                 measurementId,
-                includeItemScopedVariables
+                isSendingEcommerceData === true ? 'true' : 'false',
+                esvContent
               );
             } catch (error) {
               this.openDialog(error);
@@ -100,7 +104,7 @@ export class FunctionalCardComponent implements OnDestroy {
         }
         element.scrollTo({
           top: element.scrollHeight - element.clientHeight,
-          behavior: 'smooth',
+          behavior: 'smooth'
         });
       }
     } catch (error) {
@@ -109,25 +113,30 @@ export class FunctionalCardComponent implements OnDestroy {
   }
 
   performConversion(
-    json: any,
+    json: Spec[],
     googleTagName: string,
     measurementId: string,
-    includeItemScopedVariables: boolean
+    isSendingEcommerceData: 'true' | 'false',
+    esvConent: {
+      name: string;
+      parameters: { [x: string]: string }[];
+    }[]
   ) {
-    // TODO: refactor
-
-    this.editorFacadeService.setInputJsonContent(JSON.parse(json));
+    this.editorFacadeService.setInputJsonContent(json);
+    // TODO: refactor: handle the logic directly without another function
     const gtmConfigGenerator = this.setupConstructorService.generateGtmConfig(
       json,
       tagManagerUrl,
       containerName,
       gtmId
     );
-    const result = this.converterService.convert(
+
+    const result = this.transformService.convert(
       googleTagName,
       measurementId,
       gtmConfigGenerator,
-      includeItemScopedVariables
+      isSendingEcommerceData,
+      esvConent
     );
     this.postConversion(result);
   }
@@ -137,38 +146,21 @@ export class FunctionalCardComponent implements OnDestroy {
     this.openSuccessConversionDialog(result);
 
     this.dataLayer.push({
-      event: 'btn_convert_click',
+      event: 'btn_convert_click'
     });
   }
 
   openDialog(data: any) {
     this.dialog.open(ErrorDialogComponent, {
       data: {
-        message: data.message,
-      },
+        message: data.message
+      }
     });
   }
 
   openSuccessConversionDialog(configuration: any) {
     this.dialog.open(ConversionSuccessDialogComponent, {
-      data: configuration,
+      data: configuration
     });
-  }
-
-  // get tagManagerUrl() {
-  //   return this.form.controls.tagManagerUrl.value;
-  // }
-
-  // get containerName() {
-  //   return this.form.controls.containerName.value;
-  // }
-
-  // get gtmId() {
-  //   return this.form.controls.gtmId.value;
-  // }
-
-  ngOnDestroy() {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

@@ -1,3 +1,5 @@
+import { Spec } from './spec.interface';
+
 export interface NestedObject {
   [key: string]: any;
 }
@@ -75,9 +77,14 @@ export interface GtmConfigGenerator {
   containerId: string;
   containerName: string;
   gtmId: string;
-  specs: string;
+  specs: Spec[];
 }
 
 export interface DataRow {
   [key: string]: string;
+}
+
+export interface DataLayer {
+  event: string;
+  paths: string[];
 }
