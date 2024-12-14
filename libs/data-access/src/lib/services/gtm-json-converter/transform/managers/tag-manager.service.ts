@@ -29,8 +29,7 @@ export class TagManager {
     triggers: Trigger[],
     googleTagName: string,
     measurementId: string,
-    isSendingEcommerceData: 'true' | 'false',
-    esvContent: EventSettingsVariable[]
+    isSendingEcommerceData: 'true' | 'false'
   ): TagConfig[] {
     const preprocessedTags: Tag[] = dataLayers.map((dL) => {
       return {
@@ -54,8 +53,7 @@ export class TagManager {
         containerId,
         tag,
         triggers,
-        isSendingEcommerceData,
-        esvContent
+        isSendingEcommerceData
       );
     });
 

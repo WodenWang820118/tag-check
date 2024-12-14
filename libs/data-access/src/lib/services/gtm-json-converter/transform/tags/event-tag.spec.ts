@@ -70,13 +70,7 @@ describe('EventTag', () => {
       containerId,
       tag,
       triggers,
-      'false',
-      [
-        {
-          name: 'GoogleTag',
-          parameters: []
-        }
-      ]
+      'false'
     );
 
     // Assert

@@ -37,6 +37,12 @@ export class TransformService {
         esvContent
       );
 
+      const builtInVariables = this.variableManager.getBuiltInVariables(
+        gtmConfigGenerator.accountId,
+        gtmConfigGenerator.containerId,
+        dataLayers
+      );
+
       const triggers = this.triggerManager.getTriggers(
         gtmConfigGenerator.accountId,
         gtmConfigGenerator.containerId,
@@ -50,14 +56,14 @@ export class TransformService {
         this.triggerManager.createTriggers(dataLayers),
         googleTagName,
         measurementId,
-        isSendingEcommerceData,
-        esvContent
+        isSendingEcommerceData
       );
 
       const result = this.configManager.getGTMFinalConfiguration(
         gtmConfigGenerator.accountId,
         gtmConfigGenerator.containerId,
         variables,
+        builtInVariables,
         triggers,
         tags,
         gtmConfigGenerator.containerName,

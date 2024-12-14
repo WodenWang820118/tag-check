@@ -11,6 +11,7 @@ export class ConfigManager {
     accountId: string,
     containerId: string,
     variables: VariableConfig[],
+    builtInVariables: VariableConfig[],
     triggers: TriggerConfig[],
     tags: TagConfig[],
     containerName: string,
@@ -52,6 +53,7 @@ export class ConfigManager {
           tagIds: [gtmId]
         },
         variable: variables,
+        builtInVariable: builtInVariables,
         trigger: triggers,
         tag: tags,
         fingerprint: '1690374452646',

@@ -79,17 +79,10 @@ export class VariableManager {
         esvConent
       );
 
-    const builtInVariables = this.getBuiltInVariables(
-      accountId,
-      containerId,
-      dataLayers
-    );
-
     return [
       ...uniqueVariables,
       regexMeasurementIdVariable,
-      ...eventSettingsVariable,
-      ...builtInVariables
+      ...eventSettingsVariable
     ].map((data, index) => ({
       ...data,
       variableId: (index + 1).toString()

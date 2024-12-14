@@ -24,10 +24,8 @@ export class EventTag {
     containerId: string,
     tag: Tag,
     triggers: Trigger[],
-    isSendEcommerceData: 'true' | 'false',
-    esvContent: EventSettingsVariable[]
+    isSendEcommerceData: 'true' | 'false'
   ): TagConfig {
-    // TODO: handle esvContent
     return this.buildTagConfig(
       googleTagName,
       accountId,

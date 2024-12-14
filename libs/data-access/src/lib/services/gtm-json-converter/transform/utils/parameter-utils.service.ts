@@ -7,7 +7,7 @@ import { Parameter, ParameterMap, Trigger } from '@utils';
 export class ParameterUtils {
   createListParameter(key: string, parameters: Parameter[]): Parameter {
     const list = parameters.map((param) => {
-      return this.createMapParameter(param.key, `DLV - ${param.value}`);
+      return this.createMapParameter(param.key, `{{DLV - ${param.value}}}`);
     });
     return {
       type: 'LIST',

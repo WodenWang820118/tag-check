@@ -41,9 +41,9 @@ describe('ParameterUtils', () => {
     expect(result.type).toBe('LIST');
     expect(result.key).toBe(key);
     expect(result.list.length).toBe(3);
-    expect(result.list[0].map[1].value).toBe('DLV - ecommerce.value');
-    expect(result.list[1].map[1].value).toBe('DLV - ecommerce.currency');
-    expect(result.list[2].map[1].value).toBe('DLV - ecommerce.items');
+    expect(result.list[0].map[1].value).toBe('{{DLV - ecommerce.value}}');
+    expect(result.list[1].map[1].value).toBe('{{DLV - ecommerce.currency}}');
+    expect(result.list[2].map[1].value).toBe('{{DLV - ecommerce.items}}');
   });
 
   it('should create a built-in list parameter correctly', () => {
