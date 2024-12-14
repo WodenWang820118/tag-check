@@ -1,35 +1,18 @@
 import { Injectable } from '@angular/core';
-import { Parameter, ParameterMap, TriggerConfig } from '@utils';
+import { Parameter, ParameterMap, Trigger } from '@utils';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ParameterUtils {
-  createListParameter(
-    key: string,
-    dataLayers: string[],
-    parameters: Parameter[]
-  ): Parameter {
-    console.log('dataLayers', dataLayers);
-    console.log('parameters', parameters);
-
-    // Filter out 'ecommerce' from dataLayers and create a Set for efficient lookup
-    const ecommerceDataLayers = new Set(
-      dataLayers.filter((layer) => layer.startsWith('ecommerce.'))
-    );
-
+  createListParameter(key: string, parameters: Parameter[]): Parameter {
     const list = parameters.map((param) => {
-      const ecommerceKey = `ecommerce.${param.key}`;
-      if (ecommerceDataLayers.has(ecommerceKey)) {
-        return this.createMapParameter(param.key, `{{DLV - ${ecommerceKey}}}`);
-      }
-      return this.createMapParameter(param.key, `{{DLV - ${param.value}}}`);
+      return this.createMapParameter(param.key, `DLV - ${param.value}`);
     });
-
     return {
       type: 'LIST',
       key,
-      list,
+      list
     };
   }
 
@@ -37,7 +20,7 @@ export class ParameterUtils {
     return {
       type: 'LIST',
       key,
-      list: [...mapParameters],
+      list: [...mapParameters]
     };
   }
 
@@ -46,8 +29,8 @@ export class ParameterUtils {
       type: 'MAP',
       map: [
         this.createTemplateParameter('parameter', name),
-        this.createTemplateParameter('parameterValue', value),
-      ],
+        this.createTemplateParameter('parameterValue', value)
+      ]
     };
   }
 
@@ -55,7 +38,7 @@ export class ParameterUtils {
     return {
       type: 'INTEGER',
       key,
-      value,
+      value
     };
   }
 
@@ -63,7 +46,7 @@ export class ParameterUtils {
     return {
       type: 'BOOLEAN',
       key,
-      value,
+      value
     };
   }
 
@@ -71,7 +54,7 @@ export class ParameterUtils {
     return {
       type: 'TAG_REFERENCE',
       key,
-      value,
+      value
     };
   }
 
@@ -79,17 +62,14 @@ export class ParameterUtils {
     return {
       type: 'TEMPLATE',
       key,
-      value,
+      value
     };
   }
 
-  findTriggerIdByEventName(
-    eventName: string,
-    triggers: TriggerConfig[]
-  ): string {
-    const trigger = triggers.find(
-      (t) => t.customEventFilter?.[0]?.parameter?.[1]?.value === eventName
-    );
-    return trigger?.triggerId ?? '';
+  findTriggerIdByEventName(eventName: string, triggers: Trigger[]): string[] {
+    const matchedTriggers = triggers.filter((t) => t.name === eventName);
+    // TODO: typing exercise
+    const triggerIds = matchedTriggers.map((t) => t.triggerId as any);
+    return triggerIds;
   }
 }

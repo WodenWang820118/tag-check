@@ -53,8 +53,7 @@ describe('scrollTrigger', () => {
 
     const result = service.createScrollTrigger(
       'test-account',
-      'test-container',
-      []
+      'test-container'
     );
 
     expect(result).toEqual([mockScrollTriggerConfig]);
@@ -65,8 +64,7 @@ describe('scrollTrigger', () => {
 
     const result = service.createScrollTrigger(
       'test-account',
-      'test-container',
-      []
+      'test-container'
     );
 
     expect(result).toEqual([]);
@@ -81,8 +79,7 @@ describe('scrollTrigger', () => {
 
     const result = service.createScrollTrigger(
       'test-account',
-      'test-container',
-      []
+      'test-container'
     );
 
     expect(result).toEqual([]);

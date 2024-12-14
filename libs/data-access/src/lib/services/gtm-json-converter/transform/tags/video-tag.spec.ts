@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { VideoTag } from './video-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { Parameter, TagConfig, TriggerConfig } from '@utils';
+import { Trigger } from '@utils';
 
 describe('VideoTag', () => {
   let videoTag: VideoTag;
@@ -25,23 +25,13 @@ describe('VideoTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const data: {
-        formattedParameters: Parameter[];
-        eventName: string;
-      }[] = [
-        {
-          formattedParameters: [],
-          eventName: 'customEvent'
-        }
-      ];
-      const triggers: TriggerConfig[] = []; // Empty triggers
+      const triggers: Trigger[] = []; // Empty triggers
 
       // Act
       const result = videoTag.createVideoTag(
         configurationName,
         accountId,
         containerId,
-        data,
         triggers
       );
 
@@ -54,16 +44,7 @@ describe('VideoTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const data: {
-        formattedParameters: Parameter[];
-        eventName: string;
-      }[] = [
-        {
-          formattedParameters: [],
-          eventName: 'customEvent'
-        }
-      ];
-      const triggers: TriggerConfig[] = []; // No triggers matching 'event youtube video'
+      const triggers: Trigger[] = []; // No triggers matching 'event youtube video'
 
       jest.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(true);
       jest.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
@@ -73,7 +54,6 @@ describe('VideoTag', () => {
         configurationName,
         accountId,
         containerId,
-        data,
         triggers
       );
 
@@ -90,20 +70,8 @@ describe('VideoTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const data: {
-        formattedParameters: Parameter[];
-        eventName: string;
-      }[] = [
+      const triggers: Trigger[] = [
         {
-          formattedParameters: [],
-          eventName: 'video_start'
-        }
-      ];
-      const triggers: TriggerConfig[] = [
-        {
-          accountId: accountId,
-          containerId: containerId,
-          type: '',
           name: 'event youtube video',
           triggerId: 'trigger789'
         }
@@ -116,7 +84,6 @@ describe('VideoTag', () => {
         configurationName,
         accountId,
         containerId,
-        data,
         triggers
       );
 

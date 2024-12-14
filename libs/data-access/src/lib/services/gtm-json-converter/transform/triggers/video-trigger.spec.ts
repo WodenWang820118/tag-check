@@ -10,7 +10,7 @@ describe('VideoTrigger', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [VideoTrigger, EventUtils],
+      providers: [VideoTrigger, EventUtils]
     });
 
     service = TestBed.inject(VideoTrigger);
@@ -26,7 +26,7 @@ describe('VideoTrigger', () => {
         {
           type: 'TEMPLATE',
           key: 'progressThresholdsPercent',
-          value: '10,25,50,75',
+          value: '10,25,50,75'
         },
         { type: 'BOOLEAN', key: 'captureComplete', value: 'true' },
         { type: 'BOOLEAN', key: 'captureStart', value: 'true' },
@@ -34,15 +34,15 @@ describe('VideoTrigger', () => {
         { type: 'TEMPLATE', key: 'triggerStartOption', value: 'WINDOW_LOAD' },
         { type: 'TEMPLATE', key: 'radioButtonGroup1', value: 'PERCENTAGE' },
         { type: 'BOOLEAN', key: 'capturePause', value: 'false' },
-        { type: 'BOOLEAN', key: 'captureProgress', value: 'true' },
-      ],
+        { type: 'BOOLEAN', key: 'captureProgress', value: 'true' }
+      ]
     };
   });
 
   it('should create a video trigger config correctly', () => {
     const result = service.videoTrigger({
       accountId: 'test-account',
-      containerId: 'test-container',
+      containerId: 'test-container'
     });
 
     expect(result).toEqual(mockVideoTriggerConfig);
@@ -51,11 +51,7 @@ describe('VideoTrigger', () => {
   it('should create a video trigger when isIncludeVideo returns true', () => {
     jest.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(true);
 
-    const result = service.createVideoTrigger(
-      'test-account',
-      'test-container',
-      []
-    );
+    const result = service.createVideoTrigger('test-account', 'test-container');
 
     expect(result).toEqual([mockVideoTriggerConfig]);
     expect(eventUtils.isIncludeVideo).toHaveBeenCalledWith([]);
@@ -64,11 +60,7 @@ describe('VideoTrigger', () => {
   it('should return an empty array when isIncludeVideo returns false', () => {
     jest.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(false);
 
-    const result = service.createVideoTrigger(
-      'test-account',
-      'test-container',
-      []
-    );
+    const result = service.createVideoTrigger('test-account', 'test-container');
 
     expect(result).toEqual([]);
     expect(eventUtils.isIncludeVideo).toHaveBeenCalledWith([]);
@@ -81,11 +73,7 @@ describe('VideoTrigger', () => {
 
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
-    const result = service.createVideoTrigger(
-      'test-account',
-      'test-container',
-      []
-    );
+    const result = service.createVideoTrigger('test-account', 'test-container');
 
     expect(result).toEqual([]);
     expect(consoleSpy).toHaveBeenCalledWith(

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { EventTag } from './event-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { Tag, TagConfig, TriggerConfig } from '@utils';
+import { Tag, TagConfig, Trigger, TriggerConfig } from '@utils';
 
 describe('EventTag', () => {
   let eventTag: EventTag;
@@ -24,10 +24,19 @@ describe('EventTag', () => {
     const tag: Tag = {
       name: 'TestTag',
       parameters: [],
-      triggers: []
+      triggers: [
+        {
+          name: 'TestTag',
+          triggerId: '1'
+        }
+      ]
     };
-    const dataLayers = [];
-    const triggers: TriggerConfig[] = [];
+    const triggers: Trigger[] = [
+      {
+        name: 'TestTag',
+        triggerId: '1'
+      }
+    ];
 
     jest.spyOn(parameterUtils, 'createBooleanParameter').mockReturnValue({
       type: 'BOOLEAN',
@@ -53,10 +62,6 @@ describe('EventTag', () => {
       value: 'GoogleTag'
     });
 
-    jest
-      .spyOn(parameterUtils, 'findTriggerIdByEventName')
-      .mockReturnValue('triggerId');
-
     // Act
     // TODO: reflect the esvContent
     const result = eventTag.createTag(
@@ -64,7 +69,6 @@ describe('EventTag', () => {
       accountId,
       containerId,
       tag,
-      dataLayers,
       triggers,
       'false',
       [
@@ -76,7 +80,7 @@ describe('EventTag', () => {
     );
 
     // Assert
-    expect(result).toEqual({
+    const expectedTag: TagConfig = {
       name: 'GA4 event - TestTag',
       type: 'gaawe',
       accountId: 'account123',
@@ -87,7 +91,7 @@ describe('EventTag', () => {
         { type: 'LIST', key: 'eventParameters', list: [] },
         { type: 'TAG_REFERENCE', key: 'measurementId', value: 'GoogleTag' }
       ],
-      firingTriggerId: [],
+      firingTriggerId: ['1'],
       tagFiringOption: 'ONCE_PER_EVENT',
       monitoringMetadata: {
         type: 'MAP'
@@ -95,7 +99,8 @@ describe('EventTag', () => {
       consentSettings: {
         consentStatus: 'NOT_SET'
       }
-    } as TagConfig);
+    };
+    expect(result).toEqual(expectedTag);
 
     expect(parameterUtils.createBooleanParameter).toHaveBeenCalledWith(
       'sendEcommerceData',
@@ -107,7 +112,6 @@ describe('EventTag', () => {
     );
     expect(parameterUtils.createListParameter).toHaveBeenCalledWith(
       'eventParameters',
-      dataLayers,
       tag.parameters
     );
     expect(parameterUtils.createTagReferenceParameter).toHaveBeenCalledWith(

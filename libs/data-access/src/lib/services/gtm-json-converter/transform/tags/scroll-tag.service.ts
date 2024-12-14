@@ -1,4 +1,4 @@
-import { Parameter, TagConfig, TriggerConfig } from '@utils';
+import { Parameter, TagConfig, Trigger, TriggerConfig } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
@@ -57,13 +57,11 @@ export class ScrollTag {
     configurationName: string,
     accountId: string,
     containerId: string,
-    data: {
-      formattedParameters: Parameter[];
-      eventName: string;
-    }[],
-    triggers: TriggerConfig[]
+    triggers: Trigger[]
   ) {
     try {
+      // TODO: get the information whether the scroll is included in the data
+      const data = [] as any;
       if (!this.eventUtils.isIncludeScroll(data)) {
         return [];
       }

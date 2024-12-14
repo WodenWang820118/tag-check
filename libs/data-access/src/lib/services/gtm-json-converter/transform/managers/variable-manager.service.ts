@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EventSettingsVariable, Parameter, VariableConfig } from '@utils';
+import { DataLayer, EventSettingsVariable, VariableConfig } from '@utils';
 import { DataLayerVariable } from '../variables/data-layer-variable.service';
 import { RegexVariable } from '../variables/regex-variable.service';
 import { ScrollVariable } from '../variables/scroll-variable.service';
@@ -9,7 +9,7 @@ import { EventUtils } from '../../utils/event-utils.service';
 @Injectable({
   providedIn: 'root'
 })
-export class VariableManger {
+export class VariableManager {
   constructor(
     private dataLayerVariable: DataLayerVariable,
     private regexVariable: RegexVariable,
@@ -19,12 +19,10 @@ export class VariableManger {
   ) {}
   getBuiltInVariables(
     accountId: string,
-    containerId: string,
-    data: {
-      formattedParameters: Parameter[];
-      eventName: string;
-    }[]
+    containerId: string
   ): VariableConfig[] {
+    // TODO: get the data from the UI
+    const data = [] as any;
     return [
       ...(this.eventUtils.isIncludeVideo(data)
         ? [
@@ -48,21 +46,27 @@ export class VariableManger {
   getVariables(
     accountId: string,
     containerId: string,
-    data: {
-      formattedParameters: Parameter[];
-      eventName: string;
-    }[],
-    dataLayers: string[],
+    dataLayers: DataLayer[],
     esvConent: EventSettingsVariable[]
   ): VariableConfig[] {
-    const dataLayerVariables = dataLayers.map((dL, i) => {
-      return this.dataLayerVariable.createDataLayerVariable(
-        accountId,
-        containerId,
-        dL
-      );
+    const dataLayerVariables = dataLayers
+      .map((dL, i) => {
+        return this.dataLayerVariable.createDataLayerVariable(
+          accountId,
+          containerId,
+          dL.paths
+        );
+      })
+      .flat();
+
+    const seen = new Set();
+    const uniqueVariables = dataLayerVariables.filter((variable) => {
+      const duplicate = seen.has(variable.name);
+      seen.add(variable.name);
+      return !duplicate;
     });
 
+    console.log('uniqueVariables: ', uniqueVariables);
     const regexMeasurementIdVariable =
       this.regexVariable.createRegexMeasurementIdVariable(
         accountId,
@@ -73,14 +77,16 @@ export class VariableManger {
       this.dataLayerVariable.createEventSettingsVariable(
         accountId,
         containerId,
-        data,
         esvConent
       );
 
+    const builtInVariables = this.getBuiltInVariables(accountId, containerId);
+
     return [
-      ...dataLayerVariables,
+      ...uniqueVariables,
       regexMeasurementIdVariable,
-      ...eventSettingsVariable
+      ...eventSettingsVariable,
+      ...builtInVariables
     ].map((data, index) => ({
       ...data,
       variableId: (index + 1).toString()

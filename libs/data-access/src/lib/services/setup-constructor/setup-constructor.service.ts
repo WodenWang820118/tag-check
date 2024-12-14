@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { GtmConfigGenerator } from '@utils';
-import { Utils } from '../gtm-json-converter/utils/utils.service';
+import { GtmConfigGenerator, Spec } from '@utils';
+import { UtilsService } from '../gtm-json-converter/utils/utils.service';
 /**
  * Service to hold the form data to generate the GTM configuration.
  * Specifically, data is used in the functional card component.
@@ -10,7 +10,7 @@ import { Utils } from '../gtm-json-converter/utils/utils.service';
   providedIn: 'root'
 })
 export class SetupConstructorService {
-  constructor(private utils: Utils) {}
+  constructor(private utilsService: UtilsService) {}
   googleTagName: BehaviorSubject<string> = new BehaviorSubject<string>('');
   measurementId: BehaviorSubject<string> = new BehaviorSubject<string>('');
   includeItemScopedVariables: BehaviorSubject<boolean> =
@@ -51,13 +51,13 @@ export class SetupConstructorService {
   }
 
   generateGtmConfig(
-    json: any,
+    json: Spec[],
     tagManagerUrl: string,
     containerName: string,
     gtmId: string
   ): GtmConfigGenerator {
     const { accountId, containerId } =
-      this.utils.extractAccountAndContainerId(tagManagerUrl);
+      this.utilsService.extractAccountAndContainerId(tagManagerUrl);
 
     const gtmConfigGenerator: GtmConfigGenerator = {
       accountId: accountId,

@@ -5,8 +5,7 @@ import {
   EditorFacadeService,
   EsvEditorService,
   SpecExtractService,
-  SetupConstructorService,
-  Utils
+  SetupConstructorService
 } from '@data-access';
 import { combineLatest, take, tap } from 'rxjs';
 import { containerName, gtmId, tagManagerUrl } from './test-data';
@@ -15,6 +14,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConversionSuccessDialogComponent } from '../conversion-success-dialog/conversion-success-dialog.component';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
 import { MatButtonModule } from '@angular/material/button';
+import { Spec } from '@utils';
 
 @Component({
   selector: 'lib-functional-card',
@@ -69,6 +69,7 @@ export class FunctionalCardComponent {
                 inputJsonEditor.state.doc.toString()
               );
 
+              console.log('json', json);
               console.log('esvConent', esvConent);
 
               const esvContent = JSON.parse(esvConent) as {
@@ -80,7 +81,6 @@ export class FunctionalCardComponent {
                 json,
                 googleTagName,
                 measurementId,
-                includeItemScopedVariables,
                 isSendingEcommerceData === true ? 'true' : 'false',
                 esvContent
               );
@@ -113,30 +113,28 @@ export class FunctionalCardComponent {
   }
 
   performConversion(
-    json: any,
+    json: Spec[],
     googleTagName: string,
     measurementId: string,
-    includeItemScopedVariables: boolean,
     isSendingEcommerceData: 'true' | 'false',
     esvConent: {
       name: string;
       parameters: { [x: string]: string }[];
     }[]
   ) {
-    // TODO: refactor
-
-    this.editorFacadeService.setInputJsonContent(JSON.parse(json));
+    this.editorFacadeService.setInputJsonContent(json);
+    // TODO: refactor: handle the logic directly without another function
     const gtmConfigGenerator = this.setupConstructorService.generateGtmConfig(
       json,
       tagManagerUrl,
       containerName,
       gtmId
     );
+
     const result = this.transformService.convert(
       googleTagName,
       measurementId,
       gtmConfigGenerator,
-      includeItemScopedVariables,
       isSendingEcommerceData,
       esvConent
     );

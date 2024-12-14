@@ -1,4 +1,4 @@
-import { Parameter, TagConfig, TriggerConfig } from '@utils';
+import { Parameter, TagConfig, Trigger, TriggerConfig } from '@utils';
 import { EventUtils } from '../../utils/event-utils.service';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
@@ -109,13 +109,11 @@ export class VideoTag {
     configurationName: string,
     accountId: string,
     containerId: string,
-    data: {
-      formattedParameters: Parameter[];
-      eventName: string;
-    }[],
-    triggers: TriggerConfig[]
+    triggers: Trigger[]
   ) {
     try {
+      // TODO: get the information whether the video is included in the data
+      const data = [] as any;
       if (!this.eventUtils.isIncludeVideo(data)) {
         return [];
       }

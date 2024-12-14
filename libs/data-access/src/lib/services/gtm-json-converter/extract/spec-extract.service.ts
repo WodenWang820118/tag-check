@@ -1,22 +1,14 @@
-import { Parameter } from '@utils';
+import { Spec } from '@utils';
 import { Injectable } from '@angular/core';
-import { Utils } from '../utils/utils.service';
-import { DataLayerUtils } from '../utils/data-layer-utils.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SpecExtractService {
-  constructor(
-    private utils: Utils,
-    private dataLayerUtils: DataLayerUtils
-  ) {}
-
   preprocessInput(inputString: string) {
     try {
       // Attempt to parse the input JSON string
-      JSON.parse(inputString);
-      return inputString;
+      return JSON.parse(inputString) as Spec[];
     } catch (error) {
       // If parsing fails, attempt to fix common issues and try again
       let fixedString = '';
@@ -24,11 +16,14 @@ export class SpecExtractService {
 
       // Attempt to parse the fixed string
       try {
-        JSON.parse(fixedString);
-        return fixedString;
+        return JSON.parse(fixedString) as Spec[];
       } catch (error) {
         console.error(error);
-        return 'null';
+        return [
+          {
+            event: 'error'
+          }
+        ] as Spec[];
       }
     }
   }
@@ -86,28 +81,28 @@ export class SpecExtractService {
     }
   }
 
-  parseAllSpecs(inputString: string): Record<string, string>[] {
-    try {
-      const allSpecs = JSON.parse(inputString);
-      return allSpecs.map(this.parseSpec.bind(this));
-    } catch (error) {
-      console.error('Error parsing specs:', error);
-      throw new Error(
-        'Cannot parse JSON. Please revise the format to follow JSON structure rules'
-      );
-    }
-  }
+  // parseAllSpecs(inputString: string): Record<string, string>[] {
+  //   try {
+  //     const allSpecs = JSON.parse(inputString);
+  //     return allSpecs.map(this.parseSpec.bind(this));
+  //   } catch (error) {
+  //     console.error('Error parsing specs:', error);
+  //     throw new Error(
+  //       'Cannot parse JSON. Please revise the format to follow JSON structure rules'
+  //     );
+  //   }
+  // }
 
-  private parseSpec(
-    parsedJSON: Record<string, string>
-  ): Record<string, string> {
-    if (parsedJSON) {
-      const { event, ...json } = parsedJSON;
-      const paths = this.utils.getAllObjectPaths(json);
-      this.dataLayerUtils.addDataLayer(paths);
-      return parsedJSON;
-    } else {
-      throw new Error('Invalid spec format');
-    }
-  }
+  // private parseSpec(
+  //   parsedJSON: Record<string, string>
+  // ): Record<string, string> {
+  //   if (parsedJSON) {
+  //     const { event, ...json } = parsedJSON;
+  //     const paths = this.utilsService.getAllObjectPaths(json);
+  //     this.dataLayerUtils.addDataLayer(paths);
+  //     return parsedJSON;
+  //   } else {
+  //     throw new Error('Invalid spec format');
+  //   }
+  // }
 }

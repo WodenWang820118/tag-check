@@ -3,56 +3,65 @@ import { TagManager } from './managers/tag-manager.service';
 import { TriggerManager } from './managers/trigger-manager.service';
 import { ConfigManager } from './managers/config-manager.service';
 import { DataLayerUtils } from '../utils/data-layer-utils.service';
-import { SpecExtractService } from '../extract/spec-extract.service';
-import { SpecTransformService } from './spec-transform.service';
 import { EventSettingsVariable, GtmConfigGenerator } from '@utils';
+import { VariableManager } from './managers/variable-manager.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TransformService {
   constructor(
+    private configManager: ConfigManager,
     private tagManager: TagManager,
     private triggerManager: TriggerManager,
-    private dataLayerUtils: DataLayerUtils,
-    private configManager: ConfigManager,
-    private specExtractService: SpecExtractService,
-    private specTransformService: SpecTransformService
+    private variableManager: VariableManager,
+    private dataLayerUtils: DataLayerUtils
   ) {}
 
   convert(
     googleTagName: string,
     measurementId: string,
     gtmConfigGenerator: GtmConfigGenerator,
-    includeItemScopedVariable = false,
     isSendingEcommerceData: 'true' | 'false',
     esvContent: EventSettingsVariable[]
   ) {
     try {
-      const specs = this.specExtractService.parseAllSpecs(
+      const dataLayers = this.dataLayerUtils.getDataLayers(
         gtmConfigGenerator.specs
       );
-      const formattedData = this.specTransformService.formatSpecs(specs);
 
-      const triggers = this.triggerManager.getTriggers();
-      const tags = this.tagManager.getTags();
-      const dataLayers = this.dataLayerUtils.getDataLayers(
-        includeItemScopedVariable
-      );
-
-      const result = this.configManager.exportGtmJSON(
-        googleTagName,
-        measurementId,
-        formattedData,
+      const variables = this.variableManager.getVariables(
         gtmConfigGenerator.accountId,
         gtmConfigGenerator.containerId,
-        gtmConfigGenerator.containerName,
-        gtmConfigGenerator.gtmId,
-        tags,
         dataLayers,
-        triggers,
+        esvContent
+      );
+
+      const triggers = this.triggerManager.getTriggers(
+        gtmConfigGenerator.accountId,
+        gtmConfigGenerator.containerId,
+        dataLayers
+      );
+
+      const tags = this.tagManager.getTags(
+        gtmConfigGenerator.accountId,
+        gtmConfigGenerator.containerId,
+        dataLayers,
+        this.triggerManager.createTriggers(dataLayers),
+        googleTagName,
+        measurementId,
         isSendingEcommerceData,
         esvContent
+      );
+
+      const result = this.configManager.getGTMFinalConfiguration(
+        gtmConfigGenerator.accountId,
+        gtmConfigGenerator.containerId,
+        variables,
+        triggers,
+        tags,
+        gtmConfigGenerator.containerName,
+        gtmConfigGenerator.gtmId
       );
       return result;
     } catch (error) {

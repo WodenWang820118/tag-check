@@ -4,7 +4,7 @@ import { NestedObject } from '@utils';
 @Injectable({
   providedIn: 'root'
 })
-export class Utils {
+export class UtilsService {
   extractAccountAndContainerId(url: string) {
     const regex = /accounts\/(\d+)\/containers\/(\d+)/;
     const result = regex.exec(url);

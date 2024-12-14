@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ParameterUtils } from './parameter-utils.service';
-import { Parameter, ParameterMap, TriggerConfig } from '@utils';
+import { Parameter, ParameterMap, Trigger, TriggerConfig } from '@utils';
 
 describe('ParameterUtils', () => {
   let service: ParameterUtils;
@@ -18,21 +18,32 @@ describe('ParameterUtils', () => {
 
   it('should create a list parameter correctly', () => {
     const key = 'testKey';
-    const dataLayers = ['ecommerce.item1', 'normalLayer', 'ecommerce.item2'];
     const parameters: Parameter[] = [
-      { type: '', key: 'item1', value: 'value1' },
-      { type: '', key: 'normalLayer', value: 'value2' },
-      { type: '', key: 'item2', value: 'value3' }
+      {
+        type: 'v',
+        key: 'value',
+        value: 'ecommerce.value'
+      },
+      {
+        type: 'v',
+        key: 'currency',
+        value: 'ecommerce.currency'
+      },
+      {
+        type: 'v',
+        key: 'items',
+        value: 'ecommerce.items'
+      }
     ];
 
-    const result = service.createListParameter(key, dataLayers, parameters);
+    const result = service.createListParameter(key, parameters);
 
     expect(result.type).toBe('LIST');
     expect(result.key).toBe(key);
     expect(result.list.length).toBe(3);
-    expect(result.list[0].map[1].value).toBe('{{DLV - ecommerce.item1}}');
-    expect(result.list[1].map[1].value).toBe('{{DLV - value2}}');
-    expect(result.list[2].map[1].value).toBe('{{DLV - ecommerce.item2}}');
+    expect(result.list[0].map[1].value).toBe('DLV - ecommerce.value');
+    expect(result.list[1].map[1].value).toBe('DLV - ecommerce.currency');
+    expect(result.list[2].map[1].value).toBe('DLV - ecommerce.items');
   });
 
   it('should create a built-in list parameter correctly', () => {
@@ -108,69 +119,29 @@ describe('ParameterUtils', () => {
 
   it('should find the correct trigger ID', () => {
     const eventName = 'select_promotion';
-    const triggers: TriggerConfig[] = [
+    const triggers: Trigger[] = [
       {
-        accountId: '6072698131',
-        containerId: '102416705',
-        type: 'CUSTOM_EVENT',
-        name: 'event equals select_promotion',
-        customEventFilter: [
-          {
-            type: 'EQUALS',
-            parameter: [
-              {
-                type: 'TEMPLATE',
-                key: 'arg0',
-                value: '{{_event}}'
-              },
-              {
-                type: 'TEMPLATE',
-                key: 'arg1',
-                value: 'select_promotion'
-              }
-            ]
-          }
-        ],
+        name: 'select_promotion',
         triggerId: '1'
       }
     ];
 
     const result = service.findTriggerIdByEventName(eventName, triggers);
 
-    expect(result).toBe('1');
+    expect(result).toEqual(['1']);
   });
 
   it('should return an empty string if no matching trigger is found', () => {
     const eventName = 'nonExistentEvent';
-    const triggers: TriggerConfig[] = [
+    const triggers: Trigger[] = [
       {
-        accountId: '6072698131',
-        containerId: '102416705',
-        type: 'CUSTOM_EVENT',
-        name: 'event equals select_promotion',
-        customEventFilter: [
-          {
-            type: 'EQUALS',
-            parameter: [
-              {
-                type: 'TEMPLATE',
-                key: 'arg0',
-                value: '{{_event}}'
-              },
-              {
-                type: 'TEMPLATE',
-                key: 'arg1',
-                value: 'select_promotion'
-              }
-            ]
-          }
-        ],
+        name: 'select_promotion',
         triggerId: '1'
       }
     ];
 
     const result = service.findTriggerIdByEventName(eventName, triggers);
 
-    expect(result).toBe('');
+    expect(result).toEqual([]);
   });
 });

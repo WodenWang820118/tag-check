@@ -1,17 +1,13 @@
-import { EventSettingsVariable, Tag, TagConfig, TriggerConfig } from '@utils';
+import {
+  EventSettingsVariable,
+  Parameter,
+  Tag,
+  TagConfig,
+  Trigger
+} from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EcParamsService } from '../../utils/ec-params.service';
-
-interface TagCreationParams {
-  googleTagName: string;
-  accountId: string;
-  containerId: string;
-  tag: Tag;
-  dataLayers: string[];
-  triggers: TriggerConfig[];
-  isSendEcommerceData: 'true' | 'false';
-}
 
 @Injectable({
   providedIn: 'root'
@@ -27,69 +23,42 @@ export class EventTag {
     accountId: string,
     containerId: string,
     tag: Tag,
-    dataLayers: string[],
-    triggers: TriggerConfig[],
+    triggers: Trigger[],
     isSendEcommerceData: 'true' | 'false',
     esvContent: EventSettingsVariable[]
   ): TagConfig {
-    // TODO: Handle esvContent (Event Settings Variables, the shared variables for the event)
-    const processedData = this.processEcommerceData(
-      dataLayers,
-      tag,
-      isSendEcommerceData
-    );
-
-    return this.buildTagConfig({
+    // TODO: handle esvContent
+    return this.buildTagConfig(
       googleTagName,
       accountId,
       containerId,
       tag,
       triggers,
-      isSendEcommerceData,
-      ...processedData
-    });
+      isSendEcommerceData
+    );
   }
 
   private processEcommerceData(
-    dataLayers: string[],
     tag: Tag,
     isSendEcommerceData: 'true' | 'false'
-  ) {
+  ): Parameter[] {
     if (isSendEcommerceData !== 'true') {
-      return { dataLayers, parameters: tag.parameters };
+      return tag.parameters;
     }
 
-    const filteredDataLayers = dataLayers.filter(
-      (layer) =>
-        !layer.startsWith('ecommerce') && !this.ecParamsService.getEcParams()
-    );
-
-    const filteredParameters = tag.parameters.filter(
-      (param) =>
-        !param.key.startsWith('ecommerce') &&
-        !this.ecParamsService.getEcParams().includes(param.key)
-    );
-
-    return {
-      dataLayers: filteredDataLayers,
-      parameters: filteredParameters
-    };
+    return tag.parameters.filter((pm) => {
+      return !(pm.value as any).includes('ecommerce');
+    });
   }
 
   private buildTagConfig(
-    config: TagCreationParams & { parameters: any[] }
+    googleTagName: string,
+    accountId: string,
+    containerId: string,
+    tag: Tag,
+    triggers: Trigger[],
+    isSendEcommerceData: 'true' | 'false'
   ): TagConfig {
-    const {
-      googleTagName,
-      accountId,
-      containerId,
-      tag,
-      dataLayers,
-      triggers,
-      isSendEcommerceData,
-      parameters
-    } = config;
-
     return {
       name: `GA4 event - ${tag.name}`,
       type: 'gaawe',
@@ -103,17 +72,18 @@ export class EventTag {
         this.parameterUtils.createTemplateParameter('eventName', tag.name),
         this.parameterUtils.createListParameter(
           'eventParameters',
-          dataLayers,
-          parameters
+          this.processEcommerceData(tag, isSendEcommerceData)
         ),
         this.parameterUtils.createTagReferenceParameter(
           'measurementId',
           googleTagName
         )
       ],
-      firingTriggerId: tag.triggers.map((t) =>
-        this.parameterUtils.findTriggerIdByEventName(t.name, triggers)
-      ),
+      firingTriggerId: tag.triggers
+        .map((t) =>
+          this.parameterUtils.findTriggerIdByEventName(t.name, triggers)
+        )
+        .flat(),
       tagFiringOption: 'ONCE_PER_EVENT',
       monitoringMetadata: {
         type: 'MAP'

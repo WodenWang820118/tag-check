@@ -5,5 +5,5 @@ export interface ProjectSpec {
 
 export interface Spec {
   event: string;
-  [key: string]: string;
+  [key: string]: any;
 }

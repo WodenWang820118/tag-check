@@ -10,31 +10,32 @@ export class DataLayerVariable {
   createDataLayerVariable(
     accountId: string,
     containerId: string,
-    dataLayerName: string
-  ): VariableConfig {
-    return {
-      name: `DLV - ${dataLayerName.trim()}`,
-      type: 'v',
-      accountId,
-      containerId,
-      parameter: [
-        this.parameterUtils.createIntegerParameter('dataLayerVersion', '2'),
-        this.parameterUtils.createBooleanParameter('setDefaultValue', 'false'),
-        this.parameterUtils.createTemplateParameter(
-          'name',
-          dataLayerName.trim()
-        )
-      ]
-    };
+    dataLayerNames: string[]
+  ): VariableConfig[] {
+    return dataLayerNames.map((dataLayerName) => {
+      return {
+        name: `DLV - ${dataLayerName.trim()}`,
+        type: 'v',
+        accountId,
+        containerId,
+        parameter: [
+          this.parameterUtils.createIntegerParameter('dataLayerVersion', '2'),
+          this.parameterUtils.createBooleanParameter(
+            'setDefaultValue',
+            'false'
+          ),
+          this.parameterUtils.createTemplateParameter(
+            'name',
+            dataLayerName.trim()
+          )
+        ]
+      };
+    });
   }
 
   createEventSettingsVariable(
     accountId: string,
     containerId: string,
-    data: {
-      formattedParameters: Parameter[];
-      eventName: string;
-    }[],
     esvContent: EventSettingsVariable[]
   ): VariableConfig[] {
     return esvContent.map((param) => {
@@ -67,37 +68,5 @@ export class DataLayerVariable {
         ]
       };
     });
-    // temporary comments for testing
-    // {
-    //   "accountId": "6140708819",
-    //   "containerId": "168785492",
-    //   "variableId": "195",
-    //   "name": "Google Tag G-8HK542DQMG Event Settings",
-    //   "type": "gtes",
-    //   "parameter": [
-    //     {
-    //       "type": "LIST",
-    //       "key": "eventSettingsTable",
-    //       "list": [
-    //         {
-    //           "type": "MAP",
-    //           "map": [
-    //             {
-    //               "type": "TEMPLATE",
-    //               "key": "parameter",
-    //               "value": "page_referrer"
-    //             },
-    //             {
-    //               "type": "TEMPLATE",
-    //               "key": "parameterValue",
-    //               "value": "{{page_referrer for G-8HK542DQMG Tags | String}}"
-    //             }
-    //           ]
-    //         }
-    //       ]
-    //     }
-    //   ],
-    //   "fingerprint": "1703652484999"
-    // }
   }
 }

@@ -51,15 +51,10 @@ export class ScrollTrigger {
     };
   }
 
-  createScrollTrigger(
-    accountId: string,
-    containerId: string,
-    data: {
-      formattedParameters: Parameter[];
-      eventName: string;
-    }[]
-  ): TriggerConfig[] {
+  createScrollTrigger(accountId: string, containerId: string): TriggerConfig[] {
     try {
+      // TODO: get the data from the UI
+      const data = [] as any;
       if (this.eventUtils.isIncludeScroll(data)) {
         const _scrollTrigger = this.scrollTriggers({
           accountId,

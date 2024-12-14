@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ScrollTag } from './scroll-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { Parameter, TagConfig, TriggerConfig } from '@utils';
+import { Trigger } from '@utils';
 
 describe('ScrollTag', () => {
   let scrollTag: ScrollTag;
@@ -25,23 +25,13 @@ describe('ScrollTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const data: {
-        formattedParameters: Parameter[];
-        eventName: string;
-      }[] = [
-        {
-          formattedParameters: [],
-          eventName: 'customEvent'
-        }
-      ];
-      const triggers: TriggerConfig[] = []; // Empty triggers
+      const triggers: Trigger[] = []; // Empty triggers
 
       // Act
       const result = scrollTag.createScrollTag(
         configurationName,
         accountId,
         containerId,
-        data,
         triggers
       );
 
@@ -54,16 +44,7 @@ describe('ScrollTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const data: {
-        formattedParameters: Parameter[];
-        eventName: string;
-      }[] = [
-        {
-          formattedParameters: [],
-          eventName: 'customEvent'
-        }
-      ];
-      const triggers: TriggerConfig[] = []; // No triggers matching 'event scroll'
+      const triggers: Trigger[] = []; // No triggers matching 'event scroll'
 
       jest.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
 
@@ -72,7 +53,6 @@ describe('ScrollTag', () => {
         configurationName,
         accountId,
         containerId,
-        data,
         triggers
       );
 
@@ -85,21 +65,9 @@ describe('ScrollTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const data: {
-        formattedParameters: Parameter[];
-        eventName: string;
-      }[] = [
+      const triggers: Trigger[] = [
         {
-          formattedParameters: [],
-          eventName: 'scroll'
-        }
-      ];
-      const triggers: TriggerConfig[] = [
-        {
-          accountId: accountId,
-          containerId: containerId,
           name: 'event scroll',
-          type: '',
           triggerId: 'trigger789'
         }
       ];
@@ -156,7 +124,6 @@ describe('ScrollTag', () => {
         configurationName,
         accountId,
         containerId,
-        data,
         triggers
       );
 
@@ -209,7 +176,6 @@ describe('ScrollTag', () => {
         }
       ]);
 
-      expect(eventUtils.isIncludeScroll).toHaveBeenCalledWith(data);
       expect(parameterUtils.createBooleanParameter).toHaveBeenCalledWith(
         'sendEcommerceData',
         'false'

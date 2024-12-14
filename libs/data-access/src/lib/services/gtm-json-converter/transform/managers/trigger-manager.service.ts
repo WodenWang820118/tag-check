@@ -1,61 +1,45 @@
-import { Parameter, Trigger, TriggerConfig } from '@utils';
-import { EventUtils } from '../../utils/event-utils.service';
+import { DataLayer, Trigger, TriggerConfig } from '@utils';
 import { Injectable } from '@angular/core';
 import { EventTrigger } from '../triggers/event-trigger.service';
 import { VideoTrigger } from '../triggers/video-trigger.service';
 import { ScrollTrigger } from '../triggers/scroll-trigger.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class TriggerManager {
   constructor(
     private eventTrigger: EventTrigger,
     private videoTrigger: VideoTrigger,
-    private scrollTrigger: ScrollTrigger,
-    private eventUtils: EventUtils
+    private scrollTrigger: ScrollTrigger
   ) {}
-  triggers: Trigger[] = [];
 
-  formatSingleTrigger(eventName: string) {
-    if (this.eventUtils.isBuiltInEvent(eventName)) {
-      return;
-    }
-
-    this.addTriggerIfNotExists(eventName);
+  createTriggers(dataLayer: DataLayer[]): Trigger[] {
+    const results = dataLayer.map(({ event }, index) => {
+      return {
+        name: event,
+        triggerId: (index + 1).toString()
+      };
+    });
+    return results;
   }
 
-  addTriggerIfNotExists(eventName: string) {
-    if (!this.triggers.some((trigger) => trigger.name === eventName)) {
-      this.triggers.push({
-        name: eventName,
-        triggerId: (this.triggers.length + 1).toString(),
-      });
-    }
-  }
-
-  getTriggers() {
-    return this.triggers;
-  }
-
-  getTriggerConfig(
+  getTriggers(
     accountId: string,
     containerId: string,
-    data: {
-      formattedParameters: Parameter[];
-      eventName: string;
-    }[],
-    triggers: Trigger[]
+    dataLayer: DataLayer[]
   ): TriggerConfig[] {
-    return [
-      ...triggers.map(({ name: trigger }) => {
-        return this.eventTrigger.createTrigger(accountId, containerId, trigger);
+    const results = [
+      ...dataLayer.map(({ event }) => {
+        return this.eventTrigger.createTrigger(accountId, containerId, event);
       }),
-      ...this.videoTrigger.createVideoTrigger(accountId, containerId, data),
-      ...this.scrollTrigger.createScrollTrigger(accountId, containerId, data),
+      ...this.videoTrigger.createVideoTrigger(accountId, containerId),
+      ...this.scrollTrigger.createScrollTrigger(accountId, containerId)
     ].map((_trigger, index) => ({
       ..._trigger,
-      triggerId: (index + 1).toString(),
+      triggerId: (index + 1).toString()
     }));
+    console.log('triggers: ', results);
+    return results;
   }
 }

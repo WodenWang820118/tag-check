@@ -1,41 +1,24 @@
-import {
-  EventSettingsVariable,
-  Parameter,
-  Tag,
-  TagConfig,
-  Trigger,
-  TriggerConfig,
-  VariableConfig
-} from '@utils';
-import { TagManager } from './tag-manager.service';
-import { VariableManger } from './variable-manager.service';
+import { TagConfig, TriggerConfig, VariableConfig } from '@utils';
 import { Injectable } from '@angular/core';
-import { TriggerManager } from './trigger-manager.service';
-import { Utils } from '../../utils/utils.service';
+import { UtilsService } from '../../utils/utils.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConfigManager {
-  constructor(
-    private tagManager: TagManager,
-    private variableManager: VariableManger,
-    private triggerManager: TriggerManager,
-    private utils: Utils
-  ) {}
+  constructor(private utilsService: UtilsService) {}
   getGTMFinalConfiguration(
     accountId: string,
     containerId: string,
     variables: VariableConfig[],
     triggers: TriggerConfig[],
     tags: TagConfig[],
-    builtInVariable: VariableConfig[],
     containerName: string,
     gtmId: string
   ) {
     return {
       exportFormatVersion: 2,
-      exportTime: this.utils.outputTime(),
+      exportTime: this.utilsService.outputTime(),
       containerVersion: {
         path: `accounts/${accountId}/containers/${containerId}/versions/0`,
         accountId: `${accountId}`,
@@ -68,7 +51,6 @@ export class ConfigManager {
           },
           tagIds: [gtmId]
         },
-        builtInVariable,
         variable: variables,
         trigger: triggers,
         tag: tags,
@@ -76,65 +58,5 @@ export class ConfigManager {
         tagManagerUrl: `https://tagmanager.google.com/#/versions/accounts/${accountId}/containers/${containerId}/versions/0?apiLink=version`
       }
     };
-  }
-
-  exportGtmJSON(
-    googleTagName: string,
-    measurementId: string,
-    data: {
-      formattedParameters: Parameter[];
-      eventName: string;
-    }[],
-    accountId: string,
-    containerId: string,
-    containerName: string,
-    gtmId: string,
-    tags: Tag[],
-    dataLayers: string[],
-    triggers: Trigger[],
-    isSendingEcommerceData: 'true' | 'false',
-    esvContent: EventSettingsVariable[]
-  ) {
-    const _variable = this.variableManager.getVariables(
-      accountId,
-      containerId,
-      data,
-      dataLayers,
-      esvContent
-    );
-    const _triggers = this.triggerManager.getTriggerConfig(
-      accountId,
-      containerId,
-      data,
-      triggers
-    );
-    const _tags = this.tagManager.getAllTags(
-      googleTagName,
-      measurementId,
-      accountId,
-      containerId,
-      data,
-      _triggers,
-      tags,
-      dataLayers,
-      isSendingEcommerceData,
-      esvContent
-    );
-    const builtInVariable = this.variableManager.getBuiltInVariables(
-      accountId,
-      containerId,
-      data
-    );
-
-    return this.getGTMFinalConfiguration(
-      accountId,
-      containerId,
-      _variable,
-      _triggers,
-      _tags,
-      builtInVariable,
-      containerName,
-      gtmId
-    );
   }
 }

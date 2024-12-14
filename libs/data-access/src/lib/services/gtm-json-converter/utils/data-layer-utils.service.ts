@@ -1,29 +1,25 @@
 import { Injectable } from '@angular/core';
+import { DataLayer, Spec } from '@utils';
+import { UtilsService } from './utils.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class DataLayerUtils {
-  dataLayers: string[] = [];
-
-  addDataLayer(paths: string[]) {
-    const uniquePaths = this.filterDuplicates(paths, this.dataLayers);
-    this.dataLayers.push(...uniquePaths);
-  }
-
-  filterDuplicates(paths: string[], dataLayers: string[]): string[] {
-    return paths.filter((path) => !dataLayers.includes(path));
-  }
-
-  hasExistedDataLayer(dLReference: string, dataLayers: string[]) {
-    return dataLayers.some((dL) => dL.includes(dLReference));
-  }
-
-  getDataLayers(includeItemScopedVariables: boolean): string[] {
-    console.log('includeItemScopedVariables: ', includeItemScopedVariables);
-    if (includeItemScopedVariables) {
-      return this.dataLayers;
+  constructor(private utilsService: UtilsService) {}
+  getDataLayers(specs: Spec[]) {
+    const dataLayers: DataLayer[] = [];
+    for (const spec of specs) {
+      const { event, ...rest } = spec;
+      const paths = this.utilsService.getAllObjectPaths(rest);
+      const uniquedPaths = new Set(paths);
+      dataLayers.push({
+        event: event,
+        paths: Array.from(uniquedPaths).filter(
+          (dL) => !dL.includes('items.0') && !(dL === 'ecommerce')
+        )
+      });
     }
-    return this.dataLayers.filter((dL) => !dL.includes('ecommerce.items.0'));
+    return dataLayers;
   }
 }

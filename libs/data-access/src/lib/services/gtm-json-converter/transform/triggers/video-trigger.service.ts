@@ -3,14 +3,14 @@ import { Injectable } from '@angular/core';
 import { EventUtils } from '../../utils/event-utils.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class VideoTrigger {
   constructor(private eventUtils: EventUtils) {}
   videoTrigger({
     accountId,
     containerId,
-    progressThresholdsPercent = '10,25,50,75',
+    progressThresholdsPercent = '10,25,50,75'
   }: {
     accountId: string;
     containerId: string;
@@ -26,62 +26,57 @@ export class VideoTrigger {
         {
           type: 'TEMPLATE',
           key: 'progressThresholdsPercent',
-          value: progressThresholdsPercent,
+          value: progressThresholdsPercent
         },
         {
           type: 'BOOLEAN',
           key: 'captureComplete',
-          value: 'true',
+          value: 'true'
         },
         {
           type: 'BOOLEAN',
           key: 'captureStart',
-          value: 'true',
+          value: 'true'
         },
         {
           type: 'BOOLEAN',
           key: 'fixMissingApi',
-          value: 'true',
+          value: 'true'
         },
         {
           type: 'TEMPLATE',
           key: 'triggerStartOption',
-          value: 'WINDOW_LOAD',
+          value: 'WINDOW_LOAD'
         },
         {
           type: 'TEMPLATE',
           key: 'radioButtonGroup1',
-          value: 'PERCENTAGE',
+          value: 'PERCENTAGE'
         },
         {
           type: 'BOOLEAN',
           key: 'capturePause',
-          value: 'false',
+          value: 'false'
         },
         {
           type: 'BOOLEAN',
           key: 'captureProgress',
-          value: 'true',
-        },
-      ],
+          value: 'true'
+        }
+      ]
     };
   }
 
-  createVideoTrigger(
-    accountId: string,
-    containerId: string,
-    data: {
-      formattedParameters: Parameter[];
-      eventName: string;
-    }[]
-  ): TriggerConfig[] {
+  createVideoTrigger(accountId: string, containerId: string): TriggerConfig[] {
+    // TODO: get the information whether the video is included in the data
     try {
+      const data = [] as any;
       console.log('Creating video trigger...');
       console.log('data: ', data);
       if (this.eventUtils.isIncludeVideo(data)) {
         const _videoTrigger = this.videoTrigger({
           accountId,
-          containerId,
+          containerId
         });
         return [_videoTrigger];
       }
