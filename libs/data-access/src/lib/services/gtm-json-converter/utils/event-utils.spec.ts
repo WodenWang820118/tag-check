@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { EventUtils } from './event-utils.service';
+import { DataLayer } from '@utils';
 
 describe('EventUtils', () => {
   let service: EventUtils;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [EventUtils],
+      providers: [EventUtils]
     });
     service = TestBed.inject(EventUtils);
   });
@@ -32,37 +33,37 @@ describe('EventUtils', () => {
 
   describe('isIncludeVideo', () => {
     it('should return true if data includes a video event', () => {
-      const data = [
-        { eventName: 'video_start', formattedParameters: [] },
-        { eventName: 'custom_event', formattedParameters: [] },
+      const dataLayers: DataLayer[] = [
+        { event: 'video_start', paths: [] },
+        { event: 'custom_event', paths: [] }
       ];
-      expect(service.isIncludeVideo(data)).toBe(true);
+      expect(service.isIncludeVideo(dataLayers)).toBe(true);
     });
 
     it('should return false if data does not include a video event', () => {
-      const data = [
-        { eventName: 'custom_event1', formattedParameters: [] },
-        { eventName: 'custom_event2', formattedParameters: [] },
+      const dataLayers: DataLayer[] = [
+        { event: 'custom_event1', paths: [] },
+        { event: 'custom_event2', paths: [] }
       ];
-      expect(service.isIncludeVideo(data)).toBe(false);
+      expect(service.isIncludeVideo(dataLayers)).toBe(false);
     });
   });
 
   describe('isIncludeScroll', () => {
     it('should return true if data includes a scroll event', () => {
-      const data = [
-        { eventName: 'scroll', formattedParameters: [] },
-        { eventName: 'custom_event', formattedParameters: [] },
+      const dataLayers: DataLayer[] = [
+        { event: 'scroll', paths: [] },
+        { event: 'custom_event', paths: [] }
       ];
-      expect(service.isIncludeScroll(data)).toBe(true);
+      expect(service.isIncludeScroll(dataLayers)).toBe(true);
     });
 
     it('should return false if data does not include a scroll event', () => {
-      const data = [
-        { eventName: 'custom_event1', formattedParameters: [] },
-        { eventName: 'custom_event2', formattedParameters: [] },
+      const dataLayers: DataLayer[] = [
+        { event: 'custom_event1', paths: [] },
+        { event: 'custom_event2', paths: [] }
       ];
-      expect(service.isIncludeScroll(data)).toBe(false);
+      expect(service.isIncludeScroll(dataLayers)).toBe(false);
     });
   });
 });

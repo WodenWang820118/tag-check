@@ -19,12 +19,11 @@ export class VariableManager {
   ) {}
   getBuiltInVariables(
     accountId: string,
-    containerId: string
+    containerId: string,
+    dataLayers: DataLayer[]
   ): VariableConfig[] {
-    // TODO: get the data from the UI
-    const data = [] as any;
     return [
-      ...(this.eventUtils.isIncludeVideo(data)
+      ...(this.eventUtils.isIncludeVideo(dataLayers)
         ? [
             ...this.videoVariable.videoBuiltInVariable({
               accountId,
@@ -32,7 +31,7 @@ export class VariableManager {
             })
           ]
         : []),
-      ...(this.eventUtils.isIncludeScroll(data)
+      ...(this.eventUtils.isIncludeScroll(dataLayers)
         ? [
             ...this.scrollVariable.scrollBuiltInVariable({
               accountId,
@@ -80,7 +79,11 @@ export class VariableManager {
         esvConent
       );
 
-    const builtInVariables = this.getBuiltInVariables(accountId, containerId);
+    const builtInVariables = this.getBuiltInVariables(
+      accountId,
+      containerId,
+      dataLayers
+    );
 
     return [
       ...uniqueVariables,

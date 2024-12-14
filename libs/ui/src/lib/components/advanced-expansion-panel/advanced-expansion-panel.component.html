@@ -13,14 +13,6 @@
             <mat-checkbox formControlName="includeScrollTag"
               >Include Scroll Tag</mat-checkbox
             >
-            <div style="display: flex; align-items: center; gap: 1rem">
-              <mat-checkbox formControlName="includeItemScopedVariables"
-                >Include item scoped variable</mat-checkbox
-              >
-              <mat-icon matSuffix matTooltip="e.g., items[0].name"
-                >help_outline</mat-icon
-              >
-            </div>
           </div>
         </form>
       </section>
@@ -42,7 +34,7 @@
           [formGroup]="setupForm"
           style="display: flex; flex-direction: column"
         >
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" density="compact">
             <mat-label>Google Tag Name</mat-label>
             <input matInput formControlName="googleTagName" />
           </mat-form-field>
