@@ -24,7 +24,7 @@
           ><mat-icon
             matSuffix
             matTooltip="Google Tag has a default name, but you can change it.
-            You can use an existing measurement ID or leave it empty"
+            You can use an existing measurement ID or leave it empty with default placeholder value"
             >help_outline</mat-icon
           ></mat-panel-description
         >
@@ -67,7 +67,7 @@
             >Send Ecommerce Data</mat-checkbox
           >
           <mat-checkbox formControlName="isEsv"
-            >Add Event Setting Variable</mat-checkbox
+            >Add Event Settings Variable</mat-checkbox
           >
           @if (this.ecAndEsvForm.controls['isEsv'].value) {
             <lib-general-editor

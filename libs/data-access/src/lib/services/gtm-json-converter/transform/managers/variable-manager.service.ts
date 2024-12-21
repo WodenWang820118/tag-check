@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { DataLayer, EventSettingsVariable, VariableConfig } from '@utils';
 import { DataLayerVariable } from '../variables/data-layer-variable.service';
-import { RegexVariable } from '../variables/regex-variable.service';
 import { ScrollVariable } from '../variables/scroll-variable.service';
 import { VideoVariable } from '../variables/video-variable.service';
 import { EventUtils } from '../../utils/event-utils.service';
+import { ConstantVariable } from '../variables/constant-variable.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,9 +12,9 @@ import { EventUtils } from '../../utils/event-utils.service';
 export class VariableManager {
   constructor(
     private dataLayerVariable: DataLayerVariable,
-    private regexVariable: RegexVariable,
     private scrollVariable: ScrollVariable,
     private videoVariable: VideoVariable,
+    private constantVariable: ConstantVariable,
     private eventUtils: EventUtils
   ) {}
   getBuiltInVariables(
@@ -45,6 +45,7 @@ export class VariableManager {
   getVariables(
     accountId: string,
     containerId: string,
+    measurementId: string,
     dataLayers: DataLayer[],
     esvConent: EventSettingsVariable[]
   ): VariableConfig[] {
@@ -65,11 +66,11 @@ export class VariableManager {
       return !duplicate;
     });
 
-    console.log('uniqueVariables: ', uniqueVariables);
-    const regexMeasurementIdVariable =
-      this.regexVariable.createRegexMeasurementIdVariable(
+    const constantMeasurementIdVariable =
+      this.constantVariable.createMeasurementIdConstantVariable(
         accountId,
-        containerId
+        containerId,
+        measurementId
       );
 
     const eventSettingsVariable =
@@ -81,7 +82,7 @@ export class VariableManager {
 
     return [
       ...uniqueVariables,
-      regexMeasurementIdVariable,
+      constantMeasurementIdVariable,
       ...eventSettingsVariable
     ].map((data, index) => ({
       ...data,
