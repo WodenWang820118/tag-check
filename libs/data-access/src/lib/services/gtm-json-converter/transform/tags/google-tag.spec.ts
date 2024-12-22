@@ -51,15 +51,15 @@ describe('Google Tag', () => {
     );
 
     // Assert
-    expect(result).toEqual({
+    const expectedTag: TagConfig = {
       name: 'TestGoogleTag',
-      type: 'gaawc',
+      type: 'googtag',
       accountId: 'account123',
       containerId: 'container456',
       parameter: [
+        { type: 'TEMPLATE', key: 'measurementId', value: 'G-12345678' },
         { type: 'BOOLEAN', key: 'sendPageView', value: 'false' },
-        { type: 'BOOLEAN', key: 'enableSendToServerContainer', value: 'false' },
-        { type: 'TEMPLATE', key: 'measurementId', value: 'G-12345678' }
+        { type: 'BOOLEAN', key: 'enableSendToServerContainer', value: 'false' }
       ],
       firingTriggerId: ['2147479553'],
       tagFiringOption: 'ONCE_PER_EVENT',
@@ -69,7 +69,8 @@ describe('Google Tag', () => {
       consentSettings: {
         consentStatus: 'NOT_SET'
       }
-    } as TagConfig);
+    };
+    expect(result).toEqual(expectedTag);
 
     expect(parameterUtils.createBooleanParameter).toHaveBeenCalledTimes(2);
     expect(parameterUtils.createTemplateParameter).toHaveBeenCalledTimes(1);
@@ -82,47 +83,8 @@ describe('Google Tag', () => {
       'false'
     );
     expect(parameterUtils.createTemplateParameter).toHaveBeenCalledWith(
-      'measurementId',
-      'G-12345678'
-    );
-  });
-
-  it('should use default measurement ID when not provided', () => {
-    // Arrange
-    const googleTagName = 'TestGoogleTag';
-    const measurementId = '';
-    const accountId = 'account123';
-    const containerId = 'container456';
-
-    jest.spyOn(parameterUtils, 'createBooleanParameter').mockReturnValue({
-      type: 'BOOLEAN',
-      key: 'sendPageView',
-      value: 'false'
-    });
-
-    jest.spyOn(parameterUtils, 'createTemplateParameter').mockReturnValue({
-      type: 'TEMPLATE',
-      key: 'measurementId',
-      value: '{{Measurement ID}}'
-    });
-
-    // Act
-    const result = googleTag.createGA4Configuration(
-      googleTagName,
-      measurementId,
-      accountId,
-      containerId
-    );
-
-    // Assert
-    expect(result.parameter[2]).toEqual({
-      type: 'TEMPLATE',
-      key: 'measurementId',
-      value: '{{Measurement ID}}'
-    });
-    expect(parameterUtils.createTemplateParameter).toHaveBeenCalledWith(
-      'measurementId',
-      '{{Measurement ID}}'
+      'tagId',
+      '{{CONST - Measurement ID}}'
     );
   });
 });

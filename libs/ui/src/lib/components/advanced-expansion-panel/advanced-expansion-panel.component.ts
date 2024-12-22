@@ -60,7 +60,7 @@ export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
 
   ecAndEsvForm: FormGroup = this.fb.group({
     isSendingEcommerceData: [false],
-    isEsv: [true],
+    isEsv: [false],
     esv: ['']
   });
 
@@ -117,22 +117,23 @@ export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.initializeFormSubscriptions(); // inspect the specification JSON and update the form
-    const esvValue = JSON.stringify(
-      [
-        {
-          name: 'Google Tag G-8HK542DQMG Event Settings',
-          parameters: [
-            {
-              page_referrer: '{{page_referrer for G-8HK542DQMG Tags | String}}'
-            }
-          ]
-        }
-      ],
-      null,
-      2
-    );
+    // Testing code below to test the custimized GTM Event Settings Variable
+    // const esvValue = JSON.stringify(
+    //   [
+    //     {
+    //       name: 'Google Tag G-8HK542DQMG Event Settings',
+    //       parameters: [
+    //         {
+    //           page_referrer: '{{page_referrer for G-8HK542DQMG Tags | String}}'
+    //         }
+    //       ]
+    //     }
+    //   ],
+    //   null,
+    //   2
+    // );
 
-    this.ecAndEsvForm.patchValue({ esv: esvValue });
+    // this.ecAndEsvForm.patchValue({ esv: esvValue });
   }
 
   ngAfterViewInit() {

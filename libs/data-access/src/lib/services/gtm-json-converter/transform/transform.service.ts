@@ -33,6 +33,7 @@ export class TransformService {
       const variables = this.variableManager.getVariables(
         gtmConfigGenerator.accountId,
         gtmConfigGenerator.containerId,
+        measurementId,
         dataLayers,
         esvContent
       );
