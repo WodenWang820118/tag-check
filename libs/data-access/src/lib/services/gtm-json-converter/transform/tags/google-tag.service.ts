@@ -13,23 +13,22 @@ export class GoogleTag {
     accountId: string,
     containerId: string
   ): TagConfig {
-    const measurementIdParameter = measurementId
-      ? measurementId
-      : '{{Measurement ID}}';
+    // create a constant for the measurementIdParameter
+    // let users define the measurementIdParameter in the GTM UI
     return {
       name: googleTagName,
-      type: 'gaawc',
+      type: 'googtag',
       accountId,
       containerId,
       parameter: [
+        this.parameterUtils.createTemplateParameter(
+          'tagId',
+          `{{CONST - Measurement ID}}`
+        ),
         this.parameterUtils.createBooleanParameter('sendPageView', 'false'),
         this.parameterUtils.createBooleanParameter(
           'enableSendToServerContainer',
           'false'
-        ),
-        this.parameterUtils.createTemplateParameter(
-          'measurementId',
-          `${measurementIdParameter}`
         )
       ],
       firingTriggerId: ['2147479553'],
