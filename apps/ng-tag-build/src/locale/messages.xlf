@@ -210,6 +210,137 @@
             libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="about.title">
+        <source>Understanding Tag Build</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.diagram.alt">
+        <source>Tag Build System Diagram</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.description.main">
+        <source>Tag Build is an innovative tool designed specifically for digital marketers and SEO
+          professionals. It streamlines the process of generating JSON files for Google Tag Manager
+          (GTM), following GA4's recommended event structure to ensure optimal tracking
+          implementation.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.description.challenges">
+        <source>While Google Tag Manager offers basic functionality for implementing GA4
+          events, the rapidly evolving nature of business and marketing requirements
+          often necessitates frequent updates and validation. Tag Build addresses
+          these challenges by providing a more efficient and maintainable solution.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.why.title">
+        <source>Why Tag Build?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.why.content">
+        <source>Traditional implementation methods using Google Cloud Platform (GCP)
+          servers can synchronize Google Sheets with GTM effectively. However, many
+          marketing agencies lack access to GCP resources, creating a need for a
+          more accessible solution. Tag Build bridges this gap by providing a
+          standalone tool that doesn't require complex infrastructure.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.benefits.title">
+        <source>Who Benefits?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.benefits.content">
+        <source> Tag Build is ideal for marketing professionals who want to streamline
+          their workflow and focus more on data analytics and business intelligence.
+          It's particularly valuable for teams looking to optimize their tracking
+          implementation while maintaining efficiency.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.howworks.title">
+        <source>How It Works</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.howworks.intro">
+        <source>Explore the seamless integration between GA4 recommended events and Tag
+          Build's structured format:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.achievement.title">
+        <source>Achievement</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.diagram.alt">
+        <source>Diagram showing the Tag Check System architecture and workflow</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.intro">
+        <source>  The GTM Tag Build provides a user-friendly interface for digital
+        marketers and SEO experts to generate JSON files for Google Tag Manager.
+        This tool streamlines tag management by:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.list.item1">
+        <source>Reducing technical complexities</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.list.item2">
+        <source>Enabling effortless creation of accurate JSON files</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.list.item3">
+        <source>Enhancing productivity</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.list.item4">
+        <source>Ensuring error-free tag management</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
     </body>
   </file>
 </xliff>

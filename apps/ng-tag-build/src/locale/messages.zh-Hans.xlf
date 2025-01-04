@@ -16,7 +16,7 @@
             libs/ui/src/lib/components/functional-card/functional-card.compontent.ts</context>
         </context-group>
       </trans-unit>
-        <trans-unit id="advancedExpansionPanelComponentAdditionalTagsVariables" datatype="ts">
+      <trans-unit id="advancedExpansionPanelComponentAdditionalTagsVariables" datatype="ts">
         <source>额外内建标签/变量</source>
         <context-group purpose="location">
           <context context-type="sourcefile">
@@ -65,7 +65,7 @@
             libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
         </context-group>
       </trans-unit>
-            <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsv" datatype="ts">
+      <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsv" datatype="ts">
         <source>电子商务数据和事件设置变量</source>
         <context-group purpose="location">
           <context context-type="sourcefile">
@@ -101,7 +101,8 @@
         </context-group>
       </trans-unit>
       <trans-unit id="articleComponentContentCustomEvents" datatype="ts">
-        <source>Tag Build 旨在通过自动化 GTM（Google 标签管理工具）配置流程来节省用户时间并提高其工作效率。这对于需要管理和跟踪多个网站标签的数字营销人员、网页开发人员和 SEO 专家特别有益，使他们能够更专注于数据分析而非标签实施。</source>
+        <source>Tag Build 旨在通过自动化 GTM（Google
+          标签管理工具）配置流程来节省用户时间并提高其工作效率。这对于需要管理和跟踪多个网站标签的数字营销人员、网页开发人员和 SEO 专家特别有益，使他们能够更专注于数据分析而非标签实施。</source>
         <context-group purpose="location">
           <context context-type="sourcefile">
             libs/ui/src/lib/components/article/article.compontent.ts</context>
@@ -185,7 +186,7 @@
             libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
         </context-group>
       </trans-unit>
-        <trans-unit id="nav.objectives" datatype="ts">
+      <trans-unit id="nav.objectives" datatype="ts">
         <source>目标</source>
         <context-group purpose="location">
           <context context-type="sourcefile">
@@ -197,6 +198,185 @@
         <context-group purpose="location">
           <context context-type="sourcefile">
             libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.title">
+        <source>了解 Tag Build</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.diagram.alt">
+        <source>Tag Build 系统图表</source>
+      </trans-unit>
+      <trans-unit id="about.description.main">
+        <source>Tag Build 是一款专为数字营销人员和 SEO 专业人士设计的创新工具。它简化了为 Google Tag Manager (GTM) 生成 JSON
+          文件的流程，遵循 GA4 建议的事件结构，确保最佳的跟踪实施。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.description.challenges">
+        <source>虽然Google Tag Manager提供了实施GA4事件的基本功能，但业务和营销需求的快速发展往往需要频繁的更新和验证。Tag
+          Build通过提供更高效和可维护的解决方案来应对这些挑战。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.why.title">
+        <source>为什么选择 Tag Build？</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.why.content">
+        <source>使用Google Cloud Platform (GCP) 服务器的传统实施方法可以有效地将Google
+          Sheets与GTM同步。然而，许多营销代理商缺乏GCP资源的使用权限，因此需要一个更容易获取的解决方案。Tag Build通过提供一个不需要复杂基础设施的独立工具来弥补这个差距。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.benefits.title">
+        <source>谁会受益？</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.benefits.content">
+        <source>Tag Build 特别适合想要简化工作流程并更专注于数据分析和商业智能的营销专业人员。对于希望在保持效率的同时优化其跟踪实施的团队来说，这是一个特别有价值的工具。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.howworks.title">
+        <source>运作方式</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.howworks.intro">
+        <source>探索 GA4 推荐事件与 Tag Build 结构化格式之间的无缝整合：</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.achievement.title">
+        <source>成就</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.diagram.alt">
+        <source>展示标签检查系统架构和工作流程的图表</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.intro">
+        <source>GTM 标签构建工具为数字营销人员和 SEO 专家提供了一个友好的界面，用于生成 Google Tag Manager 的 JSON
+          文件。此工具通过以下方式简化标签管理：</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.list.item1">
+        <source>降低技术复杂度</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.list.item2">
+        <source>轻松创建准确的 JSON 文件</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.list.item3">
+        <source>提高工作效率</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.list.item4">
+        <source>确保无错误的标签管理</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.goals.title">
+        <source>目标</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.intro">
+        <source>在维持简化标签管理这个核心目标的同时，我们主要关注验证功能。关键的验证方面包括：</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.list.item1">
+        <source>验证前端标签实施的正确性</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.list.item2">
+        <source>确保标签正确触发</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.list.item3">
+        <source>在快节奏的商业环境中提供有效的验证</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.outro">
+        <source>为了解决这些需求，我们的团队一直致力于</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.link.title">
+        <source>访问 Tag Check 仓库</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.outro2">
+        <source>系统，该系统使用与 GTM Tag Build 相同的数据结构。这种整合方法帮助用户能够自信地验证和确认标签功能。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
         </context-group>
       </trans-unit>
     </body>

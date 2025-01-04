@@ -65,7 +65,7 @@
             libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
         </context-group>
       </trans-unit>
-            <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsv" datatype="ts">
+      <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsv" datatype="ts">
         <source>Eコマースデータとイベント設定変数</source>
         <context-group purpose="location">
           <context context-type="sourcefile">
@@ -101,7 +101,9 @@
         </context-group>
       </trans-unit>
       <trans-unit id="articleComponentContentCustomEvents" datatype="ts">
-        <source>Tag Buildは、GTM（Googleタグマネージャー）の設定プロセスを自動化することで、ユーザーの時間を節約し、生産性を向上させることを目的としています。これは、複数のウェブサイトタグを管理・追跡する必要があるデジタルマーケター、ウェブ開発者、SEO専門家にとって特に有益で、タグの実装よりもデータ分析に集中できるようになります。</source>
+        <source>
+          Tag
+          Buildは、GTM（Googleタグマネージャー）の設定プロセスを自動化することで、ユーザーの時間を節約し、生産性を向上させることを目的としています。これは、複数のウェブサイトタグを管理・追跡する必要があるデジタルマーケター、ウェブ開発者、SEO専門家にとって特に有益で、タグの実装よりもデータ分析に集中できるようになります。</source>
         <context-group purpose="location">
           <context context-type="sourcefile">
             libs/ui/src/lib/components/article/article.compontent.ts</context>
@@ -185,7 +187,7 @@
             libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
         </context-group>
       </trans-unit>
-        <trans-unit id="nav.objectives" datatype="ts">
+      <trans-unit id="nav.objectives" datatype="ts">
         <source>目標</source>
         <context-group purpose="location">
           <context context-type="sourcefile">
@@ -197,6 +199,190 @@
         <context-group purpose="location">
           <context context-type="sourcefile">
             libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.title">
+        <source>Tag Build について</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.diagram.alt">
+        <source>Tag Build システム図</source>
+      </trans-unit>
+      <trans-unit id="about.description.main">
+        <source>Tag Build は、デジタルマーケターとSEO専門家のために特別に設計された革新的なツールです。Google Tag Manager (GTM)
+          用のJSONファイルを生成するプロセスを効率化し、GA4が推奨するイベント構造に従って最適なトラッキング実装を実現します。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.description.challenges">
+        <source>Google Tag
+          Managerは、GA4イベントを実装するための基本的な機能を提供していますが、ビジネスやマーケティング要件の急速な進化により、頻繁な更新と検証が必要となることがあります。Tag
+          Buildは、より効率的で保守可能なソリューションを提供することで、これらの課題に対応します。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.why.title">
+        <source>なぜ Tag Build なのか？</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.why.content">
+        <source>Google Cloud Platform (GCP) サーバーを使用する従来の実装方法では、Google
+          SheetsとGTMを効果的に同期することができます。しかし、多くのマーケティング代理店はGCPリソースへのアクセス権を持っていないため、より利用しやすいソリューションが必要とされています。Tag
+          Buildは、複雑なインフラを必要としないスタンドアロンツールを提供することで、このギャップを埋めています。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.benefits.title">
+        <source>対象者は？</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.benefits.content">
+        <source>
+          Tag
+          Buildは、ワークフローを効率化し、データ分析とビジネスインテリジェンスにより注力したいマーケティング専門家に最適です。効率性を維持しながらトラッキング実装を最適化したいチームにとって、特に価値のあるツールです。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.howworks.title">
+        <source>仕組み</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="about.section.howworks.intro">
+        <source>GA4 推奨イベントと Tag Build の構造化フォーマット間のシームレスな統合をご覧ください：</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.achievement.title">
+        <source>達成</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.diagram.alt">
+        <source>タグチェックシステムのアーキテクチャとワークフローを示す図</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.intro">
+        <source>GTM タグビルドは、デジタルマーケターやSEO専門家向けに、Google Tag
+          Manager用のJSONファイルを生成するための使いやすいインターフェースを提供します。このツールは以下の方法でタグ管理を効率化します：</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.list.item1">
+        <source>技術的な複雑さの軽減</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.list.item2">
+        <source>正確なJSONファイルの簡単な作成</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.list.item3">
+        <source>生産性の向上</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.achievement.list.item4">
+        <source>エラーのないタグ管理の実現</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.goals.title">
+        <source>目標</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.intro">
+        <source>タグ管理の簡素化という基本目標を維持しながら、私たちは検証機能に重点を置いています。主な検証の側面には以下が含まれます：</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.list.item1">
+        <source>フロントエンドのタグ実装の正確性を確認</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.list.item2">
+        <source>タグの適切な発火を確保</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.list.item3">
+        <source>スピーディなビジネス環境での効果的な検証を提供</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.outro">
+        <source>これらのニーズに対応するため、私たちのチームは</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.link.title">
+        <source>Tag Check リポジトリを訪問</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+        </context-group>
+      </trans-unit>
+
+      <trans-unit id="objectives.goals.outro2">
+        <source>システムの開発に取り組んでいます。このシステムは GTM Tag Build
+          と同じデータ構造を使用しており、この統合されたアプローチにより、ユーザーは自信を持ってタグ機能を検証できます。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
         </context-group>
       </trans-unit>
     </body>
