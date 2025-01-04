@@ -1,10 +1,10 @@
-import { EventInspectionPreset } from '../interfaces/event-inspection-preset.interface';
+import { EventInspectionPreset } from '../types/event-inspection-preset.type';
 import {
   Application,
   CookieData,
   LocalStorageData,
-  ProjectSetting,
-} from '../interfaces/setting.interface';
+  ProjectSetting
+} from '../types/setting.type';
 
 export class LocalStorageDto {
   data: LocalStorageData[];
@@ -29,10 +29,10 @@ export class ApplicationDto {
 
   constructor(application: Application) {
     this.localStorage = {
-      data: [...application.localStorage.data],
+      data: [...application.localStorage.data]
     };
     this.cookie = {
-      data: [...application.cookie.data],
+      data: [...application.cookie.data]
     };
   }
 }
@@ -44,11 +44,11 @@ export class EventInspectionPresetDto implements EventInspectionPreset {
   constructor(project: ProjectSetting) {
     (this.application = {
       localStorage: {
-        data: [...project.settings.application.localStorage.data],
+        data: [...project.settings.application.localStorage.data]
       },
       cookie: {
-        data: [...project.settings.application.cookie.data],
-      },
+        data: [...project.settings.application.cookie.data]
+      }
     }),
       (this.puppeteerArgs = [...project.settings.browser]);
   }

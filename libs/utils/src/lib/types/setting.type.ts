@@ -1,9 +1,9 @@
-export interface ProjectSetting {
+export type ProjectSetting = {
   projectSlug: string;
   settings: Setting;
-}
+};
 
-export interface Setting {
+export type Setting = {
   rootProject: string;
   projectName: string;
   projectDescription: string;
@@ -17,39 +17,39 @@ export interface Setting {
   browser: string[];
   headless: boolean;
   authentication: Authentication;
-}
+};
 
-export interface Authentication {
+export type Authentication = {
   username: string;
   password: string;
-}
+};
 
-export interface Gtm {
+export type Gtm = {
   isAccompanyMode: boolean;
   isRequestCheck: boolean;
   tagManagerUrl: string;
   gtmPreviewModeUrl: string;
-}
+};
 
-export interface Application {
+export type Application = {
   localStorage: LocalStorage;
   cookie: Cookie;
-}
+};
 
-export interface LocalStorage {
+export type LocalStorage = {
   data: LocalStorageData[];
-}
+};
 
-export interface Cookie {
+export type Cookie = {
   data: CookieData[];
-}
+};
 
-export interface LocalStorageData {
+export type LocalStorageData = {
   key: string;
   value: string;
-}
+};
 
-export interface CookieData {
+export type CookieData = {
   key: string;
   value: string;
-}
+};

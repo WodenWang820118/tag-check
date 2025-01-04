@@ -1,18 +1,18 @@
 // interfaces
-export * from './lib/interfaces/event-inspection-preset.interface';
-export * from './lib/interfaces/setting.interface';
-export * from './lib/interfaces/recording.interface';
-export * from './lib/interfaces/spec.interface';
-export * from './lib/interfaces/report.interface';
-export * from './lib/interfaces/configuration.interface';
-export * from './lib/interfaces/project-info.interface';
-export * from './lib/interfaces/data-layer.interface';
-export * from './lib/interfaces/tag-build.interface';
-export * from './lib/interfaces/topic-node.interface';
-export * from './lib/interfaces/file-report.interface';
-export * from './lib/interfaces/carousel-item.interface';
-export * from './lib/interfaces/action.interface';
-export * from './lib/interfaces/event-settings-variable.interface';
+export * from './lib/types/event-inspection-preset.type';
+export * from './lib/types/setting.type';
+export * from './lib/types/recording.type';
+export * from './lib/types/spec.type';
+export * from './lib/types/report.type';
+export * from './lib/types/configuration.type';
+export * from './lib/types/project-info.type';
+export * from './lib/types/data-layer.type';
+export * from './lib/types/tag-build.type';
+export * from './lib/types/topic-node.type';
+export * from './lib/types/file-report.type';
+export * from './lib/types/carousel-item.type';
+export * from './lib/types/action.type';
+export * from './lib/types/event-settings-variable.type';
 
 // DTOs
 export * from './lib/dtos/event-inspect-preset.dto';

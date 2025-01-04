@@ -1,4 +1,4 @@
-export interface ProjectInfo {
+export type ProjectInfo = {
   rootProject: string;
   projectName: string;
   projectSlug: string;
@@ -6,4 +6,4 @@ export interface ProjectInfo {
   measurementId: string;
   googleSpreadsheetLink: string;
   version: string;
-}
+};

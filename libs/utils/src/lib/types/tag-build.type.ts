@@ -1,32 +1,32 @@
-import { Spec } from './spec.interface';
+import { Spec } from './spec.type';
 
-export interface NestedObject {
+export type NestedObject = {
   [key: string]: any;
-}
+};
 
-export interface ParameterMap {
+export type ParameterMap = {
   type: string;
   map: Parameter[];
-}
+};
 
-export interface Parameter {
+export type Parameter = {
   type: string;
   key: string;
   value?: string;
   list?: ParameterMap[];
-}
+};
 
-export interface CustomEventFilter {
+export type CustomEventFilter = {
   type: string;
   parameter: Parameter[];
-}
+};
 
-export interface Trigger {
+export type Trigger = {
   name: string;
   triggerId: string;
-}
+};
 
-export interface TriggerConfig {
+export type TriggerConfig = {
   name: string;
   type: string;
   accountId: string;
@@ -36,15 +36,15 @@ export interface TriggerConfig {
   fingerprint?: string;
   customEventFilter?: CustomEventFilter[];
   parameter?: Parameter[];
-}
+};
 
-export interface Tag {
+export type Tag = {
   name: string;
   triggers: Trigger[];
   parameters: Parameter[];
-}
+};
 
-export interface TagConfig {
+export type TagConfig = {
   name: string;
   type: string;
   accountId: string;
@@ -59,9 +59,9 @@ export interface TagConfig {
   consentSettings: {
     consentStatus: 'NOT_SET';
   };
-}
+};
 
-export interface VariableConfig {
+export type VariableConfig = {
   name: string;
   type: string;
   accountId: string;
@@ -70,21 +70,21 @@ export interface VariableConfig {
   formatValue?: object;
   variableId?: string;
   fingerprint?: string;
-}
+};
 
-export interface GtmConfigGenerator {
+export type GtmConfigGenerator = {
   accountId: string;
   containerId: string;
   containerName: string;
   gtmId: string;
   specs: Spec[];
-}
+};
 
-export interface DataRow {
+export type DataRow = {
   [key: string]: string;
-}
+};
 
-export interface DataLayer {
+export type DataLayer = {
   event: string;
   paths: string[];
-}
+};

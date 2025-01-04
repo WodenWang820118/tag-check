@@ -1,7 +1,7 @@
 import {
   BaseDataLayerEvent,
-  StrictDataLayerEvent,
-} from '../interfaces/data-layer.interface';
+  StrictDataLayerEvent
+} from '../types/data-layer.type';
 
 export class ReportDetailsDto {
   position = 0;
