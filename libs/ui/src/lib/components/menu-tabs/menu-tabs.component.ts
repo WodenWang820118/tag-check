@@ -18,32 +18,6 @@ interface Link {
   imports: [MatTabsModule, MatIconModule, RouterModule],
   template: `
     <nav mat-tab-nav-bar [tabPanel]="tabPanel">
-      <!-- @for (link of links; track link) {
-        @if (link.nameKey.toLowerCase() === 'github') {
-          <a
-            mat-tab-link
-            (click)="activeLink = link; navigateTo(link.link)"
-            [active]="activeLink == link"
-            class="nav-link-container"
-          >
-            <mat-icon class="nav-icon" svgIcon="github"></mat-icon>
-            <span i18n="@@nav.github">GitHub</span>
-          </a>
-        } @else {
-          <a
-            mat-tab-link
-            (click)="activeLink = link; navigateTo(link.link)"
-            [active]="activeLink == link"
-            class="nav-link-container"
-          >
-            <mat-icon class="nav-icon">{{ link.icon }}</mat-icon>
-            <span i18n="Navigation link@@nav.{{ link.nameKey }}">{{
-              getTranslatedName(link.nameKey)
-            }}</span>
-          </a>
-        }
-      } -->
-
       <a
         mat-tab-link
         (click)="activeLink = links[0]; navigateTo(links[0].link)"
@@ -65,6 +39,7 @@ interface Link {
 
       <a
         mat-tab-link
+        href="https://github.com/WodenWang820118/tag-check"
         (click)="activeLink = links[2]; navigateTo(links[2].link)"
         [active]="activeLink == links[2]"
         class="nav-link-container"
