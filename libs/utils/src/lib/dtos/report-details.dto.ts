@@ -1,7 +1,4 @@
-import {
-  BaseDataLayerEvent,
-  StrictDataLayerEvent
-} from '../types/data-layer.type';
+import { BaseDataLayerEvent, StrictDataLayerEvent } from '../types/tag-check';
 
 export class ReportDetailsDto {
   position = 0;

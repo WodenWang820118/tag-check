@@ -31,8 +31,7 @@ describe('DataLayerVariable', () => {
         containerId,
         dataLayerName
       );
-
-      expect(result).toEqual([
+      const expected: VariableConfig[] = [
         {
           name: 'DLV - testDataLayer',
           type: 'v',
@@ -44,7 +43,9 @@ describe('DataLayerVariable', () => {
             { type: 'TEMPLATE', key: 'name', value: 'testDataLayer' }
           ]
         }
-      ]);
+      ];
+
+      expect(result).toEqual(expected);
     });
 
     it('should trim the dataLayerName', () => {

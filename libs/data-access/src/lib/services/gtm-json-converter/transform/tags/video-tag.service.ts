@@ -110,7 +110,7 @@ export class VideoTag {
     accountId: string,
     containerId: string,
     triggers: Trigger[]
-  ) {
+  ): TagConfig[] {
     try {
       // TODO: get the information whether the video is included in the data
       const data = [] as any;

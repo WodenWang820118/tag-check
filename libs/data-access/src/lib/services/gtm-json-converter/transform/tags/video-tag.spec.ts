@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { VideoTag } from './video-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { Trigger } from '@utils';
+import { Tag, TagConfig, Trigger } from '@utils';
 
 describe('VideoTag', () => {
   let videoTag: VideoTag;
@@ -88,7 +88,7 @@ describe('VideoTag', () => {
       );
 
       // Assert
-      expect(result).toEqual([
+      const expected: TagConfig[] = [
         {
           accountId,
           containerId,
@@ -251,7 +251,9 @@ describe('VideoTag', () => {
             consentStatus: 'NOT_SET'
           }
         }
-      ]);
+      ];
+
+      expect(result).toEqual(expected);
     });
   });
 });

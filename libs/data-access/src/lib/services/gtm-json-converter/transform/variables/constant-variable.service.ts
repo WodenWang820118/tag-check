@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
+import { VariableConfig } from '@utils';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class ConstantVariable {
     accountId: string,
     containerId: string,
     measurementId: string
-  ) {
+  ): VariableConfig {
     const measurementIdConstantVariable = {
       accountId: accountId,
       containerId: containerId,

@@ -5,7 +5,8 @@ import {
   EditorFacadeService,
   EsvEditorService,
   SpecExtractService,
-  SetupConstructorService
+  SetupConstructorService,
+  UtilsService
 } from '@data-access';
 import { combineLatest, take, tap } from 'rxjs';
 import { containerName, gtmId, tagManagerUrl } from './test-data';
@@ -14,7 +15,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConversionSuccessDialogComponent } from '../conversion-success-dialog/conversion-success-dialog.component';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
 import { MatButtonModule } from '@angular/material/button';
-import { Spec } from '@utils';
+import { GTMContainerConfig, GTMConfiguration, Spec } from '@utils';
 
 @Component({
   selector: 'lib-functional-card',
@@ -36,7 +37,8 @@ export class FunctionalCardComponent {
     public editorFacadeService: EditorFacadeService,
     private setupConstructorService: SetupConstructorService,
     private esvEditorService: EsvEditorService,
-    private specExtractService: SpecExtractService
+    private specExtractService: SpecExtractService,
+    private utilsService: UtilsService
   ) {
     this.dataLayer = (window as any).dataLayer || [];
   }
@@ -123,13 +125,17 @@ export class FunctionalCardComponent {
     }[]
   ) {
     this.editorFacadeService.setInputJsonContent(json);
-    // TODO: refactor: handle the logic directly without another function
-    const gtmConfigGenerator = this.setupConstructorService.generateGtmConfig(
-      json,
-      tagManagerUrl,
-      containerName,
-      gtmId
-    );
+
+    const { accountId, containerId } =
+      this.utilsService.extractAccountAndContainerId(tagManagerUrl);
+
+    const gtmConfigGenerator: GTMContainerConfig = {
+      accountId: accountId,
+      containerId: containerId,
+      containerName: containerName,
+      gtmId: gtmId,
+      specs: json
+    };
 
     const result = this.transformService.convert(
       googleTagName,
@@ -141,7 +147,7 @@ export class FunctionalCardComponent {
     this.postConversion(result);
   }
 
-  postConversion(result: any) {
+  postConversion(result: GTMConfiguration) {
     this.editorFacadeService.setOutputJsonContent(result);
     this.openSuccessConversionDialog(result);
 

@@ -5,5 +5,6 @@ export type ProjectRecording = {
 
 export type Recording = {
   title: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   steps: Record<string, any>[];
 };

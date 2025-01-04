@@ -1,10 +1,10 @@
-import { EventInspectionPreset } from '../types/event-inspection-preset.type';
 import {
   Application,
   CookieData,
+  EventInspectionPreset,
   LocalStorageData,
   ProjectSetting
-} from '../types/setting.type';
+} from '../types/tag-check';
 
 export class LocalStorageDto {
   data: LocalStorageData[];
@@ -42,14 +42,14 @@ export class EventInspectionPresetDto implements EventInspectionPreset {
   puppeteerArgs: string[];
 
   constructor(project: ProjectSetting) {
-    (this.application = {
+    this.application = {
       localStorage: {
         data: [...project.settings.application.localStorage.data]
       },
       cookie: {
         data: [...project.settings.application.cookie.data]
       }
-    }),
-      (this.puppeteerArgs = [...project.settings.browser]);
+    };
+    this.puppeteerArgs = [...project.settings.browser];
   }
 }

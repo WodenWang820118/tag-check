@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ScrollTag } from './scroll-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { Trigger } from '@utils';
+import { TagConfig, Trigger } from '@utils';
 
 describe('ScrollTag', () => {
   let scrollTag: ScrollTag;
@@ -128,7 +128,7 @@ describe('ScrollTag', () => {
       );
 
       // Assert
-      expect(result).toEqual([
+      const expected: TagConfig[] = [
         {
           accountId,
           containerId,
@@ -174,7 +174,9 @@ describe('ScrollTag', () => {
             consentStatus: 'NOT_SET'
           }
         }
-      ]);
+      ];
+
+      expect(result).toEqual(expected);
 
       expect(parameterUtils.createBooleanParameter).toHaveBeenCalledWith(
         'sendEcommerceData',

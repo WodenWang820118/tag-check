@@ -6,7 +6,7 @@ describe('VideoVariable', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [VideoVariable],
+      providers: [VideoVariable]
     });
 
     service = TestBed.inject(VideoVariable);
@@ -21,13 +21,12 @@ describe('VideoVariable', () => {
     const containerId = 'test-container';
 
     const result = service.videoBuiltInVariable({ accountId, containerId });
-
-    expect(result).toEqual([
+    const expected = [
       {
         accountId,
         containerId,
         type: 'VIDEO_PROVIDER',
-        name: 'Video Provider',
+        name: 'Video Provider'
       },
       { accountId, containerId, type: 'VIDEO_URL', name: 'Video URL' },
       { accountId, containerId, type: 'VIDEO_TITLE', name: 'Video Title' },
@@ -35,34 +34,35 @@ describe('VideoVariable', () => {
         accountId,
         containerId,
         type: 'VIDEO_DURATION',
-        name: 'Video Duration',
+        name: 'Video Duration'
       },
       {
         accountId,
         containerId,
         type: 'VIDEO_PERCENT',
-        name: 'Video Percent',
+        name: 'Video Percent'
       },
       {
         accountId,
         containerId,
         type: 'VIDEO_VISIBLE',
-        name: 'Video Visible',
+        name: 'Video Visible'
       },
       { accountId, containerId, type: 'VIDEO_STATUS', name: 'Video Status' },
       {
         accountId,
         containerId,
         type: 'VIDEO_CURRENT_TIME',
-        name: 'Video Current Time',
-      },
-    ]);
+        name: 'Video Current Time'
+      }
+    ];
+    expect(result).toEqual(expected);
   });
 
   it('should return an array with 8 items', () => {
     const result = service.videoBuiltInVariable({
       accountId: 'any',
-      containerId: 'any',
+      containerId: 'any'
     });
     expect(Array.isArray(result)).toBe(true);
     expect(result.length).toBe(8);
@@ -83,7 +83,7 @@ describe('VideoVariable', () => {
   it('should have unique types and names for each item', () => {
     const result = service.videoBuiltInVariable({
       accountId: 'any',
-      containerId: 'any',
+      containerId: 'any'
     });
     const types = new Set(result.map((item) => item.type));
     const names = new Set(result.map((item) => item.name));

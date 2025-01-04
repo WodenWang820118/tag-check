@@ -80,29 +80,4 @@ export class SpecExtractService {
       throw new Error('Failed to fix JSON parsing issues');
     }
   }
-
-  // parseAllSpecs(inputString: string): Record<string, string>[] {
-  //   try {
-  //     const allSpecs = JSON.parse(inputString);
-  //     return allSpecs.map(this.parseSpec.bind(this));
-  //   } catch (error) {
-  //     console.error('Error parsing specs:', error);
-  //     throw new Error(
-  //       'Cannot parse JSON. Please revise the format to follow JSON structure rules'
-  //     );
-  //   }
-  // }
-
-  // private parseSpec(
-  //   parsedJSON: Record<string, string>
-  // ): Record<string, string> {
-  //   if (parsedJSON) {
-  //     const { event, ...json } = parsedJSON;
-  //     const paths = this.utilsService.getAllObjectPaths(json);
-  //     this.dataLayerUtils.addDataLayer(paths);
-  //     return parsedJSON;
-  //   } else {
-  //     throw new Error('Invalid spec format');
-  //   }
-  // }
 }
