@@ -1,7 +1,4 @@
 <div class="main-page">
-  <div class="main-page__title">
-    <h1>Tag Build</h1>
-  </div>
   <div class="main-page__board">
     <div class="main-page__board__item main-page__editor">
       <lib-editor
@@ -22,21 +19,17 @@
     </div>
   </div>
   @defer (on viewport) {
-  <mat-sidenav-container>
-    <lib-xlsx-sidenav-form></lib-xlsx-sidenav-form>
-  </mat-sidenav-container>
+    <mat-sidenav-container>
+      <lib-xlsx-sidenav-form></lib-xlsx-sidenav-form>
+    </mat-sidenav-container>
   } @placeholder {
-  <div></div>
-  } @defer (on viewport) {
-  <div class="main-page__article">
-    <lib-article />
-  </div>
+    <div></div>
+  }
+  @defer (on viewport) {
+    <div class="main-page__article">
+      <lib-article />
+    </div>
   } @placeholder {
-  <div></div>
+    <div></div>
   }
 </div>
-@defer (on viewport) {
-<lib-footer></lib-footer>
-} @placeholder {
-<div></div>
-}

@@ -1,0 +1,116 @@
+.objectives {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 1rem;
+
+  // Section styling
+  &__section {
+    margin-bottom: 2rem;
+  }
+
+  // Figure and image styling
+  &__figure {
+    margin: 1rem 0;
+  }
+
+  &__diagram {
+    float: right;
+    max-width: 60%;
+    margin: 0 0 1rem 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  // Content styling
+  &__content {
+    margin-bottom: 1.5rem;
+
+    p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+      text-align: justify;
+      text-justify: inter-word;
+    }
+  }
+
+  &__list {
+    margin: 1rem 0 1.5rem 1.5rem;
+
+    li {
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+  }
+
+  a {
+    color: #2563eb; // Bright blue for good visibility
+    text-decoration: none;
+    text-decoration-thickness: 0.1em;
+    text-underline-offset: 0.2em;
+    transition: all 0.2s ease-in-out;
+    padding: 0.1em 0.2em;
+    border-radius: 2px;
+
+    // Link state
+    &:link {
+      color: #2563eb;
+    }
+
+    // Visited state
+    &:visited {
+      color: #7c3aed; // Purple shade
+    }
+
+    // Hover state
+    &:hover {
+      color: #1e40af; // Darker blue
+      background-color: rgba(37, 99, 235, 0.1);
+      text-decoration-thickness: 0.2em;
+    }
+
+    // Focus state (for accessibility)
+    &:focus {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+      background-color: rgba(37, 99, 235, 0.1);
+    }
+
+    // Active state
+    &:active {
+      color: #1e3a8a; // Even darker blue
+      background-color: rgba(37, 99, 235, 0.2);
+    }
+  }
+
+  // Responsive breakpoints
+  @media (max-width: 768px) {
+    &__diagram {
+      float: none;
+      max-width: 100%;
+      margin: 1rem 0;
+      display: block;
+    }
+
+    &__content {
+      p {
+        text-align: left;
+      }
+    }
+
+    &__code-container {
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+
+    &__heading {
+      font-size: 1.25rem;
+    }
+
+    &__list {
+      margin-left: 1rem;
+    }
+  }
+}

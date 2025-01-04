@@ -10,6 +10,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { UploadActionComponent } from '../../components/upload-action/upload-action.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { JsonPipe } from '@angular/common';
+import { ToolBarComponent } from '../../components/toolbar/toolbar.component';
 
 @Component({
   selector: 'lib-tag-build-app',
@@ -23,11 +24,10 @@ import { JsonPipe } from '@angular/common';
     FooterComponent,
     XlsxSidenavComponent,
     UploadActionComponent,
-    FileUploadDialogComponent,
-    ErrorDialogComponent,
+    ToolBarComponent
   ],
   templateUrl: './tag-build-app.component.html',
-  styleUrls: ['./tag-build-app.component.scss'],
+  styleUrls: ['./tag-build-app.component.scss']
 })
 export class TagBuildAppComponent {
   exampleInputJson = [];
@@ -44,8 +44,8 @@ export class TagBuildAppComponent {
   openDialog(data: any) {
     this.dialog.open(ErrorDialogComponent, {
       data: {
-        message: data.message,
-      },
+        message: data.message
+      }
     });
   }
 }

@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
   imports: [MatButtonModule],
   template: `
     <button
+      i18n="@@uploadActionComponentUploadButton"
       mat-stroked-button
       (click)="onUploadClick()"
       class="functional-card__actions__item"
@@ -14,7 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
       Upload
     </button>
   `,
-  styles: [],
+  styles: []
 })
 export class UploadActionComponent {
   @Output() uploadClick = new EventEmitter<void>();
