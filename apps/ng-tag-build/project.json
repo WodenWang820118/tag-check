@@ -5,6 +5,23 @@
   "prefix": "app",
   "sourceRoot": "apps/ng-tag-build/src",
   "tags": [],
+  "i18n": {
+    "sourceLocale": "en-US",
+    "locales": {
+      "zh-Hant": {
+        "translation": "apps/ng-tag-build/src/locale/messages.zh-hant.xlf",
+        "baseHref": ""
+      },
+      "zh-Hans": {
+        "translation": "apps/ng-tag-build/src/locale/messages.zh-hans.xlf",
+        "baseHref": ""
+      },
+      "ja": {
+        "translation": "apps/ng-tag-build/src/locale/messages.ja.xlf",
+        "baseHref": ""
+      }
+    }
+  },
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:application",
@@ -13,20 +30,38 @@
         "outputPath": "dist/apps/ng-tag-build",
         "index": "apps/ng-tag-build/src/index.html",
         "browser": "apps/ng-tag-build/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": ["zone.js", "@angular/localize/init"],
         "tsConfig": "apps/ng-tag-build/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
           "apps/ng-tag-build/src/favicon.ico",
-          "apps/ng-tag-build/src/assets"
+          "apps/ng-tag-build/src/assets",
+          "apps/ng-tag-build/src/locale"
         ],
         "styles": [
           "@angular/material/prebuilt-themes/indigo-pink.css",
           "apps/ng-tag-build/src/styles.scss"
         ],
-        "scripts": []
+        "scripts": [],
+        "localize": true,
+        "i18nMissingTranslation": "warning"
       },
       "configurations": {
+        "zh-Hant": {
+          "localize": ["zh-Hant"],
+          "outputPath": "dist/apps/ng-tag-build-zh-hant/",
+          "i18nMissingTranslation": "warning"
+        },
+        "zh-Hans": {
+          "localize": ["zh-Hans"],
+          "outputPath": "dist/apps/ng-tag-build-zh-hans/",
+          "i18nMissingTranslation": "warning"
+        },
+        "ja": {
+          "localize": ["ja"],
+          "outputPath": "dist/apps/ng-tag-build-ja/",
+          "i18nMissingTranslation": "warning"
+        },
         "production": {
           "budgets": [
             {
@@ -53,6 +88,15 @@
     "serve": {
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
+        "zh-Hant": {
+          "buildTarget": "ng-tag-build:build:zh-Hant"
+        },
+        "zh-Hans": {
+          "buildTarget": "ng-tag-build:build:zh-Hans"
+        },
+        "ja": {
+          "buildTarget": "ng-tag-build:build:ja"
+        },
         "production": {
           "buildTarget": "ng-tag-build:build:production"
         },
@@ -65,7 +109,8 @@
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
-        "buildTarget": "ng-tag-build:build"
+        "buildTarget": "ng-tag-build:build",
+        "outputPath": "apps/ng-tag-build/src/locale"
       }
     },
     "lint": {

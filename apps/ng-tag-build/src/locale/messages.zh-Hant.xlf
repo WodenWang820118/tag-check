@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="zh-Hant" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="uploadActionComponentUploadButton" datatype="ts">
+        <source>上傳</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/upload-action/upload-action.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="functionalCardComponentConvertButton" datatype="ts">
+        <source>轉換</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/functional-card/functional-card.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+        <trans-unit id="advancedExpansionPanelComponentAdditionalTagsVariables" datatype="ts">
+        <source>額外內建標籤/變數</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentIncludeVideoTag" datatype="ts">
+        <source>包含影片標籤</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentIncludeScrollTag" datatype="ts">
+        <source>包含捲動標籤</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTag" datatype="ts">
+        <source>Google 標籤</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTagHelpIcon" datatype="ts">
+        <source>Google 標籤具有預設名稱，但您可以更改它。您可以使用現有的測量 ID 或保留空白使用預設預留位置值</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTagName" datatype="ts">
+        <source>Google 標籤名稱</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTagMeasurementId" datatype="ts">
+        <source>使用現有的測量 ID</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+            <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsv" datatype="ts">
+        <source>電子商務數據和事件設定變數</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsvHelpIcon" datatype="ts">
+        <source>電子商務數據來源預設為數據層</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentSendECData" datatype="ts">
+        <source>發送電子商務數據</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentAddESV" datatype="ts">
+        <source>新增事件設定變數</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentTitleCustomEvents" datatype="ts">
+        <source>自訂事件</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentCustomEvents" datatype="ts">
+        <source>Tag Build 旨在透過自動化 GTM（Google 標籤管理工具）配置流程來節省用戶時間並提高其工作效率。這對於需要管理和追蹤多個網站標籤的數位行銷人員、網頁開發人員和 SEO 專家特別有益，使他們能夠更專注於數據分析而非標籤實施。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentArray" datatype="ts">
+        <source>預期輸入為物件陣列：</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentCustomEvents2" datatype="ts">
+        <source>請注意，美元符號「$」用於參考文件或規格中的變數。您可以用實際值替換「$變數名稱」預留位置，或將其留空。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentTitleECAndESV" datatype="ts">
+        <source>發送電子商務數據和事件設定變數</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentECAndESV" datatype="ts">
+        <source>點擊發送電子商務數據後，系統將移除每個標籤已定義的電子商務事件參數，並透過數據層進行數據收集。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentECAndESV2" datatype="ts">
+        <source>點擊新增事件設定變數後，將會出現配置編輯器。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <!-- Footer -->
+      <trans-unit id="footerComponentCreatedBy" datatype="ts">
+        <source>作者：</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentAuthorName" datatype="ts">
+        <source>王冠信</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentContact" datatype="ts">
+        <source>聯絡：</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentGitHub" datatype="ts">
+        <source>在 GitHub 上查看</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentLastUpdated" datatype="ts">
+        <source>最後更新於：2024-12-29</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="nav.about" datatype="ts">
+        <source>關於</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+        <trans-unit id="nav.objectives" datatype="ts">
+        <source>目標</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="nav.github" datatype="ts">
+        <source>GitHub</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

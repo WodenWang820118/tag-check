@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="en-US" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="uploadActionComponentUploadButton" datatype="ts">
+        <source>Upload</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/upload-action/upload-action.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="functionalCardComponentConvertButton" datatype="ts">
+        <source>Upload</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/functional-card/functional-card.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentAdditionalTagsVariables" datatype="ts">
+        <source>Additional Built-in Tags/variables</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentIncludeVideoTag" datatype="ts">
+        <source>Include Video Tag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentIncludeScrollTag" datatype="ts">
+        <source>Include Scroll Tag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTag" datatype="ts">
+        <source>Google Tag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTagHelpIcon" datatype="ts">
+        <source>Google Tag has a default name, but you can change it.
+          You can use an existing measurement ID or leave it empty with default placeholder value</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTagName" datatype="ts">
+        <source>Google Tag Name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTagMeasurementId" datatype="ts">
+        <source>Use Existing Measurement ID</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsv" datatype="ts">
+        <source>Ecommerce data &amp; Event Settings Variable</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsvHelpIcon" datatype="ts">
+        <source>Ecommerce data source is data layer by default</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentSendECData" datatype="ts">
+        <source>Send Ecommerce Data</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentAddESV" datatype="ts">
+        <source>Add Event Settings Variable</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <!-- Article -->
+      <trans-unit id="articleComponentTitleCustomEvents" datatype="ts">
+        <source>Custom Events</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentCustomEvents" datatype="ts">
+        <source>Tag Build aims to save users' time and increase their productivity by
+          automating the GTM (Google Tag Manager) configuration process. This is
+          especially beneficial for digital marketers, web developers, and SEO
+          experts who need to manage and track multiple website tags, enabling
+          them to focus more on data analysis rather than tag implementations.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentArray" datatype="ts">
+        <source>The expected input is an array of objects:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentCustomEvents2" datatype="ts">
+        <source>Note that the dollar sign "$" is intended to refer to variables that can
+          be referenced in the document or specifications. You can replace the
+          "$variable_name" placeholders with actual values, or leave them empty.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentTitleECAndESV" datatype="ts">
+        <source>Send Ecommerce Data and Event Settings Variable</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentECAndESV" datatype="ts">
+        <source>By clicking the Send Ecommerce Data The system will remove
+          defined e-commrece event parameters for each tag and perform data
+          collection via the data layer.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentECAndESV2" datatype="ts">
+        <source>By clicking the Add Event Settings Variable, there will an editor
+          for configuration.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <!-- Footer -->
+      <trans-unit id="footerComponentCreatedBy" datatype="ts">
+        <source>Created by:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentAuthorName" datatype="ts">
+        <source>Guan Xin Wang</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentContact" datatype="ts">
+        <source>Contant:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentGitHub" datatype="ts">
+        <source>View on GitHub</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentLastUpdated" datatype="ts">
+        <source>Last updated on: 2024-12-29</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="nav.about" datatype="ts">
+        <source>About</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="nav.objectives" datatype="ts">
+        <source>objectives</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="nav.github" datatype="ts">
+        <source>GitHub</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

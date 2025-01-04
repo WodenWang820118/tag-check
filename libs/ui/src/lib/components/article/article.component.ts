@@ -7,29 +7,33 @@ import { Component } from '@angular/core';
   template: `<div class="article">
     <div class="article__purpose"></div>
     <div class="article__usage">
-      <h1>Custom Events</h1>
-      <p>
+      <h1 i18n="@@articleComponentTitleCustomEvents">Custom Events</h1>
+      <p i18n="@@articleComponentContentCustomEvents">
         Tag Build aims to save users' time and increase their productivity by
         automating the GTM (Google Tag Manager) configuration process. This is
         especially beneficial for digital marketers, web developers, and SEO
         experts who need to manage and track multiple website tags, enabling
         them to focus more on data analysis rather than tag implementations.
       </p>
-      <p>The expected input is an array of objects:</p>
+      <p i18n="@@articleComponentArray">
+        The expected input is an array of objects:
+      </p>
       <pre class="json-code">{{ exampleInput | json }}</pre>
       <div></div>
-      <p>
+      <p i18n="@@articleComponentContentCustomEvents2">
         Note that the dollar sign "$" is intended to refer to variables that can
         be referenced in the document or specifications. You can replace the
         "$variable_name" placeholders with actual values, or leave them empty.
       </p>
-      <h1>Send Ecommerce Data and Event Settings Variable</h1>
-      <p>
+      <h1 i18n="@@articleComponentTitleECAndESV">
+        Send Ecommerce Data and Event Settings Variable
+      </h1>
+      <p i18n="@@articleComponentContentECAndESV">
         By clicking the <b>Send Ecommerce Data</b> The system will remove
         defined e-commrece event parameters for each tag and perform data
         collection via the data layer.
       </p>
-      <p>
+      <p i18n="@@articleComponentContentECAndESV2">
         By clicking the <b>Add Event Settings Variable</b>, there will an editor
         for configuration.
       </p>

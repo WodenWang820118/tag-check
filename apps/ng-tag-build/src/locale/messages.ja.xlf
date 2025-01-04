@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file source-language="ja" datatype="plaintext" original="ng2.template">
+    <body>
+      <trans-unit id="uploadActionComponentUploadButton" datatype="ts">
+        <source>アップロード</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/upload-action/upload-action.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="functionalCardComponentConvertButton" datatype="ts">
+        <source>変換する</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/functional-card/functional-card.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentAdditionalTagsVariables" datatype="ts">
+        <source>追加ビルトインタグ/変数</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentIncludeVideoTag" datatype="ts">
+        <source>動画タグを含める</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentIncludeScrollTag" datatype="ts">
+        <source>スクロールタグを含める</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTag" datatype="ts">
+        <source>Google タグ</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTagHelpIcon" datatype="ts">
+        <source>Google タグにはデフォルトの名前がありますが、変更することができます。既存の測定IDを使用するか、デフォルトのプレースホルダー値のまま空欄にしておくことができます</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTagName" datatype="ts">
+        <source>Google タグ名</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTagMeasurementId" datatype="ts">
+        <source>既存の測定IDを使用</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+            <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsv" datatype="ts">
+        <source>Eコマースデータとイベント設定変数</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsvHelpIcon" datatype="ts">
+        <source>Eコマースデータソースはデフォルトでデータレイヤーです</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentSendECData" datatype="ts">
+        <source>Eコマースデータを送信</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentAddESV" datatype="ts">
+        <source>イベント設定変数を追加</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentTitleCustomEvents" datatype="ts">
+        <source>カスタムイベント</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentCustomEvents" datatype="ts">
+        <source>Tag Buildは、GTM（Googleタグマネージャー）の設定プロセスを自動化することで、ユーザーの時間を節約し、生産性を向上させることを目的としています。これは、複数のウェブサイトタグを管理・追跡する必要があるデジタルマーケター、ウェブ開発者、SEO専門家にとって特に有益で、タグの実装よりもデータ分析に集中できるようになります。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentArray" datatype="ts">
+        <source>予想される入力はオブジェクトの配列です：</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentCustomEvents2" datatype="ts">
+        <source>ドル記号「$」は、ドキュメントまたは仕様で参照できる変数を示すために使用されます。「$変数名」のプレースホルダーを実際の値に置き換えるか、空のままにすることができます。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentTitleECAndESV" datatype="ts">
+        <source>Eコマースデータとイベント設定変数を送信</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentECAndESV" datatype="ts">
+        <source>Eコマースデータを送信をクリックすると、システムは各タグで定義されたEコマースイベントパラメータを削除し、データレイヤーを通じてデータ収集を実行します。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentECAndESV2" datatype="ts">
+        <source>イベント設定変数を追加をクリックすると、設定エディターが表示されます。</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/article/article.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <!-- Footer -->
+      <trans-unit id="footerComponentCreatedBy" datatype="ts">
+        <source>作成者：</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentAuthorName" datatype="ts">
+        <source>王冠信(オンカンシン)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentContact" datatype="ts">
+        <source>連絡先：</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentGitHub" datatype="ts">
+        <source>GitHubで表示</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentLastUpdated" datatype="ts">
+        <source>最終更新日：2024-12-29</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="nav.about" datatype="ts">
+        <source>概要</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+        <trans-unit id="nav.objectives" datatype="ts">
+        <source>目標</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="nav.github" datatype="ts">
+        <source>GitHub</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">
+            libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
+        </context-group>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

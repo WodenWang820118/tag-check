@@ -2,15 +2,23 @@
   <mat-accordion multi>
     <mat-expansion-panel (opened)="onPanelOpened()" togglePosition="before">
       <mat-expansion-panel-header [@.disabled]="true">
-        <mat-panel-title> Additional Built-in Tags/variables </mat-panel-title>
+        <mat-panel-title
+          i18n="@@advancedExpansionPanelComponentAdditionalTagsVariables"
+        >
+          Additional Built-in Tags/variables
+        </mat-panel-title>
       </mat-expansion-panel-header>
       <section class="advanced__tags">
         <form [formGroup]="form">
           <div style="display: flex; flex-direction: column">
-            <mat-checkbox formControlName="includeVideoTag"
+            <mat-checkbox
+              i18n="@@advancedExpansionPanelComponentIncludeVideoTag"
+              formControlName="includeVideoTag"
               >Include Video Tag</mat-checkbox
             >
-            <mat-checkbox formControlName="includeScrollTag"
+            <mat-checkbox
+              i18n="@@advancedExpansionPanelComponentIncludeScrollTag"
+              formControlName="includeScrollTag"
               >Include Scroll Tag</mat-checkbox
             >
           </div>
@@ -19,9 +27,12 @@
     </mat-expansion-panel>
     <mat-expansion-panel togglePosition="before">
       <mat-expansion-panel-header [@.disabled]="true">
-        <mat-panel-title> Google Tag</mat-panel-title>
+        <mat-panel-title i18n="@@advancedExpansionPanelComponentGoogleTag">
+          Google Tag</mat-panel-title
+        >
         <mat-panel-description
           ><mat-icon
+            i18n-matTooltip="@@advancedExpansionPanelComponentGoogleTagHelpIcon"
             matSuffix
             matTooltip="Google Tag has a default name, but you can change it.
             You can use an existing measurement ID or leave it empty with default placeholder value"
@@ -35,11 +46,16 @@
           style="display: flex; flex-direction: column"
         >
           <mat-form-field appearance="outline" density="compact">
-            <mat-label>Google Tag Name</mat-label>
+            <mat-label i18n="@@advancedExpansionPanelComponentGoogleTagName"
+              >Google Tag Name</mat-label
+            >
             <input matInput formControlName="googleTagName" />
           </mat-form-field>
           <mat-form-field appearance="outline">
-            <mat-label>Use Existing Measurement ID</mat-label>
+            <mat-label
+              i18n="@@advancedExpansionPanelComponentGoogleTagMeasurementId"
+              >Use Existing Measurement ID</mat-label
+            >
             <input matInput formControlName="useExistingMesurementId" />
           </mat-form-field>
         </form>
@@ -47,11 +63,13 @@
     </mat-expansion-panel>
     <mat-expansion-panel togglePosition="before">
       <mat-expansion-panel-header [@.disabled]="true">
-        <mat-panel-title
+        <mat-panel-title i18n="@@advancedExpansionPanelComponentEcommerceAndEsv"
           >Ecommerce data & Event Settings Variable</mat-panel-title
         >
         <mat-panel-description
           ><mat-icon
+            i18n-matTooltip="
+              @@advancedExpansionPanelComponentEcommerceAndEsvHelpIcon"
             matSuffix
             matTooltip="Ecommerce data source is data layer by default"
             >help_outline</mat-icon
@@ -63,10 +81,14 @@
           [formGroup]="ecAndEsvForm"
           style="display: flex; flex-direction: column"
         >
-          <mat-checkbox formControlName="isSendingEcommerceData"
+          <mat-checkbox
+            i18n="@@advancedExpansionPanelComponentSendECData"
+            formControlName="isSendingEcommerceData"
             >Send Ecommerce Data</mat-checkbox
           >
-          <mat-checkbox formControlName="isEsv"
+          <mat-checkbox
+            formControlName="isEsv"
+            i18n="@@advancedExpansionPanelComponentAddESV"
             >Add Event Settings Variable</mat-checkbox
           >
           @if (this.ecAndEsvForm.controls['isEsv'].value) {

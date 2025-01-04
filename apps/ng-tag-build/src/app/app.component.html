@@ -1,3 +1,9 @@
+<lib-toolbar></lib-toolbar>
 <div class="app">
   <router-outlet></router-outlet>
 </div>
+@defer (on viewport) {
+  <lib-footer></lib-footer>
+} @placeholder {
+  <div></div>
+}
