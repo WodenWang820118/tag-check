@@ -6,27 +6,36 @@ import { Component } from '@angular/core';
   template: `<footer class="footer">
     <div class="footer__container">
       <p class="text-muted">
-        Created by:
-        <a href="https://www.linkedin.com/in/guan-xin-wang/" target="_blank"
+        <ng-container i18n="@@footerComponentCreatedBy"
+          >Created by:</ng-container
+        >
+        <a
+          i18n="@@footerComponentAuthorName"
+          href="https://www.linkedin.com/in/guan-xin-wang/"
+          target="_blank"
           >Guan Xin Wang</a
         >
       </p>
       <p class="text-muted">
-        Contact:
+        <ng-container i18n="@@footerComponentContact">Contact:</ng-container>
         <a href="mailto:guanxinwang0118@gmail.com"
           >guanxinwang0118&#64;gmail.com</a
         >
       </p>
       <p class="text-muted">
-        <a
-          href="https://github.com/WodenWang820118/tag-check/tree/tag-build-release"
-          target="_blank"
-          >View on GitHub</a
+        <a href="https://github.com/WodenWang820118/tag-check" target="_blank">
+          <ng-container i18n="@@footerComponentGitHub"
+            >View on GitHub</ng-container
+          >
+        </a>
+      </p>
+      <p class="text-muted">
+        <ng-container i18n="@@footerComponentLastUpdated"
+          >Last updated on: 2024-12-29</ng-container
         >
       </p>
-      <p class="text-muted">Last updated on: 2024-04-18</p>
     </div>
-  </footer> `,
-  styleUrls: ['./footer.component.scss'],
+  </footer>`,
+  styleUrls: ['./footer.component.scss']
 })
 export class FooterComponent {}
