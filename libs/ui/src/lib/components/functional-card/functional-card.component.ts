@@ -129,7 +129,7 @@ export class FunctionalCardComponent {
     const { accountId, containerId } =
       this.utilsService.extractAccountAndContainerId(tagManagerUrl);
 
-    const gtmConfigGenerator: GTMContainerConfig = {
+    const gtmContainerConfig: GTMContainerConfig = {
       accountId: accountId,
       containerId: containerId,
       containerName: containerName,
@@ -140,7 +140,7 @@ export class FunctionalCardComponent {
     const result = this.transformService.convert(
       googleTagName,
       measurementId,
-      gtmConfigGenerator,
+      gtmContainerConfig,
       isSendingEcommerceData,
       esvConent
     );

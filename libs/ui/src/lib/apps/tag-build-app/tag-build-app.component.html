@@ -3,7 +3,7 @@
     <div class="main-page__board__item main-page__editor">
       <lib-editor
         content="{{ exampleInputJson | json }}"
-        [editorExtension]="'inputJson'"
+        [editorExtension]="inputExtension"
       />
     </div>
     <div class="main-page__board__item">
@@ -15,7 +15,7 @@
       </lib-functional-card>
     </div>
     <div class="main-page__board__item main-page__editor">
-      <lib-editor [editorExtension]="'outputJson'" />
+      <lib-editor [editorExtension]="outputExtension" />
     </div>
   </div>
   @defer (on viewport) {

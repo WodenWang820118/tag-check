@@ -6,7 +6,8 @@ import {
   effect,
   viewChild
 } from '@angular/core';
-import { EditorExtension, EditorService } from '@data-access';
+import { EditorService } from '@data-access';
+import { EditorTypeEnum } from '@utils';
 
 @Component({
   selector: 'lib-editor',
@@ -16,7 +17,7 @@ import { EditorExtension, EditorService } from '@data-access';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditorComponent {
-  editorExtension = input<EditorExtension>('inputJson');
+  editorExtension = input<EditorTypeEnum>(EditorTypeEnum.INPUT_JSON);
   content = input<string>('');
   editorElement = viewChild<ElementRef<HTMLDivElement>>('editor');
 

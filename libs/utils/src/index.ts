@@ -4,6 +4,7 @@ export * from './lib/types/tag-build/index';
 export * from './lib/types/tag-check/index';
 
 // Enums
+export * from './lib/enums/common/index';
 export * from './lib/enums/tag-build/index';
 export * from './lib/enums/tag-check/index';
 

@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { FunctionalCardComponent } from '../../components/functional-card/functional-card.component';
 import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { ProjectSpec } from '@utils';
+import { EditorTypeEnum, ProjectSpec } from '@utils';
 import { JsonPipe } from '@angular/common';
 @Component({
   selector: 'lib-tag-build-page',
@@ -15,6 +15,8 @@ import { JsonPipe } from '@angular/common';
 })
 export class TagBuildPageComponent {
   @Input() projectSpecs: ProjectSpec | null = null;
+  inputExtension = EditorTypeEnum.INPUT_JSON;
+  outputExtension = EditorTypeEnum.OUTPUT_JSON;
 
   constructor(private dialog: MatDialog) {}
 

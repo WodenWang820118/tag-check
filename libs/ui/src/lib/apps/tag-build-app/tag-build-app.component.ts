@@ -9,6 +9,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { UploadActionComponent } from '../../components/upload-action/upload-action.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { JsonPipe } from '@angular/common';
+import { EditorTypeEnum } from '@utils';
 
 @Component({
   selector: 'lib-tag-build-app',
@@ -27,6 +28,8 @@ import { JsonPipe } from '@angular/common';
 })
 export class TagBuildAppComponent {
   exampleInputJson = [];
+  inputExtension = EditorTypeEnum.INPUT_JSON;
+  outputExtension = EditorTypeEnum.OUTPUT_JSON;
 
   constructor(private dialog: MatDialog) {}
   onUpload() {
