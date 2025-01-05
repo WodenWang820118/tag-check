@@ -18,10 +18,14 @@ export class SideBarComponent {
   treeControl = new NestedTreeControl<TopicNode>((node) => node.children);
   dataSource = new MatTreeNestedDataSource<TopicNode>();
 
-  constructor(public treeNodeService: TreeNodeService) {
+  constructor(private treeNodeService: TreeNodeService) {
     this.dataSource.data = TREE_DATA;
   }
 
   hasChild = (_: number, node: TopicNode) =>
     !!node.children && node.children.length > 0;
+
+  onNodeClick(node: TopicNode) {
+    this.treeNodeService.navigateToNode(node);
+  }
 }
