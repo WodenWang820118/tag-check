@@ -1,4 +1,10 @@
-import { Parameter, TagConfig, Trigger, TriggerConfig } from '@utils';
+import {
+  EventTagConfig,
+  HTMLTagConfig,
+  TagConfig,
+  TagTypeEnum,
+  Trigger
+} from '@utils';
 import { EventUtils } from '../../utils/event-utils.service';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
@@ -16,93 +22,93 @@ export class VideoTag {
     accountId: string,
     containerId: string,
     triggerId: string
-  ): TagConfig[] {
-    return [
-      {
-        accountId,
-        containerId,
-        name: 'GA4 event - Video',
-        type: 'gaawe',
-        parameter: [
-          this.parameterUtils.createBooleanParameter(
-            'sendEcommerceData',
-            'false'
+  ): EventTagConfig {
+    return {
+      accountId,
+      containerId,
+      name: 'GA4 event - Video',
+      type: TagTypeEnum.GAAWE,
+      parameter: [
+        this.parameterUtils.createBooleanParameter(
+          'sendEcommerceData',
+          'false'
+        ),
+        this.parameterUtils.createTemplateParameter(
+          'eventName',
+          'video_{{Video Status}}'
+        ),
+        this.parameterUtils.createBuiltInListParameter('eventSettingsTable', [
+          this.parameterUtils.createMapParameter(
+            'video_current_time',
+            '{{Video Current Time}}'
           ),
-          this.parameterUtils.createTemplateParameter(
-            'eventName',
-            'video_{{Video Status}}'
+          this.parameterUtils.createMapParameter(
+            'video_duration',
+            '{{Video Duration}}'
           ),
-          this.parameterUtils.createBuiltInListParameter('eventSettingsTable', [
-            this.parameterUtils.createMapParameter(
-              'video_current_time',
-              '{{Video Current Time}}'
-            ),
-            this.parameterUtils.createMapParameter(
-              'video_duration',
-              '{{Video Duration}}'
-            ),
-            this.parameterUtils.createMapParameter(
-              'video_percent',
-              '{{Video Percent}}'
-            ),
-            this.parameterUtils.createMapParameter(
-              'video_provider',
-              '{{Video Provider}}'
-            ),
-            this.parameterUtils.createMapParameter(
-              'video_title',
-              '{{Video Title}}'
-            ),
-            this.parameterUtils.createMapParameter(
-              'video_url',
-              '{{Video URL}}'
-            ),
-            this.parameterUtils.createMapParameter(
-              'visible',
-              '{{Video Visible}}'
-            )
-          ]),
-          this.parameterUtils.createTemplateParameter(
-            'measurementIdOverride',
-            '{{Measurement ID}}'
-          )
-        ],
-        fingerprint: '1690374452646',
-        firingTriggerId: [triggerId],
-        tagFiringOption: 'ONCE_PER_EVENT',
-        monitoringMetadata: {
-          type: 'MAP'
-        },
-        consentSettings: {
-          consentStatus: 'NOT_SET'
-        }
+          this.parameterUtils.createMapParameter(
+            'video_percent',
+            '{{Video Percent}}'
+          ),
+          this.parameterUtils.createMapParameter(
+            'video_provider',
+            '{{Video Provider}}'
+          ),
+          this.parameterUtils.createMapParameter(
+            'video_title',
+            '{{Video Title}}'
+          ),
+          this.parameterUtils.createMapParameter('video_url', '{{Video URL}}'),
+          this.parameterUtils.createMapParameter('visible', '{{Video Visible}}')
+        ]),
+        this.parameterUtils.createTemplateParameter(
+          'measurementIdOverride',
+          '{{Measurement ID}}'
+        )
+      ],
+      fingerprint: '1690374452646',
+      firingTriggerId: [triggerId],
+      tagFiringOption: 'ONCE_PER_EVENT',
+      monitoringMetadata: {
+        type: 'MAP'
       },
-      {
-        accountId,
-        containerId,
-        name: 'cHTML - Youtube iframe API script',
-        type: 'html',
-        parameter: [
-          this.parameterUtils.createTemplateParameter(
-            'html',
-            '<script src="https://www.youtube.com/iframe_api">\n'
-          ),
-          this.parameterUtils.createBooleanParameter(
-            'supportDocumentWrite',
-            'false'
-          )
-        ],
-        fingerprint: '1689848944995',
-        firingTriggerId: [triggerId],
-        tagFiringOption: 'ONCE_PER_EVENT',
-        monitoringMetadata: {
-          type: 'MAP'
-        },
-        consentSettings: {
-          consentStatus: 'NOT_SET'
-        }
+      consentSettings: {
+        consentStatus: 'NOT_SET'
       }
-    ];
+    };
+  }
+
+  createHTMLScriptTag(
+    configurationName: string,
+    accountId: string,
+    containerId: string,
+    triggerId: string
+  ): HTMLTagConfig {
+    return {
+      accountId,
+      containerId,
+      name: 'cHTML - Youtube iframe API script',
+      type: TagTypeEnum.HTML,
+      parameter: [
+        this.parameterUtils.createTemplateParameter(
+          'html',
+          '<script src="https://www.youtube.com/iframe_api">\n'
+        ),
+        this.parameterUtils.createBooleanParameter(
+          'supportDocumentWrite',
+          'false'
+        )
+      ],
+      fingerprint: '1689848944995',
+      firingTriggerId: [triggerId],
+      tagFiringOption: 'ONCE_PER_EVENT',
+      monitoringMetadata: {
+        type: 'MAP'
+      },
+      consentSettings: {
+        consentStatus: 'NOT_SET'
+      }
+    };
   }
 
   createVideoTag(
@@ -125,12 +131,21 @@ export class VideoTag {
         throw new Error("Couldn't find matching trigger for video tag");
       }
 
-      return this.videoTag(
+      const videoTag = this.videoTag(
         configurationName,
         accountId,
         containerId,
         trigger.triggerId as string
       );
+
+      const htmlScriptTag = this.createHTMLScriptTag(
+        configurationName,
+        accountId,
+        containerId,
+        trigger.triggerId as string
+      );
+
+      return [videoTag, htmlScriptTag];
     } catch (error) {
       console.error('Error while creating video tag:', error);
       // Potentially re-throw the error if it should be handled upstream

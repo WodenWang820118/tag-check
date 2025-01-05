@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { VideoVariable } from './video-variable.service';
+import { VariableTypeEnum, VideoVariableConfig } from '@utils';
 
 describe('VideoVariable', () => {
   let service: VideoVariable;
@@ -21,38 +22,53 @@ describe('VideoVariable', () => {
     const containerId = 'test-container';
 
     const result = service.videoBuiltInVariable({ accountId, containerId });
-    const expected = [
+    const expected: VideoVariableConfig[] = [
       {
         accountId,
         containerId,
-        type: 'VIDEO_PROVIDER',
+        type: VariableTypeEnum.VIDEO_PROVIDER,
         name: 'Video Provider'
       },
-      { accountId, containerId, type: 'VIDEO_URL', name: 'Video URL' },
-      { accountId, containerId, type: 'VIDEO_TITLE', name: 'Video Title' },
       {
         accountId,
         containerId,
-        type: 'VIDEO_DURATION',
+        type: VariableTypeEnum.VIDEO_URL,
+        name: 'Video URL'
+      },
+      {
+        accountId,
+        containerId,
+        type: VariableTypeEnum.VIDEO_TITLE,
+        name: 'Video Title'
+      },
+      {
+        accountId,
+        containerId,
+        type: VariableTypeEnum.VIDEO_DURATION,
         name: 'Video Duration'
       },
       {
         accountId,
         containerId,
-        type: 'VIDEO_PERCENT',
+        type: VariableTypeEnum.VIDEO_PERCENT,
         name: 'Video Percent'
       },
       {
         accountId,
         containerId,
-        type: 'VIDEO_VISIBLE',
+        type: VariableTypeEnum.VIDEO_VISIBLE,
         name: 'Video Visible'
       },
-      { accountId, containerId, type: 'VIDEO_STATUS', name: 'Video Status' },
       {
         accountId,
         containerId,
-        type: 'VIDEO_CURRENT_TIME',
+        type: VariableTypeEnum.VIDEO_STATUS,
+        name: 'Video Status'
+      },
+      {
+        accountId,
+        containerId,
+        type: VariableTypeEnum.VIDEO_CURRENT_TIME,
         name: 'Video Current Time'
       }
     ];

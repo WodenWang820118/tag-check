@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { EventTrigger } from './event-trigger.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { TriggerConfig } from '@utils';
+import { CustomEventTriggerConfig, TriggerTypeEnum } from '@utils';
 
 describe('EventTrigger', () => {
   let service: EventTrigger;
@@ -26,10 +26,10 @@ describe('EventTrigger', () => {
     const trigger = 'test-trigger';
 
     const result = service.createTrigger(accountId, containerId, trigger);
-    const expected: TriggerConfig = {
+    const expected: CustomEventTriggerConfig = {
       accountId,
       containerId,
-      type: 'CUSTOM_EVENT',
+      type: TriggerTypeEnum.CUSTOM_EVENT,
       name: `event equals ${trigger}`,
       customEventFilter: [
         {

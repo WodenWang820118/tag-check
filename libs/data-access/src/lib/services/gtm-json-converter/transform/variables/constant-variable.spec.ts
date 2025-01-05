@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ConstantVariable } from './constant-variable.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { VariableConfig } from '@utils';
+import { ConstantVariableConfig, VariableTypeEnum } from '@utils';
 
 describe('ConstantVariable', () => {
   let service: ConstantVariable;
@@ -35,11 +35,11 @@ describe('ConstantVariable', () => {
       );
 
       // Assert
-      const expected: VariableConfig = {
+      const expected: ConstantVariableConfig = {
         accountId: accountId,
         containerId: containerId,
         name: 'CONST - Measurement ID',
-        type: 'c',
+        type: VariableTypeEnum.CONSTANT,
         parameter: [
           parameterUtils.createTemplateParameter('value', measurementId)
         ],

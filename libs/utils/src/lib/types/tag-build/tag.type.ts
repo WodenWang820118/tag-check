@@ -1,3 +1,4 @@
+import { TagTypeEnum } from '../../enums/tag-build';
 import { Parameter } from './common.type';
 import { Trigger } from './trigger.type';
 
@@ -9,7 +10,7 @@ export type Tag = {
 
 export type TagConfig = {
   name: string;
-  type: string;
+  type: TagTypeEnum;
   accountId: string;
   containerId: string;
   parameter: Parameter[];
@@ -23,3 +24,15 @@ export type TagConfig = {
     consentStatus: 'NOT_SET';
   };
 };
+
+export type EventTagConfig = {
+  type: TagTypeEnum.GAAWE;
+} & Omit<TagConfig, 'type'>;
+
+export type GoogleTagConfig = {
+  type: TagTypeEnum.GOOGLE_TAG;
+} & Omit<TagConfig, 'type'>;
+
+export type HTMLTagConfig = {
+  type: TagTypeEnum.HTML;
+} & Omit<TagConfig, 'type'>;

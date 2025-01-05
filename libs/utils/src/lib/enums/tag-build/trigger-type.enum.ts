@@ -1,0 +1,5 @@
+export enum TriggerTypeEnum {
+  CUSTOM_EVENT = 'CUSTOM_EVENT',
+  SCROLL_DEPTH = 'SCROLL_DEPTH',
+  YOU_TUBE_VIDEO = 'YOU_TUBE_VIDEO'
+}

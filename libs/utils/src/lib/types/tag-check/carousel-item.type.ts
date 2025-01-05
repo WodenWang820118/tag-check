@@ -1,5 +1,7 @@
+import { CarouselItemEnum } from '../../enums/tag-check';
+
 export type CarouselItem = {
-  type: 'image' | 'video';
+  type: CarouselItemEnum;
   url: string;
   alt?: string;
   caption?: string;

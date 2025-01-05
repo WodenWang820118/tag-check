@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { RegexVariable } from './regex-variable.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { VariableConfig } from '@utils';
+import { RegexVariableConfig, VariableTypeEnum } from '@utils';
 
 describe('RegexVariable', () => {
   let service: RegexVariable;
@@ -28,9 +28,9 @@ describe('RegexVariable', () => {
       accountId,
       containerId
     );
-    const expected: VariableConfig = {
+    const expected: RegexVariableConfig = {
       name: 'Measurement ID',
-      type: 'remm',
+      type: VariableTypeEnum.REGEX,
       accountId: 'test-account',
       containerId: 'test-container',
       parameter: [

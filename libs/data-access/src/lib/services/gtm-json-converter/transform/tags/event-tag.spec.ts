@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { EventTag } from './event-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { Tag, TagConfig, Trigger, TriggerConfig } from '@utils';
+import { EventTagConfig, Tag, TagTypeEnum, Trigger } from '@utils';
 
 describe('EventTag', () => {
   let eventTag: EventTag;
@@ -74,9 +74,9 @@ describe('EventTag', () => {
     );
 
     // Assert
-    const expectedTag: TagConfig = {
+    const expectedTag: EventTagConfig = {
       name: 'GA4 event - TestTag',
-      type: 'gaawe',
+      type: TagTypeEnum.GAAWE,
       accountId: 'account123',
       containerId: 'container456',
       parameter: [

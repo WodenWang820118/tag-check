@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ScrollTag } from './scroll-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { TagConfig, Trigger } from '@utils';
+import { EventTagConfig, TagTypeEnum, Trigger } from '@utils';
 
 describe('ScrollTag', () => {
   let scrollTag: ScrollTag;
@@ -128,12 +128,12 @@ describe('ScrollTag', () => {
       );
 
       // Assert
-      const expected: TagConfig[] = [
+      const expected: EventTagConfig[] = [
         {
           accountId,
           containerId,
           name: 'GA4 event - scroll',
-          type: 'gaawe',
+          type: TagTypeEnum.GAAWE,
           parameter: [
             { type: 'BOOLEAN', key: 'sendEcommerceData', value: 'false' },
             { type: 'TEMPLATE', key: 'eventName', value: 'scroll' },

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ScrollVariable } from './scroll-variable.service';
-import { VariableConfig } from '@utils';
+import { ScrollVariableConfig, VariableTypeEnum } from '@utils';
 
 describe('ScrollVariable', () => {
   let service: ScrollVariable;
@@ -22,11 +22,11 @@ describe('ScrollVariable', () => {
     const containerId = 'test-container';
 
     const result = service.scrollBuiltInVariable({ accountId, containerId });
-    const expected: VariableConfig[] = [
+    const expected: ScrollVariableConfig[] = [
       {
         accountId: 'test-account',
         containerId: 'test-container',
-        type: 'SCROLL_DEPTH_THRESHOLD',
+        type: VariableTypeEnum.SCROLL_DEPTH_THRESHOLD,
         name: 'Scroll Depth Threshold'
       }
     ];

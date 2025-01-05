@@ -1,4 +1,4 @@
-import { VariableConfig } from '@utils';
+import { RegexVariableConfig, VariableTypeEnum } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 
@@ -10,10 +10,10 @@ export class RegexVariable {
   createRegexMeasurementIdVariable(
     accountId: string,
     containerId: string
-  ): VariableConfig {
+  ): RegexVariableConfig {
     return {
       name: `Measurement ID`,
-      type: 'remm',
+      type: VariableTypeEnum.REGEX,
       accountId,
       containerId,
       parameter: [

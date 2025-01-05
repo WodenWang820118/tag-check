@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { VariableConfig } from '@utils';
+import { ConstantVariableConfig, VariableTypeEnum } from '@utils';
 
 @Injectable({
   providedIn: 'root'
@@ -11,12 +11,12 @@ export class ConstantVariable {
     accountId: string,
     containerId: string,
     measurementId: string
-  ): VariableConfig {
-    const measurementIdConstantVariable = {
+  ): ConstantVariableConfig {
+    return {
       accountId: accountId,
       containerId: containerId,
       name: 'CONST - Measurement ID',
-      type: 'c',
+      type: VariableTypeEnum.CONSTANT,
       parameter: [
         this.parameterUtils.createTemplateParameter(
           'value',
@@ -26,6 +26,5 @@ export class ConstantVariable {
       fingerprint: '1734756121031',
       formatValue: {}
     };
-    return measurementIdConstantVariable;
   }
 }

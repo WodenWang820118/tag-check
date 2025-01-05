@@ -1,5 +1,5 @@
 import { Component, computed, input, signal } from '@angular/core';
-import { CarouselItem } from '@utils';
+import { CarouselItem, CarouselItemEnum } from '@utils';
 import { BlobToUrlPipe } from '../../pipes/blob-to-url-pipe';
 
 @Component({
@@ -19,14 +19,14 @@ export class CarouselComponent {
 
     if (imgBlob !== null) {
       items.push({
-        type: 'image',
+        type: CarouselItemEnum.Image,
         url: new BlobToUrlPipe().transform(imgBlob) || ''
       });
     }
 
     if (vidBlob !== null) {
       items.push({
-        type: 'video',
+        type: CarouselItemEnum.Video,
         url: new BlobToUrlPipe().transform(vidBlob) || ''
       });
     }

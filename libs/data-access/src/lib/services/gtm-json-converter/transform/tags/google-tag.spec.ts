@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { GoogleTag } from './google-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { Tag, TagConfig, TriggerConfig } from '@utils';
+import { GoogleTagConfig, TagTypeEnum } from '@utils';
 
 describe('Google Tag', () => {
   let googleTag: GoogleTag;
@@ -51,9 +51,9 @@ describe('Google Tag', () => {
     );
 
     // Assert
-    const expectedTag: TagConfig = {
+    const expectedTag: GoogleTagConfig = {
       name: 'TestGoogleTag',
-      type: 'googtag',
+      type: TagTypeEnum.GOOGLE_TAG,
       accountId: 'account123',
       containerId: 'container456',
       parameter: [
