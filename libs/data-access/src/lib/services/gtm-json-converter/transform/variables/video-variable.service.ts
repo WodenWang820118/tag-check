@@ -1,66 +1,66 @@
 import { Injectable } from '@angular/core';
-import { VariableConfig } from '@utils';
+import { VariableTypeEnum, VideoVariableConfig } from '@utils';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class VideoVariable {
   videoBuiltInVariable({
     accountId,
-    containerId,
+    containerId
   }: {
     accountId: string;
     containerId: string;
-  }): VariableConfig[] {
+  }): VideoVariableConfig[] {
     return [
       {
         accountId,
         containerId,
-        type: 'VIDEO_PROVIDER',
-        name: 'Video Provider',
+        type: VariableTypeEnum.VIDEO_PROVIDER,
+        name: 'Video Provider'
       },
       {
         accountId,
         containerId,
-        type: 'VIDEO_URL',
-        name: 'Video URL',
+        type: VariableTypeEnum.VIDEO_URL,
+        name: 'Video URL'
       },
       {
         accountId,
         containerId,
-        type: 'VIDEO_TITLE',
-        name: 'Video Title',
+        type: VariableTypeEnum.VIDEO_TITLE,
+        name: 'Video Title'
       },
       {
         accountId,
         containerId,
-        type: 'VIDEO_DURATION',
-        name: 'Video Duration',
+        type: VariableTypeEnum.VIDEO_DURATION,
+        name: 'Video Duration'
       },
       {
         accountId,
         containerId,
-        type: 'VIDEO_PERCENT',
-        name: 'Video Percent',
+        type: VariableTypeEnum.VIDEO_PERCENT,
+        name: 'Video Percent'
       },
       {
         accountId,
         containerId,
-        type: 'VIDEO_VISIBLE',
-        name: 'Video Visible',
+        type: VariableTypeEnum.VIDEO_VISIBLE,
+        name: 'Video Visible'
       },
       {
         accountId,
         containerId,
-        type: 'VIDEO_STATUS',
-        name: 'Video Status',
+        type: VariableTypeEnum.VIDEO_STATUS,
+        name: 'Video Status'
       },
       {
         accountId,
         containerId,
-        type: 'VIDEO_CURRENT_TIME',
-        name: 'Video Current Time',
-      },
+        type: VariableTypeEnum.VIDEO_CURRENT_TIME,
+        name: 'Video Current Time'
+      }
     ];
   }
 }

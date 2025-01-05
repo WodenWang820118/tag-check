@@ -1,5 +1,5 @@
-export interface TopicNode {
+export type TopicNode = {
   id: number;
   name: string;
   children?: TopicNode[];
-}
+};

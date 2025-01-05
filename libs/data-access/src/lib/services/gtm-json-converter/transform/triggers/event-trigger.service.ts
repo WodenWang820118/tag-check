@@ -1,4 +1,4 @@
-import { TriggerConfig } from '@utils';
+import { CustomEventTriggerConfig, TriggerTypeEnum } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 
@@ -11,11 +11,11 @@ export class EventTrigger {
     accountId: string,
     containerId: string,
     trigger: string
-  ): TriggerConfig {
+  ): CustomEventTriggerConfig {
     return {
       accountId,
       containerId,
-      type: 'CUSTOM_EVENT',
+      type: TriggerTypeEnum.CUSTOM_EVENT,
       name: `event equals ${trigger}`,
       customEventFilter: [
         {

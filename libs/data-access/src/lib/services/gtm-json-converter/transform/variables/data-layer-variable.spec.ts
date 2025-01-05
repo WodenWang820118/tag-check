@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { DataLayerVariable } from './data-layer-variable.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { VariableConfig } from '@utils';
+import { DataLayerVariableConfig, VariableTypeEnum } from '@utils';
 
 describe('DataLayerVariable', () => {
   let service: DataLayerVariable;
@@ -31,11 +31,10 @@ describe('DataLayerVariable', () => {
         containerId,
         dataLayerName
       );
-
-      expect(result).toEqual([
+      const expected: DataLayerVariableConfig[] = [
         {
           name: 'DLV - testDataLayer',
-          type: 'v',
+          type: VariableTypeEnum.DATA_LAYER,
           accountId: 'test-account',
           containerId: 'test-container',
           parameter: [
@@ -44,7 +43,9 @@ describe('DataLayerVariable', () => {
             { type: 'TEMPLATE', key: 'name', value: 'testDataLayer' }
           ]
         }
-      ]);
+      ];
+
+      expect(result).toEqual(expected);
     });
 
     it('should trim the dataLayerName', () => {
@@ -52,7 +53,7 @@ describe('DataLayerVariable', () => {
       const containerId = 'test-container';
       const dataLayerName = ['  spacedDataLayer  '];
 
-      const result: VariableConfig[] = service.createDataLayerVariable(
+      const result: DataLayerVariableConfig[] = service.createDataLayerVariable(
         accountId,
         containerId,
         dataLayerName

@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { VideoTag } from './video-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { Trigger } from '@utils';
+import { EventTagConfig, HTMLTagConfig, TagTypeEnum, Trigger } from '@utils';
 
 describe('VideoTag', () => {
   let videoTag: VideoTag;
@@ -88,170 +88,170 @@ describe('VideoTag', () => {
       );
 
       // Assert
-      expect(result).toEqual([
-        {
-          accountId,
-          containerId,
-          name: 'GA4 event - Video',
-          type: 'gaawe',
-          parameter: [
-            { type: 'BOOLEAN', key: 'sendEcommerceData', value: 'false' },
-            {
-              type: 'TEMPLATE',
-              key: 'eventName',
-              value: 'video_{{Video Status}}'
-            },
-            {
-              type: 'LIST',
-              key: 'eventSettingsTable',
-              list: [
-                {
-                  type: 'MAP',
-                  map: [
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameter',
-                      value: 'video_current_time'
-                    },
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameterValue',
-                      value: '{{Video Current Time}}'
-                    }
-                  ]
-                },
-                {
-                  type: 'MAP',
-                  map: [
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameter',
-                      value: 'video_duration'
-                    },
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameterValue',
-                      value: '{{Video Duration}}'
-                    }
-                  ]
-                },
-                {
-                  type: 'MAP',
-                  map: [
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameter',
-                      value: 'video_percent'
-                    },
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameterValue',
-                      value: '{{Video Percent}}'
-                    }
-                  ]
-                },
-                {
-                  type: 'MAP',
-                  map: [
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameter',
-                      value: 'video_provider'
-                    },
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameterValue',
-                      value: '{{Video Provider}}'
-                    }
-                  ]
-                },
-                {
-                  type: 'MAP',
-                  map: [
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameter',
-                      value: 'video_title'
-                    },
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameterValue',
-                      value: '{{Video Title}}'
-                    }
-                  ]
-                },
-                {
-                  type: 'MAP',
-                  map: [
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameter',
-                      value: 'video_url'
-                    },
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameterValue',
-                      value: '{{Video URL}}'
-                    }
-                  ]
-                },
-                {
-                  type: 'MAP',
-                  map: [
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameter',
-                      value: 'visible'
-                    },
-                    {
-                      type: 'TEMPLATE',
-                      key: 'parameterValue',
-                      value: '{{Video Visible}}'
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              type: 'TEMPLATE',
-              key: 'measurementIdOverride',
-              value: '{{Measurement ID}}'
-            }
-          ],
-          fingerprint: '1690374452646',
-          firingTriggerId: ['trigger789'],
-          tagFiringOption: 'ONCE_PER_EVENT',
-          monitoringMetadata: {
-            type: 'MAP'
+      const expected: EventTagConfig = {
+        accountId,
+        containerId,
+        name: 'GA4 event - Video',
+        type: TagTypeEnum.GAAWE,
+        parameter: [
+          { type: 'BOOLEAN', key: 'sendEcommerceData', value: 'false' },
+          {
+            type: 'TEMPLATE',
+            key: 'eventName',
+            value: 'video_{{Video Status}}'
           },
-          consentSettings: {
-            consentStatus: 'NOT_SET'
+          {
+            type: 'LIST',
+            key: 'eventSettingsTable',
+            list: [
+              {
+                type: 'MAP',
+                map: [
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameter',
+                    value: 'video_current_time'
+                  },
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameterValue',
+                    value: '{{Video Current Time}}'
+                  }
+                ]
+              },
+              {
+                type: 'MAP',
+                map: [
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameter',
+                    value: 'video_duration'
+                  },
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameterValue',
+                    value: '{{Video Duration}}'
+                  }
+                ]
+              },
+              {
+                type: 'MAP',
+                map: [
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameter',
+                    value: 'video_percent'
+                  },
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameterValue',
+                    value: '{{Video Percent}}'
+                  }
+                ]
+              },
+              {
+                type: 'MAP',
+                map: [
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameter',
+                    value: 'video_provider'
+                  },
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameterValue',
+                    value: '{{Video Provider}}'
+                  }
+                ]
+              },
+              {
+                type: 'MAP',
+                map: [
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameter',
+                    value: 'video_title'
+                  },
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameterValue',
+                    value: '{{Video Title}}'
+                  }
+                ]
+              },
+              {
+                type: 'MAP',
+                map: [
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameter',
+                    value: 'video_url'
+                  },
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameterValue',
+                    value: '{{Video URL}}'
+                  }
+                ]
+              },
+              {
+                type: 'MAP',
+                map: [
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameter',
+                    value: 'visible'
+                  },
+                  {
+                    type: 'TEMPLATE',
+                    key: 'parameterValue',
+                    value: '{{Video Visible}}'
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            type: 'TEMPLATE',
+            key: 'measurementIdOverride',
+            value: '{{Measurement ID}}'
           }
+        ],
+        fingerprint: '1690374452646',
+        firingTriggerId: ['trigger789'],
+        tagFiringOption: 'ONCE_PER_EVENT',
+        monitoringMetadata: {
+          type: 'MAP'
         },
-        {
-          accountId,
-          containerId,
-          name: 'cHTML - Youtube iframe API script',
-          type: 'html',
-          parameter: [
-            {
-              type: 'TEMPLATE',
-              key: 'html',
-              value: '<script src="https://www.youtube.com/iframe_api">\n'
-            },
-            { type: 'BOOLEAN', key: 'supportDocumentWrite', value: 'false' }
-          ],
-          fingerprint: '1689848944995',
-          firingTriggerId: ['trigger789'],
-          tagFiringOption: 'ONCE_PER_EVENT',
-          monitoringMetadata: {
-            type: 'MAP'
-          },
-          consentSettings: {
-            consentStatus: 'NOT_SET'
-          }
+        consentSettings: {
+          consentStatus: 'NOT_SET'
         }
-      ]);
+      };
+
+      const expectedHTMLScriptTag: HTMLTagConfig = {
+        accountId,
+        containerId,
+        name: 'cHTML - Youtube iframe API script',
+        type: TagTypeEnum.HTML,
+        parameter: [
+          {
+            type: 'TEMPLATE',
+            key: 'html',
+            value: '<script src="https://www.youtube.com/iframe_api">\n'
+          },
+          { type: 'BOOLEAN', key: 'supportDocumentWrite', value: 'false' }
+        ],
+        fingerprint: '1689848944995',
+        firingTriggerId: ['trigger789'],
+        tagFiringOption: 'ONCE_PER_EVENT',
+        monitoringMetadata: {
+          type: 'MAP'
+        },
+        consentSettings: {
+          consentStatus: 'NOT_SET'
+        }
+      };
+      expect(result).toEqual([expected, expectedHTMLScriptTag]);
     });
   });
 });

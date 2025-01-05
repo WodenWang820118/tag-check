@@ -1,10 +1,10 @@
-import { DataLayer } from './../../../../../../utils/src/lib/interfaces/tag-build.interface';
 import { Injectable } from '@angular/core';
 import {
   BUILT_IN_EVENTS,
   BUILT_IN_SCROLL_EVENT,
   BUILT_IN_VIDEO_EVENTS
 } from '../transform/utils/constant';
+import { DataLayer } from '@utils';
 
 @Injectable({
   providedIn: 'root'

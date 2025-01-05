@@ -2,11 +2,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { Component, Inject, LOCALE_ID } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-
-interface Language {
-  code: 'en' | 'zh-hant' | 'zh-hans' | 'ja';
-  label: string;
-}
+import { Language, LanguageEnum } from '@utils';
 
 @Component({
   selector: 'lib-lang-select',
@@ -35,16 +31,16 @@ interface Language {
 export class LangSelectComponent {
   selectedLang: 'en' | 'zh-hant' | 'zh-hans' | 'ja' = 'en';
   languages: Language[] = [
-    { code: 'en', label: 'English' },
+    { code: LanguageEnum.EN, label: 'English' },
     {
-      code: 'zh-hant',
+      code: LanguageEnum.ZH_HANT,
       label: '繁體中文'
     },
     {
-      code: 'zh-hans',
+      code: LanguageEnum.ZH_HANS,
       label: '简体中文'
     },
-    { code: 'ja', label: '日本語' }
+    { code: LanguageEnum.JA, label: '日本語' }
   ];
   selectedLangLabel = 'English';
 

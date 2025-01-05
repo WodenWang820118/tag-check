@@ -1,4 +1,4 @@
-import { TagConfig } from '@utils';
+import { GoogleTagConfig, TagTypeEnum } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 
@@ -12,12 +12,12 @@ export class GoogleTag {
     measurementId: string,
     accountId: string,
     containerId: string
-  ): TagConfig {
+  ): GoogleTagConfig {
     // create a constant for the measurementIdParameter
     // let users define the measurementIdParameter in the GTM UI
     return {
       name: googleTagName,
-      type: 'googtag',
+      type: TagTypeEnum.GOOGLE_TAG,
       accountId,
       containerId,
       parameter: [

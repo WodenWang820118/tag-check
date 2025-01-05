@@ -1,4 +1,4 @@
-import { Parameter, TriggerConfig } from '@utils';
+import { TriggerTypeEnum, YouTubeVideoTriggerConfig } from '@utils';
 import { Injectable } from '@angular/core';
 import { EventUtils } from '../../utils/event-utils.service';
 
@@ -15,12 +15,12 @@ export class VideoTrigger {
     accountId: string;
     containerId: string;
     progressThresholdsPercent?: string;
-  }): TriggerConfig {
+  }): YouTubeVideoTriggerConfig {
     return {
       accountId,
       containerId,
       name: 'event youtube video',
-      type: 'YOU_TUBE_VIDEO',
+      type: TriggerTypeEnum.YOU_TUBE_VIDEO,
       fingerprint: '1689849183312',
       parameter: [
         {
@@ -67,7 +67,10 @@ export class VideoTrigger {
     };
   }
 
-  createVideoTrigger(accountId: string, containerId: string): TriggerConfig[] {
+  createVideoTrigger(
+    accountId: string,
+    containerId: string
+  ): YouTubeVideoTriggerConfig[] {
     // TODO: get the information whether the video is included in the data
     try {
       const data = [] as any;

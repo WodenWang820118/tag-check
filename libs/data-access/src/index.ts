@@ -31,7 +31,6 @@ export * from './lib/services/gtm-json-converter/transform/triggers/scroll-trigg
 export * from './lib/services/gtm-json-converter/transform/triggers/video-trigger.service';
 
 // variables
-export * from './lib/services/gtm-json-converter/transform/variables/custom-variable.service';
 export * from './lib/services/gtm-json-converter/transform/variables/data-layer-variable.service';
 export * from './lib/services/gtm-json-converter/transform/variables/regex-variable.service';
 export * from './lib/services/gtm-json-converter/transform/variables/scroll-variable.service';

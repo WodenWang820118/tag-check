@@ -1,10 +1,4 @@
-import {
-  EventSettingsVariable,
-  Parameter,
-  Tag,
-  TagConfig,
-  Trigger
-} from '@utils';
+import { EventTagConfig, Parameter, Tag, TagTypeEnum, Trigger } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EcParamsService } from '../../utils/ec-params.service';
@@ -17,24 +11,6 @@ export class EventTag {
     private parameterUtils: ParameterUtils,
     private ecParamsService: EcParamsService
   ) {}
-
-  createTag(
-    googleTagName: string,
-    accountId: string,
-    containerId: string,
-    tag: Tag,
-    triggers: Trigger[],
-    isSendEcommerceData: 'true' | 'false'
-  ): TagConfig {
-    return this.buildTagConfig(
-      googleTagName,
-      accountId,
-      containerId,
-      tag,
-      triggers,
-      isSendEcommerceData
-    );
-  }
 
   private processEcommerceData(
     tag: Tag,
@@ -49,17 +25,17 @@ export class EventTag {
     });
   }
 
-  private buildTagConfig(
+  createTag(
     googleTagName: string,
     accountId: string,
     containerId: string,
     tag: Tag,
     triggers: Trigger[],
     isSendEcommerceData: 'true' | 'false'
-  ): TagConfig {
+  ): EventTagConfig {
     return {
       name: `GA4 event - ${tag.name}`,
-      type: 'gaawe',
+      type: TagTypeEnum.GAAWE,
       accountId,
       containerId,
       parameter: [

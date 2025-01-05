@@ -1,24 +1,24 @@
 import { Injectable } from '@angular/core';
-import { VariableConfig } from '@utils';
+import { ScrollVariableConfig, VariableTypeEnum } from '@utils';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ScrollVariable {
   scrollBuiltInVariable({
     accountId,
-    containerId,
+    containerId
   }: {
     accountId: string;
     containerId: string;
-  }): VariableConfig[] {
+  }): ScrollVariableConfig[] {
     return [
       {
         accountId,
         containerId,
-        type: 'SCROLL_DEPTH_THRESHOLD',
-        name: 'Scroll Depth Threshold',
-      },
+        type: VariableTypeEnum.SCROLL_DEPTH_THRESHOLD,
+        name: 'Scroll Depth Threshold'
+      }
     ];
   }
 }

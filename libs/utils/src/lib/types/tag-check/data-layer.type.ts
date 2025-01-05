@@ -1,5 +1,5 @@
 // Base types for known properties
-export interface BaseItem {
+export type BaseItem = {
   item_id?: string;
   item_name?: string;
   affiliation?: string;
@@ -18,10 +18,11 @@ export interface BaseItem {
   location_id?: string;
   price?: number;
   quantity?: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
-}
+};
 
-export interface BaseECommerce {
+export type BaseECommerce = {
   transaction_id?: string;
   currency?: string;
   shipping?: number;
@@ -35,36 +36,36 @@ export interface BaseECommerce {
   creative_slot?: string;
   promotion_id?: string;
   promotion_name?: string;
-}
+};
 
-export interface BaseDataLayerEvent {
+export type BaseDataLayerEvent = {
   event?: string;
   ecommerce?: BaseECommerce;
   [key: string]: string | number | BaseECommerce | undefined | null;
-}
+};
 
-export interface StrictDataLayerEvent {
+export type StrictDataLayerEvent = {
   event: string;
   ecommerce?: BaseECommerce;
   [key: string]: string | number | BaseECommerce | undefined | null;
-}
+};
 
-export interface ValidationResult {
+export type ValidationResult = {
   passed: boolean;
   message: string;
   incorrectInfo?: string[];
   dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
-}
+};
 
-export interface RequestValidationResult {
+export type RequestValidationResult = {
   requestPassed: boolean;
   rawRequest: string;
   reformedDataLayer: StrictDataLayerEvent | BaseDataLayerEvent;
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
-}
+};
 
-export interface OutputValidationResult {
+export type OutputValidationResult = {
   eventName: string;
   passed: boolean;
   requestPassed: boolean;
@@ -76,11 +77,11 @@ export interface OutputValidationResult {
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
   destinationUrl: string;
   completedTime: Date;
-}
+};
 
-export interface ValidationStrategy {
+export type ValidationStrategy = {
   validateDataLayer(
     dataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[],
     spec: StrictDataLayerEvent
   ): ValidationResult;
-}
+};

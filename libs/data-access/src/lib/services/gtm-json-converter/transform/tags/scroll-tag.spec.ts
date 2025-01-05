@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ScrollTag } from './scroll-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { Trigger } from '@utils';
+import { EventTagConfig, TagTypeEnum, Trigger } from '@utils';
 
 describe('ScrollTag', () => {
   let scrollTag: ScrollTag;
@@ -128,12 +128,12 @@ describe('ScrollTag', () => {
       );
 
       // Assert
-      expect(result).toEqual([
+      const expected: EventTagConfig[] = [
         {
           accountId,
           containerId,
           name: 'GA4 event - scroll',
-          type: 'gaawe',
+          type: TagTypeEnum.GAAWE,
           parameter: [
             { type: 'BOOLEAN', key: 'sendEcommerceData', value: 'false' },
             { type: 'TEMPLATE', key: 'eventName', value: 'scroll' },
@@ -174,7 +174,9 @@ describe('ScrollTag', () => {
             consentStatus: 'NOT_SET'
           }
         }
-      ]);
+      ];
+
+      expect(result).toEqual(expected);
 
       expect(parameterUtils.createBooleanParameter).toHaveBeenCalledWith(
         'sendEcommerceData',

@@ -1,7 +1,4 @@
-import {
-  BaseDataLayerEvent,
-  StrictDataLayerEvent,
-} from '../interfaces/data-layer.interface';
+import { BaseDataLayerEvent, StrictDataLayerEvent } from '../types/tag-check';
 
 export class ReportDetailsDto {
   position = 0;

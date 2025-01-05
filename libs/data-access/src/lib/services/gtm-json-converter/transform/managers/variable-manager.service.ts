@@ -5,6 +5,7 @@ import { ScrollVariable } from '../variables/scroll-variable.service';
 import { VideoVariable } from '../variables/video-variable.service';
 import { EventUtils } from '../../utils/event-utils.service';
 import { ConstantVariable } from '../variables/constant-variable.service';
+import { EventSettingsVariableService } from '../variables/event-settings-variable.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,7 @@ export class VariableManager {
     private scrollVariable: ScrollVariable,
     private videoVariable: VideoVariable,
     private constantVariable: ConstantVariable,
+    private eventSettingsVariable: EventSettingsVariableService,
     private eventUtils: EventUtils
   ) {}
   getBuiltInVariables(
@@ -74,7 +76,7 @@ export class VariableManager {
       );
 
     const eventSettingsVariable =
-      this.dataLayerVariable.createEventSettingsVariable(
+      this.eventSettingsVariable.createEventSettingsVariable(
         accountId,
         containerId,
         esvConent

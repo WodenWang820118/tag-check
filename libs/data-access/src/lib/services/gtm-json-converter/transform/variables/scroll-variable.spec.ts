@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { ScrollVariable } from './scroll-variable.service';
+import { ScrollVariableConfig, VariableTypeEnum } from '@utils';
 
 describe('ScrollVariable', () => {
   let service: ScrollVariable;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ScrollVariable],
+      providers: [ScrollVariable]
     });
 
     service = TestBed.inject(ScrollVariable);
@@ -21,21 +22,21 @@ describe('ScrollVariable', () => {
     const containerId = 'test-container';
 
     const result = service.scrollBuiltInVariable({ accountId, containerId });
-
-    expect(result).toEqual([
+    const expected: ScrollVariableConfig[] = [
       {
         accountId: 'test-account',
         containerId: 'test-container',
-        type: 'SCROLL_DEPTH_THRESHOLD',
-        name: 'Scroll Depth Threshold',
-      },
-    ]);
+        type: VariableTypeEnum.SCROLL_DEPTH_THRESHOLD,
+        name: 'Scroll Depth Threshold'
+      }
+    ];
+    expect(result).toEqual(expected);
   });
 
   it('should return an array with a single item', () => {
     const result = service.scrollBuiltInVariable({
       accountId: 'any',
-      containerId: 'any',
+      containerId: 'any'
     });
     expect(Array.isArray(result)).toBe(true);
     expect(result.length).toBe(1);
