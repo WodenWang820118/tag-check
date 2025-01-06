@@ -1,13 +1,10 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, signal, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
-import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { timer } from 'rxjs';
-import { ProjectSetting } from '@utils';
+import { ProjectInfo, ProjectSetting } from '@utils';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
-import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-project-view',
@@ -23,33 +20,20 @@ import { toSignal } from '@angular/core/rxjs-interop';
   encapsulation: ViewEncapsulation.None
 })
 export class ProjectViewComponent {
-  // State signals
-  params = toSignal(this.route.params, {
-    initialValue: { projectSlug: '' }
-  });
-
-  project = toSignal(
-    this.settingsService.getProjectSettings(this.params().projectSlug),
-    {
-      initialValue: undefined
-    }
-  );
-  projectInfo = toSignal(this.projectInfoService.getProjects(), {
-    initialValue: []
-  });
-
-  // Convert project$ observable to signal
-  readonly currentProject = toSignal<ProjectSetting | null>(
-    this.settingsService.currentProject$,
-    { initialValue: null }
-  );
+  project = signal<ProjectSetting | null>(null);
+  projectInfo = signal<ProjectInfo[]>([]);
 
   constructor(
     private route: ActivatedRoute,
-    public projectInfoService: ProjectInfoService,
-    private settingsService: SettingsService,
     private router: Router
-  ) {}
+  ) {
+    this.route.data.subscribe((data) => {
+      const projectSettings = data['projectSetting'];
+      const projectInfo = data['projectInfo'];
+      this.project.set(projectSettings);
+      this.projectInfo.set(projectInfo);
+    });
+  }
 
   onChangeProject(projectSlug: string, snav: MatSidenav) {
     this.router.navigate(['/projects', projectSlug]);

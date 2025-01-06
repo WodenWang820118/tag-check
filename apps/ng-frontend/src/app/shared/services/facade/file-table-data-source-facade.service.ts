@@ -10,7 +10,9 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { InformationDialogComponent } from '../../components/information-dialog/information-dialog.component';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class FileTableDataSourceFacadeService {
   constructor(
     private route: ActivatedRoute,
@@ -18,39 +20,6 @@ export class FileTableDataSourceFacadeService {
     private fileReportService: FileReportService,
     private dialog: MatDialog
   ) {}
-
-  initDataSource() {
-    if (!this.route.parent) {
-      return of(null);
-    }
-
-    return this.route.parent.params.pipe(
-      switchMap((params) => {
-        const projectSlug = params['projectSlug'];
-        return this.fileReportService.getFileReports(projectSlug).pipe(
-          tap((data) => {
-            if (data) {
-              this.fileTableDataSourceService.setData(
-                this.preprocessData(data)
-              );
-            }
-          }),
-          catchError((error) => {
-            console.error(error);
-            return of(null);
-          })
-        );
-      })
-    );
-  }
-
-  observeDataSource() {
-    return this.initDataSource().pipe(
-      switchMap(() => {
-        return this.fileTableDataSourceService.getData();
-      })
-    );
-  }
 
   observeTableFilter() {
     return this.fileTableDataSourceService.getFilterStream().pipe(

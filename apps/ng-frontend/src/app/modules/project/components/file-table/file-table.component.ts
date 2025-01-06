@@ -3,7 +3,8 @@ import {
   OnDestroy,
   viewChild,
   signal,
-  computed
+  computed,
+  OnInit
 } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,7 +18,7 @@ import { FileReport } from '@utils';
 import { MatInputModule } from '@angular/material/input';
 import { FileTableDataSourceFacadeService } from '../../../../shared/services/facade/file-table-data-source-facade.service';
 import { MatSortModule } from '@angular/material/sort';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-file-table',
@@ -32,11 +33,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
     NgClass,
     MatSortModule
   ],
-  providers: [FileTableDataSourceFacadeService],
   templateUrl: './file-table.component.html',
   styleUrls: ['./file-table.component.scss']
 })
-export class FileTableComponent implements OnDestroy {
+export class FileTableComponent implements OnInit, OnDestroy {
   paginator = viewChild.required<MatPaginator>(MatPaginator);
   sort = viewChild.required<MatSort>(MatSort);
   columns: string[] = [
@@ -82,17 +82,17 @@ export class FileTableComponent implements OnDestroy {
   destroy$ = new Subject<void>();
 
   constructor(
-    private fileTableDataSourceFacadeService: FileTableDataSourceFacadeService
-  ) {
-    // TODO: using effect will cause the following error:
-    // 1. block element regarding aria-hidden and inert
-    // 2. will need two steps to close the dialog
-    this.fileTableDataSourceFacadeService
-      .observeDataSource()
+    private fileTableDataSourceFacadeService: FileTableDataSourceFacadeService,
+    private route: ActivatedRoute
+  ) {}
+
+  ngOnInit() {
+    this.route.data
       .pipe(
         takeUntil(this.destroy$),
         tap((data) => {
-          this.dataSignal.set(data || []);
+          const fileReports = data['fileReports'] as FileReport[];
+          this.dataSignal.set(fileReports || []);
         }),
         switchMap(() => {
           return forkJoin({

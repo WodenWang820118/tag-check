@@ -1,15 +1,13 @@
-import { NgIf } from '@angular/common';
 import {
   Component,
   DestroyRef,
-  OnDestroy,
   OnInit,
   signal,
   ViewEncapsulation
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { catchError, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { catchError, switchMap, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
@@ -58,23 +56,18 @@ export class BrowserFormComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.route.parent?.params
+    this.route.data
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        switchMap((params) => {
-          const projectSlug = params['projectSlug'];
-          return this.settingsService.getProjectSettings(projectSlug);
-        }),
-        tap((project) => {
-          this.browserSettings.set(project.settings.browser);
-          this.browserSettingsForm.controls['headless'].setValue(
-            project.settings.headless
-          );
-          this.loadInitialData();
-        }),
-        catchError((err) => {
-          console.error(err);
-          return [];
+        tap((data) => {
+          const settings = data['projectInfo'].settings;
+          if (settings) {
+            this.browserSettings.set(settings.browser);
+            this.browserSettingsForm.controls['headless'].setValue(
+              settings.headless
+            );
+            this.loadInitialData();
+          }
         })
       )
       .subscribe();

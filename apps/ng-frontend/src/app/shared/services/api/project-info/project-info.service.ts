@@ -6,7 +6,7 @@ import { catchError } from 'rxjs/internal/operators/catchError';
 import { of } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ProjectInfoService {
   constructor(private http: HttpClient) {}
@@ -15,7 +15,7 @@ export class ProjectInfoService {
     return this.http.get<ProjectInfo[]>(environment.projectApiUrl).pipe(
       catchError((error) => {
         console.error(error);
-        return of([]);
+        return of([] as ProjectInfo[]);
       })
     );
   }
@@ -39,7 +39,7 @@ export class ProjectInfoService {
       projectDescription: settings.projectDescription || '',
       measurementId: settings.measurementId || '',
       googleSpreadsheetLink: settings.googleSpreadsheetLink || '',
-      version: settings.version || '1.0',
+      version: settings.version || '1.0'
     };
 
     return this.http

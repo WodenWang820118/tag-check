@@ -20,7 +20,6 @@ import { IReportDetails } from '@utils';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
-import { ReportDetailsService } from '../report-details/report-details.service';
 import { InformationDialogComponent } from '../../components/information-dialog/information-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -30,7 +29,6 @@ export class DataSourceFacadeService {
     private route: ActivatedRoute,
     private projectDataSourceService: ProjectDataSourceService,
     private reportService: ReportService,
-    private reportDetailsService: ReportDetailsService,
     private settingsService: SettingsService,
     private dialog: MatDialog
   ) {}
@@ -185,29 +183,6 @@ export class DataSourceFacadeService {
         return of(null);
       })
     );
-  }
-
-  setReportDetails(eventId: string) {
-    this.route.params
-      .pipe(
-        switchMap((params) => {
-          const slug = params['projectSlug'];
-          return this.reportService.getProjectReports(slug).pipe(
-            tap((project) => {
-              if (project) {
-                const reports = project.reports;
-                const report = reports.find((item) => item.eventId === eventId);
-                this.reportDetailsService.setReportDetails(report);
-              }
-            })
-          );
-        }),
-        catchError((error) => {
-          console.error(error);
-          return of(null);
-        })
-      )
-      .subscribe();
   }
 
   observeTableFilter() {

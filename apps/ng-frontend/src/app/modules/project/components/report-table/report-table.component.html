@@ -31,7 +31,6 @@
         <a
           style="text-decoration: none"
           [routerLink]="['./', element.eventId]"
-          (click)="dataSourceFacadeService.setReportDetails(element.eventId)"
           matBadge="bookmark_border"
           [matBadgeHidden]="
             !preventNavigationEvents().includes(element.eventId)
@@ -126,9 +125,6 @@
               mat-icon-button
               aria-label="add recording"
               [routerLink]="['./', element.eventId]"
-              (click)="
-                dataSourceFacadeService.setReportDetails(element.eventId)
-              "
               matTooltipPosition="above"
               matTooltip="Please add recording to run test"
             >

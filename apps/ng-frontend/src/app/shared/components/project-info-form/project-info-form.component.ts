@@ -42,16 +42,12 @@ export class ProjectInfoFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.route.parent?.params
+    this.route.data
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        switchMap((params) => {
-          const projectSlug = params['projectSlug'];
-          return this.settingsService.getProjectSettings(projectSlug);
-        }),
-        tap((project) => {
-          if (project.settings) {
-            const settings = project.settings;
+        tap((data) => {
+          const settings = data['projectInfo'].settings;
+          if (settings) {
             this.projectInfoForm.patchValue({
               projectName: settings.projectName,
               measurementId: settings.measurementId,
@@ -59,10 +55,6 @@ export class ProjectInfoFormComponent implements OnInit {
               googleSpreadsheetLink: settings.googleSpreadsheetLink
             });
           }
-        }),
-        catchError((err) => {
-          console.error(err);
-          return [];
         })
       )
       .subscribe();
