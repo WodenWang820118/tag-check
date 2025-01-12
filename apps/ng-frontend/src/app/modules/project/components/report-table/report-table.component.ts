@@ -1,29 +1,27 @@
 import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
 import {
-  AfterViewInit,
   Component,
-  computed,
   DestroyRef,
+  OnInit,
   signal,
   viewChild
 } from '@angular/core';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { EMPTY, switchMap, take, tap, forkJoin } from 'rxjs';
+import { tap } from 'rxjs';
 import { IReportDetails } from '@utils';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { SelectionModel } from '@angular/cdk/collections';
 import { MatBadgeModule } from '@angular/material/badge';
-import { DataSourceFacadeService } from '../../../../shared/services/facade/data-source-facade.service';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { ProjectFacadeService } from '../../../../shared/services/facade/project-facade.service';
 import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-chart.component';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ReportTableFacadeService } from './report-table-facade.service';
 
 @Component({
   selector: 'app-report-table',
@@ -43,184 +41,67 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
     MatBadgeModule,
     ProgressPieChartComponent
   ],
-  providers: [
-    ProjectFacadeService,
-    DataSourceFacadeService,
-    TestRunningFacadeService
-  ],
   templateUrl: './report-table.component.html',
   styleUrls: ['./report-table.component.scss']
 })
-export class ReportTableComponent implements AfterViewInit {
-  // State signals
-  readonly columnsToDisplay = signal([
-    'testName',
-    'eventName',
-    'passed',
-    'requestPassed',
-    'completedTime'
-  ]);
-
-  readonly columnsToDisplayWithExpand = signal([
-    'select',
-    ...this.columnsToDisplay(),
-    'actions'
-  ]);
-
-  readonly expandedElement = signal<Report | null>(null);
-  readonly testDataSource = signal<MatTableDataSource<IReportDetails>>(
-    new MatTableDataSource()
-  );
-  readonly selection = signal(new SelectionModel<IReportDetails>(true, []));
+export class ReportTableComponent implements OnInit {
   readonly preventNavigationEvents = signal<string[]>([]);
-  private params = toSignal(this.route.params, {
-    initialValue: {
-      projectSlug: ''
-    }
-  });
-
-  // View children
   private readonly paginator = viewChild<MatPaginator>(MatPaginator);
   private readonly sort = viewChild<MatSort>(MatSort);
 
-  // Computed values
-  readonly isAllSelected = computed(() => {
-    const dataSource = this.testDataSource();
-    if (!dataSource) return false;
-
-    const numSelected = this.selection().selected.length;
-    const numRows = dataSource.data.length;
-    return numSelected === numRows;
-  });
-
   constructor(
     public projectFacadeService: ProjectFacadeService,
-    public dataSourceFacadeService: DataSourceFacadeService,
     public testRunningFacadeService: TestRunningFacadeService,
     private route: ActivatedRoute,
-    private destroyRef: DestroyRef
+    private destroyRef: DestroyRef,
+    public facade: ReportTableFacadeService
   ) {}
 
-  ngAfterViewInit() {
+  ngOnInit() {
     const paginator = this.paginator();
     const sort = this.sort();
-    if (this.params().projectSlug && paginator && sort) {
-      this.setupProjectObservation(paginator, sort);
-    }
-  }
-
-  private setupProjectObservation(paginator: MatPaginator, sort: MatSort) {
-    const projectSource = this.dataSourceFacadeService
-      .observeProject(paginator, sort)
-      .pipe(
-        switchMap((dataSource) => {
-          if (!dataSource) return EMPTY;
-          this.testDataSource.set(dataSource);
-          return this.dataSourceFacadeService.observeDeleteSelected(
-            this.selection(),
-            this.testDataSource()
-          );
-        })
-      );
-
-    const recordingStatus =
-      this.projectFacadeService.observeProjectRecordingStatus(
-        this.params().projectSlug
-      );
-
-    const navigationEvents = this.projectFacadeService
-      .observeNavigationEvents()
-      .pipe(
-        tap((preventNavigationEvents) => {
-          this.preventNavigationEvents.set(preventNavigationEvents);
-        })
-      );
-
-    const tableFilter = this.dataSourceFacadeService.observeTableFilter().pipe(
-      tap((filter) => {
-        this.testDataSource().filter = filter;
-      })
-    );
-
-    const preventNavigation = this.dataSourceFacadeService
-      .observePreventNavigationSelected(this.selection())
-      .pipe(
-        tap((projectSetting) => {
-          if (!projectSetting) return;
-          this.preventNavigationEvents.set(
-            projectSetting.settings.preventNavigationEvents
-          );
-        })
-      );
-
-    forkJoin({
-      project: projectSource,
-      recordingStatus,
-      navigationEvents,
-      tableFilter,
-      preventNavigation
-    })
+    this.route.data
       .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        tap((data) => {
+          if (paginator && sort)
+            this.facade.initializeData(paginator, sort, data);
+        })
+      )
       .subscribe();
   }
 
-  observeProjectRecordingStatus() {
-    return this.projectFacadeService.observeProjectRecordingStatus(
-      this.params().projectSlug
-    );
+  // The following getters make it easier to use signals in the template:
+  get columnsToDisplay() {
+    return this.facade.columnsToDisplay();
   }
 
-  observeProject(paginator: MatPaginator, sort: MatSort) {
-    return this.dataSourceFacadeService.observeProject(paginator, sort).pipe(
-      switchMap(
-        (dataSource: MatTableDataSource<IReportDetails, MatPaginator>) => {
-          if (dataSource) {
-            this.testDataSource.set(dataSource);
-            return this.dataSourceFacadeService.observeDeleteSelected(
-              this.selection(),
-              this.testDataSource()
-            );
-          }
-          return EMPTY;
-        }
-      )
-    );
+  get columnsToDisplayWithExpand() {
+    return this.facade.columnsToDisplayWithExpand();
   }
 
+  get testDataSource() {
+    return this.facade.testDataSource();
+  }
+
+  get selection() {
+    return this.facade.selection();
+  }
+
+  get isAllSelected() {
+    return this.facade.isAllSelected();
+  }
+
+  // Expose methods directly:
   runTest(eventId: string) {
-    this.testRunningFacadeService
-      .runTest(eventId, this.params().projectSlug, this.testDataSource())
-      .pipe(take(1))
-      .subscribe((updatedData) => {
-        if (updatedData) {
-          this.testDataSource().data = [...updatedData.data];
-        }
-      });
+    this.facade.runTest(eventId);
   }
 
-  selectSingleRow(row: IReportDetails) {
-    this.selection().toggle(row);
-    this.selection().select(row);
-  }
-
-  /** Selects all rows if they are not all selected; otherwise clear selection. */
   toggleAllRows() {
-    if (this.isAllSelected()) {
-      this.selection().clear();
-      return;
-    }
-
-    this.selection().select(...this.testDataSource().data);
-    console.log('selected', this.selection().selected);
+    this.facade.toggleAllRows();
   }
 
-  /** The label for the checkbox on the passed row */
-  checkboxLabel(row?: IReportDetails): string {
-    if (!row) {
-      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
-    }
-    return `${this.selection().isSelected(row) ? 'deselect' : 'select'} row ${
-      row.position + 1
-    }`;
+  checkboxLabel(row?: IReportDetails) {
+    return this.facade.checkboxLabel(row);
   }
 }

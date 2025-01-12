@@ -1,22 +1,22 @@
 import { DataSource } from '@angular/cdk/collections';
 import { IReportDetails } from '@utils';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ProjectDataSourceService extends DataSource<IReportDetails> {
   private _dataStream = new BehaviorSubject<IReportDetails[]>([]);
-  private _filterStream = new ReplaySubject<string>();
-  private _deletedStream = new BehaviorSubject<boolean>(false);
-  private _preventNavigationStream = new ReplaySubject<boolean>();
+  private _filterSignal = signal('');
+  private _preventNavigationSignal = signal(false);
+  private _deletedSignal = signal(false);
 
   constructor() {
     super();
   }
 
-  connect(): Observable<IReportDetails[]> {
+  connect() {
     return this._dataStream;
   }
 
@@ -26,35 +26,27 @@ export class ProjectDataSourceService extends DataSource<IReportDetails> {
     this._dataStream.next(data);
   }
 
-  getFilterStream(): Observable<string> {
-    return this._filterStream;
+  setFilterSignal(filter: string) {
+    this._filterSignal.set(filter);
   }
 
-  setFilter(filter: string) {
-    this._filterStream.next(filter);
+  getFilterSignal() {
+    return this._filterSignal();
   }
 
-  setDeletedStream(deleted: boolean) {
-    this._deletedStream.next(deleted);
+  setPreventNavigationSignal(prevent: boolean) {
+    this._preventNavigationSignal.set(prevent);
   }
 
-  deleteSelected() {
-    this.setDeletedStream(true);
+  getPreventNavigationSignal() {
+    return this._preventNavigationSignal();
   }
 
-  getDeletedStream(): Observable<boolean> {
-    return this._deletedStream;
+  setDeletedSignal(deleted: boolean) {
+    this._deletedSignal.set(deleted);
   }
 
-  setPreventNavigationStream(prevent: boolean) {
-    this._preventNavigationStream.next(prevent);
-  }
-
-  getPreventNavigationStream(): Observable<boolean> {
-    return this._preventNavigationStream;
-  }
-
-  preventNavigationSelected() {
-    this.setPreventNavigationStream(true);
+  getDeletedSignal() {
+    return this._deletedSignal();
   }
 }

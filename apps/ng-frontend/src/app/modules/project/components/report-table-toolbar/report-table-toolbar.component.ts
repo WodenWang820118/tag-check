@@ -44,15 +44,15 @@ export class ReportTableToolbarComponent {
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSourceService.setFilter(filterValue);
+    this.dataSourceService.setFilterSignal(filterValue);
   }
 
   deleteSelected() {
-    this.dataSourceService.deleteSelected();
+    this.dataSourceService.setDeletedSignal(true);
   }
 
   preventNavigationSelected() {
-    this.dataSourceService.preventNavigationSelected();
+    this.dataSourceService.setPreventNavigationSignal(true);
   }
 
   onToggleChange(event: MatButtonToggleChange) {

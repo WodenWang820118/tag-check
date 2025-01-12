@@ -6,10 +6,13 @@ import {
 import {
   reportDetailResolver,
   imageResolver,
-  videoResolver
+  videoResolver,
+  projectReportResolver,
+  reportNamesResolver
 } from './resolvers/report.resolver';
 import { getFileReportResolver } from './resolvers/file-report.resolver';
 import { getProjectFormSettingsResolver } from './resolvers/project-form-settings.resolver';
+import { recordingsResolver } from './resolvers/recording.resolver';
 
 export const PROJECT_ROUTES: Routes = [
   {
@@ -20,7 +23,10 @@ export const PROJECT_ROUTES: Routes = [
       ),
     resolve: {
       projectSetting: projectSettingResolver,
-      projectInfo: projectInfoResolver
+      projectInfo: projectInfoResolver,
+      projectReport: projectReportResolver,
+      reportNames: reportNamesResolver,
+      recordings: recordingsResolver
     },
     children: [
       {
