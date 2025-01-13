@@ -20,7 +20,6 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { FileTableDataSourceService } from '../../../../shared/services/file-table-data-source/file-table-data-source.service';
 
 const meta: Meta<FileTableToolbarComponent> = {
   component: FileTableToolbarComponent,
@@ -39,7 +38,7 @@ const meta: Meta<FileTableToolbarComponent> = {
         ReactiveFormsModule,
         MatButtonToggleModule
       ],
-      providers: [FileTableDataSourceService]
+      providers: []
     }),
     applicationConfig({
       providers: [

@@ -2,7 +2,7 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ReportTableToolbarComponent } from './report-table-toolbar.component';
 
@@ -21,7 +21,6 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ProjectDataSourceService } from '../../../../shared/services/project-data-source/project-data-source.service';
 
 const meta: Meta<ReportTableToolbarComponent> = {
   component: ReportTableToolbarComponent,
@@ -40,24 +39,24 @@ const meta: Meta<ReportTableToolbarComponent> = {
         MatFormFieldModule,
         FormsModule,
         ReactiveFormsModule,
-        MatButtonToggleModule,
+        MatButtonToggleModule
       ],
-      providers: [ProjectDataSourceService, TestRunningFacadeService],
+      providers: [TestRunningFacadeService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(PROJECT_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(PROJECT_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ReportTableToolbarComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };
 
 export const Searching: Story = {
@@ -69,5 +68,5 @@ export const Searching: Story = {
     // Verify that the toggle exists
     expect(buttonToggle).toBeTruthy();
     buttonToggle.click();
-  },
+  }
 };

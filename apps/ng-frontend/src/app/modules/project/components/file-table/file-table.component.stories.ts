@@ -2,7 +2,7 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { FileTableComponent } from './file-table.component';
 
@@ -17,7 +17,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
-import { FileTableDataSourceFacadeService } from '../../../../shared/services/facade/file-table-data-source-facade.service';
 import { PROJECT_ROUTES } from '../../routes';
 
 const meta: Meta<FileTableComponent> = {
@@ -34,22 +33,22 @@ const meta: Meta<FileTableComponent> = {
         DatePipe,
         MatInputModule,
         NgClass,
-        MatSortModule,
+        MatSortModule
       ],
-      providers: [FileTableDataSourceFacadeService],
+      providers: []
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(PROJECT_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(PROJECT_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<FileTableComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };
