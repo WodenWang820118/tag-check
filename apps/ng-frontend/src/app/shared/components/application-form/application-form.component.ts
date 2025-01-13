@@ -55,23 +55,20 @@ export class ApplicationFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.route.parent?.params
+    this.route.data
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        switchMap((params) => {
-          const projectSlug = params['projectSlug'];
-          return this.settingsService.getProjectSettings(projectSlug);
-        }),
-        tap((project) => {
-          this.localStorageSettings.set(
-            project.settings.application.localStorage.data
-          );
-          this.cookieSettings.set(project.settings.application.cookie.data);
-          this.loadInitialData();
-        }),
-        catchError((err) => {
-          console.error(err);
-          return EMPTY;
+        tap((data) => {
+          const settings = data['projectInfo'].settings;
+          if (settings) {
+            this.localStorageSettings.set(
+              settings.application.localStorage.data as LocalStorageData[]
+            );
+            this.cookieSettings.set(
+              settings.application.cookie.data as CookieData[]
+            );
+            this.loadInitialData();
+          }
         })
       )
       .subscribe();

@@ -1,0 +1,202 @@
+import { computed, effect, Injectable, signal } from '@angular/core';
+import { FileTableDataSourceService } from '../../../../shared/services/data-source/file-table-data-source.service';
+import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
+import { tap, take } from 'rxjs';
+import { MatTableDataSource } from '@angular/material/table';
+import { SelectionModel } from '@angular/cdk/collections';
+import { FileReport } from '@utils';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatDialog } from '@angular/material/dialog';
+import { InformationDialogComponent } from '../../../../shared/components/information-dialog/information-dialog.component';
+import { MatSort } from '@angular/material/sort';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class FileTableDataSourceFacadeService {
+  columns = signal([
+    'select',
+    'name',
+    'dataLayerState',
+    'requestState',
+    'lastModified'
+  ]);
+
+  readonly dataSource = signal<MatTableDataSource<FileReport>>(
+    new MatTableDataSource()
+  );
+
+  // Selection model as a signal
+  readonly selection = signal(new SelectionModel<FileReport>(true, []));
+
+  // Computed property for "select all" behavior
+  readonly isAllSelected = computed(() => {
+    const ds = this.dataSource();
+    const numSelected = this.selection().selected.length;
+    return ds && numSelected === ds.data.length;
+  });
+  private readonly projectSlug = signal<string>('');
+
+  constructor(
+    private fileTableDataSourceService: FileTableDataSourceService,
+    private fileReportService: FileReportService,
+    private dialog: MatDialog
+  ) {
+    effect(
+      () => {
+        const filterValue = this.fileTableDataSourceService.getFilterSignal();
+        const currentDataSource = this.dataSource();
+        if (currentDataSource) {
+          currentDataSource.filter = filterValue;
+        }
+      },
+      {
+        allowSignalWrites: true
+      }
+    );
+    effect(
+      () => {
+        const deletedSignal =
+          this.fileTableDataSourceService.getDeletedSignal();
+        if (deletedSignal) {
+          const dialogRef = this.dialog.open(InformationDialogComponent, {
+            data: {
+              title: 'Delete Reports',
+              contents: 'Are you sure you want to delete the selected reports?',
+              action: 'Delete',
+              actionColor: 'warn',
+              consent: false
+            }
+          });
+          dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+              this.handleReportDeletion();
+            }
+            this.fileTableDataSourceService.setDeletedSignal(false);
+          });
+        }
+      },
+      {
+        allowSignalWrites: true
+      }
+    );
+    effect(
+      () => {
+        const downloadSignal =
+          this.fileTableDataSourceService.getDownloadSignal();
+        if (downloadSignal) {
+          const dialogRef = this.dialog.open(InformationDialogComponent, {
+            data: {
+              title: 'Download Reports',
+              contents:
+                'Are you sure you want to download the selected reports?',
+              action: 'Download',
+              actionColor: 'primary',
+              consent: false
+            }
+          });
+          dialogRef.afterClosed().subscribe((result) => {
+            if (result) {
+              this.handleReportDownload(this.selection().selected);
+            }
+            this.fileTableDataSourceService.setDownloadSignal(false);
+          });
+        }
+      },
+      {
+        allowSignalWrites: true
+      }
+    );
+  }
+
+  initializeData(paginator: MatPaginator, sort: MatSort, data: any) {
+    console.log(data);
+    const fileReports = data['fileReports'];
+    const projectSlug = data['projectSlug'];
+
+    if (fileReports && paginator && sort) {
+      // Sort the data
+      const injectReports = (fileReports as FileReport[]).sort((a, b) =>
+        a.name.localeCompare(b.name)
+      );
+      // Create data source and assign
+      const dataSource = new MatTableDataSource(injectReports);
+      dataSource.paginator = paginator;
+      dataSource.sort = sort;
+      this.dataSource.set(dataSource);
+      this.projectSlug.set(projectSlug);
+    }
+  }
+
+  private handleReportDeletion() {
+    const remainingReports = this.dataSource().data.filter(
+      (item) => !this.selection().selected.includes(item)
+    );
+    this.dataSource().data = remainingReports;
+    this.fileTableDataSourceService.setData(remainingReports);
+    this.fileReportService
+      .deleteFileReports(this.projectSlug(), this.selection().selected)
+      .pipe(take(1))
+      .subscribe();
+  }
+
+  private handleReportDownload(selected: FileReport[]) {
+    this.fileReportService
+      .downloadFileReports(selected)
+      .pipe(
+        take(1),
+        tap((blob) => {
+          if (!blob) {
+            return;
+          }
+          const fileName = 'report.zip'; // You can generate a dynamic name if needed
+          this.selection().clear();
+          this.saveFile(blob, fileName);
+        })
+      )
+      .subscribe();
+  }
+
+  private saveFile(blob: Blob, fileName: string) {
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+    window.URL.revokeObjectURL(link.href);
+  }
+
+  preprocessData(data: FileReport[]) {
+    return data.map((item, index) => {
+      const segments = item.name.split(' ');
+      const eventName = segments[0];
+      const dataLayerState = segments[1] === 'true' ? true : false;
+      const requestState = segments[2] === 'true' ? true : false;
+      return {
+        position: index,
+        name: eventName,
+        path: item.path,
+        dataLayerState: dataLayerState,
+        requestState: requestState,
+        lastModified: item.lastModified
+      };
+    });
+  }
+
+  toggleAllRows() {
+    if (this.selection().selected.length === this.dataSource().data.length) {
+      this.selection().clear();
+      return;
+    }
+    // Otherwise, select all
+    this.selection().select(...this.dataSource().data);
+  }
+
+  checkboxLabel(row?: FileReport): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+    }
+    return `${
+      this.selection().isSelected(row) ? 'deselect' : 'select'
+    } row ${(row as any).position + 1}`;
+  }
+}

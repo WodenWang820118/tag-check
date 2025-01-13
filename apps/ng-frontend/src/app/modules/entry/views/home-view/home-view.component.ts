@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ProjectListComponent } from '../../components/project-list/project-list.component';
-import { MetadataSourceService } from '../../../../shared/services/metadata-source/metadata-source.service';
 
 @Component({
   selector: 'app-home-view',
@@ -15,16 +14,10 @@ import { MetadataSourceService } from '../../../../shared/services/metadata-sour
   `,
   styles: `
     .home {
-    &__projects {
-      margin-top: 2rem;
+      &__projects {
+        margin-top: 2rem;
+      }
     }
-  }
-  `,
+  `
 })
-export class HomeViewComponent implements OnInit {
-  constructor(private metadataSourceService: MetadataSourceService) {}
-
-  ngOnInit() {
-    this.metadataSourceService.initMetadata();
-  }
-}
+export class HomeViewComponent {}

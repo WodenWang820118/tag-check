@@ -2,7 +2,7 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { NewReportViewComponent } from './new-report-view.component';
 
@@ -21,7 +21,6 @@ import { ErrorDialogComponent } from '@ui';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
-import { ProjectDataSourceService } from '../../../../shared/services/project-data-source/project-data-source.service';
 import { EditorComponent } from 'libs/ui/src/lib/components/editor/editor.component';
 
 const meta: Meta<NewReportViewComponent> = {
@@ -37,29 +36,28 @@ const meta: Meta<NewReportViewComponent> = {
         MatInputModule,
         MatButtonModule,
         EditorComponent,
-        ErrorDialogComponent,
+        ErrorDialogComponent
       ],
       providers: [
         RecordingService,
         ReportService,
         SpecService,
-        ProjectDataSourceService,
         EditorService,
-        MatDialog,
-      ],
+        MatDialog
+      ]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(PROJECT_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(PROJECT_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<NewReportViewComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

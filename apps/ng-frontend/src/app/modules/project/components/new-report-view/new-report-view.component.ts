@@ -9,21 +9,21 @@ import {
   mergeMap,
   take,
   takeUntil,
-  tap,
+  tap
 } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
   FormBuilder,
   FormsModule,
   ReactiveFormsModule,
-  Validators,
+  Validators
 } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
-import { ProjectDataSourceService } from '../../../../shared/services/project-data-source/project-data-source.service';
+import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { EditorComponent } from '../../../../shared/components/editor/editor.component';
 import { EditorService } from '../../../../shared/services/editor/editor.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
@@ -41,23 +41,22 @@ import { v4 as uuidv4 } from 'uuid';
     ReactiveFormsModule,
     MatInputModule,
     MatButtonModule,
-    EditorComponent,
-    ErrorDialogComponent,
+    EditorComponent
   ],
   templateUrl: './new-report-view.component.html',
-  styleUrls: ['./new-report-view.component.scss'],
+  styleUrls: ['./new-report-view.component.scss']
 })
 export class NewReportViewComponent implements OnInit, OnDestroy {
   exampleInputJson = JSON.stringify({
     event: 'page_view',
     page_path: '$page_path',
     page_title: '$page_title',
-    page_location: '$page_location',
+    page_location: '$page_location'
   });
 
   reportForm = this.fb.group({
     projectSlug: ['', Validators.required],
-    testName: ['', Validators.required],
+    testName: ['', Validators.required]
   });
 
   private destroy$ = new Subject<void>();
@@ -118,7 +117,7 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
   setEditorContent() {
     combineLatest([
       this.editorService.editor$.specJsonEditor,
-      this.editorService.editor$.recordingJsonEditor,
+      this.editorService.editor$.recordingJsonEditor
     ])
       .pipe(
         takeUntil(this.destroy$),
@@ -136,7 +135,7 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
   uploadReport() {
     combineLatest([
       this.editorService.editor$.specJsonEditor,
-      this.editorService.editor$.recordingJsonEditor,
+      this.editorService.editor$.recordingJsonEditor
     ])
       .pipe(
         take(1),
@@ -168,13 +167,13 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
               eventName,
               specContent,
               recordingContent,
-              reportDetails,
+              reportDetails
             };
           } else {
             this.dialog.open(ErrorDialogComponent, {
               data: {
-                message: 'Spec content is required and cannot be empty.',
-              },
+                message: 'Spec content is required and cannot be empty.'
+              }
             });
             throw new Error('Spec content is required and cannot be empty.');
           }
@@ -186,7 +185,7 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
             eventName,
             specContent,
             recordingContent,
-            reportDetails,
+            reportDetails
           }) =>
             forkJoin([
               this.reportService.addReport(
@@ -199,7 +198,7 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
                 `${eventName}_${eventId}`,
                 recordingContent as string
               ),
-              this.specService.addSpec(projectSlug, JSON.parse(specContent)),
+              this.specService.addSpec(projectSlug, JSON.parse(specContent))
             ]).pipe(
               tap(() => {
                 this.projectDataSourceService
@@ -209,7 +208,7 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
                     tap((data) => {
                       this.projectDataSourceService.setData([
                         ...data,
-                        reportDetails,
+                        reportDetails
                       ]);
                     }),
                     catchError((error) => {
@@ -234,7 +233,7 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
           console.log('Report and all related data successfully uploaded');
           this.location.back();
         },
-        error: (err) => console.error('Error uploading report:', err),
+        error: (err) => console.error('Error uploading report:', err)
       });
   }
 

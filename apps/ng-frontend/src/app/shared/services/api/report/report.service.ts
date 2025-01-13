@@ -1,11 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Subject, catchError, forkJoin, of } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  Subject,
+  catchError,
+  forkJoin,
+  of
+} from 'rxjs';
 import { ProjectReport, IReportDetails } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ReportService {
   reportsSubject: Subject<Report> = new BehaviorSubject({} as Report);
@@ -101,7 +108,7 @@ export class ReportService {
   downloadFile(projectSlug: string, eventName: string) {
     this.http
       .get(`${environment.reportApiUrl}/xlsx/${projectSlug}/${eventName}`, {
-        responseType: 'blob',
+        responseType: 'blob'
       })
       .pipe(
         catchError((error) => {
@@ -136,5 +143,21 @@ export class ReportService {
         )
     );
     return forkJoin(tasks); // Waits for all DELETE operations to complete.
+  }
+
+  getReportDetails(
+    projectSlug: string,
+    eventId: string
+  ): Observable<IReportDetails> {
+    return this.http
+      .get<IReportDetails>(
+        `${environment.reportApiUrl}/${projectSlug}/${eventId}`
+      )
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          throw error;
+        })
+      );
   }
 }

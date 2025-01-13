@@ -13,7 +13,7 @@ import {
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenav } from '@angular/material/sidenav';
 import { MatSelectModule } from '@angular/material/select';
-import { MetadataSourceService } from '../../services/metadata-source/metadata-source.service';
+import { MetadataSourceService } from '../../services/data-source/metadata-source.service';
 import { MatInputModule } from '@angular/material/input';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -87,6 +87,6 @@ export class ToolbarComponent {
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.metadataSourceService.setFilter(filterValue);
+    this.metadataSourceService.setFilterSignal(filterValue);
   }
 }

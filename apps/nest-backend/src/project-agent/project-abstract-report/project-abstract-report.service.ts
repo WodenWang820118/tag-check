@@ -6,7 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
-  NotFoundException,
+  NotFoundException
 } from '@nestjs/common';
 import { IReportDetails, OutputValidationResult } from '@utils';
 import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
@@ -132,9 +132,9 @@ export class ProjectAbstractReportService {
       const completedTime = statSync(filePath).mtime;
 
       return {
-        eventName: eventId,
-        ...this.fileService.readJsonFile<any>(filePath),
-        completedTime,
+        // eventName: eventId,
+        ...this.fileService.readJsonFile<IReportDetails>(filePath),
+        completedTime
       };
     } catch (error) {
       if (error instanceof NotFoundException) {

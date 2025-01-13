@@ -1,5 +1,5 @@
 <div class="settings">
-  <mat-card class="gtm-preview-mode-form__card">
+  <mat-card class="gtm-preview-mode-form__card" appearance="outlined">
     <mat-card-header>
       <mat-card-title>Google Tag Manager</mat-card-title>
       <mat-card-subtitle>Settings for the GTM preview mode</mat-card-subtitle>
@@ -30,14 +30,14 @@
             <mat-label>Preview Mode URL</mat-label>
             <input matInput formControlName="url" />
             @if (urlValue) {
-            <button
-              matSuffix
-              mat-icon-button
-              aria-label="Clear"
-              (click)="onReset()"
-            >
-              <mat-icon>close</mat-icon>
-            </button>
+              <button
+                matSuffix
+                mat-icon-button
+                aria-label="Clear"
+                (click)="onReset()"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
             }
           </mat-form-field>
         </div>

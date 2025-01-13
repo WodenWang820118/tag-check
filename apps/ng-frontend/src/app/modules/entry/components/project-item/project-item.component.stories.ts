@@ -2,7 +2,7 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ProjectItemComponent } from './project-item.component';
 
@@ -15,7 +15,6 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 import { RouterLink, provideRouter } from '@angular/router';
 import { ENTRY_ROUTES } from '../../routes';
 import { ProjectIoService } from '../../../../shared/services/api/project-io/project-io.service';
-import { MetadataSourceService } from '../../../../shared/services/metadata-source/metadata-source.service';
 
 const meta: Meta<ProjectItemComponent> = {
   component: ProjectItemComponent,
@@ -24,20 +23,20 @@ const meta: Meta<ProjectItemComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [MatCardModule, MatButtonModule, RouterLink],
-      providers: [MatDialog, ProjectIoService, MetadataSourceService],
+      providers: [MatDialog, ProjectIoService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(ENTRY_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(ENTRY_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ProjectItemComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

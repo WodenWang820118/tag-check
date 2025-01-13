@@ -1,4 +1,21 @@
 import { Routes } from '@angular/router';
+import {
+  projectInfoResolver,
+  projectSettingResolver
+} from './resolvers/project.resolver';
+import {
+  reportDetailResolver,
+  imageResolver,
+  videoResolver,
+  projectReportResolver,
+  reportNamesResolver
+} from './resolvers/report.resolver';
+import {
+  getFileReportResolver,
+  getProjectSlugResolver
+} from './resolvers/file-report.resolver';
+import { getProjectFormSettingsResolver } from './resolvers/project-form-settings.resolver';
+import { recordingsResolver } from './resolvers/recording.resolver';
 
 export const PROJECT_ROUTES: Routes = [
   {
@@ -7,6 +24,13 @@ export const PROJECT_ROUTES: Routes = [
       import('./views/project-view/project-view.component').then(
         (m) => m.ProjectViewComponent
       ),
+    resolve: {
+      projectSetting: projectSettingResolver,
+      projectInfo: projectInfoResolver,
+      projectReport: projectReportResolver,
+      reportNames: reportNamesResolver,
+      recordings: recordingsResolver
+    },
     children: [
       {
         path: '',
@@ -25,42 +49,61 @@ export const PROJECT_ROUTES: Routes = [
         loadComponent: () =>
           import('./views/buckets-view/buckets-view.component').then(
             (m) => m.BucketsViewComponent
-          )
+          ),
+        resolve: {
+          fileReports: getFileReportResolver,
+          projectSlug: getProjectSlugResolver
+        }
       },
       {
         path: 'settings/project-info',
         loadComponent: () =>
           import(
             '../../shared/components/project-info-form/project-info-form.component'
-          ).then((m) => m.ProjectInfoFormComponent)
+          ).then((m) => m.ProjectInfoFormComponent),
+        resolve: {
+          projectInfo: getProjectFormSettingsResolver
+        }
       },
       {
         path: 'settings/pre-loading-values',
         loadComponent: () =>
           import(
             '../../shared/components/application-form/application-form.component'
-          ).then((m) => m.ApplicationFormComponent)
+          ).then((m) => m.ApplicationFormComponent),
+        resolve: {
+          projectInfo: getProjectFormSettingsResolver
+        }
       },
       {
         path: 'settings/authentication',
         loadComponent: () =>
           import(
             '../../shared/components/authentication-form/authentication-form.component'
-          ).then((m) => m.AuthenticationFormComponent)
+          ).then((m) => m.AuthenticationFormComponent),
+        resolve: {
+          projectInfo: getProjectFormSettingsResolver
+        }
       },
       {
         path: 'settings/gtm',
         loadComponent: () =>
           import('../../shared/components/gtm-form/gtm-form.component').then(
             (m) => m.GtmFormComponent
-          )
+          ),
+        resolve: {
+          projectInfo: getProjectFormSettingsResolver
+        }
       },
       {
         path: 'settings/advanced-browser-settings',
         loadComponent: () =>
           import(
             '../../shared/components/browser-form/browser-form.component'
-          ).then((m) => m.BrowserFormComponent)
+          ).then((m) => m.BrowserFormComponent),
+        resolve: {
+          projectInfo: getProjectFormSettingsResolver
+        }
       },
       {
         path: 'settings/project-io',
@@ -74,7 +117,12 @@ export const PROJECT_ROUTES: Routes = [
         loadComponent: () =>
           import('./views/detail-view/detail-view.component').then(
             (m) => m.DetailViewComponent
-          )
+          ),
+        resolve: {
+          reportDetails: reportDetailResolver,
+          image: imageResolver,
+          video: videoResolver
+        }
       }
     ]
   }

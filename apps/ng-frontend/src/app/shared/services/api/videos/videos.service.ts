@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class VideosService {
   constructor(private http: HttpClient) {}
@@ -12,12 +12,12 @@ export class VideosService {
   getVideo(projectSlug: string, eventId: string) {
     return this.http
       .get(`${environment.videoApiUrl}/${projectSlug}/${eventId}`, {
-        responseType: 'blob',
+        responseType: 'blob'
       })
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(new Blob());
+          return of(null);
         })
       );
   }

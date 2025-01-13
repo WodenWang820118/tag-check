@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { treeNodeResolver } from './resolvers/help-center.resolver';
+import { treeNodeDeactivateGuard } from './guards/help-center.guard';
 
 export const HELP_CENTER_ROUTES: Routes = [
   {
@@ -14,7 +16,11 @@ export const HELP_CENTER_ROUTES: Routes = [
           import('./components/main-content/main-content.component').then(
             (m) => m.MainContentComponent
           ),
-      },
-    ],
-  },
+        resolve: {
+          data: treeNodeResolver
+        },
+        canDeactivate: [treeNodeDeactivateGuard]
+      }
+    ]
+  }
 ];
