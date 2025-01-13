@@ -1,14 +1,14 @@
 import { DataSource } from '@angular/cdk/collections';
 import { ProjectInfo } from '@utils';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MetadataSourceService extends DataSource<ProjectInfo> {
   private _dataStream = new BehaviorSubject<ProjectInfo[]>([]);
-  private _filterStream = new ReplaySubject<string>();
+  private _filterSignal = signal<string>('');
 
   constructor() {
     super();
@@ -28,11 +28,11 @@ export class MetadataSourceService extends DataSource<ProjectInfo> {
     return this._dataStream;
   }
 
-  getFilterStream(): Observable<string> {
-    return this._filterStream;
+  setFilterSignal(filter: string) {
+    this._filterSignal.set(filter);
   }
 
-  setFilter(filter: string) {
-    this._filterStream.next(filter);
+  getFilterSignal() {
+    return this._filterSignal();
   }
 }

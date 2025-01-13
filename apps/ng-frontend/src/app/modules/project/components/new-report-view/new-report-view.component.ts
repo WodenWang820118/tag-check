@@ -23,7 +23,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
-import { ProjectDataSourceService } from '../../../../shared/services/project-data-source/project-data-source.service';
+import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { EditorComponent } from '../../../../shared/components/editor/editor.component';
 import { EditorService } from '../../../../shared/services/editor/editor.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';

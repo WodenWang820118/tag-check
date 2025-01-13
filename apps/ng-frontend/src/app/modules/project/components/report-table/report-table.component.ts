@@ -13,15 +13,15 @@ import { tap } from 'rxjs';
 import { IReportDetails } from '@utils';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatBadgeModule } from '@angular/material/badge';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
-import { ProjectFacadeService } from '../../../../shared/services/facade/project-facade.service';
 import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-chart.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReportTableFacadeService } from './report-table-facade.service';
+import { TableSortService } from '../../../../shared/services/utils/table-sort.service';
 
 @Component({
   selector: 'app-report-table',
@@ -50,11 +50,11 @@ export class ReportTableComponent implements OnInit {
   private readonly sort = viewChild<MatSort>(MatSort);
 
   constructor(
-    public projectFacadeService: ProjectFacadeService,
     public testRunningFacadeService: TestRunningFacadeService,
     private route: ActivatedRoute,
     private destroyRef: DestroyRef,
-    public facade: ReportTableFacadeService
+    private facade: ReportTableFacadeService,
+    private tableSortService: TableSortService
   ) {}
 
   ngOnInit() {
@@ -71,17 +71,25 @@ export class ReportTableComponent implements OnInit {
       .subscribe();
   }
 
+  sortData(sort: Sort) {
+    this.dataSource.data = this.tableSortService.sortData(
+      sort,
+      this.dataSource.data,
+      this.columns.map((col) => ({ name: col, type: 'string' }))
+    );
+  }
+
   // The following getters make it easier to use signals in the template:
-  get columnsToDisplay() {
-    return this.facade.columnsToDisplay();
+  get columns() {
+    return this.facade.columns();
   }
 
-  get columnsToDisplayWithExpand() {
-    return this.facade.columnsToDisplayWithExpand();
+  get columnsWithExpand() {
+    return this.facade.columnsWithExpand();
   }
 
-  get testDataSource() {
-    return this.facade.testDataSource();
+  get dataSource() {
+    return this.facade.dataSource();
   }
 
   get selection() {
@@ -90,6 +98,10 @@ export class ReportTableComponent implements OnInit {
 
   get isAllSelected() {
     return this.facade.isAllSelected();
+  }
+
+  hasRecording(eventId: string) {
+    return this.facade.hasRecording(eventId);
   }
 
   // Expose methods directly:

@@ -3,7 +3,7 @@ import { ResolveFn } from '@angular/router';
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { ProjectInfoService } from '../../../shared/services/api/project-info/project-info.service';
-import { MetadataSourceService } from '../../../shared/services/metadata-source/metadata-source.service';
+import { MetadataSourceService } from '../../../shared/services/data-source/metadata-source.service';
 import { ProjectInfo } from '@utils';
 
 export const entryMetadataResolver: ResolveFn<ProjectInfo[]> = (

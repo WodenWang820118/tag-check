@@ -3,8 +3,8 @@ import { ResolveFn } from '@angular/router';
 import { FileReport } from '@utils';
 import { FileReportService } from '../../../shared/services/api/file-report/file-report.service';
 import { tap } from 'rxjs';
-import { FileTableDataSourceFacadeService } from '../../../shared/services/facade/file-table-data-source-facade.service';
-import { FileTableDataSourceService } from '../../../shared/services/file-table-data-source/file-table-data-source.service';
+import { FileTableDataSourceFacadeService } from '../components/file-table/file-table-data-source-facade.service';
+import { FileTableDataSourceService } from '../../../shared/services/data-source/file-table-data-source.service';
 
 export const getFileReportResolver: ResolveFn<FileReport[] | null> = (
   route,
@@ -34,4 +34,15 @@ export const getFileReportResolver: ResolveFn<FileReport[] | null> = (
         );
       })
     );
+};
+
+export const getProjectSlugResolver: ResolveFn<string | null> = (
+  route,
+  state
+) => {
+  if (!route.parent) {
+    return null;
+  }
+
+  return route.parent.params['projectSlug'];
 };

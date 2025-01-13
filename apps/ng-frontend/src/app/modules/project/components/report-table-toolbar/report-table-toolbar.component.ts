@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ProjectDataSourceService } from '../../../../shared/services/project-data-source/project-data-source.service';
+import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   MatButtonToggleChange,

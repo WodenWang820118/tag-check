@@ -10,7 +10,10 @@ import {
   projectReportResolver,
   reportNamesResolver
 } from './resolvers/report.resolver';
-import { getFileReportResolver } from './resolvers/file-report.resolver';
+import {
+  getFileReportResolver,
+  getProjectSlugResolver
+} from './resolvers/file-report.resolver';
 import { getProjectFormSettingsResolver } from './resolvers/project-form-settings.resolver';
 import { recordingsResolver } from './resolvers/recording.resolver';
 
@@ -48,7 +51,8 @@ export const PROJECT_ROUTES: Routes = [
             (m) => m.BucketsViewComponent
           ),
         resolve: {
-          fileReports: getFileReportResolver
+          fileReports: getFileReportResolver,
+          projectSlug: getProjectSlugResolver
         }
       },
       {

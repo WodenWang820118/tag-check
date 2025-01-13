@@ -3,22 +3,18 @@ import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatDialog } from '@angular/material/dialog';
 import { take } from 'rxjs';
-import { IReportDetails } from '@utils';
-import { ProjectDataSourceService } from 'apps/ng-frontend/src/app/shared/services/project-data-source/project-data-source.service';
-import { SettingsService } from 'apps/ng-frontend/src/app/shared/services/api/settings/settings.service';
-import { ReportService } from 'apps/ng-frontend/src/app/shared/services/api/report/report.service';
-import { InformationDialogComponent } from 'apps/ng-frontend/src/app/shared/components/information-dialog/information-dialog.component';
-import { ProjectFacadeService } from '../../../../shared/services/facade/project-facade.service';
+import { IReportDetails, Recording } from '@utils';
+import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
+import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
+import { ReportService } from '../../../../shared/services/api/report/report.service';
+import { InformationDialogComponent } from '../../../../shared/components/information-dialog/information-dialog.component';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 
 @Injectable({ providedIn: 'root' })
 export class ReportTableFacadeService {
-  // ---------------------------------
-  // 1. Signals for Table & Selection
-  // ---------------------------------
-  readonly columnsToDisplay = signal([
+  readonly columns = signal([
     'testName',
     'eventName',
     'passed',
@@ -26,16 +22,16 @@ export class ReportTableFacadeService {
     'completedTime'
   ]);
 
-  readonly columnsToDisplayWithExpand = computed(() => [
+  readonly columnsWithExpand = computed(() => [
     'select',
-    ...this.columnsToDisplay(),
+    ...this.columns(),
     'actions'
   ]);
 
   readonly expandedElement = signal<Report | null>(null);
 
   // Our table data is a signal of MatTableDataSource
-  readonly testDataSource = signal<MatTableDataSource<IReportDetails>>(
+  readonly dataSource = signal<MatTableDataSource<IReportDetails>>(
     new MatTableDataSource()
   );
 
@@ -46,27 +42,24 @@ export class ReportTableFacadeService {
 
   // Computed property for "select all" behavior
   readonly isAllSelected = computed(() => {
-    const ds = this.testDataSource();
+    const ds = this.dataSource();
     const numSelected = this.selection().selected.length;
     return ds && numSelected === ds.data.length;
   });
+
+  private hasRecordingMap: Map<string, boolean> = new Map();
 
   constructor(
     private projectDataSourceService: ProjectDataSourceService,
     private settingsService: SettingsService,
     private dialog: MatDialog,
     private reportService: ReportService,
-    private projectFacadeService: ProjectFacadeService,
     private testRunningFacadeService: TestRunningFacadeService
   ) {
-    // ---------------------------------
-    // 2. Effects that handle side effects
-    // ---------------------------------
-    // 2a. Filter effect
     effect(
       () => {
         const filterValue = this.projectDataSourceService.getFilterSignal();
-        const currentDataSource = this.testDataSource();
+        const currentDataSource = this.dataSource();
         if (currentDataSource) {
           currentDataSource.filter = filterValue;
         }
@@ -124,10 +117,10 @@ export class ReportTableFacadeService {
 
           dialogRef.afterClosed().subscribe((result) => {
             if (result) {
-              const remainingReports = this.testDataSource().data.filter(
+              const remainingReports = this.dataSource().data.filter(
                 (item) => !this.selection().selected.includes(item)
               );
-              this.testDataSource().data = remainingReports;
+              this.dataSource().data = remainingReports;
               this.projectDataSourceService.setData(remainingReports);
 
               this.reportService
@@ -145,9 +138,6 @@ export class ReportTableFacadeService {
     );
   }
 
-  // ---------------------------------
-  // 3. Methods to handle table logic
-  // ---------------------------------
   initializeData(paginator: MatPaginator, sort: MatSort, data: any) {
     const project = data['projectReport'];
     const projectRecordings = data['recordings'];
@@ -163,13 +153,10 @@ export class ReportTableFacadeService {
       const dataSource = new MatTableDataSource(injectReports);
       dataSource.paginator = paginator;
       dataSource.sort = sort;
-      this.testDataSource.set(dataSource);
+      this.dataSource.set(dataSource);
 
       // Initialize statuses via facade
-      this.projectFacadeService.initializeRecordingStatus(
-        reportNames,
-        projectRecordings.recordings
-      );
+      this.initializeRecordingStatus(reportNames, projectRecordings.recordings);
       // Set up signals
       this.preventNavigationEvents.set(
         projectSettings.settings.preventNavigationEvents
@@ -180,24 +167,38 @@ export class ReportTableFacadeService {
 
   runTest(eventId: string) {
     this.testRunningFacadeService
-      .runTest(eventId, this.projectSlug(), this.testDataSource())
+      .runTest(eventId, this.projectSlug(), this.dataSource())
       .pipe(take(1))
       .subscribe((updatedData) => {
         if (updatedData) {
-          this.testDataSource().data = [...updatedData.data];
+          this.dataSource().data = [...updatedData.data];
         }
       });
   }
 
+  initializeRecordingStatus(
+    reportNames: string[],
+    recordings: Record<string, Recording>
+  ) {
+    this.hasRecordingMap.clear();
+    const reportSet = new Set(reportNames);
+    for (const [key, value] of Object.entries(recordings)) {
+      if (!reportSet.has(key)) continue;
+      this.hasRecordingMap.set(key, value.steps.length > 0);
+    }
+  }
+
+  hasRecording(eventId: string): boolean {
+    return this.hasRecordingMap.get(eventId) || false;
+  }
+
   toggleAllRows() {
-    if (
-      this.selection().selected.length === this.testDataSource().data.length
-    ) {
+    if (this.selection().selected.length === this.dataSource().data.length) {
       this.selection().clear();
       return;
     }
     // Otherwise, select all
-    this.selection().select(...this.testDataSource().data);
+    this.selection().select(...this.dataSource().data);
   }
 
   checkboxLabel(row?: IReportDetails): string {

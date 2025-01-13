@@ -1,5 +1,11 @@
 <div class="report-table">
-  <table mat-table [dataSource]="testDataSource" multiTemplateDataRows matSort>
+  <table
+    mat-table
+    [dataSource]="dataSource"
+    multiTemplateDataRows
+    matSort
+    (matSortChange)="sortData($event)"
+  >
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox
@@ -107,7 +113,7 @@
             <!-- else, show the display button by default; if there's no recording, use another icon to prompt user -->
           }
         } @else {
-          @if (projectFacadeService.hasRecording(element.eventId)) {
+          @if (hasRecording(element.eventId)) {
             <button
               mat-icon-button
               aria-label="run test"
@@ -130,13 +136,10 @@
       </td>
     </ng-container>
 
-    <tr
-      mat-header-row
-      *matHeaderRowDef="facade.columnsToDisplayWithExpand()"
-    ></tr>
+    <tr mat-header-row *matHeaderRowDef="columnsWithExpand"></tr>
     <tr
       mat-row
-      *matRowDef="let element; columns: facade.columnsToDisplayWithExpand()"
+      *matRowDef="let element; columns: columnsWithExpand"
       class="element-row"
     ></tr>
   </table>

@@ -16,7 +16,7 @@ import {
   forkJoin
 } from 'rxjs';
 import { ProjectIoService } from '../../../../shared/services/api/project-io/project-io.service';
-import { MetadataSourceService } from '../../../../shared/services/metadata-source/metadata-source.service';
+import { MetadataSourceService } from '../../../../shared/services/data-source/metadata-source.service';
 
 @Component({
   selector: 'app-project-item',
