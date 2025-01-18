@@ -1,26 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { SequelizeOptions } from 'sequelize-typescript';
 import { ConfigsService } from '../configs/configs.service';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 @Injectable()
 export class DatabaseConfigService {
   constructor(private readonly configsService: ConfigsService) {}
 
-  getDatabaseConfig(): Partial<
-    {
-      name?: string;
-      retryAttempts?: number;
-      retryDelay?: number;
-      autoLoadModels?: boolean;
-      synchronize?: boolean;
-      uri?: string;
-    } & Partial<SequelizeOptions>
-  > {
+  getTypeOrmConfig(): TypeOrmModuleOptions {
     return {
-      dialect: 'sqlite',
-      storage: this.configsService.getDatabasePath(),
-      autoLoadModels: true,
+      type: 'sqlite',
+      database: this.configsService.getDatabasePath(),
+      autoLoadEntities: true,
       synchronize: true,
+      logging: true,
+      retryAttempts: 10,
+      retryDelay: 3000
     };
   }
 }

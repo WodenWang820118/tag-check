@@ -53,7 +53,7 @@ export type StrictDataLayerEvent = {
 export type ValidationResult = {
   passed: boolean;
   message: string;
-  incorrectInfo?: string[];
+  incorrectInfo?: string;
   dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
 };
@@ -71,7 +71,7 @@ export type OutputValidationResult = {
   requestPassed: boolean;
   rawRequest: string;
   message?: string;
-  incorrectInfo?: string[];
+  incorrectInfo?: string;
   reformedDataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
   dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;

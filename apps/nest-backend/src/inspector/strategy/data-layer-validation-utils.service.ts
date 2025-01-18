@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import {
   StrictDataLayerEvent,
   BaseDataLayerEvent,
-  ValidationResult,
+  ValidationResult
 } from '@utils';
 import { ValidationResultDto } from '../../dto/validation-result.dto';
 
@@ -27,12 +27,12 @@ export class DataLayerValidationUtilsService {
       if (typeof specValue === 'string') {
         if (specValue.startsWith('$')) {
           // Condition 1: Plain string starts with "$". Only checks the key.
-          return new ValidationResultDto(
-            true,
-            'Valid',
+          return new ValidationResultDto({
+            passed: true,
+            message: 'Valid',
             dataLayerSpec,
             dataLayer
-          );
+          });
         } else if (specValue.startsWith('/') && specValue.endsWith('/')) {
           // Condition 2: Regex literal within the string. Check whether the regex matches.
           if (typeof eventValue !== 'string') {
@@ -73,7 +73,12 @@ export class DataLayerValidationUtilsService {
       }
     }
 
-    return new ValidationResultDto(true, 'Valid', dataLayerSpec, dataLayer);
+    return new ValidationResultDto({
+      passed: true,
+      message: 'Valid',
+      dataLayerSpec,
+      dataLayer
+    });
   }
 
   private createValidationError(
@@ -81,6 +86,11 @@ export class DataLayerValidationUtilsService {
     dataLayerSpec: StrictDataLayerEvent,
     dataLayer: BaseDataLayerEvent | StrictDataLayerEvent
   ): ValidationResult {
-    return new ValidationResultDto(false, message, dataLayerSpec, dataLayer);
+    return new ValidationResultDto({
+      passed: false,
+      message,
+      dataLayerSpec,
+      dataLayer
+    });
   }
 }

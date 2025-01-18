@@ -1,12 +1,11 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   InternalServerErrorException,
   NotFoundException,
   Param,
-  Post,
+  Post
 } from '@nestjs/common';
 import { WaiterConfigurationService } from './waiter-configuration.service';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
@@ -31,9 +30,8 @@ export class WaiterConfigurationController {
   @Log()
   async getConfiguration(@Param('name') name: string) {
     try {
-      const result = await this.waiterConfigurationService.getConfiguration(
-        name
-      );
+      const result =
+        await this.waiterConfigurationService.getConfiguration(name);
       return result;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -46,16 +44,9 @@ export class WaiterConfigurationController {
     }
   }
 
-  @Delete('reset/:name')
-  async resetConfiguration(@Param('name') name: string) {
-    return await this.waiterConfigurationService.resetConfiguration(name);
-  }
-
   @Post('create')
-  async createConfiguration(
-    @Body() configuration: { name: string; value: string }
-  ) {
-    return await this.waiterConfigurationService.createConfiguration(
+  createConfiguration(@Body() configuration: { name: string; value: string }) {
+    return this.waiterConfigurationService.createConfiguration(
       configuration.name,
       configuration.value
     );

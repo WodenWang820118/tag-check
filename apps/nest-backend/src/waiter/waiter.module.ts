@@ -27,7 +27,7 @@ import { WaiterConfigurationService } from './configuration/waiter-configuration
 const waiterServices = [
   WaiterEventInspectionService,
   WaiterProjectWorkFlowService,
-  WaiterConfigurationService,
+  WaiterConfigurationService
 ];
 
 @Module({
@@ -44,8 +44,8 @@ const waiterServices = [
     WaiterSettingsController,
     WaiterProjectIoController,
     WaiterFileReportsController,
-    WaiterVideosController,
+    WaiterVideosController
   ],
-  providers: [...waiterServices],
+  providers: [...waiterServices]
 })
 export class WaiterModule {}
