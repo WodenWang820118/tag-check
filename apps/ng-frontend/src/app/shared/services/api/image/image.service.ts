@@ -4,7 +4,7 @@ import { BehaviorSubject, catchError, of } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ImageService {
   private imageApiUrl = environment.imageApiUrl;
@@ -13,16 +13,16 @@ export class ImageService {
 
   constructor(private http: HttpClient) {}
 
-  getImage(projectSlug: string, eventId: string) {
+  getImage(eventId: string) {
     const httpOptions = {
       headers: new HttpHeaders({
-        Accept: 'image/png',
+        Accept: 'image/png'
       }),
-      responseType: 'blob' as 'json', // This tells angular to parse it as a blob, default is json
+      responseType: 'blob' as 'json' // This tells angular to parse it as a blob, default is json
     };
 
     return this.http
-      .get<Blob>(`${this.imageApiUrl}/${projectSlug}/${eventId}`, httpOptions)
+      .get<Blob>(`${this.imageApiUrl}/${eventId}`, httpOptions)
       .pipe(
         catchError((error) => {
           console.error(error);

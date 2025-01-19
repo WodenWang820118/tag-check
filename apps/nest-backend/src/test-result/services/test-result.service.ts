@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TestResult } from './entity/test-result.entity';
+import { TestResult } from '../entity/test-result.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -21,7 +21,6 @@ export class TestResultService {
   }
 
   async create(testResultDto: Partial<TestResult>) {
-    Logger.log('Writing test result to database');
     const testResult = this.testResultRepository.create(testResultDto);
     return await this.testResultRepository.save(testResult);
   }

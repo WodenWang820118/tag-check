@@ -9,15 +9,17 @@ import {
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
-import { TestResultService } from '../test-result/test-result.service';
+import { TestResultService } from '../test-result/services/test-result.service';
 import { TestResult } from '../test-result/entity/test-result.entity';
+import { ImageResultService } from '../test-result/services/image-result.service';
 @Injectable()
 export class EventInspectionPipelineService {
   private readonly logger = new Logger(EventInspectionPipelineService.name);
   constructor(
     private readonly inspectorSingleEventService: InspectorSingleEventService,
     private readonly projectAbstractReportService: ProjectAbstractReportService,
-    private readonly testResultService: TestResultService
+    private readonly testResultService: TestResultService,
+    private readonly imageResultService: ImageResultService
   ) {}
 
   async singleEventInspectionRecipe(
@@ -90,6 +92,16 @@ export class EventInspectionPipelineService {
         rawRequest: '',
         message: `${error}`,
         destinationUrl: ''
+      });
+
+      const screenshot = await page.screenshot({
+        fullPage: true
+      });
+
+      await this.imageResultService.create({
+        eventId: eventId,
+        name: `${projectSlug}_${eventId}`,
+        data: screenshot
       });
     }
   }

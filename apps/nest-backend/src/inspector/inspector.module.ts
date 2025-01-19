@@ -10,6 +10,8 @@ import { STRATEGY_TYPE, ValidationStrategyType } from './utils';
 import { EcommerceEventValidationStrategy } from './strategy/ecommerce-event-validation-strategy.service';
 import { OldGA4EventsValidationStrategy } from './strategy/old-ga4-events-validation-strategy.service';
 import { InspectorUtilsService } from './inspector-utils.service';
+import { TestResultModule } from '../test-result/test-result.module';
+import { ImageResultService } from '../test-result/services/image-result.service';
 
 const strategyService = {
   provide: STRATEGY_TYPE,
@@ -19,10 +21,10 @@ const strategyService = {
   ) => {
     return {
       [ValidationStrategyType.ECOMMERCE]: ecommerceEventValidationStrategy,
-      [ValidationStrategyType.OLDGA4EVENTS]: oldGA4EventsValidationStrategy,
+      [ValidationStrategyType.OLDGA4EVENTS]: oldGA4EventsValidationStrategy
     };
   },
-  inject: [EcommerceEventValidationStrategy, OldGA4EventsValidationStrategy],
+  inject: [EcommerceEventValidationStrategy, OldGA4EventsValidationStrategy]
 };
 
 const services = [
@@ -33,6 +35,7 @@ const services = [
   InspectorUtilsService,
   EcommerceEventValidationStrategy,
   OldGA4EventsValidationStrategy,
+  ImageResultService
 ];
 @Module({
   imports: [
@@ -40,8 +43,9 @@ const services = [
     RequestProcessorModule,
     ProjectAgentModule,
     DataLayerValidationStrategyModule,
+    TestResultModule
   ],
   providers: [...services],
-  exports: [...services, ProjectAgentModule],
+  exports: [...services, ProjectAgentModule]
 })
 export class InspectorModule {}

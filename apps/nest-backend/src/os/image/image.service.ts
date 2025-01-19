@@ -1,30 +1,35 @@
-import { Injectable, NotFoundException, StreamableFile } from '@nestjs/common';
-import { FolderPathService } from '../path/folder-path/folder-path.service';
-import { existsSync, createReadStream } from 'fs';
-import { join } from 'path';
+import {
+  Injectable,
+  NotFoundException,
+  StreamableFile,
+  Logger
+} from '@nestjs/common';
 import { extractEventNameFromId } from '@utils';
+import { ImageResultService } from '../../test-result/services/image-result.service';
+import { Readable } from 'stream';
 
 @Injectable()
 export class ImageService {
-  constructor(private folderPathService: FolderPathService) {}
+  private logger = new Logger(ImageService.name);
+  constructor(private imageResultService: ImageResultService) {}
+  async readImage(eventId: string) {
+    const image = await this.imageResultService.get(eventId);
 
-  async readImage(projectSlug: string, eventId: string) {
-    const imageSavingFolder =
-      await this.folderPathService.getInspectionEventFolderPath(
-        projectSlug,
-        eventId
-      );
-
-    if (!existsSync(imageSavingFolder)) {
-      throw new NotFoundException('Folder not found');
+    if (!image) {
+      throw new NotFoundException(`Image not found for event: ${eventId}`);
     }
 
-    const fileName = extractEventNameFromId(eventId);
-    const imagePath = join(imageSavingFolder, `${fileName}.png`);
+    try {
+      // Convert buffer to stream
+      const stream = Readable.from(image.data);
 
-    if (!existsSync(imagePath)) {
-      throw new NotFoundException(`Image File not found: ${imagePath}`);
+      return new StreamableFile(stream, {
+        type: 'image/png',
+        disposition: `inline; filename="${extractEventNameFromId(eventId)}.png"`
+      });
+    } catch (error) {
+      this.logger.error('Error streaming image:', error);
+      throw error; // Re-throw the error to be handled by NestJS exception filters
     }
-    return new StreamableFile(createReadStream(imagePath));
   }
 }

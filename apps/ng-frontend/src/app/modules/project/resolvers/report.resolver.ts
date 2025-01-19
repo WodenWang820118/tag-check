@@ -24,9 +24,8 @@ export const videoResolver: ResolveFn<Blob | null> = (route, state) => {
 
 export const imageResolver: ResolveFn<Blob | null> = (route, state) => {
   const imageService = inject(ImageService);
-  const projectSlug = route.parent?.params['projectSlug'];
   const eventId = route.params['eventId'];
-  return imageService.getImage(projectSlug, eventId);
+  return imageService.getImage(eventId);
 };
 
 export const projectReportResolver: ResolveFn<ProjectReport | null> = (

@@ -7,7 +7,7 @@ export class ReportDetailsDto {
   eventName: string;
   passed = false;
   requestPassed = false;
-  incorrectInfo = [];
+  incorrectInfo = '';
   completedTime = new Date();
   dataLayerSpec = {} as BaseDataLayerEvent | StrictDataLayerEvent;
   dataLayer = {} as BaseDataLayerEvent | StrictDataLayerEvent;
