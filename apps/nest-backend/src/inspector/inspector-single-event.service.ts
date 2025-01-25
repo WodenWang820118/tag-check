@@ -17,7 +17,7 @@ import { WebAgentService } from '../web-agent/web-agent.service';
 import { RequestProcessorService } from '../request-processor/request-processor.service';
 import { Credentials, Page } from 'puppeteer';
 import { InspectorUtilsService } from './inspector-utils.service';
-import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
+import { EventInspectionPresetDto } from '../shared/dto/event-inspection-preset.dto';
 import { ImageResultService } from '../test-result/services/image-result.service';
 @Injectable()
 export class InspectorSingleEventService {

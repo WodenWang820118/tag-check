@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { addDoc, collection } from 'firebase/firestore';
-import { FirebaseService } from '../infrastructure/firebase/firebase.service';
+import { FirebaseService } from '../../infrastructure/firebase/firebase.service';
 
 @Catch()
 @Injectable()

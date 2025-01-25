@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Page } from 'puppeteer';
 import { getFirstSelector } from '../handlers/utils';
-import { EventInspectionPresetDto } from '../../../dto/event-inspection-preset.dto';
+import { EventInspectionPresetDto } from '../../../shared/dto/event-inspection-preset.dto';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DataLayerService } from '../../action/web-monitoring/data-layer/data-layer.service';
 import { ConfigsService } from '../../../core/configs/configs.service';

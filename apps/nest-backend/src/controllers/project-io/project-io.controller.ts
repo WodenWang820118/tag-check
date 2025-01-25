@@ -16,7 +16,7 @@ import { diskStorage } from 'multer';
 import { Express, Response } from 'express';
 import { ConfigurationService } from '../../core/configuration/configuration.service';
 import { ProjectIoFacadeService } from '../../project-agent/project-io-facade/project-io-facade.service';
-import { Log } from '../../logging-interceptor/logging-interceptor.service';
+import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 
 @Controller('projects')
 export class ProjectIoController {

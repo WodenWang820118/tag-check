@@ -6,7 +6,7 @@ import {
   ValidationResult,
   extractEventNameFromId
 } from '@utils';
-import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
+import { EventInspectionPresetDto } from '../shared/dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
 import { TestResultService } from '../test-result/services/test-result.service';

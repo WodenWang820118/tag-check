@@ -8,12 +8,12 @@ enum BrowserAction {
   NAVIGATE = 'navigate',
   WAITFORELEMENT = 'waitForElement',
   KEYDOWN = 'keydown',
-  KEYUP = 'kkeyup',
+  KEYUP = 'kkeyup'
 }
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
 import { ACTION_HANDLERS, ActionHandler } from '..//handlers/utils';
 import { StepExecutorUtilsService } from './step-executor-utils.service';
-import { EventInspectionPresetDto } from '../../../dto/event-inspection-preset.dto';
+import { EventInspectionPresetDto } from '../../../shared/dto/event-inspection-preset.dto';
 import { Step } from '@utils';
 
 @Injectable()

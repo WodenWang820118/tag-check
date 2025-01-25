@@ -6,7 +6,7 @@ import { FilePathService } from '../../infrastructure/os/path/file-path/file-pat
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { ProjectInitializationService } from './project-initialization.service';
 import { join } from 'path';
-import { ProjectInfoDto } from '../../dto/project-info.dto';
+import { ProjectInfoDto } from '../../shared/dto/project-info.dto';
 import { existsSync, rmdirSync } from 'fs';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 import { ConfigsService } from '../../core/configs/configs.service';

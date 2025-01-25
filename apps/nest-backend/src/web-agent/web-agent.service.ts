@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
 import { WebAgentUtilsService } from './web-agent-utils.service';
-import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
+import { EventInspectionPresetDto } from '../shared/dto/event-inspection-preset.dto';
 @Injectable()
 export class WebAgentService {
   constructor(private webAgentUtilsService: WebAgentUtilsService) {}
@@ -28,7 +28,7 @@ export class WebAgentService {
       );
     return {
       dataLayer,
-      destinationUrl,
+      destinationUrl
     };
   }
 
@@ -54,7 +54,7 @@ export class WebAgentService {
     return {
       dataLayer,
       eventRequest,
-      destinationUrl,
+      destinationUrl
     };
   }
 }

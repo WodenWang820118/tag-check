@@ -3,7 +3,7 @@ import { FolderService } from '../../infrastructure/os/folder/folder.service';
 import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
-import { RecordingDto } from '../../dto/recording.dto';
+import { RecordingDto } from '../../shared/dto/recording.dto';
 import { Recording } from '@utils';
 
 @Injectable()

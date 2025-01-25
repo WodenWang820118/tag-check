@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { Recording } from '@utils';
 import { ProjectRecordingService } from '../../project-agent/project-recording/project-recording.service';
-import { Log } from '../../logging-interceptor/logging-interceptor.service';
+import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 
 @Controller('recordings')
 export class RecordingController {

@@ -4,7 +4,7 @@ import {
   BaseDataLayerEvent,
   ValidationResult
 } from '@utils';
-import { ValidationResultDto } from '../../dto/validation-result.dto';
+import { ValidationResultDto } from '../../shared/dto/validation-result.dto';
 
 @Injectable()
 export class DataLayerValidationUtilsService {

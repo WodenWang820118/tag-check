@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Injectable } from '@nestjs/common';
 import { StrictDataLayerEvent, BaseDataLayerEvent } from '@utils';
-import { ValidationResultDto } from '../../dto/validation-result.dto';
+import { ValidationResultDto } from '../../shared/dto/validation-result.dto';
 import { DataLayerValidationUtilsService } from './data-layer-validation-utils.service';
 
 @Injectable()

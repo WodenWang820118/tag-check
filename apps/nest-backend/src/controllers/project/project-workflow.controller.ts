@@ -2,7 +2,7 @@ import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ProjectWorkFlowControllerService } from './project-workflow-controller.service';
 import { ProjectMetadataService } from '../../project-agent/project-metadata/project-metadata.service';
-import { Log } from '../../logging-interceptor/logging-interceptor.service';
+import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 
 @Controller('projects')
 export class ProjectWorkFlowController {

@@ -3,8 +3,8 @@ import { FolderService } from '../../infrastructure/os/folder/folder.service';
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
 import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
-import { ProjectInfoDto } from '../../dto/project-info.dto';
-import { SettingDto } from '../../dto/setting.dto';
+import { ProjectInfoDto } from '../../shared/dto/project-info.dto';
+import { SettingDto } from '../../shared/dto/setting.dto';
 
 @Injectable()
 export class ProjectInitializationService {

@@ -8,7 +8,7 @@ import {
   Query
 } from '@nestjs/common';
 import { ProjectFileReportService } from '../../project-agent/project-file-report/project-file-report.service';
-import { Log } from '../../logging-interceptor/logging-interceptor.service';
+import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 
 @Controller('file-reports')
 export class FileReportsController {

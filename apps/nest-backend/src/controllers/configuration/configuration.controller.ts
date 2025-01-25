@@ -8,7 +8,7 @@ import {
   Post
 } from '@nestjs/common';
 import { ConfigurationControllerService } from './configuration-controller.service';
-import { Log } from '../../logging-interceptor/logging-interceptor.service';
+import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 
 @Controller('configurations')
 export class ConfigurationController {

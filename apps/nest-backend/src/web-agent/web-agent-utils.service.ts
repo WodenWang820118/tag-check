@@ -9,12 +9,12 @@ import {
   HttpStatus,
   Injectable,
   Logger,
-  UnauthorizedException,
+  UnauthorizedException
 } from '@nestjs/common';
 import { ActionService } from './action/action.service';
 import { DataLayerService } from './action/web-monitoring/data-layer/data-layer.service';
 import { Page, Credentials } from 'puppeteer';
-import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
+import { EventInspectionPresetDto } from '../shared/dto/event-inspection-preset.dto';
 import { RequestInterceptorService } from './action/request-interceptor/request-interceptor.service';
 import { catchError, firstValueFrom, map } from 'rxjs';
 
@@ -80,7 +80,7 @@ export class WebAgentUtilsService {
       return {
         dataLayer,
         eventRequest,
-        destinationUrl,
+        destinationUrl
       };
     } catch (error) {
       this.logger.error(`Failed to perform test: ${error}`);
@@ -140,7 +140,7 @@ export class WebAgentUtilsService {
     try {
       await page.waitForNavigation({
         waitUntil: 'networkidle0',
-        timeout: 5000,
+        timeout: 5000
       });
     } catch (error) {
       this.logger.log('No navigation needed', WebAgentUtilsService.name);

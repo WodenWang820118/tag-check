@@ -8,7 +8,7 @@ import {
   Logger
 } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
-import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
+import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../../event-inspection-pipeline/event-inspection-pipeline.service';
 import { PuppeteerUtilsService } from '../../web-agent/puppeteer-utils/puppeteer-utils.service';
 import { FolderPathService } from '../os/path/folder-path/folder-path.service';

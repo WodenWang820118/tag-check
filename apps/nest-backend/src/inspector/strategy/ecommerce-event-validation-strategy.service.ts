@@ -3,7 +3,7 @@ import {
   StrictDataLayerEvent,
   ValidationStrategy
 } from '@utils';
-import { ValidationResultDto } from '../../dto/validation-result.dto';
+import { ValidationResultDto } from '../../shared/dto/validation-result.dto';
 import { Injectable, Logger } from '@nestjs/common';
 import { DataLayerValidationUtilsService } from './data-layer-validation-utils.service';
 
