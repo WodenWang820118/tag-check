@@ -1,4 +1,4 @@
-import { Controller, Get, Header, Param } from '@nestjs/common';
+import { Controller, Get, Header, Logger, Param } from '@nestjs/common';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ProjectMetadataService } from '../../features/project-agent/project-metadata/project-metadata.service';
 import { ProjectImageService } from '../../features/project-agent/project-image/project-image.service';
@@ -22,10 +22,10 @@ export class ProjectDataRetrievalController {
     name: 'testName',
     description: 'The name of the test associated with the event.'
   })
-  @Get('/images/:projectSlug/:eventId')
+  @Get('/images/:eventId')
   @Header('Content-Type', 'image/png')
-  @Log()
   async readImage(@Param('eventId') eventId: string) {
+    Logger.log(`Reading image for event: ${eventId}`);
     return await this.projectImageService.readImage(eventId);
   }
 

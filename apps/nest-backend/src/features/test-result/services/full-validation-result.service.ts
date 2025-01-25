@@ -67,7 +67,7 @@ export class FullValidationResultService {
           json(t2.dataLayerSpec) as dataLayerSpec,
           t1.rawRequest,
           t1.destinationUrl,
-          t3.imdaeData
+          t3.imageData
         FROM test_result t1
         LEFT JOIN test_data_layer t2 ON t1.eventId = t2.eventId
         LEFT JOIN image_result t3 ON t1.eventId = t3.eventId
@@ -107,7 +107,7 @@ export class FullValidationResultService {
           t2.dataLayerSpec,
           t1.rawRequest,
           t1.destinationUrl,
-          t3.data
+          t3.imageData
         FROM test_result t1
         LEFT JOIN test_data_layer t2 ON t1.eventId = t2.eventId
         LEFT JOIN image_result t3 ON t1.eventId = t3.eventId
