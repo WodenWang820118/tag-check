@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { SingleEventInspectionService } from '../../event-inspection/single-event-inspection.service';
-import { GroupEventsInspectionService } from '../../event-inspection/group-events-inspection.service';
+import { SingleEventInspectionService } from '../../features/event-inspection/single-event-inspection.service';
+import { GroupEventsInspectionService } from '../../features/event-inspection/group-events-inspection.service';
 import { Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '@utils';
 

@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionControllerService } from './event-inspection-controller.service';
-import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
+import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 
 @Controller('datalayer')

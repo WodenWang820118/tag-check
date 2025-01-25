@@ -1,7 +1,7 @@
 import { Controller, Get, Header, Param } from '@nestjs/common';
 import { ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { ProjectMetadataService } from '../../project-agent/project-metadata/project-metadata.service';
-import { ProjectImageService } from '../../project-agent/project-image/project-image.service';
+import { ProjectMetadataService } from '../../features/project-agent/project-metadata/project-metadata.service';
+import { ProjectImageService } from '../../features/project-agent/project-image/project-image.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 
 @Controller('projects')

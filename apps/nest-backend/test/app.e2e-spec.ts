@@ -8,11 +8,11 @@ import { INestApplication } from '@nestjs/common';
 import { AppModule } from './../src/app.module';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { join } from 'path';
-import { TestResult } from '../src/test-result/entity/test-result.entity';
+import { TestResult } from '../src/features/test-result/entity/test-result.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { testDbConfig } from './test-db.config';
 import { DataSource } from 'typeorm';
-import { TestResultService } from '../src/test-result/services/test-result.service';
+import { TestResultService } from '../src/features/test-result/services/test-result.service';
 // TODO: run all endoint tests to ensure they are all working
 
 const rootProjectPath = join(__dirname, '..', '..', '..', 'tag_check_projects');
@@ -121,14 +121,6 @@ describe('App (e2e)', () => {
     it('should save data in the database', async () => {
       // // Query the database using TypeORM repository
       const testResultService = app.get(TestResultService);
-      // console.log(
-      //   'savedRecord:',
-      //   savedRecord.find((result) => result.id === 1)
-      // );
-      // const result = savedRecord.find(
-      //   (result) =>
-      //     result.eventId === 'add_to_cart_fda47993-f581-42f5-ac52-f40ffb43bfb8'
-      // );
       const result = await testResultService.get(
         'ng_gtm_integration_sample',
         'add_to_cart_fda47993-f581-42f5-ac52-f40ffb43bfb8'

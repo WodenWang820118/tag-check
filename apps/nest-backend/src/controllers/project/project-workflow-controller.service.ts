@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigurationService } from '../../core/configuration/configuration.service';
-import { ProjectInitializationService } from '../../project-agent/project-initialization/project-initialization.service';
+import { ProjectInitializationService } from '../../features/project-agent/project-initialization/project-initialization.service';
 import { mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { ConfigsService } from '../../core/configs/configs.service';

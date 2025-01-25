@@ -11,11 +11,11 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { IReportDetails } from '@utils';
-import { ProjectReportService } from '../../project-agent/project-report/project-report.service';
-import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
+import { ProjectReportService } from '../../features/project-agent/project-report/project-report.service';
+import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
-import { TestDataLayerService } from '../../test-result/services/test-data-layer.service';
-import { FullValidationResultService } from '../../test-result/services/full-validation-result.service';
+import { TestDataLayerService } from '../../features/test-result/services/test-data-layer.service';
+import { FullValidationResultService } from '../../features/test-result/services/full-validation-result.service';
 
 @Controller('reports')
 export class ReportController {

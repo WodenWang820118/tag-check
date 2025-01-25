@@ -7,7 +7,7 @@ import {
   Post,
   Query
 } from '@nestjs/common';
-import { ProjectFileReportService } from '../../project-agent/project-file-report/project-file-report.service';
+import { ProjectFileReportService } from '../../features/project-agent/project-file-report/project-file-report.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 
 @Controller('file-reports')

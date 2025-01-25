@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Put, Body, Logger } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
-import { ProjectSettingService } from '../../project-agent/project-setting/project-setting.service';
+import { ProjectSettingService } from '../../features/project-agent/project-setting/project-setting.service';
 import { Setting } from '@utils';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 

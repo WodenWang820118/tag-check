@@ -1,5 +1,5 @@
 import { Controller, Get, Header, Param } from '@nestjs/common';
-import { ProjectVideoService } from '../../project-agent/project-video/project-video.service';
+import { ProjectVideoService } from '../../features/project-agent/project-video/project-video.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 
 @Controller('videos')
