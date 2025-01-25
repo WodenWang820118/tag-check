@@ -9,7 +9,7 @@ import {
   extractEventNameFromId,
   Spec,
   StrictDataLayerEvent,
-  ValidationResult,
+  ValidationResult
 } from '@utils';
 import { FileService } from '../os/file/file.service';
 import { FilePathService } from '../os/path/file-path/file-path.service';
@@ -18,6 +18,7 @@ import { RequestProcessorService } from '../request-processor/request-processor.
 import { Credentials, Page } from 'puppeteer';
 import { InspectorUtilsService } from './inspector-utils.service';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
+import { ImageResultService } from '../test-result/services/image-result.service';
 @Injectable()
 export class InspectorSingleEventService {
   private readonly logger = new Logger(InspectorSingleEventService.name);
@@ -26,7 +27,8 @@ export class InspectorSingleEventService {
     private readonly fileService: FileService,
     private readonly requestProcessorService: RequestProcessorService,
     private readonly filePathService: FilePathService,
-    private readonly inspectorUtilsService: InspectorUtilsService
+    private readonly inspectorUtilsService: InspectorUtilsService,
+    private readonly imageResultService: ImageResultService
   ) {}
 
   // inspect one event
@@ -107,17 +109,23 @@ export class InspectorSingleEventService {
     const destinationUrl = result.destinationUrl;
     this.logger.log(`Destination URL: ${destinationUrl}`);
     await this.fileService.writeCacheFile(projectSlug, eventId, result);
-    await page.screenshot({
-      path: imageSavingFolder,
-      fullPage: true,
+    const screenshot = await page.screenshot({
+      // path: imageSavingFolder,
+      fullPage: true
     });
-    // allow the screencast video to be finalized
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    // await this.saveImage(projectSlug, eventId, imageSavingFolder);
+    await this.imageResultService.create({
+      eventId,
+      imageName: 'screenshot.png',
+      imageData: screenshot
+    });
+
     return {
       dataLayerResult,
       destinationUrl,
       rawRequest: '',
-      requestCheckResult: '' as unknown as ValidationResult,
+      requestCheckResult: '' as unknown as ValidationResult
     };
   }
 
@@ -162,25 +170,29 @@ export class InspectorSingleEventService {
 
     const destinationUrl = result.destinationUrl;
     await this.fileService.writeCacheFile(projectSlug, eventId, result);
-    await page.screenshot({
+    const screenshot = await page.screenshot({
       path: imageSavingFolder,
-      fullPage: true,
+      fullPage: true
     });
-    // allow the screencast video to be finalized
+
+    await this.imageResultService.create({
+      eventId,
+      imageName: 'screenshot.png',
+      imageData: screenshot
+    });
 
     return {
       dataLayerResult,
       destinationUrl,
       rawRequest,
-      requestCheckResult,
+      requestCheckResult
     };
   }
 
   private async getProjectSpecs(projectSlug: string) {
-    const specsPath = await this.filePathService.getProjectConfigFilePath(
-      projectSlug
-    );
-    const specs = this.fileService.readJsonFile<any>(specsPath);
+    const specsPath =
+      await this.filePathService.getProjectConfigFilePath(projectSlug);
+    const specs = this.fileService.readJsonFile<Spec[]>(specsPath);
     return specs;
   }
 

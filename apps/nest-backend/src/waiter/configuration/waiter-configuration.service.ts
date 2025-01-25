@@ -16,23 +16,19 @@ export class WaiterConfigurationService {
     if (!configuration) {
       throw new NotFoundException(`Configuration '${name}' not found`);
     }
-    const value = configuration.getDataValue('value');
+    const value = configuration.value;
     this.logger.log(`Configuration value: ${value}`);
     return { value };
   }
 
-  async resetConfiguration(name: string) {
-    return await this.configurationService.removeByName(name);
-  }
-
-  async createConfiguration(name: string, value: string) {
-    return await this.configurationService.create({
+  createConfiguration(name: string, value: string) {
+    return this.configurationService.create({
       id: uuidv4(),
       title: name,
       description: '',
       value: value,
       createdAt: new Date(),
-      updatedAt: new Date(),
+      updatedAt: new Date()
     });
   }
 }

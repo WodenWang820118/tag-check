@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { forkJoin, map, mergeMap, take, tap, timer } from 'rxjs';
+import { forkJoin, mergeMap, take, timer } from 'rxjs';
 import { IReportDetails, ReportDetailsDto, Spec } from '@utils';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
@@ -17,7 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
   standalone: true,
   imports: [MatCardModule, MatButtonModule, MatIconModule, EditorComponent],
   templateUrl: './upload-card.component.html',
-  styles: [``],
+  styles: [``]
 })
 export class UploadCardComponent {
   importedSpec = signal<string>('');
@@ -27,7 +27,7 @@ export class UploadCardComponent {
     private specService: SpecService,
     private route: ActivatedRoute,
     private reportService: ReportService,
-    private recordingService: RecordingService,
+    private recordingService: RecordingService
   ) {
     effect(() => {
       if (this.uploadSpecService.isUploaded()) {
@@ -71,31 +71,31 @@ export class UploadCardComponent {
             // Flatten the array of observables
             const requests = specs.map((spec) => {
               const eventId = uuidv4();
-              const reportDetails: IReportDetails = new ReportDetailsDto(
-                eventId,
-                'Standard',
-                spec.event,
-              );
+              const reportDetails: IReportDetails = new ReportDetailsDto({
+                eventId: eventId,
+                testName: spec.event,
+                eventName: 'Standard'
+              });
 
               // Combine the three requests for each spec into a single observable
               return forkJoin({
                 report: this.reportService.addReport(
                   projectSlug,
                   `${spec.event}_${eventId}`,
-                  reportDetails,
+                  reportDetails
                 ),
                 recording: this.recordingService.addRecording(
                   projectSlug,
                   `${spec.event}_${eventId}`,
-                  '{}',
+                  '{}'
                 ),
-                spec: this.specService.addSpec(projectSlug, spec),
+                spec: this.specService.addSpec(projectSlug, spec)
               });
             });
 
             // Combine all spec requests
             return forkJoin(requests);
-          }),
+          })
         )
         .subscribe({
           next: (results) => {
@@ -110,7 +110,7 @@ export class UploadCardComponent {
           error: (error) => {
             console.error('Failed to save specs:', error);
             this.emitUploadComplete();
-          },
+          }
         });
     } catch (error) {
       console.error('Failed to parse specs:', error);

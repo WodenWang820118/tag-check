@@ -8,20 +8,49 @@ import { INestApplication } from '@nestjs/common';
 import { AppModule } from './../src/app.module';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { join } from 'path';
-
+import { TestResult } from '../src/test-result/entity/test-result.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { testDbConfig } from './test-db.config';
+import { DataSource } from 'typeorm';
+import { TestResultService } from '../src/test-result/services/test-result.service';
 // TODO: run all endoint tests to ensure they are all working
 
 const rootProjectPath = join(__dirname, '..', '..', '..', 'tag_check_projects');
 
 describe('App (e2e)', () => {
   let app: INestApplication;
+  let dataSource: DataSource;
 
   beforeAll(async () => {
+    process.env.NODE_ENV = 'test'; // Ensure test environment is set
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+      imports: [
+        AppModule,
+        TypeOrmModule.forRoot(testDbConfig),
+        TypeOrmModule.forFeature([TestResult])
+      ],
+      providers: [TestResultService]
+    })
+      .overrideProvider(DataSource)
+      .useValue(dataSource)
+      .compile();
+
     app = moduleFixture.createNestApplication();
     await app.init();
+
+    dataSource = moduleFixture.get<DataSource>(DataSource);
+    await dataSource.synchronize(true);
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  describe('Environment', () => {
+    it('should be the test environment', () => {
+      expect(process.env.NODE_ENV).toBe('test');
+    });
   });
 
   describe('Configuration', () => {
@@ -59,18 +88,18 @@ describe('App (e2e)', () => {
                     ad_storage: true,
                     analytics_storage: true,
                     ad_user_data: true,
-                    ad_personalization: false,
-                  },
+                    ad_personalization: false
+                  }
                 },
                 {
                   key: 'consent',
-                  value: true,
-                },
-              ],
+                  value: true
+                }
+              ]
             },
             cookie: {
-              data: [],
-            },
+              data: []
+            }
           },
           puppeteerArgs: [
             '--window-size=1440,900',
@@ -79,12 +108,32 @@ describe('App (e2e)', () => {
             '--disable-dev-shm-usage',
             '--disable-accelerated-2d-canvas',
             '--disable-gpu',
-            '--incognito',
-          ],
+            '--incognito'
+          ]
         });
 
       expect(response.status).toBe(201);
       expect(response.body).toBeDefined();
+    });
+
+    // TODO: it should save data in the database after running the previous test
+    // so run the query and check if the data is saved in the database
+    it('should save data in the database', async () => {
+      // // Query the database using TypeORM repository
+      const testResultService = app.get(TestResultService);
+      // console.log(
+      //   'savedRecord:',
+      //   savedRecord.find((result) => result.id === 1)
+      // );
+      // const result = savedRecord.find(
+      //   (result) =>
+      //     result.eventId === 'add_to_cart_fda47993-f581-42f5-ac52-f40ffb43bfb8'
+      // );
+      const result = await testResultService.get(
+        'ng_gtm_integration_sample',
+        'add_to_cart_fda47993-f581-42f5-ac52-f40ffb43bfb8'
+      );
+      expect(result).toBeDefined();
     });
   });
 
@@ -124,6 +173,7 @@ describe('App (e2e)', () => {
       const response = await request(app.getHttpServer()).get(
         '/reports/ng_gtm_integration_sample'
       );
+      console.log(response);
       expect(response.status).toBe(200);
       expect(response.body).toBeDefined();
     });

@@ -27,7 +27,7 @@ export class ProjectAbstractReportService {
   async writeSingleAbstractTestResultJson(
     projectSlug: string,
     eventId: string,
-    data: OutputValidationResult
+    data: Partial<OutputValidationResult>
   ) {
     try {
       const folderPath =

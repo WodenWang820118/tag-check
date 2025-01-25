@@ -1,39 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsString, IsOptional } from 'class-validator';
 import {
   StrictDataLayerEvent,
   BaseDataLayerEvent,
-  ValidationResult,
+  ValidationResult
 } from '@utils';
 
 export class ValidationResultDto implements ValidationResult {
   @ApiProperty({
-    description: 'Indicates whether the validation passed or failed',
+    description: 'Indicates whether the validation passed or failed'
   })
-  passed: boolean;
+  @IsBoolean()
+  passed!: boolean;
 
   @ApiProperty({ description: 'A message describing the validation result' })
-  message: string;
+  @IsString()
+  message!: string;
 
   @ApiProperty({
-    description: 'The data layer specification used for validation',
+    description: 'The data layer specification used for validation'
   })
-  dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayerSpec!: StrictDataLayerEvent | BaseDataLayerEvent;
 
   @ApiProperty({
     description: 'The actual data layer event being validated',
-    required: false,
+    required: false
   })
+  @IsOptional()
   dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
 
-  constructor(
-    passed: boolean,
-    message: string,
-    dataLayerSpec: StrictDataLayerEvent,
-    dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent
-  ) {
-    this.passed = passed;
-    this.message = message;
-    this.dataLayerSpec = dataLayerSpec;
-    this.dataLayer = dataLayer;
+  constructor(partial: Partial<ValidationResultDto> = {}) {
+    Object.assign(this, partial);
   }
 }

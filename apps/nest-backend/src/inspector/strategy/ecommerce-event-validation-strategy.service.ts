@@ -1,7 +1,7 @@
 import {
   BaseDataLayerEvent,
   StrictDataLayerEvent,
-  ValidationStrategy,
+  ValidationStrategy
 } from '@utils';
 import { ValidationResultDto } from '../../dto/validation-result.dto';
 import { Injectable, Logger } from '@nestjs/common';
@@ -34,11 +34,11 @@ export class EcommerceEventValidationStrategy implements ValidationStrategy {
           this.logger.warn(
             `ecommerce must be reset before firing ${dataLayerSpec.event}.`
           );
-          return new ValidationResultDto(
-            false,
-            `ecommerce must be reset before firing ${dataLayerSpec.event}.`,
+          return new ValidationResultDto({
+            passed: false,
+            message: `ecommerce must be reset before firing ${dataLayerSpec.event}.`,
             dataLayerSpec
-          );
+          });
         }
         return this.dataLayerValidationUtilsService.validateKeyValues(
           dataLayerSpec,
@@ -47,10 +47,10 @@ export class EcommerceEventValidationStrategy implements ValidationStrategy {
       }
     }
 
-    return new ValidationResultDto(
-      false,
-      `Event not found: ${dataLayerSpec.event}`,
+    return new ValidationResultDto({
+      passed: false,
+      message: `Event not found: ${dataLayerSpec.event}`,
       dataLayerSpec
-    );
+    });
   }
 }

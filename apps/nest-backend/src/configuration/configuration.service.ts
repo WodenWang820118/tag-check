@@ -1,13 +1,13 @@
-import { existsSync } from 'fs';
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { CreateConfigurationDto } from './dto/create-configuration.dto';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
 import { Configuration } from './entities/configuration.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'sequelize-typescript';
 import { ConfigsService } from '../configs/configs.service';
 import { Logger } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { existsSync } from 'fs';
 
 @Injectable()
 export class ConfigurationService implements OnModuleInit {
@@ -19,34 +19,46 @@ export class ConfigurationService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    const rootPath = await this.configurationRepository.findOne({
-      where: { title: this.configsService.getCONFIG_ROOT_PATH() },
-    });
-    this.logger.log(rootPath);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    if (!rootPath || !existsSync(rootPath.getDataValue('value'))) {
-      const newRootPath = await this.create({
-        title: this.configsService.getCONFIG_ROOT_PATH(),
-        value: this.configsService.getROOT_PROJECT_PATH(),
-        id: '',
-        description: '',
+    await this.checkIfRootProjectPathExists();
+  }
+
+  async checkIfRootProjectPathExists() {
+    try {
+      const rootPath = await this.configurationRepository.findOne({
+        where: { title: this.configsService.getCONFIG_ROOT_PATH() }
       });
-      this.logger.log('Created new root path configuration:', newRootPath);
-    } else {
-      this.logger.log('Valid root path configuration found');
+
+      if (!rootPath || !existsSync(rootPath.value)) {
+        // Create new configuration entity
+        const newRootPath = this.configurationRepository.create({
+          title: this.configsService.getCONFIG_ROOT_PATH(),
+          value: this.configsService.getROOT_PROJECT_PATH(),
+          description: 'Root path configuration' // Add meaningful description
+        });
+
+        // Save the entity
+        const savedConfig =
+          await this.configurationRepository.save(newRootPath);
+
+        this.logger.log(
+          'Created new root path configuration:',
+          JSON.stringify(savedConfig, null, 2)
+        );
+      } else {
+        this.logger.log('Valid root path configuration found');
+      }
+    } catch (error) {
+      this.logger.error('Failed to initialize configuration:', error);
+      throw error; // Re-throw to prevent application from starting with invalid config
     }
   }
 
-  async create(
-    createConfigurationDto: CreateConfigurationDto
-  ): Promise<Configuration> {
-    return await this.configurationRepository.create(
-      createConfigurationDto as any
-    );
+  create(createConfigurationDto: CreateConfigurationDto): Configuration {
+    return this.configurationRepository.create(createConfigurationDto);
   }
 
   async findAll() {
-    return await this.configurationRepository.findAll();
+    return await this.configurationRepository.find();
   }
 
   async findOne(id: string) {
@@ -55,34 +67,28 @@ export class ConfigurationService implements OnModuleInit {
 
   async findOneByName(name: string) {
     return await this.configurationRepository.findOne({
-      where: { title: name },
+      where: { title: name }
     });
   }
 
   async update(id: string, updateConfigurationDto: UpdateConfigurationDto) {
     return await this.configurationRepository.update(
       { value: updateConfigurationDto.value },
-      { where: { id: id } }
+      { id: id }
     );
   }
 
   async remove(id: string) {
-    return await this.configurationRepository.destroy({ where: { id: id } });
-  }
-
-  async removeByName(name: string) {
-    return await this.configurationRepository.destroy({
-      where: { title: name },
-    });
+    return await this.configurationRepository.delete({ id });
   }
 
   async getRootProjectPath(): Promise<string> {
     return await this.configurationRepository
       .findOne({
-        where: { title: this.configsService.getCONFIG_ROOT_PATH() },
+        where: { title: this.configsService.getCONFIG_ROOT_PATH() }
       })
       .then((res) => {
-        return res?.getDataValue('value');
+        return res?.value;
       })
       .catch((err) => {
         return err;
@@ -92,10 +98,10 @@ export class ConfigurationService implements OnModuleInit {
   async getCurrentProjectPath(): Promise<string> {
     return await this.configurationRepository
       .findOne({
-        where: { title: this.configsService.getCONFIG_CURRENT_PROJECT_PATH() },
+        where: { title: this.configsService.getCONFIG_CURRENT_PROJECT_PATH() }
       })
       .then((res) => {
-        return res?.getDataValue('value');
+        return res?.value;
       })
       .catch((err) => {
         return err;

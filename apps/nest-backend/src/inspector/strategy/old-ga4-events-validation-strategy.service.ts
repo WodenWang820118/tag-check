@@ -22,10 +22,10 @@ export class OldGA4EventsValidationStrategy {
       }
     }
 
-    return new ValidationResultDto(
-      false,
-      `Event not found: ${dataLayerSpec.event}`,
+    return new ValidationResultDto({
+      passed: false,
+      message: `Event not found: ${dataLayerSpec.event}`,
       dataLayerSpec
-    );
+    });
   }
 }

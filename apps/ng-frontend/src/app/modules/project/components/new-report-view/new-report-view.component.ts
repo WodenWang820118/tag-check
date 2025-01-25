@@ -31,7 +31,7 @@ import { ReportDetailsDto, IReportDetails } from '@utils';
 import { ErrorDialogComponent } from '../../../../shared/components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { v4 as uuidv4 } from 'uuid';
-
+// TODO: facade service
 @Component({
   selector: 'app-new-report-view',
   standalone: true,
@@ -155,11 +155,11 @@ export class NewReportViewComponent implements OnInit, OnDestroy {
           if (specContent && projectSlug) {
             const eventName = JSON.parse(specContent).event as string;
 
-            const reportDetails: IReportDetails = new ReportDetailsDto(
-              eventId,
-              testName,
-              eventName
-            );
+            const reportDetails: IReportDetails = new ReportDetailsDto({
+              eventId: eventId,
+              testName: testName,
+              eventName: eventName
+            });
 
             return {
               projectSlug,

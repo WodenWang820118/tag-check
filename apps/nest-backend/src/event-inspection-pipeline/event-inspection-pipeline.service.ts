@@ -1,22 +1,25 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { ProjectXlsxReportService } from './../project-agent/project-xlsx-report/project-xlsx-report.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
 import {
   OutputValidationResult,
   ValidationResult,
-  extractEventNameFromId,
+  extractEventNameFromId
 } from '@utils';
 import { EventInspectionPresetDto } from '../dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../inspector/inspector-single-event.service';
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
+import { TestResultService } from '../test-result/services/test-result.service';
+import { TestResult } from '../test-result/entity/test-result.entity';
+import { ImageResultService } from '../test-result/services/image-result.service';
 @Injectable()
 export class EventInspectionPipelineService {
   private readonly logger = new Logger(EventInspectionPipelineService.name);
   constructor(
     private readonly inspectorSingleEventService: InspectorSingleEventService,
-    private readonly projectXlsxReportService: ProjectXlsxReportService,
-    private readonly projectAbstractReportService: ProjectAbstractReportService
+    private readonly projectAbstractReportService: ProjectAbstractReportService,
+    private readonly testResultService: TestResultService,
+    private readonly imageResultService: ImageResultService
   ) {}
 
   async singleEventInspectionRecipe(
@@ -29,8 +32,9 @@ export class EventInspectionPipelineService {
     captureRequest: string,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
+    this.logger.log('Inspecting single event');
     try {
-      const result = await this.inspectDataLayer(
+      const result = await this.inspectorSingleEventService.inspectDataLayer(
         page,
         projectSlug,
         eventId,
@@ -38,65 +42,64 @@ export class EventInspectionPipelineService {
         measurementId,
         credentials,
         captureRequest,
-        eventInspectionPresetDto
+        eventInspectionPresetDto.application
       );
+      this.logger.debug('Result:', JSON.stringify(result, null, 2));
+      const data = [
+        {
+          dataLayerResult: result.dataLayerResult,
+          rawRequest: result.rawRequest,
+          requestCheckResult: result.requestCheckResult,
+          destinationUrl: result.destinationUrl
+        }
+      ];
 
-      const data = this.prepareData(result);
+      this.logger.debug('Data:', JSON.stringify(data, null, 2));
+
       const timestamp = new Date().getTime();
       const eventName = extractEventNameFromId(eventId);
-      const dataLayerPassed = result.dataLayerResult.passed;
-      const requestPassed = result.requestCheckResult.passed;
 
+      // The ID and createdAt will be handled by the database
+      const testResult: Partial<TestResult> = {
+        projectSlug: projectSlug,
+        eventId: eventId,
+        testName: `${eventName}_${timestamp}`,
+        eventName: eventName,
+        passed: result.dataLayerResult.passed,
+        requestPassed: result.requestCheckResult.passed,
+        rawRequest: result.rawRequest,
+        message: result.dataLayerResult.message || 'failed',
+        destinationUrl: result.destinationUrl
+      };
+      this.logger.debug('Test Result:', JSON.stringify(testResult, null, 2));
+      await this.testResultService.create(testResult);
       await this.writeAbstractReport(result, projectSlug, eventId);
-      await this.projectXlsxReportService.writeXlsxFile(
-        `${eventName} ${dataLayerPassed} ${requestPassed} ${timestamp}.xlsx`,
-        'Sheet1',
-        data,
-        eventId,
-        projectSlug
-      );
       return data;
     } catch (error) {
       this.logger.error(error);
+      // TODO: get test name from database for users to locate the failed test
+      await this.testResultService.create({
+        projectSlug: projectSlug,
+        eventId: eventId,
+        testName: extractEventNameFromId(eventId),
+        eventName: extractEventNameFromId(eventId),
+        passed: false,
+        requestPassed: false,
+        rawRequest: '',
+        message: `${error}`,
+        destinationUrl: ''
+      });
+
+      const screenshot = await page.screenshot({
+        fullPage: true
+      });
+
+      await this.imageResultService.create({
+        eventId: eventId,
+        imageName: `${projectSlug}_${eventId}`,
+        imageData: screenshot
+      });
     }
-  }
-
-  private async inspectDataLayer(
-    page: Page,
-    projectName: string,
-    eventId: string,
-    headless: string,
-    measurementId: string,
-    credentials: Credentials,
-    captureRequest: string,
-    eventInspectionPresetDto: EventInspectionPresetDto
-  ) {
-    return await this.inspectorSingleEventService.inspectDataLayer(
-      page,
-      projectName,
-      eventId,
-      headless,
-      measurementId,
-      credentials,
-      captureRequest,
-      eventInspectionPresetDto.application
-    );
-  }
-
-  private prepareData(result: {
-    dataLayerResult: ValidationResult;
-    destinationUrl: string;
-    rawRequest: string;
-    requestCheckResult: ValidationResult;
-  }) {
-    return [
-      {
-        dataLayerResult: result.dataLayerResult,
-        rawRequest: result.rawRequest,
-        requestCheckResult: result.requestCheckResult,
-        destinationUrl: result.destinationUrl,
-      },
-    ];
   }
 
   private async writeAbstractReport(
@@ -111,7 +114,7 @@ export class EventInspectionPipelineService {
   ) {
     const eventName = extractEventNameFromId(eventId);
 
-    const outputValidationResult: OutputValidationResult = {
+    const outputValidationResult: Partial<OutputValidationResult> = {
       eventName: eventName,
       passed: result.dataLayerResult.passed,
       requestPassed: result.requestCheckResult.passed,
@@ -122,7 +125,7 @@ export class EventInspectionPipelineService {
       dataLayer: result.dataLayerResult.dataLayer,
       dataLayerSpec: result.dataLayerResult.dataLayerSpec,
       destinationUrl: result.destinationUrl,
-      completedTime: new Date(),
+      createdAt: new Date()
     };
 
     await this.projectAbstractReportService.writeSingleAbstractTestResultJson(

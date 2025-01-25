@@ -7,6 +7,4 @@ export type ProjectReport = {
 
 export type IReportDetails = {
   position: number;
-  eventId: string;
-  testName: string;
 } & OutputValidationResult;

@@ -8,7 +8,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Browser, Credentials, Page } from 'puppeteer';
 import { getCurrentTimestamp } from '@utils';
 import { InspectorGroupEventsService } from '../inspector/inspector-group-events.service';
-import { XlsxReportGroupEventsService } from '../os/xlsx-report/xlsx-report-group-events.service';
 import { FileService } from '../os/file/file.service';
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
 import { ConfigsService } from '../configs/configs.service';
@@ -21,7 +20,6 @@ export class GroupEventsInspectionService {
 
   constructor(
     private readonly fileService: FileService,
-    private readonly xlsxReportGroupEventsService: XlsxReportGroupEventsService,
     private readonly inspectorGroupEventsService: InspectorGroupEventsService,
     private readonly projectAbstractReportService: ProjectAbstractReportService,
     private readonly configsService: ConfigsService
@@ -48,7 +46,7 @@ export class GroupEventsInspectionService {
       ignoreHTTPSErrors: true,
       args: this.configsService.getBROWSER_ARGS(),
       executablePath: stats.executablePath,
-      signal: signal,
+      signal: signal
     });
 
     // Set up an abort listener
@@ -81,7 +79,7 @@ export class GroupEventsInspectionService {
         dataLayerResult: item.dataLayerCheckResult,
         requestCheckResult: item.requestCheckResult,
         rawRequest: item.rawRequest,
-        destinationUrl: item.destinationUrl,
+        destinationUrl: item.destinationUrl
       };
     });
 
@@ -91,15 +89,16 @@ export class GroupEventsInspectionService {
     // therefore, we handle the result gathering logic in the xlsx-report.service.ts
     const timestamp = getCurrentTimestamp();
 
-    const operations = await this.fileService.getOperationJsonByProject(
-      projectName
-    );
-    await this.xlsxReportGroupEventsService.writeXlsxFileForAllTests(
-      operations,
-      `QA_report_all_.xlsx_${timestamp}.xlsx`,
-      'Sheet1',
-      projectName
-    );
+    const operations =
+      await this.fileService.getOperationJsonByProject(projectName);
+    // TODO: Prepare the data to be written to the xlsx file
+    // Keep the original implementation for memory
+    // await this.xlsxReportGroupEventsService.writeXlsxFileForAllTests(
+    //   operations,
+    //   `QA_report_all_.xlsx_${timestamp}.xlsx`,
+    //   'Sheet1',
+    //   projectName
+    // );
 
     // TODO: 3.4 report to each test
     await this.projectAbstractReportService.writeProjectAbstractTestRsultJson(

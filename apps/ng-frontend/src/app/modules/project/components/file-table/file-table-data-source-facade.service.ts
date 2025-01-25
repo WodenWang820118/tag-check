@@ -16,10 +16,10 @@ import { MatSort } from '@angular/material/sort';
 export class FileTableDataSourceFacadeService {
   columns = signal([
     'select',
-    'name',
+    'eventName',
     'dataLayerState',
     'requestState',
-    'lastModified'
+    'createdAt'
   ]);
 
   readonly dataSource = signal<MatTableDataSource<FileReport>>(
@@ -97,7 +97,10 @@ export class FileTableDataSourceFacadeService {
           });
           dialogRef.afterClosed().subscribe((result) => {
             if (result) {
-              this.handleReportDownload(this.selection().selected);
+              this.handleReportDownload(
+                this.projectSlug(),
+                this.selection().selected
+              );
             }
             this.fileTableDataSourceService.setDownloadSignal(false);
           });
@@ -117,7 +120,7 @@ export class FileTableDataSourceFacadeService {
     if (fileReports && paginator && sort) {
       // Sort the data
       const injectReports = (fileReports as FileReport[]).sort((a, b) =>
-        a.name.localeCompare(b.name)
+        a.eventName.localeCompare(b.eventName)
       );
       // Create data source and assign
       const dataSource = new MatTableDataSource(injectReports);
@@ -135,49 +138,29 @@ export class FileTableDataSourceFacadeService {
     this.dataSource().data = remainingReports;
     this.fileTableDataSourceService.setData(remainingReports);
     this.fileReportService
-      .deleteFileReports(this.projectSlug(), this.selection().selected)
+      .deleteFileReport(
+        this.projectSlug(),
+        this.selection().selected.map((item) => item.eventId)
+      )
       .pipe(take(1))
       .subscribe();
   }
 
-  private handleReportDownload(selected: FileReport[]) {
+  private handleReportDownload(projectSlug: string, selected: FileReport[]) {
     this.fileReportService
-      .downloadFileReports(selected)
-      .pipe(
-        take(1),
-        tap((blob) => {
-          if (!blob) {
-            return;
-          }
-          const fileName = 'report.zip'; // You can generate a dynamic name if needed
-          this.selection().clear();
-          this.saveFile(blob, fileName);
-        })
+      .downloadFileReports(
+        projectSlug,
+        selected.map((item) => item.eventId)
       )
+      .pipe(take(1))
       .subscribe();
-  }
-
-  private saveFile(blob: Blob, fileName: string) {
-    const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = fileName;
-    link.click();
-    window.URL.revokeObjectURL(link.href);
   }
 
   preprocessData(data: FileReport[]) {
     return data.map((item, index) => {
-      const segments = item.name.split(' ');
-      const eventName = segments[0];
-      const dataLayerState = segments[1] === 'true' ? true : false;
-      const requestState = segments[2] === 'true' ? true : false;
       return {
-        position: index,
-        name: eventName,
-        path: item.path,
-        dataLayerState: dataLayerState,
-        requestState: requestState,
-        lastModified: item.lastModified
+        ...item,
+        position: index
       };
     });
   }
