@@ -4,8 +4,8 @@ import { ConfigurationService } from '../../configuration/configuration.service'
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
-export class WaiterConfigurationService {
-  private readonly logger = new Logger(WaiterConfigurationService.name);
+export class ConfigurationControllerService {
+  private readonly logger = new Logger(ConfigurationControllerService.name);
   constructor(private configurationService: ConfigurationService) {}
   async getConfigurations() {
     return await this.configurationService.findAll();

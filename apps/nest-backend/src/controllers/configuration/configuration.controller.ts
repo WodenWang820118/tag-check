@@ -7,12 +7,12 @@ import {
   Param,
   Post
 } from '@nestjs/common';
-import { WaiterConfigurationService } from './waiter-configuration.service';
+import { ConfigurationControllerService } from './configuration-controller.service';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('configurations')
-export class WaiterConfigurationController {
-  constructor(private waiterConfigurationService: WaiterConfigurationService) {}
+export class ConfigurationController {
+  constructor(private service: ConfigurationControllerService) {}
 
   @Get('/debug')
   @Log()
@@ -23,15 +23,14 @@ export class WaiterConfigurationController {
   @Get()
   @Log()
   async getConfigurations() {
-    return await this.waiterConfigurationService.getConfigurations();
+    return await this.service.getConfigurations();
   }
 
   @Get(':name')
   @Log()
   async getConfiguration(@Param('name') name: string) {
     try {
-      const result =
-        await this.waiterConfigurationService.getConfiguration(name);
+      const result = await this.service.getConfiguration(name);
       return result;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -46,7 +45,7 @@ export class WaiterConfigurationController {
 
   @Post('create')
   createConfiguration(@Body() configuration: { name: string; value: string }) {
-    return this.waiterConfigurationService.createConfiguration(
+    return this.service.createConfiguration(
       configuration.name,
       configuration.value
     );

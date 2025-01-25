@@ -7,8 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { ConfigsService } from '../../configs/configs.service';
 
 @Injectable()
-export class WaiterProjectWorkFlowService {
-  private readonly logger = new Logger(WaiterProjectWorkFlowService.name);
+export class ProjectWorkFlowControllerService {
+  private readonly logger = new Logger(ProjectWorkFlowControllerService.name);
   constructor(
     private readonly configurationService: ConfigurationService,
     private readonly projectInitializationService: ProjectInitializationService,
@@ -21,13 +21,13 @@ export class WaiterProjectWorkFlowService {
       const configurations = await this.configurationService.findAll();
       mkdirSync(rootProjectPath, { recursive: true });
       if (configurations.length === 0) {
-        return await this.configurationService.create({
+        return this.configurationService.create({
           id: uuidv4(),
           title: this.configsService.getCONFIG_ROOT_PATH(),
           description: 'The root project path',
           value: rootProjectPath,
           createdAt: new Date(),
-          updatedAt: new Date(),
+          updatedAt: new Date()
         });
       }
 
@@ -40,18 +40,18 @@ export class WaiterProjectWorkFlowService {
           title: this.configsService.getCONFIG_ROOT_PATH(),
           value: rootProjectPath,
           createdAt: new Date(),
-          updatedAt: new Date(),
+          updatedAt: new Date()
         });
       }
     } catch (error) {
       mkdirSync(rootProjectPath, { recursive: true });
-      await this.configurationService.create({
+      this.configurationService.create({
         id: uuidv4(),
         title: this.configsService.getCONFIG_ROOT_PATH(),
         description: 'The root project path',
         value: rootProjectPath,
         createdAt: new Date(),
-        updatedAt: new Date(),
+        updatedAt: new Date()
       });
     }
   }
@@ -71,20 +71,20 @@ export class WaiterProjectWorkFlowService {
         await this.configurationService.update(existingConfig.id, {
           title: this.configsService.getCONFIG_CURRENT_PROJECT_PATH(),
           value: projectName,
-          updatedAt: new Date(),
+          updatedAt: new Date()
         });
         await this.projectInitializationService.initProject(
           projectName,
           settings
         );
       } else {
-        await this.configurationService.create({
+        this.configurationService.create({
           id: uuidv4(),
           title: this.configsService.getCONFIG_CURRENT_PROJECT_PATH(),
           description: 'The current project path',
           value: projectName,
           createdAt: new Date(),
-          updatedAt: new Date(),
+          updatedAt: new Date()
         });
 
         await this.projectInitializationService.initProject(
@@ -112,7 +112,7 @@ export class WaiterProjectWorkFlowService {
       if (existingConfig) {
         return this.configurationService.update(existingConfig.id, {
           title: 'currentProjectPath',
-          value: projectName,
+          value: projectName
         });
       } else {
         return this.configurationService.create({
@@ -121,7 +121,7 @@ export class WaiterProjectWorkFlowService {
           description: 'The current project path',
           value: projectName,
           createdAt: new Date(),
-          updatedAt: new Date(),
+          updatedAt: new Date()
         });
       }
     } catch (error) {

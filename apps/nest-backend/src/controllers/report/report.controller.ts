@@ -18,8 +18,8 @@ import { TestDataLayerService } from '../../test-result/services/test-data-layer
 import { FullValidationResultService } from '../../test-result/services/full-validation-result.service';
 
 @Controller('reports')
-export class WaiterReportController {
-  private readonly logger = new Logger(WaiterReportController.name);
+export class ReportController {
+  private readonly logger = new Logger(ReportController.name);
   constructor(
     private readonly projectReportService: ProjectReportService,
     private readonly projectAbstractReportService: ProjectAbstractReportService,

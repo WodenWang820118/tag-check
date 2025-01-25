@@ -11,55 +11,55 @@ import {
   Param,
   Post,
   Query,
-  ValidationPipe,
+  ValidationPipe
 } from '@nestjs/common';
 import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
-import { WaiterEventInspectionService } from './waiter-event-inspection.service';
+import { EventInspectionControllerService } from './event-inspection-controller.service';
 import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('datalayer')
-export class WaiterDataLayerController {
-  private readonly logger = new Logger(WaiterDataLayerController.name);
+export class DataLayerController {
+  private readonly logger = new Logger(DataLayerController.name);
 
   constructor(
     private projectAbstractReportService: ProjectAbstractReportService,
-    private waiterEventInspectionService: WaiterEventInspectionService
+    private eventInspectionControllerService: EventInspectionControllerService
   ) {}
 
   @ApiOperation({
     summary: 'Inspects a single event dataLayer',
     description:
       'This endpoint inspects a single event and returns dataLayer object,\
-      and the comparison result written to an xlsx file.',
+      and the comparison result written to an xlsx file.'
   })
   @ApiParam({
     name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.',
+    description: 'The name of the project to which the event belongs.'
   })
   @ApiParam({
     name: 'eventId',
-    description: 'The event Id of the test associated with the event.',
+    description: 'The event Id of the test associated with the event.'
   })
   @ApiQuery({
     name: 'headless',
-    description: 'Specifies if the test runs in headless mode.',
+    description: 'Specifies if the test runs in headless mode.'
   })
   @ApiQuery({
     name: 'measurementId',
     required: false,
-    description: 'An optional identifier to measure or differentiate events.',
+    description: 'An optional identifier to measure or differentiate events.'
   })
   @ApiQuery({
     name: 'username',
     required: false,
     description:
-      'Optional username for authentication purposes. If provided, password must also be provided.',
+      'Optional username for authentication purposes. If provided, password must also be provided.'
   })
   @ApiQuery({
     name: 'password',
     required: false,
-    description: 'Optional password for authentication purposes.',
+    description: 'Optional password for authentication purposes.'
   })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
   @Post('/:projectSlug/:eventId')
@@ -75,14 +75,14 @@ export class WaiterDataLayerController {
     @Body(ValidationPipe) eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     try {
-      await this.waiterEventInspectionService.inspectSingleEvent(
+      await this.eventInspectionControllerService.inspectSingleEvent(
         projectSlug,
         eventId,
         headless,
         measurementId,
         {
           username,
-          password,
+          password
         },
         captureRequest,
         eventInspectionPresetDto
@@ -109,7 +109,7 @@ export class WaiterDataLayerController {
     description:
       'This endpoint inspects an entire project and returns dataLayer object,\
     and the comparison result written to an xlsx file. Please see the \
-    inspectSingleEvent endpoint for more parameters details.',
+    inspectSingleEvent endpoint for more parameters details.'
   })
   @Get(':projectSlug')
   @Log()
@@ -122,13 +122,13 @@ export class WaiterDataLayerController {
     @Query('captureRequest') captureRequest: string,
     @Query('concurrency') concurrency = 2
   ) {
-    return await this.waiterEventInspectionService.inspectProject(
+    return await this.eventInspectionControllerService.inspectProject(
       projectSlug,
       headless,
       measurementId,
       {
         username,
-        password,
+        password
       },
       captureRequest,
       Number(concurrency)
@@ -138,14 +138,14 @@ export class WaiterDataLayerController {
   @ApiOperation({
     summary: 'Stops the current operation',
     description:
-      'This endpoint stops the current operation and returns the results of the operation.',
+      'This endpoint stops the current operation and returns the results of the operation.'
   })
   @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
   @Post('stop-operation')
   @Log()
   async stopOperation() {
     try {
-      await this.waiterEventInspectionService.stopOperation();
+      await this.eventInspectionControllerService.stopOperation();
       return { message: 'Operation stopped successfully' };
     } catch (error) {
       this.logger.error(error);

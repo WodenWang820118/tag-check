@@ -11,7 +11,7 @@ import { ProjectFileReportService } from '../../project-agent/project-file-repor
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('file-reports')
-export class WaiterFileReportsController {
+export class FileReportsController {
   constructor(private projectFileReportService: ProjectFileReportService) {}
 
   @Delete(':projectSlug')

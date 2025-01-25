@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { WaiterModule } from './waiter/waiter.module';
+import { ControllerModule } from './controllers/controller.module';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilterModule } from './all-exceptions-filter/all-exceptions.filter.module';
 import { AllExceptionsFilter } from './all-exceptions-filter/all-exceptions-filter.service';
@@ -16,7 +16,7 @@ import { LoggingInterceptor } from './logging-interceptor/logging-interceptor.se
     DatabaseConfigModule,
     AllExceptionsFilterModule,
     ConfigModule.forRoot(),
-    WaiterModule,
+    ControllerModule,
     TypeOrmModule.forRootAsync({
       imports: [DatabaseConfigModule],
       useFactory: (databaseConfigService: DatabaseConfigService) =>

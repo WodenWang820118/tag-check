@@ -5,7 +5,7 @@ import { ProjectImageService } from '../../project-agent/project-image/project-i
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('projects')
-export class WaiterProjectDataRetrievalController {
+export class ProjectDataRetrievalController {
   constructor(
     private readonly projectMetadataService: ProjectMetadataService,
     private readonly projectImageService: ProjectImageService

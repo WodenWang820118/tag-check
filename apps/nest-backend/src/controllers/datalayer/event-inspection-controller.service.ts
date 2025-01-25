@@ -5,8 +5,8 @@ import { Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '@utils';
 
 @Injectable()
-export class WaiterEventInspectionService {
-  private readonly logger = new Logger(WaiterEventInspectionService.name);
+export class EventInspectionControllerService {
+  private readonly logger = new Logger(EventInspectionControllerService.name);
   constructor(
     private singleEventInspectionService: SingleEventInspectionService,
     private groupEventsInspection: GroupEventsInspectionService

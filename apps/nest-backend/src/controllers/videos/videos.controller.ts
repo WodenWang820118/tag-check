@@ -3,7 +3,7 @@ import { ProjectVideoService } from '../../project-agent/project-video/project-v
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('videos')
-export class WaiterVideosController {
+export class VideosController {
   constructor(private projectVideoService: ProjectVideoService) {}
 
   @Header('Content-Type', 'video/webm')

@@ -9,7 +9,7 @@ import {
   Logger,
   Param,
   Post,
-  Query,
+  Query
 } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
 import { GtmOperatorService } from '../../gtm-operator/gtm-operator.service';
@@ -17,8 +17,8 @@ import { ProjectAbstractReportService } from '../../project-agent/project-abstra
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('datalayer')
-export class WaiterGtmOperatorController {
-  private readonly logger = new Logger(WaiterGtmOperatorController.name);
+export class GtmOperatorController {
+  private readonly logger = new Logger(GtmOperatorController.name);
   constructor(
     private gtmOperatorService: GtmOperatorService,
     private projectAbstractReportService: ProjectAbstractReportService
@@ -27,34 +27,34 @@ export class WaiterGtmOperatorController {
   @ApiOperation({
     summary: 'Inspects a single event dataLayer with GTM',
     description:
-      'This endpoint inspects a single event and automates the process with GTM preview mode.',
+      'This endpoint inspects a single event and automates the process with GTM preview mode.'
   })
   @ApiQuery({
     name: 'gtmUrl',
-    description: 'The URL of the GTM preview mode share link.',
+    description: 'The URL of the GTM preview mode share link.'
   })
   @ApiParam({
     name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.',
+    description: 'The name of the project to which the event belongs.'
   })
   @ApiParam({
     name: 'eventName',
-    description: 'The name of the test associated with the event.',
+    description: 'The name of the test associated with the event.'
   })
   @ApiQuery({
     name: 'headless',
-    description: 'Specifies if the test runs in headless mode.',
+    description: 'Specifies if the test runs in headless mode.'
   })
   @ApiQuery({
     name: 'username',
     required: false,
     description:
-      'Optional username for authentication purposes. If provided, password must also be provided.',
+      'Optional username for authentication purposes. If provided, password must also be provided.'
   })
   @ApiQuery({
     name: 'password',
     required: false,
-    description: 'Optional password for authentication purposes.',
+    description: 'Optional password for authentication purposes.'
   })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
   @Post('/gtm-operator/:projectSlug/:eventName')
@@ -78,7 +78,7 @@ export class WaiterGtmOperatorController {
       measurementId,
       {
         username,
-        password,
+        password
       },
       captureRequest,
       eventInspectionPresetDto
@@ -96,7 +96,7 @@ export class WaiterGtmOperatorController {
   @ApiOperation({
     summary: 'Stops the current operation',
     description:
-      'This endpoint stops the current operation and returns the results of the operation.',
+      'This endpoint stops the current operation and returns the results of the operation.'
   })
   @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
   @Log()

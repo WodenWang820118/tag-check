@@ -5,7 +5,7 @@ import { Setting } from '@utils';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('settings')
-export class WaiterSettingsController {
+export class SettingsController {
   constructor(private projectSettingService: ProjectSettingService) {}
 
   @ApiOperation({

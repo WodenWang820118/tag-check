@@ -5,17 +5,17 @@ import { Spec } from '@utils';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('specs')
-export class WaiterSpecController {
+export class SpecController {
   constructor(private projectSpecService: ProjectSpecService) {}
 
   @ApiOperation({
     summary: 'get project specs',
     description:
-      'Get all specs for a project. The project is identified by the projectSlug.',
+      'Get all specs for a project. The project is identified by the projectSlug.'
   })
   @ApiParam({
     name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.',
+    description: 'The name of the project to which the event belongs.'
   })
   @Get(':projectSlug')
   @Log()
@@ -26,15 +26,15 @@ export class WaiterSpecController {
   @ApiOperation({
     summary: 'get specific spec details',
     description:
-      'Get the details of a specific spec. The project is identified by the projectSlug and the spec by the eventName.',
+      'Get the details of a specific spec. The project is identified by the projectSlug and the spec by the eventName.'
   })
   @ApiParam({
     name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.',
+    description: 'The name of the project to which the event belongs.'
   })
   @ApiParam({
     name: 'eventName',
-    description: 'The name of the event to which the recording belongs.',
+    description: 'The name of the event to which the recording belongs.'
   })
   @Get(':projectSlug/:eventName')
   @Log()
@@ -48,15 +48,15 @@ export class WaiterSpecController {
   @ApiOperation({
     summary: 'add spec',
     description:
-      'Add a new spec to a project. The project is identified by the projectSlug.',
+      'Add a new spec to a project. The project is identified by the projectSlug.'
   })
   @ApiParam({
     name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.',
+    description: 'The name of the project to which the event belongs.'
   })
   @ApiParam({
     name: 'eventName',
-    description: 'The name of the event to which the recording belongs.',
+    description: 'The name of the event to which the recording belongs.'
   })
   @ApiBody({
     schema: {
@@ -64,10 +64,10 @@ export class WaiterSpecController {
       properties: {
         spec: {
           type: 'string',
-          description: 'The spec to be added.',
-        },
-      },
-    },
+          description: 'The spec to be added.'
+        }
+      }
+    }
   })
   @Post(':projectSlug')
   @Log()
@@ -78,15 +78,15 @@ export class WaiterSpecController {
   @ApiOperation({
     summary: 'update spec',
     description:
-      'Update a spec. The project is identified by the projectSlug and the spec by the eventName.',
+      'Update a spec. The project is identified by the projectSlug and the spec by the eventName.'
   })
   @ApiParam({
     name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.',
+    description: 'The name of the project to which the event belongs.'
   })
   @ApiParam({
     name: 'eventName',
-    description: 'The name of the event to which the recording belongs.',
+    description: 'The name of the event to which the recording belongs.'
   })
   @ApiBody({
     schema: {
@@ -94,10 +94,10 @@ export class WaiterSpecController {
       properties: {
         spec: {
           type: 'string',
-          description: 'The spec to be updated.',
-        },
-      },
-    },
+          description: 'The spec to be updated.'
+        }
+      }
+    }
   })
   @Put(':projectSlug/:eventName')
   @Log()

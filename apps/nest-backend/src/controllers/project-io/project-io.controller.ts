@@ -9,7 +9,7 @@ import {
   Post,
   Res,
   UploadedFile,
-  UseInterceptors,
+  UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -19,12 +19,12 @@ import { ProjectIoFacadeService } from '../../project-agent/project-io-facade/pr
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('projects')
-export class WaiterProjectIoController {
-  private readonly logger = new Logger(WaiterProjectIoController.name);
+export class ProjectIoController {
+  private readonly logger = new Logger(ProjectIoController.name);
   constructor(
     private readonly projectIoFacadeService: ProjectIoFacadeService,
     private readonly configurationSerivce: ConfigurationService
-  ) { }
+  ) {}
 
   @Get('export/:projectSlug')
   @Log()
@@ -39,7 +39,7 @@ export class WaiterProjectIoController {
         filename: (req, file, callback) => {
           // You can apply logic here to customize the file name
           callback(null, file.originalname);
-        },
+        }
       }),
       fileFilter: (req, file, callback) => {
         if (!file.originalname.match(/\.(zip)$/)) {
@@ -47,7 +47,7 @@ export class WaiterProjectIoController {
           return callback(new Error('Only zip files are allowed!'), false);
         }
         callback(null, true);
-      },
+      }
     })
   )
   @Log()

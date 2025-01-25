@@ -5,17 +5,17 @@ import { ProjectRecordingService } from '../../project-agent/project-recording/p
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
 @Controller('recordings')
-export class WaiterRecordingController {
+export class RecordingController {
   constructor(private projectRecordingService: ProjectRecordingService) {}
 
   @ApiOperation({
     summary: 'get project recordings',
     description:
-      'Get all recordings for a project. The project is identified by the projectSlug.',
+      'Get all recordings for a project. The project is identified by the projectSlug.'
   })
   @ApiParam({
     name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.',
+    description: 'The name of the project to which the event belongs.'
   })
   @Get(':projectSlug')
   @Log()
@@ -26,11 +26,11 @@ export class WaiterRecordingController {
   @ApiOperation({
     summary: 'get project recording names',
     description:
-      'Get all recording names for a project. The project is identified by the projectSlug.',
+      'Get all recording names for a project. The project is identified by the projectSlug.'
   })
   @ApiParam({
     name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.',
+    description: 'The name of the project to which the event belongs.'
   })
   @Get(':projectSlug/names')
   @Log()
@@ -43,15 +43,15 @@ export class WaiterRecordingController {
   @ApiOperation({
     summary: 'get specific recording details',
     description:
-      'Get the details of a specific recording. The project is identified by the projectSlug and the recording by the eventName.',
+      'Get the details of a specific recording. The project is identified by the projectSlug and the recording by the eventName.'
   })
   @ApiParam({
     name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.',
+    description: 'The name of the project to which the event belongs.'
   })
   @ApiParam({
     name: 'eventId',
-    description: 'The name of the event to which the recording belongs.',
+    description: 'The name of the event to which the recording belongs.'
   })
   @Get(':projectSlug/:eventId')
   @Log()
@@ -68,18 +68,18 @@ export class WaiterRecordingController {
   @ApiOperation({
     summary: 'add recording',
     description:
-      'Add a recording to an event. The project is identified by the projectSlug and the event by the eventId.',
+      'Add a recording to an event. The project is identified by the projectSlug and the event by the eventId.'
   })
   @ApiParam({
     name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.',
+    description: 'The name of the project to which the event belongs.'
   })
   @ApiParam({
     name: 'eventId',
-    description: 'The name of the event to which the recording belongs.',
+    description: 'The name of the event to which the recording belongs.'
   })
   @ApiBody({
-    description: 'The recording to be added to the event.',
+    description: 'The recording to be added to the event.'
   })
   @Post(':projectSlug/:eventId')
   @Log()
@@ -98,18 +98,18 @@ export class WaiterRecordingController {
   @ApiOperation({
     summary: 'update recording',
     description:
-      'Update a recording for an event. The project is identified by the projectSlug and the event by the eventId.',
+      'Update a recording for an event. The project is identified by the projectSlug and the event by the eventId.'
   })
   @ApiParam({
     name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.',
+    description: 'The name of the project to which the event belongs.'
   })
   @ApiParam({
     name: 'eventId',
-    description: 'The name of the event to which the recording belongs.',
+    description: 'The name of the event to which the recording belongs.'
   })
   @ApiBody({
-    description: 'The updated recording.',
+    description: 'The updated recording.'
   })
   @Put(':projectSlug/:eventId')
   @Log()
