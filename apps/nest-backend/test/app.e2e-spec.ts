@@ -121,14 +121,17 @@ describe('App (e2e)', () => {
     it('should save data in the database', async () => {
       // // Query the database using TypeORM repository
       const testResultService = app.get(TestResultService);
-      const savedRecord = await testResultService.list();
       // console.log(
       //   'savedRecord:',
       //   savedRecord.find((result) => result.id === 1)
       // );
-      const result = savedRecord.find(
-        (result) =>
-          result.eventId === 'add_to_cart_fda47993-f581-42f5-ac52-f40ffb43bfb8'
+      // const result = savedRecord.find(
+      //   (result) =>
+      //     result.eventId === 'add_to_cart_fda47993-f581-42f5-ac52-f40ffb43bfb8'
+      // );
+      const result = await testResultService.get(
+        'ng_gtm_integration_sample',
+        'add_to_cart_fda47993-f581-42f5-ac52-f40ffb43bfb8'
       );
       expect(result).toBeDefined();
     });
@@ -170,6 +173,7 @@ describe('App (e2e)', () => {
       const response = await request(app.getHttpServer()).get(
         '/reports/ng_gtm_integration_sample'
       );
+      console.log(response);
       expect(response.status).toBe(200);
       expect(response.body).toBeDefined();
     });

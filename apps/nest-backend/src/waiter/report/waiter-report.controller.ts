@@ -15,7 +15,6 @@ import { ProjectReportService } from '../../project-agent/project-report/project
 import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 import { TestDataLayerService } from '../../test-result/services/test-data-layer.service';
-import { TestResultService } from '../../test-result/services/test-result.service';
 import { FullValidationResultService } from '../../test-result/services/full-validation-result.service';
 
 @Controller('reports')
@@ -25,7 +24,6 @@ export class WaiterReportController {
     private readonly projectReportService: ProjectReportService,
     private readonly projectAbstractReportService: ProjectAbstractReportService,
     private readonly testDataLayerService: TestDataLayerService,
-    private readonly testResultService: TestResultService,
     private readonly fullValidationResultService: FullValidationResultService
   ) {}
 
