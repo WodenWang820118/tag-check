@@ -1,9 +1,13 @@
 import { IsNotEmpty, IsString } from 'class-validator';
+import { FileReport } from '@utils';
 
-export class CreateTestResultDto {
+export class CreateTestResultDto implements FileReport {
+  @IsNotEmpty()
+  id!: number;
+
   @IsNotEmpty()
   @IsString()
-  position!: number;
+  projectSlug!: string;
 
   @IsNotEmpty()
   @IsString()
@@ -31,10 +35,6 @@ export class CreateTestResultDto {
 
   @IsNotEmpty()
   @IsString()
-  completedTime!: Date;
-
-  @IsNotEmpty()
-  @IsString()
   rawRequest!: string;
 
   @IsNotEmpty()
@@ -44,4 +44,8 @@ export class CreateTestResultDto {
   @IsNotEmpty()
   @IsString()
   destinationUrl!: string;
+
+  @IsNotEmpty()
+  @IsString()
+  createdAt!: Date;
 }

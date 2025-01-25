@@ -21,7 +21,7 @@ export class ImageService {
 
     try {
       // Convert buffer to stream
-      const stream = Readable.from(image.data);
+      const stream = Readable.from(image.imageData);
 
       return new StreamableFile(stream, {
         type: 'image/png',

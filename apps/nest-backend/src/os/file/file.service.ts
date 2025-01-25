@@ -10,20 +10,21 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  StreamableFile,
+  StreamableFile
 } from '@nestjs/common';
 import {
   createReadStream,
   createWriteStream,
   readFileSync,
   rmSync,
-  writeFileSync,
+  writeFileSync
 } from 'fs';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { join } from 'path';
 import archiver from 'archiver';
+import { TestResult } from '../../test-result/entity/test-result.entity';
 
 @Injectable()
 export class FileService {
@@ -46,9 +47,8 @@ export class FileService {
 
   // get all json files in the project folder
   async getOperationJsonByProject(projectSlug: string) {
-    const dirPath = await this.folderPathService.getRecordingFolderPath(
-      projectSlug
-    );
+    const dirPath =
+      await this.folderPathService.getRecordingFolderPath(projectSlug);
     const jsonFiles = this.folderService
       .getJsonFilesFromDir(dirPath)
       .filter((file) => file.endsWith('.json'));
@@ -79,7 +79,11 @@ export class FileService {
     return new StreamableFile(createReadStream(filePath));
   }
 
-  async downloadFiles(filePaths: string[], outputFilePath: string) {
+  async downloadFiles(
+    projectSlug: string,
+    testResults: TestResult[],
+    outputFilePath: string
+  ) {
     const output = createWriteStream(outputFilePath);
     const archive = archiver('zip', {});
 
@@ -97,15 +101,17 @@ export class FileService {
       this.logger.error('Archive error: ' + err);
     });
 
-    filePaths.forEach((filePath) => {
-      const fileName = filePath.split('\\').at(-1);
+    testResults.forEach((testResult) => {
+      const fileName = `${testResult.eventId}_${testResult.createdAt}'.xlsx'`;
       if (!fileName) {
         throw new HttpException(
           'File name not found',
           HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
-      archive.append(createReadStream(filePath), { name: fileName });
+      archive.append(createReadStream(join(projectSlug, fileName)), {
+        name: fileName
+      });
     });
 
     archive.pipe(output);

@@ -12,7 +12,6 @@ import { TestResultModule } from '../test-result/test-result.module';
 // services
 import { ProjectService } from './project/project.service';
 import { FileService } from './file/file.service';
-import { XlsxReportGroupEventsService } from './xlsx-report/xlsx-report-group-events.service';
 import { ProjectIoService } from './project-io/project-io.service';
 import { FolderService } from './folder/folder.service';
 import { ImageService } from './image/image.service';
@@ -32,7 +31,6 @@ const modules = [
 const services = [
   ProjectService,
   FileService,
-  XlsxReportGroupEventsService,
   FolderService,
   ImageService,
   ProjectIoService,

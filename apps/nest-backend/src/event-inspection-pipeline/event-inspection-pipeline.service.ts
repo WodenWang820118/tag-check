@@ -58,18 +58,15 @@ export class EventInspectionPipelineService {
 
       const timestamp = new Date().getTime();
       const eventName = extractEventNameFromId(eventId);
-      const dataLayerPassed = result.dataLayerResult.passed;
-      const requestPassed = result.requestCheckResult.passed;
 
       // The ID and createdAt will be handled by the database
       const testResult: Partial<TestResult> = {
         projectSlug: projectSlug,
         eventId: eventId,
-        testName: `${eventName} ${dataLayerPassed} ${requestPassed} ${timestamp}`,
+        testName: `${eventName}_${timestamp}`,
         eventName: eventName,
         passed: result.dataLayerResult.passed,
         requestPassed: result.requestCheckResult.passed,
-        completedTime: new Date(),
         rawRequest: result.rawRequest,
         message: result.dataLayerResult.message || 'failed',
         destinationUrl: result.destinationUrl
@@ -80,15 +77,14 @@ export class EventInspectionPipelineService {
       return data;
     } catch (error) {
       this.logger.error(error);
-      // TODO customize error message
+      // TODO: get test name from database for users to locate the failed test
       await this.testResultService.create({
         projectSlug: projectSlug,
         eventId: eventId,
-        testName: 'Error',
-        eventName: 'Error',
+        testName: extractEventNameFromId(eventId),
+        eventName: extractEventNameFromId(eventId),
         passed: false,
         requestPassed: false,
-        completedTime: new Date(),
         rawRequest: '',
         message: `${error}`,
         destinationUrl: ''
@@ -100,8 +96,8 @@ export class EventInspectionPipelineService {
 
       await this.imageResultService.create({
         eventId: eventId,
-        name: `${projectSlug}_${eventId}`,
-        data: screenshot
+        imageName: `${projectSlug}_${eventId}`,
+        imageData: screenshot
       });
     }
   }
@@ -118,7 +114,7 @@ export class EventInspectionPipelineService {
   ) {
     const eventName = extractEventNameFromId(eventId);
 
-    const outputValidationResult: OutputValidationResult = {
+    const outputValidationResult: Partial<OutputValidationResult> = {
       eventName: eventName,
       passed: result.dataLayerResult.passed,
       requestPassed: result.requestCheckResult.passed,
@@ -129,7 +125,7 @@ export class EventInspectionPipelineService {
       dataLayer: result.dataLayerResult.dataLayer,
       dataLayerSpec: result.dataLayerResult.dataLayerSpec,
       destinationUrl: result.destinationUrl,
-      completedTime: new Date()
+      createdAt: new Date()
     };
 
     await this.projectAbstractReportService.writeSingleAbstractTestResultJson(

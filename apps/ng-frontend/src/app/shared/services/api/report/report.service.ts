@@ -71,6 +71,7 @@ export class ReportService {
     eventId: string,
     reportDetails: IReportDetails
   ) {
+    // TODO: use SQLite3 to store the report details
     return this.http
       .post<ProjectReport>(
         `${environment.reportApiUrl}/${projectSlug}/${eventId}`,

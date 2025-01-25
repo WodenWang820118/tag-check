@@ -1,9 +1,13 @@
 import { Exclude, Expose } from 'class-transformer';
+import { FileReport } from '@utils';
 
 @Exclude()
-export class TestResultResponseDto {
+export class TestResultResponseDto implements FileReport {
   @Expose()
-  position!: number;
+  id!: number;
+
+  @Expose()
+  projectSlug!: string;
 
   @Expose()
   eventId!: string;
@@ -24,9 +28,6 @@ export class TestResultResponseDto {
   incorrectInfo!: string;
 
   @Expose()
-  completedTime!: Date;
-
-  @Expose()
   rawRequest!: string;
 
   @Expose()
@@ -34,4 +35,7 @@ export class TestResultResponseDto {
 
   @Expose()
   destinationUrl!: string;
+
+  @Expose()
+  createdAt!: Date;
 }

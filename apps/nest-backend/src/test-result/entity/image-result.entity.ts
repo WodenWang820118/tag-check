@@ -1,7 +1,8 @@
+import { ImageSchema } from '@utils';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('image_result')
-export class ImageResult {
+export class ImageResult implements ImageSchema {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -9,13 +10,13 @@ export class ImageResult {
   eventId!: string;
 
   @Column()
-  name!: string;
+  imageName!: string;
 
   @Column('blob')
-  data!: Buffer;
+  imageData!: Buffer;
 
   @Column()
-  size!: number;
+  imageSize!: number;
 
   @Column({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' })
   createdAt!: Date;

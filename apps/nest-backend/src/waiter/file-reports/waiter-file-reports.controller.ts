@@ -5,7 +5,7 @@ import {
   Get,
   Param,
   Post,
-  Query,
+  Query
 } from '@nestjs/common';
 import { ProjectFileReportService } from '../../project-agent/project-file-report/project-file-report.service';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
@@ -32,11 +32,14 @@ export class WaiterFileReportsController {
     return this.projectFileReportService.getReportFolderFiles(projectSlug);
   }
 
-  @Post('/download')
-  @Log()
-  async downloadReportFiles(@Body() body: { filePaths: string[] }) {
+  @Post('/download/:projectSlug')
+  async downloadReportFiles(
+    @Param('projectSlug') projectSlug: string,
+    @Body() eventIds: string[]
+  ) {
     return await this.projectFileReportService.downloadReportFiles(
-      body.filePaths
+      projectSlug,
+      eventIds
     );
   }
 }

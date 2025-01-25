@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TestResult } from '../entity/test-result.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+import { CreateTestResultDto } from '../dto/test-result/create-test-result.dto';
 
 @Injectable()
 export class TestResultService {
@@ -10,8 +11,10 @@ export class TestResultService {
     private readonly testResultRepository: Repository<TestResult>
   ) {}
 
-  async list() {
-    return await this.testResultRepository.find();
+  async list(projectSlug: string) {
+    return await this.testResultRepository.find({
+      where: { projectSlug: projectSlug }
+    });
   }
 
   async get(projectSlug: string, eventId: string) {
@@ -20,12 +23,25 @@ export class TestResultService {
     });
   }
 
-  async create(testResultDto: Partial<TestResult>) {
+  async getMany(projectSlug: string, eventIds: string[]) {
+    return await this.testResultRepository.find({
+      where: { projectSlug, eventId: In(eventIds) }
+    });
+  }
+
+  async create(testResultDto: Partial<CreateTestResultDto>) {
     const testResult = this.testResultRepository.create(testResultDto);
     return await this.testResultRepository.save(testResult);
   }
 
   async delete(projectSlug: string, eventId: string) {
     return await this.testResultRepository.delete({ projectSlug, eventId });
+  }
+
+  async deleteMany(projectSlug: string, eventIds: string[]) {
+    return await this.testResultRepository.delete({
+      projectSlug,
+      eventId: In(eventIds)
+    });
   }
 }

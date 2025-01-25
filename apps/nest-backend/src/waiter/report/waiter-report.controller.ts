@@ -14,13 +14,19 @@ import { IReportDetails } from '@utils';
 import { ProjectReportService } from '../../project-agent/project-report/project-report.service';
 import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
+import { TestDataLayerService } from '../../test-result/services/test-data-layer.service';
+import { TestResultService } from '../../test-result/services/test-result.service';
+import { FullValidationResultService } from '../../test-result/services/full-validation-result.service';
 
 @Controller('reports')
 export class WaiterReportController {
   private readonly logger = new Logger(WaiterReportController.name);
   constructor(
     private readonly projectReportService: ProjectReportService,
-    private readonly projectAbstractReportService: ProjectAbstractReportService
+    private readonly projectAbstractReportService: ProjectAbstractReportService,
+    private readonly testDataLayerService: TestDataLayerService,
+    private readonly testResultService: TestResultService,
+    private readonly fullValidationResultService: FullValidationResultService
   ) {}
 
   @ApiOperation({
@@ -78,12 +84,20 @@ export class WaiterReportController {
     @Param('eventId') eventId: string,
     @Body() report: IReportDetails
   ) {
+    // TODO: Unify the implmentation and use database for all reports
     this.logger.log(`updateReport: ${JSON.stringify(report, null, 2)}`);
-    return await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
+
+    await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
       projectSlug,
       eventId,
       report
     );
+
+    return await this.testDataLayerService.update({
+      eventId: eventId,
+      dataLayer: report.dataLayer as unknown as string,
+      dataLayerSpec: report.dataLayerSpec as unknown as string
+    });
   }
 
   @ApiOperation({
@@ -110,11 +124,19 @@ export class WaiterReportController {
     @Param('eventId') eventId: string,
     @Body() report: IReportDetails
   ) {
-    return await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
+    // TODO: Unify the implmentation and use database for all reports
+    // keep the original implementation for verification
+    await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
       projectSlug,
       eventId,
       report
     );
+
+    return await this.testDataLayerService.create({
+      eventId: eventId,
+      dataLayer: report.dataLayer as unknown as string,
+      dataLayerSpec: report.dataLayerSpec as unknown as string
+    });
   }
 
   @ApiOperation({
@@ -192,9 +214,14 @@ export class WaiterReportController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
   ) {
-    return await this.projectAbstractReportService.getSingleAbstractTestResultJson(
-      projectSlug,
-      eventId
+    return (
+      (await this.fullValidationResultService.getSingleReportDetailsData(
+        eventId
+      )) ??
+      (await this.projectAbstractReportService.getSingleAbstractTestResultJson(
+        projectSlug,
+        eventId
+      ))
     );
   }
 }

@@ -9,7 +9,6 @@ import { ProjectRecordingModule } from './project-recording/project-recording.mo
 import { ProjectReportModule } from './project-report/project-report.module';
 import { ProjectSettingModule } from './project-setting/project-setting.module';
 import { ProjectSpecModule } from './project-spec/project-spec.module';
-import { ProjectXlsxRportModule } from './project-xlsx-report/project-xlsx-report.module';
 import { ProjectFileReportModule } from './project-file-report/project-file-report.module';
 import { ProjectVideoModule } from './project-video/project-video.module';
 
@@ -22,7 +21,6 @@ import { ProjectRecordingService } from './project-recording/project-recording.s
 import { ProjectReportService } from './project-report/project-report.service';
 import { ProjectSettingService } from './project-setting/project-setting.service';
 import { ProjectSpecService } from './project-spec/project-spec.service';
-import { ProjectXlsxReportService } from './project-xlsx-report/project-xlsx-report.service';
 import { ProjectImageModule } from './project-image/project-image.module';
 import { ProjectImageService } from './project-image/project-image.service';
 import { ProjectFileReportService } from './project-file-report/project-file-report.service';
@@ -37,10 +35,9 @@ const modules = [
   ProjectInitializationModule,
   ProjectIoFacadeModule,
   ProjectAbstractReportModule,
-  ProjectXlsxRportModule,
   ProjectImageModule,
   ProjectFileReportModule,
-  ProjectVideoModule,
+  ProjectVideoModule
 ];
 
 const services = [
@@ -52,15 +49,14 @@ const services = [
   ProjectReportService,
   ProjectSettingService,
   ProjectSpecService,
-  ProjectXlsxReportService,
   ProjectImageService,
   ProjectFileReportService,
-  ProjectVideoService,
+  ProjectVideoService
 ];
 
 @Module({
   imports: [...modules],
   providers: [...services],
-  exports: [...modules, ...services],
+  exports: [...modules, ...services]
 })
 export class ProjectAgentModule {}

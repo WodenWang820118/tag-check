@@ -1,7 +1,8 @@
+import { FileReport } from '@utils';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('test_result')
-export class TestResult {
+export class TestResult implements FileReport {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -22,9 +23,6 @@ export class TestResult {
 
   @Column()
   requestPassed!: boolean;
-
-  @Column()
-  completedTime!: Date;
 
   @Column()
   rawRequest!: string;

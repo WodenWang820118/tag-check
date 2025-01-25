@@ -1,3 +1,5 @@
+import { ImageSchema } from './file-report.type';
+
 // Base types for known properties
 export type BaseItem = {
   item_id?: string;
@@ -66,7 +68,9 @@ export type RequestValidationResult = {
 };
 
 export type OutputValidationResult = {
+  eventId: string;
   eventName: string;
+  testName: string;
   passed: boolean;
   requestPassed: boolean;
   rawRequest: string;
@@ -76,8 +80,8 @@ export type OutputValidationResult = {
   dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
   destinationUrl: string;
-  completedTime: Date;
-};
+  createdAt?: Date;
+} & ImageSchema;
 
 export type ValidationStrategy = {
   validateDataLayer(
