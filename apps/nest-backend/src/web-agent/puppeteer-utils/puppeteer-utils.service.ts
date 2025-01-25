@@ -6,7 +6,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
 import { join } from 'path';
 import { Page, Browser, ScreenRecorder, Credentials } from 'puppeteer';
-import { FilePathService } from '../../os/path/file-path/file-path.service';
+import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
 import { ConfigsService } from '../../core/configs/configs.service';
 
 @Injectable()

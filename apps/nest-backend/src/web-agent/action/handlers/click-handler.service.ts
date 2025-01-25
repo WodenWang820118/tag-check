@@ -3,14 +3,14 @@ import {
   Logger,
   HttpException,
   HttpStatus,
-  InternalServerErrorException,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { ActionHandler, getFirstSelector } from './utils';
-import { ProjectService } from '../../../os/project/project.service';
+import { ProjectService } from '../../../infrastructure/os/project/project.service';
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
-import { FilePathService } from '../../../os/path/file-path/file-path.service';
-import { FileService } from '../../../os/file/file.service';
+import { FilePathService } from '../../../infrastructure/os/path/file-path/file-path.service';
+import { FileService } from '../../../infrastructure/os/file/file.service';
 import { extractEventNameFromId, OperationFile, Step } from '@utils';
 import { ActionUtilsService } from '../action-utils/action-utils.service';
 
@@ -36,9 +36,8 @@ export class ClickHandler implements ActionHandler {
     let clickedSuccessfully = false;
     let preventNavigation = false;
 
-    const projectSettings = await this.projectService.getProjectSettings(
-      projectSlug
-    );
+    const projectSettings =
+      await this.projectService.getProjectSettings(projectSlug);
     const preventNavigationEvents =
       projectSettings?.preventNavigationEvents || [];
     const title = extractEventNameFromId(eventId);

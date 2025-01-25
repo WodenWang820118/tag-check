@@ -3,7 +3,7 @@ import { PathUtilsService } from '../path-utils/path-utils.service';
 import { FolderPathService } from '../folder-path/folder-path.service';
 import { join } from 'path';
 import { extractEventNameFromId } from '@utils';
-import { ConfigsService } from '../../../core/configs/configs.service';
+import { ConfigsService } from '../../../../core/configs/configs.service';
 
 @Injectable()
 export class FilePathService {

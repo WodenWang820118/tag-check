@@ -7,13 +7,13 @@ import {
   HttpStatus,
   Inject,
   Injectable,
-  Logger,
+  Logger
 } from '@nestjs/common';
 import { STRATEGY_TYPE, ValidationStrategyType } from './utils';
 import { StrictDataLayerEvent, ValidationStrategy } from '@utils';
 import { Browser, Credentials } from 'puppeteer';
-import { FileService } from '../os/file/file.service';
-import { FilePathService } from '../os/path/file-path/file-path.service';
+import { FileService } from '../infrastructure/os/file/file.service';
+import { FilePathService } from '../infrastructure/os/path/file-path/file-path.service';
 import { InspectorSingleEventService } from './inspector-single-event.service';
 import { InspectorUtilsService } from './inspector-utils.service';
 
@@ -41,9 +41,8 @@ export class InspectorGroupEventsService {
     // deal with invalid concurrency
     concurrency = Math.max(1, concurrency || 1);
 
-    const operations = await this.fileService.getOperationJsonByProject(
-      projectName
-    );
+    const operations =
+      await this.fileService.getOperationJsonByProject(projectName);
 
     const results: any[] = [];
     for (let i = 0; i < operations.length; i += concurrency) {
@@ -74,7 +73,7 @@ export class InspectorGroupEventsService {
 
           await page.screenshot({
             path: imageSavingFolder,
-            fullPage: true,
+            fullPage: true
           });
           const pages = await browser.pages();
           await Promise.all(pages.map((page: Page) => page.close()));
@@ -121,7 +120,7 @@ export class InspectorGroupEventsService {
           return {
             passed: false,
             message: "The test didn't pass",
-            dataLayerSpec: spec,
+            dataLayerSpec: spec
           };
       }
     } catch (error) {

@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { ProjectSettingService } from './project-setting.service';
-import { FileService } from '../../os/file/file.service';
-import { FilePathService } from '../../os/path/file-path/file-path.service';
+import { FileService } from '../../infrastructure/os/file/file.service';
+import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
 import { Setting } from '@utils';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 
@@ -12,19 +12,19 @@ describe('ProjectSettingService', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [ProjectSettingService],
+      providers: [ProjectSettingService]
     })
       .useMocker((token) => {
         if (token === FileService) {
           return {
             readJsonFile: vi.fn(),
-            writeJsonFile: vi.fn(),
+            writeJsonFile: vi.fn()
           };
         }
 
         if (token === FilePathService) {
           return {
-            getProjectSettingFilePath: vi.fn(),
+            getProjectSettingFilePath: vi.fn()
           };
         }
 
@@ -59,7 +59,7 @@ describe('ProjectSettingService', () => {
     expect(readJsonFileSpy).toHaveBeenCalledWith('filePath');
     expect(result).toEqual({
       projectSlug,
-      settings: content,
+      settings: content
     });
   });
 
@@ -99,17 +99,17 @@ describe('ProjectSettingService', () => {
                   ad_storage: true,
                   analytics_storage: true,
                   ad_user_data: true,
-                  ad_personalization: false,
-                }),
+                  ad_personalization: false
+                })
               },
               {
                 key: 'consent',
-                value: JSON.stringify(true),
-              },
-            ],
+                value: JSON.stringify(true)
+              }
+            ]
           },
-          cookie: { data: [{ key: 'key', value: JSON.stringify('value') }] },
-        },
+          cookie: { data: [{ key: 'key', value: JSON.stringify('value') }] }
+        }
       };
 
       await service.updateProjectSettings(
@@ -131,8 +131,8 @@ describe('ProjectSettingService', () => {
           '--disable-dev-shm-usage',
           '--disable-accelerated-2d-canvas',
           '--disable-gpu',
-          '--incognito',
-        ],
+          '--incognito'
+        ]
       };
 
       await service.updateProjectSettings(
@@ -153,8 +153,8 @@ describe('ProjectSettingService', () => {
           tagManagerUrl:
             'https://tagmanager.google.com/?utm_source=marketingplatform.google.com&utm_medium=et&utm_campaign=marketingplatform.google.com%2Fabout%2Ftag-manager%2F#/container/accounts/6140708819/containers/168785492/workspaces/28',
           gtmPreviewModeUrl:
-            'https://tagassistant.google.com/#/?id=GTM-NBMX2DWS&url=https%3A%2F%2Fgtm-integration-sample.netlify.app%2F&source=TAG_MANAGER&gtm_auth=dWGYVg8mXuHHNyA2tt55zg&gtm_preview=env-3',
-        },
+            'https://tagassistant.google.com/#/?id=GTM-NBMX2DWS&url=https%3A%2F%2Fgtm-integration-sample.netlify.app%2F&source=TAG_MANAGER&gtm_auth=dWGYVg8mXuHHNyA2tt55zg&gtm_preview=env-3'
+        }
       };
 
       await service.updateProjectSettings(projectSlug, 'gtm', partialSettings);
@@ -171,7 +171,7 @@ describe('ProjectSettingService', () => {
             updateFn: (currentSetting: Setting) => Setting
           ) => {
             const currentSettings = {
-              preventNavigationEvents: ['event1', 'event2', 'event3'],
+              preventNavigationEvents: ['event1', 'event2', 'event3']
             } as Setting;
             return updateFn(currentSettings);
           }
@@ -190,7 +190,7 @@ describe('ProjectSettingService', () => {
     it('should call updateAuthenticationSettings for authentication section', async () => {
       const spy = vi.spyOn(service, 'updateAuthenticationSettings');
       const partialSettings = {
-        authentication: { username: 'user', password: 'pass' },
+        authentication: { username: 'user', password: 'pass' }
       };
 
       await service.updateProjectSettings(

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { FolderService } from '../../os/folder/folder.service';
-import { FileService } from '../../os/file/file.service';
-import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
-import { FilePathService } from '../../os/path/file-path/file-path.service';
+import { FolderService } from '../../infrastructure/os/folder/folder.service';
+import { FileService } from '../../infrastructure/os/file/file.service';
+import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
+import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
 import { ProjectInfoDto } from '../../dto/project-info.dto';
 import { SettingDto } from '../../dto/setting.dto';
 
@@ -17,18 +17,16 @@ export class ProjectInitializationService {
 
   async initProject(projectSlug: string, settings: Partial<ProjectInfoDto>) {
     await this.createProjectFolders(projectSlug);
-    const projectMetaData: ProjectInfoDto = await this.createProjectMetaData(
-      settings
-    );
+    const projectMetaData: ProjectInfoDto =
+      await this.createProjectMetaData(settings);
     const projectSettings: SettingDto =
       this.createProjectSettings(projectMetaData);
     await this.writeProjectFiles(projectSlug, projectMetaData, projectSettings);
   }
 
   private async createProjectFolders(projectSlug: string) {
-    const projectRoot = await this.folderPathService.getProjectFolderPath(
-      projectSlug
-    );
+    const projectRoot =
+      await this.folderPathService.getProjectFolderPath(projectSlug);
     this.folderService.createFolder(projectRoot);
     this.folderService.createFolder(
       await this.folderPathService.getRecordingFolderPath(projectSlug)
@@ -53,7 +51,7 @@ export class ProjectInitializationService {
       projectDescription: settings.projectDescription || '',
       projectSlug: settings.projectSlug || '',
       measurementId: settings.measurementId || '',
-      googleSpreadsheetLink: settings.googleSpreadsheetLink || '',
+      googleSpreadsheetLink: settings.googleSpreadsheetLink || ''
     };
   }
 
@@ -65,22 +63,22 @@ export class ProjectInitializationService {
         isAccompanyMode: false,
         isRequestCheck: false,
         tagManagerUrl: '',
-        gtmPreviewModeUrl: '',
+        gtmPreviewModeUrl: ''
       },
       preventNavigationEvents: [],
       authentication: {
         username: '',
-        password: '',
+        password: ''
       },
       application: {
         localStorage: {
-          data: [],
+          data: []
         },
         cookie: {
-          data: [],
-        },
+          data: []
+        }
       },
-      browser: [],
+      browser: []
     };
   }
 
@@ -93,9 +91,8 @@ export class ProjectInitializationService {
       await this.filePathService.getProjectSettingFilePath(projectSlug);
     const projectMetadataPath =
       await this.filePathService.getProjectMetaDataFilePath(projectSlug);
-    const configFilePath = await this.filePathService.getProjectConfigFilePath(
-      projectSlug
-    );
+    const configFilePath =
+      await this.filePathService.getProjectConfigFilePath(projectSlug);
 
     this.fileService.writeJsonFile(projectMetadataPath, metadata);
     this.fileService.writeJsonFile(configFilePath, []);

@@ -1,9 +1,9 @@
 import { TestResultService } from './../../test-result/services/test-result.service';
-import { Injectable, Logger } from '@nestjs/common';
-import { FolderService } from '../../os/folder/folder.service';
-import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
+import { Injectable } from '@nestjs/common';
+import { FolderService } from '../../infrastructure/os/folder/folder.service';
+import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
 import { join } from 'path';
-import { XlsxReportService } from '../../os/xlsx-report/xlsx-report.service';
+import { XlsxReportService } from '../../infrastructure/os/xlsx-report/xlsx-report.service';
 import { FullValidationResultService } from '../../test-result/services/full-validation-result.service';
 
 @Injectable()

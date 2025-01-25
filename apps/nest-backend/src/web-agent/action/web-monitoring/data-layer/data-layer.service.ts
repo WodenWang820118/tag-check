@@ -5,10 +5,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { join } from 'path';
 import { Page } from 'puppeteer';
-import { FolderPathService } from '../../../../os/path/folder-path/folder-path.service';
+import { FolderPathService } from '../../../../infrastructure/os/path/folder-path/folder-path.service';
 import { extractEventNameFromId } from '@utils';
-import { FileService } from '../../../../os/file/file.service';
-import { FilePathService } from '../../../../os/path/file-path/file-path.service';
+import { FileService } from '../../../../infrastructure/os/file/file.service';
+import { FilePathService } from '../../../../infrastructure/os/path/file-path/file-path.service';
 @Injectable()
 export class DataLayerService {
   private readonly logger = new Logger(DataLayerService.name);
@@ -19,9 +19,8 @@ export class DataLayerService {
   ) {}
 
   async initSelfDataLayer(projectName: string, eventId: string) {
-    const resultFolder = await this.folderPathService.getReportSavingFolderPath(
-      projectName
-    );
+    const resultFolder =
+      await this.folderPathService.getReportSavingFolderPath(projectName);
     const eventName = extractEventNameFromId(eventId);
     const filePath = join(
       resultFolder,
@@ -58,9 +57,8 @@ export class DataLayerService {
     eventId: string
   ) {
     if (!dataLayer || dataLayer.length === 0) return;
-    const resultFolder = await this.folderPathService.getReportSavingFolderPath(
-      projectName
-    );
+    const resultFolder =
+      await this.folderPathService.getReportSavingFolderPath(projectName);
     const eventName = extractEventNameFromId(eventId);
     const myDataLayerFile = join(
       resultFolder,

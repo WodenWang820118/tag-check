@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
-import { FileService } from '../../os/file/file.service';
-import { FilePathService } from '../../os/path/file-path/file-path.service';
+import { FileService } from '../../infrastructure/os/file/file.service';
+import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
 import { CookieData, LocalStorageData, Setting } from '@utils';
 
 @Injectable()

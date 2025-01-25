@@ -2,13 +2,13 @@ import {
   BadRequestException,
   Injectable,
   Logger,
-  StreamableFile,
+  StreamableFile
 } from '@nestjs/common';
-import { ProjectIoService } from '../../os/project-io/project-io.service';
-import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
+import { ProjectIoService } from '../../infrastructure/os/project-io/project-io.service';
+import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
 import { join } from 'path';
 import { createReadStream, mkdirSync } from 'fs';
-import { FolderService } from '../../os/folder/folder.service';
+import { FolderService } from '../../infrastructure/os/folder/folder.service';
 
 @Injectable()
 export class ProjectIoFacadeService {
@@ -23,9 +23,8 @@ export class ProjectIoFacadeService {
     if (!projectSlug) {
       throw new BadRequestException('Project slug is required');
     }
-    const projectPath = await this.folderPathService.getProjectFolderPath(
-      projectSlug
-    );
+    const projectPath =
+      await this.folderPathService.getProjectFolderPath(projectSlug);
     const tempFolder = await this.createTempFolder();
     const projectZipPath = join(tempFolder, `${projectSlug}.zip`);
 

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test } from '@nestjs/testing';
-import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
-import { FolderService } from '../../os/folder/folder.service';
-import { FilePathService } from '../../os/path/file-path/file-path.service';
-import { FileService } from '../../os/file/file.service';
+import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
+import { FolderService } from '../../infrastructure/os/folder/folder.service';
+import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
+import { FileService } from '../../infrastructure/os/file/file.service';
 import { ProjectInitializationService } from './project-initialization.service';
 import { join } from 'path';
 import { ProjectInfoDto } from '../../dto/project-info.dto';

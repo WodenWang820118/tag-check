@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { FolderService } from '../../os/folder/folder.service';
-import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
-import { FileService } from '../../os/file/file.service';
-import { FilePathService } from '../../os/path/file-path/file-path.service';
+import { FolderService } from '../../infrastructure/os/folder/folder.service';
+import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
+import { FileService } from '../../infrastructure/os/file/file.service';
+import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
 import { RecordingDto } from '../../dto/recording.dto';
 import { Recording } from '@utils';
 
@@ -43,7 +43,7 @@ export class ProjectRecordingService {
 
     return {
       projectSlug: projectSlug,
-      recordings: flattenedRecordings,
+      recordings: flattenedRecordings
     };
   }
 

@@ -11,8 +11,8 @@ import {
   StrictDataLayerEvent,
   ValidationResult
 } from '@utils';
-import { FileService } from '../os/file/file.service';
-import { FilePathService } from '../os/path/file-path/file-path.service';
+import { FileService } from '../infrastructure/os/file/file.service';
+import { FilePathService } from '../infrastructure/os/path/file-path/file-path.service';
 import { WebAgentService } from '../web-agent/web-agent.service';
 import { RequestProcessorService } from '../request-processor/request-processor.service';
 import { Credentials, Page } from 'puppeteer';

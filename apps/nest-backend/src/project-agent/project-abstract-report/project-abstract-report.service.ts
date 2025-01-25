@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import { FolderService } from '../../os/folder/folder.service';
+import { FolderService } from '../../infrastructure/os/folder/folder.service';
 import {
   HttpException,
   HttpStatus,
@@ -9,10 +9,10 @@ import {
   NotFoundException
 } from '@nestjs/common';
 import { IReportDetails, OutputValidationResult } from '@utils';
-import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
+import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
 import { existsSync, mkdirSync, statSync } from 'fs';
-import { FilePathService } from '../../os/path/file-path/file-path.service';
-import { FileService } from '../../os/file/file.service';
+import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
+import { FileService } from '../../infrastructure/os/file/file.service';
 
 @Injectable()
 export class ProjectAbstractReportService {

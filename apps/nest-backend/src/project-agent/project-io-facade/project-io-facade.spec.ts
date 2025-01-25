@@ -2,9 +2,9 @@ import { Test } from '@nestjs/testing';
 import { ProjectIoFacadeService } from './project-io-facade.service';
 import { join } from 'path';
 import { StreamableFile } from '@nestjs/common';
-import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
-import { FolderService } from '../../os/folder/folder.service';
-import { ProjectIoService } from '../../os/project-io/project-io.service';
+import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
+import { FolderService } from '../../infrastructure/os/folder/folder.service';
+import { ProjectIoService } from '../../infrastructure/os/project-io/project-io.service';
 import { createReadStream, mkdirSync } from 'fs';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 
@@ -17,9 +17,9 @@ vi.mock('fs', () => ({
         if (event === 'close') {
           cb();
         }
-      }),
+      })
     };
-  }),
+  })
 }));
 
 describe('ProjectIoFacadeService', () => {
@@ -43,25 +43,25 @@ describe('ProjectIoFacadeService', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [ProjectIoFacadeService],
+      providers: [ProjectIoFacadeService]
     })
       .useMocker((token) => {
         if (token === FolderPathService) {
           return {
             getRootProjectFolderPath: vi.fn(() => rootProjectPath),
-            getProjectFolderPath: vi.fn(() => projectPath),
+            getProjectFolderPath: vi.fn(() => projectPath)
           };
         }
 
         if (token === FolderService) {
           return {
-            deleteFolder: vi.fn(),
+            deleteFolder: vi.fn()
           };
         }
 
         if (token === ProjectIoService) {
           return {
-            compressProject: vi.fn(),
+            compressProject: vi.fn()
           };
         }
 
@@ -91,7 +91,7 @@ describe('ProjectIoFacadeService', () => {
       projectSlug
     );
     expect(mkdirSync).toHaveBeenCalledWith(tempFolder, {
-      recursive: true,
+      recursive: true
     });
     expect(projectIoService.compressProject).toHaveBeenCalledWith(
       projectPath,

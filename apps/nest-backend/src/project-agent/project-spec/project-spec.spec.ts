@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { ProjectSpecService } from './project-spec.service';
-import { FileService } from '../../os/file/file.service';
-import { FilePathService } from '../../os/path/file-path/file-path.service';
+import { FileService } from '../../infrastructure/os/file/file.service';
+import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
 import { Spec } from '@utils';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 
@@ -12,19 +12,19 @@ describe('ProjectSpecService', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [ProjectSpecService],
+      providers: [ProjectSpecService]
     })
       .useMocker((token) => {
         if (token === FileService) {
           return {
             readJsonFile: vi.fn(),
-            writeJsonFile: vi.fn(),
+            writeJsonFile: vi.fn()
           };
         }
 
         if (token === FilePathService) {
           return {
-            getProjectConfigFilePath: vi.fn(() => 'filePath'),
+            getProjectConfigFilePath: vi.fn(() => 'filePath')
           };
         }
 
@@ -53,7 +53,7 @@ describe('ProjectSpecService', () => {
 
     expect(result).toEqual({
       projectSlug,
-      specs: content,
+      specs: content
     });
     expect(fileService.readJsonFile).toHaveBeenCalledWith('filePath');
     expect(filePathService.getProjectConfigFilePath).toHaveBeenCalledWith(

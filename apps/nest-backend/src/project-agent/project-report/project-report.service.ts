@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
-import { FileService } from '../../os/file/file.service';
-import { FolderService } from '../../os/folder/folder.service';
-import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
+import { FileService } from '../../infrastructure/os/file/file.service';
+import { FolderService } from '../../infrastructure/os/folder/folder.service';
+import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
 import { FullValidationResultService } from '../../test-result/services/full-validation-result.service';
 
 @Injectable()

@@ -24,7 +24,7 @@ import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { join } from 'path';
 import archiver from 'archiver';
-import { TestResult } from '../../test-result/entity/test-result.entity';
+import { TestResult } from '../../../test-result/entity/test-result.entity';
 
 @Injectable()
 export class FileService {

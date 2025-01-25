@@ -6,11 +6,11 @@ import {
   Injectable,
   NotFoundException,
   NotAcceptableException,
-  InternalServerErrorException,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { addDoc, collection } from 'firebase/firestore';
-import { FirebaseService } from '../firebase/firebase.service';
+import { FirebaseService } from '../infrastructure/firebase/firebase.service';
 
 @Catch()
 @Injectable()
@@ -43,7 +43,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message: errorMessage,
+      message: errorMessage
     });
   }
 
@@ -64,7 +64,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         stack: exception instanceof Error ? exception.stack : undefined,
         path: request.url,
         method: request.method,
-        status: status,
+        status: status
       });
     } catch (error) {
       console.error('Failed to log error to Firebase:', error);

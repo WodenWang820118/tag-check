@@ -1,5 +1,5 @@
 import { Injectable, StreamableFile } from '@nestjs/common';
-import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
+import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
 import { join } from 'path';
 import { createReadStream } from 'fs';
 

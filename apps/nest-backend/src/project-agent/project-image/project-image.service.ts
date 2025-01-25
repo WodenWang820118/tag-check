@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ImageService } from '../../os/image/image.service';
+import { ImageService } from '../../infrastructure/os/image/image.service';
 
 @Injectable()
 export class ProjectImageService {

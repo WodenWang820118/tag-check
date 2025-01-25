@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { PathUtilsService } from '../path-utils/path-utils.service';
-import { ConfigurationService } from '../../../core/configuration/configuration.service';
+import { ConfigurationService } from '../../../../core/configuration/configuration.service';
 import { join } from 'path';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 

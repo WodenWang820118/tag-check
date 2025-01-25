@@ -2,9 +2,9 @@ import { Test } from '@nestjs/testing';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { join } from 'path';
 import { FolderPathService } from './folder-path.service';
-import { ConfigurationService } from '../../../core/configuration/configuration.service';
+import { ConfigurationService } from '../../../../core/configuration/configuration.service';
 import { describe, beforeEach, expect, vi } from 'vitest';
-import { ConfigsService } from '../../../core/configs/configs.service';
+import { ConfigsService } from '../../../../core/configs/configs.service';
 
 // Mock the entire fs module
 vi.mock('fs', () => ({

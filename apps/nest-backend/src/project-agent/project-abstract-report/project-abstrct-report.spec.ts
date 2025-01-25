@@ -1,9 +1,9 @@
 import { Test } from '@nestjs/testing';
 import { ProjectAbstractReportService } from './project-abstract-report.service';
-import { FolderPathService } from '../../os/path/folder-path/folder-path.service';
-import { FolderService } from '../../os/folder/folder.service';
-import { FilePathService } from '../../os/path/file-path/file-path.service';
-import { FileService } from '../../os/file/file.service';
+import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
+import { FolderService } from '../../infrastructure/os/folder/folder.service';
+import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
+import { FileService } from '../../infrastructure/os/file/file.service';
 import * as fs from 'fs';
 import { join } from 'path';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
@@ -14,8 +14,8 @@ vi.mock('fs', () => ({
   mkdirSync: vi.fn(),
   writeFileSync: vi.fn(),
   statSync: vi.fn(() => ({
-    mtime: new Date('2024-08-29T02:25:48.610Z'),
-  })),
+    mtime: new Date('2024-08-29T02:25:48.610Z')
+  }))
 }));
 
 const rootProjectPath = join(__dirname, '..', '..', '..', '..', '..');
@@ -47,11 +47,11 @@ const abstractJsonContent = {
           item_name: 'Switzerland',
           item_category: 'Switzerland',
           quantity: 1,
-          price: 799,
-        },
-      ],
+          price: 799
+        }
+      ]
     },
-    'gtm.uniqueEventId': 64,
+    'gtm.uniqueEventId': 64
   },
   dataLayerSpec: {
     event: 'add_payment_info',
@@ -64,13 +64,13 @@ const abstractJsonContent = {
           item_name: '$item_name',
           item_category: '$item_category',
           price: '$price' as any,
-          quantity: '$quantity' as any,
-        },
-      ],
-    },
+          quantity: '$quantity' as any
+        }
+      ]
+    }
   },
   destinationUrl: 'https://www.google.com',
-  completedTime: new Date('2024-08-29T02:25:48.610Z'),
+  completedTime: new Date('2024-08-29T02:25:48.610Z')
 };
 
 describe('ProjectAbstractReportService', () => {
@@ -87,8 +87,8 @@ describe('ProjectAbstractReportService', () => {
         FolderService,
         FilePathService,
         FileService,
-        ProjectAbstractReportService,
-      ],
+        ProjectAbstractReportService
+      ]
     })
       .useMocker((token) => {
         if (typeof token === 'function') {
@@ -147,11 +147,11 @@ describe('ProjectAbstractReportService', () => {
               item_name: 'Switzerland',
               item_category: 'Switzerland',
               quantity: 1,
-              price: 799,
-            },
-          ],
+              price: 799
+            }
+          ]
         },
-        'gtm.uniqueEventId': 64,
+        'gtm.uniqueEventId': 64
       },
       dataLayerSpec: {
         event: 'add_payment_info',
@@ -164,13 +164,13 @@ describe('ProjectAbstractReportService', () => {
               item_name: '$item_name',
               item_category: '$item_category',
               price: '$price' as any,
-              quantity: '$quantity' as any,
-            },
-          ],
-        },
+              quantity: '$quantity' as any
+            }
+          ]
+        }
       },
       destinationUrl: 'https://www.google.com',
-      completedTime: new Date('2024-08-29T02:25:48.610Z'),
+      completedTime: new Date('2024-08-29T02:25:48.610Z')
     });
   });
 

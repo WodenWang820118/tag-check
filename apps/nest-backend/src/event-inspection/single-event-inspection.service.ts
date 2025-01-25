@@ -4,12 +4,12 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
-  Logger,
+  Logger
 } from '@nestjs/common';
 import { Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '@utils';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
-import { FolderPathService } from '../os/path/folder-path/folder-path.service';
+import { FolderPathService } from '../infrastructure/os/path/folder-path/folder-path.service';
 import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
 
 @Injectable()

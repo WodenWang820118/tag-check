@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Injectable, Logger, NotAcceptableException } from '@nestjs/common';
-import { FileService } from '../../os/file/file.service';
-import { FilePathService } from '../../os/path/file-path/file-path.service';
+import { FileService } from '../../infrastructure/os/file/file.service';
+import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
 import { Spec } from '@utils';
 
 @Injectable()

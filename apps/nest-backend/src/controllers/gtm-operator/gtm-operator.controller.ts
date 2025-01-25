@@ -12,7 +12,7 @@ import {
   Query
 } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
-import { GtmOperatorService } from '../../gtm-operator/gtm-operator.service';
+import { GtmOperatorService } from '../../infrastructure/gtm-operator/gtm-operator.service';
 import { ProjectAbstractReportService } from '../../project-agent/project-abstract-report/project-abstract-report.service';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
