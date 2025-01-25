@@ -1,5 +1,14 @@
 import { ImageSchema } from './file-report.type';
 
+// Common category types
+type Category = {
+  readonly item_category?: string;
+  readonly item_category2?: string;
+  readonly item_category3?: string;
+  readonly item_category4?: string;
+  readonly item_category5?: string;
+};
+
 // Base types for known properties
 export type BaseItem = {
   item_id?: string;
@@ -9,11 +18,6 @@ export type BaseItem = {
   discount?: string;
   index?: number;
   item_brand?: string;
-  item_category?: string;
-  item_category2?: string;
-  item_category3?: string;
-  item_category4?: string;
-  item_category5?: string;
   item_list_id?: string;
   item_list_name?: string;
   item_variant?: string;
@@ -22,7 +26,7 @@ export type BaseItem = {
   quantity?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
-};
+} & Category;
 
 export type BaseECommerce = {
   transaction_id?: string;
@@ -54,7 +58,7 @@ export type StrictDataLayerEvent = {
 
 export type ValidationResult = {
   passed: boolean;
-  message: string;
+  message?: string;
   incorrectInfo?: string;
   dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
@@ -71,17 +75,12 @@ export type OutputValidationResult = {
   eventId: string;
   eventName: string;
   testName: string;
-  passed: boolean;
-  requestPassed: boolean;
   rawRequest: string;
-  message?: string;
-  incorrectInfo?: string;
-  reformedDataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
-  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
-  dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
   destinationUrl: string;
   createdAt?: Date;
-} & ImageSchema;
+} & ValidationResult &
+  RequestValidationResult &
+  ImageSchema;
 
 export type ValidationStrategy = {
   validateDataLayer(
