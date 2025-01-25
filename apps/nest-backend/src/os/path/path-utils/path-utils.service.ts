@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { join } from 'path';
-import { ConfigurationService } from '../../../configuration/configuration.service';
+import { ConfigurationService } from '../../../core/configuration/configuration.service';
 @Injectable()
 export class PathUtilsService {
   constructor(private configurationService: ConfigurationService) {}

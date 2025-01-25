@@ -7,7 +7,7 @@ import { EventInspectionPresetDto } from '@utils';
 import { join } from 'path';
 import { Page, Browser, ScreenRecorder, Credentials } from 'puppeteer';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
-import { ConfigsService } from '../../configs/configs.service';
+import { ConfigsService } from '../../core/configs/configs.service';
 
 @Injectable()
 export class PuppeteerUtilsService {
@@ -41,7 +41,7 @@ export class PuppeteerUtilsService {
         this.configsService.getBROWSER_ARGS(),
       executablePath: stats.executablePath,
       defaultViewport: { width: 1400, height: 900 },
-      signal: signal,
+      signal: signal
     });
 
     const pages = await browser.pages();
@@ -55,7 +55,7 @@ export class PuppeteerUtilsService {
 
       return {
         browser: browser,
-        page: page,
+        page: page
       };
     } catch (error) {
       this.logger.error(`Error starting browser: ${error}`);
@@ -89,7 +89,7 @@ export class PuppeteerUtilsService {
     await page.bringToFront();
     this.recorder = await page.screencast({
       ffmpegPath: ffmpegPath,
-      path: `${recordingPath}.webm`,
+      path: `${recordingPath}.webm`
     });
     return this.recorder;
   }

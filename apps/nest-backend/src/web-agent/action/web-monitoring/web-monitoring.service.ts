@@ -4,7 +4,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Browser, Page } from 'puppeteer';
 import { RequestService } from './request/request.service';
-import { ConfigsService } from '../../../configs/configs.service';
+import { ConfigsService } from '../../../core/configs/configs.service';
 
 @Injectable()
 export class WebMonitoringService {
@@ -57,7 +57,7 @@ export class WebMonitoringService {
     const browser: Browser = await stats.puppeteer.launch({
       headless: true,
       args: this.configsService.getBROWSER_ARGS(),
-      executablePath: stats.executablePath,
+      executablePath: stats.executablePath
     });
 
     try {

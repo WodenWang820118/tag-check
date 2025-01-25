@@ -2,13 +2,13 @@ import { Test } from '@nestjs/testing';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { join } from 'path';
 import { FolderPathService } from './folder-path.service';
-import { ConfigurationService } from '../../../configuration/configuration.service';
+import { ConfigurationService } from '../../../core/configuration/configuration.service';
 import { describe, beforeEach, expect, vi } from 'vitest';
-import { ConfigsService } from '../../../configs/configs.service';
+import { ConfigsService } from '../../../core/configs/configs.service';
 
 // Mock the entire fs module
 vi.mock('fs', () => ({
-  existsSync: vi.fn().mockReturnValue(true),
+  existsSync: vi.fn().mockReturnValue(true)
 }));
 
 describe('FolderPathService', () => {
@@ -20,7 +20,7 @@ describe('FolderPathService', () => {
     rootProjectPath = join('..', '..', '..', '..', '..', 'tag_check_projects');
 
     const moduleRef = await Test.createTestingModule({
-      providers: [FolderPathService, ConfigsService],
+      providers: [FolderPathService, ConfigsService]
     })
       .useMocker((token) => {
         if (token === PathUtilsService) {
@@ -72,13 +72,13 @@ describe('FolderPathService', () => {
                   join(rootProjectPath, projectSlug, folderName)
                 );
               }
-            ),
+            )
           };
         }
 
         if (token === ConfigurationService) {
           return {
-            getRootProjectPath: vi.fn().mockReturnValue(rootProjectPath),
+            getRootProjectPath: vi.fn().mockReturnValue(rootProjectPath)
           };
         }
 

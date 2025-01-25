@@ -9,7 +9,7 @@ import { join } from 'path';
 import { ProjectInfoDto } from '../../dto/project-info.dto';
 import { existsSync, rmdirSync } from 'fs';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
-import { ConfigsService } from '../../configs/configs.service';
+import { ConfigsService } from '../../core/configs/configs.service';
 
 describe('ProjectInitializationService', () => {
   let service: ProjectInitializationService;
@@ -37,8 +37,8 @@ describe('ProjectInitializationService', () => {
         FolderService,
         FilePathService,
         FileService,
-        ConfigsService,
-      ],
+        ConfigsService
+      ]
     })
       .useMocker((token) => {
         if (typeof token === 'function') {
@@ -85,7 +85,7 @@ describe('ProjectInitializationService', () => {
       projectDescription: 'projectDescription',
       projectSlug: 'projectSlug',
       measurementId: 'measurementId',
-      googleSpreadsheetLink: 'googleSpreadsheetLink',
+      googleSpreadsheetLink: 'googleSpreadsheetLink'
     };
     settingsFile = join(initializedProject, configsService.getSETTINGS());
     metadataFile = join(initializedProject, configsService.getMETA_DATA());

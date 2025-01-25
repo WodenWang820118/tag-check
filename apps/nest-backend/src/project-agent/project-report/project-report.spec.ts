@@ -6,7 +6,7 @@ import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { FileService } from '../../os/file/file.service';
 import { join } from 'path';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
-import { ConfigsService } from '../../configs/configs.service';
+import { ConfigsService } from '../../core/configs/configs.service';
 
 describe('ProjectReportService', () => {
   let service: ProjectReportService;

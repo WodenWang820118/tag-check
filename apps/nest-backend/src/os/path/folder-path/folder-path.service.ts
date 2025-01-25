@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { join } from 'path';
-import { ConfigurationService } from '../../../configuration/configuration.service';
-import { ConfigsService } from '../../../configs/configs.service';
+import { ConfigurationService } from '../../../core/configuration/configuration.service';
+import { ConfigsService } from '../../../core/configs/configs.service';
 
 @Injectable()
 export class FolderPathService {

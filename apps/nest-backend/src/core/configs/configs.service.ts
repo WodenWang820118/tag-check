@@ -3,7 +3,7 @@ import {
   HttpStatus,
   INestApplication,
   Injectable,
-  Logger,
+  Logger
 } from '@nestjs/common';
 import { join } from 'path';
 import { cwd } from 'process';
@@ -27,7 +27,7 @@ export class ConfigsService {
     '--disable-setuid-sandbox',
     '--disable-dev-shm-usage',
     '--disable-accelerated-2d-canvas',
-    '--disable-gpu',
+    '--disable-gpu'
   ];
 
   private DEFAULT_PROJECT_PATH = 'tag_check_projects';
@@ -50,6 +50,7 @@ export class ConfigsService {
         case 'test':
           process.env.DATABASE_PATH = join(
             __dirname,
+            '..',
             '..',
             '..',
             '..',
@@ -83,6 +84,7 @@ export class ConfigsService {
         case 'test':
           process.env.ROOT_PROJECT_PATH = join(
             __dirname,
+            '..',
             '..',
             '..',
             '..',

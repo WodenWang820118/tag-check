@@ -6,7 +6,7 @@ import { getFirstSelector } from '../handlers/utils';
 import { EventInspectionPresetDto } from '../../../dto/event-inspection-preset.dto';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DataLayerService } from '../../action/web-monitoring/data-layer/data-layer.service';
-import { ConfigsService } from '../../../configs/configs.service';
+import { ConfigsService } from '../../../core/configs/configs.service';
 import { Step } from '@utils';
 
 @Injectable()
@@ -72,8 +72,8 @@ export class StepExecutorUtilsService {
           page.waitForNavigation({ waitUntil: 'load', timeout }),
           page.waitForSelector(firstSelector, {
             visible: step.visible ? true : false,
-            timeout: timeout,
-          }),
+            timeout: timeout
+          })
         ]);
         return;
       } catch (error) {
@@ -137,7 +137,7 @@ export class StepExecutorUtilsService {
     if (application.cookie?.data) {
       const cookies = application.cookie.data.map((cookie) => ({
         name: cookie.key.toString(),
-        value: cookie.value.toString(),
+        value: cookie.value.toString()
         // Add domain, path, etc. if needed
       }));
       await page.setCookie(...cookies);

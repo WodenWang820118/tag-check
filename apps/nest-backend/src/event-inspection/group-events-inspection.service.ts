@@ -10,7 +10,7 @@ import { getCurrentTimestamp } from '@utils';
 import { InspectorGroupEventsService } from '../inspector/inspector-group-events.service';
 import { FileService } from '../os/file/file.service';
 import { ProjectAbstractReportService } from '../project-agent/project-abstract-report/project-abstract-report.service';
-import { ConfigsService } from '../configs/configs.service';
+import { ConfigsService } from '../core/configs/configs.service';
 
 @Injectable()
 export class GroupEventsInspectionService {

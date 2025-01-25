@@ -6,7 +6,7 @@ import { FolderService } from '../../os/folder/folder.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
 import { FileService } from '../../os/file/file.service';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
-import { ConfigsService } from '../../configs/configs.service';
+import { ConfigsService } from '../../core/configs/configs.service';
 
 describe('ProjectRecordingService', () => {
   let service: ProjectRecordingService;
@@ -23,33 +23,33 @@ describe('ProjectRecordingService', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [ProjectRecordingService, ConfigsService],
+      providers: [ProjectRecordingService, ConfigsService]
     })
       .useMocker((token) => {
         if (token === FilePathService) {
           return {
-            getRecordingFilePath: vi.fn(() => ''),
+            getRecordingFilePath: vi.fn(() => '')
           };
         }
 
         if (token === FileService) {
           return {
             readJsonFile: vi.fn(() => ({})),
-            writeJsonFile: vi.fn(),
+            writeJsonFile: vi.fn()
           };
         }
         if (token === FolderPathService) {
           return {
             getRootProjectFolderPath: vi.fn(() => rootProjectPath),
             getProjectFolderPath: vi.fn(() => projectPath),
-            getRecordingFolderPath: vi.fn().mockResolvedValue(recordingPath),
+            getRecordingFolderPath: vi.fn().mockResolvedValue(recordingPath)
           };
         }
 
         if (token === FolderService) {
           return {
             getJsonFilesFromDir: vi.fn(() => []),
-            deleteFolder: vi.fn(),
+            deleteFolder: vi.fn()
           };
         }
 
@@ -110,7 +110,7 @@ describe('ProjectRecordingService', () => {
   it('should add recording', async () => {
     const recording = {
       title: 'add_payment_info',
-      steps: [],
+      steps: []
     };
     await service.addRecording(projectSlug, eventId, recording);
     expect(filePathService.getRecordingFilePath).toHaveBeenCalledWith(
@@ -123,7 +123,7 @@ describe('ProjectRecordingService', () => {
   it('should update recording', async () => {
     const recording = {
       title: 'add_payment_info',
-      steps: [],
+      steps: []
     };
     await service.updateRecording(projectSlug, eventId, recording);
     expect(filePathService.getRecordingFilePath).toHaveBeenCalledWith(

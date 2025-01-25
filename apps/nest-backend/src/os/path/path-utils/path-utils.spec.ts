@@ -1,12 +1,12 @@
 import { Test } from '@nestjs/testing';
 import { PathUtilsService } from '../path-utils/path-utils.service';
-import { ConfigurationService } from '../../../configuration/configuration.service';
+import { ConfigurationService } from '../../../core/configuration/configuration.service';
 import { join } from 'path';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 // Mock the entire fs module
 vi.mock('fs', () => ({
-  existsSync: vi.fn().mockReturnValue(true),
+  existsSync: vi.fn().mockReturnValue(true)
 }));
 
 describe('PathUtilsService', () => {
@@ -18,12 +18,12 @@ describe('PathUtilsService', () => {
     rootProjectPath = join('..', '..', '..', '..', '..', 'tag_check_projects');
 
     const moduleRef = await Test.createTestingModule({
-      providers: [PathUtilsService],
+      providers: [PathUtilsService]
     })
       .useMocker((token) => {
         if (token === ConfigurationService) {
           return {
-            getRootProjectPath: vi.fn().mockReturnValue(rootProjectPath),
+            getRootProjectPath: vi.fn().mockReturnValue(rootProjectPath)
           };
         }
 

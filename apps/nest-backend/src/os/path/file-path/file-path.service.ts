@@ -3,7 +3,7 @@ import { PathUtilsService } from '../path-utils/path-utils.service';
 import { FolderPathService } from '../folder-path/folder-path.service';
 import { join } from 'path';
 import { extractEventNameFromId } from '@utils';
-import { ConfigsService } from '../../../configs/configs.service';
+import { ConfigsService } from '../../../core/configs/configs.service';
 
 @Injectable()
 export class FilePathService {
@@ -96,9 +96,8 @@ export class FilePathService {
   }
 
   async getMyDataLayerFilePath(projectSlug: string, eventId: string) {
-    const resultFolder = await this.folderPathService.getReportSavingFolderPath(
-      projectSlug
-    );
+    const resultFolder =
+      await this.folderPathService.getReportSavingFolderPath(projectSlug);
 
     const eventName = extractEventNameFromId(eventId);
     const myDataLayerFile = join(

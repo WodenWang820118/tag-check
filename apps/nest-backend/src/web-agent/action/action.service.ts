@@ -5,7 +5,7 @@ import { StepExecutorService } from './step-executor/step-executor.service';
 import { EventInspectionPresetDto } from '../../dto/event-inspection-preset.dto';
 import { FileService } from '../../os/file/file.service';
 import { FilePathService } from '../../os/path/file-path/file-path.service';
-import { EventsGatewayService } from '../../events-gateway/events-gateway.service';
+import { EventsGatewayService } from '../../core/events-gateway/events-gateway.service';
 import { OperationFile } from '@utils';
 
 @Injectable()
@@ -38,7 +38,7 @@ export class ActionService {
       if (i === operation.steps.length - 1) isLastStep = true;
 
       const state = {
-        isFirstNavigation: true,
+        isFirstNavigation: true
       };
 
       this.logger.log(`Performing step ${i + 1} of ${lastStep}`);

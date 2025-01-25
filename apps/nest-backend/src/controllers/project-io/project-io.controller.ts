@@ -14,7 +14,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { Express, Response } from 'express';
-import { ConfigurationService } from '../../configuration/configuration.service';
+import { ConfigurationService } from '../../core/configuration/configuration.service';
 import { ProjectIoFacadeService } from '../../project-agent/project-io-facade/project-io-facade.service';
 import { Log } from '../../logging-interceptor/logging-interceptor.service';
 
