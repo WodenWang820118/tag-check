@@ -1,10 +1,10 @@
-import { TestResultService } from './../../test-result/services/test-result.service';
+import { TestResultService } from '../../test-result/test-result.service';
 import { Injectable } from '@nestjs/common';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { join } from 'path';
 import { XlsxReportService } from '../../../infrastructure/os/xlsx-report/xlsx-report.service';
-import { FullValidationResultService } from '../../test-result/services/full-validation-result.service';
+import { FullValidationResultService } from '../../test-result/full-validation-result.service';
 
 @Injectable()
 export class ProjectFileReportService {

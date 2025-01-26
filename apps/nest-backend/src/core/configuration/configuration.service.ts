@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { CreateConfigurationDto } from './dto/create-configuration.dto';
-import { UpdateConfigurationDto } from './dto/update-configuration.dto';
-import { Configuration } from './entities/configuration.entity';
+import { Configuration } from '../../shared/entity/configuration.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigsService } from '../configs/configs.service';
 import { Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { existsSync } from 'fs';
+import { CreateConfigurationDto } from '../../shared/dto/configuration/create-configuration.dto';
+import { UpdateConfigurationDto } from '../../shared/dto/configuration/update-configuration.dto';
 
 @Injectable()
 export class ConfigurationService implements OnModuleInit {

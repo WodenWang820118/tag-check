@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TestResult } from '../entity/test-result.entity';
+import { TestResult } from '../../shared/entity/test-result.entity';
 import { In, Repository } from 'typeorm';
-import { CreateTestResultDto } from '../dto/test-result/create-test-result.dto';
+import { CreateTestResultDto } from '../../shared/dto/test-result/create-test-result.dto';
 
 @Injectable()
 export class TestResultService {

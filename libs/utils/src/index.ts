@@ -1,12 +1,12 @@
 // Types
-export * from './lib/types/common/index';
-export * from './lib/types/tag-build/index';
-export * from './lib/types/tag-check/index';
+export * from './lib/types/common';
+export * from './lib/types/tag-build';
+export * from './lib/types/tag-check';
 
 // Enums
-export * from './lib/enums/common/index';
-export * from './lib/enums/tag-build/index';
-export * from './lib/enums/tag-check/index';
+export * from './lib/enums/common';
+export * from './lib/enums/tag-build';
+export * from './lib/enums/tag-check';
 
 // DTOs
 export * from './lib/dtos/event-inspect-preset.dto';

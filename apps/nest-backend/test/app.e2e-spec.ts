@@ -8,11 +8,11 @@ import { INestApplication } from '@nestjs/common';
 import { AppModule } from './../src/app.module';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { join } from 'path';
-import { TestResult } from '../src/features/test-result/entity/test-result.entity';
+import { TestResult } from '../src/shared/entity/test-result.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { testDbConfig } from './test-db.config';
 import { DataSource } from 'typeorm';
-import { TestResultService } from '../src/features/test-result/services/test-result.service';
+import { TestResultService } from '../src/features/test-result/test-result.service';
 // TODO: run all endoint tests to ensure they are all working
 
 const rootProjectPath = join(__dirname, '..', '..', '..', 'tag_check_projects');
