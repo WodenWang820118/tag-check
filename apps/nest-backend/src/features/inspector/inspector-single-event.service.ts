@@ -18,7 +18,7 @@ import { RequestProcessorService } from '../../features/request-processor/reques
 import { Credentials, Page } from 'puppeteer';
 import { InspectorUtilsService } from './inspector-utils.service';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
-import { ImageResultService } from '../test-result/services/image-result.service';
+import { ImageResultService } from '../test-result/image-result.service';
 @Injectable()
 export class InspectorSingleEventService {
   private readonly logger = new Logger(InspectorSingleEventService.name);

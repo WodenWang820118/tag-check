@@ -11,7 +11,7 @@ import { EcommerceEventValidationStrategy } from './strategy/ecommerce-event-val
 import { OldGA4EventsValidationStrategy } from './strategy/old-ga4-events-validation-strategy.service';
 import { InspectorUtilsService } from './inspector-utils.service';
 import { TestResultModule } from '../test-result/test-result.module';
-import { ImageResultService } from '../test-result/services/image-result.service';
+import { ImageResultService } from '../test-result/image-result.service';
 
 const strategyService = {
   provide: STRATEGY_TYPE,

@@ -1,9 +1,9 @@
 import { Repository } from 'typeorm';
-import { TestDataLayer } from '../entity/test-data-layer.entity';
+import { TestDataLayer } from '../../shared/entity/test-data-layer.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateTestDataLayerDto } from '../dto/test-data-layer/create-test-data-layer.dto';
-import { UpdateTestDataLayerDto } from '../dto/test-data-layer/update-test-data-layer.dto';
+import { CreateTestDataLayerDto } from '../../shared/dto/test-data-layer/create-test-data-layer.dto';
+import { UpdateTestDataLayerDto } from '../../shared/dto/test-data-layer/update-test-data-layer.dto';
 
 @Injectable()
 export class TestDataLayerService {

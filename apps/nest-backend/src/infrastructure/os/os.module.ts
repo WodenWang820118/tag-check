@@ -15,7 +15,7 @@ import { FileService } from './file/file.service';
 import { ProjectIoService } from './project-io/project-io.service';
 import { FolderService } from './folder/folder.service';
 import { ImageService } from './image/image.service';
-import { ImageResultService } from '../../features/test-result/services/image-result.service';
+import { ImageResultService } from '../../features/test-result/image-result.service';
 
 const modules = [
   PathModule,

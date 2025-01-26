@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { FileService } from '../../../infrastructure/os/file/file.service';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
-import { FullValidationResultService } from '../../test-result/services/full-validation-result.service';
+import { FullValidationResultService } from '../../test-result/full-validation-result.service';
 
 @Injectable()
 export class ProjectReportService {

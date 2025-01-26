@@ -5,7 +5,7 @@ import {
   Logger
 } from '@nestjs/common';
 import { extractEventNameFromId } from '@utils';
-import { ImageResultService } from '../../../features/test-result/services/image-result.service';
+import { ImageResultService } from '../../../features/test-result/image-result.service';
 import { Readable } from 'stream';
 
 @Injectable()
