@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { PathUtilsService } from '../path-utils/path-utils.service';
-import { ConfigurationService } from '../../../../core/configuration/configuration.service';
+import { SysConfigurationRepositoryService } from '../../../../core/repository/sys-configuration/sys-configuration-repository.service';
 import { join } from 'path';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -11,7 +11,7 @@ vi.mock('fs', () => ({
 
 describe('PathUtilsService', () => {
   let service: PathUtilsService;
-  let configrationService: ConfigurationService;
+  let configrationService: SysConfigurationRepositoryService;
   let rootProjectPath: string;
 
   beforeEach(async () => {
@@ -21,7 +21,7 @@ describe('PathUtilsService', () => {
       providers: [PathUtilsService]
     })
       .useMocker((token) => {
-        if (token === ConfigurationService) {
+        if (token === SysConfigurationRepositoryService) {
           return {
             getRootProjectPath: vi.fn().mockReturnValue(rootProjectPath)
           };
@@ -34,8 +34,9 @@ describe('PathUtilsService', () => {
       .compile();
 
     service = moduleRef.get<PathUtilsService>(PathUtilsService);
-    configrationService =
-      moduleRef.get<ConfigurationService>(ConfigurationService);
+    configrationService = moduleRef.get<SysConfigurationRepositoryService>(
+      SysConfigurationRepositoryService
+    );
   });
 
   it('should be defined', () => {

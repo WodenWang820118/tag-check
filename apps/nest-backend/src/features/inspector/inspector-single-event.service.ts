@@ -116,7 +116,6 @@ export class InspectorSingleEventService {
 
     // await this.saveImage(projectSlug, eventId, imageSavingFolder);
     await this.imageResultService.create({
-      eventId,
       imageName: 'screenshot.png',
       imageData: screenshot
     });
@@ -176,7 +175,6 @@ export class InspectorSingleEventService {
     });
 
     await this.imageResultService.create({
-      eventId,
       imageName: 'screenshot.png',
       imageData: screenshot
     });

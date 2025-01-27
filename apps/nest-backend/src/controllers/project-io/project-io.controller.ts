@@ -14,7 +14,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { Express, Response } from 'express';
-import { ConfigurationService } from '../../core/configuration/configuration.service';
+import { SysConfigurationRepositoryService } from '../../core/repository/sys-configuration/sys-configuration-repository.service';
 import { ProjectIoFacadeService } from '../../features/project-agent/project-io-facade/project-io-facade.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 
@@ -23,7 +23,7 @@ export class ProjectIoController {
   private readonly logger = new Logger(ProjectIoController.name);
   constructor(
     private readonly projectIoFacadeService: ProjectIoFacadeService,
-    private readonly configurationSerivce: ConfigurationService
+    private readonly configurationSerivce: SysConfigurationRepositoryService
   ) {}
 
   @Get('export/:projectSlug')

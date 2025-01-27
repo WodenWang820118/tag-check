@@ -2,15 +2,19 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigsModule } from '../../core/configs/configs.module';
 import { TestResultService } from './test-result.service';
-import { TestResult } from '../../shared/entity/test-result.entity';
-import { ImageResult } from '../../shared/entity/image-result.entity';
+import { TestFileReportEntity } from '../../shared/entity/test-file-report.entity';
+import { TestImageEntity } from '../../shared/entity/test-image.entity';
 import { ImageResultService } from './image-result.service';
 import { TestDataLayerService } from './test-data-layer.service';
-import { TestDataLayer } from '../../shared/entity/test-data-layer.entity';
 import { FullValidationResultService } from './full-validation-result.service';
+import { TestDataLayerEntity } from '../../shared';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TestResult, ImageResult, TestDataLayer]),
+    TypeOrmModule.forFeature([
+      TestFileReportEntity,
+      TestImageEntity,
+      TestDataLayerEntity
+    ]),
     ConfigsModule
   ],
   providers: [
@@ -20,7 +24,11 @@ import { FullValidationResultService } from './full-validation-result.service';
     FullValidationResultService
   ],
   exports: [
-    TypeOrmModule.forFeature([TestResult, ImageResult, TestDataLayer]),
+    TypeOrmModule.forFeature([
+      TestFileReportEntity,
+      TestImageEntity,
+      TestDataLayerEntity
+    ]),
     TestResultService,
     ImageResultService,
     TestDataLayerService,

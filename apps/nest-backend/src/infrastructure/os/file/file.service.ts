@@ -24,7 +24,7 @@ import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { join } from 'path';
 import archiver from 'archiver';
-import { TestResult } from '../../../shared/entity/test-result.entity';
+import { TestFileReportEntity } from '../../../shared/entity/test-file-report.entity';
 
 @Injectable()
 export class FileService {
@@ -81,7 +81,7 @@ export class FileService {
 
   async downloadFiles(
     projectSlug: string,
-    testResults: TestResult[],
+    testResults: TestFileReportEntity[],
     outputFilePath: string
   ) {
     const output = createWriteStream(outputFilePath);
@@ -102,7 +102,7 @@ export class FileService {
     });
 
     testResults.forEach((testResult) => {
-      const fileName = `${testResult.eventId}_${testResult.createdAt}'.xlsx'`;
+      const fileName = `${testResult.id}_${testResult.createdAt}'.xlsx'`;
       if (!fileName) {
         throw new HttpException(
           'File name not found',

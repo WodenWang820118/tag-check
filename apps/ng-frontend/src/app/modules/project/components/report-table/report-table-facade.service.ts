@@ -139,6 +139,13 @@ export class ReportTableFacadeService {
   }
 
   initializeData(paginator: MatPaginator, sort: MatSort, data: any) {
+    if (
+      !data['projectReport'] ||
+      !data['recordings'] ||
+      !data['reportNames'] ||
+      !data['projectSetting']
+    )
+      return;
     const project = data['projectReport'];
     const projectRecordings = data['recordings'];
     const reportNames = data['reportNames'];

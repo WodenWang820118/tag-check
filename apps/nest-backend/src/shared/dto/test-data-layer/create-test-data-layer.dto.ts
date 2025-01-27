@@ -3,9 +3,6 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateTestDataLayerDto implements DataLayerResult {
   @IsNotEmpty()
-  id!: number;
-
-  @IsNotEmpty()
   @IsString()
   eventId!: string;
 

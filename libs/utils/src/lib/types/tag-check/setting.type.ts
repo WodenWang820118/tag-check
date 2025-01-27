@@ -1,17 +1,21 @@
+import { ProjectInfo } from './project.type';
+
 export type ProjectSetting = {
   projectSlug: string;
   settings: Setting;
 };
 
 export type Setting = {
-  rootProject: string;
-  projectName: string;
-  projectDescription: string;
-  measurementId: string;
-  projectSlug: string;
-  googleSpreadsheetLink: string;
   gtm: Gtm;
-  version: string;
+  preventNavigationEvents: string[];
+  application: Application;
+  browser: string[];
+  headless: boolean;
+  authentication: Authentication;
+} & ProjectInfo;
+
+export type EnvironmentSetting = {
+  gtm: Gtm;
   preventNavigationEvents: string[];
   application: Application;
   browser: string[];
@@ -53,3 +57,28 @@ export type CookieData = {
   key: string;
   value: string;
 };
+
+export type AuthenticationSchema = {
+  id: number;
+} & Authentication;
+
+export type BroswerSetting = {
+  browser: string[];
+  headless: boolean;
+};
+
+export type BrowserSettingSchema = {
+  id: number;
+} & BroswerSetting;
+
+export type ApplicationSetting = {
+  localStorage: LocalStorage;
+  cookie: Cookie;
+  gtm: Gtm;
+  preventNavigationEvents: string[];
+  authentication: Authentication;
+};
+
+export type ApplicationSettingSchema = {
+  id: number;
+} & ApplicationSetting;

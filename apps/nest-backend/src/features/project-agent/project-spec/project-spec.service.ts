@@ -1,79 +1,66 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Injectable, Logger, NotAcceptableException } from '@nestjs/common';
-import { FileService } from '../../../infrastructure/os/file/file.service';
-import { FilePathService } from '../../../infrastructure/os/path/file-path/file-path.service';
-import { Spec } from '@utils';
+import { ProjectSpec, Spec } from '@utils';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { SpecService } from './spec.service';
+import { ProjectEntity } from '../../../shared';
 
 @Injectable()
 export class ProjectSpecService {
   private readonly logger = new Logger(ProjectSpecService.name);
   constructor(
-    private readonly fileService: FileService,
-    private readonly filePathService: FilePathService
+    @InjectRepository(ProjectEntity)
+    private readonly projectSpecRepository: Repository<ProjectEntity>,
+    private readonly specService: SpecService
   ) {}
 
-  async getProjectSpecs(
-    projectSlug: string
-  ): Promise<{ projectSlug: string; specs: Spec[] }> {
-    const specs = await this.readSpecsFile(projectSlug);
-    return { projectSlug, specs };
+  async getProjectSpecs(projectSlug: string) {
+    const projectSpec = await this.projectSpecRepository.findOne({
+      where: { projectSlug: projectSlug }
+    });
+
+    if (!projectSpec) {
+      return { projectSlug: projectSlug, specs: [] };
+    }
+
+    return { projectSlug: projectSpec.projectSlug, specs: projectSpec };
   }
 
   async getSpec(
     projectSlug: string,
     eventName: string
   ): Promise<Spec | undefined> {
-    const specs = await this.readSpecsFile(projectSlug);
-    return specs.find((spec) => spec.event === eventName);
+    const spec = await this.specService.getSpecByEvent(eventName);
+    if (!spec) {
+      return undefined;
+    }
+    return spec.specData;
   }
 
-  async addSpec(
-    projectSlug: string,
-    spec: Spec
-  ): Promise<{ projectSlug: string; specs: Spec[] }> {
-    const specs = await this.readSpecsFile(projectSlug);
-    const existingSpecIndex = specs.findIndex((s) => s.event === spec.event);
+  async addSpec(projectSlug: string, spec: Spec) {
+    await this.specService.addSpec({
+      projectSlug: projectSlug,
+      event: spec.event,
+      specData: spec
+    });
 
-    if (existingSpecIndex !== -1) {
-      specs[existingSpecIndex] = spec;
-    } else {
-      specs.push(spec);
+    const projectSpec = await this.getProjectSpecs(projectSlug);
+    return projectSpec;
+  }
+
+  async updateSpec(projectSlug: string, eventName: string, spec: Spec) {
+    const dbSpec = await this.getSpec(projectSlug, eventName);
+    if (!dbSpec) {
+      throw new NotAcceptableException('Spec not found');
     }
 
-    await this.writeSpecsFile(projectSlug, specs);
-    return { projectSlug, specs };
-  }
+    await this.specService.updateSpec(Number(dbSpec.id), {
+      projectSlug: projectSlug,
+      event: eventName,
+      specData: spec
+    });
 
-  async updateSpec(
-    projectSlug: string,
-    eventName: string,
-    spec: Spec
-  ): Promise<{ projectSlug: string; specs: Spec[] }> {
-    const specs = await this.readSpecsFile(projectSlug);
-    const updatedSpecs = specs.map((s) => (s.event === eventName ? spec : s));
-    await this.writeSpecsFile(projectSlug, updatedSpecs);
-    return { projectSlug, specs: updatedSpecs };
-  }
-
-  private async readSpecsFile(projectSlug: string): Promise<Spec[]> {
-    const filePath =
-      await this.filePathService.getProjectConfigFilePath(projectSlug);
-    const specs = this.fileService.readJsonFile(filePath);
-
-    if (!Array.isArray(specs)) {
-      throw new NotAcceptableException('Invalid configuration file format');
-    }
-
-    return specs;
-  }
-
-  private async writeSpecsFile(
-    projectSlug: string,
-    specs: Spec[]
-  ): Promise<void> {
-    const filePath =
-      await this.filePathService.getProjectConfigFilePath(projectSlug);
-    this.fileService.writeJsonFile(filePath, specs);
+    const projectSpec = await this.getProjectSpecs(projectSlug);
+    return projectSpec;
   }
 }

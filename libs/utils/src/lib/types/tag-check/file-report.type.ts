@@ -13,17 +13,24 @@ export type FileReport = {
 };
 
 export type DataLayerResult = {
-  id: number;
   eventId: string;
   dataLayer: string;
   dataLayerSpec: string;
 };
 
-export type ImageSchema = {
+export type DataLayerSchema = {
   id: number;
+  createdAt: Date;
+} & DataLayerResult;
+
+export type ImageResult = {
   eventId: string;
   imageName: string;
   imageData: Uint8Array;
   imageSize: number;
-  createdAt: Date;
 };
+
+export type ImageSchema = {
+  id: number;
+  createdAt: Date;
+} & ImageResult;

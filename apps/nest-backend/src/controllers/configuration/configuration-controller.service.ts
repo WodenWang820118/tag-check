@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { ConfigurationService } from '../../core/configuration/configuration.service';
+import { SysConfigurationRepositoryService } from '../../core/repository/sys-configuration/sys-configuration-repository.service';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ConfigurationControllerService {
   private readonly logger = new Logger(ConfigurationControllerService.name);
-  constructor(private configurationService: ConfigurationService) {}
+  constructor(
+    private configurationService: SysConfigurationRepositoryService
+  ) {}
   async getConfigurations() {
     return await this.configurationService.findAll();
   }

@@ -1,14 +1,6 @@
-import { ImageSchema } from '@utils';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateImageResultDto implements ImageSchema {
-  @IsNotEmpty()
-  id!: number;
-
-  @IsNotEmpty()
-  @IsString()
-  eventId!: string;
-
+export class CreateImageResultDto {
   @IsNotEmpty()
   @IsString()
   imageName!: string;
@@ -16,10 +8,5 @@ export class CreateImageResultDto implements ImageSchema {
   @IsNotEmpty()
   imageData!: Uint8Array;
 
-  @IsNotEmpty()
-  imageSize!: number;
-
-  @IsNotEmpty()
-  @IsString()
-  createdAt!: Date;
+  imageSize?: number;
 }

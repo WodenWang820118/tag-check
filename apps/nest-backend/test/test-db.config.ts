@@ -1,6 +1,6 @@
 // test-db.config.ts
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { TestResult } from '../src/shared/entity/test-result.entity';
+import { TestResult } from '../src/shared/entity/test-file-report.entity';
 
 export const testDbConfig: DataSourceOptions = {
   type: 'sqlite',

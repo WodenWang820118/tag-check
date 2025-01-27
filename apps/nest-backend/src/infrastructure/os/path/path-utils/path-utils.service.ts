@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { join } from 'path';
-import { ConfigurationService } from '../../../../core/configuration/configuration.service';
+import { SysConfigurationRepositoryService } from '../../../../core/repository/sys-configuration/sys-configuration-repository.service';
 @Injectable()
 export class PathUtilsService {
-  constructor(private configurationService: ConfigurationService) {}
+  constructor(
+    private configurationService: SysConfigurationRepositoryService
+  ) {}
 
   async buildFilePath(
     projectName: string,

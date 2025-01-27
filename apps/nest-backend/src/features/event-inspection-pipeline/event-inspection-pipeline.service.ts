@@ -6,11 +6,10 @@ import {
   ValidationResult,
   extractEventNameFromId
 } from '@utils';
-import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../../features/inspector/inspector-single-event.service';
 import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
 import { TestResultService } from '../test-result/test-result.service';
-import { TestResult } from '../../shared/entity/test-result.entity';
+import { TestFileReportEntity, EventInspectionPresetDto } from '../../shared';
 import { ImageResultService } from '../test-result/image-result.service';
 @Injectable()
 export class EventInspectionPipelineService {
@@ -60,17 +59,18 @@ export class EventInspectionPipelineService {
       const eventName = extractEventNameFromId(eventId);
 
       // The ID and createdAt will be handled by the database
-      const testResult: Partial<TestResult> = {
-        projectSlug: projectSlug,
-        eventId: eventId,
-        testName: `${eventName}_${timestamp}`,
-        eventName: eventName,
-        passed: result.dataLayerResult.passed,
-        requestPassed: result.requestCheckResult.passed,
-        rawRequest: result.rawRequest,
-        message: result.dataLayerResult.message || 'failed',
-        destinationUrl: result.destinationUrl
-      };
+      // const testResult: Partial<TestFileReportEntity> = {
+      //   projectSlug: projectSlug,
+      //   eventId: eventId,
+      //   testName: `${eventName}_${timestamp}`,
+      //   eventName: eventName,
+      //   passed: result.dataLayerResult.passed,
+      //   requestPassed: result.requestCheckResult.passed,
+      //   rawRequest: result.rawRequest,
+      //   message: result.dataLayerResult.message || 'failed',
+      //   destinationUrl: result.destinationUrl
+      // };
+      const testResult = {} as Partial<TestFileReportEntity>;
       this.logger.debug('Test Result:', JSON.stringify(testResult, null, 2));
       await this.testResultService.create(testResult);
       await this.writeAbstractReport(result, projectSlug, eventId);
@@ -95,7 +95,6 @@ export class EventInspectionPipelineService {
       });
 
       await this.imageResultService.create({
-        eventId: eventId,
         imageName: `${projectSlug}_${eventId}`,
         imageData: screenshot
       });

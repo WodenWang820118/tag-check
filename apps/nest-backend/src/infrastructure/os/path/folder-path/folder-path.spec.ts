@@ -2,9 +2,9 @@ import { Test } from '@nestjs/testing';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { join } from 'path';
 import { FolderPathService } from './folder-path.service';
-import { ConfigurationService } from '../../../../core/configuration/configuration.service';
 import { describe, beforeEach, expect, vi } from 'vitest';
 import { ConfigsService } from '../../../../core/configs/configs.service';
+import { SysConfigurationRepositoryService } from '../../../../core/repository/sys-configuration/sys-configuration-repository.service';
 
 // Mock the entire fs module
 vi.mock('fs', () => ({
@@ -76,7 +76,7 @@ describe('FolderPathService', () => {
           };
         }
 
-        if (token === ConfigurationService) {
+        if (token === SysConfigurationRepositoryService) {
           return {
             getRootProjectPath: vi.fn().mockReturnValue(rootProjectPath)
           };

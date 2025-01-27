@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { ConfigurationService } from '../../core/configuration/configuration.service';
+import { SysConfigurationRepositoryService } from '../../core/repository/sys-configuration/sys-configuration-repository.service';
 import { ProjectInitializationService } from '../../features/project-agent/project-initialization/project-initialization.service';
 import { mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
@@ -10,7 +10,7 @@ import { ConfigsService } from '../../core/configs/configs.service';
 export class ProjectWorkFlowControllerService {
   private readonly logger = new Logger(ProjectWorkFlowControllerService.name);
   constructor(
-    private readonly configurationService: ConfigurationService,
+    private readonly configurationService: SysConfigurationRepositoryService,
     private readonly projectInitializationService: ProjectInitializationService,
     private readonly configsService: ConfigsService
   ) {}

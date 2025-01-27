@@ -1,17 +1,26 @@
-import { DataLayerResult } from '@utils';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { DataLayerSchema } from '@utils';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn
+} from 'typeorm';
+import { AuditableEntity } from './common';
+import { TestEventEntity } from './test-event.entity';
 
 @Entity('test_data_layer')
-export class TestDataLayer implements DataLayerResult {
+export class TestDataLayerEntity extends AuditableEntity {
   @PrimaryGeneratedColumn()
   id!: number;
-
-  @Column()
-  eventId!: string;
 
   @Column()
   dataLayer!: string;
 
   @Column()
   dataLayerSpec!: string;
+
+  @JoinColumn({ name: 'testEventId' })
+  @OneToOne(() => TestEventEntity, (testEvent) => testEvent.id)
+  testEvent!: TestEventEntity;
 }

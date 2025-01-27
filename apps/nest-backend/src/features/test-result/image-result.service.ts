@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ImageResult } from '../../shared/entity/image-result.entity';
+import { TestImageEntity } from '../../shared/entity/test-image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { CreateImageResultDto } from '../../shared/dto/image-result/create-image-result.dto';
@@ -7,21 +7,17 @@ import { CreateImageResultDto } from '../../shared/dto/image-result/create-image
 @Injectable()
 export class ImageResultService {
   constructor(
-    @InjectRepository(ImageResult)
-    private readonly imageResultRepository: Repository<ImageResult>
+    @InjectRepository(TestImageEntity)
+    private readonly imageResultRepository: Repository<TestImageEntity>
   ) {}
 
   async get(eventId: string) {
-    return this.imageResultRepository.findOne({ where: { eventId } });
+    return this.imageResultRepository.find();
   }
 
-  async create(data: Partial<CreateImageResultDto>): Promise<ImageResult> {
+  async create(data: CreateImageResultDto): Promise<TestImageEntity> {
     if (!data.imageData) {
       throw new Error('No data provided');
-    }
-
-    if (!data.eventId) {
-      throw new Error('No eventId provided');
     }
 
     if (!data.imageName) {
@@ -31,8 +27,7 @@ export class ImageResultService {
     const blob = new Blob([data.imageData]);
     const buffer = Buffer.from(data.imageData);
 
-    const imageResult = new ImageResult();
-    imageResult.eventId = data.eventId;
+    const imageResult = new TestImageEntity();
     imageResult.imageName = data.imageName;
     imageResult.imageData = buffer;
     imageResult.imageSize = blob.size; // Size in bytes
