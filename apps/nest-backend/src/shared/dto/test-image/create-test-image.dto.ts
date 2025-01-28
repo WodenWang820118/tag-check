@@ -1,6 +1,7 @@
+import { TestImage } from '@utils';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateImageResultDto {
+export class CreateTestImageDto implements TestImage {
   @IsNotEmpty()
   @IsString()
   imageName!: string;

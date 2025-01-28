@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { TestImageEntity } from '../../shared/entity/test-image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
-import { CreateImageResultDto } from '../../shared/dto/image-result/create-image-result.dto';
+import { CreateTestImageDto } from '../../shared';
 
 @Injectable()
 export class ImageResultService {
@@ -15,7 +15,7 @@ export class ImageResultService {
     return this.imageResultRepository.find();
   }
 
-  async create(data: CreateImageResultDto): Promise<TestImageEntity> {
+  async create(data: CreateTestImageDto): Promise<TestImageEntity> {
     if (!data.imageData) {
       throw new Error('No data provided');
     }

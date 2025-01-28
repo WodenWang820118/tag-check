@@ -1,5 +1,7 @@
-import { ImageResult, Setting } from '@utils';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-// TODO: haven't been defined
-export class CreateProjectDto {}
+export class CreateProjectDto {
+  @IsNotEmpty()
+  @IsString()
+  projectSlug!: string;
+}

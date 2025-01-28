@@ -1,3 +1,4 @@
+import { Auditable } from './auditable.type';
 import { ProjectInfo } from './project.type';
 
 export type ProjectSetting = {
@@ -60,23 +61,25 @@ export type CookieData = {
 
 export type AuthenticationSchema = {
   id: number;
-} & Authentication;
+} & Authentication &
+  Auditable;
 
 export type BroswerSetting = {
-  browser: string[];
+  browser?: string[];
   headless: boolean;
 };
 
 export type BrowserSettingSchema = {
   id: number;
-} & BroswerSetting;
+} & BroswerSetting &
+  Auditable;
 
 export type ApplicationSetting = {
-  localStorage: LocalStorage;
-  cookie: Cookie;
-  gtm: Gtm;
-  preventNavigationEvents: string[];
-  authentication: Authentication;
+  localStorage?: LocalStorage;
+  cookie?: Cookie;
+  gtm?: Gtm;
+  preventNavigationEvents?: string[];
+  authentication?: Authentication;
 };
 
 export type ApplicationSettingSchema = {

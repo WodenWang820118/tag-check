@@ -1,8 +1,8 @@
 import { Exclude, Expose } from 'class-transformer';
-import { ImageSchema } from '@utils';
+import { TestImageSchema } from '@utils';
 
 @Exclude()
-export class ImageResultResponseDto implements ImageSchema {
+export class TestImageResponseDto implements TestImageSchema {
   @Expose()
   id!: number;
 
@@ -16,8 +16,11 @@ export class ImageResultResponseDto implements ImageSchema {
   imageData!: Buffer;
 
   @Expose()
-  imageSize!: number;
+  imageSize?: number;
 
   @Expose()
   createdAt!: Date;
+
+  @Expose()
+  updatedAt!: Date;
 }

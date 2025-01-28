@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { SysConfigurationRepositoryService } from '../../core/repository/sys-configuration/sys-configuration-repository.service';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ConfigurationControllerService {
@@ -25,12 +24,8 @@ export class ConfigurationControllerService {
 
   createConfiguration(name: string, value: string) {
     return this.configurationService.create({
-      id: uuidv4(),
-      title: name,
-      description: '',
-      value: value,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      name: name,
+      value: value
     });
   }
 }

@@ -1,7 +1,6 @@
 import {
   Column,
   Entity,
-  JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn
@@ -10,21 +9,14 @@ import { SpecEntity } from './spec.entity';
 import { AuditableEntity } from './common';
 import { RecordingEntity } from './recording.entity';
 import { ProjectInfoEntity } from './project-info.entity';
-import {
-  EnvironmentSetting,
-  FileReport,
-  ProjectInfo,
-  ProjectSchema,
-  Recording,
-  Spec
-} from '@utils';
+import { ProjectSchema } from '@utils';
 import { AuthenticationSettingEntity } from './authentication-setting.entity';
 import { BrowserSettingEntity } from './browser-setting.entity';
 import { ApplicationSettingEntity } from './application-setting.entity';
 import { TestEventEntity } from './test-event.entity';
 
 @Entity('project')
-export class ProjectEntity extends AuditableEntity {
+export class ProjectEntity extends AuditableEntity implements ProjectSchema {
   @PrimaryGeneratedColumn()
   id!: number;
 

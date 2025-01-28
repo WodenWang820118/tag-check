@@ -1,4 +1,3 @@
-import { TestSchema } from '@utils';
 import { AuditableEntity } from './common';
 import {
   Column,
@@ -8,9 +7,10 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { TestEventEntity } from './test-event.entity';
+import { TestInfoSchema } from '@utils';
 
 @Entity('test_info')
-export class TestInfoEntity extends AuditableEntity implements TestSchema {
+export class TestInfoEntity extends AuditableEntity implements TestInfoSchema {
   @PrimaryGeneratedColumn()
   id!: number;
 

@@ -1,4 +1,4 @@
-import { ImageSchema } from '@utils';
+import { ImageSchema, TestImageSchema } from '@utils';
 import {
   Column,
   Entity,
@@ -10,7 +10,10 @@ import { AuditableEntity } from './common';
 import { TestEventEntity } from './test-event.entity';
 
 @Entity('test-image')
-export class TestImageEntity extends AuditableEntity {
+export class TestImageEntity
+  extends AuditableEntity
+  implements TestImageSchema
+{
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -21,7 +24,7 @@ export class TestImageEntity extends AuditableEntity {
   imageData!: Buffer;
 
   @Column()
-  imageSize!: number;
+  imageSize?: number;
 
   @JoinColumn({ name: 'testEventId' })
   @OneToOne(() => TestEventEntity, (testEvent) => testEvent.id)

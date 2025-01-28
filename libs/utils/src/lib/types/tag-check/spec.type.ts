@@ -1,3 +1,5 @@
+import { Auditable } from './auditable.type';
+
 export type ProjectSpec = {
   projectSlug: string;
   specs: Spec[];
@@ -8,3 +10,8 @@ export type Spec = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };
+
+export type SpecSchema = {
+  id: number;
+} & Spec &
+  Auditable;

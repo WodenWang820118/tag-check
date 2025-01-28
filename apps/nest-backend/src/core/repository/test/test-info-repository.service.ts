@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TestInfoEntity } from '../../../shared';
+import {
+  CreateTestInfoDto,
+  TestInfoEntity,
+  UpdateTestInfoDto
+} from '../../../shared';
 
 @Injectable()
 export class TestInfoRepositoryService {
@@ -9,4 +13,16 @@ export class TestInfoRepositoryService {
     @InjectRepository(TestInfoEntity)
     private readonly repository: Repository<TestInfoEntity>
   ) {}
+
+  async get(id: number) {
+    return this.repository.findOne({ where: { id } });
+  }
+
+  async create(data: CreateTestInfoDto) {
+    return this.repository.save(data);
+  }
+
+  async update(data: UpdateTestInfoDto) {
+    return this.repository.save(data);
+  }
 }

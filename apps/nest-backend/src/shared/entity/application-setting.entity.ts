@@ -13,9 +13,13 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { ProjectEntity } from './project.entity';
+import { AuditableEntity } from './common';
 
 @Entity('application_settings')
-export class ApplicationSettingEntity implements ApplicationSettingSchema {
+export class ApplicationSettingEntity
+  extends AuditableEntity
+  implements ApplicationSettingSchema
+{
   @PrimaryGeneratedColumn()
   id!: number;
 

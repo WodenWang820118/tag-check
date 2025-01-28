@@ -1,8 +1,8 @@
 import { Exclude, Expose } from 'class-transformer';
-import { Auditable, Spec } from '@utils';
+import { SpecSchema } from '@utils';
 
 @Exclude()
-export class SpecResponseDto implements Spec, Auditable {
+export class SpecResponseDto implements SpecSchema {
   @Expose()
   id!: number;
 

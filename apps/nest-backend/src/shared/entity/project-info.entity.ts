@@ -6,34 +6,25 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { AuditableEntity } from './common';
-import { ProjectInfo } from '@utils';
 import { ProjectEntity } from './project.entity';
+import { ProjectInfoSchema } from '@utils';
 
 @Entity('project_info')
-export class ProjectInfoEntity extends AuditableEntity implements ProjectInfo {
+export class ProjectInfoEntity
+  extends AuditableEntity
+  implements ProjectInfoSchema
+{
   @PrimaryGeneratedColumn()
   id!: number;
-
-  @Column()
-  rootProject!: string;
 
   @Column()
   projectName!: string;
 
   @Column()
-  projectSlug!: string;
+  projectDescription?: string;
 
   @Column()
-  projectDescription!: string;
-
-  @Column()
-  measurementId!: string;
-
-  @Column()
-  googleSpreadsheetLink!: string;
-
-  @Column()
-  version!: string;
+  measurementId?: string;
 
   @OneToOne(() => ProjectEntity, (project) => project.info)
   @JoinColumn({ name: 'projectId' })

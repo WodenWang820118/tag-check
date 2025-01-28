@@ -7,9 +7,13 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { ProjectEntity } from './project.entity';
+import { AuditableEntity } from './common';
 
 @Entity('authentication_settings')
-export class AuthenticationSettingEntity implements AuthenticationSchema {
+export class AuthenticationSettingEntity
+  extends AuditableEntity
+  implements AuthenticationSchema
+{
   @PrimaryGeneratedColumn()
   id!: number;
 

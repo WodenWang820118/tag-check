@@ -1,9 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  OnModuleInit
+} from '@nestjs/common';
 import {
   SysConfigurationEntity,
-  CreateConfigurationDto,
-  UpdateConfigurationDto
+  CreateSysConfigurationDto,
+  UpdateSysConfigurationDto
 } from '../../../shared';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigsService } from '../../configs/configs.service';
@@ -27,13 +31,13 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
   async checkIfRootProjectPathExists() {
     try {
       const rootPath = await this.configurationRepository.findOne({
-        where: { title: this.configsService.getCONFIG_ROOT_PATH() }
+        where: { name: this.configsService.getCONFIG_ROOT_PATH() }
       });
 
       if (!rootPath || !existsSync(rootPath.value)) {
         // Create new configuration entity
         const newRootPath = this.configurationRepository.create({
-          title: this.configsService.getCONFIG_ROOT_PATH(),
+          name: this.configsService.getCONFIG_ROOT_PATH(),
           value: this.configsService.getROOT_PROJECT_PATH(),
           description: 'Root path configuration' // Add meaningful description
         });
@@ -56,7 +60,7 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
   }
 
   create(
-    createConfigurationDto: CreateConfigurationDto
+    createConfigurationDto: CreateSysConfigurationDto
   ): SysConfigurationEntity {
     return this.configurationRepository.create(createConfigurationDto);
   }
@@ -65,50 +69,74 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
     return await this.configurationRepository.find();
   }
 
-  async findOne(id: string) {
-    return await this.configurationRepository.findOne({ where: { id: id } });
+  async findOne(id: number) {
+    const configuration = await this.configurationRepository.findOne({
+      where: { id: id }
+    });
+
+    if (!configuration) {
+      throw new HttpException(
+        `Configuration with ID ${id} not found`,
+        HttpStatus.NOT_FOUND
+      );
+    }
+
+    return configuration;
   }
 
   async findOneByName(name: string) {
-    return await this.configurationRepository.findOne({
-      where: { title: name }
+    const configuration = await this.configurationRepository.findOne({
+      where: { name: name }
     });
+
+    if (!configuration) {
+      throw new HttpException(
+        `Configuration with name ${name} not found`,
+        HttpStatus.NOT_FOUND
+      );
+    }
+
+    return configuration;
   }
 
-  async update(id: string, updateConfigurationDto: UpdateConfigurationDto) {
+  async update(id: number, updateConfigurationDto: UpdateSysConfigurationDto) {
     return await this.configurationRepository.update(
       { value: updateConfigurationDto.value },
       { id: id }
     );
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     return await this.configurationRepository.delete({ id });
   }
 
-  async getRootProjectPath(): Promise<string> {
-    return await this.configurationRepository
-      .findOne({
-        where: { title: this.configsService.getCONFIG_ROOT_PATH() }
-      })
-      .then((res) => {
-        return res?.value;
-      })
-      .catch((err) => {
-        return err;
-      });
+  async getRootProjectPath() {
+    const configuration = await this.configurationRepository.findOne({
+      where: { name: this.configsService.getCONFIG_ROOT_PATH() }
+    });
+
+    if (!configuration) {
+      throw new HttpException(
+        'Root project path configuration not found',
+        HttpStatus.NOT_FOUND
+      );
+    }
+
+    return configuration.value;
   }
 
-  async getCurrentProjectPath(): Promise<string> {
-    return await this.configurationRepository
-      .findOne({
-        where: { title: this.configsService.getCONFIG_CURRENT_PROJECT_PATH() }
-      })
-      .then((res) => {
-        return res?.value;
-      })
-      .catch((err) => {
-        return err;
-      });
+  async getCurrentProjectPath() {
+    const configuration = await this.configurationRepository.findOne({
+      where: { name: this.configsService.getCONFIG_CURRENT_PROJECT_PATH() }
+    });
+
+    if (!configuration) {
+      throw new HttpException(
+        'Current project path configuration not found',
+        HttpStatus.NOT_FOUND
+      );
+    }
+
+    return configuration;
   }
 }

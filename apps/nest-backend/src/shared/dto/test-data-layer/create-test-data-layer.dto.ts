@@ -8,7 +8,7 @@ export class CreateTestDataLayerDto implements DataLayerResult {
 
   @IsNotEmpty()
   @IsString()
-  dataLayer!: string;
+  dataLayer?: string;
 
   @IsNotEmpty()
   @IsString()

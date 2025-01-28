@@ -1,4 +1,4 @@
-import { Recording } from '@utils';
+import { Recording, RecordingSchema } from '@utils';
 import {
   Column,
   Entity,
@@ -10,14 +10,20 @@ import { AuditableEntity } from './common';
 import { ProjectEntity } from './project.entity';
 
 @Entity('recording')
-export class RecordingEntity extends AuditableEntity {
+export class RecordingEntity
+  extends AuditableEntity
+  implements RecordingSchema
+{
   @PrimaryGeneratedColumn()
   id!: number;
+
+  @Column()
+  title!: string;
+
+  @Column('json')
+  steps!: Record<string, any>[]; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   @JoinColumn({ name: 'projectId' })
   @ManyToOne(() => ProjectEntity, (project) => project.recordings)
   project!: ProjectEntity;
-
-  @Column('json')
-  recordingData!: Recording;
 }

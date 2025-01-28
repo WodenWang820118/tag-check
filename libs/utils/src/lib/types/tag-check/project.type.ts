@@ -1,53 +1,53 @@
-import { FileReport } from './file-report.type';
-import { Recording } from './recording.type';
-import { EnvironmentSetting } from './setting.type';
-import { Spec } from './spec.type';
+import { Auditable } from './auditable.type';
 
 export type ProjectInfo = {
-  rootProject: string;
   projectName: string;
+  projectDescription?: string;
+  measurementId?: string;
+};
+
+export type ProjectInfoSchema = {
+  id: number;
+} & ProjectInfo &
+  Auditable;
+
+export type Project = {
   projectSlug: string;
-  projectDescription: string;
-  measurementId: string;
-  googleSpreadsheetLink: string;
-  version: string;
 };
 
 export type ProjectSchema = {
   id: number;
-  projectSlug: string;
-  specs: Spec[];
-  settings: EnvironmentSetting;
-  recordings: Recording[];
-  testResults: FileReport[];
-  projectInfo: ProjectInfo;
-};
+} & Project &
+  Auditable;
 
-export type Test = {
+export type TestInfo = {
   testName: string;
   eventName: string;
   passed: boolean;
 };
 
-export type TestSchema = {
+export type TestInfoSchema = {
   id: number;
-} & Test;
+} & TestInfo &
+  Auditable;
 
-export type TestRequest = {
+export type TestRequestInfo = {
   requestPassed: boolean;
   rawRequest: string;
   destinationUrl: string;
 };
 
-export type TestRequestSchema = {
+export type TestRequestInfoSchema = {
   id: number;
-} & TestRequest;
+} & TestRequestInfo &
+  Auditable;
 
 export type TestEvent = {
   eventId: string;
-  message: string;
+  message?: string;
 };
 
 export type TestEventSchema = {
   id: number;
-} & TestEvent;
+} & TestEvent &
+  Auditable;

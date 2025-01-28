@@ -1,3 +1,5 @@
+import { Auditable } from './auditable.type';
+
 export type FileReport = {
   id: number;
   projectSlug: string;
@@ -14,7 +16,7 @@ export type FileReport = {
 
 export type DataLayerResult = {
   eventId: string;
-  dataLayer: string;
+  dataLayer?: string;
   dataLayerSpec: string;
 };
 
@@ -34,3 +36,14 @@ export type ImageSchema = {
   id: number;
   createdAt: Date;
 } & ImageResult;
+
+export type TestImage = {
+  imageName: string;
+  imageData: Uint8Array;
+  imageSize?: number;
+};
+
+export type TestImageSchema = {
+  id: number;
+  createdAt: Date;
+} & Auditable;

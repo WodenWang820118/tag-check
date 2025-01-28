@@ -7,14 +7,18 @@ import {
 } from 'typeorm';
 import { ProjectEntity } from './project.entity';
 import { BrowserSettingSchema } from '@utils';
+import { AuditableEntity } from './common';
 
 @Entity('browser_settings')
-export class BrowserSettingEntity implements BrowserSettingSchema {
+export class BrowserSettingEntity
+  extends AuditableEntity
+  implements BrowserSettingSchema
+{
   @PrimaryGeneratedColumn()
   id!: number;
 
   @Column('simple-array')
-  browser!: string[];
+  browser?: string[];
 
   @Column()
   headless!: boolean;

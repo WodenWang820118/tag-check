@@ -25,5 +25,5 @@ export class TestEventEntity
   eventId!: string;
 
   @Column()
-  message!: string;
+  message?: string;
 }
