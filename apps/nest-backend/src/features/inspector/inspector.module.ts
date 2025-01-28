@@ -10,8 +10,8 @@ import { STRATEGY_TYPE, ValidationStrategyType } from './utils';
 import { EcommerceEventValidationStrategy } from './strategy/ecommerce-event-validation-strategy.service';
 import { OldGA4EventsValidationStrategy } from './strategy/old-ga4-events-validation-strategy.service';
 import { InspectorUtilsService } from './inspector-utils.service';
-import { TestResultModule } from '../test-result/test-result.module';
-import { ImageResultService } from '../test-result/image-result.service';
+import { TestReportFacadeModule } from '../repository/test-report-facade/test-report-facade.module';
+import { TestImageService } from '../repository/test-report-facade/image-result.service';
 
 const strategyService = {
   provide: STRATEGY_TYPE,
@@ -35,7 +35,7 @@ const services = [
   InspectorUtilsService,
   EcommerceEventValidationStrategy,
   OldGA4EventsValidationStrategy,
-  ImageResultService
+  TestImageService
 ];
 @Module({
   imports: [
@@ -43,7 +43,7 @@ const services = [
     RequestProcessorModule,
     ProjectAgentModule,
     DataLayerValidationStrategyModule,
-    TestResultModule
+    TestReportFacadeModule
   ],
   providers: [...services],
   exports: [...services, ProjectAgentModule]

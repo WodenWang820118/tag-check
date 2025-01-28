@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn
@@ -20,6 +21,7 @@ export class ProjectEntity extends AuditableEntity implements ProjectSchema {
   @PrimaryGeneratedColumn()
   id!: number;
 
+  @Index({ unique: true })
   @Column({ nullable: false, unique: true, type: 'varchar', length: 255 })
   projectSlug!: string;
 

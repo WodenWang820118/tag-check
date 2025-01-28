@@ -37,8 +37,10 @@ import {
   TestRequestInfoEntity
 } from '../../shared';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ProjectFacadeRepositoryModule } from '../repository/project-facade/project-facade-repository.module';
 
 const modules = [
+  ProjectFacadeRepositoryModule,
   ProjectMetadataModule,
   ProjectRecordingModule,
   ProjectReportModule,

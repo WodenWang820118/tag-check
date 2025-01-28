@@ -1,4 +1,4 @@
-import { Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { AuditableEntity } from './common';
 import { TestEventEntity } from './test-event.entity';
 
@@ -8,6 +8,6 @@ export class TestFileReportEntity extends AuditableEntity {
   id!: number;
 
   @JoinColumn({ name: 'testEventId' })
-  @OneToOne(() => TestEventEntity, (testEvent) => testEvent.id)
+  @ManyToOne(() => TestEventEntity, (testEvent) => testEvent.id)
   testEvent!: TestEventEntity;
 }

@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { TestImageEntity } from '../../shared/entity/test-image.entity';
+import { TestImageEntity } from '../../../shared/entity/test-image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
-import { CreateTestImageDto } from '../../shared';
-
+import { CreateTestImageDto } from '../../../shared';
+// TODO: replace the service with the another repository service
 @Injectable()
-export class ImageResultService {
+export class TestImageService {
   constructor(
     @InjectRepository(TestImageEntity)
-    private readonly imageResultRepository: Repository<TestImageEntity>
+    private readonly repository: Repository<TestImageEntity>
   ) {}
 
   async get(eventId: string) {
-    return this.imageResultRepository.find();
+    return this.repository.find();
   }
 
   async create(data: CreateTestImageDto): Promise<TestImageEntity> {
@@ -32,6 +32,6 @@ export class ImageResultService {
     imageResult.imageData = buffer;
     imageResult.imageSize = blob.size; // Size in bytes
 
-    return this.imageResultRepository.save(imageResult);
+    return this.repository.save(imageResult);
   }
 }

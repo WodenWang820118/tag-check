@@ -1,11 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import {
-  ApplicationSettingSchema,
-  Authentication,
-  Cookie,
-  Gtm,
-  LocalStorage
-} from '@utils';
+import { ApplicationSettingSchema, Cookie, Gtm, LocalStorage } from '@utils';
 
 @Exclude()
 export class ApplicationSettingResponseDto implements ApplicationSettingSchema {
@@ -23,9 +17,6 @@ export class ApplicationSettingResponseDto implements ApplicationSettingSchema {
 
   @Expose()
   preventNavigationEvents?: string[] | undefined;
-
-  @Expose()
-  authentication?: Authentication | undefined;
 
   @Expose()
   createdAt!: Date;

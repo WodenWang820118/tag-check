@@ -1,14 +1,8 @@
-import {
-  ApplicationSetting,
-  Authentication,
-  Cookie,
-  Gtm,
-  LocalStorage
-} from '@utils';
+import { ApplicationSetting, Cookie, Gtm, LocalStorage } from '@utils';
 import { IsArray, IsJSON, IsOptional, IsString } from 'class-validator';
 
 export class CreateApplicationSettingDto implements ApplicationSetting {
-  @IsString()
+  @IsJSON()
   @IsOptional()
   localStorage?: LocalStorage;
 
@@ -25,8 +19,4 @@ export class CreateApplicationSettingDto implements ApplicationSetting {
   @IsOptional()
   @IsString({ each: true })
   preventNavigationEvents?: string[];
-
-  @IsJSON()
-  @IsOptional()
-  authentication?: Authentication;
 }

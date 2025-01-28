@@ -39,7 +39,6 @@ export class ProjectSpecService {
 
   async addSpec(projectSlug: string, spec: Spec) {
     await this.specService.addSpec({
-      projectSlug: projectSlug,
       event: spec.event,
       specData: spec
     });
@@ -55,7 +54,6 @@ export class ProjectSpecService {
     }
 
     await this.specService.updateSpec(Number(dbSpec.id), {
-      projectSlug: projectSlug,
       event: eventName,
       specData: spec
     });

@@ -11,4 +11,4 @@ const services = [SpecRepositoryService];
   providers: [...services],
   exports: [...services, ...modules]
 })
-export class RecordingRepositoryModule {}
+export class SpecRepositoryModule {}

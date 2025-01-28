@@ -8,9 +8,9 @@ import {
 } from '@utils';
 import { InspectorSingleEventService } from '../../features/inspector/inspector-single-event.service';
 import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
-import { TestResultService } from '../test-result/test-result.service';
+import { TestResultService } from '../repository/test-report-facade/test-result.service';
 import { TestFileReportEntity, EventInspectionPresetDto } from '../../shared';
-import { ImageResultService } from '../test-result/image-result.service';
+import { TestImageService } from '../repository/test-report-facade/image-result.service';
 @Injectable()
 export class EventInspectionPipelineService {
   private readonly logger = new Logger(EventInspectionPipelineService.name);
@@ -18,7 +18,7 @@ export class EventInspectionPipelineService {
     private readonly inspectorSingleEventService: InspectorSingleEventService,
     private readonly projectAbstractReportService: ProjectAbstractReportService,
     private readonly testResultService: TestResultService,
-    private readonly imageResultService: ImageResultService
+    private readonly imageResultService: TestImageService
   ) {}
 
   async singleEventInspectionRecipe(

@@ -7,7 +7,7 @@ import { PathModule } from './path/path.module';
 import { ProjectIoModule } from './project-io/project-io.module';
 import { FolderModule } from './folder/folder.module';
 import { ImageModule } from './image/image.module';
-import { TestResultModule } from '../../features/test-result/test-result.module';
+import { TestReportFacadeModule } from '../../features/repository/test-report-facade/test-report-facade.module';
 
 // services
 import { ProjectService } from './project/project.service';
@@ -15,7 +15,7 @@ import { FileService } from './file/file.service';
 import { ProjectIoService } from './project-io/project-io.service';
 import { FolderService } from './folder/folder.service';
 import { ImageService } from './image/image.service';
-import { ImageResultService } from '../../features/test-result/image-result.service';
+import { TestImageService } from '../../features/repository/test-report-facade/image-result.service';
 
 const modules = [
   PathModule,
@@ -25,7 +25,7 @@ const modules = [
   FolderModule,
   ImageModule,
   ProjectIoModule,
-  TestResultModule
+  TestReportFacadeModule
 ];
 
 const services = [
@@ -34,7 +34,7 @@ const services = [
   FolderService,
   ImageService,
   ProjectIoService,
-  ImageResultService
+  TestImageService
 ];
 @Module({
   imports: [...modules],

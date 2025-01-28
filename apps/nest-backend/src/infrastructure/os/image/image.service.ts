@@ -5,13 +5,13 @@ import {
   Logger
 } from '@nestjs/common';
 import { extractEventNameFromId } from '@utils';
-import { ImageResultService } from '../../../features/test-result/image-result.service';
+import { TestImageService } from '../../../features/repository/test-report-facade/image-result.service';
 import { Readable } from 'stream';
 
 @Injectable()
 export class ImageService {
   private logger = new Logger(ImageService.name);
-  constructor(private imageResultService: ImageResultService) {}
+  constructor(private imageResultService: TestImageService) {}
   async readImage(eventId: string) {
     const image = await this.imageResultService.get(eventId);
 

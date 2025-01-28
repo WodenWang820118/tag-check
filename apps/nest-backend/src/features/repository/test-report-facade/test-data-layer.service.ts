@@ -1,10 +1,10 @@
 import { Repository } from 'typeorm';
-import { TestDataLayerEntity } from '../../shared/entity/test-data-layer.entity';
+import { TestDataLayerEntity } from '../../../shared/entity/test-data-layer.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateTestDataLayerDto } from '../../shared/dto/test-data-layer/create-test-data-layer.dto';
-import { UpdateTestDataLayerDto } from '../../shared/dto/test-data-layer/update-test-data-layer.dto';
-
+import { CreateTestDataLayerDto } from '../../../shared/dto/test-data-layer/create-test-data-layer.dto';
+import { UpdateTestDataLayerDto } from '../../../shared/dto/test-data-layer/update-test-data-layer.dto';
+// TODO: replace the service with the another repository service
 @Injectable()
 export class TestDataLayerService {
   constructor(

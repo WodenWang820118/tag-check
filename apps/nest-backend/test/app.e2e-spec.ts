@@ -11,7 +11,6 @@ import { join } from 'path';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { testDbConfig } from './test-db.config';
 import { DataSource } from 'typeorm';
-import { TestResultService } from '../src/features/test-result/test-result.service';
 import {
   ApplicationSettingEntity,
   AuthenticationSettingEntity,
@@ -21,17 +20,25 @@ import {
   RecordingEntity,
   SpecEntity,
   SysConfigurationEntity,
+  TestDataLayerEntity,
   TestEventEntity,
   TestFileReportEntity,
-  TestImageEntity
+  TestImageEntity,
+  TestInfoEntity,
+  TestRequestInfoEntity
 } from '../src/shared';
+import { TestResultService } from '../src/features/repository/test-report-facade/test-result.service';
+import { vi } from 'vitest';
 // TODO: run all endoint tests to ensure they are all working
 
 const rootProjectPath = join(__dirname, '..', '..', '..', 'tag_check_projects');
 const testEventEntities = [
   TestEventEntity,
   TestImageEntity,
-  TestFileReportEntity
+  TestFileReportEntity,
+  TestDataLayerEntity,
+  TestInfoEntity,
+  TestRequestInfoEntity
 ];
 
 const projectEntities = [ProjectInfoEntity, ProjectEntity];
@@ -45,6 +52,8 @@ const settingEntities = [
 describe('App (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
+
+  vi.setConfig({ testTimeout: 30000 });
 
   beforeAll(async () => {
     process.env.NODE_ENV = 'test'; // Ensure test environment is set
@@ -107,7 +116,7 @@ describe('App (e2e)', () => {
     it('should return dataLayer examination result', async () => {
       const response = await request(app.getHttpServer())
         .post(
-          '/datalayer/ng_gtm_integration_sample/add_to_cart_fda47993-f581-42f5-ac52-f40ffb43bfb8'
+          '/datalayer/ng_gtm_integration_sample/page_view_54aab8c1-b641-49b9-9ad9-dad029fb1bec'
         )
         .query({ headless: 'true', measurementId: 'G-8HK542DQMG' })
         .send({

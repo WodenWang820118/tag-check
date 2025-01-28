@@ -1,10 +1,4 @@
-import {
-  ApplicationSettingSchema,
-  Authentication,
-  Cookie,
-  Gtm,
-  LocalStorage
-} from '@utils';
+import { ApplicationSettingSchema, Cookie, Gtm, LocalStorage } from '@utils';
 import {
   Column,
   Entity,
@@ -24,16 +18,13 @@ export class ApplicationSettingEntity
   id!: number;
 
   @Column('json')
-  localStorage!: LocalStorage;
+  localStorage?: LocalStorage;
 
   @Column('json')
-  cookie!: Cookie;
+  cookie?: Cookie;
 
   @Column('json')
-  gtm!: Gtm;
-
-  @Column('json')
-  authentication!: Authentication;
+  gtm?: Gtm;
 
   @Column('simple-array')
   preventNavigationEvents!: string[];

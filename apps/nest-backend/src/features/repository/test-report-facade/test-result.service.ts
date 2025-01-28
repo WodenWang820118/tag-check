@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TestFileReportEntity } from '../../shared/entity/test-file-report.entity';
+import { TestFileReportEntity } from '../../../shared/entity/test-file-report.entity';
 import { In, Repository } from 'typeorm';
-import { CreateTestResultDto } from '../../shared/dto/test-result/create-test-result.dto';
-
+import { CreateTestResultDto } from '../../../shared/dto/test-result/create-test-result.dto';
+// TODO: replace the service with the another repository service
 @Injectable()
 export class TestResultService {
   constructor(

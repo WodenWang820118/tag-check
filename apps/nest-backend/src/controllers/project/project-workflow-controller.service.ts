@@ -3,6 +3,7 @@ import { SysConfigurationRepositoryService } from '../../core/repository/sys-con
 import { ProjectInitializationService } from '../../features/project-agent/project-initialization/project-initialization.service';
 import { mkdirSync } from 'fs';
 import { ConfigsService } from '../../core/configs/configs.service';
+import { ProjectInfoDto } from '../../shared';
 
 @Injectable()
 export class ProjectWorkFlowControllerService {
@@ -38,6 +39,7 @@ export class ProjectWorkFlowControllerService {
       }
     } catch (error) {
       mkdirSync(rootProjectPath, { recursive: true });
+      this.logger.warn(error);
       this.configurationService.create({
         name: this.configsService.getCONFIG_ROOT_PATH(),
         description: 'The root project path',
@@ -47,7 +49,7 @@ export class ProjectWorkFlowControllerService {
   }
 
   // 2) init project if not exists
-  async initProject(projectName: string, settings: any) {
+  async initProject(projectSlug: string, settings: Partial<ProjectInfoDto>) {
     try {
       // 1) check if project settings exists
       const configurations = await this.configurationService.findAll();
@@ -60,21 +62,21 @@ export class ProjectWorkFlowControllerService {
       if (existingConfig) {
         await this.configurationService.update(existingConfig.id, {
           name: this.configsService.getCONFIG_CURRENT_PROJECT_PATH(),
-          value: projectName
+          value: projectSlug
         });
         await this.projectInitializationService.initProject(
-          projectName,
+          projectSlug,
           settings
         );
       } else {
         this.configurationService.create({
           name: this.configsService.getCONFIG_CURRENT_PROJECT_PATH(),
           description: 'The current project path',
-          value: projectName
+          value: projectSlug
         });
 
         await this.projectInitializationService.initProject(
-          projectName,
+          projectSlug,
           settings
         );
       }
@@ -85,26 +87,26 @@ export class ProjectWorkFlowControllerService {
   }
 
   // 2) select project if exists
-  async setProject(projectName: string) {
+  async setProject(projectSlug: string) {
     try {
       const configurations = await this.configurationService.findAll();
 
       const existingConfig = configurations.find(
         (item) =>
           item.name === this.configsService.getCONFIG_CURRENT_PROJECT_PATH() &&
-          item.value !== projectName
+          item.value !== projectSlug
       );
 
       if (existingConfig) {
         return this.configurationService.update(existingConfig.id, {
           name: 'currentProjectPath',
-          value: projectName
+          value: projectSlug
         });
       } else {
         return this.configurationService.create({
           name: 'currentProjectPath',
           description: 'The current project path',
-          value: projectName
+          value: projectSlug
         });
       }
     } catch (error) {
