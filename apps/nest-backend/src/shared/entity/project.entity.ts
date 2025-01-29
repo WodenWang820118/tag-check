@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import { SpecEntity } from './spec.entity';
 import { AuditableEntity } from './common';
-import { RecordingEntity } from './recording.entity';
 import { ProjectSchema } from '@utils';
 import { AuthenticationSettingEntity } from './authentication-setting.entity';
 import { BrowserSettingEntity } from './browser-setting.entity';
@@ -24,20 +23,17 @@ export class ProjectEntity extends AuditableEntity implements ProjectSchema {
   @Column({ nullable: false, unique: true, type: 'varchar', length: 255 })
   projectSlug!: string;
 
-  @Column()
+  @Column({ nullable: false })
   projectName!: string;
 
-  @Column()
+  @Column({ nullable: true })
   projectDescription?: string;
 
-  @Column()
+  @Column({ nullable: true })
   measurementId?: string;
 
   @OneToMany(() => SpecEntity, (spec) => spec.project)
   specs!: SpecEntity[];
-
-  @OneToMany(() => RecordingEntity, (recording) => recording.project)
-  recordings!: RecordingEntity[];
 
   @OneToMany(() => TestEventEntity, (testEvent) => testEvent.project)
   testEvents!: TestEventEntity[];

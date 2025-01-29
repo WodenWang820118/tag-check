@@ -151,7 +151,7 @@ export class ReportTableFacadeService {
     const reportNames = data['reportNames'];
     const projectSettings = data['projectSetting'];
 
-    if (project && paginator && sort) {
+    if (project.length && paginator && sort) {
       // Sort the data
       const injectReports = (project.reports as IReportDetails[]).sort((a, b) =>
         a.eventName.localeCompare(b.eventName)

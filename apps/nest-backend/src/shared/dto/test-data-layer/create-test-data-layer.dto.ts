@@ -1,16 +1,16 @@
-import { DataLayerResult } from '@utils';
+import {
+  BaseDataLayerEvent,
+  StrictDataLayerEvent,
+  TestDataLayer
+} from '@utils';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateTestDataLayerDto implements DataLayerResult {
+export class CreateTestDataLayerDto implements TestDataLayer {
   @IsNotEmpty()
   @IsString()
   eventId!: string;
 
   @IsNotEmpty()
   @IsString()
-  dataLayer?: string;
-
-  @IsNotEmpty()
-  @IsString()
-  dataLayerSpec!: string;
+  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent | undefined;
 }

@@ -7,7 +7,11 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { TestEventEntity } from './test-event.entity';
-import { TestRequestInfoSchema } from '@utils';
+import {
+  BaseDataLayerEvent,
+  StrictDataLayerEvent,
+  TestRequestInfoSchema
+} from '@utils';
 
 @Entity('test_request_info')
 export class TestRequestInfoEntity
@@ -21,12 +25,15 @@ export class TestRequestInfoEntity
   @OneToOne(() => TestEventEntity, (testEvent) => testEvent.id)
   testEvent!: TestEventEntity;
 
-  @Column()
-  rawRequest!: string;
+  @Column({ nullable: true })
+  rawRequest?: string;
 
   @Column()
   destinationUrl!: string;
 
   @Column()
   requestPassed!: boolean;
+
+  @Column('json', { nullable: true })
+  reformedDataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
 }

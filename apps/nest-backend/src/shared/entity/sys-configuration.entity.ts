@@ -16,6 +16,6 @@ export class SysConfigurationEntity
   @Column()
   value!: string;
 
-  @Column()
+  @Column({ nullable: true })
   description?: string;
 }

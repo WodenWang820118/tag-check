@@ -1,4 +1,6 @@
-import { OutputValidationResult } from './data-layer.type';
+import { Auditable } from './auditable.type';
+import { TestDataLayer } from './data-layer.type';
+import { TestEvent, TestInfo, TestRequestInfo } from './project.type';
 
 export type ProjectReport = {
   projectSlug: string;
@@ -7,4 +9,8 @@ export type ProjectReport = {
 
 export type IReportDetails = {
   position: number;
-} & OutputValidationResult;
+} & TestEvent &
+  TestInfo &
+  TestRequestInfo &
+  TestDataLayer &
+  Auditable;

@@ -1,7 +1,15 @@
 import { TestEvent } from '@utils';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateTestEventDto implements TestEvent {
+  @IsNotEmpty()
+  @IsString()
+  testName!: string;
+
+  @IsNotEmpty()
+  @IsString()
+  eventName!: string;
+
   @IsNotEmpty()
   @IsString()
   eventId!: string;
@@ -9,4 +17,8 @@ export class CreateTestEventDto implements TestEvent {
   @IsOptional()
   @IsString()
   message?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  stopNavigation?: boolean;
 }

@@ -8,7 +8,11 @@ import {
   ProjectEntity,
   RecordingEntity,
   SpecEntity,
-  TestEventEntity
+  TestDataLayerEntity,
+  TestEventEntity,
+  TestImageEntity,
+  TestInfoEntity,
+  TestRequestInfoEntity
 } from '../../../shared';
 import { ProjectRepositoryService } from '../../../core/repository/project/project-repository.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
@@ -17,7 +21,20 @@ import { AuthenticationSettingRepositoryService } from '../../../core/repository
 import { BrowserSettingRepositoryService } from '../../../core/repository/settings/browser-setting-repository.service';
 import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
 import { vi } from 'vitest';
-
+import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
+const entities = [
+  ProjectEntity,
+  AuthenticationSettingEntity,
+  BrowserSettingEntity,
+  ApplicationSettingEntity,
+  RecordingEntity,
+  SpecEntity,
+  TestEventEntity,
+  TestInfoEntity,
+  TestDataLayerEntity,
+  TestRequestInfoEntity,
+  TestImageEntity
+];
 describe('ProjectFacadeRepositoryService', () => {
   let service: ProjectFacadeRepositoryService;
   let module: TestingModule;
@@ -33,27 +50,12 @@ describe('ProjectFacadeRepositoryService', () => {
         TypeOrmModule.forRoot({
           type: 'sqlite',
           database: ':memory:',
-          entities: [
-            ProjectEntity,
-            AuthenticationSettingEntity,
-            BrowserSettingEntity,
-            ApplicationSettingEntity,
-            RecordingEntity,
-            SpecEntity,
-            TestEventEntity
-          ],
+          entities: entities,
           synchronize: true,
           dropSchema: true,
           logging: false
         }),
-        TypeOrmModule.forFeature([
-          ProjectEntity,
-          AuthenticationSettingEntity,
-          BrowserSettingEntity,
-          ApplicationSettingEntity,
-          RecordingEntity,
-          SpecEntity
-        ])
+        TypeOrmModule.forFeature(entities)
       ],
       providers: [
         ProjectFacadeRepositoryService,
@@ -62,7 +64,8 @@ describe('ProjectFacadeRepositoryService', () => {
         BrowserSettingRepositoryService,
         ApplicationSettingRepositoryService,
         RecordingRepositoryService,
-        SpecRepositoryService
+        SpecRepositoryService,
+        TestEventRepositoryService
       ]
     }).compile();
   };
@@ -96,7 +99,6 @@ describe('ProjectFacadeRepositoryService', () => {
     const authRepo = module.get(AuthenticationSettingRepositoryService);
     const browserRepo = module.get(BrowserSettingRepositoryService);
     const appRepo = module.get(ApplicationSettingRepositoryService);
-    const recordingRepo = module.get(RecordingRepositoryService);
     const specRepo = module.get(SpecRepositoryService);
 
     // Verify all entities were created
@@ -113,10 +115,6 @@ describe('ProjectFacadeRepositoryService', () => {
 
     const appSetting = await appRepo.get(1);
     expect(appSetting).toBeDefined();
-
-    const recording = await recordingRepo.get(1);
-    expect(recording).toBeDefined();
-    expect(recording?.title).toBe('page_view');
 
     const spec = await specRepo.get(1);
     expect(spec).toBeDefined();

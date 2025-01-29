@@ -24,7 +24,7 @@ import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { join } from 'path';
 import archiver from 'archiver';
-import { TestFileReportEntity } from '../../../shared/entity/test-file-report.entity';
+import { IReportDetails } from '@utils';
 
 @Injectable()
 export class FileService {
@@ -81,7 +81,7 @@ export class FileService {
 
   async downloadFiles(
     projectSlug: string,
-    testResults: TestFileReportEntity[],
+    testResults: any[],
     outputFilePath: string
   ) {
     const output = createWriteStream(outputFilePath);

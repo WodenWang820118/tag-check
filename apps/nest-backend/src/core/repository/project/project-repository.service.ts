@@ -18,8 +18,23 @@ export class ProjectRepositoryService {
     return this.repository.findOne({ where: { id } });
   }
 
+  async list() {
+    return this.repository.find();
+  }
+
   async getBySlug(slug: string) {
     return this.repository.findOne({ where: { projectSlug: slug } });
+  }
+
+  async getSettingBySlug(slug: string) {
+    return this.repository.findOne({
+      relations: {
+        authenticationSettings: true,
+        browserSettings: true,
+        applicationSettings: true
+      },
+      where: { projectSlug: slug }
+    });
   }
 
   async create(data: CreateProjectDto) {
@@ -28,5 +43,9 @@ export class ProjectRepositoryService {
 
   async update(id: number, data: UpdateProjectDto) {
     return this.repository.update(id, data);
+  }
+
+  async deleteBySlug(slug: string) {
+    return this.repository.delete({ projectSlug: slug });
   }
 }

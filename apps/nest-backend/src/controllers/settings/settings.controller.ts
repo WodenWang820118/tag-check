@@ -1,12 +1,16 @@
-import { Controller, Get, Param, Put, Body, Logger } from '@nestjs/common';
+import { Controller, Get, Param, Put, Body } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { ProjectSettingService } from '../../features/project-agent/project-setting/project-setting.service';
 import { Setting } from '@utils';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
+import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 
 @Controller('settings')
 export class SettingsController {
-  constructor(private projectSettingService: ProjectSettingService) {}
+  constructor(
+    private projectSettingService: ProjectSettingService,
+    private projectRepositoryService: ProjectRepositoryService
+  ) {}
 
   @ApiOperation({
     summary: 'get project settings',
@@ -20,7 +24,7 @@ export class SettingsController {
   @Get(':projectSlug')
   @Log()
   async getProjectSettings(@Param('projectSlug') projectSlug: string) {
-    return await this.projectSettingService.getProjectSettings(projectSlug);
+    return await this.projectRepositoryService.getSettingBySlug(projectSlug);
   }
 
   @ApiOperation({

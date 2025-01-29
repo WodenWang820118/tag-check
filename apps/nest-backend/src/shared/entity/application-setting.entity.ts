@@ -20,14 +20,11 @@ export class ApplicationSettingEntity
   @Column('json')
   localStorage?: LocalStorage;
 
-  @Column('json')
+  @Column('json', { nullable: true })
   cookie?: Cookie;
 
-  @Column('json')
+  @Column('json', { nullable: true })
   gtm?: Gtm;
-
-  @Column('simple-array')
-  preventNavigationEvents!: string[];
 
   @OneToOne(() => ProjectEntity, (project) => project.id)
   @JoinColumn({ name: 'projectId' })

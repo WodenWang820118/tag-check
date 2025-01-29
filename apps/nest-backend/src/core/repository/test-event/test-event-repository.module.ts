@@ -4,12 +4,10 @@ import { TestEventRepositoryService } from './test-event-repository.service';
 import { TestImageRepositoryService } from './test-image-repository.service';
 import { TestInfoRepositoryService } from './test-info-repository.service';
 import { TestRequestInfoRepositoryService } from './test-request-info-repository.service';
-import { TestFileReportRepositoryService } from './test-file-report-repository.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   TestDataLayerEntity,
   TestEventEntity,
-  TestFileReportEntity,
   TestImageEntity,
   TestInfoEntity,
   TestRequestInfoEntity
@@ -21,8 +19,7 @@ const modules = [
     TestEventEntity,
     TestImageEntity,
     TestInfoEntity,
-    TestRequestInfoEntity,
-    TestFileReportEntity
+    TestRequestInfoEntity
   ])
 ];
 
@@ -31,8 +28,7 @@ const services = [
   TestEventRepositoryService,
   TestImageRepositoryService,
   TestInfoRepositoryService,
-  TestRequestInfoRepositoryService,
-  TestFileReportRepositoryService
+  TestRequestInfoRepositoryService
 ];
 
 @Module({

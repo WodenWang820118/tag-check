@@ -10,6 +10,15 @@ export class TestEventResponseDto implements TestEventSchema {
   eventId!: string;
 
   @Expose()
+  testName!: string;
+
+  @Expose()
+  eventName!: string;
+
+  @Expose()
+  stopNavigation?: boolean;
+
+  @Expose()
   message?: string;
 
   @Expose()

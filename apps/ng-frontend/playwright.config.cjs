@@ -20,29 +20,29 @@ module.exports = defineConfig({
   use: {
     baseURL,
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: 'on-first-retry'
   },
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'pnpm run dev-front',
     url: 'http://locahost:4200',
     reuseExistingServer: !process.env.CI,
-    cwd: workspaceRoot,
+    cwd: workspaceRoot
   },
   reporter: [['html', { outputFolder: 'dist/.playwright/apps/ng-frontend' }]],
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
+      use: { ...devices['Desktop Chrome'] }
+    }
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
     // Uncomment for mobile browsers support
     /* {
       name: 'Mobile Chrome',
@@ -61,5 +61,5 @@ module.exports = defineConfig({
       name: 'Google Chrome',
       use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     } */
-  ],
+  ]
 });

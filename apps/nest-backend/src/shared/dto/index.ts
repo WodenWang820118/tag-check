@@ -13,7 +13,6 @@ export * from './authentication-setting';
 export * from './browser-setting';
 export * from './sys-configuration';
 export * from './test-event';
-export * from './test-file-report';
 export * from './test-image';
 export * from './test-info';
 export * from './test-request-info';

@@ -7,8 +7,7 @@ export class CreateTestRequestInfoDto implements TestRequestInfo {
   requestPassed!: boolean;
 
   @IsString()
-  @IsNotEmpty()
-  rawRequest!: string;
+  rawRequest?: string;
 
   @IsString()
   @IsNotEmpty()

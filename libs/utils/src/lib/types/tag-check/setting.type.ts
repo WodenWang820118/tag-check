@@ -78,7 +78,6 @@ export type ApplicationSetting = {
   localStorage?: LocalStorage;
   cookie?: Cookie;
   gtm?: Gtm;
-  preventNavigationEvents?: string[];
   authentication?: Authentication;
 };
 

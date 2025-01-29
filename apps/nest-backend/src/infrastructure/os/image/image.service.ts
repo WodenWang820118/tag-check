@@ -6,17 +6,14 @@ import {
 } from '@nestjs/common';
 import { extractEventNameFromId } from '@utils';
 import { Readable } from 'stream';
-import { TestReportFacadeRepositoryService } from '../../../features/repository/test-report-facade/test-report-facade-repository.service';
+import { TestImageRepositoryService } from '../../../core/repository/test-event/test-image-repository.service';
 
 @Injectable()
 export class ImageService {
   private logger = new Logger(ImageService.name);
-  constructor(
-    private testReportFacadeRepositoryService: TestReportFacadeRepositoryService
-  ) {}
+  constructor(private testInageRepositoryService: TestImageRepositoryService) {}
   async readImage(eventId: string) {
-    const image =
-      await this.testReportFacadeRepositoryService.getTestImage(eventId);
+    const image = await this.testInageRepositoryService.getByEventId(eventId);
 
     if (!image) {
       throw new NotFoundException(`Image not found for event: ${eventId}`);

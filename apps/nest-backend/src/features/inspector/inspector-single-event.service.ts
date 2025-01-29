@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
 import {
@@ -18,7 +15,7 @@ import { RequestProcessorService } from '../../features/request-processor/reques
 import { Credentials, Page } from 'puppeteer';
 import { InspectorUtilsService } from './inspector-utils.service';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
-import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
+import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
 @Injectable()
 export class InspectorSingleEventService {
   private readonly logger = new Logger(InspectorSingleEventService.name);
@@ -28,7 +25,7 @@ export class InspectorSingleEventService {
     private readonly requestProcessorService: RequestProcessorService,
     private readonly filePathService: FilePathService,
     private readonly inspectorUtilsService: InspectorUtilsService,
-    private readonly imageResultService: TestReportFacadeRepositoryService
+    private readonly testImageRepositoryService: TestImageRepositoryService
   ) {}
 
   // inspect one event
@@ -115,7 +112,7 @@ export class InspectorSingleEventService {
     });
 
     // await this.saveImage(projectSlug, eventId, imageSavingFolder);
-    await this.imageResultService.createTestImage({
+    await this.testImageRepositoryService.create({
       imageName: 'screenshot.png',
       imageData: screenshot
     });
@@ -174,7 +171,7 @@ export class InspectorSingleEventService {
       fullPage: true
     });
 
-    await this.imageResultService.createTestImage({
+    await this.testImageRepositoryService.create({
       imageName: 'screenshot.png',
       imageData: screenshot
     });

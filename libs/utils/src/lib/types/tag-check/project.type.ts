@@ -1,4 +1,5 @@
 import { Auditable } from './auditable.type';
+import { StrictDataLayerEvent, BaseDataLayerEvent } from './data-layer.type';
 
 export type Project = {
   projectSlug: string;
@@ -25,7 +26,8 @@ export type TestInfoSchema = {
 
 export type TestRequestInfo = {
   requestPassed: boolean;
-  rawRequest: string;
+  rawRequest?: string;
+  reformedDataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
   destinationUrl: string;
 };
 
@@ -35,7 +37,10 @@ export type TestRequestInfoSchema = {
   Auditable;
 
 export type TestEvent = {
+  testName: string;
+  eventName: string;
   eventId: string;
+  stopNavigation?: boolean;
   message?: string;
 };
 

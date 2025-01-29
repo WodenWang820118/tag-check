@@ -1,4 +1,9 @@
-import { DataLayerSchema } from '@utils';
+import {
+  BaseDataLayerEvent,
+  DataLayerSchema,
+  StrictDataLayerEvent,
+  TestDataLayerSchema
+} from '@utils';
 import {
   Column,
   Entity,
@@ -10,15 +15,15 @@ import { AuditableEntity } from './common';
 import { TestEventEntity } from './test-event.entity';
 
 @Entity('test_data_layer')
-export class TestDataLayerEntity extends AuditableEntity {
+export class TestDataLayerEntity
+  extends AuditableEntity
+  implements TestDataLayerSchema
+{
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
-  dataLayer!: string;
-
-  @Column()
-  dataLayerSpec!: string;
+  @Column('json', { nullable: true })
+  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
 
   @JoinColumn({ name: 'testEventId' })
   @OneToOne(() => TestEventEntity, (testEvent) => testEvent.id)

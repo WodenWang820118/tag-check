@@ -18,6 +18,35 @@ export class TestImageRepositoryService {
     return this.repository.findOne({ where: { id } });
   }
 
+  async getByProjectSlugAndEventId(projectSlug: string, eventId: string) {
+    return this.repository.findOne({
+      relations: {
+        testEvent: true
+      },
+      where: {
+        testEvent: {
+          eventId,
+          project: {
+            projectSlug
+          }
+        }
+      }
+    });
+  }
+
+  async getByEventId(eventId: string) {
+    return this.repository.findOne({
+      relations: {
+        testEvent: true
+      },
+      where: {
+        testEvent: {
+          eventId
+        }
+      }
+    });
+  }
+
   async create(data: CreateTestImageDto) {
     if (!data.imageData) {
       throw new Error('No data provided');

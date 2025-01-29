@@ -16,6 +16,7 @@ import {
   CreateTestRequestInfoDto
 } from '../../shared';
 import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
+import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
 @Injectable()
 export class EventInspectionPipelineService {
   private readonly logger = new Logger(EventInspectionPipelineService.name);
@@ -23,7 +24,7 @@ export class EventInspectionPipelineService {
     private readonly inspectorSingleEventService: InspectorSingleEventService,
     private readonly projectAbstractReportService: ProjectAbstractReportService,
     private readonly testResultService: TestReportFacadeRepositoryService,
-    private readonly imageResultService: TestReportFacadeRepositoryService
+    private readonly testImageRepositoryService: TestImageRepositoryService
   ) {}
 
   async singleEventInspectionRecipe(
@@ -96,7 +97,7 @@ export class EventInspectionPipelineService {
         fullPage: true
       });
 
-      await this.imageResultService.createTestImage({
+      await this.testImageRepositoryService.create({
         imageName: `${projectSlug}_${eventId}`,
         imageData: screenshot
       });

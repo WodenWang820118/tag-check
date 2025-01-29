@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import {
   TestEventEntity,
   CreateTestEventDto,
@@ -16,6 +16,23 @@ export class TestEventRepositoryService {
 
   async list(id: number) {
     return this.repository.find({ where: { id } });
+  }
+
+  async listReports(projectSlug: string) {
+    return await this.repository.find({
+      relations: {
+        testInfo: true,
+        testRequestInfo: true,
+        testDataLayer: true,
+        testImage: true,
+        project: true
+      },
+      where: {
+        project: {
+          projectSlug
+        }
+      }
+    });
   }
 
   async get(id: number) {
@@ -36,6 +53,24 @@ export class TestEventRepositoryService {
 
   async delete(eventId: string) {
     return this.repository.delete(eventId);
+  }
+
+  async deleteByProjectSlugAndEventId(projectSlug: string, eventId: string) {
+    return this.repository.delete({ project: { projectSlug }, eventId });
+  }
+
+  async deleteByProjectSlugAndEventIds(
+    projectSlug: string,
+    eventIds: string[]
+  ) {
+    try {
+      return this.repository.delete({
+        project: { projectSlug },
+        eventId: In(eventIds)
+      });
+    } catch (error) {
+      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
+    }
   }
 
   async deleteMany(eventIds: string[]) {

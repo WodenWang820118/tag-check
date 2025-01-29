@@ -21,7 +21,6 @@ import {
   SysConfigurationEntity,
   TestDataLayerEntity,
   TestEventEntity,
-  TestFileReportEntity,
   TestImageEntity,
   TestInfoEntity,
   TestRequestInfoEntity
@@ -33,7 +32,6 @@ const rootProjectPath = join(__dirname, '..', '..', '..', 'tag_check_projects');
 const testEventEntities = [
   TestEventEntity,
   TestImageEntity,
-  TestFileReportEntity,
   TestDataLayerEntity,
   TestInfoEntity,
   TestRequestInfoEntity
@@ -116,7 +114,7 @@ describe('App (e2e)', () => {
         .post(
           '/datalayer/ng_gtm_integration_sample/page_view_54aab8c1-b641-49b9-9ad9-dad029fb1bec'
         )
-        .query({ headless: 'true', measurementId: 'G-8HK542DQMG' })
+        .query({ headless: 'true', measurementId: '' })
         .send({
           application: {
             localStorage: {

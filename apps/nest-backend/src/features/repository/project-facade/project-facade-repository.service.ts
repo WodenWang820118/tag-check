@@ -10,9 +10,9 @@ import {
   CreateAuthenticationSettingDto,
   CreateBrowserSettingDto,
   CreateProjectDto,
-  CreateRecordingDto,
   CreateSpecDto
 } from '../../../shared';
+import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 
 @Injectable()
 export class ProjectFacadeRepositoryService {
@@ -22,7 +22,8 @@ export class ProjectFacadeRepositoryService {
     private browserRepositoryService: BrowserSettingRepositoryService,
     private applicationRepositoryService: ApplicationSettingRepositoryService,
     private recordingRepositoryService: RecordingRepositoryService,
-    private specRepositoryService: SpecRepositoryService
+    private specRepositoryService: SpecRepositoryService,
+    private testEventRepositoryService: TestEventRepositoryService
   ) {}
 
   async createProject(projectSlug: string, settings: CreateProjectDto) {
@@ -41,11 +42,6 @@ export class ProjectFacadeRepositoryService {
     const browserSetting: CreateBrowserSettingDto = {
       headless: true,
       browser: []
-    };
-
-    const recording: CreateRecordingDto = {
-      title: 'page_view',
-      steps: []
     };
 
     const applicationSetting: CreateApplicationSettingDto = {
@@ -75,7 +71,6 @@ export class ProjectFacadeRepositoryService {
     await this.applicationRepositoryService.create(applicationSetting);
     await this.authenticationRepositoryService.create(authenticationSetting);
     await this.browserRepositoryService.create(browserSetting);
-    await this.recordingRepositoryService.create(recording);
     await this.specRepositoryService.create(spec);
   }
 }

@@ -14,6 +14,10 @@ export class TestInfoRepositoryService {
     private readonly repository: Repository<TestInfoEntity>
   ) {}
 
+  async list(id: number) {
+    return this.repository.find({ where: { id } });
+  }
+
   async get(id: number) {
     return this.repository.findOne({ where: { id } });
   }

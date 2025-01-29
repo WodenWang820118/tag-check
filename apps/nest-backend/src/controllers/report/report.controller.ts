@@ -16,6 +16,7 @@ import { ProjectAbstractReportService } from '../../features/project-agent/proje
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { FullValidationResultService } from '../../features/repository/test-report-facade/full-validation-result.service';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
+import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 
 @Controller('reports')
 export class ReportController {
@@ -23,8 +24,9 @@ export class ReportController {
   constructor(
     private readonly projectReportService: ProjectReportService,
     private readonly projectAbstractReportService: ProjectAbstractReportService,
-    private readonly testDataLayerService: TestReportFacadeRepositoryService,
-    private readonly fullValidationResultService: FullValidationResultService
+    private readonly testReportFacadeRepositoryService: TestReportFacadeRepositoryService,
+    private readonly fullValidationResultService: FullValidationResultService,
+    private readonly testEventRepositoryService: TestEventRepositoryService
   ) {}
 
   @ApiOperation({
@@ -39,7 +41,10 @@ export class ReportController {
   @Get(':projectSlug')
   @Log()
   async getProjectEventReports(@Param('projectSlug') projectSlug: string) {
-    return await this.projectReportService.getProjectEventReports(projectSlug);
+    const reports =
+      await this.testEventRepositoryService.listReports(projectSlug);
+    console.log(reports);
+    return reports;
   }
 
   @ApiOperation({
@@ -53,6 +58,7 @@ export class ReportController {
   })
   @Get(':projectSlug/names')
   async getProjectEventReportNames(@Param('projectSlug') projectSlug: string) {
+    // it equals to get unique test event ids
     return await this.projectReportService.getProjectEventReportFolderNames(
       projectSlug
     );
@@ -90,11 +96,6 @@ export class ReportController {
       eventId,
       report
     );
-
-    return await this.testDataLayerService.updateTestLayer(eventId, {
-      dataLayer: report.dataLayer as unknown as string,
-      dataLayerSpec: report.dataLayerSpec as unknown as string
-    });
   }
 
   @ApiOperation({
@@ -121,18 +122,7 @@ export class ReportController {
     @Param('eventId') eventId: string,
     @Body() report: IReportDetails
   ) {
-    // TODO: Unify the implmentation and use database for all reports
-    // keep the original implementation for verification
-    await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
-      projectSlug,
-      eventId,
-      report
-    );
-
-    return await this.testDataLayerService.updateTestLayer(eventId, {
-      dataLayer: report.dataLayer as unknown as string,
-      dataLayerSpec: report.dataLayerSpec as unknown as string
-    });
+    return this.testReportFacadeRepositoryService.createTestFileReport(report);
   }
 
   @ApiOperation({

@@ -1,4 +1,4 @@
-import { ImageSchema, TestImageSchema } from '@utils';
+import { TestImageSchema } from '@utils';
 import {
   Column,
   Entity,
@@ -9,7 +9,7 @@ import {
 import { AuditableEntity } from './common';
 import { TestEventEntity } from './test-event.entity';
 
-@Entity('test-image')
+@Entity('test_image')
 export class TestImageEntity
   extends AuditableEntity
   implements TestImageSchema
@@ -23,7 +23,7 @@ export class TestImageEntity
   @Column('blob')
   imageData!: Buffer;
 
-  @Column()
+  @Column({ nullable: true })
   imageSize?: number;
 
   @JoinColumn({ name: 'testEventId' })

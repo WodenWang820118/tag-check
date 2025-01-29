@@ -1,13 +1,13 @@
-import { Recording, RecordingSchema } from '@utils';
+import { RecordingSchema } from '@utils';
 import {
   Column,
   Entity,
   JoinColumn,
-  ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { AuditableEntity } from './common';
-import { ProjectEntity } from './project.entity';
+import { TestEventEntity } from './test-event.entity';
 
 @Entity('recording')
 export class RecordingEntity
@@ -23,7 +23,7 @@ export class RecordingEntity
   @Column('json')
   steps!: Record<string, any>[]; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-  @JoinColumn({ name: 'projectId' })
-  @ManyToOne(() => ProjectEntity, (project) => project.recordings)
-  project!: ProjectEntity;
+  @JoinColumn({ name: 'testEventId' })
+  @OneToOne(() => TestEventEntity, (event) => event.id)
+  testEvent!: TestEventEntity;
 }

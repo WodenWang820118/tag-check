@@ -17,7 +17,7 @@ export class BrowserSettingEntity
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column('simple-array')
+  @Column('simple-array', { nullable: true })
   browser?: string[];
 
   @Column()

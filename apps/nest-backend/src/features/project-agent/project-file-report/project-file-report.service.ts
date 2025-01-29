@@ -5,6 +5,7 @@ import { join } from 'path';
 import { XlsxReportService } from '../../../infrastructure/os/xlsx-report/xlsx-report.service';
 import { FullValidationResultService } from '../../repository/test-report-facade/full-validation-result.service';
 import { TestReportFacadeRepositoryService } from '../../repository/test-report-facade/test-report-facade-repository.service';
+import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 
 @Injectable()
 export class ProjectFileReportService {
@@ -13,7 +14,8 @@ export class ProjectFileReportService {
     private readonly folderPathService: FolderPathService,
     private readonly testResultService: TestReportFacadeRepositoryService,
     private readonly fullValidationResultService: FullValidationResultService,
-    private readonly xlsxReportService: XlsxReportService
+    private readonly xlsxReportService: XlsxReportService,
+    private readonly testEventRepositoryService: TestEventRepositoryService
   ) {}
 
   async getReportFolders(projectSlug: string) {
@@ -29,15 +31,21 @@ export class ProjectFileReportService {
   }
 
   async getReportFolderFiles(projectSlug: string) {
-    return await this.testResultService.listFileReports(projectSlug);
+    return await this.testEventRepositoryService.listReports(projectSlug);
   }
 
   async deleteReportFile(projectSlug: string, eventId: string) {
-    return this.testResultService.deleteFileReport(projectSlug, eventId);
+    return this.testEventRepositoryService.deleteByProjectSlugAndEventId(
+      projectSlug,
+      eventId
+    );
   }
 
   async deleteSelectedFiles(projectSlug: string, eventIds: string[]) {
-    return this.testResultService.deleteFileReports(projectSlug, eventIds);
+    return this.testEventRepositoryService.deleteByProjectSlugAndEventIds(
+      projectSlug,
+      eventIds
+    );
   }
 
   async downloadReportFiles(projectSlug: string, eventIds: string[]) {
