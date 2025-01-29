@@ -1,5 +1,5 @@
 import { Auditable } from './auditable.type';
-import { ProjectInfo } from './project.type';
+import { Project } from './project.type';
 
 export type ProjectSetting = {
   projectSlug: string;
@@ -13,7 +13,7 @@ export type Setting = {
   browser: string[];
   headless: boolean;
   authentication: Authentication;
-} & ProjectInfo;
+} & Project;
 
 export type EnvironmentSetting = {
   gtm: Gtm;

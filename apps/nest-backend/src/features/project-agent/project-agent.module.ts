@@ -25,18 +25,6 @@ import { ProjectImageModule } from './project-image/project-image.module';
 import { ProjectImageService } from './project-image/project-image.service';
 import { ProjectFileReportService } from './project-file-report/project-file-report.service';
 import { ProjectVideoService } from './project-video/project-video.service';
-import { ProjectInfoEntity } from '../../shared/entity/project-info.entity';
-import {
-  ApplicationSettingEntity,
-  AuthenticationSettingEntity,
-  BrowserSettingEntity,
-  RecordingEntity,
-  TestEventEntity,
-  TestFileReportEntity,
-  TestInfoEntity,
-  TestRequestInfoEntity
-} from '../../shared';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProjectFacadeRepositoryModule } from '../repository/project-facade/project-facade-repository.module';
 
 const modules = [
@@ -51,18 +39,7 @@ const modules = [
   ProjectAbstractReportModule,
   ProjectImageModule,
   ProjectFileReportModule,
-  ProjectVideoModule,
-  TypeOrmModule.forFeature([
-    ProjectInfoEntity,
-    RecordingEntity,
-    TestInfoEntity,
-    TestFileReportEntity,
-    TestEventEntity,
-    TestRequestInfoEntity,
-    BrowserSettingEntity,
-    ApplicationSettingEntity,
-    AuthenticationSettingEntity
-  ])
+  ProjectVideoModule
 ];
 
 const services = [

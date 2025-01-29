@@ -73,9 +73,7 @@ export class ProjectInfoFormComponent implements OnInit {
             projectName: this.projectInfoForm.value.projectName as string,
             measurementId: this.projectInfoForm.value.measurementId as string,
             projectDescription: this.projectInfoForm.value
-              .projectDescription as string,
-            googleSpreadsheetLink: this.projectInfoForm.value
-              .googleSpreadsheetLink as string
+              .projectDescription as string
           };
           return this.settingsService.updateSettings(
             projectSlug,

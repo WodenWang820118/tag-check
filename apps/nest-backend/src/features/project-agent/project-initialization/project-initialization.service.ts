@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
-import { ProjectInfoDto } from '../../../shared/dto/project-info.dto';
 import { ProjectFacadeRepositoryService } from '../../repository/project-facade/project-facade-repository.service';
+import { CreateProjectDto } from '../../../shared';
 
 @Injectable()
 export class ProjectInitializationService {
@@ -13,7 +13,7 @@ export class ProjectInitializationService {
   ) {}
 
   // TODO: transfer data to database, but keep the file system
-  async initProject(projectSlug: string, settings: Partial<ProjectInfoDto>) {
+  async initProject(projectSlug: string, settings: CreateProjectDto) {
     await this.createProjectFolders(projectSlug); // keep project folders for videos
     await this.projectFacadeService.createProject(projectSlug, settings);
   }

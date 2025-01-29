@@ -92,7 +92,7 @@ export class TestRunningFacadeService {
       return this.qaRequestService.runDataLayerWithRequestCheck(
         projectSlug,
         eventId,
-        project.settings.measurementId,
+        project.settings.measurementId || '',
         headless,
         inspectEventDto,
         project.settings.authentication.username,

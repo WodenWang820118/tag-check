@@ -9,10 +9,4 @@ export class CreateTestEventDto implements TestEvent {
   @IsOptional()
   @IsString()
   message?: string;
-
-  @IsNotEmpty()
-  createdAt!: Date;
-
-  @IsOptional()
-  updatedAt?: Date;
 }

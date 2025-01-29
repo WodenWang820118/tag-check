@@ -9,7 +9,6 @@ import {
 import { SpecEntity } from './spec.entity';
 import { AuditableEntity } from './common';
 import { RecordingEntity } from './recording.entity';
-import { ProjectInfoEntity } from './project-info.entity';
 import { ProjectSchema } from '@utils';
 import { AuthenticationSettingEntity } from './authentication-setting.entity';
 import { BrowserSettingEntity } from './browser-setting.entity';
@@ -25,8 +24,14 @@ export class ProjectEntity extends AuditableEntity implements ProjectSchema {
   @Column({ nullable: false, unique: true, type: 'varchar', length: 255 })
   projectSlug!: string;
 
-  @OneToOne(() => ProjectInfoEntity, (info) => info.project)
-  info!: ProjectInfoEntity;
+  @Column()
+  projectName!: string;
+
+  @Column()
+  projectDescription?: string;
+
+  @Column()
+  measurementId?: string;
 
   @OneToMany(() => SpecEntity, (spec) => spec.project)
   specs!: SpecEntity[];

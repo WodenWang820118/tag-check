@@ -19,10 +19,10 @@ export class TestDataLayerRepositoryService {
   }
 
   async create(data: CreateTestDataLayerDto) {
-    return this.repository.save(data);
+    return await this.repository.save(data);
   }
 
-  async update(data: UpdateTestDataLayerDto) {
-    return this.repository.save(data);
+  async update(id: number, data: UpdateTestDataLayerDto) {
+    return await this.repository.update({ id }, data);
   }
 }

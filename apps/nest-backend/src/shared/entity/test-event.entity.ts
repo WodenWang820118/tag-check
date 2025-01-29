@@ -21,7 +21,7 @@ export class TestEventEntity
   @ManyToOne(() => ProjectEntity, (project) => project.id)
   project!: ProjectEntity;
 
-  @Column({ unique: true })
+  @Column()
   eventId!: string;
 
   @Column()

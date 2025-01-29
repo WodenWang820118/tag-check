@@ -1,15 +1,13 @@
 import { Module } from '@nestjs/common';
 import { EventInspectionPipelineService } from './event-inspection-pipeline.service';
 import { InspectorModule } from '../../features/inspector/inspector.module';
-import { TestResultService } from '../repository/test-report-facade/test-result.service';
 import { TestReportFacadeModule } from '../repository/test-report-facade/test-report-facade.module';
-import { TestImageService } from '../repository/test-report-facade/image-result.service';
+import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
 @Module({
   imports: [InspectorModule, TestReportFacadeModule],
   providers: [
     EventInspectionPipelineService,
-    TestResultService,
-    TestImageService
+    TestReportFacadeRepositoryService
   ],
   exports: [
     EventInspectionPipelineService,

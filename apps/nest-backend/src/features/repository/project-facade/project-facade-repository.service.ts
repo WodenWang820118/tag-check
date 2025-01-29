@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ProjectInfoRepositoryService } from '../../../core/repository/project/project-info-repository.service';
 import { ProjectRepositoryService } from '../../../core/repository/project/project-repository.service';
 import { AuthenticationSettingRepositoryService } from '../../../core/repository/settings/authentication-setting-repository.service';
 import { BrowserSettingRepositoryService } from '../../../core/repository/settings/browser-setting-repository.service';
@@ -10,17 +9,15 @@ import {
   CreateApplicationSettingDto,
   CreateAuthenticationSettingDto,
   CreateBrowserSettingDto,
-  CreateProjectInfoDto,
+  CreateProjectDto,
   CreateRecordingDto,
-  CreateSpecDto,
-  ProjectInfoDto
+  CreateSpecDto
 } from '../../../shared';
 
 @Injectable()
 export class ProjectFacadeRepositoryService {
   constructor(
     private projectRepositoryService: ProjectRepositoryService,
-    private projectInfoRepositoryService: ProjectInfoRepositoryService,
     private authenticationRepositoryService: AuthenticationSettingRepositoryService,
     private browserRepositoryService: BrowserSettingRepositoryService,
     private applicationRepositoryService: ApplicationSettingRepositoryService,
@@ -28,8 +25,9 @@ export class ProjectFacadeRepositoryService {
     private specRepositoryService: SpecRepositoryService
   ) {}
 
-  async createProject(projectSlug: string, settings: Partial<ProjectInfoDto>) {
-    const initializedProjectInfo: CreateProjectInfoDto = {
+  async createProject(projectSlug: string, settings: CreateProjectDto) {
+    const initializedProjectInfo: CreateProjectDto = {
+      projectSlug: projectSlug,
       projectName: settings.projectName || '',
       projectDescription: settings.projectDescription || '',
       measurementId: settings.measurementId || ''
@@ -73,8 +71,7 @@ export class ProjectFacadeRepositoryService {
       }
     };
 
-    await this.projectRepositoryService.create({ projectSlug });
-    await this.projectInfoRepositoryService.create(initializedProjectInfo);
+    await this.projectRepositoryService.create(initializedProjectInfo);
     await this.applicationRepositoryService.create(applicationSetting);
     await this.authenticationRepositoryService.create(authenticationSetting);
     await this.browserRepositoryService.create(browserSetting);

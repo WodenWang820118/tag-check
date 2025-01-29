@@ -18,7 +18,7 @@ import { RequestProcessorService } from '../../features/request-processor/reques
 import { Credentials, Page } from 'puppeteer';
 import { InspectorUtilsService } from './inspector-utils.service';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
-import { TestImageService } from '../repository/test-report-facade/image-result.service';
+import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
 @Injectable()
 export class InspectorSingleEventService {
   private readonly logger = new Logger(InspectorSingleEventService.name);
@@ -28,7 +28,7 @@ export class InspectorSingleEventService {
     private readonly requestProcessorService: RequestProcessorService,
     private readonly filePathService: FilePathService,
     private readonly inspectorUtilsService: InspectorUtilsService,
-    private readonly imageResultService: TestImageService
+    private readonly imageResultService: TestReportFacadeRepositoryService
   ) {}
 
   // inspect one event
@@ -115,7 +115,7 @@ export class InspectorSingleEventService {
     });
 
     // await this.saveImage(projectSlug, eventId, imageSavingFolder);
-    await this.imageResultService.create({
+    await this.imageResultService.createTestImage({
       imageName: 'screenshot.png',
       imageData: screenshot
     });
@@ -174,7 +174,7 @@ export class InspectorSingleEventService {
       fullPage: true
     });
 
-    await this.imageResultService.create({
+    await this.imageResultService.createTestImage({
       imageName: 'screenshot.png',
       imageData: screenshot
     });

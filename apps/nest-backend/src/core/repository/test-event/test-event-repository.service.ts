@@ -14,8 +14,16 @@ export class TestEventRepositoryService {
     private readonly repository: Repository<TestEventEntity>
   ) {}
 
+  async list(id: number) {
+    return this.repository.find({ where: { id } });
+  }
+
   async get(id: number) {
     return this.repository.findOne({ where: { id } });
+  }
+
+  async getByEventId(eventId: string) {
+    return this.repository.findOne({ where: { eventId } });
   }
 
   async create(data: CreateTestEventDto) {
@@ -24,5 +32,13 @@ export class TestEventRepositoryService {
 
   async update(data: UpdateTestEventDto) {
     return this.repository.save(data);
+  }
+
+  async delete(eventId: string) {
+    return this.repository.delete(eventId);
+  }
+
+  async deleteMany(eventIds: string[]) {
+    return this.repository.delete(eventIds);
   }
 }

@@ -11,7 +11,7 @@ import { EcommerceEventValidationStrategy } from './strategy/ecommerce-event-val
 import { OldGA4EventsValidationStrategy } from './strategy/old-ga4-events-validation-strategy.service';
 import { InspectorUtilsService } from './inspector-utils.service';
 import { TestReportFacadeModule } from '../repository/test-report-facade/test-report-facade.module';
-import { TestImageService } from '../repository/test-report-facade/image-result.service';
+import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
 
 const strategyService = {
   provide: STRATEGY_TYPE,
@@ -35,7 +35,7 @@ const services = [
   InspectorUtilsService,
   EcommerceEventValidationStrategy,
   OldGA4EventsValidationStrategy,
-  TestImageService
+  TestReportFacadeRepositoryService
 ];
 @Module({
   imports: [

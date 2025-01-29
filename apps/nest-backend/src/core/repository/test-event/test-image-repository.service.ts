@@ -19,7 +19,23 @@ export class TestImageRepositoryService {
   }
 
   async create(data: CreateTestImageDto) {
-    return this.repository.save(data);
+    if (!data.imageData) {
+      throw new Error('No data provided');
+    }
+
+    if (!data.imageName) {
+      throw new Error('No name provided');
+    }
+
+    const blob = new Blob([data.imageData]);
+    const buffer = Buffer.from(data.imageData);
+
+    const imageResult = new TestImageEntity();
+    imageResult.imageName = data.imageName;
+    imageResult.imageData = buffer;
+    imageResult.imageSize = blob.size; // Size in bytes
+
+    return this.repository.save(imageResult);
   }
 
   async update(data: UpdateTestImageDto) {

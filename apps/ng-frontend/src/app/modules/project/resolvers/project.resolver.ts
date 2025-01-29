@@ -1,8 +1,8 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
 import { SettingsService } from '../../../shared/services/api/settings/settings.service';
-import { ProjectInfo, ProjectSetting } from '@utils';
-import { ProjectInfoService } from '../../../shared/services/api/project-info/project-info.service';
+import { Project, ProjectSetting } from '@utils';
+import { ProjectService } from '../../../shared/services/api/project-info/project-info.service';
 
 export const projectSettingResolver: ResolveFn<ProjectSetting> = (
   route,
@@ -13,7 +13,7 @@ export const projectSettingResolver: ResolveFn<ProjectSetting> = (
   return settingsService.getProjectSettings(projectSlug);
 };
 
-export const projectInfoResolver: ResolveFn<ProjectInfo[]> = (route, state) => {
-  const projectInfoService = inject(ProjectInfoService);
-  return projectInfoService.getProjects();
+export const projectInfoResolver: ResolveFn<Project[]> = (route, state) => {
+  const projectService = inject(ProjectService);
+  return projectService.getProjects();
 };

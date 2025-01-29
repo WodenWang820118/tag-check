@@ -6,12 +6,10 @@ import {
   AuthenticationSettingEntity,
   BrowserSettingEntity,
   ProjectEntity,
-  ProjectInfoEntity,
   RecordingEntity,
   SpecEntity,
   TestEventEntity
 } from '../../../shared';
-import { ProjectInfoRepositoryService } from '../../../core/repository/project/project-info-repository.service';
 import { ProjectRepositoryService } from '../../../core/repository/project/project-repository.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
 import { ApplicationSettingRepositoryService } from '../../../core/repository/settings/application-setting-repository.service';
@@ -37,7 +35,6 @@ describe('ProjectFacadeRepositoryService', () => {
           database: ':memory:',
           entities: [
             ProjectEntity,
-            ProjectInfoEntity,
             AuthenticationSettingEntity,
             BrowserSettingEntity,
             ApplicationSettingEntity,
@@ -51,7 +48,6 @@ describe('ProjectFacadeRepositoryService', () => {
         }),
         TypeOrmModule.forFeature([
           ProjectEntity,
-          ProjectInfoEntity,
           AuthenticationSettingEntity,
           BrowserSettingEntity,
           ApplicationSettingEntity,
@@ -62,7 +58,6 @@ describe('ProjectFacadeRepositoryService', () => {
       providers: [
         ProjectFacadeRepositoryService,
         ProjectRepositoryService,
-        ProjectInfoRepositoryService,
         AuthenticationSettingRepositoryService,
         BrowserSettingRepositoryService,
         ApplicationSettingRepositoryService,
@@ -88,6 +83,7 @@ describe('ProjectFacadeRepositoryService', () => {
   it('should create a project with all related entities', async () => {
     const projectSlug = 'test-project';
     const settings = {
+      projectSlug: 'test-project',
       projectName: 'Test Project',
       projectDescription: 'Test Description',
       measurementId: 'TEST-123'
@@ -97,7 +93,6 @@ describe('ProjectFacadeRepositoryService', () => {
 
     // Get the repositories to verify the created entities
     const projectRepo = module.get(ProjectRepositoryService);
-    const projectInfoRepo = module.get(ProjectInfoRepositoryService);
     const authRepo = module.get(AuthenticationSettingRepositoryService);
     const browserRepo = module.get(BrowserSettingRepositoryService);
     const appRepo = module.get(ApplicationSettingRepositoryService);
@@ -108,10 +103,6 @@ describe('ProjectFacadeRepositoryService', () => {
     const project = await projectRepo.get(1);
     expect(project).toBeDefined();
     expect(project?.projectSlug).toBe(projectSlug);
-
-    const projectInfo = await projectInfoRepo.get(1);
-    expect(projectInfo).toBeDefined();
-    expect(projectInfo?.projectName).toBe(settings.projectName);
 
     const authSetting = await authRepo.get(1);
     expect(authSetting).toBeDefined();

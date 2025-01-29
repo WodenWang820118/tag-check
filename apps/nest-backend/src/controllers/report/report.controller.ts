@@ -14,8 +14,8 @@ import { IReportDetails } from '@utils';
 import { ProjectReportService } from '../../features/project-agent/project-report/project-report.service';
 import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
-import { TestDataLayerService } from '../../features/repository/test-report-facade/test-data-layer.service';
 import { FullValidationResultService } from '../../features/repository/test-report-facade/full-validation-result.service';
+import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 
 @Controller('reports')
 export class ReportController {
@@ -23,7 +23,7 @@ export class ReportController {
   constructor(
     private readonly projectReportService: ProjectReportService,
     private readonly projectAbstractReportService: ProjectAbstractReportService,
-    private readonly testDataLayerService: TestDataLayerService,
+    private readonly testDataLayerService: TestReportFacadeRepositoryService,
     private readonly fullValidationResultService: FullValidationResultService
   ) {}
 
@@ -91,8 +91,7 @@ export class ReportController {
       report
     );
 
-    return await this.testDataLayerService.update({
-      eventId: eventId,
+    return await this.testDataLayerService.updateTestLayer(eventId, {
       dataLayer: report.dataLayer as unknown as string,
       dataLayerSpec: report.dataLayerSpec as unknown as string
     });
@@ -130,8 +129,7 @@ export class ReportController {
       report
     );
 
-    return await this.testDataLayerService.create({
-      eventId: eventId,
+    return await this.testDataLayerService.updateTestLayer(eventId, {
       dataLayer: report.dataLayer as unknown as string,
       dataLayerSpec: report.dataLayerSpec as unknown as string
     });

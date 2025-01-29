@@ -4,7 +4,6 @@ import {
   ApplicationSettingEntity,
   AuthenticationSettingEntity,
   BrowserSettingEntity,
-  ProjectInfoEntity,
   RecordingEntity,
   SpecEntity,
   TestEventEntity
@@ -19,7 +18,13 @@ export class ProjectResponseDto implements ProjectSchema {
   projectSlug!: string;
 
   @Expose()
-  info!: ProjectInfoEntity;
+  projectName!: string;
+
+  @Expose()
+  projectDescription?: string | undefined;
+
+  @Expose()
+  measurementId?: string | undefined;
 
   @Expose()
   specs!: SpecEntity[];

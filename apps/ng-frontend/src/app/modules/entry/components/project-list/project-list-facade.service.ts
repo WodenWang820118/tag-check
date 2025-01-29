@@ -1,7 +1,7 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
-import { ProjectInfo } from '@utils';
+import { Project } from '@utils';
 import { MetadataSourceService } from '../../../../shared/services/data-source/metadata-source.service';
 import { map } from 'rxjs';
 
@@ -9,12 +9,12 @@ import { map } from 'rxjs';
   providedIn: 'root'
 })
 export class ProjectListFacadeService {
-  private projectsSignal = signal<ProjectInfo[]>([]);
+  private projectsSignal = signal<Project[]>([]);
   private filterSignal = computed(() =>
     this.metadataSourceService.getFilterSignal().toLowerCase()
   );
 
-  readonly dataSource = new MatTableDataSource<ProjectInfo>();
+  readonly dataSource = new MatTableDataSource<Project>();
   readonly hidePaginator = computed(() => this.projectsSignal().length <= 5);
   readonly dataSourceLength = computed(() => this.projectsSignal().length);
   readonly filteredProjects = computed(() => {
@@ -33,7 +33,7 @@ export class ProjectListFacadeService {
   }
 
   private setupFilterPredicate(): void {
-    this.dataSource.filterPredicate = (data: ProjectInfo, filter: string) =>
+    this.dataSource.filterPredicate = (data: Project, filter: string) =>
       Object.values(data).some((value) =>
         String(value).toLowerCase().includes(filter)
       );

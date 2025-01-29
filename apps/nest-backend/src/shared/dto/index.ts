@@ -1,15 +1,12 @@
 export * from './event-inspection-preset.dto';
-export * from './project-info.dto';
 export * from './setting.dto';
 export * from './validation-result.dto';
-
 export * from './sys-configuration';
 export * from './test-image';
 export * from './spec';
 export * from './test-data-layer';
 export * from './test-result';
 export * from './project';
-export * from './project-info';
 export * from './recording';
 export * from './application-setting';
 export * from './authentication-setting';

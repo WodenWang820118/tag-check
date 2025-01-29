@@ -18,6 +18,10 @@ export class ProjectRepositoryService {
     return this.repository.findOne({ where: { id } });
   }
 
+  async getBySlug(slug: string) {
+    return this.repository.findOne({ where: { projectSlug: slug } });
+  }
+
   async create(data: CreateProjectDto) {
     return this.repository.save(data);
   }

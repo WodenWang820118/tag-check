@@ -16,7 +16,6 @@ import {
   AuthenticationSettingEntity,
   BrowserSettingEntity,
   ProjectEntity,
-  ProjectInfoEntity,
   RecordingEntity,
   SpecEntity,
   SysConfigurationEntity,
@@ -27,7 +26,6 @@ import {
   TestInfoEntity,
   TestRequestInfoEntity
 } from '../src/shared';
-import { TestResultService } from '../src/features/repository/test-report-facade/test-result.service';
 import { vi } from 'vitest';
 // TODO: run all endoint tests to ensure they are all working
 
@@ -41,7 +39,7 @@ const testEventEntities = [
   TestRequestInfoEntity
 ];
 
-const projectEntities = [ProjectInfoEntity, ProjectEntity];
+const projectEntities = [ProjectEntity];
 
 const settingEntities = [
   ApplicationSettingEntity,
@@ -71,7 +69,7 @@ describe('App (e2e)', () => {
           SysConfigurationEntity
         ])
       ],
-      providers: [TestResultService]
+      providers: []
     })
       .overrideProvider(DataSource)
       .useValue(dataSource)

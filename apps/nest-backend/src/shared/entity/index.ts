@@ -3,7 +3,6 @@ export * from './test-image.entity';
 export * from './test-data-layer.entity';
 export * from './test-file-report.entity';
 export * from './project.entity';
-export * from './project-info.entity';
 export * from './spec.entity';
 export * from './recording.entity';
 export * from './test-info.entity';

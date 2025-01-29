@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import { SystemConfiguration } from '@utils';
+import { SysConfiguration } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
@@ -18,7 +18,7 @@ export class ConfigurationService {
 
   getConfigurations() {
     return this.http
-      .get<SystemConfiguration[]>(environment.configurationApiUrl)
+      .get<SysConfiguration[]>(environment.configurationApiUrl)
       .pipe(
         catchError((error) => {
           console.error(error);
@@ -29,7 +29,7 @@ export class ConfigurationService {
 
   getConfiguration(name: string) {
     return this.http
-      .get<SystemConfiguration>(`${environment.configurationApiUrl}/${name}`)
+      .get<SysConfiguration>(`${environment.configurationApiUrl}/${name}`)
       .pipe(
         catchError((error) => {
           console.error(error);
@@ -49,7 +49,7 @@ export class ConfigurationService {
       );
   }
 
-  createConfiguration(configuration: SystemConfiguration) {
+  createConfiguration(configuration: SysConfiguration) {
     return this.http
       .post(`${environment.configurationApiUrl}/create`, configuration)
       .pipe(

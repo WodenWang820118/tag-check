@@ -1,18 +1,10 @@
 import { Auditable } from './auditable.type';
 
-export type ProjectInfo = {
+export type Project = {
+  projectSlug: string;
   projectName: string;
   projectDescription?: string;
   measurementId?: string;
-};
-
-export type ProjectInfoSchema = {
-  id: number;
-} & ProjectInfo &
-  Auditable;
-
-export type Project = {
-  projectSlug: string;
 };
 
 export type ProjectSchema = {

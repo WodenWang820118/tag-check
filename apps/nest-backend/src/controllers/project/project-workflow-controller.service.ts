@@ -3,7 +3,7 @@ import { SysConfigurationRepositoryService } from '../../core/repository/sys-con
 import { ProjectInitializationService } from '../../features/project-agent/project-initialization/project-initialization.service';
 import { mkdirSync } from 'fs';
 import { ConfigsService } from '../../core/configs/configs.service';
-import { ProjectInfoDto } from '../../shared';
+import { CreateProjectDto } from '../../shared';
 
 @Injectable()
 export class ProjectWorkFlowControllerService {
@@ -49,7 +49,7 @@ export class ProjectWorkFlowControllerService {
   }
 
   // 2) init project if not exists
-  async initProject(projectSlug: string, settings: Partial<ProjectInfoDto>) {
+  async initProject(projectSlug: string, settings: CreateProjectDto) {
     try {
       // 1) check if project settings exists
       const configurations = await this.configurationService.findAll();

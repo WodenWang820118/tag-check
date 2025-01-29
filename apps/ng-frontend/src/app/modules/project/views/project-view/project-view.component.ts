@@ -1,7 +1,7 @@
 import { Component, signal, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { timer } from 'rxjs';
-import { ProjectInfo, ProjectSetting } from '@utils';
+import { Project, ProjectSetting } from '@utils';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
@@ -21,7 +21,7 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
 })
 export class ProjectViewComponent {
   project = signal<ProjectSetting | null>(null);
-  projectInfo = signal<ProjectInfo[]>([]);
+  projectInfo = signal<Project[]>([]);
 
   constructor(
     private route: ActivatedRoute,

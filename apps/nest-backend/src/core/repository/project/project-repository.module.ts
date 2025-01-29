@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProjectEntity, ProjectInfoEntity } from '../../../shared';
+import { ProjectEntity } from '../../../shared';
 
-import { ProjectInfoRepositoryService } from './project-info-repository.service';
 import { ProjectRepositoryService } from './project-repository.service';
 
-const modules = [TypeOrmModule.forFeature([ProjectInfoEntity, ProjectEntity])];
-
-const services = [ProjectInfoRepositoryService, ProjectRepositoryService];
+const modules = [TypeOrmModule.forFeature([ProjectEntity])];
+const services = [ProjectRepositoryService];
 
 @Module({
   imports: [...modules],

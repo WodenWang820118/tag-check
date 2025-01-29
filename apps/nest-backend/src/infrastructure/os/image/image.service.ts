@@ -5,15 +5,18 @@ import {
   Logger
 } from '@nestjs/common';
 import { extractEventNameFromId } from '@utils';
-import { TestImageService } from '../../../features/repository/test-report-facade/image-result.service';
 import { Readable } from 'stream';
+import { TestReportFacadeRepositoryService } from '../../../features/repository/test-report-facade/test-report-facade-repository.service';
 
 @Injectable()
 export class ImageService {
   private logger = new Logger(ImageService.name);
-  constructor(private imageResultService: TestImageService) {}
+  constructor(
+    private testReportFacadeRepositoryService: TestReportFacadeRepositoryService
+  ) {}
   async readImage(eventId: string) {
-    const image = await this.imageResultService.get(eventId);
+    const image =
+      await this.testReportFacadeRepositoryService.getTestImage(eventId);
 
     if (!image) {
       throw new NotFoundException(`Image not found for event: ${eventId}`);
@@ -21,8 +24,7 @@ export class ImageService {
 
     try {
       // Convert buffer to stream
-      // TODO: use image only
-      const stream = Readable.from(image[0].imageData);
+      const stream = Readable.from(image.imageData);
 
       return new StreamableFile(stream, {
         type: 'image/png',

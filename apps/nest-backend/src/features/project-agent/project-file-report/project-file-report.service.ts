@@ -1,17 +1,17 @@
-import { TestResultService } from '../../repository/test-report-facade/test-result.service';
 import { Injectable } from '@nestjs/common';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { join } from 'path';
 import { XlsxReportService } from '../../../infrastructure/os/xlsx-report/xlsx-report.service';
 import { FullValidationResultService } from '../../repository/test-report-facade/full-validation-result.service';
+import { TestReportFacadeRepositoryService } from '../../repository/test-report-facade/test-report-facade-repository.service';
 
 @Injectable()
 export class ProjectFileReportService {
   constructor(
     private readonly folderService: FolderService,
     private readonly folderPathService: FolderPathService,
-    private readonly testResultService: TestResultService,
+    private readonly testResultService: TestReportFacadeRepositoryService,
     private readonly fullValidationResultService: FullValidationResultService,
     private readonly xlsxReportService: XlsxReportService
   ) {}
@@ -29,15 +29,15 @@ export class ProjectFileReportService {
   }
 
   async getReportFolderFiles(projectSlug: string) {
-    return await this.testResultService.list(projectSlug);
+    return await this.testResultService.listFileReports(projectSlug);
   }
 
   async deleteReportFile(projectSlug: string, eventId: string) {
-    return this.testResultService.delete(projectSlug, eventId);
+    return this.testResultService.deleteFileReport(projectSlug, eventId);
   }
 
   async deleteSelectedFiles(projectSlug: string, eventIds: string[]) {
-    return this.testResultService.deleteMany(projectSlug, eventIds);
+    return this.testResultService.deleteFileReports(projectSlug, eventIds);
   }
 
   async downloadReportFiles(projectSlug: string, eventIds: string[]) {

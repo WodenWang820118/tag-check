@@ -1,28 +1,28 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ProjectInfo } from '@utils';
 import { environment } from '../../../../../environments/environment';
 import { catchError } from 'rxjs/internal/operators/catchError';
 import { of } from 'rxjs';
+import { Project } from '@utils';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ProjectInfoService {
+export class ProjectService {
   constructor(private http: HttpClient) {}
 
   getProjects() {
-    return this.http.get<ProjectInfo[]>(environment.projectApiUrl).pipe(
+    return this.http.get<Project[]>(environment.projectApiUrl).pipe(
       catchError((error) => {
         console.error(error);
-        return of([] as ProjectInfo[]);
+        return of([] as Project[]);
       })
     );
   }
 
   getProject(projectSlug: string) {
     return this.http
-      .get<ProjectInfo>(`${environment.projectApiUrl}/${projectSlug}`)
+      .get<Project>(`${environment.projectApiUrl}/${projectSlug}`)
       .pipe(
         catchError((error) => {
           console.error(error);
@@ -32,14 +32,11 @@ export class ProjectInfoService {
   }
 
   initProject(rootProjectValue: string, settings: any) {
-    const project: ProjectInfo = {
-      rootProject: rootProjectValue,
+    const project: Project = {
       projectName: settings.projectName,
       projectSlug: settings.projectSlug,
       projectDescription: settings.projectDescription || '',
-      measurementId: settings.measurementId || '',
-      googleSpreadsheetLink: settings.googleSpreadsheetLink || '',
-      version: settings.version || '1.0'
+      measurementId: settings.measurementId || ''
     };
 
     return this.http
@@ -55,10 +52,10 @@ export class ProjectInfoService {
       );
   }
 
-  updateProject(project: ProjectInfo) {
+  updateProject(project: Project) {
     console.log('Updating project: ', project);
     return this.http
-      .put<ProjectInfo>(
+      .put<Project>(
         `${environment.projectApiUrl}/${project.projectSlug}`,
         project
       )

@@ -12,7 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
-import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
+import { ProjectService } from '../../../../shared/services/api/project-info/project-info.service';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
 import {
   catchError,
@@ -50,7 +50,7 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   constructor(
     private fb: FormBuilder,
-    private projectInfoService: ProjectInfoService,
+    private projectService: ProjectService,
     private router: Router,
     private configurationService: ConfigurationService,
     private dialog: MatDialog
@@ -152,7 +152,7 @@ export class InitProjectFormComponent implements OnInit, OnDestroy {
               'project slug: ',
               this.projectForm.value['projectSlug']
             );
-            return this.projectInfoService.initProject(
+            return this.projectService.initProject(
               rootProjectPath.value,
               this.projectForm.value
             );
