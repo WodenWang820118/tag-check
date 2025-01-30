@@ -64,7 +64,7 @@ export class ProjectWorkFlowControllerService {
           name: this.configsService.getCONFIG_CURRENT_PROJECT_PATH(),
           value: projectSlug
         });
-        await this.projectInitializationService.initProject(
+        return await this.projectInitializationService.initProject(
           projectSlug,
           settings
         );
@@ -75,7 +75,7 @@ export class ProjectWorkFlowControllerService {
           value: projectSlug
         });
 
-        await this.projectInitializationService.initProject(
+        return await this.projectInitializationService.initProject(
           projectSlug,
           settings
         );

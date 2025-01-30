@@ -33,7 +33,7 @@ export class ProjectWorkFlowController {
     @Param('projectSlug') projectSlug: string,
     @Body() settings: CreateProjectDto
   ) {
-    await this.projectWorkFlowControllerService.initProject(
+    return await this.projectWorkFlowControllerService.initProject(
       projectSlug,
       settings
     );

@@ -4,8 +4,10 @@ import { Repository } from 'typeorm';
 import {
   CreateProjectDto,
   ProjectEntity,
+  ProjectResponseDto,
   UpdateProjectDto
 } from '../../../shared';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ProjectRepositoryService {
@@ -15,19 +17,24 @@ export class ProjectRepositoryService {
   ) {}
 
   async get(id: number) {
-    return this.repository.findOne({ where: { id } });
+    const entity = await this.repository.findOne({ where: { id } });
+    return plainToInstance(ProjectResponseDto, entity);
   }
 
   async list() {
-    return this.repository.find();
+    const entity = await this.repository.find();
+    return plainToInstance(ProjectResponseDto, entity);
   }
 
   async getBySlug(slug: string) {
-    return this.repository.findOne({ where: { projectSlug: slug } });
+    const entity = await this.repository.findOne({
+      where: { projectSlug: slug }
+    });
+    return plainToInstance(ProjectResponseDto, entity);
   }
 
   async getSettingBySlug(slug: string) {
-    return this.repository.findOne({
+    const entity = await this.repository.findOne({
       relations: {
         authenticationSettings: true,
         browserSettings: true,
@@ -35,17 +42,22 @@ export class ProjectRepositoryService {
       },
       where: { projectSlug: slug }
     });
+
+    return plainToInstance(ProjectResponseDto, entity);
   }
 
-  async create(data: CreateProjectDto) {
-    return this.repository.save(data);
+  async create(data: CreateProjectDto): Promise<ProjectResponseDto> {
+    const entity = await this.repository.save(data);
+    return plainToInstance(ProjectResponseDto, entity);
   }
 
   async update(id: number, data: UpdateProjectDto) {
-    return this.repository.update(id, data);
+    const entity = await this.repository.update(id, data);
+    return plainToInstance(ProjectResponseDto, entity);
   }
 
   async deleteBySlug(slug: string) {
-    return this.repository.delete({ projectSlug: slug });
+    const entity = await this.repository.delete({ projectSlug: slug });
+    return plainToInstance(ProjectResponseDto, entity);
   }
 }

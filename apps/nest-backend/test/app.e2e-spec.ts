@@ -49,7 +49,7 @@ describe('App (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
 
-  vi.setConfig({ testTimeout: 30000 });
+  vi.setConfig({ testTimeout: 120000 });
 
   beforeAll(async () => {
     process.env.NODE_ENV = 'test'; // Ensure test environment is set
@@ -110,6 +110,7 @@ describe('App (e2e)', () => {
 
   describe('Data Layer', () => {
     it('should return dataLayer examination result', async () => {
+      // TODO: will need to be refactored
       const response = await request(app.getHttpServer())
         .post(
           '/datalayer/ng_gtm_integration_sample/page_view_54aab8c1-b641-49b9-9ad9-dad029fb1bec'

@@ -92,7 +92,7 @@ describe('ProjectFacadeRepositoryService', () => {
       measurementId: 'TEST-123'
     };
 
-    await service.createProject(projectSlug, settings);
+    await service.createProject(settings);
 
     // Get the repositories to verify the created entities
     const projectRepo = module.get(ProjectRepositoryService);

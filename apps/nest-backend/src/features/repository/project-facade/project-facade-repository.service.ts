@@ -26,14 +26,7 @@ export class ProjectFacadeRepositoryService {
     private testEventRepositoryService: TestEventRepositoryService
   ) {}
 
-  async createProject(projectSlug: string, settings: CreateProjectDto) {
-    const initializedProjectInfo: CreateProjectDto = {
-      projectSlug: projectSlug,
-      projectName: settings.projectName || '',
-      projectDescription: settings.projectDescription || '',
-      measurementId: settings.measurementId || ''
-    };
-
+  async createProject(project: CreateProjectDto) {
     const authenticationSetting: CreateAuthenticationSettingDto = {
       username: '',
       password: ''
@@ -67,10 +60,21 @@ export class ProjectFacadeRepositoryService {
       }
     };
 
-    await this.projectRepositoryService.create(initializedProjectInfo);
-    await this.applicationRepositoryService.create(applicationSetting);
-    await this.authenticationRepositoryService.create(authenticationSetting);
-    await this.browserRepositoryService.create(browserSetting);
-    await this.specRepositoryService.create(spec);
+    const applicationPromise =
+      this.applicationRepositoryService.create(applicationSetting);
+    const authenticationPromise = this.authenticationRepositoryService.create(
+      authenticationSetting
+    );
+    const browserPromise = this.browserRepositoryService.create(browserSetting);
+    const specPromise = this.specRepositoryService.create(spec);
+
+    await Promise.all([
+      applicationPromise,
+      authenticationPromise,
+      browserPromise,
+      specPromise
+    ]);
+
+    return await this.projectRepositoryService.create(project);
   }
 }

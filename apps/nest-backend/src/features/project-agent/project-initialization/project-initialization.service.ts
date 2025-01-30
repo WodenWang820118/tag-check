@@ -15,7 +15,7 @@ export class ProjectInitializationService {
   // TODO: transfer data to database, but keep the file system
   async initProject(projectSlug: string, settings: CreateProjectDto) {
     await this.createProjectFolders(projectSlug); // keep project folders for videos
-    await this.projectFacadeService.createProject(projectSlug, settings);
+    return await this.projectFacadeService.createProject(settings);
   }
 
   private async createProjectFolders(projectSlug: string) {

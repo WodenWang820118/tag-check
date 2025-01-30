@@ -1,12 +1,13 @@
-import { DestroyRef, Injectable, OnInit, signal } from '@angular/core';
+import { DestroyRef, Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
 import { ProjectService } from '../../../../shared/services/api/project-info/project-info.service';
-import { catchError, EMPTY, map, Observable, switchMap, take, tap } from 'rxjs';
+import { catchError, EMPTY, switchMap, take, tap } from 'rxjs';
 import { ErrorDialogComponent } from '@ui';
 import { InstantErrorStateMatcher } from './helper';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -36,7 +37,8 @@ export class InitProjectFormFacadeService {
     private projectService: ProjectService,
     private configurationService: ConfigurationService,
     private dialog: MatDialog,
-    private destoryRef: DestroyRef
+    private destoryRef: DestroyRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -74,7 +76,7 @@ export class InitProjectFormFacadeService {
       .replace(/--+/g, '-');
   }
 
-  submitProject(): Observable<string> {
+  submitProject() {
     if (this.projectForm.invalid) {
       this.showErrorDialog('Please fill in the required fields.');
       return EMPTY;
@@ -87,9 +89,18 @@ export class InitProjectFormFacadeService {
           this.showErrorDialog('Please configure the root path first.');
           return EMPTY;
         }
-        return this.projectService
-          .initProject(rootProjectPath.value, this.projectForm.value)
-          .pipe(map(() => this.projectForm.value['projectSlug']));
+
+        return this.projectService.initProject(this.projectForm.value).pipe(
+          tap((data) => {
+            if (data) {
+              this.router
+                .navigate(['/', 'projects', data.projectSlug])
+                .then(() => {
+                  this.projectForm.reset();
+                });
+            }
+          })
+        );
       }),
       catchError((error) => {
         console.error('Error initializing project:', error);
