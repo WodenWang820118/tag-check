@@ -20,6 +20,7 @@ import { recordingsResolver } from './resolvers/recording.resolver';
 export const PROJECT_ROUTES: Routes = [
   {
     path: '',
+    runGuardsAndResolvers: 'always',
     loadComponent: () =>
       import('./views/project-view/project-view.component').then(
         (m) => m.ProjectViewComponent
@@ -29,7 +30,8 @@ export const PROJECT_ROUTES: Routes = [
       projectInfo: projectInfoResolver,
       projectReport: projectReportResolver,
       reportNames: reportNamesResolver,
-      recordings: recordingsResolver
+      recordings: recordingsResolver,
+      projectSlug: getProjectSlugResolver
     },
     children: [
       {

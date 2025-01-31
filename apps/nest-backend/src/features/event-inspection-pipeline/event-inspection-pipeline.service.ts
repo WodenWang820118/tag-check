@@ -12,8 +12,8 @@ import { ProjectAbstractReportService } from '../../features/project-agent/proje
 import {
   EventInspectionPresetDto,
   CreateTestEventDto,
-  CreateTestInfoDto,
-  CreateTestRequestInfoDto
+  CreateTestEventDetailDto,
+  CreateSpecDto
 } from '../../shared';
 import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
 import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
@@ -64,8 +64,8 @@ export class EventInspectionPipelineService {
       const timestamp = new Date().getTime();
       const eventName = extractEventNameFromId(eventId);
       const testResultDto: CreateTestEventDto &
-        CreateTestInfoDto &
-        CreateTestRequestInfoDto = {
+        CreateTestEventDetailDto &
+        CreateSpecDto = {
         eventId: eventId,
         testName: `${eventName}_${timestamp}`,
         eventName: eventName,
@@ -73,16 +73,22 @@ export class EventInspectionPipelineService {
         requestPassed: result.requestCheckResult.passed,
         rawRequest: result.rawRequest,
         message: result.dataLayerResult.message || 'failed',
-        destinationUrl: result.destinationUrl
+        destinationUrl: result.destinationUrl,
+        dataLayer: result.dataLayerResult.dataLayer,
+        dataLayerSpec: result.dataLayerResult.dataLayerSpec
       };
       this.logger.debug('Test Result:', JSON.stringify(testResultDto, null, 2));
-      await this.testResultService.createTestFileReport(testResultDto);
+      await this.testResultService.createAbstractReport(
+        projectSlug,
+        eventId,
+        testResultDto
+      );
       await this.writeAbstractReport(result, projectSlug, eventId);
       return data;
     } catch (error) {
       this.logger.error(error);
       // TODO: get test name from database for users to locate the failed test
-      await this.testResultService.createTestFileReport({
+      await this.testResultService.createAbstractReport(projectSlug, eventId, {
         eventId: eventId,
         testName: extractEventNameFromId(eventId),
         eventName: extractEventNameFromId(eventId),
@@ -90,14 +96,16 @@ export class EventInspectionPipelineService {
         requestPassed: false,
         rawRequest: '',
         message: `${error}`,
-        destinationUrl: ''
+        destinationUrl: '',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        dataLayerSpec: {}
       });
 
       const screenshot = await page.screenshot({
         fullPage: true
       });
 
-      await this.testImageRepositoryService.create({
+      await this.testImageRepositoryService.create(projectSlug, eventId, {
         imageName: `${projectSlug}_${eventId}`,
         imageData: screenshot
       });
@@ -122,7 +130,6 @@ export class EventInspectionPipelineService {
       requestPassed: result.requestCheckResult.passed,
       rawRequest: result.rawRequest,
       message: result.dataLayerResult.message,
-      incorrectInfo: result.dataLayerResult.incorrectInfo,
       reformedDataLayer: result.requestCheckResult.dataLayer,
       dataLayer: result.dataLayerResult.dataLayer,
       dataLayerSpec: result.dataLayerResult.dataLayerSpec,

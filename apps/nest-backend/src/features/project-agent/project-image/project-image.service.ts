@@ -5,7 +5,7 @@ import { ImageService } from '../../../infrastructure/os/image/image.service';
 export class ProjectImageService {
   constructor(private readonly imageService: ImageService) {}
 
-  async readImage(eventId: string) {
-    return await this.imageService.readImage(eventId);
+  async readImage(projectSlug: string, eventId: string) {
+    return await this.imageService.readImage(projectSlug, eventId);
   }
 }

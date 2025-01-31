@@ -23,7 +23,9 @@ export class AuthenticationSettingEntity
   @Column()
   password!: string;
 
-  @OneToOne(() => ProjectEntity, (project) => project.id)
+  @OneToOne(() => ProjectEntity, (project) => project.authenticationSettings, {
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'projectId' })
   project!: ProjectEntity;
 }

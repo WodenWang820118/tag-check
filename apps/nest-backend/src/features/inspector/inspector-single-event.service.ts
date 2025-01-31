@@ -107,12 +107,10 @@ export class InspectorSingleEventService {
     this.logger.log(`Destination URL: ${destinationUrl}`);
     await this.fileService.writeCacheFile(projectSlug, eventId, result);
     const screenshot = await page.screenshot({
-      // path: imageSavingFolder,
       fullPage: true
     });
 
-    // await this.saveImage(projectSlug, eventId, imageSavingFolder);
-    await this.testImageRepositoryService.create({
+    await this.testImageRepositoryService.create(projectSlug, eventId, {
       imageName: 'screenshot.png',
       imageData: screenshot
     });
@@ -171,7 +169,7 @@ export class InspectorSingleEventService {
       fullPage: true
     });
 
-    await this.testImageRepositoryService.create({
+    await this.testImageRepositoryService.create(projectSlug, eventId, {
       imageName: 'screenshot.png',
       imageData: screenshot
     });

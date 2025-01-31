@@ -24,7 +24,7 @@ export class SpecService {
 
   async getSpecByEvent(event: string) {
     return await this.specRepository.findOne({
-      where: { event: event }
+      where: { eventName: event }
     });
   }
 

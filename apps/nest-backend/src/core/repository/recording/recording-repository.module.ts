@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RecordingEntity } from '../../../shared';
+import { RecordingEntity, TestEventEntity } from '../../../shared';
 import { RecordingRepositoryService } from './recording-repository.service';
 
-const modules = [TypeOrmModule.forFeature([RecordingEntity])];
+const modules = [TypeOrmModule.forFeature([RecordingEntity, TestEventEntity])];
 const services = [RecordingRepositoryService];
 
 @Module({

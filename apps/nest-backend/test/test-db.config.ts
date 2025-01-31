@@ -7,11 +7,9 @@ import {
   ProjectEntity,
   RecordingEntity,
   SpecEntity,
-  TestDataLayerEntity,
+  TestEventDetailEntity,
   TestEventEntity,
-  TestImageEntity,
-  TestInfoEntity,
-  TestRequestInfoEntity
+  TestImageEntity
 } from '../src/shared';
 
 export const testDbConfig: DataSourceOptions = {
@@ -19,16 +17,14 @@ export const testDbConfig: DataSourceOptions = {
   database: ':memory:',
   entities: [
     TestEventEntity,
-    TestDataLayerEntity,
     TestImageEntity,
-    TestInfoEntity,
-    TestRequestInfoEntity,
     ProjectEntity,
     AuthenticationSettingEntity,
     BrowserSettingEntity,
     ApplicationSettingEntity,
     RecordingEntity,
-    SpecEntity
+    SpecEntity,
+    TestEventDetailEntity
   ], // Add all your entities here
   synchronize: true,
   dropSchema: true,

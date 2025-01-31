@@ -3,9 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
   ApplicationSettingEntity,
+  ApplicationSettingResponseDto,
   CreateApplicationSettingDto,
+  ProjectEntity,
   UpdateApplicationSettingDto
 } from '../../../shared';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ApplicationSettingRepositoryService {
@@ -15,14 +18,25 @@ export class ApplicationSettingRepositoryService {
   ) {}
 
   async get(id: number) {
-    return this.repository.findOne({ where: { id } });
+    const entity = await this.repository.findOne({ where: { id } });
+    return plainToInstance(ApplicationSettingResponseDto, entity);
   }
 
-  async create(data: CreateApplicationSettingDto) {
-    return this.repository.save(data);
+  async create(
+    projectEntity: ProjectEntity,
+    data: CreateApplicationSettingDto
+  ) {
+    const applicationSetting = new ApplicationSettingEntity();
+    applicationSetting.project = projectEntity;
+    applicationSetting.localStorage = data.localStorage;
+    applicationSetting.cookie = data.cookie;
+    applicationSetting.gtm = data.gtm;
+    const entity = await this.repository.save(applicationSetting);
+    return plainToInstance(ApplicationSettingResponseDto, entity);
   }
 
   async update(id: number, data: UpdateApplicationSettingDto) {
-    return this.repository.update(id, data);
+    const entity = await this.repository.update(id, data);
+    return plainToInstance(ApplicationSettingResponseDto, entity);
   }
 }

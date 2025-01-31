@@ -32,18 +32,23 @@ export class ProjectEntity extends AuditableEntity implements ProjectSchema {
   @Column({ nullable: true })
   measurementId?: string;
 
-  @OneToMany(() => SpecEntity, (spec) => spec.project)
-  specs!: SpecEntity[];
-
-  @OneToMany(() => TestEventEntity, (testEvent) => testEvent.project)
+  @OneToMany(() => TestEventEntity, (testEvent) => testEvent.project, {
+    onDelete: 'CASCADE'
+  })
   testEvents!: TestEventEntity[];
 
-  @OneToOne(() => AuthenticationSettingEntity, (auth) => auth.project)
+  @OneToOne(() => AuthenticationSettingEntity, (auth) => auth.project, {
+    onDelete: 'CASCADE'
+  })
   authenticationSettings!: AuthenticationSettingEntity;
 
-  @OneToOne(() => BrowserSettingEntity, (browser) => browser.project)
+  @OneToOne(() => BrowserSettingEntity, (browser) => browser.project, {
+    onDelete: 'CASCADE'
+  })
   browserSettings!: BrowserSettingEntity;
 
-  @OneToOne(() => ApplicationSettingEntity, (app) => app.project)
+  @OneToOne(() => ApplicationSettingEntity, (app) => app.project, {
+    onDelete: 'CASCADE'
+  })
   applicationSettings!: ApplicationSettingEntity;
 }

@@ -29,19 +29,11 @@ export class EditorComponent {
   private editor = viewChild<ElementRef<HTMLDivElement>>('editor');
 
   constructor(private readonly editorService: EditorService) {
-    // Use effect to handle initialization and changes
-    effect(() => {
-      const editorElement = this.editor();
-      if (editorElement && !this.editMode()) {
-        this.initializeEditor();
-      }
-    });
-
     // Handle content changes
     effect(() => {
       const content = this.content();
       const editorElement = this.editor();
-      if (editorElement && content) {
+      if (editorElement && content && !this.editMode()) {
         this.initializeEditor();
       }
     });

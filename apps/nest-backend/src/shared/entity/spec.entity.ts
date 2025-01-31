@@ -1,26 +1,28 @@
-import { Spec } from '@utils';
+import { BaseDataLayerEvent, StrictDataLayerEvent } from '@utils';
 import {
   Column,
   Entity,
   JoinColumn,
-  ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { ProjectEntity } from './project.entity';
 import { AuditableEntity } from './common';
+import { TestEventEntity } from './test-event.entity';
 
 @Entity('spec')
-export class SpecEntity extends AuditableEntity implements Spec {
+export class SpecEntity extends AuditableEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @JoinColumn({ name: 'projectId' })
-  @ManyToOne(() => ProjectEntity, (project) => project.specs)
-  project!: ProjectEntity;
+  @OneToOne(() => TestEventEntity, (testEvent) => testEvent.spec, {
+    onDelete: 'CASCADE'
+  })
+  @JoinColumn({ name: 'testEventId' })
+  testEvent!: TestEventEntity;
 
   @Column()
-  event!: string;
+  eventName!: string;
 
   @Column('json')
-  specData!: Spec;
+  dataLayerSpec!: StrictDataLayerEvent | BaseDataLayerEvent;
 }

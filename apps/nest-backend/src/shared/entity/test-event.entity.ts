@@ -5,14 +5,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { ProjectEntity } from './project.entity';
-import { TestInfoEntity } from './test-info.entity';
-import { TestRequestInfoEntity } from './test-request-info.entity';
 import { TestImageEntity } from './test-image.entity';
-import { TestDataLayerEntity } from './test-data-layer.entity';
+import { TestEventDetailEntity } from './test-event-detail.entity';
+import { SpecEntity } from './spec.entity';
 
 @Entity('test_event')
 export class TestEventEntity
@@ -22,33 +22,29 @@ export class TestEventEntity
   @PrimaryGeneratedColumn()
   id!: number;
 
+  @ManyToOne(() => ProjectEntity, (project) => project.testEvents, {
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'projectId' })
-  @ManyToOne(() => ProjectEntity, (project) => project.id)
   project!: ProjectEntity;
 
-  @OneToOne(() => TestInfoEntity, (testInfo) => testInfo.testEvent)
-  testInfo!: TestInfoEntity;
+  @OneToOne(() => SpecEntity, (spec) => spec.testEvent, {
+    onDelete: 'CASCADE'
+  })
+  spec!: SpecEntity;
 
-  @OneToOne(
-    () => TestRequestInfoEntity,
-    (testRequestInfo) => testRequestInfo.testEvent
-  )
-  testRequestInfo!: TestRequestInfoEntity;
+  @OneToMany(() => TestEventDetailEntity, (detail) => detail.testEvent, {
+    onDelete: 'CASCADE'
+  })
+  testEventDetail!: TestEventDetailEntity;
 
-  @OneToOne(() => TestImageEntity, (testImage) => testImage.testEvent)
+  @OneToOne(() => TestImageEntity, (testImage) => testImage.testEvent, {
+    onDelete: 'CASCADE'
+  })
   testImage!: TestImageEntity;
 
-  @OneToOne(
-    () => TestDataLayerEntity,
-    (testDataLayer) => testDataLayer.testEvent
-  )
-  testDataLayer!: TestDataLayerEntity;
-
-  @Column()
+  @Column({ name: 'eventId' })
   eventId!: string;
-
-  @Column()
-  eventName!: string;
 
   @Column()
   testName!: string;

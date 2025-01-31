@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -27,10 +27,18 @@ export class ProjectRepositoryService {
   }
 
   async getBySlug(slug: string) {
+    const entity = await this.getEntityBySlug(slug);
+    return plainToInstance(ProjectResponseDto, entity);
+  }
+
+  async getEntityBySlug(slug: string) {
     const entity = await this.repository.findOne({
       where: { projectSlug: slug }
     });
-    return plainToInstance(ProjectResponseDto, entity);
+    if (!entity) {
+      throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
+    }
+    return entity;
   }
 
   async getSettingBySlug(slug: string) {

@@ -1,5 +1,5 @@
 import { ApplicationSetting, Cookie, Gtm, LocalStorage } from '@utils';
-import { IsArray, IsJSON, IsOptional, IsString } from 'class-validator';
+import { IsJSON, IsOptional } from 'class-validator';
 
 export class CreateApplicationSettingDto implements ApplicationSetting {
   @IsJSON()
@@ -13,10 +13,4 @@ export class CreateApplicationSettingDto implements ApplicationSetting {
   @IsJSON()
   @IsOptional()
   gtm?: Gtm;
-
-  // TODO: could be normalized into test events as preventNavigation boolean
-  @IsArray()
-  @IsOptional()
-  @IsString({ each: true })
-  preventNavigationEvents?: string[];
 }

@@ -12,8 +12,12 @@ import { TestImageRepositoryService } from '../../../core/repository/test-event/
 export class ImageService {
   private logger = new Logger(ImageService.name);
   constructor(private testInageRepositoryService: TestImageRepositoryService) {}
-  async readImage(eventId: string) {
-    const image = await this.testInageRepositoryService.getByEventId(eventId);
+  async readImage(projectSlug: string, eventId: string) {
+    const image =
+      await this.testInageRepositoryService.getByProjectSlugAndEventId(
+        projectSlug,
+        eventId
+      );
 
     if (!image) {
       throw new NotFoundException(`Image not found for event: ${eventId}`);

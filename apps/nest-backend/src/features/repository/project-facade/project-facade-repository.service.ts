@@ -9,8 +9,7 @@ import {
   CreateApplicationSettingDto,
   CreateAuthenticationSettingDto,
   CreateBrowserSettingDto,
-  CreateProjectDto,
-  CreateSpecDto
+  CreateProjectDto
 } from '../../../shared';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 
@@ -27,6 +26,11 @@ export class ProjectFacadeRepositoryService {
   ) {}
 
   async createProject(project: CreateProjectDto) {
+    const projectDto = await this.projectRepositoryService.create(project);
+    const projectEntity = await this.projectRepositoryService.getEntityBySlug(
+      project.projectSlug
+    );
+
     const authenticationSetting: CreateAuthenticationSettingDto = {
       username: '',
       password: ''
@@ -49,32 +53,28 @@ export class ProjectFacadeRepositoryService {
         isRequestCheck: false,
         tagManagerUrl: '',
         gtmPreviewModeUrl: ''
-      },
-      preventNavigationEvents: []
-    };
-
-    const spec: CreateSpecDto = {
-      event: 'page_view',
-      specData: {
-        event: 'page_view'
       }
     };
 
-    const applicationPromise =
-      this.applicationRepositoryService.create(applicationSetting);
+    const applicationPromise = this.applicationRepositoryService.create(
+      projectEntity,
+      applicationSetting
+    );
     const authenticationPromise = this.authenticationRepositoryService.create(
+      projectEntity,
       authenticationSetting
     );
-    const browserPromise = this.browserRepositoryService.create(browserSetting);
-    const specPromise = this.specRepositoryService.create(spec);
+    const browserPromise = this.browserRepositoryService.create(
+      projectEntity,
+      browserSetting
+    );
 
     await Promise.all([
       applicationPromise,
       authenticationPromise,
-      browserPromise,
-      specPromise
+      browserPromise
     ]);
 
-    return await this.projectRepositoryService.create(project);
+    return projectDto;
   }
 }

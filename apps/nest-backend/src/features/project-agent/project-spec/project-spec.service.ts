@@ -1,5 +1,5 @@
 import { Injectable, Logger, NotAcceptableException } from '@nestjs/common';
-import { ProjectSpec, Spec } from '@utils';
+import { Spec } from '@utils';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SpecService } from './spec.service';
@@ -26,21 +26,18 @@ export class ProjectSpecService {
     return { projectSlug: projectSpec.projectSlug, specs: projectSpec };
   }
 
-  async getSpec(
-    projectSlug: string,
-    eventName: string
-  ): Promise<Spec | undefined> {
+  async getSpec(projectSlug: string, eventName: string) {
     const spec = await this.specService.getSpecByEvent(eventName);
     if (!spec) {
       return undefined;
     }
-    return spec.specData;
+    return spec.dataLayerSpec;
   }
 
   async addSpec(projectSlug: string, spec: Spec) {
     await this.specService.addSpec({
-      event: spec.event,
-      specData: spec
+      eventName: spec.event,
+      dataLayerSpec: spec
     });
 
     const projectSpec = await this.getProjectSpecs(projectSlug);
@@ -54,8 +51,8 @@ export class ProjectSpecService {
     }
 
     await this.specService.updateSpec(Number(dbSpec.id), {
-      event: eventName,
-      specData: spec
+      eventName: eventName,
+      dataLayerSpec: spec
     });
 
     const projectSpec = await this.getProjectSpecs(projectSlug);

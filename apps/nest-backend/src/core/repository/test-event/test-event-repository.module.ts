@@ -1,34 +1,26 @@
 import { Module } from '@nestjs/common';
-import { TestDataLayerRepositoryService } from './test-data-layer-repository.service';
 import { TestEventRepositoryService } from './test-event-repository.service';
 import { TestImageRepositoryService } from './test-image-repository.service';
-import { TestInfoRepositoryService } from './test-info-repository.service';
-import { TestRequestInfoRepositoryService } from './test-request-info-repository.service';
+import { TestEventDetailRepositoryService } from './test-event-detail-repository.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
-  TestDataLayerEntity,
+  TestEventDetailEntity,
   TestEventEntity,
-  TestImageEntity,
-  TestInfoEntity,
-  TestRequestInfoEntity
+  TestImageEntity
 } from '../../../shared';
 
 const modules = [
   TypeOrmModule.forFeature([
-    TestDataLayerEntity,
     TestEventEntity,
-    TestImageEntity,
-    TestInfoEntity,
-    TestRequestInfoEntity
+    TestEventDetailEntity,
+    TestImageEntity
   ])
 ];
 
 const services = [
-  TestDataLayerRepositoryService,
   TestEventRepositoryService,
   TestImageRepositoryService,
-  TestInfoRepositoryService,
-  TestRequestInfoRepositoryService
+  TestEventDetailRepositoryService
 ];
 
 @Module({

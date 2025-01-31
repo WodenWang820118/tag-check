@@ -27,6 +27,8 @@ export class TestImageEntity
   imageSize?: number;
 
   @JoinColumn({ name: 'testEventId' })
-  @OneToOne(() => TestEventEntity, (testEvent) => testEvent.id)
+  @OneToOne(() => TestEventEntity, (testEvent) => testEvent.testImage, {
+    onDelete: 'CASCADE'
+  })
   testEvent!: TestEventEntity;
 }

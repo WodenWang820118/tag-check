@@ -8,11 +8,9 @@ import {
   ProjectEntity,
   RecordingEntity,
   SpecEntity,
-  TestDataLayerEntity,
+  TestEventDetailEntity,
   TestEventEntity,
-  TestImageEntity,
-  TestInfoEntity,
-  TestRequestInfoEntity
+  TestImageEntity
 } from '../../../shared';
 import { ProjectRepositoryService } from '../../../core/repository/project/project-repository.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
@@ -30,9 +28,7 @@ const entities = [
   RecordingEntity,
   SpecEntity,
   TestEventEntity,
-  TestInfoEntity,
-  TestDataLayerEntity,
-  TestRequestInfoEntity,
+  TestEventDetailEntity,
   TestImageEntity
 ];
 describe('ProjectFacadeRepositoryService', () => {
@@ -99,7 +95,6 @@ describe('ProjectFacadeRepositoryService', () => {
     const authRepo = module.get(AuthenticationSettingRepositoryService);
     const browserRepo = module.get(BrowserSettingRepositoryService);
     const appRepo = module.get(ApplicationSettingRepositoryService);
-    const specRepo = module.get(SpecRepositoryService);
 
     // Verify all entities were created
     const project = await projectRepo.get(1);
@@ -115,9 +110,5 @@ describe('ProjectFacadeRepositoryService', () => {
 
     const appSetting = await appRepo.get(1);
     expect(appSetting).toBeDefined();
-
-    const spec = await specRepo.get(1);
-    expect(spec).toBeDefined();
-    expect(spec?.event).toBe('page_view');
   });
 });

@@ -8,7 +8,7 @@ import {
   forkJoin,
   of
 } from 'rxjs';
-import { ProjectReport, IReportDetails } from '@utils';
+import { ProjectReport, IReportDetails, TestEventSchema } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
@@ -24,7 +24,7 @@ export class ReportService {
   constructor(private http: HttpClient) {}
 
   getReports() {
-    return this.http.get<Report[]>(environment.reportApiUrl).pipe(
+    return this.http.get<TestEventSchema[]>(environment.reportApiUrl).pipe(
       catchError((error) => {
         console.error(error);
         return of([]);
@@ -34,7 +34,7 @@ export class ReportService {
 
   getProjectReports(projectSlug: string) {
     return this.http
-      .get<ProjectReport>(`${environment.reportApiUrl}/${projectSlug}`)
+      .get<TestEventSchema>(`${environment.reportApiUrl}/${projectSlug}`)
       .pipe(
         catchError((error) => {
           console.error(error);
@@ -57,7 +57,10 @@ export class ReportService {
   updateReport(projectSlug: string, report: ProjectReport) {
     if (!projectSlug || !report) return of({} as ProjectReport);
     return this.http
-      .put<ProjectReport>(`${environment.reportApiUrl}/${projectSlug}`, report)
+      .put<TestEventSchema>(
+        `${environment.reportApiUrl}/${projectSlug}`,
+        report
+      )
       .pipe(
         catchError((error) => {
           console.error(error);
@@ -73,7 +76,7 @@ export class ReportService {
   ) {
     // TODO: use SQLite3 to store the report details
     return this.http
-      .post<ProjectReport>(
+      .post<TestEventSchema>(
         `${environment.reportApiUrl}/${projectSlug}/${eventId}`,
         reportDetails
       )
@@ -133,7 +136,7 @@ export class ReportService {
   deleteReports(projectSlug: string, reports: IReportDetails[]) {
     const tasks = reports.map((report) =>
       this.http
-        .delete<ProjectReport>(
+        .delete<TestEventSchema>(
           `${environment.reportApiUrl}/${projectSlug}/${report.eventId}`
         )
         .pipe(
@@ -144,6 +147,21 @@ export class ReportService {
         )
     );
     return forkJoin(tasks); // Waits for all DELETE operations to complete.
+  }
+
+  deleteBatchReports(projectSlug: string, eventIds: string[]) {
+    if (!projectSlug || !eventIds) throw new Error('Invalid arguments');
+    console.log('Deleting reports:', eventIds);
+    return this.http
+      .delete<TestEventSchema>(`${environment.reportApiUrl}/${projectSlug}`, {
+        body: eventIds
+      })
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
   }
 
   getReportDetails(

@@ -38,7 +38,6 @@ export type TestRequestInfoSchema = {
 
 export type TestEvent = {
   testName: string;
-  eventName: string;
   eventId: string;
   stopNavigation?: boolean;
   message?: string;

@@ -68,7 +68,7 @@ export class RecordingController {
     @Param('eventId') eventId: string,
     @Body() recording: Recording
   ) {
-    return await this.recordingRepositoryService.create({
+    return await this.recordingRepositoryService.create(projectSlug, eventId, {
       title: recording.title,
       steps: recording.steps
     });

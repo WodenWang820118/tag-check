@@ -37,7 +37,7 @@ export class ReportTableFacadeService {
 
   // Selection model as a signal
   readonly selection = signal(new SelectionModel<IReportDetails>(true, []));
-  readonly preventNavigationEvents = signal<string[]>([]);
+  // readonly preventNavigationEvents = signal<string[]>([]);
   private readonly projectSlug = signal<string>('');
 
   // Computed property for "select all" behavior
@@ -87,9 +87,9 @@ export class ReportTableFacadeService {
               if (data) {
                 // On success
                 this.projectDataSourceService.setPreventNavigationSignal(false);
-                this.preventNavigationEvents.set(
-                  data.settings.preventNavigationEvents
-                );
+                // this.preventNavigationEvents.set(
+                //   data.settings.preventNavigationEvents
+                // );
                 this.selection().clear();
               }
             });
@@ -124,7 +124,10 @@ export class ReportTableFacadeService {
               this.projectDataSourceService.setData(remainingReports);
 
               this.reportService
-                .deleteReports(this.projectSlug(), this.selection().selected)
+                .deleteBatchReports(
+                  this.projectSlug(),
+                  this.selection().selected.map((item) => item.eventId)
+                )
                 .pipe(take(1))
                 .subscribe();
             }
@@ -146,14 +149,14 @@ export class ReportTableFacadeService {
       !data['projectSetting']
     )
       return;
-    const project = data['projectReport'];
+    const reports = data['projectReport'];
     const projectRecordings = data['recordings'];
     const reportNames = data['reportNames'];
     const projectSettings = data['projectSetting'];
 
-    if (project.length && paginator && sort) {
+    if (reports.length && paginator && sort) {
       // Sort the data
-      const injectReports = (project.reports as IReportDetails[]).sort((a, b) =>
+      const injectReports = (reports as IReportDetails[]).sort((a, b) =>
         a.eventName.localeCompare(b.eventName)
       );
       // Create data source and assign
@@ -163,12 +166,13 @@ export class ReportTableFacadeService {
       this.dataSource.set(dataSource);
 
       // Initialize statuses via facade
-      this.initializeRecordingStatus(reportNames, projectRecordings.recordings);
+      // TODO: Implement recording status. i.e., whether a recording exists for an abstract report
+      // this.initializeRecordingStatus(reportNames, projectRecordings.recordings);
       // Set up signals
-      this.preventNavigationEvents.set(
-        projectSettings.settings.preventNavigationEvents
-      );
-      this.projectSlug.set(project.projectSlug);
+      // this.preventNavigationEvents.set(
+      //   projectSettings.settings.preventNavigationEvents
+      // );
+      this.projectSlug.set(data['projectSlug']);
     }
   }
 

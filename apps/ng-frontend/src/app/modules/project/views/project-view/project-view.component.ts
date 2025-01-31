@@ -1,7 +1,7 @@
 import { Component, signal, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { timer } from 'rxjs';
-import { Project, ProjectSetting } from '@utils';
+import { IReportDetails, Project, ProjectSetting } from '@utils';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
@@ -22,6 +22,7 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
 export class ProjectViewComponent {
   project = signal<ProjectSetting | null>(null);
   projectInfo = signal<Project[]>([]);
+  reports = signal<IReportDetails[]>([]);
 
   constructor(
     private route: ActivatedRoute,
@@ -30,8 +31,10 @@ export class ProjectViewComponent {
     this.route.data.subscribe((data) => {
       const projectSettings = data['projectSetting'];
       const projectInfo = data['projectInfo'];
+      const report = data['reports'];
       this.project.set(projectSettings);
       this.projectInfo.set(projectInfo);
+      this.reports.set(report);
     });
   }
 

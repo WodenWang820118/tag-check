@@ -1,21 +1,29 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { RecordingEntity, CreateRecordingDto } from '../../../shared';
+import {
+  RecordingEntity,
+  CreateRecordingDto,
+  TestEventEntity
+} from '../../../shared';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class RecordingRepositoryService {
   constructor(
     @InjectRepository(RecordingEntity)
-    private readonly repository: Repository<RecordingEntity>
+    private readonly repository: Repository<RecordingEntity>,
+    @InjectRepository(TestEventEntity)
+    private readonly testEventRepository: Repository<TestEventEntity>
   ) {}
 
   async get(id: number) {
-    return this.repository.findOne({ where: { id } });
+    const entity = await this.repository.findOne({ where: { id } });
+    return plainToInstance(RecordingEntity, entity);
   }
 
   async listByProject(projectSlug: string) {
-    return this.repository.find({
+    const entity = await this.repository.find({
       relations: {
         testEvent: {
           project: true
@@ -29,10 +37,11 @@ export class RecordingRepositoryService {
         }
       }
     });
+    return plainToInstance(RecordingEntity, entity);
   }
 
   async getRecordingDetails(projectSlug: string, eventId: string) {
-    return this.repository.findOne({
+    const entity = await this.repository.findOne({
       relations: {
         testEvent: {
           project: true
@@ -47,18 +56,33 @@ export class RecordingRepositoryService {
         }
       }
     });
+    return plainToInstance(RecordingEntity, entity);
   }
 
-  async getByTestEventId(testEventId: number) {
-    return this.repository.findOne({
-      where: { testEvent: { id: testEventId } },
-      relations: ['testEvent']
+  async create(projectSlug: string, eventId: string, data: CreateRecordingDto) {
+    const testEventEntity = await this.testEventRepository.findOne({
+      relations: {
+        project: true
+      },
+      where: {
+        eventId: eventId,
+        project: {
+          projectSlug: projectSlug
+        }
+      }
     });
-  }
 
-  async create(data: CreateRecordingDto) {
-    const recording = this.repository.create(data);
-    return this.repository.save(recording);
+    if (!testEventEntity) {
+      throw new HttpException('TestEvent not found', HttpStatus.NOT_FOUND);
+    }
+
+    const recordingEntity = new RecordingEntity();
+    recordingEntity.title = data.title;
+    recordingEntity.steps = data.steps;
+    recordingEntity.testEvent = testEventEntity;
+
+    const entity = await this.repository.save(recordingEntity);
+    return plainToInstance(RecordingEntity, entity);
   }
 
   async update(projectSlug: string, eventId: string, data: CreateRecordingDto) {
@@ -68,6 +92,7 @@ export class RecordingRepositoryService {
     }
 
     Object.assign(recording, data);
-    return this.repository.save(recording);
+    const entity = await this.repository.save(recording);
+    return plainToInstance(RecordingEntity, entity);
   }
 }

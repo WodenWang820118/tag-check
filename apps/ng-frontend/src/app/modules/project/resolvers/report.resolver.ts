@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
-import { IReportDetails, ProjectReport } from '@utils';
+import { IReportDetails, TestEventSchema } from '@utils';
 import { ImageService } from '../../../shared/services/api/image/image.service';
 import { ReportService } from '../../../shared/services/api/report/report.service';
 import { VideosService } from '../../../shared/services/api/videos/videos.service';
@@ -28,7 +28,7 @@ export const imageResolver: ResolveFn<Blob | null> = (route, state) => {
   return imageService.getImage(eventId);
 };
 
-export const projectReportResolver: ResolveFn<ProjectReport | null> = (
+export const projectReportResolver: ResolveFn<TestEventSchema | null> = (
   route,
   state
 ) => {

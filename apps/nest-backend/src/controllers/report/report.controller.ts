@@ -9,7 +9,6 @@ import {
   Header,
   Delete
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { IReportDetails } from '@utils';
 import { ProjectReportService } from '../../features/project-agent/project-report/project-report.service';
 import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
@@ -29,15 +28,6 @@ export class ReportController {
     private readonly testEventRepositoryService: TestEventRepositoryService
   ) {}
 
-  @ApiOperation({
-    summary: 'get project reports',
-    description:
-      'Get all reports for a project. The project is identified by the projectSlug.'
-  })
-  @ApiParam({
-    name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.'
-  })
   @Get(':projectSlug')
   @Log()
   async getProjectEventReports(@Param('projectSlug') projectSlug: string) {
@@ -47,15 +37,18 @@ export class ReportController {
     return reports;
   }
 
-  @ApiOperation({
-    summary: 'get report folder names',
-    description:
-      'Get all report folder names for a project. The project is identified by the projectSlug.'
-  })
-  @ApiParam({
-    name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.'
-  })
+  @Delete(':projectSlug')
+  @Log()
+  async deleteProjectEventReports(
+    @Param('projectSlug') projectSlug: string,
+    @Body() eventIds: string[]
+  ) {
+    return await this.testEventRepositoryService.deleteByProjectSlugAndEventIds(
+      projectSlug,
+      eventIds
+    );
+  }
+
   @Get(':projectSlug/names')
   async getProjectEventReportNames(@Param('projectSlug') projectSlug: string) {
     // it equals to get unique test event ids
@@ -64,23 +57,6 @@ export class ReportController {
     );
   }
 
-  @ApiOperation({
-    summary: 'update project report',
-    description:
-      'Update a report for a project. The project is identified by the projectSlug. The report is identified by the eventName.'
-  })
-  @ApiParam({
-    name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.'
-  })
-  @ApiParam({
-    name: 'eventId',
-    description: 'The name of the test associated with the event.'
-  })
-  @ApiBody({
-    description: 'The report to be updated.',
-    type: Object
-  })
   @Put(':projectSlug/:eventId')
   @Log()
   async updateReport(
@@ -98,47 +74,20 @@ export class ReportController {
     );
   }
 
-  @ApiOperation({
-    summary: 'add a new project report',
-    description:
-      'Add a new report for a project. The project is identified by the projectSlug.'
-  })
-  @ApiParam({
-    name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.'
-  })
-  @ApiParam({
-    name: 'eventId',
-    description: 'The name of the test associated with the event.'
-  })
-  @ApiBody({
-    description: 'The report to be added.',
-    type: Object
-  })
   @Post(':projectSlug/:eventId')
-  @Log()
   async addReport(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
     @Body() report: IReportDetails
   ) {
-    return this.testReportFacadeRepositoryService.createTestFileReport(report);
+    Logger.log(`addReport: ${JSON.stringify(report, null, 2)}`);
+    return this.testReportFacadeRepositoryService.createAbstractReport(
+      projectSlug,
+      eventId,
+      report
+    );
   }
 
-  @ApiOperation({
-    summary: 'read report(s) from a specifc project',
-    description:
-      'This endpoint reads report(s) from a specifc project. \
-      If multiple reports are found, it will return an array of report names.'
-  })
-  @ApiParam({
-    name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.'
-  })
-  @ApiParam({
-    name: 'eventId',
-    description: 'The id of the test associated with the event.'
-  })
   @Get('xlsx/:projectSlug/:eventId')
   @Header(
     'Content-Type',
@@ -156,20 +105,6 @@ export class ReportController {
     );
   }
 
-  @ApiOperation({
-    summary: 'delete report from a specifc project',
-    description:
-      'This endpoint deletes report(s) from a specifc project. \
-      If multiple reports are found, it will delete all of them.'
-  })
-  @ApiParam({
-    name: 'projectName',
-    description: 'The name of the project to which the event belongs.'
-  })
-  @ApiParam({
-    name: 'eventId',
-    description: 'The name of the test associated with the event.'
-  })
   @Delete(':projectSlug/:eventId')
   @Log()
   async deleteReport(
@@ -182,19 +117,6 @@ export class ReportController {
     );
   }
 
-  @ApiOperation({
-    summary: 'get report details',
-    description:
-      'Get the details of a report for a project. The project is identified by the projectSlug. The report is identified by the eventId.'
-  })
-  @ApiParam({
-    name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.'
-  })
-  @ApiParam({
-    name: 'eventId',
-    description: 'The name of the test associated with the event.'
-  })
   @Get(':projectSlug/:eventId')
   async getReportDetails(
     @Param('projectSlug') projectSlug: string,

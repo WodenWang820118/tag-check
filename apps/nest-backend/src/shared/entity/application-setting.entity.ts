@@ -26,7 +26,9 @@ export class ApplicationSettingEntity
   @Column('json', { nullable: true })
   gtm?: Gtm;
 
-  @OneToOne(() => ProjectEntity, (project) => project.id)
+  @OneToOne(() => ProjectEntity, (project) => project.applicationSettings, {
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'projectId' })
   project!: ProjectEntity;
 }

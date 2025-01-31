@@ -1,51 +1,65 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { TestDataLayerRepositoryService } from '../../../core/repository/test-event/test-data-layer-repository.service';
+import { Injectable, Logger } from '@nestjs/common';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 import { TestImageRepositoryService } from '../../../core/repository/test-event/test-image-repository.service';
-import { TestInfoRepositoryService } from '../../../core/repository/test-event/test-info-repository.service';
-import { TestRequestInfoRepositoryService } from '../../../core/repository/test-event/test-request-info-repository.service';
 import {
   CreateTestEventDto,
-  CreateTestImageDto,
-  CreateTestInfoDto,
-  CreateTestRequestInfoDto,
-  UpdateTestDataLayerDto
+  CreateTestEventDetailDto,
+  CreateSpecDto
 } from '../../../shared';
 import { ProjectRepositoryService } from '../../../core/repository/project/project-repository.service';
+import { TestEventDetailRepositoryService } from '../../../core/repository/test-event/test-event-detail-repository.service';
+import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
 
 @Injectable()
 export class TestReportFacadeRepositoryService {
   constructor(
     private projectRepositoryService: ProjectRepositoryService,
     private testEventRepositoryService: TestEventRepositoryService,
-    private testDataLayerRepositoryService: TestDataLayerRepositoryService,
-    private testImageRepositoryService: TestImageRepositoryService,
-    private testInfoRepositoryService: TestInfoRepositoryService,
-    private testRequestInfoRepositoryService: TestRequestInfoRepositoryService
+    private testEventDetailRepositoryService: TestEventDetailRepositoryService,
+    private specRepositoryService: SpecRepositoryService,
+    private testImageRepositoryService: TestImageRepositoryService
   ) {}
 
-  async createTestFileReport(
-    data: CreateTestEventDto & CreateTestInfoDto & CreateTestRequestInfoDto
+  async createAbstractReport(
+    projectSlug: string,
+    eventId: string,
+    data: CreateTestEventDto & CreateTestEventDetailDto & CreateSpecDto
   ) {
-    const testEventCreation = this.testEventRepositoryService.create({
-      eventId: data.eventId,
-      testName: data.testName,
+    const projectEntity =
+      await this.projectRepositoryService.getEntityBySlug(projectSlug);
+
+    const testEventCreation = await this.testEventRepositoryService.create(
+      projectEntity,
+      {
+        eventId: data.eventId,
+        testName: data.testName,
+        eventName: data.eventName,
+        message: data.message
+      }
+    );
+
+    const testEventEntity =
+      await this.testEventRepositoryService.getEntityByEventId(eventId);
+
+    const testEventDetailCreation =
+      await this.testEventDetailRepositoryService.create(testEventEntity, {
+        passed: data.passed,
+        requestPassed: data.requestPassed,
+        rawRequest: data.rawRequest,
+        destinationUrl: data.destinationUrl,
+        dataLayer: data.dataLayer,
+        reformedDataLayer: data.reformedDataLayer
+      });
+
+    const specCreation = this.specRepositoryService.create(testEventEntity, {
       eventName: data.eventName,
-      message: data.message
+      dataLayerSpec: data.dataLayerSpec
     });
 
-    const testInfoCreation = this.testInfoRepositoryService.create({
-      testName: data.testName,
-      eventName: data.eventName,
-      passed: data.passed
-    });
-
-    const testRequestInfo = this.testRequestInfoRepositoryService.create({
-      requestPassed: data.requestPassed,
-      rawRequest: data.rawRequest,
-      destinationUrl: data.destinationUrl
-    });
-
-    return Promise.all([testEventCreation, testInfoCreation, testRequestInfo]);
+    return Promise.all([
+      testEventCreation,
+      testEventDetailCreation,
+      specCreation
+    ]);
   }
 }

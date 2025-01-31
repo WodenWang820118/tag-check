@@ -1,11 +1,11 @@
-import { Spec } from '@utils';
+import { BaseDataLayerEvent, Spec, StrictDataLayerEvent } from '@utils';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateSpecDto implements Spec {
+export class CreateSpecDto {
   @IsNotEmpty()
   @IsString()
-  event!: string;
+  eventName!: string;
 
   @IsNotEmpty()
-  specData!: Spec;
+  dataLayerSpec!: StrictDataLayerEvent | BaseDataLayerEvent;
 }

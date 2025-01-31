@@ -3,17 +3,16 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigsModule } from '../../../core/configs/configs.module';
 import { TestImageEntity } from '../../../shared/entity/test-image.entity';
 import { FullValidationResultService } from './full-validation-result.service';
-import { TestDataLayerEntity } from '../../../shared';
 import { RepositoryModule } from '../../../core/repository/repository.module';
 @Module({
   imports: [
     RepositoryModule,
-    TypeOrmModule.forFeature([TestImageEntity, TestDataLayerEntity]),
+    TypeOrmModule.forFeature([TestImageEntity]),
     ConfigsModule
   ],
   providers: [FullValidationResultService],
   exports: [
-    TypeOrmModule.forFeature([TestImageEntity, TestDataLayerEntity]),
+    TypeOrmModule.forFeature([TestImageEntity]),
     FullValidationResultService,
     RepositoryModule
   ]
