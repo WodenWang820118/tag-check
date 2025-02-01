@@ -21,7 +21,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
 import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
-import { Router } from '@angular/router';
+import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 
 @Injectable({
   providedIn: 'root'
@@ -49,7 +49,7 @@ export class NewReportViewFacadeService {
     private recordingService: RecordingService,
     private specService: SpecService,
     private projectDataSourceService: ProjectDataSourceService,
-    private router: Router
+    private uploadSpecService: UploadSpecService
   ) {}
 
   cancel() {
@@ -101,7 +101,6 @@ export class NewReportViewFacadeService {
       this.editorService.editor$.specJsonEditor,
       this.editorService.editor$.recordingJsonEditor
     ]).pipe(
-      take(1),
       map(([specEditor, recordingEditor]) => {
         if (!this.reportForm.controls['testName'].value)
           throw new Error('Test name is required');
@@ -165,6 +164,7 @@ export class NewReportViewFacadeService {
                       ...data,
                       reportDetails
                     ]);
+                    this.uploadSpecService.completeUpload();
                   }),
                   catchError((error) => {
                     console.error('Error updating project data source:', error);

@@ -4,6 +4,7 @@ import { IReportDetails, TestEventSchema } from '@utils';
 import { ImageService } from '../../../shared/services/api/image/image.service';
 import { ReportService } from '../../../shared/services/api/report/report.service';
 import { VideosService } from '../../../shared/services/api/videos/videos.service';
+import { Observable } from 'rxjs';
 
 export const reportDetailResolver: ResolveFn<IReportDetails | null> = (
   route,
@@ -15,7 +16,10 @@ export const reportDetailResolver: ResolveFn<IReportDetails | null> = (
   return reportService.getReportDetails(projectSlug, eventId);
 };
 
-export const videoResolver: ResolveFn<Blob | null> = (route, state) => {
+export const videoResolver: ResolveFn<{ blob: Blob; hasVideo: boolean }> = (
+  route,
+  state
+) => {
   const videoService = inject(VideosService);
   const projectSlug = route.parent?.params['projectSlug'];
   const eventId = route.params['eventId'];
@@ -24,8 +28,9 @@ export const videoResolver: ResolveFn<Blob | null> = (route, state) => {
 
 export const imageResolver: ResolveFn<Blob | null> = (route, state) => {
   const imageService = inject(ImageService);
+  const projectSlug = route.parent?.params['projectSlug'];
   const eventId = route.params['eventId'];
-  return imageService.getImage(eventId);
+  return imageService.getImage(projectSlug, eventId);
 };
 
 export const projectReportResolver: ResolveFn<TestEventSchema | null> = (

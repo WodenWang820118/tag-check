@@ -1,7 +1,7 @@
 import { TestEventEntity } from './../../../shared/entity/test-event.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import {
   CreateTestImageDto,
   TestImageEntity,
@@ -24,7 +24,7 @@ export class TestImageRepositoryService {
     return plainToInstance(TestImageResponseDto, entity);
   }
 
-  async getByProjectSlugAndEventId(projectSlug: string, eventId: string) {
+  async getBySlugAndEventId(projectSlug: string, eventId: string) {
     const entity = await this.repository.findOne({
       relations: {
         testEvent: true
@@ -39,6 +39,25 @@ export class TestImageRepositoryService {
       }
     });
     return plainToInstance(TestImageResponseDto, entity);
+  }
+
+  async getBySlugAndEventIds(projectSlug: string, eventIds: string[]) {
+    const entities = await this.repository.find({
+      relations: {
+        testEvent: true
+      },
+      where: {
+        testEvent: {
+          eventId: In(eventIds),
+          project: {
+            projectSlug
+          }
+        }
+      }
+    });
+    return entities.map((entity) =>
+      plainToInstance(TestImageResponseDto, entity)
+    );
   }
 
   async create(projectSlug: string, eventId: string, data: CreateTestImageDto) {

@@ -1,16 +1,13 @@
 import { ApplicationSetting, Cookie, Gtm, LocalStorage } from '@utils';
-import { IsJSON, IsOptional } from 'class-validator';
+import { IsJSON } from 'class-validator';
 
 export class CreateApplicationSettingDto implements ApplicationSetting {
   @IsJSON()
-  @IsOptional()
-  localStorage?: LocalStorage;
+  localStorage!: LocalStorage;
 
   @IsJSON()
-  @IsOptional()
-  cookie?: Cookie;
+  cookie!: Cookie;
 
   @IsJSON()
-  @IsOptional()
-  gtm?: Gtm;
+  gtm!: Gtm;
 }

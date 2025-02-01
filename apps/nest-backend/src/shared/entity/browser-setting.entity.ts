@@ -18,7 +18,7 @@ export class BrowserSettingEntity
   id!: number;
 
   @Column('simple-array', { nullable: true })
-  browser?: string[];
+  browser!: string[];
 
   @Column()
   headless!: boolean;

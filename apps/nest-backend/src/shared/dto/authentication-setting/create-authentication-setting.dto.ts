@@ -1,7 +1,7 @@
-import { Authentication } from '@utils';
+import { AuthenticationSetting } from '@utils';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateAuthenticationSettingDto implements Authentication {
+export class CreateAuthenticationSettingDto implements AuthenticationSetting {
   @IsString()
   @IsNotEmpty()
   username!: string;

@@ -13,7 +13,6 @@ import { IReportDetails } from '@utils';
 import { ProjectReportService } from '../../features/project-agent/project-report/project-report.service';
 import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
-import { FullValidationResultService } from '../../features/repository/test-report-facade/full-validation-result.service';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 
@@ -24,7 +23,6 @@ export class ReportController {
     private readonly projectReportService: ProjectReportService,
     private readonly projectAbstractReportService: ProjectAbstractReportService,
     private readonly testReportFacadeRepositoryService: TestReportFacadeRepositoryService,
-    private readonly fullValidationResultService: FullValidationResultService,
     private readonly testEventRepositoryService: TestEventRepositoryService
   ) {}
 
@@ -122,14 +120,9 @@ export class ReportController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
   ) {
-    return (
-      (await this.fullValidationResultService.getSingleReportDetailsData(
-        eventId
-      )) ??
-      (await this.projectAbstractReportService.getSingleAbstractTestResultJson(
-        projectSlug,
-        eventId
-      ))
+    return await this.testReportFacadeRepositoryService.getReportDetail(
+      projectSlug,
+      eventId
     );
   }
 }

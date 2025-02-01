@@ -1,4 +1,3 @@
-import { Auditable } from './auditable.type';
 import { ImageSchema } from './file-report.type';
 
 // Common category types
@@ -88,12 +87,12 @@ export type ValidationStrategy = {
   ): ValidationResult;
 };
 
-export type TestDataLayer = {
-  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
-  dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
-};
+// export type TestDataLayer = {
+//   dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
+//   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
+// };
 
-export type TestDataLayerSchema = {
-  id: number;
-} & TestDataLayer &
-  Auditable;
+// export type TestDataLayerSchema = {
+//   id: number;
+// } & TestDataLayer &
+//   Auditable;

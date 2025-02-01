@@ -7,16 +7,13 @@ export class ApplicationSettingResponseDto implements ApplicationSettingSchema {
   id!: number;
 
   @Expose()
-  localStorage?: LocalStorage | undefined;
+  localStorage!: LocalStorage;
 
   @Expose()
-  cookie?: Cookie | undefined;
+  cookie!: Cookie;
 
   @Expose()
-  gtm?: Gtm | undefined;
-
-  @Expose()
-  preventNavigationEvents?: string[] | undefined;
+  gtm!: Gtm;
 
   @Expose()
   createdAt!: Date;

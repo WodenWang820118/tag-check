@@ -9,6 +9,7 @@ import { BlobToUrlPipe } from '../../pipes/blob-to-url-pipe';
   styleUrls: ['./carousel.component.scss']
 })
 export class CarouselComponent {
+  // TODO: may use placeholder image if no image or video
   imageBlob = input<Blob | null>(null);
   videoBlob = input<Blob | null>(null);
 

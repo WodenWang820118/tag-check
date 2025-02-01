@@ -1,12 +1,13 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import {
   TestEventEntity,
   CreateTestEventDto,
   UpdateTestEventDto,
-  TestEventResponseDto,
-  ProjectEntity
+  AbstractTestEventResponseDto,
+  ProjectEntity,
+  FullTestEventResponseDto
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
@@ -19,10 +20,12 @@ export class TestEventRepositoryService {
 
   async list(id: number) {
     const entity = await this.repository.find({ where: { id } });
-    return plainToInstance(TestEventResponseDto, entity);
+    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
-  async listReports(projectSlug: string): Promise<TestEventResponseDto[]> {
+  async listReports(
+    projectSlug: string
+  ): Promise<AbstractTestEventResponseDto[]> {
     const entity = await this.repository.find({
       relations: {
         testEventDetail: true,
@@ -31,17 +34,17 @@ export class TestEventRepositoryService {
       },
       where: { project: { projectSlug } }
     });
-    return plainToInstance(TestEventResponseDto, entity);
+    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
   async get(id: number) {
     const entity = await this.repository.findOne({ where: { id } });
-    return plainToInstance(TestEventResponseDto, entity);
+    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
   async getByEventId(eventId: string) {
     const entity = await this.repository.findOne({ where: { eventId } });
-    return plainToInstance(TestEventResponseDto, entity);
+    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
   async getEntityByEventId(eventId: string) {
@@ -52,24 +55,56 @@ export class TestEventRepositoryService {
     return entity;
   }
 
+  async getBySlugAndEventId(projectSlug: string, eventId: string) {
+    const entity = await this.repository.findOne({
+      relations: {
+        testEventDetail: true,
+        testImage: true,
+        project: true
+      },
+      where: { project: { projectSlug }, eventId }
+    });
+
+    return plainToInstance(AbstractTestEventResponseDto, entity);
+  }
+
+  async getBySlugAndEventIds(projectSlug: string, eventIds: string[]) {
+    const entities = await this.repository.find({
+      relations: {
+        testEventDetail: true,
+        testImage: true,
+        project: true
+      },
+      where: { project: { projectSlug }, eventId: In(eventIds) }
+    });
+
+    return entities.map((entity) => {
+      return plainToInstance(FullTestEventResponseDto, entity, {
+        enableImplicitConversion: true,
+        excludeExtraneousValues: true
+      });
+    });
+  }
+
   async create(projectEntity: ProjectEntity, data: CreateTestEventDto) {
     const testEvent = new TestEventEntity();
     testEvent.eventId = data.eventId;
+    testEvent.eventName = data.eventName;
     testEvent.testName = data.testName;
     testEvent.message = data.message;
     testEvent.project = projectEntity;
     const entity = await this.repository.save(testEvent);
-    return plainToInstance(TestEventResponseDto, entity);
+    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
   async update(data: UpdateTestEventDto) {
     const entity = await this.repository.save(data);
-    return plainToInstance(TestEventResponseDto, entity);
+    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
   async delete(eventId: string) {
     const entity = await this.repository.delete(eventId);
-    return plainToInstance(TestEventResponseDto, entity);
+    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
   async deleteByProjectSlugAndEventId(projectSlug: string, eventId: string) {
@@ -77,7 +112,7 @@ export class TestEventRepositoryService {
       project: { projectSlug },
       eventId
     });
-    return plainToInstance(TestEventResponseDto, entity);
+    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
   async deleteByProjectSlugAndEventIds(
@@ -120,7 +155,7 @@ export class TestEventRepositoryService {
           eventIds: validatedEventIds
         });
       const entity = await this.repository.remove(await query.getMany());
-      return plainToInstance(TestEventResponseDto, entity);
+      return plainToInstance(AbstractTestEventResponseDto, entity);
     } catch (error) {
       throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
     }
@@ -128,6 +163,6 @@ export class TestEventRepositoryService {
 
   async deleteMany(eventIds: string[]) {
     const entity = await this.repository.delete(eventIds);
-    return plainToInstance(TestEventResponseDto, entity);
+    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 }

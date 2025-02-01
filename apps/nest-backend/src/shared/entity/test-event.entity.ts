@@ -49,6 +49,9 @@ export class TestEventEntity
   @Column()
   testName!: string;
 
+  @Column()
+  eventName!: string;
+
   @Column({ nullable: true })
   stopNavigation?: boolean;
 

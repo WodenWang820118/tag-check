@@ -2,7 +2,7 @@ import { Exclude, Expose } from 'class-transformer';
 import { TestEventSchema } from '@utils';
 
 @Exclude()
-export class TestEventResponseDto implements TestEventSchema {
+export class AbstractTestEventResponseDto implements TestEventSchema {
   @Expose()
   id!: number;
 

@@ -7,9 +7,6 @@ export class TestImageResponseDto implements TestImageSchema {
   id!: number;
 
   @Expose()
-  eventId!: string;
-
-  @Expose()
   imageName!: string;
 
   @Expose()

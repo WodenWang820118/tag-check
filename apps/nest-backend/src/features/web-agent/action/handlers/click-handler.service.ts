@@ -11,7 +11,7 @@ import { ProjectService } from '../../../../infrastructure/os/project/project.se
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
 import { FilePathService } from '../../../../infrastructure/os/path/file-path/file-path.service';
 import { FileService } from '../../../../infrastructure/os/file/file.service';
-import { extractEventNameFromId, OperationFile, Step } from '@utils';
+import { OperationFile, Step } from '@utils';
 import { ActionUtilsService } from '../action-utils/action-utils.service';
 
 @Injectable()
@@ -34,17 +34,18 @@ export class ClickHandler implements ActionHandler {
   ): Promise<void> {
     // Logic of handleClick
     let clickedSuccessfully = false;
-    let preventNavigation = false;
+    // TODO: implementation
+    const preventNavigation = false;
 
-    const projectSettings =
-      await this.projectService.getProjectSettings(projectSlug);
-    const preventNavigationEvents =
-      projectSettings?.preventNavigationEvents || [];
-    const title = extractEventNameFromId(eventId);
-    preventNavigation =
-      step.type === 'click' &&
-      preventNavigationEvents.includes(title) &&
-      isLastStep;
+    // const projectSettings =
+    //   await this.projectService.getProjectSettings(projectSlug);
+    // const preventNavigationEvents =
+    //   projectSettings?.preventNavigationEvents || [];
+    // const title = extractEventNameFromId(eventId);
+    // preventNavigation =
+    //   step.type === 'click' &&
+    //   preventNavigationEvents.includes(title) &&
+    //   isLastStep;
 
     for (const selector of step.selectors) {
       const firstSelector = getFirstSelector(selector);

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 import { TestImageRepositoryService } from '../../../core/repository/test-event/test-image-repository.service';
 import {
@@ -61,5 +61,25 @@ export class TestReportFacadeRepositoryService {
       testEventDetailCreation,
       specCreation
     ]);
+  }
+
+  async getReportDetail(projectSlug: string, eventId: string) {
+    const testEvent = await this.testEventRepositoryService.getBySlugAndEventId(
+      projectSlug,
+      eventId
+    );
+
+    const testEventDetail =
+      await this.testEventDetailRepositoryService.getBySlugAndEventId(
+        projectSlug,
+        eventId
+      );
+
+    const testImage = await this.testImageRepositoryService.getBySlugAndEventId(
+      projectSlug,
+      eventId
+    );
+
+    return Promise.all([testEvent, testEventDetail, testImage]);
   }
 }

@@ -6,6 +6,7 @@ import { IReportDetails } from '@utils';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel.component';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-detail-view',
@@ -34,10 +35,10 @@ export class DetailViewComponent implements OnInit {
   ngOnInit(): void {
     this.route.data.subscribe((data) => {
       const reportDetails = data['reportDetails'];
-      const video = data['video'];
+      const video = data['video'] as { blob: Blob; hasVideo: boolean };
       const image = data['image'];
       this.reportDetails.set(reportDetails);
-      this.videoBlob.set(video);
+      this.videoBlob.set(video.hasVideo ? video.blob : null);
       this.imageBlob.set(image);
     });
   }

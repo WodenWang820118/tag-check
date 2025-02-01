@@ -4,7 +4,7 @@ import { BrowserSettingSchema } from '@utils';
 @Exclude()
 export class BrowserSettingResponseDto implements BrowserSettingSchema {
   @Expose()
-  browser?: string[] | undefined;
+  browser!: string[];
 
   @Expose()
   headless!: boolean;

@@ -13,7 +13,7 @@ export class ImageService {
 
   constructor(private http: HttpClient) {}
 
-  getImage(eventId: string) {
+  getImage(projectSlug: string, eventId: string) {
     const httpOptions = {
       headers: new HttpHeaders({
         Accept: 'image/png'
@@ -22,7 +22,7 @@ export class ImageService {
     };
 
     return this.http
-      .get<Blob>(`${this.imageApiUrl}/${eventId}`, httpOptions)
+      .get<Blob>(`${this.imageApiUrl}/${projectSlug}/${eventId}`, httpOptions)
       .pipe(
         catchError((error) => {
           console.error(error);

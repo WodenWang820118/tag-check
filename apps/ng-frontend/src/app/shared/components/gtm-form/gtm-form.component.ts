@@ -1,3 +1,4 @@
+import { app } from 'electron';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -22,7 +23,11 @@ import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Setting } from '@utils';
+import {
+  ApplicationSetting,
+  ApplicationSettingSchema,
+  ProjectSetting
+} from '@utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-gtm-form',
@@ -63,14 +68,9 @@ export class GtmFormComponent implements OnInit {
     this.route.data.pipe(
       takeUntilDestroyed(this.destroyRef),
       tap((data) => {
-        const settings = data['projectInfo'].settings;
+        const settings: ProjectSetting = data['projectInfo'];
         if (settings) {
-          this.previewModeForm.patchValue({
-            url: settings.gtm.gtmPreviewModeUrl,
-            isAccompanyMode: settings.gtm.isAccompanyMode,
-            isRequestCheck: settings.gtm.isRequestCheck,
-            tagManagerUrl: settings.gtm.tagManagerUrl
-          });
+          this.previewModeForm.patchValue(settings.applicationSettings.gtm);
           if (settings.measurementId) {
             this.previewModeForm.controls['isRequestCheck'].enable();
           } else {
@@ -101,7 +101,7 @@ export class GtmFormComponent implements OnInit {
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           console.log(this.previewModeForm.value);
-          const settings: Partial<Setting> = {
+          const settings: Partial<ApplicationSetting> = {
             gtm: {
               gtmPreviewModeUrl: this.previewModeForm.value.url as string,
               isAccompanyMode: this.previewModeForm.value
@@ -111,9 +111,8 @@ export class GtmFormComponent implements OnInit {
               tagManagerUrl: this.previewModeForm.value.tagManagerUrl as string
             }
           };
-          return this.settingsService.updateSettings(
+          return this.settingsService.updateApplicationSetting(
             projectSlug,
-            'gtm',
             settings
           );
         }),

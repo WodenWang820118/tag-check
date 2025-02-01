@@ -1,5 +1,5 @@
 import { ProjectEntity } from './../../../shared/entity/project.entity';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -31,8 +31,36 @@ export class BrowserSettingRepositoryService {
     return plainToInstance(BrowserSettingResponseDto, entity);
   }
 
-  async update(id: number, data: UpdateBrowserSettingDto) {
-    const entity = await this.repository.update(id, data);
-    return plainToInstance(BrowserSettingResponseDto, entity);
+  async update(projectEntity: ProjectEntity, data: UpdateBrowserSettingDto) {
+    try {
+      // First, find existing setting for the project
+      const existingSetting = await this.repository.findOne({
+        where: {
+          project: { id: projectEntity.id } // Assuming project has an id field
+        }
+      });
+
+      if (existingSetting) {
+        // Update existing setting
+        const updatedSetting = await this.repository.save({
+          ...existingSetting,
+          ...data,
+          project: projectEntity
+        });
+
+        return plainToInstance(BrowserSettingResponseDto, updatedSetting);
+      }
+
+      throw new HttpException(
+        'Browser settings not found',
+        HttpStatus.NOT_FOUND
+      );
+    } catch (error) {
+      Logger.error(`Failed to update Browser settings: ${error}`);
+      throw new HttpException(
+        'Failed to update Browser settings',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 }

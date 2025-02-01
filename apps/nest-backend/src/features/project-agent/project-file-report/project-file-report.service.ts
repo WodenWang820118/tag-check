@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { join } from 'path';
 import { XlsxReportService } from '../../../infrastructure/os/xlsx-report/xlsx-report.service';
-import { FullValidationResultService } from '../../repository/test-report-facade/full-validation-result.service';
 import { TestReportFacadeRepositoryService } from '../../repository/test-report-facade/test-report-facade-repository.service';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 
@@ -13,9 +12,9 @@ export class ProjectFileReportService {
     private readonly folderService: FolderService,
     private readonly folderPathService: FolderPathService,
     private readonly testResultService: TestReportFacadeRepositoryService,
-    private readonly fullValidationResultService: FullValidationResultService,
     private readonly xlsxReportService: XlsxReportService,
-    private readonly testEventRepositoryService: TestEventRepositoryService
+    private readonly testEventRepositoryService: TestEventRepositoryService,
+    private readonly testReportFacadeRepositoryService: TestReportFacadeRepositoryService
   ) {}
 
   async getReportFolders(projectSlug: string) {
@@ -49,11 +48,16 @@ export class ProjectFileReportService {
   }
 
   async downloadReportFiles(projectSlug: string, eventIds: string[]) {
-    const reports =
-      await this.fullValidationResultService.getReportDetailsData(eventIds);
+    const reports = await this.testEventRepositoryService.getBySlugAndEventIds(
+      projectSlug,
+      eventIds
+    );
     if (!reports || reports.length === 0) {
       throw new Error('No reports found');
     }
-    return await this.xlsxReportService.writeXlsxFile(reports);
+
+    Logger.log('Downloading reports', reports);
+    // TODO: based on the actual implementation, this method should return a file
+    // return await this.xlsxReportService.writeXlsxFile(reports);
   }
 }

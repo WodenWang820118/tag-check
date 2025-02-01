@@ -16,7 +16,7 @@ export class ProjectDataRetrievalController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
   ) {
-    return await this.testImageRepositoryService.getByProjectSlugAndEventId(
+    return await this.testImageRepositoryService.getBySlugAndEventId(
       projectSlug,
       eventId
     );

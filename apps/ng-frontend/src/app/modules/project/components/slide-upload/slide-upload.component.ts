@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 
 @Component({
-  selector: 'app-slide-sidenav',
+  selector: 'app-slide-upload',
   standalone: true,
   imports: [
     MatSidenavModule,
@@ -24,9 +24,9 @@ export class SlideUploadComponent {
   constructor(public uploadSpecService: UploadSpecService) {
     effect(() => {
       if (this.uploadSpecService.isUploaded()) {
-        this.sidenav()?.toggle(false);
+        this.sidenav().toggle(false);
       } else if (this.uploadSpecService.isStarted()) {
-        this.sidenav()?.toggle(true);
+        this.sidenav().toggle(true);
       }
     });
   }

@@ -44,12 +44,12 @@ export class EventInspectionPresetDto implements EventInspectionPreset {
   constructor(project: ProjectSetting) {
     this.application = {
       localStorage: {
-        data: [...project.settings.application.localStorage.data]
+        data: [...project.applicationSettings.localStorage.data]
       },
       cookie: {
-        data: [...project.settings.application.cookie.data]
+        data: [...project.applicationSettings.cookie.data]
       }
     };
-    this.puppeteerArgs = [...project.settings.browser];
+    this.puppeteerArgs = [...project.browserSettings.browser];
   }
 }

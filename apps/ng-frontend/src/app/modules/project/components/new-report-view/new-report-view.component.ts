@@ -1,4 +1,11 @@
-import { ChangeDetectorRef, Component, input, signal } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  input,
+  OnDestroy,
+  OnInit,
+  signal
+} from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -7,6 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { EditorComponent } from '../../../../shared/components/editor/editor.component';
 import { NewReportViewFacadeService } from './new-report-view-facade.service';
 import { MatSidenav } from '@angular/material/sidenav';
+import { pipe, take } from 'rxjs';
 
 @Component({
   selector: 'app-new-report-view',
@@ -56,17 +64,18 @@ export class NewReportViewComponent {
     if (!this.projectSlug()) throw new Error('Project slug is required');
     this.newReportViewFacadeService
       .uploadReport(this.projectSlug())
+      .pipe(take(1))
       .subscribe(() => {
         // force reload the page
         this.router.navigated = false;
         this.router.navigate([this.router.url]).then(() => {
           if (this.route.snapshot.data['reports']) {
-            this.sidenav().toggle();
+            this.sidenav().close();
           }
         });
-        // force change detection
-        this.changeDetectorRef.detectChanges();
       });
+    // force change detection; paired with runGuardsAndResolvers: 'always',
+    this.changeDetectorRef.detectChanges();
   }
 
   get exampleInputJson() {

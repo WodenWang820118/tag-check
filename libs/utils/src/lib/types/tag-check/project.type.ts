@@ -1,5 +1,6 @@
 import { Auditable } from './auditable.type';
-import { StrictDataLayerEvent, BaseDataLayerEvent } from './data-layer.type';
+import { TestImageSchema } from './file-report.type';
+import { TestEventDetailSchema } from './report.type';
 
 export type Project = {
   projectSlug: string;
@@ -13,30 +14,8 @@ export type ProjectSchema = {
 } & Project &
   Auditable;
 
-export type TestInfo = {
-  testName: string;
-  eventName: string;
-  passed: boolean;
-};
-
-export type TestInfoSchema = {
-  id: number;
-} & TestInfo &
-  Auditable;
-
-export type TestRequestInfo = {
-  requestPassed: boolean;
-  rawRequest?: string;
-  reformedDataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
-  destinationUrl: string;
-};
-
-export type TestRequestInfoSchema = {
-  id: number;
-} & TestRequestInfo &
-  Auditable;
-
 export type TestEvent = {
+  eventName: string;
   testName: string;
   eventId: string;
   stopNavigation?: boolean;
@@ -47,3 +26,9 @@ export type TestEventSchema = {
   id: number;
 } & TestEvent &
   Auditable;
+
+export type FullTestEventSchema = {
+  testEventDetail: TestEventDetailSchema[];
+  testImage: TestImageSchema;
+  project: ProjectSchema;
+} & TestEventSchema;

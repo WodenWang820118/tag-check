@@ -18,13 +18,13 @@ export class ApplicationSettingEntity
   id!: number;
 
   @Column('json')
-  localStorage?: LocalStorage;
+  localStorage!: LocalStorage;
 
   @Column('json', { nullable: true })
-  cookie?: Cookie;
+  cookie!: Cookie;
 
   @Column('json', { nullable: true })
-  gtm?: Gtm;
+  gtm!: Gtm;
 
   @OneToOne(() => ProjectEntity, (project) => project.applicationSettings, {
     onDelete: 'CASCADE'

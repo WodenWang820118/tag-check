@@ -78,21 +78,22 @@ export class ReportTableFacadeService {
           const selectedIds = this.selection().selected.map(
             (item) => item.eventId
           );
-          this.settingsService
-            .updateSettings(this.projectSlug(), 'preventNavigationEvents', {
-              preventNavigationEvents: selectedIds
-            })
-            .pipe(take(1))
-            .subscribe((data) => {
-              if (data) {
-                // On success
-                this.projectDataSourceService.setPreventNavigationSignal(false);
-                // this.preventNavigationEvents.set(
-                //   data.settings.preventNavigationEvents
-                // );
-                this.selection().clear();
-              }
-            });
+          // TODO: implementations
+          // this.settingsService
+          //   .updateSettings(this.projectSlug(), 'preventNavigationEvents', {
+          //     preventNavigationEvents: selectedIds
+          //   })
+          //   .pipe(take(1))
+          //   .subscribe((data) => {
+          //     if (data) {
+          //       // On success
+          //       this.projectDataSourceService.setPreventNavigationSignal(false);
+          //       // this.preventNavigationEvents.set(
+          //       //   data.settings.preventNavigationEvents
+          //       // );
+          //       this.selection().clear();
+          //     }
+          //   });
         }
       },
       {
