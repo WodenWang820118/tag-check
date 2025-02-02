@@ -15,6 +15,7 @@ import { ProjectAbstractReportService } from '../../features/project-agent/proje
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
+import { CreateFullTestEventDto } from '../../shared';
 
 @Controller('reports')
 export class ReportController {
@@ -47,14 +48,6 @@ export class ReportController {
     );
   }
 
-  @Get(':projectSlug/names')
-  async getProjectEventReportNames(@Param('projectSlug') projectSlug: string) {
-    // it equals to get unique test event ids
-    return await this.projectReportService.getProjectEventReportFolderNames(
-      projectSlug
-    );
-  }
-
   @Put(':projectSlug/:eventId')
   @Log()
   async updateReport(
@@ -76,13 +69,13 @@ export class ReportController {
   async addReport(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
-    @Body() report: IReportDetails
+    @Body() reportData: CreateFullTestEventDto
   ) {
-    Logger.log(`addReport: ${JSON.stringify(report, null, 2)}`);
-    return this.testReportFacadeRepositoryService.createAbstractReport(
+    Logger.log(`addReport: ${JSON.stringify(reportData, null, 2)}`);
+    return this.testReportFacadeRepositoryService.createFullReport(
       projectSlug,
       eventId,
-      report
+      reportData
     );
   }
 

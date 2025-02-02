@@ -1,4 +1,5 @@
 import { Auditable } from './auditable.type';
+import { StrictDataLayerEvent, BaseDataLayerEvent } from './data-layer.type';
 
 export type ProjectSpec = {
   projectSlug: string;
@@ -14,4 +15,14 @@ export type Spec = {
 export type SpecSchema = {
   id: number;
 } & Spec &
+  Auditable;
+
+export type DataLayerSpec = {
+  eventName: string;
+  dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
+};
+
+export type DataLayerSpecSchema = {
+  id: number;
+} & DataLayerSpec &
   Auditable;

@@ -1,4 +1,8 @@
-import { BaseDataLayerEvent, StrictDataLayerEvent } from '@utils';
+import {
+  BaseDataLayerEvent,
+  DataLayerSpecSchema,
+  StrictDataLayerEvent
+} from '@utils';
 import {
   Column,
   Entity,
@@ -10,7 +14,7 @@ import { AuditableEntity } from './common';
 import { TestEventEntity } from './test-event.entity';
 
 @Entity('spec')
-export class SpecEntity extends AuditableEntity {
+export class SpecEntity extends AuditableEntity implements DataLayerSpecSchema {
   @PrimaryGeneratedColumn()
   id!: number;
 

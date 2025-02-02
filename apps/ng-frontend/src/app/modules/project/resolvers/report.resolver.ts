@@ -1,10 +1,9 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
-import { IReportDetails, TestEventSchema } from '@utils';
+import { AbstractTestEvent, IReportDetails, TestEventSchema } from '@utils';
 import { ImageService } from '../../../shared/services/api/image/image.service';
 import { ReportService } from '../../../shared/services/api/report/report.service';
 import { VideosService } from '../../../shared/services/api/videos/videos.service';
-import { Observable } from 'rxjs';
 
 export const reportDetailResolver: ResolveFn<IReportDetails | null> = (
   route,
@@ -33,20 +32,11 @@ export const imageResolver: ResolveFn<Blob | null> = (route, state) => {
   return imageService.getImage(projectSlug, eventId);
 };
 
-export const projectReportResolver: ResolveFn<TestEventSchema | null> = (
+export const projectReportResolver: ResolveFn<AbstractTestEvent[]> = (
   route,
   state
 ) => {
   const reportService = inject(ReportService);
   const projectSlug = route.params['projectSlug'];
   return reportService.getProjectReports(projectSlug);
-};
-
-export const reportNamesResolver: ResolveFn<string[] | null> = (
-  route,
-  state
-) => {
-  const reportService = inject(ReportService);
-  const projectSlug = route.params['projectSlug'];
-  return reportService.getProjectReportNames(projectSlug);
 };

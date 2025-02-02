@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import {
@@ -56,17 +56,21 @@ export class TestEventDetailRepositoryService {
     testEventEntity: TestEventEntity,
     data: CreateTestEventDetailDto
   ) {
-    const testEventDetailEntity = new TestEventDetailEntity();
+    try {
+      const testEventDetailEntity = new TestEventDetailEntity();
 
-    testEventDetailEntity.dataLayer = data.dataLayer;
-    testEventDetailEntity.reformedDataLayer = data.reformedDataLayer;
-    testEventDetailEntity.destinationUrl = data.destinationUrl;
-    testEventDetailEntity.passed = data.passed;
-    testEventDetailEntity.requestPassed = data.requestPassed;
-    testEventDetailEntity.rawRequest = data.rawRequest;
-    testEventDetailEntity.testEvent = testEventEntity;
+      testEventDetailEntity.dataLayer = data.dataLayer;
+      testEventDetailEntity.reformedDataLayer = data.reformedDataLayer;
+      testEventDetailEntity.destinationUrl = data.destinationUrl;
+      testEventDetailEntity.passed = data.passed;
+      testEventDetailEntity.requestPassed = data.requestPassed;
+      testEventDetailEntity.rawRequest = data.rawRequest;
+      testEventDetailEntity.testEvent = testEventEntity;
 
-    const entity = await this.repository.save(testEventDetailEntity);
-    return plainToInstance(TestEventDetailEntity, entity);
+      const entity = await this.repository.save(testEventDetailEntity);
+      return plainToInstance(TestEventDetailEntity, entity);
+    } catch (error) {
+      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
+    }
   }
 }

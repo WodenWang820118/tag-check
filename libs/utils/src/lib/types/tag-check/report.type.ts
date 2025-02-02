@@ -16,6 +16,7 @@ export type IReportDetails = {
   destinationUrl: string;
   dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
+  event: string;
 } & TestEvent &
   Auditable;
 

@@ -3,7 +3,7 @@ import { RecordingSchema } from '@utils';
 
 @Exclude()
 export class RecordingResponseDto implements RecordingSchema {
-  @Expose()
+  @Exclude()
   id!: number;
 
   @Expose()
@@ -12,9 +12,9 @@ export class RecordingResponseDto implements RecordingSchema {
   @Expose()
   steps!: Record<string, any>[]; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-  @Expose()
+  @Exclude()
   createdAt!: Date;
 
-  @Expose()
+  @Exclude()
   updatedAt?: Date;
 }

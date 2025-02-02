@@ -3,14 +3,15 @@ import { ReportService } from '../../../../shared/services/api/report/report.ser
 import { ErrorDialogComponent } from '@ui';
 import { IReportDetails, ReportDetailsDto } from '@utils';
 import {
-  takeUntil,
   tap,
   combineLatest,
   take,
   map,
   mergeMap,
   forkJoin,
-  catchError
+  catchError,
+  switchMap,
+  throwError
 } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EditorService } from '../../../../shared/services/editor/editor.service';
@@ -60,21 +61,14 @@ export class NewReportViewFacadeService {
     const target = event.target as HTMLInputElement;
     const file: File | null = target.files?.[0] || null;
     if (file) {
-      this.reportService.readJsonFileContent(file);
-
-      this.reportService.fileContent$
-        .pipe(
-          takeUntilDestroyed(this.destroyedRef),
-          tap((data) => {
-            if (data) {
-              this.editorService.setContent(
-                'recordingJson',
-                JSON.stringify(data)
-              );
-            }
-          })
-        )
-        .subscribe();
+      this.recordingService.readRecordingJsonFileContent(file);
+      const recordingContent = this.recordingService.recordingContent$();
+      if (recordingContent) {
+        this.editorService.setContent(
+          'recordingJson',
+          JSON.stringify(recordingContent)
+        );
+      }
     }
   }
 
@@ -119,6 +113,18 @@ export class NewReportViewFacadeService {
             eventName: eventName
           });
 
+          this.projectDataSourceService.connect().pipe(
+            take(1),
+            tap((data) => {
+              this.projectDataSourceService.setData([...data, reportDetails]);
+              this.uploadSpecService.completeUpload();
+            }),
+            catchError((error) => {
+              console.error('Error updating project data source:', error);
+              return error;
+            })
+          );
+
           return {
             projectSlug,
             eventId,
@@ -136,7 +142,7 @@ export class NewReportViewFacadeService {
           throw new Error('Spec content is required and cannot be empty.');
         }
       }),
-      mergeMap(
+      switchMap(
         ({
           projectSlug,
           eventId,
@@ -144,41 +150,20 @@ export class NewReportViewFacadeService {
           specContent,
           recordingContent,
           reportDetails
-        }) =>
-          forkJoin([
-            this.reportService.addReport(projectSlug, eventId, reportDetails),
-            this.recordingService.addRecording(
-              projectSlug,
-              eventId,
-              recordingContent as string
-            ),
-            this.specService.addSpec(projectSlug, JSON.parse(specContent))
-          ]).pipe(
-            tap(() => {
-              this.projectDataSourceService
-                .connect()
-                .pipe(
-                  take(1),
-                  tap((data) => {
-                    this.projectDataSourceService.setData([
-                      ...data,
-                      reportDetails
-                    ]);
-                    this.uploadSpecService.completeUpload();
-                  }),
-                  catchError((error) => {
-                    console.error('Error updating project data source:', error);
-                    return error;
-                  })
-                )
-                .subscribe();
-            })
-          )
-      ),
-      catchError((error) => {
-        console.error('Error uploading report:', error);
-        return error;
-      })
+        }) => {
+          return this.reportService.addReport(
+            projectSlug,
+            eventId,
+            reportDetails,
+            JSON.parse(recordingContent),
+            JSON.parse(specContent)
+          );
+        }
+      )
     );
+  }
+
+  completeUpload() {
+    this.uploadSpecService.completeUpload();
   }
 }

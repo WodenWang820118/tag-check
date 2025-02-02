@@ -4,7 +4,8 @@ import { Repository } from 'typeorm';
 import {
   RecordingEntity,
   CreateRecordingDto,
-  TestEventEntity
+  TestEventEntity,
+  RecordingResponseDto
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
@@ -37,7 +38,7 @@ export class RecordingRepositoryService {
         }
       }
     });
-    return plainToInstance(RecordingEntity, entity);
+    return plainToInstance(RecordingResponseDto, entity);
   }
 
   async getRecordingDetails(projectSlug: string, eventId: string) {
@@ -56,43 +57,49 @@ export class RecordingRepositoryService {
         }
       }
     });
-    return plainToInstance(RecordingEntity, entity);
+    return plainToInstance(RecordingResponseDto, entity);
   }
 
-  async create(projectSlug: string, eventId: string, data: CreateRecordingDto) {
-    const testEventEntity = await this.testEventRepository.findOne({
-      relations: {
-        project: true
-      },
-      where: {
-        eventId: eventId,
-        project: {
-          projectSlug: projectSlug
-        }
-      }
-    });
+  async create(testEventEntity: TestEventEntity, data: CreateRecordingDto) {
+    try {
+      const recordingEntity = new RecordingEntity();
+      recordingEntity.title = data.title;
+      recordingEntity.steps = data.steps;
+      recordingEntity.testEvent = testEventEntity;
 
-    if (!testEventEntity) {
-      throw new HttpException('TestEvent not found', HttpStatus.NOT_FOUND);
+      const entity = await this.repository.save(recordingEntity);
+      return plainToInstance(RecordingResponseDto, entity);
+    } catch (error) {
+      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
     }
-
-    const recordingEntity = new RecordingEntity();
-    recordingEntity.title = data.title;
-    recordingEntity.steps = data.steps;
-    recordingEntity.testEvent = testEventEntity;
-
-    const entity = await this.repository.save(recordingEntity);
-    return plainToInstance(RecordingEntity, entity);
   }
 
   async update(projectSlug: string, eventId: string, data: CreateRecordingDto) {
     const recording = await this.getRecordingDetails(projectSlug, eventId);
     if (!recording) {
-      throw new HttpException('Recording not found', HttpStatus.NOT_FOUND);
+      const testEvent = await this.testEventRepository.findOne({
+        relations: {
+          project: true
+        },
+        where: {
+          eventId: eventId,
+          project: {
+            projectSlug: projectSlug
+          }
+        }
+      });
+      if (!testEvent)
+        throw new HttpException('TestEvent not found', HttpStatus.NOT_FOUND);
+      const newRecording = new RecordingEntity();
+      newRecording.title = data.title;
+      newRecording.steps = data.steps;
+      newRecording.testEvent = testEvent;
+      const entity = await this.repository.save(newRecording);
+      return plainToInstance(RecordingResponseDto, entity);
     }
 
     Object.assign(recording, data);
     const entity = await this.repository.save(recording);
-    return plainToInstance(RecordingEntity, entity);
+    return plainToInstance(RecordingResponseDto, entity);
   }
 }

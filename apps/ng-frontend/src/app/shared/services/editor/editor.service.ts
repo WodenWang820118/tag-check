@@ -11,27 +11,27 @@ export type EditorExtension = 'specJson' | 'recordingJson';
 type ExtensionArray = any[];
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class EditorService {
   editorExtensions: Record<EditorExtension, ExtensionArray> = {
     specJson: jsonLightEditorExtensions,
-    recordingJson: jsonLightEditorExtensions,
+    recordingJson: jsonLightEditorExtensions
   };
 
   contentSubjects = {
     specJson: new BehaviorSubject(''),
-    recordingJson: new BehaviorSubject(''),
+    recordingJson: new BehaviorSubject('')
   };
 
   editorViewSubjects = {
     specJson: new BehaviorSubject<EditorView>(new EditorView()),
-    recordingJson: new BehaviorSubject<EditorView>(new EditorView()),
+    recordingJson: new BehaviorSubject<EditorView>(new EditorView())
   };
 
   editor$ = {
     specJsonEditor: this.editorViewSubjects.specJson.asObservable(),
-    recordingJsonEditor: this.editorViewSubjects.recordingJson.asObservable(),
+    recordingJsonEditor: this.editorViewSubjects.recordingJson.asObservable()
   };
 
   isJsonSyntaxError = new BehaviorSubject<boolean>(false);
@@ -49,23 +49,24 @@ export class EditorService {
         lintGutter(),
         EditorView.theme(editorStyles),
         EditorView.lineWrapping,
-        this.isEditorSyntaxError(),
+        this.isEditorSyntaxError()
         // placeholder(
         //   content ? content : this.contentSubjects[extension].getValue()
         // ),
       ],
-      parent: elementRef.nativeElement,
+      parent: elementRef.nativeElement
     });
 
     editorView.dispatch({
       changes: {
         from: 0,
         insert: content ? JSON.stringify(JSON.parse(content), null, 2) : '',
-        to: editorView.state.doc.length,
-      },
+        to: editorView.state.doc.length
+      }
     });
 
     this.editorViewSubjects[extension].next(editorView);
+    return editorView;
   }
 
   setContent(extension: EditorExtension, content: string) {
@@ -75,8 +76,8 @@ export class EditorService {
       changes: {
         from: 0,
         insert: jsonContent,
-        to: this.editorViewSubjects[extension].getValue().state.doc.length,
-      },
+        to: this.editorViewSubjects[extension].getValue().state.doc.length
+      }
     });
   }
 

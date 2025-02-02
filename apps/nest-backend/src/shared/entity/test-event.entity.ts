@@ -13,6 +13,7 @@ import { ProjectEntity } from './project.entity';
 import { TestImageEntity } from './test-image.entity';
 import { TestEventDetailEntity } from './test-event-detail.entity';
 import { SpecEntity } from './spec.entity';
+import { RecordingEntity } from './recording.entity';
 
 @Entity('test_event')
 export class TestEventEntity
@@ -27,6 +28,11 @@ export class TestEventEntity
   })
   @JoinColumn({ name: 'projectId' })
   project!: ProjectEntity;
+
+  @OneToOne(() => RecordingEntity, (recording) => recording.testEvent, {
+    onDelete: 'CASCADE'
+  })
+  recording!: RecordingEntity;
 
   @OneToOne(() => SpecEntity, (spec) => spec.testEvent, {
     onDelete: 'CASCADE'

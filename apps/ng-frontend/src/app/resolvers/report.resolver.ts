@@ -1,9 +1,9 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
-import { TestEventSchema } from '@utils';
+import { AbstractTestEvent } from '@utils';
 import { ReportService } from '../shared/services/api/report/report.service';
 
-export const ReportResolver: ResolveFn<TestEventSchema | null> = (
+export const ReportResolver: ResolveFn<AbstractTestEvent[]> = (
   route,
   state
 ) => {

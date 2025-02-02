@@ -76,6 +76,7 @@ export class NewReportViewComponent {
       });
     // force change detection; paired with runGuardsAndResolvers: 'always',
     this.changeDetectorRef.detectChanges();
+    this.newReportViewFacadeService.completeUpload();
   }
 
   get exampleInputJson() {

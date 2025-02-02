@@ -36,6 +36,7 @@ export class ProjectSpecService {
 
   async addSpec(projectSlug: string, spec: Spec) {
     await this.specService.addSpec({
+      event: spec.event,
       eventName: spec.event,
       dataLayerSpec: spec
     });
@@ -44,14 +45,14 @@ export class ProjectSpecService {
     return projectSpec;
   }
 
-  async updateSpec(projectSlug: string, eventName: string, spec: Spec) {
-    const dbSpec = await this.getSpec(projectSlug, eventName);
+  async updateSpec(projectSlug: string, eventId: string, spec: Spec) {
+    const dbSpec = await this.getSpec(projectSlug, eventId);
     if (!dbSpec) {
       throw new NotAcceptableException('Spec not found');
     }
 
     await this.specService.updateSpec(Number(dbSpec.id), {
-      eventName: eventName,
+      eventName: eventId,
       dataLayerSpec: spec
     });
 

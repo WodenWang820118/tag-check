@@ -1,55 +1,29 @@
-import { Injectable } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable, catchError, forkJoin, of, throwError } from 'rxjs';
 import {
-  BehaviorSubject,
-  Observable,
-  Subject,
-  catchError,
-  forkJoin,
-  of
-} from 'rxjs';
-import { ProjectReport, IReportDetails, TestEventSchema } from '@utils';
+  ProjectReport,
+  IReportDetails,
+  TestEventSchema,
+  Recording,
+  Spec,
+  TestEvent,
+  AbstractTestEvent
+} from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportService {
-  reportsSubject: Subject<Report> = new BehaviorSubject({} as Report);
-  reports$ = this.reportsSubject.asObservable();
-
-  fileContent = new BehaviorSubject<any>(null);
-  fileContent$ = this.fileContent.asObservable();
-
   constructor(private http: HttpClient) {}
-
-  getReports() {
-    return this.http.get<TestEventSchema[]>(environment.reportApiUrl).pipe(
-      catchError((error) => {
-        console.error(error);
-        return of([]);
-      })
-    );
-  }
-
   getProjectReports(projectSlug: string) {
     return this.http
-      .get<TestEventSchema>(`${environment.reportApiUrl}/${projectSlug}`)
+      .get<AbstractTestEvent[]>(`${environment.reportApiUrl}/${projectSlug}`)
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
-        })
-      );
-  }
-
-  getProjectReportNames(projectSlug: string) {
-    return this.http
-      .get<string[]>(`${environment.reportApiUrl}/${projectSlug}/names`)
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of(null);
+          return throwError(() => new Error('Failed to get reports'));
         })
       );
   }
@@ -57,7 +31,7 @@ export class ReportService {
   updateReport(projectSlug: string, report: ProjectReport) {
     if (!projectSlug || !report) return of({} as ProjectReport);
     return this.http
-      .put<TestEventSchema>(
+      .put<AbstractTestEvent>(
         `${environment.reportApiUrl}/${projectSlug}`,
         report
       )
@@ -72,41 +46,25 @@ export class ReportService {
   addReport(
     projectSlug: string,
     eventId: string,
-    reportDetails: IReportDetails
+    reportDetails: IReportDetails,
+    recording: Recording,
+    spec: Spec
   ) {
-    // TODO: use SQLite3 to store the report details
     return this.http
-      .post<TestEventSchema>(
+      .post<TestEvent>(
         `${environment.reportApiUrl}/${projectSlug}/${eventId}`,
-        reportDetails
+        {
+          reportDetails,
+          recording,
+          spec
+        }
       )
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
+          return throwError(() => new Error('Failed to add report'));
         })
       );
-  }
-
-  readJsonFileContent(file: File): void {
-    const reader = new FileReader();
-
-    reader.onload = (e: any) => {
-      const fileContentString = e.target.result;
-
-      try {
-        // update the file content
-        this.fileContent.next(JSON.parse(fileContentString));
-      } catch (error) {
-        console.error('Error parsing file content', error);
-      }
-    };
-
-    reader.onerror = () => {
-      console.error('Error reading file content');
-    };
-
-    reader.readAsText(file);
   }
 
   downloadFile(projectSlug: string, eventName: string) {

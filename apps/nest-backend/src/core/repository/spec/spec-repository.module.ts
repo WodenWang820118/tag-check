@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SpecEntity } from '../../../shared';
+import { SpecEntity, TestEventEntity } from '../../../shared';
 import { SpecRepositoryService } from './spec-repository.service';
 
-const modules = [TypeOrmModule.forFeature([SpecEntity])];
+const modules = [TypeOrmModule.forFeature([SpecEntity, TestEventEntity])];
 const services = [SpecRepositoryService];
 
 @Module({

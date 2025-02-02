@@ -9,9 +9,9 @@ export class ReportDetailsDto implements OutputValidationResult {
   eventId!: string;
   testName!: string;
   eventName!: string;
+  event!: string;
   passed = false;
   requestPassed = false;
-  incorrectInfo = '';
   completedTime = new Date();
   dataLayerSpec = {} as BaseDataLayerEvent | StrictDataLayerEvent;
   dataLayer = {} as BaseDataLayerEvent | StrictDataLayerEvent;

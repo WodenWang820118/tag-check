@@ -1,30 +1,53 @@
-import { Injectable } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {
-  BehaviorSubject,
-  catchError,
-  of,
-  Subject,
-  tap,
-  throwError
-} from 'rxjs';
-import { ProjectSpec, Spec } from '@utils';
+import { catchError, map, Observable, throwError } from 'rxjs';
+import { DataLayerSpec, ProjectSpec, Spec } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SpecService {
-  currentSpec: Subject<Spec> = new BehaviorSubject({} as Spec);
-  currentSpec$ = this.currentSpec.asObservable();
+  tempSpecContent = signal<Spec | null>(null);
+  tempSpecContent$ = computed(() => this.tempSpecContent());
+  specContent = signal<Spec | null>(null);
+  specContent$ = computed(() => this.specContent());
 
   constructor(private http: HttpClient) {}
+
+  setTempSpec(spec: Spec | null) {
+    this.tempSpecContent.set(spec);
+  }
+
+  setSpec(spec: Spec | null) {
+    this.specContent.set(spec);
+  }
+
+  readSpecJsonFileContent(file: File): void {
+    const reader = new FileReader();
+
+    reader.onload = (e: any) => {
+      const fileContentString = e.target.result;
+
+      try {
+        this.tempSpecContent.set(JSON.parse(fileContentString));
+      } catch (error) {
+        console.error('Error parsing file content', error);
+      }
+    };
+
+    reader.onerror = () => {
+      console.error('Error reading file content');
+    };
+
+    reader.readAsText(file);
+  }
 
   getSpecs() {
     return this.http.get<ProjectSpec[]>(environment.specApiUrl).pipe(
       catchError((error) => {
         console.error(error);
-        return [];
+        return throwError(() => new Error('Failed to get specs'));
       })
     );
   }
@@ -35,35 +58,7 @@ export class SpecService {
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
-        })
-      );
-  }
-
-  getSpec(projectSlug: string, eventName: string) {
-    return this.http
-      .get<Spec>(`${environment.specApiUrl}/${projectSlug}/${eventName}`)
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of(null);
-        })
-      );
-  }
-
-  addSpec(projectSlug: string, content: Spec) {
-    return this.http
-      .post<{
-        projectSlug: string;
-        specs: Spec[];
-      }>(`${environment.specApiUrl}/${projectSlug}`, {
-        ...content
-      })
-      .pipe(
-        catchError((error) => {
-          console.error('Error adding spec:', error);
-          // Throw the error instead of returning an empty result
-          return throwError(() => error);
+          return throwError(() => new Error('Failed to get project specs'));
         })
       );
   }
@@ -76,7 +71,26 @@ export class SpecService {
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
+          return throwError(() => new Error('Failed to update spec'));
+        })
+      );
+  }
+
+  getEventSpec(projectSlug: string, eventId: string): Observable<Spec> {
+    return this.http
+      .get<DataLayerSpec>(`${environment.specApiUrl}/${projectSlug}/${eventId}`)
+      .pipe(
+        map((spec) => {
+          const transformedSpec: Spec = {
+            event: spec.eventName,
+            ...spec
+          };
+          console.log('Transformed Spec:', transformedSpec);
+          return transformedSpec;
+        }),
+        catchError((error) => {
+          console.error(error);
+          return throwError(() => new Error('Failed to get spec details'));
         })
       );
   }

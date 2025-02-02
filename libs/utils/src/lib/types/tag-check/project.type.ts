@@ -1,6 +1,8 @@
 import { Auditable } from './auditable.type';
 import { TestImageSchema } from './file-report.type';
+import { Recording } from './recording.type';
 import { TestEventDetailSchema } from './report.type';
+import { Spec } from './spec.type';
 
 export type Project = {
   projectSlug: string;
@@ -26,6 +28,12 @@ export type TestEventSchema = {
   id: number;
 } & TestEvent &
   Auditable;
+
+export type AbstractTestEvent = {
+  recording?: Recording;
+  spec?: Spec;
+  hasRecording?: boolean;
+} & TestEventSchema;
 
 export type FullTestEventSchema = {
   testEventDetail: TestEventDetailSchema[];

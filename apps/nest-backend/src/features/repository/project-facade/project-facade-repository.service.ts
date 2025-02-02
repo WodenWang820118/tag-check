@@ -16,7 +16,8 @@ import {
   ApplicationSetting,
   AuthenticationSetting,
   BrowserSetting,
-  ProjectSetting
+  ProjectSetting,
+  Spec
 } from '@utils';
 
 @Injectable()
@@ -133,5 +134,15 @@ export class ProjectFacadeRepositoryService {
       await this.projectRepositoryService.getEntityBySlug(projectSlug);
     // Handle browser settings update
     return await this.browserRepositoryService.update(projectEntity, settings);
+  }
+
+  async updateSpec(projectSlug: string, eventId: string, spec: Spec) {
+    const projectEntity =
+      await this.projectRepositoryService.getEntityBySlug(projectSlug);
+    return await this.specRepositoryService.update(
+      projectEntity,
+      eventId,
+      spec
+    );
   }
 }

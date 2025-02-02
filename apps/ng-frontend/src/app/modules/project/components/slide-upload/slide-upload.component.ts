@@ -23,10 +23,10 @@ export class SlideUploadComponent {
 
   constructor(public uploadSpecService: UploadSpecService) {
     effect(() => {
-      if (this.uploadSpecService.isUploaded()) {
-        this.sidenav().toggle(false);
-      } else if (this.uploadSpecService.isStarted()) {
+      if (this.uploadSpecService.isStarted()) {
         this.sidenav().toggle(true);
+      } else {
+        this.sidenav().toggle(false);
       }
     });
   }

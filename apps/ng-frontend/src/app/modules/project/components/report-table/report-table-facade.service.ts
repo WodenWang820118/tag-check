@@ -146,14 +146,10 @@ export class ReportTableFacadeService {
     if (
       !data['projectReport'] ||
       !data['recordings'] ||
-      !data['reportNames'] ||
       !data['projectSetting']
     )
       return;
     const reports = data['projectReport'];
-    const projectRecordings = data['recordings'];
-    const reportNames = data['reportNames'];
-    const projectSettings = data['projectSetting'];
 
     if (reports.length && paginator && sort) {
       // Sort the data
@@ -165,14 +161,6 @@ export class ReportTableFacadeService {
       dataSource.paginator = paginator;
       dataSource.sort = sort;
       this.dataSource.set(dataSource);
-
-      // Initialize statuses via facade
-      // TODO: Implement recording status. i.e., whether a recording exists for an abstract report
-      // this.initializeRecordingStatus(reportNames, projectRecordings.recordings);
-      // Set up signals
-      // this.preventNavigationEvents.set(
-      //   projectSettings.settings.preventNavigationEvents
-      // );
       this.projectSlug.set(data['projectSlug']);
     }
   }
@@ -186,18 +174,6 @@ export class ReportTableFacadeService {
           this.dataSource().data = [...updatedData.data];
         }
       });
-  }
-
-  initializeRecordingStatus(
-    reportNames: string[],
-    recordings: Record<string, Recording>
-  ) {
-    this.hasRecordingMap.clear();
-    const reportSet = new Set(reportNames);
-    for (const [key, value] of Object.entries(recordings)) {
-      if (!reportSet.has(key)) continue;
-      this.hasRecordingMap.set(key, value.steps.length > 0);
-    }
   }
 
   hasRecording(eventId: string): boolean {

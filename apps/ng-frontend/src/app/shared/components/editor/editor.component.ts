@@ -4,12 +4,16 @@ import {
   ChangeDetectionStrategy,
   effect,
   input,
-  viewChild
+  viewChild,
+  signal,
+  computed,
+  OnDestroy
 } from '@angular/core';
 import {
   EditorExtension,
   EditorService
 } from '../../services/editor/editor.service';
+import { EditorView } from '@codemirror/view';
 
 @Component({
   selector: 'app-editor',
@@ -21,32 +25,47 @@ import {
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EditorComponent {
+export class EditorComponent implements OnDestroy {
   editorExtension = input.required<EditorExtension>();
-  content = input.required<string>();
   editMode = input<boolean>(false);
-
+  content = input<string>();
+  private editorContent = computed(() => {
+    const content = this.content();
+    return content;
+  });
   private editor = viewChild<ElementRef<HTMLDivElement>>('editor');
+  private editorView: EditorView | null = null;
 
   constructor(private readonly editorService: EditorService) {
-    // Handle content changes
     effect(() => {
-      const content = this.content();
+      const content = this.editorContent();
       const editorElement = this.editor();
-      if (editorElement && content && !this.editMode()) {
-        this.initializeEditor();
+      if (editorElement && content) {
+        if (!this.editorView) {
+          this.editorView = this.editorService.initEditorView(
+            this.editorExtension(),
+            editorElement,
+            content
+          );
+        } else {
+          // Update existing editor content
+          const transaction = this.editorView.state.update({
+            changes: {
+              from: 0,
+              to: this.editorView.state.doc.length,
+              insert: content
+            }
+          });
+          this.editorView.dispatch(transaction);
+        }
       }
     });
   }
 
-  private initializeEditor() {
-    const editorElement = this.editor();
-    if (editorElement) {
-      this.editorService.initEditorView(
-        this.editorExtension(),
-        editorElement,
-        this.content()
-      );
+  ngOnDestroy() {
+    if (this.editorView) {
+      this.editorView.destroy();
+      this.editorView = null;
     }
   }
 }

@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Post,
+  Put
+} from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { Recording } from '@utils';
 import { ProjectRecordingService } from '../../features/project-agent/project-recording/project-recording.service';
@@ -43,35 +51,6 @@ export class RecordingController {
       projectSlug,
       eventId
     );
-  }
-
-  @ApiOperation({
-    summary: 'add recording',
-    description:
-      'Add a recording to an event. The project is identified by the projectSlug and the event by the eventId.'
-  })
-  @ApiParam({
-    name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.'
-  })
-  @ApiParam({
-    name: 'eventId',
-    description: 'The name of the event to which the recording belongs.'
-  })
-  @ApiBody({
-    description: 'The recording to be added to the event.'
-  })
-  @Post(':projectSlug/:eventId')
-  @Log()
-  async addRecording(
-    @Param('projectSlug') projectSlug: string,
-    @Param('eventId') eventId: string,
-    @Body() recording: Recording
-  ) {
-    return await this.recordingRepositoryService.create(projectSlug, eventId, {
-      title: recording.title,
-      steps: recording.steps
-    });
   }
 
   @ApiOperation({

@@ -26,15 +26,19 @@ export class TestEventRepositoryService {
   async listReports(
     projectSlug: string
   ): Promise<AbstractTestEventResponseDto[]> {
-    const entity = await this.repository.find({
+    const entities = await this.repository.find({
       relations: {
         testEventDetail: true,
         testImage: true,
-        project: true
+        project: true,
+        recording: true,
+        spec: true
       },
       where: { project: { projectSlug } }
     });
-    return plainToInstance(AbstractTestEventResponseDto, entity);
+    return plainToInstance(AbstractTestEventResponseDto, entities, {
+      enableImplicitConversion: true
+    });
   }
 
   async get(id: number) {
@@ -87,14 +91,19 @@ export class TestEventRepositoryService {
   }
 
   async create(projectEntity: ProjectEntity, data: CreateTestEventDto) {
-    const testEvent = new TestEventEntity();
-    testEvent.eventId = data.eventId;
-    testEvent.eventName = data.eventName;
-    testEvent.testName = data.testName;
-    testEvent.message = data.message;
-    testEvent.project = projectEntity;
-    const entity = await this.repository.save(testEvent);
-    return plainToInstance(AbstractTestEventResponseDto, entity);
+    try {
+      const testEvent = new TestEventEntity();
+      testEvent.eventId = data.eventId;
+      testEvent.eventName = data.eventName;
+      testEvent.testName = data.testName;
+      testEvent.message = data.message;
+      testEvent.project = projectEntity;
+      testEvent.stopNavigation = data.stopNavigation ?? false;
+      const entity = await this.repository.save(testEvent);
+      return plainToInstance(AbstractTestEventResponseDto, entity);
+    } catch (error) {
+      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
+    }
   }
 
   async update(data: UpdateTestEventDto) {

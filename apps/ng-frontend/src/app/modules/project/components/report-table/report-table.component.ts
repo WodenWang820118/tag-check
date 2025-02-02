@@ -45,7 +45,6 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
   styleUrls: ['./report-table.component.scss']
 })
 export class ReportTableComponent implements OnInit {
-  readonly preventNavigationEvents = signal<string[]>([]);
   private readonly paginator = viewChild<MatPaginator>(MatPaginator);
   private readonly sort = viewChild<MatSort>(MatSort);
 

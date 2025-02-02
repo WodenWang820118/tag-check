@@ -69,6 +69,7 @@ export class EventInspectionPipelineService {
         eventId: eventId,
         testName: `${eventName}_${timestamp}`,
         eventName: eventName,
+        event: eventName,
         passed: result.dataLayerResult.passed,
         requestPassed: result.requestCheckResult.passed,
         rawRequest: result.rawRequest,
@@ -77,6 +78,7 @@ export class EventInspectionPipelineService {
         dataLayer: result.dataLayerResult.dataLayer,
         dataLayerSpec: result.dataLayerResult.dataLayerSpec
       };
+
       this.logger.debug('Test Result:', JSON.stringify(testResultDto, null, 2));
       await this.testResultService.createAbstractReport(
         projectSlug,
@@ -92,6 +94,7 @@ export class EventInspectionPipelineService {
         eventId: eventId,
         testName: extractEventNameFromId(eventId),
         eventName: extractEventNameFromId(eventId),
+        event: extractEventNameFromId(eventId),
         passed: false,
         requestPassed: false,
         rawRequest: '',

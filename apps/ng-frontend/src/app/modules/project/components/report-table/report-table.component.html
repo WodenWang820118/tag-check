@@ -33,9 +33,7 @@
           style="text-decoration: none"
           [routerLink]="['./', element.eventId]"
           matBadge="bookmark_border"
-          [matBadgeHidden]="
-            !preventNavigationEvents().includes(element.eventId)
-          "
+          [matBadgeHidden]="!element.stopNavigation"
           matBadgeOverlap="false"
         >
           {{ element.testName }}
@@ -113,7 +111,7 @@
             <!-- else, show the display button by default; if there's no recording, use another icon to prompt user -->
           }
         } @else {
-          @if (hasRecording(element.eventId)) {
+          @if (element.hasRecording) {
             <button
               mat-icon-button
               aria-label="run test"
