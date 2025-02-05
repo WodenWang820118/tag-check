@@ -15,7 +15,7 @@ import { ProjectAbstractReportService } from '../../features/project-agent/proje
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
-import { CreateFullTestEventDto } from '../../shared';
+import { CreateFullTestEventDto, UpdateTestEventDto } from '../../shared';
 
 @Controller('reports')
 export class ReportController {
@@ -116,6 +116,26 @@ export class ReportController {
     return await this.testReportFacadeRepositoryService.getReportDetail(
       projectSlug,
       eventId
+    );
+  }
+
+  @Put(':projectSlug')
+  async updateTestEvents(
+    @Param('projectSlug') projectSlug: string,
+    @Body() reports: IReportDetails[]
+  ) {
+    const events = reports.map((report) => {
+      const event = new UpdateTestEventDto();
+      event.eventId = report.eventId;
+      event.testName = report.testName;
+      event.eventName = report.eventName;
+      event.message = report.message;
+      event.stopNavigation = report.stopNavigation;
+      return event;
+    });
+    return await this.testEventRepositoryService.updateTestEvents(
+      projectSlug,
+      events
     );
   }
 }

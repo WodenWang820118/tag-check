@@ -28,8 +28,18 @@ export class ReportService {
       );
   }
 
-  updateReport(projectSlug: string, report: ProjectReport) {
-    if (!projectSlug || !report) return of({} as ProjectReport);
+  updateTestEvents(projectSlug: string, reports: IReportDetails[]) {
+    return this.http
+      .put<TestEvent[]>(`${environment.reportApiUrl}/${projectSlug}`, reports)
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return throwError(() => new Error('Failed to update test event'));
+        })
+      );
+  }
+
+  updateReport(projectSlug: string, report: AbstractTestEvent) {
     return this.http
       .put<AbstractTestEvent>(
         `${environment.reportApiUrl}/${projectSlug}`,
@@ -38,7 +48,7 @@ export class ReportService {
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
+          return throwError(() => new Error('Failed to update report'));
         })
       );
   }
