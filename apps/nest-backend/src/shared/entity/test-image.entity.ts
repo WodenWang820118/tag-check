@@ -17,18 +17,28 @@ export class TestImageEntity
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({
+    name: 'image_name',
+    type: 'varchar'
+  })
   imageName!: string;
 
-  @Column('blob')
+  @Column({
+    name: 'image_data',
+    type: 'blob'
+  })
   imageData!: Buffer;
 
-  @Column({ nullable: true })
+  @Column({
+    name: 'image_size',
+    type: 'int',
+    nullable: true
+  })
   imageSize?: number;
 
-  @JoinColumn({ name: 'testEventId' })
   @OneToOne(() => TestEventEntity, (testEvent) => testEvent.testImage, {
     onDelete: 'CASCADE'
   })
+  @JoinColumn({ name: 'test_event_id' })
   testEvent!: TestEventEntity;
 }

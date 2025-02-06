@@ -21,12 +21,20 @@ export class SpecEntity extends AuditableEntity implements DataLayerSpecSchema {
   @OneToOne(() => TestEventEntity, (testEvent) => testEvent.spec, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'testEventId' })
+  @JoinColumn({ name: 'test_event_id' })
   testEvent!: TestEventEntity;
 
-  @Column()
+  @Column({
+    name: 'event_name',
+    type: 'varchar',
+    length: 255
+  })
   eventName!: string;
 
-  @Column('json')
+  @Column({
+    name: 'data_layer_spec',
+    type: 'json',
+    comment: 'Stores the data layer specification in JSON format'
+  })
   dataLayerSpec!: StrictDataLayerEvent | BaseDataLayerEvent;
 }

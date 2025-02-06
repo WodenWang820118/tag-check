@@ -9,7 +9,7 @@ import { ProjectEntity } from './project.entity';
 import { BrowserSettingSchema } from '@utils';
 import { AuditableEntity } from './common';
 
-@Entity('browser_settings')
+@Entity('browser_setting')
 export class BrowserSettingEntity
   extends AuditableEntity
   implements BrowserSettingSchema
@@ -17,15 +17,28 @@ export class BrowserSettingEntity
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column('simple-array', { nullable: true })
+  @Column({
+    name: 'browser',
+    type: 'json',
+    nullable: true,
+    comment: 'List of supported browsers'
+  })
   browser!: string[];
 
-  @Column()
+  @Column({
+    name: 'headless',
+    type: 'boolean',
+    default: false,
+    comment: 'Whether to run browser in headless mode'
+  })
   headless!: boolean;
 
   @OneToOne(() => ProjectEntity, (project) => project.browserSettings, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'projectId' })
+  @JoinColumn({
+    name: 'project_id',
+    referencedColumnName: 'id'
+  })
   project!: ProjectEntity;
 }

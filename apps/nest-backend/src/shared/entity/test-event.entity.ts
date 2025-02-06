@@ -26,41 +26,44 @@ export class TestEventEntity
   @ManyToOne(() => ProjectEntity, (project) => project.testEvents, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'projectId' })
+  @JoinColumn({ name: 'project_id' })
   project!: ProjectEntity;
 
   @OneToOne(() => RecordingEntity, (recording) => recording.testEvent, {
     onDelete: 'CASCADE'
   })
+  @JoinColumn({ name: 'recording_id' })
   recording!: RecordingEntity;
 
   @OneToOne(() => SpecEntity, (spec) => spec.testEvent, {
     onDelete: 'CASCADE'
   })
+  @JoinColumn({ name: 'spec_id' })
   spec!: SpecEntity;
 
   @OneToMany(() => TestEventDetailEntity, (detail) => detail.testEvent, {
     onDelete: 'CASCADE'
   })
-  testEventDetail!: TestEventDetailEntity;
+  testEventDetails!: TestEventDetailEntity[]; // Changed to plural for collection
 
   @OneToOne(() => TestImageEntity, (testImage) => testImage.testEvent, {
     onDelete: 'CASCADE'
   })
+  @JoinColumn({ name: 'test_image_id' })
   testImage!: TestImageEntity;
 
-  @Column({ name: 'eventId' })
+  @Column({ name: 'event_id', unique: true })
   eventId!: string;
 
-  @Column()
+  @Column({ name: 'test_name' })
   testName!: string;
 
-  @Column()
+  @Column({ name: 'event_name' })
   eventName!: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'stop_navigation', nullable: true })
   stopNavigation?: boolean;
 
-  @Column({ nullable: true })
+  @Column({ name: 'message', nullable: true })
   message?: string;
 }

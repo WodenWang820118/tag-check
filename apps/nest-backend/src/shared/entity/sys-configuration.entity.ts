@@ -10,12 +10,25 @@ export class SysConfigurationEntity
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({
+    name: 'name',
+    type: 'varchar',
+    length: 255,
+    unique: true
+  })
   name!: string;
 
-  @Column()
+  @Column({
+    name: 'value',
+    type: 'varchar',
+    length: 1000
+  })
   value!: string;
 
-  @Column({ nullable: true })
+  @Column({
+    name: 'description',
+    type: 'text',
+    nullable: true
+  })
   description?: string;
 }

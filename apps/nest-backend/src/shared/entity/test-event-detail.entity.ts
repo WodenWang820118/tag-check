@@ -21,27 +21,46 @@ export class TestEventDetailEntity
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne(() => TestEventEntity, (testEvent) => testEvent.testEventDetail, {
+  @ManyToOne(() => TestEventEntity, (testEvent) => testEvent.testEventDetails, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'testEventId' })
+  @JoinColumn({ name: 'test_event_id' })
   testEvent!: TestEventEntity;
 
-  @Column()
+  @Column({
+    name: 'passed',
+    type: 'boolean'
+  })
   passed!: boolean;
 
-  @Column()
+  @Column({
+    name: 'request_passed',
+    type: 'boolean'
+  })
   requestPassed!: boolean;
 
-  @Column({ nullable: true })
+  @Column({
+    name: 'raw_request',
+    type: 'text',
+    nullable: true
+  })
   rawRequest?: string;
 
-  @Column('json', { nullable: true })
+  @Column('json', {
+    name: 'reformed_data_layer',
+    nullable: true
+  })
   reformedDataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
 
-  @Column()
+  @Column({
+    name: 'destination_url',
+    type: 'varchar'
+  })
   destinationUrl!: string;
 
-  @Column('json', { nullable: true })
+  @Column('json', {
+    name: 'data_layer',
+    nullable: true
+  })
   dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
 }

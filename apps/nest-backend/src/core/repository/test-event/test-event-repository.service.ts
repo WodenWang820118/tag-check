@@ -28,7 +28,7 @@ export class TestEventRepositoryService {
   ): Promise<AbstractTestEventResponseDto[]> {
     const entities = await this.repository.find({
       relations: {
-        testEventDetail: true,
+        testEventDetails: true,
         testImage: true,
         project: true,
         recording: true,
@@ -62,7 +62,7 @@ export class TestEventRepositoryService {
   async getBySlugAndEventId(projectSlug: string, eventId: string) {
     const entity = await this.repository.findOne({
       relations: {
-        testEventDetail: true,
+        testEventDetails: true,
         testImage: true,
         project: true
       },
@@ -75,7 +75,7 @@ export class TestEventRepositoryService {
   async getBySlugAndEventIds(projectSlug: string, eventIds: string[]) {
     const entities = await this.repository.find({
       relations: {
-        testEventDetail: true,
+        testEventDetails: true,
         testImage: true,
         project: true
       },

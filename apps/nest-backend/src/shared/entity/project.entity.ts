@@ -6,7 +6,6 @@ import {
   OneToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { SpecEntity } from './spec.entity';
 import { AuditableEntity } from './common';
 import { ProjectSchema } from '@utils';
 import { AuthenticationSettingEntity } from './authentication-setting.entity';
@@ -20,16 +19,36 @@ export class ProjectEntity extends AuditableEntity implements ProjectSchema {
   id!: number;
 
   @Index({ unique: true })
-  @Column({ nullable: false, unique: true, type: 'varchar', length: 255 })
+  @Column({
+    name: 'project_slug',
+    type: 'varchar',
+    length: 255,
+    nullable: false,
+    unique: true
+  })
   projectSlug!: string;
 
-  @Column({ nullable: false })
+  @Column({
+    name: 'project_name',
+    type: 'varchar',
+    length: 255,
+    nullable: false
+  })
   projectName!: string;
 
-  @Column({ nullable: true })
+  @Column({
+    name: 'project_description',
+    type: 'text',
+    nullable: true
+  })
   projectDescription?: string;
 
-  @Column({ nullable: true })
+  @Column({
+    name: 'measurement_id',
+    type: 'varchar',
+    length: 100,
+    nullable: true
+  })
   measurementId?: string;
 
   @OneToMany(() => TestEventEntity, (testEvent) => testEvent.project, {

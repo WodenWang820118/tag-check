@@ -17,13 +17,24 @@ export class RecordingEntity
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({
+    name: 'title',
+    type: 'varchar',
+    length: 255
+  })
   title!: string;
 
-  @Column('json')
-  steps!: Record<string, any>[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  @Column({
+    name: 'steps',
+    type: 'json',
+    comment: 'Array of recording steps containing action details'
+  })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  steps!: any[];
 
-  @JoinColumn({ name: 'testEventId' })
-  @OneToOne(() => TestEventEntity, (event) => event.id)
+  @OneToOne(() => TestEventEntity, (testEvent) => testEvent.recording, {
+    onDelete: 'CASCADE'
+  })
+  @JoinColumn({ name: 'test_event_id' }) // Changed to snake_case
   testEvent!: TestEventEntity;
 }

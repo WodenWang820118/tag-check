@@ -9,7 +9,7 @@ import {
 import { ProjectEntity } from './project.entity';
 import { AuditableEntity } from './common';
 
-@Entity('application_settings')
+@Entity('application_setting')
 export class ApplicationSettingEntity
   extends AuditableEntity
   implements ApplicationSettingSchema
@@ -17,18 +17,36 @@ export class ApplicationSettingEntity
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column('json')
+  @Column({
+    name: 'local_storage_config',
+    type: 'json',
+    nullable: false,
+    comment: 'Local storage configuration settings'
+  })
   localStorage!: LocalStorage;
 
-  @Column('json', { nullable: true })
+  @Column({
+    name: 'cookie_config',
+    type: 'json',
+    nullable: true,
+    comment: 'Cookie configuration settings'
+  })
   cookie!: Cookie;
 
-  @Column('json', { nullable: true })
+  @Column({
+    name: 'gtm_config',
+    type: 'json',
+    nullable: true,
+    comment: 'Google Tag Manager configuration settings'
+  })
   gtm!: Gtm;
 
   @OneToOne(() => ProjectEntity, (project) => project.applicationSettings, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'projectId' })
+  @JoinColumn({
+    name: 'project_id',
+    referencedColumnName: 'id'
+  })
   project!: ProjectEntity;
 }
