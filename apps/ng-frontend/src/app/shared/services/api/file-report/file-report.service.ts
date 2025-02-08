@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
-import { catchError, forkJoin, map, of } from 'rxjs';
+import { catchError, map, of, throwError } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
-import { FileReport } from '@utils';
+import { FrontFileReport } from '@utils';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +12,7 @@ export class FileReportService {
 
   getFileReports(projectSlug: string) {
     return this.http
-      .get<FileReport[]>(`${environment.fileReportApiUrl}/${projectSlug}`)
+      .get<FrontFileReport[]>(`${environment.fileReportApiUrl}/${projectSlug}`)
       .pipe(
         catchError((error) => {
           console.error(error);
@@ -23,13 +23,16 @@ export class FileReportService {
 
   deleteFileReport(projectSlug: string, eventIds: string[]) {
     return this.http
-      .delete<FileReport>(`${environment.fileReportApiUrl}/${projectSlug}`, {
-        params: { eventIds: eventIds }
-      })
+      .delete<FrontFileReport>(
+        `${environment.fileReportApiUrl}/${projectSlug}`,
+        {
+          params: { eventIds: eventIds }
+        }
+      )
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
+          return throwError(() => new Error('Error deleting file report'));
         })
       );
   }

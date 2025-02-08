@@ -73,6 +73,7 @@ export class DataLayerController {
     @Body(ValidationPipe) eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     try {
+      // TODO: double-check if the process is correct
       await this.eventInspectionControllerService.inspectSingleEvent(
         projectSlug,
         eventId,
@@ -86,6 +87,7 @@ export class DataLayerController {
         eventInspectionPresetDto
       );
 
+      // TODO: get the result from the DB
       const abstractReport =
         await this.projectAbstractReportService.getSingleAbstractTestResultJson(
           projectSlug,

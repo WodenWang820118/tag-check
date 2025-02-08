@@ -1,21 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  BaseDataLayerEvent,
-  extractEventNameFromId,
-  Spec,
-  StrictDataLayerEvent,
-  ValidationResult
-} from '@utils';
+import { StrictDataLayerEvent, ValidationResult } from '@utils';
 import { FileService } from '../../infrastructure/os/file/file.service';
-import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
 import { WebAgentService } from '../web-agent/web-agent.service';
 import { RequestProcessorService } from '../../features/request-processor/request-processor.service';
 import { Credentials, Page } from 'puppeteer';
 import { InspectorUtilsService } from './inspector-utils.service';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
+import { SpecRepositoryService } from '../../core/repository/spec/spec-repository.service';
 @Injectable()
 export class InspectorSingleEventService {
   private readonly logger = new Logger(InspectorSingleEventService.name);
@@ -23,28 +17,26 @@ export class InspectorSingleEventService {
     private readonly webAgentService: WebAgentService,
     private readonly fileService: FileService,
     private readonly requestProcessorService: RequestProcessorService,
-    private readonly filePathService: FilePathService,
     private readonly inspectorUtilsService: InspectorUtilsService,
+    private readonly specRepositoryService: SpecRepositoryService,
     private readonly testImageRepositoryService: TestImageRepositoryService
   ) {}
-
+  // TODO: use DB instead of OS system
   // inspect one event
   async inspectDataLayer(
     page: Page,
     projectSlug: string,
     eventId: string,
-    headless: string,
     measurementId: string,
     credentials: Credentials,
     captureRequest: string,
     application: EventInspectionPresetDto['application']
   ) {
-    const specs = await this.getProjectSpecs(projectSlug);
-    const expectedObj = this.getExpectedObject(specs, eventId);
-    const imageSavingFolder = await this.getImageSavingFolder(
-      projectSlug,
-      eventId
-    );
+    const spec =
+      await this.specRepositoryService.getSpecByProjectSlugAndEventId(
+        projectSlug,
+        eventId
+      );
 
     if (captureRequest === 'false') {
       return await this.handleNoCaptureRequest(
@@ -55,8 +47,7 @@ export class InspectorSingleEventService {
         credentials,
         captureRequest,
         application,
-        expectedObj,
-        imageSavingFolder
+        spec.dataLayerSpec
       );
     }
 
@@ -68,8 +59,7 @@ export class InspectorSingleEventService {
       credentials,
       captureRequest,
       application,
-      expectedObj,
-      imageSavingFolder
+      spec.dataLayerSpec
     );
   }
 
@@ -81,8 +71,7 @@ export class InspectorSingleEventService {
     credentials: Credentials,
     captureRequest: string,
     application: EventInspectionPresetDto['application'],
-    expectedObj: StrictDataLayerEvent,
-    imageSavingFolder: string
+    expectedObj: StrictDataLayerEvent
   ) {
     this.logger.log(`MeasurementId is empty`);
     const result = await this.webAgentService.executeAndGetDataLayer(
@@ -105,6 +94,7 @@ export class InspectorSingleEventService {
 
     const destinationUrl = result.destinationUrl;
     this.logger.log(`Destination URL: ${destinationUrl}`);
+    // TODO: cached file might be suitable to be stored in the DB
     await this.fileService.writeCacheFile(projectSlug, eventId, result);
     const screenshot = await page.screenshot({
       fullPage: true
@@ -131,8 +121,7 @@ export class InspectorSingleEventService {
     credentials: Credentials,
     captureRequest: string,
     application: EventInspectionPresetDto['application'],
-    expectedObj: StrictDataLayerEvent,
-    imageSavingFolder: string
+    spec: StrictDataLayerEvent
   ) {
     const result = await this.webAgentService.executeAndGetDataLayerAndRequest(
       page,
@@ -149,7 +138,7 @@ export class InspectorSingleEventService {
     // 3.2 Compare the expectedObj with the result, applying strategies
     const dataLayerResult = this.inspectorUtilsService.isDataLayerCorrect(
       result.dataLayer,
-      expectedObj
+      spec
     );
 
     const rawRequest = result.eventRequest;
@@ -159,13 +148,12 @@ export class InspectorSingleEventService {
 
     const requestCheckResult = this.inspectorUtilsService.isDataLayerCorrect(
       [recomposedRequest],
-      expectedObj
+      spec
     );
 
     const destinationUrl = result.destinationUrl;
     await this.fileService.writeCacheFile(projectSlug, eventId, result);
     const screenshot = await page.screenshot({
-      path: imageSavingFolder,
       fullPage: true
     });
 
@@ -180,33 +168,5 @@ export class InspectorSingleEventService {
       rawRequest,
       requestCheckResult
     };
-  }
-
-  private async getProjectSpecs(projectSlug: string) {
-    const specsPath =
-      await this.filePathService.getProjectConfigFilePath(projectSlug);
-    const specs = this.fileService.readJsonFile<Spec[]>(specsPath);
-    return specs;
-  }
-
-  private getExpectedObject(
-    specs: Spec[],
-    eventId: string
-  ): StrictDataLayerEvent {
-    const eventName = extractEventNameFromId(eventId);
-    const spec = specs.find(
-      (spec: BaseDataLayerEvent) => spec.event === eventName
-    );
-    if (!spec) {
-      throw new Error(`No spec found for event ${eventName}`);
-    }
-    return spec;
-  }
-
-  private async getImageSavingFolder(
-    projectSlug: string,
-    eventId: string
-  ): Promise<string> {
-    return this.filePathService.getImageFilePath(projectSlug, eventId);
   }
 }

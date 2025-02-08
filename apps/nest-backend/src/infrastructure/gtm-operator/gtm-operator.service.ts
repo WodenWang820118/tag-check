@@ -97,7 +97,6 @@ export class GtmOperatorService {
           targetPage,
           projectSlug,
           eventId,
-          headless,
           measurementId,
           credentials,
           captureRequest,

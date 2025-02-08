@@ -74,7 +74,13 @@ export class TestReportFacadeRepositoryService {
       specCreation
     ]);
   }
-
+  /**
+   * Initialize all nessessary entities for a full report to be used
+   * @param projectSlug
+   * @param eventId
+   * @param data
+   * @returns
+   */
   async createFullReport(
     projectSlug: string,
     eventId: string,

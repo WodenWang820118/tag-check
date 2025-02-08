@@ -5,6 +5,7 @@ import { SettingRepositoryModule } from './settings/setting-repositoy.module';
 import { ProjectRepositoryModule } from './project/project-repository.module';
 import { RecordingRepositoryModule } from './recording/recording-repository.module';
 import { SpecRepositoryModule } from './spec/spec-repository.module';
+import { FileReportRepositoryModule } from './file-report/file-report-repository.module';
 
 const modules = [
   ProjectRepositoryModule,
@@ -12,7 +13,8 @@ const modules = [
   SettingRepositoryModule,
   SpecRepositoryModule,
   SysConfigurationRepositoryModule,
-  TestEventRepositoryModule
+  TestEventRepositoryModule,
+  FileReportRepositoryModule
 ];
 
 @Module({

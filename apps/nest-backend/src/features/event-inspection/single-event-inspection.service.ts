@@ -70,7 +70,6 @@ export class SingleEventInspectionService {
           page,
           projectSlug,
           eventId,
-          headless,
           measurementId,
           credentials,
           captureRequest,

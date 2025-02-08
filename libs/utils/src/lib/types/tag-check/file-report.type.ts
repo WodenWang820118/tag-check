@@ -1,18 +1,21 @@
 import { Auditable } from './auditable.type';
+import { TestEvent } from './project.type';
+import { TestEventDetail } from './report.type';
+
+export type FrontFileReport = {
+  fileName: string;
+} & TestEvent &
+  TestEventDetail &
+  Auditable;
 
 export type FileReport = {
-  id: number;
-  projectSlug: string;
-  eventId: string;
-  testName: string;
-  eventName: string;
-  passed: boolean;
-  requestPassed: boolean;
-  rawRequest: string;
-  message: string;
-  destinationUrl: string;
-  createdAt: Date;
+  fileName: string;
 };
+
+export type FileReportSchema = {
+  id: number;
+} & FileReport &
+  Auditable;
 
 export type DataLayerResult = {
   eventId: string;

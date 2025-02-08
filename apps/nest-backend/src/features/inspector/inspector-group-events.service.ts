@@ -32,7 +32,6 @@ export class InspectorGroupEventsService {
   async inspectProjectDataLayer(
     browser: Browser,
     projectName: string,
-    headless: string,
     measurementId: string,
     credentials: Credentials,
     captureRequest: string,
@@ -59,7 +58,6 @@ export class InspectorGroupEventsService {
               page,
               projectName,
               testName,
-              headless,
               measurementId,
               credentials,
               captureRequest,

@@ -4,6 +4,8 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -14,6 +16,7 @@ import { TestImageEntity } from './test-image.entity';
 import { TestEventDetailEntity } from './test-event-detail.entity';
 import { SpecEntity } from './spec.entity';
 import { RecordingEntity } from './recording.entity';
+import { FileReportEntity } from './file-report.entity';
 
 @Entity('test_event')
 export class TestEventEntity
@@ -48,6 +51,20 @@ export class TestEventEntity
     onDelete: 'CASCADE'
   })
   testImage!: TestImageEntity;
+
+  @ManyToMany(() => FileReportEntity, (fileReport) => fileReport.testEvents)
+  @JoinTable({
+    name: 'test_events_file_reports',
+    joinColumn: {
+      name: 'test_event_id',
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'file_report_id',
+      referencedColumnName: 'id'
+    }
+  })
+  fileReports!: FileReportEntity[];
 
   @Column({ name: 'event_id', unique: true })
   eventId!: string;

@@ -5,7 +5,8 @@ import {
   CreateTestEventDetailDto,
   TestEventDetailEntity,
   TestEventDetailResponseDto,
-  TestEventEntity
+  TestEventEntity,
+  UpdateTestEventDetailDto
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
@@ -68,9 +69,28 @@ export class TestEventDetailRepositoryService {
       testEventDetailEntity.testEvent = testEventEntity;
 
       const entity = await this.repository.save(testEventDetailEntity);
-      return plainToInstance(TestEventDetailEntity, entity);
+      return plainToInstance(TestEventDetailResponseDto, entity);
     } catch (error) {
       throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
     }
+  }
+
+  async update(
+    projectSlug: string,
+    eventId: string,
+    data: UpdateTestEventDetailDto
+  ) {
+    const entity = await this.repository.update(
+      {
+        testEvent: {
+          project: {
+            projectSlug
+          },
+          eventId
+        }
+      },
+      data
+    );
+    return plainToInstance(TestEventDetailResponseDto, entity);
   }
 }

@@ -4,7 +4,7 @@ import { FileReportService } from '../../../../shared/services/api/file-report/f
 import { tap, take } from 'rxjs';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
-import { FileReport } from '@utils';
+import { FileReport, FrontFileReport } from '@utils';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { InformationDialogComponent } from '../../../../shared/components/information-dialog/information-dialog.component';
@@ -22,12 +22,12 @@ export class FileTableDataSourceFacadeService {
     'createdAt'
   ]);
 
-  readonly dataSource = signal<MatTableDataSource<FileReport>>(
+  readonly dataSource = signal<MatTableDataSource<FrontFileReport>>(
     new MatTableDataSource()
   );
 
   // Selection model as a signal
-  readonly selection = signal(new SelectionModel<FileReport>(true, []));
+  readonly selection = signal(new SelectionModel<FrontFileReport>(true, []));
 
   // Computed property for "select all" behavior
   readonly isAllSelected = computed(() => {
@@ -119,7 +119,7 @@ export class FileTableDataSourceFacadeService {
 
     if (fileReports && paginator && sort) {
       // Sort the data
-      const injectReports = (fileReports as FileReport[]).sort((a, b) =>
+      const injectReports = (fileReports as FrontFileReport[]).sort((a, b) =>
         a.eventName.localeCompare(b.eventName)
       );
       // Create data source and assign
@@ -146,7 +146,10 @@ export class FileTableDataSourceFacadeService {
       .subscribe();
   }
 
-  private handleReportDownload(projectSlug: string, selected: FileReport[]) {
+  private handleReportDownload(
+    projectSlug: string,
+    selected: FrontFileReport[]
+  ) {
     this.fileReportService
       .downloadFileReports(
         projectSlug,
@@ -174,7 +177,7 @@ export class FileTableDataSourceFacadeService {
     this.selection().select(...this.dataSource().data);
   }
 
-  checkboxLabel(row?: FileReport): string {
+  checkboxLabel(row?: FrontFileReport): string {
     if (!row) {
       return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
     }
