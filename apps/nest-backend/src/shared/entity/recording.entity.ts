@@ -35,6 +35,6 @@ export class RecordingEntity
   @OneToOne(() => TestEventEntity, (testEvent) => testEvent.recording, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'test_event_id' }) // Changed to snake_case
+  @JoinColumn({ name: 'test_event_id' })
   testEvent!: TestEventEntity;
 }

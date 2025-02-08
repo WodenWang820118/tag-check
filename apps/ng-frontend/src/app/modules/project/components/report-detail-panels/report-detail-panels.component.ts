@@ -1,15 +1,8 @@
 import { ReportDetailPanelsFacadeService } from './report-detail-panels-facade.service';
 import { AsyncPipe, JsonPipe } from '@angular/common';
-import {
-  Component,
-  computed,
-  effect,
-  input,
-  OnInit,
-  signal
-} from '@angular/core';
+import { Component, computed, input, OnInit, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { DataLayerSpec, IReportDetails, Spec } from '@utils';
+import { IReportDetails, Spec } from '@utils';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
@@ -49,10 +42,9 @@ export class ReportDetailPanelsComponent implements OnInit {
 
   // Computed signals
   specContent = computed(() => {
-    const specFileContent =
-      this.reportDetailPanelsFacadeService.specFileContent$;
+    const specFileContent = this.reportDetailPanelsFacadeService.specContent$;
     const tempSpecFileContent =
-      this.reportDetailPanelsFacadeService.tempSpecFileContent$;
+      this.reportDetailPanelsFacadeService.tempSpecContent$;
     const result = tempSpecFileContent || specFileContent;
     console.log('Spec Content: ', result);
     return result;
@@ -60,9 +52,9 @@ export class ReportDetailPanelsComponent implements OnInit {
 
   recordingContent = computed(() => {
     const recordingFileContent =
-      this.reportDetailPanelsFacadeService.recordingFileContent$;
+      this.reportDetailPanelsFacadeService.recordingContent$;
     const tempRecordingFileContent =
-      this.reportDetailPanelsFacadeService.tempRecordingFileContent$;
+      this.reportDetailPanelsFacadeService.tempRecordingContent$;
     const result = tempRecordingFileContent || recordingFileContent;
     console.log('Recording Content: ', result);
     return result;

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { EditorService } from '../../../../shared/services/editor/editor.service';
-import { firstValueFrom } from 'rxjs';
+import { catchError, EMPTY, map, switchMap, take, throwError } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
@@ -43,61 +43,57 @@ export class ReportDetailPanelsFacadeService {
   }
 
   async onSpecUpdate(projectSlug: string, eventId: string) {
-    const editor = await firstValueFrom(
-      this.editorService.editor$.specJsonEditor
-    );
-
-    const specContent = editor.state.doc.toString();
-
-    try {
-      const parsedContent = JSON.parse(specContent);
-
-      if (
-        projectSlug &&
-        eventId &&
-        !this.utilsService.isEmptyObject(parsedContent)
-      ) {
-        await firstValueFrom(
-          this.specService.updateSpec(projectSlug, eventId, parsedContent)
-        );
-      } else {
-        this.showErrorDialog('Spec content is required and cannot be empty.');
-      }
-    } catch (err) {
-      this.showErrorDialog('Invalid spec content');
-    }
+    this.editorService.editor$.specJsonEditor
+      .pipe(
+        take(1),
+        map((editor) => {
+          const content = editor.state.doc.toString();
+          return JSON.parse(content) as Spec;
+        }),
+        switchMap((parsedContent) => {
+          if (!this.utilsService.isEmptyObject(parsedContent)) {
+            this.specService.setSpec(parsedContent);
+            return this.specService.updateSpec(
+              projectSlug,
+              eventId,
+              parsedContent
+            );
+          }
+          return EMPTY;
+        }),
+        catchError((error) => {
+          console.error(error);
+          return throwError(() => new Error('Failed to update spec'));
+        })
+      )
+      .subscribe();
   }
 
   async onRecordingUpdate(projectSlug: string, eventId: string) {
-    const editor = await firstValueFrom(
-      this.editorService.editor$.recordingJsonEditor
-    );
-
-    const recordingContent = editor.state.doc.toString();
-
-    try {
-      const parsedContent = JSON.parse(recordingContent);
-
-      if (
-        projectSlug &&
-        eventId &&
-        !this.utilsService.isEmptyObject(parsedContent)
-      ) {
-        await firstValueFrom(
-          this.recordingService.updateRecording(
-            projectSlug,
-            eventId,
-            parsedContent
-          )
-        );
-      } else {
-        this.showErrorDialog(
-          'Recording content is required and cannot be empty.'
-        );
-      }
-    } catch (err) {
-      this.showErrorDialog('Invalid recording content');
-    }
+    this.editorService.editor$.recordingJsonEditor
+      .pipe(
+        take(1),
+        map((editor) => {
+          const content = editor.state.doc.toString();
+          return JSON.parse(content) as Recording;
+        }),
+        switchMap((parsedContent) => {
+          if (!this.utilsService.isEmptyObject(parsedContent)) {
+            this.recordingService.setRecording(parsedContent);
+            return this.recordingService.updateRecording(
+              projectSlug,
+              eventId,
+              parsedContent
+            );
+          }
+          return EMPTY;
+        }),
+        catchError((error) => {
+          console.error(error);
+          return throwError(() => new Error('Failed to update recording'));
+        })
+      )
+      .subscribe();
   }
 
   onDownload(projectSlug: string, eventId: string) {
@@ -133,19 +129,19 @@ export class ReportDetailPanelsFacadeService {
     this.specService.setSpec(content);
   }
 
-  get tempRecordingFileContent$() {
+  get tempRecordingContent$() {
     return this.recordingService.tempRecordingContent$();
   }
 
-  get tempSpecFileContent$() {
+  get tempSpecContent$() {
     return this.specService.tempSpecContent$();
   }
 
-  get recordingFileContent$() {
+  get recordingContent$() {
     return this.recordingService.recordingContent$();
   }
 
-  get specFileContent$() {
+  get specContent$() {
     return this.specService.specContent$();
   }
 

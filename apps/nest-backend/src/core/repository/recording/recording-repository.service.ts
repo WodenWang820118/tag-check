@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -75,31 +75,25 @@ export class RecordingRepositoryService {
   }
 
   async update(projectSlug: string, eventId: string, data: CreateRecordingDto) {
-    const recording = await this.getRecordingDetails(projectSlug, eventId);
-    if (!recording) {
-      const testEvent = await this.testEventRepository.findOne({
-        relations: {
-          project: true
-        },
-        where: {
-          eventId: eventId,
-          project: {
-            projectSlug: projectSlug
-          }
-        }
-      });
-      if (!testEvent)
-        throw new HttpException('TestEvent not found', HttpStatus.NOT_FOUND);
-      const newRecording = new RecordingEntity();
-      newRecording.title = data.title;
-      newRecording.steps = data.steps;
-      newRecording.testEvent = testEvent;
-      const entity = await this.repository.save(newRecording);
-      return plainToInstance(RecordingResponseDto, entity);
-    }
+    const testEvent = await this.testEventRepository.findOne({
+      relations: { project: true },
+      where: {
+        eventId: eventId,
+        project: { projectSlug: projectSlug }
+      }
+    });
+    if (!testEvent)
+      throw new HttpException('TestEvent not found', HttpStatus.NOT_FOUND);
 
-    Object.assign(recording, data);
-    const entity = await this.repository.save(recording);
+    const newRecording = new RecordingEntity();
+    newRecording.title = data.title;
+    newRecording.steps = data.steps;
+    newRecording.testEvent = testEvent;
+
+    const entity = await this.repository.update(
+      { testEvent: testEvent },
+      newRecording
+    );
     return plainToInstance(RecordingResponseDto, entity);
   }
 }

@@ -137,12 +137,6 @@ export class ProjectFacadeRepositoryService {
   }
 
   async updateSpec(projectSlug: string, eventId: string, spec: Spec) {
-    const projectEntity =
-      await this.projectRepositoryService.getEntityBySlug(projectSlug);
-    return await this.specRepositoryService.update(
-      projectEntity,
-      eventId,
-      spec
-    );
+    return await this.specRepositoryService.update(projectSlug, eventId, spec);
   }
 }

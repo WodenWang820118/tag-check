@@ -32,13 +32,11 @@ export class TestEventEntity
   @OneToOne(() => RecordingEntity, (recording) => recording.testEvent, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'recording_id' })
   recording!: RecordingEntity;
 
   @OneToOne(() => SpecEntity, (spec) => spec.testEvent, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'spec_id' })
   spec!: SpecEntity;
 
   @OneToMany(() => TestEventDetailEntity, (detail) => detail.testEvent, {
@@ -49,7 +47,6 @@ export class TestEventEntity
   @OneToOne(() => TestImageEntity, (testImage) => testImage.testEvent, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'test_image_id' })
   testImage!: TestImageEntity;
 
   @Column({ name: 'event_id', unique: true })
