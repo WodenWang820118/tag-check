@@ -1,6 +1,6 @@
 import { Exclude, Expose, Transform } from 'class-transformer';
 import { AbstractTestEvent, Recording, Spec } from '@utils';
-import { Logger } from '@nestjs/common';
+import { TestEventEntity } from '../../entity';
 
 @Exclude()
 export class AbstractTestEventResponseDto implements AbstractTestEvent {
@@ -45,4 +45,18 @@ export class AbstractTestEventResponseDto implements AbstractTestEvent {
     );
   })
   hasRecording!: boolean;
+
+  @Expose()
+  @Transform(({ obj }) => {
+    const testEvent = obj as TestEventEntity;
+    return testEvent.testEventDetails.passed;
+  })
+  passed!: boolean;
+
+  @Expose()
+  @Transform(({ obj }) => {
+    const testEvent = obj as TestEventEntity;
+    return testEvent.testEventDetails.requestPassed;
+  })
+  requestPassed!: boolean;
 }

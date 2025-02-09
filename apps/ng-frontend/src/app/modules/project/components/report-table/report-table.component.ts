@@ -55,7 +55,7 @@ export class ReportTableComponent implements OnInit {
     private facade: ReportTableFacadeService,
     private tableSortService: TableSortService
   ) {}
-
+  // TODO: retrieve the pass or not information from the test event details
   ngOnInit() {
     const paginator = this.paginator();
     const sort = this.sort();
@@ -63,6 +63,7 @@ export class ReportTableComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .pipe(
         tap((data) => {
+          console.warn('data: ', data);
           if (paginator && sort)
             this.facade.initializeData(paginator, sort, data);
         })

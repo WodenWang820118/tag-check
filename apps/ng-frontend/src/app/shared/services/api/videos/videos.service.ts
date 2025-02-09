@@ -9,10 +9,7 @@ import { environment } from '../../../../../environments/environment';
 export class VideosService {
   constructor(private http: HttpClient) {}
 
-  getVideo(
-    projectSlug: string,
-    eventId: string
-  ): Observable<{ blob: Blob; hasVideo: boolean }> {
+  getVideo(projectSlug: string, eventId: string): Observable<{ blob: Blob }> {
     return this.http
       .get(`${environment.videoApiUrl}/${projectSlug}/${eventId}`, {
         responseType: 'blob',
@@ -20,8 +17,7 @@ export class VideosService {
       })
       .pipe(
         map((response) => ({
-          blob: response.body!,
-          hasVideo: response.headers.get('X-Video-Available') === 'true'
+          blob: response.body ? response.body : new Blob()
         })),
         catchError((error) => {
           console.error('Error fetching video:', error);

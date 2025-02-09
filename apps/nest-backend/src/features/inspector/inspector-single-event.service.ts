@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
-import { StrictDataLayerEvent, ValidationResult } from '@utils';
+import { DataLayerSpec, ValidationResult } from '@utils';
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { WebAgentService } from '../web-agent/web-agent.service';
 import { RequestProcessorService } from '../../features/request-processor/request-processor.service';
@@ -38,6 +38,8 @@ export class InspectorSingleEventService {
         eventId
       );
 
+    Logger.debug(JSON.stringify(spec, null, 2), 'Expected Spec: ');
+
     if (captureRequest === 'false') {
       return await this.handleNoCaptureRequest(
         page,
@@ -47,7 +49,7 @@ export class InspectorSingleEventService {
         credentials,
         captureRequest,
         application,
-        spec.dataLayerSpec
+        spec
       );
     }
 
@@ -59,7 +61,7 @@ export class InspectorSingleEventService {
       credentials,
       captureRequest,
       application,
-      spec.dataLayerSpec
+      spec
     );
   }
 
@@ -71,7 +73,7 @@ export class InspectorSingleEventService {
     credentials: Credentials,
     captureRequest: string,
     application: EventInspectionPresetDto['application'],
-    expectedObj: StrictDataLayerEvent
+    spec: DataLayerSpec
   ) {
     this.logger.log(`MeasurementId is empty`);
     const result = await this.webAgentService.executeAndGetDataLayer(
@@ -89,7 +91,7 @@ export class InspectorSingleEventService {
     // 3.2 Compare the expectedObj with the result, applying strategies
     const dataLayerResult = this.inspectorUtilsService.isDataLayerCorrect(
       result.dataLayer,
-      expectedObj
+      spec.dataLayerSpec
     );
 
     const destinationUrl = result.destinationUrl;
@@ -121,7 +123,7 @@ export class InspectorSingleEventService {
     credentials: Credentials,
     captureRequest: string,
     application: EventInspectionPresetDto['application'],
-    spec: StrictDataLayerEvent
+    spec: DataLayerSpec
   ) {
     const result = await this.webAgentService.executeAndGetDataLayerAndRequest(
       page,
@@ -138,7 +140,7 @@ export class InspectorSingleEventService {
     // 3.2 Compare the expectedObj with the result, applying strategies
     const dataLayerResult = this.inspectorUtilsService.isDataLayerCorrect(
       result.dataLayer,
-      spec
+      spec.dataLayerSpec
     );
 
     const rawRequest = result.eventRequest;
@@ -148,7 +150,7 @@ export class InspectorSingleEventService {
 
     const requestCheckResult = this.inspectorUtilsService.isDataLayerCorrect(
       [recomposedRequest],
-      spec
+      spec.dataLayerSpec
     );
 
     const destinationUrl = result.destinationUrl;

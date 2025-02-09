@@ -13,16 +13,16 @@ import {
 } from '@nestjs/common';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionControllerService } from './event-inspection-controller.service';
-import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
+import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 
 @Controller('datalayer')
 export class DataLayerController {
   private readonly logger = new Logger(DataLayerController.name);
 
   constructor(
-    private projectAbstractReportService: ProjectAbstractReportService,
-    private eventInspectionControllerService: EventInspectionControllerService
+    private eventInspectionControllerService: EventInspectionControllerService,
+    private testReportFacadeRepositoryService: TestReportFacadeRepositoryService
   ) {}
 
   @ApiOperation({
@@ -61,7 +61,6 @@ export class DataLayerController {
   })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
   @Post('/:projectSlug/:eventId')
-  @Log()
   async inspectSingleEvent(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
@@ -87,9 +86,8 @@ export class DataLayerController {
         eventInspectionPresetDto
       );
 
-      // TODO: get the result from the DB
       const abstractReport =
-        await this.projectAbstractReportService.getSingleAbstractTestResultJson(
+        await this.testReportFacadeRepositoryService.getReportDetail(
           projectSlug,
           eventId
         );
@@ -112,7 +110,6 @@ export class DataLayerController {
     inspectSingleEvent endpoint for more parameters details.'
   })
   @Get(':projectSlug')
-  @Log()
   async inspectProject(
     @Param('projectSlug') projectSlug: string,
     @Query('headless') headless: string,

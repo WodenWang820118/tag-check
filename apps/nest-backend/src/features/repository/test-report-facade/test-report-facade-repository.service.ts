@@ -150,6 +150,6 @@ export class TestReportFacadeRepositoryService {
       eventId
     );
 
-    return Promise.all([testEvent, testEventDetail, testImage]);
+    return [testEvent, testEventDetail, testImage];
   }
 }

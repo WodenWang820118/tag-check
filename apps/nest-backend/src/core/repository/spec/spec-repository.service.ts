@@ -27,22 +27,27 @@ export class SpecRepositoryService {
   }
 
   async getSpecByProjectSlugAndEventId(projectSlug: string, eventId: string) {
-    const entity = await this.repository.findOne({
-      relations: {
-        testEvent: {
-          project: true
+    try {
+      const entity = await this.repository.findOne({
+        relations: {
+          testEvent: {
+            project: true
+          }
+        },
+        where: {
+          testEvent: {
+            project: {
+              projectSlug: projectSlug
+            },
+            eventId: eventId
+          }
         }
-      },
-      where: {
-        testEvent: {
-          project: {
-            projectSlug: projectSlug
-          },
-          eventId: eventId
-        }
-      }
-    });
-    return plainToInstance(AbstractSpecResponseDto, entity);
+      });
+      return plainToInstance(AbstractSpecResponseDto, entity);
+    } catch (error) {
+      Logger.error(error);
+      throw new HttpException('Error getting spec', HttpStatus.BAD_REQUEST);
+    }
   }
 
   async create(testEventEntity: TestEventEntity, spec: CreateSpecDto) {

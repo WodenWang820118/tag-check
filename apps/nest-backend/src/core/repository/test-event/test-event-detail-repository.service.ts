@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import {
@@ -14,7 +14,9 @@ import { plainToInstance } from 'class-transformer';
 export class TestEventDetailRepositoryService {
   constructor(
     @InjectRepository(TestEventDetailEntity)
-    private readonly repository: Repository<TestEventDetailEntity>
+    private readonly repository: Repository<TestEventDetailEntity>,
+    @InjectRepository(TestEventEntity)
+    private readonly testEventRepository: Repository<TestEventEntity>
   ) {}
 
   async getBySlugAndEventId(projectSlug: string, eventId: string) {
@@ -80,17 +82,37 @@ export class TestEventDetailRepositoryService {
     eventId: string,
     data: UpdateTestEventDetailDto
   ) {
-    const entity = await this.repository.update(
-      {
-        testEvent: {
-          project: {
-            projectSlug
-          },
-          eventId
+    try {
+      const testEvent = await this.testEventRepository.findOne({
+        relations: { project: true },
+        where: {
+          eventId: eventId,
+          project: { projectSlug: projectSlug }
         }
-      },
-      data
-    );
-    return plainToInstance(TestEventDetailResponseDto, entity);
+      });
+      if (!testEvent)
+        throw new HttpException('TestEvent not found', HttpStatus.NOT_FOUND);
+
+      const newDetail = new TestEventDetailEntity();
+      newDetail.passed = data.passed ?? false;
+      newDetail.requestPassed = data.requestPassed ?? false;
+      newDetail.rawRequest = data.rawRequest ?? '';
+      newDetail.destinationUrl = data.destinationUrl ?? '';
+      newDetail.dataLayer = data.dataLayer ?? {};
+      newDetail.reformedDataLayer = data.reformedDataLayer ?? {};
+
+      const entity = await this.repository.update(
+        { testEvent: testEvent },
+        newDetail
+      );
+
+      return plainToInstance(TestEventDetailResponseDto, entity);
+    } catch (error) {
+      Logger.error(error);
+      throw new HttpException(
+        'Error updating test event detail',
+        HttpStatus.BAD_REQUEST
+      );
+    }
   }
 }

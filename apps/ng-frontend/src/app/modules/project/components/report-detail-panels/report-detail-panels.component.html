@@ -149,7 +149,6 @@
         <mat-panel-title> Raw Request </mat-panel-title>
       </mat-expansion-panel-header>
       <mat-panel-description>
-        <!-- <p>{{ (reportDetails$ | async)?.rawRequest }}</p> -->
         <p>{{ reportDetails()?.rawRequest }}</p>
       </mat-panel-description>
     </mat-expansion-panel>
@@ -159,9 +158,6 @@
         <mat-panel-title> Request Data Layer </mat-panel-title>
       </mat-expansion-panel-header>
       <mat-panel-description>
-        <!-- <pre class="json">{{
-          (reportDetails$ | async)?.reformedDataLayer | json
-        }}</pre> -->
         <pre class="json">{{ reportDetails()?.reformedDataLayer | json }}</pre>
       </mat-panel-description>
     </mat-expansion-panel>

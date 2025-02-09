@@ -1,4 +1,4 @@
-import { Controller, Get, Header, Param } from '@nestjs/common';
+import { Controller, Get, Header, Param, StreamableFile } from '@nestjs/common';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
@@ -16,10 +16,12 @@ export class ProjectDataRetrievalController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
   ) {
-    return await this.testImageRepositoryService.getBySlugAndEventId(
+    const image = await this.testImageRepositoryService.getBySlugAndEventId(
       projectSlug,
       eventId
     );
+
+    return new StreamableFile(image.imageData);
   }
 
   @Get(':projectSlug')

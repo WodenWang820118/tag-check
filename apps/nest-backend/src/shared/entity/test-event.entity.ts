@@ -7,7 +7,6 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
-  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
@@ -42,10 +41,10 @@ export class TestEventEntity
   })
   spec!: SpecEntity;
 
-  @OneToMany(() => TestEventDetailEntity, (detail) => detail.testEvent, {
+  @OneToOne(() => TestEventDetailEntity, (detail) => detail.testEvent, {
     onDelete: 'CASCADE'
   })
-  testEventDetails!: TestEventDetailEntity[]; // Changed to plural for collection
+  testEventDetails!: TestEventDetailEntity;
 
   @OneToOne(() => TestImageEntity, (testImage) => testImage.testEvent, {
     onDelete: 'CASCADE'

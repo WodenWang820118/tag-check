@@ -1,8 +1,4 @@
-import {
-  BaseDataLayerEvent,
-  DataLayerSpecSchema,
-  StrictDataLayerEvent
-} from '@utils';
+import { DataLayerSpecSchema, StrictDataLayerEvent } from '@utils';
 import {
   Column,
   Entity,
@@ -36,5 +32,5 @@ export class SpecEntity extends AuditableEntity implements DataLayerSpecSchema {
     type: 'json',
     comment: 'Stores the data layer specification in JSON format'
   })
-  dataLayerSpec!: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayerSpec!: StrictDataLayerEvent;
 }

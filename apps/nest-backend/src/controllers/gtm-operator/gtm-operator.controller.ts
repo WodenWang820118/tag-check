@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import {
   Body,
@@ -13,15 +11,15 @@ import {
 } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
 import { GtmOperatorService } from '../../infrastructure/gtm-operator/gtm-operator.service';
-import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
+import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 
 @Controller('datalayer')
 export class GtmOperatorController {
   private readonly logger = new Logger(GtmOperatorController.name);
   constructor(
     private gtmOperatorService: GtmOperatorService,
-    private projectAbstractReportService: ProjectAbstractReportService
+    private testReportFacadeRepositoryService: TestReportFacadeRepositoryService
   ) {}
 
   @ApiOperation({
@@ -85,7 +83,7 @@ export class GtmOperatorController {
     );
 
     const abstractReport =
-      await this.projectAbstractReportService.getSingleAbstractTestResultJson(
+      await this.testReportFacadeRepositoryService.getReportDetail(
         projectSlug,
         eventName
       );

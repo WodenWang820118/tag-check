@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { Injectable, Logger } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
 import { InspectorSingleEventService } from '../../features/inspector/inspector-single-event.service';
@@ -58,7 +57,7 @@ export class EventInspectionPipelineService {
         rawRequest: result.rawRequest,
         destinationUrl: result.destinationUrl,
         dataLayer: result.dataLayerResult.dataLayer,
-        reformedDataLayer: result.dataLayerResult.dataLayerSpec
+        reformedDataLayer: {}
       };
       // TODO: might create a test event report to be downloaded by users here
       // here only update the latest test event detail

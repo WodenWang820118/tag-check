@@ -1,10 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import {
-  BaseDataLayerEvent,
-  DataLayerSpecSchema,
-  Spec,
-  StrictDataLayerEvent
-} from '@utils';
+import { DataLayerSpecSchema, Spec, StrictDataLayerEvent } from '@utils';
 
 @Exclude()
 export class SpecResponseDto implements DataLayerSpecSchema, Spec {
@@ -12,7 +7,7 @@ export class SpecResponseDto implements DataLayerSpecSchema, Spec {
   id!: number;
 
   @Expose()
-  dataLayerSpec!: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayerSpec!: StrictDataLayerEvent;
 
   @Expose()
   event!: string;

@@ -5,8 +5,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
 import { join } from 'path';
-import { Page, Browser, ScreenRecorder, Credentials } from 'puppeteer';
-import { FilePathService } from '../../../infrastructure/os/path/file-path/file-path.service';
+import { Page, Browser, ScreenRecorder } from 'puppeteer';
 import { ConfigsService } from '../../../core/configs/configs.service';
 
 @Injectable()
@@ -14,17 +13,11 @@ export class PuppeteerUtilsService {
   private readonly logger = new Logger(PuppeteerUtilsService.name);
   private recorder: ScreenRecorder | null = null;
 
-  constructor(
-    private filePathService: FilePathService,
-    private configsService: ConfigsService
-  ) {}
+  constructor(private configsService: ConfigsService) {}
 
   async startBrowser(
-    projectSlug: string,
-    eventId: string,
     headless: string,
     measurementId: string,
-    credentials: Credentials,
     eventInspectionPresetDto: EventInspectionPresetDto,
     signal: AbortSignal
   ) {
@@ -33,7 +26,7 @@ export class PuppeteerUtilsService {
     const options = {};
     const stats = await PCR(options);
     const browser: Browser = await stats.puppeteer.launch({
-      headless: headless === 'true' ? true : false,
+      headless: headless ? true : false,
       devtools: !!measurementId,
       acceptInsecureCerts: true,
       args:

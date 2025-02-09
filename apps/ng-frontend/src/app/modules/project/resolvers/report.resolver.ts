@@ -15,17 +15,14 @@ export const reportDetailResolver: ResolveFn<IReportDetails | null> = (
   return reportService.getReportDetails(projectSlug, eventId);
 };
 
-export const videoResolver: ResolveFn<{ blob: Blob; hasVideo: boolean }> = (
-  route,
-  state
-) => {
+export const videoResolver: ResolveFn<{ blob: Blob }> = (route, state) => {
   const videoService = inject(VideosService);
   const projectSlug = route.parent?.params['projectSlug'];
   const eventId = route.params['eventId'];
   return videoService.getVideo(projectSlug, eventId);
 };
 
-export const imageResolver: ResolveFn<Blob | null> = (route, state) => {
+export const imageResolver: ResolveFn<{ blob: Blob }> = (route, state) => {
   const imageService = inject(ImageService);
   const projectSlug = route.parent?.params['projectSlug'];
   const eventId = route.params['eventId'];

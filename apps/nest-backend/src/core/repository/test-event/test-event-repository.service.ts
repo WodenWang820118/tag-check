@@ -29,13 +29,14 @@ export class TestEventRepositoryService {
     const entities = await this.repository.find({
       relations: {
         testEventDetails: true,
-        testImage: true,
+        testImage: false,
         project: true,
         recording: true,
         spec: true
       },
       where: { project: { projectSlug } }
     });
+    Logger.debug('Entities: ', entities);
     return plainToInstance(AbstractTestEventResponseDto, entities, {
       enableImplicitConversion: true
     });

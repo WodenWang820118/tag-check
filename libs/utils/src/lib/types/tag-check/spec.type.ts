@@ -19,7 +19,7 @@ export type SpecSchema = {
 
 export type DataLayerSpec = {
   eventName: string;
-  dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayerSpec: StrictDataLayerEvent;
 };
 
 export type DataLayerSpecSchema = {
