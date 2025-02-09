@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../../../infrastructure/os/file/file.service';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
@@ -31,5 +31,19 @@ export class ProjectReportService {
 
   async downloadXlsxReport(projectSlug: string, eventId: string) {
     return await this.fileService.getEventReport(projectSlug, eventId);
+  }
+
+  async createEventReportFolder(projectSlug: string, eventId: string) {
+    try {
+      const eventFolderPath =
+        await this.folderPathService.getInspectionEventFolderPath(
+          projectSlug,
+          eventId
+        );
+      this.folderService.createFolder(eventFolderPath);
+    } catch (error) {
+      Logger.error(error);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

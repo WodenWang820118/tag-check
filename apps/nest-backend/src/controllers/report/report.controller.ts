@@ -72,6 +72,13 @@ export class ReportController {
     @Body() reportData: CreateFullTestEventDto
   ) {
     Logger.log(`addReport: ${JSON.stringify(reportData, null, 2)}`);
+    // Video isn't suitable to be saved in SQL DB as a blob
+    // Use file system to save video instead
+    await this.projectReportService.createEventReportFolder(
+      projectSlug,
+      eventId
+    );
+
     return this.testReportFacadeRepositoryService.createFullReport(
       projectSlug,
       eventId,
