@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { join } from 'path';
@@ -55,9 +55,6 @@ export class ProjectFileReportService {
     if (!reports || reports.length === 0) {
       throw new Error('No reports found');
     }
-
-    Logger.log('Downloading reports', reports);
-    // TODO: based on the actual implementation, this method should return a file
-    // return await this.xlsxReportService.writeXlsxFile(reports);
+    return await this.xlsxReportService.writeXlsxFile(reports);
   }
 }

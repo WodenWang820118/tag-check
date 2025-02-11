@@ -86,22 +86,22 @@ export class ReportController {
     );
   }
 
-  @Get('xlsx/:projectSlug/:eventId')
-  @Header(
-    'Content-Type',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  )
-  @Header('Content-Disposition', 'attachment; filename="report.xlsx"')
-  @Log()
-  async downloadXlsxReport(
-    @Param('projectSlug') projectSlug: string,
-    @Param('eventId') eventId: string
-  ) {
-    return await this.projectReportService.downloadXlsxReport(
-      projectSlug,
-      eventId
-    );
-  }
+  // @Get('xlsx/:projectSlug/:eventId')
+  // @Header(
+  //   'Content-Type',
+  //   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  // )
+  // @Header('Content-Disposition', 'attachment; filename="report.xlsx"')
+  // @Log()
+  // async downloadXlsxReport(
+  //   @Param('projectSlug') projectSlug: string,
+  //   @Param('eventId') eventId: string
+  // ) {
+  //   return await this.projectReportService.downloadXlsxReport(
+  //     projectSlug,
+  //     eventId
+  //   );
+  // }
 
   @Delete(':projectSlug/:eventId')
   @Log()

@@ -6,21 +6,13 @@ import {
   StreamableFile
 } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
-import { OutputValidationResult } from '@utils';
+import { FullTestEventResponseDto } from '../../../shared';
 
 @Injectable()
 export class XlsxReportService {
   private readonly logger = new Logger(XlsxReportService.name);
-  async writeXlsxFile(reports: OutputValidationResult[]) {
-    const reportsData = reports.map((report) => {
-      return {
-        ...report,
-        data: ''
-      };
-    });
 
-    Logger.log(JSON.parse(JSON.stringify(reportsData, null, 2)));
-
+  async writeXlsxFile(reports: FullTestEventResponseDto[]) {
     try {
       const workbook = new ExcelJS.Workbook();
 
@@ -29,7 +21,7 @@ export class XlsxReportService {
         const worksheet = workbook.addWorksheet(worksheetName);
 
         // Set columns as needed
-        worksheet.columns = [
+        const columnDefinitions: Partial<ExcelJS.Column>[] = [
           { header: 'DataLayer Spec', key: 'dataLayerSpec', width: 25 },
           { header: 'DataLayer', key: 'dataLayer', width: 25 },
           { header: 'Passed', key: 'passed', width: 10 },
@@ -39,7 +31,9 @@ export class XlsxReportService {
           { header: 'Destination URL', key: 'destinationUrl', width: 25 }
         ];
 
-        const imageBuffer = Buffer.from(report.imageData);
+        worksheet.columns = columnDefinitions;
+
+        const imageBuffer = Buffer.from(report.testImage.imageData);
         const imageId = workbook.addImage({
           buffer: imageBuffer,
           extension: 'png'
@@ -51,7 +45,19 @@ export class XlsxReportService {
         });
 
         // Add rows
-        worksheet.addRow(report);
+        const rowData = {
+          dataLayerSpec: JSON.stringify(report.spec?.dataLayerSpec || {}),
+          dataLayer: JSON.stringify(report.testEventDetails?.dataLayer || {}),
+          passed: report.testEventDetails?.passed || false,
+          requestPassed: report.testEventDetails?.requestPassed || false,
+          rawRequest: report.testEventDetails?.rawRequest || '',
+          reformedDataLayer: JSON.stringify(
+            report.testEventDetails?.reformedDataLayer || {}
+          ),
+          destinationUrl: report.testEventDetails?.destinationUrl || ''
+        };
+
+        worksheet.addRow(rowData);
       }
 
       const buffer = (await workbook.xlsx.writeBuffer()) as Buffer;

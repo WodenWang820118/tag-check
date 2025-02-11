@@ -3,6 +3,8 @@ import { FullTestEventSchema } from '@utils';
 import { TestEventDetailResponseDto } from '../test-event-detail';
 import { TestImageResponseDto } from '../test-image';
 import { ProjectResponseDto } from '../project';
+import { SpecResponseDto } from '../spec';
+import { RecordingResponseDto } from '../recording';
 
 @Exclude()
 export class FullTestEventResponseDto implements FullTestEventSchema {
@@ -32,7 +34,7 @@ export class FullTestEventResponseDto implements FullTestEventSchema {
 
   @Expose()
   @Type(() => TestEventDetailResponseDto)
-  testEventDetail!: TestEventDetailResponseDto[];
+  testEventDetails!: TestEventDetailResponseDto;
 
   @Expose()
   @Type(() => TestImageResponseDto)
@@ -41,4 +43,12 @@ export class FullTestEventResponseDto implements FullTestEventSchema {
   @Expose()
   @Type(() => ProjectResponseDto)
   project!: ProjectResponseDto;
+
+  @Expose()
+  @Type(() => SpecResponseDto)
+  spec!: SpecResponseDto;
+
+  @Expose()
+  @Type(() => RecordingResponseDto)
+  recording!: RecordingResponseDto;
 }

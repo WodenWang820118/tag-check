@@ -1,18 +1,18 @@
-import { Injectable } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class WebSocketService {
   private socket: Socket;
-  private connectionStatus = new BehaviorSubject<boolean>(false);
+  private connectionStatus = signal<boolean>(false);
+  connectionStatus$ = computed(() => this.connectionStatus());
 
   constructor() {
     this.socket = io('http://localhost:7002/events', {
       withCredentials: true,
-      transports: ['websocket', 'polling'],
+      transports: ['websocket', 'polling']
     });
 
     this.socket.on('events', (message) => {
@@ -21,7 +21,7 @@ export class WebSocketService {
 
     this.socket.on('connect', () => {
       console.log('Connected to server');
-      this.connectionStatus.next(true);
+      this.connectionStatus.set(true);
     });
 
     this.socket.on('connect_error', (error) => {
@@ -31,10 +31,6 @@ export class WebSocketService {
 
   getSocket(): Socket {
     return this.socket;
-  }
-
-  getConnectionStatus(): Observable<boolean> {
-    return this.connectionStatus;
   }
 
   sendMessage(message: string) {

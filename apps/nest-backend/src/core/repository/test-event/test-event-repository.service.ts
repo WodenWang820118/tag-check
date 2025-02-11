@@ -78,7 +78,9 @@ export class TestEventRepositoryService {
       relations: {
         testEventDetails: true,
         testImage: true,
-        project: true
+        project: true,
+        spec: true,
+        recording: true
       },
       where: { project: { projectSlug }, eventId: In(eventIds) }
     });

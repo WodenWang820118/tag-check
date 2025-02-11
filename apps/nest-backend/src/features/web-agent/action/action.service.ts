@@ -24,15 +24,17 @@ export class ActionService {
       projectSlug,
       eventId
     );
-    if (!operation || !operation.steps) return;
+    const steps = operation.steps;
+
+    if (!operation || !steps) return;
 
     let isLastStep = false;
-    const lastStep = operation.steps.length;
+    const lastStep = steps.length;
 
-    for (let i = 0; i < operation.steps.length; i++) {
-      const step = operation.steps[i];
+    for (let i = 0; i < steps.length; i++) {
+      const step = steps[i];
 
-      if (i === operation.steps.length - 1) isLastStep = true;
+      if (i === steps.length - 1) isLastStep = true;
 
       const state = {
         isFirstNavigation: true

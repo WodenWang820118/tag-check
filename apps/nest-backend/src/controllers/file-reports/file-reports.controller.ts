@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   Param,
   Post,
   Query
@@ -37,6 +38,11 @@ export class FileReportsController {
   }
 
   @Post('/download/:projectSlug')
+  @Header(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  )
+  @Header('Content-Disposition', 'attachment; filename="report.xlsx"')
   async downloadReportFiles(
     @Param('projectSlug') projectSlug: string,
     @Body() eventIds: string[]
