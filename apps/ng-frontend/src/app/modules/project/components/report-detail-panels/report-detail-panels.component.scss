@@ -2,7 +2,7 @@
   overflow: auto;
 }
 
-.example-headers-align {
+.headers-align {
   justify-content: space-between;
   align-items: center;
 }
@@ -18,4 +18,12 @@
 
 .edit {
   transform: scale(0.7);
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100px;
 }

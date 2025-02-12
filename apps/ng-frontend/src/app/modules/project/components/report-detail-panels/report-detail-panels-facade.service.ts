@@ -23,6 +23,7 @@ export class ReportDetailPanelsFacadeService {
   ) {}
 
   onRecordingFileSelected(event: Event) {
+    this.recordingService.setLoading(true); // close spinner after file is read
     const target = event.target as HTMLInputElement;
     const file: File | null = target.files?.[0] || null;
     if (file) {
@@ -33,6 +34,7 @@ export class ReportDetailPanelsFacadeService {
   }
 
   onSpecFileSelected(event: Event) {
+    this.specService.setLoading(true); // close spinner after file is read
     const target = event.target as HTMLInputElement;
     const file: File | null = target.files?.[0] || null;
     if (file) {
@@ -42,7 +44,8 @@ export class ReportDetailPanelsFacadeService {
     }
   }
 
-  async onSpecUpdate(projectSlug: string, eventId: string) {
+  onSpecUpdate(projectSlug: string, eventId: string) {
+    this.specService.setLoading(true);
     this.editorService.editor$.specJsonEditor
       .pipe(
         take(1),
@@ -66,10 +69,14 @@ export class ReportDetailPanelsFacadeService {
           return throwError(() => new Error('Failed to update spec'));
         })
       )
-      .subscribe();
+      .subscribe(() => {
+        setTimeout(() => {
+          this.specService.setLoading(false);
+        });
+      });
   }
 
-  async onRecordingUpdate(projectSlug: string, eventId: string) {
+  onRecordingUpdate(projectSlug: string, eventId: string) {
     this.editorService.editor$.recordingJsonEditor
       .pipe(
         take(1),
@@ -93,7 +100,11 @@ export class ReportDetailPanelsFacadeService {
           return throwError(() => new Error('Failed to update recording'));
         })
       )
-      .subscribe();
+      .subscribe(() => {
+        setTimeout(() => {
+          this.recordingService.setLoading(false);
+        }, 1000);
+      });
   }
 
   onDownload(projectSlug: string, eventId: string) {
@@ -147,5 +158,13 @@ export class ReportDetailPanelsFacadeService {
 
   get isJsonSyntaxError() {
     return this.editorService.isJsonSyntaxError$;
+  }
+
+  get isSpecLoading() {
+    return this.specService.isLoading$();
+  }
+
+  get isRecordingLoading() {
+    return this.recordingService.isLoading$();
   }
 }

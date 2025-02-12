@@ -1,5 +1,5 @@
 <div class="test-detail-panels">
-  <mat-accordion class=".example-headers-align" multi>
+  <mat-accordion class="headers-align" multi>
     <mat-expansion-panel
       hideToggle
       (opened)="switchSpecEdit()"
@@ -23,17 +23,25 @@
         </mat-panel-description>
       </mat-expansion-panel-header>
       <mat-panel-description>
-        @if (!specContent()) {
-          <p>No Spec found</p>
-        } @else if (!specEditMode()) {
-          <ng-container>
-            <pre class="json">{{ specContent() | json }}</pre>
-          </ng-container>
+        @if (isSpecLoading) {
+          <div class="loading-spinner">
+            <mat-progress-spinner
+              [mode]="'indeterminate'"
+            ></mat-progress-spinner>
+          </div>
         } @else {
-          <app-editor
-            [editorExtension]="'specJson'"
-            [content]="specContent() | json"
-          ></app-editor>
+          @if (!specContent()) {
+            <p>No Spec found</p>
+          } @else if (!specEditMode()) {
+            <ng-container>
+              <pre class="json">{{ specContent() | json }}</pre>
+            </ng-container>
+          } @else {
+            <app-editor
+              [editorExtension]="'specJson'"
+              [content]="specContent() | json"
+            ></app-editor>
+          }
         }
       </mat-panel-description>
       @if (specEditMode()) {
@@ -101,17 +109,25 @@
         </mat-panel-description>
       </mat-expansion-panel-header>
       <mat-panel-description>
-        @if (!recordingContent()) {
-          <p>No recording found</p>
-        } @else if (!recordingEditMode()) {
-          <ng-container>
-            <pre class="json">{{ recordingContent() | json }}</pre>
-          </ng-container>
+        @if (isRecordingLoading) {
+          <div class="loading-spinner">
+            <mat-progress-spinner
+              [mode]="'indeterminate'"
+            ></mat-progress-spinner>
+          </div>
         } @else {
-          <app-editor
-            [editorExtension]="'recordingJson'"
-            [content]="recordingContent() | json"
-          ></app-editor>
+          @if (!recordingContent()) {
+            <p>No recording found</p>
+          } @else if (!recordingEditMode()) {
+            <ng-container>
+              <pre class="json">{{ recordingContent() | json }}</pre>
+            </ng-container>
+          } @else {
+            <app-editor
+              [editorExtension]="'recordingJson'"
+              [content]="recordingContent() | json"
+            ></app-editor>
+          }
         }
       </mat-panel-description>
       @if (recordingEditMode()) {
@@ -167,7 +183,6 @@
         <mat-panel-title> Data Layer </mat-panel-title>
       </mat-expansion-panel-header>
       <mat-panel-description>
-        <!-- <pre class="json">{{ (reportDetails$ | async)?.dataLayer | json }}</pre> -->
         <pre class="json">{{ reportDetails()?.dataLayer | json }}</pre>
       </mat-panel-description>
       <!-- <mat-action-row

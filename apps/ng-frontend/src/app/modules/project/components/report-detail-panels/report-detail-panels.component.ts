@@ -8,7 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
 import { EditorComponent } from '../../../../shared/components/editor/editor.component';
 import { MatButtonModule } from '@angular/material/button';
-
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 @Component({
   selector: 'app-report-datail-panels',
   standalone: true,
@@ -19,7 +19,8 @@ import { MatButtonModule } from '@angular/material/button';
     MatExpansionModule,
     MatTooltipModule,
     EditorComponent,
-    MatButtonModule
+    MatButtonModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './report-detail-panels.component.html',
   styleUrls: ['./report-detail-panels.component.scss']
@@ -112,7 +113,7 @@ export class ReportDetailPanelsComponent implements OnInit {
     this.reportDetailPanelsFacadeService.onSpecFileSelected(event);
   }
 
-  async onSpecUpdate() {
+  onSpecUpdate() {
     const projectSlug = this.projectSlug();
     const eventId = this.eventId();
     if (!projectSlug || !eventId) {
@@ -121,7 +122,7 @@ export class ReportDetailPanelsComponent implements OnInit {
     this.reportDetailPanelsFacadeService.onSpecUpdate(projectSlug, eventId);
   }
 
-  async onRecordingUpdate() {
+  onRecordingUpdate() {
     const projectSlug = this.projectSlug();
     const eventId = this.eventId();
     if (!projectSlug || !eventId) {
@@ -144,5 +145,13 @@ export class ReportDetailPanelsComponent implements OnInit {
 
   get isJsonSyntaxError() {
     return this.reportDetailPanelsFacadeService.isJsonSyntaxError;
+  }
+
+  get isSpecLoading() {
+    return this.reportDetailPanelsFacadeService.isSpecLoading;
+  }
+
+  get isRecordingLoading() {
+    return this.reportDetailPanelsFacadeService.isRecordingLoading;
   }
 }

@@ -13,6 +13,8 @@ export class RecordingService {
   tempRecordingContent$ = computed(() => this.tempRecordingContent());
   recordingContent = signal<Recording | null>(null);
   recordingContent$ = computed(() => this.recordingContent());
+  isLoading = signal(false);
+  isLoading$ = computed(() => this.isLoading());
 
   constructor(
     private http: HttpClient,
@@ -27,6 +29,10 @@ export class RecordingService {
     this.recordingContent.set(recording);
   }
 
+  setLoading(isLoading: boolean) {
+    this.isLoading.set(isLoading);
+  }
+
   readRecordingJsonFileContent(file: File): void {
     const reader = new FileReader();
 
@@ -35,6 +41,9 @@ export class RecordingService {
 
       try {
         this.tempRecordingContent.set(JSON.parse(fileContentString));
+        setTimeout(() => {
+          this.setLoading(false);
+        }, 1000);
       } catch (error) {
         console.error('Error parsing file content', error);
       }

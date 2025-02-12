@@ -12,6 +12,8 @@ export class SpecService {
   tempSpecContent$ = computed(() => this.tempSpecContent());
   specContent = signal<Spec | null>(null);
   specContent$ = computed(() => this.specContent());
+  isLoading = signal(false);
+  isLoading$ = computed(() => this.isLoading());
 
   constructor(private http: HttpClient) {}
 
@@ -23,6 +25,10 @@ export class SpecService {
     this.specContent.set(spec);
   }
 
+  setLoading(isLoading: boolean) {
+    this.isLoading.set(isLoading);
+  }
+
   readSpecJsonFileContent(file: File): void {
     const reader = new FileReader();
 
@@ -31,6 +37,9 @@ export class SpecService {
 
       try {
         this.tempSpecContent.set(JSON.parse(fileContentString));
+        setTimeout(() => {
+          this.setLoading(false);
+        }, 1000);
       } catch (error) {
         console.error('Error parsing file content', error);
       }
