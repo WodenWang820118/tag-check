@@ -8,5 +8,4 @@ export * from './browser-setting.entity';
 export * from './authentication-setting.entity';
 export * from './application-setting.entity';
 export * from './test-event-detail.entity';
-export * from './file-report.entity';
 export * from './common';

@@ -21,8 +21,7 @@ import {
   SysConfigurationEntity,
   TestEventEntity,
   TestImageEntity,
-  TestEventDetailEntity,
-  FileReportEntity
+  TestEventDetailEntity
 } from '../src/shared';
 import { vi } from 'vitest';
 // TODO: run all endoint tests to ensure they are all working
@@ -61,8 +60,7 @@ describe('App (e2e)', () => {
           ...settingEntities,
           RecordingEntity,
           SpecEntity,
-          SysConfigurationEntity,
-          FileReportEntity
+          SysConfigurationEntity
         ])
       ],
       providers: []

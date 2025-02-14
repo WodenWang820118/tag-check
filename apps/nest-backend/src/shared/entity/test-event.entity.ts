@@ -4,9 +4,8 @@ import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
@@ -15,14 +14,13 @@ import { TestImageEntity } from './test-image.entity';
 import { TestEventDetailEntity } from './test-event-detail.entity';
 import { SpecEntity } from './spec.entity';
 import { RecordingEntity } from './recording.entity';
-import { FileReportEntity } from './file-report.entity';
 
 @Entity('test_event')
 export class TestEventEntity
   extends AuditableEntity
   implements TestEventSchema
 {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id!: number;
 
   @ManyToOne(() => ProjectEntity, (project) => project.testEvents, {
@@ -41,29 +39,17 @@ export class TestEventEntity
   })
   spec!: SpecEntity;
 
-  @OneToOne(() => TestEventDetailEntity, (detail) => detail.testEvent, {
+  @OneToMany(() => TestEventDetailEntity, (detail) => detail.testEvent, {
     onDelete: 'CASCADE'
   })
-  testEventDetails!: TestEventDetailEntity;
+  @JoinColumn({ name: 'test_event_detail_id' })
+  testEventDetails!: TestEventDetailEntity[];
 
-  @OneToOne(() => TestImageEntity, (testImage) => testImage.testEvent, {
+  @OneToMany(() => TestImageEntity, (testImage) => testImage.testEvent, {
     onDelete: 'CASCADE'
   })
-  testImage!: TestImageEntity;
-
-  @ManyToMany(() => FileReportEntity, (fileReport) => fileReport.testEvents)
-  @JoinTable({
-    name: 'test_events_file_reports',
-    joinColumn: {
-      name: 'test_event_id',
-      referencedColumnName: 'id'
-    },
-    inverseJoinColumn: {
-      name: 'file_report_id',
-      referencedColumnName: 'id'
-    }
-  })
-  fileReports!: FileReportEntity[];
+  @JoinColumn({ name: 'test_image_id' })
+  testImage!: TestImageEntity[];
 
   @Column({ name: 'event_id', unique: true })
   eventId!: string;
@@ -79,4 +65,19 @@ export class TestEventEntity
 
   @Column({ name: 'message', nullable: true })
   message?: string;
+
+  // Foreign keys for latest records (star schema part)
+  @Column({ nullable: true })
+  latest_test_event_detail_id!: string;
+
+  @Column({ nullable: true })
+  latest_test_image_id!: string;
+
+  @OneToOne(() => TestEventDetailEntity)
+  @JoinColumn({ name: 'latest_test_event_detail_id' })
+  latestTestEventDetail!: TestEventDetailEntity;
+
+  @OneToOne(() => TestImageEntity)
+  @JoinColumn({ name: 'latest_test_image_id' })
+  latestTestImage!: TestImageEntity;
 }

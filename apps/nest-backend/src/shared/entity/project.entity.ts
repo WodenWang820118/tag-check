@@ -12,7 +12,6 @@ import { AuthenticationSettingEntity } from './authentication-setting.entity';
 import { BrowserSettingEntity } from './browser-setting.entity';
 import { ApplicationSettingEntity } from './application-setting.entity';
 import { TestEventEntity } from './test-event.entity';
-import { FileReportEntity } from './file-report.entity';
 
 @Entity('project')
 export class ProjectEntity extends AuditableEntity implements ProjectSchema {
@@ -71,9 +70,4 @@ export class ProjectEntity extends AuditableEntity implements ProjectSchema {
     onDelete: 'CASCADE'
   })
   applicationSettings!: ApplicationSettingEntity;
-
-  @OneToMany(() => FileReportEntity, (fileReport) => fileReport.project, {
-    onDelete: 'CASCADE'
-  })
-  fileReports!: FileReportEntity[];
 }

@@ -18,13 +18,12 @@ export class TestEventDetailEntity
   extends AuditableEntity
   implements TestEventDetailSchema
 {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id!: number;
 
   @ManyToOne(() => TestEventEntity, (testEvent) => testEvent.testEventDetails, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'test_event_id' })
   testEvent!: TestEventEntity;
 
   @Column({

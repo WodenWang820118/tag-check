@@ -12,4 +12,3 @@ export * from './sys-configuration';
 export * from './test-event';
 export * from './test-image';
 export * from './test-event-detail';
-export * from './file-report';

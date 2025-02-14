@@ -4,7 +4,6 @@ import {
   ApplicationSettingEntity,
   AuthenticationSettingEntity,
   BrowserSettingEntity,
-  FileReportEntity,
   ProjectEntity,
   RecordingEntity,
   SpecEntity,
@@ -25,8 +24,7 @@ export const testDbConfig: DataSourceOptions = {
     ApplicationSettingEntity,
     RecordingEntity,
     SpecEntity,
-    TestEventDetailEntity,
-    FileReportEntity
+    TestEventDetailEntity
   ], // Add all your entities here
   synchronize: true,
   dropSchema: true,

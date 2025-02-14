@@ -5,7 +5,6 @@ import {
   ApplicationSettingEntity,
   AuthenticationSettingEntity,
   BrowserSettingEntity,
-  FileReportEntity,
   ProjectEntity,
   RecordingEntity,
   SpecEntity,
@@ -30,8 +29,7 @@ const entities = [
   SpecEntity,
   TestEventEntity,
   TestEventDetailEntity,
-  TestImageEntity,
-  FileReportEntity
+  TestImageEntity
 ];
 describe('ProjectFacadeRepositoryService', () => {
   let service: ProjectFacadeRepositoryService;

@@ -15,7 +15,7 @@ export class TestImageEntity
   extends AuditableEntity
   implements TestImageSchema
 {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id!: number;
 
   @Column({
@@ -37,9 +37,8 @@ export class TestImageEntity
   })
   imageSize?: number;
 
-  @OneToOne(() => TestEventEntity, (testEvent) => testEvent.testImage, {
+  @ManyToOne(() => TestEventEntity, (testEvent) => testEvent.testImage, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'test_event_id' })
   testEvent!: TestEventEntity;
 }
