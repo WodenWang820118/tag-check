@@ -20,7 +20,7 @@ export class TestEventEntity
   extends AuditableEntity
   implements TestEventSchema
 {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
   id!: number;
 
   @ManyToOne(() => ProjectEntity, (project) => project.testEvents, {
@@ -67,17 +67,17 @@ export class TestEventEntity
   message?: string;
 
   // Foreign keys for latest records (star schema part)
-  @Column({ nullable: true })
-  latest_test_event_detail_id!: string;
+  @Column({ name: 'latest_test_event_detail_id', nullable: true })
+  latestTestEventDetailId?: number | null;
 
-  @Column({ nullable: true })
-  latest_test_image_id!: string;
+  @Column({ name: 'latest_test_image_id', nullable: true })
+  latestTestImageId?: number | null;
 
   @OneToOne(() => TestEventDetailEntity)
   @JoinColumn({ name: 'latest_test_event_detail_id' })
-  latestTestEventDetail!: TestEventDetailEntity;
+  latestTestEventDetail?: TestEventDetailEntity;
 
   @OneToOne(() => TestImageEntity)
   @JoinColumn({ name: 'latest_test_image_id' })
-  latestTestImage!: TestImageEntity;
+  latestTestImage?: TestImageEntity;
 }

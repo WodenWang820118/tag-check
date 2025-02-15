@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 import { TestImageRepositoryService } from '../../../core/repository/test-event/test-image-repository.service';
 import {
@@ -86,51 +86,69 @@ export class TestReportFacadeRepositoryService {
     eventId: string,
     data: CreateFullTestEventDto
   ) {
-    // Get the project entity by slug
-    const projectEntity =
-      await this.projectRepositoryService.getEntityBySlug(projectSlug);
+    try {
+      // Get the project entity by slug
+      const projectEntity =
+        await this.projectRepositoryService.getEntityBySlug(projectSlug);
 
-    // Create a test event entity
-    await this.testEventRepositoryService.create(projectEntity, {
-      eventId: data.reportDetails.eventId,
-      testName: data.reportDetails.testName,
-      eventName: data.reportDetails.eventName,
-      message: data.reportDetails.message
-    });
+      // Create test event first
+      const testEventEntity = await this.testEventRepositoryService.create(
+        projectEntity,
+        {
+          eventId: data.reportDetails.eventId,
+          testName: data.reportDetails.testName,
+          eventName: data.reportDetails.eventName,
+          message: data.reportDetails.message
+        }
+      );
 
-    // Get the test event entity by event id to be used in the following operations
-    const testEventEntity =
-      await this.testEventRepositoryService.getEntityByEventId(eventId);
+      const testEvent =
+        await this.testEventRepositoryService.getEntityByEventId(eventId);
 
-    const testEventDetailCreation =
-      await this.testEventDetailRepositoryService.create(testEventEntity, {
-        passed: false,
-        requestPassed: false,
-        rawRequest: '',
-        destinationUrl: '',
-        dataLayer: {},
-        reformedDataLayer: {}
+      // Create test event detail
+      const testEventDetailEntity =
+        await this.testEventDetailRepositoryService.create(testEvent, {
+          passed: false,
+          requestPassed: false,
+          rawRequest: '',
+          destinationUrl: '',
+          dataLayer: {},
+          reformedDataLayer: {}
+        });
+
+      // Create recording
+      const recordingEntity = await this.recordingRepositoryService.create(
+        testEvent,
+        {
+          title: data.reportDetails.eventName,
+          steps: data.recording.steps ?? []
+        }
+      );
+
+      // Create spec
+      const specEntity = await this.specRepositoryService.create(testEvent, {
+        event: data.reportDetails.eventName,
+        eventName: data.reportDetails.eventName,
+        dataLayerSpec: data.spec
       });
 
-    const recordingCreation = this.recordingRepositoryService.create(
-      testEventEntity,
-      {
-        title: data.reportDetails.eventName,
-        steps: data.recording.steps ?? []
-      }
-    );
+      // Update test event with the latest test event detail reference
+      await this.testEventRepositoryService.update(testEvent.id, {
+        latestTestEventDetailId: testEventDetailEntity.id
+      });
 
-    const specCreation = this.specRepositoryService.create(testEventEntity, {
-      event: data.reportDetails.eventName,
-      eventName: data.reportDetails.eventName,
-      dataLayerSpec: data.spec
-    });
+      // Fetch the complete updated test event with all relations
+      const updatedTestEvent =
+        await this.testEventRepositoryService.getBySlugAndEventId(
+          projectSlug,
+          eventId
+        );
 
-    return Promise.all([
-      testEventDetailCreation,
-      recordingCreation,
-      specCreation
-    ]);
+      return updatedTestEvent;
+    } catch (error) {
+      Logger.error('Error in createFullReport:', error);
+      throw error;
+    }
   }
 
   async getReportDetail(projectSlug: string, eventId: string) {

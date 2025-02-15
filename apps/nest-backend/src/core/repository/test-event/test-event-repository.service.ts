@@ -18,11 +18,6 @@ export class TestEventRepositoryService {
     private readonly repository: Repository<TestEventEntity>
   ) {}
 
-  async list(id: number) {
-    const entity = await this.repository.find({ where: { id } });
-    return plainToInstance(AbstractTestEventResponseDto, entity);
-  }
-
   async listReports(
     projectSlug: string
   ): Promise<AbstractTestEventResponseDto[]> {
@@ -40,16 +35,6 @@ export class TestEventRepositoryService {
     return plainToInstance(AbstractTestEventResponseDto, entities, {
       enableImplicitConversion: true
     });
-  }
-
-  async get(id: number) {
-    const entity = await this.repository.findOne({ where: { id } });
-    return plainToInstance(AbstractTestEventResponseDto, entity);
-  }
-
-  async getByEventId(eventId: string) {
-    const entity = await this.repository.findOne({ where: { eventId } });
-    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
   async getEntityByEventId(eventId: string) {
@@ -109,19 +94,19 @@ export class TestEventRepositoryService {
     }
   }
 
-  async update(id: number, data: UpdateTestEventDto) {
-    const entity = await this.repository.update(id, data);
-    return plainToInstance(AbstractTestEventResponseDto, entity);
-  }
-
   // TODO: verify it works as expected
+  // TODO: according to the star schema, this method should be refactored
   async updateTestEvents(projectSlug: string, data: UpdateTestEventDto[]) {
-    // First fetch existing events
+    // First fetch existing events with necessary relations
     const events = await this.repository.find({
       relations: {
-        project: true
+        project: true,
+        latestTestEventDetail: true,
+        latestTestImage: true
       },
-      where: { project: { projectSlug } }
+      where: {
+        project: { projectSlug }
+      }
     });
 
     const updatedEntities: TestEventEntity[] = [];
@@ -129,23 +114,42 @@ export class TestEventRepositoryService {
     for (const event of events) {
       const updatedEvent = data.find((e) => e.eventId === event.eventId);
       if (updatedEvent) {
-        // Update only specific fields to avoid unintended changes
-        event.stopNavigation = updatedEvent.stopNavigation;
-        // Add other fields you want to update
+        // Create update object with only the fields that can be updated
+        const updateData: Partial<TestEventEntity> = {
+          message: updatedEvent.message
+        };
 
-        // Use update() for specific field updates
-        await this.repository.update(event.id, {
-          stopNavigation: updatedEvent.stopNavigation
-          // Add other fields you want to update
+        // If latest records are provided in the DTO, update their references
+        if (updatedEvent.latestTestEventDetailId) {
+          updateData.latestTestEventDetailId =
+            updatedEvent.latestTestEventDetailId;
+        }
+
+        if (updatedEvent.latestTestImageId) {
+          updateData.latestTestImageId = updatedEvent.latestTestImageId;
+        }
+
+        // Use save instead of update to properly handle relations
+        // Upsert
+        const updatedEntity = await this.repository.save({
+          ...event,
+          ...updateData
         });
 
-        updatedEntities.push(event);
+        updatedEntities.push(updatedEntity);
       }
     }
 
-    // Fetch the final state of updated entities
+    // Fetch final state with all necessary relations
     const finalEntities = await this.repository.find({
-      where: { id: In(updatedEntities.map((e) => e.id)) }
+      where: {
+        id: In(updatedEntities.map((e) => e.id))
+      },
+      relations: {
+        project: true,
+        latestTestEventDetail: true,
+        latestTestImage: true
+      }
     });
 
     return finalEntities.map((entity) =>
@@ -153,9 +157,11 @@ export class TestEventRepositoryService {
     );
   }
 
-  async delete(eventId: string) {
-    const entity = await this.repository.delete(eventId);
-    return plainToInstance(AbstractTestEventResponseDto, entity);
+  async update(id: number, data: UpdateTestEventDto) {
+    const updatedEntity = await this.repository.update(id, {
+      ...data
+    });
+    return plainToInstance(AbstractTestEventResponseDto, updatedEntity);
   }
 
   async deleteByProjectSlugAndEventId(projectSlug: string, eventId: string) {
@@ -210,10 +216,5 @@ export class TestEventRepositoryService {
     } catch (error) {
       throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
     }
-  }
-
-  async deleteMany(eventIds: string[]) {
-    const entity = await this.repository.delete(eventIds);
-    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 }

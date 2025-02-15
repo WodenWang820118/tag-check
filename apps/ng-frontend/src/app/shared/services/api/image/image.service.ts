@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, Observable, tap, throwError } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
@@ -26,10 +26,6 @@ export class ImageService {
           return {
             blob: response.body ? response.body : new Blob()
           };
-        }),
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to get image'));
         })
       );
   }

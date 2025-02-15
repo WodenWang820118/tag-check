@@ -49,14 +49,14 @@ export class AbstractTestEventResponseDto implements AbstractTestEvent {
   @Expose()
   @Transform(({ obj }) => {
     const testEvent = obj as TestEventEntity;
-    return testEvent.latestTestEventDetail.passed;
+    return testEvent.latestTestEventDetail?.passed ?? false;
   })
   passed!: boolean;
 
   @Expose()
   @Transform(({ obj }) => {
     const testEvent = obj as TestEventEntity;
-    return testEvent.latestTestEventDetail.requestPassed;
+    return testEvent.latestTestEventDetail?.requestPassed ?? false;
   })
   requestPassed!: boolean;
 }

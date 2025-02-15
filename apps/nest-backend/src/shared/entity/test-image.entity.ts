@@ -1,12 +1,5 @@
 import { TestImageSchema } from '@utils';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToOne,
-  PrimaryGeneratedColumn
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { AuditableEntity } from './common';
 import { TestEventEntity } from './test-event.entity';
 
@@ -15,7 +8,7 @@ export class TestImageEntity
   extends AuditableEntity
   implements TestImageSchema
 {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
   id!: number;
 
   @Column({

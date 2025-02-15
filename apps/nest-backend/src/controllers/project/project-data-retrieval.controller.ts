@@ -1,4 +1,11 @@
-import { Controller, Get, Header, Param, StreamableFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Header,
+  Logger,
+  Param,
+  StreamableFile
+} from '@nestjs/common';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
@@ -20,8 +27,12 @@ export class ProjectDataRetrievalController {
       projectSlug,
       eventId
     );
-
-    return new StreamableFile(image.imageData);
+    try {
+      return new StreamableFile(image.imageData);
+    } catch (error) {
+      Logger.error(error);
+      return new StreamableFile(Buffer.from(''));
+    }
   }
 
   @Get(':projectSlug')

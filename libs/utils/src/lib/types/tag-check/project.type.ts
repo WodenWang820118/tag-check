@@ -26,6 +26,10 @@ export type TestEvent = {
 
 export type TestEventSchema = {
   id: number;
+  latestTestEventDetailId?: number | null;
+  latestTestImageId?: number | null;
+  latestTestEventDetail?: TestEventDetailSchema;
+  latestTestImage?: TestImageSchema;
 } & TestEvent &
   Auditable;
 

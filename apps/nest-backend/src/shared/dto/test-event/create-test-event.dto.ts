@@ -21,4 +21,10 @@ export class CreateTestEventDto implements TestEvent {
   @IsOptional()
   @IsBoolean()
   stopNavigation?: boolean;
+
+  @IsOptional()
+  latestTestEventDetailId?: number;
+
+  @IsOptional()
+  latestTestImageId?: number;
 }

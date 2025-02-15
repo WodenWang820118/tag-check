@@ -39,8 +39,8 @@ export class DetailViewComponent implements OnInit {
       const reportDetailsArray = data['reportDetails'];
       // Flatten the array of objects into a single object
       const flattenedReportDetails = Object.assign({}, ...reportDetailsArray);
-      const video = data['video'] as { blob: Blob };
-      const image = data['image'] as { blob: Blob };
+      const video = data['video'] as { blob: Blob | null };
+      const image = data['image'] as { blob: Blob | null };
       this.reportDetails.set(flattenedReportDetails);
       this.videoBlob.set(video.blob);
       this.imageBlob.set(image.blob);
