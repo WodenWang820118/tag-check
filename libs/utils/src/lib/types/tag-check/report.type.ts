@@ -9,15 +9,9 @@ export type ProjectReport = {
 
 export type IReportDetails = {
   position: number;
-  passed: boolean;
-  requestPassed: boolean;
-  rawRequest?: string;
-  reformedDataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
-  destinationUrl: string;
-  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
-  dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
   event: string;
 } & TestEvent &
+  TestEventDetail &
   Auditable;
 
 export type TestEventDetail = {

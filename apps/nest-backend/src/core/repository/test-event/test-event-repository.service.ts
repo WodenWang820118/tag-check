@@ -37,8 +37,38 @@ export class TestEventRepositoryService {
     });
   }
 
+  async listFileReports(projectSlug: string) {
+    const query = this.repository
+      .createQueryBuilder('test_event')
+      .leftJoinAndSelect('test_event.project', 'project')
+      .leftJoinAndSelect('test_event.testEventDetails', 'test_event_detail')
+      .leftJoinAndSelect('test_event.recording', 'recording')
+      .leftJoinAndSelect('test_event.spec', 'spec')
+      .leftJoinAndSelect('test_event.testImage', 'test_image');
+
+    return await query
+      .where('project.projectSlug = :projectSlug', { projectSlug })
+      .getMany();
+  }
+
   async getEntityByEventId(eventId: string) {
     const entity = await this.repository.findOne({ where: { eventId } });
+    if (!entity) {
+      throw new HttpException('Test event not found', HttpStatus.NOT_FOUND);
+    }
+    return entity;
+  }
+
+  async getEntityBySlugAndEventId(projectSlug: string, eventId: string) {
+    const entity = await this.repository.findOne({
+      relations: {
+        testEventDetails: true,
+        testImage: true,
+        project: true
+      },
+      where: { project: { projectSlug }, eventId }
+    });
+
     if (!entity) {
       throw new HttpException('Test event not found', HttpStatus.NOT_FOUND);
     }
@@ -88,6 +118,15 @@ export class TestEventRepositoryService {
       testEvent.project = projectEntity;
       testEvent.stopNavigation = data.stopNavigation ?? false;
       const entity = await this.repository.save(testEvent);
+      return plainToInstance(AbstractTestEventResponseDto, entity);
+    } catch (error) {
+      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  async updateTestEvent(id: number, data: UpdateTestEventDto) {
+    try {
+      const entity = await this.repository.update(id, data);
       return plainToInstance(AbstractTestEventResponseDto, entity);
     } catch (error) {
       throw new HttpException(String(error), HttpStatus.BAD_REQUEST);

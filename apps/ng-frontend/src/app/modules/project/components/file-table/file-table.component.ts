@@ -6,7 +6,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { DatePipe, NgClass } from '@angular/common';
 import { MatSort, Sort } from '@angular/material/sort';
-import { FileReport, FrontFileReport } from '@utils';
+import { IReportDetails, TestImage } from '@utils';
 import { MatInputModule } from '@angular/material/input';
 import { FileTableDataSourceFacadeService } from './file-table-data-source-facade.service';
 import { MatSortModule } from '@angular/material/sort';
@@ -84,7 +84,7 @@ export class FileTableComponent implements OnInit {
     this.facade.toggleAllRows();
   }
 
-  checkboxLabel(row?: FrontFileReport) {
+  checkboxLabel(row?: IReportDetails & TestImage) {
     return this.facade.checkboxLabel(row);
   }
 }

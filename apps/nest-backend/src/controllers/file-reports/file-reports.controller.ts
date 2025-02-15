@@ -32,9 +32,8 @@ export class FileReportsController {
   }
 
   @Get(':projectSlug')
-  @Log()
   async getReportFiles(@Param('projectSlug') projectSlug: string) {
-    return this.projectFileReportService.getReportFolderFiles(projectSlug);
+    return this.testEventFileRepositoryService.listFileReports(projectSlug);
   }
 
   @Post('/download/:projectSlug')

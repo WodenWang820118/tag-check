@@ -1,11 +1,12 @@
 import { Auditable } from './auditable.type';
 import { TestEvent } from './project.type';
-import { TestEventDetail } from './report.type';
+import { TestEventDetailSchema } from './report.type';
 
 export type FrontFileReport = {
   fileName: string;
+  testEventDetails: TestEventDetailSchema[]; // for retrieving the created date
+  testImage: TestImage[];
 } & TestEvent &
-  TestEventDetail &
   Auditable;
 
 export type FileReport = {

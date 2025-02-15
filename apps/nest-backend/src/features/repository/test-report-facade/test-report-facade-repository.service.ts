@@ -105,17 +105,6 @@ export class TestReportFacadeRepositoryService {
       const testEvent =
         await this.testEventRepositoryService.getEntityByEventId(eventId);
 
-      // Create test event detail
-      const testEventDetailEntity =
-        await this.testEventDetailRepositoryService.create(testEvent, {
-          passed: false,
-          requestPassed: false,
-          rawRequest: '',
-          destinationUrl: '',
-          dataLayer: {},
-          reformedDataLayer: {}
-        });
-
       // Create recording
       const recordingEntity = await this.recordingRepositoryService.create(
         testEvent,
@@ -130,11 +119,6 @@ export class TestReportFacadeRepositoryService {
         event: data.reportDetails.eventName,
         eventName: data.reportDetails.eventName,
         dataLayerSpec: data.spec
-      });
-
-      // Update test event with the latest test event detail reference
-      await this.testEventRepositoryService.update(testEvent.id, {
-        latestTestEventDetailId: testEventDetailEntity.id
       });
 
       // Fetch the complete updated test event with all relations
