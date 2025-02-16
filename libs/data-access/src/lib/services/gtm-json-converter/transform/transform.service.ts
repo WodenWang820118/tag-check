@@ -3,7 +3,7 @@ import { TagManager } from './managers/tag-manager.service';
 import { TriggerManager } from './managers/trigger-manager.service';
 import { ConfigManager } from './managers/config-manager.service';
 import { DataLayerUtils } from '../utils/data-layer-utils.service';
-import { EventSettingsVariable, GtmConfigGenerator } from '@utils';
+import { EventSettingsVariable, GTMContainerConfig } from '@utils';
 import { VariableManager } from './managers/variable-manager.service';
 
 @Injectable({
@@ -21,7 +21,7 @@ export class TransformService {
   convert(
     googleTagName: string,
     measurementId: string,
-    gtmConfigGenerator: GtmConfigGenerator,
+    gtmConfigGenerator: GTMContainerConfig,
     isSendingEcommerceData: 'true' | 'false',
     esvContent: EventSettingsVariable[]
   ) {
@@ -73,7 +73,7 @@ export class TransformService {
       return result;
     } catch (error) {
       console.error('An error occurred in ConverterService:', error);
-      return null;
+      throw new Error('Failed to convert the JSON');
     }
   }
 }

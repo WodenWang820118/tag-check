@@ -1,4 +1,9 @@
-import { TagConfig, TriggerConfig, VariableConfig } from '@utils';
+import {
+  GTMConfiguration,
+  TagConfig,
+  TriggerConfig,
+  VariableConfig
+} from '@utils';
 import { Injectable } from '@angular/core';
 import { UtilsService } from '../../utils/utils.service';
 
@@ -16,7 +21,7 @@ export class ConfigManager {
     tags: TagConfig[],
     containerName: string,
     gtmId: string
-  ) {
+  ): GTMConfiguration {
     return {
       exportFormatVersion: 2,
       exportTime: this.utilsService.outputTime(),

@@ -1,0 +1,6 @@
+export const exampleData = {
+  event: 'page_view',
+  page_path: '$page_path',
+  page_title: '$page_title',
+  page_location: '$page_location'
+};

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { EventTrigger } from './event-trigger.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
+import { CustomEventTriggerConfig, TriggerTypeEnum } from '@utils';
 
 describe('EventTrigger', () => {
   let service: EventTrigger;
@@ -25,11 +26,10 @@ describe('EventTrigger', () => {
     const trigger = 'test-trigger';
 
     const result = service.createTrigger(accountId, containerId, trigger);
-
-    expect(result).toEqual({
+    const expected: CustomEventTriggerConfig = {
       accountId,
       containerId,
-      type: 'CUSTOM_EVENT',
+      type: TriggerTypeEnum.CUSTOM_EVENT,
       name: `event equals ${trigger}`,
       customEventFilter: [
         {
@@ -40,6 +40,7 @@ describe('EventTrigger', () => {
           ]
         }
       ]
-    });
+    };
+    expect(result).toEqual(expected);
   });
 });

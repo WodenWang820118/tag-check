@@ -2,14 +2,15 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
+  OnInit,
   signal
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MarkdownModule } from 'ngx-markdown';
-import { MarkdownService } from 'ngx-markdown';
-import { ViewportScroller, AsyncPipe } from '@angular/common';
+import { ViewportScroller } from '@angular/common';
 import { TopicNode } from '@utils';
 import { TreeNodeService } from '../../../../shared/services/tree-node/tree-node.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,16 +18,12 @@ import { MatButtonModule } from '@angular/material/button';
 @Component({
   selector: 'app-contents',
   standalone: true,
-  imports: [AsyncPipe, MarkdownModule, MatButtonModule],
+  imports: [MarkdownModule, MatButtonModule],
   templateUrl: './main-content.component.html',
   styleUrls: ['./main-content.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MainContentComponent {
-  // Convert observables to signals outside of reactive contexts
-  private readonly routeParams = toSignal(this.route.params, {
-    initialValue: { name: '' }
-  });
+export class MainContentComponent implements OnInit {
   readonly currentNode = toSignal(this.treeNodeService.getCurrentNode(), {
     initialValue: {} as TopicNode
   });
@@ -43,33 +40,10 @@ export class MainContentComponent {
 
   constructor(
     private route: ActivatedRoute,
-    private markdownService: MarkdownService,
     private viewportScroller: ViewportScroller,
-    public treeNodeService: TreeNodeService
+    public treeNodeService: TreeNodeService,
+    private destroyedRef: DestroyRef
   ) {
-    // Handle route params changes
-    effect(
-      () => {
-        const params = this.routeParams();
-        const name = params['name']?.toLowerCase();
-        const fileName = `assets/${name}.md`;
-        this.fileNameSignal.set(fileName);
-
-        // Load markdown content
-        this.markdownService.getSource(fileName).subscribe({
-          next: (content) => {
-            this.tocSignal.set([]);
-            this.generateTOC(content);
-          },
-          error: (error) => {
-            console.error('Error: ', error);
-            this.fileNameSignal.set('assets/404.md');
-          }
-        });
-      },
-      { allowSignalWrites: true }
-    );
-
     // Update currentNodeId when currentNode changes
     effect(
       () => {
@@ -82,6 +56,20 @@ export class MainContentComponent {
     );
   }
 
+  ngOnInit() {
+    this.route.data
+      .pipe(takeUntilDestroyed(this.destroyedRef))
+      .subscribe((data) => {
+        const fullData = data['data'];
+        const fileName = fullData['fileName'] as string;
+        const content = fullData['content'] as string;
+        this.fileNameSignal.set(fileName);
+        console.log('Loaded markdown file:', fileName);
+        this.tocSignal.set([]);
+        this.generateTOC(content);
+      });
+  }
+
   generateTOC(content: string) {
     const headingRegex = /^(#{1,6})\s+(.*)$/gm;
     const newToc: { id: string; text: string }[] = [];
@@ -92,7 +80,6 @@ export class MainContentComponent {
       const id = text.toLowerCase().replace(/[^\w]+/g, '-');
       newToc.push({ id, text });
     }
-
     this.tocSignal.set(newToc);
   }
 

@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { TopicNode } from '@utils';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import { TREE_DATA } from '../../../modules/help-center/tree-data';
 import { Router } from '@angular/router';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class TreeNodeService {
   private readonly CACHE_KEY = 'currentTreeNode';
@@ -14,7 +14,6 @@ export class TreeNodeService {
     TREE_DATA[0]
   );
 
-  currentNode$ = this.currentNode.asObservable();
   private nodeIndex: Map<number, TopicNode> = new Map();
 
   constructor(private router: Router) {
@@ -26,29 +25,23 @@ export class TreeNodeService {
     if (cachedNode) {
       try {
         const parsedNode: TopicNode = JSON.parse(cachedNode);
+        this.currentNode.next(parsedNode);
         this.navigateToNode(parsedNode);
       } catch (error) {
         console.error('Error parsing cached node:', error);
         localStorage.removeItem(this.CACHE_KEY);
-        this.navigateToInitialNode();
+        this.currentNode.next(TREE_DATA[0]);
+        this.navigateToNode(TREE_DATA[0]);
       }
     } else {
-      this.navigateToInitialNode();
-    }
-  }
-
-  private navigateToInitialNode(): void {
-    const initialNode = this.searchNodeById(1) || TREE_DATA[0];
-    if (initialNode) {
-      this.navigateToNode(initialNode);
-    } else {
-      console.error('No initial node found');
+      this.currentNode.next(TREE_DATA[0]);
+      this.navigateToNode(TREE_DATA[0]);
     }
   }
 
   navigateToNode(node: TopicNode) {
     this.setCurrentNode(node);
-    const url = ['topics', this.getSelectedTitle(node.name)];
+    const url = ['help-center', this.getSelectedTitle(node.name)];
     console.log('Navigating to URL:', url);
     this.router.navigate(url).then(
       (success) => {
@@ -66,7 +59,7 @@ export class TreeNodeService {
     return nodeName.toLowerCase().replace(/ /g, '-');
   }
 
-  searchNodeByName(nodes: TopicNode[], nodeName: string): TopicNode | null {
+  searchNodeByName(nodes: TopicNode[], nodeName: string): TopicNode {
     for (const node of nodes) {
       if (node.name === nodeName) {
         return node;
@@ -78,7 +71,7 @@ export class TreeNodeService {
         }
       }
     }
-    return null;
+    return TREE_DATA[0];
   }
 
   searchNodeById(id: number): TopicNode | null {

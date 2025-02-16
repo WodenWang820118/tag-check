@@ -2,7 +2,7 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ReportTableComponent } from './report-table.component';
 
@@ -19,8 +19,6 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
-import { DataSourceFacadeService } from '../../../../shared/services/facade/data-source-facade.service';
-import { ProjectFacadeService } from '../../../../shared/services/facade/project-facade.service';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-chart.component';
 
@@ -42,26 +40,22 @@ const meta: Meta<ReportTableComponent> = {
         MatInputModule,
         MatCheckboxModule,
         MatBadgeModule,
-        ProgressPieChartComponent,
+        ProgressPieChartComponent
       ],
-      providers: [
-        ProjectFacadeService,
-        DataSourceFacadeService,
-        TestRunningFacadeService,
-      ],
+      providers: [TestRunningFacadeService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(PROJECT_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(PROJECT_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ReportTableComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

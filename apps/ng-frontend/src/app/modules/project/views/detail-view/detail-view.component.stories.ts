@@ -2,7 +2,7 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { DetailViewComponent } from './detail-view.component';
 
@@ -18,7 +18,6 @@ import { CarouselComponent } from '../../../../shared/components/carousel/carous
 import { BlobToUrlPipe } from '../../../../shared/pipes/blob-to-url-pipe';
 import { ImageService } from '../../../../shared/services/api/image/image.service';
 import { VideosService } from '../../../../shared/services/api/videos/videos.service';
-import { ReportDetailsService } from '../../../../shared/services/report-details/report-details.service';
 import { ReportDetailPanelsComponent } from '../../components/report-detail-panels/report-detail-panels.component';
 
 const meta: Meta<DetailViewComponent> = {
@@ -36,22 +35,22 @@ const meta: Meta<DetailViewComponent> = {
         MatButtonModule,
         CarouselComponent,
         DatePipe,
-        RouterLink,
+        RouterLink
       ],
-      providers: [ReportDetailsService, ImageService, VideosService],
+      providers: [ImageService, VideosService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(PROJECT_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(PROJECT_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<DetailViewComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

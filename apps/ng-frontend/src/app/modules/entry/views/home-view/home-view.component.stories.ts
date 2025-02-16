@@ -2,7 +2,7 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { HomeViewComponent } from './home-view.component';
 
@@ -11,7 +11,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { ENTRY_ROUTES } from '../../routes';
-import { MetadataSourceService } from '../../../../shared/services/metadata-source/metadata-source.service';
 import { ProjectListComponent } from '../../components/project-list/project-list.component';
 
 const meta: Meta<HomeViewComponent> = {
@@ -21,20 +20,20 @@ const meta: Meta<HomeViewComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [ProjectListComponent],
-      providers: [MetadataSourceService],
+      providers: []
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(ENTRY_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(ENTRY_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<HomeViewComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

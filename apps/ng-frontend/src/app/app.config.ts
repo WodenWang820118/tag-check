@@ -3,6 +3,7 @@ import {
   ApplicationConfig,
   ErrorHandler,
   importProvidersFrom,
+  SecurityContext
 } from '@angular/core';
 import { provideRouter, Router } from '@angular/router';
 import { APP_ROUTES } from './app.routes';
@@ -16,22 +17,26 @@ export const appConfig: ApplicationConfig = {
     provideRouter(APP_ROUTES),
     provideAnimationsAsync(),
     provideHttpClient(),
-    importProvidersFrom(MarkdownModule.forRoot()),
+    importProvidersFrom(
+      MarkdownModule.forRoot({
+        sanitize: SecurityContext.NONE
+      })
+    ),
     {
       provide: ErrorHandler,
       useValue: Sentry.createErrorHandler({
-        showDialog: true,
-      }),
+        showDialog: true
+      })
     },
     {
       provide: Sentry.TraceService,
-      deps: [Router],
+      deps: [Router]
     },
     {
       provide: APP_INITIALIZER,
       useFactory: () => () => {},
       deps: [Sentry.TraceService],
-      multi: true,
-    },
-  ],
+      multi: true
+    }
+  ]
 };

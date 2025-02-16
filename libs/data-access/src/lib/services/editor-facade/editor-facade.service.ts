@@ -1,18 +1,25 @@
 import { Injectable } from '@angular/core';
 import { EditorService } from '../editor/editor.service';
+import { EditorTypeEnum } from '@utils';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class EditorFacadeService {
   constructor(private editorService: EditorService) {}
 
   setInputJsonContent(json: any): void {
-    this.editorService.setContent('inputJson', JSON.stringify(json, null, 2));
+    this.editorService.setContent(
+      EditorTypeEnum.INPUT_JSON,
+      JSON.stringify(json, null, 2)
+    );
   }
 
   setOutputJsonContent(json: any): void {
-    this.editorService.setContent('outputJson', JSON.stringify(json, null, 2));
+    this.editorService.setContent(
+      EditorTypeEnum.OUTPUT_JSON,
+      JSON.stringify(json, null, 2)
+    );
   }
 
   getEditorView() {
@@ -47,7 +54,7 @@ export class EditorFacadeService {
     // Configuration object to map form properties to their respective events
     const eventConfig = {
       includeVideoTag: ['video_start', 'video_progress', 'video_completion'],
-      includeScrollTag: ['scroll'],
+      includeScrollTag: ['scroll']
       // more mappings can be added here in the future...
     };
 

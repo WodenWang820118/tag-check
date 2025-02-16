@@ -1,15 +1,13 @@
-import { NgIf } from '@angular/common';
 import {
   Component,
   DestroyRef,
-  OnDestroy,
   OnInit,
   signal,
   ViewEncapsulation
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { catchError, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { catchError, switchMap, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
@@ -24,6 +22,7 @@ import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { BrowserSetting, ProjectSetting } from '@utils';
 
 @Component({
   selector: 'app-browser-form',
@@ -58,23 +57,18 @@ export class BrowserFormComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.route.parent?.params
+    this.route.data
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        switchMap((params) => {
-          const projectSlug = params['projectSlug'];
-          return this.settingsService.getProjectSettings(projectSlug);
-        }),
-        tap((project) => {
-          this.browserSettings.set(project.settings.browser);
-          this.browserSettingsForm.controls['headless'].setValue(
-            project.settings.headless
-          );
-          this.loadInitialData();
-        }),
-        catchError((err) => {
-          console.error(err);
-          return [];
+        tap((data) => {
+          const settings: ProjectSetting = data['projectInfo'];
+          if (settings) {
+            this.browserSettings.set(settings.browserSettings.browser);
+            this.browserSettingsForm.controls['headless'].setValue(
+              settings.browserSettings.headless
+            );
+            this.loadInitialData();
+          }
         })
       )
       .subscribe();
@@ -133,10 +127,14 @@ export class BrowserFormComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
-          return this.settingsService.updateSettings(projectSlug, 'browser', {
+          const browserSettings: Partial<BrowserSetting> = {
             headless,
             browser
-          });
+          };
+          return this.settingsService.updateBrowserSetting(
+            projectSlug,
+            browserSettings
+          );
         }),
         catchError((error) => {
           console.error('Error: ', error);

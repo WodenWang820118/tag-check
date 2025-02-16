@@ -1,3 +1,4 @@
+import { app } from 'electron';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -22,7 +23,11 @@ import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Setting } from '@utils';
+import {
+  ApplicationSetting,
+  ApplicationSettingSchema,
+  ProjectSetting
+} from '@utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-gtm-form',
@@ -60,36 +65,21 @@ export class GtmFormComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.route.parent?.params
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        switchMap((params) => {
-          const projectSlug = params['projectSlug'];
-          return this.settingsService.getProjectSettings(projectSlug);
-        }),
-        tap((project) => {
-          const previewModeUrl = project.settings.gtm['gtmPreviewModeUrl'];
-          const isAccompanyMode = project.settings.gtm['isAccompanyMode'];
-          const tagManagerUrl = project.settings.gtm['tagManagerUrl'];
-          const qaRequestCheck = project.settings.gtm['isRequestCheck'];
-          const measumentId = project.settings['measurementId'];
-
-          this.previewModeForm.patchValue({
-            url: previewModeUrl,
-            isAccompanyMode: isAccompanyMode,
-            isRequestCheck: qaRequestCheck,
-            tagManagerUrl: tagManagerUrl
-          });
-
-          if (measumentId) {
+    this.route.data.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      tap((data) => {
+        const settings: ProjectSetting = data['projectInfo'];
+        if (settings) {
+          this.previewModeForm.patchValue(settings.applicationSettings.gtm);
+          if (settings.measurementId) {
             this.previewModeForm.controls['isRequestCheck'].enable();
           } else {
             this.previewModeForm.controls['isRequestCheck'].disable();
             this.previewModeForm.controls['isRequestCheck'].setValue(false);
           }
-        })
-      )
-      .subscribe();
+        }
+      })
+    );
   }
 
   get urlFormControl() {
@@ -111,7 +101,7 @@ export class GtmFormComponent implements OnInit {
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           console.log(this.previewModeForm.value);
-          const settings: Partial<Setting> = {
+          const settings: Partial<ApplicationSetting> = {
             gtm: {
               gtmPreviewModeUrl: this.previewModeForm.value.url as string,
               isAccompanyMode: this.previewModeForm.value
@@ -121,9 +111,8 @@ export class GtmFormComponent implements OnInit {
               tagManagerUrl: this.previewModeForm.value.tagManagerUrl as string
             }
           };
-          return this.settingsService.updateSettings(
+          return this.settingsService.updateApplicationSetting(
             projectSlug,
-            'gtm',
             settings
           );
         }),

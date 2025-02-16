@@ -6,11 +6,11 @@ import {
   of,
   Subject,
   switchMap,
-  takeUntil,
+  takeUntil
 } from 'rxjs';
 import { TagBuildPageComponent } from '@ui';
 import { ActivatedRoute } from '@angular/router';
-import { ProjectSpec } from '@utils';
+import { DataLayerSpec, ProjectSpec, Spec } from '@utils';
 import { SpecService } from '../../../shared/services/api/spec/spec.service';
 
 @Component({
@@ -20,19 +20,22 @@ import { SpecService } from '../../../shared/services/api/spec/spec.service';
   template: `<lib-tag-build-page
     [projectSpecs]="projectSpec$ | async"
   ></lib-tag-build-page>`,
-  styles: [``],
+  styles: [``]
 })
 export class TagBuildViewComponent implements OnDestroy {
   projectSpec$!: Observable<ProjectSpec | null>;
   destroy$ = new Subject<void>();
 
-  constructor(private specService: SpecService, private route: ActivatedRoute) {
+  constructor(
+    private specService: SpecService,
+    private route: ActivatedRoute
+  ) {
     // TODO: may need to refactor due to using parent.parent
     // could be a way to get the projectSlug from somewhere else
     this.projectSpec$ = (
       this.route.parent?.parent?.params ??
       of({
-        projectSlug: '',
+        projectSlug: ''
       } as any)
     ).pipe(
       takeUntil(this.destroy$),

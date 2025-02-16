@@ -1,16 +1,17 @@
 import {
   BaseDataLayerEvent,
-  StrictDataLayerEvent,
-} from '../interfaces/data-layer.interface';
+  OutputValidationResult,
+  StrictDataLayerEvent
+} from '../types/tag-check';
 
-export class ReportDetailsDto {
+export class ReportDetailsDto implements OutputValidationResult {
   position = 0;
-  eventId: string;
-  testName: string;
-  eventName: string;
+  eventId!: string;
+  testName!: string;
+  eventName!: string;
+  event!: string;
   passed = false;
   requestPassed = false;
-  incorrectInfo = [];
   completedTime = new Date();
   dataLayerSpec = {} as BaseDataLayerEvent | StrictDataLayerEvent;
   dataLayer = {} as BaseDataLayerEvent | StrictDataLayerEvent;
@@ -18,10 +19,13 @@ export class ReportDetailsDto {
   rawRequest = '';
   message = '';
   destinationUrl = '';
+  createdAt: Date = new Date();
+  id!: number;
+  imageName!: string;
+  imageData!: any; // should be the image buffer data
+  imageSize!: number;
 
-  constructor(eventId: string, testName: string, eventName: string) {
-    this.eventId = eventId;
-    this.testName = testName;
-    this.eventName = eventName;
+  constructor(report: Partial<OutputValidationResult>) {
+    Object.assign(this, report);
   }
 }

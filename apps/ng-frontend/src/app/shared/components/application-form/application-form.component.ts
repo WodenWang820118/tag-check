@@ -14,7 +14,7 @@ import {
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-import { CookieData, LocalStorageData, Setting } from '@utils';
+import { ApplicationSetting, CookieData, LocalStorageData } from '@utils';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -55,23 +55,20 @@ export class ApplicationFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.route.parent?.params
+    this.route.data
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        switchMap((params) => {
-          const projectSlug = params['projectSlug'];
-          return this.settingsService.getProjectSettings(projectSlug);
-        }),
-        tap((project) => {
-          this.localStorageSettings.set(
-            project.settings.application.localStorage.data
-          );
-          this.cookieSettings.set(project.settings.application.cookie.data);
-          this.loadInitialData();
-        }),
-        catchError((err) => {
-          console.error(err);
-          return EMPTY;
+        tap((data) => {
+          const settings = data['projectInfo'].settings;
+          if (settings) {
+            this.localStorageSettings.set(
+              settings.application.localStorage.data as LocalStorageData[]
+            );
+            this.cookieSettings.set(
+              settings.application.cookie.data as CookieData[]
+            );
+            this.loadInitialData();
+          }
         })
       )
       .subscribe();
@@ -145,26 +142,23 @@ export class ApplicationFormComponent implements OnInit {
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           if (projectSlug) {
-            const settings: Partial<Setting> = {
-              application: {
-                localStorage: {
-                  data: this.localStorageFormArrayValue.map((item) => ({
-                    key: item.value.key,
-                    value: item.value.value
-                  }))
-                },
-                cookie: {
-                  data: this.cookieFormArrayValue.map((item) => ({
-                    key: item.value.key,
-                    value: item.value.value
-                  }))
-                }
+            const settings: Partial<ApplicationSetting> = {
+              localStorage: {
+                data: this.localStorageFormArrayValue.map((item) => ({
+                  key: item.value.key,
+                  value: item.value.value
+                }))
+              },
+              cookie: {
+                data: this.cookieFormArrayValue.map((item) => ({
+                  key: item.value.key,
+                  value: item.value.value
+                }))
               }
             };
 
-            return this.settingsService.updateSettings(
+            return this.settingsService.updateApplicationSetting(
               projectSlug,
-              'application',
               settings
             );
           }

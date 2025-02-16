@@ -3,7 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 // import { SpelunkerModule } from 'nestjs-spelunker';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ConfigsService } from './configs/configs.service';
+import { ConfigsService } from './core/configs/configs.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -12,7 +12,7 @@ async function bootstrap() {
   app.enableCors({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false,
+    preflightContinue: false
   });
   // Handle uncaught exceptions
   // 1. Generate the tree as text

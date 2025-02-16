@@ -2,7 +2,7 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ToolbarComponent } from './toolbar.component';
 
@@ -20,7 +20,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { RouterLink, provideRouter } from '@angular/router';
 import { APP_ROUTES } from '../../../app.routes';
-import { MetadataSourceService } from '../../services/metadata-source/metadata-source.service';
 
 const meta: Meta<ToolbarComponent> = {
   component: ToolbarComponent,
@@ -38,22 +37,22 @@ const meta: Meta<ToolbarComponent> = {
         MatSelectModule,
         MatFormFieldModule,
         MatButtonToggleModule,
-        MatInputModule,
+        MatInputModule
       ],
-      providers: [MetadataSourceService],
+      providers: []
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(APP_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(APP_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ToolbarComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

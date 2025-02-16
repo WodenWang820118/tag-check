@@ -13,7 +13,7 @@ import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
-import { Setting } from '@utils';
+import { AuthenticationSetting, ProjectSetting } from '@utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -33,7 +33,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   encapsulation: ViewEncapsulation.None
 })
 export class AuthenticationFormComponent implements OnInit {
-  authenticationForm = this.fb.group({
+  authenticationForm = this.fb.nonNullable.group({
     username: [''],
     password: ['']
   });
@@ -46,25 +46,14 @@ export class AuthenticationFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.route.parent?.params
+    this.route.data
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        switchMap((params) => {
-          const projectSlug = params['projectSlug'];
-          return this.settingsService.getProjectSettings(projectSlug);
-        }),
-        tap((project) => {
-          if (project.settings) {
-            const settings = project.settings;
-            this.authenticationForm.patchValue({
-              username: settings.authentication.username,
-              password: settings.authentication.password
-            });
+        tap((data) => {
+          const settings: ProjectSetting = data['projectInfo'];
+          if (settings) {
+            this.authenticationForm.patchValue(settings.authenticationSettings);
           }
-        }),
-        catchError((err) => {
-          console.error(err);
-          return [];
         })
       )
       .subscribe();
@@ -76,19 +65,13 @@ export class AuthenticationFormComponent implements OnInit {
         take(1),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
-          console.log(this.authenticationForm.value);
-          console.log(projectSlug);
-
-          const settings: Partial<Setting> = {
-            authentication: {
-              username: this.authenticationForm.value.username as string,
-              password: this.authenticationForm.value.password as string
-            }
+          const settings: Partial<AuthenticationSetting> = {
+            username: this.authenticationForm.getRawValue().username,
+            password: this.authenticationForm.getRawValue().password
           };
 
-          return this.settingsService.updateSettings(
+          return this.settingsService.updateAuthenticationSetting(
             projectSlug,
-            'authentication',
             settings
           );
         }),

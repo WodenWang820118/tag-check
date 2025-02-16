@@ -3,11 +3,11 @@ import { BehaviorSubject } from 'rxjs';
 import { EditorService } from '../../services/editor/editor.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '@ui';
-import { DataRow } from '@utils';
+import { DataRow, EditorTypeEnum } from '@utils';
 import { XlsxHelper } from '../xlsx-facade/xlsx-helper.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class XlsxDisplayService {
   dataSource$ = new BehaviorSubject<any[]>([]);
@@ -45,14 +45,14 @@ export class XlsxDisplayService {
     const combinedData = events
       .map((event: any) => {
         return {
-          Spec: JSON.parse(JSON.stringify(event, null, 2)),
+          Spec: JSON.parse(JSON.stringify(event, null, 2))
         };
       })
       .filter((event: any) => event.Spec.event !== null);
 
     this.xlsxHelper.unfixedableJsonString.forEach((jsonString) => {
       failedEvents.push({
-        failedEvents: jsonString,
+        failedEvents: jsonString
       });
     });
     this.displayedFailedEvents$.next(failedEvents);
@@ -62,8 +62,8 @@ export class XlsxDisplayService {
     if (this.displayedDataSource$.getValue()[0].Spec === null) {
       this.dialog.open(ErrorDialogComponent, {
         data: {
-          message: `No events found in the selected colulmn. Please select another sheet and try again.`,
-        },
+          message: `No events found in the selected colulmn. Please select another sheet and try again.`
+        }
       });
     }
   }
@@ -76,8 +76,8 @@ export class XlsxDisplayService {
       } catch (error) {
         this.dialog.open(ErrorDialogComponent, {
           data: {
-            message: `Failed to parse the following spec: ${spec}`,
-          },
+            message: `Failed to parse the following spec: ${spec}`
+          }
         });
       }
     });
@@ -91,7 +91,10 @@ export class XlsxDisplayService {
 
   processAndSetSpecsContent(data: DataRow[]): void {
     const events = this.processSpecs(data);
-    this.editorService.setContent('inputJson', JSON.stringify(events, null, 2));
+    this.editorService.setContent(
+      EditorTypeEnum.INPUT_JSON,
+      JSON.stringify(events, null, 2)
+    );
   }
 
   resetDisplayData() {

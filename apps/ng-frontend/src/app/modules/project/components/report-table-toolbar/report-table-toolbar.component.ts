@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ProjectDataSourceService } from '../../../../shared/services/project-data-source/project-data-source.service';
+import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   MatButtonToggleChange,
@@ -44,15 +44,15 @@ export class ReportTableToolbarComponent {
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSourceService.setFilter(filterValue);
+    this.dataSourceService.setFilterSignal(filterValue);
   }
 
   deleteSelected() {
-    this.dataSourceService.deleteSelected();
+    this.dataSourceService.setDeletedSignal(true);
   }
 
   preventNavigationSelected() {
-    this.dataSourceService.preventNavigationSelected();
+    this.dataSourceService.setPreventNavigationSignal(true);
   }
 
   onToggleChange(event: MatButtonToggleChange) {

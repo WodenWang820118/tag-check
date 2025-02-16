@@ -1,5 +1,5 @@
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ProjectInfo, Setting } from '@utils';
+import { Project, ProjectSetting } from '@utils';
 import { Component, effect, input, model, output, signal } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,7 +13,7 @@ import {
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenav } from '@angular/material/sidenav';
 import { MatSelectModule } from '@angular/material/select';
-import { MetadataSourceService } from '../../services/metadata-source/metadata-source.service';
+import { MetadataSourceService } from '../../services/data-source/metadata-source.service';
 import { MatInputModule } from '@angular/material/input';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -38,8 +38,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 export class ToolbarComponent {
   // Convert inputs to signal inputs
   snav = input<MatSidenav | undefined>();
-  settings = input.required<Setting | undefined>();
-  projects = input.required<ProjectInfo[] | undefined>();
+  settings = input.required<ProjectSetting | undefined>();
+  projects = input.required<Project[] | undefined>();
   params = toSignal(this.route.params, {
     initialValue: { projectSlug: '' }
   });
@@ -87,6 +87,6 @@ export class ToolbarComponent {
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.metadataSourceService.setFilter(filterValue);
+    this.metadataSourceService.setFilterSignal(filterValue);
   }
 }

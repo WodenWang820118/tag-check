@@ -13,7 +13,7 @@
       <mat-icon>{{
         reportDetails()?.passed ? 'check_circle' : 'cancel'
       }}</mat-icon>
-      <p>{{ reportDetails()?.completedTime | date: 'medium' }}</p>
+      <p>{{ reportDetails()?.createdAt | date: 'medium' }}</p>
       <div>
         <button
           mat-icon-button
@@ -28,8 +28,8 @@
   <div class="detail__content">
     <div class="detail__images">
       <app-carousel
-        [imageBlob]="imageBlob()"
-        [videoBlob]="videoBlob()"
+        [imageBlob]="imageBlob$()"
+        [videoBlob]="videoBlob$()"
       ></app-carousel>
     </div>
     <div class="detail__panels">

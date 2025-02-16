@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { RegexVariable } from './regex-variable.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
+import { RegexVariableConfig, VariableTypeEnum } from '@utils';
 
 describe('RegexVariable', () => {
   let service: RegexVariable;
@@ -27,10 +28,9 @@ describe('RegexVariable', () => {
       accountId,
       containerId
     );
-
-    expect(result).toEqual({
+    const expected: RegexVariableConfig = {
       name: 'Measurement ID',
-      type: 'remm',
+      type: VariableTypeEnum.REGEX,
       accountId: 'test-account',
       containerId: 'test-container',
       parameter: [
@@ -43,7 +43,9 @@ describe('RegexVariable', () => {
       ],
       fingerprint: '1696861232768',
       formatValue: {}
-    });
+    };
+
+    expect(result).toEqual(expected);
   });
 
   it('should use the provided accountId and containerId', () => {

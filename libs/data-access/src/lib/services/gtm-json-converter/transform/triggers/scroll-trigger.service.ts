@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Parameter, TriggerConfig } from '@utils';
+import {
+  Parameter,
+  ScrollDepthTriggerConfig,
+  TriggerConfig,
+  TriggerTypeEnum
+} from '@utils';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
 
@@ -19,12 +24,12 @@ export class ScrollTrigger {
     accountId: string;
     containerId: string;
     verticalThresholdsPercent?: string;
-  }): TriggerConfig {
+  }): ScrollDepthTriggerConfig {
     return {
       accountId,
       containerId,
       name: 'event scroll',
-      type: 'SCROLL_DEPTH',
+      type: TriggerTypeEnum.SCROLL_DEPTH,
       fingerprint: '1687976535532',
       parameter: [
         this.parameterUtils.createTemplateParameter(

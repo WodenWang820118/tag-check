@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { VideoTrigger } from './video-trigger.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { TriggerConfig } from '@utils';
+import { TriggerTypeEnum, YouTubeVideoTriggerConfig } from '@utils';
 
 describe('VideoTrigger', () => {
   let service: VideoTrigger;
   let eventUtils: EventUtils;
-  let mockVideoTriggerConfig: TriggerConfig;
+  let mockVideoTriggerConfig: YouTubeVideoTriggerConfig;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -20,7 +20,7 @@ describe('VideoTrigger', () => {
       accountId: 'test-account',
       containerId: 'test-container',
       name: 'event youtube video',
-      type: 'YOU_TUBE_VIDEO',
+      type: TriggerTypeEnum.YOU_TUBE_VIDEO,
       fingerprint: '1689849183312',
       parameter: [
         {

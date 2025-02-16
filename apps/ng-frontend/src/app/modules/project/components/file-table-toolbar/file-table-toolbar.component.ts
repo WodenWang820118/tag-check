@@ -1,12 +1,4 @@
-import {
-  Component,
-  AfterViewInit,
-  OnDestroy,
-  viewChild,
-  signal,
-  effect,
-  DestroyRef
-} from '@angular/core';
+import { Component, OnDestroy, viewChild, signal } from '@angular/core';
 import {
   MatButtonToggleChange,
   MatButtonToggleModule
@@ -14,14 +6,11 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { FileTableDataSourceService } from '../../../../shared/services/file-table-data-source/file-table-data-source.service';
+import { FileTableDataSourceService } from '../../../../shared/services/data-source/file-table-data-source.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ActivatedRoute } from '@angular/router';
-import { tap, map, catchError, of } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-file-table-toolbar',
@@ -40,52 +29,22 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   templateUrl: './file-table-toolbar.component.html',
   styleUrls: ['./file-table-toolbar.component.scss']
 })
-export class FileTableToolbarComponent implements AfterViewInit, OnDestroy {
+export class FileTableToolbarComponent implements OnDestroy {
   isSearchVisible = signal(false);
   filterValue = signal('');
   searchInput = viewChild<HTMLInputElement>('searchInput');
 
-  constructor(
-    private fileTableDataSourceService: FileTableDataSourceService,
-    private route: ActivatedRoute,
-    private destroyRef: DestroyRef
-  ) {
-    // Initialize filter value from route params
-    effect(() => {
-      this.initializeFilterValue();
-    });
-
-    // Effect for filter changes
-    effect(() => {
-      const currentFilter = this.filterValue();
-      this.fileTableDataSourceService.setFilter(currentFilter);
-    });
-  }
-
-  ngAfterViewInit() {
-    this.initializeFilterValue()
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        tap((value) => {
-          if (value) {
-            this.isSearchVisible.update(() => true);
-            this.setSearchInputValue(value);
-            this.triggerApplyFilter();
-          }
-        })
-      )
-      .subscribe();
-  }
+  constructor(private fileTableDataSourceService: FileTableDataSourceService) {}
 
   applyFilter(event: Event) {
     console.log('event', event);
     const filterValue = (event.target as HTMLInputElement).value;
     console.log('filter value in applyFilter', filterValue);
-    this.fileTableDataSourceService.setFilter(filterValue);
+    this.fileTableDataSourceService.setFilterSignal(filterValue);
   }
 
   deleteSelected() {
-    this.fileTableDataSourceService.deleteSelected();
+    this.fileTableDataSourceService.setDeletedSignal(true);
   }
 
   onToggleChange(event: MatButtonToggleChange) {
@@ -95,44 +54,13 @@ export class FileTableToolbarComponent implements AfterViewInit, OnDestroy {
   }
 
   downloadSelected() {
-    this.fileTableDataSourceService.downloadSelected();
+    this.fileTableDataSourceService.setDownloadSignal(true);
   }
-
-  private initializeFilterValue() {
-    return this.route.queryParams.pipe(
-      takeUntilDestroyed(this.destroyRef),
-      map((params) => {
-        const eventName: string = params['event'];
-        if (eventName) {
-          console.log('event name in the toolbar', eventName);
-          return eventName;
-        }
-        return '';
-      }),
-      catchError((error) => {
-        console.error(error);
-        return of('');
-      })
-    );
-  }
-
   private setSearchInputValue(value: string) {
     const input = this.searchInput();
     if (input) {
       input.value = value;
       this.filterValue.set(value);
-    }
-  }
-
-  private triggerApplyFilter() {
-    const input = this.searchInput();
-    if (input) {
-      const event = new KeyboardEvent('keyup', {
-        bubbles: true,
-        cancelable: true,
-        composed: true
-      });
-      input.dispatchEvent(event);
     }
   }
 

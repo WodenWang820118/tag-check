@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
-import { ProjectInfo } from '@utils';
+import { Project } from '@utils';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { InformationDialogComponent } from '../../../../shared/components/information-dialog/information-dialog.component';
@@ -16,7 +16,7 @@ import {
   forkJoin
 } from 'rxjs';
 import { ProjectIoService } from '../../../../shared/services/api/project-io/project-io.service';
-import { MetadataSourceService } from '../../../../shared/services/metadata-source/metadata-source.service';
+import { MetadataSourceService } from '../../../../shared/services/data-source/metadata-source.service';
 
 @Component({
   selector: 'app-project-item',
@@ -65,7 +65,7 @@ import { MetadataSourceService } from '../../../../shared/services/metadata-sour
   `
 })
 export class ProjectItemComponent {
-  project = input.required<ProjectInfo>();
+  project = input.required<Project>();
   constructor(
     private dialog: MatDialog,
     private projectIoService: ProjectIoService,
@@ -104,7 +104,7 @@ export class ProjectItemComponent {
       .subscribe();
   }
 
-  private updateMetadata(): Observable<ProjectInfo[]> {
+  private updateMetadata(): Observable<Project[]> {
     return this.metadataSourceService.getData().pipe(
       take(1),
       map((data) =>

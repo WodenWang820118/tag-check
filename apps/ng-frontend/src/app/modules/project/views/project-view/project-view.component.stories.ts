@@ -2,7 +2,7 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ProjectViewComponent } from './project-view.component';
 
@@ -14,7 +14,6 @@ import { PROJECT_ROUTES } from '../../routes';
 import { AsyncPipe } from '@angular/common';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
-import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
 import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
 
@@ -29,22 +28,22 @@ const meta: Meta<ProjectViewComponent> = {
         RouterOutlet,
         MatSidenavModule,
         ToolbarComponent,
-        SideNavListComponent,
+        SideNavListComponent
       ],
-      providers: [ProjectInfoService, SettingsService],
+      providers: [SettingsService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(PROJECT_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(PROJECT_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ProjectViewComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

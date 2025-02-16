@@ -1,32 +1,31 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, catchError, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { map, Observable, tap } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ImageService {
-  private imageApiUrl = environment.imageApiUrl;
-  private imageSubject = new BehaviorSubject<Blob | null>(null);
-  image$ = this.imageSubject.asObservable();
-
   constructor(private http: HttpClient) {}
 
-  getImage(projectSlug: string, eventId: string) {
-    const httpOptions = {
-      headers: new HttpHeaders({
-        Accept: 'image/png',
-      }),
-      responseType: 'blob' as 'json', // This tells angular to parse it as a blob, default is json
-    };
-
+  getImage(projectSlug: string, eventId: string): Observable<{ blob: Blob }> {
     return this.http
-      .get<Blob>(`${this.imageApiUrl}/${projectSlug}/${eventId}`, httpOptions)
+      .get(`${environment.imageApiUrl}/${projectSlug}/${eventId}`, {
+        headers: {
+          Accept: 'image/png'
+        },
+        responseType: 'blob',
+        observe: 'response'
+      })
       .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of(null);
+        tap((response) => {
+          console.warn('response: ', response);
+        }),
+        map((response) => {
+          return {
+            blob: response.body ? response.body : new Blob()
+          };
         })
       );
   }

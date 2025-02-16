@@ -1,7 +1,5 @@
 import {
   Component,
-  AfterViewInit,
-  computed,
   signal,
   effect,
   viewChild,
@@ -24,25 +22,17 @@ import { ProgressUpdateService } from '../../../../shared/services/progress-upda
   template: '<canvas #chart></canvas>',
   styles: ['canvas { max-width: 30px; max-height: 30px; }']
 })
-export class ProgressPieChartComponent implements AfterViewInit {
-  chart = signal<Chart | null>(null);
+export class ProgressPieChartComponent {
   chartRef = viewChild.required<ElementRef<HTMLCanvasElement>>('chart');
-  currentStep = signal<number>(0);
-  totalSteps = signal<number>(0);
+  chart = signal<Chart | null>(null);
   isFirstRender = signal<boolean>(true);
-
-  completedSteps = computed(() =>
-    Array(this.totalSteps())
-      .fill(false)
-      .map((_, index) => index < this.currentStep() - 1)
-  );
 
   constructor(private progressUpdateService: ProgressUpdateService) {
     // Setup effect to handle chart updates
     effect(
       () => {
-        const current = this.currentStep();
-        const total = this.totalSteps();
+        const current = this.progressUpdateService.currentStep$();
+        const total = this.progressUpdateService.totalSteps$();
 
         if (current > 0 && total > 0) {
           if (this.isFirstRender()) {
@@ -54,17 +44,6 @@ export class ProgressPieChartComponent implements AfterViewInit {
       },
       { allowSignalWrites: true }
     );
-  }
-
-  ngAfterViewInit() {
-    // Subscribe to service updates
-    this.progressUpdateService
-      .getCurrentStep()
-      .subscribe((step) => this.currentStep.set(step));
-
-    this.progressUpdateService
-      .getTotalSteps()
-      .subscribe((total) => this.totalSteps.set(total));
   }
 
   private destroyChart() {
@@ -89,17 +68,21 @@ export class ProgressPieChartComponent implements AfterViewInit {
 
     const data: ChartData = {
       labels: Array.from(
-        { length: this.totalSteps() },
+        { length: this.progressUpdateService.totalSteps$() },
         (_, i) => `Step ${i + 1}`
       ),
       datasets: [
         {
-          data: Array(this.totalSteps()).fill(1),
-          backgroundColor: Array(this.totalSteps()).fill('#e0e0e0'),
+          data: Array(this.progressUpdateService.totalSteps$()).fill(1),
+          backgroundColor: Array(this.progressUpdateService.totalSteps$()).fill(
+            '#e0e0e0'
+          ),
           borderWidth: 1
         }
       ]
     };
+    const currentStep = this.progressUpdateService.currentStep$();
+    const totalSteps = this.progressUpdateService.totalSteps$();
 
     const config: ChartConfiguration = {
       type: 'pie',
@@ -128,11 +111,7 @@ export class ProgressPieChartComponent implements AfterViewInit {
             ctx.fillStyle = 'black';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(
-              `${this.currentStep()}/${this.totalSteps()}`,
-              centerX,
-              centerY
-            );
+            ctx.fillText(`${currentStep}/${totalSteps}`, centerX, centerY);
             ctx.restore();
           }
         }
@@ -145,12 +124,14 @@ export class ProgressPieChartComponent implements AfterViewInit {
   private updateChart() {
     const chartInstance = this.chart();
     if (chartInstance?.data?.datasets) {
-      const newBackgroundColors = Array(this.totalSteps())
+      const newBackgroundColors = Array(
+        this.progressUpdateService.totalSteps$()
+      )
         .fill('')
         .map((_, i) => {
-          if (i < this.currentStep() - 1) {
+          if (i < this.progressUpdateService.currentStep$() - 1) {
             return '#009688'; // Completed step
-          } else if (i === this.currentStep() - 1) {
+          } else if (i === this.progressUpdateService.currentStep$() - 1) {
             return '#FFCA28'; // Current step
           } else {
             return '#e0e0e0'; // Future step

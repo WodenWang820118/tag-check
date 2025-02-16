@@ -1,60 +1,54 @@
-import { Injectable } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Subject, catchError, forkJoin, of } from 'rxjs';
-import { ProjectReport, IReportDetails } from '@utils';
+import { Observable, catchError, forkJoin, of, throwError } from 'rxjs';
+import {
+  ProjectReport,
+  IReportDetails,
+  TestEventSchema,
+  Recording,
+  Spec,
+  TestEvent,
+  AbstractTestEvent
+} from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ReportService {
-  reportsSubject: Subject<Report> = new BehaviorSubject({} as Report);
-  reports$ = this.reportsSubject.asObservable();
-
-  fileContent = new BehaviorSubject<any>(null);
-  fileContent$ = this.fileContent.asObservable();
-
   constructor(private http: HttpClient) {}
-
-  getReports() {
-    return this.http.get<Report[]>(environment.reportApiUrl).pipe(
-      catchError((error) => {
-        console.error(error);
-        return of([]);
-      })
-    );
-  }
-
   getProjectReports(projectSlug: string) {
     return this.http
-      .get<ProjectReport>(`${environment.reportApiUrl}/${projectSlug}`)
+      .get<AbstractTestEvent[]>(`${environment.reportApiUrl}/${projectSlug}`)
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
+          return throwError(() => new Error('Failed to get reports'));
         })
       );
   }
 
-  getProjectReportNames(projectSlug: string) {
+  updateTestEvents(projectSlug: string, reports: IReportDetails[]) {
     return this.http
-      .get<string[]>(`${environment.reportApiUrl}/${projectSlug}/names`)
+      .put<TestEvent[]>(`${environment.reportApiUrl}/${projectSlug}`, reports)
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
+          return throwError(() => new Error('Failed to update test event'));
         })
       );
   }
 
-  updateReport(projectSlug: string, report: ProjectReport) {
-    if (!projectSlug || !report) return of({} as ProjectReport);
+  updateReport(projectSlug: string, report: AbstractTestEvent) {
     return this.http
-      .put<ProjectReport>(`${environment.reportApiUrl}/${projectSlug}`, report)
+      .put<AbstractTestEvent>(
+        `${environment.reportApiUrl}/${projectSlug}`,
+        report
+      )
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
+          return throwError(() => new Error('Failed to update report'));
         })
       );
   }
@@ -62,46 +56,31 @@ export class ReportService {
   addReport(
     projectSlug: string,
     eventId: string,
-    reportDetails: IReportDetails
+    reportDetails: IReportDetails,
+    recording: Recording,
+    spec: Spec
   ) {
     return this.http
-      .post<ProjectReport>(
+      .post<TestEvent>(
         `${environment.reportApiUrl}/${projectSlug}/${eventId}`,
-        reportDetails
+        {
+          reportDetails,
+          recording,
+          spec
+        }
       )
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
+          return throwError(() => new Error('Failed to add report'));
         })
       );
-  }
-
-  readJsonFileContent(file: File): void {
-    const reader = new FileReader();
-
-    reader.onload = (e: any) => {
-      const fileContentString = e.target.result;
-
-      try {
-        // update the file content
-        this.fileContent.next(JSON.parse(fileContentString));
-      } catch (error) {
-        console.error('Error parsing file content', error);
-      }
-    };
-
-    reader.onerror = () => {
-      console.error('Error reading file content');
-    };
-
-    reader.readAsText(file);
   }
 
   downloadFile(projectSlug: string, eventName: string) {
     this.http
       .get(`${environment.reportApiUrl}/xlsx/${projectSlug}/${eventName}`, {
-        responseType: 'blob',
+        responseType: 'blob'
       })
       .pipe(
         catchError((error) => {
@@ -125,7 +104,7 @@ export class ReportService {
   deleteReports(projectSlug: string, reports: IReportDetails[]) {
     const tasks = reports.map((report) =>
       this.http
-        .delete<ProjectReport>(
+        .delete<TestEventSchema>(
           `${environment.reportApiUrl}/${projectSlug}/${report.eventId}`
         )
         .pipe(
@@ -136,5 +115,36 @@ export class ReportService {
         )
     );
     return forkJoin(tasks); // Waits for all DELETE operations to complete.
+  }
+
+  deleteBatchReports(projectSlug: string, eventIds: string[]) {
+    if (!projectSlug || !eventIds) throw new Error('Invalid arguments');
+    console.log('Deleting reports:', eventIds);
+    return this.http
+      .delete<TestEventSchema>(`${environment.reportApiUrl}/${projectSlug}`, {
+        body: eventIds
+      })
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
+  }
+
+  getReportDetails(
+    projectSlug: string,
+    eventId: string
+  ): Observable<IReportDetails> {
+    return this.http
+      .get<IReportDetails>(
+        `${environment.reportApiUrl}/${projectSlug}/${eventId}`
+      )
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          throw error;
+        })
+      );
   }
 }

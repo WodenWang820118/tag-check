@@ -1,4 +1,4 @@
-import { Parameter, TagConfig, Trigger, TriggerConfig } from '@utils';
+import { EventTagConfig, TagTypeEnum, Trigger } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
@@ -16,13 +16,13 @@ export class ScrollTag {
     accountId: string,
     containerId: string,
     triggerId: string
-  ): TagConfig[] {
+  ): EventTagConfig[] {
     return [
       {
         accountId,
         containerId,
         name: 'GA4 event - scroll',
-        type: 'gaawe',
+        type: TagTypeEnum.GAAWE,
         parameter: [
           this.parameterUtils.createBooleanParameter(
             'sendEcommerceData',

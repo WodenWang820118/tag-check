@@ -1,7 +1,6 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { SideBarComponent } from '../components/sidebar/sidebar.component';
 import { RouterOutlet } from '@angular/router';
-import { TreeNodeService } from '../../../shared/services/tree-node/tree-node.service';
 
 @Component({
   selector: 'app-help-center-view',
@@ -35,14 +34,4 @@ import { TreeNodeService } from '../../../shared/services/tree-node/tree-node.se
     `
   ]
 })
-export class HelpCenterViewComponent implements OnInit, OnDestroy {
-  constructor(private treeNodeService: TreeNodeService) {}
-
-  ngOnInit(): void {
-    this.treeNodeService.initializeTreeNodes();
-  }
-
-  ngOnDestroy(): void {
-    this.treeNodeService.resetCurrentNode();
-  }
-}
+export class HelpCenterViewComponent {}

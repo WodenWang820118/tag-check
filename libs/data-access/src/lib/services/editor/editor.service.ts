@@ -6,38 +6,37 @@ import { jsonLightEditorExtensions } from './editor-extensions';
 import { editorStyles } from './editor-style';
 import { linter, lintGutter } from '@codemirror/lint';
 import { jsonParseLinter } from '@codemirror/lang-json';
-
-export type EditorExtension = 'inputJson' | 'outputJson';
+import { EditorTypeEnum } from '@utils';
 type ExtensionArray = any[];
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class EditorService {
-  editorExtensions: Record<EditorExtension, ExtensionArray> = {
+  editorExtensions: Record<EditorTypeEnum, ExtensionArray> = {
     inputJson: jsonLightEditorExtensions,
-    outputJson: jsonLightEditorExtensions,
+    outputJson: jsonLightEditorExtensions
   };
 
   contentSubjects = {
     inputJson: new BehaviorSubject(`Placeholder content for JSON editor`),
-    outputJson: new BehaviorSubject(``),
+    outputJson: new BehaviorSubject(``)
   };
 
   editorSubjects = {
     inputJson: new BehaviorSubject<EditorView>(new EditorView()),
-    outputJson: new BehaviorSubject<EditorView>(new EditorView()),
+    outputJson: new BehaviorSubject<EditorView>(new EditorView())
   };
 
   editor$ = {
     inputJson: this.editorSubjects.inputJson.asObservable(),
-    outputJson: this.editorSubjects.outputJson.asObservable(),
+    outputJson: this.editorSubjects.outputJson.asObservable()
   };
 
   constructor() {}
 
   initEditorView(
-    extension: EditorExtension,
+    extension: EditorTypeEnum,
     elementRef: ElementRef,
     content?: string
   ) {
@@ -52,9 +51,9 @@ export class EditorService {
           EditorView.lineWrapping,
           placeholder(
             content ? content : this.contentSubjects[extension].getValue()
-          ),
+          )
         ],
-        parent: elementRef.nativeElement,
+        parent: elementRef.nativeElement
       });
     } else if (extension === 'outputJson') {
       editorView = new EditorView({
@@ -64,14 +63,14 @@ export class EditorService {
           EditorView.lineWrapping,
           placeholder(
             content ? content : this.contentSubjects[extension].getValue()
-          ),
+          )
         ],
-        parent: elementRef.nativeElement,
+        parent: elementRef.nativeElement
       });
     } else {
       editorView = new EditorView({
         extensions: this.editorExtensions[extension],
-        parent: elementRef.nativeElement,
+        parent: elementRef.nativeElement
       });
     }
 
@@ -80,15 +79,15 @@ export class EditorService {
         changes: {
           from: 0,
           insert: content ? content : '[]',
-          to: editorView.state.doc.length,
-        },
+          to: editorView.state.doc.length
+        }
       });
     }
 
     this.editorSubjects[extension].next(editorView);
   }
 
-  setContent(extension: EditorExtension, content: string) {
+  setContent(extension: EditorTypeEnum, content: string) {
     // set content in contentSubjects
     this.contentSubjects[extension].next(content);
     // dispatch content to editorView
@@ -96,8 +95,8 @@ export class EditorService {
       changes: {
         from: 0,
         insert: content,
-        to: this.editorSubjects[extension].getValue().state.doc.length,
-      },
+        to: this.editorSubjects[extension].getValue().state.doc.length
+      }
     });
   }
 }

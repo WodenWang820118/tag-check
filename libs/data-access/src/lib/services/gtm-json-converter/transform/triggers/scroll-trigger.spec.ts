@@ -2,13 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { ScrollTrigger } from './scroll-trigger.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { TriggerConfig } from '@utils';
+import { ScrollDepthTriggerConfig, TriggerTypeEnum } from '@utils';
 
 describe('scrollTrigger', () => {
   let service: ScrollTrigger;
   let parameterUtils: ParameterUtils;
   let eventUtils: EventUtils;
-  let mockScrollTriggerConfig: TriggerConfig;
+  let mockScrollTriggerConfig: ScrollDepthTriggerConfig;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -23,7 +23,7 @@ describe('scrollTrigger', () => {
       accountId: 'test-account',
       containerId: 'test-container',
       name: 'event scroll',
-      type: 'SCROLL_DEPTH',
+      type: TriggerTypeEnum.SCROLL_DEPTH,
       fingerprint: '1687976535532',
       parameter: [
         { type: 'TEMPLATE', key: 'verticalThresholdUnits', value: 'PERCENT' },

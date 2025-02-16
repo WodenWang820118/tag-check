@@ -1,5 +1,5 @@
 <div class="test-detail-panels">
-  <mat-accordion class=".example-headers-align" multi>
+  <mat-accordion class="headers-align" multi>
     <mat-expansion-panel
       hideToggle
       (opened)="switchSpecEdit()"
@@ -23,14 +23,25 @@
         </mat-panel-description>
       </mat-expansion-panel-header>
       <mat-panel-description>
-        @if (specEditMode()) {
-          <app-editor
-            [editorExtension]="'specJson'"
-            [content]="spec() | json"
-            [editMode]="true"
-          ></app-editor>
+        @if (isSpecLoading) {
+          <div class="loading-spinner">
+            <mat-progress-spinner
+              [mode]="'indeterminate'"
+            ></mat-progress-spinner>
+          </div>
         } @else {
-          <pre class="json">{{ spec() | json }}</pre>
+          @if (!specContent()) {
+            <p>No Spec found</p>
+          } @else if (!specEditMode()) {
+            <ng-container>
+              <pre class="json">{{ specContent() | json }}</pre>
+            </ng-container>
+          } @else {
+            <app-editor
+              [editorExtension]="'specJson'"
+              [content]="specContent() | json"
+            ></app-editor>
+          }
         }
       </mat-panel-description>
       @if (specEditMode()) {
@@ -38,7 +49,20 @@
           <button
             mat-raised-button
             color="primary"
-            [disabled]="editorService.isJsonSyntaxError$ | async"
+            (click)="specFileInput.click()"
+          >
+            Upload
+          </button>
+          <input
+            hidden
+            (change)="onSpecFileSelected($event)"
+            #specFileInput
+            type="file"
+          />
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="isJsonSyntaxError | async"
             (click)="onSpecUpdate(); switchSpecEditMode($event)"
           >
             Save
@@ -77,7 +101,7 @@
             </button>
             <input
               hidden
-              (change)="onFileSelected($event)"
+              (change)="onRecordingFileSelected($event)"
               #fileInput
               type="file"
             />
@@ -85,30 +109,24 @@
         </mat-panel-description>
       </mat-expansion-panel-header>
       <mat-panel-description>
-        @if (
-          recordingEditMode() &&
-          (this.reportService.fileContent$ | async) !== null
-        ) {
-          <!-- upload condition -->
-          <app-editor
-            [editorExtension]="'recordingJson'"
-            [content]="this.reportService.fileContent$ | async | json"
-          ></app-editor>
-        } @else if (recordingEditMode()) {
-          <!-- pure editting -->
-          <app-editor
-            [editorExtension]="'recordingJson'"
-            [content]="recording() | json"
-            [editMode]="true"
-          ></app-editor>
+        @if (isRecordingLoading) {
+          <div class="loading-spinner">
+            <mat-progress-spinner
+              [mode]="'indeterminate'"
+            ></mat-progress-spinner>
+          </div>
         } @else {
-          <!-- otherwise, showing the info -->
-          @if (recording()) {
+          @if (!recordingContent()) {
+            <p>No recording found</p>
+          } @else if (!recordingEditMode()) {
             <ng-container>
-              <pre class="json">{{ recording() | json }}</pre>
+              <pre class="json">{{ recordingContent() | json }}</pre>
             </ng-container>
           } @else {
-            <p>No recording found</p>
+            <app-editor
+              [editorExtension]="'recordingJson'"
+              [content]="recordingContent() | json"
+            ></app-editor>
           }
         }
       </mat-panel-description>
@@ -119,14 +137,14 @@
           </button>
           <input
             hidden
-            (change)="onFileSelected($event)"
+            (change)="onRecordingFileSelected($event)"
             #fileInput
             type="file"
           />
           <button
             mat-raised-button
             color="primary"
-            [disabled]="editorService.isJsonSyntaxError$ | async"
+            [disabled]="isJsonSyntaxError | async"
             (click)="onRecordingUpdate(); switchRecordingEditMode($event)"
           >
             Save
@@ -147,7 +165,6 @@
         <mat-panel-title> Raw Request </mat-panel-title>
       </mat-expansion-panel-header>
       <mat-panel-description>
-        <!-- <p>{{ (reportDetails$ | async)?.rawRequest }}</p> -->
         <p>{{ reportDetails()?.rawRequest }}</p>
       </mat-panel-description>
     </mat-expansion-panel>
@@ -157,9 +174,6 @@
         <mat-panel-title> Request Data Layer </mat-panel-title>
       </mat-expansion-panel-header>
       <mat-panel-description>
-        <!-- <pre class="json">{{
-          (reportDetails$ | async)?.reformedDataLayer | json
-        }}</pre> -->
         <pre class="json">{{ reportDetails()?.reformedDataLayer | json }}</pre>
       </mat-panel-description>
     </mat-expansion-panel>
@@ -169,7 +183,6 @@
         <mat-panel-title> Data Layer </mat-panel-title>
       </mat-expansion-panel-header>
       <mat-panel-description>
-        <!-- <pre class="json">{{ (reportDetails$ | async)?.dataLayer | json }}</pre> -->
         <pre class="json">{{ reportDetails()?.dataLayer | json }}</pre>
       </mat-panel-description>
       <!-- <mat-action-row

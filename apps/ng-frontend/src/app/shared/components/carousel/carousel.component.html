@@ -3,14 +3,14 @@
     @for (item of items(); track item; let i = $index) {
       <div class="carousel-item" [class.active]="i === currentIndex()">
         @switch (item.type) {
-          @case ('image') {
+          @case (imageType) {
             <img
               [src]="item.url"
               [alt]="item.alt || ''"
               class="detail__images__item"
             />
           }
-          @case ('video') {
+          @case (videoType) {
             <video controls>
               <source [src]="item.url" type="video/webm" />
             </video>

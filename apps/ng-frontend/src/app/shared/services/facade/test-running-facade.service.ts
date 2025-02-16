@@ -10,16 +10,16 @@ import {
   forkJoin,
   Observable,
   of,
-  map,
+  map
 } from 'rxjs';
 import {
   IReportDetails,
   EventInspectionPresetDto,
-  ProjectSetting,
+  ProjectSetting
 } from '@utils';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
-import { ProjectDataSourceService } from '../project-data-source/project-data-source.service';
+import { ProjectDataSourceService } from '../data-source/project-data-source.service';
 import { QaRequestService } from '../api/qa-request/qa-request.service';
 import { SettingsService } from '../api/settings/settings.service';
 
@@ -63,41 +63,41 @@ export class TestRunningFacadeService {
     projectSlug: string,
     project: ProjectSetting
   ) {
-    const headless = project.settings.headless;
+    const headless = project.browserSettings.headless;
     console.log('project', project);
     const inspectEventDto = new EventInspectionPresetDto(project);
     // change the play button to a spinner
     this.isRunningTestSubject.next(true);
     this.eventRunningTestSubject.next(eventId);
 
-    if (project.settings.gtm.isAccompanyMode) {
-      const measurementId = project.settings.gtm.isRequestCheck
-        ? project.settings.measurementId
+    if (project.applicationSettings.gtm.isAccompanyMode) {
+      const measurementId = project.applicationSettings.gtm.isRequestCheck
+        ? project.measurementId
         : undefined;
       return this.gtmOperatorService.runInspectionViaGtm(
         projectSlug,
         eventId,
-        project.settings.gtm.gtmPreviewModeUrl,
+        project.applicationSettings.gtm.gtmPreviewModeUrl,
         headless,
         inspectEventDto,
         measurementId,
-        project.settings.authentication.username,
-        project.settings.authentication.password,
-        project.settings.gtm.isRequestCheck
+        project.authenticationSettings.username,
+        project.authenticationSettings.password,
+        project.applicationSettings.gtm.isRequestCheck
       );
     }
 
-    if (project.settings.gtm.isRequestCheck) {
+    if (project.applicationSettings.gtm.isRequestCheck) {
       console.log('Running data layer with request check');
       return this.qaRequestService.runDataLayerWithRequestCheck(
         projectSlug,
         eventId,
-        project.settings.measurementId,
+        project.measurementId || '',
         headless,
         inspectEventDto,
-        project.settings.authentication.username,
-        project.settings.authentication.password,
-        project.settings.gtm.isRequestCheck
+        project.authenticationSettings.username,
+        project.authenticationSettings.password,
+        project.applicationSettings.gtm.isRequestCheck
       );
     }
     console.log('Running data layer without request check');
@@ -106,9 +106,9 @@ export class TestRunningFacadeService {
       eventId,
       headless,
       inspectEventDto,
-      project.settings.authentication.username,
-      project.settings.authentication.password,
-      project.settings.gtm.isRequestCheck
+      project.authenticationSettings.username,
+      project.authenticationSettings.password,
+      project.applicationSettings.gtm.isRequestCheck
     );
   }
 
@@ -133,7 +133,7 @@ export class TestRunningFacadeService {
           console.error('Error stopping QA Request operation:', error);
           return of(null);
         })
-      ),
+      )
     }).pipe(
       map((res) => res),
       finalize(() => {
@@ -153,7 +153,7 @@ export class TestRunningFacadeService {
     // TODO: maybe return a consistent eventId from the backend
     const updatedEvent: IReportDetails = {
       ...res[0],
-      eventId: `${res[0].eventName}_${res[0].eventId}`,
+      eventId: `${res[0].eventName}_${res[0].eventId}`
     };
     testDataSource.data = testDataSource.data.map((event) =>
       event.eventId === updatedEvent.eventId ? updatedEvent : event

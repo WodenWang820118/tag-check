@@ -2,7 +2,7 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ProjectListComponent } from './project-list.component';
 
@@ -11,12 +11,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { RouterLink, provideRouter } from '@angular/router';
-import { MetadataSourceService } from '../../../../shared/services/metadata-source/metadata-source.service';
 import { ENTRY_ROUTES } from '../../routes';
 import { AsyncPipe, NgIf } from '@angular/common';
 import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
 import { ProjectItemComponent } from '../project-item/project-item.component';
-import { MetadataSourceFacadeService } from '../../../../shared/services/facade/metadata-source-facade.service';
 
 const meta: Meta<ProjectListComponent> = {
   component: ProjectListComponent,
@@ -30,22 +28,22 @@ const meta: Meta<ProjectListComponent> = {
         ProjectItemComponent,
         MatCardModule,
         RouterLink,
-        PaginatorComponent,
+        PaginatorComponent
       ],
-      providers: [MetadataSourceService, MetadataSourceFacadeService],
+      providers: []
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(ENTRY_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(ENTRY_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ProjectListComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

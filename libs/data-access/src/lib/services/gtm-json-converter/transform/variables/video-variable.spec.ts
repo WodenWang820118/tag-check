@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { VideoVariable } from './video-variable.service';
+import { VariableTypeEnum, VideoVariableConfig } from '@utils';
 
 describe('VideoVariable', () => {
   let service: VideoVariable;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [VideoVariable],
+      providers: [VideoVariable]
     });
 
     service = TestBed.inject(VideoVariable);
@@ -21,48 +22,63 @@ describe('VideoVariable', () => {
     const containerId = 'test-container';
 
     const result = service.videoBuiltInVariable({ accountId, containerId });
-
-    expect(result).toEqual([
+    const expected: VideoVariableConfig[] = [
       {
         accountId,
         containerId,
-        type: 'VIDEO_PROVIDER',
-        name: 'Video Provider',
-      },
-      { accountId, containerId, type: 'VIDEO_URL', name: 'Video URL' },
-      { accountId, containerId, type: 'VIDEO_TITLE', name: 'Video Title' },
-      {
-        accountId,
-        containerId,
-        type: 'VIDEO_DURATION',
-        name: 'Video Duration',
+        type: VariableTypeEnum.VIDEO_PROVIDER,
+        name: 'Video Provider'
       },
       {
         accountId,
         containerId,
-        type: 'VIDEO_PERCENT',
-        name: 'Video Percent',
+        type: VariableTypeEnum.VIDEO_URL,
+        name: 'Video URL'
       },
       {
         accountId,
         containerId,
-        type: 'VIDEO_VISIBLE',
-        name: 'Video Visible',
+        type: VariableTypeEnum.VIDEO_TITLE,
+        name: 'Video Title'
       },
-      { accountId, containerId, type: 'VIDEO_STATUS', name: 'Video Status' },
       {
         accountId,
         containerId,
-        type: 'VIDEO_CURRENT_TIME',
-        name: 'Video Current Time',
+        type: VariableTypeEnum.VIDEO_DURATION,
+        name: 'Video Duration'
       },
-    ]);
+      {
+        accountId,
+        containerId,
+        type: VariableTypeEnum.VIDEO_PERCENT,
+        name: 'Video Percent'
+      },
+      {
+        accountId,
+        containerId,
+        type: VariableTypeEnum.VIDEO_VISIBLE,
+        name: 'Video Visible'
+      },
+      {
+        accountId,
+        containerId,
+        type: VariableTypeEnum.VIDEO_STATUS,
+        name: 'Video Status'
+      },
+      {
+        accountId,
+        containerId,
+        type: VariableTypeEnum.VIDEO_CURRENT_TIME,
+        name: 'Video Current Time'
+      }
+    ];
+    expect(result).toEqual(expected);
   });
 
   it('should return an array with 8 items', () => {
     const result = service.videoBuiltInVariable({
       accountId: 'any',
-      containerId: 'any',
+      containerId: 'any'
     });
     expect(Array.isArray(result)).toBe(true);
     expect(result.length).toBe(8);
@@ -83,7 +99,7 @@ describe('VideoVariable', () => {
   it('should have unique types and names for each item', () => {
     const result = service.videoBuiltInVariable({
       accountId: 'any',
-      containerId: 'any',
+      containerId: 'any'
     });
     const types = new Set(result.map((item) => item.type));
     const names = new Set(result.map((item) => item.name));
