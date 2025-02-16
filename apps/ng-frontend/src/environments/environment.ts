@@ -10,4 +10,5 @@ export const environment = {
   settingsApiUrl: 'http://localhost:7001/settings',
   fileReportApiUrl: 'http://localhost:7001/file-reports',
   videoApiUrl: 'http://localhost:7001/videos',
+  webSocketUrl: 'http://localhost:7002/events'
 };

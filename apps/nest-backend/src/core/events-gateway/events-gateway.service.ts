@@ -6,20 +6,20 @@ import {
   WebSocketServer,
   SubscribeMessage,
   MessageBody,
-  ConnectedSocket,
+  ConnectedSocket
 } from '@nestjs/websockets';
 import { Socket } from 'dgram';
 import { Server } from 'http';
 import { Logger } from '@nestjs/common';
 
-@WebSocketGateway(7002, {
+@WebSocketGateway(Number(process.env.WEB_SOCKET as unknown as string), {
   transports: ['websocket'],
   namespace: 'events',
   cors: {
     origin: '*',
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+  }
 })
 export class EventsGatewayService
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect

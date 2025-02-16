@@ -1,4 +1,5 @@
 import { computed, Injectable, signal } from '@angular/core';
+import { environment } from '../../../../environments/environment';
 import { io, Socket } from 'socket.io-client';
 
 @Injectable({
@@ -8,9 +9,8 @@ export class WebSocketService {
   private socket: Socket;
   private connectionStatus = signal<boolean>(false);
   connectionStatus$ = computed(() => this.connectionStatus());
-
   constructor() {
-    this.socket = io('http://localhost:7002/events', {
+    this.socket = io(environment.webSocketUrl, {
       withCredentials: true,
       transports: ['websocket', 'polling']
     });

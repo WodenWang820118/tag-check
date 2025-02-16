@@ -74,6 +74,11 @@ export class ProjectIoController {
 
   @Delete('delete/:projectSlug')
   async deleteProject(@Param('projectSlug') projectSlug: string) {
+    try {
+      await this.projectIoFacadeService.deleteProject(projectSlug);
+    } catch (error) {
+      this.logger.error(error);
+    }
     return await this.projectRepositoryService.deleteBySlug(projectSlug);
   }
 }
