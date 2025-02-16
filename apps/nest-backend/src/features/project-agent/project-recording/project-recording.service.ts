@@ -3,7 +3,6 @@ import { FolderService } from '../../../infrastructure/os/folder/folder.service'
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { FileService } from '../../../infrastructure/os/file/file.service';
 import { FilePathService } from '../../../infrastructure/os/path/file-path/file-path.service';
-import { RecordingDto } from '../../../shared/dto/recording.dto';
 import { Recording } from '@utils';
 
 @Injectable()
@@ -22,9 +21,9 @@ export class ProjectRecordingService {
       await this.folderPathService.getRecordingFolderPath(projectSlug)
     );
 
-    const recordings: Record<string, RecordingDto>[] = await Promise.all(
+    const recordings: Record<string, Recording>[] = await Promise.all(
       folderNames.map(async (fileName) => {
-        const recordingContent = this.fileService.readJsonFile<RecordingDto>(
+        const recordingContent = this.fileService.readJsonFile<Recording>(
           await this.filePathService.getRecordingFilePath(projectSlug, fileName)
         );
         const key = fileName.replace('.json', '');
@@ -32,7 +31,7 @@ export class ProjectRecordingService {
       })
     );
 
-    const flattenedRecordings: Record<string, RecordingDto> = recordings.reduce(
+    const flattenedRecordings: Record<string, Recording> = recordings.reduce(
       (acc, recording) => {
         const key = Object.keys(recording)[0];
         acc[key] = { ...recording[key], ...recording };

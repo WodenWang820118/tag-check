@@ -11,7 +11,7 @@ import { ProjectDataRetrievalController } from './project/project-data-retrieval
 import { RecordingController } from './recording/recording.controller';
 import { SpecController } from './spec/spec.controller';
 import { ReportController } from './report/report.controller';
-import { DataLayerController } from './datalayer/datalayer.controller';
+import { DataLayerController } from './data-layer/datalayer.controller';
 import { GtmOperatorController } from './gtm-operator/gtm-operator.controller';
 import { ConfigurationController } from './configuration/configuration.controller';
 import { SettingsController } from './settings/settings.controller';
@@ -20,7 +20,7 @@ import { FileReportsController } from './file-reports/file-reports.controller';
 import { VideosController } from './videos/videos.controller';
 
 // services
-import { EventInspectionControllerService } from './datalayer/event-inspection-controller.service';
+import { EventInspectionControllerService } from './data-layer/event-inspection-controller.service';
 import { ProjectWorkFlowControllerService } from './project/project-workflow-controller.service';
 import { ConfigurationControllerService } from './configuration/configuration-controller.service';
 

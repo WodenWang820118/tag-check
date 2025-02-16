@@ -14,7 +14,7 @@ import {
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-import { CookieData, LocalStorageData, Setting } from '@utils';
+import { ApplicationSetting, CookieData, LocalStorageData } from '@utils';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -142,26 +142,23 @@ export class ApplicationFormComponent implements OnInit {
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           if (projectSlug) {
-            const settings: Partial<Setting> = {
-              application: {
-                localStorage: {
-                  data: this.localStorageFormArrayValue.map((item) => ({
-                    key: item.value.key,
-                    value: item.value.value
-                  }))
-                },
-                cookie: {
-                  data: this.cookieFormArrayValue.map((item) => ({
-                    key: item.value.key,
-                    value: item.value.value
-                  }))
-                }
+            const settings: Partial<ApplicationSetting> = {
+              localStorage: {
+                data: this.localStorageFormArrayValue.map((item) => ({
+                  key: item.value.key,
+                  value: item.value.value
+                }))
+              },
+              cookie: {
+                data: this.cookieFormArrayValue.map((item) => ({
+                  key: item.value.key,
+                  value: item.value.value
+                }))
               }
             };
 
-            return this.settingsService.updateSettings(
+            return this.settingsService.updateApplicationSetting(
               projectSlug,
-              'application',
               settings
             );
           }

@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PathUtilsService } from '../path-utils/path-utils.service';
 import { join } from 'path';
-import { ConfigurationService } from '../../../../core/configuration/configuration.service';
+import { SysConfigurationRepositoryService } from '../../../../core/repository/sys-configuration/sys-configuration-repository.service';
 import { ConfigsService } from '../../../../core/configs/configs.service';
 
 @Injectable()
 export class FolderPathService {
   constructor(
     private pathUtilsService: PathUtilsService,
-    private configurationService: ConfigurationService,
+    private configurationService: SysConfigurationRepositoryService,
     private configsService: ConfigsService
   ) {}
 

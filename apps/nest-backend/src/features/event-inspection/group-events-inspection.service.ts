@@ -66,7 +66,6 @@ export class GroupEventsInspectionService {
       await this.inspectorGroupEventsService.inspectProjectDataLayer(
         browser,
         projectName,
-        headless,
         measurementId,
         credentials,
         captureRequest,

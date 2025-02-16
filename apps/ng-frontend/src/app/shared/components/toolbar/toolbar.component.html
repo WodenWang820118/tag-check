@@ -32,6 +32,7 @@
     @if (isHomeView()) {
       @if (!isSearchVisible()) {
         <button
+          id="top-search-button"
           mat-icon-button
           (click)="toggleSearch()"
           style="cursor: pointer"
@@ -39,6 +40,7 @@
           <mat-icon>search</mat-icon>
         </button>
         <button
+          id="new-project-button"
           mat-icon-button
           [routerLink]="['/init-project']"
           matTooltip="New Project"
@@ -47,6 +49,7 @@
           <mat-icon>add</mat-icon>
         </button>
         <button
+          id="help-center-button"
           mat-icon-button
           [routerLink]="['/help-center']"
           matTooltip="Help Center"

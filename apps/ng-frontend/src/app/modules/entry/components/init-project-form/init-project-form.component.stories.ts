@@ -2,7 +2,7 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { InitProjectFormComponent } from './init-project-form.component';
 
@@ -19,7 +19,6 @@ import { provideRouter, Router, RouterLink } from '@angular/router';
 import { ErrorDialogComponent } from '@ui';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
-import { ProjectInfoService } from '../../../../shared/services/api/project-info/project-info.service';
 import { ENTRY_ROUTES } from '../../../../modules/entry/routes';
 
 const meta: Meta<InitProjectFormComponent> = {
@@ -37,30 +36,24 @@ const meta: Meta<InitProjectFormComponent> = {
         MatInputModule,
         MatButtonModule,
         RouterLink,
-        ErrorDialogComponent,
+        ErrorDialogComponent
       ],
-      providers: [
-        FormBuilder,
-        ProjectInfoService,
-        Router,
-        ConfigurationService,
-        MatDialog,
-      ],
+      providers: [FormBuilder, Router, ConfigurationService, MatDialog]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(ENTRY_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(ENTRY_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<InitProjectFormComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };
 
 export const Form: Story = {
@@ -71,7 +64,7 @@ export const Form: Story = {
     expect(canvas.getByText(/Measurement ID/gi)).toBeTruthy();
     expect(canvas.getByText(/Description/gi)).toBeTruthy();
     expect(canvas.getByText(/Spreadsheet/gi)).toBeTruthy();
-  },
+  }
 };
 
 export const ErrorMessage: Story = {
@@ -86,5 +79,5 @@ export const ErrorMessage: Story = {
     const errorDialog = document.querySelector('.error-dialog') as HTMLElement;
     const errorText = await within(errorDialog).findByText(/Error/i);
     expect(errorText).toBeTruthy();
-  },
+  }
 };

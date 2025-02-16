@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, computed, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReportDetailPanelsComponent } from '../../components/report-detail-panels/report-detail-panels.component';
@@ -26,6 +26,9 @@ export class DetailViewComponent implements OnInit {
   imageBlob = signal<Blob | null>(null);
   videoBlob = signal<Blob | null>(null);
 
+  imageBlob$ = computed(() => this.imageBlob());
+  videoBlob$ = computed(() => this.videoBlob());
+
   constructor(
     private router: Router,
     private route: ActivatedRoute
@@ -33,12 +36,14 @@ export class DetailViewComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.data.subscribe((data) => {
-      const reportDetails = data['reportDetails'];
-      const video = data['video'];
-      const image = data['image'];
-      this.reportDetails.set(reportDetails);
-      this.videoBlob.set(video);
-      this.imageBlob.set(image);
+      const reportDetailsArray = data['reportDetails'];
+      // Flatten the array of objects into a single object
+      const flattenedReportDetails = Object.assign({}, ...reportDetailsArray);
+      const video = data['video'] as { blob: Blob | null };
+      const image = data['image'] as { blob: Blob | null };
+      this.reportDetails.set(flattenedReportDetails);
+      this.videoBlob.set(video.blob);
+      this.imageBlob.set(image.blob);
     });
   }
 

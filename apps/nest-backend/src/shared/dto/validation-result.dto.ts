@@ -15,7 +15,11 @@ export class ValidationResultDto implements ValidationResult {
 
   @ApiProperty({ description: 'A message describing the validation result' })
   @IsString()
-  message!: string;
+  message?: string;
+
+  @ApiProperty({ description: 'The name of the event being validated' })
+  @IsString()
+  eventName!: string;
 
   @ApiProperty({
     description: 'The data layer specification used for validation'
@@ -27,7 +31,7 @@ export class ValidationResultDto implements ValidationResult {
     required: false
   })
   @IsOptional()
-  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayer!: StrictDataLayerEvent | BaseDataLayerEvent;
 
   constructor(partial: Partial<ValidationResultDto> = {}) {
     Object.assign(this, partial);

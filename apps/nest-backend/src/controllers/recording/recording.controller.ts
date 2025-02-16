@@ -1,43 +1,31 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Param,
+  Post,
+  Put
+} from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { Recording } from '@utils';
 import { ProjectRecordingService } from '../../features/project-agent/project-recording/project-recording.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
+import { ProjectFacadeRepositoryService } from '../../features/repository/project-facade/project-facade-repository.service';
+import { RecordingRepositoryService } from '../../core/repository/recording/recording-repository.service';
 
 @Controller('recordings')
 export class RecordingController {
-  constructor(private projectRecordingService: ProjectRecordingService) {}
+  constructor(
+    private projectRecordingService: ProjectRecordingService,
+    private projectFacadeRepositoryService: ProjectFacadeRepositoryService,
+    private recordingRepositoryService: RecordingRepositoryService
+  ) {}
 
-  @ApiOperation({
-    summary: 'get project recordings',
-    description:
-      'Get all recordings for a project. The project is identified by the projectSlug.'
-  })
-  @ApiParam({
-    name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.'
-  })
   @Get(':projectSlug')
   @Log()
-  async getProjectRecordings(@Param('projectSlug') projectSlug: string) {
-    return await this.projectRecordingService.getProjectRecordings(projectSlug);
-  }
-
-  @ApiOperation({
-    summary: 'get project recording names',
-    description:
-      'Get all recording names for a project. The project is identified by the projectSlug.'
-  })
-  @ApiParam({
-    name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.'
-  })
-  @Get(':projectSlug/names')
-  @Log()
-  async getProjectRecordingNames(@Param('projectSlug') projectSlug: string) {
-    return await this.projectRecordingService.getProjectRecordingNames(
-      projectSlug
-    );
+  async getRecordings(@Param('projectSlug') projectSlug: string) {
+    return await this.recordingRepositoryService.listByProject(projectSlug);
   }
 
   @ApiOperation({
@@ -59,39 +47,9 @@ export class RecordingController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
   ) {
-    return await this.projectRecordingService.getRecordingDetails(
+    return await this.recordingRepositoryService.getRecordingDetails(
       projectSlug,
       eventId
-    );
-  }
-
-  @ApiOperation({
-    summary: 'add recording',
-    description:
-      'Add a recording to an event. The project is identified by the projectSlug and the event by the eventId.'
-  })
-  @ApiParam({
-    name: 'projectSlug',
-    description: 'The name of the project to which the event belongs.'
-  })
-  @ApiParam({
-    name: 'eventId',
-    description: 'The name of the event to which the recording belongs.'
-  })
-  @ApiBody({
-    description: 'The recording to be added to the event.'
-  })
-  @Post(':projectSlug/:eventId')
-  @Log()
-  async addRecording(
-    @Param('projectSlug') projectSlug: string,
-    @Param('eventId') eventId: string,
-    @Body() recording: Recording
-  ) {
-    return await this.projectRecordingService.addRecording(
-      projectSlug,
-      eventId,
-      recording
     );
   }
 
@@ -118,10 +76,9 @@ export class RecordingController {
     @Param('eventId') eventId: string,
     @Body() recording: Recording
   ) {
-    return await this.projectRecordingService.updateRecording(
-      projectSlug,
-      eventId,
-      recording
-    );
+    return await this.recordingRepositoryService.update(projectSlug, eventId, {
+      title: recording.title,
+      steps: recording.steps
+    });
   }
 }

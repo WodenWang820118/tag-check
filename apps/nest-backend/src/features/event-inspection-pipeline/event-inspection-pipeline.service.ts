@@ -1,50 +1,58 @@
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { Injectable, Logger } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
-import {
-  OutputValidationResult,
-  ValidationResult,
-  extractEventNameFromId
-} from '@utils';
-import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { InspectorSingleEventService } from '../../features/inspector/inspector-single-event.service';
-import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
-import { TestResultService } from '../test-result/test-result.service';
-import { TestResult } from '../../shared/entity/test-result.entity';
-import { ImageResultService } from '../test-result/image-result.service';
+import {
+  CreateTestEventDetailDto,
+  EventInspectionPresetDto,
+  TestEventDetailResponseDto,
+  TestEventEntity,
+  TestImageResponseDto,
+  UpdateTestEventDto
+} from '../../shared';
+import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
+import { TestEventDetailRepositoryService } from '../../core/repository/test-event/test-event-detail-repository.service';
+import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
+import { ValidationResult } from '@utils';
+
 @Injectable()
 export class EventInspectionPipelineService {
   private readonly logger = new Logger(EventInspectionPipelineService.name);
+
   constructor(
     private readonly inspectorSingleEventService: InspectorSingleEventService,
-    private readonly projectAbstractReportService: ProjectAbstractReportService,
-    private readonly testResultService: TestResultService,
-    private readonly imageResultService: ImageResultService
+    private readonly testEventRepositoryService: TestEventRepositoryService,
+    private readonly testEventDetailRepositoryService: TestEventDetailRepositoryService,
+    private readonly testImageRepositoryService: TestImageRepositoryService
   ) {}
 
   async singleEventInspectionRecipe(
     page: Page,
     projectSlug: string,
     eventId: string,
-    headless: string,
     measurementId: string,
     credentials: Credentials,
     captureRequest: string,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     this.logger.log('Inspecting single event');
+
+    // Retrieve the test event once since it is needed in both paths.
+    const testEvent = await this.getTestEvent(projectSlug, eventId);
+
     try {
+      // Call the inspector service to get the inspection result.
       const result = await this.inspectorSingleEventService.inspectDataLayer(
         page,
         projectSlug,
         eventId,
-        headless,
         measurementId,
         credentials,
         captureRequest,
         eventInspectionPresetDto.application
       );
       this.logger.debug('Result:', JSON.stringify(result, null, 2));
+
+      // Map service response to the output data format.
       const data = [
         {
           dataLayerResult: result.dataLayerResult,
@@ -53,85 +61,120 @@ export class EventInspectionPipelineService {
           destinationUrl: result.destinationUrl
         }
       ];
-
       this.logger.debug('Data:', JSON.stringify(data, null, 2));
 
-      const timestamp = new Date().getTime();
-      const eventName = extractEventNameFromId(eventId);
+      // Build detail DTO for a passed event.
+      const updatedDetail = this.buildTestEventDetail(result);
+      const testEventDetailDto =
+        await this.testEventDetailRepositoryService.create(
+          testEvent,
+          updatedDetail
+        );
 
-      // The ID and createdAt will be handled by the database
-      const testResult: Partial<TestResult> = {
-        projectSlug: projectSlug,
-        eventId: eventId,
-        testName: `${eventName}_${timestamp}`,
-        eventName: eventName,
-        passed: result.dataLayerResult.passed,
-        requestPassed: result.requestCheckResult.passed,
-        rawRequest: result.rawRequest,
-        message: result.dataLayerResult.message || 'failed',
-        destinationUrl: result.destinationUrl
-      };
-      this.logger.debug('Test Result:', JSON.stringify(testResult, null, 2));
-      await this.testResultService.create(testResult);
-      await this.writeAbstractReport(result, projectSlug, eventId);
+      const testImageDto = await this.buildTestImage(
+        page,
+        projectSlug,
+        eventId
+      );
+      await this.updateLatestTestEvent(
+        testEvent,
+        testEventDetailDto,
+        testImageDto
+      );
       return data;
     } catch (error) {
-      this.logger.error(error);
-      // TODO: get test name from database for users to locate the failed test
-      await this.testResultService.create({
-        projectSlug: projectSlug,
-        eventId: eventId,
-        testName: extractEventNameFromId(eventId),
-        eventName: extractEventNameFromId(eventId),
-        passed: false,
-        requestPassed: false,
-        rawRequest: '',
-        message: `${error}`,
-        destinationUrl: ''
-      });
+      this.logger.error('Error during event inspection', error);
 
-      const screenshot = await page.screenshot({
-        fullPage: true
-      });
-
-      await this.imageResultService.create({
-        eventId: eventId,
-        imageName: `${projectSlug}_${eventId}`,
-        imageData: screenshot
-      });
+      // Build detail DTO for a failed event.
+      const updatedDetail = this.buildFallbackTestEventDetail();
+      const testEventDetailDto =
+        await this.testEventDetailRepositoryService.create(
+          testEvent,
+          updatedDetail
+        );
+      const testImageDto = await this.buildTestImage(
+        page,
+        projectSlug,
+        eventId
+      );
+      await this.updateLatestTestEvent(
+        testEvent,
+        testEventDetailDto,
+        testImageDto
+      );
     }
   }
 
-  private async writeAbstractReport(
-    result: {
-      dataLayerResult: ValidationResult;
-      destinationUrl: string;
-      rawRequest: string;
-      requestCheckResult: ValidationResult;
-    },
-    projectSlug: string,
-    eventId: string
-  ) {
-    const eventName = extractEventNameFromId(eventId);
+  /**
+   * Retrieves the test event based on projectSlug and eventId.
+   */
+  private async getTestEvent(projectSlug: string, eventId: string) {
+    return await this.testEventRepositoryService.getEntityBySlugAndEventId(
+      projectSlug,
+      eventId
+    );
+  }
 
-    const outputValidationResult: Partial<OutputValidationResult> = {
-      eventName: eventName,
+  /**
+   * Builds a DTO for saving the event detail on successful inspection.
+   */
+  private buildTestEventDetail(result: {
+    dataLayerResult: ValidationResult;
+    destinationUrl: string;
+    rawRequest: string;
+    requestCheckResult: ValidationResult;
+  }): CreateTestEventDetailDto {
+    return {
       passed: result.dataLayerResult.passed,
       requestPassed: result.requestCheckResult.passed,
       rawRequest: result.rawRequest,
-      message: result.dataLayerResult.message,
-      incorrectInfo: result.dataLayerResult.incorrectInfo,
-      reformedDataLayer: result.requestCheckResult.dataLayer,
-      dataLayer: result.dataLayerResult.dataLayer,
-      dataLayerSpec: result.dataLayerResult.dataLayerSpec,
       destinationUrl: result.destinationUrl,
-      createdAt: new Date()
+      dataLayer: result.dataLayerResult.dataLayer,
+      reformedDataLayer: {} // placeholder for additional processing if needed
     };
+  }
 
-    await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
-      projectSlug,
-      eventId,
-      outputValidationResult
+  /**
+   * Builds a fallback DTO when an error occurs during inspection.
+   */
+  private buildFallbackTestEventDetail(): CreateTestEventDetailDto {
+    return {
+      passed: false,
+      requestPassed: false,
+      rawRequest: '',
+      destinationUrl: '',
+      dataLayer: {},
+      reformedDataLayer: {}
+    };
+  }
+
+  private async buildTestImage(
+    page: Page,
+    projectSlug: string,
+    eventId: string
+  ) {
+    const screenshot = await page.screenshot({ fullPage: true });
+    return await this.testImageRepositoryService.create(projectSlug, eventId, {
+      imageName: `screenshot.png`,
+      imageData: screenshot
+    });
+  }
+
+  private async updateLatestTestEvent(
+    testEvent: TestEventEntity,
+    testEventDetail: TestEventDetailResponseDto,
+    testImage: TestImageResponseDto
+  ) {
+    // Logger.debug('Test image:', testImage);
+    const updatedInfo: UpdateTestEventDto = {
+      latestTestEventDetailId: testEventDetail.id,
+      latestTestImageId: testImage.id
+    };
+    Logger.debug('Updated info:', JSON.stringify(updatedInfo, null, 2));
+    const updatedEvent = await this.testEventRepositoryService.updateTestEvent(
+      testEvent.id,
+      updatedInfo
     );
+    Logger.debug('Updated event:', JSON.stringify(updatedEvent, null, 2));
   }
 }

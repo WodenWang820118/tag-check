@@ -7,19 +7,27 @@ import {
   reportDetailResolver,
   imageResolver,
   videoResolver,
-  projectReportResolver,
-  reportNamesResolver
+  projectReportResolver
 } from './resolvers/report.resolver';
 import {
   getFileReportResolver,
   getProjectSlugResolver
 } from './resolvers/file-report.resolver';
 import { getProjectFormSettingsResolver } from './resolvers/project-form-settings.resolver';
-import { recordingsResolver } from './resolvers/recording.resolver';
+import {
+  recordingDetailResolver,
+  recordingResolver
+} from './resolvers/recording.resolver';
+import {
+  reportDetailEventIdResolver,
+  reportDetailSlugResolver,
+  specResolver
+} from './resolvers/spec.resolver';
 
 export const PROJECT_ROUTES: Routes = [
   {
     path: '',
+    runGuardsAndResolvers: 'always',
     loadComponent: () =>
       import('./views/project-view/project-view.component').then(
         (m) => m.ProjectViewComponent
@@ -28,8 +36,8 @@ export const PROJECT_ROUTES: Routes = [
       projectSetting: projectSettingResolver,
       projectInfo: projectInfoResolver,
       projectReport: projectReportResolver,
-      reportNames: reportNamesResolver,
-      recordings: recordingsResolver
+      recordings: recordingResolver,
+      projectSlug: getProjectSlugResolver
     },
     children: [
       {
@@ -121,7 +129,11 @@ export const PROJECT_ROUTES: Routes = [
         resolve: {
           reportDetails: reportDetailResolver,
           image: imageResolver,
-          video: videoResolver
+          video: videoResolver,
+          spec: specResolver,
+          recording: recordingDetailResolver,
+          projectSlug: reportDetailSlugResolver,
+          eventId: reportDetailEventIdResolver
         }
       }
     ]

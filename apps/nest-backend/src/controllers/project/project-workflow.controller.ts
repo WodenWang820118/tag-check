@@ -1,36 +1,16 @@
-import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ProjectWorkFlowControllerService } from './project-workflow-controller.service';
-import { ProjectMetadataService } from '../../features/project-agent/project-metadata/project-metadata.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
+import { CreateProjectDto } from '../../shared';
+import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 
 @Controller('projects')
 export class ProjectWorkFlowController {
   constructor(
-    private projectMetadataService: ProjectMetadataService,
+    private projectRepositoryService: ProjectRepositoryService,
     private projectWorkFlowControllerService: ProjectWorkFlowControllerService
   ) {}
-
-  @ApiOperation({
-    summary: 'set and create a application root folder',
-    description:
-      'This endpoint sets and creates a root folder for the application. \
-      After setup, we can create projects and run tests.'
-  })
-  @ApiQuery({
-    name: 'rootProjectPath',
-    description: 'The absolute path to the root folder of the application.'
-  })
-  @ApiResponse({ status: 200, description: 'Create a application root folder' })
-  @Get('/set-root-project-folder')
-  @Log()
-  async setRootProjectFolder(
-    @Query('rootProjectPath') rootProjectPath: string
-  ) {
-    await this.projectWorkFlowControllerService.setRootProjectFolder(
-      rootProjectPath
-    );
-  }
 
   @ApiOperation({
     summary: 'init a project',
@@ -51,15 +31,14 @@ export class ProjectWorkFlowController {
   @Log()
   async initProject(
     @Param('projectSlug') projectSlug: string,
-    @Body() settings: any
+    @Body() settings: CreateProjectDto
   ) {
-    await this.projectWorkFlowControllerService.initProject(
+    return await this.projectWorkFlowControllerService.initProject(
       projectSlug,
       settings
     );
   }
 
-  // if it exists, the shared service will update and use it
   @ApiOperation({
     summary: 'set and select a current project',
     description: 'Select and cache current project.'
@@ -80,6 +59,6 @@ export class ProjectWorkFlowController {
   @Get()
   @Log()
   async getProjects() {
-    return await this.projectMetadataService.getProjectsMetadata();
+    return await this.projectRepositoryService.list();
   }
 }

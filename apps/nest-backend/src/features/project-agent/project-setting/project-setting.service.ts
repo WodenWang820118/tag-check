@@ -2,8 +2,19 @@
 import { Injectable } from '@nestjs/common';
 import { FileService } from '../../../infrastructure/os/file/file.service';
 import { FilePathService } from '../../../infrastructure/os/path/file-path/file-path.service';
-import { CookieData, LocalStorageData, Setting } from '@utils';
+import {
+  ApplicationSetting,
+  ApplicationSettingSchema,
+  AuthenticationSchema,
+  AuthenticationSetting,
+  BrowserSetting,
+  BrowserSettingSchema,
+  CookieData,
+  LocalStorageData,
+  ProjectSetting
+} from '@utils';
 
+// DEPRECATED
 @Injectable()
 export class ProjectSettingService {
   constructor(
@@ -24,11 +35,12 @@ export class ProjectSettingService {
 
   async updateSettings(
     projectSlug: string,
-    updateFn: (currentSettings: Setting) => Setting
+    updateFn: (currentSettings: ProjectSetting) => ProjectSetting
   ) {
     const filePath =
       await this.filePathService.getProjectSettingFilePath(projectSlug);
-    const currentSettings: Setting = this.fileService.readJsonFile(filePath);
+    const currentSettings: ProjectSetting =
+      this.fileService.readJsonFile(filePath);
     const updatedSettings = updateFn(currentSettings);
     this.fileService.writeJsonFile(filePath, updatedSettings);
     return updatedSettings;
@@ -37,17 +49,21 @@ export class ProjectSettingService {
   async updateProjectSettings(
     projectSlug: string,
     section: string,
-    partialSettings: Partial<Setting>
+    partialSettings:
+      | Partial<AuthenticationSchema>
+      | ApplicationSettingSchema
+      | Partial<BrowserSettingSchema>
   ) {
     switch (section) {
       case 'application':
-        return this.updateApplicationSettings(projectSlug, partialSettings);
+        return this.updateApplicationSettings(
+          projectSlug,
+          partialSettings as ApplicationSettingSchema
+        );
       case 'browser':
         return this.updateBrowserSettings(projectSlug, partialSettings);
       case 'gtm':
         return this.updateGtmSettings(projectSlug, partialSettings);
-      case 'preventNavigationEvents':
-        return this.updatePreventNavigationEvents(projectSlug, partialSettings);
       case 'authentication':
         return this.updateAuthenticationSettings(projectSlug, partialSettings);
       case 'others':
@@ -59,68 +75,37 @@ export class ProjectSettingService {
 
   async updateAuthenticationSettings(
     projectSlug: string,
-    settings: Partial<Setting>
+    settings: Partial<AuthenticationSchema>
   ) {
     return this.updateSettings(projectSlug, (currentSettings) => ({
       ...currentSettings,
       authentication: {
         username:
-          settings.authentication?.username ||
-          currentSettings.authentication.username,
+          settings.username || currentSettings.authenticationSettings.username,
         password:
-          settings.authentication?.password ||
-          currentSettings.authentication.password
+          settings.password || currentSettings.authenticationSettings.password
       }
     }));
   }
 
-  async updatePreventNavigationEvents(
+  async updateGtmSettings(
     projectSlug: string,
-    partialSettings: Partial<Setting>
+    settings: Partial<
+      AuthenticationSchema | ApplicationSettingSchema | BrowserSettingSchema
+    >
   ) {
-    return this.updateSettings(projectSlug, (currentSettings) => {
-      const preventNavigationEvents = currentSettings.preventNavigationEvents;
-      const newEvents = partialSettings.preventNavigationEvents;
-
-      if (!newEvents) {
-        return currentSettings;
-      }
-
-      // Create a copy of the current preventNavigationEvents to modify
-      let newSettings: string[] = [...preventNavigationEvents];
-
-      for (const receivedEvent of newEvents) {
-        const index = newSettings.indexOf(receivedEvent);
-
-        if (index > -1) {
-          // Event is found, remove it (toggle behavior)
-          newSettings.splice(index, 1);
-        } else {
-          // Event is new, add it to the array
-          newSettings.push(receivedEvent);
-        }
-      }
-
-      // If original array was empty, just return the new events
-      if (!preventNavigationEvents.length) {
-        newSettings = [...newEvents];
-      }
-
-      return {
-        ...currentSettings,
-        preventNavigationEvents: newSettings
-      };
-    });
-  }
-
-  async updateGtmSettings(projectSlug: string, settings: Partial<Setting>) {
     return this.updateSettings(projectSlug, (currentSettings) => ({
       ...currentSettings,
       ...settings
     }));
   }
 
-  async updateGeneralSettings(projectSlug: string, settings: Partial<Setting>) {
+  async updateGeneralSettings(
+    projectSlug: string,
+    settings: Partial<
+      AuthenticationSetting | ApplicationSetting | BrowserSetting
+    >
+  ) {
     return this.updateSettings(projectSlug, (currentSettings) => ({
       ...currentSettings,
       ...settings
@@ -129,7 +114,7 @@ export class ProjectSettingService {
 
   async updateBrowserSettings(
     projectSlug: string,
-    rawSettings: Partial<Setting>
+    rawSettings: Partial<BrowserSettingSchema>
   ) {
     const settingBox = rawSettings;
 
@@ -142,7 +127,7 @@ export class ProjectSettingService {
 
   async updateApplicationSettings(
     projectSlug: string,
-    settings: Partial<Setting>
+    settings: ApplicationSetting
   ) {
     // Helper function for safe parsing
     const safeJsonParse = (value: string) => {
@@ -156,7 +141,7 @@ export class ProjectSettingService {
     };
 
     // Safely parse localStorage data
-    const localStorageData = settings.application?.localStorage.data.map(
+    const localStorageData = settings.localStorage.data.map(
       (item: LocalStorageData) => ({
         key: item.key,
         value: safeJsonParse(item.value)
@@ -164,12 +149,10 @@ export class ProjectSettingService {
     );
 
     // Safely parse cookie data
-    const cookieData = settings.application?.cookie.data.map(
-      (item: CookieData) => ({
-        key: item.key,
-        value: safeJsonParse(item.value)
-      })
-    );
+    const cookieData = settings.cookie.data.map((item: CookieData) => ({
+      key: item.key,
+      value: safeJsonParse(item.value)
+    }));
 
     return this.updateSettings(projectSlug, (currentSettings) => ({
       ...currentSettings,
@@ -180,7 +163,7 @@ export class ProjectSettingService {
     }));
   }
 
-  async createProjectSettings(projectSlug: string, settings: Setting) {
+  async createProjectSettings(projectSlug: string, settings: ProjectSetting) {
     const filePath =
       await this.filePathService.getProjectSettingFilePath(projectSlug);
     this.fileService.writeJsonFile(filePath, settings);

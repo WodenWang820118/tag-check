@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../../../infrastructure/os/file/file.service';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
-import { FullValidationResultService } from '../../test-result/full-validation-result.service';
+import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 
 @Injectable()
 export class ProjectReportService {
@@ -11,12 +11,12 @@ export class ProjectReportService {
     private readonly fileService: FileService,
     private readonly folderService: FolderService,
     private readonly folderPathService: FolderPathService,
-    private readonly fullValidationResultService: FullValidationResultService
+    private readonly testEventRepositoryService: TestEventRepositoryService
   ) {}
 
   async getProjectEventReports(projectSlug: string) {
     const reports =
-      await this.fullValidationResultService.getReports(projectSlug);
+      await this.testEventRepositoryService.listReports(projectSlug);
     return {
       projectSlug: projectSlug,
       reports: reports
@@ -31,5 +31,19 @@ export class ProjectReportService {
 
   async downloadXlsxReport(projectSlug: string, eventId: string) {
     return await this.fileService.getEventReport(projectSlug, eventId);
+  }
+
+  async createEventReportFolder(projectSlug: string, eventId: string) {
+    try {
+      const eventFolderPath =
+        await this.folderPathService.getInspectionEventFolderPath(
+          projectSlug,
+          eventId
+        );
+      this.folderService.createFolder(eventFolderPath);
+    } catch (error) {
+      Logger.error(error);
+      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

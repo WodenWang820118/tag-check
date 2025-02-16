@@ -59,8 +59,8 @@ export type StrictDataLayerEvent = {
 export type ValidationResult = {
   passed: boolean;
   message?: string;
-  incorrectInfo?: string;
-  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
+  eventName: string;
+  dataLayer: StrictDataLayerEvent | BaseDataLayerEvent;
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
 };
 
@@ -73,9 +73,7 @@ export type RequestValidationResult = {
 
 export type OutputValidationResult = {
   eventId: string;
-  eventName: string;
   testName: string;
-  rawRequest: string;
   destinationUrl: string;
   createdAt?: Date;
 } & ValidationResult &
@@ -88,3 +86,13 @@ export type ValidationStrategy = {
     spec: StrictDataLayerEvent
   ): ValidationResult;
 };
+
+// export type TestDataLayer = {
+//   dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
+//   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
+// };
+
+// export type TestDataLayerSchema = {
+//   id: number;
+// } & TestDataLayer &
+//   Auditable;

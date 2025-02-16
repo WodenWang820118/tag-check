@@ -44,11 +44,8 @@ export class SingleEventInspectionService {
     }
 
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
-      projectSlug,
-      eventId,
       headless,
       measurementId,
-      credentials,
       eventInspectionPresetDto,
       this.abortController.signal
     );
@@ -70,7 +67,6 @@ export class SingleEventInspectionService {
           page,
           projectSlug,
           eventId,
-          headless,
           measurementId,
           credentials,
           captureRequest,

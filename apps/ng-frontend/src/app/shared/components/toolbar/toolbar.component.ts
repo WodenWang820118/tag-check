@@ -1,5 +1,5 @@
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ProjectInfo, Setting } from '@utils';
+import { Project, ProjectSetting } from '@utils';
 import { Component, effect, input, model, output, signal } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -38,8 +38,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 export class ToolbarComponent {
   // Convert inputs to signal inputs
   snav = input<MatSidenav | undefined>();
-  settings = input.required<Setting | undefined>();
-  projects = input.required<ProjectInfo[] | undefined>();
+  settings = input.required<ProjectSetting | undefined>();
+  projects = input.required<Project[] | undefined>();
   params = toSignal(this.route.params, {
     initialValue: { projectSlug: '' }
   });

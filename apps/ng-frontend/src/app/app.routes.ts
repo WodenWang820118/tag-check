@@ -1,4 +1,8 @@
 import { Route } from '@angular/router';
+import {
+  ProjectSlugResolver,
+  ReportResolver
+} from './resolvers/report.resolver';
 
 export const APP_ROUTES: Route[] = [
   {
@@ -9,7 +13,11 @@ export const APP_ROUTES: Route[] = [
   {
     path: 'projects/:projectSlug',
     loadChildren: () =>
-      import('./modules/project/routes').then((m) => m.PROJECT_ROUTES)
+      import('./modules/project/routes').then((m) => m.PROJECT_ROUTES),
+    resolve: {
+      reports: ReportResolver,
+      projectSlug: ProjectSlugResolver
+    }
   },
   {
     path: '',

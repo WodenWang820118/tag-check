@@ -1,12 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { FileService } from '../file/file.service';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
-import { Setting } from '@utils';
+import { ProjectSetting } from '@utils';
 
 @Injectable()
 export class ProjectService {
@@ -20,7 +17,7 @@ export class ProjectService {
   async getProjectSettings(projectSlug: string) {
     const settingsFilePath =
       await this.filePathService.getProjectSettingFilePath(projectSlug);
-    return this.fileService.readJsonFile<Setting>(settingsFilePath);
+    return this.fileService.readJsonFile<ProjectSetting>(settingsFilePath);
   }
 
   async getProjectsMetadata() {

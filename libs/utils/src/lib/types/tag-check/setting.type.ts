@@ -1,25 +1,13 @@
+import { Auditable } from './auditable.type';
+import { Project } from './project.type';
+
 export type ProjectSetting = {
-  projectSlug: string;
-  settings: Setting;
-};
+  authenticationSettings: AuthenticationSetting;
+  browserSettings: BrowserSetting;
+  applicationSettings: ApplicationSetting;
+} & Project;
 
-export type Setting = {
-  rootProject: string;
-  projectName: string;
-  projectDescription: string;
-  measurementId: string;
-  projectSlug: string;
-  googleSpreadsheetLink: string;
-  gtm: Gtm;
-  version: string;
-  preventNavigationEvents: string[];
-  application: Application;
-  browser: string[];
-  headless: boolean;
-  authentication: Authentication;
-};
-
-export type Authentication = {
+export type AuthenticationSetting = {
   username: string;
   password: string;
 };
@@ -53,3 +41,28 @@ export type CookieData = {
   key: string;
   value: string;
 };
+
+export type AuthenticationSchema = {
+  id: number;
+} & AuthenticationSetting &
+  Auditable;
+
+export type BrowserSetting = {
+  browser: string[];
+  headless: boolean;
+};
+
+export type BrowserSettingSchema = {
+  id: number;
+} & BrowserSetting &
+  Auditable;
+
+export type ApplicationSetting = {
+  localStorage: LocalStorage;
+  cookie: Cookie;
+  gtm: Gtm;
+};
+
+export type ApplicationSettingSchema = {
+  id: number;
+} & ApplicationSetting;

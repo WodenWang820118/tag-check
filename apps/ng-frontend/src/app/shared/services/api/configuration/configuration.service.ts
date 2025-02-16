@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, catchError, of } from 'rxjs';
-import { Configuration } from '@utils';
+import { SysConfiguration } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 /**
  * This service will communicate with SQLite3 databases
@@ -17,17 +17,19 @@ export class ConfigurationService {
   constructor(private http: HttpClient) {}
 
   getConfigurations() {
-    return this.http.get<Configuration[]>(environment.configurationApiUrl).pipe(
-      catchError((error) => {
-        console.error(error);
-        return of([]);
-      })
-    );
+    return this.http
+      .get<SysConfiguration[]>(environment.configurationApiUrl)
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of([]);
+        })
+      );
   }
 
   getConfiguration(name: string) {
     return this.http
-      .get<Configuration>(`${environment.configurationApiUrl}/${name}`)
+      .get<SysConfiguration>(`${environment.configurationApiUrl}/${name}`)
       .pipe(
         catchError((error) => {
           console.error(error);
@@ -47,7 +49,7 @@ export class ConfigurationService {
       );
   }
 
-  createConfiguration(configuration: Configuration) {
+  createConfiguration(configuration: SysConfiguration) {
     return this.http
       .post(`${environment.configurationApiUrl}/create`, configuration)
       .pipe(

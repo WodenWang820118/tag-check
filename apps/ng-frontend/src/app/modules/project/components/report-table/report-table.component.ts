@@ -1,11 +1,5 @@
 import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  signal,
-  viewChild
-} from '@angular/core';
+import { Component, DestroyRef, OnInit, viewChild } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -45,7 +39,6 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
   styleUrls: ['./report-table.component.scss']
 })
 export class ReportTableComponent implements OnInit {
-  readonly preventNavigationEvents = signal<string[]>([]);
   private readonly paginator = viewChild<MatPaginator>(MatPaginator);
   private readonly sort = viewChild<MatSort>(MatSort);
 
@@ -56,7 +49,7 @@ export class ReportTableComponent implements OnInit {
     private facade: ReportTableFacadeService,
     private tableSortService: TableSortService
   ) {}
-
+  // TODO: retrieve the pass or not information from the test event details
   ngOnInit() {
     const paginator = this.paginator();
     const sort = this.sort();
@@ -64,6 +57,7 @@ export class ReportTableComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .pipe(
         tap((data) => {
+          console.warn('data: ', data);
           if (paginator && sort)
             this.facade.initializeData(paginator, sort, data);
         })

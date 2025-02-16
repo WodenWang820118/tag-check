@@ -1,11 +1,31 @@
 // test-db.config.ts
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { TestResult } from '../src/shared/entity/test-result.entity';
+import {
+  ApplicationSettingEntity,
+  AuthenticationSettingEntity,
+  BrowserSettingEntity,
+  ProjectEntity,
+  RecordingEntity,
+  SpecEntity,
+  TestEventDetailEntity,
+  TestEventEntity,
+  TestImageEntity
+} from '../src/shared';
 
 export const testDbConfig: DataSourceOptions = {
   type: 'sqlite',
   database: ':memory:',
-  entities: [TestResult], // Add all your entities here
+  entities: [
+    TestEventEntity,
+    TestImageEntity,
+    ProjectEntity,
+    AuthenticationSettingEntity,
+    BrowserSettingEntity,
+    ApplicationSettingEntity,
+    RecordingEntity,
+    SpecEntity,
+    TestEventDetailEntity
+  ], // Add all your entities here
   synchronize: true,
   dropSchema: true,
   logging: false

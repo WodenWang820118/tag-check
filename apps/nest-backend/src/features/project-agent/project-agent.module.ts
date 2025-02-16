@@ -25,8 +25,10 @@ import { ProjectImageModule } from './project-image/project-image.module';
 import { ProjectImageService } from './project-image/project-image.service';
 import { ProjectFileReportService } from './project-file-report/project-file-report.service';
 import { ProjectVideoService } from './project-video/project-video.service';
+import { ProjectFacadeRepositoryModule } from '../repository/project-facade/project-facade-repository.module';
 
 const modules = [
+  ProjectFacadeRepositoryModule,
   ProjectMetadataModule,
   ProjectRecordingModule,
   ProjectReportModule,

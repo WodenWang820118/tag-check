@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { EventInspectionPreset } from '@utils';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of, throwError } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class DataLayerService {
   constructor(private http: HttpClient) {}
@@ -34,7 +34,9 @@ export class DataLayerService {
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
+          return throwError(
+            () => 'Error running data layer inspection: ' + error
+          );
         })
       );
   }

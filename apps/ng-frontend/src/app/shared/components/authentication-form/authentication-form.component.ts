@@ -13,7 +13,7 @@ import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
-import { Setting } from '@utils';
+import { AuthenticationSetting, ProjectSetting } from '@utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -33,7 +33,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   encapsulation: ViewEncapsulation.None
 })
 export class AuthenticationFormComponent implements OnInit {
-  authenticationForm = this.fb.group({
+  authenticationForm = this.fb.nonNullable.group({
     username: [''],
     password: ['']
   });
@@ -50,12 +50,9 @@ export class AuthenticationFormComponent implements OnInit {
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         tap((data) => {
-          const settings = data['projectInfo'].settings;
+          const settings: ProjectSetting = data['projectInfo'];
           if (settings) {
-            this.authenticationForm.patchValue({
-              username: settings.authentication.username,
-              password: settings.authentication.password
-            });
+            this.authenticationForm.patchValue(settings.authenticationSettings);
           }
         })
       )
@@ -68,19 +65,13 @@ export class AuthenticationFormComponent implements OnInit {
         take(1),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
-          console.log(this.authenticationForm.value);
-          console.log(projectSlug);
-
-          const settings: Partial<Setting> = {
-            authentication: {
-              username: this.authenticationForm.value.username as string,
-              password: this.authenticationForm.value.password as string
-            }
+          const settings: Partial<AuthenticationSetting> = {
+            username: this.authenticationForm.getRawValue().username,
+            password: this.authenticationForm.getRawValue().password
           };
 
-          return this.settingsService.updateSettings(
+          return this.settingsService.updateAuthenticationSetting(
             projectSlug,
-            'authentication',
             settings
           );
         }),

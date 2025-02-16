@@ -1,28 +1,28 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { ProjectInfo } from '@utils';
 import { environment } from '../../../../../environments/environment';
 import { catchError } from 'rxjs/internal/operators/catchError';
 import { of } from 'rxjs';
+import { Project, ProjectSchema } from '@utils';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ProjectInfoService {
+export class ProjectService {
   constructor(private http: HttpClient) {}
 
   getProjects() {
-    return this.http.get<ProjectInfo[]>(environment.projectApiUrl).pipe(
+    return this.http.get<ProjectSchema[]>(environment.projectApiUrl).pipe(
       catchError((error) => {
         console.error(error);
-        return of([] as ProjectInfo[]);
+        throw error;
       })
     );
   }
 
   getProject(projectSlug: string) {
     return this.http
-      .get<ProjectInfo>(`${environment.projectApiUrl}/${projectSlug}`)
+      .get<ProjectSchema>(`${environment.projectApiUrl}/${projectSlug}`)
       .pipe(
         catchError((error) => {
           console.error(error);
@@ -31,20 +31,10 @@ export class ProjectInfoService {
       );
   }
 
-  initProject(rootProjectValue: string, settings: any) {
-    const project: ProjectInfo = {
-      rootProject: rootProjectValue,
-      projectName: settings.projectName,
-      projectSlug: settings.projectSlug,
-      projectDescription: settings.projectDescription || '',
-      measurementId: settings.measurementId || '',
-      googleSpreadsheetLink: settings.googleSpreadsheetLink || '',
-      version: settings.version || '1.0'
-    };
-
+  initProject(project: Project) {
     return this.http
-      .post(
-        `${environment.projectApiUrl}/init-project/${settings.projectSlug}`,
+      .post<ProjectSchema>(
+        `${environment.projectApiUrl}/init-project/${project.projectSlug}`,
         project
       )
       .pipe(
@@ -55,10 +45,10 @@ export class ProjectInfoService {
       );
   }
 
-  updateProject(project: ProjectInfo) {
+  updateProject(project: Project) {
     console.log('Updating project: ', project);
     return this.http
-      .put<ProjectInfo>(
+      .put<ProjectSchema>(
         `${environment.projectApiUrl}/${project.projectSlug}`,
         project
       )

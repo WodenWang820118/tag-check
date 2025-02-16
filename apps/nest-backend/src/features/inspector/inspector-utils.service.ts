@@ -4,9 +4,13 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
-  Logger,
+  Logger
 } from '@nestjs/common';
-import { StrictDataLayerEvent, ValidationStrategy } from '@utils';
+import {
+  StrictDataLayerEvent,
+  ValidationResult,
+  ValidationStrategy
+} from '@utils';
 import { STRATEGY_TYPE, ValidationStrategyType } from './utils';
 
 @Injectable()
@@ -31,12 +35,16 @@ export class InspectorUtilsService {
         case ValidationStrategyType.ECOMMERCE:
         case ValidationStrategyType.OLDGA4EVENTS:
           return this.strategy[strategyType].validateDataLayer(dataLayer, spec);
-        default:
-          return {
+        default: {
+          const result: ValidationResult = {
             passed: false,
-            message: "The test didn't pass",
-            dataLayerSpec: spec,
+            message: 'The strategy is not found',
+            eventName: spec.event,
+            dataLayer: {},
+            dataLayerSpec: spec
           };
+          return result;
+        }
       }
     } catch (error) {
       throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);

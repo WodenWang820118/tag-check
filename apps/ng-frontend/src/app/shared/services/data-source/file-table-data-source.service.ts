@@ -1,13 +1,15 @@
 import { DataSource } from '@angular/cdk/collections';
-import { FileReport } from '@utils';
+import { FileReport, IReportDetails, TestImage } from '@utils';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
-export class FileTableDataSourceService extends DataSource<FileReport> {
-  private _dataStream = new BehaviorSubject<FileReport[]>([]);
+export class FileTableDataSourceService extends DataSource<
+  IReportDetails & TestImage
+> {
+  private _dataStream = new BehaviorSubject<(IReportDetails & TestImage)[]>([]);
   private _filterSignal = signal<string>('');
   private _deletedSignal = signal<boolean>(false);
   private _downloadSignal = signal<boolean>(false);
@@ -16,17 +18,17 @@ export class FileTableDataSourceService extends DataSource<FileReport> {
     super();
   }
 
-  connect(): Observable<FileReport[]> {
+  connect(): Observable<(IReportDetails & TestImage)[]> {
     return this._dataStream;
   }
 
   disconnect() {}
 
-  setData(data: FileReport[]) {
+  setData(data: (IReportDetails & TestImage)[]) {
     this._dataStream.next(data);
   }
 
-  getData(): Observable<FileReport[]> {
+  getData(): Observable<(IReportDetails & TestImage)[]> {
     return this._dataStream;
   }
 

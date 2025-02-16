@@ -1,7 +1,7 @@
 import { Component, signal, ViewEncapsulation } from '@angular/core';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { timer } from 'rxjs';
-import { ProjectInfo, ProjectSetting } from '@utils';
+import { IReportDetails, Project, ProjectSetting } from '@utils';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
@@ -20,8 +20,10 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
   encapsulation: ViewEncapsulation.None
 })
 export class ProjectViewComponent {
-  project = signal<ProjectSetting | null>(null);
-  projectInfo = signal<ProjectInfo[]>([]);
+  project = signal<ProjectSetting>({} as ProjectSetting);
+  projectInfo = signal<Project[]>([]);
+  reports = signal<IReportDetails[]>([]);
+  isProjectRoute = signal<boolean>(false);
 
   constructor(
     private route: ActivatedRoute,
@@ -30,8 +32,19 @@ export class ProjectViewComponent {
     this.route.data.subscribe((data) => {
       const projectSettings = data['projectSetting'];
       const projectInfo = data['projectInfo'];
+      const report = data['reports'];
       this.project.set(projectSettings);
       this.projectInfo.set(projectInfo);
+      this.reports.set(report);
+    });
+
+    // Subscribe to route parameters to check if we're in a project route
+    this.route.params.subscribe((params) => {
+      const urlParts = this.router.url.split('/');
+      this.isProjectRoute.set(
+        urlParts.length === 3 && // ['', 'projects', 'projectSlug']
+          urlParts[1] === 'projects'
+      );
     });
   }
 

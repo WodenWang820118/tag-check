@@ -1,21 +1,17 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { StepExecutorService } from './step-executor/step-executor.service';
 import { EventInspectionPresetDto } from '../../../shared/dto/event-inspection-preset.dto';
-import { FileService } from '../../../infrastructure/os/file/file.service';
-import { FilePathService } from '../../../infrastructure/os/path/file-path/file-path.service';
 import { EventsGatewayService } from '../../../core/events-gateway/events-gateway.service';
-import { OperationFile } from '@utils';
+import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
 
 @Injectable()
 export class ActionService {
   private readonly logger = new Logger(ActionService.name);
   constructor(
-    private readonly fileService: FileService,
-    private readonly filePathService: FilePathService,
     private readonly eventsGatewayService: EventsGatewayService,
-    private readonly stepExecutorService: StepExecutorService
+    private readonly stepExecutorService: StepExecutorService,
+    private readonly recordingRepositoryService: RecordingRepositoryService
   ) {}
 
   async performOperation(
@@ -24,18 +20,21 @@ export class ActionService {
     eventId: string,
     application: EventInspectionPresetDto['application']
   ) {
-    const operation = this.fileService.readJsonFile<OperationFile>(
-      await this.filePathService.getOperationFilePath(projectSlug, eventId)
+    const operation = await this.recordingRepositoryService.getRecordingDetails(
+      projectSlug,
+      eventId
     );
-    if (!operation || !operation.steps) return;
+    const steps = operation.steps;
+
+    if (!operation || !steps) return;
 
     let isLastStep = false;
-    const lastStep = operation.steps.length;
+    const lastStep = steps.length;
 
-    for (let i = 0; i < operation.steps.length; i++) {
-      const step = operation.steps[i];
+    for (let i = 0; i < steps.length; i++) {
+      const step = steps[i];
 
-      if (i === operation.steps.length - 1) isLastStep = true;
+      if (i === steps.length - 1) isLastStep = true;
 
       const state = {
         isFirstNavigation: true

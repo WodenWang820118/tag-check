@@ -1,6 +1,5 @@
 import { Controller, Get, Header, Param } from '@nestjs/common';
 import { ProjectVideoService } from '../../features/project-agent/project-video/project-video.service';
-import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 
 @Controller('videos')
 export class VideosController {
@@ -8,8 +7,9 @@ export class VideosController {
 
   @Header('Content-Type', 'video/webm')
   @Header('Content-Disposition', `inline; filename="recording.webm"`)
+  @Header('Cache-Control', 'max-age=300')
+  @Header('Access-Control-Expose-Headers', 'Content-Disposition')
   @Get(':projectSlug/:eventId')
-  @Log()
   async getVideos(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
