@@ -5,10 +5,10 @@ const { composePlugins, withNx } = require('@nx/webpack');
 // const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
 
 // Nx plugins for webpack.
-module.exports = composePlugins(
+const config = composePlugins(
   withNx({
     optimization: true,
-    statsJson: true,
+    statsJson: true
   }),
   (config) => {
     // Update the webpack config as needed here.
@@ -22,6 +22,16 @@ module.exports = composePlugins(
     //     project: 'tag-check-nestjs',
     //   })
     // );
+    config.node = {
+      __dirname: false,
+      __filename: false
+    };
+
+    // Ensure we have proper source maps
+    config.devtool = 'source-map';
+
     return config;
   }
 );
+
+module.exports = config;

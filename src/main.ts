@@ -10,10 +10,11 @@ import * as database from './database';
 import * as frontend from './frontend';
 import { updateElectronApp } from 'update-electron-app';
 import { Database } from 'sqlite3';
+import electronLog from 'electron-log';
 
 updateElectronApp({
   updateInterval: '1 hour',
-  logger: require('electron-log'),
+  logger: electronLog
 }); // additional configuration options available
 
 let server: ChildProcess;
@@ -29,12 +30,19 @@ app.whenReady().then(() => {
     )
   );
 
-  const projectSavingForlder = join(pathUtils.getRootBackendFolderPath(
-    environmentUtils.getEnvironment(),
-    process.resourcesPath
-  ), constants.ROOT_PROJECT_NAME)
+  const projectSavingForlder = join(
+    pathUtils.getRootBackendFolderPath(
+      environmentUtils.getEnvironment(),
+      process.resourcesPath
+    ),
+    constants.ROOT_PROJECT_NAME
+  );
 
-  fileUtils.logToFile(logFilePath, `Project Saving Folder: ${projectSavingForlder}`, 'info');
+  fileUtils.logToFile(
+    logFilePath,
+    `Project Saving Folder: ${projectSavingForlder}`,
+    'info'
+  );
 
   fileUtils.createProjectSavingRootFolder(projectSavingForlder);
   db = database.getDatabase(process.resourcesPath);

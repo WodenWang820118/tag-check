@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ControllerModule } from './controllers/controller.module';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilterModule } from './common/all-exceptions-filter/all-exceptions.filter.module';
 import { AllExceptionsFilter } from './common/all-exceptions-filter/all-exceptions-filter.service';
 import { HealthModule } from './common/health/health.module';
@@ -10,20 +10,34 @@ import { DatabaseConfigService } from './core/database/database.service';
 import { DatabaseConfigModule } from './core/database/database.module';
 import { LoggingInterceptorModule } from './common/logging-interceptor/logging-interceptor.module';
 import { LoggingInterceptor } from './common/logging-interceptor/logging-interceptor.service';
+import { ConfigsModule } from './core/configs/configs.module';
+import { ConfigsService } from './core/configs/configs.service';
 
 @Module({
   imports: [
+    // // Load ConfigModule first as other modules depend on it
+    ConfigModule.forRoot({
+      isGlobal: true // Make configuration globally available
+    }),
+
+    // Core modules
+    ConfigsModule,
     DatabaseConfigModule,
-    AllExceptionsFilterModule,
-    ConfigModule.forRoot(),
-    ControllerModule,
+
+    // TypeORM configuration
     TypeOrmModule.forRootAsync({
       imports: [DatabaseConfigModule],
       useFactory: (databaseConfigService: DatabaseConfigService) =>
         databaseConfigService.getTypeOrmConfig(),
       inject: [DatabaseConfigService]
     }),
+
+    // Feature modules
+    ControllerModule,
     HealthModule,
+
+    // Cross-cutting concerns
+    AllExceptionsFilterModule,
     LoggingInterceptorModule
   ],
   controllers: [],
@@ -33,7 +47,7 @@ import { LoggingInterceptor } from './common/logging-interceptor/logging-interce
       useClass: AllExceptionsFilter
     },
     {
-      provide: 'APP_INTERCEPTOR',
+      provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor
     }
   ]
