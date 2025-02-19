@@ -23,19 +23,23 @@ function createLoadingWindow() {
       height: 200,
       frame: false,
       transparent: true,
-      alwaysOnTop: true,
-      webPreferences: {
-        nodeIntegration: true,
-        preload: join(__dirname, 'preload.js'),
-      },
+      alwaysOnTop: true
     });
     console.log('Loading window created');
-    console.log('MAIN_WINDOW_VITE_DEV_SERVER_URL:', MAIN_WINDOW_VITE_DEV_SERVER_URL);
-    console.log('ANOTHER MAIN_WINDOW_VITE_DEV_SERVER_URL:', join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+    console.log(
+      'MAIN_WINDOW_VITE_DEV_SERVER_URL:',
+      MAIN_WINDOW_VITE_DEV_SERVER_URL
+    );
+    console.log(
+      'ANOTHER MAIN_WINDOW_VITE_DEV_SERVER_URL:',
+      join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
+    );
     if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
       loadingWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
     } else {
-      loadingWindow.loadFile(join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+      loadingWindow.loadFile(
+        join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
+      );
     }
 
     loadingWindow.center();
@@ -65,9 +69,8 @@ function createWindow(resourcesPath: string) {
     height: 900,
     alwaysOnTop: true,
     webPreferences: {
-      nodeIntegration: true,
-      // preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-    },
+      nodeIntegration: true
+    }
   });
 
   try {

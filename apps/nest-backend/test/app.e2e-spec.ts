@@ -11,35 +11,11 @@ import { join } from 'path';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { testDbConfig } from './test-db.config';
 import { DataSource } from 'typeorm';
-import {
-  ApplicationSettingEntity,
-  AuthenticationSettingEntity,
-  BrowserSettingEntity,
-  ProjectEntity,
-  RecordingEntity,
-  SpecEntity,
-  SysConfigurationEntity,
-  TestEventEntity,
-  TestImageEntity,
-  TestEventDetailEntity
-} from '../src/shared';
 import { vi } from 'vitest';
+import { entities } from './common';
 // TODO: run all endoint tests to ensure they are all working
 
 const rootProjectPath = join(__dirname, '..', '..', '..', 'tag_check_projects');
-const testEventEntities = [
-  TestEventEntity,
-  TestEventDetailEntity,
-  TestImageEntity
-];
-
-const projectEntities = [ProjectEntity];
-
-const settingEntities = [
-  ApplicationSettingEntity,
-  AuthenticationSettingEntity,
-  BrowserSettingEntity
-];
 
 describe('App (e2e)', () => {
   let app: INestApplication;
@@ -54,14 +30,7 @@ describe('App (e2e)', () => {
       imports: [
         AppModule,
         TypeOrmModule.forRoot(testDbConfig),
-        TypeOrmModule.forFeature([
-          ...testEventEntities,
-          ...projectEntities,
-          ...settingEntities,
-          RecordingEntity,
-          SpecEntity,
-          SysConfigurationEntity
-        ])
+        TypeOrmModule.forFeature(entities)
       ],
       providers: []
     })
