@@ -22,7 +22,7 @@ let db: Database;
 app.commandLine.appendSwitch('disable-gpu');
 app.commandLine.appendSwitch('use-gl', 'desktop');
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   const logFilePath = join(
     pathUtils.getRootBackendFolderPath(
       environmentUtils.getEnvironment(),
@@ -47,7 +47,7 @@ app.whenReady().then(() => {
   fileUtils.createProjectSavingRootFolder(projectSavingForlder);
   db = database.getDatabase(process.resourcesPath);
 
-  database.initTables(db, process.resourcesPath);
+  await database.initTables(db, process.resourcesPath);
   server = backend.startBackend(process.resourcesPath);
   const loadingWindow = frontend.createLoadingWindow();
   server.once('spawn', async () => {
