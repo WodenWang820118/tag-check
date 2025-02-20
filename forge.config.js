@@ -1,13 +1,11 @@
-const { MakerSquirrel } = require('@electron-forge/maker-squirrel');
-const { MakerDeb } = require('@electron-forge/maker-deb');
-const { MakerRpm } = require('@electron-forge/maker-rpm');
-const { FusesPlugin } = require('@electron-forge/plugin-fuses');
-const { FuseV1Options, FuseVersion } = require('@electron/fuses');
-const { MakerZIP } = require('@electron-forge/maker-zip');
-const {
-  AutoUnpackNativesPlugin,
-} = require('@electron-forge/plugin-auto-unpack-natives');
-const { VitePlugin } = require('@electron-forge/plugin-vite');
+import { MakerSquirrel } from '@electron-forge/maker-squirrel';
+import { MakerDeb } from '@electron-forge/maker-deb';
+import { MakerRpm } from '@electron-forge/maker-rpm';
+import { FusesPlugin } from '@electron-forge/plugin-fuses';
+import { FuseV1Options, FuseVersion } from '@electron/fuses';
+import { MakerZIP } from '@electron-forge/maker-zip';
+import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
+import { VitePlugin } from '@electron-forge/plugin-vite';
 
 const config = {
   packagerConfig: {
@@ -16,13 +14,15 @@ const config = {
     extraResource: [
       './dist/apps/ng-frontend',
       './dist/apps/nest-backend/main.js',
-      './dist/apps/nest-backend/node_modules',
-    ],
+      './dist/apps/nest-backend/node_modules'
+    ]
   },
-  rebuildConfig: {},
+  rebuildConfig: {
+    force: true
+  },
   makers: [
     // new MakerSquirrel({}),
-    new MakerZIP({}, ['darwin', 'linux', 'win32']),
+    new MakerZIP({}, ['darwin', 'linux', 'win32'])
     // new MakerDeb({}),
     // new MakerRpm({}),
   ],
@@ -36,21 +36,21 @@ const config = {
           // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
           entry: 'src/main.ts',
           config: 'vite.main.config.ts',
-          target: 'main',
+          target: 'main'
         },
         {
           entry: 'src/preload.ts',
           config: 'vite.preload.config.ts',
-          target: 'preload',
-        },
+          target: 'preload'
+        }
       ],
       renderer: [
         {
           name: 'main_window',
-          config: 'vite.renderer.config.ts',
-        },
-      ],
-    }),
+          config: 'vite.renderer.config.ts'
+        }
+      ]
+    })
     // Fuses are used to enable/disable various Electron functionality
     // at package time, before code signing the application
     // new FusesPlugin({
@@ -69,12 +69,12 @@ const config = {
       config: {
         repository: {
           owner: 'WodenWang820118',
-          name: 'tag-check',
+          name: 'tag-check'
         },
-        prerelease: false,
-      },
-    },
-  ],
+        prerelease: false
+      }
+    }
+  ]
 };
 
-module.exports = config;
+export default config;

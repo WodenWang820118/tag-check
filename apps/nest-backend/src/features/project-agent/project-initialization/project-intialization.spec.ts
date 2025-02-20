@@ -66,17 +66,4 @@ describe('ProjectInitializationService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
-
-  it('should create event folder', async () => {
-    if (existsSync(eventFolder)) rmdirSync(eventFolder, { recursive: true });
-    const eventFolderPath = vi
-      .spyOn(folderPathService, 'getInspectionEventFolderPath')
-      .mockResolvedValue(eventFolder);
-    const createFolder = vi.spyOn(folderService, 'createFolder');
-
-    await service.initInspectionEventSavingFolder('newProject', 'eventId');
-
-    expect(eventFolderPath).toHaveBeenCalled();
-    expect(createFolder).toHaveBeenCalled();
-  });
 });

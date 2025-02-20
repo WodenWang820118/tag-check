@@ -51,26 +51,25 @@ export class TestEventEntity
   @JoinColumn({ name: 'test_image_id' })
   testImage!: TestImageEntity[];
 
-  @Column({ name: 'event_id', unique: true })
+  @Column({ name: 'event_id', unique: true, type: 'varchar' })
   eventId!: string;
 
-  @Column({ name: 'test_name' })
+  @Column({ name: 'test_name', type: 'varchar' })
   testName!: string;
 
-  @Column({ name: 'event_name' })
+  @Column({ name: 'event_name', type: 'varchar' })
   eventName!: string;
 
-  @Column({ name: 'stop_navigation', nullable: true })
+  @Column({ name: 'stop_navigation', nullable: true, type: 'boolean' })
   stopNavigation?: boolean;
 
-  @Column({ name: 'message', nullable: true })
+  @Column({ name: 'message', nullable: true, type: 'text' })
   message?: string;
 
-  // Foreign keys for latest records (star schema part)
-  @Column({ name: 'latest_test_event_detail_id', nullable: true })
+  @Column({ name: 'latest_test_event_detail_id', nullable: true, type: 'int' })
   latestTestEventDetailId?: number | null;
 
-  @Column({ name: 'latest_test_image_id', nullable: true })
+  @Column({ name: 'latest_test_image_id', nullable: true, type: 'int' })
   latestTestImageId?: number | null;
 
   @OneToOne(() => TestEventDetailEntity)

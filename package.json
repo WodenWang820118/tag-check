@@ -3,7 +3,7 @@
   "version": "1.2.0",
   "main": ".vite/build/main.js",
   "author": "Guan Xin Wang",
-  "description": "A tool to check the data layer of a website",
+  "description": "A tool to verify Google Tag Manager implementations on websites",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -190,6 +190,7 @@
     "nx": "20.0.0",
     "prettier": "^3.3.3",
     "prismjs": "^1.29.0",
+    "reflect-metadata": "^0.2.2",
     "sass": "^1.79.5",
     "sass-loader": "^16.0.2",
     "socket.io-client": "^4.7.5",
@@ -198,9 +199,11 @@
     "storybook": "8.3.6",
     "style-loader": "^4.0.0",
     "supertest": "^7.0.0",
+    "swc-loader": "^0.2.6",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.5.1",
     "ts-node": "10.9.1",
+    "tsc": "^2.0.4",
     "typescript": "5.5.4",
     "unplugin-swc": "^1.5.1",
     "vite": "^5.4.9",
@@ -251,5 +254,5 @@
     "update-electron-app": "^3.0.0",
     "uuid": "^9.0.1"
   },
-  "packageManager": "pnpm@9.12.2"
+  "packageManager": "pnpm@10.14.0"
 }

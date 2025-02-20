@@ -4,13 +4,10 @@ import { builtinModules } from 'module';
 export default defineConfig({
   build: {
     rollupOptions: {
-      external: [
-        'sqlite3',
-        ...builtinModules,
-      ],
+      external: ['sqlite3', ...builtinModules]
     },
     commonjsOptions: {
-      ignoreDynamicRequires: true,
-    },
-  },
+      ignoreDynamicRequires: true
+    }
+  }
 });

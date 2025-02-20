@@ -1,8 +1,10 @@
-import { Database } from 'sqlite3';
+import pkg from 'sqlite3';
 import * as pathUtils from './path-utils';
 import * as environmentUtils from './environment-utils';
 import * as fileUtils from './file-utils';
 import { v4 as uuidv4 } from 'uuid';
+
+const { Database } = pkg;
 
 function getDatabase(resourcesPath: string) {
   const logFilePath = pathUtils.getRootBackendFolderPath(
@@ -23,67 +25,58 @@ function getDatabase(resourcesPath: string) {
   return db;
 }
 
-function initTables(db: Database, resourcesPath: string) {
-  db.serialize(() => {
-    // Create table statement remains unchanged
-    db.run(
-      'CREATE TABLE IF NOT EXISTS configurations (\
-        id TEXT PRIMARY KEY, \
-        title TEXT, \
-        description TEXT, \
-        value TEXT, \
-        createdAt DATE, \
-        updatedAt DATE);'
-    );
+async function initTables(db: any, resourcesPath: string) {
+  return new Promise((resolve, reject) => {
+    db.serialize(async () => {
+      try {
+        // Create table
+        await db.run(`CREATE TABLE IF NOT EXISTS sys_configuration (
+          id TEXT PRIMARY KEY,
+          name TEXT,
+          description TEXT,
+          value TEXT,
+          createdAt DATE,
+          updatedAt DATE
+        )`);
 
-    // Prepare a statement to select the rootProjectPath configuration
-    const selectStmt = db.prepare(
-      'SELECT * FROM configurations WHERE title =?;'
-    );
-    let configExists = false;
-    let configId: any;
-
-    selectStmt.get('rootProjectPath', (err, row) => {
-      if (row) {
-        configExists = true;
-        configId = (row as any).id;
-      }
-
-      // Depending on whether the configuration exists, prepare the appropriate SQL statement
-      const sql = configExists
-        ? 'UPDATE configurations SET value =?, updatedAt =? WHERE id =?;'
-        : 'INSERT INTO configurations (id, title, description, value, createdAt, updatedAt) VALUES (?,?,?,?,?,?);';
-
-      const stmt = db.prepare(sql);
-
-      // Bind values appropriately
-      if (configExists) {
-        stmt.run(
-          pathUtils.getProjectSavingRootFolder(
-            environmentUtils.getEnvironment(),
-            resourcesPath
-          ),
-          new Date(),
-          configId
+        const row = await db.get(
+          'SELECT * FROM sys_configuration WHERE name = ?',
+          ['rootProjectPath']
         );
-      } else {
-        stmt.run(
-          uuidv4(),
-          'rootProjectPath',
-          'Root folder for projects',
-          pathUtils.getProjectSavingRootFolder(
-            environmentUtils.getEnvironment(),
-            resourcesPath
-          ),
-          new Date(),
-          new Date()
-        );
-      }
 
-      stmt.finalize();
+        if (row) {
+          await db.run(
+            'UPDATE sys_configuration SET value = ?, updatedAt = ? WHERE id = ?',
+            [
+              pathUtils.getProjectSavingRootFolder(
+                environmentUtils.getEnvironment(),
+                resourcesPath
+              ),
+              new Date(),
+              row.id
+            ]
+          );
+        } else {
+          await db.run(
+            'INSERT INTO sys_configuration (id, name, description, value, createdAt, updatedAt) VALUES (?,?,?,?,?,?)',
+            [
+              uuidv4(),
+              'rootProjectPath',
+              'Root folder for projects',
+              pathUtils.getProjectSavingRootFolder(
+                environmentUtils.getEnvironment(),
+                resourcesPath
+              ),
+              new Date(),
+              new Date()
+            ]
+          );
+        }
+        resolve({});
+      } catch (error) {
+        reject(error);
+      }
     });
-
-    selectStmt.finalize();
   });
 }
 

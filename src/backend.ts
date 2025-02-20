@@ -25,7 +25,7 @@ function startBackend(resourcesPath: string) {
   const serverPath = join(rootBackendFolderPath, 'main.js');
   const commonEnv = {
     ROOT_PROJECT_PATH: join(rootBackendFolderPath, constants.ROOT_PROJECT_NAME),
-    DATABASE_PATH: join(rootBackendFolderPath, constants.ROOT_DATABASE_NAME),
+    DATABASE_PATH: join(rootBackendFolderPath, constants.ROOT_DATABASE_NAME)
   };
 
   const devCommonEnv = {
@@ -43,32 +43,32 @@ function startBackend(resourcesPath: string) {
       '..',
       '.db',
       constants.ROOT_DATABASE_NAME
-    ),
+    )
   };
 
   switch (environmentUtils.getEnvironment()) {
     case 'dev':
       env = {
         ...devCommonEnv,
-        NODE_ENV: 'dev',
+        NODE_ENV: 'dev'
       };
       break;
     case 'staging':
       env = {
         ...devCommonEnv,
-        NODE_ENV: 'staging',
+        NODE_ENV: 'staging'
       };
       break;
     case 'prod':
       env = {
         ...commonEnv,
-        NODE_ENV: 'prod',
+        NODE_ENV: 'prod'
       };
       break;
     default:
       env = {
         ...commonEnv,
-        NODE_ENV: 'prod',
+        NODE_ENV: 'prod'
       };
       break;
   }
@@ -141,64 +141,65 @@ async function checkIfPortIsOpen(
       resourcesPath
     )
   );
-  await new Promise((resolve) => setTimeout(resolve, 5000)); // await the backend to start
+
+  // Initialize logging
   fileUtils.logToFile(
     logFilePath,
-    `Checking if ports are open: ${urls}`,
+    `Starting port check for: ${urls.join(', ')}`,
     'info'
   );
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    for (const url of urls) {
-      try {
+
+  // Create a function to check a single URL
+  const checkUrl = async (url: string, attempt: number) => {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const responseData = await response.text();
         fileUtils.logToFile(
           logFilePath,
-          `Attempt ${attempt}: Checking port: ${url}`,
+          `Connection successful to ${url}: ${responseData}`,
           'info'
         );
-        const response = await fetch(url);
-
-        console.log('Response status:', response.status);
-
-        const responseData = await response.text();
-        console.log('Response body:', responseData);
-
-        fileUtils.logToFile(logFilePath, responseData, 'info');
-
-        if (response.ok) {
-          console.log('Server is ready');
-          fileUtils.logToFile(
-            logFilePath,
-            `Server is ready: ${responseData}`,
-            'info'
-          );
-          return true; // Port is open
-        } else {
-          console.log(`Server responded with status: ${response.status}`);
-          fileUtils.logToFile(
-            logFilePath,
-            `Server responded with status: ${response.status}`,
-            'warning'
-          );
-        }
-      } catch (error) {
-        console.error(`Attempt ${attempt}: Error connecting to server:`, error);
-        fileUtils.logToFile(
-          logFilePath,
-          `Attempt ${attempt}: ${error.toString()}`,
-          'error'
-        );
+        return true;
       }
+    } catch (error) {
+      fileUtils.logToFile(
+        logFilePath,
+        `Attempt ${attempt} failed for ${url}: ${error.toString()}`,
+        'error'
+      );
+      return false;
+    }
+    return false;
+  };
+
+  // Try all attempts
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    // Check all URLs concurrently
+    const results = await Promise.all(
+      urls.map((url) => checkUrl(url, attempt))
+    );
+
+    // If any URL check succeeded, return true
+    if (results.some((result) => result === true)) {
+      return true;
     }
 
+    // Wait before next attempt
     if (attempt < maxAttempts) {
-      console.log(`Waiting ${timeout}ms before next attempt...`);
       await new Promise((resolve) => setTimeout(resolve, timeout));
     }
   }
 
+  // Close loading window and throw error if all attempts failed
   loadingWindow.close();
   throw new Error(
-    `Failed to connect to the server after ${maxAttempts} attempts`
+    `Failed to connect to any server after ${maxAttempts} attempts`
   );
 }
 

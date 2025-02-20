@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 // import { SpelunkerModule } from 'nestjs-spelunker';
@@ -6,7 +5,13 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigsService } from './core/configs/configs.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger:
+      process.env.NODE_ENV === 'prod'
+        ? ['error', 'warn']
+        : ['error', 'warn', 'log', 'debug']
+  });
+
   const configsService = app.get(ConfigsService);
 
   app.enableCors({
@@ -39,19 +44,23 @@ async function bootstrap() {
   // 2. Copy and paste the log content in "https://mermaid.live/"
 
   // Swagger documentation
-  const config = new DocumentBuilder()
-    .setTitle('Nest TagCheck')
-    .setDescription('The Nest TagCheck API description')
-    .setVersion('1.0')
-    .addTag('datalayer')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  if (process.env.NODE_ENV !== 'prod') {
+    const config = new DocumentBuilder()
+      .setTitle('Nest TagCheck')
+      .setDescription('The Nest TagCheck API description')
+      .setVersion('1.0')
+      .addTag('datalayer')
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+  }
+
   await configsService.activatePort(app);
 
-  process.on('SIGTERM', async () => {
-    await app.close();
-    process.exit(0);
+  process.on('SIGTERM', () => {
+    void app.close().then(() => {
+      process.exit(0);
+    });
   });
 }
 
