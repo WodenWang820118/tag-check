@@ -6,6 +6,7 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
 import { VitePlugin } from '@electron-forge/plugin-vite';
+import { writeFileSync } from 'fs';
 
 const config = {
   packagerConfig: {
@@ -14,9 +15,27 @@ const config = {
     extraResource: [
       './dist/apps/ng-frontend',
       './dist/apps/nest-backend/main.js',
-      './dist/apps/nest-backend/node_modules'
-    ]
+      './dist/apps/nest-backend/node_modules',
+      './index.html'
+    ],
+    env: {
+      PORT: process.env.PORT,
+      WEB_SOCKET: process.env.WEB_SOCKET
+    }
   },
+  // if using environment variables, you can use hooks to generate a file with the environment variables
+  // hooks: {
+  //   generateAssets: async () => {
+  //     writeFileSync(
+  //       './env.json',
+  //       JSON.stringify({
+  //         NODE_ENV: process.env.NODE_ENV,
+  //         PORT: process.env.PORT,
+  //         WEB_SOCKET: process.env.WEB_SOCKET
+  //       })
+  //     );
+  //   }
+  // },
   rebuildConfig: {
     force: true
   },

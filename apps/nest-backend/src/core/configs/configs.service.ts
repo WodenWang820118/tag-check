@@ -1,10 +1,4 @@
-import {
-  HttpException,
-  HttpStatus,
-  INestApplication,
-  Injectable,
-  Logger
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { join } from 'path';
 import { cwd } from 'process';
 
@@ -62,6 +56,9 @@ export class ConfigsService {
           Logger.log(process.env.DATABASE_PATH, 'DATABASE_PATH');
           return process.env.DATABASE_PATH;
         default: {
+          Logger.warn(
+            `No NODE_ENV set. Defaulting to production database path: ${defaultDatabasePath}`
+          );
           return defaultDatabasePath;
         }
       }
@@ -94,25 +91,18 @@ export class ConfigsService {
           Logger.log(process.env.ROOT_PROJECT_PATH, 'ROOT_PROJECT_PATH');
           return process.env.ROOT_PROJECT_PATH;
         case 'prod':
-          if (process.env.ROOT_PROJECT_PATH && this.DEFAULT_PROJECT_PATH) {
-            return join(
-              process.env.ROOT_PROJECT_PATH,
-              this.DEFAULT_PROJECT_PATH
-            );
+          if (process.env.ROOT_PROJECT_PATH) {
+            return process.env.ROOT_PROJECT_PATH;
           }
           return defaultProjectPath;
         default: {
-          if (process.env.ROOT_PROJECT_PATH && this.DEFAULT_PROJECT_PATH) {
+          if (process.env.ROOT_PROJECT_PATH) {
             Logger.warn(
-              `No NODE_ENV set. Defaulting to production database path: ${join(
-                process.env.ROOT_PROJECT_PATH,
+              `No NODE_ENV set. Defaulting to production database path: ${
                 this.DEFAULT_PROJECT_PATH
-              )}`
+              }`
             );
-            return join(
-              process.env.ROOT_PROJECT_PATH,
-              this.DEFAULT_PROJECT_PATH
-            );
+            return process.env.ROOT_PROJECT_PATH;
           }
           return defaultProjectPath;
         }
@@ -124,48 +114,6 @@ export class ConfigsService {
       );
       throw new HttpException(
         'Error getting the root project path',
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
-  }
-
-  // TODO: configure port number effectively for both frontend and backend
-  async activatePort(app: INestApplication<any>) {
-    try {
-      switch (process.env.NODE_ENV) {
-        case 'dev':
-          Logger.log('Listening on port 7070');
-          await app.listen(process.env.PORT || 7070);
-          break;
-        case 'staging':
-        case 'test':
-          Logger.log('Listening on port 6060');
-          await app.listen(process.env.PORT || 6060);
-          break;
-        case 'prod':
-          Logger.log('Listening on port 7001');
-          await app.listen(process.env.PORT || 7001);
-          break;
-        default:
-          if (process.env.ROOT_PROJECT_PATH && this.DEFAULT_PROJECT_PATH) {
-            Logger.warn(
-              `No NODE_ENV set. Defaulting to production database path: ${join(
-                process.env.ROOT_PROJECT_PATH,
-                this.DEFAULT_PROJECT_PATH
-              )}`
-            );
-            await app.listen(process.env.PORT || 7001);
-            break;
-          }
-          break;
-      }
-    } catch (error) {
-      Logger.error(
-        error,
-        `${ConfigsService.name}.${ConfigsService.prototype.activatePort.name}`
-      );
-      throw new HttpException(
-        'the server is not activated',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }

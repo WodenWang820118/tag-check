@@ -2,18 +2,17 @@ import { BrowserWindow } from 'electron';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import * as pathUtils from './path-utils';
-import * as fileUtils from './file-utils';
-import * as environmentUtils from './environment-utils';
+import log from './logger';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;
 
 let loadingWindow: null | BrowserWindow = null;
 
-function createLoadingWindow() {
-  console.log('Creating loading window');
+function createLoadingWindow(resourcesPath: string) {
+  log.info('Creating loading window');
   if (loadingWindow) {
-    console.log('Loading window already exists');
+    log.info('Loading window already exists');
     return loadingWindow;
   }
 
@@ -25,21 +24,19 @@ function createLoadingWindow() {
       transparent: true,
       alwaysOnTop: true
     });
-    console.log('Loading window created');
-    console.log(
+    log.info('Loading window created');
+    log.info(
       'MAIN_WINDOW_VITE_DEV_SERVER_URL:',
       MAIN_WINDOW_VITE_DEV_SERVER_URL
     );
-    console.log(
-      'ANOTHER MAIN_WINDOW_VITE_DEV_SERVER_URL:',
-      join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
-    );
+
+    // loading screen
+    const productionUrl = join(resourcesPath, 'index.html');
+    log.info('productionUrl:', productionUrl);
     if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
       loadingWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
     } else {
-      loadingWindow.loadFile(
-        join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
-      );
+      loadingWindow.loadFile(productionUrl);
     }
 
     loadingWindow.center();
@@ -50,15 +47,7 @@ function createLoadingWindow() {
 
     return loadingWindow;
   } catch (error) {
-    console.error('Error creating loading window:', error);
-    fileUtils.logToFile(
-      pathUtils.getRootBackendFolderPath(
-        environmentUtils.getEnvironment(),
-        process.resourcesPath
-      ),
-      error,
-      'error'
-    );
+    log.error('Error creating loading window:', error);
     return null;
   }
 }
@@ -75,14 +64,7 @@ function createWindow(resourcesPath: string) {
 
   try {
     const entryPath = pathUtils.getProductionFrontendPath(resourcesPath);
-    fileUtils.logToFile(
-      pathUtils.getRootBackendFolderPath(
-        environmentUtils.getEnvironment(),
-        resourcesPath
-      ),
-      `Loading file: ${entryPath}`,
-      'info'
-    );
+    log.info(`Loading file: ${entryPath}`);
     if (!existsSync(entryPath)) {
       const devFrontendPath = pathUtils.getDevFrontendPath();
       mainWindow.loadFile(devFrontendPath);
@@ -92,7 +74,7 @@ function createWindow(resourcesPath: string) {
       mainWindow.loadFile(entryPath);
     }
   } catch (e) {
-    console.error(e);
+    log.error('Error loading main window:', e);
   }
 }
 

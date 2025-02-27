@@ -12,7 +12,7 @@
   ],
   "compilerOptions": {
     "esModuleInterop": true,
-    "module": "CommonJS",
+    "module": "ESNext",
     "moduleResolution": "node10",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
