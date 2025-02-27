@@ -1,9 +1,4 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  OnModuleInit
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
   SysConfigurationEntity,
   CreateSysConfigurationDto,
@@ -16,46 +11,52 @@ import { Repository } from 'typeorm';
 import { existsSync } from 'fs';
 
 @Injectable()
-export class SysConfigurationRepositoryService implements OnModuleInit {
+export class SysConfigurationRepositoryService {
   private logger = new Logger(SysConfigurationRepositoryService.name);
   constructor(
     @InjectRepository(SysConfigurationEntity)
     private readonly configurationRepository: Repository<SysConfigurationEntity>,
     private readonly configsService: ConfigsService
-  ) {}
-
-  async onModuleInit() {
-    await this.checkIfRootProjectPathExists();
+  ) {
+    void this.checkIfRootProjectPathExists();
   }
 
   async checkIfRootProjectPathExists() {
     try {
+      const configName = this.configsService.getCONFIG_ROOT_PATH();
+      const configValue = this.configsService.getROOT_PROJECT_PATH();
+
+      // Try to find existing configuration
       const rootPath = await this.configurationRepository.findOne({
-        where: { name: this.configsService.getCONFIG_ROOT_PATH() }
+        where: { name: configName }
       });
 
-      if (!rootPath || !existsSync(rootPath.value)) {
-        // Create new configuration entity
-        const newRootPath = this.configurationRepository.create({
-          name: this.configsService.getCONFIG_ROOT_PATH(),
-          value: this.configsService.getROOT_PROJECT_PATH(),
-          description: 'Root path configuration' // Add meaningful description
-        });
+      if (!rootPath) {
+        // Use insert or update (upsert) to handle potential race conditions
+        await this.configurationRepository
+          .createQueryBuilder()
+          .insert()
+          .into(SysConfigurationEntity)
+          .values({
+            name: configName,
+            value: configValue,
+            description: 'Root path configuration'
+          })
+          .orUpdate(['value', 'description'], ['name'])
+          .execute();
 
-        // Save the entity
-        const savedConfig =
-          await this.configurationRepository.save(newRootPath);
-
-        this.logger.log(
-          'Created new root path configuration:',
-          JSON.stringify(savedConfig, null, 2)
-        );
+        this.logger.log('Root path configuration created or updated');
+      } else if (!existsSync(rootPath.value)) {
+        // Path doesn't exist, update it
+        rootPath.value = configValue;
+        await this.configurationRepository.save(rootPath);
+        this.logger.log('Updated root path configuration with valid path');
       } else {
         this.logger.log('Valid root path configuration found');
       }
     } catch (error) {
       this.logger.error('Failed to initialize configuration:', error);
-      throw error; // Re-throw to prevent application from starting with invalid config
+      throw error;
     }
   }
 

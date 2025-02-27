@@ -6,31 +6,24 @@ import * as pathUtils from './path-utils';
 import * as fileUtils from './file-utils';
 import * as environmentUtils from './environment-utils';
 import * as backend from './backend';
-import * as database from './database';
 import * as frontend from './frontend';
 import { updateElectronApp } from 'update-electron-app';
 import { Database } from 'sqlite3';
-import electronLog from 'electron-log';
+import log from './logger';
 
 updateElectronApp({
   updateInterval: '1 hour',
-  logger: electronLog
-}); // additional configuration options available
+  logger: log
+});
 
 let server: ChildProcess;
 let db: Database;
+
 app.commandLine.appendSwitch('disable-gpu');
 app.commandLine.appendSwitch('use-gl', 'desktop');
 
 app.whenReady().then(async () => {
-  const logFilePath = join(
-    pathUtils.getRootBackendFolderPath(
-      environmentUtils.getEnvironment(),
-      process.resourcesPath
-    )
-  );
-
-  const projectSavingForlder = join(
+  const projectSavingFolder = join(
     pathUtils.getRootBackendFolderPath(
       environmentUtils.getEnvironment(),
       process.resourcesPath
@@ -38,56 +31,35 @@ app.whenReady().then(async () => {
     constants.ROOT_PROJECT_NAME
   );
 
-  fileUtils.logToFile(
-    logFilePath,
-    `Project Saving Folder: ${projectSavingForlder}`,
-    'info'
-  );
+  log.info(`Project Saving Folder: ${projectSavingFolder}`);
 
-  fileUtils.createProjectSavingRootFolder(projectSavingForlder);
-  db = database.getDatabase(process.resourcesPath);
+  fileUtils.createProjectSavingRootFolder(projectSavingFolder);
 
-  await database.initTables(db, process.resourcesPath);
-  server = backend.startBackend(process.resourcesPath);
-  const loadingWindow = frontend.createLoadingWindow();
+  const loadingWindow = frontend.createLoadingWindow(process.resourcesPath);
+  server = backend.startBackend(process.resourcesPath, loadingWindow);
+
   server.once('spawn', async () => {
     try {
-      if (
-        await backend.checkIfPortIsOpen(
-          constants.URLs,
-          20,
-          2000,
-          process.resourcesPath,
-          loadingWindow
-        )
-      ) {
+      if (await backend.checkIfPortIsOpen(loadingWindow)) {
         loadingWindow?.close();
         frontend.createWindow(process.resourcesPath);
       }
     } catch (error) {
-      console.error(error);
-      fileUtils.logToFile(logFilePath, error.toString(), 'error');
+      log.error('Error checking backend port:', error);
     }
   });
 
   server.on('message', (message) => {
-    console.log(`Message from child: ${message}`);
+    log.info(`Message from backend process: ${message}`);
   });
 
   server.on('error', (error) => {
-    fileUtils.logToFile(logFilePath, error.toString(), 'error');
+    log.error('Backend encountered an error:', error);
     backend.stopBackend(server);
   });
 
   server.on('exit', (code, signal) => {
-    console.log(`Child exited with code ${code} and signal ${signal}`);
-    fileUtils.logToFile(
-      logFilePath,
-      `Child exited with code ${code} and signal ${signal}`,
-      'info'
-    );
-
-    if (signal !== 'SIGTERM') backend.restartBackend(process.resourcesPath);
+    log.info(`Backend exited with code ${code} and signal ${signal}`);
   });
 });
 
@@ -98,27 +70,19 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', async () => {
-  // Perform any necessary cleanup here
-  console.log('App is about to quit. Performing cleanup...');
-  // Ensure all background processes are terminated
+  log.info('App is about to quit. Performing cleanup...');
   if (server) {
     server.kill();
   }
-
-  // Close any open connections
   db.close((err) => {
     if (err) {
-      console.error('Error closing the database:', err.toString());
+      log.error('Error closing the database:', err);
     } else {
-      console.log('Database connection closed.');
+      log.info('Database connection closed.');
     }
   });
-
-  // Wait for all asynchronous operations to complete
   await new Promise((resolve) => {
-    setTimeout(resolve, 1000); // Adjust the timeout as needed
+    setTimeout(resolve, 1000);
   });
-
-  // Quit the app
   app.quit();
 });

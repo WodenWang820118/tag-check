@@ -23,7 +23,7 @@ import { VideosController } from './videos/videos.controller';
 import { EventInspectionControllerService } from './data-layer/event-inspection-controller.service';
 import { ProjectWorkFlowControllerService } from './project/project-workflow-controller.service';
 import { ConfigurationControllerService } from './configuration/configuration-controller.service';
-
+// TODO: might do lazy loading
 const services = [
   EventInspectionControllerService,
   ProjectWorkFlowControllerService,

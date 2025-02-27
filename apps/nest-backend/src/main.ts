@@ -1,67 +1,114 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, LazyModuleLoader } from '@nestjs/core';
 import { AppModule } from './app.module';
-// import { SpelunkerModule } from 'nestjs-spelunker';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ConfigsService } from './core/configs/configs.service';
+import { Logger, INestApplication } from '@nestjs/common';
+import { writeFileSync } from 'fs';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { app } from 'electron';
+import * as path from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger:
-      process.env.NODE_ENV === 'prod'
-        ? ['error', 'warn']
-        : ['error', 'warn', 'log', 'debug']
-  });
-
-  const configsService = app.get(ConfigsService);
-
-  app.enableCors({
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    preflightContinue: false
-  });
-  // Handle uncaught exceptions
-  // 1. Generate the tree as text
-  // const tree = SpelunkerModule.explore(app);
-  // const root = SpelunkerModule.graph(tree);
-  // const edges = SpelunkerModule.findGraphEdges(root);
-  // const mermaidEdges = edges
-  //   .filter(
-  //     // I'm just filtering some extra Modules out
-  //     ({ from, to }) =>
-  //       !(
-  //         from.module.name === 'ConfigHostModule' ||
-  //         from.module.name === 'LoggerModule' ||
-  //         to.module.name === 'ConfigHostModule' ||
-  //         to.module.name === 'LoggerModule' ||
-  //         to.module.name === 'SequelizeModule' ||
-  //         to.module.name === 'SequelizeCoreModule' ||
-  //         to.module.name === 'ConfigModule'
-  //       )
-  //   )
-  //   .map(({ from, to }) => `${from.module.name}-->${to.module.name}`);
-  // console.log(`graph TD\n\t${mermaidEdges.join('\n\t')}`);
-
-  // 2. Copy and paste the log content in "https://mermaid.live/"
-
-  // Swagger documentation
-  if (process.env.NODE_ENV !== 'prod') {
-    const config = new DocumentBuilder()
-      .setTitle('Nest TagCheck')
-      .setDescription('The Nest TagCheck API description')
-      .setVersion('1.0')
-      .addTag('datalayer')
-      .build();
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, document);
-  }
-
-  await configsService.activatePort(app);
-
-  process.on('SIGTERM', () => {
-    void app.close().then(() => {
-      process.exit(0);
+  try {
+    // Create the application with full logging in all environments
+    const nestApp = await NestFactory.create(AppModule, {
+      logger: ['error', 'warn', 'log', 'debug']
     });
+
+    // Configure CORS
+    nestApp.enableCors({
+      origin: '*',
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      preflightContinue: false,
+      optionsSuccessStatus: 204
+    });
+
+    // Retrieve the LazyModuleLoader using its class reference
+    const lazyModuleLoader = nestApp.get(LazyModuleLoader);
+
+    const { HealthModule } = await import('./common/health/health.module');
+
+    // Use the official lazy loading method
+    await lazyModuleLoader.load(() => HealthModule);
+
+    // Swagger documentation for non-prod environments
+    if (process.env.NODE_ENV !== 'prod') {
+      const { SwaggerModule, DocumentBuilder } = await import(
+        '@nestjs/swagger'
+      );
+      const config = new DocumentBuilder()
+        .setTitle('Nest TagCheck')
+        .setDescription('The Nest TagCheck API description')
+        .setVersion('1.0')
+        .addTag('datalayer')
+        .build();
+      const document = SwaggerModule.createDocument(nestApp, config);
+      SwaggerModule.setup('api', nestApp, document);
+    }
+
+    // Port configuration with environment awareness
+    const port = process.env.PORT || getDefaultPort();
+
+    await nestApp.listen(port);
+    Logger.log(
+      `Application is running on port ${port} in ${process.env.NODE_ENV || 'default'} mode`
+    );
+
+    // Graceful shutdown handling
+    setupGracefulShutdown(nestApp);
+  } catch (error) {
+    handleFatalError(error instanceof Error ? error : new Error(String(error)));
+  }
+}
+
+function getDefaultPort(): number {
+  switch (process.env.NODE_ENV) {
+    case 'dev':
+      return 7070;
+    case 'staging':
+    case 'test':
+      return 6060;
+    default:
+      return 7001;
+  }
+}
+
+function setupGracefulShutdown(nestApp: INestApplication): void {
+  process.on('SIGTERM', () => {
+    nestApp
+      .close()
+      .then(() => {
+        Logger.log('Application shut down gracefully');
+        process.exit(0);
+      })
+      .catch((error) => {
+        Logger.error('Error during graceful shutdown:', error);
+        process.exit(1);
+      });
   });
 }
 
-void bootstrap();
+function handleFatalError(error: Error): void {
+  Logger.error('Failed to start application:', error);
+
+  try {
+    const errorLogPath =
+      process.env.NODE_ENV === 'prod' && process.resourcesPath
+        ? path.join(process.resourcesPath, 'error.log')
+        : path.join(__dirname, 'error.log');
+
+    writeFileSync(
+      errorLogPath,
+      `${new Date().toISOString()}: ${error.stack || error.message}`,
+      'utf-8'
+    );
+  } catch (logError) {
+    Logger.error('Failed to write error log:', logError);
+  }
+
+  process.exit(1);
+}
+
+// Bootstrap with error handling
+bootstrap().catch((err) => {
+  Logger.error('Bootstrap function failed:', err);
+  process.exit(1);
+});

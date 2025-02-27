@@ -2,7 +2,7 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "target": "ES6",
-    "module": "CommonJS",
+    "module": "System",
     "moduleResolution": "node10",
     "allowJs": true,
     "skipLibCheck": true,
@@ -10,7 +10,6 @@
     "noImplicitAny": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "outDir": "dist",
-    "resolveJsonModule": true
+    "outDir": "dist"
   }
 }

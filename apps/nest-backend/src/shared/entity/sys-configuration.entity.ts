@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn
+} from 'typeorm';
 import { AuditableEntity } from './common';
 import { SysConfigurationSchema } from '@utils';
 
@@ -31,4 +37,10 @@ export class SysConfigurationEntity
     nullable: true
   })
   description?: string;
+
+  @CreateDateColumn({ name: 'createdAt' })
+  createdAt!: Date;
+
+  @UpdateDateColumn({ name: 'updatedAt' })
+  updatedAt!: Date;
 }
