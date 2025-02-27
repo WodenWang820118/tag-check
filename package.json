@@ -254,5 +254,5 @@
     "update-electron-app": "^3.0.0",
     "uuid": "^9.0.1"
   },
-  "packageManager": "pnpm@10.14.0"
+  "packageManager": "pnpm@10.5.2"
 }
