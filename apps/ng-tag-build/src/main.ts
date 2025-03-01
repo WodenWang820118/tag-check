@@ -2,7 +2,7 @@ import { appConfig } from './app/app.config';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { registerLocaleData } from '@angular/common';
 import { loadTranslations } from '@angular/localize';
-import '@angular/localize/init'; // Required for Angular localization
+// import '@angular/localize/init'; // Required for Angular localization
 
 // Read locale from local storage before app initialization
 const appLang = localStorage.getItem('locale') || 'en';

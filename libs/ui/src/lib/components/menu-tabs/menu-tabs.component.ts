@@ -4,7 +4,9 @@ import { Component } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
-import '@angular/localize/init'; // For $localize
+// import '@angular/localize/init'; // For $localize
+
+import { ɵ$localize } from '@angular/localize';
 
 interface Link {
   nameKey: string; // Changed from name to nameKey for translation reference
@@ -100,9 +102,9 @@ export class MenuTabsComponent {
   getTranslatedName(key: string): string {
     // This will be replaced by actual translations
     const translations: { [key: string]: string } = {
-      about: $localize`:@@nav.about:About`,
-      objectives: $localize`:@@nav.objectives:Objectives`,
-      github: $localize`:@@nav.github:GitHub`
+      about: ɵ$localize`:@@nav.about:About`,
+      objectives: ɵ$localize`:@@nav.objectives:Objectives`,
+      github: ɵ$localize`:@@nav.github:GitHub`
     };
     return translations[key] || key;
   }
