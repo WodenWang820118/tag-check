@@ -11,7 +11,7 @@
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node10",
     "importHelpers": true,
     "target": "ES2022",
     "useDefineForClassFields": false,
