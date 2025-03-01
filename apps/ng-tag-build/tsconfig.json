@@ -11,11 +11,13 @@
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node10",
     "importHelpers": true,
     "target": "ES2022",
     "useDefineForClassFields": false,
-    "lib": ["ESNext", "dom"]
+    "skipLibCheck": true,
+    "lib": ["ESNext", "dom"],
+    "module": "ES2022"
   },
   "files": [],
   "include": [],

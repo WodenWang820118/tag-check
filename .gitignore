@@ -65,3 +65,6 @@ storybook-static
 
 # Coverge files
 coverage/
+
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
