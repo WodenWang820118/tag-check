@@ -1,6 +1,6 @@
 {
   "name": "tag-check",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": ".vite/build/main.js",
   "author": "Guan Xin Wang",
   "description": "A tool to verify Google Tag Manager implementations on websites",
