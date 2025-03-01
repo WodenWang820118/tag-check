@@ -82,7 +82,6 @@
       "unitTestRunner": "jest"
     }
   },
-  // "nxCloudAccessToken": "NDI3YTMyYjQtYjRlMi00Zjc4LWFiMjktYmM4ZDQ4Y2I2NWRkfHJlYWQtd3JpdGU=",
   "plugins": [
     {
       "plugin": "@nx/vite/plugin",

@@ -1,4 +1,4 @@
-@import './variables';
+@use './variables' as *;
 
 html {
   -ms-overflow-style: -ms-autohiding-scrollbar;
@@ -29,7 +29,7 @@ a {
   color: inherit;
 
   &:hover {
-    text-decoration: underline
+    text-decoration: underline;
   }
 }
 
