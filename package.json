@@ -261,6 +261,6 @@
   "packageManager": "pnpm@10.5.2",
   "engines": {
     "node": ">=22.13.0",
-    "pnpm": ">=10.5.2"
+    "pnpm": ">=9.15.5"
   }
 }
