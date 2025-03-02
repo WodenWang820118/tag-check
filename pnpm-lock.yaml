@@ -307,7 +307,7 @@ importers:
         specifier: 20.4.6
         version: 20.4.6(@swc-node/register@1.9.2(@swc/core@1.5.7(@swc/helpers@0.5.13))(@swc/types@0.1.19)(typescript@5.7.3))(@swc/core@1.5.7(@swc/helpers@0.5.13))
       '@playwright/test':
-        specifier: ^1.50.1
+        specifier: ^1.36.0
         version: 1.50.1
       '@rspack/plugin-minify':
         specifier: ^0.7.5
@@ -21293,7 +21293,7 @@ snapshots:
 
   '@npmcli/fs@3.1.1':
     dependencies:
-      semver: 7.5.4
+      semver: 7.7.1
 
   '@npmcli/git@5.0.8':
     dependencies:
@@ -21335,7 +21335,7 @@ snapshots:
       json-parse-even-better-errors: 3.0.2
       normalize-package-data: 6.0.2
       proc-log: 4.2.0
-      semver: 7.5.4
+      semver: 7.7.1
     transitivePeerDependencies:
       - bluebird
 
@@ -31599,7 +31599,7 @@ snapshots:
       make-fetch-happen: 13.0.1
       nopt: 7.2.1
       proc-log: 4.2.0
-      semver: 7.5.4
+      semver: 7.7.1
       tar: 6.2.1
       which: 4.0.0
     transitivePeerDependencies:

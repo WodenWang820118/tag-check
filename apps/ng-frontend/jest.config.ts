@@ -1,24 +1,21 @@
-/* eslint-disable */
-module.exports = {
-  displayName: 'ng-frontend',
-  preset: '../../jest.preset.cjs',
+export default {
+  displayName: 'my-angular-workspace',
+  preset: '../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../coverage/apps/ng-frontend',
-  testEnvironment: 'jsdom',
+  coverageDirectory: '../../coverage/apps/my-angular-workspace',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
-        stringifyContentPathRegex: '\\.(html|svg)$',
-      },
-    ],
+        stringifyContentPathRegex: '\\.(html|svg)$'
+      }
+    ]
   },
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',
     'jest-preset-angular/build/serializers/ng-snapshot',
-    'jest-preset-angular/build/serializers/html-comment',
-  ],
-  testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
+    'jest-preset-angular/build/serializers/html-comment'
+  ]
 };

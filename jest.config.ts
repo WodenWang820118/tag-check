@@ -1,6 +1,5 @@
-import { getJestProjects } from '@nx/jest';
+import { getJestProjectsAsync } from '@nx/jest';
 
-export default {
-  projects: [...getJestProjects(), 'libs/data-access/jest.config.ts'],
-  testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
-};
+export default async () => ({
+  projects: await getJestProjectsAsync(),
+});
