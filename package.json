@@ -1,7 +1,7 @@
 {
   "name": "tag-check",
   "version": "1.2.1",
-  "main": ".vite/build/main.js",
+  "main": "dist/main.js",
   "author": "Guan Xin Wang",
   "description": "A tool to verify Google Tag Manager implementations on websites",
   "license": "MIT",
@@ -58,7 +58,7 @@
     "test-back:cov": "vitest --coverage --root=apps/nest-backend --exclude=**/test/*e2e-spec.ts --watch=false",
     "test-back:e2e": "cross-env-shell WEB_SOCKET=7003 \"vitest --coverage --root=apps/nest-backend/test --watch=false\"",
     "test-front:e2e": "pnpm exec playwright test \"apps/ng-frontend/e2e/app.app-spec.ts\"",
-    "test-electron": "pnpm exec playwright test \"src/e2e/app.e2e-spec.ts\"",
+    "test-electron": "pnpm run build && pnpm exec playwright test \"src/e2e/app.e2e-spec.ts\"",
     "test": "vitest run",
     "prepare": "husky",
     "test:e2e": "vitest run apps/nest-backend/test/app.e2e-spec.ts --root=apps/nest-backend --watch=false",
