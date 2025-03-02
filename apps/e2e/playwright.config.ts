@@ -15,7 +15,7 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  ...nxE2EPreset(__filename, { testDir: './e2e' }),
+  ...nxE2EPreset(__filename, { testDir: './src' }),
   testMatch: '**/*.e2e-spec.ts',
   testIgnore: ['**/*.spec.ts', '!**/*.e2e-spec.ts'], // Ignore all .spec.ts files except .e2e-spec.ts
   // rest of your config...
@@ -27,25 +27,27 @@ export default defineConfig({
   },
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'pnpm run dev-front',
+    command: 'pnpm exec nx run e2e:serve',
     url: 'http://localhost:4200',
     reuseExistingServer: !process.env.CI,
     cwd: workspaceRoot
   },
-  reporter: [['html', { outputFolder: 'dist/.playwright/apps/ng-frontend' }]],
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] }
     }
+
     // {
     //   name: 'firefox',
     //   use: { ...devices['Desktop Firefox'] },
     // },
+
     // {
     //   name: 'webkit',
     //   use: { ...devices['Desktop Safari'] },
     // },
+
     // Uncomment for mobile browsers support
     /* {
       name: 'Mobile Chrome',
@@ -55,6 +57,7 @@ export default defineConfig({
       name: 'Mobile Safari',
       use: { ...devices['iPhone 12'] },
     }, */
+
     // Uncomment for branded browsers
     /* {
       name: 'Microsoft Edge',
