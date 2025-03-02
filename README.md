@@ -61,6 +61,12 @@ npm install -g pnpm
 pnpm install
 ```
 
+Approve the build for the listed packages warned by pnpm after installation:
+
+```bash
+pnpm approve-builds
+```
+
 ### Frontend (Angular)
 
 For development:
