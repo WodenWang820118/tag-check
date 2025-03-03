@@ -1,18 +1,22 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { ToolbarComponent } from './shared/components/toolbar/toolbar.component';
+import { RouterContainerComponent } from './app-router.component';
 
 @Component({
   standalone: true,
-  imports: [RouterOutlet, ToolbarComponent],
+  imports: [RouterContainerComponent, ToolbarComponent],
   selector: 'app-root',
   template: `
-    @defer (on immediate) {
+    @defer {
       <app-toolbar [settings]="undefined" [projects]="undefined"></app-toolbar>
-    } @loading {
+    } @placeholder {
       <div style="height: 60px"></div>
     }
-    <router-outlet></router-outlet>
+    @defer {
+      <app-router-container></app-router-container>
+    } @placeholder {
+      <div>Loading application...</div>
+    }
   `
 })
 export class AppComponent {
