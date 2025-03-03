@@ -39,7 +39,13 @@
           "node_modules/prismjs/components/prism-javascript.min.js",
           "node_modules/prismjs/components/prism-typescript.min.js",
           "node_modules/prismjs/plugins/command-line/prism-command-line.js"
-        ]
+        ],
+        "sourceMap": {
+          "scripts": true,
+          "styles": false,
+          "hidden": true,
+          "vendor": true
+        }
       },
       "configurations": {
         "production": {
@@ -57,7 +63,7 @@
           ],
           "optimization": true,
           "outputHashing": "all",
-          "sourceMap": true
+          "sourceMap": false
         },
         "development": {
           "optimization": false,

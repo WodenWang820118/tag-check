@@ -6,28 +6,31 @@
       </button>
     }
     <span [routerLink]="['/']" style="cursor: pointer">TagCheck</span>
-    @defer (when this.snav() && this.settings() && this.projects()) {
-      @if (this.snav() && this.settings() && this.projects()) {
-        <mat-form-field
-          appearance="outline"
-          color="primary"
-          style="margin-left: 1rem; margin-top: 20px"
+
+    @defer (
+      when this.snav() && this.settings() && this.projects();
+      prefetch on idle
+    ) {
+      <mat-form-field
+        appearance="outline"
+        color="primary"
+        style="margin-left: 1rem; margin-top: 20px"
+        class="density-compact"
+      >
+        <mat-label>Project</mat-label>
+        <mat-select
+          [(value)]="selectedProject"
+          (valueChange)="onChangeProject($event)"
         >
-          <mat-label>Project</mat-label>
-          <!-- use output signal to notify the view to switch project -->
-          <mat-select
-            [(value)]="selectedProject"
-            (valueChange)="onChangeProject($event)"
-          >
-            @for (project of projects(); track project.projectSlug) {
-              <mat-option [value]="project.projectSlug">{{
-                project.projectName
-              }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-      }
+          @for (project of projects(); track project.projectSlug) {
+            <mat-option [value]="project.projectSlug">{{
+              project.projectName
+            }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     }
+
     <span class="spacer"></span>
     @if (isHomeView()) {
       @if (!isSearchVisible()) {
@@ -59,8 +62,8 @@
         </button>
       }
       @if (isSearchVisible()) {
-        <div class="filter-container">
-          <mat-form-field appearance="outline" class="filter">
+        <div class="filter-container density-compact">
+          <mat-form-field appearance="outline" class="filter density-compact">
             <input
               matInput
               (keyup)="applyFilter($event)"
