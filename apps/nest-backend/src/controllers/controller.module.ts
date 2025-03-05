@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 import { GtmOperatorModule } from '../infrastructure/gtm-operator/gtm-operator.module';
 import { EventInspectionModule } from '../features/event-inspection/event-inspection.module';
 import { ProjectAgentModule } from '../features/project-agent/project-agent.module';
+import { ExampleProjectRepositoryModule } from '../features/example-project/example-project-repository.module';
 
 // controllers
 import { ProjectWorkFlowController } from './project/project-workflow.controller';
@@ -23,7 +24,7 @@ import { VideosController } from './videos/videos.controller';
 import { EventInspectionControllerService } from './data-layer/event-inspection-controller.service';
 import { ProjectWorkFlowControllerService } from './project/project-workflow-controller.service';
 import { ConfigurationControllerService } from './configuration/configuration-controller.service';
-// TODO: might do lazy loading
+
 const services = [
   EventInspectionControllerService,
   ProjectWorkFlowControllerService,
@@ -31,7 +32,12 @@ const services = [
 ];
 
 @Module({
-  imports: [ProjectAgentModule, EventInspectionModule, GtmOperatorModule],
+  imports: [
+    ProjectAgentModule,
+    EventInspectionModule,
+    GtmOperatorModule,
+    ExampleProjectRepositoryModule
+  ],
   controllers: [
     ProjectWorkFlowController,
     ProjectDataRetrievalController,

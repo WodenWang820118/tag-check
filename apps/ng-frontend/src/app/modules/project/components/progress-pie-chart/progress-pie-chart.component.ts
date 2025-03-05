@@ -29,21 +29,18 @@ export class ProgressPieChartComponent {
 
   constructor(private progressUpdateService: ProgressUpdateService) {
     // Setup effect to handle chart updates
-    effect(
-      () => {
-        const current = this.progressUpdateService.currentStep$();
-        const total = this.progressUpdateService.totalSteps$();
+    effect(() => {
+      const current = this.progressUpdateService.currentStep$();
+      const total = this.progressUpdateService.totalSteps$();
 
-        if (current > 0 && total > 0) {
-          if (this.isFirstRender()) {
-            this.createChart();
-            this.isFirstRender.set(false);
-          }
-          this.updateChart();
+      if (current > 0 && total > 0) {
+        if (this.isFirstRender()) {
+          this.createChart();
+          this.isFirstRender.set(false);
         }
-      },
-      { allowSignalWrites: true }
-    );
+        this.updateChart();
+      }
+    });
   }
 
   private destroyChart() {
