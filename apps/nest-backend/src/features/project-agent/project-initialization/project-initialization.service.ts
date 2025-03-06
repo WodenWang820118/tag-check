@@ -12,8 +12,7 @@ export class ProjectInitializationService {
     private readonly projectFacadeService: ProjectFacadeRepositoryService
   ) {}
 
-  // TODO: transfer data to database, but keep the file system
-  async initProject(projectSlug: string, settings: CreateProjectDto) {
+  async initProjectFileSystem(projectSlug: string, settings: CreateProjectDto) {
     await this.createProjectFolders(projectSlug); // keep project folders for videos
     return await this.projectFacadeService.createProject(settings);
   }

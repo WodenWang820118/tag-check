@@ -50,74 +50,57 @@ export class FileTableDataSourceFacadeService {
     private fileReportService: FileReportService,
     private dialog: MatDialog
   ) {
-    effect(
-      () => {
-        const filterValue = this.fileTableDataSourceService.getFilterSignal();
-        const currentDataSource = this.dataSource();
-        if (currentDataSource) {
-          currentDataSource.filter = filterValue;
-        }
-      },
-      {
-        allowSignalWrites: true
+    effect(() => {
+      const filterValue = this.fileTableDataSourceService.getFilterSignal();
+      const currentDataSource = this.dataSource();
+      if (currentDataSource) {
+        currentDataSource.filter = filterValue;
       }
-    );
-    effect(
-      () => {
-        const deletedSignal =
-          this.fileTableDataSourceService.getDeletedSignal();
-        if (deletedSignal) {
-          const dialogRef = this.dialog.open(InformationDialogComponent, {
-            data: {
-              title: 'Delete Reports',
-              contents: 'Are you sure you want to delete the selected reports?',
-              action: 'Delete',
-              actionColor: 'warn',
-              consent: false
-            }
-          });
-          dialogRef.afterClosed().subscribe((result) => {
-            if (result) {
-              this.handleReportDeletion();
-            }
-            this.fileTableDataSourceService.setDeletedSignal(false);
-          });
-        }
-      },
-      {
-        allowSignalWrites: true
+    });
+    effect(() => {
+      const deletedSignal = this.fileTableDataSourceService.getDeletedSignal();
+      if (deletedSignal) {
+        const dialogRef = this.dialog.open(InformationDialogComponent, {
+          data: {
+            title: 'Delete Reports',
+            contents: 'Are you sure you want to delete the selected reports?',
+            action: 'Delete',
+            actionColor: 'warn',
+            consent: false
+          }
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+          if (result) {
+            this.handleReportDeletion();
+          }
+          this.fileTableDataSourceService.setDeletedSignal(false);
+        });
       }
-    );
-    effect(
-      () => {
-        const downloadSignal =
-          this.fileTableDataSourceService.getDownloadSignal();
-        if (downloadSignal) {
-          const dialogRef = this.dialog.open(InformationDialogComponent, {
-            data: {
-              title: 'Download Reports',
-              contents:
-                'Are you sure you want to download the selected reports?',
-              action: 'Download',
-              actionColor: 'primary',
-              consent: false
-            }
-          });
-          dialogRef.afterClosed().subscribe((result) => {
-            if (result) {
-              this.handleReportDownload(
-                this.projectSlug(),
-                this.selection().selected
-              );
-            }
-            this.fileTableDataSourceService.setDownloadSignal(false);
-          });
-        }
-      },
-      {
-        allowSignalWrites: true
+    });
+    effect(() => {
+      const downloadSignal =
+        this.fileTableDataSourceService.getDownloadSignal();
+      if (downloadSignal) {
+        const dialogRef = this.dialog.open(InformationDialogComponent, {
+          data: {
+            title: 'Download Reports',
+            contents: 'Are you sure you want to download the selected reports?',
+            action: 'Download',
+            actionColor: 'primary',
+            consent: false
+          }
+        });
+        dialogRef.afterClosed().subscribe((result) => {
+          if (result) {
+            this.handleReportDownload(
+              this.projectSlug(),
+              this.selection().selected
+            );
+          }
+          this.fileTableDataSourceService.setDownloadSignal(false);
+        });
       }
-    );
+    });
   }
 
   initializeData(paginator: MatPaginator, sort: MatSort, data: any) {

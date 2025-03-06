@@ -103,53 +103,43 @@ export class SideNavListComponent {
     });
 
     // Convert route params subscription to effect
-    effect(
-      () => {
-        this.route.params.subscribe((params) => {
-          const projectSlug = params['projectSlug'];
-          this.items.set([
-            {
-              icon: 'home',
-              title: 'Tests',
-              link: `./`,
-              subTitle: projectSlug
-            },
-            {
-              icon: 'build',
-              title: 'TagBuild',
-              link: `tag-build`
-            },
-            {
-              icon: 'folder_shared',
-              title: 'Reports',
-              link: `buckets`
-            },
-            {
-              icon: 'settings',
-              title: 'Settings',
-              link: `settings`
-            }
-          ]);
-        });
-      },
-      {
-        allowSignalWrites: true
-      }
-    );
+    effect(() => {
+      this.route.params.subscribe((params) => {
+        const projectSlug = params['projectSlug'];
+        this.items.set([
+          {
+            icon: 'home',
+            title: 'Tests',
+            link: `./`,
+            subTitle: projectSlug
+          },
+          {
+            icon: 'build',
+            title: 'TagBuild',
+            link: `tag-build`
+          },
+          {
+            icon: 'folder_shared',
+            title: 'Reports',
+            link: `buckets`
+          },
+          {
+            icon: 'settings',
+            title: 'Settings',
+            link: `settings`
+          }
+        ]);
+      });
+    });
 
     // Convert snav subscription to effect
-    effect(
-      () => {
-        this.snav().openedChange.subscribe((isOpen) => {
-          if (isOpen === false) {
-            this.isOpen.set(false);
-          }
-        });
-      },
-      {
-        allowSignalWrites: true
-      }
-    );
+    effect(() => {
+      this.snav().openedChange.subscribe((isOpen) => {
+        if (isOpen === false) {
+          this.isOpen.set(false);
+        }
+      });
+    });
   }
 
   onMenuClick() {
