@@ -1,5 +1,6 @@
+import { ProjectInitializationService } from './../project-agent/project-initialization/project-initialization.service';
+import { ProjectReportService } from '../project-agent/project-report/project-report.service';
 import { Injectable, Logger } from '@nestjs/common';
-import { ProjectFacadeRepositoryService } from '../repository/project-facade/project-facade-repository.service';
 import { CreateFullTestEventDto, CreateProjectDto } from '../../shared';
 import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
 import { IReportDetails, Recording, Spec } from '@utils';
@@ -10,10 +11,12 @@ import { ProjectRepositoryService } from '../../core/repository/project/project-
 @Injectable()
 export class ExampleProjectRepositoryService {
   private logger = new Logger(ExampleProjectRepositoryService.name);
+
   constructor(
-    private readonly projectFacadeRepositoryService: ProjectFacadeRepositoryService,
     private readonly testReportFacadeRepositoryService: TestReportFacadeRepositoryService,
-    private readonly projectRepositoryService: ProjectRepositoryService
+    private readonly projectRepositoryService: ProjectRepositoryService,
+    private readonly projectInitializationService: ProjectInitializationService,
+    private readonly projectReportService: ProjectReportService
   ) {
     void this.buildExampleProject();
   }
@@ -23,17 +26,21 @@ export class ExampleProjectRepositoryService {
     try {
       const projects = await this.projectRepositoryService.list();
       if (projects.length > 0) return;
+
       // 1. create a project with basic settings
-      // It will create other settings like authentication, browser, application, recording, spec, test event
       const projectSlug = 'example-project-slug';
       const eventId = '5dfb6b1f-3496-4862-81f6-87bdccfb0be4';
-
       const createProjectDto: CreateProjectDto = {
         projectSlug: projectSlug,
         projectName: 'Example Project',
         projectDescription: 'This is an example project'
       };
-      await this.projectFacadeRepositoryService.createProject(createProjectDto);
+
+      // First, initialize the project in the database and file system
+      await this.projectInitializationService.initProjectFileSystem(
+        projectSlug,
+        createProjectDto
+      );
 
       // 2. create a full test event
       const reportDetail: IReportDetails = {
@@ -67,6 +74,13 @@ export class ExampleProjectRepositoryService {
         spec: spec
       };
 
+      // Now create the event report folder
+      await this.projectReportService.createEventReportFolder(
+        projectSlug,
+        eventId
+      );
+
+      // Finally create the full report after the project exists
       await this.testReportFacadeRepositoryService.createFullReport(
         projectSlug,
         eventId,
