@@ -11,5 +11,10 @@
     "sourceMap": true,
     "baseUrl": ".",
     "outDir": "dist"
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs"
+    }
   }
 }

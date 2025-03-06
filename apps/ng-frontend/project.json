@@ -183,10 +183,6 @@
           "apps/ng-tag-build/src/styles.scss",
           "node_modules/prismjs/themes/prism-okaidia.css",
           "node_modules/prismjs/plugins/command-line/prism-command-line.css",
-          "@fontsource/roboto/300.css",
-          "@fontsource/roboto/400.css",
-          "@fontsource/roboto/500.css",
-          "@fontsource/roboto/700.css",
           "@fontsource/material-icons"
         ]
       },
@@ -212,10 +208,6 @@
           "apps/ng-tag-build/src/styles.scss",
           "node_modules/prismjs/themes/prism-okaidia.css",
           "node_modules/prismjs/plugins/command-line/prism-command-line.css",
-          "@fontsource/roboto/300.css",
-          "@fontsource/roboto/400.css",
-          "@fontsource/roboto/500.css",
-          "@fontsource/roboto/700.css",
           "@fontsource/material-icons"
         ]
       },
