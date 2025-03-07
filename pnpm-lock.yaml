@@ -110,6 +110,9 @@ importers:
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
+      slugify:
+        specifier: ^1.6.6
+        version: 1.6.6
       tag-check:
         specifier: 'file:'
         version: file:(@algolia/client-search@5.20.3)(@docusaurus/types@3.4.0(@swc/core@1.5.7(@swc/helpers@0.5.13))(acorn@8.14.0)(esbuild@0.25.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(@rspack/core@1.2.6(@swc/helpers@0.5.13))(@swc/core@1.5.7(@swc/helpers@0.5.13))(@types/react@18.3.18)(acorn@8.14.0)(encoding@0.1.13)(esbuild@0.25.0)(eslint@9.21.0(jiti@1.21.7))(reflect-metadata@0.1.14)(search-insights@2.17.2)(sqlite3@5.1.7)(storybook@8.6.3(prettier@3.5.2))(ts-node@10.9.1(@swc/core@1.5.7(@swc/helpers@0.5.13))(@types/node@22.13.8)(typescript@5.7.3))(typescript@5.7.3)
@@ -12771,6 +12774,10 @@ packages:
   slice-ansi@7.1.0:
     resolution: {integrity: sha512-bSiSngZ/jWeX93BqeIAbImyTbEihizcwNjFoRUIY/T1wWQsfsm2Vw1agPKylXvQTU7iASGdHhyqRlqQzfz+Htg==}
     engines: {node: '>=18'}
+
+  slugify@1.6.6:
+    resolution: {integrity: sha512-h+z7HKHYXj6wJU+AnS/+IH8Uh9fdcX1Lrhg1/VMdf9PwoBQXFcXiAdsy2tSK0P6gKwJLXp02r90ahUCqHk9rrw==}
+    engines: {node: '>=8.0.0'}
 
   smart-buffer@4.2.0:
     resolution: {integrity: sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg==}
@@ -31431,6 +31438,8 @@ snapshots:
     dependencies:
       ansi-styles: 6.2.1
       is-fullwidth-code-point: 5.0.0
+
+  slugify@1.6.6: {}
 
   smart-buffer@4.2.0: {}
 

@@ -1,21 +1,38 @@
 import { DestroyRef, Injectable } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormControl
+} from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
 import { ProjectService } from '../../../../shared/services/api/project-info/project-info.service';
-import { catchError, EMPTY, switchMap, take, tap } from 'rxjs';
+import {
+  catchError,
+  distinctUntilChanged,
+  EMPTY,
+  switchMap,
+  take,
+  tap
+} from 'rxjs';
 import { ErrorDialogComponent } from '@ui';
 import { InstantErrorStateMatcher } from './helper';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-
+import slugify from 'slugify';
 @Injectable({
   providedIn: 'root'
 })
 export class InitProjectFormFacadeService {
   validProjectNameMatcher = new InstantErrorStateMatcher();
   allowedSymbolsPattern = /^[a-zA-Z0-9-!'",\s]+$/;
-  projectForm: FormGroup = this.fb.group({
+  projectForm: FormGroup<{
+    projectName: FormControl<string>;
+    projectSlug: FormControl<string>;
+    measurementId: FormControl<string>;
+    projectDescription: FormControl<string>;
+  }> = this.fb.nonNullable.group({
     projectName: [
       '',
       {
@@ -27,9 +44,9 @@ export class InitProjectFormFacadeService {
         ]
       }
     ],
-    projectSlug: [''],
-    measurementId: [''],
-    projectDescription: ['']
+    projectSlug: ['', Validators.required],
+    measurementId: '',
+    projectDescription: ''
   });
 
   constructor(
@@ -46,8 +63,9 @@ export class InitProjectFormFacadeService {
   }
 
   observeProjectNameChanges(): void {
-    this.projectForm.controls['projectName'].valueChanges
+    this.projectForm.controls.projectName.valueChanges
       .pipe(
+        distinctUntilChanged(),
         takeUntilDestroyed(this.destoryRef),
         tap((value) => {
           if (!value) {
@@ -56,7 +74,7 @@ export class InitProjectFormFacadeService {
           }
           const formattedValue = this.formatProjectSlug(value);
           const fourRandomChars = Math.random().toString(36).substring(2, 6);
-          this.projectForm.controls['projectSlug'].setValue(
+          this.projectForm.controls.projectSlug.setValue(
             formattedValue + '-' + fourRandomChars
           );
         }),
@@ -69,11 +87,15 @@ export class InitProjectFormFacadeService {
   }
 
   private formatProjectSlug(value: string): string {
-    return value
-      .replace(/[-!'",\s]/g, '-')
-      .replace(/[^a-z0-9-]/gi, '')
-      .toLowerCase()
-      .replace(/--+/g, '-');
+    // Use slugify to handle non-English characters
+    return slugify(value, {
+      lower: true, // Convert to lowercase
+      strict: true, // Strip special characters except replacement
+      locale: 'en', // Language for transliteration rules
+      replacement: '-', // Replace spaces with hyphens
+      remove: /[*+~.()'"!:@]/g, // Remove these chars
+      trim: true // Trim leading and trailing replacement chars
+    });
   }
 
   submitProject() {
@@ -90,17 +112,19 @@ export class InitProjectFormFacadeService {
           return EMPTY;
         }
 
-        return this.projectService.initProject(this.projectForm.value).pipe(
-          tap((data) => {
-            if (data) {
-              this.router
-                .navigate(['/', 'projects', data.projectSlug])
-                .then(() => {
-                  this.projectForm.reset();
-                });
-            }
-          })
-        );
+        return this.projectService
+          .initProject(this.projectForm.getRawValue())
+          .pipe(
+            tap((data) => {
+              if (data) {
+                this.router
+                  .navigate(['/', 'projects', data.projectSlug])
+                  .then(() => {
+                    this.projectForm.reset();
+                  });
+              }
+            })
+          );
       }),
       catchError((error) => {
         console.error('Error initializing project:', error);
