@@ -7,65 +7,102 @@ import {
 } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { FullTestEventResponseDto } from '../../../shared';
+import { XlsxHeaderService } from './xlsx-header.service';
+import { XlsxTestInfoSectionService } from './xlsx-test-info-section.service';
+import { XlsxTestDataSectionService } from './xlsx-test-data-section.service';
+import { XlsxSummarySectionService } from './xlsx-summary-section.service';
+import { XlsxRecordingSectionService } from './xlsx-recordinng-section.service';
 
 @Injectable()
 export class XlsxReportService {
   private readonly logger = new Logger(XlsxReportService.name);
-
+  constructor(
+    private xlsxHeaderService: XlsxHeaderService,
+    private xlsxTestInfoSectionService: XlsxTestInfoSectionService,
+    private xlsxTestDataSectionService: XlsxTestDataSectionService,
+    private xlsxSummarySectionService: XlsxSummarySectionService,
+    private xlsxRecordingSectionService: XlsxRecordingSectionService
+  ) {}
   async writeXlsxFile(reports: FullTestEventResponseDto[]) {
     try {
       const workbook = new ExcelJS.Workbook();
 
-      for (const report of reports) {
-        const worksheetName = report.testName;
-        const worksheet = workbook.addWorksheet(worksheetName);
+      // Group reports by project for better organization
+      const projectGroups = this.groupReportsByProject(reports);
 
-        // Set columns as needed
-        const columnDefinitions: Partial<ExcelJS.Column>[] = [
-          { header: 'DataLayer Spec', key: 'dataLayerSpec', width: 25 },
-          { header: 'DataLayer', key: 'dataLayer', width: 25 },
-          { header: 'Passed', key: 'passed', width: 10 },
-          { header: 'Request Passed', key: 'requestPassed', width: 10 },
-          { header: 'Raw Request', key: 'rawRequest', width: 25 },
-          { header: 'Reformed DataLayer', key: 'reformedDataLayer', width: 25 },
-          { header: 'Destination URL', key: 'destinationUrl', width: 25 }
-        ];
+      for (const [projectKey, projectReports] of Object.entries(
+        projectGroups
+      )) {
+        // Extract project info from the first report in the group
+        const projectInfo = this.extractProjectInfo(projectReports[0]);
 
-        worksheet.columns = columnDefinitions;
+        for (const report of projectReports) {
+          // Create sheet name using test name and event name
+          const worksheetName = `${report.testName} - ${report.eventName || 'No Event'}`;
+          const worksheet = workbook.addWorksheet(worksheetName);
 
-        const imageBuffer = Buffer.from(report.testImage.imageData);
-        const imageId = workbook.addImage({
-          buffer: imageBuffer,
-          extension: 'png'
-        });
+          // Add project header information (dashboard-like)
+          this.xlsxHeaderService.addProjectHeader(
+            worksheet,
+            projectInfo,
+            report
+          );
 
-        worksheet.addImage(imageId, {
-          tl: { col: 2, row: 1 },
-          ext: { width: 100, height: 50 }
-        });
+          // Add test information section
+          this.xlsxTestInfoSectionService.addTestInfoSection(worksheet, report);
 
-        // Add rows
-        const rowData = {
-          dataLayerSpec: JSON.stringify(report.spec?.dataLayerSpec || {}),
-          dataLayer: JSON.stringify(report.testEventDetails?.dataLayer || {}),
-          passed: report.testEventDetails?.passed || false,
-          requestPassed: report.testEventDetails?.requestPassed || false,
-          rawRequest: report.testEventDetails?.rawRequest || '',
-          reformedDataLayer: JSON.stringify(
-            report.testEventDetails?.reformedDataLayer || {}
-          ),
-          destinationUrl: report.testEventDetails?.destinationUrl || ''
-        };
+          // Add test image if available
+          let imageRowOffset = 0;
+          if (report.testImage && report.testImage.imageData) {
+            // FIXME: Buffer imcompatibility
+            const imageBuffer = Buffer.from(
+              report.testImage.imageData
+            ) as unknown as ExcelJS.Buffer;
+            const imageId = workbook.addImage({
+              buffer: imageBuffer,
+              extension: 'png'
+            });
 
-        worksheet.addRow(rowData);
+            // Position the image below the header sections
+            worksheet.addImage(imageId, {
+              tl: { col: 0, row: 12 },
+              ext: { width: 300, height: 150 }
+            });
+            imageRowOffset = 10; // Add offset for image space
+          }
+          this.logger.log(`${JSON.stringify(report.spec, null, 2)}`);
+          // Add test data section with proper column headers
+          this.xlsxTestDataSectionService.addTestDataSection(
+            worksheet,
+            report,
+            12 + imageRowOffset
+          );
+
+          // Add summary section at the bottom
+          this.xlsxSummarySectionService.addSummarySection(
+            worksheet,
+            report,
+            16 + imageRowOffset
+          );
+
+          // Add recording section if available
+          this.xlsxRecordingSectionService.addRecordingSection(
+            worksheet,
+            report
+          );
+        }
       }
 
-      const buffer = (await workbook.xlsx.writeBuffer()) as Buffer;
-      // throw new Error('Not implemented');
+      // Generate filename based on project info from the first report
+      const projectInfo = this.extractProjectInfo(reports[0]);
+      const fileName = `${projectInfo.projectName}-${projectInfo.projectSlug}`;
+
+      // FIXME: Buffer imcompatibility
+      const buffer = (await workbook.xlsx.writeBuffer()) as unknown as Buffer;
 
       return new StreamableFile(buffer, {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        disposition: `attachment; filename="report.xlsx"`
+        disposition: `attachment; filename="${fileName}.xlsx"`
       });
     } catch (error) {
       this.handleError(error, 'writeXlsxFile');
@@ -76,6 +113,40 @@ export class XlsxReportService {
     }
   }
 
+  private groupReportsByProject(
+    reports: FullTestEventResponseDto[]
+  ): Record<string, FullTestEventResponseDto[]> {
+    const groups: Record<string, FullTestEventResponseDto[]> = {};
+
+    for (const report of reports) {
+      const projectInfo = this.extractProjectInfo(report);
+      const key = `${projectInfo.projectName}-${projectInfo.projectSlug}`;
+
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+
+      groups[key].push(report);
+    }
+
+    return groups;
+  }
+
+  private extractProjectInfo(report: FullTestEventResponseDto): {
+    projectName: string;
+    projectSlug: string;
+    projectDescription: string;
+    measurementId: string;
+  } {
+    return {
+      projectName: report.project.projectName || 'Unknown Project',
+      projectSlug: report.project.projectSlug || 'unknown-project',
+      projectDescription:
+        report.project.projectDescription || 'No description available',
+      measurementId: report.project.measurementId || 'No measurement ID'
+    };
+  }
+
   private handleError(error: unknown, methodName: string) {
     this.logger.error(
       `Error in ${XlsxReportService.name}.${methodName}: ${
@@ -83,11 +154,9 @@ export class XlsxReportService {
       }`,
       error instanceof Error ? error.stack : undefined
     );
-
     if (error instanceof HttpException) {
       throw error;
     }
-
     throw new HttpException(
       'An error occurred while processing the Excel file',
       HttpStatus.INTERNAL_SERVER_ERROR
