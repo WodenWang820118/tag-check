@@ -39,7 +39,13 @@
           "node_modules/prismjs/components/prism-javascript.min.js",
           "node_modules/prismjs/components/prism-typescript.min.js",
           "node_modules/prismjs/plugins/command-line/prism-command-line.js"
-        ]
+        ],
+        "sourceMap": {
+          "scripts": true,
+          "styles": false,
+          "hidden": true,
+          "vendor": true
+        }
       },
       "configurations": {
         "production": {
@@ -57,7 +63,7 @@
           ],
           "optimization": true,
           "outputHashing": "all",
-          "sourceMap": true
+          "sourceMap": false
         },
         "development": {
           "optimization": false,
@@ -142,18 +148,7 @@
       "executor": "@nx/eslint:lint"
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "apps/ng-frontend/jest.config.cjs",
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
-      }
+      "executor": "@analogjs/vitest-angular:test"
     },
     "serve-static": {
       "executor": "@nx/web:file-server",
@@ -177,10 +172,6 @@
           "apps/ng-tag-build/src/styles.scss",
           "node_modules/prismjs/themes/prism-okaidia.css",
           "node_modules/prismjs/plugins/command-line/prism-command-line.css",
-          "@fontsource/roboto/300.css",
-          "@fontsource/roboto/400.css",
-          "@fontsource/roboto/500.css",
-          "@fontsource/roboto/700.css",
           "@fontsource/material-icons"
         ]
       },
@@ -206,10 +197,6 @@
           "apps/ng-tag-build/src/styles.scss",
           "node_modules/prismjs/themes/prism-okaidia.css",
           "node_modules/prismjs/plugins/command-line/prism-command-line.css",
-          "@fontsource/roboto/300.css",
-          "@fontsource/roboto/400.css",
-          "@fontsource/roboto/500.css",
-          "@fontsource/roboto/700.css",
           "@fontsource/material-icons"
         ]
       },

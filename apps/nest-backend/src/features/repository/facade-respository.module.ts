@@ -8,6 +8,7 @@ const modules = [
   TestOperationFacadeRepositoryModule,
   TestReportFacadeModule
 ];
+
 @Module({
   imports: [...modules],
   exports: [...modules]

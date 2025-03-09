@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { GoogleTag } from './google-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { GoogleTagConfig, TagTypeEnum } from '@utils';
+import { describe, it, expect } from 'vitest';
 
 describe('Google Tag', () => {
   let googleTag: GoogleTag;
@@ -23,8 +24,7 @@ describe('Google Tag', () => {
     const accountId = 'account123';
     const containerId = 'container456';
 
-    jest
-      .spyOn(parameterUtils, 'createBooleanParameter')
+    vi.spyOn(parameterUtils, 'createBooleanParameter')
       .mockReturnValueOnce({
         type: 'BOOLEAN',
         key: 'sendPageView',
@@ -36,7 +36,7 @@ describe('Google Tag', () => {
         value: 'false'
       });
 
-    jest.spyOn(parameterUtils, 'createTemplateParameter').mockReturnValue({
+    vi.spyOn(parameterUtils, 'createTemplateParameter').mockReturnValue({
       type: 'TEMPLATE',
       key: 'measurementId',
       value: 'G-12345678'

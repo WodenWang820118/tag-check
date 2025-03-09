@@ -45,15 +45,12 @@ export class MainContentComponent implements OnInit {
     private destroyedRef: DestroyRef
   ) {
     // Update currentNodeId when currentNode changes
-    effect(
-      () => {
-        const node = this.currentNode();
-        if (node?.id) {
-          this.currentNodeIdSignal.set(node.id);
-        }
-      },
-      { allowSignalWrites: true }
-    );
+    effect(() => {
+      const node = this.currentNode();
+      if (node?.id) {
+        this.currentNodeIdSignal.set(node.id);
+      }
+    });
   }
 
   ngOnInit() {

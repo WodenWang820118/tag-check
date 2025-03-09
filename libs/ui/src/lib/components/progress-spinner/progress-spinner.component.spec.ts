@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { ProgressSpinnerComponent } from './progress-spinner.component';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 describe('ProgressSpinnerComponent', () => {
   let component: ProgressSpinnerComponent;
@@ -8,7 +8,7 @@ describe('ProgressSpinnerComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [ProgressSpinnerComponent],
+      imports: [ProgressSpinnerComponent]
     });
     fixture = TestBed.createComponent(ProgressSpinnerComponent);
     component = fixture.componentInstance;

@@ -61,6 +61,12 @@ npm install -g pnpm
 pnpm install
 ```
 
+Approve the build for the listed packages warned by pnpm after installation:
+
+```bash
+pnpm approve-builds
+```
+
 ### Frontend (Angular)
 
 For development:
@@ -132,6 +138,14 @@ Generate a OS-based zip file:
 
 ```bash
 pnpm run make
+```
+
+### Debugging
+
+When debugging with unexpected crashes such as `electron-forge make`
+
+```bash
+DEBUG=electron-forge:\* pnpm electron-forge make
 ```
 
 ### Actual project and end-to-end tests

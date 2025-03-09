@@ -17,9 +17,9 @@ $primary-theme: mat.m2-define-light-theme(
     color: (
       primary: var.$primary,
       accent: var.$accent,
-      warn: var.$warn,
+      warn: var.$warn
     ),
-    typography: var.$typography,
+    typography: var.$typography
   )
 );
 
@@ -53,4 +53,13 @@ $primary-theme: mat.m2-define-light-theme(
 
 .icon-contrast {
   color: mat.m2-get-color-from-palette(var.$remark, 500-contrast) !important;
+}
+
+// Create a single density configuration
+.density-compact {
+  @include mat.form-field-density(-4);
+  @include mat.input-density(-4);
+  @include mat.select-density(-4);
+  @include mat.button-density(-4);
+  @include mat.icon-button-density(-4);
 }

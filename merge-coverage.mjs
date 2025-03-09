@@ -1,7 +1,8 @@
 'use strict';
-const { glob } = require('glob');
-const { readFileSync, writeFileSync } = require('fs');
-const { resolve } = require('path');
+
+import { glob } from 'glob';
+import { readFileSync, writeFileSync } from 'fs';
+import { resolve } from 'path';
 
 async function getLcovFiles() {
   try {

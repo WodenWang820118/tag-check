@@ -3,6 +3,7 @@ import { ScrollTag } from './scroll-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
 import { EventTagConfig, TagTypeEnum, Trigger } from '@utils';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('ScrollTag', () => {
   let scrollTag: ScrollTag;
@@ -46,7 +47,7 @@ describe('ScrollTag', () => {
       const containerId = 'container456';
       const triggers: Trigger[] = []; // No triggers matching 'event scroll'
 
-      jest.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
+      vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
 
       // Act
       const result = scrollTag.createScrollTag(
@@ -72,19 +73,19 @@ describe('ScrollTag', () => {
         }
       ];
 
-      jest.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(true);
+      vi.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(true);
 
-      jest
-        .spyOn(parameterUtils, 'createTemplateParameter')
-        .mockImplementation((key, value) => ({ type: 'TEMPLATE', key, value }));
+      vi.spyOn(parameterUtils, 'createTemplateParameter').mockImplementation(
+        (key, value) => ({ type: 'TEMPLATE', key, value })
+      );
 
-      jest.spyOn(parameterUtils, 'createBooleanParameter').mockReturnValue({
+      vi.spyOn(parameterUtils, 'createBooleanParameter').mockReturnValue({
         type: 'BOOLEAN',
         key: 'sendEcommerceData',
         value: 'false'
       });
 
-      jest.spyOn(parameterUtils, 'createBuiltInListParameter').mockReturnValue({
+      vi.spyOn(parameterUtils, 'createBuiltInListParameter').mockReturnValue({
         type: 'LIST',
         key: 'eventParameters',
         list: [
@@ -105,19 +106,20 @@ describe('ScrollTag', () => {
           }
         ]
       });
-      jest
-        .spyOn(parameterUtils, 'createMapParameter')
-        .mockImplementation((key, value) => ({
+      vi.spyOn(parameterUtils, 'createMapParameter').mockImplementation(
+        (key, value) => ({
           type: 'MAP',
           map: [{ type: 'TEMPLATE', key, value }]
-        }));
-      jest
-        .spyOn(parameterUtils, 'createTagReferenceParameter')
-        .mockImplementation((key, value) => ({
-          type: 'TAG_REFERENCE',
-          key,
-          value
-        }));
+        })
+      );
+      vi.spyOn(
+        parameterUtils,
+        'createTagReferenceParameter'
+      ).mockImplementation((key, value) => ({
+        type: 'TAG_REFERENCE',
+        key,
+        value
+      }));
 
       // Act
       const result = scrollTag.createScrollTag(

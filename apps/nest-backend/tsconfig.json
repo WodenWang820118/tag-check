@@ -21,6 +21,7 @@
     "noImplicitReturns": false,
     "noFallthroughCasesInSwitch": true,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "target": "ES2022"
   }
 }

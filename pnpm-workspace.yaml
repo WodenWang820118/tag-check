@@ -1,3 +1,21 @@
 packages:
-  - 'apps/**'
-  - 'libs/**'
+  - apps/**
+  - libs/**
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@parcel/watcher'
+  - '@swc/core'
+  - core-js
+  - core-js-pure
+  - electron
+  - electron-winstaller
+  - esbuild
+  - ffmpeg-static
+  - lmdb
+  - msgpackr-extract
+  - nx
+  - protobufjs
+  - puppeteer
+  - puppeteer-chromium-resolver
+  - sqlite3
+  - tag-check

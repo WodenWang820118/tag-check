@@ -54,96 +54,80 @@ export class ReportTableFacadeService {
     private reportService: ReportService,
     private testRunningFacadeService: TestRunningFacadeService
   ) {
-    effect(
-      () => {
-        const filterValue = this.projectDataSourceService.getFilterSignal();
-        const currentDataSource = this.dataSource();
-        if (currentDataSource) {
-          currentDataSource.filter = filterValue;
-        }
-      },
-      {
-        allowSignalWrites: true
+    effect(() => {
+      const filterValue = this.projectDataSourceService.getFilterSignal();
+      const currentDataSource = this.dataSource();
+      if (currentDataSource) {
+        currentDataSource.filter = filterValue;
       }
-    );
+    });
 
     // 2b. Update Settings effect
-    effect(
-      () => {
-        const preventSignal =
-          this.projectDataSourceService.getPreventNavigationSignal();
-        if (preventSignal) {
-          const testEvents = this.selection().selected.map((item) => {
-            // Handle the toggle logic properly
-            const newStopNavigation =
-              item.stopNavigation === true ? false : true;
+    effect(() => {
+      const preventSignal =
+        this.projectDataSourceService.getPreventNavigationSignal();
+      if (preventSignal) {
+        const testEvents = this.selection().selected.map((item) => {
+          // Handle the toggle logic properly
+          const newStopNavigation = item.stopNavigation === true ? false : true;
 
-            return {
-              ...item,
-              stopNavigation: newStopNavigation
-            };
-          });
+          return {
+            ...item,
+            stopNavigation: newStopNavigation
+          };
+        });
 
-          // Update the data source with the same logic
-          this.dataSource().data = this.dataSource().data.map((item) => {
-            if (this.selection().selected.includes(item)) {
-              item.stopNavigation = item.stopNavigation === true ? false : true;
-            }
-            return item;
-          });
+        // Update the data source with the same logic
+        this.dataSource().data = this.dataSource().data.map((item) => {
+          if (this.selection().selected.includes(item)) {
+            item.stopNavigation = item.stopNavigation === true ? false : true;
+          }
+          return item;
+        });
 
-          this.reportService
-            .updateTestEvents(this.projectSlug(), testEvents)
-            .pipe(take(1))
-            .subscribe();
+        this.reportService
+          .updateTestEvents(this.projectSlug(), testEvents)
+          .pipe(take(1))
+          .subscribe();
 
-          this.projectDataSourceService.setPreventNavigationSignal(false);
-        }
-      },
-      {
-        allowSignalWrites: true
+        this.projectDataSourceService.setPreventNavigationSignal(false);
       }
-    );
+    });
 
     // 2c. Delete Confirmation effect
-    effect(
-      () => {
-        const deletedSignal = this.projectDataSourceService.getDeletedSignal();
-        if (deletedSignal) {
-          const dialogRef = this.dialog.open(InformationDialogComponent, {
-            data: {
-              title: 'Delete Reports',
-              contents: 'Are you sure you want to delete the selected reports?',
-              action: 'Delete',
-              actionColor: 'warn',
-              consent: false
-            }
-          });
+    effect(() => {
+      const deletedSignal = this.projectDataSourceService.getDeletedSignal();
+      if (deletedSignal) {
+        const dialogRef = this.dialog.open(InformationDialogComponent, {
+          data: {
+            title: 'Delete Reports',
+            contents: 'Are you sure you want to delete the selected reports?',
+            action: 'Delete',
+            actionColor: 'warn',
+            consent: false
+          }
+        });
 
-          dialogRef.afterClosed().subscribe((result) => {
-            if (result) {
-              const remainingReports = this.dataSource().data.filter(
-                (item) => !this.selection().selected.includes(item)
-              );
-              this.dataSource().data = remainingReports;
-              this.projectDataSourceService.setData(remainingReports);
+        dialogRef.afterClosed().subscribe((result) => {
+          if (result) {
+            const remainingReports = this.dataSource().data.filter(
+              (item) => !this.selection().selected.includes(item)
+            );
+            this.dataSource().data = remainingReports;
+            this.projectDataSourceService.setData(remainingReports);
 
-              this.reportService
-                .deleteBatchReports(
-                  this.projectSlug(),
-                  this.selection().selected.map((item) => item.eventId)
-                )
-                .pipe(take(1))
-                .subscribe();
-            }
-            this.projectDataSourceService.setDeletedSignal(false);
-          });
-        }
-      },
-      {
-        allowSignalWrites: true
+            this.reportService
+              .deleteBatchReports(
+                this.projectSlug(),
+                this.selection().selected.map((item) => item.eventId)
+              )
+              .pipe(take(1))
+              .subscribe();
+          }
+          this.projectDataSourceService.setDeletedSignal(false);
+        });
       }
-    );
+    });
   }
 
   initializeData(paginator: MatPaginator, sort: MatSort, data: any) {

@@ -58,18 +58,13 @@ export class ToolbarComponent {
     private route: ActivatedRoute
   ) {
     // Handle navigation with effect
-    effect(
-      () => {
-        this.router.events.subscribe((event) => {
-          if (event instanceof NavigationEnd) {
-            this.isHomeView.set(event.url === '/');
-          }
-        });
-      },
-      {
-        allowSignalWrites: true
-      }
-    );
+    effect(() => {
+      this.router.events.subscribe((event) => {
+        if (event instanceof NavigationEnd) {
+          this.isHomeView.set(event.url === '/');
+        }
+      });
+    });
   }
 
   onChangeProject(projectSlug: string) {
