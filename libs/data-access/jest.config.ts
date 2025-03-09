@@ -1,22 +1,10 @@
 export default {
   displayName: 'data-access',
-  preset: '../../jest.preset.js',
-  setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  globals: {},
+  preset: '../../jest.preset.mjs',
   coverageDirectory: '../../coverage/libs/data-access',
+  extensionsToTreatAsEsm: ['.ts', '.mts'],
   transform: {
-    '^.+\\.(ts|mjs|js|html)$': [
-      'jest-preset-angular',
-      {
-        tsconfig: '<rootDir>/tsconfig.spec.json',
-        stringifyContentPathRegex: '\\.(html|svg)$'
-      }
-    ]
+    '^.+\\.[tj]s$': 'ts-jest'
   },
-  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
-  snapshotSerializers: [
-    'jest-preset-angular/build/serializers/no-ng-attributes',
-    'jest-preset-angular/build/serializers/ng-snapshot',
-    'jest-preset-angular/build/serializers/html-comment'
-  ]
+  moduleFileExtensions: ['ts', 'js', 'html', 'mts']
 };

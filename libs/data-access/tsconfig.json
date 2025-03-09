@@ -10,10 +10,10 @@
     "composite": true,
     "declaration": true,
     "esModuleInterop": true,
-    "target": "ES2020",
-    "module": "esnext",
+    "module": "ESNext",
     "moduleResolution": "node",
-    "lib": ["ESNext", "dom", "dom.iterable", "webworker"] // support Worker and Angular SPA
+    "target": "ES2020",
+    "lib": ["ESNext", "dom", "dom.iterable", "webworker"]
   },
   "files": [],
   "include": [],

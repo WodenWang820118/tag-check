@@ -1,33 +1,29 @@
 import { defineConfig } from 'vite';
 import { builtinModules } from 'module';
 import { resolve } from 'path';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
-export default process.env.NODE_ENV === 'dev'
-  ? defineConfig({
-      build: {
-        outDir: '.', // Output to a dist folder at the root of your project
-        rollupOptions: {
-          external: ['sqlite3', ...builtinModules],
-          output: {
-            entryFileNames: 'main.js', // Output as main.js directly
-            format: 'cjs' // Use CommonJS format for Node.js compatibility
-          },
-          input: {
-            main: resolve(__dirname, 'src/main.ts') // Your main process entry file
-          }
-        },
-        commonjsOptions: {
-          ignoreDynamicRequires: true
-        }
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+export default defineConfig({
+  build: {
+    outDir: '.vite/build',
+    lib: {
+      entry: resolve(__dirname, 'src/main.ts'),
+      formats: ['es'],
+      fileName: () => 'main.mjs'
+    },
+    rollupOptions: {
+      external: ['sqlite3', ...builtinModules, 'electron'],
+      output: {
+        format: 'es'
       }
-    })
-  : defineConfig({
-      build: {
-        rollupOptions: {
-          external: ['sqlite3', ...builtinModules]
-        },
-        commonjsOptions: {
-          ignoreDynamicRequires: true
-        }
-      }
-    });
+    }
+  },
+  resolve: {
+    // Ensure .mjs extensions are properly handled
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
+  }
+});

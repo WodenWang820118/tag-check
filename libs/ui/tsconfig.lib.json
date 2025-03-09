@@ -11,8 +11,9 @@
   "exclude": [
     "src/**/*.spec.ts",
     "src/test-setup.ts",
-    "jest.config.ts",
-    "src/**/*.test.ts"
+    "jest.config.mjs",
+    "src/**/*.test.ts",
+    "jest.config.ts"
   ],
   "include": ["src/**/*.ts"]
 }

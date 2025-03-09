@@ -1,6 +1,6 @@
 export default {
   displayName: 'my-angular-workspace',
-  preset: '../../jest.preset.js',
+  preset: '../../jest.preset.mjs',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   coverageDirectory: '../../coverage/apps/my-angular-workspace',
   transform: {
@@ -17,5 +17,13 @@ export default {
     'jest-preset-angular/build/serializers/no-ng-attributes',
     'jest-preset-angular/build/serializers/ng-snapshot',
     'jest-preset-angular/build/serializers/html-comment'
-  ]
+  ],
+  testEnvironment: 'jsdom',
+  compilerOptions: {
+    baseUrl: '.',
+    paths: {
+      '@utils': ['libs/utils/src/index.ts'],
+      '@utils/*': ['libs/utils/src/*']
+    }
+  }
 };

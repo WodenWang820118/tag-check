@@ -1,23 +1,22 @@
-"use strict";
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 var _a;
-const require$$0$5 = require("electron");
-const require$$2 = require("path");
-const process$1 = require("process");
-const require$$0 = require("fs");
-const require$$0$1 = require("child_process");
-const require$$1 = require("os");
-const require$$0$2 = require("util");
-const require$$0$3 = require("events");
-const require$$0$4 = require("http");
-const require$$1$1 = require("https");
-const require$$2$1 = require("node:assert");
-const require$$3 = require("node:fs");
-const require$$4 = require("node:os");
-const require$$5 = require("node:path");
-const require$$6 = require("node:util");
+import require$$0$5, { BrowserWindow, app } from "electron";
+import require$$2, { join } from "path";
+import { cwd } from "process";
+import require$$0, { existsSync, mkdirSync } from "fs";
+import require$$0$1, { fork } from "child_process";
+import require$$1 from "os";
+import require$$0$2 from "util";
+import require$$0$3 from "events";
+import require$$0$4 from "http";
+import require$$1$1 from "https";
+import require$$2$1 from "node:assert";
+import require$$3 from "node:fs";
+import require$$4 from "node:os";
+import require$$5 from "node:path";
+import require$$6 from "node:util";
 const ROOT_PROJECT_NAME = "tag_check_projects";
 const ROOT_DATABASE_NAME = "data.sqlite3";
 const DEFAULT_PORT = "7001";
@@ -31,22 +30,22 @@ function getRootBackendFolderPath(env, resourcesPath) {
   switch (env) {
     case "dev":
     case "staging":
-      return require$$2.join(process$1.cwd(), "dist", "apps", "nest-backend");
+      return join(cwd(), "dist", "apps", "nest-backend");
     case "prod":
       return resourcesPath;
     default:
-      return require$$2.join(process$1.cwd(), "dist", "apps", "nest-backend");
+      return join(cwd(), "dist", "apps", "nest-backend");
   }
 }
 function getProductionFrontendPath(resourcesPath) {
-  return require$$2.join(resourcesPath, "ng-frontend", "browser", "index.html");
+  return join(resourcesPath, "ng-frontend", "browser", "index.html");
 }
 function getDevFrontendPath() {
-  return require$$2.join(process$1.cwd(), "dist", "apps", "ng-frontend", "browser", "index.html");
+  return join(cwd(), "dist", "apps", "ng-frontend", "browser", "index.html");
 }
 function createProjectSavingRootFolder(folderPath) {
-  if (!require$$0.existsSync(folderPath)) {
-    require$$0.mkdirSync(folderPath, { recursive: true });
+  if (!existsSync(folderPath)) {
+    mkdirSync(folderPath, { recursive: true });
   }
 }
 function getEnvironment() {
@@ -62,7 +61,7 @@ var hasRequiredElectronLogPreload;
 function requireElectronLogPreload() {
   if (hasRequiredElectronLogPreload) return electronLogPreload.exports;
   hasRequiredElectronLogPreload = 1;
-  (function(module2) {
+  (function(module) {
     let electron2 = {};
     try {
       electron2 = require("electron");
@@ -72,7 +71,7 @@ function requireElectronLogPreload() {
       initialize2(electron2);
     }
     {
-      module2.exports = initialize2;
+      module.exports = initialize2;
     }
     function initialize2({ contextBridge, ipcRenderer }) {
       if (!ipcRenderer) {
@@ -417,34 +416,27 @@ function requireRendererErrorHandler() {
   RendererErrorHandler_1 = RendererErrorHandler;
   return RendererErrorHandler_1;
 }
-var transform_1;
-var hasRequiredTransform;
-function requireTransform() {
-  if (hasRequiredTransform) return transform_1;
-  hasRequiredTransform = 1;
-  transform_1 = { transform: transform2 };
-  function transform2({
-    logger,
-    message,
-    transport,
-    initialData = (message == null ? void 0 : message.data) || [],
-    transforms = transport == null ? void 0 : transport.transforms
-  }) {
-    return transforms.reduce((data, trans) => {
-      if (typeof trans === "function") {
-        return trans({ data, logger, message, transport });
-      }
-      return data;
-    }, initialData);
-  }
-  return transform_1;
+var transform_1 = { transform: transform$5 };
+function transform$5({
+  logger,
+  message,
+  transport,
+  initialData = (message == null ? void 0 : message.data) || [],
+  transforms = transport == null ? void 0 : transport.transforms
+}) {
+  return transforms.reduce((data, trans) => {
+    if (typeof trans === "function") {
+      return trans({ data, logger, message, transport });
+    }
+    return data;
+  }, initialData);
 }
 var console_1$1;
 var hasRequiredConsole;
 function requireConsole() {
   if (hasRequiredConsole) return console_1$1;
   hasRequiredConsole = 1;
-  const { transform: transform2 } = requireTransform();
+  const { transform: transform2 } = transform_1;
   console_1$1 = consoleTransportRendererFactory;
   const consoleMethods2 = {
     error: console.error,
@@ -529,7 +521,7 @@ var hasRequiredIpc;
 function requireIpc() {
   if (hasRequiredIpc) return ipc$1;
   hasRequiredIpc = 1;
-  const { transform: transform2 } = requireTransform();
+  const { transform: transform2 } = transform_1;
   ipc$1 = ipcTransportRendererFactory;
   const RESTRICTED_TYPES = /* @__PURE__ */ new Set([Promise, WeakMap, WeakSet]);
   function ipcTransportRendererFactory(logger) {
@@ -639,14 +631,14 @@ var hasRequiredRenderer;
 function requireRenderer() {
   if (hasRequiredRenderer) return renderer.exports;
   hasRequiredRenderer = 1;
-  (function(module2) {
+  (function(module) {
     const Logger2 = Logger_1;
     const RendererErrorHandler = requireRendererErrorHandler();
     const transportConsole2 = requireConsole();
     const transportIpc2 = requireIpc();
-    module2.exports = createLogger();
-    module2.exports.Logger = Logger2;
-    module2.exports.default = module2.exports;
+    module.exports = createLogger();
+    module.exports.Logger = Logger2;
+    module.exports.default = module.exports;
     function createLogger() {
       const logger = new Logger2({
         allowUnknownLevel: true,
@@ -736,8 +728,8 @@ function tryReadJsonAt(...searchPaths) {
     return void 0;
   }
 }
-function findUp(fileName, cwd) {
-  let currentPath = cwd;
+function findUp(fileName, cwd2) {
+  let currentPath = cwd2;
   while (true) {
     const parsedPath = path$5.parse(currentPath);
     const root = parsedPath.root;
@@ -1509,7 +1501,7 @@ let EventLogger$1 = class EventLogger {
   }
 };
 var EventLogger_1 = EventLogger$1;
-const { transform: transform$4 } = requireTransform();
+const { transform: transform$4 } = transform_1;
 var format$2 = {
   concatFirstStringElements: concatFirstStringElements$2,
   format({ message, logger, transport, data = message == null ? void 0 : message.data }) {
@@ -1636,9 +1628,9 @@ function formatText({ data }) {
   return result;
 }
 var object = { exports: {} };
-(function(module2) {
+(function(module) {
   const util = require$$0$2;
-  module2.exports = {
+  module.exports = {
     serialize,
     maxDepth({ data, transport, depth = (transport == null ? void 0 : transport.depth) ?? 6 }) {
       if (!data) {
@@ -1650,7 +1642,7 @@ var object = { exports: {} };
         return data;
       }
       if (Array.isArray(data)) {
-        return data.map((child) => module2.exports.maxDepth({
+        return data.map((child) => module.exports.maxDepth({
           data: child,
           depth: depth - 1
         }));
@@ -1670,7 +1662,7 @@ var object = { exports: {} };
       const newJson = {};
       for (const i in data) {
         if (!Object.prototype.hasOwnProperty.call(data, i)) continue;
-        newJson[i] = module2.exports.maxDepth({
+        newJson[i] = module.exports.maxDepth({
           data: data[i],
           depth: depth - 1
         });
@@ -1797,7 +1789,7 @@ const {
   applyAnsiStyles,
   removeStyles: removeStyles$2
 } = style;
-const { transform: transform$3 } = requireTransform();
+const { transform: transform$3 } = transform_1;
 const consoleMethods = {
   error: console.error,
   warn: console.warn,
@@ -2075,7 +2067,7 @@ const fs = require$$0;
 const os = require$$1;
 const path = require$$2;
 const FileRegistry2 = FileRegistry_1;
-const { transform: transform$2 } = requireTransform();
+const { transform: transform$2 } = transform_1;
 const { removeStyles: removeStyles$1 } = style;
 const {
   format,
@@ -2202,7 +2194,7 @@ function getDefaultFileName(processType = process.type) {
   }
 }
 const { maxDepth: maxDepth$1, toJSON: toJSON$1 } = objectExports;
-const { transform: transform$1 } = requireTransform();
+const { transform: transform$1 } = transform_1;
 var ipc = ipcTransportFactory;
 function ipcTransportFactory(logger, { externalApi: externalApi2 }) {
   Object.assign(transport, {
@@ -2225,7 +2217,7 @@ function ipcTransportFactory(logger, { externalApi: externalApi2 }) {
 }
 const http = require$$0$4;
 const https = require$$1$1;
-const { transform } = requireTransform();
+const { transform } = transform_1;
 const { removeStyles } = style;
 const { toJSON, maxDepth } = objectExports;
 var remote = remoteTransportFactory;
@@ -2402,7 +2394,7 @@ const main = main$1;
 var main_1 = main;
 const log = /* @__PURE__ */ getDefaultExportFromCjs(main_1);
 log.initialize();
-const logFilePath = require$$2.join(
+const logFilePath = join(
   getRootBackendFolderPath(
     getEnvironment(),
     process.resourcesPath
@@ -2422,20 +2414,20 @@ function startBackend(resourcesPath, loadingWindow2) {
     resourcesPath
   );
   electronLog.debug("Starting backend service...");
-  const serverPath = require$$2.join(rootBackendFolderPath, "main.js");
+  const serverPath = join(rootBackendFolderPath, "main.js");
   const commonEnv = {
-    ROOT_PROJECT_PATH: require$$2.join(rootBackendFolderPath, ROOT_PROJECT_NAME),
-    DATABASE_PATH: require$$2.join(rootBackendFolderPath, ROOT_DATABASE_NAME)
+    ROOT_PROJECT_PATH: join(rootBackendFolderPath, ROOT_PROJECT_NAME),
+    DATABASE_PATH: join(rootBackendFolderPath, ROOT_DATABASE_NAME)
   };
   const devCommonEnv = {
-    ROOT_PROJECT_PATH: require$$2.join(
+    ROOT_PROJECT_PATH: join(
       rootBackendFolderPath,
       "..",
       "..",
       "..",
       ROOT_PROJECT_NAME
     ),
-    DATABASE_PATH: require$$2.join(
+    DATABASE_PATH: join(
       rootBackendFolderPath,
       "..",
       "..",
@@ -2480,7 +2472,7 @@ function startBackend(resourcesPath, loadingWindow2) {
     `Starting backend with environment: ${JSON.stringify(env, null, 2)}`
   );
   electronLog.info(`Starting backend with Server path: ${serverPath}`);
-  const child = require$$0$1.fork(serverPath, { env });
+  const child = fork(serverPath, { env });
   electronLog.debug(`Forked backend process with PID: ${child.pid}`);
   child.on("error", (err) => {
     electronLog.error(`Error in backend process: ${err}`);
@@ -2551,7 +2543,7 @@ function createLoadingWindow(resourcesPath) {
     return loadingWindow;
   }
   try {
-    loadingWindow = new require$$0$5.BrowserWindow({
+    loadingWindow = new BrowserWindow({
       width: 400,
       height: 200,
       frame: false,
@@ -2563,7 +2555,7 @@ function createLoadingWindow(resourcesPath) {
       "MAIN_WINDOW_VITE_DEV_SERVER_URL:",
       "http://localhost:5173"
     );
-    const productionUrl = require$$2.join(resourcesPath, "index.html");
+    const productionUrl = join(resourcesPath, "index.html");
     electronLog.info("productionUrl:", productionUrl);
     if ("http://localhost:5173") {
       loadingWindow.loadURL("http://localhost:5173");
@@ -2579,7 +2571,7 @@ function createLoadingWindow(resourcesPath) {
   }
 }
 function createWindow(resourcesPath) {
-  const mainWindow = new require$$0$5.BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
     alwaysOnTop: true,
@@ -2590,7 +2582,7 @@ function createWindow(resourcesPath) {
   try {
     const entryPath = getProductionFrontendPath(resourcesPath);
     electronLog.info(`Loading file: ${entryPath}`);
-    if (!require$$0.existsSync(entryPath)) {
+    if (!existsSync(entryPath)) {
       const devFrontendPath = getDevFrontendPath();
       mainWindow.loadFile(devFrontendPath);
       mainWindow.webContents.openDevTools();
@@ -3021,10 +3013,10 @@ updateElectronApp_1({
 });
 let server;
 let db;
-require$$0$5.app.commandLine.appendSwitch("disable-gpu");
-require$$0$5.app.commandLine.appendSwitch("use-gl", "desktop");
-require$$0$5.app.whenReady().then(async () => {
-  const projectSavingFolder = require$$2.join(
+app.commandLine.appendSwitch("disable-gpu");
+app.commandLine.appendSwitch("use-gl", "desktop");
+app.whenReady().then(async () => {
+  const projectSavingFolder = join(
     getRootBackendFolderPath(
       getEnvironment(),
       process.resourcesPath
@@ -3056,12 +3048,12 @@ require$$0$5.app.whenReady().then(async () => {
     electronLog.info(`Backend exited with code ${code} and signal ${signal}`);
   });
 });
-require$$0$5.app.on("window-all-closed", () => {
+app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
-    require$$0$5.app.quit();
+    app.quit();
   }
 });
-require$$0$5.app.on("before-quit", async () => {
+app.on("before-quit", async () => {
   electronLog.info("App is about to quit. Performing cleanup...");
   if (server) {
     server.kill();
@@ -3076,5 +3068,5 @@ require$$0$5.app.on("before-quit", async () => {
   await new Promise((resolve) => {
     setTimeout(resolve, 1e3);
   });
-  require$$0$5.app.quit();
+  app.quit();
 });

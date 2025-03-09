@@ -1,7 +1,7 @@
 /* eslint-disable */
 export default {
   displayName: 'ng-tag-build',
-  preset: '../../jest.preset.js',
+  preset: '../../jest.preset.mjs',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   coverageDirectory: '../../coverage/apps/ng-tag-build',
   transform: {

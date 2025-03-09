@@ -1,7 +1,8 @@
 {
   "name": "tag-check",
   "version": "1.2.1",
-  "main": "dist/main.js",
+  "type": "module",
+  "main": ".vite/build/main.mjs",
   "author": "Guan Xin Wang",
   "description": "A tool to verify Google Tag Manager implementations on websites",
   "license": "MIT",
@@ -54,6 +55,7 @@
     "mock-reports-back": "nodemon mock/mock-server/mock-reports-backend.js",
     "mock-settings-back": "nodemon mock/mock-server/mock-settings-backend.js",
     "testing": "-----------------all testing scripts-----------------",
+    "test:data-access": "nx test data-access --experimental-vm-modules",
     "test:cov": "nx run-many --target=test --parallel=6 --coverage --verbose --exclude=**/nest-backend,**/e2e && pnpm run test-back:cov && node ./merge-coverage.mjs",
     "test-back:cov": "vitest --coverage --root=apps/nest-backend --exclude=**/test/*e2e-spec.ts --watch=false",
     "test-back:e2e": "cross-env-shell WEB_SOCKET=7003 \"vitest --coverage --root=apps/nest-backend/test --watch=false\"",
@@ -212,7 +214,7 @@
     "tsc": "^2.0.4",
     "typescript": "5.7.3",
     "unplugin-swc": "^1.5.1",
-    "vite": "^5.4.14",
+    "vite": "^5.0.0",
     "vitest": "^2.1.9",
     "webpack-merge": "^6.0.1",
     "zone.js": "0.15.0"
