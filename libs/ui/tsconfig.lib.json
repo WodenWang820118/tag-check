@@ -6,6 +6,7 @@
     "declarationMap": true,
     "inlineSources": true,
     "composite": true,
+    "useDefineForClassFields": false,
     "types": []
   },
   "exclude": [

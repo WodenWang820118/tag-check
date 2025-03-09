@@ -3,6 +3,7 @@ import { ScrollTrigger } from './scroll-trigger.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
 import { ScrollDepthTriggerConfig, TriggerTypeEnum } from '@utils';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('scrollTrigger', () => {
   let service: ScrollTrigger;
@@ -14,11 +15,9 @@ describe('scrollTrigger', () => {
     TestBed.configureTestingModule({
       providers: [ScrollTrigger, ParameterUtils, EventUtils]
     });
-
     service = TestBed.inject(ScrollTrigger);
     parameterUtils = TestBed.inject(ParameterUtils);
     eventUtils = TestBed.inject(EventUtils);
-
     mockScrollTriggerConfig = {
       accountId: 'test-account',
       containerId: 'test-container',
@@ -44,50 +43,41 @@ describe('scrollTrigger', () => {
       accountId: 'test-account',
       containerId: 'test-container'
     });
-
     expect(result).toEqual(mockScrollTriggerConfig);
   });
 
   it('should create a scroll trigger when isIncludeScroll returns true', () => {
-    jest.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(true);
-
+    vi.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(true);
     const result = service.createScrollTrigger(
       'test-account',
       'test-container'
     );
-
     expect(result).toEqual([mockScrollTriggerConfig]);
   });
 
   it('should return an empty array when isIncludeScroll returns false', () => {
-    jest.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(false);
-
+    vi.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(false);
     const result = service.createScrollTrigger(
       'test-account',
       'test-container'
     );
-
     expect(result).toEqual([]);
   });
 
   it('should return an empty array and log error when an exception occurs', () => {
-    jest.spyOn(eventUtils, 'isIncludeScroll').mockImplementation(() => {
+    vi.spyOn(eventUtils, 'isIncludeScroll').mockImplementation(() => {
       throw new Error('Test error');
     });
-
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const result = service.createScrollTrigger(
       'test-account',
       'test-container'
     );
-
     expect(result).toEqual([]);
     expect(consoleSpy).toHaveBeenCalledWith(
       'Failed to create scroll trigger:',
       expect.any(Error)
     );
-
     consoleSpy.mockRestore();
   });
 });

@@ -3,6 +3,7 @@ import { VideoTag } from './video-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
 import { EventTagConfig, HTMLTagConfig, TagTypeEnum, Trigger } from '@utils';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('VideoTag', () => {
   let videoTag: VideoTag;
@@ -46,8 +47,8 @@ describe('VideoTag', () => {
       const containerId = 'container456';
       const triggers: Trigger[] = []; // No triggers matching 'event youtube video'
 
-      jest.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(true);
-      jest.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
+      vi.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(true);
+      vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
 
       // Act
       const result = videoTag.createVideoTag(
@@ -77,7 +78,7 @@ describe('VideoTag', () => {
         }
       ];
 
-      jest.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(true);
+      vi.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(true);
 
       // Act
       const result = videoTag.createVideoTag(

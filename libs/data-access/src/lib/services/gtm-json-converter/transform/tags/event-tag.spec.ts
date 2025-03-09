@@ -1,4 +1,8 @@
 import { TestBed } from '@angular/core/testing';
+import {
+  BrowserDynamicTestingModule,
+  platformBrowserDynamicTesting
+} from '@angular/platform-browser-dynamic/testing';
 import { EventTag } from './event-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventTagConfig, Tag, TagTypeEnum, Trigger } from '@utils';
@@ -11,7 +15,6 @@ describe('EventTag', () => {
     TestBed.configureTestingModule({
       providers: [EventTag, ParameterUtils]
     });
-
     eventTag = TestBed.inject(EventTag);
     parameterUtils = TestBed.inject(ParameterUtils);
   });
@@ -38,25 +41,25 @@ describe('EventTag', () => {
       }
     ];
 
-    jest.spyOn(parameterUtils, 'createBooleanParameter').mockReturnValue({
+    vi.spyOn(parameterUtils, 'createBooleanParameter').mockReturnValue({
       type: 'BOOLEAN',
       key: 'sendEcommerceData',
       value: 'false'
     });
 
-    jest.spyOn(parameterUtils, 'createTemplateParameter').mockReturnValue({
+    vi.spyOn(parameterUtils, 'createTemplateParameter').mockReturnValue({
       type: 'TEMPLATE',
       key: 'eventName',
       value: 'TestTag'
     });
 
-    jest.spyOn(parameterUtils, 'createListParameter').mockReturnValue({
+    vi.spyOn(parameterUtils, 'createListParameter').mockReturnValue({
       type: 'LIST',
       key: 'eventParameters',
       list: []
     });
 
-    jest.spyOn(parameterUtils, 'createTagReferenceParameter').mockReturnValue({
+    vi.spyOn(parameterUtils, 'createTagReferenceParameter').mockReturnValue({
       type: 'TAG_REFERENCE',
       key: 'measurementId',
       value: 'GoogleTag'
@@ -94,8 +97,8 @@ describe('EventTag', () => {
         consentStatus: 'NOT_SET'
       }
     };
-    expect(result).toEqual(expectedTag);
 
+    expect(result).toEqual(expectedTag);
     expect(parameterUtils.createBooleanParameter).toHaveBeenCalledWith(
       'sendEcommerceData',
       'false'

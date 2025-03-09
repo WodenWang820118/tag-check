@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { VideoTrigger } from './video-trigger.service';
 import { EventUtils } from '../../utils/event-utils.service';
 import { TriggerTypeEnum, YouTubeVideoTriggerConfig } from '@utils';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 describe('VideoTrigger', () => {
   let service: VideoTrigger;
@@ -49,7 +50,7 @@ describe('VideoTrigger', () => {
   });
 
   it('should create a video trigger when isIncludeVideo returns true', () => {
-    jest.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(true);
+    vi.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(true);
 
     const result = service.createVideoTrigger('test-account', 'test-container');
 
@@ -58,7 +59,7 @@ describe('VideoTrigger', () => {
   });
 
   it('should return an empty array when isIncludeVideo returns false', () => {
-    jest.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(false);
+    vi.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(false);
 
     const result = service.createVideoTrigger('test-account', 'test-container');
 
@@ -67,11 +68,11 @@ describe('VideoTrigger', () => {
   });
 
   it('should return an empty array and log error when an exception occurs', () => {
-    jest.spyOn(eventUtils, 'isIncludeVideo').mockImplementation(() => {
+    vi.spyOn(eventUtils, 'isIncludeVideo').mockImplementation(() => {
       throw new Error('Test error');
     });
 
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const result = service.createVideoTrigger('test-account', 'test-container');
 

@@ -1,9 +1,7 @@
 {
   "extends": "./../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "System",
-    "target": "es2022",
-    "useDefineForClassFields": false,
+    "target": "es2020",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
