@@ -140,6 +140,14 @@ Generate a OS-based zip file:
 pnpm run make
 ```
 
+### Debugging
+
+When debugging with unexpected crashes such as `electron-forge make`
+
+```bash
+DEBUG=electron-forge:\* pnpm electron-forge make
+```
+
 ### Actual project and end-to-end tests
 
 Please refer `tag_check_projects` folder where manages projects under the root direcetory. The `ng_gtm_integration_sample` project within is utilized for end-to-end tests for both backend and frontend. Moreover, the project is also used for development purposes.

@@ -1,11 +1,11 @@
 import { test, expect, Page, ElectronApplication } from '@playwright/test';
-const { _electron: electron } = require('playwright');
+import { _electron as electron } from 'playwright';
 
 test('should open the app', async () => {
   // Launch Electron app.
   test.setTimeout(120000);
   const electronApp: ElectronApplication = await electron.launch({
-    args: ['main.js'],
+    args: ['main.mjs'],
     env: {
       ...process.env,
       NODE_ENV: 'dev'

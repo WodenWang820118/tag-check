@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { EventUtils } from './event-utils.service';
 import { DataLayer } from '@utils';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 describe('EventUtils', () => {
   let service: EventUtils;
@@ -13,7 +14,7 @@ describe('EventUtils', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks(); // Changed from jest.restoreAllMocks()
   });
 
   it('should be created', () => {
