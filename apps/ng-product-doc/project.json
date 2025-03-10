@@ -1,0 +1,55 @@
+{
+  "name": "ng-product-doc",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@analogjs/platform:vite",
+      "defaultConfiguration": "production",
+      "configurations": {
+        "development": {
+          "mode": "development"
+        },
+        "production": {
+          "sourcemap": false,
+          "mode": "production"
+        }
+      },
+      "outputs": [
+        "{options.outputPath}",
+        "{workspaceRoot}/dist/apps/ng-product-doc/.nitro",
+        "{workspaceRoot}/dist/apps/ng-product-doc/ssr",
+        "{workspaceRoot}/dist/apps/ng-product-doc/analog"
+      ],
+      "options": {
+        "main": "apps/ng-product-doc/src/main.ts",
+        "configFile": "apps/ng-product-doc/vite.config.ts",
+        "outputPath": "dist/apps/ng-product-doc/client",
+        "tsConfig": "apps/ng-product-doc/tsconfig.app.json"
+      }
+    },
+    "serve": {
+      "executor": "@analogjs/platform:vite-dev-server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "ng-product-doc:build",
+        "port": 4200
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "ng-product-doc:build:development",
+          "hmr": true
+        },
+        "production": {
+          "buildTarget": "ng-product-doc:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "@analogjs/vitest-angular:test",
+      "outputs": ["{projectRoot}/coverage"]
+    }
+  },
+  "tags": [],
+  "sourceRoot": "apps/ng-product-doc/src"
+}

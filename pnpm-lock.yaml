@@ -583,8 +583,6 @@ importers:
         specifier: 0.15.0
         version: 0.15.0
 
-  apps/analog-app: {}
-
 packages:
 
   '@adobe/css-tools@4.3.3':
