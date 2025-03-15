@@ -1,3 +1,5 @@
+// TODO: might be removed in the future
+/* You can add global styles to this file, and also import other style files */
 @use '@angular/material' as mat;
 @use 'variables' as var;
 @include mat.core();
@@ -22,6 +24,21 @@ $primary-theme: mat.m2-define-light-theme(
     typography: var.$typography
   )
 );
+
+// define custom theme mixin with theme
+@mixin custom-button-toggle-theme($theme) {
+  // custome css class
+  .custom-mat-button-toggle {
+    background-color: mat.m2-get-color-from-palette(
+      var.$primary,
+      500
+    ) !important;
+    color: mat.m2-get-color-from-palette(var.$primary, 500-contrast) !important;
+  }
+}
+
+@include custom-button-toggle-theme($primary-theme);
+@include mat.all-component-themes($primary-theme);
 
 .secondary {
   background-color: mat.m2-get-color-from-palette(
@@ -48,37 +65,3 @@ $primary-theme: mat.m2-define-light-theme(
   @include mat.button-density(-4);
   @include mat.icon-button-density(-4);
 }
-
-// define custom theme mixin with theme
-@mixin custom-button-toggle-theme($theme) {
-  // custome css class
-  .custom-mat-button-toggle {
-    background-color: mat.m2-get-color-from-palette(
-      var.$primary,
-      500
-    ) !important;
-    color: mat.m2-get-color-from-palette(var.$primary, 500-contrast) !important;
-  }
-}
-
-// define custom tree node theme mixin
-@mixin custom-tree-node-theme($theme) {
-  .mat-tree-node.active-node,
-  .mat-mdc-tree-node.active-node {
-    border-radius: 50px;
-    background-color: mat.m2-get-color-from-palette(
-      var.$secondary,
-      200
-    ) !important;
-    color: mat.m2-get-color-from-palette(var.$primary, 900) !important;
-
-    // Style for links inside active nodes
-    a {
-      color: mat.m2-get-color-from-palette(var.$primary, 900) !important;
-    }
-  }
-}
-
-@include custom-button-toggle-theme($primary-theme);
-@include mat.all-component-themes($primary-theme);
-@include custom-tree-node-theme($primary-theme);

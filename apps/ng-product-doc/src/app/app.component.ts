@@ -1,9 +1,17 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
-  selector: 'ng-product-doc-root',
   imports: [RouterOutlet],
-  template: ` <router-outlet></router-outlet> `
+  selector: 'app-root',
+  template: `<router-outlet />`,
+  styles: [``]
 })
-export class AppComponent {}
+export class AppComponent implements OnInit {
+  title = 'TagCheck';
+  constructor(private router: Router) {}
+
+  ngOnInit() {
+    this.router.navigate(['/documentation']);
+  }
+}

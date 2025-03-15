@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { XlsxProcessService } from '../xlsx-process/xlsx-process.service';
 import { Observable } from 'rxjs/internal/Observable';
 import { take, filter, tap, catchError, EMPTY } from 'rxjs';
@@ -7,10 +7,13 @@ import { WebWorkerService } from '../web-worker/web-worker.service';
 import { Dialog } from '@angular/cdk/dialog';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class XlsxProcessFacade {
   // Expose the necessary observables directly
+  private xlsxProcessService = inject(XlsxProcessService);
+  private webWorkerService = inject(WebWorkerService);
+  private dialog = inject(Dialog);
   workbook$ = this.xlsxProcessService.workbook$;
   worksheetNames$ = this.xlsxProcessService.worksheetNames$;
   fileName$ = this.xlsxProcessService.fileName$;
@@ -20,12 +23,6 @@ export class XlsxProcessFacade {
   displayedFailedEvents$ = this.xlsxProcessService.getDisplayedFailedEvents();
   isRenderingJson$ = this.xlsxProcessService.getIsRenderingJson();
   isPreviewing$ = this.xlsxProcessService.getIsPreviewing();
-
-  constructor(
-    private xlsxProcessService: XlsxProcessService,
-    private webWorkerService: WebWorkerService,
-    private dialog: Dialog
-  ) {}
 
   onCloseOverlay(): void {
     this.xlsxProcessService.setIsPreviewing(true);
@@ -98,15 +95,15 @@ export class XlsxProcessFacade {
     this.webWorkerService.postMessage('message', {
       action,
       data,
-      name,
+      name
     });
   }
 
   private handlePostError(titleName: string) {
     this.dialog.open(ErrorDialogComponent, {
       data: {
-        message: `Failed to extract specs from the title: ${titleName}`,
-      },
+        message: `Failed to extract specs from the title: ${titleName}`
+      }
     });
   }
 

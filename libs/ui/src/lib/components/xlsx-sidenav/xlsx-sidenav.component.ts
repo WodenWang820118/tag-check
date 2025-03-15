@@ -4,8 +4,9 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  inject,
   OnDestroy,
-  ViewChild,
+  ViewChild
 } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { EventBusService, XlsxProcessFacade } from '@data-access';
@@ -18,14 +19,14 @@ import {
   takeUntil,
   takeWhile,
   tap,
-  timer,
+  timer
 } from 'rxjs';
 import { ViewEncapsulation } from '@angular/core';
 import {
   FormBuilder,
   FormsModule,
   ReactiveFormsModule,
-  Validators,
+  Validators
 } from '@angular/forms';
 import { ProgressSpinnerComponent } from '../progress-spinner/progress-spinner.component';
 import { CustomMatTableComponent } from '../custom-mat-table/custom-mat-table.component';
@@ -46,13 +47,17 @@ import { MatTableModule } from '@angular/material/table';
     ReactiveFormsModule,
     MatIconModule,
     ProgressSpinnerComponent,
-    CustomMatTableComponent,
+    CustomMatTableComponent
   ],
   templateUrl: `./xlsx-sidenav.component.html`,
   styleUrls: ['./xlsx-sidenav.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None
 })
 export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
+  public xlsxFacadeService = inject(XlsxProcessFacade);
+  private eventBusService = inject(EventBusService);
+  private fb = inject(FormBuilder);
+
   @ViewChild('sidenav') sidenav: MatSidenav | undefined;
   @ViewChild('scrollContainer', { static: false }) scrollContainer!: ElementRef;
 
@@ -80,17 +85,11 @@ export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
   dataColumnNameString = 'dataLayer Specs';
   form = this.fb.group({
     worksheetNames: [''],
-    dataColumnName: [this.dataColumnNameString, Validators.required],
+    dataColumnName: [this.dataColumnNameString, Validators.required]
   });
 
   numTotalTags$ = this.xlsxFacadeService.getNumTotalEvents();
   numParsedTags$ = this.xlsxFacadeService.getNumParsedEvents();
-
-  constructor(
-    private eventBusService: EventBusService,
-    private fb: FormBuilder,
-    public xlsxFacadeService: XlsxProcessFacade
-  ) {}
 
   // Lifecycle hooks
   ngAfterViewInit() {
@@ -121,7 +120,7 @@ export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
       this.xlsxFacadeService.workbook$,
       this.xlsxFacadeService.dataSource$,
       this.xlsxFacadeService.displayedDataSource$,
-      this.xlsxFacadeService.displayedColumns$,
+      this.xlsxFacadeService.displayedColumns$
     ]).pipe(
       takeWhile(([timer]) => timer <= spinningTime),
       tap(
@@ -130,7 +129,7 @@ export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
           workbook,
           dataSource,
           displayedDataSource,
-          displayedColumns,
+          displayedColumns
         ]) => {
           if (
             !workbook ||

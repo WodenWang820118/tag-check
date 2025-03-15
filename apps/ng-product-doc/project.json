@@ -2,54 +2,104 @@
   "name": "ng-product-doc",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/ng-product-doc/src",
+  "tags": [],
   "targets": {
     "build": {
-      "executor": "@analogjs/platform:vite",
-      "defaultConfiguration": "production",
+      "executor": "@angular-devkit/build-angular:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/ng-product-doc",
+        "index": "apps/ng-product-doc/src/index.html",
+        "browser": "apps/ng-product-doc/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/ng-product-doc/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/ng-product-doc/public"
+          },
+          {
+            "input": "libs/utils/src/lib/assets",
+            "glob": "**/*",
+            "output": "/assets/"
+          }
+        ],
+        "styles": [
+          "@angular/material/prebuilt-themes/indigo-pink.css",
+          "apps/ng-product-doc/src/styles.scss",
+          "node_modules/prismjs/themes/prism-okaidia.css",
+          "node_modules/prismjs/plugins/command-line/prism-command-line.css"
+        ],
+        "scripts": [
+          "node_modules/prismjs/prism.js",
+          "node_modules/prismjs/components/prism-markup.min.js",
+          "node_modules/prismjs/components/prism-javascript.min.js",
+          "node_modules/prismjs/components/prism-typescript.min.js",
+          "node_modules/prismjs/plugins/command-line/prism-command-line.js"
+        ]
+      },
       "configurations": {
-        "development": {
-          "mode": "development"
-        },
         "production": {
-          "sourcemap": false,
-          "mode": "production"
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
         }
       },
-      "outputs": [
-        "{options.outputPath}",
-        "{workspaceRoot}/dist/apps/ng-product-doc/.nitro",
-        "{workspaceRoot}/dist/apps/ng-product-doc/ssr",
-        "{workspaceRoot}/dist/apps/ng-product-doc/analog"
-      ],
-      "options": {
-        "main": "apps/ng-product-doc/src/main.ts",
-        "configFile": "apps/ng-product-doc/vite.config.ts",
-        "outputPath": "dist/apps/ng-product-doc/client",
-        "tsConfig": "apps/ng-product-doc/tsconfig.app.json"
-      }
+      "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@analogjs/platform:vite-dev-server",
-      "defaultConfiguration": "development",
-      "options": {
-        "buildTarget": "ng-product-doc:build",
-        "port": 4200
-      },
+      "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
-        "development": {
-          "buildTarget": "ng-product-doc:build:development",
-          "hmr": true
-        },
         "production": {
           "buildTarget": "ng-product-doc:build:production"
+        },
+        "development": {
+          "buildTarget": "ng-product-doc:build:development"
         }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "ng-product-doc:build"
       }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
     },
     "test": {
       "executor": "@analogjs/vitest-angular:test",
-      "outputs": ["{projectRoot}/coverage"]
+      "options": {
+        "passWithNoTests": true
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "ng-product-doc:build",
+        "port": 4200,
+        "staticFilePath": "dist/apps/ng-product-doc/browser",
+        "spa": true
+      }
     }
-  },
-  "tags": [],
-  "sourceRoot": "apps/ng-product-doc/src"
+  }
 }

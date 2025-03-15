@@ -6,9 +6,8 @@ import {
 
 export const APP_ROUTES: Route[] = [
   {
-    path: 'help-center',
-    loadChildren: () =>
-      import('./modules/help-center/routes').then((m) => m.HELP_CENTER_ROUTES)
+    path: 'documentation',
+    loadChildren: () => import('@ui').then((m) => m.DOCS_ROUTES)
   },
   {
     path: 'projects/:projectSlug',

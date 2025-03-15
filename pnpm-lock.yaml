@@ -116,6 +116,9 @@ importers:
       multer:
         specifier: 1.4.5-lts.1
         version: 1.4.5-lts.1
+      ngx-scrollbar:
+        specifier: ^18.0.0
+        version: 18.0.0(@angular/cdk@19.1.5(@angular/common@19.1.8(@angular/core@19.1.8(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/core@19.1.8(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/common@19.1.8(@angular/core@19.1.8(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/core@19.1.8(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2)
       prism-react-renderer:
         specifier: ^2.4.1
         version: 2.4.1(react@18.3.1)
@@ -11181,6 +11184,14 @@ packages:
       marked: ^15.0.0
       rxjs: ^6.5.3 || ^7.4.0
       zone.js: ~0.15.0
+
+  ngx-scrollbar@18.0.0:
+    resolution: {integrity: sha512-+ykmY491x+nzXvnecJvZHvDz0YWuX1r7SYMxNG4RVHXm5Z68P/8kd/3ryLD6DXdNWmJawd4NGvqq2ZkUKb/g3A==}
+    peerDependencies:
+      '@angular/cdk': '>=19.0.0'
+      '@angular/common': '>=19.0.0'
+      '@angular/core': '>=19.0.0'
+      rxjs: '>=7.0.0'
 
   nice-try@1.0.5:
     resolution: {integrity: sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==}
@@ -30123,6 +30134,14 @@ snapshots:
       prismjs: 1.29.0
     transitivePeerDependencies:
       - supports-color
+
+  ngx-scrollbar@18.0.0(@angular/cdk@19.1.5(@angular/common@19.1.8(@angular/core@19.1.8(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/core@19.1.8(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/common@19.1.8(@angular/core@19.1.8(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/core@19.1.8(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2):
+    dependencies:
+      '@angular/cdk': 19.1.5(@angular/common@19.1.8(@angular/core@19.1.8(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2))(@angular/core@19.1.8(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2)
+      '@angular/common': 19.1.8(@angular/core@19.1.8(rxjs@7.8.2)(zone.js@0.15.0))(rxjs@7.8.2)
+      '@angular/core': 19.1.8(rxjs@7.8.2)(zone.js@0.15.0)
+      rxjs: 7.8.2
+      tslib: 2.8.1
 
   nice-try@1.0.5: {}
 

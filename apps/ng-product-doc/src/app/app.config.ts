@@ -1,20 +1,25 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import {
-  provideHttpClient,
-  withFetch,
-  withInterceptors
-} from '@angular/common/http';
-import { provideClientHydration } from '@angular/platform-browser';
-import { provideFileRouter, requestContextInterceptor } from '@analogjs/router';
+  ApplicationConfig,
+  importProvidersFrom,
+  provideZoneChangeDetection,
+  SecurityContext
+} from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { appRoutes } from './app.routes';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { provideHttpClient } from '@angular/common/http';
+import { MarkdownModule } from 'ngx-markdown';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideFileRouter(),
-    provideClientHydration(),
-    provideHttpClient(
-      withFetch(),
-      withInterceptors([requestContextInterceptor])
+    provideRouter(appRoutes),
+    provideAnimationsAsync(),
+    provideHttpClient(),
+    importProvidersFrom(
+      MarkdownModule.forRoot({
+        sanitize: SecurityContext.NONE
+      })
     )
   ]
 };

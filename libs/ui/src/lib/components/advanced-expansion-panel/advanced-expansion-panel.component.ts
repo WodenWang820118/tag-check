@@ -8,7 +8,8 @@ import {
   viewChild,
   ViewEncapsulation,
   effect,
-  Signal
+  Signal,
+  inject
 } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormBuilder } from '@angular/forms';
@@ -47,6 +48,13 @@ import { GeneralEditorComponent } from '../general-editor/general-editor.compone
   encapsulation: ViewEncapsulation.None
 })
 export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
+  private fb = inject(FormBuilder);
+  private dialog = inject(MatDialog);
+  private editorFacadeService = inject(EditorFacadeService);
+  private setupConstructorService = inject(SetupConstructorService);
+  private esvEditorService = inject(EsvEditorService);
+  private destroyRef = inject(DestroyRef);
+
   form: FormGroup = this.fb.group({
     includeVideoTag: [false],
     includeScrollTag: [false],
@@ -76,14 +84,7 @@ export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
     esv: string;
   }> = toSignal(this.ecAndEsvForm.valueChanges);
 
-  constructor(
-    private fb: FormBuilder,
-    private dialog: MatDialog,
-    private editorFacadeService: EditorFacadeService,
-    private setupConstructorService: SetupConstructorService,
-    private esvEditorService: EsvEditorService,
-    private destroyRef: DestroyRef
-  ) {
+  constructor() {
     // Setup form subscriptions using signals
     effect(() => {
       const setupFormValue = this.setupFormChanges$();

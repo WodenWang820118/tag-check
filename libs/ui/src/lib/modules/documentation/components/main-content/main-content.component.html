@@ -1,0 +1,32 @@
+<div class="docs-container" style="background-color: none">
+  <mat-sidenav-container class="docs-sidenav-container">
+    <mat-sidenav-content class="docs-content-wrapper">
+      <ng-scrollbar [thumbClass]="'scrollbar-thumb'">
+        <div id="markdown" class="docs-article-content">
+          <markdown [src]="fileName()" (ready)="onMarkdownReady()"></markdown>
+        </div>
+      </ng-scrollbar>
+    </mat-sidenav-content>
+
+    <mat-sidenav position="end" mode="side" opened class="docs-toc-sidenav">
+      <h2>On This Page</h2>
+      <div class="docs-toc-content">
+        @for (heading of toc(); track heading.id) {
+          <a
+            mat-list-item
+            class="docs-toc-item"
+            [ngClass]="{ 'active-section': activeSection === heading.id }"
+            (click)="scrollToSection(heading.id)"
+          >
+            {{ heading.text }}
+          </a>
+        }
+      </div>
+      <div class="back-to-top">
+        <button mat-button (click)="scrollToTop()">
+          <mat-icon>arrow_upward</mat-icon>Top
+        </button>
+      </div>
+    </mat-sidenav>
+  </mat-sidenav-container>
+</div>

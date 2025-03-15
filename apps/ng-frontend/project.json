@@ -17,12 +17,14 @@
         "tsConfig": "apps/ng-frontend/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
-          "apps/ng-frontend/src/favicon.ico",
-          "apps/ng-frontend/src/assets",
           {
-            "input": "libs/utils/src/lib/shared-docs",
             "glob": "**/*",
-            "output": "assets"
+            "input": "apps/ng-frontend/public"
+          },
+          {
+            "input": "libs/utils/src/lib/assets",
+            "glob": "**/*",
+            "output": "/assets/"
           }
         ],
         "styles": [
