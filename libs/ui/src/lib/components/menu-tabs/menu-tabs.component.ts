@@ -1,11 +1,8 @@
-// menu-tabs.component.ts
 import { Router, RouterModule } from '@angular/router';
 import { Component } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
-// import '@angular/localize/init'; // For $localize
-
 import { ɵ$localize } from '@angular/localize';
 
 interface Link {
@@ -20,13 +17,14 @@ interface Link {
   imports: [MatTabsModule, MatIconModule, RouterModule],
   template: `
     <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+      <!-- TODO: how to use @for to dynamically render all links with i18n -->
       <a
         mat-tab-link
         (click)="activeLink = links[0]; navigateTo(links[0].link)"
         [active]="activeLink === links[0]"
       >
         <mat-icon class="nav-icon">{{ links[0].icon }}</mat-icon>
-        <span i18n="@@nav.about">{{ links[0].nameKey }}</span>
+        <span i18n="@@nav.about" class="nav-text">{{ links[0].nameKey }}</span>
       </a>
 
       <a
@@ -36,7 +34,9 @@ interface Link {
         class="nav-link-container"
       >
         <mat-icon class="nav-icon">{{ links[1].icon }}</mat-icon>
-        <span i18n="@@nav.objectives">{{ links[1].nameKey }}</span>
+        <span i18n="@@nav.objectives" class="nav-text">{{
+          links[1].nameKey
+        }}</span>
       </a>
 
       <a
@@ -47,7 +47,7 @@ interface Link {
         class="nav-link-container"
       >
         <mat-icon class="nav-icon" svgIcon="github"></mat-icon>
-        <span i18n="@@nav.github">GitHub</span>
+        <span i18n="@@nav.github" class="nav-text">GitHub</span>
       </a>
     </nav>
     <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
@@ -63,6 +63,12 @@ interface Link {
         margin-right: 4px;
         display: flex;
         align-items: center;
+        color: white;
+      }
+      .nav-text {
+        display: flex;
+        align-items: center;
+        color: white;
       }
     `
   ]

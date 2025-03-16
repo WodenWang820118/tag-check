@@ -5,25 +5,11 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import {
   PreloadAllModules,
   provideRouter,
-  Route,
   withPreloading
 } from '@angular/router';
+import { routes } from './app.routes';
 
 const appLang = localStorage.getItem('locale') || 'en';
-const routes: Route[] = [
-  {
-    path: '',
-    loadComponent: () => import('@ui').then((m) => m.TagBuildAppComponent)
-  },
-  {
-    path: 'about',
-    loadComponent: () => import('@ui').then((m) => m.AboutComponent)
-  },
-  {
-    path: 'objectives',
-    loadComponent: () => import('@ui').then((m) => m.ObjectivesComponent)
-  }
-];
 
 export const appConfig: ApplicationConfig = {
   providers: [

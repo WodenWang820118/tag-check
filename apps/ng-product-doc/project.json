@@ -13,7 +13,7 @@
         "outputPath": "dist/apps/ng-product-doc",
         "index": "apps/ng-product-doc/src/index.html",
         "browser": "apps/ng-product-doc/src/main.ts",
-        "polyfills": ["zone.js"],
+        "polyfills": ["zone.js", "@angular/localize/init"],
         "tsConfig": "apps/ng-product-doc/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
