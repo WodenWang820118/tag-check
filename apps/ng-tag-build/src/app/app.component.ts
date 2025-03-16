@@ -6,8 +6,25 @@ import { ToolBarComponent, FooterComponent } from '@ui';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, ToolBarComponent, FooterComponent],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  template: `
+    <lib-toolbar></lib-toolbar>
+    <div class="app">
+      <router-outlet></router-outlet>
+    </div>
+    @defer (on viewport) {
+      <lib-footer></lib-footer>
+    } @placeholder {
+      <div></div>
+    }
+  `,
+  styles: [
+    `
+      .app {
+        margin-top: 3rem;
+        padding: 0 10rem 3rem;
+      }
+    `
+  ]
 })
 export class AppComponent implements OnInit {
   title = 'Tag Build';

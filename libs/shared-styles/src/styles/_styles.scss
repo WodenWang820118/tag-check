@@ -1,0 +1,100 @@
+@use '@angular/material' as mat;
+@use 'variables' as var;
+@use 'palette' as palette;
+@use 'mixin' as mixin;
+@use 'theme' as theme;
+
+@include mat.core();
+
+// CSS Variables
+:root {
+  --screen-tablet1: #{var.$screen-tablet1};
+  --screen-tablet2: #{var.$screen-tablet2};
+  --screen-tablet3: #{var.$screen-tablet3};
+}
+
+// Reset and base styles
+html {
+  -ms-overflow-style: -ms-autohiding-scrollbar;
+  box-sizing: border-box;
+  border-collapse: collapse;
+  width: 100%;
+  height: 100%;
+  font-size: 62.5%;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background-color: var.$back-light;
+  color: var.$text;
+  width: 100%;
+  height: 100%;
+}
+
+// Link styles
+a {
+  text-decoration: none;
+  cursor: pointer;
+  color: inherit;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Color utility classes
+.secondary {
+  background-color: mat.m2-get-color-from-palette(
+    palette.$secondary,
+    500
+  ) !important;
+  color: mat.m2-get-color-from-palette(
+    palette.$secondary,
+    500-contrast
+  ) !important;
+}
+
+.remark {
+  background-color: mat.m2-get-color-from-palette(
+    palette.$remark,
+    500
+  ) !important;
+  color: mat.m2-get-color-from-palette(
+    palette.$remark,
+    500-contrast
+  ) !important;
+}
+
+.icon-contrast {
+  color: mat.m2-get-color-from-palette(
+    palette.$remark,
+    500-contrast
+  ) !important;
+}
+
+// Density configuration
+.density-compact {
+  @include mat.form-field-density(-4);
+  @include mat.input-density(-4);
+  @include mat.select-density(-4);
+  @include mat.button-density(-4);
+  @include mat.icon-button-density(-4);
+}
+
+// Theme includes
+@include mat.all-component-themes(theme.$primary-theme);
+@include mixin.custom-button-toggle-theme(theme.$primary-theme);
+@include mixin.custom-tree-node-theme(theme.$primary-theme);
