@@ -150,6 +150,7 @@
     "@storybook/addon-interactions": "8.6.3",
     "@storybook/addon-links": "8.6.3",
     "@storybook/angular": "8.6.3",
+    "@storybook/builder-vite": "^8.6.6",
     "@storybook/core-server": "8.6.3",
     "@storybook/jest": "^0.2.3",
     "@storybook/preset-scss": "^1.0.3",
