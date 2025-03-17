@@ -18,12 +18,18 @@
         "inlineStyleLanguage": "scss",
         "assets": [
           "apps/ng-tag-build/src/favicon.ico",
-          "apps/ng-tag-build/src/assets",
-          "apps/ng-tag-build/src/locale"
+          "apps/ng-tag-build/src/locale",
+          {
+            "input": "libs/utils/src/lib/assets",
+            "glob": "**/*",
+            "output": "/assets/"
+          }
         ],
         "styles": [
           "@angular/material/prebuilt-themes/indigo-pink.css",
-          "apps/ng-tag-build/src/styles.scss"
+          "apps/ng-tag-build/src/styles.scss",
+          "libs/shared-styles/src/index.scss",
+          "libs/shared-styles/src/variables.scss"
         ],
         "scripts": []
       },

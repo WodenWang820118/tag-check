@@ -1,0 +1,14 @@
+@use '@angular/material' as mat;
+@use 'palette' as palette;
+@include mat.core();
+
+$primary-theme: mat.m2-define-light-theme(
+  (
+    color: (
+      primary: palette.$primary,
+      accent: palette.$accent,
+      warn: palette.$warn
+    ),
+    typography: palette.$typography
+  )
+);

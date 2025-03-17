@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DataRow } from '@utils';
 import { Injectable } from '@angular/core';
 import { SpecExtractService } from '../gtm-json-converter/extract/spec-extract.service';
@@ -35,7 +36,7 @@ export class XlsxHelper {
     // Check if the match has the string 'event: "view_item_list"'
     const desiredMatch = matches.find((match) => match[1].includes('event'));
 
-    let jsonString =
+    const jsonString =
       desiredMatch && desiredMatch[1] ? desiredMatch[1] : inputString;
 
     // Try parsing the JSON string directly
@@ -43,6 +44,7 @@ export class XlsxHelper {
       return JSON.parse(jsonString);
     } catch (error) {
       // If direct parsing fails, attempt to fix and parse again
+      console.error('Failed to parse:', jsonString, error);
       try {
         return JSON.parse(this.specExtractService.fixJsonString(jsonString));
       } catch (nestedError) {
@@ -55,7 +57,7 @@ export class XlsxHelper {
 
   filterNonEmptyData(data: any[]) {
     // 1. Find the column index
-    let columnIndex: number = 0;
+    let columnIndex = 0;
     const lastColumnIndex = Object.keys(data[0]).length - 1;
 
     for (const row of data) {

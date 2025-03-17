@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { EditorService } from '../../services/editor/editor.service';
 import { MatDialog } from '@angular/material/dialog';
-import { ErrorDialogComponent } from '@ui';
 import { DataRow, EditorTypeEnum } from '@utils';
 import { XlsxHelper } from '../xlsx-facade/xlsx-helper.service';
+import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -76,7 +77,7 @@ export class XlsxDisplayService {
       } catch (error) {
         this.dialog.open(ErrorDialogComponent, {
           data: {
-            message: `Failed to parse the following spec: ${spec}`
+            message: `Failed to parse the following spec: ${spec}; ${error}`
           }
         });
       }

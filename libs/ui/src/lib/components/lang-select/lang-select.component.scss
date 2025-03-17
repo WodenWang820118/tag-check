@@ -2,6 +2,7 @@
 
 .mat-mdc-form-field {
   border-radius: 5px;
+  border-color: white;
   width: 150px;
   flex-direction: row;
   @include mat.form-field-density(-4);
@@ -11,4 +12,16 @@
 .language-icon {
   vertical-align: middle;
   margin-right: 8px;
+  color: white;
+}
+
+:host {
+  .mat-mdc-form-field.mat-mdc-form-field-type-mat-select {
+    --mdc-outlined-text-field-outline-color: white;
+    --mdc-outlined-text-field-hover-outline-color: white;
+    --mdc-outlined-text-field-focus-outline-color: white;
+    --mdc-outlined-text-field-focus-label-text-color: white;
+    --mat-select-enabled-trigger-text-color: white;
+    --mat-select-enabled-arrow-color: white;
+  }
 }

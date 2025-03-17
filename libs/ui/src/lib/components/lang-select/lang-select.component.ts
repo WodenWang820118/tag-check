@@ -9,7 +9,11 @@ import { Language, LanguageEnum } from '@utils';
   standalone: true,
   imports: [MatFormFieldModule, MatSelectModule, MatIconModule],
   template: `
-    <mat-form-field appearance="outline">
+    <mat-form-field
+      appearance="outline"
+      color="primary"
+      class="density-compact"
+    >
       <mat-select
         [(value)]="selectedLang"
         (selectionChange)="changeLocale(); reloadPage()"
@@ -67,9 +71,9 @@ export class LangSelectComponent {
   }
 
   detectLocaleLabel() {
-    this.selectedLangLabel = this.languages.find(
-      (lang) => lang.code === this.selectedLang
-    )!.label;
+    this.selectedLangLabel =
+      this.languages.find((lang) => lang.code === this.selectedLang)?.label ||
+      'English';
   }
 
   changeLocale() {
@@ -82,6 +86,11 @@ export class LangSelectComponent {
   }
 
   getSelectedLanguage(): Language {
-    return this.languages.find((lang) => lang.code === this.selectedLang)!;
+    return (
+      this.languages.find((lang) => lang.code === this.selectedLang) || {
+        code: LanguageEnum.EN,
+        label: 'English'
+      }
+    );
   }
 }
