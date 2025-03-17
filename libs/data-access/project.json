@@ -5,16 +5,6 @@
   "prefix": "lib",
   "projectType": "library",
   "targets": {
-    "build": {
-      "executor": "@nx/angular:package",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/libs/data-access",
-        "main": "libs/data-access/src/index.ts",
-        "tsConfig": "libs/data-access/tsconfig.lib.json",
-        "assets": ["libs/data-access/*.md"]
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]

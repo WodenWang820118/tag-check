@@ -6,19 +6,6 @@
   "projectType": "library",
   "tags": [],
   "targets": {
-    "build": {
-      "executor": "@nx/angular:package",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/libs/ui",
-        "main": "libs/ui/src/index.ts",
-        "tsConfig": "libs/ui/tsconfig.lib.json",
-        "assets": ["libs/ui/*.md"],
-        "stylePreprocessorOptions": {
-          "includePaths": ["libs/shared-styles/src/variables.scss"]
-        }
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]

@@ -31,7 +31,7 @@ import { Component } from '@angular/core';
       </p>
       <p class="text-muted">
         <ng-container i18n="@@footerComponentLastUpdated"
-          >Last updated on: 2024-12-29</ng-container
+          >Last updated on: 2025-03-31</ng-container
         >
       </p>
     </div>

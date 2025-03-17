@@ -5,7 +5,6 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class SetupConstructorService {
-  constructor() {}
   googleTagName: BehaviorSubject<string> = new BehaviorSubject<string>('');
   measurementId: BehaviorSubject<string> = new BehaviorSubject<string>('');
   includeItemScopedVariables: BehaviorSubject<boolean> =

@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { inject, Injectable } from '@angular/core';
 import { XlsxProcessService } from '../xlsx-process/xlsx-process.service';
 import { Observable } from 'rxjs/internal/Observable';
 import { take, filter, tap, catchError, EMPTY } from 'rxjs';
-import { ErrorDialogComponent } from '@ui';
 import { WebWorkerService } from '../web-worker/web-worker.service';
 import { Dialog } from '@angular/cdk/dialog';
+import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
 
 @Injectable({
   providedIn: 'root'

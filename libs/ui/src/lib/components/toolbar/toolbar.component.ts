@@ -26,8 +26,13 @@ import { LangSelectComponent } from '../lang-select/lang-select.component';
         <a [routerLink]="['./']" (click)="onHomeClick()"> {{ title() }}</a>
       </span>
       <span class="spacer"></span>
-      <!-- TODO: lib-menu should be accommendating for dynamic contents -->
-      <lib-menu-tabs #menuTabs></lib-menu-tabs>
+      <lib-menu-tabs
+        #menuTabs
+        [aboutDisabled]="aboutDisabled()"
+        [objectivesDisabled]="objectivesDisabled()"
+      >
+        ></lib-menu-tabs
+      >
       <lib-lang-select></lib-lang-select>
       <div style="margin-left: 1rem"></div>
     </mat-toolbar>
@@ -42,6 +47,8 @@ import { LangSelectComponent } from '../lang-select/lang-select.component';
 })
 export class ToolBarComponent {
   title = input.required<string>();
+  aboutDisabled = input<boolean>(false);
+  objectivesDisabled = input<boolean>(false);
   menuTabs = viewChild.required<MenuTabsComponent>('menuTabs');
 
   onHomeClick() {

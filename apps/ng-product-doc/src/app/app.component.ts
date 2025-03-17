@@ -8,19 +8,50 @@ import { Meta } from '@angular/platform-browser';
   standalone: true,
   selector: 'app-root',
   template: `
-    <ng-container *ngIf="toolbarComponent | async as toolbar">
-      <ng-container
-        *ngComponentOutlet="toolbar; inputs: toolbarInputs"
-      ></ng-container>
-    </ng-container>
-    <router-outlet />
+    <div class="app-container">
+      <ng-container *ngIf="toolbarComponent | async as toolbar">
+        <ng-container
+          *ngComponentOutlet="toolbar; inputs: toolbarInputs"
+        ></ng-container>
+      </ng-container>
+      <div class="app-content">
+        <router-outlet />
+      </div>
+    </div>
+    @defer (on viewport) {
+      @if (footerComponent | async) {
+        <ng-container
+          *ngComponentOutlet="footerComponent | async"
+        ></ng-container>
+      }
+    } @placeholder {
+      <div></div>
+    }
   `,
-  styles: [``]
+  styles: [
+    `
+      .app-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .app-content {
+        flex: 1;
+        overflow: hidden;
+      }
+    `
+  ]
 })
 export class AppComponent implements OnInit {
   title = 'TagCheck';
   toolbarComponent = this.loadToolbarComponent();
-  toolbarInputs = { title: this.title };
+  footerComponent = this.loadFooterComponent();
+  toolbarInputs = {
+    title: this.title,
+    aboutDisabled: true,
+    objectivesDisabled: false
+  };
 
   constructor(
     private router: Router,
@@ -40,5 +71,10 @@ export class AppComponent implements OnInit {
       console.error('Failed to load toolbar component:', error);
       return null;
     }
+  }
+
+  private async loadFooterComponent() {
+    const module = await import('@ui');
+    return module.FooterComponent;
   }
 }

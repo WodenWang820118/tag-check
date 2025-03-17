@@ -1,9 +1,10 @@
 import { Router, RouterModule } from '@angular/router';
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ɵ$localize } from '@angular/localize';
+import { NgClass } from '@angular/common';
 
 interface Link {
   nameKey: string; // Changed from name to nameKey for translation reference
@@ -14,14 +15,14 @@ interface Link {
 @Component({
   selector: 'lib-menu-tabs',
   standalone: true,
-  imports: [MatTabsModule, MatIconModule, RouterModule],
+  imports: [MatTabsModule, MatIconModule, RouterModule, NgClass],
   template: `
     <nav mat-tab-nav-bar [tabPanel]="tabPanel">
-      <!-- TODO: how to use @for to dynamically render all links with i18n -->
       <a
         mat-tab-link
         (click)="activeLink = links[0]; navigateTo(links[0].link)"
         [active]="activeLink === links[0]"
+        [ngClass]="{ hidden: aboutDisabled() }"
       >
         <mat-icon class="nav-icon">{{ links[0].icon }}</mat-icon>
         <span i18n="@@nav.about" class="nav-text">{{ links[0].nameKey }}</span>
@@ -32,6 +33,7 @@ interface Link {
         (click)="activeLink = links[1]; navigateTo(links[1].link)"
         [active]="activeLink === links[1]"
         class="nav-link-container"
+        [ngClass]="{ hidden: objectivesDisabled() }"
       >
         <mat-icon class="nav-icon">{{ links[1].icon }}</mat-icon>
         <span i18n="@@nav.objectives" class="nav-text">{{
@@ -70,6 +72,9 @@ interface Link {
         align-items: center;
         color: white;
       }
+      .hidden {
+        display: none;
+      }
     `
   ]
 })
@@ -92,6 +97,8 @@ export class MenuTabsComponent {
     }
   ];
   activeLink: Link | null = null;
+  aboutDisabled = input<boolean>(true);
+  objectivesDisabled = input<boolean>();
 
   constructor(
     private matIconRegistry: MatIconRegistry,

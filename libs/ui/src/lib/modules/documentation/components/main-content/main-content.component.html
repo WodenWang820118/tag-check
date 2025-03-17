@@ -1,13 +1,12 @@
-<div class="docs-container" style="background-color: none">
+<div class="docs-container">
   <mat-sidenav-container class="docs-sidenav-container">
     <mat-sidenav-content class="docs-content-wrapper">
-      <ng-scrollbar [thumbClass]="'scrollbar-thumb'">
+      <ng-scrollbar [thumbClass]="'scrollbar-thumb'" style="height: 100%">
         <div id="markdown" class="docs-article-content">
           <markdown [src]="fileName()" (ready)="onMarkdownReady()"></markdown>
         </div>
       </ng-scrollbar>
     </mat-sidenav-content>
-
     <mat-sidenav position="end" mode="side" opened class="docs-toc-sidenav">
       <h2>On This Page</h2>
       <div class="docs-toc-content">
