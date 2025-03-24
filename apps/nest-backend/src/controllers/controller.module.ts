@@ -5,6 +5,7 @@ import { GtmOperatorModule } from '../infrastructure/gtm-operator/gtm-operator.m
 import { EventInspectionModule } from '../features/event-inspection/event-inspection.module';
 import { ProjectAgentModule } from '../features/project-agent/project-agent.module';
 import { ExampleProjectRepositoryModule } from '../features/example-project/example-project-repository.module';
+import { DatabaseIoModule } from '../infrastructure/os/database-io/database-io.module';
 
 // controllers
 import { ProjectWorkFlowController } from './project/project-workflow.controller';
@@ -19,6 +20,7 @@ import { SettingsController } from './settings/settings.controller';
 import { ProjectIoController } from './project-io/project-io.controller';
 import { FileReportsController } from './file-reports/file-reports.controller';
 import { VideosController } from './videos/videos.controller';
+import { DatabaseIoController } from './database-io/database-io.controller';
 
 // services
 import { EventInspectionControllerService } from './data-layer/event-inspection-controller.service';
@@ -36,7 +38,8 @@ const services = [
     ProjectAgentModule,
     EventInspectionModule,
     GtmOperatorModule,
-    ExampleProjectRepositoryModule
+    ExampleProjectRepositoryModule,
+    DatabaseIoModule
   ],
   controllers: [
     ProjectWorkFlowController,
@@ -50,7 +53,8 @@ const services = [
     SettingsController,
     ProjectIoController,
     FileReportsController,
-    VideosController
+    VideosController,
+    DatabaseIoController
   ],
   providers: [...services]
 })

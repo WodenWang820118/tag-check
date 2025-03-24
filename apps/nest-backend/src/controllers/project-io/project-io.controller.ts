@@ -52,7 +52,6 @@ export class ProjectIoController {
       }
     })
   )
-  @Log()
   async importProject(
     @UploadedFile() file: Express.Multer.File,
     @Res() response: Response
