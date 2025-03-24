@@ -21,7 +21,7 @@ export class AuthenticationSettingEntity
     name: 'username',
     type: 'varchar',
     length: 255,
-    nullable: false,
+    nullable: true,
     comment: 'Authentication username'
   })
   username!: string;
@@ -30,7 +30,7 @@ export class AuthenticationSettingEntity
     name: 'password',
     type: 'varchar',
     length: 255,
-    nullable: false,
+    nullable: true,
     comment: 'Authentication password - should be encrypted before storage',
     select: false // Security: Don't select password by default
   })

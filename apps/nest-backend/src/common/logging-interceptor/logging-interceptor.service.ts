@@ -1,15 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-misused-promises */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Injectable,
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
+  Logger
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -132,7 +127,7 @@ export class LoggingInterceptor implements NestInterceptor {
           error: (error) => {
             // Log error
             this.logger.error(`${error.message}, ${error.stack}`, logContext);
-          },
+          }
         })
       );
     }
