@@ -16,7 +16,7 @@ export class DatabaseIoController {
   private readonly logger = new Logger(DatabaseIoService.name);
   constructor(private databaseIoService: DatabaseIoService) {}
 
-  @Get('dump/:projectSlug')
+  @Post('dump/:projectSlug')
   async dumpProjectDatabase(
     @Param('projectSlug') projectSlug: string,
     @Query('outputPath') outputPath: string
@@ -47,7 +47,7 @@ export class DatabaseIoController {
     }
   }
 
-  @Post('import')
+  @Get('import')
   async importProjectDatabase(@Query('sqlDumpPath') sqlDumpPath: string) {
     try {
       return await this.databaseIoService.importProjectDatabase(sqlDumpPath);

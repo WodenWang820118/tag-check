@@ -122,9 +122,6 @@ export class DatabaseDumpService {
   ): Promise<void> {
     if (records.length === 0) return;
 
-    // Get column names from the first record
-    const columns = Object.keys(records[0]);
-
     // Get the actual table name from the entity metadata
     const tableName = entity.tableName;
 
@@ -133,10 +130,28 @@ export class DatabaseDumpService {
       `-- Data for entity: ${entity.name} (table: ${tableName})\n`
     );
 
+    // Get the property-to-column mapping from entity metadata
+    const columnMapping = new Map<string, string>();
+    entity.columns.forEach((column) => {
+      columnMapping.set(column.propertyName, column.databaseName);
+    });
+
+    // Get property names from the first record
+    const propertyNames = Object.keys(records[0]).filter((prop) => {
+      const value = records[0][prop];
+      return value !== undefined && typeof value !== 'function';
+    });
+
+    // Map property names to database column names
+    const columnNames = propertyNames.map(
+      (prop) => columnMapping.get(prop) || prop // Fallback to property name if mapping not found
+    );
+
     // Process each record
     for (const record of records) {
-      const values = columns.map((column) => {
-        const value = record[column];
+      const values = propertyNames.map((prop) => {
+        const value = record[prop];
+
         if (value === null || value === undefined) {
           return 'NULL';
         } else if (typeof value === 'string') {
@@ -145,18 +160,27 @@ export class DatabaseDumpService {
         } else if (value instanceof Date) {
           return `'${value.toISOString()}'`;
         } else if (typeof value === 'object') {
-          // Handle JSON objects
-          return `'${JSON.stringify(value).replace(/'/g, "''")}'`;
+          if (Buffer.isBuffer(value)) {
+            // Handle Buffer objects (BLOBs)
+            return `X'${value.toString('hex')}'`;
+          } else {
+            // Handle JSON objects
+            return `'${JSON.stringify(value).replace(/'/g, "''")}'`;
+          }
+        } else if (typeof value === 'boolean') {
+          // SQLite doesn't have a boolean type, store as 0 or 1
+          return value ? 1 : 0;
         } else {
           return value;
         }
       });
 
-      // Write the INSERT statement using the table name instead of entity name
+      // Write the INSERT statement using the database column names
       writeStream.write(
-        `INSERT INTO "${tableName}" (${columns.map((c) => `"${c}"`).join(', ')}) VALUES (${values.join(', ')});\n`
+        `INSERT INTO "${tableName}" (${columnNames.map((c) => `"${c}"`).join(', ')}) VALUES (${values.join(', ')});\n`
       );
     }
+
     writeStream.write('\n');
   }
 }

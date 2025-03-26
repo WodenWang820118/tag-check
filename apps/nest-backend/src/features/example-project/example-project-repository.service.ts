@@ -25,7 +25,7 @@ export class ExampleProjectRepositoryService {
     this.logger.debug('Building example project');
     try {
       const projects = await this.projectRepositoryService.list();
-      if (projects.length >= 0) return;
+      if (projects.length > 0) return;
 
       // 1. create a project with basic settings
       const projectSlug = 'example-project-slug';
