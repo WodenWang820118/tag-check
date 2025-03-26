@@ -17,16 +17,12 @@ export class DatabaseImportService {
    * Imports database data from a SQL file
    */
   async importProjectDatabase(sqlDumpPath: string): Promise<void> {
-    // Check if connection is active
     const queryRunner = this.dataSource.createQueryRunner();
-
     try {
-      // Read SQL file
       const sqlContent = readFileSync(resolve(sqlDumpPath), 'utf8');
+      // Optionally, log the dump
       this.logger.log(`Importing database from ${sqlDumpPath}`, sqlContent);
-
       await queryRunner.connect();
-
       await queryRunner.startTransaction();
 
       // Disable foreign key constraints temporarily
@@ -38,29 +34,31 @@ export class DatabaseImportService {
         'INSERT OR REPLACE INTO'
       );
 
-      // Execute modified SQL statements
-      await queryRunner.query(modifiedSqlContent);
+      // Split the SQL content on semicolons (if simple; be cautious with semicolons inside strings)
+      const statements = modifiedSqlContent
+        .split(';')
+        .map((stmt) => stmt.trim())
+        .filter((stmt) => stmt.length > 0);
+
+      // Execute each statement sequentially
+      for (const statement of statements) {
+        await queryRunner.query(statement);
+      }
 
       // Re-enable foreign key constraints
       await queryRunner.query('PRAGMA foreign_keys = ON;');
-
-      // Commit transaction
       await queryRunner.commitTransaction();
-
       this.logger.log('Database import completed successfully');
     } catch (error) {
-      // Rollback transaction on error
       if (queryRunner.isTransactionActive) {
         await queryRunner.rollbackTransaction();
       }
-
       this.logger.error(`Failed to import database`, error);
       throw new HttpException(
         `Failed to import database: ${error}`,
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     } finally {
-      // Release query runner
       await queryRunner.release();
     }
   }

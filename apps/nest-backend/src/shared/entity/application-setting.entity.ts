@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { ProjectEntity } from './project.entity';
 import { AuditableEntity } from './common';
+import { Expose } from 'class-transformer';
 
 @Entity('application_setting')
 export class ApplicationSettingEntity
@@ -17,6 +18,7 @@ export class ApplicationSettingEntity
   @PrimaryGeneratedColumn()
   id!: number;
 
+  @Expose({ name: 'localStorage' })
   @Column({
     name: 'local_storage_config',
     type: 'json',
@@ -25,6 +27,7 @@ export class ApplicationSettingEntity
   })
   localStorage!: LocalStorage;
 
+  @Expose({ name: 'cookie' })
   @Column({
     name: 'cookie_config',
     type: 'json',
@@ -33,6 +36,7 @@ export class ApplicationSettingEntity
   })
   cookie!: Cookie;
 
+  @Expose({ name: 'gtm' })
   @Column({
     name: 'gtm_config',
     type: 'json',
