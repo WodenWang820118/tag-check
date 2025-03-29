@@ -1,18 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import request from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module.js';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { join } from 'path';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { testDbConfig } from './test-db.config';
+import { testDbConfig } from './test-db.config.js';
 import { DataSource } from 'typeorm';
 import { vi } from 'vitest';
-import { entities } from './common';
+import { entities } from './common/index.js';
 // TODO: run all endoint tests to ensure they are all working
 
 const rootProjectPath = join(__dirname, '..', '..', '..', 'tag_check_projects');
