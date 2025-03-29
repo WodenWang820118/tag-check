@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@angular/core';
 import { EditorService } from '../editor/editor.service';
 import { EditorTypeEnum } from '@utils';

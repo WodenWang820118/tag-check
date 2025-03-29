@@ -1,12 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, OnDestroy } from '@angular/core';
 import {
   BehaviorSubject,
   Subject,
   map,
   shareReplay,
-  take,
   takeUntil,
-  tap,
+  tap
 } from 'rxjs';
 import { WebWorkerService } from '../../services/web-worker/web-worker.service';
 import { WorkbookService } from '../workbook/workbook.service';
@@ -14,7 +14,7 @@ import { XlsxDisplayService } from '../xlsx-display/xlsx-display.service';
 import { FileService } from '../file/file.service';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class XlsxProcessService implements OnDestroy {
   workbook$: BehaviorSubject<any>;
@@ -52,7 +52,7 @@ export class XlsxProcessService implements OnDestroy {
 
       this.webWorkerService.postMessage('message', {
         action: 'readXlsx',
-        data: fileData,
+        data: fileData
       });
       this.fileName$.next(file.name);
     } catch (error) {

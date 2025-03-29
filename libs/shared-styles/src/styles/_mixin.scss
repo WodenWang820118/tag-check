@@ -1,0 +1,34 @@
+@use '@angular/material' as mat;
+@use './palette' as palette;
+
+@include mat.core();
+
+@mixin custom-button-toggle-theme($theme) {
+  .custom-mat-button-toggle {
+    background-color: mat.m2-get-color-from-palette(
+      palette.$primary,
+      500
+    ) !important;
+    color: mat.m2-get-color-from-palette(
+      palette.$primary,
+      500-contrast
+    ) !important;
+  }
+}
+
+@mixin custom-tree-node-theme($theme) {
+  .mat-tree-node.active-node,
+  .mat-mdc-tree-node.active-node {
+    border-radius: 50px;
+    background-color: mat.m2-get-color-from-palette(
+      palette.$secondary,
+      200
+    ) !important;
+    color: mat.m2-get-color-from-palette(palette.$primary, 900) !important;
+
+    // Style for links inside active nodes
+    a {
+      color: mat.m2-get-color-from-palette(palette.$primary, 900) !important;
+    }
+  }
+}

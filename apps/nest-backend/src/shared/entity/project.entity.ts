@@ -12,12 +12,14 @@ import { AuthenticationSettingEntity } from './authentication-setting.entity';
 import { BrowserSettingEntity } from './browser-setting.entity';
 import { ApplicationSettingEntity } from './application-setting.entity';
 import { TestEventEntity } from './test-event.entity';
+import { Expose } from 'class-transformer';
 
 @Entity('project')
 export class ProjectEntity extends AuditableEntity implements ProjectSchema {
   @PrimaryGeneratedColumn()
   id!: number;
 
+  @Expose({ name: 'projectSlug' })
   @Index({ unique: true })
   @Column({
     name: 'project_slug',
@@ -28,6 +30,7 @@ export class ProjectEntity extends AuditableEntity implements ProjectSchema {
   })
   projectSlug!: string;
 
+  @Expose({ name: 'projectName' })
   @Column({
     name: 'project_name',
     type: 'varchar',
@@ -36,6 +39,7 @@ export class ProjectEntity extends AuditableEntity implements ProjectSchema {
   })
   projectName!: string;
 
+  @Expose({ name: 'projectDescription' })
   @Column({
     name: 'project_description',
     type: 'text',
@@ -43,6 +47,7 @@ export class ProjectEntity extends AuditableEntity implements ProjectSchema {
   })
   projectDescription?: string;
 
+  @Expose({ name: 'measurementId' })
   @Column({
     name: 'measurement_id',
     type: 'varchar',

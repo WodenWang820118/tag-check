@@ -52,7 +52,6 @@ export class ProjectIoController {
       }
     })
   )
-  @Log()
   async importProject(
     @UploadedFile() file: Express.Multer.File,
     @Res() response: Response
@@ -60,6 +59,7 @@ export class ProjectIoController {
     try {
       const rootProjectPath =
         await this.configurationSerivce.getRootProjectPath();
+      // TODO: project slug might be unsafe
       await this.projectIoFacadeService.importProject(
         file.originalname.split('.')[0],
         file.path,

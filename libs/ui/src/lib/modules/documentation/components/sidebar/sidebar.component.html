@@ -1,0 +1,36 @@
+<mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor">
+  <!-- Leaf Nodes -->
+  <mat-tree-node
+    *matTreeNodeDef="let node"
+    matTreeNodePadding
+    routerLinkActive="active-node"
+  >
+    <span routerLink="{{ node.route }}" class="tree-node tree-node-font">
+      {{ node.name }}
+    </span>
+  </mat-tree-node>
+
+  <!-- Expandable/Parent Nodes -->
+  <mat-tree-node
+    *matTreeNodeDef="let node; when: hasChild"
+    matTreeNodeToggle
+    [cdkTreeNodeTypeaheadLabel]="node.name"
+  >
+    <div>
+      <span class="tree-node tree-node-font">
+        {{ node.name }}
+      </span>
+      <button
+        matTreeNodeToggle
+        [attr.aria-label]="'Toggle ' + node.name"
+      ></button>
+    </div>
+
+    <div
+      [class.docs-tree-children-hidden]="!tree.isExpanded(node)"
+      role="group"
+    >
+      <ng-container matTreeNodeOutlet></ng-container>
+    </div>
+  </mat-tree-node>
+</mat-tree>

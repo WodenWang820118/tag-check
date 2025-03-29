@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@data-access": ["libs/data-access/src/index.ts"],
+      "@shared-styles": ["libs/shared-styles/src/index.ts"],
       "@ui": ["libs/ui/src/index.ts"],
       "@utils": ["libs/utils/src/index.ts"]
     }

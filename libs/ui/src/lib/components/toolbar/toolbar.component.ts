@@ -1,4 +1,4 @@
-import { Component, viewChild } from '@angular/core';
+import { Component, input, viewChild } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,17 +20,21 @@ import { LangSelectComponent } from '../lang-select/lang-select.component';
     LangSelectComponent
   ],
   template: `
-    <mat-toolbar>
-      <div style="margin-right: 8rem"></div>
-      <span
-        ><a [routerLink]="['./']" (click)="onTagBuildClick()"
-          >Tag Build</a
-        ></span
-      >
+    <mat-toolbar color="primary">
+      <div style="margin-right: 1rem"></div>
+      <span>
+        <a [routerLink]="['./']" (click)="onHomeClick()"> {{ title() }}</a>
+      </span>
       <span class="spacer"></span>
-      <lib-menu-tabs #menuTabs></lib-menu-tabs>
+      <lib-menu-tabs
+        #menuTabs
+        [aboutDisabled]="aboutDisabled()"
+        [objectivesDisabled]="objectivesDisabled()"
+      >
+        ></lib-menu-tabs
+      >
       <lib-lang-select></lib-lang-select>
-      <div style="margin-left: 6rem"></div>
+      <div style="margin-left: 1rem"></div>
     </mat-toolbar>
   `,
   styles: [
@@ -42,9 +46,12 @@ import { LangSelectComponent } from '../lang-select/lang-select.component';
   ]
 })
 export class ToolBarComponent {
+  title = input.required<string>();
+  aboutDisabled = input<boolean>(false);
+  objectivesDisabled = input<boolean>(false);
   menuTabs = viewChild.required<MenuTabsComponent>('menuTabs');
 
-  onTagBuildClick() {
+  onHomeClick() {
     this.menuTabs().activeLink = null;
   }
 }

@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "System",
+    "module": "ES2022",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitOverride": true,
@@ -11,7 +11,8 @@
     "composite": true,
     "outDir": "../../dist/out-tsc",
     "declaration": true,
-    "types": ["node", "jest"]
+    "types": ["node"],
+    "importHelpers": true
   },
   "files": [],
   "include": [],

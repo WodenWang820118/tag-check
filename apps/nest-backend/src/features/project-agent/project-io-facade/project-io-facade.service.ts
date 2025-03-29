@@ -28,7 +28,11 @@ export class ProjectIoFacadeService {
     const tempFolder = await this.createTempFolder();
     const projectZipPath = join(tempFolder, `${projectSlug}.zip`);
 
-    await this.projectIoService.compressProject(projectPath, projectZipPath);
+    await this.projectIoService.compressProject(
+      projectPath,
+      projectZipPath,
+      projectSlug
+    );
     const fileStream = createReadStream(projectZipPath);
 
     fileStream.on('close', () => {
@@ -70,7 +74,7 @@ export class ProjectIoFacadeService {
     try {
       this.folderService.deleteFolder(tempFolder);
     } catch (error) {
-      this.logger.error(`Error cleaning up temp folder`);
+      this.logger.error(`Error cleaning up temp folder`, error);
     }
   }
 }

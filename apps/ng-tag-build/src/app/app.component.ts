@@ -1,16 +1,52 @@
+import { AsyncPipe, NgComponentOutlet, NgIf } from '@angular/common';
 import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
-import { ToolBarComponent, FooterComponent } from '@ui';
+
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ToolBarComponent, FooterComponent],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  imports: [RouterOutlet, AsyncPipe, NgComponentOutlet, NgIf],
+  template: `
+    @defer {
+      <ng-container *ngIf="toolbarComponent | async as toolbar">
+        <ng-container
+          *ngComponentOutlet="toolbar; inputs: toolbarInputs"
+        ></ng-container>
+      </ng-container>
+    } @placeholder {
+      <div class="toolbar-placeholder">Loading toolbar...</div>
+    }
+
+    <div class="app">
+      <router-outlet></router-outlet>
+    </div>
+
+    @defer (on viewport) {
+      @if (footerComponent | async) {
+        <ng-container
+          *ngComponentOutlet="footerComponent | async"
+        ></ng-container>
+      }
+    } @placeholder {
+      <div></div>
+    }
+  `,
+  styles: [
+    `
+      .app {
+        margin-top: 3rem;
+        padding: 3rem 3rem;
+      }
+    `
+  ]
 })
 export class AppComponent implements OnInit {
   title = 'Tag Build';
+  toolbarComponent = this.loadToolbarComponent();
+  footerComponent = this.loadFooterComponent();
+  toolbarInputs = { title: this.title };
+
   constructor(
     private metaService: Meta,
     @Inject(LOCALE_ID) public locale: string
@@ -18,6 +54,16 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.addMetaTags();
+  }
+
+  private async loadToolbarComponent() {
+    const module = await import('@ui');
+    return module.ToolBarComponent;
+  }
+
+  private async loadFooterComponent() {
+    const module = await import('@ui');
+    return module.FooterComponent;
   }
 
   addMetaTags(): void {
