@@ -14,7 +14,6 @@ import { MarkdownModule } from 'ngx-markdown';
 import { TreeNodeService } from '../../services/tree-node/tree-node.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { TopicNode } from '@utils';
 import { MatCardModule } from '@angular/material/card';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { NgScrollbarModule } from 'ngx-scrollbar';
@@ -68,25 +67,10 @@ export class MainContentComponent implements OnInit {
       .subscribe((data) => {
         const fullData = data['data'];
         const fileName = fullData['fileName'] as string;
-        const content = fullData['content'] as string;
         this.fileNameSignal.set(fileName);
         console.log('Loaded markdown file:', fileName);
         this.tocSignal.set([]);
-        this.generateTOC(content);
       });
-  }
-
-  // Rest of your component methods...
-  generateTOC(content: string) {
-    const headingRegex = /^(#{1,6})\s+(.*)$/gm;
-    const newToc: { id: string; text: string }[] = [];
-    let match;
-    while ((match = headingRegex.exec(content)) !== null) {
-      const text = match[2];
-      const id = text.toLowerCase().replace(/[^\w]+/g, '-');
-      newToc.push({ id, text });
-    }
-    this.tocSignal.set(newToc);
   }
 
   scrollToSection(sectionId: string) {
@@ -104,16 +88,25 @@ export class MainContentComponent implements OnInit {
   }
 
   onMarkdownReady() {
-    const h1Elements = document.querySelectorAll('h1');
-    const h2Elements = document.querySelectorAll('h2');
+    // Clear the TOC first
+    this.tocSignal.set([]);
+
+    // Get all heading elements from the rendered markdown
+    const h1Elements = document.querySelectorAll('#markdown h1');
+    const h2Elements = document.querySelectorAll('#markdown h2');
     const headElements = Array.from(h1Elements).concat(Array.from(h2Elements));
-    const currentToc = this.toc();
-    for (const element of headElements) {
-      const text = element.textContent;
-      const tocEntry = currentToc.find((entry) => entry.text === text);
-      if (tocEntry) {
-        (element as HTMLElement).id = tocEntry.id;
-      }
-    }
+
+    // Create TOC entries from the heading elements
+    const newToc = headElements.map((element) => {
+      const text = element.textContent || '';
+      const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+
+      // Set the ID on the element for linking
+      element.id = id;
+
+      return { id, text };
+    });
+
+    this.tocSignal.set(newToc);
   }
 }
