@@ -3,6 +3,7 @@ import { FolderService } from '../../../infrastructure/os/folder/folder.service'
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { ProjectFacadeRepositoryService } from '../../repository/project-facade/project-facade-repository.service';
 import { CreateProjectDto } from '../../../shared';
+import { existsSync, mkdirSync } from 'fs';
 
 @Injectable()
 export class ProjectInitializationService {
@@ -13,6 +14,10 @@ export class ProjectInitializationService {
   ) {}
 
   async initProjectFileSystem(projectSlug: string, settings: CreateProjectDto) {
+    const projectRoot = await this.folderPathService.getRootProjectFolderPath();
+    if (!existsSync(projectRoot)) {
+      mkdirSync(projectRoot, { recursive: true });
+    }
     await this.createProjectFolders(projectSlug); // keep project folders for videos
     return await this.projectFacadeService.createProject(settings);
   }
