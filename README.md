@@ -17,9 +17,22 @@
   - [Make](#make)
 - [Feedback and Contribution](#feedback-and-contribution)
 
-[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-highlight.svg)](https://sonarcloud.io/summary/new_code?id=WodenWang820118_tag-check)
+Overall Project Health
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=WodenWang820118_tag-check)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=WodenWang820118_tag-check)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=WodenWang820118_tag-check)
+
+Code Quality Metrics
+
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=WodenWang820118_tag-check)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=WodenWang820118_tag-check)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=WodenWang820118_tag-check)
+
+Project Size and Test Coverage
+
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=WodenWang820118_tag-check)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=coverage)](https://sonarcloud.io/summary/new_code?id=WodenWang820118_tag-check)
 
 ## Overview
 
@@ -61,6 +74,7 @@ This project uses LTS NodeJS v22.13.0 npm v10.9.2 for development. If cannot com
     - Improve the stability of Puppeteer and Electron, especially request interception and data layer verification.
     - Improve the connection quality between Google Tag Manager's shareable debug link and the application.
     - Improve the output of the XLSX report format.
+  - Address the SonarCloud issues and warnings.
 
 ### Prerequisites
 
