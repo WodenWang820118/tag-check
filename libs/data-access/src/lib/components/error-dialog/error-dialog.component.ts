@@ -3,7 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 
 @Component({
-  selector: 'lib-error-dialog',
+  selector: 'lib-data-access-error-dialog',
   standalone: true,
   imports: [MatDialogModule, MatButtonModule],
   template: `<div class="error-dialog">
@@ -15,7 +15,7 @@ import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
       </button>
     </div>
   </div>`,
-  styles: [``],
+  styles: [``]
 })
 export class ErrorDialogComponent {
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) {}
