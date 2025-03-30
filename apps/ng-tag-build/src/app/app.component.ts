@@ -71,37 +71,79 @@ export class AppComponent implements OnInit {
       {
         name: 'description',
         content:
-          'Automate your GTM configuration process effortlessly with our GTM Tag Build, ensuring accurate and optimized JSON file creation. Ideal for digital marketers and SEO experts, our tool streamlines tag management, reducing errors and enhancing productivity by focusing on data analysis over technicalities.'
+          'Tag Build automates GTM configuration, creating accurate JSON files for digital marketers and SEO experts. \
+          Streamline tag management, reduce errors, and boost productivity.'
       },
+      // Google no longer uses keywords meta tag, but keeping for other search engines
       {
         name: 'keywords',
         content:
-          'GTM, Tag Build, JSON, SEO, Digital Marketing, Web Development, Tag Management, Data Analysis, Productivity, Optimization'
+          'Google Tag Manager, GTM Automation, Tag Build, JSON Configuration, SEO Tools, Digital Marketing, Tag Management'
       },
+      // Viewport tag for mobile optimization
+      {
+        name: 'viewport',
+        content: 'width=device-width, initial-scale=1'
+      },
+      // Canonical URL with proper format
+      {
+        rel: 'canonical',
+        href: 'https://tag-build.vercel.app'
+      },
+      // Open Graph tags for social sharing
       {
         property: 'og:title',
-        content:
-          'Effortless GTM Configuration and Management with Our JSON Generator Tool'
+        content: 'Tag Build | Effortless GTM Configuration and Management'
       },
       {
         property: 'og:description',
         content:
-          'Automate your GTM configuration process effortlessly with our GTM Tag Build, ensuring accurate and optimized JSON file creation. Ideal for digital marketers and SEO experts, our tool streamlines tag management, reducing errors and enhancing productivity by focusing on data analysis over technicalities.'
+          'Automate your GTM configuration with Tag Build. Create accurate JSON files, streamline tag management, \
+          and enhance productivity for digital marketers and SEO experts.'
       },
       {
         property: 'og:url',
-        content: 'https://gtm-config-generator.netlify.app/'
-      },
-      { property: 'og:type', content: 'website' },
-      {
-        property: 'twitter:title',
-        content:
-          'Effortless GTM Configuration and Management with Our JSON Building Tool'
+        content: 'https://tag-build.vercel.app'
       },
       {
-        property: 'twitter:description',
+        property: 'og:type',
+        content: 'website'
+      },
+      {
+        property: 'og:image',
+        content: 'https://tag-build.vercel.app/assets/images/tagbuild-og.png'
+      },
+      {
+        property: 'og:image:width',
+        content: '1200'
+      },
+      {
+        property: 'og:image:height',
+        content: '630'
+      },
+      // Twitter Card tags
+      {
+        name: 'twitter:card',
+        content: 'summary_large_image'
+      },
+      {
+        name: 'twitter:title',
+        content: 'Tag Build | Effortless GTM Configuration and Management'
+      },
+      {
+        name: 'twitter:description',
         content:
-          'Automate your GTM configuration process effortlessly with our GTM Tag Build, ensuring accurate and optimized JSON file creation. Ideal for digital marketers and SEO experts, our tool streamlines tag management, reducing errors and enhancing productivity by focusing on data analysis over technicalities.'
+          'Automate your GTM configuration with Tag Build. Create accurate JSON files, streamline tag management,\
+          and enhance productivity for digital marketers and SEO experts.'
+      },
+      {
+        name: 'twitter:image',
+        content: 'https://tag-build.vercel.app/assets/images/twitter-image.jpg' // Replace with your actual image path
+      },
+      // Optional: Add language tag if your site is multilingual
+      {
+        'http-equiv': 'content-language',
+        content: 'en'
       }
     ]);
   }
