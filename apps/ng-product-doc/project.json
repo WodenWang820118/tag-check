@@ -25,7 +25,8 @@
             "input": "libs/utils/src/lib/assets",
             "glob": "**/*",
             "output": "/assets/"
-          }
+          },
+          "apps/ng-product-doc/src/assets"
         ],
         "styles": [
           "@angular/material/prebuilt-themes/indigo-pink.css",
