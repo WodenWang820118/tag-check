@@ -19,6 +19,7 @@
         "assets": [
           "apps/ng-tag-build/src/favicon.ico",
           "apps/ng-tag-build/src/locale",
+          "apps/ng-tag-build/src/assets",
           {
             "input": "libs/utils/src/lib/assets",
             "glob": "**/*",
