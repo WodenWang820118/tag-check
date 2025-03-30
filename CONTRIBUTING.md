@@ -9,7 +9,7 @@ Thank you for your interest in contributing to this project! We welcome contribu
 
 - [Repository Structure](#repository-structure)
 - [Integration with Electron](#integration-with-electron)
-- [CI/CD Pipeline](#ci/cd-pipeline)
+- [CI/CD Pipeline](#cicd-pipeline)
 - [Monorepo Advantages](#monorepo-advantages)
 - [Future Considerations](#future-considerations)
 
@@ -34,12 +34,12 @@ To facilitate a uniform user experience across various operating systems, the ap
 
 The Electron configuration is centralized in two key files:
 
-- `main.js`: Serves as the entry point for the Electron app, orchestrating the main process.
-- `forge.config.js`: Contains configuration settings for Electron Forge, which aids in packaging and distributing the application.
+- `main.mjs`: Serves as the entry point for the Electron app, orchestrating the main process.
+- `forge.config.mjs`: Contains configuration settings for [Electron Forge](https://www.electronforge.io/), which aids in packaging and distributing the application.
 
 ### CI/CD Pipeline
 
-The project currently lacks a CI/CD pipeline, but establishing one is a forthcoming enhancement to ensure continuous integration and delivery. Utilizing [GitHub Actions](https://github.com/marketplace/actions/electron-builder-action), the project will automate its build and deployment processes. The CI/CD configuration will be delineated in the `.github/workflows` directory, ensuring that the application remains in a consistently deployable state.
+Utilizing [GitHub Actions](https://github.com/marketplace/actions/electron-builder-action), the project will automate its build and deployment processes via Electron forge. The CI/CD configuration will be delineated in the `.github/workflows` directory, ensuring that the application remains in a consistently deployable state.
 
 ### Monorepo Advantages
 
