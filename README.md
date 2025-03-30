@@ -4,8 +4,8 @@
 
 - [Overview](#overview)
 - [Features](#features)
-- [Example](#example)
 - [Development](#development)
+  - [Current Status](#current-status)
   - [Prerequisites](#prerequisites)
   - [Frontend (Angular)](#frontend-angular)
   - [Backend (NestJS)](#backend-nestjs)
@@ -17,7 +17,9 @@
   - [Make](#make)
 - [Feedback and Contribution](#feedback-and-contribution)
 
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=security_rating)](https://sonarcloud.io/dashboard?id=WodenWang820118_tag-check) [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=bugs)](https://sonarcloud.io/dashboard?id=WodenWang820118_tag-check) [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=code_smells)](https://sonarcloud.io/dashboard?id=WodenWang820118_tag-check) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=WodenWang820118_tag-check) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=ncloc)](https://sonarcloud.io/dashboard?id=WodenWang820118_tag-check)
+[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-highlight.svg)](https://sonarcloud.io/summary/new_code?id=WodenWang820118_tag-check)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=WodenWang820118_tag-check&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=WodenWang820118_tag-check)
 
 ## Overview
 
@@ -41,13 +43,24 @@ Designed for QA, development, and analytics teams, this free standalone tool lev
   - Screenshots of event triggers
 - **Project Transfer**: Archive projects as .zip files for import into other users' applications.
 
-## Example
-
-The example project is located at the `tag_check_projects` folder at the root directory. The `ng_gtm_integration_sample` project is utilized for end-to-end tests for both backend and frontend. Moreover, the project is also used for development purposes.
-
 ## Development
 
-This project uses NodeJS v22.10.0 npm v10.9.0 for development. If cannot compile, please run `nx reset` and `rm -rf .nx` to reset the project.
+This project uses LTS NodeJS v22.13.0 npm v10.9.2 for development. If cannot compile, please run `nx reset` and `rm -rf .nx` to reset the project. Please refer to the `package.json`'s `engines` field for the exact version.
+
+### Current Status
+
+- TagBuild is already in [production stage](https://tag-build.vercel.app/) but subject to change by the Google Tag Manager team.
+- Documentation site is already in [production stage](https://tag-check-documentation.vercel.app/) but subject to change by users' feedback.
+- TagCheck is in beta stage.
+- Goals for the next release:
+  - Frontend
+    - Improve the UI/UX of the application.
+    - Improve the performance of the application.
+  - Backend
+    - Improve the backend code quality and coverage.
+    - Improve the stability of Puppeteer and Electron, especially request interception and data layer verification.
+    - Improve the connection quality between Google Tag Manager's shareable debug link and the application.
+    - Improve the output of the XLSX report format.
 
 ### Prerequisites
 
@@ -99,14 +112,6 @@ For Storybook development:
 pnpm run storybook-front
 ```
 
-### Docusaurus
-
-For Docusaurus development:
-
-```bash
-pnpm run docusaurus-front
-```
-
 ## Build and Production
 
 ### Build
@@ -140,6 +145,8 @@ Generate a OS-based zip file:
 pnpm run make
 ```
 
+The building efficiency depends on the machine performance. The first time running the app usually takes longer.
+
 ### Debugging
 
 When debugging with unexpected crashes such as `electron-forge make`
@@ -150,7 +157,7 @@ DEBUG=electron-forge:\* pnpm electron-forge make
 
 ### Actual project and end-to-end tests
 
-Please refer `tag_check_projects` folder where manages projects under the root direcetory. The `ng_gtm_integration_sample` project within is utilized for end-to-end tests for both backend and frontend. Moreover, the project is also used for development purposes.
+The example project is located at the `tag_check_projects` folder at the root directory. An example project is automatically built after app activation and utilized for end-to-end tests for both backend and frontend. Moreover, the project is also used for development purposes.
 
 ## Feedback and Contribution
 
