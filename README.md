@@ -56,6 +56,8 @@ Designed for QA, development, and analytics teams, this free standalone tool lev
   - Screenshots of event triggers
 - **Project Transfer**: Archive projects as .zip files for import into other users' applications.
 
+  ![System](./libs/utils/src/lib/assets/i18n/en/tag_check_system_en.drawio.svg)
+
 ## Development
 
 This project uses LTS NodeJS v22.13.0 npm v10.9.2 for development. If cannot compile, please run `nx reset` and `rm -rf .nx` to reset the project. Please refer to the `package.json`'s `engines` field for the exact version.
