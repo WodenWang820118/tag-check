@@ -26,6 +26,52 @@ export class SpecRepositoryService {
     return plainToInstance(SpecResponseDto, entity);
   }
 
+  async list(projectSlug: string) {
+    try {
+      const entities = await this.repository.find({
+        relations: {
+          testEvent: {
+            project: true
+          }
+        },
+        where: {
+          testEvent: {
+            project: {
+              projectSlug: projectSlug
+            }
+          }
+        }
+      });
+
+      Logger.log(`Found ${entities.length} entities`);
+
+      // Check if entities exist before conversion
+      if (!entities || entities.length === 0) {
+        return [];
+      }
+
+      try {
+        const result = plainToInstance(AbstractSpecResponseDto, entities);
+        return result;
+      } catch (conversionError) {
+        Logger.error(
+          `DTO conversion error: ${conversionError}`,
+          conversionError
+        );
+        throw new HttpException(
+          `Error converting specs: ${conversionError}`,
+          HttpStatus.INTERNAL_SERVER_ERROR
+        );
+      }
+    } catch (error) {
+      Logger.error(`Database query error: ${error}`, error);
+      throw new HttpException(
+        `Error getting project specs: ${error}`,
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
   async getSpecByProjectSlugAndEventId(projectSlug: string, eventId: string) {
     try {
       const entity = await this.repository.findOne({

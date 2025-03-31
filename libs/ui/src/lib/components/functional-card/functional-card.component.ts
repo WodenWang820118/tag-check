@@ -66,25 +66,46 @@ export class FunctionalCardComponent {
             isSendingEcommerceData,
             esvConent
           ]) => {
+            let esvContent = null;
+            let json: Spec[] = [];
+
             try {
-              const json = this.specExtractService.preprocessInput(
+              if (esvConent !== '') {
+                esvContent = JSON.parse(esvConent) as {
+                  name: string;
+                  parameters: { [x: string]: string }[];
+                }[];
+                console.log('esvConent', esvConent);
+              }
+            } catch (error) {
+              console.warn(error);
+            }
+
+            try {
+              if (inputJsonEditor.state.doc.toString() === '') {
+                this.openDialog({
+                  message: 'Please provide a valid JSON input.'
+                });
+                return;
+              }
+
+              json = this.specExtractService.preprocessInput(
                 inputJsonEditor.state.doc.toString()
               );
 
               console.log('json', json);
-              console.log('esvConent', esvConent);
+            } catch (error) {
+              this.openDialog(error);
+              console.error(error);
+            }
 
-              const esvContent = JSON.parse(esvConent) as {
-                name: string;
-                parameters: { [x: string]: string }[];
-              }[];
-
+            try {
               this.performConversion(
                 json,
                 googleTagName,
                 measurementId,
                 isSendingEcommerceData === true ? 'true' : 'false',
-                esvContent
+                esvContent || []
               );
             } catch (error) {
               this.openDialog(error);

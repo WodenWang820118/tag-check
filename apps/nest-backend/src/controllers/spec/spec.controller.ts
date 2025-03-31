@@ -14,7 +14,6 @@ export class SpecController {
   ) {}
 
   @Get(':projectSlug')
-  @Log()
   async getProjectSpecs(@Param('projectSlug') projectSlug: string) {
     return await this.projectSpecService.getProjectSpecs(projectSlug);
   }

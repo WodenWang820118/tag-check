@@ -1,29 +1,23 @@
 import { Injectable, Logger, NotAcceptableException } from '@nestjs/common';
 import { Spec } from '@utils';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { SpecService } from './spec.service';
-import { ProjectEntity } from '../../../shared';
+import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
 
 @Injectable()
 export class ProjectSpecService {
   private readonly logger = new Logger(ProjectSpecService.name);
   constructor(
-    @InjectRepository(ProjectEntity)
-    private readonly projectSpecRepository: Repository<ProjectEntity>,
+    private readonly specRepositoryService: SpecRepositoryService,
     private readonly specService: SpecService
   ) {}
 
   async getProjectSpecs(projectSlug: string) {
-    const projectSpec = await this.projectSpecRepository.findOne({
-      where: { projectSlug: projectSlug }
-    });
+    const specs = await this.specRepositoryService.list(projectSlug);
 
-    if (!projectSpec) {
-      return { projectSlug: projectSlug, specs: [] };
-    }
-
-    return { projectSlug: projectSpec.projectSlug, specs: projectSpec };
+    return {
+      projectSlug: projectSlug,
+      specs: specs.map((spec) => spec.dataLayerSpec)
+    };
   }
 
   async getSpec(projectSlug: string, eventName: string) {
