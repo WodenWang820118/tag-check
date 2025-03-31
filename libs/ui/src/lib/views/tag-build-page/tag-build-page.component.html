@@ -5,9 +5,9 @@
 
   <div class="main-page__board">
     <div class="main-page__board__item main-page__editor">
-      @if (projectSpecs !== null) {
+      @if (specs !== null) {
         <lib-editor
-          content="{{ projectSpecs.specs | json }}"
+          content="{{ specs | json }}"
           [editorExtension]="inputExtension"
         />
       }

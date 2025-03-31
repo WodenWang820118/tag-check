@@ -25,6 +25,7 @@ export class ProjectInitializationService {
   private async createProjectFolders(projectSlug: string) {
     const projectRoot =
       await this.folderPathService.getProjectFolderPath(projectSlug);
+    if (existsSync(projectRoot)) return;
     this.folderService.createFolder(projectRoot);
     this.folderService.createFolder(
       await this.folderPathService.getRecordingFolderPath(projectSlug)

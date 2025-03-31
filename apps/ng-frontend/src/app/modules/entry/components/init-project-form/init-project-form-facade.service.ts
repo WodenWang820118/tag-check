@@ -16,7 +16,6 @@ import {
   take,
   tap
 } from 'rxjs';
-import { ErrorDialogComponent } from '@ui';
 import { InstantErrorStateMatcher } from './helper';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -25,6 +24,7 @@ import slugify from 'slugify';
   providedIn: 'root'
 })
 export class InitProjectFormFacadeService {
+  errorDialogComponent = this.loadErrorDialogComponent();
   validProjectNameMatcher = new InstantErrorStateMatcher();
   allowedSymbolsPattern = /^[a-zA-Z0-9-!'",\s]+$/;
   projectForm: FormGroup<{
@@ -56,10 +56,18 @@ export class InitProjectFormFacadeService {
     private dialog: MatDialog,
     private destoryRef: DestroyRef,
     private router: Router
-  ) {}
-
-  ngOnInit(): void {
+  ) {
     this.observeProjectNameChanges();
+  }
+
+  private async loadErrorDialogComponent() {
+    try {
+      const module = await import('@ui');
+      return module.ErrorDialogComponent;
+    } catch (error) {
+      console.error('Failed to load toolbar component:', error);
+      return null;
+    }
   }
 
   observeProjectNameChanges(): void {
@@ -133,12 +141,18 @@ export class InitProjectFormFacadeService {
     );
   }
 
-  private showErrorDialog(message: string): void {
-    this.dialog.open(ErrorDialogComponent, {
-      data: { message }
-    });
+  private async showErrorDialog(message: string) {
+    const errorComponent = await this.errorDialogComponent;
+    if (errorComponent !== null) {
+      this.dialog.open(errorComponent, {
+        data: {
+          message: message
+        }
+      });
+    }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private isEmptyObject(obj: any): boolean {
     return obj && Object.keys(obj).length === 0 && obj.constructor === Object;
   }
