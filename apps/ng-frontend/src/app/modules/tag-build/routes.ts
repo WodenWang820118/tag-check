@@ -6,6 +6,6 @@ export const TAG_BUILD_ROUTES: Routes = [
     loadComponent: () =>
       import('./views/tag-build-view.component').then(
         (m) => m.TagBuildViewComponent
-      ),
-  },
+      )
+  }
 ];

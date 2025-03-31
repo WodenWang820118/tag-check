@@ -1,17 +1,14 @@
-import { DestroyRef, Injectable } from '@angular/core';
+import { DestroyRef, Injectable, inject } from '@angular/core';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
-import { ErrorDialogComponent } from '@ui';
 import { IReportDetails, ReportDetailsDto } from '@utils';
 import {
   tap,
   combineLatest,
   take,
   map,
-  mergeMap,
-  forkJoin,
-  catchError,
   switchMap,
-  throwError
+  throwError,
+  catchError
 } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EditorService } from '../../../../shared/services/editor/editor.service';
@@ -23,11 +20,16 @@ import { RecordingService } from '../../../../shared/services/api/recording/reco
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
 import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
+import { LoggerService } from '../../../../shared/services/logger/logger.service'; // Create this service
 
 @Injectable({
   providedIn: 'root'
 })
 export class NewReportViewFacadeService {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private errorDialogComponentPromise: Promise<any> | null = null;
+  private logger = inject(LoggerService);
+
   exampleInputJson = JSON.stringify({
     event: 'page_view',
     page_path: '$page_path',
@@ -51,7 +53,45 @@ export class NewReportViewFacadeService {
     private specService: SpecService,
     private projectDataSourceService: ProjectDataSourceService,
     private uploadSpecService: UploadSpecService
-  ) {}
+  ) {
+    // Initialize the component promise but don't await it yet
+    this.initErrorDialogComponent();
+  }
+
+  private initErrorDialogComponent(): void {
+    this.errorDialogComponentPromise = this.loadErrorDialogComponent();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private async loadErrorDialogComponent(): Promise<any> {
+    try {
+      const module = await import('@ui');
+      this.logger.info('ErrorDialogComponent loaded successfully');
+      return module.ErrorDialogComponent;
+    } catch (error) {
+      this.logger.error(`Failed to load ErrorDialogComponent:  ${error}`);
+      return null;
+    }
+  }
+
+  // Method to show error dialog with proper error handling
+  async showErrorDialog(message: string): Promise<void> {
+    try {
+      const component = await this.errorDialogComponentPromise;
+      if (component) {
+        this.dialog.open(component, {
+          data: { message }
+        });
+      } else {
+        // Fallback if component couldn't be loaded
+        this.logger.error('Error:', message);
+        alert(message); // Simple fallback
+      }
+    } catch (error) {
+      this.logger.error(`Failed to show error dialog: ${error}`);
+      alert(message); // Simple fallback
+    }
+  }
 
   cancel() {
     this.location.back();
@@ -82,7 +122,6 @@ export class NewReportViewFacadeService {
         tap(([specEditor, recordingEditor]) => {
           const specContent = specEditor.state.doc.toString();
           const recordingContent = recordingEditor.state.doc.toString();
-
           this.editorService.setContent('specJson', specContent);
           this.editorService.setContent('recordingJson', recordingContent);
         })
@@ -96,8 +135,10 @@ export class NewReportViewFacadeService {
       this.editorService.editor$.recordingJsonEditor
     ]).pipe(
       map(([specEditor, recordingEditor]) => {
-        if (!this.reportForm.controls['testName'].value)
+        if (!this.reportForm.controls['testName'].value) {
+          this.showErrorDialog('Test name is required');
           throw new Error('Test name is required');
+        }
 
         const specContent = specEditor.state.doc.toString();
         const recordingContent = recordingEditor.state.doc.toString();
@@ -106,24 +147,26 @@ export class NewReportViewFacadeService {
 
         if (specContent && projectSlug) {
           const eventName = JSON.parse(specContent).event as string;
-
           const reportDetails: IReportDetails = new ReportDetailsDto({
             eventId: eventId,
             testName: testName,
             eventName: eventName
           });
 
-          this.projectDataSourceService.connect().pipe(
-            take(1),
-            tap((data) => {
-              this.projectDataSourceService.setData([...data, reportDetails]);
-              this.uploadSpecService.completeUpload();
-            }),
-            catchError((error) => {
-              console.error('Error updating project data source:', error);
-              return error;
-            })
-          );
+          this.projectDataSourceService
+            .connect()
+            .pipe(
+              take(1),
+              tap((data) => {
+                this.projectDataSourceService.setData([...data, reportDetails]);
+                this.uploadSpecService.completeUpload();
+              }),
+              catchError((error) => {
+                this.logger.error('Error updating project data source:', error);
+                return throwError(() => error);
+              })
+            )
+            .subscribe();
 
           return {
             projectSlug,
@@ -134,11 +177,7 @@ export class NewReportViewFacadeService {
             reportDetails
           };
         } else {
-          this.dialog.open(ErrorDialogComponent, {
-            data: {
-              message: 'Spec content is required and cannot be empty.'
-            }
-          });
+          this.showErrorDialog('Spec content is required and cannot be empty.');
           throw new Error('Spec content is required and cannot be empty.');
         }
       }),
@@ -151,13 +190,21 @@ export class NewReportViewFacadeService {
           recordingContent,
           reportDetails
         }) => {
-          return this.reportService.addReport(
-            projectSlug,
-            eventId,
-            reportDetails,
-            JSON.parse(recordingContent),
-            JSON.parse(specContent)
-          );
+          return this.reportService
+            .addReport(
+              projectSlug,
+              eventId,
+              reportDetails,
+              JSON.parse(recordingContent),
+              JSON.parse(specContent)
+            )
+            .pipe(
+              catchError((error) => {
+                this.logger.error('Error adding report:', error);
+                this.showErrorDialog('Failed to add report. Please try again.');
+                return throwError(() => error);
+              })
+            );
         }
       )
     );

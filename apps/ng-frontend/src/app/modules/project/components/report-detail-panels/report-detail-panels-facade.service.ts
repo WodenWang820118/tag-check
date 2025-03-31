@@ -6,13 +6,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
-import { ErrorDialogComponent } from '@ui';
 import { Recording, Spec } from '@utils';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportDetailPanelsFacadeService {
+  errorDialogComponent = this.loadErrorDialogComponent();
   constructor(
     private reportService: ReportService,
     private recordingService: RecordingService,
@@ -21,6 +21,16 @@ export class ReportDetailPanelsFacadeService {
     private dialog: MatDialog,
     private utilsService: UtilsService
   ) {}
+
+  private async loadErrorDialogComponent() {
+    try {
+      const module = await import('@ui');
+      return module.ErrorDialogComponent;
+    } catch (error) {
+      console.error('Failed to load toolbar component:', error);
+      return null;
+    }
+  }
 
   onRecordingFileSelected(event: Event) {
     this.recordingService.setLoading(true); // close spinner after file is read
@@ -115,12 +125,15 @@ export class ReportDetailPanelsFacadeService {
     }
   }
 
-  private showErrorDialog(message: string) {
-    this.dialog.open(ErrorDialogComponent, {
-      data: {
-        message: message
-      }
-    });
+  private async showErrorDialog(message: string) {
+    const errorComponent = await this.errorDialogComponent;
+    if (errorComponent !== null) {
+      this.dialog.open(errorComponent, {
+        data: {
+          message: message
+        }
+      });
+    }
   }
 
   setTempRecordingFileContent(content: Recording | null) {
