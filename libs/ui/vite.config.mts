@@ -16,6 +16,8 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       setupFiles: ['src/test-setup.ts'],
       include: ['**/*.spec.ts'],
+      // Allow CI/pre-commit to pass when this package has no tests yet
+      passWithNoTests: true,
       reporters: ['default']
     },
     define: {
