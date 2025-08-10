@@ -19,3 +19,4 @@ onlyBuiltDependencies:
   - puppeteer-chromium-resolver
   - sqlite3
   - tag-check
+  - unrs-resolver
