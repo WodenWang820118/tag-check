@@ -14,8 +14,8 @@ export class ReportDetailsDto implements OutputValidationResult {
   requestPassed = false;
   completedTime = new Date();
   dataLayerSpec = {} as BaseDataLayerEvent | StrictDataLayerEvent;
-  dataLayer = {} as BaseDataLayerEvent | StrictDataLayerEvent;
-  reformedDataLayer = {} as BaseDataLayerEvent | StrictDataLayerEvent;
+  dataLayer = [] as (BaseDataLayerEvent | StrictDataLayerEvent)[];
+  reformedDataLayer = [] as (BaseDataLayerEvent | StrictDataLayerEvent)[];
   rawRequest = '';
   message = '';
   destinationUrl = '';

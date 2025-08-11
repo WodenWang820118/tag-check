@@ -1,4 +1,4 @@
-import { AsyncPipe, NgComponentOutlet, NgIf } from '@angular/common';
+import { AsyncPipe, NgComponentOutlet } from '@angular/common';
 import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
@@ -6,14 +6,15 @@ import { RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AsyncPipe, NgComponentOutlet, NgIf],
+  imports: [RouterOutlet, AsyncPipe, NgComponentOutlet],
   template: `
     @defer {
-      <ng-container *ngIf="toolbarComponent | async as toolbar">
+      @if (toolbarComponent | async; as toolbar) {
         <ng-container
-          *ngComponentOutlet="toolbar; inputs: toolbarInputs"
+          [ngComponentOutlet]="toolbar"
+          [ngComponentOutletInputs]="toolbarInputs"
         ></ng-container>
-      </ng-container>
+      }
     } @placeholder {
       <div class="toolbar-placeholder">Loading toolbar...</div>
     }
@@ -23,10 +24,8 @@ import { RouterOutlet } from '@angular/router';
     </div>
 
     @defer (on viewport) {
-      @if (footerComponent | async) {
-        <ng-container
-          *ngComponentOutlet="footerComponent | async"
-        ></ng-container>
+      @if (footerComponent | async; as footer) {
+        <ng-container [ngComponentOutlet]="footer"></ng-container>
       }
     } @placeholder {
       <div></div>

@@ -31,6 +31,9 @@ export class TestEventDetailRepositoryService {
           },
           eventId
         }
+      },
+      order: {
+        createdAt: 'DESC'
       }
     });
     return plainToInstance(TestEventDetailResponseDto, entity);
@@ -98,8 +101,8 @@ export class TestEventDetailRepositoryService {
       newDetail.requestPassed = data.requestPassed ?? false;
       newDetail.rawRequest = data.rawRequest ?? '';
       newDetail.destinationUrl = data.destinationUrl ?? '';
-      newDetail.dataLayer = data.dataLayer ?? {};
-      newDetail.reformedDataLayer = data.reformedDataLayer ?? {};
+      newDetail.dataLayer = data.dataLayer ?? [];
+      newDetail.reformedDataLayer = data.reformedDataLayer ?? [];
 
       const entity = await this.repository.update(
         { testEvent: testEvent },

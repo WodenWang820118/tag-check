@@ -37,7 +37,7 @@ export class InspectorSingleEventService {
 
     Logger.debug(JSON.stringify(spec, null, 2), 'Expected Spec: ');
 
-    if (captureRequest === 'false') {
+    if (captureRequest === 'false' || !captureRequest) {
       return await this.handleNoCaptureRequest(
         page,
         projectSlug,
@@ -86,17 +86,24 @@ export class InspectorSingleEventService {
     // 3. Compare the result with the project spec
     // 3.1 Get the corresponding event object from the result
     // 3.2 Compare the expectedObj with the result, applying strategies
-    const dataLayerResults = [result.dataLayer] as StrictDataLayerEvent[];
+    const dataLayerResults = result.dataLayer as StrictDataLayerEvent[];
+    this.logger.debug(
+      'Data layer results in inspector single event before validation:',
+      JSON.stringify(dataLayerResults, null, 2)
+    );
     const dataLayerResult = this.inspectorUtilsService.isDataLayerCorrect(
       dataLayerResults,
       spec.dataLayerSpec
     );
 
+    this.logger.log(
+      'data layer result in inspector single event: ',
+      JSON.stringify(dataLayerResult, null, 2)
+    );
     const destinationUrl = result.destinationUrl;
     this.logger.log(`Destination URL: ${destinationUrl}`);
     // TODO: cached file might be suitable to be stored in the DB
     await this.fileService.writeCacheFile(projectSlug, eventId, result);
-
     return {
       dataLayerResult,
       destinationUrl,
@@ -128,7 +135,7 @@ export class InspectorSingleEventService {
     // 3. Compare the result with the project spec
     // 3.1 Get the corresponding event object from the result
     // 3.2 Compare the expectedObj with the result, applying strategies
-    const dataLayerResults = [result.dataLayer] as StrictDataLayerEvent[];
+    const dataLayerResults = result.dataLayer as StrictDataLayerEvent[];
     const dataLayerResult = this.inspectorUtilsService.isDataLayerCorrect(
       dataLayerResults,
       spec.dataLayerSpec

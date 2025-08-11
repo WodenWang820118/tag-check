@@ -20,13 +20,13 @@ export class TestEventDetailResponseDto implements TestEventDetailSchema {
   rawRequest?: string | undefined;
 
   @Expose()
-  reformedDataLayer?: StrictDataLayerEvent | BaseDataLayerEvent | undefined;
+  reformedDataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];
 
   @Expose()
   destinationUrl!: string;
 
   @Expose()
-  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent | undefined;
+  dataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];
 
   @Expose()
   dataLayerSpec!: StrictDataLayerEvent | BaseDataLayerEvent;

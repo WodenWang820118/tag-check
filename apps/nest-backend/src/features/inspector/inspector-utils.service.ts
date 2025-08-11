@@ -29,7 +29,7 @@ export class InspectorUtilsService {
     spec: StrictDataLayerEvent
   ) {
     const strategyType = this.determineStrategy();
-
+    this.logger.debug(`Using validation strategy: ${strategyType}`);
     try {
       switch (strategyType) {
         case ValidationStrategyType.ECOMMERCE:
@@ -38,9 +38,9 @@ export class InspectorUtilsService {
         default: {
           const result: ValidationResult = {
             passed: false,
-            message: 'The strategy is not found',
+            message: 'Unmatched data layer',
             eventName: spec.event,
-            dataLayer: {},
+            dataLayer: dataLayer,
             dataLayerSpec: spec
           };
           return result;
