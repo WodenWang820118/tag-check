@@ -13,6 +13,7 @@ import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class TestEventRepositoryService {
+  private readonly logger = new Logger(TestEventRepositoryService.name);
   constructor(
     @InjectRepository(TestEventEntity)
     private readonly repository: Repository<TestEventEntity>
@@ -31,7 +32,6 @@ export class TestEventRepositoryService {
       },
       where: { project: { projectSlug } }
     });
-    Logger.debug('Entities: ', entities);
     return plainToInstance(AbstractTestEventResponseDto, entities, {
       enableImplicitConversion: true
     });

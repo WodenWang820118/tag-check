@@ -31,7 +31,9 @@ export class ReportController {
   async getProjectEventReports(@Param('projectSlug') projectSlug: string) {
     const reports =
       await this.testEventRepositoryService.listReports(projectSlug);
-    console.log(reports);
+    this.logger.log(
+      `getProjectEventReports: ${JSON.stringify(reports, null, 2)}`
+    );
     return reports;
   }
 

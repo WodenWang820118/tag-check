@@ -1,4 +1,4 @@
-import { AsyncPipe, NgComponentOutlet, NgIf } from '@angular/common';
+import { AsyncPipe, NgComponentOutlet } from '@angular/common';
 import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import { Subject, takeUntil, tap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -8,18 +8,14 @@ import { SpecService } from '../../../shared/services/api/spec/spec.service';
 @Component({
   selector: 'app-tag-build-view',
   standalone: true,
-  imports: [AsyncPipe, NgIf, AsyncPipe, NgComponentOutlet],
+  imports: [AsyncPipe, NgComponentOutlet],
   template: `
-    <ng-container
-      *ngIf="tagBuildPageComponent | async as tagBuildPageComponent"
-    >
+    @if (tagBuildPageComponent | async; as tagBuildPageComponent) {
       <ng-container
-        *ngComponentOutlet="
-          tagBuildPageComponent;
-          inputs: { specs: projectSpecSignal$() }
-        "
+        [ngComponentOutlet]="tagBuildPageComponent"
+        [ngComponentOutletInputs]="{ specs: projectSpecSignal$() }"
       ></ng-container>
-    </ng-container>
+    }
   `,
   styles: [``]
 })

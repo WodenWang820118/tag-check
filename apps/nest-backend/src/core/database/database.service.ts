@@ -12,7 +12,7 @@ export class DatabaseConfigService {
       database: this.configsService.getDatabasePath(),
       autoLoadEntities: true,
       synchronize: true,
-      logging: true,
+      logging: false, // TODO: use args to toggle
       retryAttempts: 10,
       retryDelay: 3000
     };

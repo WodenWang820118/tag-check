@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { StrictDataLayerEvent, BaseDataLayerEvent } from '@utils';
 import { ValidationResultDto } from '../../../shared/dto/validation-result.dto';
 import { DataLayerValidationUtilsService } from './data-layer-validation-utils.service';
 
 @Injectable()
 export class OldGA4EventsValidationStrategy {
+  private readonly logger = new Logger(OldGA4EventsValidationStrategy.name);
   constructor(
     private dataLayerValidationUtilsService: DataLayerValidationUtilsService
   ) {}
@@ -13,8 +14,12 @@ export class OldGA4EventsValidationStrategy {
     dataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[],
     dataLayerSpec: StrictDataLayerEvent
   ) {
+    this.logger.debug(`Data layer: ${JSON.stringify(dataLayer, null, 2)}`);
     for (const eventObj of dataLayer) {
-      if (eventObj.event === dataLayerSpec.event) {
+      this.logger.debug(
+        `Validating event: ${JSON.stringify(eventObj, null, 2)}`
+      );
+      if (eventObj.event?.toString() === dataLayerSpec.event) {
         return this.dataLayerValidationUtilsService.validateKeyValues(
           dataLayerSpec,
           eventObj

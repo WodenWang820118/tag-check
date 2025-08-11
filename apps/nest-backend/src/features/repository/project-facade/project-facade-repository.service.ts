@@ -22,6 +22,7 @@ import {
 
 @Injectable()
 export class ProjectFacadeRepositoryService {
+  private logger = new Logger(ProjectFacadeRepositoryService.name);
   constructor(
     private projectRepositoryService: ProjectRepositoryService,
     private authenticationRepositoryService: AuthenticationSettingRepositoryService,
@@ -102,8 +103,23 @@ export class ProjectFacadeRepositoryService {
     projectSlug: string,
     settings: Partial<ApplicationSetting>
   ) {
+    if (!settings) {
+      throw new Error('Invalid settings');
+    }
+
+    if (!projectSlug) {
+      throw new Error('Invalid projectSlug');
+    }
+
     const projectEntity =
       await this.projectRepositoryService.getEntityBySlug(projectSlug);
+
+    if (!projectEntity) {
+      throw new Error('Project not found');
+    }
+    this.logger.debug(
+      `updateApplicationSettings - projectSlug=${projectSlug}, entity=${JSON.stringify(projectEntity, null, 2)}`
+    );
     // Handle application settings update
     return await this.applicationRepositoryService.update(
       projectEntity,
@@ -132,6 +148,7 @@ export class ProjectFacadeRepositoryService {
   ) {
     const projectEntity =
       await this.projectRepositoryService.getEntityBySlug(projectSlug);
+    Logger.log('projectEntity: ', JSON.stringify(projectEntity, null, 2));
     // Handle browser settings update
     return await this.browserRepositoryService.update(projectEntity, settings);
   }

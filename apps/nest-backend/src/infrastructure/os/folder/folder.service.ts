@@ -9,7 +9,7 @@ export class FolderService {
       throw new NotFoundException('Folder not found');
     }
     return readdirSync(folderPath, {
-      withFileTypes: true,
+      withFileTypes: true
     });
   }
 
@@ -25,12 +25,15 @@ export class FolderService {
       throw new NotFoundException('Folder not found');
     }
     return readdirSync(folderPath, {
-      withFileTypes: true,
+      withFileTypes: true
     }).filter((dirent) => dirent.isDirectory());
   }
 
   createFolder(folderPath: string) {
-    mkdirSync(folderPath);
+    // create folder only if it doesn't exist, use recursive to avoid errors if parent folders are missing
+    if (!existsSync(folderPath)) {
+      mkdirSync(folderPath, { recursive: true });
+    }
   }
 
   getJsonFilesFromDir(dirPath: string) {

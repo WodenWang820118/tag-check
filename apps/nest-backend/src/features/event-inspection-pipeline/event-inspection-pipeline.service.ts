@@ -35,13 +35,17 @@ export class EventInspectionPipelineService {
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     this.logger.log('Inspecting single event');
-
     // Retrieve the test event once since it is needed in both paths.
     const testEvent = await this.getTestEvent(projectSlug, eventId);
 
     try {
       // Call the inspector service to get the inspection result.
-      const result = await this.inspectorSingleEventService.inspectDataLayer(
+      const {
+        dataLayerResult,
+        destinationUrl,
+        rawRequest,
+        requestCheckResult
+      } = await this.inspectorSingleEventService.inspectDataLayer(
         page,
         projectSlug,
         eventId,
@@ -50,21 +54,33 @@ export class EventInspectionPipelineService {
         captureRequest,
         eventInspectionPresetDto.application
       );
-      this.logger.debug('Result:', JSON.stringify(result, null, 2));
-
+      this.logger.debug(
+        'data layer result:',
+        JSON.stringify(dataLayerResult, null, 2)
+      );
       // Map service response to the output data format.
       const data = [
         {
-          dataLayerResult: result.dataLayerResult,
-          rawRequest: result.rawRequest,
-          requestCheckResult: result.requestCheckResult,
-          destinationUrl: result.destinationUrl
+          dataLayerResult,
+          rawRequest,
+          requestCheckResult,
+          destinationUrl
         }
       ];
-      this.logger.debug('Data:', JSON.stringify(data, null, 2));
+      this.logger.debug('Data to be saved:', JSON.stringify(data, null, 2));
 
       // Build detail DTO for a passed event.
-      const updatedDetail = this.buildTestEventDetail(result);
+      const updatedDetail = this.buildTestEventDetail({
+        dataLayerResult,
+        rawRequest,
+        requestCheckResult,
+        destinationUrl
+      });
+
+      this.logger.debug(
+        'Updated detail:',
+        JSON.stringify(updatedDetail, null, 2)
+      );
       const testEventDetailDto =
         await this.testEventDetailRepositoryService.create(
           testEvent,
@@ -84,7 +100,6 @@ export class EventInspectionPipelineService {
       return data;
     } catch (error) {
       this.logger.error('Error during event inspection', error);
-
       // Build detail DTO for a failed event.
       const updatedDetail = this.buildFallbackTestEventDetail();
       const testEventDetailDto =
@@ -125,12 +140,12 @@ export class EventInspectionPipelineService {
     requestCheckResult: ValidationResult;
   }): CreateTestEventDetailDto {
     return {
-      passed: result.dataLayerResult.passed,
-      requestPassed: result.requestCheckResult.passed,
+      passed: result.dataLayerResult.passed || false,
+      requestPassed: result.requestCheckResult.passed || false,
       rawRequest: result.rawRequest,
       destinationUrl: result.destinationUrl,
       dataLayer: result.dataLayerResult.dataLayer,
-      reformedDataLayer: {} // placeholder for additional processing if needed
+      reformedDataLayer: [] // placeholder for additional processing if needed
     };
   }
 
@@ -143,8 +158,8 @@ export class EventInspectionPipelineService {
       requestPassed: false,
       rawRequest: '',
       destinationUrl: '',
-      dataLayer: {},
-      reformedDataLayer: {}
+      dataLayer: [],
+      reformedDataLayer: []
     };
   }
 

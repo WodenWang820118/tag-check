@@ -59,15 +59,15 @@ export class ApplicationFormComponent implements OnInit {
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         tap((data) => {
-          const settings = data['projectInfo'].settings;
+          const settings = data['projectInfo'].applicationSettings;
           if (settings) {
             this.localStorageSettings.set(
-              settings.application.localStorage.data as LocalStorageData[]
+              settings.localStorage.data as LocalStorageData[]
             );
-            this.cookieSettings.set(
-              settings.application.cookie.data as CookieData[]
-            );
+            this.cookieSettings.set(settings.cookie.data as CookieData[]);
             this.loadInitialData();
+          } else {
+            throw new Error('Application settings not found');
           }
         })
       )
