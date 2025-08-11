@@ -1,6 +1,6 @@
 {
   "name": "tag-check",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "type": "module",
   "main": ".vite/build/main.mjs",
   "author": "Guan Xin Wang",
@@ -58,7 +58,7 @@
     "mock-settings-back": "nodemon mock/mock-server/mock-settings-backend.js",
     "testing": "-----------------all testing scripts-----------------",
     "test:data-access": "nx test data-access --experimental-vm-modules",
-    "test:cov": "cross-env NX_DAEMON=false nx run-many --target=test --parallel=6 --coverage --verbose --exclude=**/nest-backend,**/e2e && pnpm run test-back:cov && node ./merge-coverage.mjs",
+    "test:cov": "nx run-many --target=test --parallel=6 --coverage --verbose --exclude=**/nest-backend,**/e2e && pnpm run test-back:cov && node ./merge-coverage.mjs",
     "test-back:cov": "vitest --coverage --root=apps/nest-backend --exclude=**/test/*e2e-spec.ts --watch=false",
     "test-back:e2e": "cross-env-shell WEB_SOCKET=7003 \"vitest --coverage --root=apps/nest-backend/test --watch=false\"",
     "test-front:e2e": "pnpm exec playwright test \"apps/ng-frontend/e2e/app.e2e-spec.ts\"",

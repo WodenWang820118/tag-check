@@ -18,9 +18,9 @@ export type TestEventDetail = {
   passed: boolean;
   requestPassed: boolean;
   rawRequest?: string;
-  reformedDataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
+  reformedDataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];
   destinationUrl: string;
-  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];
 };
 
 export type TestEventDetailSchema = {

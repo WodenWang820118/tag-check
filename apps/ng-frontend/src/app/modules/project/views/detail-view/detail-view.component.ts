@@ -2,7 +2,7 @@ import { Component, computed, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReportDetailPanelsComponent } from '../../components/report-detail-panels/report-detail-panels.component';
-import { IReportDetails } from '@utils';
+import { IReportDetails, TestEvent, TestEventDetail, TestImage } from '@utils';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel.component';
@@ -36,9 +36,22 @@ export class DetailViewComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.data.subscribe((data) => {
-      const reportDetailsArray = data['reportDetails'];
+      const reportDetailsObject = data['reportDetails'] as {
+        testEvent: TestEvent;
+        testEventDetail: TestEventDetail;
+        testImage: TestImage;
+      };
       // Flatten the array of objects into a single object
-      const flattenedReportDetails = Object.assign({}, ...reportDetailsArray);
+      console.log('Report details object:', reportDetailsObject);
+      const flattenedReportDetails: IReportDetails = {
+        ...reportDetailsObject.testEvent,
+        ...reportDetailsObject.testEventDetail,
+        ...reportDetailsObject.testImage,
+        position: 0,
+        event: reportDetailsObject.testEvent.eventName,
+        createdAt: new Date() // FIXME: should expose createdAt from testEvent
+      };
+      console.log('Flattened report details:', flattenedReportDetails);
       const video = data['video'] as { blob: Blob | null };
       const image = data['image'] as { blob: Blob | null };
       this.reportDetails.set(flattenedReportDetails);

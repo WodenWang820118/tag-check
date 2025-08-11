@@ -50,8 +50,8 @@ export class TestReportFacadeRepositoryService {
         requestPassed: false,
         rawRequest: '',
         destinationUrl: '',
-        dataLayer: {},
-        reformedDataLayer: {}
+        dataLayer: [],
+        reformedDataLayer: []
       });
 
     const recordingCreation = this.recordingRepositoryService.create(
@@ -152,6 +152,10 @@ export class TestReportFacadeRepositoryService {
       eventId
     );
 
-    return [testEvent, testEventDetail, testImage];
+    return {
+      testEvent,
+      testEventDetail,
+      testImage
+    };
   }
 }

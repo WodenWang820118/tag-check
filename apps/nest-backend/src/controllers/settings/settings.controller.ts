@@ -16,6 +16,7 @@ import { ProjectFacadeRepositoryService } from '../../features/repository/projec
 
 @Controller('settings')
 export class SettingsController {
+  private readonly logger = new Logger(SettingsController.name);
   constructor(
     private projectSettingService: ProjectSettingService,
     private projectRepositoryService: ProjectRepositoryService,
@@ -43,7 +44,9 @@ export class SettingsController {
     @Param('projectSlug') projectSlug: string,
     @Body() settings: Partial<ProjectSetting>
   ) {
-    Logger.log('project settings: ', settings);
+    this.logger.log(
+      `updateProjectSettings - projectSlug=${projectSlug}, settings=${JSON.stringify(settings)}`
+    );
     return await this.projectFacadeRepositoryService.updateProjectSettings(
       projectSlug,
       settings
@@ -56,7 +59,9 @@ export class SettingsController {
     @Param('projectSlug') projectSlug: string,
     @Body() settings: Partial<ApplicationSetting>
   ) {
-    Logger.log('application settings: ', settings);
+    this.logger.log(
+      `updateApplicationSettings - projectSlug=${projectSlug}, settings=${JSON.stringify(settings)}`
+    );
     return await this.projectFacadeRepositoryService.updateApplicationSettings(
       projectSlug,
       settings
@@ -69,7 +74,9 @@ export class SettingsController {
     @Param('projectSlug') projectSlug: string,
     @Body() settings: Partial<AuthenticationSetting>
   ) {
-    Logger.log('authentication settings: ', settings);
+    this.logger.log(
+      `updateAuthenticationSettings - projectSlug=${projectSlug}, settings=${JSON.stringify(settings)}`
+    );
     return await this.projectFacadeRepositoryService.updateAuthenticationSettings(
       projectSlug,
       settings
@@ -82,7 +89,9 @@ export class SettingsController {
     @Param('projectSlug') projectSlug: string,
     @Body() settings: Partial<BrowserSetting>
   ) {
-    Logger.log('browser settings: ', settings);
+    this.logger.log(
+      `updateBrowserSettings - projectSlug=${projectSlug}, settings=${JSON.stringify(settings)}`
+    );
     return await this.projectFacadeRepositoryService.updateBrowserSettings(
       projectSlug,
       settings

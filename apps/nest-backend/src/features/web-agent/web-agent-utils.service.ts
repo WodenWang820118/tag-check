@@ -72,9 +72,11 @@ export class WebAgentUtilsService {
         eventId
       );
 
-      const dataLayer = await this.getOptimizedDataLayer(projectSlug, eventId);
+      const dataLayer = (await this.getOptimizedDataLayer(
+        projectSlug,
+        eventId
+      )) as any[];
       const destinationUrl = page.url();
-
       this.logger.log('Test completed');
 
       return {
@@ -152,6 +154,7 @@ export class WebAgentUtilsService {
       projectSlug,
       eventId
     );
+    this.logger.log('Optimized data layer:', dataLayer);
     return dataLayer.map(
       (event: { [x: string]: any; 'gtm.uniqueEventId': any }) => {
         const { 'gtm.uniqueEventId': _, ...rest } = event;

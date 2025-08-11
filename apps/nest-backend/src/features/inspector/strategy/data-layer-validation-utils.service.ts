@@ -10,18 +10,18 @@ import { ValidationResultDto } from '../../../shared/dto/validation-result.dto';
 export class DataLayerValidationUtilsService {
   validateKeyValues(
     dataLayerSpec: StrictDataLayerEvent,
-    dataLayer: BaseDataLayerEvent | StrictDataLayerEvent
+    dataLayerObj: BaseDataLayerEvent | StrictDataLayerEvent
   ): ValidationResult {
     for (const key in dataLayerSpec) {
-      if (!(key in dataLayer)) {
+      if (!(key in dataLayerObj)) {
         return this.createValidationError(
           `Key "${key}" is missing in the data layer`,
           dataLayerSpec,
-          dataLayer
+          dataLayerObj
         );
       }
 
-      const eventValue = dataLayer[key];
+      const eventValue = dataLayerObj[key];
       const specValue = dataLayerSpec[key];
 
       if (typeof specValue === 'string') {
@@ -31,7 +31,9 @@ export class DataLayerValidationUtilsService {
             passed: true,
             message: 'Valid',
             dataLayerSpec,
-            dataLayer
+            dataLayer: Array.isArray(dataLayerObj)
+              ? dataLayerObj
+              : [dataLayerObj]
           });
         } else if (specValue.startsWith('/') && specValue.endsWith('/')) {
           // Condition 2: Regex literal within the string. Check whether the regex matches.
@@ -39,7 +41,7 @@ export class DataLayerValidationUtilsService {
             return this.createValidationError(
               `Value for key "${key}" is not a string as expected`,
               dataLayerSpec,
-              dataLayer
+              dataLayerObj
             );
           }
 
@@ -48,7 +50,7 @@ export class DataLayerValidationUtilsService {
             return this.createValidationError(
               `Value for key "${key}" does not match the regex pattern`,
               dataLayerSpec,
-              dataLayer
+              dataLayerObj
             );
           }
         } else {
@@ -57,7 +59,7 @@ export class DataLayerValidationUtilsService {
             return this.createValidationError(
               `Value for key "${key}" does not match the expected value`,
               dataLayerSpec,
-              dataLayer
+              dataLayerObj
             );
           }
         }
@@ -67,7 +69,7 @@ export class DataLayerValidationUtilsService {
           return this.createValidationError(
             `Value for key "${key}" does not match the expected value`,
             dataLayerSpec,
-            dataLayer
+            dataLayerObj
           );
         }
       }
@@ -77,7 +79,7 @@ export class DataLayerValidationUtilsService {
       passed: true,
       message: 'Valid',
       dataLayerSpec,
-      dataLayer
+      dataLayer: Array.isArray(dataLayerObj) ? dataLayerObj : [dataLayerObj]
     });
   }
 
@@ -90,7 +92,7 @@ export class DataLayerValidationUtilsService {
       passed: false,
       message,
       dataLayerSpec,
-      dataLayer
+      dataLayer: Array.isArray(dataLayer) ? dataLayer : [dataLayer]
     });
   }
 }
