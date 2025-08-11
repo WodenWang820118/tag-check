@@ -12,6 +12,7 @@ import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ApplicationSettingRepositoryService {
+  private logger = new Logger(ApplicationSettingRepositoryService.name);
   constructor(
     @InjectRepository(ApplicationSettingEntity)
     private readonly repository: Repository<ApplicationSettingEntity>
@@ -43,10 +44,12 @@ export class ApplicationSettingRepositoryService {
       // First, find existing setting for the project
       const existingSetting = await this.repository.findOne({
         where: {
-          project: { id: projectEntity.id } // Assuming project has an id field
+          project: { id: projectEntity.id } // Assuming project has a projectSlug field
         }
       });
-
+      this.logger.debug(
+        `application setting repository: updateApplicationSettings - projectSlug=${projectEntity.projectSlug}, existingSetting=${JSON.stringify(existingSetting, null, 2)}`
+      );
       if (existingSetting) {
         // Update existing setting
         const updatedSetting = await this.repository.save({

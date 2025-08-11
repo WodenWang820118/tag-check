@@ -85,7 +85,6 @@ export class DataLayerController {
         captureRequest,
         eventInspectionPresetDto
       );
-
       const abstractReport =
         await this.testReportFacadeRepositoryService.getReportDetail(
           projectSlug,

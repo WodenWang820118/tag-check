@@ -43,7 +43,7 @@ export class TestEventDetailEntity
     name: 'reformed_data_layer',
     nullable: true
   })
-  reformedDataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
+  reformedDataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];
 
   @Column({
     name: 'destination_url',
@@ -55,5 +55,5 @@ export class TestEventDetailEntity
     name: 'data_layer',
     nullable: true
   })
-  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];
 }

@@ -3,6 +3,7 @@ import {
   StrictDataLayerEvent,
   TestEventDetail
 } from '@utils';
+import { Expose } from 'class-transformer';
 import {
   IsBoolean,
   IsJSON,
@@ -14,10 +15,11 @@ import {
 export class CreateTestEventDetailDto implements TestEventDetail {
   @IsOptional()
   @IsJSON()
-  dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent | undefined;
+  dataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];
 
   @IsNotEmpty()
   @IsBoolean()
+  @Expose({ name: 'request_passed' })
   requestPassed!: boolean;
 
   @IsNotEmpty()
@@ -29,7 +31,7 @@ export class CreateTestEventDetailDto implements TestEventDetail {
 
   @IsOptional()
   @IsJSON()
-  reformedDataLayer?: StrictDataLayerEvent | BaseDataLayerEvent | undefined;
+  reformedDataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];
 
   @IsString()
   destinationUrl!: string;

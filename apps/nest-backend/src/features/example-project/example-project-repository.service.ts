@@ -3,10 +3,11 @@ import { ProjectReportService } from '../project-agent/project-report/project-re
 import { Injectable, Logger } from '@nestjs/common';
 import { CreateFullTestEventDto, CreateProjectDto } from '../../shared';
 import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
-import { IReportDetails, Recording, Spec } from '@utils';
+import { Cookie, IReportDetails, LocalStorage, Recording, Spec } from '@utils';
 import { exampleRecording } from './example-recording';
 import { exampleSpec } from './example-spec';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
+import { ApplicationSettingRepositoryService } from '../../core/repository/settings/application-setting-repository.service';
 
 @Injectable()
 export class ExampleProjectRepositoryService {
@@ -16,7 +17,8 @@ export class ExampleProjectRepositoryService {
     private readonly testReportFacadeRepositoryService: TestReportFacadeRepositoryService,
     private readonly projectRepositoryService: ProjectRepositoryService,
     private readonly projectInitializationService: ProjectInitializationService,
-    private readonly projectReportService: ProjectReportService
+    private readonly projectReportService: ProjectReportService,
+    private readonly applicationSettingRepositoryService: ApplicationSettingRepositoryService
   ) {
     void this.buildExampleProject();
   }
@@ -55,8 +57,8 @@ export class ExampleProjectRepositoryService {
         requestPassed: false,
         rawRequest: '',
         destinationUrl: '',
-        dataLayer: {},
-        reformedDataLayer: {},
+        dataLayer: [],
+        reformedDataLayer: [],
         createdAt: new Date()
       };
 
@@ -86,9 +88,44 @@ export class ExampleProjectRepositoryService {
         eventId,
         fullReport
       );
+
+      const projectEntity =
+        await this.projectRepositoryService.getEntityBySlug(projectSlug);
+      this.logger.log(
+        'Updating application settings for project:',
+        projectEntity
+      );
+      await this.applicationSettingRepositoryService.update(projectEntity, {
+        localStorage: this.localStorageSettings(),
+        cookie: this.cookieSettings()
+      });
     } catch (error) {
       this.logger.error('Failed to build example project:', error);
       throw error;
     }
+  }
+
+  private localStorageSettings() {
+    const localStorage: LocalStorage = {
+      data: [
+        {
+          key: 'consent',
+          value: 'true'
+        },
+        {
+          key: 'consentPreferences',
+          value:
+            '{"ad_storage":true,"analytics_storage":true,"ad_user_data":true,"ad_personalization":false}'
+        }
+      ]
+    };
+    return localStorage;
+  }
+
+  private cookieSettings() {
+    const cookie: Cookie = {
+      data: []
+    };
+    return cookie;
   }
 }

@@ -60,14 +60,14 @@ export type ValidationResult = {
   passed: boolean;
   message?: string;
   eventName: string;
-  dataLayer: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[];
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
 };
 
 export type RequestValidationResult = {
   requestPassed: boolean;
   rawRequest: string;
-  reformedDataLayer: StrictDataLayerEvent | BaseDataLayerEvent;
+  reformedDataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[];
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
 };
 

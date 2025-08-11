@@ -31,7 +31,7 @@ export class ValidationResultDto implements ValidationResult {
     required: false
   })
   @IsOptional()
-  dataLayer!: StrictDataLayerEvent | BaseDataLayerEvent;
+  dataLayer!: StrictDataLayerEvent[] | BaseDataLayerEvent[];
 
   constructor(partial: Partial<ValidationResultDto> = {}) {
     Object.assign(this, partial);

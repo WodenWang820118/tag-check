@@ -9,7 +9,7 @@ describe('RequestProcessorService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [RequestProcessorService],
+      providers: [RequestProcessorService]
     }).compile();
 
     service = module.get<RequestProcessorService>(RequestProcessorService);
@@ -120,10 +120,10 @@ describe('RequestProcessorService', () => {
               item_category: 'Switzerland',
               price: '799',
               quantity: '1',
-              item_list_name: 'destinations',
-            },
-          ],
-        },
+              item_list_name: 'destinations'
+            }
+          ]
+        }
       };
 
       const actual = service.recomposeGA4ECEvent(ecommerceRequest);
