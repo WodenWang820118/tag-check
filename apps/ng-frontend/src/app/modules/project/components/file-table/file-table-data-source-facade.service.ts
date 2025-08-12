@@ -1,9 +1,8 @@
-import { computed, effect, Injectable, signal } from '@angular/core';
+import { effect, Injectable, signal } from '@angular/core';
 import { FileTableDataSourceService } from '../../../../shared/services/data-source/file-table-data-source.service';
 import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
 import { take } from 'rxjs';
 import { MatTableDataSource } from '@angular/material/table';
-import { SelectionModel } from '@angular/cdk/collections';
 import {
   FrontFileReport,
   IReportDetails,
@@ -15,6 +14,8 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { InformationDialogComponent } from '../../../../shared/components/information-dialog/information-dialog.component';
 import { MatSort } from '@angular/material/sort';
+import { FileTableDataSourceModelService } from '../../services/file-table-data-source-model/file-table-data-source-model.service';
+import { SelectionModel } from '@angular/cdk/collections';
 
 @Injectable({
   providedIn: 'root'
@@ -28,31 +29,33 @@ export class FileTableDataSourceFacadeService {
     'createdAt'
   ]);
 
-  readonly dataSource = signal<MatTableDataSource<IReportDetails & TestImage>>(
-    new MatTableDataSource()
-  );
+  // readonly dataSource = signal<MatTableDataSource<IReportDetails & TestImage>>(
+  //   new MatTableDataSource()
+  // );
 
-  // Selection model as a signal
-  readonly selection = signal(
-    new SelectionModel<IReportDetails & TestImage>(true, [])
-  );
+  // // Selection model as a signal
+  // readonly selection = signal(
+  //   new SelectionModel<IReportDetails & TestImage>(true, [])
+  // );
 
-  // Computed property for "select all" behavior
-  readonly isAllSelected = computed(() => {
-    const ds = this.dataSource();
-    const numSelected = this.selection().selected.length;
-    return ds && numSelected === ds.data.length;
-  });
+  // // Computed property for "select all" behavior
+  // readonly isAllSelected = computed(() => {
+  //   const ds = this.dataSource();
+  //   const numSelected = this.selection().selected.length;
+  //   return ds && numSelected === ds.data.length;
+  // });
   private readonly projectSlug = signal<string>('');
 
   constructor(
     private fileTableDataSourceService: FileTableDataSourceService,
+    private fileTableDataSourceModelService: FileTableDataSourceModelService,
     private fileReportService: FileReportService,
     private dialog: MatDialog
   ) {
     effect(() => {
       const filterValue = this.fileTableDataSourceService.getFilterSignal();
-      const currentDataSource = this.dataSource();
+      const currentDataSource =
+        this.fileTableDataSourceModelService.dataSource();
       if (currentDataSource) {
         currentDataSource.filter = filterValue;
       }
@@ -94,7 +97,7 @@ export class FileTableDataSourceFacadeService {
           if (result) {
             this.handleReportDownload(
               this.projectSlug(),
-              this.selection().selected
+              this.fileTableDataSourceModelService.selection().selected
             );
           }
           this.fileTableDataSourceService.setDownloadSignal(false);
@@ -104,9 +107,10 @@ export class FileTableDataSourceFacadeService {
   }
 
   initializeData(paginator: MatPaginator, sort: MatSort, data: any) {
-    console.log(data);
     const fileReports = data['fileReports'] as FrontFileReport[];
     const projectSlug = data['projectSlug'] as string;
+
+    console.log('File Reports: ', fileReports);
 
     // cross-join the test events with the test event details and test images
     const reports = fileReports.flatMap((report, index) => {
@@ -131,7 +135,7 @@ export class FileTableDataSourceFacadeService {
       const dataSource = new MatTableDataSource(injectReports);
       dataSource.paginator = paginator;
       dataSource.sort = sort;
-      this.dataSource.set(dataSource);
+      this.fileTableDataSourceModelService.dataSource.set(dataSource);
       this.projectSlug.set(projectSlug);
     }
   }
@@ -169,15 +173,22 @@ export class FileTableDataSourceFacadeService {
   }
 
   private handleReportDeletion() {
-    const remainingReports = this.dataSource().data.filter(
-      (item) => !this.selection().selected.includes(item)
-    );
-    this.dataSource().data = remainingReports;
+    const remainingReports = this.fileTableDataSourceModelService
+      .dataSource()
+      .data.filter(
+        (item) =>
+          !this.fileTableDataSourceModelService
+            .selection()
+            .selected.includes(item)
+      );
+    this.fileTableDataSourceModelService.dataSource().data = remainingReports;
     this.fileTableDataSourceService.setData(remainingReports);
     this.fileReportService
       .deleteFileReport(
         this.projectSlug(),
-        this.selection().selected.map((item) => item.eventId)
+        this.fileTableDataSourceModelService
+          .selection()
+          .selected.map((item) => item.eventId)
       )
       .pipe(take(1))
       .subscribe();
@@ -197,20 +208,53 @@ export class FileTableDataSourceFacadeService {
   }
 
   toggleAllRows() {
-    if (this.selection().selected.length === this.dataSource().data.length) {
-      this.selection().clear();
-      return;
-    }
-    // Otherwise, select all
-    this.selection().select(...this.dataSource().data);
+    // Rebuild selection immutably so the signal notifies subscribers
+    const ds = this.fileTableDataSourceModelService.dataSource();
+    const current = this.fileTableDataSourceModelService.selection();
+    const allSelected = current.selected.length === ds.data.length;
+    const newSelected = allSelected ? [] : [...ds.data];
+    const newModel = new SelectionModel<IReportDetails & TestImage>(
+      true,
+      newSelected
+    );
+    this.fileTableDataSourceModelService.selection.set(newModel);
+  }
+
+  toggleRow(row: IReportDetails & TestImage) {
+    const prevModel = this.fileTableDataSourceModelService.selection();
+    const prevSelected = prevModel.selected;
+    const isSelected = prevModel.isSelected(row);
+    const newSelected = isSelected
+      ? prevSelected.filter((r) => r !== row)
+      : [...prevSelected, row];
+    const newModel = new SelectionModel<IReportDetails & TestImage>(
+      true,
+      newSelected
+    );
+    this.fileTableDataSourceModelService.selection.set(newModel);
   }
 
   checkboxLabel(row?: IReportDetails & TestImage): string {
     if (!row) {
-      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+      return `${this.isAllSelected ? 'deselect' : 'select'} all`;
     }
-    return `${
-      this.selection().isSelected(row) ? 'deselect' : 'select'
-    } row ${(row as any).position + 1}`;
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
+  }
+
+  /** Return the current data source directly */
+  get dataSource(): MatTableDataSource<IReportDetails & TestImage> {
+    return this.fileTableDataSourceModelService.computedDataSource();
+  }
+
+  /** Return the current selection model directly */
+  get selection(): SelectionModel<IReportDetails & TestImage> {
+    return this.fileTableDataSourceModelService.computedSelection();
+  }
+
+  /** Return whether all rows are selected */
+  get isAllSelected(): boolean {
+    const ds = this.fileTableDataSourceModelService.dataSource();
+    const sel = this.fileTableDataSourceModelService.selection();
+    return sel.selected.length === ds.data.length;
   }
 }

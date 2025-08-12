@@ -15,13 +15,15 @@
       }}</mat-icon>
       <p>{{ reportDetails()?.createdAt | date: 'medium' }}</p>
       <div>
-        <button
-          mat-icon-button
-          [routerLink]="['..', 'buckets']"
-          [queryParams]="{ event: reportDetails()?.eventName }"
-        >
-          <mat-icon>history</mat-icon>
-        </button>
+        @if (testEventDetail$().length) {
+          <button
+            mat-icon-button
+            [routerLink]="['..', 'buckets']"
+            [queryParams]="{ event: reportDetails()?.eventName }"
+            >
+            <mat-icon>history</mat-icon>
+          </button>
+        }
       </div>
     </div>
   </div>
