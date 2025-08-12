@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { CarouselComponent } from './carousel.component';
 
-import { expect, fn, userEvent, within } from '@storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';

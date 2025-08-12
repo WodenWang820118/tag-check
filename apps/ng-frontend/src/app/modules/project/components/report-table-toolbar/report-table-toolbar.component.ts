@@ -14,6 +14,7 @@ import {
   MatButtonToggleModule
 } from '@angular/material/button-toggle';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
+import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
 
 @Component({
   selector: 'app-report-table-toolbar',
@@ -39,7 +40,8 @@ export class ReportTableToolbarComponent {
   constructor(
     private dataSourceService: ProjectDataSourceService,
     private testRunningFacade: TestRunningFacadeService,
-    private uploadSpecService: UploadSpecService
+    private uploadSpecService: UploadSpecService,
+    private reportTableDataSourceModelService: ReportTableDataSourceModelService
   ) {}
 
   applyFilter(event: Event) {
@@ -68,5 +70,13 @@ export class ReportTableToolbarComponent {
 
   emitAddEvent() {
     this.uploadSpecService.startUpload();
+  }
+
+  hasSelection() {
+    return this.reportTableDataSourceModelService.selection().hasValue();
+  }
+
+  isRunningTest() {
+    return this.testRunningFacade.isRunningTest$();
   }
 }

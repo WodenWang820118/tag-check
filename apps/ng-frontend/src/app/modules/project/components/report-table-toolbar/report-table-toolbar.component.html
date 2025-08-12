@@ -15,6 +15,7 @@
     matTooltip="Delete"
     matTooltipPosition="above"
     aria-label="Delete"
+    [disabled]="!hasSelection()"
     (click)="deleteSelected()"
   >
     <mat-icon>delete_outline</mat-icon>
@@ -26,6 +27,7 @@
     matTooltip="Mark to stop operation for this event"
     matTooltipPosition="above"
     aria-label="Stop operation"
+    [disabled]="!isRunningTest()"
     (click)="stopOperation()"
   >
     <mat-icon>cancel</mat-icon>

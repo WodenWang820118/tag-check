@@ -2,7 +2,13 @@ import { Component, computed, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ReportDetailPanelsComponent } from '../../components/report-detail-panels/report-detail-panels.component';
-import { IReportDetails, TestEvent, TestEventDetail, TestImage } from '@utils';
+import {
+  FrontFileReport,
+  IReportDetails,
+  TestEvent,
+  TestEventDetail,
+  TestImage
+} from '@utils';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel.component';
@@ -28,6 +34,10 @@ export class DetailViewComponent implements OnInit {
 
   imageBlob$ = computed(() => this.imageBlob());
   videoBlob$ = computed(() => this.videoBlob());
+  frontFileReport = signal([] as FrontFileReport[]);
+  testEventDetail$ = computed(() =>
+    this.frontFileReport().flatMap((report) => report.testEventDetails)
+  );
 
   constructor(
     private router: Router,
@@ -36,6 +46,10 @@ export class DetailViewComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.data.subscribe((data) => {
+      console.log('Route data:', data);
+      const fileReports = data['fileReports'] as FrontFileReport[];
+      this.frontFileReport.set(fileReports);
+
       const reportDetailsObject = data['reportDetails'] as {
         testEvent: TestEvent;
         testEventDetail: TestEventDetail;
@@ -49,7 +63,7 @@ export class DetailViewComponent implements OnInit {
         ...reportDetailsObject.testImage,
         position: 0,
         event: reportDetailsObject.testEvent.eventName,
-        createdAt: new Date() // FIXME: should expose createdAt from testEvent
+        createdAt: new Date()
       };
       console.log('Flattened report details:', flattenedReportDetails);
       const video = data['video'] as { blob: Blob | null };
