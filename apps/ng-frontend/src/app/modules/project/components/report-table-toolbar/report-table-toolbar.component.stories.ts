@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { ReportTableToolbarComponent } from './report-table-toolbar.component';
 
-import { expect, fn, userEvent, within } from '@storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { NgIf } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';

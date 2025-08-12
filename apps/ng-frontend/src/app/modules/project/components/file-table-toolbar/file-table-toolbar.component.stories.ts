@@ -7,7 +7,7 @@ import {
 } from '@storybook/angular';
 import { FileTableToolbarComponent } from './file-table-toolbar.component';
 
-import { expect, within } from '@storybook/test';
+import { expect, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
