@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { ReportTableComponent } from './report-table.component';
 
-import { expect, fn, userEvent, within } from '@storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';

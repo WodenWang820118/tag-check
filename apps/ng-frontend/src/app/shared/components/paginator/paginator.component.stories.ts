@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { PaginatorComponent } from './paginator.component';
 
-import { expect, fn, userEvent, within } from '@storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';

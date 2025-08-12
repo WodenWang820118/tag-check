@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { ProjectIoFormComponent } from './project-io-form.component';
 
-import { expect, fn, userEvent, within } from '@storybook/test';
+import { expect, fn, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
