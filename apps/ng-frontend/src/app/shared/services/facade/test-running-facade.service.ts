@@ -1,9 +1,8 @@
-import { Injectable } from '@angular/core';
+import { computed, Injectable } from '@angular/core';
 import { DataLayerService } from '../api/datalayer/datalayer.service';
 import { GtmOperatorService } from '../api/gtm-operator/gtm-operator.service';
 import {
   switchMap,
-  BehaviorSubject,
   take,
   catchError,
   finalize,
@@ -12,6 +11,7 @@ import {
   of,
   map
 } from 'rxjs';
+import { signal, WritableSignal } from '@angular/core';
 import {
   IReportDetails,
   EventInspectionPresetDto,
@@ -25,11 +25,12 @@ import { SettingsService } from '../api/settings/settings.service';
 
 @Injectable({ providedIn: 'root' })
 export class TestRunningFacadeService {
-  isRunningTestSubject = new BehaviorSubject<boolean>(false);
-  eventRunningTestSubject = new BehaviorSubject<string>('');
+  // Signals to track test-running state
+  private isRunningTest: WritableSignal<boolean> = signal(false);
+  private eventRunningTest: WritableSignal<string> = signal('');
 
-  isRunningTest$ = this.isRunningTestSubject.asObservable();
-  eventRunningTest$ = this.eventRunningTestSubject.asObservable();
+  readonly isRunningTest$ = computed(() => this.isRunningTest());
+  readonly eventRunningTest$ = computed(() => this.eventRunningTest());
 
   constructor(
     private dataLayerService: DataLayerService,
@@ -52,8 +53,8 @@ export class TestRunningFacadeService {
       map((res) => this.updateReportDetails(res, testDataSource)),
       catchError((error) => this.handleError(error)),
       finalize(() => {
-        this.isRunningTestSubject.next(false);
-        this.eventRunningTestSubject.next('');
+        this.isRunningTest.set(false);
+        this.eventRunningTest.set('');
       })
     );
   }
@@ -67,8 +68,8 @@ export class TestRunningFacadeService {
     console.log('project', project);
     const inspectEventDto = new EventInspectionPresetDto(project);
     // change the play button to a spinner
-    this.isRunningTestSubject.next(true);
-    this.eventRunningTestSubject.next(eventId);
+    this.isRunningTest.set(true);
+    this.eventRunningTest.set(eventId);
 
     if (project.applicationSettings.gtm.isAccompanyMode) {
       const measurementId = project.applicationSettings.gtm.isRequestCheck
@@ -112,7 +113,7 @@ export class TestRunningFacadeService {
     );
   }
 
-  stopOperation(): Observable<any> {
+  stopOperation(): Observable<unknown> {
     console.log('Stop operation from the test running facade');
 
     return forkJoin({
@@ -138,8 +139,8 @@ export class TestRunningFacadeService {
       map((res) => res),
       finalize(() => {
         console.log('Stop operation completed, setting isRunningTest to false');
-        this.isRunningTestSubject.next(false);
-        this.eventRunningTestSubject.next('');
+        this.isRunningTest.set(false);
+        this.eventRunningTest.set('');
       })
     );
   }
@@ -162,7 +163,7 @@ export class TestRunningFacadeService {
     return testDataSource;
   }
 
-  private handleError(error: any): Observable<never> {
+  private handleError(error: unknown): Observable<never> {
     console.error('Error in test operation:', error);
     return of();
   }

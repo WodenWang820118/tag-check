@@ -133,7 +133,8 @@ export const PROJECT_ROUTES: Routes = [
           spec: specResolver,
           recording: recordingDetailResolver,
           projectSlug: reportDetailSlugResolver,
-          eventId: reportDetailEventIdResolver
+          eventId: reportDetailEventIdResolver,
+          fileReports: getFileReportResolver
         }
       }
     ]
