@@ -20,7 +20,9 @@ export class ProjectDataSourceService extends DataSource<IReportDetails> {
     return this._dataStream;
   }
 
-  disconnect() {}
+  disconnect() {
+    this._dataStream.complete();
+  }
 
   setData(data: IReportDetails[]) {
     this._dataStream.next(data);

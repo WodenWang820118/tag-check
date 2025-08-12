@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { Component, DestroyRef, OnInit, viewChild } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,7 +21,6 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
   selector: 'app-report-table',
   standalone: true,
   imports: [
-    AsyncPipe,
     DatePipe,
     NgClass,
     MatTableModule,
@@ -105,6 +104,11 @@ export class ReportTableComponent implements OnInit {
 
   toggleAllRows() {
     this.facade.toggleAllRows();
+  }
+
+  /** Toggle selection of a single row via facade */
+  toggleSelection(row: IReportDetails) {
+    this.facade.toggleRow(row);
   }
 
   checkboxLabel(row?: IReportDetails) {

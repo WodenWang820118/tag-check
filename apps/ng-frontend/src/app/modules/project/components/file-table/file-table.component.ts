@@ -69,19 +69,24 @@ export class FileTableComponent implements OnInit {
   }
 
   get dataSource() {
-    return this.facade.dataSource();
+    return this.facade.dataSource;
   }
 
   get selection() {
-    return this.facade.selection();
+    return this.facade.selection;
   }
 
   get isAllSelected() {
-    return this.facade.isAllSelected();
+    return this.facade.isAllSelected;
   }
 
   toggleAllRows() {
     this.facade.toggleAllRows();
+  }
+
+  /** Toggle selection of a single row via facade */
+  toggleSelection(row: IReportDetails & TestImage) {
+    this.facade.toggleRow(row);
   }
 
   checkboxLabel(row?: IReportDetails & TestImage) {

@@ -9,19 +9,21 @@
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox
-          (change)="$event ? toggleAllRows() : null"
-          [checked]="selection.hasValue() && isAllSelected"
+          (change)="toggleAllRows()"
+          [checked]="isAllSelected"
           [indeterminate]="selection.hasValue() && !isAllSelected"
           [aria-label]="checkboxLabel()"
+          [disabled]="testRunningFacadeService.isRunningTest$()"
         >
         </mat-checkbox>
       </th>
       <td mat-cell *matCellDef="let row">
         <mat-checkbox
           (click)="$event.stopPropagation()"
-          (change)="$event ? selection.toggle(row) : null"
+          (change)="toggleSelection(row)"
           [checked]="selection.isSelected(row)"
           [aria-label]="checkboxLabel(row)"
+          [disabled]="testRunningFacadeService.isRunningTest$()"
         >
         </mat-checkbox>
       </td>
@@ -87,16 +89,16 @@
       </th>
       <td mat-cell *matCellDef="let element">
         <!-- running a test -->
-        @if ((testRunningFacadeService.isRunningTest$ | async) === true) {
+        @if ((testRunningFacadeService.isRunningTest$())) {
           @if (
-            (testRunningFacadeService.eventRunningTest$ | async) ===
+            (testRunningFacadeService.eventRunningTest$()) ===
             element.eventId
           ) {
             <div style="padding-left: 10px">
               <app-progress-pie-chart></app-progress-pie-chart>
             </div>
           } @else if (
-            (testRunningFacadeService.eventRunningTest$ | async) !==
+            (testRunningFacadeService.eventRunningTest$()) !==
             element.eventId
           ) {
             <!-- other buttons should be disabled when running a test -->

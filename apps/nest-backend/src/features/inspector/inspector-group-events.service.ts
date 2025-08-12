@@ -70,9 +70,10 @@ export class InspectorGroupEventsService {
           );
 
           await page.screenshot({
-            path: imageSavingFolder,
-            fullPage: true
+            fullPage: true,
+            path: `${imageSavingFolder}.png`
           });
+
           const pages = await browser.pages();
           await Promise.all(pages.map((page: Page) => page.close()));
           await browser.close();

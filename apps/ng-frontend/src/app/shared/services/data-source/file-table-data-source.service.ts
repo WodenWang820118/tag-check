@@ -1,5 +1,5 @@
 import { DataSource } from '@angular/cdk/collections';
-import { FileReport, IReportDetails, TestImage } from '@utils';
+import { IReportDetails, TestImage } from '@utils';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Injectable, signal } from '@angular/core';
 
@@ -22,7 +22,9 @@ export class FileTableDataSourceService extends DataSource<
     return this._dataStream;
   }
 
-  disconnect() {}
+  disconnect() {
+    this._dataStream.complete();
+  }
 
   setData(data: (IReportDetails & TestImage)[]) {
     this._dataStream.next(data);
