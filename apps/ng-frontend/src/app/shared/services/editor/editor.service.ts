@@ -1,6 +1,6 @@
 import { ElementRef, Injectable } from '@angular/core';
 import { EditorView } from 'codemirror';
-// Removed unused placeholder import for accessibility enhancements
+import { Extension } from '@codemirror/state';
 import { BehaviorSubject } from 'rxjs';
 import { jsonLightEditorExtensions } from './editor-extensions';
 import { editorStyles } from './editor-style';
@@ -8,7 +8,7 @@ import { linter, lintGutter } from '@codemirror/lint';
 import { jsonParseLinter } from '@codemirror/lang-json';
 
 export type EditorExtension = 'specJson' | 'recordingJson';
-type ExtensionArray = unknown[];
+type ExtensionArray = Extension[];
 
 @Injectable({
   providedIn: 'root'
