@@ -1,7 +1,7 @@
 <mat-toolbar color="primary">
   <mat-toolbar-row>
     @if (this.snav()) {
-      <button mat-icon-button (click)="this.snav()?.toggle()">
+      <button mat-icon-button aria-label="Toggle menu" (click)="this.snav()?.toggle()">
         <mat-icon>menu</mat-icon>
       </button>
     }
@@ -17,7 +17,7 @@
         style="margin-left: 1rem; margin-top: 20px"
         class="density-compact"
       >
-        <mat-label>Project</mat-label>
+        <!-- <mat-label>Project</mat-label> -->
         <mat-select
           [(value)]="selectedProject"
           (valueChange)="onChangeProject($event)"
@@ -37,6 +37,7 @@
         <button
           id="top-search-button"
           mat-icon-button
+          aria-label="Open search"
           (click)="toggleSearch()"
           style="cursor: pointer"
         >
@@ -45,6 +46,7 @@
         <button
           id="new-project-button"
           mat-icon-button
+          aria-label="New project"
           [routerLink]="['/init-project']"
           matTooltip="New Project"
           style="cursor: pointer"
@@ -54,6 +56,7 @@
         <button
           id="documentation-button"
           mat-icon-button
+          aria-label="Help center"
           [routerLink]="['/documentation']"
           matTooltip="Help Center"
           style="cursor: pointer"
@@ -73,7 +76,9 @@
             <button
               matSuffix
               mat-icon-button
-              aria-label="Clear"
+              aria-label="Clear search"
+              aria-hidden="false"
+              aria-controls="input"
               (click)="closeSearch()"
               class="filter__clear"
             >
