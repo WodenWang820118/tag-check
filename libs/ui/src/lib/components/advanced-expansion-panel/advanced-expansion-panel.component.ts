@@ -2,7 +2,6 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
   Component,
-  AfterViewInit,
   OnInit,
   DestroyRef,
   viewChild,
@@ -29,6 +28,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { GeneralEditorComponent } from '../general-editor/general-editor.component';
 
+// Define the shape of the main form values
+interface AdvancedFormValues {
+  includeVideoTag: boolean;
+  includeScrollTag: boolean;
+  includeItemScopedVariables: boolean;
+}
+
 @Component({
   selector: 'lib-advanced-expansion-panel',
   standalone: true,
@@ -47,7 +53,7 @@ import { GeneralEditorComponent } from '../general-editor/general-editor.compone
   styleUrls: ['./advanced-expansion-panel.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
+export class AdvancedExpansionPanelComponent implements OnInit {
   private fb = inject(FormBuilder);
   private dialog = inject(MatDialog);
   private editorFacadeService = inject(EditorFacadeService);
@@ -62,7 +68,7 @@ export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
   });
 
   setupForm: FormGroup = this.fb.group({
-    googleTagName: [''],
+    googleTagName: ['GA4 Configuration Tag'],
     useExistingMesurementId: ['']
   });
 
@@ -137,10 +143,6 @@ export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
     // this.ecAndEsvForm.patchValue({ esv: esvValue });
   }
 
-  ngAfterViewInit() {
-    this.setupForm.controls['googleTagName'].setValue('GA4 Configuration Tag');
-  }
-
   private initializeFormSubscriptions(): void {
     // Handle main form changes
     combineLatest([
@@ -161,8 +163,11 @@ export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
       });
   }
 
-  private handleEditorAndFormChanges(editor: EditorView, form: any): void {
-    if (!editor.state.doc.toString() || !form) return;
+  private handleEditorAndFormChanges(
+    editor: EditorView,
+    form: AdvancedFormValues
+  ): void {
+    if (!editor.state.doc.toString()) return;
 
     try {
       const jsonString = editor.state.doc.toString();
@@ -205,7 +210,7 @@ export class AdvancedExpansionPanelComponent implements OnInit, AfterViewInit {
       });
   }
 
-  private handleError(message: string, error: any): void {
+  private handleError(message: string, error: unknown): void {
     console.error(message, error);
     this.dialog.open(ErrorDialogComponent, {
       data: { message: 'Please check your JSON syntax.' }

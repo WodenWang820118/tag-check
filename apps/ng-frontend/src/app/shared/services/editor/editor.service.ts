@@ -1,6 +1,6 @@
 import { ElementRef, Injectable } from '@angular/core';
 import { EditorView } from 'codemirror';
-import { placeholder } from '@codemirror/view';
+// Removed unused placeholder import for accessibility enhancements
 import { BehaviorSubject } from 'rxjs';
 import { jsonLightEditorExtensions } from './editor-extensions';
 import { editorStyles } from './editor-style';
@@ -8,7 +8,7 @@ import { linter, lintGutter } from '@codemirror/lint';
 import { jsonParseLinter } from '@codemirror/lang-json';
 
 export type EditorExtension = 'specJson' | 'recordingJson';
-type ExtensionArray = any[];
+type ExtensionArray = unknown[];
 
 @Injectable({
   providedIn: 'root'
@@ -49,6 +49,11 @@ export class EditorService {
         lintGutter(),
         EditorView.theme(editorStyles),
         EditorView.lineWrapping,
+        // Add ARIA attributes for accessibility
+        EditorView.editorAttributes.of({
+          role: 'textbox',
+          'aria-label': 'Code editor'
+        }),
         this.isEditorSyntaxError()
         // placeholder(
         //   content ? content : this.contentSubjects[extension].getValue()
@@ -97,7 +102,7 @@ export class EditorService {
     try {
       JSON.parse(content);
       return false;
-    } catch (error) {
+    } catch {
       return true;
     }
   }

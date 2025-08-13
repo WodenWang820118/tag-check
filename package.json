@@ -37,7 +37,7 @@
     "build-prod-front": "nx build ng-frontend --configuration production --optimization --base-href ./",
     "build-prod-back": "cross-env-shell NODE_ENV=prod \"nx build nest-backend\"",
     "build-prod": "pnpm run build-prod-front && pnpm run build-prod-back && cd dist/apps/nest-backend && npm install && npm install sqlite3 update-electron-app electron-log && cd ../../..",
-    "build-tag-build": "nx build ng-tag-build --configuration production --optimization",
+    "build-tag-build": "nx build ng-tag-build --configuration production --optimization --source-map",
     "build-product-doc": "nx build ng-product-doc --configuration production --optimization --base-href ./",
     "make": "cross-env-shell NODE_ENV=prod PORT=7001 \"pnpm run build-prod && electron-forge make\"",
     "package": "cross-env-shell NODE_ENV=prod \"pnpm run build-prod && electron-forge package\"",
