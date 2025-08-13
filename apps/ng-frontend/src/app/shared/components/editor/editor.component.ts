@@ -5,7 +5,6 @@ import {
   effect,
   input,
   viewChild,
-  signal,
   computed,
   OnDestroy
 } from '@angular/core';
@@ -20,7 +19,7 @@ import { EditorView } from '@codemirror/view';
   standalone: true,
   template: `
     <div class="root-wrapper">
-      <div id="cm-editor" #editor></div>
+      <div id="cm-editor" #editor role="textbox" aria-label="Code editor"></div>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
