@@ -28,6 +28,9 @@
           tabindex="-1"
           class="btn-chevron"
           mat-icon-button
+          aria-label="Toggle settings submenu"
+          aria-haspopup="true"
+          [attr.aria-expanded]="isOpen()"
           (click)="isOpen.set(!isOpen())"
           cdkOverlayOrigin
           #trigger="cdkOverlayOrigin"
