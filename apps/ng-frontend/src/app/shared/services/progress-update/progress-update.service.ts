@@ -5,12 +5,12 @@ import { WebSocketService } from '../web-socket/web-socket.service';
   providedIn: 'root'
 })
 export class ProgressUpdateService {
-  private _currentStep = signal<number>(0);
-  private _totalSteps = signal<number>(0);
+  private readonly _currentStep = signal<number>(0);
+  private readonly _totalSteps = signal<number>(0);
   currentStep$ = computed(() => this._currentStep());
   totalSteps$ = computed(() => this._totalSteps());
 
-  constructor(private webSocketService: WebSocketService) {
+  constructor(private readonly webSocketService: WebSocketService) {
     this.initializeSocketListeners();
   }
 

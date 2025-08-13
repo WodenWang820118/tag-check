@@ -39,10 +39,10 @@ export class AuthenticationFormComponent implements OnInit {
   });
 
   constructor(
-    private fb: FormBuilder,
-    private settingsService: SettingsService,
-    private route: ActivatedRoute,
-    private destroyRef: DestroyRef
+    private readonly fb: FormBuilder,
+    private readonly settingsService: SettingsService,
+    private readonly route: ActivatedRoute,
+    private readonly destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {

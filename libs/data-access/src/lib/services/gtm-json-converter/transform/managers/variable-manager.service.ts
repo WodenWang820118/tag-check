@@ -12,12 +12,12 @@ import { EventSettingsVariableService } from '../variables/event-settings-variab
 })
 export class VariableManager {
   constructor(
-    private dataLayerVariable: DataLayerVariable,
-    private scrollVariable: ScrollVariable,
-    private videoVariable: VideoVariable,
-    private constantVariable: ConstantVariable,
-    private eventSettingsVariable: EventSettingsVariableService,
-    private eventUtils: EventUtils
+    private readonly dataLayerVariable: DataLayerVariable,
+    private readonly scrollVariable: ScrollVariable,
+    private readonly videoVariable: VideoVariable,
+    private readonly constantVariable: ConstantVariable,
+    private readonly eventSettingsVariable: EventSettingsVariableService,
+    private readonly eventUtils: EventUtils
   ) {}
   getBuiltInVariables(
     accountId: string,
@@ -52,7 +52,7 @@ export class VariableManager {
     esvConent: EventSettingsVariable[]
   ): VariableConfig[] {
     const dataLayerVariables = dataLayers
-      .map((dL, i) => {
+      .map((dL) => {
         return this.dataLayerVariable.createDataLayerVariable(
           accountId,
           containerId,

@@ -47,14 +47,14 @@ import { MatIconModule } from '@angular/material/icon';
           }
         }
       }
-    `,
-  ],
+    `
+  ]
 })
 export class FileUploadDialogComponent {
   constructor(
     public dialog: MatDialog,
-    private eventBusService: EventBusService,
-    private editorFacadeService: EditorFacadeService
+    private readonly eventBusService: EventBusService,
+    private readonly editorFacadeService: EditorFacadeService
   ) {}
 
   selectedFile: File | null = null;
@@ -86,8 +86,8 @@ export class FileUploadDialogComponent {
         this.selectedFile = null;
         this.dialog.open(ErrorDialogComponent, {
           data: {
-            message: 'Please upload a valid JSON file.',
-          },
+            message: 'Please upload a valid JSON file.'
+          }
         });
       }
     }
@@ -110,8 +110,8 @@ export class FileUploadDialogComponent {
       } catch (error) {
         this.dialog.open(ErrorDialogComponent, {
           data: {
-            message: 'Error parsing JSON file. Please try again.',
-          },
+            message: 'Error parsing JSON file. Please try again.'
+          }
         });
       }
     };
@@ -119,8 +119,8 @@ export class FileUploadDialogComponent {
     reader.onerror = () => {
       this.dialog.open(ErrorDialogComponent, {
         data: {
-          message: 'Error reading file. Please try again.',
-        },
+          message: 'Error reading file. Please try again.'
+        }
       });
     };
 

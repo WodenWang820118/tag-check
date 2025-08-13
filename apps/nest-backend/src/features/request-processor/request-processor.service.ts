@@ -6,7 +6,8 @@ import { standardPageParameterMap, standardParameterMap } from './utilities';
 @Injectable()
 export class RequestProcessorService {
   private readonly logger = new Logger(RequestProcessorService.name);
-  private excludedEventParams = ['debug_mode'];
+  private readonly excludedEventParams = ['debug_mode'];
+
   decodeUrl(url: string): string {
     return decodeURIComponent(url);
   }

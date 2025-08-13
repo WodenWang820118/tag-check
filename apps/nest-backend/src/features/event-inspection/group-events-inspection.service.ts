@@ -1,12 +1,5 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
 import { Browser, Credentials, Page } from 'puppeteer';
-import { getCurrentTimestamp } from '@utils';
 import { InspectorGroupEventsService } from '../../features/inspector/inspector-group-events.service';
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
@@ -86,10 +79,7 @@ export class GroupEventsInspectionService {
     // the reason to use cache file is that there could be 20 tests running at the same time
     // one failed test will cause all other tests to fail in terms of test execution logic
     // therefore, we handle the result gathering logic in the xlsx-report.service.ts
-    const timestamp = getCurrentTimestamp();
 
-    const operations =
-      await this.fileService.getOperationJsonByProject(projectName);
     // TODO: Prepare the data to be written to the xlsx file
     // Keep the original implementation for memory
     // await this.xlsxReportGroupEventsService.writeXlsxFileForAllTests(

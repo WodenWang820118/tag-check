@@ -47,7 +47,7 @@ export class AppComponent implements OnInit {
   toolbarInputs = { title: this.title };
 
   constructor(
-    private metaService: Meta,
+    private readonly metaService: Meta,
     @Inject(LOCALE_ID) public locale: string
   ) {}
 

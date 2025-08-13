@@ -2,18 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { catchError, map, of, throwError } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
-import {
-  FrontFileReport,
-  IReportDetails,
-  TestEventSchema,
-  TestImage
-} from '@utils';
+import { FrontFileReport, TestEventSchema } from '@utils';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FileReportService {
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   getFileReports(projectSlug: string) {
     return this.http
@@ -82,8 +77,8 @@ export class FileReportService {
       const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(
         contentDisposition
       );
-      if (matches != null && matches[1]) {
-        return matches[1].replace(/['"]/g, '');
+      if (matches?.[1]) {
+        return matches?.[1].replace(/['"]/g, '');
       }
     }
     return null;

@@ -12,9 +12,9 @@ import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog
 })
 export class XlsxProcessFacade {
   // Expose the necessary observables directly
-  private xlsxProcessService = inject(XlsxProcessService);
-  private webWorkerService = inject(WebWorkerService);
-  private dialog = inject(Dialog);
+  private readonly xlsxProcessService = inject(XlsxProcessService);
+  private readonly webWorkerService = inject(WebWorkerService);
+  private readonly dialog = inject(Dialog);
   workbook$ = this.xlsxProcessService.workbook$;
   worksheetNames$ = this.xlsxProcessService.worksheetNames$;
   fileName$ = this.xlsxProcessService.fileName$;

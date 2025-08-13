@@ -9,9 +9,9 @@ import { ScrollTrigger } from '../triggers/scroll-trigger.service';
 })
 export class TriggerManager {
   constructor(
-    private eventTrigger: EventTrigger,
-    private videoTrigger: VideoTrigger,
-    private scrollTrigger: ScrollTrigger
+    private readonly eventTrigger: EventTrigger,
+    private readonly videoTrigger: VideoTrigger,
+    private readonly scrollTrigger: ScrollTrigger
   ) {}
 
   createTriggers(dataLayer: DataLayer[]): Trigger[] {

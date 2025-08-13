@@ -14,7 +14,7 @@ export class ConfigurationService {
   rootSubject = new BehaviorSubject('');
   root$ = this.rootSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   getConfigurations() {
     return this.http

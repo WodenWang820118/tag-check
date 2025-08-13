@@ -9,8 +9,8 @@ import { map } from 'rxjs';
   providedIn: 'root'
 })
 export class ProjectListFacadeService {
-  private projectsSignal = signal<Project[]>([]);
-  private filterSignal = computed(() =>
+  private readonly projectsSignal = signal<Project[]>([]);
+  private readonly filterSignal = computed(() =>
     this.metadataSourceService.getFilterSignal().toLowerCase()
   );
 
@@ -28,7 +28,7 @@ export class ProjectListFacadeService {
     return this.dataSource.connect();
   });
 
-  constructor(private metadataSourceService: MetadataSourceService) {
+  constructor(private readonly metadataSourceService: MetadataSourceService) {
     this.setupFilterPredicate();
   }
 

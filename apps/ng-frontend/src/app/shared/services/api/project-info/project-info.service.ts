@@ -9,7 +9,7 @@ import { Project, ProjectSchema } from '@utils';
   providedIn: 'root'
 })
 export class ProjectService {
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   getProjects() {
     return this.http.get<ProjectSchema[]>(environment.projectApiUrl).pipe(

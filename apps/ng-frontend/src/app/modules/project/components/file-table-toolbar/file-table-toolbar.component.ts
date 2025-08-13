@@ -34,7 +34,9 @@ export class FileTableToolbarComponent implements OnDestroy {
   filterValue = signal('');
   searchInput = viewChild<HTMLInputElement>('searchInput');
 
-  constructor(private fileTableDataSourceService: FileTableDataSourceService) {}
+  constructor(
+    private readonly fileTableDataSourceService: FileTableDataSourceService
+  ) {}
 
   applyFilter(event: Event) {
     console.log('event', event);

@@ -4,18 +4,18 @@ import { cwd } from 'process';
 
 @Injectable()
 export class ConfigsService {
-  private USER_AGENT =
+  private readonly USER_AGENT =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36';
-  private RECORDING_FOLDER = 'chrome_recordings';
-  private RESULT_FOLDER = 'inspection_results';
-  private CONFIG_FOLDER = 'config';
-  private CONFIG_ROOT_PATH = 'rootProjectPath';
-  private CONFIG_CURRENT_PROJECT_PATH = 'currentProjectPath';
-  private ABSTRACT_REPORT_FILE_NAME = 'abstract.json';
-  private SPECS = 'spec.json';
-  private SETTINGS = 'settings.json';
-  private META_DATA = 'project.json';
-  private BROWSER_ARGS = [
+  private readonly RECORDING_FOLDER = 'chrome_recordings';
+  private readonly RESULT_FOLDER = 'inspection_results';
+  private readonly CONFIG_FOLDER = 'config';
+  private readonly CONFIG_ROOT_PATH = 'rootProjectPath';
+  private readonly CONFIG_CURRENT_PROJECT_PATH = 'currentProjectPath';
+  private readonly ABSTRACT_REPORT_FILE_NAME = 'abstract.json';
+  private readonly SPECS = 'spec.json';
+  private readonly SETTINGS = 'settings.json';
+  private readonly META_DATA = 'project.json';
+  private readonly BROWSER_ARGS = [
     '--window-size=1440,900',
     '--no-sandbox',
     '--disable-setuid-sandbox',
@@ -24,8 +24,8 @@ export class ConfigsService {
     '--disable-gpu'
   ];
 
-  private DEFAULT_PROJECT_PATH = 'tag_check_projects';
-  private DEFAULT_DATABASE_PATH = 'data.sqlite3';
+  private readonly DEFAULT_PROJECT_PATH = 'tag_check_projects';
+  private readonly DEFAULT_DATABASE_PATH = 'data.sqlite3';
 
   // the DATABASE_PATH and ROOT_PROJECT_PATH is set in the electron main process
   getDatabasePath(): string {

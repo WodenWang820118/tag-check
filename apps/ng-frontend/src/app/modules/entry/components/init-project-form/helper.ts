@@ -4,7 +4,7 @@ import {
   NgForm,
   ValidatorFn,
   AbstractControl,
-  ValidationErrors,
+  ValidationErrors
 } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 
@@ -17,7 +17,7 @@ export class InstantErrorStateMatcher implements ErrorStateMatcher {
     return !!(
       control &&
       control.invalid &&
-      (control.touched || (form && form.submitted))
+      (control.touched || form?.submitted)
     );
   }
 

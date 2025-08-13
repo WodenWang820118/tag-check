@@ -12,7 +12,7 @@ import { FolderService } from '../../../infrastructure/os/folder/folder.service'
 
 @Injectable()
 export class ProjectIoFacadeService {
-  private logger = new Logger(ProjectIoFacadeService.name);
+  private readonly logger = new Logger(ProjectIoFacadeService.name);
   constructor(
     private readonly projectIoService: ProjectIoService,
     private readonly folderPathService: FolderPathService,

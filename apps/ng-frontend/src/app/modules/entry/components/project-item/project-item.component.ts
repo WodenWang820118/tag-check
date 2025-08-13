@@ -67,9 +67,9 @@ import { MetadataSourceService } from '../../../../shared/services/data-source/m
 export class ProjectItemComponent {
   project = input.required<Project>();
   constructor(
-    private dialog: MatDialog,
-    private projectIoService: ProjectIoService,
-    private metadataSourceService: MetadataSourceService
+    private readonly dialog: MatDialog,
+    private readonly projectIoService: ProjectIoService,
+    private readonly metadataSourceService: MetadataSourceService
   ) {}
 
   deleteProject() {
@@ -113,7 +113,6 @@ export class ProjectItemComponent {
         )
       ),
       tap((filteredData) => {
-        // console.log('filteredData', filteredData);
         this.metadataSourceService.setData(filteredData);
       })
     );

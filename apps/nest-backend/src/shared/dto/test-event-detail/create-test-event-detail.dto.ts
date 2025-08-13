@@ -27,7 +27,7 @@ export class CreateTestEventDetailDto implements TestEventDetail {
   passed!: boolean;
 
   @IsOptional()
-  rawRequest?: string | undefined;
+  rawRequest?: string;
 
   @IsOptional()
   @IsJSON()

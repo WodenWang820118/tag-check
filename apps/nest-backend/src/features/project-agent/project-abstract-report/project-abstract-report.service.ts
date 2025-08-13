@@ -81,7 +81,6 @@ export class ProjectAbstractReportService {
               projectName,
               name
             );
-          // writeFileSync(abstractFilePath, JSON.stringify(data, null, 2));
           this.fileService.writeJsonFile(abstractFilePath, dataPiece);
         }
       }

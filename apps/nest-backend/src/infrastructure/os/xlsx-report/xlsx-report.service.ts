@@ -17,11 +17,11 @@ import { XlsxRecordingSectionService } from './xlsx-recordinng-section.service';
 export class XlsxReportService {
   private readonly logger = new Logger(XlsxReportService.name);
   constructor(
-    private xlsxHeaderService: XlsxHeaderService,
-    private xlsxTestInfoSectionService: XlsxTestInfoSectionService,
-    private xlsxTestDataSectionService: XlsxTestDataSectionService,
-    private xlsxSummarySectionService: XlsxSummarySectionService,
-    private xlsxRecordingSectionService: XlsxRecordingSectionService
+    private readonly xlsxHeaderService: XlsxHeaderService,
+    private readonly xlsxTestInfoSectionService: XlsxTestInfoSectionService,
+    private readonly xlsxTestDataSectionService: XlsxTestDataSectionService,
+    private readonly xlsxSummarySectionService: XlsxSummarySectionService,
+    private readonly xlsxRecordingSectionService: XlsxRecordingSectionService
   ) {}
   async writeXlsxFile(reports: FullTestEventResponseDto[]) {
     try {

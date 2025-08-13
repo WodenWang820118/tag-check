@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import {
   StrictDataLayerEvent,
   BaseDataLayerEvent,
-  ValidationResult
+  ValidationResult,
+  BaseECommerce
 } from '@utils';
 import { ValidationResultDto } from '../../../shared/dto/validation-result.dto';
 
@@ -20,67 +21,20 @@ export class DataLayerValidationUtilsService {
           dataLayerObj
         );
       }
-
       const eventValue = dataLayerObj[key];
       const specValue = dataLayerSpec[key];
-
-      if (typeof specValue === 'string') {
-        if (specValue.startsWith('$')) {
-          // Condition 1: Plain string starts with "$". Only checks the key.
-          return new ValidationResultDto({
-            passed: true,
-            message: 'Valid',
-            dataLayerSpec,
-            dataLayer: Array.isArray(dataLayerObj)
-              ? dataLayerObj
-              : [dataLayerObj]
-          });
-        } else if (specValue.startsWith('/') && specValue.endsWith('/')) {
-          // Condition 2: Regex literal within the string. Check whether the regex matches.
-          if (typeof eventValue !== 'string') {
-            return this.createValidationError(
-              `Value for key "${key}" is not a string as expected`,
-              dataLayerSpec,
-              dataLayerObj
-            );
-          }
-
-          const regex = new RegExp(specValue.slice(1, -1));
-          if (!regex.test(eventValue)) {
-            return this.createValidationError(
-              `Value for key "${key}" does not match the regex pattern`,
-              dataLayerSpec,
-              dataLayerObj
-            );
-          }
-        } else {
-          // Condition 3: Plain string with static value. Checks whether the value equals.
-          if (specValue !== eventValue) {
-            return this.createValidationError(
-              `Value for key "${key}" does not match the expected value`,
-              dataLayerSpec,
-              dataLayerObj
-            );
-          }
-        }
-      } else if (typeof specValue === 'number') {
-        // If the spec value is a number, compare it directly
-        if (specValue !== eventValue) {
-          return this.createValidationError(
-            `Value for key "${key}" does not match the expected value`,
-            dataLayerSpec,
-            dataLayerObj
-          );
-        }
+      const result = this.validateSpecValue(
+        key,
+        specValue,
+        eventValue,
+        dataLayerSpec,
+        dataLayerObj
+      );
+      if (result) {
+        return result;
       }
     }
-
-    return new ValidationResultDto({
-      passed: true,
-      message: 'Valid',
-      dataLayerSpec,
-      dataLayer: Array.isArray(dataLayerObj) ? dataLayerObj : [dataLayerObj]
-    });
+    return this.createPassedResult(dataLayerSpec, dataLayerObj);
   }
 
   private createValidationError(
@@ -93,6 +47,83 @@ export class DataLayerValidationUtilsService {
       message,
       dataLayerSpec,
       dataLayer: Array.isArray(dataLayer) ? dataLayer : [dataLayer]
+    });
+  }
+
+  private validateSpecValue(
+    key: string,
+    specValue: string | number | BaseECommerce | null | undefined,
+    eventValue: unknown,
+    dataLayerSpec: StrictDataLayerEvent,
+    dataLayerObj: BaseDataLayerEvent | StrictDataLayerEvent
+  ): ValidationResult | null {
+    if (typeof specValue === 'string') {
+      return this.validateStringSpec(
+        key,
+        specValue,
+        eventValue,
+        dataLayerSpec,
+        dataLayerObj
+      );
+    }
+    if (typeof specValue === 'number') {
+      return specValue !== eventValue
+        ? this.createValidationError(
+            `Value for key "${key}" does not match the expected value`,
+            dataLayerSpec,
+            dataLayerObj
+          )
+        : null;
+    }
+    return null;
+  }
+
+  private validateStringSpec(
+    key: string,
+    specValue: string,
+    eventValue: unknown,
+    dataLayerSpec: StrictDataLayerEvent,
+    dataLayerObj: BaseDataLayerEvent | StrictDataLayerEvent
+  ): ValidationResult | null {
+    if (specValue.startsWith('$')) {
+      return this.createPassedResult(dataLayerSpec, dataLayerObj);
+    }
+    if (specValue.startsWith('/') && specValue.endsWith('/')) {
+      if (typeof eventValue !== 'string') {
+        return this.createValidationError(
+          `Value for key "${key}" is not a string as expected`,
+          dataLayerSpec,
+          dataLayerObj
+        );
+      }
+      const regex = new RegExp(specValue.slice(1, -1));
+      if (!regex.test(eventValue)) {
+        return this.createValidationError(
+          `Value for key "${key}" does not match the regex pattern`,
+          dataLayerSpec,
+          dataLayerObj
+        );
+      }
+      return null;
+    }
+    return specValue !== eventValue
+      ? this.createValidationError(
+          `Value for key "${key}" does not match the expected value`,
+          dataLayerSpec,
+          dataLayerObj
+        )
+      : null;
+  }
+
+  private createPassedResult(
+    dataLayerSpec: StrictDataLayerEvent,
+    dataLayerObj: BaseDataLayerEvent | StrictDataLayerEvent
+  ): ValidationResult {
+    return new ValidationResultDto({
+      passed: true,
+      message: 'Valid',
+      dataLayerSpec,
+      dataLayer: Array.isArray(dataLayerObj) ? dataLayerObj : [dataLayerObj]
     });
   }
 }

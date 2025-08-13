@@ -7,7 +7,7 @@ import { SpecExtractService } from '../gtm-json-converter/extract/spec-extract.s
   providedIn: 'root'
 })
 export class XlsxHelper {
-  constructor(private specExtractService: SpecExtractService) {}
+  constructor(private readonly specExtractService: SpecExtractService) {}
   unfixedableJsonString: Set<string> = new Set();
   filterGtmSpecsFromData(data: DataRow[]) {
     return data

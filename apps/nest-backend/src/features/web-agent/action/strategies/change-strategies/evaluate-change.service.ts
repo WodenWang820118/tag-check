@@ -7,7 +7,7 @@ import { ActionUtilsService } from '../../action-utils/action-utils.service';
 @Injectable()
 export class EvaluateChangeService implements ChangeOperation {
   private readonly logger = new Logger(EvaluateChangeService.name);
-  constructor(private actionUtilsService: ActionUtilsService) {}
+  constructor(private readonly actionUtilsService: ActionUtilsService) {}
   async operate(
     page: Page,
     projectName: string,
@@ -17,7 +17,6 @@ export class EvaluateChangeService implements ChangeOperation {
     value?: string,
     timeout = 5000
   ): Promise<boolean> {
-    // TODO: verifiy this
     if (!value) {
       this.logger.error('Value is required to change the element');
       return false;
@@ -53,7 +52,7 @@ export class EvaluateChangeService implements ChangeOperation {
             () => reject(new Error('Timeout exceeded Changing')),
             timeout
           )
-        ),
+        )
       ]);
       return true;
     } catch (error) {

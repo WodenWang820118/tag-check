@@ -6,8 +6,8 @@ import { TestEventDetailRepositoryService } from '../../../core/repository/test-
 @Injectable()
 export class TestOperationFacadeRepositoryService {
   constructor(
-    private testEventRepositoryService: TestEventRepositoryService,
-    private testEventDetailRepositoryService: TestEventDetailRepositoryService,
-    private testImageRepositoryService: TestImageRepositoryService
+    private readonly testEventRepositoryService: TestEventRepositoryService,
+    private readonly testEventDetailRepositoryService: TestEventDetailRepositoryService,
+    private readonly testImageRepositoryService: TestImageRepositoryService
   ) {}
 }

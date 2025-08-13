@@ -6,7 +6,7 @@ import { ParameterUtils } from '../utils/parameter-utils.service';
   providedIn: 'root'
 })
 export class RegexVariable {
-  constructor(private parameterUtils: ParameterUtils) {}
+  constructor(private readonly parameterUtils: ParameterUtils) {}
   createRegexMeasurementIdVariable(
     accountId: string,
     containerId: string

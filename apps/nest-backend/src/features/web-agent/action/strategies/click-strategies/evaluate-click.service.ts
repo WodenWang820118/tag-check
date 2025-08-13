@@ -6,7 +6,7 @@ import { ActionUtilsService } from '../../action-utils/action-utils.service';
 @Injectable()
 export class EvaluateClickService implements ClickOperation {
   private readonly logger = new Logger(EvaluateClickService.name);
-  constructor(private actionUtilsService: ActionUtilsService) {}
+  constructor(private readonly actionUtilsService: ActionUtilsService) {}
   async operate(
     page: Page,
     projectName: string,
@@ -37,7 +37,7 @@ export class EvaluateClickService implements ClickOperation {
             () => reject(new Error('Timeout exceeded Evaluation Clicking')),
             timeout
           )
-        ),
+        )
       ]);
       return true;
     } catch (error) {

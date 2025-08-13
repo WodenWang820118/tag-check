@@ -17,7 +17,7 @@ import { UploadSpecService } from '../../../../shared/services/upload-spec/uploa
   styleUrls: ['./report-big-table.component.scss']
 })
 export class ReportBigTableComponent implements OnDestroy {
-  constructor(private uploadSpecService: UploadSpecService) {}
+  constructor(private readonly uploadSpecService: UploadSpecService) {}
 
   ngOnDestroy(): void {
     // resetting the upload state

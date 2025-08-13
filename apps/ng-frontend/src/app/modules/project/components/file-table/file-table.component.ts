@@ -35,10 +35,10 @@ export class FileTableComponent implements OnInit {
   sort = viewChild.required<MatSort>(MatSort);
 
   constructor(
-    private facade: FileTableDataSourceFacadeService,
-    private route: ActivatedRoute,
-    private destroyRef: DestroyRef,
-    private tableSortService: TableSortService
+    private readonly facade: FileTableDataSourceFacadeService,
+    private readonly route: ActivatedRoute,
+    private readonly destroyRef: DestroyRef,
+    private readonly tableSortService: TableSortService
   ) {}
 
   ngOnInit() {

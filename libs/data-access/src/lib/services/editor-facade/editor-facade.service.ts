@@ -7,7 +7,7 @@ import { EditorTypeEnum } from '@utils';
   providedIn: 'root'
 })
 export class EditorFacadeService {
-  constructor(private editorService: EditorService) {}
+  constructor(private readonly editorService: EditorService) {}
 
   setInputJsonContent(json: any): void {
     this.editorService.setContent(

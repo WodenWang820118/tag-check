@@ -26,8 +26,8 @@ export class TagBuildViewComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
 
   constructor(
-    private specService: SpecService,
-    private route: ActivatedRoute
+    private readonly specService: SpecService,
+    private readonly route: ActivatedRoute
   ) {}
 
   ngOnInit() {

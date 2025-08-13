@@ -17,8 +17,8 @@ export class UploadCardComponent implements OnInit {
   projectSlug = signal<string>('');
 
   constructor(
-    private route: ActivatedRoute,
-    private uploadCardFacadeService: UploadCardFacadeService
+    private readonly route: ActivatedRoute,
+    private readonly uploadCardFacadeService: UploadCardFacadeService
   ) {
     effect(() => {
       if (this.uploadCardFacadeService.isUploaded()) {

@@ -7,9 +7,9 @@ import { ConfigsService } from '../../../../core/configs/configs.service';
 @Injectable()
 export class FolderPathService {
   constructor(
-    private pathUtilsService: PathUtilsService,
-    private configurationService: SysConfigurationRepositoryService,
-    private configsService: ConfigsService
+    private readonly pathUtilsService: PathUtilsService,
+    private readonly configurationService: SysConfigurationRepositoryService,
+    private readonly configsService: ConfigsService
   ) {}
 
   async getRootProjectFolderPath() {

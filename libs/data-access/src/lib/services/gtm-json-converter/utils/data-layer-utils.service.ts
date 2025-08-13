@@ -6,7 +6,7 @@ import { UtilsService } from './utils.service';
   providedIn: 'root'
 })
 export class DataLayerUtils {
-  constructor(private utilsService: UtilsService) {}
+  constructor(private readonly utilsService: UtilsService) {}
   getDataLayers(specs: Spec[]) {
     const dataLayers: DataLayer[] = [];
     for (const spec of specs) {

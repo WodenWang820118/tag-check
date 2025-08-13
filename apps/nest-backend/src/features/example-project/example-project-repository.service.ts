@@ -1,6 +1,6 @@
 import { ProjectInitializationService } from './../project-agent/project-initialization/project-initialization.service';
 import { ProjectReportService } from '../project-agent/project-report/project-report.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CreateFullTestEventDto, CreateProjectDto } from '../../shared';
 import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
 import { Cookie, IReportDetails, LocalStorage, Recording, Spec } from '@utils';
@@ -10,8 +10,8 @@ import { ProjectRepositoryService } from '../../core/repository/project/project-
 import { ApplicationSettingRepositoryService } from '../../core/repository/settings/application-setting-repository.service';
 
 @Injectable()
-export class ExampleProjectRepositoryService {
-  private logger = new Logger(ExampleProjectRepositoryService.name);
+export class ExampleProjectRepositoryService implements OnModuleInit {
+  private readonly logger = new Logger(ExampleProjectRepositoryService.name);
 
   constructor(
     private readonly testReportFacadeRepositoryService: TestReportFacadeRepositoryService,
@@ -19,8 +19,10 @@ export class ExampleProjectRepositoryService {
     private readonly projectInitializationService: ProjectInitializationService,
     private readonly projectReportService: ProjectReportService,
     private readonly applicationSettingRepositoryService: ApplicationSettingRepositoryService
-  ) {
-    void this.buildExampleProject();
+  ) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.buildExampleProject();
   }
 
   async buildExampleProject() {

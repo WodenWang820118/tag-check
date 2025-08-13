@@ -29,7 +29,7 @@ export class LoggerService {
   };
 
   // CSS styles for different log levels
-  private styles = {
+  private readonly styles = {
     debug: 'color: #7f8c8d; font-weight: bold;',
     info: 'color: #3498db; font-weight: bold;',
     warn: 'color: #f39c12; font-weight: bold;',
@@ -120,6 +120,25 @@ export class LoggerService {
     this.logWithLevel(LogLevel.INFO, message, context, optionalParams);
   }
 
+  // Helper to map log level to console method and style
+  private getLevelSettings(level: LogLevel): {
+    consoleMethod: 'debug' | 'info' | 'warn' | 'error' | 'log';
+    levelStyle: string;
+  } {
+    switch (level) {
+      case LogLevel.DEBUG:
+        return { consoleMethod: 'debug', levelStyle: this.styles.debug };
+      case LogLevel.INFO:
+        return { consoleMethod: 'info', levelStyle: this.styles.info };
+      case LogLevel.WARN:
+        return { consoleMethod: 'warn', levelStyle: this.styles.warn };
+      case LogLevel.ERROR:
+        return { consoleMethod: 'error', levelStyle: this.styles.error };
+      default:
+        return { consoleMethod: 'log', levelStyle: this.styles.info };
+    }
+  }
+
   /**
    * Internal method to handle logging with level check
    */
@@ -136,99 +155,51 @@ export class LoggerService {
 
     const timestamp = this.config.enableTimestamp ? this.getTimestamp() : null;
     const formattedContext = this.formatContext(context);
+    const { consoleMethod, levelStyle } = this.getLevelSettings(level);
 
-    // Choose the console method based on level
-    let consoleMethod: 'debug' | 'log' | 'info' | 'warn' | 'error';
-    let levelStyle: string;
-    switch (level) {
-      case LogLevel.DEBUG:
-        consoleMethod = 'debug';
-        levelStyle = this.styles.debug;
-        break;
-      case LogLevel.INFO:
-        consoleMethod = 'info';
-        levelStyle = this.styles.info;
-        break;
-      case LogLevel.WARN:
-        consoleMethod = 'warn';
-        levelStyle = this.styles.warn;
-        break;
-      case LogLevel.ERROR:
-        consoleMethod = 'error';
-        levelStyle = this.styles.error;
-        break;
-      default:
-        consoleMethod = 'log';
-        levelStyle = this.styles.info;
-    }
-
-    // Format the log parts
     const parts: string[] = [];
-    const styles: string[] = [];
+    const stylesArr: string[] = [];
+    const values: any[] = [];
 
-    // Add timestamp if enabled
     if (timestamp) {
       parts.push('%c[%s]');
-      styles.push(this.styles.timestamp);
+      stylesArr.push(this.styles.timestamp);
+      values.push(timestamp);
     }
 
-    // Add context if enabled and provided
     if (formattedContext) {
       parts.push('%c[%s]');
-      styles.push(this.getContextStyle(context));
+      stylesArr.push(this.getContextStyle(context));
+      values.push(formattedContext);
     }
 
-    // Add the message part
     parts.push('%c%s');
-    styles.push(levelStyle);
+    stylesArr.push(levelStyle);
 
-    // Combine all parts
     const format = parts.join(' ');
 
-    // Handle different message types
-    if (typeof message === 'string') {
-      const args = [
-        format,
-        ...(timestamp ? [this.styles.timestamp, timestamp] : []),
-        ...(formattedContext
-          ? [this.getContextStyle(context), formattedContext]
-          : []),
-        levelStyle,
-        message,
-        ...optionalParams
-      ];
-      console[consoleMethod](...args);
-    } else if (message instanceof Error) {
-      const args = [
-        format,
-        ...(timestamp ? [this.styles.timestamp, timestamp] : []),
-        ...(formattedContext
-          ? [this.getContextStyle(context), formattedContext]
-          : []),
-        levelStyle,
-        message.message,
-        ...optionalParams
-      ];
-      console[consoleMethod](...args);
-      console[consoleMethod](message.stack);
+    let messageText: string;
+    if (message instanceof Error) {
+      messageText = message.message;
+    } else if (typeof message === 'string') {
+      messageText = message;
     } else {
-      // For objects, first log the formatted header
-      const args = [
-        format,
-        ...(timestamp ? [this.styles.timestamp, timestamp] : []),
-        ...(formattedContext
-          ? [this.getContextStyle(context), formattedContext]
-          : []),
-        levelStyle,
-        typeof message === 'object' ? 'Object:' : message,
-        ...optionalParams
-      ];
-      console[consoleMethod](...args);
+      messageText = 'Object:';
+    }
 
-      // Then log the object itself for better inspection
-      if (typeof message === 'object') {
-        console[consoleMethod](message);
-      }
+    const args = [
+      format,
+      ...stylesArr,
+      ...values,
+      messageText,
+      ...optionalParams
+    ];
+    console[consoleMethod](...args);
+
+    if (message instanceof Error) {
+      console[consoleMethod](message.stack);
+    } else if (typeof message === 'object') {
+      console[consoleMethod](message);
     }
   }
 

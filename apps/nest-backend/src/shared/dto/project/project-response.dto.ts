@@ -21,10 +21,10 @@ export class ProjectResponseDto implements ProjectSchema {
   projectName!: string;
 
   @Expose()
-  projectDescription?: string | undefined;
+  projectDescription?: string;
 
   @Expose()
-  measurementId?: string | undefined;
+  measurementId?: string;
 
   @Expose()
   specs!: SpecEntity[];
@@ -48,5 +48,5 @@ export class ProjectResponseDto implements ProjectSchema {
   createdAt!: Date;
 
   @Expose()
-  updatedAt?: Date | undefined;
+  updatedAt?: Date;
 }

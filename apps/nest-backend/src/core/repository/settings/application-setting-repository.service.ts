@@ -12,7 +12,9 @@ import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ApplicationSettingRepositoryService {
-  private logger = new Logger(ApplicationSettingRepositoryService.name);
+  private readonly logger = new Logger(
+    ApplicationSettingRepositoryService.name
+  );
   constructor(
     @InjectRepository(ApplicationSettingEntity)
     private readonly repository: Repository<ApplicationSettingEntity>

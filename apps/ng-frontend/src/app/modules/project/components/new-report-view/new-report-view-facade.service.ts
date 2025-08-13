@@ -17,7 +17,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { Location } from '@angular/common';
 import { v4 as uuidv4 } from 'uuid';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
-import { SpecService } from '../../../../shared/services/api/spec/spec.service';
 import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 import { LoggerService } from '../../../../shared/services/logger/logger.service'; // Create this service
@@ -28,7 +27,7 @@ import { LoggerService } from '../../../../shared/services/logger/logger.service
 export class NewReportViewFacadeService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private errorDialogComponentPromise: Promise<any> | null = null;
-  private logger = inject(LoggerService);
+  private readonly logger = inject(LoggerService);
 
   exampleInputJson = JSON.stringify({
     event: 'page_view',
@@ -43,16 +42,15 @@ export class NewReportViewFacadeService {
   });
 
   constructor(
-    private reportService: ReportService,
-    private destroyedRef: DestroyRef,
-    private editorService: EditorService,
-    private fb: FormBuilder,
-    private location: Location,
-    private dialog: MatDialog,
-    private recordingService: RecordingService,
-    private specService: SpecService,
-    private projectDataSourceService: ProjectDataSourceService,
-    private uploadSpecService: UploadSpecService
+    private readonly reportService: ReportService,
+    private readonly destroyedRef: DestroyRef,
+    private readonly editorService: EditorService,
+    private readonly fb: FormBuilder,
+    private readonly location: Location,
+    private readonly dialog: MatDialog,
+    private readonly recordingService: RecordingService,
+    private readonly projectDataSourceService: ProjectDataSourceService,
+    private readonly uploadSpecService: UploadSpecService
   ) {
     // Initialize the component promise but don't await it yet
     this.initErrorDialogComponent();

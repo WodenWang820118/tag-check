@@ -6,7 +6,7 @@ import { ParameterUtils } from '../utils/parameter-utils.service';
   providedIn: 'root'
 })
 export class DataLayerVariable {
-  constructor(private parameterUtils: ParameterUtils) {}
+  constructor(private readonly parameterUtils: ParameterUtils) {}
   createDataLayerVariable(
     accountId: string,
     containerId: string,

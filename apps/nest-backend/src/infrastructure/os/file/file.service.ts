@@ -1,9 +1,3 @@
-import { existsSync } from 'fs';
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   HttpException,
   HttpStatus,
@@ -17,22 +11,22 @@ import {
   createWriteStream,
   readFileSync,
   rmSync,
-  writeFileSync
+  writeFileSync,
+  existsSync
 } from 'fs';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
 import { join } from 'path';
 import archiver from 'archiver';
-import { IReportDetails } from '@utils';
 
 @Injectable()
 export class FileService {
   private readonly logger = new Logger(FileService.name);
   constructor(
-    private folderService: FolderService,
-    private folderPathService: FolderPathService,
-    private filePathService: FilePathService
+    private readonly folderService: FolderService,
+    private readonly folderPathService: FolderPathService,
+    private readonly filePathService: FilePathService
   ) {}
 
   readJsonFile<T>(filePath: string): T {
