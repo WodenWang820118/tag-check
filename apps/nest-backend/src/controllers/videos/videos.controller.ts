@@ -3,7 +3,7 @@ import { ProjectVideoService } from '../../features/project-agent/project-video/
 
 @Controller('videos')
 export class VideosController {
-  constructor(private projectVideoService: ProjectVideoService) {}
+  constructor(private readonly projectVideoService: ProjectVideoService) {}
 
   @Header('Content-Type', 'video/webm')
   @Header('Content-Disposition', `inline; filename="recording.webm"`)

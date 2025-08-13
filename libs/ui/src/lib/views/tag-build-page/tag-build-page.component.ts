@@ -18,7 +18,7 @@ export class TagBuildPageComponent {
   inputExtension = EditorTypeEnum.INPUT_JSON;
   outputExtension = EditorTypeEnum.OUTPUT_JSON;
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private readonly dialog: MatDialog) {}
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   openDialog(data: any) {

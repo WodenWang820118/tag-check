@@ -40,7 +40,7 @@ import { Router, RouterOutlet } from '@angular/router';
   ]
 })
 export class HelpCenterViewComponent implements OnInit {
-  constructor(private router: Router) {}
+  constructor(private readonly router: Router) {}
   ngOnInit(): void {
     this.router.navigate(['/documentation/introduction']);
   }

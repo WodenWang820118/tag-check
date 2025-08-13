@@ -3,7 +3,6 @@ import { ProjectRepositoryService } from '../../../core/repository/project/proje
 import { AuthenticationSettingRepositoryService } from '../../../core/repository/settings/authentication-setting-repository.service';
 import { BrowserSettingRepositoryService } from '../../../core/repository/settings/browser-setting-repository.service';
 import { ApplicationSettingRepositoryService } from '../../../core/repository/settings/application-setting-repository.service';
-import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
 import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
 import {
   CreateApplicationSettingDto,
@@ -11,7 +10,6 @@ import {
   CreateBrowserSettingDto,
   CreateProjectDto
 } from '../../../shared';
-import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 import {
   ApplicationSetting,
   AuthenticationSetting,
@@ -22,15 +20,13 @@ import {
 
 @Injectable()
 export class ProjectFacadeRepositoryService {
-  private logger = new Logger(ProjectFacadeRepositoryService.name);
+  private readonly logger = new Logger(ProjectFacadeRepositoryService.name);
   constructor(
-    private projectRepositoryService: ProjectRepositoryService,
-    private authenticationRepositoryService: AuthenticationSettingRepositoryService,
-    private browserRepositoryService: BrowserSettingRepositoryService,
-    private applicationRepositoryService: ApplicationSettingRepositoryService,
-    private recordingRepositoryService: RecordingRepositoryService,
-    private specRepositoryService: SpecRepositoryService,
-    private testEventRepositoryService: TestEventRepositoryService
+    private readonly projectRepositoryService: ProjectRepositoryService,
+    private readonly authenticationRepositoryService: AuthenticationSettingRepositoryService,
+    private readonly browserRepositoryService: BrowserSettingRepositoryService,
+    private readonly applicationRepositoryService: ApplicationSettingRepositoryService,
+    private readonly specRepositoryService: SpecRepositoryService
   ) {}
 
   async createProject(project: CreateProjectDto) {

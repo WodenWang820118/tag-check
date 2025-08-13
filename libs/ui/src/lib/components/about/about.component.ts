@@ -43,7 +43,7 @@ export class AboutComponent {
     this.exampleInput
   ];
 
-  constructor(@Inject(LOCALE_ID) private locale: string) {}
+  constructor(@Inject(LOCALE_ID) private readonly locale: string) {}
 
   getLocalizedSvgPath(): string {
     return `assets/i18n/${this.locale}/tag_build_system_${this.locale}.drawio.svg`;

@@ -101,9 +101,9 @@ export class MenuTabsComponent {
   objectivesDisabled = input<boolean>();
 
   constructor(
-    private matIconRegistry: MatIconRegistry,
-    private domSanitizer: DomSanitizer,
-    private router: Router
+    private readonly matIconRegistry: MatIconRegistry,
+    private readonly domSanitizer: DomSanitizer,
+    private readonly router: Router
   ) {
     this.matIconRegistry.addSvgIcon(
       'github',

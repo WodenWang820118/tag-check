@@ -19,9 +19,9 @@ export class XlsxDisplayService {
   isPreviewing$ = new BehaviorSubject<boolean>(true);
 
   constructor(
-    private dialog: MatDialog,
-    private editorService: EditorService,
-    private xlsxHelper: XlsxHelper
+    private readonly dialog: MatDialog,
+    private readonly editorService: EditorService,
+    private readonly xlsxHelper: XlsxHelper
   ) {}
 
   // TODO: data types

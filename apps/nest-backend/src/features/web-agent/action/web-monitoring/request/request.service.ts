@@ -7,7 +7,7 @@ import { Page } from 'puppeteer';
 export class RequestService {
   private requests: string[] = [];
 
-  constructor(private configsService: ConfigsService) {}
+  constructor(private readonly configsService: ConfigsService) {}
 
   async initializeRequestCapture(page: Page): Promise<void> {
     this.requests = []; // Reset the request list

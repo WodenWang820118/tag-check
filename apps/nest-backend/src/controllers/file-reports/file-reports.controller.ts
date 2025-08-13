@@ -15,8 +15,8 @@ import { TestEventRepositoryService } from '../../core/repository/test-event/tes
 @Controller('file-reports')
 export class FileReportsController {
   constructor(
-    private projectFileReportService: ProjectFileReportService,
-    private testEventFileRepositoryService: TestEventRepositoryService
+    private readonly projectFileReportService: ProjectFileReportService,
+    private readonly testEventFileRepositoryService: TestEventRepositoryService
   ) {}
 
   @Delete(':projectSlug/:eventId')

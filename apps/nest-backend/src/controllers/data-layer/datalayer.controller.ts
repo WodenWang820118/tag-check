@@ -21,8 +21,8 @@ export class DataLayerController {
   private readonly logger = new Logger(DataLayerController.name);
 
   constructor(
-    private eventInspectionControllerService: EventInspectionControllerService,
-    private testReportFacadeRepositoryService: TestReportFacadeRepositoryService
+    private readonly eventInspectionControllerService: EventInspectionControllerService,
+    private readonly testReportFacadeRepositoryService: TestReportFacadeRepositoryService
   ) {}
 
   @ApiOperation({

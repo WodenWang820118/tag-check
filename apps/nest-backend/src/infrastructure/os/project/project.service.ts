@@ -8,10 +8,10 @@ import { ProjectSetting } from '@utils';
 @Injectable()
 export class ProjectService {
   constructor(
-    private fileService: FileService,
-    private folderService: FolderService,
-    private folderPathService: FolderPathService,
-    private filePathService: FilePathService
+    private readonly fileService: FileService,
+    private readonly folderService: FolderService,
+    private readonly folderPathService: FolderPathService,
+    private readonly filePathService: FilePathService
   ) {}
 
   async getProjectSettings(projectSlug: string) {

@@ -6,7 +6,7 @@ import { ParameterUtils } from '../utils/parameter-utils.service';
   providedIn: 'root'
 })
 export class GoogleTag {
-  constructor(private parameterUtils: ParameterUtils) {}
+  constructor(private readonly parameterUtils: ParameterUtils) {}
   createGA4Configuration(
     googleTagName: string,
     measurementId: string,

@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { SpecSchema, SysConfigurationSchema } from '@utils';
+import { SysConfigurationSchema } from '@utils';
 
 @Exclude()
 export class SysConfigurationResponseDto implements SysConfigurationSchema {
@@ -13,7 +13,7 @@ export class SysConfigurationResponseDto implements SysConfigurationSchema {
   value!: string;
 
   @Expose()
-  description?: string | undefined;
+  description?: string;
 
   @Expose()
   createdAt!: Date;

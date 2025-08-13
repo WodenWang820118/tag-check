@@ -90,8 +90,8 @@ export class SideNavListComponent {
   ]);
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
   ) {
     // Convert router subscription to effect
     effect(() => {

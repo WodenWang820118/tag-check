@@ -8,5 +8,9 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
   },
-  "nxConsole.generateAiAgentRules": true
+  "nxConsole.generateAiAgentRules": true,
+  "sonarlint.connectedMode.project": {
+    "connectionId": "guanxin0118",
+    "projectKey": "WodenWang820118_tag-check"
+  }
 }

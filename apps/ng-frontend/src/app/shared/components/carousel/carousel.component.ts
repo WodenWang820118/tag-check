@@ -16,8 +16,8 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
   styleUrls: ['./carousel.component.scss']
 })
 export class CarouselComponent implements OnDestroy {
-  private sanitizer = inject(DomSanitizer);
-  private objectUrls: string[] = [];
+  private readonly sanitizer = inject(DomSanitizer);
+  private readonly objectUrls: string[] = [];
   imageBlob = input<Blob | null>(null);
   videoBlob = input<Blob | null>(null);
 

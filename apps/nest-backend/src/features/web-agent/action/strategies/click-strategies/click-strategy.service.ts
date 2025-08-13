@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/unbound-method */
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { PageClickService } from './page-click.service';
@@ -10,8 +7,8 @@ import { EvaluateClickService } from './evaluate-click.service';
 export class ClickStrategyService {
   private readonly logger = new Logger(ClickStrategyService.name);
   constructor(
-    private pageClickService: PageClickService,
-    private evaluateClickService: EvaluateClickService
+    private readonly pageClickService: PageClickService,
+    private readonly evaluateClickService: EvaluateClickService
   ) {}
 
   async clickElement(

@@ -27,9 +27,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class ProjectImportComponent {
   constructor(
-    private projectIoService: ProjectIoService,
-    private router: Router,
-    private destroyRef: DestroyRef
+    private readonly projectIoService: ProjectIoService,
+    private readonly router: Router,
+    private readonly destroyRef: DestroyRef
   ) {}
 
   importProject(event: Event) {

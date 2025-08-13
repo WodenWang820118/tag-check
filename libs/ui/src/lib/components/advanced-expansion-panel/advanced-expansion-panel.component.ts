@@ -10,8 +10,12 @@ import {
   Signal,
   inject
 } from '@angular/core';
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FormBuilder } from '@angular/forms';
+import {
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder
+} from '@angular/forms';
 import { combineLatest, take, catchError, EMPTY, filter, map } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
@@ -54,12 +58,12 @@ interface AdvancedFormValues {
   encapsulation: ViewEncapsulation.None
 })
 export class AdvancedExpansionPanelComponent implements OnInit {
-  private fb = inject(FormBuilder);
-  private dialog = inject(MatDialog);
-  private editorFacadeService = inject(EditorFacadeService);
-  private setupConstructorService = inject(SetupConstructorService);
-  private esvEditorService = inject(EsvEditorService);
-  private destroyRef = inject(DestroyRef);
+  private readonly fb = inject(FormBuilder);
+  private readonly dialog = inject(MatDialog);
+  private readonly editorFacadeService = inject(EditorFacadeService);
+  private readonly setupConstructorService = inject(SetupConstructorService);
+  private readonly esvEditorService = inject(EsvEditorService);
+  private readonly destroyRef = inject(DestroyRef);
 
   form: FormGroup = this.fb.group({
     includeVideoTag: [false],

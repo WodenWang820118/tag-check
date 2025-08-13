@@ -10,7 +10,7 @@ export class DatabaseImportService {
 
   constructor(
     @InjectDataSource()
-    private dataSource: DataSource
+    private readonly dataSource: DataSource
   ) {}
 
   /**

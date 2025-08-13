@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialog,
-  MatDialogModule,
+  MatDialogModule
 } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -40,13 +40,13 @@ import { MatIconModule } from '@angular/material/icon';
           }
         }
       }
-    `,
-  ],
+    `
+  ]
 })
 export class ConversionSuccessDialogComponent {
   constructor(
     @Inject(MAT_DIALOG_DATA) public configuration: any,
-    private dialog: MatDialog
+    private readonly dialog: MatDialog
   ) {}
 
   onDownload() {

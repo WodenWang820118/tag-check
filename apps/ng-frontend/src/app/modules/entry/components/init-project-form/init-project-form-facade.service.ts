@@ -50,12 +50,12 @@ export class InitProjectFormFacadeService {
   });
 
   constructor(
-    private fb: FormBuilder,
-    private projectService: ProjectService,
-    private configurationService: ConfigurationService,
-    private dialog: MatDialog,
-    private destoryRef: DestroyRef,
-    private router: Router
+    private readonly fb: FormBuilder,
+    private readonly projectService: ProjectService,
+    private readonly configurationService: ConfigurationService,
+    private readonly dialog: MatDialog,
+    private readonly destoryRef: DestroyRef,
+    private readonly router: Router
   ) {
     this.observeProjectNameChanges();
   }

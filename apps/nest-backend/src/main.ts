@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, INestApplication } from '@nestjs/common';
 import { writeFileSync } from 'fs';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { app } from 'electron';
+import { app } from 'electron'; // It is for accessing the process.resourcesPath
 import * as path from 'path';
 
 async function bootstrap() {

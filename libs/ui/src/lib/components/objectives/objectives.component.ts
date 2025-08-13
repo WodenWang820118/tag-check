@@ -8,7 +8,7 @@ import { Component, Inject, LOCALE_ID } from '@angular/core';
 })
 export class ObjectivesComponent {
   // TODO: More content regarding products and objectives
-  constructor(@Inject(LOCALE_ID) private locale: string) {}
+  constructor(@Inject(LOCALE_ID) private readonly locale: string) {}
   getLocalizedSvgPath(): string {
     return `assets/i18n/${this.locale}/tag_check_system_${this.locale}.drawio.svg`;
   }

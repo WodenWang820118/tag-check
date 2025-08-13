@@ -8,8 +8,8 @@ import { EventInspectionPresetDto } from '@utils';
 export class EventInspectionControllerService {
   private readonly logger = new Logger(EventInspectionControllerService.name);
   constructor(
-    private singleEventInspectionService: SingleEventInspectionService,
-    private groupEventsInspection: GroupEventsInspectionService
+    private readonly singleEventInspectionService: SingleEventInspectionService,
+    private readonly groupEventsInspection: GroupEventsInspectionService
   ) {}
 
   async inspectSingleEvent(

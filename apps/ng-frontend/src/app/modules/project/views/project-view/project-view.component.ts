@@ -26,8 +26,8 @@ export class ProjectViewComponent {
   isProjectRoute = signal<boolean>(false);
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
   ) {
     this.route.data.subscribe((data) => {
       const projectSettings = data['projectSetting'];

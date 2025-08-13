@@ -50,10 +50,10 @@ export class BrowserFormComponent implements OnInit {
   browserSettings = signal<string[]>([]);
 
   constructor(
-    private fb: FormBuilder,
-    private settingsService: SettingsService,
-    private route: ActivatedRoute,
-    private destroyRef: DestroyRef
+    private readonly fb: FormBuilder,
+    private readonly settingsService: SettingsService,
+    private readonly route: ActivatedRoute,
+    private readonly destroyRef: DestroyRef
   ) {}
 
   ngOnInit() {
@@ -119,7 +119,7 @@ export class BrowserFormComponent implements OnInit {
     const settingsArray = this.browserSettingsFormFormArray.value as {
       value: string;
     }[];
-    const headless = this.browserSettingsForm.get('headless')?.value as boolean;
+    const headless = this.browserSettingsForm.controls.headless.value || false;
     const browser = settingsArray.map((setting) => setting.value);
 
     this.route.parent?.params

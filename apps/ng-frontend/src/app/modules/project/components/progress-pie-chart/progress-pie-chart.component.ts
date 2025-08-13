@@ -27,7 +27,7 @@ export class ProgressPieChartComponent {
   chart = signal<Chart | null>(null);
   isFirstRender = signal<boolean>(true);
 
-  constructor(private progressUpdateService: ProgressUpdateService) {
+  constructor(private readonly progressUpdateService: ProgressUpdateService) {
     // Setup effect to handle chart updates
     effect(() => {
       const current = this.progressUpdateService.currentStep$();

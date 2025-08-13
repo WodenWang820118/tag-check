@@ -14,12 +14,12 @@ import { Recording, Spec } from '@utils';
 export class ReportDetailPanelsFacadeService {
   errorDialogComponent = this.loadErrorDialogComponent();
   constructor(
-    private reportService: ReportService,
-    private recordingService: RecordingService,
-    private specService: SpecService,
-    private editorService: EditorService,
-    private dialog: MatDialog,
-    private utilsService: UtilsService
+    private readonly reportService: ReportService,
+    private readonly recordingService: RecordingService,
+    private readonly specService: SpecService,
+    private readonly editorService: EditorService,
+    private readonly dialog: MatDialog,
+    private readonly utilsService: UtilsService
   ) {}
 
   private async loadErrorDialogComponent() {

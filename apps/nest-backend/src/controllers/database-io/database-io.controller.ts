@@ -14,7 +14,7 @@ import { DatabaseIoService } from '../../infrastructure/os/database-io/database-
 @Controller('db-io')
 export class DatabaseIoController {
   private readonly logger = new Logger(DatabaseIoService.name);
-  constructor(private databaseIoService: DatabaseIoService) {}
+  constructor(private readonly databaseIoService: DatabaseIoService) {}
 
   @Post('dump/:projectSlug')
   async dumpProjectDatabase(

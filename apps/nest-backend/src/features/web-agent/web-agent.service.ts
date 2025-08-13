@@ -5,7 +5,7 @@ import { WebAgentUtilsService } from './web-agent-utils.service';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 @Injectable()
 export class WebAgentService {
-  constructor(private webAgentUtilsService: WebAgentUtilsService) {}
+  constructor(private readonly webAgentUtilsService: WebAgentUtilsService) {}
 
   async executeAndGetDataLayer(
     page: Page,

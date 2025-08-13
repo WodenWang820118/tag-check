@@ -40,8 +40,8 @@ export class DetailViewComponent implements OnInit {
   );
 
   constructor(
-    private router: Router,
-    private route: ActivatedRoute
+    private readonly router: Router,
+    private readonly route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {

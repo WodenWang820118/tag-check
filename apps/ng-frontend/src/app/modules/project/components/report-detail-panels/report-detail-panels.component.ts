@@ -62,8 +62,8 @@ export class ReportDetailPanelsComponent implements OnInit {
   });
 
   constructor(
-    private route: ActivatedRoute,
-    private reportDetailPanelsFacadeService: ReportDetailPanelsFacadeService
+    private readonly route: ActivatedRoute,
+    private readonly reportDetailPanelsFacadeService: ReportDetailPanelsFacadeService
   ) {}
 
   ngOnInit(): void {

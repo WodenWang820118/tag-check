@@ -53,8 +53,8 @@ export class AppComponent implements OnInit {
   };
 
   constructor(
-    private router: Router,
-    private metaService: Meta,
+    private readonly router: Router,
+    private readonly metaService: Meta,
     @Inject(LOCALE_ID) public locale: string
   ) {}
 

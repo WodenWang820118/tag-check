@@ -33,7 +33,7 @@ export class GeneralEditorComponent implements AfterViewInit, OnDestroy {
   editorElement = viewChild<ElementRef<HTMLDivElement>>('generalEditor');
   editorView = signal<EditorView | null>(null);
 
-  private contentEffect = effect(() => {
+  private readonly contentEffect = effect(() => {
     const view = this.editorView();
     const content = this.content();
 

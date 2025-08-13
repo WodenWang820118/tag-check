@@ -5,8 +5,8 @@ import { DatabaseImportService } from './database-import.service';
 @Injectable()
 export class DatabaseIoService {
   constructor(
-    private databaseDumpService: DatabaseDumpService,
-    private databaseImportService: DatabaseImportService
+    private readonly databaseDumpService: DatabaseDumpService,
+    private readonly databaseImportService: DatabaseImportService
   ) {}
 
   async dumpProjectDatabase(

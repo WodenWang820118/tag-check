@@ -18,8 +18,8 @@ import { TestReportFacadeRepositoryService } from '../../features/repository/tes
 export class GtmOperatorController {
   private readonly logger = new Logger(GtmOperatorController.name);
   constructor(
-    private gtmOperatorService: GtmOperatorService,
-    private testReportFacadeRepositoryService: TestReportFacadeRepositoryService
+    private readonly gtmOperatorService: GtmOperatorService,
+    private readonly testReportFacadeRepositoryService: TestReportFacadeRepositoryService
   ) {}
 
   @ApiOperation({
