@@ -29,16 +29,16 @@ export class FunctionalCardComponent {
   accordionContainer =
     viewChild.required<AdvancedExpansionPanelComponent>('accordionContainer');
   color = input<string>('primary');
-  private dataLayer: any[];
+  private readonly dataLayer: any[];
 
   constructor(
-    private transformService: TransformService,
+    private readonly transformService: TransformService,
     public dialog: MatDialog,
     public editorFacadeService: EditorFacadeService,
-    private setupConstructorService: SetupConstructorService,
-    private esvEditorService: EsvEditorService,
-    private specExtractService: SpecExtractService,
-    private utilsService: UtilsService
+    private readonly setupConstructorService: SetupConstructorService,
+    private readonly esvEditorService: EsvEditorService,
+    private readonly specExtractService: SpecExtractService,
+    private readonly utilsService: UtilsService
   ) {
     this.dataLayer = (window as any).dataLayer || [];
   }

@@ -6,8 +6,8 @@ import { io, Socket } from 'socket.io-client';
   providedIn: 'root'
 })
 export class WebSocketService {
-  private socket: Socket;
-  private connectionStatus = signal<boolean>(false);
+  private readonly socket: Socket;
+  private readonly connectionStatus = signal<boolean>(false);
   connectionStatus$ = computed(() => this.connectionStatus());
   constructor() {
     this.socket = io(environment.webSocketUrl, {

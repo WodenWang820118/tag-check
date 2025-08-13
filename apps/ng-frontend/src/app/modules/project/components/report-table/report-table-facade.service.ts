@@ -30,14 +30,14 @@ export class ReportTableFacadeService {
 
   readonly expandedElement = signal<Report | null>(null);
   private readonly projectSlug = signal<string>('');
-  private hasRecordingMap: Map<string, boolean> = new Map();
+  private readonly hasRecordingMap: Map<string, boolean> = new Map();
 
   constructor(
-    private projectDataSourceService: ProjectDataSourceService,
-    private dialog: MatDialog,
-    private reportService: ReportService,
-    private testRunningFacadeService: TestRunningFacadeService,
-    private reportTableDataSourceModelService: ReportTableDataSourceModelService
+    private readonly projectDataSourceService: ProjectDataSourceService,
+    private readonly dialog: MatDialog,
+    private readonly reportService: ReportService,
+    private readonly testRunningFacadeService: TestRunningFacadeService,
+    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService
   ) {
     effect(() => {
       const filterValue = this.projectDataSourceService.getFilterSignal();
@@ -57,8 +57,7 @@ export class ReportTableFacadeService {
           .selection()
           .selected.map((item) => {
             // Handle the toggle logic properly
-            const newStopNavigation =
-              item.stopNavigation === true ? false : true;
+            const newStopNavigation = item.stopNavigation !== true;
 
             return {
               ...item,
@@ -76,8 +75,7 @@ export class ReportTableFacadeService {
                   .selection()
                   .selected.includes(item)
               ) {
-                item.stopNavigation =
-                  item.stopNavigation === true ? false : true;
+                item.stopNavigation = item.stopNavigation !== true;
               }
               return item;
             });

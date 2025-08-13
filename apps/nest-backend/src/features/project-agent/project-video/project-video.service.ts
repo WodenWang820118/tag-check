@@ -6,7 +6,7 @@ import { Readable } from 'stream';
 
 @Injectable()
 export class ProjectVideoService {
-  constructor(private folderPathService: FolderPathService) {}
+  constructor(private readonly folderPathService: FolderPathService) {}
 
   async getVideos(projectSlug: string, eventId: string) {
     const folder = await this.folderPathService.getInspectionEventFolderPath(

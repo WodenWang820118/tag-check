@@ -9,10 +9,12 @@ import { Injectable, signal } from '@angular/core';
 export class FileTableDataSourceService extends DataSource<
   IReportDetails & TestImage
 > {
-  private _dataStream = new BehaviorSubject<(IReportDetails & TestImage)[]>([]);
-  private _filterSignal = signal<string>('');
-  private _deletedSignal = signal<boolean>(false);
-  private _downloadSignal = signal<boolean>(false);
+  private readonly _dataStream = new BehaviorSubject<
+    (IReportDetails & TestImage)[]
+  >([]);
+  private readonly _filterSignal = signal<string>('');
+  private readonly _deletedSignal = signal<boolean>(false);
+  private readonly _downloadSignal = signal<boolean>(false);
 
   constructor() {
     super();

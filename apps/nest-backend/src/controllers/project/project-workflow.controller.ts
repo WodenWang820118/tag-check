@@ -8,8 +8,8 @@ import { ProjectRepositoryService } from '../../core/repository/project/project-
 @Controller('projects')
 export class ProjectWorkFlowController {
   constructor(
-    private projectRepositoryService: ProjectRepositoryService,
-    private projectWorkFlowControllerService: ProjectWorkFlowControllerService
+    private readonly projectRepositoryService: ProjectRepositoryService,
+    private readonly projectWorkFlowControllerService: ProjectWorkFlowControllerService
   ) {}
 
   @ApiOperation({

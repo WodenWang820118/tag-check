@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Logger,
-  Param,
-  Post,
-  Put
-} from '@nestjs/common';
+import { Body, Controller, Get, Logger, Param, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { Recording } from '@utils';
 import { ProjectRecordingService } from '../../features/project-agent/project-recording/project-recording.service';
@@ -16,10 +8,11 @@ import { RecordingRepositoryService } from '../../core/repository/recording/reco
 
 @Controller('recordings')
 export class RecordingController {
+  private readonly logger = new Logger(RecordingController.name);
   constructor(
-    private projectRecordingService: ProjectRecordingService,
-    private projectFacadeRepositoryService: ProjectFacadeRepositoryService,
-    private recordingRepositoryService: RecordingRepositoryService
+    private readonly projectRecordingService: ProjectRecordingService,
+    private readonly projectFacadeRepositoryService: ProjectFacadeRepositoryService,
+    private readonly recordingRepositoryService: RecordingRepositoryService
   ) {}
 
   @Get(':projectSlug')

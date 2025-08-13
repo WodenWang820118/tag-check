@@ -14,7 +14,7 @@
     "preinstall": "npx only-allow pnpm",
     "development": "-------------all development scripts-------------",
     "dev-front": "nx serve ng-frontend",
-    "dev-back": "cross-env-shell NODE_ENV=dev WEB_SOCKET=7002 \"nx serve nest-backend --watch\"",
+    "dev-back": "cross-env-shell NODE_ENV=dev WEB_SOCKET=7002 DB_LOGGING=${DB_LOGGING} \"nx serve nest-backend --watch\"",
     "dev-app": "concurrently \"pnpm run dev-front\" \"pnpm run dev-back\"",
     "prod-front": "nx serve ng-frontend --prod",
     "prod-back": "cross-env-shell NODE_ENV=prod ROOT_PROJECT_PATH=./tag_check_projects \"nx serve nest-backend --prod\"",

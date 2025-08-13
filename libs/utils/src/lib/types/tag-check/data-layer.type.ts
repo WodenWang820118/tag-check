@@ -86,13 +86,3 @@ export type ValidationStrategy = {
     spec: StrictDataLayerEvent
   ): ValidationResult;
 };
-
-// export type TestDataLayer = {
-//   dataLayer?: StrictDataLayerEvent | BaseDataLayerEvent;
-//   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
-// };
-
-// export type TestDataLayerSchema = {
-//   id: number;
-// } & TestDataLayer &
-//   Auditable;

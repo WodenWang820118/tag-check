@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, of, throwError } from 'rxjs';
 import { Recording } from '@utils';
 import { environment } from '../../../../../environments/environment';
-import { UtilsService } from '../../utils/utils.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,10 +15,7 @@ export class RecordingService {
   isLoading = signal(false);
   isLoading$ = computed(() => this.isLoading());
 
-  constructor(
-    private http: HttpClient,
-    private utilsService: UtilsService
-  ) {}
+  constructor(private readonly http: HttpClient) {}
 
   setTempRecording(recording: Recording | null) {
     this.tempRecordingContent.set(recording);

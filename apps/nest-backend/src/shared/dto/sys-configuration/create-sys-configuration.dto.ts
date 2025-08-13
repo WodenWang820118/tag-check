@@ -11,5 +11,5 @@ export class CreateSysConfigurationDto implements SysConfiguration {
   value!: string;
 
   @IsString()
-  description?: string | undefined;
+  description?: string;
 }

@@ -7,7 +7,7 @@ import { environment } from '../../../../../environments/environment';
   providedIn: 'root'
 })
 export class ImageService {
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   getImage(projectSlug: string, eventId: string): Observable<{ blob: Blob }> {
     return this.http

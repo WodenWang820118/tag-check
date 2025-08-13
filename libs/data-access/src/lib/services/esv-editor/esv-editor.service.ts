@@ -5,7 +5,7 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class EsvEditorService {
-  private content = new BehaviorSubject<string>('');
+  private readonly content = new BehaviorSubject<string>('');
   setEsvContent(content: string) {
     this.content.next(content);
   }

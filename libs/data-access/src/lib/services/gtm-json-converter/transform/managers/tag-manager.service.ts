@@ -1,11 +1,4 @@
-import {
-  DataLayer,
-  EventSettingsVariable,
-  Parameter,
-  Tag,
-  TagConfig,
-  Trigger
-} from '@utils';
+import { DataLayer, Parameter, Tag, TagConfig, Trigger } from '@utils';
 import { Injectable } from '@angular/core';
 import { EventTag } from '../tags/event-tag.service';
 import { GoogleTag } from '../tags/google-tag.service';
@@ -17,10 +10,10 @@ import { VideoTag } from '../tags/video-tag.service';
 })
 export class TagManager {
   constructor(
-    private eventTag: EventTag,
-    private googleTag: GoogleTag,
-    private scrollTag: ScrollTag,
-    private videoTag: VideoTag
+    private readonly eventTag: EventTag,
+    private readonly googleTag: GoogleTag,
+    private readonly scrollTag: ScrollTag,
+    private readonly videoTag: VideoTag
   ) {}
   getTags(
     accountId: string,

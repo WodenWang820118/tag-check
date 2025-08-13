@@ -10,10 +10,12 @@ import { TestImageRepositoryService } from '../../../core/repository/test-event/
 
 @Injectable()
 export class ImageService {
-  private logger = new Logger(ImageService.name);
-  constructor(private testInageRepositoryService: TestImageRepositoryService) {}
+  private readonly logger = new Logger(ImageService.name);
+  constructor(
+    private readonly testImageRepositoryService: TestImageRepositoryService
+  ) {}
   async readImage(projectSlug: string, eventId: string) {
-    const image = await this.testInageRepositoryService.getBySlugAndEventId(
+    const image = await this.testImageRepositoryService.getBySlugAndEventId(
       projectSlug,
       eventId
     );

@@ -5,7 +5,7 @@ import { XlsxUtilsService } from './xlsx-utils.service';
 
 @Injectable()
 export class XlsxRecordingSectionService {
-  constructor(private xlsxUtilsService: XlsxUtilsService) {}
+  constructor(private readonly xlsxUtilsService: XlsxUtilsService) {}
   addRecordingSection(
     worksheet: ExcelJS.Worksheet,
     report: FullTestEventResponseDto

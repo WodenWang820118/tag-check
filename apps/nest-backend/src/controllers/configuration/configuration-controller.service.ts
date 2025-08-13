@@ -6,7 +6,7 @@ import { SysConfigurationRepositoryService } from '../../core/repository/sys-con
 export class ConfigurationControllerService {
   private readonly logger = new Logger(ConfigurationControllerService.name);
   constructor(
-    private configurationService: SysConfigurationRepositoryService
+    private readonly configurationService: SysConfigurationRepositoryService
   ) {}
   async getConfigurations() {
     return await this.configurationService.findAll();

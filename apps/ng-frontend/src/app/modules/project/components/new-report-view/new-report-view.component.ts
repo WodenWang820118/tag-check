@@ -1,11 +1,4 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  input,
-  OnDestroy,
-  OnInit,
-  signal
-} from '@angular/core';
+import { ChangeDetectorRef, Component, input, signal } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -14,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { EditorComponent } from '../../../../shared/components/editor/editor.component';
 import { NewReportViewFacadeService } from './new-report-view-facade.service';
 import { MatSidenav } from '@angular/material/sidenav';
-import { pipe, take } from 'rxjs';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-new-report-view',
@@ -34,10 +27,10 @@ export class NewReportViewComponent {
   sidenav = input.required<MatSidenav>();
   projectSlug = signal<string>('');
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private newReportViewFacadeService: NewReportViewFacadeService,
-    private changeDetectorRef: ChangeDetectorRef
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly newReportViewFacadeService: NewReportViewFacadeService,
+    private readonly changeDetectorRef: ChangeDetectorRef
   ) {
     this.route.data.subscribe((data) => {
       console.log('data: ', data);

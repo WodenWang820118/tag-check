@@ -6,7 +6,7 @@ import { EventUtils } from '../../utils/event-utils.service';
   providedIn: 'root'
 })
 export class VideoTrigger {
-  constructor(private eventUtils: EventUtils) {}
+  constructor(private readonly eventUtils: EventUtils) {}
   videoTrigger({
     accountId,
     containerId,

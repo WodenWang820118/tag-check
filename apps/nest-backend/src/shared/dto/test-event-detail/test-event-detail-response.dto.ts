@@ -17,7 +17,7 @@ export class TestEventDetailResponseDto implements TestEventDetailSchema {
   passed!: boolean;
 
   @Expose()
-  rawRequest?: string | undefined;
+  rawRequest?: string;
 
   @Expose()
   reformedDataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];

@@ -28,29 +28,13 @@ export class FileTableDataSourceFacadeService {
     'requestState',
     'createdAt'
   ]);
-
-  // readonly dataSource = signal<MatTableDataSource<IReportDetails & TestImage>>(
-  //   new MatTableDataSource()
-  // );
-
-  // // Selection model as a signal
-  // readonly selection = signal(
-  //   new SelectionModel<IReportDetails & TestImage>(true, [])
-  // );
-
-  // // Computed property for "select all" behavior
-  // readonly isAllSelected = computed(() => {
-  //   const ds = this.dataSource();
-  //   const numSelected = this.selection().selected.length;
-  //   return ds && numSelected === ds.data.length;
-  // });
   private readonly projectSlug = signal<string>('');
 
   constructor(
-    private fileTableDataSourceService: FileTableDataSourceService,
-    private fileTableDataSourceModelService: FileTableDataSourceModelService,
-    private fileReportService: FileReportService,
-    private dialog: MatDialog
+    private readonly fileTableDataSourceService: FileTableDataSourceService,
+    private readonly fileTableDataSourceModelService: FileTableDataSourceModelService,
+    private readonly fileReportService: FileReportService,
+    private readonly dialog: MatDialog
   ) {
     effect(() => {
       const filterValue = this.fileTableDataSourceService.getFilterSignal();
@@ -106,6 +90,7 @@ export class FileTableDataSourceFacadeService {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initializeData(paginator: MatPaginator, sort: MatSort, data: any) {
     const fileReports = data['fileReports'] as FrontFileReport[];
     const projectSlug = data['projectSlug'] as string;
@@ -113,7 +98,7 @@ export class FileTableDataSourceFacadeService {
     console.log('File Reports: ', fileReports);
 
     // cross-join the test events with the test event details and test images
-    const reports = fileReports.flatMap((report, index) => {
+    const reports = fileReports.flatMap((report) => {
       return report.testEventDetails.map((detail, detailIndex) =>
         this.mapTestEventDetails(
           detail,
@@ -128,7 +113,7 @@ export class FileTableDataSourceFacadeService {
 
     if (reports.length && paginator && sort) {
       // Sort the data
-      const injectReports = reports.sort((a, b) =>
+      const injectReports = reports.toSorted((a, b) =>
         a.eventName.localeCompare(b.eventName)
       );
       // Create data source and assign
@@ -161,7 +146,7 @@ export class FileTableDataSourceFacadeService {
       eventId: event.eventId,
       eventName: event.eventName,
       testName: event.testName,
-      createdAt: details.createdAt, // TODO: fix this
+      createdAt: details.createdAt,
       stopNavigation: event.stopNavigation,
       message: event.message,
 

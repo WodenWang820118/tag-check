@@ -53,9 +53,9 @@ export class ToolbarComponent {
   isHomeView = signal(false);
 
   constructor(
-    private metadataSourceService: MetadataSourceService,
-    private router: Router,
-    private route: ActivatedRoute
+    private readonly metadataSourceService: MetadataSourceService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute
   ) {
     // Handle navigation with effect
     effect(() => {

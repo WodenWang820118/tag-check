@@ -1,4 +1,3 @@
-import { app } from 'electron';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -23,11 +22,7 @@ import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import {
-  ApplicationSetting,
-  ApplicationSettingSchema,
-  ProjectSetting
-} from '@utils';
+import { ApplicationSetting, ProjectSetting } from '@utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'app-gtm-form',
@@ -58,10 +53,10 @@ export class GtmFormComponent implements OnInit {
   });
 
   constructor(
-    private settingsService: SettingsService,
-    private route: ActivatedRoute,
-    private fb: FormBuilder,
-    private destroyRef: DestroyRef
+    private readonly settingsService: SettingsService,
+    private readonly route: ActivatedRoute,
+    private readonly fb: FormBuilder,
+    private readonly destroyRef: DestroyRef
   ) {}
 
   ngOnInit() {
@@ -103,12 +98,12 @@ export class GtmFormComponent implements OnInit {
           console.log(this.previewModeForm.value);
           const settings: Partial<ApplicationSetting> = {
             gtm: {
-              gtmPreviewModeUrl: this.previewModeForm.value.url as string,
-              isAccompanyMode: this.previewModeForm.value
-                .isAccompanyMode as boolean,
-              isRequestCheck: this.previewModeForm.value
-                .isRequestCheck as boolean,
-              tagManagerUrl: this.previewModeForm.value.tagManagerUrl as string
+              gtmPreviewModeUrl: this.previewModeForm.value.url || '',
+              isAccompanyMode:
+                this.previewModeForm.value.isAccompanyMode || false,
+              isRequestCheck:
+                this.previewModeForm.value.isRequestCheck || false,
+              tagManagerUrl: this.previewModeForm.value.tagManagerUrl || ''
             }
           };
           return this.settingsService.updateApplicationSetting(

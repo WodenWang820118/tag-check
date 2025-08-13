@@ -5,7 +5,7 @@ import { ActionUtilsService } from '../../action-utils/action-utils.service';
 @Injectable()
 export class EvaluateHoverService {
   private readonly logger = new Logger(EvaluateHoverService.name);
-  constructor(private actionUtilsService: ActionUtilsService) {}
+  constructor(private readonly actionUtilsService: ActionUtilsService) {}
   async operate(
     page: Page,
     projectName: string,
@@ -34,7 +34,7 @@ export class EvaluateHoverService {
         }, selector),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Timeout exceeded')), timeout)
-        ),
+        )
       ]);
       return true;
     } catch (error) {

@@ -31,7 +31,7 @@ export class TagBuildAppComponent {
   inputExtension = EditorTypeEnum.INPUT_JSON;
   outputExtension = EditorTypeEnum.OUTPUT_JSON;
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private readonly dialog: MatDialog) {}
   onUpload() {
     this.openFileUploadDialog();
   }

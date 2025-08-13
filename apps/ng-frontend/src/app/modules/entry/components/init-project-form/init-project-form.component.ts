@@ -25,7 +25,7 @@ import { RouterLink } from '@angular/router';
 })
 export class InitProjectFormComponent implements OnInit {
   constructor(
-    private initProjectFormFacadeService: InitProjectFormFacadeService
+    private readonly initProjectFormFacadeService: InitProjectFormFacadeService
   ) {}
 
   ngOnInit(): void {

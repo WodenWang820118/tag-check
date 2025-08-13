@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { cwd } from 'process';
-import * as constants from './constants';
+import * as constants from './constants.js';
 
 function getRootBackendFolderPath(env: any, resourcesPath: string) {
   switch (env) {
@@ -60,5 +60,5 @@ export {
   getDataBasePath,
   getProjectSavingRootFolder,
   getProductionFrontendPath,
-  getDevFrontendPath,
+  getDevFrontendPath
 };

@@ -180,7 +180,6 @@ export class EventInspectionPipelineService {
     testEventDetail: TestEventDetailResponseDto,
     testImage: TestImageResponseDto
   ) {
-    // Logger.debug('Test image:', testImage);
     const updatedInfo: UpdateTestEventDto = {
       latestTestEventDetailId: testEventDetail.id,
       latestTestImageId: testImage.id

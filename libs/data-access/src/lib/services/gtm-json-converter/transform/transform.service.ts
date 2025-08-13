@@ -11,11 +11,11 @@ import { VariableManager } from './managers/variable-manager.service';
 })
 export class TransformService {
   constructor(
-    private configManager: ConfigManager,
-    private tagManager: TagManager,
-    private triggerManager: TriggerManager,
-    private variableManager: VariableManager,
-    private dataLayerUtils: DataLayerUtils
+    private readonly configManager: ConfigManager,
+    private readonly tagManager: TagManager,
+    private readonly triggerManager: TriggerManager,
+    private readonly variableManager: VariableManager,
+    private readonly dataLayerUtils: DataLayerUtils
   ) {}
 
   convert(
