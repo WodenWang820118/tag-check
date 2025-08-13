@@ -10,15 +10,15 @@ import {
   first,
   of,
   timeout,
-  TimeoutError,
+  TimeoutError
 } from 'rxjs';
 
 @Injectable()
 export class RequestInterceptorService {
   private readonly logger = new Logger(RequestInterceptorService.name);
-  private rawRequest = new BehaviorSubject<string>('');
+  private readonly rawRequest = new BehaviorSubject<string>('');
 
-  constructor(private dataLayerService: DataLayerService) {}
+  constructor(private readonly dataLayerService: DataLayerService) {}
 
   async setupInterception(
     page: Page,

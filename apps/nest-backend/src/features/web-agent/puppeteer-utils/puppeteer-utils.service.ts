@@ -13,7 +13,7 @@ export class PuppeteerUtilsService {
   private readonly logger = new Logger(PuppeteerUtilsService.name);
   private recorder: ScreenRecorder | null = null;
 
-  constructor(private configsService: ConfigsService) {}
+  constructor(private readonly configsService: ConfigsService) {}
 
   async startBrowser(
     headless: string,
@@ -26,7 +26,7 @@ export class PuppeteerUtilsService {
     const options = {};
     const stats = await PCR(options);
     const browser: Browser = await stats.puppeteer.launch({
-      headless: headless ? true : false,
+      headless: !!headless,
       devtools: !!measurementId,
       acceptInsecureCerts: true,
       args:

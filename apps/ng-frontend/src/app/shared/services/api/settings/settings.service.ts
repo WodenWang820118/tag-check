@@ -27,8 +27,8 @@ export class SettingsService {
   );
   currentProject$ = this.currentProject.asObservable();
   constructor(
-    private http: HttpClient,
-    private _snackBar: MatSnackBar
+    private readonly http: HttpClient,
+    private readonly _snackBar: MatSnackBar
   ) {}
 
   getSettings() {

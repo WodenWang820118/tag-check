@@ -1,13 +1,10 @@
 import { Controller, Get, Param, Put, Body, Logger } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { ProjectSettingService } from '../../features/project-agent/project-setting/project-setting.service';
 import {
   ApplicationSetting,
-  ApplicationSettingSchema,
-  AuthenticationSchema,
   AuthenticationSetting,
   BrowserSetting,
-  BrowserSettingSchema,
   ProjectSetting
 } from '@utils';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
@@ -18,9 +15,9 @@ import { ProjectFacadeRepositoryService } from '../../features/repository/projec
 export class SettingsController {
   private readonly logger = new Logger(SettingsController.name);
   constructor(
-    private projectSettingService: ProjectSettingService,
-    private projectRepositoryService: ProjectRepositoryService,
-    private projectFacadeRepositoryService: ProjectFacadeRepositoryService
+    private readonly projectSettingService: ProjectSettingService,
+    private readonly projectRepositoryService: ProjectRepositoryService,
+    private readonly projectFacadeRepositoryService: ProjectFacadeRepositoryService
   ) {}
 
   @ApiOperation({

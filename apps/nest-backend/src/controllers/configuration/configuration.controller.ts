@@ -12,7 +12,7 @@ import { Log } from '../../common/logging-interceptor/logging-interceptor.servic
 
 @Controller('configurations')
 export class ConfigurationController {
-  constructor(private service: ConfigurationControllerService) {}
+  constructor(private readonly service: ConfigurationControllerService) {}
 
   @Get('/debug')
   @Log()

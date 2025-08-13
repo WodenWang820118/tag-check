@@ -15,12 +15,12 @@ import { RecordingRepositoryService } from '../../../core/repository/recording/r
 @Injectable()
 export class TestReportFacadeRepositoryService {
   constructor(
-    private projectRepositoryService: ProjectRepositoryService,
-    private testEventRepositoryService: TestEventRepositoryService,
-    private testEventDetailRepositoryService: TestEventDetailRepositoryService,
-    private specRepositoryService: SpecRepositoryService,
-    private testImageRepositoryService: TestImageRepositoryService,
-    private recordingRepositoryService: RecordingRepositoryService
+    private readonly projectRepositoryService: ProjectRepositoryService,
+    private readonly testEventRepositoryService: TestEventRepositoryService,
+    private readonly testEventDetailRepositoryService: TestEventDetailRepositoryService,
+    private readonly specRepositoryService: SpecRepositoryService,
+    private readonly testImageRepositoryService: TestImageRepositoryService,
+    private readonly recordingRepositoryService: RecordingRepositoryService
   ) {}
 
   async createAbstractReport(
@@ -92,30 +92,24 @@ export class TestReportFacadeRepositoryService {
         await this.projectRepositoryService.getEntityBySlug(projectSlug);
 
       // Create test event first
-      const testEventEntity = await this.testEventRepositoryService.create(
-        projectEntity,
-        {
-          eventId: data.reportDetails.eventId,
-          testName: data.reportDetails.testName,
-          eventName: data.reportDetails.eventName,
-          message: data.reportDetails.message
-        }
-      );
+      await this.testEventRepositoryService.create(projectEntity, {
+        eventId: data.reportDetails.eventId,
+        testName: data.reportDetails.testName,
+        eventName: data.reportDetails.eventName,
+        message: data.reportDetails.message
+      });
 
       const testEvent =
         await this.testEventRepositoryService.getEntityByEventId(eventId);
 
       // Create recording
-      const recordingEntity = await this.recordingRepositoryService.create(
-        testEvent,
-        {
-          title: data.reportDetails.eventName,
-          steps: data.recording.steps ?? []
-        }
-      );
+      await this.recordingRepositoryService.create(testEvent, {
+        title: data.reportDetails.eventName,
+        steps: data.recording.steps ?? []
+      });
 
       // Create spec
-      const specEntity = await this.specRepositoryService.create(testEvent, {
+      await this.specRepositoryService.create(testEvent, {
         event: data.reportDetails.eventName,
         eventName: data.reportDetails.eventName,
         dataLayerSpec: data.spec

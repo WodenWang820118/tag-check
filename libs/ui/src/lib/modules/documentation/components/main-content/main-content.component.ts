@@ -39,7 +39,7 @@ import { NgClass } from '@angular/common';
 export class MainContentComponent implements OnInit {
   public treeNodeService = inject(TreeNodeService);
   public route = inject(ActivatedRoute);
-  private destroyedRef = inject(DestroyRef);
+  private readonly destroyedRef = inject(DestroyRef);
 
   // Create writable signals for state
   private readonly fileNameSignal = signal<string>('');

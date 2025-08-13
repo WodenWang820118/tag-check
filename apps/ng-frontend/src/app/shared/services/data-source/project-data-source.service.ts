@@ -7,10 +7,10 @@ import { Injectable, signal } from '@angular/core';
   providedIn: 'root'
 })
 export class ProjectDataSourceService extends DataSource<IReportDetails> {
-  private _dataStream = new BehaviorSubject<IReportDetails[]>([]);
-  private _filterSignal = signal('');
-  private _preventNavigationSignal = signal(false);
-  private _deletedSignal = signal(false);
+  private readonly _dataStream = new BehaviorSubject<IReportDetails[]>([]);
+  private readonly _filterSignal = signal('');
+  private readonly _preventNavigationSignal = signal(false);
+  private readonly _deletedSignal = signal(false);
 
   constructor() {
     super();

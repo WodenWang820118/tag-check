@@ -14,8 +14,8 @@ import { ParameterUtils } from '../utils/parameter-utils.service';
 })
 export class VideoTag {
   constructor(
-    private parameterUtils: ParameterUtils,
-    private eventUtils: EventUtils
+    private readonly parameterUtils: ParameterUtils,
+    private readonly eventUtils: EventUtils
   ) {}
   videoTag(
     configurationName: string,

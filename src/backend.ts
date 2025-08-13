@@ -1,10 +1,10 @@
 import { ChildProcess, fork } from 'child_process';
 import { join } from 'path';
-import * as pathUtils from './path-utils';
-import * as environmentUtils from './environment-utils';
-import * as constants from './constants';
+import * as pathUtils from './path-utils.js';
+import * as environmentUtils from './environment-utils.js';
+import * as constants from './constants.js';
 import { BrowserWindow } from 'electron';
-import log from './logger';
+import log from './logger.js';
 
 function startBackend(
   resourcesPath: string,

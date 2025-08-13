@@ -27,7 +27,7 @@ export class ProjectListComponent implements AfterViewInit {
 
   pageIndex = model<number>(0);
 
-  constructor(private facade: ProjectListFacadeService) {}
+  constructor(private readonly facade: ProjectListFacadeService) {}
 
   ngAfterViewInit(): void {
     this.facade.setPaginator(this.paginator());

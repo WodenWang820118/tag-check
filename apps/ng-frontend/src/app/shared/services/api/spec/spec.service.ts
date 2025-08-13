@@ -15,7 +15,7 @@ export class SpecService {
   isLoading = signal(false);
   isLoading$ = computed(() => this.isLoading());
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   setTempSpec(spec: Spec | null) {
     this.tempSpecContent.set(spec);

@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  OnModuleInit
+} from '@nestjs/common';
 import {
   SysConfigurationEntity,
   CreateSysConfigurationDto,
@@ -6,19 +12,20 @@ import {
 } from '../../../shared';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigsService } from '../../configs/configs.service';
-import { Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { existsSync } from 'fs';
 
 @Injectable()
-export class SysConfigurationRepositoryService {
-  private logger = new Logger(SysConfigurationRepositoryService.name);
+export class SysConfigurationRepositoryService implements OnModuleInit {
+  private readonly logger = new Logger(SysConfigurationRepositoryService.name);
   constructor(
     @InjectRepository(SysConfigurationEntity)
     private readonly configurationRepository: Repository<SysConfigurationEntity>,
     private readonly configsService: ConfigsService
-  ) {
-    void this.checkIfRootProjectPathExists();
+  ) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.checkIfRootProjectPathExists();
   }
 
   async checkIfRootProjectPathExists() {

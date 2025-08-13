@@ -4,7 +4,7 @@ import { SysConfigurationRepositoryService } from '../../../../core/repository/s
 @Injectable()
 export class PathUtilsService {
   constructor(
-    private configurationService: SysConfigurationRepositoryService
+    private readonly configurationService: SysConfigurationRepositoryService
   ) {}
 
   async buildFilePath(

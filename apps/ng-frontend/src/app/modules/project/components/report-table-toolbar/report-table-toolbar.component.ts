@@ -38,10 +38,10 @@ export class ReportTableToolbarComponent {
   isSearchVisible = signal(false);
 
   constructor(
-    private dataSourceService: ProjectDataSourceService,
-    private testRunningFacade: TestRunningFacadeService,
-    private uploadSpecService: UploadSpecService,
-    private reportTableDataSourceModelService: ReportTableDataSourceModelService
+    private readonly dataSourceService: ProjectDataSourceService,
+    private readonly testRunningFacade: TestRunningFacadeService,
+    private readonly uploadSpecService: UploadSpecService,
+    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService
   ) {}
 
   applyFilter(event: Event) {

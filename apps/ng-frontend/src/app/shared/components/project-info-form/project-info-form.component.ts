@@ -8,7 +8,7 @@ import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
-import { Project, ProjectSchema, ProjectSetting } from '@utils';
+import { Project, ProjectSetting } from '@utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -34,10 +34,10 @@ export class ProjectInfoFormComponent implements OnInit {
   });
 
   constructor(
-    private fb: FormBuilder,
-    private settingsService: SettingsService,
-    private route: ActivatedRoute,
-    private destroyRef: DestroyRef
+    private readonly fb: FormBuilder,
+    private readonly settingsService: SettingsService,
+    private readonly route: ActivatedRoute,
+    private readonly destroyRef: DestroyRef
   ) {}
 
   ngOnInit(): void {
@@ -64,10 +64,10 @@ export class ProjectInfoFormComponent implements OnInit {
           console.log(projectSlug);
 
           const settings: Partial<Project> = {
-            projectName: this.projectInfoForm.value.projectName as string,
-            measurementId: this.projectInfoForm.value.measurementId as string,
-            projectDescription: this.projectInfoForm.value
-              .projectDescription as string
+            projectName: this.projectInfoForm.value.projectName || '',
+            measurementId: this.projectInfoForm.value.measurementId || '',
+            projectDescription:
+              this.projectInfoForm.value.projectDescription || ''
           };
           return this.settingsService.updateProjectSetting(
             projectSlug,

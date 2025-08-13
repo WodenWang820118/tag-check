@@ -8,9 +8,9 @@ import { ConfigsService } from '../../../../core/configs/configs.service';
 @Injectable()
 export class FilePathService {
   constructor(
-    private pathUtilsService: PathUtilsService,
-    private folderPathService: FolderPathService,
-    private configsService: ConfigsService
+    private readonly pathUtilsService: PathUtilsService,
+    private readonly folderPathService: FolderPathService,
+    private readonly configsService: ConfigsService
   ) {}
 
   async getOperationFilePath(projectSlug: string, eventId: string) {

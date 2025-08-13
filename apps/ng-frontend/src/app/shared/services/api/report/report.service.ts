@@ -1,8 +1,7 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, forkJoin, of, throwError } from 'rxjs';
 import {
-  ProjectReport,
   IReportDetails,
   TestEventSchema,
   Recording,
@@ -16,7 +15,7 @@ import { environment } from '../../../../../environments/environment';
   providedIn: 'root'
 })
 export class ReportService {
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
   getProjectReports(projectSlug: string) {
     return this.http
       .get<AbstractTestEvent[]>(`${environment.reportApiUrl}/${projectSlug}`)

@@ -47,11 +47,11 @@ export class TableSortService {
     type: SortableColumn['type']
   ): number {
     switch (type) {
-      case 'date':
+      case 'date': {
         const dateA = a instanceof Date ? a : new Date(a);
         const dateB = b instanceof Date ? b : new Date(b);
         return (dateA.getTime() - dateB.getTime()) * (isAsc ? 1 : -1);
-
+      }
       case 'number':
         return (Number(a) - Number(b)) * (isAsc ? 1 : -1);
 

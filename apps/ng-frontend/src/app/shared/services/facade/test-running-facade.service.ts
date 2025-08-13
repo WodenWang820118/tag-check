@@ -1,4 +1,4 @@
-import { computed, Injectable } from '@angular/core';
+import { computed, Injectable, signal, WritableSignal } from '@angular/core';
 import { DataLayerService } from '../api/datalayer/datalayer.service';
 import { GtmOperatorService } from '../api/gtm-operator/gtm-operator.service';
 import {
@@ -11,7 +11,6 @@ import {
   of,
   map
 } from 'rxjs';
-import { signal, WritableSignal } from '@angular/core';
 import {
   IReportDetails,
   EventInspectionPresetDto,
@@ -26,18 +25,18 @@ import { SettingsService } from '../api/settings/settings.service';
 @Injectable({ providedIn: 'root' })
 export class TestRunningFacadeService {
   // Signals to track test-running state
-  private isRunningTest: WritableSignal<boolean> = signal(false);
-  private eventRunningTest: WritableSignal<string> = signal('');
+  private readonly isRunningTest: WritableSignal<boolean> = signal(false);
+  private readonly eventRunningTest: WritableSignal<string> = signal('');
 
   readonly isRunningTest$ = computed(() => this.isRunningTest());
   readonly eventRunningTest$ = computed(() => this.eventRunningTest());
 
   constructor(
-    private dataLayerService: DataLayerService,
-    private gtmOperatorService: GtmOperatorService,
-    private qaRequestService: QaRequestService,
-    private projectDataSourceService: ProjectDataSourceService,
-    private settingsService: SettingsService
+    private readonly dataLayerService: DataLayerService,
+    private readonly gtmOperatorService: GtmOperatorService,
+    private readonly qaRequestService: QaRequestService,
+    private readonly projectDataSourceService: ProjectDataSourceService,
+    private readonly settingsService: SettingsService
   ) {}
 
   runTest(

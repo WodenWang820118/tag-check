@@ -4,15 +4,15 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, EMPTY, of, throwError } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ProjectIoService {
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   exportProject(projectSlug: string) {
     this.http
       .get(`${environment.projectApiUrl}/export/${projectSlug}`, {
-        responseType: 'blob',
+        responseType: 'blob'
       })
       .pipe(
         catchError((error) => {
@@ -43,7 +43,7 @@ export class ProjectIoService {
     return this.http
       .post(`${environment.projectApiUrl}/import`, formData, {
         reportProgress: true,
-        observe: 'events',
+        observe: 'events'
       })
       .pipe(
         catchError((error) => {

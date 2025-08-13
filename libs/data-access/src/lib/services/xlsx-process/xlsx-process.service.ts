@@ -26,12 +26,12 @@ export class XlsxProcessService implements OnDestroy {
   displayedFailedEvents$: BehaviorSubject<string[]>;
   isRenderingJson$: BehaviorSubject<boolean>;
   isPreviewing$: BehaviorSubject<boolean>;
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   constructor(
-    private webWorkerService: WebWorkerService,
-    private workbookService: WorkbookService,
-    private fileService: FileService,
-    private xlsxDisplayService: XlsxDisplayService
+    private readonly webWorkerService: WebWorkerService,
+    private readonly workbookService: WorkbookService,
+    private readonly fileService: FileService,
+    private readonly xlsxDisplayService: XlsxDisplayService
   ) {
     this.workbook$ = this.workbookService.workbook$;
     this.worksheetNames$ = this.workbookService.worksheetNames$;

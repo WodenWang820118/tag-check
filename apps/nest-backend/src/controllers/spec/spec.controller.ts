@@ -8,9 +8,9 @@ import { SpecRepositoryService } from '../../core/repository/spec/spec-repositor
 @Controller('specs')
 export class SpecController {
   constructor(
-    private projectSpecService: ProjectSpecService,
-    private projectFacadeRepositoryService: ProjectFacadeRepositoryService,
-    private specRepositoryService: SpecRepositoryService
+    private readonly projectSpecService: ProjectSpecService,
+    private readonly projectFacadeRepositoryService: ProjectFacadeRepositoryService,
+    private readonly specRepositoryService: SpecRepositoryService
   ) {}
 
   @Get(':projectSlug')

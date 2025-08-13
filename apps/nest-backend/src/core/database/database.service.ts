@@ -7,12 +7,14 @@ export class DatabaseConfigService {
   constructor(private readonly configsService: ConfigsService) {}
 
   getTypeOrmConfig(): TypeOrmModuleOptions {
+    // Determine if database logging is enabled via environment variable
+    const enableDbLogging = process.env.DB_LOGGING === 'true';
     return {
       type: 'sqlite',
       database: this.configsService.getDatabasePath(),
       autoLoadEntities: true,
       synchronize: true,
-      logging: false, // TODO: use args to toggle
+      logging: enableDbLogging,
       retryAttempts: 10,
       retryDelay: 3000
     };

@@ -1,24 +1,17 @@
-import { Injectable, signal, inject, computed } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { TopicNode } from '@utils';
 import { TREE_DATA } from '../../tree-data';
-import {
-  ActivatedRoute,
-  ActivatedRouteSnapshot,
-  Router
-} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TreeNodeService {
   private readonly CACHE_KEY = 'currentTreeNode';
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
 
-  private treeDataSignal = signal<TopicNode[]>(TREE_DATA);
+  private readonly treeDataSignal = signal<TopicNode[]>(TREE_DATA);
   readonly treeData = computed(() => this.treeDataSignal());
 
-  private currentNodeSignal = signal<TopicNode>(TREE_DATA[0]);
+  private readonly currentNodeSignal = signal<TopicNode>(TREE_DATA[0]);
   readonly currentNode = computed(() => this.currentNodeSignal());
   readonly currentNodeId = computed(() => this.currentNode().id);
 
@@ -27,7 +20,7 @@ export class TreeNodeService {
     node.children || [];
 
   // Node index for quick lookups
-  private nodeIndex: Map<number, TopicNode> = new Map();
+  private readonly nodeIndex: Map<number, TopicNode> = new Map();
 
   constructor() {
     this.buildNodeIndex(TREE_DATA);

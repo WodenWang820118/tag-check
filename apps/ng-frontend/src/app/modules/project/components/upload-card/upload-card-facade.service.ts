@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Spec, IReportDetails, ReportDetailsDto } from '@utils';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
-import { take, mergeMap, forkJoin, timer, catchError, of, tap } from 'rxjs';
+import { take, forkJoin, timer, catchError, of, tap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -13,9 +13,9 @@ export class UploadCardFacadeService {
   importedSpec = signal<string>('');
 
   constructor(
-    private uploadSpecService: UploadSpecService,
-    private route: ActivatedRoute,
-    private reportService: ReportService
+    private readonly uploadSpecService: UploadSpecService,
+    private readonly route: ActivatedRoute,
+    private readonly reportService: ReportService
   ) {}
 
   onFileSelected(event: any) {

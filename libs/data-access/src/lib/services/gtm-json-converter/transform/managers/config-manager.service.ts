@@ -11,7 +11,7 @@ import { UtilsService } from '../../utils/utils.service';
   providedIn: 'root'
 })
 export class ConfigManager {
-  constructor(private utilsService: UtilsService) {}
+  constructor(private readonly utilsService: UtilsService) {}
   getGTMFinalConfiguration(
     accountId: string,
     containerId: string,

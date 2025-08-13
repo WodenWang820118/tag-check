@@ -1,7 +1,7 @@
 import {
   BaseDataLayerEvent,
   StrictDataLayerEvent,
-  ValidationResult,
+  ValidationResult
 } from '@utils';
 import { EcommerceEventValidationStrategy } from './ecommerce-event-validation-strategy.service';
 import { OldGA4EventsValidationStrategy } from './old-ga4-events-validation-strategy.service';
@@ -29,17 +29,17 @@ describe('ValidationStrategy', () => {
                 [ValidationStrategyType.ECOMMERCE]:
                   ecommerceEventValidationStrategy,
                 [ValidationStrategyType.OLDGA4EVENTS]:
-                  oldGA4EventsValidationStrategy,
+                  oldGA4EventsValidationStrategy
               };
             },
             inject: [
               EcommerceEventValidationStrategy,
-              OldGA4EventsValidationStrategy,
-            ],
+              OldGA4EventsValidationStrategy
+            ]
           },
           InspectorUtilsService,
-          DataLayerValidationUtilsService,
-        ],
+          DataLayerValidationUtilsService
+        ]
       })
         .useMocker((token) => {
           if (typeof token === 'function') {
@@ -64,12 +64,12 @@ describe('ValidationStrategy', () => {
               item_name: 'Switzerland',
               item_category: 'Europe',
               quantity: 1,
-              price: 200,
-            },
+              price: 200
+            }
           ],
           currency: 'USD',
-          value: 200,
-        },
+          value: 200
+        }
       };
 
       // the spec for the dataLayer object
@@ -85,12 +85,12 @@ describe('ValidationStrategy', () => {
               item_name: '^(?:switzerland|california)$',
               item_category: 'Europe',
               quantity: 1,
-              price: 200,
-            },
+              price: 200
+            }
           ],
           currency: 'USD',
-          value: 200,
-        },
+          value: 200
+        }
       };
 
       const tests: {
@@ -108,8 +108,10 @@ describe('ValidationStrategy', () => {
             passed: true,
             message: 'Valid',
             dataLayerSpec: dataLayerSpec,
-          },
-        },
+            eventName: 'add_to_cart',
+            dataLayer: [actualDataLayerObj]
+          }
+        }
       ];
 
       it.each(tests)(
@@ -132,10 +134,10 @@ describe('ValidationStrategy', () => {
               items: [
                 {
                   item_id: 'SKU_12345',
-                  item_name: 'Laptop',
-                },
-              ],
-            },
+                  item_name: 'Laptop'
+                }
+              ]
+            }
           },
           {
             event: 'add_to_cart',
@@ -143,11 +145,11 @@ describe('ValidationStrategy', () => {
               items: [
                 {
                   item_id: 'SKU_12346',
-                  item_name: 'Mouse',
-                },
-              ],
-            },
-          },
+                  item_name: 'Mouse'
+                }
+              ]
+            }
+          }
         ];
         const spec: StrictDataLayerEvent = {
           event: 'add_to_cart',
@@ -155,10 +157,10 @@ describe('ValidationStrategy', () => {
             items: [
               {
                 item_id: 'SKU_12346',
-                item_name: 'Mouse',
-              },
-            ],
-          },
+                item_name: 'Mouse'
+              }
+            ]
+          }
         };
         const result = ecommerceEventValidationStrategy.validateDataLayer(
           dataLayer,
@@ -190,17 +192,17 @@ describe('ValidationStrategy', () => {
                 [ValidationStrategyType.ECOMMERCE]:
                   ecommerceEventValidationStrategy,
                 [ValidationStrategyType.OLDGA4EVENTS]:
-                  oldGA4EventsValidationStrategy,
+                  oldGA4EventsValidationStrategy
               };
             },
             inject: [
               EcommerceEventValidationStrategy,
-              OldGA4EventsValidationStrategy,
-            ],
+              OldGA4EventsValidationStrategy
+            ]
           },
           InspectorUtilsService,
-          DataLayerValidationUtilsService,
-        ],
+          DataLayerValidationUtilsService
+        ]
       })
         .useMocker((token) => {
           if (typeof token === 'function') {
@@ -216,12 +218,12 @@ describe('ValidationStrategy', () => {
 
     it('should pass for generate_lead event with all keys', () => {
       const dataLayer: StrictDataLayerEvent[] = [
-        { event: 'generate_lead', value: 10, currency: 'USD' },
+        { event: 'generate_lead', value: 10, currency: 'USD' }
       ];
       const spec: StrictDataLayerEvent = {
         event: 'generate_lead',
         value: 10,
-        currency: 'USD',
+        currency: 'USD'
       };
       const result = oldGA4EventsValidationStrategy.validateDataLayer(
         dataLayer,

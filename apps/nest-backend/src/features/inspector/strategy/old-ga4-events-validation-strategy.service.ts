@@ -8,7 +8,7 @@ import { DataLayerValidationUtilsService } from './data-layer-validation-utils.s
 export class OldGA4EventsValidationStrategy {
   private readonly logger = new Logger(OldGA4EventsValidationStrategy.name);
   constructor(
-    private dataLayerValidationUtilsService: DataLayerValidationUtilsService
+    private readonly dataLayerValidationUtilsService: DataLayerValidationUtilsService
   ) {}
   validateDataLayer(
     dataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[],

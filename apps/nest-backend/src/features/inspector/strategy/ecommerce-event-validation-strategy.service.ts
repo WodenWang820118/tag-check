@@ -11,7 +11,7 @@ import { DataLayerValidationUtilsService } from './data-layer-validation-utils.s
 export class EcommerceEventValidationStrategy implements ValidationStrategy {
   private readonly logger = new Logger(EcommerceEventValidationStrategy.name);
   constructor(
-    private dataLayerValidationUtilsService: DataLayerValidationUtilsService
+    private readonly dataLayerValidationUtilsService: DataLayerValidationUtilsService
   ) {}
 
   ecommerceReset = false;

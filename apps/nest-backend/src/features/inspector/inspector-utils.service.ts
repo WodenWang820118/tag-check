@@ -3,7 +3,6 @@ import {
   HttpStatus,
   Inject,
   Injectable,
-  InternalServerErrorException,
   Logger
 } from '@nestjs/common';
 import {
@@ -18,7 +17,7 @@ export class InspectorUtilsService {
   private readonly logger = new Logger(InspectorUtilsService.name);
   constructor(
     @Inject(STRATEGY_TYPE)
-    private strategy: { [key: string]: ValidationStrategy }
+    private readonly strategy: { [key: string]: ValidationStrategy }
   ) {}
 
   // return true if the dataLayer is correct
@@ -52,16 +51,10 @@ export class InspectorUtilsService {
   }
 
   determineStrategy() {
-    try {
-      if (this.isNumericKeysObject([ValidationStrategyType.ECOMMERCE])) {
-        return ValidationStrategyType.ECOMMERCE;
-      } else {
-        return ValidationStrategyType.OLDGA4EVENTS;
-      }
-    } catch (error) {
-      const errorMessage = `There is no spec available for determining strategy.`;
-      this.logger.log(errorMessage);
-      throw new InternalServerErrorException(errorMessage);
+    if (this.isNumericKeysObject([ValidationStrategyType.ECOMMERCE])) {
+      return ValidationStrategyType.ECOMMERCE;
+    } else {
+      return ValidationStrategyType.OLDGA4EVENTS;
     }
   }
 

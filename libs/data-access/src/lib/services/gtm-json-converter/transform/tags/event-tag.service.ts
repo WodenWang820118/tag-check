@@ -8,8 +8,8 @@ import { EcParamsService } from '../../utils/ec-params.service';
 })
 export class EventTag {
   constructor(
-    private parameterUtils: ParameterUtils,
-    private ecParamsService: EcParamsService
+    private readonly parameterUtils: ParameterUtils,
+    private readonly ecParamsService: EcParamsService
   ) {}
 
   private processEcommerceData(

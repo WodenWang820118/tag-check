@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import {
-  Parameter,
   ScrollDepthTriggerConfig,
   TriggerConfig,
   TriggerTypeEnum
@@ -13,8 +12,8 @@ import { EventUtils } from '../../utils/event-utils.service';
 })
 export class ScrollTrigger {
   constructor(
-    private parameterUtils: ParameterUtils,
-    private eventUtils: EventUtils
+    private readonly parameterUtils: ParameterUtils,
+    private readonly eventUtils: EventUtils
   ) {}
   scrollTriggers({
     accountId,

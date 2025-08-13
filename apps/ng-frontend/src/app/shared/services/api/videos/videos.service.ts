@@ -7,7 +7,7 @@ import { environment } from '../../../../../environments/environment';
   providedIn: 'root'
 })
 export class VideosService {
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   getVideo(projectSlug: string, eventId: string): Observable<{ blob: Blob }> {
     return this.http

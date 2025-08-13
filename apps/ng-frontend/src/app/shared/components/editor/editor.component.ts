@@ -28,11 +28,11 @@ export class EditorComponent implements OnDestroy {
   editorExtension = input.required<EditorExtension>();
   editMode = input<boolean>(false);
   content = input<string>();
-  private editorContent = computed(() => {
+  private readonly editorContent = computed(() => {
     const content = this.content();
     return content;
   });
-  private editor = viewChild<ElementRef<HTMLDivElement>>('editor');
+  private readonly editor = viewChild<ElementRef<HTMLDivElement>>('editor');
   private editorView: EditorView | null = null;
 
   constructor(private readonly editorService: EditorService) {

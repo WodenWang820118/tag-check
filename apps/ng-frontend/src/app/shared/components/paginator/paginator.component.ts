@@ -13,18 +13,12 @@ import {
   MatPaginatorModule,
   MatPaginator
 } from '@angular/material/paginator';
-import { StylePaginatorDirective } from '../../directives/style-paginator.directive';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-paginator',
   standalone: true,
-  imports: [
-    MatButtonModule,
-    MatPaginatorModule,
-    StylePaginatorDirective,
-    MatIconModule
-  ],
+  imports: [MatButtonModule, MatPaginatorModule, MatIconModule],
   template: `
     <mat-paginator
       #paginator

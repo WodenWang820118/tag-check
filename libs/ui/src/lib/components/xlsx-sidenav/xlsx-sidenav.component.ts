@@ -6,7 +6,8 @@ import {
   ElementRef,
   inject,
   OnDestroy,
-  ViewChild
+  ViewChild,
+  ViewEncapsulation
 } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { EventBusService, XlsxProcessFacade } from '@data-access';
@@ -21,7 +22,6 @@ import {
   tap,
   timer
 } from 'rxjs';
-import { ViewEncapsulation } from '@angular/core';
 import {
   FormBuilder,
   FormsModule,
@@ -55,8 +55,8 @@ import { MatTableModule } from '@angular/material/table';
 })
 export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
   public xlsxFacadeService = inject(XlsxProcessFacade);
-  private eventBusService = inject(EventBusService);
-  private fb = inject(FormBuilder);
+  private readonly eventBusService = inject(EventBusService);
+  private readonly fb = inject(FormBuilder);
 
   @ViewChild('sidenav') sidenav: MatSidenav | undefined;
   @ViewChild('scrollContainer', { static: false }) scrollContainer!: ElementRef;
@@ -78,7 +78,7 @@ export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
   hasProcessedFailedEvents$ = this.displayedFailedEvents$.pipe(
     map((events) => events.length > 0)
   );
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
   file: File | undefined;
   loading = true;

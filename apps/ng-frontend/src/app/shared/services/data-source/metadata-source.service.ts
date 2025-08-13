@@ -7,8 +7,8 @@ import { Injectable, signal } from '@angular/core';
   providedIn: 'root'
 })
 export class MetadataSourceService extends DataSource<Project> {
-  private _dataStream = new BehaviorSubject<Project[]>([]);
-  private _filterSignal = signal<string>('');
+  private readonly _dataStream = new BehaviorSubject<Project[]>([]);
+  private readonly _filterSignal = signal<string>('');
 
   constructor() {
     super();
@@ -18,7 +18,10 @@ export class MetadataSourceService extends DataSource<Project> {
     return this._dataStream;
   }
 
-  disconnect() {}
+  disconnect() {
+    this._dataStream.complete();
+    this._filterSignal.set('');
+  }
 
   setData(data: Project[]) {
     this._dataStream.next(data);

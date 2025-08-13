@@ -1,7 +1,3 @@
-import { Page } from 'puppeteer';
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   HttpException,
   HttpStatus,
@@ -11,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { STRATEGY_TYPE, ValidationStrategyType } from './utils';
 import { StrictDataLayerEvent, ValidationStrategy } from '@utils';
-import { Browser, Credentials } from 'puppeteer';
+import { Page, Browser, Credentials } from 'puppeteer';
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
 import { InspectorSingleEventService } from './inspector-single-event.service';
@@ -21,12 +17,12 @@ import { InspectorUtilsService } from './inspector-utils.service';
 export class InspectorGroupEventsService {
   private readonly logger = new Logger(InspectorGroupEventsService.name);
   constructor(
-    private fileService: FileService,
-    private filePathService: FilePathService,
-    private inspectorSingleEventService: InspectorSingleEventService,
-    private inspectorUtilsService: InspectorUtilsService,
+    private readonly fileService: FileService,
+    private readonly filePathService: FilePathService,
+    private readonly inspectorSingleEventService: InspectorSingleEventService,
+    private readonly inspectorUtilsService: InspectorUtilsService,
     @Inject(STRATEGY_TYPE)
-    private strategy: { [key: string]: ValidationStrategy }
+    private readonly strategy: { [key: string]: ValidationStrategy }
   ) {}
 
   async inspectProjectDataLayer(

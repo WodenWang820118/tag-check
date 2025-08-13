@@ -1,8 +1,8 @@
 import { BrowserWindow } from 'electron';
 import { existsSync } from 'fs';
 import { join } from 'path';
-import * as pathUtils from './path-utils';
-import log from './logger';
+import * as pathUtils from './path-utils.js';
+import log from './logger.js';
 
 declare const MAIN_WINDOW_VITE_DEV_SERVER_URL: string;
 declare const MAIN_WINDOW_VITE_NAME: string;

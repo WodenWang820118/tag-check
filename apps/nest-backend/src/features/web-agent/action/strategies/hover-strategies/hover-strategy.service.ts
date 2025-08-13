@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/unbound-method */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { PageHoverService } from './page-hover.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
@@ -10,8 +7,8 @@ import { EvaluateHoverService } from './evaluate-hover.service';
 export class HoverStrategyService {
   private readonly logger = new Logger(HoverStrategyService.name);
   constructor(
-    private pageHoverService: PageHoverService,
-    private evaluteHoverService: EvaluateHoverService
+    private readonly pageHoverService: PageHoverService,
+    private readonly evaluateHoverService: EvaluateHoverService
   ) {}
 
   async hoverElement(
@@ -61,7 +58,7 @@ export class HoverStrategyService {
     const serviceInstance =
       hoverMethod === this.pageHoverService.operate
         ? this.pageHoverService
-        : this.evaluteHoverService;
+        : this.evaluateHoverService;
 
     const result = await hoverMethod.call(
       serviceInstance,
@@ -77,12 +74,12 @@ export class HoverStrategyService {
       // Fallback to the other click method
       const fallbackMethod =
         serviceInstance === this.pageHoverService
-          ? this.evaluteHoverService.operate
+          ? this.evaluateHoverService.operate
           : this.pageHoverService.operate;
 
       return await fallbackMethod.call(
         serviceInstance === this.pageHoverService
-          ? this.evaluteHoverService
+          ? this.evaluateHoverService
           : this.pageHoverService,
         page,
         projectName,

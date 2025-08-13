@@ -6,7 +6,7 @@ import { ParameterUtils } from '../utils/parameter-utils.service';
   providedIn: 'root'
 })
 export class EventTrigger {
-  constructor(private parameterUtils: ParameterUtils) {}
+  constructor(private readonly parameterUtils: ParameterUtils) {}
   createTrigger(
     accountId: string,
     containerId: string,

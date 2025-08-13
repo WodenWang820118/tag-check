@@ -8,8 +8,8 @@ import { EventUtils } from '../../utils/event-utils.service';
 })
 export class ScrollTag {
   constructor(
-    private parameterUtils: ParameterUtils,
-    private eventUtils: EventUtils
+    private readonly parameterUtils: ParameterUtils,
+    private readonly eventUtils: EventUtils
   ) {}
   scrollTag(
     configurationName: string,

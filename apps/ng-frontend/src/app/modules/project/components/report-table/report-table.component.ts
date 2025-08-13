@@ -43,10 +43,10 @@ export class ReportTableComponent implements OnInit {
 
   constructor(
     public testRunningFacadeService: TestRunningFacadeService,
-    private route: ActivatedRoute,
-    private destroyRef: DestroyRef,
-    private facade: ReportTableFacadeService,
-    private tableSortService: TableSortService
+    private readonly route: ActivatedRoute,
+    private readonly destroyRef: DestroyRef,
+    private readonly facade: ReportTableFacadeService,
+    private readonly tableSortService: TableSortService
   ) {}
   // TODO: retrieve the pass or not information from the test event details
   ngOnInit() {

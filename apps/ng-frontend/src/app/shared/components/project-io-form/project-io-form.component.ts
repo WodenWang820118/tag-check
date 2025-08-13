@@ -17,10 +17,10 @@ import { MatDialog } from '@angular/material/dialog';
 })
 export class ProjectIoFormComponent {
   constructor(
-    private route: ActivatedRoute,
-    private projectIoService: ProjectIoService,
-    private dialog: MatDialog,
-    private router: Router
+    private readonly route: ActivatedRoute,
+    private readonly projectIoService: ProjectIoService,
+    private readonly dialog: MatDialog,
+    private readonly router: Router
   ) {}
 
   exportProject() {

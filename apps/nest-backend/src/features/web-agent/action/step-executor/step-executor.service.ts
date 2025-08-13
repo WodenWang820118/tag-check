@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 enum BrowserAction {
@@ -20,7 +17,8 @@ import { Step } from '@utils';
 export class StepExecutorService {
   private readonly logger = new Logger(StepExecutorService.name);
   constructor(
-    @Inject(ACTION_HANDLERS) private handlers: { [key: string]: ActionHandler },
+    @Inject(ACTION_HANDLERS)
+    private readonly handlers: { [key: string]: ActionHandler },
     private readonly dataLayerService: DataLayerService,
     private readonly stepExecutorUtilsService: StepExecutorUtilsService
   ) {}

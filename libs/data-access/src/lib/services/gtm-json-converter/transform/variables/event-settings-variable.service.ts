@@ -10,7 +10,7 @@ import { ParameterUtils } from '../utils/parameter-utils.service';
   providedIn: 'root'
 })
 export class EventSettingsVariableService {
-  constructor(private parameterUtils: ParameterUtils) {}
+  constructor(private readonly parameterUtils: ParameterUtils) {}
   createEventSettingsVariable(
     accountId: string,
     containerId: string,
