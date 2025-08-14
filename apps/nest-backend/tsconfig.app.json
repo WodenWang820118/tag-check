@@ -4,6 +4,7 @@
     "outDir": "../../dist/out-tsc",
     "module": "commonjs",
     "types": ["node"],
+    "lib": ["es2022"],
     "emitDecoratorMetadata": true,
     "target": "es2021"
   },
