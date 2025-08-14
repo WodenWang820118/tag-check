@@ -9,7 +9,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import type { ProjectEntity } from './project.entity';
+import { ProjectEntity } from './project.entity';
 import { TestImageEntity } from './test-image.entity';
 import { TestEventDetailEntity } from './test-event-detail.entity';
 import { SpecEntity } from './spec.entity';
@@ -23,7 +23,9 @@ export class TestEventEntity
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne('ProjectEntity', 'testEvents', { onDelete: 'CASCADE' })
+  @ManyToOne(() => ProjectEntity, (project) => project.testEvents, {
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'project_id' })
   project!: ProjectEntity;
 

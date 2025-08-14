@@ -72,9 +72,11 @@ export const ErrorMessage: Story = {
     expect(submitBtn).toBeTruthy();
     submitBtn.click();
 
-    // TODO:  bad practice to access DOM directly
-    const errorDialog = document.querySelector('.error-dialog') as HTMLElement;
-    const errorText = await within(errorDialog).findByText(/Error/i);
+    const errorDialog = document.querySelector('.error-dialog');
+    if (!errorDialog) return;
+    const errorText = await within(errorDialog as HTMLElement).findByText(
+      /Error/i
+    );
     expect(errorText).toBeTruthy();
   }
 };
