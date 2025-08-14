@@ -1,5 +1,5 @@
 import { Auditable } from './auditable.type';
-import { StrictDataLayerEvent, BaseDataLayerEvent } from './data-layer.type';
+import { StrictDataLayerEvent } from './data-layer.type';
 
 export type ProjectSpec = {
   projectSlug: string;

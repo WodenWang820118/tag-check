@@ -103,16 +103,14 @@ export class TestRunningFacadeService {
       );
     }
     console.log('Running data layer without request check');
-    return this.dataLayerService.runDataLayerInspection(
-      projectSlug,
-      eventId,
-      project.applicationSettings.websiteUrl,
+    return this.dataLayerService.runDataLayerInspection(projectSlug, eventId, {
+      websiteUrl: project.applicationSettings.websiteUrl,
       headless,
-      inspectEventDto,
-      project.authenticationSettings.username,
-      project.authenticationSettings.password,
-      project.applicationSettings.gtm.isRequestCheck
-    );
+      eventInspectionPreset: inspectEventDto,
+      username: project.authenticationSettings.username,
+      password: project.authenticationSettings.password,
+      captureRequest: project.applicationSettings.gtm.isRequestCheck
+    });
   }
 
   stopOperation(): Observable<unknown> {

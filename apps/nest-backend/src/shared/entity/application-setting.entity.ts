@@ -6,7 +6,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import type { ProjectEntity } from './project.entity';
+import { ProjectEntity } from './project.entity';
 import { AuditableEntity } from './common';
 import { Expose } from 'class-transformer';
 
@@ -45,7 +45,9 @@ export class ApplicationSettingEntity
   })
   gtm!: Gtm;
 
-  @OneToOne('ProjectEntity', 'applicationSettings', { onDelete: 'CASCADE' })
+  @OneToOne(() => ProjectEntity, (project) => project.applicationSettings, {
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({
     name: 'project_id',
     referencedColumnName: 'id'

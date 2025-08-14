@@ -6,7 +6,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import type { ProjectEntity } from './project.entity';
+import { ProjectEntity } from './project.entity';
 import { AuditableEntity } from './common';
 
 @Entity('authentication_setting')
@@ -36,7 +36,9 @@ export class AuthenticationSettingEntity
   })
   password!: string;
 
-  @OneToOne('ProjectEntity', 'authenticationSettings', { onDelete: 'CASCADE' })
+  @OneToOne(() => ProjectEntity, (project) => project.authenticationSettings, {
+    onDelete: 'CASCADE'
+  })
   @JoinColumn({ name: 'project_id', referencedColumnName: 'id' })
   project!: ProjectEntity;
 }
