@@ -3,7 +3,7 @@ import {
   InternalServerErrorException,
   Logger
 } from '@nestjs/common';
-import { Page } from 'puppeteer';
+import { CookieData, Page, Browser } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
 import { PuppeteerUtilsService } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
@@ -42,6 +42,9 @@ export class GtmOperatorService {
       eventInspectionPresetDto,
       this.abortController.signal
     );
+
+    // extract cookie setting logic to helper
+    await this.applyCookies(browser, query.gtmUrl, eventInspectionPresetDto);
 
     const websiteUrl = this.extractBaseUrlFromGtmUrl(query.gtmUrl);
     const folder = await this.folderPathService.getInspectionEventFolderPath(
@@ -138,5 +141,28 @@ export class GtmOperatorService {
     if (this.abortController) {
       this.abortController.abort();
     }
+  }
+
+  // helper to apply cookies from preset
+  private async applyCookies(
+    browser: Browser,
+    url: string,
+    eventInspectionPresetDto: EventInspectionPresetDto
+  ): Promise<void> {
+    if (!eventInspectionPresetDto.application.cookie.data.length) {
+      return;
+    }
+    const cookies = eventInspectionPresetDto.application.cookie.data.map(
+      (cookie) => ({
+        name: cookie.key.toString(),
+        value: cookie.value.toString()
+      })
+    );
+    const cookieData: CookieData[] = cookies.map((cookie) => ({
+      name: cookie.name,
+      value: cookie.value,
+      domain: new URL(url).hostname
+    }));
+    await browser.setCookie(...cookieData);
   }
 }

@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { ProjectEntity } from './project.entity';
+import type { ProjectEntity } from './project.entity';
 import { BrowserSettingSchema } from '@utils';
 import { AuditableEntity } from './common';
 
@@ -33,12 +33,7 @@ export class BrowserSettingEntity
   })
   headless!: boolean;
 
-  @OneToOne(() => ProjectEntity, (project) => project.browserSettings, {
-    onDelete: 'CASCADE'
-  })
-  @JoinColumn({
-    name: 'project_id',
-    referencedColumnName: 'id'
-  })
+  @OneToOne('ProjectEntity', 'browserSettings', { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'project_id', referencedColumnName: 'id' })
   project!: ProjectEntity;
 }

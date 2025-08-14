@@ -6,7 +6,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn
 } from 'typeorm';
-import { ProjectEntity } from './project.entity';
+import type { ProjectEntity } from './project.entity';
 import { AuditableEntity } from './common';
 import { Expose } from 'class-transformer';
 
@@ -45,12 +45,20 @@ export class ApplicationSettingEntity
   })
   gtm!: Gtm;
 
-  @OneToOne(() => ProjectEntity, (project) => project.applicationSettings, {
-    onDelete: 'CASCADE'
-  })
+  @OneToOne('ProjectEntity', 'applicationSettings', { onDelete: 'CASCADE' })
   @JoinColumn({
     name: 'project_id',
     referencedColumnName: 'id'
   })
   project!: ProjectEntity;
+
+  @Column({
+    name: 'website_url',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    comment: 'Website URL'
+  })
+  @Expose({ name: 'websiteUrl' })
+  websiteUrl!: string;
 }

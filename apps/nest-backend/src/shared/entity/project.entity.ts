@@ -8,10 +8,10 @@ import {
 } from 'typeorm';
 import { AuditableEntity } from './common';
 import { ProjectSchema } from '@utils';
-import { AuthenticationSettingEntity } from './authentication-setting.entity';
-import { BrowserSettingEntity } from './browser-setting.entity';
-import { ApplicationSettingEntity } from './application-setting.entity';
-import { TestEventEntity } from './test-event.entity';
+import type { AuthenticationSettingEntity } from './authentication-setting.entity';
+import type { BrowserSettingEntity } from './browser-setting.entity';
+import type { ApplicationSettingEntity } from './application-setting.entity';
+import type { TestEventEntity } from './test-event.entity';
 import { Expose } from 'class-transformer';
 
 @Entity('project')
@@ -56,23 +56,15 @@ export class ProjectEntity extends AuditableEntity implements ProjectSchema {
   })
   measurementId?: string;
 
-  @OneToMany(() => TestEventEntity, (testEvent) => testEvent.project, {
-    onDelete: 'CASCADE'
-  })
+  @OneToMany('TestEventEntity', 'project', { onDelete: 'CASCADE' })
   testEvents!: TestEventEntity[];
 
-  @OneToOne(() => AuthenticationSettingEntity, (auth) => auth.project, {
-    onDelete: 'CASCADE'
-  })
+  @OneToOne('AuthenticationSettingEntity', 'project', { onDelete: 'CASCADE' })
   authenticationSettings!: AuthenticationSettingEntity;
 
-  @OneToOne(() => BrowserSettingEntity, (browser) => browser.project, {
-    onDelete: 'CASCADE'
-  })
+  @OneToOne('BrowserSettingEntity', 'project', { onDelete: 'CASCADE' })
   browserSettings!: BrowserSettingEntity;
 
-  @OneToOne(() => ApplicationSettingEntity, (app) => app.project, {
-    onDelete: 'CASCADE'
-  })
+  @OneToOne('ApplicationSettingEntity', 'project', { onDelete: 'CASCADE' })
   applicationSettings!: ApplicationSettingEntity;
 }

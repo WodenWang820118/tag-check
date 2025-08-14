@@ -22,16 +22,22 @@ export class EventInspectionControllerService {
     return await this.singleEventInspectionService.inspectSingleEvent(
       projectName,
       eventId,
-      query.headless || 'false',
-      query.measurementId || '',
-      { username: query.username || '', password: query.password || '' },
-      query.captureRequest || 'false',
-      eventInspectionPresetDto || {
-        application: {
-          localStorage: { data: [] as LocalStorageData[] },
-          cookie: { data: [] as CookieData[] }
+      {
+        headless: query.headless || 'false',
+        measurementId: query.measurementId || '',
+        credentials: {
+          username: query.username || '',
+          password: query.password || ''
         },
-        puppeteerArgs: []
+        captureRequest: query.captureRequest || 'false',
+        url: query.url,
+        eventInspectionPresetDto: eventInspectionPresetDto || {
+          application: {
+            localStorage: { data: [] as LocalStorageData[] },
+            cookie: { data: [] as CookieData[] }
+          },
+          puppeteerArgs: []
+        }
       }
     );
   }

@@ -11,6 +11,15 @@ import { EventInspectionPipelineService } from '../../features/event-inspection-
 import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
 import { PuppeteerUtilsService } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
 
+export interface InspectSingleEventOptions {
+  headless: string;
+  measurementId: string;
+  credentials: Credentials;
+  captureRequest: string;
+  url: string;
+  eventInspectionPresetDto: EventInspectionPresetDto;
+}
+
 @Injectable()
 export class SingleEventInspectionService {
   private readonly logger = new Logger(SingleEventInspectionService.name);
@@ -29,11 +38,7 @@ export class SingleEventInspectionService {
   async inspectSingleEvent(
     projectSlug: string,
     eventId: string,
-    headless: string,
-    measurementId: string,
-    credentials: Credentials,
-    captureRequest: string,
-    eventInspectionPresetDto: EventInspectionPresetDto
+    options: InspectSingleEventOptions
   ) {
     this.initializeAbortController();
     if (!this.abortController) {
@@ -42,12 +47,23 @@ export class SingleEventInspectionService {
       );
     }
 
+    const {
+      headless,
+      measurementId,
+      credentials,
+      captureRequest,
+      url,
+      eventInspectionPresetDto
+    } = options;
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
       headless,
       measurementId,
       eventInspectionPresetDto,
       this.abortController.signal
     );
+
+    // extract cookie setting logic to helper
+    await this.applyCookies(browser, url, eventInspectionPresetDto);
 
     const folder = await this.folderPathService.getInspectionEventFolderPath(
       projectSlug,
@@ -87,5 +103,28 @@ export class SingleEventInspectionService {
     if (this.abortController) {
       this.abortController.abort();
     }
+  }
+
+  // helper to apply cookies from preset
+  private async applyCookies(
+    browser: import('puppeteer').Browser,
+    url: string,
+    eventInspectionPresetDto: EventInspectionPresetDto
+  ): Promise<void> {
+    if (!eventInspectionPresetDto.application.cookie.data.length) {
+      return;
+    }
+    const cookies = eventInspectionPresetDto.application.cookie.data.map(
+      (cookie) => ({
+        name: cookie.key.toString(),
+        value: cookie.value.toString()
+      })
+    );
+    const cookieData: CookieData[] = cookies.map((cookie) => ({
+      name: cookie.name,
+      value: cookie.value,
+      domain: new URL(url).hostname
+    }));
+    await browser.setCookie(...cookieData);
   }
 }

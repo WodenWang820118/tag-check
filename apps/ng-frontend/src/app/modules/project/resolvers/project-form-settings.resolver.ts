@@ -5,7 +5,7 @@ import { SettingsService } from '../../../shared/services/api/settings/settings.
 
 export const getProjectFormSettingsResolver: ResolveFn<
   ProjectSetting | null
-> = (route, state) => {
+> = (route) => {
   const settingsService = inject(SettingsService);
   if (!route.parent) {
     return null;

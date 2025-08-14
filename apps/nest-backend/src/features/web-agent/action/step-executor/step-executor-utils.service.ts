@@ -108,7 +108,6 @@ export class StepExecutorUtilsService {
     application: EventInspectionPresetDto['application']
   ): Promise<void> {
     await this.setLocalStorage(page, application);
-    await this.setCookies(page, application);
     await page.goto(step.url, { waitUntil: 'networkidle2' });
     await new Promise((resolve) => setTimeout(resolve, 2000));
     await page.goto(step.url, { waitUntil: 'networkidle2' });
@@ -130,22 +129,6 @@ export class StepExecutorUtilsService {
           localStorage.setItem(setting.key, value);
         }
       }, application.localStorage);
-    }
-  }
-
-  // TODO: handle deprecated cookies
-  // Use browser.setCookie with the required domain parameter
-  private async setCookies(
-    page: Page,
-    application: EventInspectionPresetDto['application']
-  ): Promise<void> {
-    if (application.cookie?.data) {
-      const cookies = application.cookie.data.map((cookie) => ({
-        name: cookie.key.toString(),
-        value: cookie.value.toString()
-        // Add domain, path, etc. if needed
-      }));
-      await page.setCookie(...cookies);
     }
   }
 }

@@ -13,6 +13,7 @@ export class DataLayerService {
   runDataLayerInspection(
     projectSlug: string,
     eventId: string,
+    url: string,
     headless?: boolean,
     eventInspectionPreset?: EventInspectionPreset,
     username?: string,

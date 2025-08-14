@@ -106,6 +106,7 @@ export class TestRunningFacadeService {
     return this.dataLayerService.runDataLayerInspection(
       projectSlug,
       eventId,
+      project.applicationSettings.websiteUrl,
       headless,
       inspectEventDto,
       project.authenticationSettings.username,
