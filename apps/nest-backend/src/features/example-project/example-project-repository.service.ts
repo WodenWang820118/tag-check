@@ -12,6 +12,8 @@ import { ApplicationSettingRepositoryService } from '../../core/repository/setti
 @Injectable()
 export class ExampleProjectRepositoryService implements OnModuleInit {
   private readonly logger = new Logger(ExampleProjectRepositoryService.name);
+  private readonly DEFAULT_WEBSITE_URL =
+    'https://gtm-integration-sample.netlify.app';
 
   constructor(
     private readonly testReportFacadeRepositoryService: TestReportFacadeRepositoryService,
@@ -99,7 +101,8 @@ export class ExampleProjectRepositoryService implements OnModuleInit {
       );
       await this.applicationSettingRepositoryService.update(projectEntity, {
         localStorage: this.localStorageSettings(),
-        cookie: this.cookieSettings()
+        cookie: this.cookieSettings(),
+        websiteUrl: this.DEFAULT_WEBSITE_URL
       });
     } catch (error) {
       this.logger.error('Failed to build example project:', error);

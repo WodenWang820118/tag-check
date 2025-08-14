@@ -27,4 +27,6 @@ export class InspectGtmQueryDto {
     description: 'Whether to capture the request payload.'
   })
   captureRequest?: string;
+
+  url?: string;
 }

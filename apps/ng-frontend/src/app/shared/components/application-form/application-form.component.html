@@ -3,89 +3,105 @@
     <mat-card-header>
       <mat-card-title>Pre-loading Values</mat-card-title>
       <mat-card-subtitle
-        >Pre-load values for localStorage and cookie</mat-card-subtitle
+        >Set URL and other settings before running tests</mat-card-subtitle
       >
     </mat-card-header>
     <br />
     <mat-card-content>
       <form class="application-form" [formGroup]="applicationForm">
-        <h2>localStorage</h2>
-        <div formArrayName="localStorage">
-          @for (
-            item of localStorageFormArrayValue;
-            track item.key;
-            let idx = $index
-          ) {
-            <div class="application-form__sub-form" [formGroupName]="idx">
-              <mat-form-field
-                class="application-form__field"
-                appearance="outline"
-              >
-                <input matInput formControlName="key" />
-              </mat-form-field>
-              <mat-form-field
-                class="application-form__field"
-                appearance="outline"
-              >
-                <input matInput formControlName="value" />
-              </mat-form-field>
-              <button mat-icon-button (click)="removeLocalStorageSetting(idx)">
-                <mat-icon>remove_circle_outline</mat-icon>
-              </button>
-            </div>
-          }
-        </div>
-        <mat-card-actions align="start">
-          <button
-            mat-raised-button
-            color="action"
-            (click)="addLocalStorageSetting()"
-          >
-            Add local storage
-          </button>
-        </mat-card-actions>
-        <br />
-        <h2>Cookie</h2>
-        <div formArrayName="cookie">
-          @for (
-            item of cookieFormArrayValue;
-            track item.key;
-            let idx = $index
-          ) {
-            <div class="application-form__sub-form" [formGroupName]="idx">
-              <mat-form-field
-                class="application-form__field"
-                appearance="outline"
-              >
-                <mat-label>cookie Key</mat-label>
-                <input
-                  matInput
-                  formControlName="key"
-                  placeholder="cookie key"
-                />
-              </mat-form-field>
-              <mat-form-field
-                class="application-form__field"
-                appearance="outline"
-              >
-                <mat-label>cookie Value</mat-label>
-                <input
-                  matInput
-                  formControlName="value"
-                  placeholder="cookie value"
-                />
-              </mat-form-field>
-              <button mat-icon-button (click)="removeCookieSetting(idx)">
-                <mat-icon>remove_circle_outline</mat-icon>
-              </button>
-            </div>
-          }
-        </div>
-        <mat-card-actions align="start">
-          <button mat-raised-button color="action" (click)="addCookieSetting()">
-            Add cookie
-          </button>
-        </mat-card-actions>
+        <!-- Website URL section -->
+        <section aria-labelledby="website-url-heading">
+          <h2 id="website-url-heading">Website URL</h2>
+          <mat-form-field class="application-form__field" appearance="outline">
+            <input matInput formControlName="websiteUrl" placeholder="Website URL" />
+          </mat-form-field>
+        </section>
+
+        <!-- Local Storage section -->
+        <section aria-labelledby="local-storage-heading">
+          <h2 id="local-storage-heading">Local Storage</h2>
+          <div formArrayName="localStorage">
+            @for (
+              item of localStorageFormArrayValue;
+              track item.key;
+              let idx = $index
+            ) {
+              <div class="application-form__sub-form" [formGroupName]="idx">
+                <mat-form-field
+                  class="application-form__field"
+                  appearance="outline"
+                >
+                  <input matInput formControlName="key" />
+                </mat-form-field>
+                <mat-form-field
+                  class="application-form__field"
+                  appearance="outline"
+                >
+                  <input matInput formControlName="value" />
+                </mat-form-field>
+                <button mat-icon-button (click)="removeLocalStorageSetting(idx)">
+                  <mat-icon>remove_circle_outline</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+          <mat-card-actions align="start">
+            <button
+              mat-raised-button
+              color="action"
+              (click)="addLocalStorageSetting()"
+            >
+              Add local storage
+            </button>
+          </mat-card-actions>
+        </section>
+
+        <!-- Cookie section -->
+        <section aria-labelledby="cookie-heading">
+          <h2 id="cookie-heading">Cookie</h2>
+          <div formArrayName="cookie">
+            @for (
+              item of cookieFormArrayValue;
+              track item.key;
+              let idx = $index
+            ) {
+              <div class="application-form__sub-form" [formGroupName]="idx">
+                <mat-form-field
+                  class="application-form__field"
+                  appearance="outline"
+                >
+                  <mat-label>cookie Key</mat-label>
+                  <input
+                    matInput
+                    formControlName="key"
+                    placeholder="cookie key"
+                  />
+                </mat-form-field>
+                <mat-form-field
+                  class="application-form__field"
+                  appearance="outline"
+                >
+                  <mat-label>cookie Value</mat-label>
+                  <input
+                    matInput
+                    formControlName="value"
+                    placeholder="cookie value"
+                  />
+                </mat-form-field>
+                <button mat-icon-button (click)="removeCookieSetting(idx)">
+                  <mat-icon>remove_circle_outline</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+          <mat-card-actions align="start">
+            <button mat-raised-button color="action" (click)="addCookieSetting()">
+              Add cookie
+            </button>
+          </mat-card-actions>
+        </section>
+
+        <!-- Save action -->
         <mat-card-actions align="end" style="gap: 1rem">
           <button
             mat-raised-button

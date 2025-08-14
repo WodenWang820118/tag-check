@@ -27,4 +27,9 @@ export class InspectEventQueryDto {
 
   @ApiPropertyOptional({ description: 'Concurrency for project inspections.' })
   concurrency?: number;
+
+  @ApiPropertyOptional({
+    description: 'The URL to inspect'
+  })
+  url!: string;
 }
