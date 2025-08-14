@@ -143,20 +143,17 @@ export class AdvancedExpansionPanelComponent implements OnInit {
     //   null,
     //   2
     // );
-
-    // this.ecAndEsvForm.patchValue({ esv: esvValue });
   }
 
   private initializeFormSubscriptions(): void {
-    // Handle main form changes
-    combineLatest([
-      this.editorFacadeService.getInputJsonContent(),
-      this.form.valueChanges
-    ])
+    // Handle main form changes using object overload to avoid deprecated signature
+    combineLatest({
+      editor: this.editorFacadeService.getInputJsonContent(),
+      form: this.form.valueChanges
+    })
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        filter(([editor, form]) => !!editor && !!form),
-        map(([editor, form]) => ({ editor, form })),
+        filter(({ editor, form }) => !!editor && !!form),
         catchError((error) => {
           this.handleError('Error processing form changes', error);
           return EMPTY;

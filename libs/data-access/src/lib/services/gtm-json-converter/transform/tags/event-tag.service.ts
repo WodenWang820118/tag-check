@@ -21,7 +21,7 @@ export class EventTag {
     }
 
     return tag.parameters.filter((pm) => {
-      return !(pm.value as any).includes('ecommerce');
+      return !(typeof pm.value === 'string' && pm.value.includes('ecommerce'));
     });
   }
 

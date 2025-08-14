@@ -115,22 +115,22 @@ export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
 
   private isLoading() {
     const spinningTime = 1;
-    return combineLatest([
-      timer(0, 500),
-      this.xlsxFacadeService.workbook$,
-      this.xlsxFacadeService.dataSource$,
-      this.xlsxFacadeService.displayedDataSource$,
-      this.xlsxFacadeService.displayedColumns$
-    ]).pipe(
-      takeWhile(([timer]) => timer <= spinningTime),
+    return combineLatest({
+      timer: timer(0, 500),
+      workbook: this.xlsxFacadeService.workbook$,
+      dataSource: this.xlsxFacadeService.dataSource$,
+      displayedDataSource: this.xlsxFacadeService.displayedDataSource$,
+      displayedColumns: this.xlsxFacadeService.displayedColumns$
+    }).pipe(
+      takeWhile(({ timer }) => timer <= spinningTime),
       tap(
-        ([
+        ({
           timer,
           workbook,
           dataSource,
           displayedDataSource,
           displayedColumns
-        ]) => {
+        }) => {
           if (
             !workbook ||
             !dataSource ||
@@ -174,7 +174,7 @@ export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
   }
 
   onAction(action: string) {
-    const dataColumnName = this.dataColumnName?.value as string;
+    const dataColumnName = this.dataColumnName?.value;
     this.xlsxFacadeService.onAction(action, dataColumnName);
   }
 

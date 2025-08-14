@@ -6,8 +6,7 @@ import {
 } from '@storybook/angular';
 import { ReportTableToolbarComponent } from './report-table-toolbar.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
-import { NgIf } from '@angular/common';
+import { expect, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -29,7 +28,6 @@ const meta: Meta<ReportTableToolbarComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [
-        NgIf,
         RouterLink,
         MatIconModule,
         MatToolbarModule,

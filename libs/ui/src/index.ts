@@ -9,6 +9,7 @@ export * from './lib/components/footer/footer.component';
 export * from './lib/components/error-dialog/error-dialog.component';
 export * from './lib/components/progress-spinner/progress-spinner.component';
 export * from './lib/components/custom-mat-table/custom-mat-table.component';
+export * from './lib/components/editor/editor.component';
 
 // modules
 export * from './lib/modules/tag-build-app/tag-build-app.component';

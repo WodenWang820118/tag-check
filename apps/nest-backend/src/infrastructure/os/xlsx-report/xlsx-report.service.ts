@@ -148,7 +148,7 @@ export class XlsxReportService {
   private handleError(error: unknown, methodName: string) {
     this.logger.error(
       `Error in ${XlsxReportService.name}.${methodName}: ${
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : JSON.stringify(error, null, 2)
       }`,
       error instanceof Error ? error.stack : undefined
     );

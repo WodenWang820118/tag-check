@@ -1,8 +1,14 @@
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Component, effect, viewChild, signal, computed } from '@angular/core';
+import {
+  Component,
+  effect,
+  viewChild,
+  signal,
+  computed,
+  ViewEncapsulation
+} from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
-import { ViewEncapsulation } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { UploadCardComponent } from '../upload-card/upload-card.component';

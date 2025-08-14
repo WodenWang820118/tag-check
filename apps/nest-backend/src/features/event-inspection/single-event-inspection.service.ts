@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
   Logger
 } from '@nestjs/common';
-import { Credentials } from 'puppeteer';
+import { CookieData, Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '@utils';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
 import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';

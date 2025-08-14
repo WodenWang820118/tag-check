@@ -28,9 +28,8 @@ export class DataLayerController {
 
   @ApiOperation({
     summary: 'Inspects a single event dataLayer',
-    description:
-      'This endpoint inspects a single event and returns dataLayer object,\
-      and the comparison result written to an xlsx file.'
+    description: `This endpoint inspects a single event and returns dataLayer object,
+      and the comparison result written to an xlsx file.`
   })
   @ApiParam({
     name: 'projectSlug',
@@ -73,10 +72,9 @@ export class DataLayerController {
 
   @ApiOperation({
     summary: 'Inspects a project dataLayer',
-    description:
-      'This endpoint inspects an entire project and returns dataLayer object,\
-    and the comparison result written to an xlsx file. Please see the \
-    inspectSingleEvent endpoint for more parameters details.'
+    description: `This endpoint inspects an entire project and returns dataLayer object,
+    and the comparison result written to an xlsx file. Please see the 
+    inspectSingleEvent endpoint for more parameters details.`
   })
   @Get(':projectSlug')
   async inspectProject(

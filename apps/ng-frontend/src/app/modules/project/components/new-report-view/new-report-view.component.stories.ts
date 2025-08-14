@@ -6,7 +6,6 @@ import {
 } from '@storybook/angular';
 import { NewReportViewComponent } from './new-report-view.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -17,11 +16,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { EditorService } from '@data-access';
-import { ErrorDialogComponent } from '@ui';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
-import { EditorComponent } from 'libs/ui/src/lib/components/editor/editor.component';
 
 const meta: Meta<NewReportViewComponent> = {
   component: NewReportViewComponent,
@@ -35,8 +32,8 @@ const meta: Meta<NewReportViewComponent> = {
         ReactiveFormsModule,
         MatInputModule,
         MatButtonModule,
-        EditorComponent,
-        ErrorDialogComponent
+        () => import('@ui').then((m) => m.ErrorDialogComponent),
+        () => import('@ui').then((m) => m.EditorComponent)
       ],
       providers: [
         RecordingService,

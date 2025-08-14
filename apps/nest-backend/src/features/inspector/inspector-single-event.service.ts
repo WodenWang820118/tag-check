@@ -1,11 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
-import { DataLayerSpec, StrictDataLayerEvent, ValidationResult } from '@utils';
+import { StrictDataLayerEvent, ValidationResult } from '@utils';
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { WebAgentService } from '../web-agent/web-agent.service';
 import { RequestProcessorService } from '../../features/request-processor/request-processor.service';
 import { Credentials, Page } from 'puppeteer';
 import { InspectorUtilsService } from './inspector-utils.service';
+import { InspectDataLayerDto } from '../../shared/dto/inspect-data-layer.dto';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { SpecRepositoryService } from '../../core/repository/spec/spec-repository.service';
 @Injectable()
@@ -18,7 +18,7 @@ export class InspectorSingleEventService {
     private readonly inspectorUtilsService: InspectorUtilsService,
     private readonly specRepositoryService: SpecRepositoryService
   ) {}
-  // TODO: use DB instead of OS system
+
   // inspect one event
   async inspectDataLayer(
     page: Page,
@@ -29,58 +29,49 @@ export class InspectorSingleEventService {
     captureRequest: string,
     application: EventInspectionPresetDto['application']
   ) {
-    const spec =
+    // Fetch the project spec and extract the data layer spec
+    const projectSpec =
       await this.specRepositoryService.getSpecByProjectSlugAndEventId(
         projectSlug,
         eventId
       );
-
-    Logger.debug(JSON.stringify(spec, null, 2), 'Expected Spec: ');
-
-    if (captureRequest === 'false' || !captureRequest) {
-      return await this.handleNoCaptureRequest(
-        page,
-        projectSlug,
-        eventId,
-        measurementId,
-        credentials,
-        captureRequest,
-        application,
-        spec
-      );
-    }
-
-    return await this.handleCaptureRequest(
-      page,
-      projectSlug,
-      eventId,
+    // Create DTO for inspection parameters
+    const dto: InspectDataLayerDto = {
       measurementId,
       credentials,
       captureRequest,
       application,
-      spec
+      spec: projectSpec
+    };
+
+    // Debug the extracted data layer spec from DTO
+    this.logger.debug(
+      JSON.stringify(dto.spec, null, 2),
+      'Expected Spec (from DTO): '
     );
+
+    if (dto.captureRequest === 'false' || !dto.captureRequest) {
+      return await this.handleNoCaptureRequest(page, projectSlug, eventId, dto);
+    }
+
+    return await this.handleCaptureRequest(page, projectSlug, eventId, dto);
   }
 
   private async handleNoCaptureRequest(
     page: Page,
     projectSlug: string,
     eventId: string,
-    measurementId: string,
-    credentials: Credentials,
-    captureRequest: string,
-    application: EventInspectionPresetDto['application'],
-    spec: DataLayerSpec
+    dto: InspectDataLayerDto
   ) {
     this.logger.log(`MeasurementId is empty`);
     const result = await this.webAgentService.executeAndGetDataLayer(
       page,
       projectSlug,
       eventId,
-      measurementId,
-      credentials,
-      captureRequest,
-      application
+      dto.measurementId || '',
+      dto.credentials || { username: '', password: '' },
+      dto.captureRequest || 'false',
+      dto.application
     );
 
     // 3. Compare the result with the project spec
@@ -93,7 +84,7 @@ export class InspectorSingleEventService {
     );
     const dataLayerResult = this.inspectorUtilsService.isDataLayerCorrect(
       dataLayerResults,
-      spec.dataLayerSpec
+      dto.spec.dataLayerSpec
     );
 
     this.logger.log(
@@ -116,20 +107,16 @@ export class InspectorSingleEventService {
     page: Page,
     projectSlug: string,
     eventId: string,
-    measurementId: string,
-    credentials: Credentials,
-    captureRequest: string,
-    application: EventInspectionPresetDto['application'],
-    spec: DataLayerSpec
+    dto: InspectDataLayerDto
   ) {
     const result = await this.webAgentService.executeAndGetDataLayerAndRequest(
       page,
       projectSlug,
       eventId,
-      measurementId,
-      credentials,
-      captureRequest,
-      application
+      dto.measurementId || '',
+      dto.credentials || { username: '', password: '' },
+      dto.captureRequest || 'false',
+      dto.application
     );
 
     // 3. Compare the result with the project spec
@@ -138,7 +125,7 @@ export class InspectorSingleEventService {
     const dataLayerResults = result.dataLayer as StrictDataLayerEvent[];
     const dataLayerResult = this.inspectorUtilsService.isDataLayerCorrect(
       dataLayerResults,
-      spec.dataLayerSpec
+      dto.spec.dataLayerSpec
     );
 
     const rawRequest = result.eventRequest;
@@ -148,7 +135,7 @@ export class InspectorSingleEventService {
 
     const requestCheckResult = this.inspectorUtilsService.isDataLayerCorrect(
       [recomposedRequest as StrictDataLayerEvent],
-      spec.dataLayerSpec
+      dto.spec.dataLayerSpec
     );
 
     const destinationUrl = result.destinationUrl;

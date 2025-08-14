@@ -2,11 +2,10 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { InitProjectViewComponent } from './init-project-view.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
@@ -23,20 +22,20 @@ const meta: Meta<InitProjectViewComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [InitProjectFormComponent, ProjectImportComponent],
-      providers: [FormBuilder, ConfigurationService],
+      providers: [FormBuilder, ConfigurationService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(ENTRY_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(ENTRY_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<InitProjectViewComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

@@ -6,7 +6,6 @@ import {
 } from '@storybook/angular';
 import { FileTableComponent } from './file-table.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
 import { DatePipe, NgClass } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';

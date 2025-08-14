@@ -2,11 +2,10 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { GtmFormComponent } from './gtm-form.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -40,22 +39,22 @@ const meta: Meta<GtmFormComponent> = {
         ReactiveFormsModule,
         MatCardModule,
         MatCheckboxModule,
-        MatTooltipModule,
+        MatTooltipModule
       ],
-      providers: [SettingsService],
+      providers: [SettingsService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(APP_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(APP_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<GtmFormComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

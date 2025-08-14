@@ -2,12 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SingleEventInspectionService } from '../../features/event-inspection/single-event-inspection.service';
 import { GroupEventsInspectionService } from '../../features/event-inspection/group-events-inspection.service';
 import { Credentials } from 'puppeteer';
-import {
-  CookieData,
-  EventInspectionPresetDto,
-  LocalStorage,
-  LocalStorageData
-} from '@utils';
+import { CookieData, EventInspectionPresetDto, LocalStorageData } from '@utils';
 import { InspectEventQueryDto } from './dto/inspect-event-query.dto';
 
 @Injectable()
@@ -59,7 +54,6 @@ export class EventInspectionControllerService {
     );
   }
 
-  // TODO: might need to separate the cleanup logic
   async stopOperation() {
     this.logger.log('Stopping the operation');
     // Wait for a short time to ensure the operation has started
