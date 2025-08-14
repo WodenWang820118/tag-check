@@ -39,7 +39,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class ApplicationFormComponent implements OnInit {
   applicationForm = this.fb.group({
     localStorage: this.fb.array([] as LocalStorageData[]),
-    cookie: this.fb.array([] as CookieData[])
+    cookie: this.fb.array([] as CookieData[]),
+    websiteUrl: this.fb.control<string>('')
   });
 
   localStorageSettings = signal<LocalStorageData[]>([]);
@@ -59,12 +60,18 @@ export class ApplicationFormComponent implements OnInit {
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         tap((data) => {
+          console.log('data in application: ', data);
           const settings = data['projectInfo'].applicationSettings;
           if (settings) {
             this.localStorageSettings.set(
               settings.localStorage.data as LocalStorageData[]
             );
             this.cookieSettings.set(settings.cookie.data as CookieData[]);
+            this.applicationForm.patchValue({
+              localStorage: this.localStorageSettings(),
+              cookie: this.cookieSettings(),
+              websiteUrl: settings.websiteUrl || ''
+            });
             this.loadInitialData();
           } else {
             throw new Error('Application settings not found');

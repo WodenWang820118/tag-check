@@ -1,12 +1,18 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/unbound-method */
 import { Injectable, Logger } from '@nestjs/common';
 import { EvaluateChangeService } from './evaluate-change.service';
 import { PageChangeService } from './page-change.service';
-import { ChangeStrategy } from './utils';
+import { ChangeStrategy, ChangeOperation } from './utils';
 import { Page } from 'puppeteer';
 
+// Context for change operations to reduce parameter list
+interface ChangeContext {
+  page: Page;
+  projectName: string;
+  eventId: string;
+  selector: string;
+  selectorType: string;
+  value: string;
+}
 @Injectable()
 export class ChangeStrategyService implements ChangeStrategy {
   private readonly logger = new Logger(ChangeStrategyService.name);
@@ -31,12 +37,7 @@ export class ChangeStrategyService implements ChangeStrategy {
       }
 
       return await this.attemptChange(
-        page,
-        projectName,
-        eventId,
-        selector,
-        selectorType,
-        value,
+        { page, projectName, eventId, selector, selectorType, value },
         this.pageChangeService.operate,
         timeout
       );
@@ -49,23 +50,11 @@ export class ChangeStrategyService implements ChangeStrategy {
   }
 
   async attemptChange(
-    page: Page,
-    projectName: string,
-    eventId: string,
-    selector: string,
-    selectorType: string,
-    value: string,
-    changeMethod: (
-      page: Page,
-      projectName: string,
-      eventId: string,
-      selector: string,
-      selectorType: string,
-      value?: string,
-      timeout?: number
-    ) => Promise<boolean>,
+    ctx: ChangeContext,
+    changeMethod: ChangeOperation['operate'],
     timeout = 10000
   ): Promise<boolean> {
+    const { page, projectName, eventId, selector, selectorType, value } = ctx;
     const serviceInstance =
       changeMethod === this.pageChangeService.operate
         ? this.pageChangeService
@@ -83,16 +72,17 @@ export class ChangeStrategyService implements ChangeStrategy {
     );
 
     if (!result) {
-      // Fallback to the other click method
+      // Fallback to the other change method
       const fallbackMethod =
         serviceInstance === this.pageChangeService
           ? this.evaluateChangeService.operate
           : this.pageChangeService.operate;
-
-      return await fallbackMethod.call(
+      const fallbackInstance =
         serviceInstance === this.pageChangeService
           ? this.evaluateChangeService
-          : this.pageChangeService,
+          : this.pageChangeService;
+      return await fallbackMethod.call(
+        fallbackInstance,
         page,
         projectName,
         eventId,

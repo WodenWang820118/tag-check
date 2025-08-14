@@ -30,9 +30,7 @@ export class XlsxReportService {
       // Group reports by project for better organization
       const projectGroups = this.groupReportsByProject(reports);
 
-      for (const [projectKey, projectReports] of Object.entries(
-        projectGroups
-      )) {
+      for (const [, projectReports] of Object.entries(projectGroups)) {
         // Extract project info from the first report in the group
         const projectInfo = this.extractProjectInfo(projectReports[0]);
 
@@ -53,8 +51,8 @@ export class XlsxReportService {
 
           // Add test image if available
           let imageRowOffset = 0;
-          if (report.testImage && report.testImage.imageData) {
-            // FIXME: Buffer imcompatibility
+          if (report.testImage.imageData) {
+            // FIXME: Buffer incompatibility
             const imageBuffer = Buffer.from(
               report.testImage.imageData
             ) as unknown as ExcelJS.Buffer;
@@ -97,7 +95,7 @@ export class XlsxReportService {
       const projectInfo = this.extractProjectInfo(reports[0]);
       const fileName = `${projectInfo.projectName}-${projectInfo.projectSlug}`;
 
-      // FIXME: Buffer imcompatibility
+      // FIXME: Buffer incompatibility
       const buffer = (await workbook.xlsx.writeBuffer()) as unknown as Buffer;
 
       return new StreamableFile(buffer, {
@@ -150,7 +148,7 @@ export class XlsxReportService {
   private handleError(error: unknown, methodName: string) {
     this.logger.error(
       `Error in ${XlsxReportService.name}.${methodName}: ${
-        error instanceof Error ? error.message : String(error)
+        error instanceof Error ? error.message : JSON.stringify(error, null, 2)
       }`,
       error instanceof Error ? error.stack : undefined
     );

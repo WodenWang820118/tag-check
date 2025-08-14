@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
-import { IReportDetails, TestEventSchema, TestImage } from '@utils';
+import { TestEventSchema } from '@utils';
 import { FileReportService } from '../../../shared/services/api/file-report/file-report.service';
 
 export const getFileReportResolver: ResolveFn<TestEventSchema[] | null> = (
@@ -15,10 +15,7 @@ export const getFileReportResolver: ResolveFn<TestEventSchema[] | null> = (
   return fileReportService.getFileReports(route.parent.params['projectSlug']);
 };
 
-export const getProjectSlugResolver: ResolveFn<string | null> = (
-  route,
-  state
-) => {
+export const getProjectSlugResolver: ResolveFn<string | null> = (route) => {
   if (!route.parent) {
     return null;
   }

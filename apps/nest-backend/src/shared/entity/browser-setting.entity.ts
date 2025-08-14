@@ -36,9 +36,6 @@ export class BrowserSettingEntity
   @OneToOne(() => ProjectEntity, (project) => project.browserSettings, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({
-    name: 'project_id',
-    referencedColumnName: 'id'
-  })
+  @JoinColumn({ name: 'project_id', referencedColumnName: 'id' })
   project!: ProjectEntity;
 }

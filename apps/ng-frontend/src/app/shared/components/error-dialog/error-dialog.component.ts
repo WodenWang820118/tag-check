@@ -1,7 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 @Component({
   selector: 'app-error-dialog',
   standalone: true,
@@ -15,7 +14,7 @@ import { MatDialogModule } from '@angular/material/dialog';
       </button>
     </div>
   </div>`,
-  styles: [``],
+  styles: [``]
 })
 export class ErrorDialogComponent {
   constructor(@Inject(MAT_DIALOG_DATA) public data: any) {}

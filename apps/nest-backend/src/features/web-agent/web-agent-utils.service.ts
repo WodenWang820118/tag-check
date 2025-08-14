@@ -1,9 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   HttpException,
   HttpStatus,
@@ -122,7 +116,9 @@ export class WebAgentUtilsService {
       this.requestInterceptorService.getRawRequest().pipe(
         map((request) => {
           if (request) {
-            this.logger.log(`Request captured in web-agent: ${request}`);
+            this.logger.log(
+              `Request captured in web-agent: ${JSON.stringify(request, null, 2)}`
+            );
             return request;
           }
           this.logger.error('No request captured');
@@ -145,6 +141,7 @@ export class WebAgentUtilsService {
         timeout: 5000
       });
     } catch (error) {
+      this.logger.warn(`Navigation failed: ${JSON.stringify(error, null, 2)}`);
       this.logger.log('No navigation needed', WebAgentUtilsService.name);
     }
   }
@@ -156,7 +153,7 @@ export class WebAgentUtilsService {
     );
     this.logger.log('Optimized data layer:', dataLayer);
     return dataLayer.map(
-      (event: { [x: string]: any; 'gtm.uniqueEventId': any }) => {
+      (event: { [x: string]: any; 'gtm.uniqueEventId': string }) => {
         const { 'gtm.uniqueEventId': _, ...rest } = event;
         return rest;
       }

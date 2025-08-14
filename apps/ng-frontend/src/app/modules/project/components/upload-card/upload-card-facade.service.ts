@@ -1,7 +1,15 @@
 import { Injectable, signal } from '@angular/core';
 import { Spec, IReportDetails, ReportDetailsDto } from '@utils';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
-import { take, forkJoin, timer, catchError, of, tap } from 'rxjs';
+import {
+  forkJoin,
+  timer,
+  catchError,
+  of,
+  tap,
+  Observable,
+  concatMap
+} from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -32,6 +40,7 @@ export class UploadCardFacadeService {
           alert('Invalid spec');
         }
       } catch (error) {
+        console.error('Error parsing file:', error);
         alert('Error parsing file');
       }
     };
@@ -51,51 +60,68 @@ export class UploadCardFacadeService {
   }
 
   // TODO: batch upload instead of one by one
-  save(projectSlug: string) {
+  save(projectSlug: string): Observable<any> {
     try {
       const specs = JSON.parse(this.importedSpec()) as Spec[];
 
-      // Create array of observables
-      const requests = specs.map((spec) => {
-        const eventId = uuidv4();
-        const reportDetails: IReportDetails = new ReportDetailsDto({
-          eventId: eventId,
-          testName: spec.event,
-          eventName: 'Standard'
-        });
+      // 1. Use .reduce() to create a dictionary of observables
+      const requestsAsObject = specs.reduce(
+        (acc, spec) => {
+          const eventId = uuidv4(); // This will be the key in our dictionary
+          const reportDetails: IReportDetails = new ReportDetailsDto({
+            eventId: eventId,
+            testName: spec.event,
+            eventName: 'Standard'
+          });
 
-        // Return the observable without subscribing
-        return this.reportService
-          .addReport(
-            projectSlug,
-            `${spec.event}_${eventId}`,
-            reportDetails,
-            JSON.parse('{}'),
-            spec
-          )
-          .pipe(
-            // Handle errors for individual requests
-            catchError((error) => {
-              console.error('Failed to save spec:', error);
-              return of(null); // Return null for failed requests
-            })
-          );
-      });
+          const reportObservable = this.reportService
+            .addReport(
+              projectSlug,
+              `${spec.event}_${eventId}`,
+              reportDetails,
+              JSON.parse('{}'),
+              spec
+            )
+            .pipe(
+              // Handle errors for individual requests, so one failure doesn't stop all
+              catchError((error) => {
+                console.error(
+                  `Failed to save spec for event "${spec.event}":`,
+                  error
+                );
+                return of(null); // Allow forkJoin to complete by returning a null result
+              })
+            );
 
-      // Combine all requests with forkJoin
-      return forkJoin(requests).pipe(
-        // Handle successful completion of all requests
-        tap(() => {
+          // Add the observable to the accumulator object using eventId as the key
+          acc[eventId] = reportObservable;
+          return acc;
+        },
+        {} as { [key: string]: Observable<any> }
+      ); // Start with an empty object
+
+      // Check if there are any requests to process
+      if (Object.keys(requestsAsObject).length === 0) {
+        this.emitUploadComplete();
+        return of([]); // Nothing to do, complete immediately
+      }
+
+      // 2. Pass the dictionary to forkJoin
+      return forkJoin(requestsAsObject).pipe(
+        // 3. Use concatMap for cleaner, chained asynchronous operations
+        concatMap((results) => {
+          // `results` is now an object, e.g., { "uuid1": result1, "uuid2": null }
+          console.log('All specs processed:', results);
           this.emitUploadComplete();
-          timer(1500)
-            .pipe(take(1))
-            .subscribe(() => {
-              window.location.reload();
-            });
+          // Chain the timer, then reload
+          return timer(1500).pipe(tap(() => window.location.reload()));
         }),
-        // Handle errors for the combined observable
+        // This outer catchError is for catastrophic failures, not individual ones
         catchError((error) => {
-          console.error('Failed to save specs:', error);
+          console.error(
+            'An unexpected error occurred in the forkJoin stream:',
+            error
+          );
           this.emitUploadComplete();
           return of(error);
         })

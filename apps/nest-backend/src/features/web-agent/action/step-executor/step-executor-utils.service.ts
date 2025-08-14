@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Page } from 'puppeteer';
 import { getFirstSelector } from '../handlers/utils';
 import { EventInspectionPresetDto } from '../../../../shared/dto/event-inspection-preset.dto';
@@ -36,6 +33,9 @@ export class StepExecutorUtilsService {
       try {
         await page.waitForNavigation({ timeout: delay });
       } catch (error) {
+        this.logger.warn(
+          `Navigation timeout: ${JSON.stringify(error, null, 2)}`
+        );
         this.logger.error(`No Navigation needed`);
       }
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -71,12 +71,15 @@ export class StepExecutorUtilsService {
         await Promise.race([
           page.waitForNavigation({ waitUntil: 'load', timeout }),
           page.waitForSelector(firstSelector, {
-            visible: step.visible ? true : false,
+            visible: step.visible === true,
             timeout: timeout
           })
         ]);
         return;
       } catch (error) {
+        this.logger.warn(
+          `Failed to find selector: ${selector}, error: ${JSON.stringify(error, null, 2)}`
+        );
         this.logger.error(`Failed to find selector: ${selector}`);
       }
     }
@@ -105,7 +108,6 @@ export class StepExecutorUtilsService {
     application: EventInspectionPresetDto['application']
   ): Promise<void> {
     await this.setLocalStorage(page, application);
-    await this.setCookies(page, application);
     await page.goto(step.url, { waitUntil: 'networkidle2' });
     await new Promise((resolve) => setTimeout(resolve, 2000));
     await page.goto(step.url, { waitUntil: 'networkidle2' });
@@ -127,20 +129,6 @@ export class StepExecutorUtilsService {
           localStorage.setItem(setting.key, value);
         }
       }, application.localStorage);
-    }
-  }
-
-  private async setCookies(
-    page: Page,
-    application: EventInspectionPresetDto['application']
-  ): Promise<void> {
-    if (application.cookie?.data) {
-      const cookies = application.cookie.data.map((cookie) => ({
-        name: cookie.key.toString(),
-        value: cookie.value.toString()
-        // Add domain, path, etc. if needed
-      }));
-      await page.setCookie(...cookies);
     }
   }
 }

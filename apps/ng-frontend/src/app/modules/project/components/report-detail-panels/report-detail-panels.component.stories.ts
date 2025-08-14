@@ -2,16 +2,15 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ReportDetailPanelsComponent } from './report-detail-panels.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { PROJECT_ROUTES } from '../../routes';
-import { AsyncPipe, NgIf, JsonPipe } from '@angular/common';
+import { AsyncPipe, JsonPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -20,12 +19,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { EditorService } from '@data-access';
-import { ErrorDialogComponent } from '@ui';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
-import { EditorComponent } from 'libs/ui/src/lib/components/editor/editor.component';
 
 const meta: Meta<ReportDetailPanelsComponent> = {
   component: ReportDetailPanelsComponent,
@@ -35,16 +32,15 @@ const meta: Meta<ReportDetailPanelsComponent> = {
       //👇 Imports both components to allow component composition with Storybook
       imports: [
         AsyncPipe,
-        NgIf,
         JsonPipe,
         MatIconModule,
         MatExpansionModule,
         MatTooltipModule,
-        EditorComponent,
         MatButtonModule,
-        ErrorDialogComponent,
         MatFormFieldModule,
         MatInputModule,
+        () => import('@ui').then((m) => m.EditorComponent),
+        () => import('@ui').then((m) => m.ErrorDialogComponent)
       ],
       providers: [
         RecordingService,
@@ -52,21 +48,21 @@ const meta: Meta<ReportDetailPanelsComponent> = {
         ReportService,
         EditorService,
         MatDialog,
-        UtilsService,
-      ],
+        UtilsService
+      ]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(PROJECT_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(PROJECT_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ReportDetailPanelsComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

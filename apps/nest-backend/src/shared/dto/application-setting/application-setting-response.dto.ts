@@ -16,6 +16,9 @@ export class ApplicationSettingResponseDto implements ApplicationSettingSchema {
   gtm!: Gtm;
 
   @Expose()
+  websiteUrl!: string;
+
+  @Expose()
   createdAt!: Date;
 
   @Expose()

@@ -69,9 +69,8 @@ export class AppComponent implements OnInit {
     this.metaService.addTags([
       {
         name: 'description',
-        content:
-          'Tag Build automates GTM configuration, creating accurate JSON files for digital marketers and SEO experts. \
-          Streamline tag management, reduce errors, and boost productivity.'
+        content: `Tag Build automates GTM configuration, creating accurate JSON files for digital marketers and SEO experts.
+          Streamline tag management, reduce errors, and boost productivity.`
       },
       // Google no longer uses keywords meta tag, but keeping for other search engines
       {
@@ -96,9 +95,8 @@ export class AppComponent implements OnInit {
       },
       {
         property: 'og:description',
-        content:
-          'Automate your GTM configuration with Tag Build. Create accurate JSON files, streamline tag management, \
-          and enhance productivity for digital marketers and SEO experts.'
+        content: `Automate your GTM configuration with Tag Build. Create accurate JSON files, streamline tag management,
+          and enhance productivity for digital marketers and SEO experts.`
       },
       {
         property: 'og:url',
@@ -131,9 +129,8 @@ export class AppComponent implements OnInit {
       },
       {
         name: 'twitter:description',
-        content:
-          'Automate your GTM configuration with Tag Build. Create accurate JSON files, streamline tag management,\
-          and enhance productivity for digital marketers and SEO experts.'
+        content: `Automate your GTM configuration with Tag Build. Create accurate JSON files, streamline tag management,
+          and enhance productivity for digital marketers and SEO experts.`
       },
       {
         name: 'twitter:image',

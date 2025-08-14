@@ -2,11 +2,11 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ReportBigTableComponent } from './report-big-table.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
+import { expect, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
@@ -21,22 +21,22 @@ const meta: Meta<ReportBigTableComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [ReportTableComponent, ReportTableToolbarComponent],
-      providers: [],
+      providers: []
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(PROJECT_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(PROJECT_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ReportBigTableComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };
 
 export const Searching: Story = {
@@ -48,5 +48,5 @@ export const Searching: Story = {
     // Verify that the toggle exists
     expect(buttonToggle).toBeTruthy();
     buttonToggle.click();
-  },
+  }
 };

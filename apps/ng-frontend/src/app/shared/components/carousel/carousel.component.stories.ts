@@ -2,12 +2,11 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { CarouselComponent } from './carousel.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
@@ -19,21 +18,21 @@ const meta: Meta<CarouselComponent> = {
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
-      imports: [NgIf, AsyncPipe],
-      providers: [],
+      imports: [AsyncPipe],
+      providers: []
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(APP_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(APP_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<CarouselComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

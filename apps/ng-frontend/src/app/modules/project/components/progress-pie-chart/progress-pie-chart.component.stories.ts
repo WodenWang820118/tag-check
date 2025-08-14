@@ -2,11 +2,10 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ProgressPieChartComponent } from './progress-pie-chart.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
@@ -20,20 +19,20 @@ const meta: Meta<ProgressPieChartComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [],
-      providers: [ProgressUpdateService],
+      providers: [ProgressUpdateService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(PROJECT_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(PROJECT_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ProgressPieChartComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

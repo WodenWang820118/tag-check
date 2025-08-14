@@ -82,7 +82,7 @@ export class XlsxDisplayService {
         });
       }
     });
-    return cleanedGtmSpecs.filter((spec) => spec && spec.event);
+    return cleanedGtmSpecs.filter((spec) => spec?.event);
   }
 
   updateDisplayData(data: any) {

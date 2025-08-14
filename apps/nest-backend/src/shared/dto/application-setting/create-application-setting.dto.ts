@@ -10,4 +10,6 @@ export class CreateApplicationSettingDto implements ApplicationSetting {
 
   @IsJSON()
   gtm!: Gtm;
+
+  websiteUrl!: string;
 }

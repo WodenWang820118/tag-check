@@ -2,11 +2,10 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ErrorDialogComponent } from './error-dialog.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
@@ -23,22 +22,22 @@ const meta: Meta<ErrorDialogComponent> = {
       providers: [
         {
           provide: MAT_DIALOG_DATA,
-          useValue: { message: 'This is a test error message' },
-        },
-      ],
+          useValue: { message: 'This is a test error message' }
+        }
+      ]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(APP_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(APP_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ErrorDialogComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

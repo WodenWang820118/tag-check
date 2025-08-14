@@ -57,7 +57,8 @@ export class ProjectFacadeRepositoryService {
         isRequestCheck: false,
         tagManagerUrl: '',
         gtmPreviewModeUrl: ''
-      }
+      },
+      websiteUrl: ''
     };
 
     const applicationPromise = this.applicationRepositoryService.create(

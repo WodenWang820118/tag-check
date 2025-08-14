@@ -14,9 +14,8 @@ export class ProjectWorkFlowController {
 
   @ApiOperation({
     summary: 'init a project',
-    description:
-      'This endpoint sets and creates a project folder for the application. \
-      Note the project folder could be created after root folder is set.'
+    description: `This endpoint sets and creates a project folder for the application.
+      Note the project folder could be created after root folder is set.`
   })
   @ApiQuery({
     name: 'projectSlug',

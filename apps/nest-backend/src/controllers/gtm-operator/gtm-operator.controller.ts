@@ -1,4 +1,4 @@
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -12,6 +12,7 @@ import {
 import { EventInspectionPresetDto } from '@utils';
 import { GtmOperatorService } from '../../infrastructure/gtm-operator/gtm-operator.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
+import { InspectGtmQueryDto } from './dto/inspect-gtm-query.dto';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 
 @Controller('datalayer')
@@ -27,10 +28,6 @@ export class GtmOperatorController {
     description:
       'This endpoint inspects a single event and automates the process with GTM preview mode.'
   })
-  @ApiQuery({
-    name: 'gtmUrl',
-    description: 'The URL of the GTM preview mode share link.'
-  })
   @ApiParam({
     name: 'projectSlug',
     description: 'The name of the project to which the event belongs.'
@@ -39,46 +36,19 @@ export class GtmOperatorController {
     name: 'eventName',
     description: 'The name of the test associated with the event.'
   })
-  @ApiQuery({
-    name: 'headless',
-    description: 'Specifies if the test runs in headless mode.'
-  })
-  @ApiQuery({
-    name: 'username',
-    required: false,
-    description:
-      'Optional username for authentication purposes. If provided, password must also be provided.'
-  })
-  @ApiQuery({
-    name: 'password',
-    required: false,
-    description: 'Optional password for authentication purposes.'
-  })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
   @Post('/gtm-operator/:projectSlug/:eventName')
   @Log()
   async inspectSingleEventViaGtm(
     @Param('projectSlug') projectSlug: string,
     @Param('eventName') eventName: string,
-    @Query('gtmUrl') gtmUrl: string,
-    @Query('headless') headless: string,
-    @Query('username') username: string,
-    @Query('password') password: string,
-    @Query('measurementId') measurementId: string,
-    @Query('captureRequest') captureRequest: string,
+    @Query() query: InspectGtmQueryDto,
     @Body() eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     await this.gtmOperatorService.inspectSingleEventViaGtm(
-      gtmUrl,
       projectSlug,
       eventName,
-      'false',
-      measurementId,
-      {
-        username,
-        password
-      },
-      captureRequest,
+      query,
       eventInspectionPresetDto
     );
 

@@ -2,12 +2,10 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ApplicationFormComponent } from './application-form.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
-import { NgIf } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatBadgeModule } from '@angular/material/badge';
@@ -29,7 +27,6 @@ const meta: Meta<ApplicationFormComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [
-        NgIf,
         MatIconModule,
         MatButtonModule,
         MatCardModule,
@@ -38,22 +35,22 @@ const meta: Meta<ApplicationFormComponent> = {
         MatTooltipModule,
         ReactiveFormsModule,
         FormsModule,
-        MatBadgeModule,
+        MatBadgeModule
       ],
-      providers: [SettingsService],
+      providers: [SettingsService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(APP_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(APP_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ApplicationFormComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

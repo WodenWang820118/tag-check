@@ -44,7 +44,7 @@ export class ProjectIoController {
         }
       }),
       fileFilter: (req, file, callback) => {
-        if (!file.originalname.match(/\.(zip)$/)) {
+        if (!/\.(zip)$/.test(file.originalname)) {
           // Reject the file if it's not a zip
           return callback(new Error('Only zip files are allowed!'), false);
         }

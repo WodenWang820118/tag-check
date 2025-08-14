@@ -1,8 +1,17 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { EventInspectionPreset } from '@utils';
-import { catchError, map, Observable, of, throwError } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
+
+export interface RunDataLayerParams {
+  websiteUrl: string;
+  headless?: boolean;
+  eventInspectionPreset?: EventInspectionPreset;
+  username?: string;
+  password?: string;
+  captureRequest?: boolean;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -13,23 +22,40 @@ export class DataLayerService {
   runDataLayerInspection(
     projectSlug: string,
     eventId: string,
-    headless?: boolean,
-    eventInspectionPreset?: EventInspectionPreset,
-    username?: string,
-    password?: string,
-    captureRequest?: boolean
+    params: RunDataLayerParams
   ) {
-    const queryParams = [];
-    if (headless !== undefined) queryParams.push(`headless=${headless}`);
-    if (username) queryParams.push(`username=${username}`);
-    if (password) queryParams.push(`password=${password}`);
-    if (captureRequest) queryParams.push(`captureRequest=${captureRequest}`);
-    const queryString = queryParams.length ? '?' + queryParams.join('&') : '';
+    const {
+      websiteUrl,
+      headless,
+      eventInspectionPreset,
+      username,
+      password,
+      captureRequest
+    } = params;
+    let httpParams = new HttpParams();
+    // include website URL
+    if (websiteUrl) {
+      httpParams = httpParams.set('websiteUrl', websiteUrl);
+    }
+    // set optional parameters
+    if (headless !== undefined) {
+      httpParams = httpParams.set('headless', headless.toString());
+    }
+    if (username) {
+      httpParams = httpParams.set('username', username);
+    }
+    if (password) {
+      httpParams = httpParams.set('password', password);
+    }
+    if (captureRequest !== undefined) {
+      httpParams = httpParams.set('captureRequest', captureRequest.toString());
+    }
 
     return this.http
       .post(
-        `${environment.dataLayerApiUrl}/${projectSlug}/${eventId}${queryString}`,
-        eventInspectionPreset
+        `${environment.dataLayerApiUrl}/${projectSlug}/${eventId}`,
+        eventInspectionPreset,
+        { params: httpParams }
       )
       .pipe(
         catchError((error) => {

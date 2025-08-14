@@ -36,8 +36,7 @@ export class XlsxHelper {
     // Check if the match has the string 'event: "view_item_list"'
     const desiredMatch = matches.find((match) => match[1].includes('event'));
 
-    const jsonString =
-      desiredMatch && desiredMatch[1] ? desiredMatch[1] : inputString;
+    const jsonString = desiredMatch?.[1] ? desiredMatch[1] : inputString;
 
     // Try parsing the JSON string directly
     try {

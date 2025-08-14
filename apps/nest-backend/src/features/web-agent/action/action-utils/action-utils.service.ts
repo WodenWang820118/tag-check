@@ -74,12 +74,13 @@ export class ActionUtilsService {
     page: Page,
     selector: string
   ): Promise<ElementHandle<Element> | null> {
-    const match = selector.match(/aria\/(aria-\w+)\/(.+)/);
-    if (!match) {
+    // Use RegExp.exec() on the regex literal instead of string.match
+    const execResult = /aria\/(aria-\w+)\/(.+)/.exec(selector);
+    if (!execResult) {
       throw new Error(`Invalid ARIA selector: ${selector}`);
     }
 
-    const [, ariaAttribute, ariaValue] = match;
+    const [, ariaAttribute, ariaValue] = execResult;
     const constructedSelector = `[${ariaAttribute}="${ariaValue}"]`;
     return await page.$(constructedSelector);
   }

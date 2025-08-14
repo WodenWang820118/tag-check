@@ -27,12 +27,10 @@ bootstrapApplication(AppComponent, appConfig)
 // Function to load Sentry integrations
 async function loadSentryIntegrations() {
   try {
-    // TODO: load integrations as needed
-    Sentry.lazyLoadIntegration('replayIntegration').then(
-      (replayIntegration) => {
-        Sentry.addIntegration(replayIntegration());
-      }
-    );
+    // Load integrations as needed using await to properly handle errors
+    const replayIntegrationFactory =
+      await Sentry.lazyLoadIntegration('replayIntegration');
+    Sentry.addIntegration(replayIntegrationFactory());
   } catch (error) {
     console.error('Failed to load Sentry integrations:', error);
   }

@@ -108,6 +108,7 @@ export class FileUploadDialogComponent {
         // update the file content
         this.fileContent.next(JSON.parse(fileContentString));
       } catch (error) {
+        console.error('Error parsing JSON file:', error);
         this.dialog.open(ErrorDialogComponent, {
           data: {
             message: 'Error parsing JSON file. Please try again.'

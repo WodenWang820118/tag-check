@@ -61,6 +61,7 @@ export type ApplicationSetting = {
   localStorage: LocalStorage;
   cookie: Cookie;
   gtm: Gtm;
+  websiteUrl: string;
 };
 
 export type ApplicationSettingSchema = {

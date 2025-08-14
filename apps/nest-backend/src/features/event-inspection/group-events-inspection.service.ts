@@ -29,12 +29,11 @@ export class GroupEventsInspectionService {
     // 3.1) inspect both dataLayer and the request sent to GA4
     this.abortController = new AbortController();
     const { signal } = this.abortController;
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
     const stats = await PCR(options);
     const browser = await stats.puppeteer.launch({
-      headless: headless === 'true' ? true : false,
+      headless: headless === 'true',
       defaultViewport: null,
       ignoreHTTPSErrors: true,
       args: this.configsService.getBROWSER_ARGS(),
