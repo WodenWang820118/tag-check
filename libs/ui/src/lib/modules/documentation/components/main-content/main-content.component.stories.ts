@@ -5,16 +5,15 @@ import {
   type StoryObj
 } from '@storybook/angular';
 import { MainContentComponent } from './main-content.component';
-
-import { expect, fn, userEvent, within } from '@storybook/test';
+import { expect, within } from '@storybook/test';
 import { AsyncPipe, ViewportScroller } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { MarkdownModule, MarkdownService } from 'ngx-markdown';
-import { TreeNodeService } from '../../../../shared/services/tree-node/tree-node.service';
-import { HELP_CENTER_ROUTES } from '../../routes';
+import { TreeNodeService } from '../../services/tree-node/tree-node.service';
+import { DOCS_ROUTES } from '../../routes';
 import { importProvidersFrom, signal } from '@angular/core';
 import { of } from 'rxjs';
 
@@ -49,7 +48,7 @@ const meta: Meta<MainContentComponent> = {
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(HELP_CENTER_ROUTES),
+        provideRouter(DOCS_ROUTES),
         importProvidersFrom(MarkdownModule.forRoot())
       ]
     })

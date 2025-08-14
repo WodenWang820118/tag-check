@@ -6,7 +6,6 @@ import {
 } from '@storybook/angular';
 import { SideBarComponent } from './sidebar.component';
 
-import { expect, fn, userEvent, within } from '@storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';

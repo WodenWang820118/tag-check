@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
 import { join } from 'path';
 import { Page } from 'puppeteer';
@@ -34,7 +30,7 @@ export class DataLayerService {
     try {
       await page.waitForFunction(
         () =>
-          Object.hasOwnProperty.call(window, 'dataLayer') &&
+          Object.hasOwn(window, 'dataLayer') &&
           Array.isArray(window.dataLayer) &&
           window.dataLayer.length > 0,
         { timeout: 5000 }
