@@ -21,6 +21,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { ProjectDataSourceService } from '../data-source/project-data-source.service';
 import { QaRequestService } from '../api/qa-request/qa-request.service';
 import { SettingsService } from '../api/settings/settings.service';
+import { GtmInspectionParams } from '../utils/interfaces';
 
 @Injectable({ providedIn: 'root' })
 export class TestRunningFacadeService {
@@ -70,20 +71,26 @@ export class TestRunningFacadeService {
     this.isRunningTest.set(true);
     this.eventRunningTest.set(eventId);
 
+    const gtmInspectionParams: GtmInspectionParams = {
+      gtmUrl: project.applicationSettings.gtm.gtmPreviewModeUrl,
+      headless,
+      eventInspectionPreset: inspectEventDto,
+      measurementId: project.measurementId,
+      username: project.authenticationSettings.username,
+      password: project.authenticationSettings.password,
+      captureRequest: project.applicationSettings.gtm.isRequestCheck
+    };
+
     if (project.applicationSettings.gtm.isAccompanyMode) {
       const measurementId = project.applicationSettings.gtm.isRequestCheck
         ? project.measurementId
         : undefined;
+
+      gtmInspectionParams.measurementId = measurementId;
       return this.gtmOperatorService.runInspectionViaGtm(
         projectSlug,
         eventId,
-        project.applicationSettings.gtm.gtmPreviewModeUrl,
-        headless,
-        inspectEventDto,
-        measurementId,
-        project.authenticationSettings.username,
-        project.authenticationSettings.password,
-        project.applicationSettings.gtm.isRequestCheck
+        gtmInspectionParams
       );
     }
 
@@ -92,12 +99,7 @@ export class TestRunningFacadeService {
       return this.qaRequestService.runDataLayerWithRequestCheck(
         projectSlug,
         eventId,
-        project.measurementId || '',
-        headless,
-        inspectEventDto,
-        project.authenticationSettings.username,
-        project.authenticationSettings.password,
-        project.applicationSettings.gtm.isRequestCheck
+        gtmInspectionParams
       );
     }
     console.log('Running data layer without request check');

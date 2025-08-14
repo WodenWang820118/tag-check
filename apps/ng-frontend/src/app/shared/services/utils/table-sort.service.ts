@@ -46,20 +46,32 @@ export class TableSortService {
     isAsc: boolean,
     type: SortableColumn['type']
   ): number {
+    // extract sort order instead of repeating nested ternaries
+    const sortOrder = isAsc ? 1 : -1;
+
     switch (type) {
       case 'date': {
+        // ...existing date parsing code...
         const dateA = a instanceof Date ? a : new Date(a);
         const dateB = b instanceof Date ? b : new Date(b);
-        return (dateA.getTime() - dateB.getTime()) * (isAsc ? 1 : -1);
+        return (dateA.getTime() - dateB.getTime()) * sortOrder;
       }
       case 'number':
-        return (Number(a) - Number(b)) * (isAsc ? 1 : -1);
-
-      case 'boolean':
-        return (a === b ? 0 : a ? -1 : 1) * (isAsc ? 1 : -1);
-
-      default: // string
-        return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+        // number comparison
+        return (Number(a) - Number(b)) * sortOrder;
+      case 'boolean': {
+        if (a === b) {
+          return 0;
+        }
+        return (a ? -1 : 1) * sortOrder;
+      }
+      default: {
+        // string
+        if (a < b) {
+          return -1 * sortOrder;
+        }
+        return 1 * sortOrder;
+      }
     }
   }
 }

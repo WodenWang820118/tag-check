@@ -69,15 +69,19 @@ export class ScrollTag {
       const trigger = triggers.find(
         (trigger) => trigger.name === 'event scroll'
       );
-      if (!trigger || !trigger.triggerId) {
+      if (!trigger) {
         throw new Error("Couldn't find matching trigger for scroll tag");
+      }
+
+      if (!trigger.triggerId) {
+        throw new Error("Couldn't find triggerId for scroll tag");
       }
 
       return this.scrollTag(
         configurationName,
         accountId,
         containerId,
-        trigger.triggerId as string
+        trigger.triggerId
       );
     } catch (error) {
       console.error('Error while creating scroll tag:', error);

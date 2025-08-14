@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { FileService } from '../../../infrastructure/os/file/file.service';
 import { FilePathService } from '../../../infrastructure/os/path/file-path/file-path.service';
@@ -88,16 +87,24 @@ export class ProjectSettingService {
     }));
   }
 
+  // Shared merge strategy for GTM and general settings
+  private mergeSettings(
+    projectSlug: string,
+    settings: Partial<ProjectSetting>
+  ) {
+    return this.updateSettings(projectSlug, (currentSettings) => ({
+      ...currentSettings,
+      ...settings
+    }));
+  }
+
   async updateGtmSettings(
     projectSlug: string,
     settings: Partial<
       AuthenticationSchema | ApplicationSettingSchema | BrowserSettingSchema
     >
   ) {
-    return this.updateSettings(projectSlug, (currentSettings) => ({
-      ...currentSettings,
-      ...settings
-    }));
+    return this.mergeSettings(projectSlug, settings as Partial<ProjectSetting>);
   }
 
   async updateGeneralSettings(
@@ -106,10 +113,7 @@ export class ProjectSettingService {
       AuthenticationSetting | ApplicationSetting | BrowserSetting
     >
   ) {
-    return this.updateSettings(projectSlug, (currentSettings) => ({
-      ...currentSettings,
-      ...settings
-    }));
+    return this.mergeSettings(projectSlug, settings as Partial<ProjectSetting>);
   }
 
   async updateBrowserSettings(
@@ -132,10 +136,8 @@ export class ProjectSettingService {
     // Helper function for safe parsing
     const safeJsonParse = (value: string) => {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return JSON.parse(value);
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (e) {
+      } catch {
         return value; // Return original value if parsing fails
       }
     };

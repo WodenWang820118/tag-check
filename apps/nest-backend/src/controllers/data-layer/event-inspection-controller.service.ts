@@ -2,7 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SingleEventInspectionService } from '../../features/event-inspection/single-event-inspection.service';
 import { GroupEventsInspectionService } from '../../features/event-inspection/group-events-inspection.service';
 import { Credentials } from 'puppeteer';
-import { EventInspectionPresetDto } from '@utils';
+import {
+  CookieData,
+  EventInspectionPresetDto,
+  LocalStorage,
+  LocalStorageData
+} from '@utils';
+import { InspectEventQueryDto } from './dto/inspect-event-query.dto';
 
 @Injectable()
 export class EventInspectionControllerService {
@@ -15,20 +21,23 @@ export class EventInspectionControllerService {
   async inspectSingleEvent(
     projectName: string,
     eventId: string,
-    headless: string,
-    measurementId: string,
-    credentials: Credentials,
-    captureRequest: string,
-    eventInspectionPresetDto: EventInspectionPresetDto
+    query: InspectEventQueryDto,
+    eventInspectionPresetDto?: EventInspectionPresetDto
   ) {
     return await this.singleEventInspectionService.inspectSingleEvent(
       projectName,
       eventId,
-      headless,
-      measurementId,
-      credentials,
-      captureRequest,
-      eventInspectionPresetDto
+      query.headless || 'false',
+      query.measurementId || '',
+      { username: query.username || '', password: query.password || '' },
+      query.captureRequest || 'false',
+      eventInspectionPresetDto || {
+        application: {
+          localStorage: { data: [] as LocalStorageData[] },
+          cookie: { data: [] as CookieData[] }
+        },
+        puppeteerArgs: []
+      }
     );
   }
 

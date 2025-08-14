@@ -14,8 +14,6 @@ export class ProjectRecordingService {
     private readonly folderPathService: FolderPathService
   ) {}
 
-  // TODO: temporary solution to return the same structure as the json-server's mock backend
-  // but there might be a better way to optimize the data structure
   async getProjectRecordings(projectSlug: string) {
     const folderNames = this.folderService.getJsonFilesFromDir(
       await this.folderPathService.getRecordingFolderPath(projectSlug)
@@ -63,11 +61,11 @@ export class ProjectRecordingService {
     return content;
   }
 
-  async addRecording(
+  private async saveRecording(
     projectSlug: string,
     eventId: string,
     recording: Recording
-  ) {
+  ): Promise<void> {
     const recordingPath = await this.filePathService.getRecordingFilePath(
       projectSlug,
       `${eventId}.json`
@@ -75,15 +73,19 @@ export class ProjectRecordingService {
     this.fileService.writeJsonFile(recordingPath, recording);
   }
 
+  async addRecording(
+    projectSlug: string,
+    eventId: string,
+    recording: Recording
+  ) {
+    await this.saveRecording(projectSlug, eventId, recording);
+  }
+
   async updateRecording(
     projectSlug: string,
     eventId: string,
     recording: Recording
   ) {
-    const recordingPath = await this.filePathService.getRecordingFilePath(
-      projectSlug,
-      `${eventId}.json`
-    );
-    this.fileService.writeJsonFile(recordingPath, recording);
+    await this.saveRecording(projectSlug, eventId, recording);
   }
 }
