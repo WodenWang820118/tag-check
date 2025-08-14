@@ -32,6 +32,7 @@ export class UploadCardFacadeService {
           alert('Invalid spec');
         }
       } catch (error) {
+        console.error('Error parsing file:', error);
         alert('Error parsing file');
       }
     };

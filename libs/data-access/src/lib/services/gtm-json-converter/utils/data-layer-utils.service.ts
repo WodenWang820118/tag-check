@@ -16,7 +16,7 @@ export class DataLayerUtils {
       dataLayers.push({
         event: event,
         paths: Array.from(uniquedPaths).filter(
-          (dL) => !dL.includes('items.0') && !(dL === 'ecommerce')
+          (dL) => !dL.includes('items.0') && dL !== 'ecommerce'
         )
       });
     }

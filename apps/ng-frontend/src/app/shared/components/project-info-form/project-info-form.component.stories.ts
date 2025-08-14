@@ -2,11 +2,10 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ProjectInfoFormComponent } from './project-info-form.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -32,22 +31,22 @@ const meta: Meta<ProjectInfoFormComponent> = {
         MatFormFieldModule,
         MatInputModule,
         ReactiveFormsModule,
-        FormsModule,
+        FormsModule
       ],
-      providers: [SettingsService],
+      providers: [SettingsService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(APP_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(APP_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ProjectInfoFormComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

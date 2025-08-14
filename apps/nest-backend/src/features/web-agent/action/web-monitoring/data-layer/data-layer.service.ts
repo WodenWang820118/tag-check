@@ -34,7 +34,7 @@ export class DataLayerService {
     try {
       await page.waitForFunction(
         () =>
-          Object.prototype.hasOwnProperty.call(window, 'dataLayer') &&
+          Object.hasOwnProperty.call(window, 'dataLayer') &&
           Array.isArray(window.dataLayer) &&
           window.dataLayer.length > 0,
         { timeout: 5000 }

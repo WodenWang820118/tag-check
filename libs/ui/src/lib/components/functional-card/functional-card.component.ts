@@ -47,25 +47,24 @@ export class FunctionalCardComponent {
     this.accordionContainer().accordion().closeAll();
     this.scrollToBottom();
 
-    combineLatest([
-      this.editorFacadeService.getInputJsonContent(),
-      this.setupConstructorService.getGoogleTagName(),
-      this.setupConstructorService.getMeasurementId(),
-      this.setupConstructorService.getIncludeItemScopedVariables(),
-      this.setupConstructorService.getIsSendingEcommerceData(),
-      this.esvEditorService.getEsvContent()
-    ])
+    combineLatest({
+      inputJsonEditor: this.editorFacadeService.getInputJsonContent(),
+      googleTagName: this.setupConstructorService.getGoogleTagName(),
+      measurementId: this.setupConstructorService.getMeasurementId(),
+      isSendingEcommerceData:
+        this.setupConstructorService.getIsSendingEcommerceData(),
+      esvConent: this.esvEditorService.getEsvContent()
+    })
       .pipe(
         take(1),
         tap(
-          ([
+          ({
             inputJsonEditor,
             googleTagName,
             measurementId,
-            includeItemScopedVariables,
             isSendingEcommerceData,
             esvConent
-          ]) => {
+          }) => {
             let esvContent = null;
             let json: Spec[] = [];
 
@@ -95,7 +94,12 @@ export class FunctionalCardComponent {
 
               console.log('json', json);
             } catch (error) {
-              this.openDialog(error);
+              const data = {
+                message:
+                  String(error) ||
+                  'An error occurred while processing the input JSON.'
+              };
+              this.openDialog(data);
               console.error(error);
             }
 
@@ -108,7 +112,12 @@ export class FunctionalCardComponent {
                 esvContent || []
               );
             } catch (error) {
-              this.openDialog(error);
+              const data = {
+                message:
+                  String(error) ||
+                  'An error occurred while processing the input JSON.'
+              };
+              this.openDialog(data);
               console.error(error);
             }
           }
@@ -177,7 +186,7 @@ export class FunctionalCardComponent {
     });
   }
 
-  openDialog(data: any) {
+  openDialog(data: { message: string }): void {
     this.dialog.open(ErrorDialogComponent, {
       data: {
         message: data.message
@@ -185,7 +194,7 @@ export class FunctionalCardComponent {
     });
   }
 
-  openSuccessConversionDialog(configuration: any) {
+  openSuccessConversionDialog(configuration: GTMConfiguration): void {
     this.dialog.open(ConversionSuccessDialogComponent, {
       data: configuration
     });

@@ -6,12 +6,11 @@ import {
 } from '@storybook/angular';
 import { DetailViewComponent } from './detail-view.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, RouterLink } from '@angular/router';
 import { PROJECT_ROUTES } from '../../routes';
-import { AsyncPipe, NgIf, DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel.component';
@@ -28,7 +27,6 @@ const meta: Meta<DetailViewComponent> = {
       //👇 Imports both components to allow component composition with Storybook
       imports: [
         AsyncPipe,
-        NgIf,
         ReportDetailPanelsComponent,
         BlobToUrlPipe,
         MatIconModule,

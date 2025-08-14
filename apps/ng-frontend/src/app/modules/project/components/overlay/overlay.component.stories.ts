@@ -6,7 +6,6 @@ import {
 } from '@storybook/angular';
 import { OverlayComponent } from './overlay.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';

@@ -2,11 +2,10 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { BucketsViewComponent } from './buckets-view.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
@@ -21,20 +20,20 @@ const meta: Meta<BucketsViewComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [FileTableComponent, FileTableToolbarComponent],
-      providers: [],
+      providers: []
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(PROJECT_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(PROJECT_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<BucketsViewComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

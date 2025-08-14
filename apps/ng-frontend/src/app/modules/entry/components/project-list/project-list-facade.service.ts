@@ -35,7 +35,7 @@ export class ProjectListFacadeService {
   private setupFilterPredicate(): void {
     this.dataSource.filterPredicate = (data: Project, filter: string) =>
       Object.values(data).some((value) =>
-        String(value).toLowerCase().includes(filter)
+        JSON.stringify(value).toLowerCase().includes(filter)
       );
   }
 

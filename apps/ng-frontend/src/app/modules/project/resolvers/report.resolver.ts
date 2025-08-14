@@ -1,13 +1,12 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
-import { AbstractTestEvent, IReportDetails, TestEventSchema } from '@utils';
+import { AbstractTestEvent, IReportDetails } from '@utils';
 import { ImageService } from '../../../shared/services/api/image/image.service';
 import { ReportService } from '../../../shared/services/api/report/report.service';
 import { VideosService } from '../../../shared/services/api/videos/videos.service';
 
 export const reportDetailResolver: ResolveFn<IReportDetails | null> = (
-  route,
-  state
+  route
 ) => {
   const reportService = inject(ReportService);
   const projectSlug = route.parent?.params['projectSlug'];
@@ -15,14 +14,14 @@ export const reportDetailResolver: ResolveFn<IReportDetails | null> = (
   return reportService.getReportDetails(projectSlug, eventId);
 };
 
-export const videoResolver: ResolveFn<{ blob: Blob }> = (route, state) => {
+export const videoResolver: ResolveFn<{ blob: Blob }> = (route) => {
   const videoService = inject(VideosService);
   const projectSlug = route.parent?.params['projectSlug'];
   const eventId = route.params['eventId'];
   return videoService.getVideo(projectSlug, eventId);
 };
 
-export const imageResolver: ResolveFn<{ blob: Blob }> = (route, state) => {
+export const imageResolver: ResolveFn<{ blob: Blob }> = (route) => {
   const imageService = inject(ImageService);
   const projectSlug = route.parent?.params['projectSlug'];
   const eventId = route.params['eventId'];
@@ -30,8 +29,7 @@ export const imageResolver: ResolveFn<{ blob: Blob }> = (route, state) => {
 };
 
 export const projectReportResolver: ResolveFn<AbstractTestEvent[]> = (
-  route,
-  state
+  route
 ) => {
   const reportService = inject(ReportService);
   const projectSlug = route.params['projectSlug'];

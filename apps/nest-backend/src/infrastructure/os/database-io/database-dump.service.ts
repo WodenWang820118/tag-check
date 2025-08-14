@@ -136,7 +136,7 @@ export class DatabaseDumpService {
     } else if (typeof value === 'boolean') {
       return value ? '1' : '0';
     } else {
-      return String(value);
+      return JSON.stringify(value, null, 2);
     }
   }
 

@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Page } from 'puppeteer';
 import { getFirstSelector } from '../handlers/utils';
 import { EventInspectionPresetDto } from '../../../../shared/dto/event-inspection-preset.dto';
@@ -36,6 +33,9 @@ export class StepExecutorUtilsService {
       try {
         await page.waitForNavigation({ timeout: delay });
       } catch (error) {
+        this.logger.warn(
+          `Navigation timeout: ${JSON.stringify(error, null, 2)}`
+        );
         this.logger.error(`No Navigation needed`);
       }
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -71,12 +71,15 @@ export class StepExecutorUtilsService {
         await Promise.race([
           page.waitForNavigation({ waitUntil: 'load', timeout }),
           page.waitForSelector(firstSelector, {
-            visible: step.visible ? true : false,
+            visible: step.visible === true,
             timeout: timeout
           })
         ]);
         return;
       } catch (error) {
+        this.logger.warn(
+          `Failed to find selector: ${selector}, error: ${JSON.stringify(error, null, 2)}`
+        );
         this.logger.error(`Failed to find selector: ${selector}`);
       }
     }
@@ -130,6 +133,8 @@ export class StepExecutorUtilsService {
     }
   }
 
+  // TODO: handle deprecated cookies
+  // Use browser.setCookie with the required domain parameter
   private async setCookies(
     page: Page,
     application: EventInspectionPresetDto['application']

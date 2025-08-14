@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BaseItem } from '@utils';
-import { parse, URLSearchParams } from 'url';
+import { URL, URLSearchParams } from 'url';
 import { standardPageParameterMap, standardParameterMap } from './utilities';
 
 @Injectable()
@@ -13,8 +13,15 @@ export class RequestProcessorService {
   }
 
   parseUrl(decodedUrl: string): URLSearchParams {
-    const parsedUrl = parse(decodedUrl);
-    return new URLSearchParams(parsedUrl.query || '');
+    // Use WHATWG URL API for parsing
+    // If the decodedUrl does not have a protocol, add a dummy one for parsing
+    let urlObj: URL;
+    try {
+      urlObj = new URL(decodedUrl);
+    } catch {
+      urlObj = new URL(decodedUrl, 'http://dummy');
+    }
+    return urlObj.searchParams;
   }
 
   extractEventName(queryParams: URLSearchParams): string {
@@ -47,8 +54,9 @@ export class RequestProcessorService {
     item: BaseItem,
     customKeys: { [index: string]: string }
   ): void {
-    const customKeyMatch = field.match(/^k(\d+)/);
-    const customValueMatch = field.match(/^v(\d+)/);
+    // Use RegExp.exec() on the regex literal instead of string.match
+    const customKeyMatch = /^k(\d+)/.exec(field);
+    const customValueMatch = /^v(\d+)/.exec(field);
 
     if (customKeyMatch) {
       const index = customKeyMatch[1];
@@ -67,10 +75,11 @@ export class RequestProcessorService {
   extractItems(queryParams: URLSearchParams, queryString: string): BaseItem[] {
     const items: BaseItem[] = [];
     const regex = /(pr\d+)=/g;
-    let match;
+    // Rename loop variable from match to test
+    let test: RegExpExecArray | null;
 
-    while ((match = regex.exec(queryString)) !== null) {
-      const matchedKeyName = match[1];
+    while ((test = regex.exec(queryString)) !== null) {
+      const matchedKeyName = test[1];
       const itemParam = queryParams.get(matchedKeyName);
       if (itemParam) {
         const item = this.formStandardItemObj(itemParam);

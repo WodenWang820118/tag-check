@@ -124,7 +124,11 @@ export class XlsxProcessFacade {
     this.withWorkbookHandling(this.workbook$, 'switchSheet', name);
   }
 
-  onAction(action: string, dataColumnName: string) {
+  onAction(action: string, dataColumnName: string | null) {
+    if (!dataColumnName) {
+      throw new Error('Data column name is required');
+    }
+
     switch (action) {
       case 'close': {
         this.onCloseOverlay();
