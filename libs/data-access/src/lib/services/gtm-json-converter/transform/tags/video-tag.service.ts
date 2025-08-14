@@ -127,8 +127,13 @@ export class VideoTag {
       const trigger = triggers.find(
         (trigger) => trigger.name === 'event youtube video'
       );
-      if (!trigger || !trigger.triggerId) {
+
+      if (!trigger) {
         throw new Error("Couldn't find matching trigger for video tag");
+      }
+
+      if (!trigger.triggerId) {
+        throw new Error("Couldn't find triggerId for video tag");
       }
 
       const videoTag = this.videoTag(

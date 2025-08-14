@@ -7,21 +7,37 @@ import {
 import { Injectable } from '@angular/core';
 import { UtilsService } from '../../utils/utils.service';
 
+export interface GTMFinalConfigurationOptions {
+  accountId: string;
+  containerId: string;
+  variables: VariableConfig[];
+  builtInVariables: VariableConfig[];
+  triggers: TriggerConfig[];
+  tags: TagConfig[];
+  containerName: string;
+  gtmId: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ConfigManager {
   constructor(private readonly utilsService: UtilsService) {}
+
   getGTMFinalConfiguration(
-    accountId: string,
-    containerId: string,
-    variables: VariableConfig[],
-    builtInVariables: VariableConfig[],
-    triggers: TriggerConfig[],
-    tags: TagConfig[],
-    containerName: string,
-    gtmId: string
+    options: GTMFinalConfigurationOptions
   ): GTMConfiguration {
+    const {
+      accountId,
+      containerId,
+      variables,
+      builtInVariables,
+      triggers,
+      tags,
+      containerName,
+      gtmId
+    } = options;
+
     return {
       exportFormatVersion: 2,
       exportTime: this.utilsService.outputTime(),

@@ -1,4 +1,4 @@
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -15,6 +15,7 @@ import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-pres
 import { EventInspectionControllerService } from './event-inspection-controller.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
+import { InspectEventQueryDto } from './dto/inspect-event-query.dto';
 
 @Controller('datalayer')
 export class DataLayerController {
@@ -39,50 +40,19 @@ export class DataLayerController {
     name: 'eventId',
     description: 'The event Id of the test associated with the event.'
   })
-  @ApiQuery({
-    name: 'headless',
-    description: 'Specifies if the test runs in headless mode.'
-  })
-  @ApiQuery({
-    name: 'measurementId',
-    required: false,
-    description: 'An optional identifier to measure or differentiate events.'
-  })
-  @ApiQuery({
-    name: 'username',
-    required: false,
-    description:
-      'Optional username for authentication purposes. If provided, password must also be provided.'
-  })
-  @ApiQuery({
-    name: 'password',
-    required: false,
-    description: 'Optional password for authentication purposes.'
-  })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
   @Post('/:projectSlug/:eventId')
   async inspectSingleEvent(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
-    @Query('headless') headless: string,
-    @Query('username') username: string,
-    @Query('password') password: string,
-    @Query('measurementId') measurementId: string,
-    @Query('captureRequest') captureRequest: string,
+    @Query() query: InspectEventQueryDto,
     @Body(ValidationPipe) eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     try {
-      // TODO: double-check if the process is correct
       await this.eventInspectionControllerService.inspectSingleEvent(
         projectSlug,
         eventId,
-        headless,
-        measurementId,
-        {
-          username,
-          password
-        },
-        captureRequest,
+        query,
         eventInspectionPresetDto
       );
       const abstractReport =

@@ -44,8 +44,8 @@ export class ClickHandler implements ActionHandler {
           projectSlug,
           eventId,
           firstSelector,
-          5000,
-          preventNavigation
+          preventNavigation,
+          5000
         );
         if (clicked) {
           clickedSuccessfully = true;
@@ -73,8 +73,8 @@ export class ClickHandler implements ActionHandler {
     projectName: string,
     eventId: string,
     selector: string,
-    timeout = 3000,
-    preventNavigation: boolean
+    preventNavigation: boolean,
+    timeout = 3000
   ): Promise<boolean> {
     // Retrieve operation file path and domain
     const operationPath = await this.filePathService.getOperationFilePath(
