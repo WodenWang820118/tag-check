@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class UtilsService {
   isEmptyObject(value: unknown): boolean {
@@ -29,8 +29,8 @@ export class UtilsService {
     }
 
     return (
-      Object.keys(value as object).length === 0 &&
-      Object.getOwnPropertySymbols(value as object).length === 0
+      Object.keys(value).length === 0 &&
+      Object.getOwnPropertySymbols(value).length === 0
     );
   }
 

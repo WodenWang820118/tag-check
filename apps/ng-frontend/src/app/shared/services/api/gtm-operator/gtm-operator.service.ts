@@ -2,41 +2,49 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { EventInspectionPreset } from '@utils';
-import { catchError, map, Observable, of, tap } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
+
+interface GtmInspectionParams {
+  gtmUrl: string;
+  headless?: boolean;
+  eventInspectionPreset?: EventInspectionPreset;
+  measurementId?: string;
+  username?: string;
+  password?: string;
+  captureRequest?: boolean;
+}
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class GtmOperatorService {
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   runInspectionViaGtm(
     projectSlug: string,
     eventId: string,
-    gtmUrl: string,
-    headless?: boolean,
-    eventInspectionPreset?: EventInspectionPreset,
-    measurmentId?: string,
-    username?: string,
-    password?: string,
-    captureRequest?: boolean
+    params: GtmInspectionParams
   ) {
-    const encodedGtmUrl = encodeURIComponent(gtmUrl);
+    const encodedGtmUrl = encodeURIComponent(params.gtmUrl);
     const queryParams = [`gtmUrl=${encodedGtmUrl}`];
 
     // GTM operator should be always headful
-    if (headless !== undefined) queryParams.push(`headless=${false}`);
-    if (measurmentId) queryParams.push(`measurementId=${measurmentId}`);
-    if (username) queryParams.push(`username=${encodeURIComponent(username)}`);
-    if (password) queryParams.push(`password=${encodeURIComponent(password)}`);
-    if (captureRequest) queryParams.push(`captureRequest=${captureRequest}`);
+    if (params.headless !== undefined) queryParams.push(`headless=${false}`);
+    if (params.measurementId)
+      queryParams.push(`measurementId=${params.measurementId}`);
+    if (params.username)
+      queryParams.push(`username=${encodeURIComponent(params.username)}`);
+    if (params.password)
+      queryParams.push(`password=${encodeURIComponent(params.password)}`);
+    if (params.captureRequest)
+      queryParams.push(`captureRequest=${params.captureRequest}`);
 
     const queryString = queryParams.join('&');
 
     return this.http
       .post(
         `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventId}?${queryString}`,
-        eventInspectionPreset
+        params.eventInspectionPreset
       )
       .pipe(
         catchError((error) => {

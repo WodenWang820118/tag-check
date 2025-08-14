@@ -101,13 +101,14 @@ export class ProjectIoService {
           .on('error', (err: { message: any }) => {
             // Create a new error with just the message to avoid circular references
             const errorMessage =
-              err instanceof Error ? err.message : String(err);
+              err instanceof Error ? err.message : JSON.stringify(err, null, 2);
             reject(new Error(`Extraction error: ${errorMessage}`));
           });
 
         readStream.on('error', (err: { message: any }) => {
           // Create a new error with just the message to avoid circular references
-          const errorMessage = err instanceof Error ? err.message : String(err);
+          const errorMessage =
+            err instanceof Error ? err.message : JSON.stringify(err, null, 2);
           reject(new Error(`Read stream error: ${errorMessage}`));
         });
       });

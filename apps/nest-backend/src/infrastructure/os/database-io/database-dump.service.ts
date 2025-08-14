@@ -113,74 +113,66 @@ export class DatabaseDumpService {
   }
 
   /**
+   * Quotes and escapes a database identifier (table or column).
+   */
+  private quoteIdentifier(identifier: string): string {
+    return `"${identifier.replace(/"/g, '""')}"`;
+  }
+
+  /**
+   * Quotes and escapes a value for SQL insertion.
+   */
+  private quoteValue(value: unknown): string {
+    if (value === null || value === undefined) {
+      return 'NULL';
+    } else if (typeof value === 'string') {
+      return `'${value.replace(/'/g, "''")}'`;
+    } else if (value instanceof Date) {
+      return `'${value.toISOString()}'`;
+    } else if (Buffer.isBuffer(value)) {
+      return `X'${value.toString('hex')}'`;
+    } else if (typeof value === 'object') {
+      return `'${JSON.stringify(value).replace(/'/g, "''")}'`;
+    } else if (typeof value === 'boolean') {
+      return value ? '1' : '0';
+    } else {
+      return JSON.stringify(value, null, 2);
+    }
+  }
+
+  /**
    * Writes INSERT statements for entity records
    */
   private async writeInsertStatements(
     writeStream: NodeJS.WritableStream,
     entity: EntityMetadata,
-    records: any[]
+    records: unknown[]
   ): Promise<void> {
     if (records.length === 0) return;
 
-    // Get the actual table name from the entity metadata
-    const tableName = entity.tableName;
-
-    // Write a comment for this entity
+    // Comment for this entity
     writeStream.write(
-      `-- Data for entity: ${entity.name} (table: ${tableName})\n`
+      `-- Data for entity: ${entity.name} (table: ${entity.tableName})\n`
     );
 
-    // Get the property-to-column mapping from entity metadata
-    const columnMapping = new Map<string, string>();
-    entity.columns.forEach((column) => {
-      columnMapping.set(column.propertyName, column.databaseName);
-    });
+    // Prepare columns and table identifier
+    const props = Object.keys(records[0] as Record<string, unknown>);
+    const columns = props
+      .map((prop) => {
+        const meta = entity.columns.find((c) => c.propertyName === prop);
+        return this.quoteIdentifier(meta?.databaseName ?? prop);
+      })
+      .join(', ');
+    const table = this.quoteIdentifier(entity.tableName);
 
-    // Get property names from the first record
-    const propertyNames = Object.keys(records[0]).filter((prop) => {
-      const value = records[0][prop];
-      return value !== undefined && typeof value !== 'function';
-    });
-
-    // Map property names to database column names
-    const columnNames = propertyNames.map(
-      (prop) => columnMapping.get(prop) || prop // Fallback to property name if mapping not found
-    );
-
-    // Process each record
-    for (const record of records) {
-      const values = propertyNames.map((prop) => {
-        const value = record[prop];
-
-        if (value === null || value === undefined) {
-          return 'NULL';
-        } else if (typeof value === 'string') {
-          // Escape single quotes in strings
-          return `'${value.replace(/'/g, "''")}'`;
-        } else if (value instanceof Date) {
-          return `'${value.toISOString()}'`;
-        } else if (typeof value === 'object') {
-          if (Buffer.isBuffer(value)) {
-            // Handle Buffer objects (BLOBs)
-            return `X'${value.toString('hex')}'`;
-          } else {
-            // Handle JSON objects
-            return `'${JSON.stringify(value).replace(/'/g, "''")}'`;
-          }
-        } else if (typeof value === 'boolean') {
-          // SQLite doesn't have a boolean type, store as 0 or 1
-          return value ? 1 : 0;
-        } else {
-          return value;
-        }
-      });
-
-      // Write the INSERT statement using the database column names
+    // Write each record as an INSERT
+    for (const rec of records) {
+      const row = rec as Record<string, unknown>;
+      const vals = props.map((prop) => this.quoteValue(row[prop]));
       writeStream.write(
-        `INSERT INTO "${tableName}" (${columnNames.map((c) => `"${c}"`).join(', ')}) VALUES (${values.join(', ')});\n`
+        `INSERT INTO ${table} (${columns}) VALUES (${vals.join(', ')});\n`
       );
     }
-
     writeStream.write('\n');
   }
 }

@@ -53,4 +53,14 @@ export class ApplicationSettingEntity
     referencedColumnName: 'id'
   })
   project!: ProjectEntity;
+
+  @Column({
+    name: 'website_url',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    comment: 'Website URL'
+  })
+  @Expose({ name: 'websiteUrl' })
+  websiteUrl!: string;
 }

@@ -3,11 +3,12 @@ import {
   InternalServerErrorException,
   Logger
 } from '@nestjs/common';
-import { Credentials, Page } from 'puppeteer';
+import { CookieData, Page, Browser } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
 import { PuppeteerUtilsService } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
 import { FolderPathService } from '../os/path/folder-path/folder-path.service';
+import { InspectGtmQueryDto } from '../../controllers/gtm-operator/dto/inspect-gtm-query.dto';
 
 @Injectable()
 export class GtmOperatorService {
@@ -24,13 +25,9 @@ export class GtmOperatorService {
   }
 
   async inspectSingleEventViaGtm(
-    gtmUrl: string,
     projectSlug: string,
-    eventId: string,
-    headless: string,
-    measurementId: string,
-    credentials: Credentials,
-    captureRequest: string,
+    eventName: string,
+    query: InspectGtmQueryDto,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     this.initializeAbortController();
@@ -40,19 +37,22 @@ export class GtmOperatorService {
       );
     }
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
-      headless,
-      measurementId,
+      query.headless || 'false',
+      query.measurementId,
       eventInspectionPresetDto,
       this.abortController.signal
     );
 
-    const websiteUrl = this.extractBaseUrlFromGtmUrl(gtmUrl);
+    // extract cookie setting logic to helper
+    await this.applyCookies(browser, query.gtmUrl, eventInspectionPresetDto);
+
+    const websiteUrl = this.extractBaseUrlFromGtmUrl(query.gtmUrl);
     const folder = await this.folderPathService.getInspectionEventFolderPath(
       projectSlug,
-      eventId
+      eventName
     );
 
-    await this.operateGtmPreviewMode(page, gtmUrl);
+    await this.operateGtmPreviewMode(page, query.gtmUrl);
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const pages = await browser.pages();
@@ -89,10 +89,10 @@ export class GtmOperatorService {
         await this.eventInspectionPipelineService.singleEventInspectionRecipe(
           targetPage,
           projectSlug,
-          eventId,
-          measurementId,
-          credentials,
-          captureRequest,
+          eventName,
+          query.measurementId,
+          { username: query.username || '', password: query.password || '' },
+          query.captureRequest || 'false',
           eventInspectionPresetDto
         );
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -141,5 +141,28 @@ export class GtmOperatorService {
     if (this.abortController) {
       this.abortController.abort();
     }
+  }
+
+  // helper to apply cookies from preset
+  private async applyCookies(
+    browser: Browser,
+    url: string,
+    eventInspectionPresetDto: EventInspectionPresetDto
+  ): Promise<void> {
+    if (!eventInspectionPresetDto.application.cookie.data.length) {
+      return;
+    }
+    const cookies = eventInspectionPresetDto.application.cookie.data.map(
+      (cookie) => ({
+        name: cookie.key.toString(),
+        value: cookie.value.toString()
+      })
+    );
+    const cookieData: CookieData[] = cookies.map((cookie) => ({
+      name: cookie.name,
+      value: cookie.value,
+      domain: new URL(url).hostname
+    }));
+    await browser.setCookie(...cookieData);
   }
 }

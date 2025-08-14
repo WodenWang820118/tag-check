@@ -2,11 +2,10 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { ProjectIoFormComponent } from './project-io-form.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -23,20 +22,20 @@ const meta: Meta<ProjectIoFormComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [MatButtonModule, MatCardModule, InformationDialogComponent],
-      providers: [ProjectIoService],
+      providers: [ProjectIoService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(APP_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(APP_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<ProjectIoFormComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

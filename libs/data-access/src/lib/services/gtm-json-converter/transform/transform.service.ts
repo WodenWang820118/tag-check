@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { TagManager } from './managers/tag-manager.service';
 import { TriggerManager } from './managers/trigger-manager.service';
-import { ConfigManager } from './managers/config-manager.service';
+import {
+  ConfigManager,
+  GTMFinalConfigurationOptions
+} from './managers/config-manager.service';
 import { DataLayerUtils } from '../utils/data-layer-utils.service';
 import { EventSettingsVariable, GTMContainerConfig } from '@utils';
 import { VariableManager } from './managers/variable-manager.service';
@@ -60,16 +63,16 @@ export class TransformService {
         isSendingEcommerceData
       );
 
-      const result = this.configManager.getGTMFinalConfiguration(
-        gtmConfigGenerator.accountId,
-        gtmConfigGenerator.containerId,
+      const result = this.configManager.getGTMFinalConfiguration({
+        accountId: gtmConfigGenerator.accountId,
+        containerId: gtmConfigGenerator.containerId,
         variables,
         builtInVariables,
         triggers,
         tags,
-        gtmConfigGenerator.containerName,
-        gtmConfigGenerator.gtmId
-      );
+        containerName: gtmConfigGenerator.containerName,
+        gtmId: gtmConfigGenerator.gtmId
+      } as GTMFinalConfigurationOptions);
       return result;
     } catch (error) {
       console.error('An error occurred in ConverterService:', error);

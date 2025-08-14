@@ -111,13 +111,13 @@ export class NewReportViewFacadeService {
   }
 
   setEditorContent() {
-    combineLatest([
-      this.editorService.editor$.specJsonEditor,
-      this.editorService.editor$.recordingJsonEditor
-    ])
+    combineLatest({
+      specEditor: this.editorService.editor$.specJsonEditor,
+      recordingEditor: this.editorService.editor$.recordingJsonEditor
+    })
       .pipe(
         takeUntilDestroyed(this.destroyedRef),
-        tap(([specEditor, recordingEditor]) => {
+        tap(({ specEditor, recordingEditor }) => {
           const specContent = specEditor.state.doc.toString();
           const recordingContent = recordingEditor.state.doc.toString();
           this.editorService.setContent('specJson', specContent);
@@ -128,11 +128,11 @@ export class NewReportViewFacadeService {
   }
 
   uploadReport(projectSlug: string) {
-    return combineLatest([
-      this.editorService.editor$.specJsonEditor,
-      this.editorService.editor$.recordingJsonEditor
-    ]).pipe(
-      map(([specEditor, recordingEditor]) => {
+    return combineLatest({
+      specEditor: this.editorService.editor$.specJsonEditor,
+      recordingEditor: this.editorService.editor$.recordingJsonEditor
+    }).pipe(
+      map(({ specEditor, recordingEditor }) => {
         if (!this.reportForm.controls['testName'].value) {
           this.showErrorDialog('Test name is required');
           throw new Error('Test name is required');

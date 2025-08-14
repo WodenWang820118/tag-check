@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { FullTestEventResponseDto } from '../../../shared';
 import * as ExcelJS from 'exceljs';
 import { XlsxUtilsService } from './xlsx-utils.service';
 
 @Injectable()
 export class XlsxRecordingSectionService {
+  private readonly logger = new Logger(XlsxRecordingSectionService.name);
   constructor(private readonly xlsxUtilsService: XlsxUtilsService) {}
   addRecordingSection(
     worksheet: ExcelJS.Worksheet,
@@ -63,6 +64,10 @@ export class XlsxRecordingSectionService {
     try {
       return JSON.parse(jsonString);
     } catch (e) {
+      this.logger.warn(
+        'Failed to parse JSON string',
+        JSON.stringify(e, null, 2)
+      );
       return jsonString;
     }
   }

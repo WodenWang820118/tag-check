@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { SpecEntity } from '../../../shared';
+import { SpecEntity, CreateSpecDto, UpdateSpecDto } from '../../../shared';
 import { Repository } from 'typeorm';
-import { CreateSpecDto } from '../../../shared';
-import { UpdateSpecDto } from '../../../shared';
 
 @Injectable()
 export class SpecService {

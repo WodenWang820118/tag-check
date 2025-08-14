@@ -2,12 +2,10 @@ import {
   applicationConfig,
   moduleMetadata,
   type Meta,
-  type StoryObj,
+  type StoryObj
 } from '@storybook/angular';
 import { BrowserFormComponent } from './browser-form.component';
 
-import { expect, fn, userEvent, within } from 'storybook/test';
-import { NgIf } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -28,7 +26,6 @@ const meta: Meta<BrowserFormComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [
-        NgIf,
         MatIconModule,
         MatButtonModule,
         MatCardModule,
@@ -36,22 +33,22 @@ const meta: Meta<BrowserFormComponent> = {
         MatInputModule,
         ReactiveFormsModule,
         FormsModule,
-        MatCheckboxModule,
+        MatCheckboxModule
       ],
-      providers: [SettingsService],
+      providers: [SettingsService]
     }),
     applicationConfig({
       providers: [
         provideAnimationsAsync(),
         provideHttpClient(),
-        provideRouter(APP_ROUTES),
-      ],
-    }),
-  ],
+        provideRouter(APP_ROUTES)
+      ]
+    })
+  ]
 };
 export default meta;
 type Story = StoryObj<BrowserFormComponent>;
 
 export const Default: Story = {
-  args: {},
+  args: {}
 };

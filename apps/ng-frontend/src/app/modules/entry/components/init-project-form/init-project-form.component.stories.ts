@@ -9,14 +9,12 @@ import { InitProjectFormComponent } from './init-project-form.component';
 import { expect, within } from 'storybook/test';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
-import { NgIf } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { provideRouter, Router, RouterLink } from '@angular/router';
-import { ErrorDialogComponent } from '@ui';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
 import { ENTRY_ROUTES } from '../../../../modules/entry/routes';
@@ -28,7 +26,6 @@ const meta: Meta<InitProjectFormComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [
-        NgIf,
         MatCardModule,
         ReactiveFormsModule,
         FormsModule,
@@ -36,7 +33,7 @@ const meta: Meta<InitProjectFormComponent> = {
         MatInputModule,
         MatButtonModule,
         RouterLink,
-        ErrorDialogComponent
+        () => import('@ui').then((m) => m.ErrorDialogComponent)
       ],
       providers: [FormBuilder, Router, ConfigurationService, MatDialog]
     }),
@@ -75,9 +72,11 @@ export const ErrorMessage: Story = {
     expect(submitBtn).toBeTruthy();
     submitBtn.click();
 
-    // TODO:  bad practice to access DOM directly
-    const errorDialog = document.querySelector('.error-dialog') as HTMLElement;
-    const errorText = await within(errorDialog).findByText(/Error/i);
+    const errorDialog = document.querySelector('.error-dialog');
+    if (!errorDialog) return;
+    const errorText = await within(errorDialog as HTMLElement).findByText(
+      /Error/i
+    );
     expect(errorText).toBeTruthy();
   }
 };

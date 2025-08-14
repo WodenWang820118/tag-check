@@ -60,7 +60,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       await addDoc(errorsCollection, {
         timestamp: new Date(),
         exception:
-          exception instanceof Error ? exception.message : String(exception),
+          exception instanceof Error
+            ? exception.message
+            : JSON.stringify(exception, null, 2),
         stack: exception instanceof Error ? exception.stack : undefined,
         path: request.url,
         method: request.method,

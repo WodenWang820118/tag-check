@@ -1,15 +1,14 @@
 import { inject } from '@angular/core';
-import { ResolveFn, Router } from '@angular/router';
+import { ResolveFn } from '@angular/router';
 import { MarkdownService } from 'ngx-markdown';
-import { catchError, map, Observable, of } from 'rxjs';
-import { TreeNodeService } from '../services/tree-node/tree-node.service';
+import { catchError, map, Observable } from 'rxjs';
 
 export const treeNodeResolver: ResolveFn<
   Observable<{
     fileName: string;
     content: string;
   }>
-> = (route, state) => {
+> = (route) => {
   const markdownService = inject(MarkdownService);
   const nodeName = route.params['name'];
 

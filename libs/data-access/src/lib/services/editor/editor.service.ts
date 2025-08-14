@@ -7,13 +7,13 @@ import { editorStyles } from './editor-style';
 import { linter, lintGutter } from '@codemirror/lint';
 import { jsonParseLinter } from '@codemirror/lang-json';
 import { EditorTypeEnum } from '@utils';
-type ExtensionArray = any[];
+import { Extension } from '@codemirror/state';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EditorService {
-  editorExtensions: Record<EditorTypeEnum, ExtensionArray> = {
+  editorExtensions: Record<EditorTypeEnum, Extension[]> = {
     inputJson: jsonLightEditorExtensions,
     outputJson: jsonLightEditorExtensions
   };
@@ -33,8 +33,6 @@ export class EditorService {
     outputJson: this.editorSubjects.outputJson.asObservable()
   };
 
-  constructor() {}
-
   initEditorView(
     extension: EditorTypeEnum,
     elementRef: ElementRef,
@@ -49,9 +47,7 @@ export class EditorService {
           lintGutter(),
           EditorView.theme(editorStyles),
           EditorView.lineWrapping,
-          placeholder(
-            content ? content : this.contentSubjects[extension].getValue()
-          )
+          placeholder(content || this.contentSubjects[extension].getValue())
         ],
         parent: elementRef.nativeElement
       });
@@ -61,9 +57,7 @@ export class EditorService {
           ...this.editorExtensions[extension],
           EditorView.theme(editorStyles),
           EditorView.lineWrapping,
-          placeholder(
-            content ? content : this.contentSubjects[extension].getValue()
-          )
+          placeholder(content || this.contentSubjects[extension].getValue())
         ],
         parent: elementRef.nativeElement
       });
@@ -78,7 +72,7 @@ export class EditorService {
       editorView.dispatch({
         changes: {
           from: 0,
-          insert: content ? content : '[]',
+          insert: content || '[]',
           to: editorView.state.doc.length
         }
       });
