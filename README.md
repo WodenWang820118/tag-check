@@ -66,17 +66,39 @@ This project uses LTS NodeJS v22.13.0 npm v10.9.2 for development. If cannot com
 
 - TagBuild is already in [production stage](https://tag-build.vercel.app/) but subject to change by the Google Tag Manager team.
 - Documentation site is already in [production stage](https://tag-check-documentation.vercel.app/) but subject to change by users' feedback.
-- TagCheck is in beta stage.
-- Goals for the next release:
-  - Frontend
-    - Improve the UI/UX of the application.
-    - Improve the performance of the application.
-  - Backend
-    - Improve the backend code quality and coverage.
-    - Improve the stability of Puppeteer and Electron, especially request interception and data layer verification.
-    - Improve the connection quality between Google Tag Manager's shareable debug link and the application.
-    - Improve the output of the XLSX report format.
-  - Address the SonarCloud issues and warnings.
+
+```mermaid
+graph TD
+    subgraph A [User Journey]
+        direction LR
+        B(Plan & Configure) --> C(Verify & Debug) --> D(Report & Collaborate)
+    end
+
+    subgraph Stories_Plan [Stories for Plan & Configure]
+        direction TB
+        B --> P1("Generate GTM Container from Spec")
+        B --> P2("Import Tracking Plan as Spec")
+        B --> P3("Import Project File")
+    end
+
+    subgraph Stories_Verify [Stories for Verify & Debug]
+        direction TB
+        C --> V1("Verify Tags in GTM Preview Mode")
+        C --> V2("Validate Network Requests (GA4 Hits)")
+        C --> V3("Automate Verification via Journey Replay")
+    end
+
+    subgraph Stories_Report [Stories for Report & Collaborate]
+        direction TB
+        D --> R1("Generate Sharable Report")
+        D --> R2("Capture Verification Evidence")
+        D --> R3("Export Project & Results")
+    end
+
+    style B fill:#cce5ff,stroke:#333,stroke-width:2px
+    style C fill:#cce5ff,stroke:#333,stroke-width:2px
+    style D fill:#cce5ff,stroke:#333,stroke-width:2px
+```
 
 ### Prerequisites
 
