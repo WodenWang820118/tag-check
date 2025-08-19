@@ -5,6 +5,7 @@
     multiTemplateDataRows
     matSort
     (matSortChange)="sortData($event)"
+    #reportTable
   >
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef>
@@ -89,17 +90,15 @@
       </th>
       <td mat-cell *matCellDef="let element">
         <!-- running a test -->
-        @if ((testRunningFacadeService.isRunningTest$())) {
+        @if (testRunningFacadeService.isRunningTest$()) {
           @if (
-            (testRunningFacadeService.eventRunningTest$()) ===
-            element.eventId
+            testRunningFacadeService.eventRunningTest$() === element.eventId
           ) {
             <div style="padding-left: 10px">
               <app-progress-pie-chart></app-progress-pie-chart>
             </div>
           } @else if (
-            (testRunningFacadeService.eventRunningTest$()) !==
-            element.eventId
+            testRunningFacadeService.eventRunningTest$() !== element.eventId
           ) {
             <!-- other buttons should be disabled when running a test -->
             <button

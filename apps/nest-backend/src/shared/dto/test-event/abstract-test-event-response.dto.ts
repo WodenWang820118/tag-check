@@ -48,7 +48,9 @@ export class AbstractTestEventResponseDto implements AbstractTestEvent {
 
   @Expose()
   @Transform(({ obj }) => {
-    const eventDetails = obj.testEventDetails as TestEventDetailEntity[];
+    const eventDetails = Array.isArray(obj.testEventDetails)
+      ? (obj.testEventDetails as TestEventDetailEntity[])
+      : [];
     const latestedEventDetail = eventDetails.find(
       (item) => item.id === obj.latestTestEventDetailId
     );
@@ -58,7 +60,9 @@ export class AbstractTestEventResponseDto implements AbstractTestEvent {
 
   @Expose()
   @Transform(({ obj }) => {
-    const eventDetails = obj.testEventDetails as TestEventDetailEntity[];
+    const eventDetails = Array.isArray(obj.testEventDetails)
+      ? (obj.testEventDetails as TestEventDetailEntity[])
+      : [];
     const latestedEventDetail = eventDetails.find(
       (item) => item.id === obj.latestTestEventDetailId
     );

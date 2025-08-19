@@ -1,9 +1,15 @@
 import { DatePipe, NgClass } from '@angular/common';
-import { Component, DestroyRef, OnInit, viewChild } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  OnInit,
+  viewChild
+} from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { tap } from 'rxjs';
+import { tap, take } from 'rxjs';
 import { IReportDetails } from '@utils';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -40,13 +46,15 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
 export class ReportTableComponent implements OnInit {
   private readonly paginator = viewChild<MatPaginator>(MatPaginator);
   private readonly sort = viewChild<MatSort>(MatSort);
+  private readonly reportTable = viewChild('reportTable');
 
   constructor(
     public testRunningFacadeService: TestRunningFacadeService,
     private readonly route: ActivatedRoute,
     private readonly destroyRef: DestroyRef,
     private readonly facade: ReportTableFacadeService,
-    private readonly tableSortService: TableSortService
+    private readonly tableSortService: TableSortService,
+    private readonly cdr: ChangeDetectorRef
   ) {}
   // TODO: retrieve the pass or not information from the test event details
   ngOnInit() {
@@ -99,7 +107,12 @@ export class ReportTableComponent implements OnInit {
 
   // Expose methods directly:
   runTest(eventId: string) {
-    this.facade.runTest(eventId);
+    this.facade
+      .runTest(eventId)
+      .pipe(take(1))
+      .subscribe(() => {
+        this.cdr.detectChanges();
+      });
   }
 
   toggleAllRows() {

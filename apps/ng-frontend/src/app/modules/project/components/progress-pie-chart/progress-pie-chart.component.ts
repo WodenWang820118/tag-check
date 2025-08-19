@@ -49,13 +49,19 @@ export class ProgressPieChartComponent {
 
       // Show spinner when test finished (total reset from non-zero)
       if (total === 0) {
-        if (this.lastTotalSteps > 0) {
+        if (
+          this.lastTotalSteps > 0 &&
+          this.progressUpdateService.eventCompleted$()
+        ) {
           this.spinnerVisible.set(true);
+          // reset completion flag to prevent repeated triggers
+          this.progressUpdateService.setEventCompleted(false);
         }
         this.destroyChart();
         this.lastTotalSteps = 0;
         return;
       }
+
       // hide spinner when new test progress begins
       if (this.spinnerVisible()) {
         this.spinnerVisible.set(false);
