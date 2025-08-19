@@ -2,7 +2,7 @@ import { Injectable, effect, signal, computed } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
-import { take } from 'rxjs';
+import { take, tap } from 'rxjs';
 import { IReportDetails } from '@utils';
 import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
@@ -158,20 +158,22 @@ export class ReportTableFacadeService {
   }
 
   runTest(eventId: string) {
-    this.testRunningFacadeService
+    return this.testRunningFacadeService
       .runTest(
         eventId,
         this.projectSlug(),
         this.reportTableDataSourceModelService.dataSource()
       )
-      .pipe(take(1))
-      .subscribe((updatedData) => {
-        if (updatedData) {
-          this.reportTableDataSourceModelService.dataSource().data = [
-            ...updatedData.data
-          ];
-        }
-      });
+      .pipe(
+        take(1),
+        tap((updatedData) => {
+          if (updatedData) {
+            this.reportTableDataSourceModelService.dataSource().data = [
+              ...updatedData.data
+            ];
+          }
+        })
+      );
   }
 
   hasRecording(eventId: string): boolean {

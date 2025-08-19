@@ -7,8 +7,10 @@ import { WebSocketService } from '../web-socket/web-socket.service';
 export class ProgressUpdateService {
   private readonly _currentStep = signal<number>(0);
   private readonly _totalSteps = signal<number>(0);
+  private readonly _eventCompleted = signal<boolean>(false);
   currentStep$ = computed(() => this._currentStep());
   totalSteps$ = computed(() => this._totalSteps());
+  eventCompleted$ = computed(() => this._eventCompleted());
 
   constructor(private readonly webSocketService: WebSocketService) {
     this.initializeSocketListeners();
@@ -24,13 +26,17 @@ export class ProgressUpdateService {
           console.warn('Received progress update', data);
           this.setCurrentStep(data.currentStep);
           this.setTotalSteps(data.totalSteps);
+        });
 
-          if (data.currentStep === data.totalSteps) {
-            console.log('All steps completed');
-            // Reset the progress state
-            this.setCurrentStep(0);
-            this.setTotalSteps(0);
-          }
+        this.webSocketService.getSocket().on('eventCompleted', (data) => {
+          console.warn('Received event completed', data);
+          this.setEventCompleted(true);
+          console.log(
+            'All steps completed via event; resetting progress state'
+          );
+          // Reset the progress state after completion event
+          this.setCurrentStep(0);
+          this.setTotalSteps(0);
         });
       }
     });
@@ -42,5 +48,9 @@ export class ProgressUpdateService {
 
   setTotalSteps(steps: number) {
     this._totalSteps.set(steps);
+  }
+
+  setEventCompleted(completed: boolean) {
+    this._eventCompleted.set(completed);
   }
 }

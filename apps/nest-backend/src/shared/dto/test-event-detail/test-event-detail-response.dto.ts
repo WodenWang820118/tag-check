@@ -32,6 +32,9 @@ export class TestEventDetailResponseDto implements TestEventDetailSchema {
   dataLayerSpec!: StrictDataLayerEvent | BaseDataLayerEvent;
 
   @Expose()
+  message?: string;
+
+  @Expose()
   createdAt!: Date;
 
   @Expose()

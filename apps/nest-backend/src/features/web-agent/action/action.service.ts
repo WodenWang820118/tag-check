@@ -54,5 +54,6 @@ export class ActionService {
       );
     }
     this.logger.log('Operation performed successfully');
+    this.eventsGatewayService.sendEventCompleted(eventId);
   }
 }

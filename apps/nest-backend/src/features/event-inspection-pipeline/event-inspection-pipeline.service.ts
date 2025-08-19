@@ -87,6 +87,8 @@ export class EventInspectionPipelineService {
           updatedDetail
         );
 
+      testEventDetailDto.message = dataLayerResult.message || '';
+
       const testImageDto = await this.buildTestImage(
         page,
         projectSlug,
@@ -182,7 +184,8 @@ export class EventInspectionPipelineService {
   ) {
     const updatedInfo: UpdateTestEventDto = {
       latestTestEventDetailId: testEventDetail.id,
-      latestTestImageId: testImage.id
+      latestTestImageId: testImage.id,
+      message: testEventDetail.message
     };
     Logger.debug('Updated info:', JSON.stringify(updatedInfo, null, 2));
     const updatedEvent = await this.testEventRepositoryService.updateTestEvent(
