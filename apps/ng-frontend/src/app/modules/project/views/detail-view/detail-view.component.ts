@@ -12,6 +12,10 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel.component';
+import { TextFieldModule } from '@angular/cdk/text-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-detail-view',
@@ -22,7 +26,12 @@ import { CarouselComponent } from '../../../../shared/components/carousel/carous
     MatButtonModule,
     CarouselComponent,
     DatePipe,
-    RouterLink
+    RouterLink,
+    TextFieldModule,
+    MatInputModule,
+    MatFormFieldModule,
+    FormsModule,
+    ReactiveFormsModule
   ],
   templateUrl: './detail-view.component.html',
   styleUrls: ['./detail-view.component.scss']
@@ -39,9 +48,14 @@ export class DetailViewComponent implements OnInit {
     this.frontFileReport().flatMap((report) => report.testEventDetails)
   );
 
+  formGroup = this.fb.group({
+    message: ['']
+  });
+
   constructor(
     private readonly router: Router,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
+    private readonly fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
@@ -55,6 +69,11 @@ export class DetailViewComponent implements OnInit {
         testEventDetail: TestEventDetail;
         testImage: TestImage;
       };
+
+      this.formGroup.controls.message.patchValue(
+        reportDetailsObject.testEvent.message || ''
+      );
+
       // Flatten the array of objects into a single object
       console.log('Report details object:', reportDetailsObject);
       const flattenedReportDetails: IReportDetails = {
