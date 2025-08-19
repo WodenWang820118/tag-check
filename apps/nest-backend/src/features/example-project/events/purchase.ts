@@ -77,8 +77,10 @@ const recording: Recording = {
 
 const spec: Spec = {
   event: 'purchase',
-  currency: '$currency',
-  items: []
+  ecommerce: {
+    currency: 'USD',
+    items: []
+  }
 };
 
 export const purchaseExample = {

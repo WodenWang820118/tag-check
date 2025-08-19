@@ -42,7 +42,10 @@ const recording: Recording = {
 
 const spec: Spec = {
   event: 'add_to_cart',
-  currency: '$currency'
+  ecommerce: {
+    currency: 'USD',
+    items: []
+  }
 };
 
 export const addToCartExample = {

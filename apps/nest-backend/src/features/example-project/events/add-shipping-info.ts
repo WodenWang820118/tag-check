@@ -63,8 +63,10 @@ const recording: Recording = {
 
 const spec: Spec = {
   event: 'add_shipping_info',
-  currency: '$currency',
-  items: []
+  ecommerce: {
+    currency: '$currency',
+    items: []
+  }
 };
 
 export const addShippingInfoExample = {
