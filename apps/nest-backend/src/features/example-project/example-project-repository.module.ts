@@ -4,6 +4,7 @@ import { RepositoryModule } from '../../core/repository/repository.module';
 import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
 import { ProjectAgentModule } from '../project-agent/project-agent.module';
 import { ProjectInitializationService } from '../project-agent/project-initialization/project-initialization.service';
+import { ExampleEventsBuilderService } from './example-events-builder.service';
 
 const modules = [RepositoryModule, ProjectAgentModule];
 const services = [
@@ -13,7 +14,16 @@ const services = [
 
 @Module({
   imports: [...modules],
-  providers: [ExampleProjectRepositoryService, ...services],
-  exports: [ExampleProjectRepositoryService, ...modules, ...services]
+  providers: [
+    ExampleProjectRepositoryService,
+    ExampleEventsBuilderService,
+    ...services
+  ],
+  exports: [
+    ExampleProjectRepositoryService,
+    ExampleEventsBuilderService,
+    ...modules,
+    ...services
+  ]
 })
 export class ExampleProjectRepositoryModule {}

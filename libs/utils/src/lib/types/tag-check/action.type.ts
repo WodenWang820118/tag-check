@@ -3,6 +3,8 @@ export type Step = {
   target: string;
   selectors: string[];
   url: string;
+  offsetX: number;
+  offsetY: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };

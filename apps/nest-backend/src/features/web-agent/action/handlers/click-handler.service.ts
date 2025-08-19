@@ -30,12 +30,13 @@ export class ClickHandler implements ActionHandler {
     projectSlug: string,
     eventId: string,
     step: Step,
-    isLastStep: boolean
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _isLastStep: boolean
   ): Promise<void> {
-    // Logic of handleClick
     let clickedSuccessfully = false;
     const preventNavigation = false;
-
+    const offsetX = step.offsetX;
+    const offsetY = step.offsetY;
     for (const selector of step.selectors) {
       const firstSelector = getFirstSelector(selector);
       try {
@@ -44,8 +45,7 @@ export class ClickHandler implements ActionHandler {
           projectSlug,
           eventId,
           firstSelector,
-          preventNavigation,
-          5000
+          { preventNavigation, timeout: 5000, offsetX, offsetY }
         );
         if (clicked) {
           clickedSuccessfully = true;
@@ -73,14 +73,20 @@ export class ClickHandler implements ActionHandler {
     projectName: string,
     eventId: string,
     selector: string,
-    preventNavigation: boolean,
-    timeout = 3000
+    options: {
+      preventNavigation: boolean;
+      timeout?: number;
+      offsetX: number;
+      offsetY: number;
+    }
   ): Promise<boolean> {
+    const { preventNavigation, timeout = 3000, offsetX, offsetY } = options;
     // Retrieve operation file path and domain
     const operationPath = await this.filePathService.getOperationFilePath(
       projectName,
       eventId
     );
+    this.logger.log(`Operation file path: ${operationPath}`);
     const operationFile =
       this.fileService.readJsonFile<OperationFile>(operationPath);
     const stepUrl = operationFile.steps[1]?.url;
@@ -93,6 +99,27 @@ export class ClickHandler implements ActionHandler {
 
     // Wait for the selector to be visible
     await page.waitForSelector(selector, { timeout, visible: true });
+
+    if (offsetX !== undefined && offsetY !== undefined) {
+      const elementHandle = await page.$(selector);
+      if (!elementHandle) {
+        throw new InternalServerErrorException(
+          `Element not found for selector ${selector}`
+        );
+      }
+      const box = await elementHandle.boundingBox();
+      if (!box) {
+        throw new InternalServerErrorException(
+          `Could not determine bounding box for selector ${selector}`
+        );
+      }
+      if (preventNavigation) {
+        await this.preventNavigationOnElement(page, selector);
+      }
+      // Perform mouse click at specified offset
+      await page.mouse.click(box.x + offsetX, box.y + offsetY, { delay: 100 });
+      return true;
+    }
 
     // Determine the click method based on conditions
     const pages = await page.browserContext().pages();
@@ -127,8 +154,7 @@ export class ClickHandler implements ActionHandler {
   }
 
   eventTargetToNode(eventTarget: EventTarget): Node {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-return
-    return eventTarget as any; // Note: This is a type assertion and should be used cautiously
+    return eventTarget as Node; // Convert EventTarget to Node
   }
 
   private async preventNavigationOnElement(
