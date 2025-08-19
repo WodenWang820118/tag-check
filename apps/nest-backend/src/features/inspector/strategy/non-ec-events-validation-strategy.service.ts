@@ -5,8 +5,8 @@ import { ValidationResultDto } from '../../../shared/dto/validation-result.dto';
 import { DataLayerValidationUtilsService } from './data-layer-validation-utils.service';
 
 @Injectable()
-export class OldGA4EventsValidationStrategy {
-  private readonly logger = new Logger(OldGA4EventsValidationStrategy.name);
+export class NonEcEventsValidationStrategy {
+  private readonly logger = new Logger(this.constructor.name);
   constructor(
     private readonly dataLayerValidationUtilsService: DataLayerValidationUtilsService
   ) {}
