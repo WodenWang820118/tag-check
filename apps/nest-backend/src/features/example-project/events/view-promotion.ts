@@ -35,19 +35,21 @@ const recording: Recording = {
 
 const spec: Spec = {
   event: 'view_promotion',
-  creative_name: '$creativeName',
-  creative_slot: '$creativeSlot',
-  promotion_id: '$promotionId',
-  promotion_name: '$promotionName',
-  items: [
-    {
-      item_id: 'city003',
-      item_name: 'Providence',
-      item_category: 'Providence',
-      price: 799,
-      quantity: 1
-    }
-  ]
+  ecommerce: {
+    creative_name: '$creativeName',
+    creative_slot: '$creativeSlot',
+    promotion_id: '$promotionId',
+    promotion_name: '$promotionName',
+    items: [
+      {
+        item_id: 'city003',
+        item_name: 'Providence',
+        item_category: 'Providence',
+        price: 799,
+        quantity: 1
+      }
+    ]
+  }
 };
 
 export const viewPromotionExample = {

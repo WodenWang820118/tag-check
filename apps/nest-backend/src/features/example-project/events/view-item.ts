@@ -35,17 +35,19 @@ const viewItemRecording: Recording = {
 
 const viewItemSpec: Spec = {
   event: 'view_item',
-  value: '$value',
-  currency: '$currency',
-  items: [
-    {
-      item_id: 'city003',
-      item_name: 'Providence',
-      item_category: 'Providence',
-      price: 799,
-      quantity: 1
-    }
-  ]
+  ecommerce: {
+    value: '$value',
+    currency: '$currency',
+    items: [
+      {
+        item_id: 'city003',
+        item_name: 'Providence',
+        item_category: 'Providence',
+        price: 799,
+        quantity: 1
+      }
+    ]
+  }
 };
 
 export const viewItemExample = {

@@ -56,8 +56,10 @@ const recording: Recording = {
 
 const spec: Spec = {
   event: 'app_payment_info',
-  currency: '$currency',
-  items: []
+  ecommerce: {
+    currency: 'USD',
+    items: []
+  }
 };
 
 export const addPaymentInfoExample = {
