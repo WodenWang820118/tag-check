@@ -29,7 +29,7 @@
         ],
         "styles": [
           "@angular/material/prebuilt-themes/indigo-pink.css",
-          "apps/ng-frontend/src/styles.scss",
+          "apps/ng-frontend/src/styles.css",
           "apps/ng-tag-build/src/styles.scss",
           "libs/shared-styles/src/index.scss",
           "node_modules/prismjs/themes/prism-okaidia.css",
