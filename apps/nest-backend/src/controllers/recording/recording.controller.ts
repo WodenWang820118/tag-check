@@ -16,7 +16,6 @@ export class RecordingController {
   ) {}
 
   @Get(':projectSlug')
-  @Log()
   async getRecordings(@Param('projectSlug') projectSlug: string) {
     return await this.recordingRepositoryService.listByProject(projectSlug);
   }
