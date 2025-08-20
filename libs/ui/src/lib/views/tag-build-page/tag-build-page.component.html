@@ -1,10 +1,14 @@
-<div class="main-page">
-  <div class="main-page__title">
+<div class="main-page pt-0 pb-12 px-[10rem]">
+  <div class="main-page__title text-left my-8">
     <h1>Tag Build</h1>
   </div>
 
-  <div class="main-page__board">
-    <div class="main-page__board__item main-page__editor">
+  <div
+    class="main-page__board flex flex-row flex-wrap justify-center items-stretch gap-16 mb-12"
+  >
+    <div
+      class="main-page__board__item main-page__editor grow border border-gray-300 dark:border-gray-700"
+    >
       @if (specs !== null) {
         <lib-editor
           content="{{ specs | json }}"
@@ -12,11 +16,13 @@
         />
       }
     </div>
-    <div class="main-page__board__item">
+    <div class="main-page__board__item grow">
       <lib-functional-card> </lib-functional-card>
     </div>
-    <div class="main-page__board__item main-page__editor">
-      <lib-editor [editorExtension]="outputExtension" />
+    <div
+      class="main-page__board__item main-page__editor grow border border-gray-300 dark:border-gray-700"
+    >
+      <lib-editor [editorExtension]="outputExtension"></lib-editor>
     </div>
   </div>
 </div>

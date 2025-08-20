@@ -14,9 +14,10 @@ import {
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
-  FormBuilder
+  FormBuilder,
+  FormControl
 } from '@angular/forms';
-import { combineLatest, take, catchError, EMPTY, filter, map } from 'rxjs';
+import { catchError, EMPTY, filter, map } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import {
@@ -71,9 +72,12 @@ export class AdvancedExpansionPanelComponent implements OnInit {
     includeItemScopedVariables: [false]
   });
 
-  setupForm: FormGroup = this.fb.group({
-    googleTagName: ['GA4 Configuration Tag'],
-    useExistingMesurementId: ['']
+  setupForm: FormGroup<{
+    googleTagName: FormControl<string | null>;
+    useExistingMeasurementId: FormControl<string | null>;
+  }> = this.fb.group({
+    googleTagName: [''],
+    useExistingMeasurementId: ['']
   });
 
   ecAndEsvForm: FormGroup = this.fb.group({
@@ -84,15 +88,23 @@ export class AdvancedExpansionPanelComponent implements OnInit {
 
   accordion = viewChild.required<MatAccordion>(MatAccordion);
 
-  private readonly setupFormChanges$: Signal<{
-    googleTagName: string;
-    useExistingMesurementId: string;
-  }> = toSignal(this.setupForm.valueChanges);
-  private readonly ecAndEsvFormChanges$: Signal<{
-    isSendingEcommerceData: boolean;
-    isEsv: boolean;
-    esv: string;
-  }> = toSignal(this.ecAndEsvForm.valueChanges);
+  private readonly setupFormChanges$: Signal<
+    Partial<{
+      googleTagName: string | null;
+      useExistingMeasurementId: string | null;
+    }>
+  > = toSignal(this.setupForm.valueChanges, {
+    initialValue: this.setupForm.getRawValue()
+  });
+  private readonly ecAndEsvFormChanges$: Signal<
+    Partial<{
+      isSendingEcommerceData: boolean;
+      isEsv: boolean;
+      esv: string;
+    }>
+  > = toSignal(this.ecAndEsvForm.valueChanges, {
+    initialValue: this.ecAndEsvForm.getRawValue()
+  });
 
   constructor() {
     // Setup form subscriptions using signals
@@ -100,10 +112,10 @@ export class AdvancedExpansionPanelComponent implements OnInit {
       const setupFormValue = this.setupFormChanges$();
       if (setupFormValue) {
         this.setupConstructorService.setGoogleTagName(
-          setupFormValue.googleTagName
+          setupFormValue.googleTagName ?? ''
         );
         this.setupConstructorService.setMeasurementId(
-          setupFormValue.useExistingMesurementId
+          setupFormValue.useExistingMeasurementId ?? ''
         );
       }
     });
@@ -113,7 +125,7 @@ export class AdvancedExpansionPanelComponent implements OnInit {
       const ecAndEsvValue = this.ecAndEsvFormChanges$();
       if (ecAndEsvValue) {
         this.setupConstructorService.setIsSendingEcommerceData(
-          ecAndEsvValue.isSendingEcommerceData
+          ecAndEsvValue.isSendingEcommerceData ?? false
         );
       }
     });
@@ -121,7 +133,7 @@ export class AdvancedExpansionPanelComponent implements OnInit {
     effect(() => {
       const ecAndEsvValue = this.ecAndEsvFormChanges$();
       if (ecAndEsvValue) {
-        this.esvEditorService.setEsvContent(ecAndEsvValue.esv);
+        this.esvEditorService.setEsvContent(ecAndEsvValue.esv ?? '');
       }
     });
   }
@@ -143,16 +155,18 @@ export class AdvancedExpansionPanelComponent implements OnInit {
     //   null,
     //   2
     // );
+    this.setupForm.controls.googleTagName.setValue('GA4 Configuration Tag');
+    this.setupForm.controls.useExistingMeasurementId.setValue('');
   }
 
   private initializeFormSubscriptions(): void {
-    // Handle main form changes using object overload to avoid deprecated signature
-    combineLatest({
-      editor: this.editorFacadeService.getInputJsonContent(),
-      form: this.form.valueChanges
-    })
+    this.form.valueChanges
       .pipe(
         takeUntilDestroyed(this.destroyRef),
+        map(() => {
+          const editor = this.editorFacadeService.getInputJsonContent()();
+          return { editor, form: this.form.getRawValue() };
+        }),
         filter(({ editor, form }) => !!editor && !!form),
         catchError((error) => {
           this.handleError('Error processing form changes', error);
@@ -188,27 +202,11 @@ export class AdvancedExpansionPanelComponent implements OnInit {
   }
 
   onPanelOpened(): void {
-    this.editorFacadeService
-      .getInputJsonContent()
-      .pipe(
-        take(1),
-        takeUntilDestroyed(this.destroyRef),
-        filter((editor) => !!editor?.state?.doc?.toString()),
-        map((editor) => JSON.parse(editor.state.doc.toString())),
-        catchError((error) => {
-          this.handleError('Error opening panel', error);
-          return EMPTY;
-        })
-      )
-      .subscribe((json) => {
-        this.form.patchValue(
-          {
-            includeVideoTag: this.editorFacadeService.hasVideoTag(json),
-            includeScrollTag: this.editorFacadeService.hasScrollTag(json)
-          },
-          { emitEvent: false }
-        );
-      });
+    const editor = this.editorFacadeService.getInputJsonContent()();
+    this.form.patchValue({
+      includeVideoTag: this.editorFacadeService.hasVideoTag(editor),
+      includeScrollTag: this.editorFacadeService.hasScrollTag(editor)
+    });
   }
 
   private handleError(message: string, error: unknown): void {

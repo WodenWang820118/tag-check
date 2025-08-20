@@ -39,6 +39,8 @@ export class TagManager {
       containerId
     );
 
+    console.log('googletag:, ', configTag);
+
     const tags = preprocessedTags.map((tag) => {
       return this.eventTag.createTag(
         googleTagName,
