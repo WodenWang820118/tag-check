@@ -27,7 +27,7 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
     MatSortModule
   ],
   templateUrl: './file-table.component.html',
-  styleUrls: ['./file-table.component.scss']
+  styleUrls: ['./file-table.component.css']
 })
 export class FileTableComponent implements OnInit {
   paginator = viewChild.required<MatPaginator>(MatPaginator);

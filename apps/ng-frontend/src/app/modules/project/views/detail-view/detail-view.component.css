@@ -1,0 +1,50 @@
+.detail {
+  padding: 2rem 10rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail__header {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.detail__header__row {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.detail__status {
+  padding-left: 6rem;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: baseline;
+}
+
+.detail__content {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+}
+
+.detail__panels {
+  flex: 1 1 0;
+  max-width: 40vw;
+}
+
+.detail__images {
+  flex: 1 1 0;
+}
+
+.detail__images__item {
+  max-width: 40vw;
+}
+
+.detail .mat-icon {
+  transform: scale(1.2);
+}

@@ -32,7 +32,7 @@ export class InspectorUtilsService {
     try {
       switch (strategyType) {
         case ValidationStrategyType.ECOMMERCE:
-        case ValidationStrategyType.OLDGA4EVENTS:
+        case ValidationStrategyType.NONEC:
           return this.strategy[strategyType].validateDataLayer(dataLayer, spec);
         default: {
           const result: ValidationResult = {
@@ -54,7 +54,7 @@ export class InspectorUtilsService {
     if (this.isNumericKeysObject([ValidationStrategyType.ECOMMERCE])) {
       return ValidationStrategyType.ECOMMERCE;
     } else {
-      return ValidationStrategyType.OLDGA4EVENTS;
+      return ValidationStrategyType.NONEC;
     }
   }
 

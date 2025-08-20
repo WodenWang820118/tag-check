@@ -13,7 +13,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-project-info-form',
-  standalone: true,
   imports: [
     MatIconModule,
     MatButtonModule,

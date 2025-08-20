@@ -109,7 +109,7 @@ export class InspectorGroupEventsService {
     try {
       switch (strategyType) {
         case ValidationStrategyType.ECOMMERCE:
-        case ValidationStrategyType.OLDGA4EVENTS:
+        case ValidationStrategyType.NONEC:
           return this.strategy[strategyType].validateDataLayer(dataLayer, spec);
         default:
           return {

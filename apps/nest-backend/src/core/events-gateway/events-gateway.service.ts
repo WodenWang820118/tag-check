@@ -54,4 +54,8 @@ export class EventsGatewayService
   sendProgressUpdate(totalSteps: number, currentStep: number) {
     this.server.emit('progressUpdate', { totalSteps, currentStep });
   }
+
+  sendEventCompleted(message: any) {
+    this.server.emit('eventCompleted', { message });
+  }
 }

@@ -152,9 +152,9 @@ export class TestRunningFacadeService {
     if (!res) return;
     console.log('res', res[0]);
     // TODO: maybe return a consistent eventId from the backend
+    // Spread the response directly without overriding eventId so matching works correctly
     const updatedEvent: IReportDetails = {
-      ...res[0],
-      eventId: `${res[0].eventName}_${res[0].eventId}`
+      ...res[0]
     };
     testDataSource.data = testDataSource.data.map((event) =>
       event.eventId === updatedEvent.eventId ? updatedEvent : event

@@ -16,7 +16,15 @@ import { ProjectListFacadeService } from './project-list-facade.service';
   standalone: true,
   imports: [ProjectItemComponent, MatCardModule, MatPaginator, AsyncPipe],
   templateUrl: './project-list.component.html',
-  styleUrls: ['./project-list.component.scss'],
+  styles: [
+    `
+      .mat-mdc-card {
+        height: 200px;
+        min-width: 400px;
+        max-width: 500px;
+      }
+    `
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProjectListComponent implements AfterViewInit {

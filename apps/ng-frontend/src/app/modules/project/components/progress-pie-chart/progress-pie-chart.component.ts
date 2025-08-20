@@ -15,31 +15,64 @@ import {
   Legend
 } from 'chart.js';
 import { ProgressUpdateService } from '../../../../shared/services/progress-update/progress-update.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-progress-pie-chart',
-  standalone: true,
-  template: '<canvas #chart></canvas>',
+  imports: [MatProgressSpinnerModule],
+  template: `
+    @if (!spinnerVisible()) {
+      <ng-container>
+        <canvas #chart></canvas>
+      </ng-container>
+    } @else {
+      <mat-progress-spinner
+        mode="indeterminate"
+        diameter="30"
+      ></mat-progress-spinner>
+    }
+  `,
   styles: ['canvas { max-width: 30px; max-height: 30px; }']
 })
 export class ProgressPieChartComponent {
   chartRef = viewChild.required<ElementRef<HTMLCanvasElement>>('chart');
   chart = signal<Chart | null>(null);
-  isFirstRender = signal<boolean>(true);
+  // Track last total steps and spinner state
+  private lastTotalSteps = 0;
+  spinnerVisible = signal<boolean>(false);
 
   constructor(private readonly progressUpdateService: ProgressUpdateService) {
     // Setup effect to handle chart updates
     effect(() => {
-      const current = this.progressUpdateService.currentStep$();
+      // track totalSteps for chart recreation and update
       const total = this.progressUpdateService.totalSteps$();
 
-      if (current > 0 && total > 0) {
-        if (this.isFirstRender()) {
-          this.createChart();
-          this.isFirstRender.set(false);
+      // Show spinner when test finished (total reset from non-zero)
+      if (total === 0) {
+        if (
+          this.lastTotalSteps > 0 &&
+          this.progressUpdateService.eventCompleted$()
+        ) {
+          this.spinnerVisible.set(true);
+          // reset completion flag to prevent repeated triggers
+          this.progressUpdateService.setEventCompleted(false);
         }
-        this.updateChart();
+        this.destroyChart();
+        this.lastTotalSteps = 0;
+        return;
       }
+
+      // hide spinner when new test progress begins
+      if (this.spinnerVisible()) {
+        this.spinnerVisible.set(false);
+      }
+
+      // Create or recreate chart if needed
+      if (!this.chart() || total !== this.lastTotalSteps) {
+        this.createChart();
+        this.lastTotalSteps = total;
+      }
+      this.updateChart();
     });
   }
 
@@ -78,8 +111,7 @@ export class ProgressPieChartComponent {
         }
       ]
     };
-    const currentStep = this.progressUpdateService.currentStep$();
-    const totalSteps = this.progressUpdateService.totalSteps$();
+    // Plugin will use dynamic values for current and total, so remove stale captures
 
     const config: ChartConfiguration = {
       type: 'pie',
@@ -108,7 +140,10 @@ export class ProgressPieChartComponent {
             ctx.fillStyle = 'black';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(`${currentStep}/${totalSteps}`, centerX, centerY);
+            // Draw up-to-date progress in center
+            const cur = this.progressUpdateService.currentStep$();
+            const tot = this.progressUpdateService.totalSteps$();
+            ctx.fillText(`${cur}/${tot}`, centerX, centerY);
             ctx.restore();
           }
         }

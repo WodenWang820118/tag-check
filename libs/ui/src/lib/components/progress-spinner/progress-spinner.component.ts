@@ -4,7 +4,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 enum ProgressSpinnerColor {
   primary = 'primary',
   accent = 'accent',
-  warn = 'warn',
+  warn = 'warn'
 }
 
 @Component({
@@ -38,22 +38,22 @@ enum ProgressSpinnerColor {
         display: flex;
         flex-direction: row;
         justify-content: flex-start;
-
-        &__state {
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          gap: 1rem;
-          flex: 1 1 0;
-        }
-
-        &__description {
-          flex: 2 1 0;
-        }
       }
-    `,
+
+      .progress__state {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 1rem;
+        flex: 1 1 0;
+      }
+
+      .progress__description {
+        flex: 2 1 0;
+      }
+    `
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProgressSpinnerComponent {
   @Input() numParsedTags: number | null = null;

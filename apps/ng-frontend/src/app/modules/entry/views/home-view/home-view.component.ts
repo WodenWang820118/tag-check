@@ -6,18 +6,11 @@ import { ProjectListComponent } from '../../components/project-list/project-list
   standalone: true,
   imports: [ProjectListComponent],
   template: `
-    <div class="home">
-      <div class="home__projects">
+    <div>
+      <div class="mt-8">
         <app-project-list></app-project-list>
       </div>
     </div>
-  `,
-  styles: `
-    .home {
-      &__projects {
-        margin-top: 2rem;
-      }
-    }
   `
 })
 export class HomeViewComponent {}

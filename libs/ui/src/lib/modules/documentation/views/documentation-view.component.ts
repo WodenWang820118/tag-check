@@ -23,18 +23,18 @@ import { Router, RouterOutlet } from '@angular/router';
         height: 100%;
         margin: 0 auto;
         overflow: hidden;
+      }
 
-        &__sidebar {
-          border-right: 1px solid var(--border-color, #e0e0e0);
-          padding: 2rem 16px;
-          height: 100%;
-          overflow-y: auto;
-        }
+      .documentation-layout__sidebar {
+        border-right: 1px solid var(--border-color, #e0e0e0);
+        padding: 2rem 16px;
+        height: 100%;
+        overflow-y: auto;
+      }
 
-        &__content {
-          height: 100%;
-          overflow: hidden;
-        }
+      .documentation-layout__content {
+        height: 100%;
+        overflow: hidden;
       }
     `
   ]
