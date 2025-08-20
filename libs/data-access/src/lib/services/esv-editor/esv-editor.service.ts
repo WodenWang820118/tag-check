@@ -1,16 +1,13 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { computed, Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EsvEditorService {
-  private readonly content = new BehaviorSubject<string>('');
-  setEsvContent(content: string) {
-    this.content.next(content);
-  }
+  private readonly content = signal<string>('');
+  content$ = computed(() => this.content());
 
-  getEsvContent() {
-    return this.content.asObservable();
+  setEsvContent(content: string) {
+    this.content.set(content);
   }
 }

@@ -7,9 +7,9 @@
       (click)="convertCode()"
       class="functional-card__actions__item"
       [disabled]="
-        (
-          this.editorFacadeService.getInputJsonContent() | async
-        )?.state?.doc?.toString() === '[]'
+        this.editorFacadeService
+          .getInputJsonContent()()
+          .state.doc.toString() === '[]'
       "
     >
       Convert
