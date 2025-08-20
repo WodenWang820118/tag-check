@@ -7,22 +7,12 @@ import { ProjectImportComponent } from '../../../../shared/components/project-im
   standalone: true,
   imports: [InitProjectFormComponent, ProjectImportComponent],
   template: `
-    <div class="init-project">
-      <div class="init-project__form">
+    <div class="py-4 px-40">
+      <div class="flex flex-col gap-12">
         <app-project-import></app-project-import>
         <app-init-project-form></app-init-project-form>
       </div>
     </div>
-  `,
-  styles: `
-    .init-project {
-      padding: 1rem 10rem;
-      &__form {
-        display: flex;
-        flex-direction: column;
-        gap: 3rem;
-      }
-    }
   `
 })
 export class InitProjectViewComponent {}

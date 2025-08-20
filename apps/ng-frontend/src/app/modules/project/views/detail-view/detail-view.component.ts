@@ -34,7 +34,7 @@ import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule
   ],
   templateUrl: './detail-view.component.html',
-  styleUrls: ['./detail-view.component.scss']
+  styleUrls: ['./detail-view.component.css']
 })
 export class DetailViewComponent implements OnInit {
   reportDetails = signal<IReportDetails | undefined>(undefined);

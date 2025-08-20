@@ -29,23 +29,20 @@ import { MatIconModule } from '@angular/material/icon';
   `,
   styles: [
     `
-      .conversion-success {
-        &__options {
-          .mat-icon {
-            transform: scale(1.5);
-          }
+      /* Plain CSS equivalent of previous nested/SCSS rules */
+      .conversion-success__options .mat-icon {
+        transform: scale(1.5);
+      }
 
-          &__option:not(:last-child) {
-            margin-bottom: 1rem;
-          }
-        }
+      .conversion-success__options__option:not(:last-child) {
+        margin-bottom: 1rem;
       }
     `
   ]
 })
 export class ConversionSuccessDialogComponent {
   constructor(
-    @Inject(MAT_DIALOG_DATA) public configuration: any,
+    @Inject(MAT_DIALOG_DATA) public configuration: unknown,
     private readonly dialog: MatDialog
   ) {}
 
