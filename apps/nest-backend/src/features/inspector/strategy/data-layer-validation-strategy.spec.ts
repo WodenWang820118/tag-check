@@ -4,7 +4,7 @@ import {
   ValidationResult
 } from '@utils';
 import { EcommerceEventValidationStrategy } from './ecommerce-event-validation-strategy.service';
-import { OldGA4EventsValidationStrategy } from './old-ga4-events-validation-strategy.service';
+import { NonEcEventsValidationStrategy } from './non-ec-events-validation-strategy.service';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 import { Test } from '@nestjs/testing/test';
 import { STRATEGY_TYPE, ValidationStrategyType } from '../utils';
@@ -23,18 +23,17 @@ describe('ValidationStrategy', () => {
             provide: STRATEGY_TYPE,
             useFactory: (
               ecommerceEventValidationStrategy: EcommerceEventValidationStrategy,
-              oldGA4EventsValidationStrategy: OldGA4EventsValidationStrategy
+              nonEcEventsValidationStrategy: NonEcEventsValidationStrategy
             ) => {
               return {
                 [ValidationStrategyType.ECOMMERCE]:
                   ecommerceEventValidationStrategy,
-                [ValidationStrategyType.OLDGA4EVENTS]:
-                  oldGA4EventsValidationStrategy
+                [ValidationStrategyType.NONEC]: nonEcEventsValidationStrategy
               };
             },
             inject: [
               EcommerceEventValidationStrategy,
-              OldGA4EventsValidationStrategy
+              NonEcEventsValidationStrategy
             ]
           },
           InspectorUtilsService,
@@ -176,28 +175,27 @@ describe('ValidationStrategy', () => {
   });
 
   describe('OldGA4EventsValidationStrategy', () => {
-    let oldGA4EventsValidationStrategy: OldGA4EventsValidationStrategy;
+    let oldGA4EventsValidationStrategy: NonEcEventsValidationStrategy;
 
     beforeEach(async () => {
       const moduleRef = await Test.createTestingModule({
         providers: [
-          OldGA4EventsValidationStrategy,
+          NonEcEventsValidationStrategy,
           {
             provide: STRATEGY_TYPE,
             useFactory: (
               ecommerceEventValidationStrategy: EcommerceEventValidationStrategy,
-              oldGA4EventsValidationStrategy: OldGA4EventsValidationStrategy
+              nonEcEventsValidationStrategy: NonEcEventsValidationStrategy
             ) => {
               return {
                 [ValidationStrategyType.ECOMMERCE]:
                   ecommerceEventValidationStrategy,
-                [ValidationStrategyType.OLDGA4EVENTS]:
-                  oldGA4EventsValidationStrategy
+                [ValidationStrategyType.NONEC]: nonEcEventsValidationStrategy
               };
             },
             inject: [
               EcommerceEventValidationStrategy,
-              OldGA4EventsValidationStrategy
+              NonEcEventsValidationStrategy
             ]
           },
           InspectorUtilsService,
@@ -211,8 +209,8 @@ describe('ValidationStrategy', () => {
         })
         .compile();
       oldGA4EventsValidationStrategy =
-        moduleRef.get<OldGA4EventsValidationStrategy>(
-          OldGA4EventsValidationStrategy
+        moduleRef.get<NonEcEventsValidationStrategy>(
+          NonEcEventsValidationStrategy
         );
     });
 

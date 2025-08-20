@@ -28,24 +28,21 @@ import { MatIconModule } from '@angular/material/icon';
   </div>`,
   styles: [
     `
-      .file-upload-dialog {
-        &__actions {
-          .mat-icon {
-            transform: scale(1.5);
-          }
-          width: 100%;
-          margin: auto;
+      .file-upload-dialog__actions .mat-icon {
+        transform: scale(1.5);
+      }
 
-          &__action {
-            button {
-              margin-right: 1rem;
-            }
-          }
+      .file-upload-dialog__actions {
+        width: 100%;
+        margin: auto;
+      }
 
-          &__action:not(:last-child) {
-            margin-bottom: 1rem;
-          }
-        }
+      .file-upload-dialog__actions__action button {
+        margin-right: 1rem;
+      }
+
+      .file-upload-dialog__actions__action:not(:last-child) {
+        margin-bottom: 1rem;
       }
     `
   ]
@@ -58,15 +55,16 @@ export class FileUploadDialogComponent {
   ) {}
 
   selectedFile: File | null = null;
-  fileContent = new BehaviorSubject<any>(null);
+  fileContent = new BehaviorSubject<unknown | null>(null);
 
   handFileToSidenavForm(file: File) {
     this.dialog.closeAll();
     this.eventBusService.emit('toggleDrawer', file);
   }
 
-  onFileSelected(event: any): void {
-    const file: File = event.target.files[0];
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement | null;
+    const file: File | undefined = input?.files?.[0];
 
     if (file) {
       const fileExtension = file.name.split('.').pop();
@@ -101,8 +99,15 @@ export class FileUploadDialogComponent {
   readJsonFileContent(file: File): void {
     const reader = new FileReader();
 
-    reader.onload = (e: any) => {
-      const fileContentString = e.target.result;
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      const fileContentString = e.target?.result as string | null;
+
+      if (fileContentString === null) {
+        this.dialog.open(ErrorDialogComponent, {
+          data: { message: 'Error reading file content. Please try again.' }
+        });
+        return;
+      }
 
       try {
         // update the file content
@@ -133,7 +138,7 @@ export class FileUploadDialogComponent {
     this.fileContent
       .pipe(
         tap((data) => {
-          if (data !== null || data !== undefined) {
+          if (data != null) {
             this.editorFacadeService.setInputJsonContent(data);
             this.dialog.closeAll();
           }

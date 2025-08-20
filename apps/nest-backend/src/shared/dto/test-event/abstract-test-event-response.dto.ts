@@ -1,6 +1,6 @@
 import { Exclude, Expose, Transform } from 'class-transformer';
 import { AbstractTestEvent, Recording, Spec } from '@utils';
-import { TestEventEntity } from '../../entity';
+import { TestEventDetailEntity } from '../../entity';
 
 @Exclude()
 export class AbstractTestEventResponseDto implements AbstractTestEvent {
@@ -48,15 +48,25 @@ export class AbstractTestEventResponseDto implements AbstractTestEvent {
 
   @Expose()
   @Transform(({ obj }) => {
-    const testEvent = obj as TestEventEntity;
-    return testEvent.latestTestEventDetail?.passed ?? false;
+    const eventDetails = Array.isArray(obj.testEventDetails)
+      ? (obj.testEventDetails as TestEventDetailEntity[])
+      : [];
+    const latestedEventDetail = eventDetails.find(
+      (item) => item.id === obj.latestTestEventDetailId
+    );
+    return latestedEventDetail?.passed ?? false;
   })
   passed!: boolean;
 
   @Expose()
   @Transform(({ obj }) => {
-    const testEvent = obj as TestEventEntity;
-    return testEvent.latestTestEventDetail?.requestPassed ?? false;
+    const eventDetails = Array.isArray(obj.testEventDetails)
+      ? (obj.testEventDetails as TestEventDetailEntity[])
+      : [];
+    const latestedEventDetail = eventDetails.find(
+      (item) => item.id === obj.latestTestEventDetailId
+    );
+    return latestedEventDetail?.requestPassed ?? false;
   })
   requestPassed!: boolean;
 }

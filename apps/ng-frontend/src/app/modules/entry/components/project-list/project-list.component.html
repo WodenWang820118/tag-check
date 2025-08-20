@@ -1,15 +1,18 @@
-<div class="project-list">
-  <div class="project-list__items">
+<div class="flex flex-col items-center">
+  <!-- grid: single column on very small screens, two columns from sm and up -->
+  <div class="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 gap-16 mb-40">
     @for (item of displayedProjects() | async; track item.projectSlug) {
       <app-project-item
-        class="project-list__items__item"
+        class="w-full flex-1 basis-1/2"
         [project]="item"
       ></app-project-item>
     }
   </div>
-  <div [hidden]="hidePaginator()">
+
+  <div [hidden]="hidePaginator()" class="w-full max-w-6xl">
     <mat-paginator
       #paginator
+      class="w-full"
       [length]="dataSourceLength()"
       [pageSize]="6"
       [pageSizeOptions]="[5, 10, 25, 100]"

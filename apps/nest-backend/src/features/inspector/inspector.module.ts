@@ -8,7 +8,7 @@ import { ProjectAgentModule } from '../project-agent/project-agent.module';
 import { DataLayerValidationStrategyModule } from './strategy/data-layer-validation-strategy.module';
 import { STRATEGY_TYPE, ValidationStrategyType } from './utils';
 import { EcommerceEventValidationStrategy } from './strategy/ecommerce-event-validation-strategy.service';
-import { OldGA4EventsValidationStrategy } from './strategy/old-ga4-events-validation-strategy.service';
+import { NonEcEventsValidationStrategy } from './strategy/non-ec-events-validation-strategy.service';
 import { InspectorUtilsService } from './inspector-utils.service';
 import { TestReportFacadeModule } from '../repository/test-report-facade/test-report-facade.module';
 import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
@@ -17,14 +17,14 @@ const strategyService = {
   provide: STRATEGY_TYPE,
   useFactory: (
     ecommerceEventValidationStrategy: EcommerceEventValidationStrategy,
-    oldGA4EventsValidationStrategy: OldGA4EventsValidationStrategy
+    nonEcEventsValidationStrategy: NonEcEventsValidationStrategy
   ) => {
     return {
       [ValidationStrategyType.ECOMMERCE]: ecommerceEventValidationStrategy,
-      [ValidationStrategyType.OLDGA4EVENTS]: oldGA4EventsValidationStrategy
+      [ValidationStrategyType.NONEC]: nonEcEventsValidationStrategy
     };
   },
-  inject: [EcommerceEventValidationStrategy, OldGA4EventsValidationStrategy]
+  inject: [EcommerceEventValidationStrategy, NonEcEventsValidationStrategy]
 };
 
 const services = [
@@ -34,7 +34,7 @@ const services = [
   strategyService,
   InspectorUtilsService,
   EcommerceEventValidationStrategy,
-  OldGA4EventsValidationStrategy,
+  NonEcEventsValidationStrategy,
   TestReportFacadeRepositoryService
 ];
 @Module({
