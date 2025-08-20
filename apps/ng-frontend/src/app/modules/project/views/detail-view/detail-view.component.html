@@ -38,17 +38,19 @@
       <app-report-datail-panels
         [reportDetails]="reportDetails()"
       ></app-report-datail-panels>
-      <form [formGroup]="formGroup" class="mt-8" style="margin-top: 1rem">
-        <mat-form-field class="w-full">
-          <mat-label>Message</mat-label>
-          <textarea
-            matInput
-            formControlName="message"
-            [rows]="3"
-            readonly="true"
-          ></textarea>
-        </mat-form-field>
-      </form>
+      <div class="mt-8">
+        <form [formGroup]="formGroup">
+          <mat-form-field class="w-full">
+            <mat-label>Message</mat-label>
+            <textarea
+              matInput
+              formControlName="message"
+              [rows]="3"
+              readonly="true"
+            ></textarea>
+          </mat-form-field>
+        </form>
+      </div>
     </div>
   </div>
 </div>

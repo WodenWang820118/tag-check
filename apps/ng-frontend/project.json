@@ -15,7 +15,7 @@
         "browser": "apps/ng-frontend/src/main.ts",
         "polyfills": ["zone.js", "@angular/localize/init"],
         "tsConfig": "apps/ng-frontend/tsconfig.app.json",
-        "inlineStyleLanguage": "scss",
+        "inlineStyleLanguage": "css",
         "assets": [
           {
             "glob": "**/*",
