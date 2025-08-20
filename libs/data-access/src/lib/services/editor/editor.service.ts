@@ -1,4 +1,4 @@
-import { ElementRef, Injectable } from '@angular/core';
+import { computed, ElementRef, Injectable, signal } from '@angular/core';
 import { EditorView } from 'codemirror';
 import { placeholder } from '@codemirror/view';
 import { BehaviorSubject } from 'rxjs';
@@ -18,19 +18,31 @@ export class EditorService {
     outputJson: jsonLightEditorExtensions
   };
 
-  contentSubjects = {
-    inputJson: new BehaviorSubject(`Placeholder content for JSON editor`),
-    outputJson: new BehaviorSubject(``)
+  // contentSubjects = {
+  //   inputJson: new BehaviorSubject(`Placeholder content for JSON editor`),
+  //   outputJson: new BehaviorSubject(``)
+  // };
+  contents = {
+    inputJson: signal(`Placeholder content for JSON editor`),
+    outputJson: signal(`Placeholder content for JSON editor`)
   };
 
+  // editorSubjects = {
+  //   inputJson: new BehaviorSubject<EditorView>(new EditorView()),
+  //   outputJson: new BehaviorSubject<EditorView>(new EditorView())
+  // };
   editorSubjects = {
-    inputJson: new BehaviorSubject<EditorView>(new EditorView()),
-    outputJson: new BehaviorSubject<EditorView>(new EditorView())
+    inputJson: signal(new EditorView()),
+    outputJson: signal(new EditorView())
   };
 
+  // editor$ = {
+  //   inputJson: this.editorSubjects.inputJson.asObservable(),
+  //   outputJson: this.editorSubjects.outputJson.asObservable()
+  // };
   editor$ = {
-    inputJson: this.editorSubjects.inputJson.asObservable(),
-    outputJson: this.editorSubjects.outputJson.asObservable()
+    inputJson: computed(() => this.editorSubjects.inputJson()),
+    outputJson: computed(() => this.editorSubjects.outputJson())
   };
 
   initEditorView(
@@ -47,7 +59,7 @@ export class EditorService {
           lintGutter(),
           EditorView.theme(editorStyles),
           EditorView.lineWrapping,
-          placeholder(content || this.contentSubjects[extension].getValue())
+          placeholder(content || this.contents[extension]())
         ],
         parent: elementRef.nativeElement
       });
@@ -57,7 +69,7 @@ export class EditorService {
           ...this.editorExtensions[extension],
           EditorView.theme(editorStyles),
           EditorView.lineWrapping,
-          placeholder(content || this.contentSubjects[extension].getValue())
+          placeholder(content || this.contents[extension]())
         ],
         parent: elementRef.nativeElement
       });
@@ -78,18 +90,18 @@ export class EditorService {
       });
     }
 
-    this.editorSubjects[extension].next(editorView);
+    this.editorSubjects[extension].set(editorView);
   }
 
   setContent(extension: EditorTypeEnum, content: string) {
-    // set content in contentSubjects
-    this.contentSubjects[extension].next(content);
+    // set content in contents
+    this.contents[extension].set(content);
     // dispatch content to editorView
-    this.editorSubjects[extension].getValue().dispatch({
+    this.editorSubjects[extension]().dispatch({
       changes: {
         from: 0,
         insert: content,
-        to: this.editorSubjects[extension].getValue().state.doc.length
+        to: this.editorSubjects[extension]().state.doc.length
       }
     });
   }
