@@ -10,7 +10,6 @@ import { JsonPipe } from '@angular/common';
   standalone: true,
   imports: [JsonPipe, FunctionalCardComponent, EditorComponent],
   templateUrl: './tag-build-page.component.html',
-  styleUrls: ['./tag-build-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagBuildPageComponent {
