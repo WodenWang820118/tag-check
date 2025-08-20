@@ -22,6 +22,7 @@
         <mat-checkbox
           (click)="$event.stopPropagation()"
           (change)="toggleSelection(row)"
+          (keydown)="$event.key === 'Enter' && toggleSelection(row)"
           [checked]="selection.isSelected(row)"
           [aria-label]="checkboxLabel(row)"
           [disabled]="testRunningFacadeService.isRunningTest$()"
