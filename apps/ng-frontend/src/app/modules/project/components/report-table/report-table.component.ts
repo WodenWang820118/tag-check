@@ -6,7 +6,7 @@ import {
   OnInit,
   viewChild
 } from '@angular/core';
-import { MatTableModule } from '@angular/material/table';
+import { MatTable, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { tap, take } from 'rxjs';
@@ -46,7 +46,8 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
 export class ReportTableComponent implements OnInit {
   private readonly paginator = viewChild<MatPaginator>(MatPaginator);
   private readonly sort = viewChild<MatSort>(MatSort);
-  private readonly reportTable = viewChild('reportTable');
+  private readonly reportTable =
+    viewChild<MatTable<IReportDetails>>('reportTable');
 
   constructor(
     public testRunningFacadeService: TestRunningFacadeService,
@@ -56,7 +57,6 @@ export class ReportTableComponent implements OnInit {
     private readonly tableSortService: TableSortService,
     private readonly cdr: ChangeDetectorRef
   ) {}
-  // TODO: retrieve the pass or not information from the test event details
   ngOnInit() {
     const paginator = this.paginator();
     const sort = this.sort();
@@ -111,6 +111,8 @@ export class ReportTableComponent implements OnInit {
       .runTest(eventId)
       .pipe(take(1))
       .subscribe(() => {
+        // Ensure the material table updates immediately with new data
+        this.reportTable()?.renderRows();
         this.cdr.detectChanges();
       });
   }
