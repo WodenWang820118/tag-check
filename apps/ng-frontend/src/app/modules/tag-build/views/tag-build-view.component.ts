@@ -11,10 +11,17 @@ import { SpecService } from '../../../shared/services/api/spec/spec.service';
   imports: [AsyncPipe, NgComponentOutlet],
   template: `
     @if (tagBuildPageComponent | async; as tagBuildPageComponent) {
-      <ng-container
-        [ngComponentOutlet]="tagBuildPageComponent"
-        [ngComponentOutletInputs]="{ specs: projectSpecSignal$() }"
-      ></ng-container>
+      @if (projectSpecSignal$().length > 0) {
+        <ng-container
+          [ngComponentOutlet]="tagBuildPageComponent"
+          [ngComponentOutletInputs]="{ specs: projectSpecSignal$() }"
+        ></ng-container>
+      } @else {
+        <ng-container
+          [ngComponentOutlet]="tagBuildPageComponent"
+          [ngComponentOutletInputs]="{ specs: [] }"
+        ></ng-container>
+      }
     }
   `,
   styles: [``]
@@ -39,7 +46,9 @@ export class TagBuildViewComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         tap((data) => {
-          this.projectSpecSignal.set(data.specs);
+          if (data.specs.length > 0) {
+            this.projectSpecSignal.set(data.specs);
+          }
         })
       )
       .subscribe();

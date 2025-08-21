@@ -38,26 +38,8 @@ export class EventTag {
       type: TagTypeEnum.GAAWE,
       accountId,
       containerId,
-      parameter: [
-        this.parameterUtils.createBooleanParameter(
-          'sendEcommerceData',
-          isSendEcommerceData
-        ),
-        this.parameterUtils.createTemplateParameter('eventName', tag.name),
-        this.parameterUtils.createListParameter(
-          'eventParameters',
-          this.processEcommerceData(tag, isSendEcommerceData)
-        ),
-        this.parameterUtils.createTagReferenceParameter(
-          'measurementId',
-          googleTagName
-        )
-      ],
-      firingTriggerId: tag.triggers
-        .map((t) =>
-          this.parameterUtils.findTriggerIdByEventName(t.name, triggers)
-        )
-        .flat(),
+      parameter: this.buildParameter(googleTagName, tag, isSendEcommerceData),
+      firingTriggerId: this.buildTriggerIds(tag, triggers),
       tagFiringOption: 'ONCE_PER_EVENT',
       monitoringMetadata: {
         type: 'MAP'
@@ -66,5 +48,35 @@ export class EventTag {
         consentStatus: 'NOT_SET'
       }
     };
+  }
+
+  private buildParameter(
+    googleTagName: string,
+    tag: Tag,
+    isSendEcommerceData: 'true' | 'false'
+  ) {
+    return [
+      this.parameterUtils.createBooleanParameter(
+        'sendEcommerceData',
+        isSendEcommerceData
+      ),
+      this.parameterUtils.createTemplateParameter('eventName', tag.name),
+      this.parameterUtils.createListParameter(
+        'eventParameters',
+        this.processEcommerceData(tag, isSendEcommerceData)
+      ),
+      this.parameterUtils.createTagReferenceParameter(
+        'measurementId',
+        googleTagName
+      )
+    ];
+  }
+
+  private buildTriggerIds(tag: Tag, triggers: Trigger[]): string[] {
+    return tag.triggers
+      .map((t) =>
+        this.parameterUtils.findTriggerIdByEventName(t.name, triggers)
+      )
+      .flat();
   }
 }

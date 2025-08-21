@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { inject, Injectable } from '@angular/core';
 import { XlsxProcessService } from '../xlsx-process/xlsx-process.service';
-import { Observable } from 'rxjs/internal/Observable';
-import { take, filter, tap, catchError, EMPTY } from 'rxjs';
+import { take, filter, tap, catchError, EMPTY, Observable } from 'rxjs';
 import { WebWorkerService } from '../web-worker/web-worker.service';
 import { Dialog } from '@angular/cdk/dialog';
 import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
@@ -12,18 +11,9 @@ import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog
 })
 export class XlsxProcessFacade {
   // Expose the necessary observables directly
-  private readonly xlsxProcessService = inject(XlsxProcessService);
+  public readonly xlsxProcessService = inject(XlsxProcessService);
   private readonly webWorkerService = inject(WebWorkerService);
   private readonly dialog = inject(Dialog);
-  workbook$ = this.xlsxProcessService.workbook$;
-  worksheetNames$ = this.xlsxProcessService.worksheetNames$;
-  fileName$ = this.xlsxProcessService.fileName$;
-  dataSource$ = this.xlsxProcessService.dataSource$;
-  displayedDataSource$ = this.xlsxProcessService.displayedDataSource$;
-  displayedColumns$ = this.xlsxProcessService.displayedColumns$;
-  displayedFailedEvents$ = this.xlsxProcessService.getDisplayedFailedEvents();
-  isRenderingJson$ = this.xlsxProcessService.getIsRenderingJson();
-  isPreviewing$ = this.xlsxProcessService.getIsPreviewing();
 
   onCloseOverlay(): void {
     this.xlsxProcessService.setIsPreviewing(true);
@@ -42,11 +32,11 @@ export class XlsxProcessFacade {
   }
 
   // Public API to get total events
-  getNumTotalEvents(): Observable<number> {
+  get numTotalEvents() {
     return this.xlsxProcessService.getNumTotalEvents();
   }
 
-  getNumParsedEvents(): Observable<number> {
+  get numParsedEvents() {
     return this.xlsxProcessService.getNumParsedEvents();
   }
 
@@ -54,27 +44,27 @@ export class XlsxProcessFacade {
     this.xlsxProcessService.setIsRenderingJson(isRenderingJson);
   }
 
-  getIsRenderingJson(): Observable<boolean> {
-    return this.xlsxProcessService.getIsRenderingJson();
+  get isRenderingJson() {
+    return this.xlsxProcessService.isRenderingJson;
   }
 
   setIsPreviewing(isPreviewing: boolean): void {
     this.xlsxProcessService.setIsPreviewing(isPreviewing);
   }
 
-  getIsPreviewing(): Observable<boolean> {
-    return this.xlsxProcessService.getIsPreviewing();
+  get isPreviewing() {
+    return this.xlsxProcessService.isPreviewing;
   }
 
   resetAllData(): void {
     this.xlsxProcessService.resetAllData();
   }
 
-  withDataHandling(source: Observable<any>, action: string, name: string) {
+  withDataHandling(source: any, action: string, name: string) {
     return this.commonPipeHandler(source, action, name).subscribe();
   }
 
-  withWorkbookHandling(source: Observable<any>, action: string, name: string) {
+  withWorkbookHandling(source: any, action: string, name: string) {
     this.xlsxProcessService.setIsPreviewing(true);
     this.xlsxProcessService.setIsRenderingJson(false);
     return this.commonPipeHandler(source, action, name).subscribe();
@@ -109,19 +99,28 @@ export class XlsxProcessFacade {
   }
 
   retrieveSpecsFromSource(dataColoumnName: string) {
-    this.withDataHandling(this.dataSource$, 'extractSpecs', dataColoumnName);
+    this.withDataHandling(
+      this.xlsxProcessService.xlsxDisplayService.dataSource$,
+      'extractSpecs',
+      dataColoumnName
+    );
   }
 
   previewData(dataColumnName: string) {
     this.withDataHandling(
-      this.displayedDataSource$,
+      this.xlsxProcessService.xlsxDisplayService.displayedDataSource$(),
       'previewData',
       dataColumnName
     );
   }
 
   switchToSelectedSheet(name: string) {
-    this.withWorkbookHandling(this.workbook$, 'switchSheet', name);
+    // Ensure workbook$() returns an observable, not a direct value
+    const workbook$ = this.xlsxProcessService.workbookService.workbook$();
+    if (typeof workbook$?.pipe !== 'function') {
+      throw new Error('workbook$ must be an observable');
+    }
+    this.withWorkbookHandling(workbook$, 'switchSheet', name);
   }
 
   onAction(action: string, dataColumnName: string | null) {

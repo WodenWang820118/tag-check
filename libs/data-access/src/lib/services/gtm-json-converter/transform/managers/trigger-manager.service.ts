@@ -15,13 +15,8 @@ export class TriggerManager {
   ) {}
 
   createTriggers(dataLayer: DataLayer[]): Trigger[] {
-    const results = dataLayer.map(({ event }, index) => {
-      return {
-        name: event,
-        triggerId: (index + 1).toString()
-      };
-    });
-    return results;
+    const triggers = this.buildSimpleTriggers(dataLayer);
+    return this.assignTriggerIds(triggers) as Trigger[];
   }
 
   getTriggers(
@@ -29,17 +24,45 @@ export class TriggerManager {
     containerId: string,
     dataLayer: DataLayer[]
   ): TriggerConfig[] {
-    const results = [
-      ...dataLayer.map(({ event }) => {
-        return this.eventTrigger.createTrigger(accountId, containerId, event);
-      }),
-      ...this.videoTrigger.createVideoTrigger(accountId, containerId),
-      ...this.scrollTrigger.createScrollTrigger(accountId, containerId)
-    ].map((_trigger, index) => ({
-      ..._trigger,
-      triggerId: (index + 1).toString()
-    }));
-    console.log('triggers: ', results);
-    return results;
+    const triggers = this.buildAllTriggers(accountId, containerId, dataLayer);
+    return this.assignTriggerIds(triggers) as TriggerConfig[];
+  }
+
+  // Private helper to build simple triggers without IDs
+  private buildSimpleTriggers(
+    dataLayer: DataLayer[]
+  ): Array<Omit<Trigger, 'triggerId'>> {
+    return dataLayer.map(({ event }) => ({ name: event }));
+  }
+
+  // Private helper to build all trigger configs
+  private buildAllTriggers(
+    accountId: string,
+    containerId: string,
+    dataLayer: DataLayer[]
+  ): TriggerConfig[] {
+    const eventTriggers = dataLayer.map(({ event }) =>
+      this.eventTrigger.createTrigger(accountId, containerId, event)
+    );
+    const videoTriggers = this.videoTrigger.createVideoTrigger(
+      accountId,
+      containerId
+    );
+    const scrollTriggers = this.scrollTrigger.createScrollTrigger(
+      accountId,
+      containerId
+    );
+    return [...eventTriggers, ...videoTriggers, ...scrollTriggers];
+  }
+
+  // Private helper to assign sequential IDs to triggers
+  private assignTriggerIds<T>(triggers: T[]): Array<T & { triggerId: string }> {
+    return triggers.map(
+      (trigger, idx) =>
+        ({
+          ...trigger,
+          triggerId: String(idx + 1)
+        }) as T & { triggerId: string }
+    );
   }
 }
