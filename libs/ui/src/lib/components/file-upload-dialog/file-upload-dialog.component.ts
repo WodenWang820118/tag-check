@@ -1,7 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, computed, effect, signal } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
-import { BehaviorSubject, tap } from 'rxjs';
 import { EventBusService, EditorFacadeService } from '@data-access';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -52,10 +51,19 @@ export class FileUploadDialogComponent {
     public dialog: MatDialog,
     private readonly eventBusService: EventBusService,
     private readonly editorFacadeService: EditorFacadeService
-  ) {}
+  ) {
+    effect(() => {
+      const fileContent = this.fileContent();
+      if (fileContent !== null) {
+        this.editorFacadeService.setInputJsonContent(fileContent);
+        this.dialog.closeAll();
+      }
+    });
+  }
 
   selectedFile: File | null = null;
-  fileContent = new BehaviorSubject<unknown | null>(null);
+  fileContent = signal<unknown | null>(null);
+  fileContent$ = computed(() => this.fileContent());
 
   handFileToSidenavForm(file: File) {
     this.dialog.closeAll();
@@ -93,7 +101,6 @@ export class FileUploadDialogComponent {
 
   handleJsonFile(file: File): void {
     this.readJsonFileContent(file);
-    this.handleJsonFileContent();
   }
 
   readJsonFileContent(file: File): void {
@@ -111,7 +118,7 @@ export class FileUploadDialogComponent {
 
       try {
         // update the file content
-        this.fileContent.next(JSON.parse(fileContentString));
+        this.fileContent.set(JSON.parse(fileContentString));
       } catch (error) {
         console.error('Error parsing JSON file:', error);
         this.dialog.open(ErrorDialogComponent, {
@@ -131,19 +138,5 @@ export class FileUploadDialogComponent {
     };
 
     reader.readAsText(file);
-  }
-
-  handleJsonFileContent() {
-    // handle the file content after it has been read
-    this.fileContent
-      .pipe(
-        tap((data) => {
-          if (data != null) {
-            this.editorFacadeService.setInputJsonContent(data);
-            this.dialog.closeAll();
-          }
-        })
-      )
-      .subscribe();
   }
 }

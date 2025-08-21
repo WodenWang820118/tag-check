@@ -6,6 +6,14 @@ import { ParameterUtils } from '../utils/parameter-utils.service';
   providedIn: 'root'
 })
 export class GoogleTag {
+  // Extracted constants
+  private static readonly DEFAULT_TRIGGER_ID = '2147479553';
+  private static readonly TAG_FIRING_OPTION = 'ONCE_PER_EVENT';
+  private static readonly MONITORING_METADATA_TYPE = 'MAP';
+  private static readonly CONSENT_STATUS = 'NOT_SET';
+  private static readonly MEASUREMENT_ID_TEMPLATE =
+    '{{CONST - Measurement ID}}';
+
   constructor(private readonly parameterUtils: ParameterUtils) {}
   createGA4Configuration(
     googleTagName: string,
@@ -20,25 +28,29 @@ export class GoogleTag {
       type: TagTypeEnum.GOOGLE_TAG,
       accountId,
       containerId,
-      parameter: [
-        this.parameterUtils.createTemplateParameter(
-          'tagId',
-          `{{CONST - Measurement ID}}`
-        ),
-        this.parameterUtils.createBooleanParameter('sendPageView', 'false'),
-        this.parameterUtils.createBooleanParameter(
-          'enableSendToServerContainer',
-          'false'
-        )
-      ],
-      firingTriggerId: ['2147479553'],
-      tagFiringOption: 'ONCE_PER_EVENT',
+      parameter: this.buildParameters(),
+      firingTriggerId: [GoogleTag.DEFAULT_TRIGGER_ID],
+      tagFiringOption: GoogleTag.TAG_FIRING_OPTION,
       monitoringMetadata: {
-        type: 'MAP'
+        type: GoogleTag.MONITORING_METADATA_TYPE
       },
       consentSettings: {
-        consentStatus: 'NOT_SET'
+        consentStatus: GoogleTag.CONSENT_STATUS
       }
     };
+  }
+
+  private buildParameters() {
+    return [
+      this.parameterUtils.createTemplateParameter(
+        'tagId',
+        GoogleTag.MEASUREMENT_ID_TEMPLATE
+      ),
+      this.parameterUtils.createBooleanParameter('sendPageView', 'false'),
+      this.parameterUtils.createBooleanParameter(
+        'enableSendToServerContainer',
+        'false'
+      )
+    ];
   }
 }

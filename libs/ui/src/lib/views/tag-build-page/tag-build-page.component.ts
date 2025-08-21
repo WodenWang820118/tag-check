@@ -1,5 +1,5 @@
 import { EditorComponent } from '../../components/editor/editor.component';
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FunctionalCardComponent } from '../../components/functional-card/functional-card.component';
 import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -13,7 +13,7 @@ import { JsonPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagBuildPageComponent {
-  @Input() specs: Spec[] | null = null;
+  specs = input.required<Spec[]>();
   inputExtension = EditorTypeEnum.INPUT_JSON;
   outputExtension = EditorTypeEnum.OUTPUT_JSON;
 

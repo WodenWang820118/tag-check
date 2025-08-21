@@ -3,19 +3,18 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   AfterViewInit,
   Component,
+  computed,
   ElementRef,
   inject,
   OnDestroy,
-  ViewChild,
+  viewChild,
   ViewEncapsulation
 } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { EventBusService, XlsxProcessFacade } from '@data-access';
 import {
-  Observable,
   Subject,
   combineLatest,
-  map,
   switchMap,
   takeUntil,
   takeWhile,
@@ -31,14 +30,12 @@ import {
 import { ProgressSpinnerComponent } from '../progress-spinner/progress-spinner.component';
 import { CustomMatTableComponent } from '../custom-mat-table/custom-mat-table.component';
 import { MatIconModule } from '@angular/material/icon';
-import { AsyncPipe } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 
 @Component({
   selector: 'lib-xlsx-sidenav-form',
   standalone: true,
   imports: [
-    AsyncPipe,
     MatSidenavModule,
     MatProgressSpinnerModule,
     MatCardModule,
@@ -58,26 +55,9 @@ export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
   private readonly eventBusService = inject(EventBusService);
   private readonly fb = inject(FormBuilder);
 
-  @ViewChild('sidenav') sidenav: MatSidenav | undefined;
-  @ViewChild('scrollContainer', { static: false }) scrollContainer!: ElementRef;
+  sidenav = viewChild<MatSidenav>('sidenav');
+  scrollContainer = viewChild<ElementRef>('scrollContainer');
 
-  fileName$ = this.xlsxFacadeService.fileName$ as Observable<string>;
-  worksheetNames$ = this.xlsxFacadeService.worksheetNames$ as Observable<
-    string[]
-  >;
-  workbook$ = this.xlsxFacadeService.workbook$ as Observable<any>;
-  dataSource$ = this.xlsxFacadeService.dataSource$ as Observable<any[]>;
-  displayedDataSource$ = this.xlsxFacadeService
-    .displayedDataSource$ as Observable<any[]>;
-  displayedColumns$ = this.xlsxFacadeService.displayedColumns$ as Observable<
-    string[]
-  >;
-
-  displayedFailedColumns = ['failedEvents'];
-  displayedFailedEvents$ = this.xlsxFacadeService.displayedFailedEvents$;
-  hasProcessedFailedEvents$ = this.displayedFailedEvents$.pipe(
-    map((events) => events.length > 0)
-  );
   private readonly destroy$ = new Subject<void>();
 
   file: File | undefined;
@@ -88,8 +68,27 @@ export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
     dataColumnName: [this.dataColumnNameString, Validators.required]
   });
 
-  numTotalTags$ = this.xlsxFacadeService.getNumTotalEvents();
-  numParsedTags$ = this.xlsxFacadeService.getNumParsedEvents();
+  numTotalTags = this.xlsxFacadeService.numTotalEvents;
+  numParsedTags = this.xlsxFacadeService.numParsedEvents;
+  displayedColumns$ =
+    this.xlsxFacadeService.xlsxProcessService.xlsxDisplayService
+      .displayedColumns$;
+  displayedFailedColumns$ =
+    this.xlsxFacadeService.xlsxProcessService.xlsxDisplayService
+      .displayedColumns$;
+  displayedFailedEvents$ =
+    this.xlsxFacadeService.xlsxProcessService.xlsxDisplayService
+      .displayedFailedEvents$;
+  hasProcessedFailedEvents$ = computed(
+    () => this.displayedFailedEvents$().length > 0
+  );
+  displayedDataSource$ =
+    this.xlsxFacadeService.xlsxProcessService.xlsxDisplayService
+      .displayedDataSource$;
+  worksheetNames$ =
+    this.xlsxFacadeService.xlsxProcessService.workbookService.worksheetNames$;
+  fileName$ =
+    this.xlsxFacadeService.xlsxProcessService.workbookService.fileName$;
 
   // Lifecycle hooks
   ngAfterViewInit() {
@@ -109,42 +108,38 @@ export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
 
   private adjustBodyOverflow() {
     if (!this.sidenav) return;
-    this.sidenav.toggle();
-    document.body.style.overflow = this.sidenav.opened ? 'hidden' : 'auto';
+    this.sidenav()?.toggle();
+    document.body.style.overflow = this.sidenav()?.opened ? 'hidden' : 'auto';
   }
 
   private isLoading() {
     const spinningTime = 1;
     return combineLatest({
-      timer: timer(0, 500),
-      workbook: this.xlsxFacadeService.workbook$,
-      dataSource: this.xlsxFacadeService.dataSource$,
-      displayedDataSource: this.xlsxFacadeService.displayedDataSource$,
-      displayedColumns: this.xlsxFacadeService.displayedColumns$
+      timer: timer(0, 500)
     }).pipe(
       takeWhile(({ timer }) => timer <= spinningTime),
-      tap(
-        ({
-          timer,
-          workbook,
-          dataSource,
-          displayedDataSource,
-          displayedColumns
-        }) => {
-          if (
-            !workbook ||
-            !dataSource ||
-            !displayedDataSource ||
-            !displayedColumns
-          ) {
-            this.loading = true;
-          } else if (timer === spinningTime) {
-            this.loading = false;
-          } else {
-            this.loading = true;
-          }
+      tap(({ timer }) => {
+        const workbook =
+          this.xlsxFacadeService.xlsxProcessService.workbookService.workbook$();
+        const dataSource =
+          this.xlsxFacadeService.xlsxProcessService.xlsxDisplayService.dataSource$();
+        const displayedDataSource =
+          this.xlsxFacadeService.xlsxProcessService.xlsxDisplayService.displayedDataSource$();
+        const displayedColumns =
+          this.xlsxFacadeService.xlsxProcessService.xlsxDisplayService.displayedColumns$();
+        if (
+          !workbook ||
+          !dataSource ||
+          !displayedDataSource ||
+          !displayedColumns
+        ) {
+          this.loading = true;
+        } else if (timer === spinningTime) {
+          this.loading = false;
+        } else {
+          this.loading = true;
         }
-      )
+      })
     );
   }
 
@@ -166,11 +161,9 @@ export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
       throw new Error('Event target is undefined');
     }
     const name = (event.target as HTMLInputElement).value;
-    this.xlsxFacadeService.withWorkbookHandling(
-      this.workbook$,
-      'switchSheet',
-      name
-    );
+    const workbook =
+      this.xlsxFacadeService.xlsxProcessService.workbookService.workbook$();
+    this.xlsxFacadeService.withWorkbookHandling(workbook, 'switchSheet', name);
   }
 
   onAction(action: string) {
