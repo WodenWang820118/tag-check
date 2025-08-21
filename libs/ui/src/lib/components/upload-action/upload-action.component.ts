@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 
 @Component({
@@ -18,7 +18,7 @@ import { MatButtonModule } from '@angular/material/button';
   styles: []
 })
 export class UploadActionComponent {
-  @Output() uploadClick = new EventEmitter<void>();
+  uploadClick = output<void>();
 
   onUploadClick() {
     this.uploadClick.emit();

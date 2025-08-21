@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 enum ProgressSpinnerColor {
@@ -17,11 +17,11 @@ enum ProgressSpinnerColor {
         <mat-progress-spinner
           mode="determinate"
           [value]="getRatio()"
-          [color]="color"
+          [color]="color()"
           [diameter]="50"
           [strokeWidth]="10"
         ></mat-progress-spinner>
-        <p>Parsed tags: {{ numParsedTags }} / {{ numTotalTags }}</p>
+        <p>Parsed tags: {{ numParsedTags() }} / {{ numTotalTags() }}</p>
       </div>
       <div class="progress__description">
         <p>
@@ -56,12 +56,14 @@ enum ProgressSpinnerColor {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProgressSpinnerComponent {
-  @Input() numParsedTags: number | null = null;
-  @Input() numTotalTags: number | null = null;
-  @Input() color: ProgressSpinnerColor = ProgressSpinnerColor.primary;
+  numParsedTags = input<number | null>(null);
+  numTotalTags = input<number | null>(null);
+  color = input<ProgressSpinnerColor>(ProgressSpinnerColor.primary);
 
   getRatio() {
-    if (this.numParsedTags === null || this.numTotalTags === null) return;
-    return (this.numParsedTags / this.numTotalTags) * 100;
+    const parsedTags = this.numParsedTags();
+    const totalTags = this.numTotalTags();
+    if (parsedTags === null || totalTags === null || totalTags === 0) return 0;
+    return (parsedTags / totalTags) * 100;
   }
 }
