@@ -1,13 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable, OnDestroy } from '@angular/core';
-import {
-  BehaviorSubject,
-  Subject,
-  map,
-  shareReplay,
-  takeUntil,
-  tap
-} from 'rxjs';
+import { Subject, takeUntil, tap } from 'rxjs';
 import { WebWorkerService } from '../../services/web-worker/web-worker.service';
 import { WorkbookService } from '../workbook/workbook.service';
 import { XlsxDisplayService } from '../xlsx-display/xlsx-display.service';
@@ -17,33 +10,13 @@ import { FileService } from '../file/file.service';
   providedIn: 'root'
 })
 export class XlsxProcessService implements OnDestroy {
-  workbook$: BehaviorSubject<any>;
-  worksheetNames$: BehaviorSubject<string[]>;
-  fileName$: BehaviorSubject<string>;
-  dataSource$: BehaviorSubject<any[]>;
-  displayedDataSource$: BehaviorSubject<any[]>;
-  displayedColumns$: BehaviorSubject<string[]>;
-  displayedFailedEvents$: BehaviorSubject<string[]>;
-  isRenderingJson$: BehaviorSubject<boolean>;
-  isPreviewing$: BehaviorSubject<boolean>;
   private readonly destroy$ = new Subject<void>();
   constructor(
     private readonly webWorkerService: WebWorkerService,
-    private readonly workbookService: WorkbookService,
     private readonly fileService: FileService,
-    private readonly xlsxDisplayService: XlsxDisplayService
-  ) {
-    this.workbook$ = this.workbookService.workbook$;
-    this.worksheetNames$ = this.workbookService.worksheetNames$;
-    this.fileName$ = this.workbookService.fileName$;
-    this.dataSource$ = this.xlsxDisplayService.dataSource$;
-    this.displayedDataSource$ = this.xlsxDisplayService.displayedDataSource$;
-    this.displayedColumns$ = this.xlsxDisplayService.displayedColumns$;
-    this.displayedFailedEvents$ =
-      this.xlsxDisplayService.displayedFailedEvents$;
-    this.isRenderingJson$ = this.xlsxDisplayService.isRenderingJson$;
-    this.isPreviewing$ = this.xlsxDisplayService.isPreviewing$;
-  }
+    public readonly workbookService: WorkbookService,
+    public readonly xlsxDisplayService: XlsxDisplayService
+  ) {}
 
   async loadXlsxFile(file: File) {
     try {
@@ -54,7 +27,7 @@ export class XlsxProcessService implements OnDestroy {
         action: 'readXlsx',
         data: fileData
       });
-      this.fileName$.next(file.name);
+      this.workbookService.setFileName(file.name);
     } catch (error) {
       console.error(error);
     }
@@ -83,41 +56,31 @@ export class XlsxProcessService implements OnDestroy {
   }
 
   getNumTotalEvents() {
-    return this.dataSource$.pipe(
-      map((data) => {
-        return data.length;
-      }),
-      shareReplay(1) // cache the last emitted value
-    );
+    return this.xlsxDisplayService.dataSource$().length;
   }
 
   getNumParsedEvents() {
-    return this.displayedDataSource$.pipe(
-      map((data) => {
-        return data.length;
-      }),
-      shareReplay(1) // cache the last emitted value
-    );
+    return this.xlsxDisplayService.displayedDataSource$().length;
   }
 
-  getIsRenderingJson() {
-    return this.isRenderingJson$.asObservable();
+  get isRenderingJson() {
+    return this.xlsxDisplayService.isRenderingJson$();
   }
 
   setIsRenderingJson(isRenderingJson: boolean) {
     this.xlsxDisplayService.setIsRenderingJson(isRenderingJson);
   }
 
-  getIsPreviewing() {
-    return this.isPreviewing$.asObservable();
+  get isPreviewing() {
+    return this.xlsxDisplayService.isPreviewing$();
   }
 
   setIsPreviewing(isPreviewing: boolean) {
     this.xlsxDisplayService.setIsPreviewing(isPreviewing);
   }
 
-  getDisplayedFailedEvents() {
-    return this.displayedFailedEvents$.asObservable();
+  get displayedFailedEvents() {
+    return this.xlsxDisplayService.displayedFailedEvents$();
   }
 
   resetAllData() {
