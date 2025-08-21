@@ -24,7 +24,7 @@ export class UtilsService {
     //output the time like the format: 2023-08-03 02:16:33
     const date: Date = new Date();
 
-    let year: number = date.getFullYear();
+    const year: number = date.getFullYear();
 
     let month: number | string = date.getMonth() + 1; // getMonth() is zero-indexed, so we need to add 1
     month = month < 10 ? '0' + month : month; // ensure month is 2-digits
@@ -59,7 +59,7 @@ export class UtilsService {
     let paths: string[] = [];
 
     for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         const path = prefix ? `${prefix}.${key}` : key;
         paths.push(path);
 

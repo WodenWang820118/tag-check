@@ -32,6 +32,7 @@ export class EditorFacadeService {
   }
 
   hasVideoTag(json: any) {
+    if (!Array.isArray(json)) return false;
     return json.some(
       (item: any) =>
         item.event === 'video_start' ||
@@ -41,6 +42,7 @@ export class EditorFacadeService {
   }
 
   hasScrollTag(json: any) {
+    if (!Array.isArray(json)) return false;
     return json.some((item: any) => item.event === 'scroll');
   }
 

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ParameterUtils } from './parameter-utils.service';
-import { Parameter, ParameterMap, Trigger, TriggerConfig } from '@utils';
+import { Parameter, ParameterMap, Trigger } from '@utils';
 
 describe('ParameterUtils', () => {
   let service: ParameterUtils;
@@ -40,10 +40,12 @@ describe('ParameterUtils', () => {
 
     expect(result.type).toBe('LIST');
     expect(result.key).toBe(key);
-    expect(result.list.length).toBe(3);
-    expect(result.list[0].map[1].value).toBe('{{DLV - ecommerce.value}}');
-    expect(result.list[1].map[1].value).toBe('{{DLV - ecommerce.currency}}');
-    expect(result.list[2].map[1].value).toBe('{{DLV - ecommerce.items}}');
+    expect(result.list?.length).toBe(3);
+    expect(result.list?.[0].map?.[1]?.value).toBe('{{DLV - ecommerce.value}}');
+    expect(result.list?.[1].map?.[1]?.value).toBe(
+      '{{DLV - ecommerce.currency}}'
+    );
+    expect(result.list?.[2].map?.[1]?.value).toBe('{{DLV - ecommerce.items}}');
   });
 
   it('should create a built-in list parameter correctly', () => {
@@ -131,7 +133,7 @@ describe('ParameterUtils', () => {
     expect(result).toEqual(['1']);
   });
 
-  it('should return an empty string if no matching trigger is found', () => {
+  it('should return an empty array if no matching trigger is found', () => {
     const eventName = 'nonExistentEvent';
     const triggers: Trigger[] = [
       {
