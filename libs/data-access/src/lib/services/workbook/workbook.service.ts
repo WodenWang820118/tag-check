@@ -1,23 +1,41 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { computed, Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkbookService {
-  workbook$ = new BehaviorSubject<any>(null);
-  worksheetNames$ = new BehaviorSubject<string[]>(['']);
-  fileName$ = new BehaviorSubject<string>('');
+  private readonly workbook = signal<any>(null);
+  workbook$ = computed(() => this.workbook());
+  private readonly worksheetNames = signal<string[]>(['']);
+  worksheetNames$ = computed(() => this.worksheetNames());
+  private readonly fileName = signal<string>('');
+  fileName$ = computed(() => this.fileName());
+
+  setWorkbook(workbook: any) {
+    this.workbook.set(workbook);
+  }
+
+  setWorksheetNames(worksheetNames: string[]) {
+    this.worksheetNames.set(worksheetNames);
+  }
+
+  setFileName(fileName: string) {
+    this.fileName.set(fileName);
+  }
 
   handleReadXlsxAction(data: any): void {
-    this.workbook$.next(data.workbook);
-    this.worksheetNames$.next(data.sheetNames);
+    this.workbook.set(data.workbook);
+    this.worksheetNames.set(data.sheetNames);
   }
 
   resetWorkbookData() {
-    this.workbook$.next(null);
-    this.worksheetNames$.next(['']);
-    this.fileName$.next('');
+    this.workbook.set(null);
+    this.worksheetNames.set(['']);
+    this.fileName.set('');
+  }
+
+  resetFileName() {
+    this.fileName.set('');
   }
 }

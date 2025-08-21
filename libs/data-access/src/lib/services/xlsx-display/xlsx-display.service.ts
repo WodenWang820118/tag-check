@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { computed, Injectable, signal } from '@angular/core';
 import { EditorService } from '../../services/editor/editor.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DataRow, EditorTypeEnum } from '@utils';
@@ -11,12 +10,23 @@ import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog
   providedIn: 'root'
 })
 export class XlsxDisplayService {
-  dataSource$ = new BehaviorSubject<any[]>([]);
-  displayedDataSource$ = new BehaviorSubject<any[]>([]);
-  displayedColumns$ = new BehaviorSubject<string[]>([]);
-  displayedFailedEvents$ = new BehaviorSubject<any[]>([]);
-  isRenderingJson$ = new BehaviorSubject<boolean>(false);
-  isPreviewing$ = new BehaviorSubject<boolean>(true);
+  private readonly dataSource = signal<any[]>([]);
+  dataSource$ = computed(() => this.dataSource());
+
+  private readonly displayedDataSource = signal<any[]>([]);
+  displayedDataSource$ = computed(() => this.displayedDataSource());
+
+  private readonly displayedColumns = signal<string[]>([]);
+  displayedColumns$ = computed(() => this.displayedColumns());
+
+  private readonly displayedFailedEvents = signal<any[]>([]);
+  displayedFailedEvents$ = computed(() => this.displayedFailedEvents());
+
+  private readonly isRenderingJson = signal<boolean>(false);
+  isRenderingJson$ = computed(() => this.isRenderingJson());
+
+  private readonly isPreviewing = signal<boolean>(true);
+  isPreviewing$ = computed(() => this.isPreviewing());
 
   constructor(
     private readonly dialog: MatDialog,
@@ -26,16 +36,16 @@ export class XlsxDisplayService {
 
   // TODO: data types
   handleReadXlsxAction(data: any): void {
-    this.dataSource$.next(data.jsonData);
+    this.dataSource.set(data.jsonData);
     this.updateDisplayData(this.xlsxHelper.filterNonEmptyData(data.jsonData));
   }
 
   handleSwitchSheetAction(data: any) {
-    this.dataSource$.next(data.jsonData);
-    this.displayedDataSource$.next(
+    this.dataSource.set(data.jsonData);
+    this.displayedDataSource.set(
       this.xlsxHelper.filterNonEmptyData(data.jsonData)
     );
-    this.displayedColumns$.next(
+    this.displayedColumns.set(
       Object.keys(this.xlsxHelper.filterNonEmptyData(data.jsonData)[0])
     );
   }
@@ -56,11 +66,14 @@ export class XlsxDisplayService {
         failedEvents: jsonString
       });
     });
-    this.displayedFailedEvents$.next(failedEvents);
-    this.displayedDataSource$.next(combinedData);
-    this.displayedColumns$.next(['Spec']);
+    this.displayedFailedEvents.set(failedEvents);
+    this.displayedDataSource.set(combinedData);
+    this.displayedColumns.set(['Spec']);
 
-    if (this.displayedDataSource$.getValue()[0].Spec === null) {
+    if (
+      this.displayedDataSource().length > 0 &&
+      this.displayedDataSource()[0].Spec === null
+    ) {
       this.dialog.open(ErrorDialogComponent, {
         data: {
           message: `No events found in the selected colulmn. Please select another sheet and try again.`
@@ -86,8 +99,8 @@ export class XlsxDisplayService {
   }
 
   updateDisplayData(data: any) {
-    this.displayedDataSource$.next(data);
-    this.displayedColumns$.next(Object.keys(data[0]));
+    this.displayedDataSource.set(data);
+    this.displayedColumns.set(Object.keys(data[0]));
   }
 
   processAndSetSpecsContent(data: DataRow[]): void {
@@ -99,19 +112,19 @@ export class XlsxDisplayService {
   }
 
   resetDisplayData() {
-    this.dataSource$.next([]);
-    this.displayedDataSource$.next([]);
-    this.displayedColumns$.next([]);
-    this.isRenderingJson$.next(false);
-    this.isPreviewing$.next(true);
-    this.displayedFailedEvents$.next([]);
+    this.dataSource.set([]);
+    this.displayedDataSource.set([]);
+    this.displayedColumns.set([]);
+    this.isRenderingJson.set(false);
+    this.isPreviewing.set(true);
+    this.displayedFailedEvents.set([]);
   }
 
   setIsRenderingJson(isRenderingJson: boolean) {
-    this.isRenderingJson$.next(isRenderingJson);
+    this.isRenderingJson.set(isRenderingJson);
   }
 
   setIsPreviewing(isPreviewing: boolean) {
-    this.isPreviewing$.next(isPreviewing);
+    this.isPreviewing.set(isPreviewing);
   }
 }
