@@ -27,7 +27,7 @@ export class FunctionalCardComponent {
   accordionContainer =
     viewChild.required<AdvancedExpansionPanelComponent>('accordionContainer');
   color = input<string>('primary');
-  private readonly dataLayer: any[];
+  private readonly dataLayer: Array<Record<string, unknown>>;
 
   constructor(
     private readonly transformService: TransformService,
@@ -38,7 +38,10 @@ export class FunctionalCardComponent {
     private readonly specExtractService: SpecExtractService,
     private readonly utilsService: UtilsService
   ) {
-    this.dataLayer = (window as any).dataLayer || [];
+    const dl = (
+      window as unknown as { dataLayer?: Array<Record<string, unknown>> }
+    ).dataLayer;
+    this.dataLayer = dl ?? [];
   }
 
   convertCode() {
@@ -147,13 +150,13 @@ export class FunctionalCardComponent {
       specs: json
     };
 
-    const result = this.transformService.convert(
+    const result = this.transformService.convert({
       googleTagName,
       measurementId,
-      gtmContainerConfig,
+      gtmConfigGenerator: gtmContainerConfig,
       isSendingEcommerceData,
-      esvConent
-    );
+      esvContent: esvConent
+    });
     this.postConversion(result);
   }
 

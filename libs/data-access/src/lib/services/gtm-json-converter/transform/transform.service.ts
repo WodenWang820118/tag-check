@@ -21,62 +21,83 @@ export class TransformService {
     private readonly dataLayerUtils: DataLayerUtils
   ) {}
 
-  convert(
-    googleTagName: string,
-    measurementId: string,
-    gtmConfigGenerator: GTMContainerConfig,
-    isSendingEcommerceData: 'true' | 'false',
-    esvContent: EventSettingsVariable[]
-  ) {
+  /**
+   * Orchestrates managers to build a GTM container configuration.
+   */
+  convert({
+    googleTagName,
+    measurementId,
+    gtmConfigGenerator,
+    isSendingEcommerceData,
+    esvContent
+  }: ConvertOptions): GTMFinalConfig {
     try {
-      const dataLayers = this.dataLayerUtils.getDataLayers(
-        gtmConfigGenerator.specs
-      );
+      const { accountId, containerId, containerName, gtmId, specs } =
+        gtmConfigGenerator;
 
-      const variables = this.variableManager.getVariables(
-        gtmConfigGenerator.accountId,
-        gtmConfigGenerator.containerId,
+      const dataLayers = this.dataLayerUtils.getDataLayers(specs);
+
+      const variables = this.variableManager.getVariables({
+        accountId,
+        containerId,
         measurementId,
         dataLayers,
         esvContent
-      );
+      });
 
-      const builtInVariables = this.variableManager.getBuiltInVariables(
-        gtmConfigGenerator.accountId,
-        gtmConfigGenerator.containerId,
+      const builtInVariables = this.variableManager.getBuiltInVariables({
+        accountId,
+        containerId,
         dataLayers
-      );
+      });
 
       const triggers = this.triggerManager.getTriggers(
-        gtmConfigGenerator.accountId,
-        gtmConfigGenerator.containerId,
+        accountId,
+        containerId,
         dataLayers
       );
 
+      // Avoid recomputing trigger structures used by tags
+      const createdTriggers = this.triggerManager.createTriggers(dataLayers);
+
       const tags = this.tagManager.getTags(
-        gtmConfigGenerator.accountId,
-        gtmConfigGenerator.containerId,
+        accountId,
+        containerId,
         dataLayers,
-        this.triggerManager.createTriggers(dataLayers),
+        createdTriggers,
         googleTagName,
         measurementId,
         isSendingEcommerceData
       );
 
-      const result = this.configManager.getGTMFinalConfiguration({
-        accountId: gtmConfigGenerator.accountId,
-        containerId: gtmConfigGenerator.containerId,
+      return this.configManager.getGTMFinalConfiguration({
+        accountId,
+        containerId,
         variables,
         builtInVariables,
         triggers,
         tags,
-        containerName: gtmConfigGenerator.containerName,
-        gtmId: gtmConfigGenerator.gtmId
+        containerName,
+        gtmId
       } as GTMFinalConfigurationOptions);
-      return result;
     } catch (error) {
-      console.error('An error occurred in ConverterService:', error);
-      throw new Error('Failed to convert the JSON');
+      // Preserve the original error for better diagnostics
+      console.error('[TransformService] Failed to convert GTM JSON:', error);
+      throw error;
     }
   }
 }
+
+/**
+ * Input contract for convert(). Groups parameters to keep the API stable and readable.
+ */
+export interface ConvertOptions {
+  googleTagName: string;
+  measurementId: string;
+  gtmConfigGenerator: GTMContainerConfig;
+  isSendingEcommerceData: 'true' | 'false';
+  esvContent: EventSettingsVariable[];
+}
+
+// Inferred return type based on ConfigManager.getGTMFinalConfiguration
+type GTMFinalConfig = ReturnType<ConfigManager['getGTMFinalConfiguration']>;

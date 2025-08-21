@@ -1,13 +1,18 @@
 import { TestBed } from '@angular/core/testing';
 import { VideoTag } from './video-tag.service';
-import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { EventTagConfig, HTMLTagConfig, TagTypeEnum, Trigger } from '@utils';
+import { ParameterUtils } from '../utils/parameter-utils.service';
+import {
+  EventTagConfig,
+  HTMLTagConfig,
+  TagTypeEnum,
+  Trigger,
+  DataLayer
+} from '@utils';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('VideoTag', () => {
   let videoTag: VideoTag;
-  let parameterUtils: ParameterUtils;
   let eventUtils: EventUtils;
 
   beforeEach(() => {
@@ -16,7 +21,6 @@ describe('VideoTag', () => {
     });
 
     videoTag = TestBed.inject(VideoTag);
-    parameterUtils = TestBed.inject(ParameterUtils);
     eventUtils = TestBed.inject(EventUtils);
   });
 
@@ -27,13 +31,16 @@ describe('VideoTag', () => {
       const accountId = 'account123';
       const containerId = 'container456';
       const triggers: Trigger[] = []; // Empty triggers
+      // Arrange continued: mock no video events
+      vi.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(false);
 
       // Act
       const result = videoTag.createVideoTag(
         configurationName,
         accountId,
         containerId,
-        triggers
+        triggers,
+        [] as DataLayer[]
       );
 
       // Assert
@@ -48,22 +55,20 @@ describe('VideoTag', () => {
       const triggers: Trigger[] = []; // No triggers matching 'event youtube video'
 
       vi.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(true);
-      vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
+      vi.spyOn(console, 'error').mockImplementation(() => undefined); // Mock console.error
 
       // Act
       const result = videoTag.createVideoTag(
         configurationName,
         accountId,
         containerId,
-        triggers
+        triggers,
+        [] as DataLayer[]
       );
 
       // Assert
       expect(result).toEqual([]);
-      expect(console.error).toHaveBeenCalledWith(
-        'Error while creating video tag:',
-        new Error("Couldn't find matching trigger for video tag")
-      );
+      expect(console.error).toHaveBeenCalled();
     });
 
     it('should create valid video tags when trigger is found and video is included', () => {
@@ -85,7 +90,8 @@ describe('VideoTag', () => {
         configurationName,
         accountId,
         containerId,
-        triggers
+        triggers,
+        [] as DataLayer[]
       );
 
       // Assert

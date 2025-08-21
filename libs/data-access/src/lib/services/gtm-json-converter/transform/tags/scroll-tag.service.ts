@@ -1,4 +1,4 @@
-import { EventTagConfig, TagTypeEnum, Trigger } from '@utils';
+import { EventTagConfig, TagTypeEnum, Trigger, DataLayer } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
@@ -7,11 +7,20 @@ import { EventUtils } from '../../utils/event-utils.service';
   providedIn: 'root'
 })
 export class ScrollTag {
+  // Constants for easier maintenance
+  private static readonly TRIGGER_NAME = 'event scroll';
+  private static readonly TAG_NAME = 'GA4 event - scroll';
+  private static readonly EVENT_NAME = 'scroll';
+  private static readonly FINGERPRINT = '1690184079241';
+  private static readonly SCROLL_DEPTH_KEY = 'scroll_depth_threshold';
+  private static readonly SCROLL_DEPTH_VAR = '{{Scroll Depth Threshold}}';
+
   constructor(
     private readonly parameterUtils: ParameterUtils,
     private readonly eventUtils: EventUtils
   ) {}
-  scrollTag(
+  // Build the scroll tag configuration
+  private buildScrollTag(
     configurationName: string,
     accountId: string,
     containerId: string,
@@ -21,18 +30,21 @@ export class ScrollTag {
       {
         accountId,
         containerId,
-        name: 'GA4 event - scroll',
+        name: ScrollTag.TAG_NAME,
         type: TagTypeEnum.GAAWE,
         parameter: [
           this.parameterUtils.createBooleanParameter(
             'sendEcommerceData',
             'false'
           ),
-          this.parameterUtils.createTemplateParameter('eventName', 'scroll'),
+          this.parameterUtils.createTemplateParameter(
+            'eventName',
+            ScrollTag.EVENT_NAME
+          ),
           this.parameterUtils.createBuiltInListParameter('eventParameters', [
             this.parameterUtils.createMapParameter(
-              'scroll_depth_threshold',
-              '{{Scroll Depth Threshold}}'
+              ScrollTag.SCROLL_DEPTH_KEY,
+              ScrollTag.SCROLL_DEPTH_VAR
             )
           ]),
           this.parameterUtils.createTagReferenceParameter(
@@ -40,7 +52,7 @@ export class ScrollTag {
             configurationName
           )
         ],
-        fingerprint: '1690184079241',
+        fingerprint: ScrollTag.FINGERPRINT,
         firingTriggerId: [triggerId],
         tagFiringOption: 'ONCE_PER_EVENT',
         monitoringMetadata: {
@@ -53,41 +65,37 @@ export class ScrollTag {
     ];
   }
 
-  createScrollTag(
+  /**
+   * Creates scroll tag(s) if scroll events are present in dataLayers
+   * @param configurationName GTM configuration tag reference
+   * @param accountId GTM account ID
+   * @param containerId GTM container ID
+   * @param triggers Available triggers to match
+   * @param dataLayers DataLayer events to inspect
+   */
+  public createScrollTag(
     configurationName: string,
     accountId: string,
     containerId: string,
-    triggers: Trigger[]
-  ) {
-    try {
-      // TODO: get the information whether the scroll is included in the data
-      const data = [] as any;
-      if (!this.eventUtils.isIncludeScroll(data)) {
-        return [];
-      }
-
-      const trigger = triggers.find(
-        (trigger) => trigger.name === 'event scroll'
-      );
-      if (!trigger) {
-        throw new Error("Couldn't find matching trigger for scroll tag");
-      }
-
-      if (!trigger.triggerId) {
-        throw new Error("Couldn't find triggerId for scroll tag");
-      }
-
-      return this.scrollTag(
-        configurationName,
-        accountId,
-        containerId,
-        trigger.triggerId
-      );
-    } catch (error) {
-      console.error('Error while creating scroll tag:', error);
-      // Potentially re-throw the error if it should be handled upstream
-      // throw error;
+    triggers: Trigger[],
+    dataLayers: DataLayer[] = []
+  ): EventTagConfig[] {
+    // Only proceed if scroll event is included
+    if (!this.eventUtils.isIncludeScroll(dataLayers)) {
       return [];
     }
+    // Find the scroll trigger
+    const trigger = triggers.find((t) => t.name === ScrollTag.TRIGGER_NAME);
+    if (!trigger?.triggerId) {
+      console.error(`Missing trigger (${ScrollTag.TRIGGER_NAME}) or triggerId`);
+      return [];
+    }
+    // Build and return the tag configuration
+    return this.buildScrollTag(
+      configurationName,
+      accountId,
+      containerId,
+      trigger.triggerId
+    );
   }
 }
