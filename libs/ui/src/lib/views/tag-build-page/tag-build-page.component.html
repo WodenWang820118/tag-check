@@ -9,11 +9,13 @@
     <div
       class="main-page__board__item main-page__editor grow border border-gray-300 dark:border-gray-700"
     >
-      @if (specs !== null) {
+      @if (specs().length > 0) {
         <lib-editor
-          content="{{ specs | json }}"
+          content="{{ specs() | json }}"
           [editorExtension]="inputExtension"
         />
+      } @else {
+        <lib-editor content="[]" [editorExtension]="inputExtension" />
       }
     </div>
     <div class="main-page__board__item grow">

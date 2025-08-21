@@ -13,7 +13,7 @@ import { JsonPipe } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagBuildPageComponent {
-  specs = input<Spec[] | null>(null);
+  specs = input.required<Spec[]>();
   inputExtension = EditorTypeEnum.INPUT_JSON;
   outputExtension = EditorTypeEnum.OUTPUT_JSON;
 
