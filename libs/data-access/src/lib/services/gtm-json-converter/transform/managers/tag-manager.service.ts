@@ -24,54 +24,16 @@ export class TagManager {
     measurementId: string,
     isSendingEcommerceData: 'true' | 'false'
   ): TagConfig[] {
-    const preprocessedTags: Tag[] = dataLayers.map((dL) => {
-      return {
-        name: dL.event,
-        triggers: triggers.filter((trigger) => trigger.name === dL.event),
-        parameters: this.preprocessParameters(dL.paths)
-      };
-    });
-
-    const configTag = this.googleTag.createGA4Configuration(
+    const configs = this.buildRawTagConfigs(
+      accountId,
+      containerId,
+      dataLayers,
+      triggers,
       googleTagName,
       measurementId,
-      accountId,
-      containerId
+      isSendingEcommerceData
     );
-
-    console.log('googletag:, ', configTag);
-
-    const tags = preprocessedTags.map((tag) => {
-      return this.eventTag.createTag(
-        googleTagName,
-        accountId,
-        containerId,
-        tag,
-        triggers,
-        isSendingEcommerceData
-      );
-    });
-
-    const videoTags = this.videoTag.createVideoTag(
-      googleTagName,
-      accountId,
-      containerId,
-      triggers
-    );
-
-    const scrollTags = this.scrollTag.createScrollTag(
-      googleTagName,
-      accountId,
-      containerId,
-      triggers
-    );
-
-    return [configTag, ...tags, ...videoTags, ...scrollTags].map(
-      (_data, index) => ({
-        ..._data,
-        tagId: (index + 1).toString()
-      })
-    );
+    return this.assignTagIds(configs) as TagConfig[];
   }
 
   private preprocessParameters(paths: string[]): Parameter[] {
@@ -82,5 +44,70 @@ export class TagManager {
         value: path
       };
     });
+  }
+
+  // Build raw TagConfig objects without tagId
+  private buildRawTagConfigs(
+    accountId: string,
+    containerId: string,
+    dataLayers: DataLayer[],
+    triggers: Trigger[],
+    googleTagName: string,
+    measurementId: string,
+    isSendingEcommerceData: 'true' | 'false'
+  ): Array<Omit<TagConfig, 'tagId'>> {
+    // Base Tag objects
+    const baseTags: Tag[] = dataLayers.map((dL) => ({
+      name: dL.event,
+      triggers: triggers.filter((t) => t.name === dL.event),
+      parameters: this.preprocessParameters(dL.paths)
+    }));
+
+    // GA4 configuration tag
+    const configTag = this.googleTag.createGA4Configuration(
+      googleTagName,
+      measurementId,
+      accountId,
+      containerId
+    );
+
+    // Event tags
+    const eventTags = baseTags.map((tag) =>
+      this.eventTag.createTag(
+        googleTagName,
+        accountId,
+        containerId,
+        tag,
+        triggers,
+        isSendingEcommerceData
+      )
+    );
+
+    // Video and scroll tags
+    const videoTags = this.videoTag.createVideoTag(
+      googleTagName,
+      accountId,
+      containerId,
+      triggers
+    );
+    const scrollTags = this.scrollTag.createScrollTag(
+      googleTagName,
+      accountId,
+      containerId,
+      triggers
+    );
+
+    return [configTag, ...eventTags, ...videoTags, ...scrollTags];
+  }
+
+  // Assign sequential tagIds
+  private assignTagIds<T>(items: T[]): Array<T & { tagId: string }> {
+    return items.map(
+      (item, idx) =>
+        ({
+          ...item,
+          tagId: String(idx + 1)
+        }) as T & { tagId: string }
+    );
   }
 }

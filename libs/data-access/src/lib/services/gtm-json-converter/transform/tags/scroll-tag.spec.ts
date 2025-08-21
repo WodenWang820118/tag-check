@@ -28,12 +28,15 @@ describe('ScrollTag', () => {
       const containerId = 'container456';
       const triggers: Trigger[] = []; // Empty triggers
 
+      // Arrange continued: mock no scroll events
+      vi.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(false);
       // Act
       const result = scrollTag.createScrollTag(
         configurationName,
         accountId,
         containerId,
-        triggers
+        triggers,
+        []
       );
 
       // Assert
@@ -47,18 +50,21 @@ describe('ScrollTag', () => {
       const containerId = 'container456';
       const triggers: Trigger[] = []; // No triggers matching 'event scroll'
 
-      vi.spyOn(console, 'error').mockImplementation(() => {}); // Mock console.error
+      vi.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(true);
+      vi.spyOn(console, 'error').mockImplementation(() => undefined); // Mock console.error
 
       // Act
       const result = scrollTag.createScrollTag(
         configurationName,
         accountId,
         containerId,
-        triggers
+        triggers,
+        []
       );
 
       // Assert
       expect(result).toEqual([]);
+      expect(console.error).toHaveBeenCalled();
     });
 
     it('should create a valid scroll tag when trigger is found and scroll is included', () => {
@@ -126,7 +132,8 @@ describe('ScrollTag', () => {
         configurationName,
         accountId,
         containerId,
-        triggers
+        triggers,
+        []
       );
 
       // Assert
