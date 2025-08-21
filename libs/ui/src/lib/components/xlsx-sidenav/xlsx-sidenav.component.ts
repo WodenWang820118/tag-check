@@ -7,7 +7,7 @@ import {
   ElementRef,
   inject,
   OnDestroy,
-  ViewChild,
+  viewChild,
   ViewEncapsulation
 } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
@@ -55,8 +55,8 @@ export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
   private readonly eventBusService = inject(EventBusService);
   private readonly fb = inject(FormBuilder);
 
-  @ViewChild('sidenav') sidenav: MatSidenav | undefined;
-  @ViewChild('scrollContainer', { static: false }) scrollContainer!: ElementRef;
+  sidenav = viewChild<MatSidenav>('sidenav');
+  scrollContainer = viewChild<ElementRef>('scrollContainer');
 
   private readonly destroy$ = new Subject<void>();
 
@@ -108,8 +108,8 @@ export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {
 
   private adjustBodyOverflow() {
     if (!this.sidenav) return;
-    this.sidenav.toggle();
-    document.body.style.overflow = this.sidenav.opened ? 'hidden' : 'auto';
+    this.sidenav()?.toggle();
+    document.body.style.overflow = this.sidenav()?.opened ? 'hidden' : 'auto';
   }
 
   private isLoading() {
