@@ -1,7 +1,6 @@
 import { computed, ElementRef, Injectable, signal } from '@angular/core';
 import { EditorView } from 'codemirror';
 import { placeholder } from '@codemirror/view';
-import { BehaviorSubject } from 'rxjs';
 import { jsonLightEditorExtensions } from './editor-extensions';
 import { editorStyles } from './editor-style';
 import { linter, lintGutter } from '@codemirror/lint';
@@ -18,31 +17,24 @@ export class EditorService {
     outputJson: jsonLightEditorExtensions
   };
 
-  // contentSubjects = {
-  //   inputJson: new BehaviorSubject(`Placeholder content for JSON editor`),
-  //   outputJson: new BehaviorSubject(``)
-  // };
-  contents = {
-    inputJson: signal(`Placeholder content for JSON editor`),
+  private readonly contents = {
+    inputJson: signal('[]'),
     outputJson: signal(`Placeholder content for JSON editor`)
   };
 
-  // editorSubjects = {
-  //   inputJson: new BehaviorSubject<EditorView>(new EditorView()),
-  //   outputJson: new BehaviorSubject<EditorView>(new EditorView())
-  // };
-  editorSubjects = {
+  contents$ = {
+    inputJson: computed(() => this.contents.inputJson()),
+    outputJson: computed(() => this.contents.outputJson())
+  };
+
+  private readonly editors = {
     inputJson: signal(new EditorView()),
     outputJson: signal(new EditorView())
   };
 
-  // editor$ = {
-  //   inputJson: this.editorSubjects.inputJson.asObservable(),
-  //   outputJson: this.editorSubjects.outputJson.asObservable()
-  // };
   editor$ = {
-    inputJson: computed(() => this.editorSubjects.inputJson()),
-    outputJson: computed(() => this.editorSubjects.outputJson())
+    inputJson: computed(() => this.editors.inputJson()),
+    outputJson: computed(() => this.editors.outputJson())
   };
 
   initEditorView(
@@ -90,18 +82,19 @@ export class EditorService {
       });
     }
 
-    this.editorSubjects[extension].set(editorView);
+    this.editors[extension].set(editorView);
   }
 
   setContent(extension: EditorTypeEnum, content: string) {
     // set content in contents
     this.contents[extension].set(content);
+    console.debug('setContent', content);
     // dispatch content to editorView
-    this.editorSubjects[extension]().dispatch({
+    this.editors[extension]().dispatch({
       changes: {
         from: 0,
         insert: content,
-        to: this.editorSubjects[extension]().state.doc.length
+        to: this.editors[extension]().state.doc.length
       }
     });
   }
