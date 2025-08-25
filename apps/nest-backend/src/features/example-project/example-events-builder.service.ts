@@ -6,6 +6,8 @@ import { events } from './events/events';
 import { IReportDetails } from '@utils';
 import { CreateFullTestEventDto } from '../../shared';
 import { ProjectRecordingService } from '../project-agent/project-recording/project-recording.service';
+import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
+import { join } from 'path';
 
 @Injectable()
 export class ExampleEventsBuilderService {
@@ -14,7 +16,8 @@ export class ExampleEventsBuilderService {
   constructor(
     private readonly projectReportService: ProjectReportService,
     private readonly testReportFacadeRepositoryService: TestReportFacadeRepositoryService,
-    private readonly projectRecordingService: ProjectRecordingService
+    private readonly projectRecordingService: ProjectRecordingService,
+    private readonly folderPathService: FolderPathService
   ) {}
 
   async buildEvents(projectSlug: string): Promise<void> {
@@ -45,6 +48,22 @@ export class ExampleEventsBuilderService {
         recording,
         spec
       };
+
+      // Attach GTM JSON file path if exists in project config folder
+      try {
+        const configFolder =
+          await this.folderPathService.getProjectConfigFolderPath(projectSlug);
+        const gtmPath = join(configFolder, 'gtm-container.json');
+        // mutate spec to include the path (CreateFullTestEventDto.spec is typed loosely in many places)
+        const specWithPath = fullReport.spec as unknown as {
+          gtmConfigurationPath?: string;
+        };
+        specWithPath.gtmConfigurationPath = gtmPath;
+      } catch (err) {
+        this.logger.debug(
+          'No project config folder available for GTM path: ' + err
+        );
+      }
 
       await this.projectReportService.createEventReportFolder(
         projectSlug,

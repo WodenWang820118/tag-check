@@ -1,8 +1,8 @@
-import { DataLayerSpec, Spec, StrictDataLayerEvent } from '@utils';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { StrictDataLayerEvent } from '@utils';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-// keep the frontend type to Spec while using DataLayerEvent in the backend
-export class CreateSpecDto implements DataLayerSpec, Spec {
+// DTO used to create a SpecEntity; supports new GTM JSON and legacy dataLayerSpec
+export class CreateSpecDto {
   @IsNotEmpty()
   @IsString()
   event!: string;
@@ -10,6 +10,6 @@ export class CreateSpecDto implements DataLayerSpec, Spec {
   @IsString()
   eventName!: string;
 
-  @IsNotEmpty()
-  dataLayerSpec!: StrictDataLayerEvent;
+  @IsOptional()
+  dataLayerSpec?: StrictDataLayerEvent;
 }

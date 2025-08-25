@@ -5,6 +5,10 @@ import { Cookie, LocalStorage } from '@utils';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 import { ApplicationSettingRepositoryService } from '../../core/repository/settings/application-setting-repository.service';
 import { ExampleEventsBuilderService } from './example-events-builder.service';
+import { exampleGtmJson } from './gtm-json';
+import { FileService } from '../../infrastructure/os/file/file.service';
+import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
+import { join } from 'path';
 
 @Injectable()
 export class ExampleProjectRepositoryService implements OnModuleInit {
@@ -16,7 +20,9 @@ export class ExampleProjectRepositoryService implements OnModuleInit {
     private readonly projectRepositoryService: ProjectRepositoryService,
     private readonly projectInitializationService: ProjectInitializationService,
     private readonly exampleEventsBuilderService: ExampleEventsBuilderService,
-    private readonly applicationSettingRepositoryService: ApplicationSettingRepositoryService
+    private readonly applicationSettingRepositoryService: ApplicationSettingRepositoryService,
+    private readonly fileService: FileService,
+    private readonly folderPathService: FolderPathService
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -31,10 +37,13 @@ export class ExampleProjectRepositoryService implements OnModuleInit {
 
       // 1. create a project with basic settings
       const projectSlug = 'example-project-slug';
+      const configFolder =
+        await this.folderPathService.getProjectConfigFolderPath(projectSlug);
       const createProjectDto: CreateProjectDto = {
         projectSlug: projectSlug,
         projectName: 'Example Project',
-        projectDescription: 'This is an example project'
+        projectDescription: 'This is an example project',
+        gtmConfigurationPath: configFolder
       };
 
       // First, initialize the project in the database and file system
@@ -42,6 +51,15 @@ export class ExampleProjectRepositoryService implements OnModuleInit {
         projectSlug,
         createProjectDto
       );
+
+      // Write example GTM JSON to the project's config folder
+      try {
+        const filePath = join(configFolder, 'gtm-container.json');
+        this.logger.debug(`Writing example GTM JSON to ${filePath}`);
+        this.fileService.writeJsonFile(filePath, exampleGtmJson);
+      } catch (err) {
+        this.logger.warn('Failed to write example GTM JSON file: ' + err);
+      }
 
       await this.exampleEventsBuilderService.buildEvents(projectSlug);
 

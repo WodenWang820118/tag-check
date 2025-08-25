@@ -1,8 +1,8 @@
 import { Exclude, Expose } from 'class-transformer';
-import { DataLayerSpec, StrictDataLayerEvent } from '@utils';
+import { StrictDataLayerEvent } from '@utils';
 
 @Exclude()
-export class AbstractSpecResponseDto implements DataLayerSpec {
+export class AbstractSpecResponseDto {
   @Expose()
   dataLayerSpec!: StrictDataLayerEvent;
 
