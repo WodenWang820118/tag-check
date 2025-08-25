@@ -17,4 +17,8 @@ export class CreateProjectDto implements Project {
   @IsOptional()
   @IsString()
   measurementId?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  gtmConfigurationPath!: string;
 }

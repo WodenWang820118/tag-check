@@ -23,6 +23,7 @@ import {
   reportDetailSlugResolver,
   specResolver
 } from './resolvers/spec.resolver';
+import { gtmConfigResolver } from './resolvers/gtm-config.resolver';
 
 export const PROJECT_ROUTES: Routes = [
   {
@@ -131,6 +132,7 @@ export const PROJECT_ROUTES: Routes = [
           image: imageResolver,
           video: videoResolver,
           spec: specResolver,
+          gtmConfig: gtmConfigResolver,
           recording: recordingDetailResolver,
           projectSlug: reportDetailSlugResolver,
           eventId: reportDetailEventIdResolver,

@@ -30,6 +30,9 @@ export class ProjectResponseDto implements ProjectSchema {
   specs!: SpecEntity[];
 
   @Expose()
+  gtmConfigurationPath!: string;
+
+  @Expose()
   recordings!: RecordingEntity[];
 
   @Expose()
