@@ -1,4 +1,5 @@
 export * from './lib/services/gtm-json-converter/transform/transform.service';
+export * from './lib/services/gtm-json-parser/gtm-json-parser.service';
 export * from './lib/services/editor-facade/editor-facade.service';
 export * from './lib/services/editor/editor.service';
 export * from './lib/services/event-bus/event-bus.service';
@@ -11,6 +12,7 @@ export * from './lib/services/xlsx-facade/xlsx-facade.service';
 export * from './lib/services/xlsx-process/xlsx-process.service';
 export * from './lib/services/gtm-json-converter/utils/utils.service';
 export * from './lib/services/esv-editor/esv-editor.service';
+export * from './lib/services/tag-build-mode/tag-build-mode.service';
 
 // converter services
 // managers

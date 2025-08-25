@@ -35,6 +35,10 @@ export class EditorComponent {
           this.content()
         );
       }
+
+      if (this.content().length > 0) {
+        this.editorService.setContent(this.editorExtension(), this.content());
+      }
     });
   }
 }

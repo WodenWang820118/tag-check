@@ -1,6 +1,13 @@
 <div class="main-page pt-0 pb-12 px-[10rem]">
   <div class="main-page__title text-left my-8">
-    <h1>Tag Build</h1>
+    <mat-tab-group
+      mat-stretch-tabs="false"
+      mat-align-tabs="start"
+      [(selectedIndex)]="selectedIndex"
+    >
+      <mat-tab label="Tag Build"> </mat-tab>
+      <mat-tab label="Tag Extract"> </mat-tab>
+    </mat-tab-group>
   </div>
 
   <div
@@ -9,17 +16,34 @@
     <div
       class="main-page__board__item main-page__editor grow border border-gray-300 dark:border-gray-700"
     >
-      @if (specs().length > 0) {
-        <lib-editor
-          content="{{ specs() | json }}"
-          [editorExtension]="inputExtension"
-        />
+      <!-- If using Tag Extract (selectedIndex === TagBuildMode.TagExtract) input should be blank -->
+      @if (selectedIndex === TagBuildMode.TagBuild) {
+        @if (specs().length > 0) {
+          <lib-editor
+            [content]="specs() | json"
+            [editorExtension]="inputExtension"
+          >
+          </lib-editor>
+        } @else {
+          <lib-editor
+            [content]="[] | json"
+            [editorExtension]="inputExtension"
+          ></lib-editor>
+        }
       } @else {
-        <lib-editor content="[]" [editorExtension]="inputExtension" />
+        <lib-editor
+          [content]="[] | json"
+          [editorExtension]="inputExtension"
+        ></lib-editor>
       }
     </div>
     <div class="main-page__board__item grow">
-      <lib-functional-card> </lib-functional-card>
+      <lib-functional-card>
+        <lib-upload-action
+          class="functional-card__actions__item"
+          (uploadClick)="onUpload()"
+        ></lib-upload-action>
+      </lib-functional-card>
     </div>
     <div
       class="main-page__board__item main-page__editor grow border border-gray-300 dark:border-gray-700"

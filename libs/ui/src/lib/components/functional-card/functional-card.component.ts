@@ -1,19 +1,20 @@
-import { Component, input, viewChild, ViewEncapsulation } from '@angular/core';
 import {
-  TransformService,
+  Component,
+  computed,
+  effect,
+  input,
+  signal,
+  viewChild,
+  ViewEncapsulation
+} from '@angular/core';
+import {
   EditorFacadeService,
-  EsvEditorService,
-  SpecExtractService,
-  SetupConstructorService,
-  UtilsService
+  TagBuildMode,
+  TagBuildModeService
 } from '@data-access';
-import { containerName, gtmId, tagManagerUrl } from './test-data';
-import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
-import { MatDialog } from '@angular/material/dialog';
-import { ConversionSuccessDialogComponent } from '../conversion-success-dialog/conversion-success-dialog.component';
+import { FunctionalCardFacade } from './functional-card.facade.service';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
 import { MatButtonModule } from '@angular/material/button';
-import { GTMContainerConfig, GTMConfiguration, Spec } from '@utils';
 
 @Component({
   selector: 'lib-functional-card',
@@ -28,90 +29,72 @@ export class FunctionalCardComponent {
     viewChild.required<AdvancedExpansionPanelComponent>('accordionContainer');
   color = input<string>('primary');
   private readonly dataLayer: Array<Record<string, unknown>>;
+  private readonly isConvertDisabled = signal<boolean>(true);
+  isConvertDisabled$ = computed(() => {
+    const inputJson = this.editorFacadeService.inputJsonContent();
+    // disable when empty
+    if (!inputJson && this.isConvertDisabled()) return true;
+
+    // try to parse valid JSON; if invalid, disable
+    try {
+      const parsed = JSON.parse(inputJson);
+      if (Array.isArray(parsed)) {
+        return parsed.length === 0;
+      }
+      if (parsed && typeof parsed === 'object') {
+        return Object.keys(parsed).length === 0;
+      }
+      // for primitives (string/number/etc), consider non-empty as enabled
+      return false;
+    } catch (e) {
+      // invalid JSON -> disable
+      console.warn('isConvertDisabled: invalid JSON', e);
+      return true;
+    }
+  });
 
   constructor(
-    private readonly transformService: TransformService,
-    public dialog: MatDialog,
     public editorFacadeService: EditorFacadeService,
-    private readonly setupConstructorService: SetupConstructorService,
-    private readonly esvEditorService: EsvEditorService,
-    private readonly specExtractService: SpecExtractService,
-    private readonly utilsService: UtilsService
+    private readonly tagBuildModeService: TagBuildModeService,
+    private readonly facade: FunctionalCardFacade
   ) {
     const dl = (
       window as unknown as { dataLayer?: Array<Record<string, unknown>> }
     ).dataLayer;
     this.dataLayer = dl ?? [];
+
+    effect(() => {
+      const inputContent = this.editorFacadeService.inputJsonContent();
+      try {
+        const inputContentObj = JSON.parse(inputContent);
+        if (inputContentObj.length > 0) {
+          console.log('input content exists: ', inputContent);
+          this.isConvertDisabled.set(false);
+        }
+      } catch (error) {
+        // Invalid JSON, do nothing or handle as needed
+        console.warn('Invalid JSON in effect:', error);
+      }
+    });
+  }
+
+  get mode() {
+    return this.tagBuildModeService.mode;
+  }
+
+  get tagBuildModeEnum() {
+    return TagBuildMode;
   }
 
   convertCode() {
-    this.accordionContainer().accordion().closeAll();
-    this.scrollToBottom();
-
-    const inputJsonEditor = this.editorFacadeService.getInputJsonContent();
-    const googleTagName = this.setupConstructorService.googleTagName$();
-    const measurementId = this.setupConstructorService.measurementId$();
-    const isSendingEcommerceData =
-      this.setupConstructorService.isSendingEcommerceData$();
-    const esvConent = this.esvEditorService.content$();
-    let esvContent = null;
-    let json: Spec[] = [];
-
-    try {
-      if (esvConent !== '') {
-        esvContent = JSON.parse(esvConent) as {
-          name: string;
-          parameters: { [x: string]: string }[];
-        }[];
-        console.log('esvConent', esvConent);
-      }
-    } catch (error) {
-      console.warn(error);
-    }
-
-    try {
-      if (inputJsonEditor().state.doc.toString() === '') {
-        this.openDialog({
-          message: 'Please provide a valid JSON input.'
-        });
-        return;
-      }
-
-      json = this.specExtractService.preprocessInput(
-        inputJsonEditor().state.doc.toString()
-      );
-
-      console.log('json', json);
-    } catch (error) {
-      const data = {
-        message:
-          String(error) || 'An error occurred while processing the input JSON.'
-      };
-      this.openDialog(data);
-      console.error(error);
-    }
-
-    try {
-      this.performConversion(
-        json,
-        googleTagName,
-        measurementId,
-        isSendingEcommerceData === true ? 'true' : 'false',
-        esvContent || []
-      );
-    } catch (error) {
-      const data = {
-        message:
-          String(error) || 'An error occurred while processing the input JSON.'
-      };
-      this.openDialog(data);
-      console.error(error);
-    }
+    this.facade.convertCode(this.accordionContainer);
   }
+
+  // conversion logic moved to `FunctionalCardFacade`
 
   scrollToBottom() {
     try {
-      // TODO: refactor
+      // small helper to scroll drawer to bottom
       const element = document.querySelector('.mat-drawer-content');
       if (element) {
         if (element.scrollHeight === element.clientHeight) {
@@ -125,61 +108,5 @@ export class FunctionalCardComponent {
     } catch (error) {
       console.error(error);
     }
-  }
-
-  performConversion(
-    json: Spec[],
-    googleTagName: string,
-    measurementId: string,
-    isSendingEcommerceData: 'true' | 'false',
-    esvConent: {
-      name: string;
-      parameters: { [x: string]: string }[];
-    }[]
-  ) {
-    this.editorFacadeService.setInputJsonContent(json);
-
-    const { accountId, containerId } =
-      this.utilsService.extractAccountAndContainerId(tagManagerUrl);
-
-    const gtmContainerConfig: GTMContainerConfig = {
-      accountId: accountId,
-      containerId: containerId,
-      containerName: containerName,
-      gtmId: gtmId,
-      specs: json
-    };
-
-    const result = this.transformService.convert({
-      googleTagName,
-      measurementId,
-      gtmConfigGenerator: gtmContainerConfig,
-      isSendingEcommerceData,
-      esvContent: esvConent
-    });
-    this.postConversion(result);
-  }
-
-  postConversion(result: GTMConfiguration) {
-    this.editorFacadeService.setOutputJsonContent(result);
-    this.openSuccessConversionDialog(result);
-
-    this.dataLayer.push({
-      event: 'btn_convert_click'
-    });
-  }
-
-  openDialog(data: { message: string }): void {
-    this.dialog.open(ErrorDialogComponent, {
-      data: {
-        message: data.message
-      }
-    });
-  }
-
-  openSuccessConversionDialog(configuration: GTMConfiguration): void {
-    this.dialog.open(ConversionSuccessDialogComponent, {
-      data: configuration
-    });
   }
 }

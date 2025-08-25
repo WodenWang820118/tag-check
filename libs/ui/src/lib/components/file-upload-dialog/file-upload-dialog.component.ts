@@ -47,23 +47,35 @@ import { MatIconModule } from '@angular/material/icon';
   ]
 })
 export class FileUploadDialogComponent {
+  selectedFile: File | null = null;
+  fileContent = signal<unknown | null>(null);
+  fileContent$ = computed(() => this.fileContent());
+
   constructor(
     public dialog: MatDialog,
     private readonly eventBusService: EventBusService,
     private readonly editorFacadeService: EditorFacadeService
   ) {
     effect(() => {
-      const fileContent = this.fileContent();
+      const fileContent = this.fileContent$();
       if (fileContent !== null) {
-        this.editorFacadeService.setInputJsonContent(fileContent);
-        this.dialog.closeAll();
+        // Ensure the fileContent is a valid object (parsed JSON)
+        if (typeof fileContent === 'object' && fileContent !== null) {
+          this.editorFacadeService.inputJsonContent = fileContent as Record<
+            string,
+            unknown
+          >;
+          this.dialog.closeAll();
+        } else {
+          this.dialog.open(ErrorDialogComponent, {
+            data: {
+              message: 'Uploaded file content is not valid JSON object.'
+            }
+          });
+        }
       }
     });
   }
-
-  selectedFile: File | null = null;
-  fileContent = signal<unknown | null>(null);
-  fileContent$ = computed(() => this.fileContent());
 
   handFileToSidenavForm(file: File) {
     this.dialog.closeAll();

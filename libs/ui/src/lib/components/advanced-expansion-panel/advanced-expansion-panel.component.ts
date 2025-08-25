@@ -20,11 +20,8 @@ import {
 import { catchError, EMPTY, filter, map } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
-import {
-  EditorFacadeService,
-  EsvEditorService,
-  SetupConstructorService
-} from '@data-access';
+import { EditorFacadeService, SetupConstructorService } from '@data-access';
+import { AdvancedExpansionPanelFacade } from './advanced-expansion-panel.facade.service';
 import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
 import { EditorView } from 'codemirror';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -62,8 +59,8 @@ export class AdvancedExpansionPanelComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly dialog = inject(MatDialog);
   private readonly editorFacadeService = inject(EditorFacadeService);
+  private readonly facade = inject(AdvancedExpansionPanelFacade);
   private readonly setupConstructorService = inject(SetupConstructorService);
-  private readonly esvEditorService = inject(EsvEditorService);
   private readonly destroyRef = inject(DestroyRef);
 
   form: FormGroup = this.fb.group({
@@ -107,33 +104,19 @@ export class AdvancedExpansionPanelComponent implements OnInit {
   });
 
   constructor() {
-    // Setup form subscriptions using signals
+    // Setup form subscriptions using signals - delegate to facade
     effect(() => {
       const setupFormValue = this.setupFormChanges$();
       if (setupFormValue) {
-        this.setupConstructorService.setGoogleTagName(
-          setupFormValue.googleTagName ?? ''
-        );
-        this.setupConstructorService.setMeasurementId(
-          setupFormValue.useExistingMeasurementId ?? ''
-        );
+        this.facade.applySetupFormValues(setupFormValue);
       }
     });
 
-    // EC and ESV form subscriptions using signals
+    // EC and ESV form subscriptions using signals - delegate to facade
     effect(() => {
       const ecAndEsvValue = this.ecAndEsvFormChanges$();
       if (ecAndEsvValue) {
-        this.setupConstructorService.setIsSendingEcommerceData(
-          ecAndEsvValue.isSendingEcommerceData ?? false
-        );
-      }
-    });
-
-    effect(() => {
-      const ecAndEsvValue = this.ecAndEsvFormChanges$();
-      if (ecAndEsvValue) {
-        this.esvEditorService.setEsvContent(ecAndEsvValue.esv ?? '');
+        this.facade.applyEcAndEsvFormValues(ecAndEsvValue);
       }
     });
   }
@@ -164,7 +147,7 @@ export class AdvancedExpansionPanelComponent implements OnInit {
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         map(() => {
-          const editor = this.editorFacadeService.getInputJsonContent()();
+          const editor = this.editorFacadeService.editorView.inputJson();
           return { editor, form: this.form.getRawValue() };
         }),
         filter(({ editor, form }) => !!editor && !!form),
@@ -174,7 +157,8 @@ export class AdvancedExpansionPanelComponent implements OnInit {
         })
       )
       .subscribe(({ editor, form }) => {
-        this.handleEditorAndFormChanges(editor, form);
+        // Delegate the heavy lifting to the facade which returns the updated JSON or null on error
+        this.facade.updateJsonBasedOnForm(editor, form as AdvancedFormValues);
       });
   }
 
@@ -192,7 +176,7 @@ export class AdvancedExpansionPanelComponent implements OnInit {
         form
       );
 
-      this.editorFacadeService.setInputJsonContent(updatedJson);
+      this.editorFacadeService.inputJsonContent = updatedJson;
       this.setupConstructorService.setIncludeItemScopedVariables(
         form.includeItemScopedVariables
       );
@@ -202,14 +186,13 @@ export class AdvancedExpansionPanelComponent implements OnInit {
   }
 
   onPanelOpened(): void {
-    const editor = this.editorFacadeService.getInputJsonContent()();
-    this.form.patchValue({
-      includeVideoTag: this.editorFacadeService.hasVideoTag(editor),
-      includeScrollTag: this.editorFacadeService.hasScrollTag(editor)
-    });
+    const editor = this.editorFacadeService.editorView.inputJson();
+    const patch = this.facade.getPatchValuesFromEditor(editor);
+    this.form.patchValue(patch);
   }
 
   private handleError(message: string, error: unknown): void {
+    // Keep a lightweight wrapper so callers inside this component can still use it.
     console.error(message, error);
     this.dialog.open(ErrorDialogComponent, {
       data: { message: 'Please check your JSON syntax.' }
