@@ -2,6 +2,7 @@ export * from './sys-configuration.entity';
 export * from './test-image.entity';
 export * from './project.entity';
 export * from './spec.entity';
+export * from './item-def.entity';
 export * from './recording.entity';
 export * from './test-event.entity';
 export * from './browser-setting.entity';

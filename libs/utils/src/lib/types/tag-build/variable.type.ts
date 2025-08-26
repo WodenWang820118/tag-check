@@ -1,9 +1,11 @@
-import { VariableTypeEnum } from '../../enums/tag-build';
 import { Parameter } from './common.type';
+import { VariableTypeEnum } from '../../enums/tag-build';
 
 export type VariableConfig = {
   name: string;
-  type: VariableTypeEnum;
+  // Use string to support both GTM built-in variable identifiers (e.g., PAGE_URL)
+  // and custom/template variable types (e.g., 'v', 'c', 'remm', 'gtes').
+  type: string;
   accountId: string;
   containerId: string;
   parameter?: Parameter[];

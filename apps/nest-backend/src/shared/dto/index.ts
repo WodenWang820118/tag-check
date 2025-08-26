@@ -3,6 +3,7 @@ export * from './validation-result.dto';
 export * from './sys-configuration';
 export * from './test-image';
 export * from './spec';
+export * from './item-def';
 export * from './project';
 export * from './recording';
 export * from './application-setting';

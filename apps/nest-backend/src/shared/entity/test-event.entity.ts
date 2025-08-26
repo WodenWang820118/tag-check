@@ -14,6 +14,7 @@ import { TestImageEntity } from './test-image.entity';
 import { TestEventDetailEntity } from './test-event-detail.entity';
 import { SpecEntity } from './spec.entity';
 import { RecordingEntity } from './recording.entity';
+import { ItemDefEntity } from './item-def.entity';
 
 @Entity('test_event')
 export class TestEventEntity
@@ -38,6 +39,12 @@ export class TestEventEntity
     onDelete: 'CASCADE'
   })
   spec!: SpecEntity;
+
+  @OneToOne(() => ItemDefEntity, (itemDef) => itemDef.testEvent, {
+    onDelete: 'CASCADE'
+  })
+  @JoinColumn({ name: 'item_def_id' })
+  itemDef!: ItemDefEntity;
 
   @OneToMany(() => TestEventDetailEntity, (detail) => detail.testEvent, {
     onDelete: 'CASCADE'

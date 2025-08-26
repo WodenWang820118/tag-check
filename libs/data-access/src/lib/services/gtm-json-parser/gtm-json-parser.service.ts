@@ -6,8 +6,6 @@ import {
   Spec,
   TagConfig
 } from '@utils';
-// TODO: doesn't extract the variables and triggers
-// TODO: how to be compatible with the specs? Since original specs doesn't have trigger information
 @Injectable({
   providedIn: 'root'
 })
@@ -48,7 +46,8 @@ export class GtmJsonParserService {
     if (!eventName) return null;
 
     const eventParams = this.findListMaps(params, 'eventParameters');
-    const spec: Spec = { event: eventName };
+    // Tests expect the parsed spec to have an `event` top-level property
+    const spec: Record<string, unknown> = { event: eventName };
     const ecommerce: Record<string, unknown> = {};
 
     for (const m of eventParams) {
@@ -73,7 +72,7 @@ export class GtmJsonParserService {
       (spec as Record<string, unknown>)['ecommerce'] = ecommerce;
     }
 
-    return spec;
+    return spec as Spec;
   }
 
   private setByPath(

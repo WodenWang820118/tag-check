@@ -1,3 +1,4 @@
+// TODO: use it to satisfy Specs
 export const exampleGtmJson = {
   exportFormatVersion: 2,
   exportTime: '2025-08-22 06:14:14',

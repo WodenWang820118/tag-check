@@ -2,7 +2,7 @@ import { ReportDetailPanelsFacadeService } from './report-detail-panels-facade.s
 import { AsyncPipe, JsonPipe } from '@angular/common';
 import { Component, computed, input, OnInit, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { IReportDetails, Spec } from '@utils';
+import { DataLayerSpec, IReportDetails } from '@utils';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
@@ -48,7 +48,7 @@ export class ReportDetailPanelsComponent implements OnInit {
       this.reportDetailPanelsFacadeService.tempSpecContent$;
     const result = tempSpecFileContent || specFileContent;
     console.log('Spec Content: ', result);
-    return result;
+    return result?.dataLayerSpec;
   });
 
   recordingContent = computed(() => {
@@ -72,16 +72,14 @@ export class ReportDetailPanelsComponent implements OnInit {
       console.log('Data: ', data);
       const projectSlug = data['projectSlug'];
       const eventId = data['eventId'];
-      const spec = data['spec'] as Spec;
+      const spec = data['spec'] as DataLayerSpec;
       const recording = data['recording'];
 
       this.projectSlug.set(projectSlug);
       this.eventId.set(eventId);
 
       this.reportDetailPanelsFacadeService.setRecordingFileContent(recording);
-      this.reportDetailPanelsFacadeService.setSpecFileContent(
-        (spec as any).dataLayerSpec
-      );
+      this.reportDetailPanelsFacadeService.setSpecFileContent(spec);
     });
   }
 

@@ -44,6 +44,9 @@ export type GTMContainerVersion = {
   tag: TagConfig[];
   fingerprint: string;
   tagManagerUrl: string;
+  // Present in exports when using community templates
+  // Keep it loose, as we don't currently introspect templateData
+  customTemplate?: unknown[];
 };
 
 export interface GTMConfiguration {

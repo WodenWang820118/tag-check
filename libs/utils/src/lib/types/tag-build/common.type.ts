@@ -12,9 +12,19 @@ export type ParameterMap = {
 
 export type Parameter = {
   type: string;
-  key: string;
+  // Some parameter objects (e.g. TRIGGER_REFERENCE list items) don't carry a key
+  key?: string;
   value?: string;
-  list?: ParameterMap[];
+  // In GTM exports, list items can be either MAPs with nested parameters or
+  // simple references like TRIGGER_REFERENCE items with just a value.
+  list?: Array<
+    | ParameterMap
+    | {
+        type: string;
+        value?: string;
+        map?: Parameter[];
+      }
+  >;
 };
 
 export type CustomEventFilter = {

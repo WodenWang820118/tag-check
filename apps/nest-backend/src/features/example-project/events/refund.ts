@@ -1,4 +1,5 @@
-import { Recording, Spec } from '@utils';
+import { Recording, Spec, TagConfig, TriggerConfig } from '@utils';
+import { exampleGtmJson } from '../gtm-json';
 
 const recording: Recording = {
   title: 'refund',
@@ -75,17 +76,26 @@ const recording: Recording = {
   ]
 };
 
+const tag = exampleGtmJson.containerVersion.tag.find(
+  (t) => t.parameter.find((p) => p.key === 'eventName')?.value === 'refund'
+);
+if (!tag) {
+  throw new Error('Tag with eventName "refund" not found in exampleGtmJson');
+}
+const normalizedTag: TagConfig = tag;
+
+const triggerNormalized = exampleGtmJson.containerVersion.trigger.find(
+  (t) => t.triggerId && (tag.firingTriggerId || []).includes(t.triggerId)
+) as unknown as TriggerConfig | undefined;
+
 const spec: Spec = {
-  event: 'refund',
-  ecommerce: {
-    currency: '$currency',
-    items: []
-  }
+  tag: normalizedTag,
+  trigger: triggerNormalized ? [triggerNormalized] : []
 };
 
 export const refundExample = {
   eventName: 'refund',
-  testName: 'Standard Refund Test',
+  testName: normalizedTag.name,
   recording,
   spec
 };

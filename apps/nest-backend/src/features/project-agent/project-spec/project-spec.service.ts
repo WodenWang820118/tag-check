@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotAcceptableException } from '@nestjs/common';
-import { Spec } from '@utils';
 import { SpecService } from './spec.service';
 import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
+import { CreateSpecDto, UpdateSpecDto } from '../../../shared';
 
 @Injectable()
 export class ProjectSpecService {
@@ -28,18 +28,26 @@ export class ProjectSpecService {
     return spec.dataLayerSpec;
   }
 
-  async addSpec(projectSlug: string, spec: Spec) {
+  async addSpec(projectSlug: string, spec: CreateSpecDto) {
+    const eventName = spec.rawGtmTag.tag.parameter.find(
+      (p) => p.key === 'eventName'
+    )?.value;
+    if (!eventName) {
+      throw new NotAcceptableException('Event name is required');
+    }
+
     await this.specService.addSpec({
-      event: spec.event,
-      eventName: spec.event,
-      dataLayerSpec: spec
+      event: eventName,
+      eventName: eventName,
+      dataLayerSpec: spec.dataLayerSpec,
+      rawGtmTag: spec.rawGtmTag
     });
 
     const projectSpec = await this.getProjectSpecs(projectSlug);
     return projectSpec;
   }
 
-  async updateSpec(projectSlug: string, eventId: string, spec: Spec) {
+  async updateSpec(projectSlug: string, eventId: string, spec: UpdateSpecDto) {
     const dbSpec = await this.getSpec(projectSlug, eventId);
     if (!dbSpec) {
       throw new NotAcceptableException('Spec not found');
@@ -47,7 +55,7 @@ export class ProjectSpecService {
 
     await this.specService.updateSpec(Number(dbSpec.id), {
       eventName: eventId,
-      dataLayerSpec: spec
+      dataLayerSpec: spec.dataLayerSpec
     });
 
     const projectSpec = await this.getProjectSpecs(projectSlug);

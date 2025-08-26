@@ -70,14 +70,14 @@ export class UploadCardFacadeService {
           const eventId = uuidv4(); // This will be the key in our dictionary
           const reportDetails: IReportDetails = new ReportDetailsDto({
             eventId: eventId,
-            testName: spec.event,
+            testName: spec.tag.name,
             eventName: 'Standard'
           });
 
           const reportObservable = this.reportService
             .addReport(
               projectSlug,
-              `${spec.event}_${eventId}`,
+              `${spec.tag.name}_${eventId}`,
               reportDetails,
               JSON.parse('{}'),
               spec
@@ -86,7 +86,7 @@ export class UploadCardFacadeService {
               // Handle errors for individual requests, so one failure doesn't stop all
               catchError((error) => {
                 console.error(
-                  `Failed to save spec for event "${spec.event}":`,
+                  `Failed to save spec for event "${spec.tag.name}":`,
                   error
                 );
                 return of(null); // Allow forkJoin to complete by returning a null result

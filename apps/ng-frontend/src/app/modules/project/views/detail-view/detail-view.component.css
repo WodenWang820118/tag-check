@@ -4,6 +4,7 @@
   flex-direction: column;
 }
 
+/*
 .detail__header {
   display: flex;
   flex-direction: column;
@@ -47,4 +48,4 @@
 
 .detail .mat-icon {
   transform: scale(1.2);
-}
+} */
