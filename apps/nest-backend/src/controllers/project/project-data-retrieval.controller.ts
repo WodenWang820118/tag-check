@@ -6,7 +6,8 @@ import {
   HttpStatus,
   Logger,
   Param,
-  StreamableFile
+  StreamableFile,
+  UseInterceptors
 } from '@nestjs/common';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
@@ -14,6 +15,7 @@ import { ProjectRepositoryService } from '../../core/repository/project/project-
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { GTMConfiguration } from '@utils';
 import { join } from 'path';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 
 @Controller('projects')
 export class ProjectDataRetrievalController {
@@ -47,6 +49,7 @@ export class ProjectDataRetrievalController {
     return this.projectRepositoryService.getBySlug(projectSlug);
   }
 
+  @UseInterceptors(CacheInterceptor)
   @Get(':projectSlug/gtm-config')
   // @Log()
   async getGtmConfig(@Param('projectSlug') projectSlug: string) {

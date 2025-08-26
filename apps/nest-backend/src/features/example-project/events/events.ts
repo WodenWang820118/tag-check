@@ -10,7 +10,7 @@ import { viewCartExample } from './view-cart';
 import { viewItemExample } from './view-item';
 import { viewItemListExample } from './view-item-list';
 import { viewPromotionExample } from './view-promotion';
-import type { Recording, Spec } from '@utils';
+import type { ItemDef, Recording, Spec } from '@utils';
 
 // TODO: build multiple event examples
 export type ExampleEvent = {
@@ -18,6 +18,7 @@ export type ExampleEvent = {
   testName: string;
   recording: Recording;
   spec: Spec;
+  fullItemDef?: ItemDef;
 };
 
 export const events: Record<string, ExampleEvent> = {

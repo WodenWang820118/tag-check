@@ -1,4 +1,5 @@
-import { Recording, Spec } from '@utils';
+import { ItemDef, Recording, Spec, TagConfig, TriggerConfig } from '@utils';
+import { exampleGtmJson } from '../gtm-json';
 
 const recording: Recording = {
   title: 'add_to_cart',
@@ -40,17 +41,42 @@ const recording: Recording = {
   ]
 };
 
+const tag = exampleGtmJson.containerVersion.tag.find(
+  (t) => t.parameter.find((p) => p.key === 'eventName')?.value === 'add_to_cart'
+);
+if (!tag) {
+  throw new Error(
+    'Tag with eventName "add_to_cart" not found in exampleGtmJson'
+  );
+}
+const normalizedTag: TagConfig = tag;
+
+const triggerNormalized = exampleGtmJson.containerVersion.trigger.find(
+  (t) => t.triggerId && (tag.firingTriggerId || []).includes(t.triggerId)
+) as unknown as TriggerConfig | undefined;
+
 const spec: Spec = {
-  event: 'add_to_cart',
-  ecommerce: {
-    currency: 'USD',
-    items: []
+  tag: normalizedTag,
+  trigger: triggerNormalized ? [triggerNormalized] : []
+};
+
+const fullItemDef: ItemDef = {
+  templateName: 'Add to cart Info Items',
+  itemId: 'add_to_cart',
+  fullItemDef: {
+    item_id: 'city001',
+    item_name: 'Switzerland',
+    item_list_name: 'destinations',
+    item_category: 'Switzerland',
+    quantity: 1,
+    price: 799
   }
 };
 
 export const addToCartExample = {
   eventName: 'add_to_cart',
-  testName: 'Standard Add to Cart Test',
+  testName: normalizedTag.name,
   recording,
-  spec
+  spec,
+  fullItemDef
 };

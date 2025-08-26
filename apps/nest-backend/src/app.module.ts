@@ -10,11 +10,16 @@ import { DatabaseConfigModule } from './core/database/database.module';
 import { LoggingInterceptorModule } from './common/logging-interceptor/logging-interceptor.module';
 import { LoggingInterceptor } from './common/logging-interceptor/logging-interceptor.service';
 import { ConfigsModule } from './core/configs/configs.module';
+import { CacheModule } from '@nestjs/cache-manager';
+
 @Module({
   imports: [
     // // Load ConfigModule first as other modules depend on it
     ConfigModule.forRoot({
       isGlobal: true // Make configuration globally available
+    }),
+    CacheModule.register({
+      isGlobal: true
     }),
 
     // Core modules

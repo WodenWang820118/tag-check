@@ -16,6 +16,7 @@ import { TextFieldModule } from '@angular/cdk/text-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @Component({
   selector: 'app-detail-view',
@@ -31,7 +32,8 @@ import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
     MatInputModule,
     MatFormFieldModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatTabsModule
   ],
   templateUrl: './detail-view.component.html',
   styleUrls: ['./detail-view.component.css']

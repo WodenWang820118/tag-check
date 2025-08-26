@@ -3,6 +3,7 @@ import { TestEventRepositoryService } from '../../../core/repository/test-event/
 import { TestImageRepositoryService } from '../../../core/repository/test-event/test-image-repository.service';
 import {
   CreateFullTestEventDto,
+  CreateItemDefDto,
   CreateSpecDto,
   CreateTestEventDetailDto,
   CreateTestEventDto
@@ -11,6 +12,7 @@ import { ProjectRepositoryService } from '../../../core/repository/project/proje
 import { TestEventDetailRepositoryService } from '../../../core/repository/test-event/test-event-detail-repository.service';
 import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
+import { ItemDefRepositoryService } from '../../../core/repository/item-def/item-def-repository.service';
 
 @Injectable()
 export class TestReportFacadeRepositoryService {
@@ -20,13 +22,17 @@ export class TestReportFacadeRepositoryService {
     private readonly testEventDetailRepositoryService: TestEventDetailRepositoryService,
     private readonly specRepositoryService: SpecRepositoryService,
     private readonly testImageRepositoryService: TestImageRepositoryService,
-    private readonly recordingRepositoryService: RecordingRepositoryService
+    private readonly recordingRepositoryService: RecordingRepositoryService,
+    private readonly itemDefRepositoryService: ItemDefRepositoryService
   ) {}
 
   async createAbstractReport(
     projectSlug: string,
     eventId: string,
-    data: CreateTestEventDto & CreateTestEventDetailDto & CreateSpecDto
+    data: CreateTestEventDto &
+      CreateTestEventDetailDto &
+      CreateSpecDto &
+      CreateItemDefDto
   ) {
     // Get the project entity by slug
     const projectEntity =
@@ -65,13 +71,19 @@ export class TestReportFacadeRepositoryService {
     const specCreation = this.specRepositoryService.create(testEventEntity, {
       event: data.eventName,
       eventName: data.eventName,
-      dataLayerSpec: data.dataLayerSpec
+      dataLayerSpec: data.dataLayerSpec,
+      rawGtmTag: data.rawGtmTag
     });
+
+    const itemDefCreation = data.fullItemDef
+      ? this.itemDefRepositoryService.create(testEventEntity, data)
+      : Promise.resolve();
 
     return Promise.all([
       testEventDetailCreation,
       recordingCreation,
-      specCreation
+      specCreation,
+      itemDefCreation
     ]);
   }
   /**
@@ -112,8 +124,18 @@ export class TestReportFacadeRepositoryService {
       await this.specRepositoryService.create(testEvent, {
         event: data.reportDetails.eventName,
         eventName: data.reportDetails.eventName,
-        dataLayerSpec: data.spec
+        dataLayerSpec: data.dataLayerSpec,
+        rawGtmTag: data.spec
       });
+
+      // Create item definition if provided in the full report DTO
+      if (data.fullItemDef) {
+        await this.itemDefRepositoryService.create(testEvent, {
+          fullItemDef: data.fullItemDef.fullItemDef,
+          itemId: data.fullItemDef.itemId,
+          templateName: data.fullItemDef.templateName
+        });
+      }
 
       // Fetch the complete updated test event with all relations
       const updatedTestEvent =

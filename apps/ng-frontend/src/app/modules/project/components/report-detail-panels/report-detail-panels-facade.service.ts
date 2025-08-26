@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
-import { Recording, Spec } from '@utils';
+import { DataLayerSpec, Recording, Spec } from '@utils';
 
 @Injectable({
   providedIn: 'root'
@@ -61,7 +61,7 @@ export class ReportDetailPanelsFacadeService {
         take(1),
         map((editor) => {
           const content = editor.state.doc.toString();
-          return JSON.parse(content) as Spec;
+          return JSON.parse(content) as DataLayerSpec;
         }),
         switchMap((parsedContent) => {
           if (!this.utilsService.isEmptyObject(parsedContent)) {
@@ -140,7 +140,7 @@ export class ReportDetailPanelsFacadeService {
     this.recordingService.setTempRecording(content);
   }
 
-  setTempSpecFileContent(content: Spec | null) {
+  setTempSpecFileContent(content: DataLayerSpec | null) {
     this.specService.setTempSpec(content);
   }
 
@@ -149,7 +149,7 @@ export class ReportDetailPanelsFacadeService {
     this.recordingService.setRecording(content);
   }
 
-  setSpecFileContent(content: Spec) {
+  setSpecFileContent(content: DataLayerSpec) {
     this.specService.setSpec(content);
   }
 

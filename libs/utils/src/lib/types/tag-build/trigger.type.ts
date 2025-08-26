@@ -8,13 +8,15 @@ export type Trigger = {
 
 export type TriggerConfig = {
   name: string;
-  type: TriggerTypeEnum;
+  type: string;
   accountId: string;
   containerId: string;
   triggerId?: string;
   firingTriggerId?: string[];
   fingerprint?: string;
   customEventFilter?: CustomEventFilter[];
+  // Some triggers (e.g., PAGEVIEW, CUSTOM_EVENT) include generic filters
+  filter?: CustomEventFilter[];
   parameter?: Parameter[];
 };
 
