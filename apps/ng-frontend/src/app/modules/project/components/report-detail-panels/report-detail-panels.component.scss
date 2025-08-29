@@ -7,8 +7,38 @@
   align-items: center;
 }
 
+/* Establish stacking context to keep header above content */
+.mat-accordion, .mat-expansion-panel {
+  position: relative;
+}
+
+/* Make the expansion panel content collapse by default for our hover-expand animation.
+   When the panel is actually expanded (has .mat-expanded) the normal behaviour wins. */
 .mat-expansion-panel-content {
+  position: relative;
+  z-index: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 200ms ease, opacity 150ms ease;
+}
+
+/* When the panel is expanded by Angular Material keep full behaviour */
+.mat-expansion-panel.mat-expanded .mat-expansion-panel-content {
+  max-height: 9999px; /* let material manage real height; this just removes the cap */
   overflow: auto !important;
+}
+
+.mat-expansion-panel:not(.mat-expanded):hover .mat-expansion-panel-content,
+.mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:hover ~ .mat-expansion-panel-content {
+  /* lightweight reveal on hover - tuned to show a snippet of content */
+  max-height: 420px;
+  overflow: auto;
+}
+
+.mat-expansion-panel-header {
+  position: relative; /* anchor for absolute-positioned edit button */
+  overflow: visible; /* ensure absolutely positioned edit button isn't clipped */
+  z-index: 2; /* keep header above expanding content during hover preview */
 }
 
 .mat-expansion-panel-header-description {
@@ -16,8 +46,23 @@
   gap: 1rem;
 }
 
-.edit {
-  transform: scale(0.7);
+/* style the edit action button: keep it hidden until hover, then show at top-right */
+button.edit {
+  transform: scale(0.8) !important; /* slightly smaller than normal */
+  position: absolute;
+  right: 12px;
+  top: 3px;
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.mat-expansion-panel-header:hover button.edit,
+.mat-expansion-panel-header:focus-within button.edit {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
 }
 
 .loading-spinner {

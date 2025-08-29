@@ -3,7 +3,10 @@ import { AsyncPipe, JsonPipe } from '@angular/common';
 import { Component, computed, input, OnInit, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DataLayerSpec, IReportDetails } from '@utils';
-import { MatExpansionModule } from '@angular/material/expansion';
+import {
+  MatExpansionModule,
+  MatExpansionPanel
+} from '@angular/material/expansion';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
 import { EditorComponent } from '../../../../shared/components/editor/editor.component';
@@ -91,6 +94,66 @@ export class ReportDetailPanelsComponent implements OnInit {
 
   switchRecordingEditMode(event: Event) {
     event.stopPropagation();
+    this.reportDetailPanelsFacadeService.setTempRecordingFileContent(null);
+    this.recordingEditMode.update((prev) => !prev);
+  }
+
+  // Helpers to open/close a panel and toggle edit mode from the template.
+  // `panel` is a template ref to the MatExpansionPanel. Keep type loose to avoid adding imports.
+  openPanelAndToggleSpec(panel: MatExpansionPanel | undefined, event: Event) {
+    event.stopPropagation();
+    // Scroll into view immediately using the button as anchor to avoid stale DOM refs
+    try {
+      const current = event.currentTarget as HTMLElement | null;
+      const host = current?.closest('.mat-expansion-panel');
+      host?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch {
+      /* ignore DOM errors */
+    }
+    if (panel) {
+      panel.open();
+    }
+    this.reportDetailPanelsFacadeService.setTempSpecFileContent(null);
+    this.specEditMode.update((prev) => !prev);
+  }
+
+  closePanelAndToggleSpec(panel: MatExpansionPanel | undefined, event: Event) {
+    event.stopPropagation();
+    if (panel) {
+      panel.close();
+    }
+    this.reportDetailPanelsFacadeService.setTempSpecFileContent(null);
+    this.specEditMode.update((prev) => !prev);
+  }
+
+  openPanelAndToggleRecording(
+    panel: MatExpansionPanel | undefined,
+    event: Event
+  ) {
+    event.stopPropagation();
+    // Scroll immediately using the button element as anchor
+    try {
+      const current = event.currentTarget as HTMLElement | null;
+      const host = current?.closest('.mat-expansion-panel');
+      host?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch {
+      /* ignore DOM errors */
+    }
+    if (panel) {
+      panel.open();
+    }
+    this.reportDetailPanelsFacadeService.setTempRecordingFileContent(null);
+    this.recordingEditMode.update((prev) => !prev);
+  }
+
+  closePanelAndToggleRecording(
+    panel: MatExpansionPanel | undefined,
+    event: Event
+  ) {
+    event.stopPropagation();
+    if (panel) {
+      panel.close();
+    }
     this.reportDetailPanelsFacadeService.setTempRecordingFileContent(null);
     this.recordingEditMode.update((prev) => !prev);
   }

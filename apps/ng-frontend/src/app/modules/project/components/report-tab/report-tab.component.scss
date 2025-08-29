@@ -1,0 +1,7 @@
+@use '@angular/material' as mat;
+
+.mat-mdc-form-field {
+    border-radius: 5px;
+    @include mat.form-field-density(-4);
+    @include mat.select-density(-4);
+  }

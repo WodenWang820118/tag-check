@@ -1,51 +1,34 @@
 .detail {
-  padding: 2rem 10rem;
-  display: flex;
-  flex-direction: column;
+  /* Use a responsive max-width container instead of huge fixed side padding */
+  padding: 1rem 1.25rem 2rem;
+  margin: 0 auto;
+  max-width: 1200px;
 }
 
-/*
 .detail__header {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
+  position: sticky;
+  top: 56px; /* below app toolbar height */
+  z-index: 10;
+  background: var(--mat-sys-surface, #fff);
+  /* subtle separator */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .detail__header__row {
   display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  align-items: stretch;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0;
 }
 
-.detail__status {
-  padding-left: 6rem;
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  align-items: baseline;
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-.detail__content {
-  display: flex;
-  flex-direction: row;
-  gap: 2rem;
+@media (max-width: 640px) {
+  .back-label {
+    display: none;
+  }
 }
-
-.detail__panels {
-  flex: 1 1 0;
-  max-width: 40vw;
-}
-
-.detail__images {
-  flex: 1 1 0;
-}
-
-.detail__images__item {
-  max-width: 40vw;
-}
-
-.detail .mat-icon {
-  transform: scale(1.2);
-} */
