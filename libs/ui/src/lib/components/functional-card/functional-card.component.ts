@@ -68,7 +68,6 @@ export class FunctionalCardComponent {
       try {
         const inputContentObj = JSON.parse(inputContent);
         if (inputContentObj.length > 0) {
-          console.log('input content exists: ', inputContent);
           this.isConvertDisabled.set(false);
         }
       } catch (error) {
