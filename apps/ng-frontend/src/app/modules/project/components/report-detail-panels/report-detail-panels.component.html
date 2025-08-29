@@ -1,6 +1,7 @@
 <div class="test-detail-panels">
   <mat-accordion class="headers-align" multi>
     <mat-expansion-panel
+      #specPanelRef
       hideToggle
       (opened)="switchSpecEdit()"
       (closed)="switchSpecEdit()"
@@ -8,14 +9,12 @@
       <mat-expansion-panel-header>
         <mat-panel-title> Data Layer Spec </mat-panel-title>
         <mat-panel-description>
-          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-          @if (specEdit() && !specEditMode()) {
+          @if (!specEditMode()) {
             <button
               mat-mini-fab
-              color="primary edit"
-              (click)="switchSpecEditMode($event); $event.stopPropagation()"
+              color="primary"
+              class="edit"
+              (click)="openPanelAndToggleSpec(specPanelRef, $event)"
             >
               <mat-icon class="icon-contrast" matTooltip="Edit">edit</mat-icon>
             </button>
@@ -70,7 +69,7 @@
           <button
             mat-raised-button
             class="remark"
-            (click)="switchSpecEditMode($event)"
+            (click)="closePanelAndToggleSpec(specPanelRef, $event)"
           >
             Cancel
           </button>
@@ -79,6 +78,7 @@
     </mat-expansion-panel>
 
     <mat-expansion-panel
+      #recordingPanel
       hideToggle
       (opened)="switchRecordingEdit()"
       (closed)="switchRecordingEdit()"
@@ -86,16 +86,12 @@
       <mat-expansion-panel-header>
         <mat-panel-title> Chrome Recording </mat-panel-title>
         <mat-panel-description>
-          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-          &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-          @if (recordingEdit() && !recordingEditMode()) {
+          @if (!recordingEditMode()) {
             <button
               mat-mini-fab
-              color="primary edit"
-              (click)="
-                switchRecordingEditMode($event); $event.stopPropagation()
-              "
+              color="primary"
+              class="edit"
+              (click)="openPanelAndToggleRecording(recordingPanel, $event)"
             >
               <mat-icon class="icon-contrast" matTooltip="Edit">edit</mat-icon>
             </button>
@@ -152,7 +148,7 @@
           <button
             mat-raised-button
             class="remark"
-            (click)="switchRecordingEditMode($event)"
+            (click)="closePanelAndToggleRecording(recordingPanel, $event)"
           >
             Cancel
           </button>

@@ -1,13 +1,16 @@
 import { Exclude, Expose } from 'class-transformer';
-import { StrictDataLayerEvent } from '@utils';
+import { Spec, StrictDataLayerEvent, TagSpec } from '@utils';
 
 @Exclude()
-export class SpecResponseDto {
+export class SpecResponseDto implements TagSpec {
   @Expose()
   id!: number;
 
   @Expose()
-  dataLayerSpec?: StrictDataLayerEvent;
+  dataLayerSpec!: StrictDataLayerEvent;
+
+  @Expose()
+  rawGtmTag!: Spec;
 
   @Expose()
   event!: string;
