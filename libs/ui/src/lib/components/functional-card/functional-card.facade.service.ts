@@ -6,7 +6,6 @@ import {
   SpecExtractService,
   SetupConstructorService,
   UtilsService,
-  GtmJsonParserService,
   TagBuildModeService,
   TagBuildMode
 } from '@data-access';
@@ -53,7 +52,6 @@ export class FunctionalCardFacade {
     private readonly setupConstructorService: SetupConstructorService,
     private readonly utilsService: UtilsService,
     private readonly tagBuildModeService: TagBuildModeService,
-    private readonly gtmJsonParserService: GtmJsonParserService,
     private readonly dialog: MatDialog
   ) {
     const dl = (
@@ -87,34 +85,34 @@ export class FunctionalCardFacade {
     const mode = this.tagBuildModeService.mode;
     console.log('Converting code in mode:', TagBuildMode[mode]);
     if (mode === TagBuildMode.TagExtract) {
-      this.convertTagExtract();
+      // this.convertTagExtract();
     } else {
       this.convertTagBuild(accordionContainer);
     }
   }
 
-  private convertTagExtract() {
-    console.log('Converting code in mode: TagExtract');
-    const inputJsonEditor = this.editorFacadeService.editorView;
-    const inputText = inputJsonEditor.inputJson().state.doc.toString();
-    try {
-      if (inputText === '') {
-        this.openDialog({ message: 'Please provide a valid JSON input.' });
-        return;
-      }
+  // private convertTagExtract() {
+  //   console.log('Converting code in mode: TagExtract');
+  //   const inputJsonEditor = this.editorFacadeService.editorView;
+  //   const inputText = inputJsonEditor.inputJson().state.doc.toString();
+  //   try {
+  //     if (inputText === '') {
+  //       this.openDialog({ message: 'Please provide a valid JSON input.' });
+  //       return;
+  //     }
 
-      const specs = this.gtmJsonParserService.parse(inputText);
-      this.editorFacadeService.outputJsonContent = specs;
-      //  this.editorFacadeService.
-    } catch (error) {
-      const data = {
-        message:
-          String(error) || 'An error occurred while processing the input JSON.'
-      };
-      this.openDialog(data);
-      console.error(error);
-    }
-  }
+  //     const specs = this.gtmJsonParserService.parse(inputText);
+  //     this.editorFacadeService.outputJsonContent = specs;
+  //     //  this.editorFacadeService.
+  //   } catch (error) {
+  //     const data = {
+  //       message:
+  //         String(error) || 'An error occurred while processing the input JSON.'
+  //     };
+  //     this.openDialog(data);
+  //     console.error(error);
+  //   }
+  // }
 
   private convertTagBuild(
     accordionContainer?: () => AdvancedExpansionPanelComponent

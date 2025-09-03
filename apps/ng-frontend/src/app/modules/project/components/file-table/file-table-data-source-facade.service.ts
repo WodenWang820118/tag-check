@@ -193,14 +193,43 @@ export class FileTableDataSourceFacadeService {
   }
 
   toggleAllRows() {
-    // Rebuild selection immutably so the signal notifies subscribers
+    // Toggle selection for only the rows displayed on the current page
     const ds = this.fileTableDataSourceModelService.dataSource();
-    const current = this.fileTableDataSourceModelService.selection();
-    const allSelected = current.selected.length === ds.data.length;
-    const newSelected = allSelected ? [] : [...ds.data];
+    const sel = this.fileTableDataSourceModelService.selection();
+
+    // Derive the working set: prefer filteredData if present, else all data
+    // Note: MatTableDataSource exposes filteredData publicly
+    const working =
+      (ds as unknown as { filteredData?: (IReportDetails & TestImage)[] })
+        .filteredData ?? ds.data;
+    // Apply sorting consistent with the table if available
+    const sorted = ds.sort ? ds.sortData(working, ds.sort) : working;
+
+    const pageIndex = ds.paginator?.pageIndex ?? 0;
+    const pageSize = ds.paginator?.pageSize ?? sorted.length;
+    const start = pageIndex * pageSize;
+    const end = Math.min(start + pageSize, sorted.length);
+    const pageRows = sorted.slice(start, end);
+
+    // Determine if all rows on the current page are already selected
+    const allPageSelected = pageRows.every((r) => sel.isSelected(r));
+
+    // Build next selection set immutably
+    let nextSelected: (IReportDetails & TestImage)[];
+    if (allPageSelected) {
+      // Deselect only the current page rows
+      const pageSet = new Set(pageRows);
+      nextSelected = sel.selected.filter((r) => !pageSet.has(r));
+    } else {
+      // Select union of existing selection and current page rows
+      const set = new Set(sel.selected);
+      pageRows.forEach((r) => set.add(r));
+      nextSelected = Array.from(set);
+    }
+
     const newModel = new SelectionModel<IReportDetails & TestImage>(
       true,
-      newSelected
+      nextSelected
     );
     this.fileTableDataSourceModelService.selection.set(newModel);
   }
@@ -240,6 +269,16 @@ export class FileTableDataSourceFacadeService {
   get isAllSelected(): boolean {
     const ds = this.fileTableDataSourceModelService.dataSource();
     const sel = this.fileTableDataSourceModelService.selection();
-    return sel.selected.length === ds.data.length;
+
+    const working =
+      (ds as unknown as { filteredData?: (IReportDetails & TestImage)[] })
+        .filteredData ?? ds.data;
+    const sorted = ds.sort ? ds.sortData(working, ds.sort) : working;
+    const pageIndex = ds.paginator?.pageIndex ?? 0;
+    const pageSize = ds.paginator?.pageSize ?? sorted.length;
+    const start = pageIndex * pageSize;
+    const end = Math.min(start + pageSize, sorted.length);
+    const pageRows = sorted.slice(start, end);
+    return pageRows.length > 0 && pageRows.every((r) => sel.isSelected(r));
   }
 }

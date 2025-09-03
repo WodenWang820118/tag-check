@@ -5,18 +5,11 @@ import { TestReportFacadeRepositoryService } from '../repository/test-report-fac
 import { ProjectAgentModule } from '../project-agent/project-agent.module';
 import { ProjectInitializationService } from '../project-agent/project-initialization/project-initialization.service';
 import { ExampleEventsBuilderService } from './example-events-builder.service';
-import { DataLayerSpecBuilderModule } from '../data-layer-spec-builder/data-layer-spec.builder.module';
-import { DataLayerSpecBuilderService } from '../data-layer-spec-builder/data-layer-spec.builder.service';
 
-const modules = [
-  RepositoryModule,
-  ProjectAgentModule,
-  DataLayerSpecBuilderModule
-];
+const modules = [RepositoryModule, ProjectAgentModule];
 const services = [
   TestReportFacadeRepositoryService,
-  ProjectInitializationService,
-  DataLayerSpecBuilderService
+  ProjectInitializationService
 ];
 
 @Module({

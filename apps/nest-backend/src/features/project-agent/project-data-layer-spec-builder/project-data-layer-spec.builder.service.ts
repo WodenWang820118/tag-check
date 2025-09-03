@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Spec, StrictDataLayerEvent } from '@utils';
 
 @Injectable()
-export class DataLayerSpecBuilderService {
-  private readonly logger = new Logger(DataLayerSpecBuilderService.name);
+export class ProjectDataLayerSpecBuilderService {
+  private readonly logger = new Logger(ProjectDataLayerSpecBuilderService.name);
   buildDataLayerSpec(spec: Spec): StrictDataLayerEvent {
     // 1) Resolve event name from tag parameters, fallback to tag name suffix
     const eventNameParam = spec.tag.parameter.find(

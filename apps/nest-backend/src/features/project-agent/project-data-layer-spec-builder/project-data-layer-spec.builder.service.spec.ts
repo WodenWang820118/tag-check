@@ -1,11 +1,11 @@
-import { DataLayerSpecBuilderService } from './data-layer-spec.builder.service';
+import { ProjectDataLayerSpecBuilderService } from './project-data-layer-spec.builder.service';
 import { Spec, TagConfig, TriggerConfig } from '@utils';
 
-describe('DataLayerSpecBuilderService', () => {
-  let service: DataLayerSpecBuilderService;
+describe('ProjectDataLayerSpecBuilderService', () => {
+  let service: ProjectDataLayerSpecBuilderService;
 
   beforeEach(() => {
-    service = new DataLayerSpecBuilderService();
+    service = new ProjectDataLayerSpecBuilderService();
   });
 
   it('builds event from tag parameter eventName', () => {

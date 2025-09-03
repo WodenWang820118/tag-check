@@ -11,6 +11,9 @@ import { ProjectSettingModule } from './project-setting/project-setting.module';
 import { ProjectSpecModule } from './project-spec/project-spec.module';
 import { ProjectFileReportModule } from './project-file-report/project-file-report.module';
 import { ProjectVideoModule } from './project-video/project-video.module';
+import { ProjectImageModule } from './project-image/project-image.module';
+import { ProjectFacadeRepositoryModule } from '../repository/project-facade/project-facade-repository.module';
+import { ProjectDataLayerSpecBuilderModule } from './project-data-layer-spec-builder/project-data-layer-spec.builder.module';
 
 // services
 import { ProjectAbstractReportService } from './project-abstract-report/project-abstract-report.service';
@@ -21,11 +24,11 @@ import { ProjectRecordingService } from './project-recording/project-recording.s
 import { ProjectReportService } from './project-report/project-report.service';
 import { ProjectSettingService } from './project-setting/project-setting.service';
 import { ProjectSpecService } from './project-spec/project-spec.service';
-import { ProjectImageModule } from './project-image/project-image.module';
 import { ProjectImageService } from './project-image/project-image.service';
 import { ProjectFileReportService } from './project-file-report/project-file-report.service';
 import { ProjectVideoService } from './project-video/project-video.service';
-import { ProjectFacadeRepositoryModule } from '../repository/project-facade/project-facade-repository.module';
+import { ProjectEventsBuilderService } from './project-events-builder/project-events-builder.service';
+import { ProjectDataLayerSpecBuilderService } from './project-data-layer-spec-builder/project-data-layer-spec.builder.service';
 
 const modules = [
   ProjectFacadeRepositoryModule,
@@ -39,7 +42,8 @@ const modules = [
   ProjectAbstractReportModule,
   ProjectImageModule,
   ProjectFileReportModule,
-  ProjectVideoModule
+  ProjectVideoModule,
+  ProjectDataLayerSpecBuilderModule
 ];
 
 const services = [
@@ -53,7 +57,9 @@ const services = [
   ProjectSpecService,
   ProjectImageService,
   ProjectFileReportService,
-  ProjectVideoService
+  ProjectVideoService,
+  ProjectEventsBuilderService,
+  ProjectDataLayerSpecBuilderService
 ];
 
 @Module({
