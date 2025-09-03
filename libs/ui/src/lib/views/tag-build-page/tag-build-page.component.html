@@ -6,7 +6,7 @@
       [(selectedIndex)]="selectedIndex"
     >
       <mat-tab label="Tag Build"> </mat-tab>
-      <mat-tab label="Tag Extract"> </mat-tab>
+      <mat-tab label="Tag Extract (In Development)" disabled> </mat-tab>
     </mat-tab-group>
   </header>
 
@@ -17,7 +17,6 @@
     <!-- Left: Input Editor Panel -->
     <div
       class="main-page__board__item main-page__editor border border-gray-300 dark:border-gray-700 rounded-md bg-white/60 dark:bg-transparent w-full md:w-[48rem] xl:w-[54rem] shrink-0 shadow-sm mx-auto"
-      role="region"
       aria-label="Input JSON editor"
     >
       <div
@@ -64,17 +63,13 @@
     <!-- Right: Output Editor Panel -->
     <div
       class="main-page__board__item main-page__editor border border-gray-300 dark:border-gray-700 rounded-md bg-white/60 dark:bg-transparent w-full md:w-[48rem] xl:w-[54rem] shrink-0 shadow-sm mx-auto"
-      role="region"
       aria-label="Output JSON editor"
     >
-      <div
-        class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200"
-      >
-        Output JSON
-      </div>
-      <div class="p-2">
-        <lib-editor [editorExtension]="outputExtension"></lib-editor>
-      </div>
+      class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm
+      font-medium text-gray-700 dark:text-gray-200" > Output JSON
+    </div>
+    <div class="p-2">
+      <lib-editor [editorExtension]="outputExtension"></lib-editor>
     </div>
   </section>
 </main>

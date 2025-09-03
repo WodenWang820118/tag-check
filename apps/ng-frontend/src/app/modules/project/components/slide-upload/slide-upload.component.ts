@@ -2,6 +2,8 @@ import { Component, effect, signal, viewChild } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { NewReportViewComponent } from '../new-report-view/new-report-view.component';
+import { UploadCardComponent } from '../upload-card/upload-card.component';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 
@@ -12,7 +14,9 @@ import { UploadSpecService } from '../../../../shared/services/upload-spec/uploa
     MatSidenavModule,
     MatIconModule,
     NewReportViewComponent,
-    MatButtonModule
+    MatButtonModule,
+    UploadCardComponent,
+    MatTabsModule
   ],
   templateUrl: './slide-upload.component.html',
   styleUrls: ['./slide-upload.component.scss']

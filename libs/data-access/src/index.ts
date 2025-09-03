@@ -1,5 +1,4 @@
 export * from './lib/services/gtm-json-converter/transform/transform.service';
-export * from './lib/services/gtm-json-parser/gtm-json-parser.service';
 export * from './lib/services/editor-facade/editor-facade.service';
 export * from './lib/services/editor/editor.service';
 export * from './lib/services/event-bus/event-bus.service';

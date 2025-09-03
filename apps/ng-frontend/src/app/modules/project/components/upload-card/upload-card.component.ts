@@ -15,6 +15,7 @@ import { UploadCardFacadeService } from './upload-card-facade.service';
 export class UploadCardComponent implements OnInit {
   importedSpec = computed(() => this.uploadCardFacadeService.importedSpec());
   projectSlug = signal<string>('');
+  projectSlug$ = computed(() => this.projectSlug());
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -38,7 +39,7 @@ export class UploadCardComponent implements OnInit {
   }
 
   onFileSelected(event: any) {
-    this.uploadCardFacadeService.onFileSelected(event);
+    this.uploadCardFacadeService.onFileSelected(this.projectSlug$(), event);
   }
 
   emitUploadComplete() {
