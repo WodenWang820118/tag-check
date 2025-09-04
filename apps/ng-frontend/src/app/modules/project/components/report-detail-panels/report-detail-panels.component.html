@@ -61,7 +61,7 @@
           <button
             mat-raised-button
             color="primary"
-            [disabled]="isJsonSyntaxError | async"
+            [disabled]="isJsonSyntaxError()"
             (click)="onSpecUpdate(); switchSpecEditMode($event)"
           >
             Save
@@ -140,7 +140,7 @@
           <button
             mat-raised-button
             color="primary"
-            [disabled]="isJsonSyntaxError | async"
+            [disabled]="isJsonSyntaxError()"
             (click)="onRecordingUpdate(); switchRecordingEditMode($event)"
           >
             Save

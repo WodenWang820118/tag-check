@@ -2,8 +2,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   Component,
-  effect,
-  viewChild,
+  input,
   signal,
   computed,
   ViewEncapsulation
@@ -32,8 +31,8 @@ import { MatButtonModule } from '@angular/material/button';
   encapsulation: ViewEncapsulation.None
 })
 export class SlideImportComponent {
-  // Convert viewChild to signal-based query
-  importedSidenav = viewChild.required<MatSidenav>('importSidenav');
+  // Accept sidenav via input from parent container
+  importedSidenav = input.required<MatSidenav>();
 
   // Convert loading to signal
   loading = signal(true);
@@ -46,27 +45,21 @@ export class SlideImportComponent {
     return this.uploadSpecService.isOpenImportSidenav();
   });
 
-  constructor(public uploadSpecService: UploadSpecService) {
-    // Effect for handling sidenav state changes
-    effect(() => {
-      const shouldOpen = this.sidenavOpen();
-      this.importedSidenav()?.toggle(shouldOpen);
-
-      // Update body overflow based on sidenav state
-      if (this.importedSidenav()) {
-        document.body.style.overflow = this.importedSidenav().opened
-          ? 'hidden'
-          : 'auto';
-      }
-    });
-  }
+  constructor(public uploadSpecService: UploadSpecService) {}
 
   // UI event handler
   toggleSidenav() {
     const sidenav = this.importedSidenav();
     if (sidenav) {
       sidenav.toggle();
-      document.body.style.overflow = sidenav.opened ? 'hidden' : 'auto';
+    }
+  }
+
+  closeIfOpen() {
+    const sidenav = this.importedSidenav();
+    if (sidenav?.opened) {
+      sidenav.close();
+      this.uploadSpecService.resetImport();
     }
   }
 }

@@ -1,55 +1,44 @@
-<mat-sidenav
-  class="slide-sidenav"
-  opened="false"
-  #sidenav
-  mode="side"
-  position="end"
-  autoFocus="true"
-  fixedInViewport="true"
-  fixedTopGap="0"
-  fixedBottomGap="0"
+<!-- Header -->
+<div
+  class="flex items-center justify-between px-4 py-3 md:px-6 border-b border-gray-200/70"
 >
-  <!-- Header -->
-  <div
-    class="flex items-center justify-between px-4 py-3 md:px-6 border-b border-gray-200/70"
-  >
-    <div class="flex items-center gap-3">
-      <button
-        mat-icon-button
-        aria-label="Close"
-        (click)="sidenav.toggle(); uploadSpecService.resetStart()"
-      >
-        <mat-icon>close</mat-icon>
-      </button>
-      <div class="text-3xl">Add report to project</div>
-    </div>
+  <div class="flex items-center gap-3">
+    <button
+      mat-icon-button
+      aria-label="Close"
+      (click)="sidenav().close(); uploadSpecService.resetStart()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+    <div class="text-3xl">Add report to project</div>
+  </div>
+</div>
+
+<!-- Content -->
+<div class="p-4 md:p-6">
+  <!-- Intro -->
+  <div class="mb-4 text-2xl text-gray-600">
+    Start by importing a GTM JSON file (recommended). You can also create a
+    report manually with the editor.
   </div>
 
-  <!-- Content -->
-  <mat-sidenav-content>
-    <div class="p-4 md:p-6">
-      <!-- Intro -->
-      <div class="mb-4 text-2xl text-gray-600">
-        Start by importing a GTM JSON file (recommended). You can also create a
-        report manually with the editor.
+  <!-- Tabs: Import (default) | Create manually -->
+  <mat-tab-group mat-stretch-tabs="true" dynamicHeight>
+    <mat-tab label="Import GTM JSON">
+      <div class="mt-4 flex flex-col gap-3">
+        <app-upload-card></app-upload-card>
+        <div class="flex justify-end"></div>
       </div>
-
-      <!-- Tabs: Import (default) | Create manually -->
-      <mat-tab-group mat-stretch-tabs="true" dynamicHeight>
-        <mat-tab label="Import GTM JSON">
-          <div class="mt-4 flex flex-col gap-3">
-            <app-upload-card></app-upload-card>
-            <div class="flex justify-end"></div>
-          </div>
-        </mat-tab>
-        <mat-tab label="Create report manually">
-          <div
-            class="mt-4 rounded-md border border-gray-200 p-3 md:p-4 bg-white"
-          >
-            <app-new-report-view [sidenav]="sidenav"></app-new-report-view>
-          </div>
-        </mat-tab>
-      </mat-tab-group>
-    </div>
-  </mat-sidenav-content>
-</mat-sidenav>
+    </mat-tab>
+    <mat-tab label="Import GA4 events">
+      <div class="mt-4 flex flex-col gap-3">
+        <app-ga4-upload></app-ga4-upload>
+      </div>
+    </mat-tab>
+    <mat-tab label="Create report manually">
+      <div class="mt-4 rounded-md border border-gray-200 p-3 md:p-4 bg-white">
+        <app-new-report-view [sidenav]="sidenav()"></app-new-report-view>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

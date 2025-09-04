@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { EditorService } from '../../../../shared/services/editor/editor.service';
-import { catchError, EMPTY, map, switchMap, take, throwError } from 'rxjs';
+import { Subscription, take } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
-import { DataLayerSpec, Recording, Spec } from '@utils';
+import { DataLayerSpec, Recording } from '@utils';
 
 @Injectable({
   providedIn: 'root'
@@ -56,65 +56,29 @@ export class ReportDetailPanelsFacadeService {
 
   onSpecUpdate(projectSlug: string, eventId: string) {
     this.specService.setLoading(true);
-    this.editorService.editor$.specJsonEditor
-      .pipe(
-        take(1),
-        map((editor) => {
-          const content = editor.state.doc.toString();
-          return JSON.parse(content) as DataLayerSpec;
-        }),
-        switchMap((parsedContent) => {
-          if (!this.utilsService.isEmptyObject(parsedContent)) {
-            this.specService.setSpec(parsedContent);
-            return this.specService.updateSpec(
-              projectSlug,
-              eventId,
-              parsedContent
-            );
-          }
-          return EMPTY;
-        }),
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to update spec'));
-        })
-      )
-      .subscribe(() => {
-        setTimeout(() => {
-          this.specService.setLoading(false);
-        });
-      });
+    const specEditor = this.editorService.editor$.specJsonEditor();
+    const content = specEditor.state.doc.toString();
+    if (!this.utilsService.isEmptyObject(content)) {
+      this.specService.setSpec(JSON.parse(content));
+      return this.specService
+        .updateSpec(projectSlug, eventId, JSON.parse(content))
+        .pipe(take(1))
+        .subscribe();
+    }
+    return new Subscription();
   }
 
   onRecordingUpdate(projectSlug: string, eventId: string) {
-    this.editorService.editor$.recordingJsonEditor
-      .pipe(
-        take(1),
-        map((editor) => {
-          const content = editor.state.doc.toString();
-          return JSON.parse(content) as Recording;
-        }),
-        switchMap((parsedContent) => {
-          if (!this.utilsService.isEmptyObject(parsedContent)) {
-            this.recordingService.setRecording(parsedContent);
-            return this.recordingService.updateRecording(
-              projectSlug,
-              eventId,
-              parsedContent
-            );
-          }
-          return EMPTY;
-        }),
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to update recording'));
-        })
-      )
-      .subscribe(() => {
-        setTimeout(() => {
-          this.recordingService.setLoading(false);
-        }, 1000);
-      });
+    const recordingEditor = this.editorService.editor$.recordingJsonEditor();
+    const content = recordingEditor.state.doc.toString();
+    if (!this.utilsService.isEmptyObject(content)) {
+      this.recordingService.setRecording(JSON.parse(content));
+      return this.recordingService
+        .updateRecording(projectSlug, eventId, JSON.parse(content))
+        .pipe(take(1))
+        .subscribe();
+    }
+    return new Subscription();
   }
 
   onDownload(projectSlug: string, eventId: string) {

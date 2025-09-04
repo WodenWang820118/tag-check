@@ -15,7 +15,40 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
     ToolbarComponent,
     SideNavListComponent
   ],
-  templateUrl: './project-view.component.html',
+  template: `
+    <div class="project-view">
+      <!-- receive the $event from the toolbar and switch the project -->
+      <app-toolbar
+        [settings]="project()"
+        [snav]="snav"
+        [projects]="projectInfo()"
+        (changeProject)="snav.close(); onChangeProject($event, snav)"
+      ></app-toolbar>
+
+      <mat-sidenav-container
+        class="project-view__sidenav-container"
+        [hasBackdrop]="true"
+        (backdropClick)="snav.close()"
+      >
+        <mat-sidenav
+          #snav
+          [opened]="isProjectRoute()"
+          [mode]="'over'"
+          fixedTopGap="56"
+        >
+          <app-side-nav-list
+            [snav]="snav"
+            (menuClick)="snav.toggle()"
+          ></app-side-nav-list>
+        </mat-sidenav>
+        <mat-sidenav-content>
+          <div class="table-container">
+            <router-outlet></router-outlet>
+          </div>
+        </mat-sidenav-content>
+      </mat-sidenav-container>
+    </div>
+  `,
   styleUrls: ['./project-view.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
