@@ -12,12 +12,13 @@ import {
   readFileSync,
   rmSync,
   writeFileSync,
-  existsSync
+  existsSync,
+  mkdirSync
 } from 'fs';
 import { FolderService } from '../folder/folder.service';
 import { FolderPathService } from '../path/folder-path/folder-path.service';
 import { FilePathService } from '../path/file-path/file-path.service';
-import { join } from 'path';
+import { join, dirname } from 'path';
 import archiver from 'archiver';
 
 @Injectable()
@@ -128,6 +129,11 @@ export class FileService {
   }
 
   writeJsonFile(filePath: string, content: any) {
+    const dir = dirname(filePath);
+    if (!existsSync(dir)) {
+      mkdirSync(dir, { recursive: true });
+    }
+
     writeFileSync(filePath, JSON.stringify(content, null, 2));
   }
 

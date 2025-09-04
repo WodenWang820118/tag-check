@@ -18,9 +18,17 @@ export class ParameterUtils {
    * @returns A {@link Parameter} of type LIST containing mapped parameters.
    */
   createListParameter(key: string, parameters: Parameter[]): Parameter {
-    const list = parameters.map((param) =>
-      this.createMapParameter(param.key, `{{DLV - ${param.value}}}`)
-    );
+    // Guard against optional key/value in Parameter type
+    const list = parameters
+      .filter(
+        (
+          param
+        ): param is Parameter & Required<Pick<Parameter, 'key' | 'value'>> =>
+          typeof param.key === 'string' && typeof param.value === 'string'
+      )
+      .map((param) =>
+        this.createMapParameter(param.key, `{{DLV - ${param.value}}}`)
+      );
     return { type: 'LIST', key, list };
   }
 

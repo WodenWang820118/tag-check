@@ -1,4 +1,5 @@
 import { TagTypeEnum } from '../../enums/tag-build';
+import { Spec, StrictDataLayerEvent } from '../tag-check';
 import { Parameter } from './common.type';
 import { Trigger } from './trigger.type';
 
@@ -10,18 +11,34 @@ export type Tag = {
 
 export type TagConfig = {
   name: string;
-  type: TagTypeEnum;
+  type: string;
   accountId: string;
   containerId: string;
   parameter: Parameter[];
   fingerprint?: string;
-  firingTriggerId: string[];
-  tagFiringOption: string;
-  monitoringMetadata: {
-    type: 'MAP';
+  // Present on most tags, but not strictly required (e.g., some config tags)
+  firingTriggerId?: string[];
+  tagFiringOption?: string;
+  // Optional additional metadata fields seen in exports
+  notes?: string;
+  priority?: {
+    type: string;
+    value: string;
   };
-  consentSettings: {
-    consentStatus: 'NOT_SET';
+  monitoringMetadata?: {
+    // GTM exports provide a MAP here, but the runtime object often widens to string
+    type: string;
+  };
+  // Consent settings vary by template; keep flexible to match raw export objects
+  consentSettings?: {
+    consentStatus: string;
+    consentType?: {
+      type: string;
+      list: Array<{
+        type: string;
+        value: string;
+      }>;
+    };
   };
 };
 
@@ -36,3 +53,10 @@ export type GoogleTagConfig = {
 export type HTMLTagConfig = {
   type: TagTypeEnum.HTML;
 } & Omit<TagConfig, 'type'>;
+
+export type TagSpec = {
+  event: string;
+  eventName: string;
+  dataLayerSpec: StrictDataLayerEvent;
+  rawGtmTag: Spec;
+};

@@ -1,7 +1,10 @@
-import { Recording, Spec } from '@utils';
+import { ItemDef, Recording, Spec, TagConfig, TriggerConfig } from '@utils';
+import { exampleGtmJson } from '../gtm-json';
+
+const EVENT_NAME = 'add_payment_info';
 
 const recording: Recording = {
-  title: 'app_payment_info',
+  title: EVENT_NAME,
   steps: [
     {
       type: 'setViewport',
@@ -54,17 +57,41 @@ const recording: Recording = {
   ]
 };
 
+const tag = exampleGtmJson.containerVersion.tag.find(
+  (t) => t.parameter.find((p) => p.key === 'eventName')?.value === EVENT_NAME
+);
+if (!tag) {
+  throw new Error(
+    `Tag with eventName "${EVENT_NAME}" not found in exampleGtmJson`
+  );
+}
+const normalizedTag: TagConfig = tag;
+
+const triggerNormalized = exampleGtmJson.containerVersion.trigger.find(
+  (t) => t.triggerId && (tag.firingTriggerId || []).includes(t.triggerId)
+) as unknown as TriggerConfig | undefined;
+
 const spec: Spec = {
-  event: 'app_payment_info',
-  ecommerce: {
-    currency: 'USD',
-    items: []
+  tag: normalizedTag,
+  trigger: triggerNormalized ? [triggerNormalized] : []
+};
+
+const fullItemDef: ItemDef = {
+  templateName: 'Payment Info Items',
+  itemId: 'payment_info',
+  fullItemDef: {
+    item_id: 'city001',
+    item_name: 'Switzerland',
+    item_category: 'Switzerland',
+    quantity: 1,
+    price: 799
   }
 };
 
 export const addPaymentInfoExample = {
-  eventName: 'app_payment_info',
-  testName: 'Standard Add Payment Info Test',
+  eventName: EVENT_NAME,
+  testName: normalizedTag.name,
   recording,
-  spec
+  spec,
+  fullItemDef
 };

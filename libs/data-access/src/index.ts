@@ -11,6 +11,7 @@ export * from './lib/services/xlsx-facade/xlsx-facade.service';
 export * from './lib/services/xlsx-process/xlsx-process.service';
 export * from './lib/services/gtm-json-converter/utils/utils.service';
 export * from './lib/services/esv-editor/esv-editor.service';
+export * from './lib/services/tag-build-mode/tag-build-mode.service';
 
 // converter services
 // managers

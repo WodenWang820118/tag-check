@@ -25,7 +25,7 @@ export class SpecExtractService {
         console.error(error);
         return [
           {
-            event: 'error'
+            tag: { name: 'Error parsing spec JSON. Please check the format.' }
           }
         ] as Spec[];
       }

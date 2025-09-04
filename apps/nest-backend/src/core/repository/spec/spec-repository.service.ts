@@ -9,7 +9,6 @@ import {
   UpdateSpecDto
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
-import { StrictDataLayerEvent } from '@utils';
 import { AbstractSpecResponseDto } from '../../../shared/dto/spec/datalayer-spec-response.dto';
 
 @Injectable()
@@ -102,6 +101,7 @@ export class SpecRepositoryService {
       specEntity.testEvent = testEventEntity;
       specEntity.eventName = spec.event;
       specEntity.dataLayerSpec = spec.dataLayerSpec;
+      specEntity.rawGtmTag = spec.rawGtmTag;
       const entity = await this.repository.save(specEntity);
       return plainToInstance(SpecResponseDto, entity);
     } catch (error) {
@@ -124,7 +124,7 @@ export class SpecRepositoryService {
     const newSpec = new SpecEntity();
 
     newSpec.eventName = spec.event ?? '';
-    newSpec.dataLayerSpec = spec as StrictDataLayerEvent;
+    newSpec.dataLayerSpec = spec.dataLayerSpec;
     const entity = await this.repository.update(
       { testEvent: testEvent },
       newSpec

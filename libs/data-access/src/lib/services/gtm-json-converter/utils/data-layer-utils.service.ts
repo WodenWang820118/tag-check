@@ -10,15 +10,15 @@ export class DataLayerUtils {
   getDataLayers(specs: Spec[]) {
     const dataLayers: DataLayer[] = [];
     for (const spec of specs) {
-      const { event, ...rest } = spec;
-      const paths = this.utilsService.getAllObjectPaths(rest);
-      const uniquedPaths = new Set(paths);
-      dataLayers.push({
-        event: event,
-        paths: Array.from(uniquedPaths).filter(
-          (dL) => !dL.includes('items.0') && dL !== 'ecommerce'
-        )
-      });
+      const { event, ...rest } = spec as Record<string, unknown>;
+      const paths = this.utilsService.getAllObjectPaths(
+        rest as unknown as Record<string, unknown>
+      );
+      const uniquedPaths = Array.from(new Set(paths));
+      const filtered = uniquedPaths.filter(
+        (dL) => !dL.includes('items.0') && dL !== 'ecommerce'
+      );
+      dataLayers.push({ event: event as string, paths: filtered });
     }
     return dataLayers;
   }

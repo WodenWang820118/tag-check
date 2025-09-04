@@ -6,12 +6,13 @@ import { ProjectService } from '../../../shared/services/api/project-info/projec
 import { MetadataSourceService } from '../../../shared/services/data-source/metadata-source.service';
 import { Project } from '@utils';
 
-export const entryMetadataResolver: ResolveFn<Project[]> = (route, state) => {
+export const entryMetadataResolver: ResolveFn<Project[]> = () => {
   const metadataService = inject(MetadataSourceService);
   const projectInfoService = inject(ProjectService);
 
   return projectInfoService.getProjects().pipe(
     map((projects) => {
+      console.debug('projects: ', projects);
       metadataService.setData(projects);
       return projects;
     }),

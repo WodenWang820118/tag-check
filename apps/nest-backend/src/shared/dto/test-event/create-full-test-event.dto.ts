@@ -1,4 +1,10 @@
-import { IReportDetails, Recording, Spec } from '@utils';
+import {
+  IReportDetails,
+  ItemDef,
+  Recording,
+  Spec,
+  StrictDataLayerEvent
+} from '@utils';
 import { IsNotEmpty } from 'class-validator';
 
 export class CreateFullTestEventDto {
@@ -10,4 +16,10 @@ export class CreateFullTestEventDto {
 
   @IsNotEmpty()
   spec!: Spec;
+
+  @IsNotEmpty()
+  fullItemDef?: ItemDef;
+
+  @IsNotEmpty()
+  dataLayerSpec!: StrictDataLayerEvent;
 }

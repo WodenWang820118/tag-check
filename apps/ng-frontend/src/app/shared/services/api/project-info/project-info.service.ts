@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { catchError } from 'rxjs/internal/operators/catchError';
 import { of } from 'rxjs';
-import { Project, ProjectSchema } from '@utils';
+import { GTMConfiguration, Project, ProjectSchema } from '@utils';
 
 @Injectable({
   providedIn: 'root'
@@ -51,6 +51,19 @@ export class ProjectService {
       .put<ProjectSchema>(
         `${environment.projectApiUrl}/${project.projectSlug}`,
         project
+      )
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return of(null);
+        })
+      );
+  }
+
+  getProjectGtmConfig(projectSlug: string) {
+    return this.http
+      .get<GTMConfiguration>(
+        `${environment.projectApiUrl}/${projectSlug}/gtm-config`
       )
       .pipe(
         catchError((error) => {

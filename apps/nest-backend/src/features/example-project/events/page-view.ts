@@ -1,7 +1,10 @@
-import { Recording, Spec } from '@utils';
+import { Recording, Spec, TagConfig, TriggerConfig } from '@utils';
+import { exampleGtmJson } from '../gtm-json';
+
+const EVENT_NAME = 'page_view';
 
 const pageViewRecording: Recording = {
-  title: 'page_view',
+  title: EVENT_NAME,
   steps: [
     {
       type: 'setViewport',
@@ -26,17 +29,26 @@ const pageViewRecording: Recording = {
   ]
 };
 
-const pageViewSpec: Spec = {
-  event: 'page_view',
-  pagePath: '$pagePath',
-  pageTitle: '$pageTitle',
-  pageUrl: '$pageUrl',
-  pageReferrer: '$pageReferrer'
+const tag = exampleGtmJson.containerVersion.tag.find(
+  (t) => t.parameter.find((p) => p.key === 'eventName')?.value === EVENT_NAME
+);
+if (!tag) {
+  throw new Error('Tag with eventName "page_view" not found in exampleGtmJson');
+}
+const normalizedTag: TagConfig = tag;
+
+const triggerNormalized = exampleGtmJson.containerVersion.trigger.find(
+  (t) => t.triggerId && (tag.firingTriggerId || []).includes(t.triggerId)
+) as unknown as TriggerConfig | undefined;
+
+const spec: Spec = {
+  tag: normalizedTag,
+  trigger: triggerNormalized ? [triggerNormalized] : []
 };
 
 export const pageViewExample = {
+  eventName: EVENT_NAME,
   recording: pageViewRecording,
-  spec: pageViewSpec,
-  eventName: 'page_view',
-  testName: 'Standard Page View'
+  spec,
+  testName: normalizedTag.name
 };

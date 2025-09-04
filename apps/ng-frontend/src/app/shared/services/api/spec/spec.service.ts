@@ -1,6 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, tap, throwError } from 'rxjs';
 import { DataLayerSpec, ProjectSpec, Spec } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
@@ -8,20 +8,20 @@ import { environment } from '../../../../../environments/environment';
   providedIn: 'root'
 })
 export class SpecService {
-  tempSpecContent = signal<Spec | null>(null);
+  tempSpecContent = signal<DataLayerSpec | null>(null);
   tempSpecContent$ = computed(() => this.tempSpecContent());
-  specContent = signal<Spec | null>(null);
+  specContent = signal<DataLayerSpec | null>(null);
   specContent$ = computed(() => this.specContent());
   isLoading = signal(false);
   isLoading$ = computed(() => this.isLoading());
 
   constructor(private readonly http: HttpClient) {}
 
-  setTempSpec(spec: Spec | null) {
+  setTempSpec(spec: DataLayerSpec | null) {
     this.tempSpecContent.set(spec);
   }
 
-  setSpec(spec: Spec | null) {
+  setSpec(spec: DataLayerSpec | null) {
     this.specContent.set(spec);
   }
 
@@ -72,7 +72,7 @@ export class SpecService {
       );
   }
 
-  updateSpec(projectSlug: string, eventName: string, content: Spec) {
+  updateSpec(projectSlug: string, eventName: string, content: DataLayerSpec) {
     return this.http
       .put(`${environment.specApiUrl}/${projectSlug}/${eventName}`, {
         ...content
@@ -85,17 +85,16 @@ export class SpecService {
       );
   }
 
-  getEventSpec(projectSlug: string, eventId: string): Observable<Spec> {
+  getEventSpec(
+    projectSlug: string,
+    eventId: string
+  ): Observable<DataLayerSpec> {
     return this.http
       .get<DataLayerSpec>(`${environment.specApiUrl}/${projectSlug}/${eventId}`)
       .pipe(
-        map((spec) => {
-          const transformedSpec: Spec = {
-            event: spec.eventName,
-            ...spec
-          };
-          console.log('Transformed Spec:', transformedSpec);
-          return transformedSpec;
+        map((response) => {
+          console.log('Fetched event spec:', response);
+          return response;
         }),
         catchError((error) => {
           console.error(error);

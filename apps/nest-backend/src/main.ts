@@ -5,6 +5,7 @@ import { writeFileSync } from 'fs';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { app } from 'electron'; // It is for accessing the process.resourcesPath
 import * as path from 'path';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   try {
@@ -20,6 +21,9 @@ async function bootstrap() {
       preflightContinue: false,
       optionsSuccessStatus: 204
     });
+
+    nestApp.use(json({ limit: '20mb' }));
+    nestApp.use(urlencoded({ extended: true, limit: '20mb' }));
 
     // Retrieve the LazyModuleLoader using its class reference
     const lazyModuleLoader = nestApp.get(LazyModuleLoader);
