@@ -3,13 +3,14 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
+  OnDestroy,
   OnInit,
   viewChild
 } from '@angular/core';
 import { MatTable, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { tap, take } from 'rxjs';
+import { tap, take, Subscription } from 'rxjs';
 import { IReportDetails } from '@utils';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -43,11 +44,12 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
   templateUrl: './report-table.component.html',
   styleUrls: ['./report-table.component.scss']
 })
-export class ReportTableComponent implements OnInit {
+export class ReportTableComponent implements OnInit, OnDestroy {
   private readonly paginator = viewChild<MatPaginator>(MatPaginator);
   private readonly sort = viewChild<MatSort>(MatSort);
   private readonly reportTable =
     viewChild<MatTable<IReportDetails>>('reportTable');
+  protected routeDataSubscription!: Subscription;
 
   constructor(
     public testRunningFacadeService: TestRunningFacadeService,
@@ -57,10 +59,11 @@ export class ReportTableComponent implements OnInit {
     private readonly tableSortService: TableSortService,
     private readonly cdr: ChangeDetectorRef
   ) {}
+
   ngOnInit() {
     const paginator = this.paginator();
     const sort = this.sort();
-    this.route.data
+    this.routeDataSubscription = this.route.data
       .pipe(takeUntilDestroyed(this.destroyRef))
       .pipe(
         tap((data) => {
@@ -128,5 +131,9 @@ export class ReportTableComponent implements OnInit {
 
   checkboxLabel(row?: IReportDetails) {
     return this.facade.checkboxLabel(row);
+  }
+
+  ngOnDestroy() {
+    this.routeDataSubscription.unsubscribe();
   }
 }
