@@ -1,9 +1,9 @@
 import { computed, effect, Injectable, signal } from '@angular/core';
 import {
-  Spec,
   IReportDetails,
   ReportDetailsDto,
-  GTMConfiguration
+  GTMConfiguration,
+  StrictDataLayerEvent
 } from '@utils';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 import {
@@ -81,11 +81,9 @@ export class UploadCardFacadeService {
     this.uploadSpecService.completeUpload();
   }
 
-  // TODO: batch upload instead of one by one
-  // TODO: GTM JSON compatible
   save(projectSlug: string): Observable<any> {
     try {
-      const specs = JSON.parse(this.importedSpec()) as Spec[];
+      const specs = JSON.parse(this.importedSpec()) as StrictDataLayerEvent[];
 
       // 1. Use .reduce() to create a dictionary of observables
       const requestsAsObject = specs.reduce(
@@ -93,14 +91,14 @@ export class UploadCardFacadeService {
           const eventId = uuidv4(); // This will be the key in our dictionary
           const reportDetails: IReportDetails = new ReportDetailsDto({
             eventId: eventId,
-            testName: spec.tag.name,
-            eventName: 'Standard'
+            testName: `GA4 event - ${spec.event}`,
+            eventName: spec.event
           });
 
           const reportObservable = this.reportService
             .addReport(
               projectSlug,
-              `${spec.tag.name}_${eventId}`,
+              `${eventId}`,
               reportDetails,
               JSON.parse('{}'),
               spec
@@ -109,7 +107,7 @@ export class UploadCardFacadeService {
               // Handle errors for individual requests, so one failure doesn't stop all
               catchError((error) => {
                 console.error(
-                  `Failed to save spec for event "${spec.tag.name}":`,
+                  `Failed to save spec for event "${spec.event}":`,
                   error
                 );
                 return of(null); // Allow forkJoin to complete by returning a null result

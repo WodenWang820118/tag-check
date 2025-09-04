@@ -135,15 +135,9 @@ export class ReportTableFacadeService {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initializeData(paginator: MatPaginator, sort: MatSort, data: any) {
-    if (
-      !data['projectReport'] ||
-      !data['recordings'] ||
-      !data['projectSetting']
-    )
-      return;
-    const reports = data['projectReport'];
+    const reports = data['projectReport'] || [];
 
-    if (reports.length && paginator && sort) {
+    if (paginator && sort) {
       // Sort the data
       const injectReports = (reports as IReportDetails[]).sort((a, b) =>
         a.eventName.localeCompare(b.eventName)

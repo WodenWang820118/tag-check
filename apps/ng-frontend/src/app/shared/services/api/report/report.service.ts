@@ -7,7 +7,8 @@ import {
   Recording,
   Spec,
   TestEvent,
-  AbstractTestEvent
+  AbstractTestEvent,
+  StrictDataLayerEvent
 } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
@@ -57,7 +58,7 @@ export class ReportService {
     eventId: string,
     reportDetails: IReportDetails,
     recording: Recording,
-    spec: Spec
+    spec: StrictDataLayerEvent
   ) {
     return this.http
       .post<TestEvent>(
@@ -72,6 +73,32 @@ export class ReportService {
         catchError((error) => {
           console.error(error);
           return throwError(() => new Error('Failed to add report'));
+        })
+      );
+  }
+
+  addFullReport(
+    projectSlug: string,
+    eventId: string,
+    reportDetails: IReportDetails,
+    recording: Recording,
+    spec: Spec,
+    dataLayerSpec: StrictDataLayerEvent
+  ) {
+    return this.http
+      .post<TestEvent>(
+        `${environment.reportApiUrl}/${projectSlug}/${eventId}`,
+        {
+          reportDetails,
+          recording,
+          spec,
+          dataLayerSpec
+        }
+      )
+      .pipe(
+        catchError((error) => {
+          console.error(error);
+          return throwError(() => new Error('Failed to add full report'));
         })
       );
   }

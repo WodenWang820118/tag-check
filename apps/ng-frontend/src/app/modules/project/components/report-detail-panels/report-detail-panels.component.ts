@@ -1,5 +1,5 @@
 import { ReportDetailPanelsFacadeService } from './report-detail-panels-facade.service';
-import { AsyncPipe, JsonPipe } from '@angular/common';
+import { JsonPipe } from '@angular/common';
 import { Component, computed, input, OnInit, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DataLayerSpec, IReportDetails } from '@utils';
@@ -16,7 +16,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   selector: 'app-report-datail-panels',
   standalone: true,
   imports: [
-    AsyncPipe,
     JsonPipe,
     MatIconModule,
     MatExpansionModule,

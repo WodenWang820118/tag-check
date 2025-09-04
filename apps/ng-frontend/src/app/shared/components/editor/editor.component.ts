@@ -10,7 +10,8 @@ import {
 } from '@angular/core';
 import {
   EditorExtension,
-  EditorService
+  EditorService,
+  EditorThemeStyles
 } from '../../services/editor/editor.service';
 import { EditorView } from '@codemirror/view';
 
@@ -22,12 +23,19 @@ import { EditorView } from '@codemirror/view';
       <div id="cm-editor" #editor role="textbox" aria-label="Code editor"></div>
     </div>
   `,
+  styles: [
+    // Make the host accept height from utility classes and let inner elements stretch
+    ':host { display: block; }',
+    '.root-wrapper { height: 100%; }',
+    '#cm-editor { height: 100%; }'
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditorComponent implements OnDestroy {
   editorExtension = input.required<EditorExtension>();
   editMode = input<boolean>(false);
   content = input<string>();
+  stylesOverride = input<EditorThemeStyles | undefined>(undefined);
   private readonly editorContent = computed(() => {
     const content = this.content();
     return content;
@@ -44,7 +52,8 @@ export class EditorComponent implements OnDestroy {
           this.editorView = this.editorService.initEditorView(
             this.editorExtension(),
             editorElement,
-            content
+            content,
+            this.stylesOverride()
           );
         } else {
           // Update existing editor content
