@@ -3,7 +3,9 @@ import {
   IReportDetails,
   ReportDetailsDto,
   GTMConfiguration,
-  StrictDataLayerEvent
+  StrictDataLayerEvent,
+  TestEvent,
+  AbstractTestEvent
 } from '@utils';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 import {
@@ -14,11 +16,14 @@ import {
   tap,
   Observable,
   concatMap,
-  take
+  take,
+  switchMap
 } from 'rxjs';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { v4 as uuidv4 } from 'uuid';
 import { GtmJsonParserService } from '../../../../shared/services/api/gtm-json-parser/gtm-json-parser.service';
+import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
+import { ReportMapperService } from '../../services/report-mapper/report-mapper.service';
 
 @Injectable({
   providedIn: 'root'
@@ -36,23 +41,44 @@ export class UploadCardFacadeService {
   constructor(
     private readonly uploadSpecService: UploadSpecService,
     private readonly reportService: ReportService,
-    private readonly gtmJsonParserService: GtmJsonParserService
+    private readonly gtmJsonParserService: GtmJsonParserService,
+    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService,
+    private readonly reportMapper: ReportMapperService
   ) {
     effect(() => {
       const gtmConfig = this.gtmConfiguration$();
       const projectSlug = this.projectSlug$();
       console.log('project slug: ', projectSlug);
+      console.log('gtm config: ', gtmConfig);
       if (gtmConfig && projectSlug) {
         this.gtmJsonParserService
-          .uploadGtmJson(projectSlug, JSON.stringify(gtmConfig))
-          .pipe(take(1))
+          .uploadGtmJson(projectSlug, gtmConfig)
+          .pipe(
+            switchMap(() => this.reportService.getProjectReports(projectSlug)),
+            tap((reports: AbstractTestEvent[]) => {
+              const mapped = this.reportMapper.toReportDetails(reports);
+              const sorted = [...mapped].sort((a, b) =>
+                a.eventName.localeCompare(b.eventName)
+              );
+              const ds = this.reportTableDataSourceModelService.dataSource();
+              ds.data = [...sorted];
+            }),
+            take(1)
+          )
           .subscribe();
       }
     });
   }
 
-  onFileSelected(projectSlug: string, event: any) {
-    const file = event.target.files[0];
+  // Mapping moved to ReportMapperService
+
+  onFileSelected(projectSlug: string, event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
+    if (!file) {
+      console.warn('No file selected');
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -81,7 +107,7 @@ export class UploadCardFacadeService {
     this.uploadSpecService.completeUpload();
   }
 
-  save(projectSlug: string): Observable<any> {
+  save(projectSlug: string): Observable<unknown> {
     try {
       const specs = JSON.parse(this.importedSpec()) as StrictDataLayerEvent[];
 
@@ -118,7 +144,7 @@ export class UploadCardFacadeService {
           acc[eventId] = reportObservable;
           return acc;
         },
-        {} as { [key: string]: Observable<any> }
+        {} as { [key: string]: Observable<TestEvent | null> }
       ); // Start with an empty object
 
       // Check if there are any requests to process
