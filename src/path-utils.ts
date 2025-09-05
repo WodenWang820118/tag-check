@@ -1,6 +1,6 @@
 import { join } from 'path';
 import { cwd } from 'process';
-import * as constants from './constants.js';
+import * as constants from './constants';
 
 function getRootBackendFolderPath(env: any, resourcesPath: string) {
   switch (env) {

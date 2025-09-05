@@ -1,15 +1,12 @@
 import { ChildProcess, fork } from 'child_process';
 import { join } from 'path';
-import * as pathUtils from './path-utils.js';
-import * as environmentUtils from './environment-utils.js';
-import * as constants from './constants.js';
+import * as pathUtils from './path-utils';
+import * as environmentUtils from './environment-utils';
+import * as constants from './constants';
 import { BrowserWindow } from 'electron';
-import log from './logger.js';
+import log from './logger';
 
-function startBackend(
-  resourcesPath: string,
-  loadingWindow: BrowserWindow
-): ChildProcess {
+function startBackend(resourcesPath: string): ChildProcess {
   let env;
   const envName = environmentUtils.getEnvironment();
   const rootBackendFolderPath = pathUtils.getRootBackendFolderPath(
@@ -63,12 +60,6 @@ function startBackend(
       };
       break;
     case 'prod':
-      env = {
-        NODE_ENV: 'prod',
-        ...commonEnv,
-        ...prodCommonEnv
-      };
-      break;
     default:
       env = {
         NODE_ENV: 'prod',

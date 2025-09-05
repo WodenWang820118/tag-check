@@ -1,15 +1,15 @@
 import { ChildProcess } from 'child_process';
 import { app } from 'electron';
 import { join } from 'path';
-import * as constants from './constants.js';
-import * as pathUtils from './path-utils.js';
-import * as fileUtils from './file-utils.js';
-import * as environmentUtils from './environment-utils.js';
-import * as backend from './backend.js';
-import * as frontend from './frontend.js';
+import * as constants from './constants';
+import * as pathUtils from './path-utils';
+import * as fileUtils from './file-utils';
+import * as environmentUtils from './environment-utils';
+import * as backend from './backend';
+import * as frontend from './frontend';
 import { updateElectronApp } from 'update-electron-app';
 import { Database } from 'sqlite3';
-import log from './logger.js';
+import log from './logger';
 
 updateElectronApp({
   updateInterval: '1 hour',
@@ -36,7 +36,7 @@ app.whenReady().then(async () => {
   fileUtils.createProjectSavingRootFolder(projectSavingFolder);
 
   const loadingWindow = frontend.createLoadingWindow(process.resourcesPath);
-  server = backend.startBackend(process.resourcesPath, loadingWindow);
+  server = backend.startBackend(process.resourcesPath);
 
   server.once('spawn', async () => {
     try {
