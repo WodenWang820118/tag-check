@@ -14,7 +14,7 @@ export class GtmJsonParserService {
     return result;
   }
 
-  uploadGtmJson(projectSlug: string, json: string) {
+  uploadGtmJson(projectSlug: string, json: GTMConfiguration) {
     return this.httpClient.post(
       `${environment.gtmParserApiUrl}/upload/${projectSlug}`,
       json

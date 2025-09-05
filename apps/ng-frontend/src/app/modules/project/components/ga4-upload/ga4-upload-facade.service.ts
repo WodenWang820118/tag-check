@@ -5,8 +5,7 @@ import {
   ReportDetailsDto,
   StrictDataLayerEvent,
   Spec,
-  Recording,
-  IReportDetails
+  Recording
 } from '@utils';
 import {
   catchError,
@@ -18,6 +17,7 @@ import {
   ObservableInput
 } from 'rxjs';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
+import { ReportMapperService } from '../../services/report-mapper/report-mapper.service';
 
 @Injectable({ providedIn: 'root' })
 export class Ga4UploadFacadeService {
@@ -34,7 +34,8 @@ export class Ga4UploadFacadeService {
 
   constructor(
     private readonly reportService: ReportService,
-    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService
+    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService,
+    private readonly reportMapper: ReportMapperService
   ) {}
 
   setRawJson(content: string) {
@@ -143,7 +144,8 @@ export class Ga4UploadFacadeService {
       // After saving all events, fetch latest reports and update table
       switchMap(() => this.reportService.getProjectReports(projectSlug)),
       tap((reports) => {
-        const sorted = (reports as unknown as IReportDetails[]).sort((a, b) =>
+        const mapped = this.reportMapper.toReportDetails(reports);
+        const sorted = [...mapped].sort((a, b) =>
           a.eventName.localeCompare(b.eventName)
         );
         const ds = this.reportTableDataSourceModelService.dataSource();
