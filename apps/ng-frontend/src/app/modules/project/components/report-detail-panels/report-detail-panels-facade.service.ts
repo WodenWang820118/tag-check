@@ -6,7 +6,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
 import { SpecService } from '../../../../shared/services/api/spec/spec.service';
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
-import { DataLayerSpec, Recording } from '@utils';
+import { DataLayerSpec, ItemDef, Recording } from '@utils';
+import { ItemDefService } from '../../../../shared/services/api/item-def/item-def.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,7 @@ export class ReportDetailPanelsFacadeService {
     private readonly reportService: ReportService,
     private readonly recordingService: RecordingService,
     private readonly specService: SpecService,
+    private readonly itemDefService: ItemDefService,
     private readonly editorService: EditorService,
     private readonly dialog: MatDialog,
     private readonly utilsService: UtilsService
@@ -54,6 +56,17 @@ export class ReportDetailPanelsFacadeService {
     }
   }
 
+  onItemDefFileSelected(event: Event) {
+    this.itemDefService.setLoading(true); // close spinner after file is read
+    const target = event.target as HTMLInputElement;
+    const file: File | null = target.files?.[0] || null;
+    if (file) {
+      this.itemDefService.readItemDefJsonFileContent(file);
+    } else {
+      throw new Error('No file selected');
+    }
+  }
+
   onSpecUpdate(projectSlug: string, eventId: string) {
     this.specService.setLoading(true);
     const specEditor = this.editorService.editor$.specJsonEditor();
@@ -79,6 +92,30 @@ export class ReportDetailPanelsFacadeService {
         .subscribe();
     }
     return new Subscription();
+  }
+
+  onItemDefUpdate(itemId: string, templateName?: string) {
+    const itemDefEditor = this.editorService.editor$.itemDefJsonEditor();
+    const content = itemDefEditor.state.doc.toString();
+    if (!content?.trim()) return new Subscription();
+    try {
+      const parsed = JSON.parse(content);
+      // Accept either full ItemDef shape or just the inner object as fullItemDef
+      const isFullShape = typeof parsed === 'object' && 'fullItemDef' in parsed;
+      const payload: Partial<ItemDef> = isFullShape
+        ? (parsed as ItemDef)
+        : { fullItemDef: parsed };
+      if (templateName) {
+        payload.templateName = templateName;
+      }
+      const normalized: ItemDef | null = isFullShape
+        ? (parsed as ItemDef)
+        : null;
+      this.itemDefService.setItemDef(normalized);
+      return this.itemDefService.updateItemDef(itemId, payload).subscribe();
+    } catch {
+      return new Subscription();
+    }
   }
 
   onDownload(projectSlug: string, eventId: string) {
@@ -117,6 +154,14 @@ export class ReportDetailPanelsFacadeService {
     this.specService.setSpec(content);
   }
 
+  setTempItemDefContent(content: ItemDef | null) {
+    this.itemDefService.setTempItemDef(content);
+  }
+
+  setItemDefContent(content: ItemDef | null) {
+    this.itemDefService.setItemDef(content);
+  }
+
   get tempRecordingContent$() {
     return this.recordingService.tempRecordingContent$();
   }
@@ -133,6 +178,14 @@ export class ReportDetailPanelsFacadeService {
     return this.specService.specContent$();
   }
 
+  get itemDefContent$() {
+    return this.itemDefService.itemDefContent$();
+  }
+
+  get tempItemDefContent$() {
+    return this.itemDefService.tempItemDefContent$();
+  }
+
   get isJsonSyntaxError() {
     return this.editorService.isJsonSyntaxError$;
   }
@@ -143,5 +196,9 @@ export class ReportDetailPanelsFacadeService {
 
   get isRecordingLoading() {
     return this.recordingService.isLoading$();
+  }
+
+  get isItemDefLoading() {
+    return this.itemDefService.isLoading$();
   }
 }
