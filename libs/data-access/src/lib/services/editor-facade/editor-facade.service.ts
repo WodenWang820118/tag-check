@@ -9,26 +9,27 @@ import { EditorTypeEnum } from '@utils';
 export class EditorFacadeService {
   constructor(private readonly editorService: EditorService) {}
 
-  setInputJsonContent(json: any): void {
+  set inputJsonContent(json: any) {
+    console.log('Setting input JSON content:', json);
     this.editorService.setContent(
       EditorTypeEnum.INPUT_JSON,
       JSON.stringify(json, null, 2)
     );
   }
 
-  setOutputJsonContent(json: any): void {
+  get inputJsonContent() {
+    return this.editorService.contents$.inputJson;
+  }
+
+  set outputJsonContent(json: any) {
     this.editorService.setContent(
       EditorTypeEnum.OUTPUT_JSON,
       JSON.stringify(json, null, 2)
     );
   }
 
-  getEditorView() {
+  get editorView() {
     return this.editorService.editor$;
-  }
-
-  getInputJsonContent() {
-    return this.editorService.editor$.inputJson;
   }
 
   hasVideoTag(json: any) {

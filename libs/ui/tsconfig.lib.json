@@ -9,6 +9,7 @@
     "useDefineForClassFields": false,
     "types": []
   },
+  "references": [{ "path": "../data-access/tsconfig.lib.json" }],
   "exclude": [
     "src/**/*.spec.ts",
     "src/test-setup.ts",

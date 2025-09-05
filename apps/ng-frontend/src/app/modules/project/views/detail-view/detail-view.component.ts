@@ -1,78 +1,98 @@
 import { Component, computed, OnInit, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ReportDetailPanelsComponent } from '../../components/report-detail-panels/report-detail-panels.component';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   FrontFileReport,
   IReportDetails,
+  TagSpec,
   TestEvent,
   TestEventDetail,
   TestImage
 } from '@utils';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { CarouselComponent } from '../../../../shared/components/carousel/carousel.component';
-import { TextFieldModule } from '@angular/cdk/text-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { ReportTabComponent } from '../../components/report-tab/report-tab.component';
+import { TagManageTabComponent } from '../../components/tag-manage-tab/tag-manage-tab.component';
 
 @Component({
   selector: 'app-detail-view',
   standalone: true,
   imports: [
-    ReportDetailPanelsComponent,
     MatIconModule,
     MatButtonModule,
-    CarouselComponent,
-    DatePipe,
-    RouterLink,
-    TextFieldModule,
-    MatInputModule,
-    MatFormFieldModule,
-    FormsModule,
-    ReactiveFormsModule
+    MatTabsModule,
+    MatTooltipModule,
+    ReportTabComponent,
+    TagManageTabComponent
   ],
-  templateUrl: './detail-view.component.html',
-  styleUrls: ['./detail-view.component.css']
+  styleUrls: ['./detail-view.component.css'],
+  template: `
+    <div class="detail">
+      <div class="detail__header">
+        <div class="detail__header__row">
+          <button
+            mat-button
+            class="back-btn"
+            aria-label="Go back"
+            matTooltip="Back"
+            (click)="goBack()"
+          >
+            <mat-icon aria-hidden="true">arrow_back</mat-icon>
+            <span class="back-label">Back</span>
+          </button>
+          <!-- Title intentionally minimal to avoid duplication with card header -->
+        </div>
+        <mat-tab-group mat-stretch-tabs="true" dynamicHeight>
+          <mat-tab label="Tag Snapshot">
+            <app-tag-manage-tab [tagSpec]="tagSpec$()"></app-tag-manage-tab>
+          </mat-tab>
+          <mat-tab label="Reports">
+            <app-report-tab
+              [reportDetails]="reportDetails$()"
+              [tagSpec]="tagSpec$()"
+              [videoBlob]="videoBlob$()"
+              [imageBlob]="imageBlob$()"
+              [frontFileReport]="frontFileReport()"
+            ></app-report-tab>
+          </mat-tab>
+        </mat-tab-group>
+        <br />
+      </div>
+    </div>
+  `
 })
 export class DetailViewComponent implements OnInit {
   reportDetails = signal<IReportDetails | undefined>(undefined);
-  imageBlob = signal<Blob | null>(null);
+  reportDetails$ = computed(() => this.reportDetails());
+  tagSpec = signal<TagSpec | undefined>(undefined);
+  tagSpec$ = computed(() => this.tagSpec());
   videoBlob = signal<Blob | null>(null);
-
-  imageBlob$ = computed(() => this.imageBlob());
   videoBlob$ = computed(() => this.videoBlob());
+  imageBlob = signal<Blob | null>(null);
+  imageBlob$ = computed(() => this.imageBlob());
   frontFileReport = signal([] as FrontFileReport[]);
-  testEventDetail$ = computed(() =>
-    this.frontFileReport().flatMap((report) => report.testEventDetails)
-  );
-
-  formGroup = this.fb.group({
-    message: ['']
-  });
+  // testEventDetail$ moved into the ReportTabComponent
 
   constructor(
     private readonly router: Router,
-    private readonly route: ActivatedRoute,
-    private readonly fb: FormBuilder
+    private readonly route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.route.data.subscribe((data) => {
       console.log('Route data:', data);
       const fileReports = data['fileReports'] as FrontFileReport[];
+      const spec = data['spec'] as TagSpec;
+
       this.frontFileReport.set(fileReports);
+      this.tagSpec.set(spec);
 
       const reportDetailsObject = data['reportDetails'] as {
         testEvent: TestEvent;
         testEventDetail: TestEventDetail;
         testImage: TestImage;
       };
-
-      this.formGroup.controls.message.patchValue(
-        reportDetailsObject.testEvent.message || ''
-      );
 
       // Flatten the array of objects into a single object
       console.log('Report details object:', reportDetailsObject);

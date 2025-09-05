@@ -1,0 +1,79 @@
+<mat-card class="max-w-[720px]">
+  <div class="h-2"></div>
+  <mat-card-content>
+    <div class="flex flex-col gap-3">
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          mat-stroked-button
+          color="primary"
+          (click)="fileInput.click()"
+        >
+          <mat-icon>cloud_upload</mat-icon>
+          Upload JSON
+        </button>
+        <button type="button" mat-button (click)="setSample()">
+          Paste sample
+        </button>
+      </div>
+      <input
+        hidden
+        (change)="onFileSelected($event)"
+        #fileInput
+        type="file"
+        accept="application/json,.json,.txt"
+      />
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>GA4 events JSON (single object or array)</mat-label>
+        <textarea
+          matInput
+          rows="10"
+          [value]="textValue$()"
+          (keyup)="textValue.set($any($event.target).value)"
+          placeholder='[{ "event": "add_payment_info", "ecommerce": { ... } }]'
+        ></textarea>
+      </mat-form-field>
+
+      @if (parseError()) {
+        <div class="text-red-600 text-2xl">{{ parseError() }}</div>
+      }
+
+      <div class="rounded border border-gray-200">
+        <div class="px-3 py-2 bg-gray-50 text-2xl font-medium">
+          Parsed events preview
+        </div>
+        <div class="p-3">
+          @if (events().length === 0) {
+            <div class="text-gray-500 text-xl">No events parsed yet.</div>
+          } @else {
+            <ul class="list-disc ml-6 space-y-1">
+              @for (e of events(); track e.event) {
+                <li>
+                  <span class="font-medium">{{ e.event }}</span>
+                  <span class="text-gray-500">
+                    -
+                    {{ e.ecommerce ? 'with ecommerce' : 'no ecommerce' }}</span
+                  >
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button
+          type="button"
+          mat-stroked-button
+          color="primary"
+          [disabled]="events().length === 0 || isSaving()"
+          (click)="save()"
+        >
+          <mat-icon>save</mat-icon>
+          Save as reports
+        </button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -1,16 +1,12 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
-import { IReportDetails, ReportDetailsDto } from '@utils';
 import {
-  tap,
-  combineLatest,
-  take,
-  map,
-  switchMap,
-  throwError,
-  catchError
-} from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+  IReportDetails,
+  ReportDetailsDto,
+  Recording,
+  StrictDataLayerEvent
+} from '@utils';
+import { tap, take, switchMap, throwError, catchError, EMPTY } from 'rxjs';
 import { EditorService } from '../../../../shared/services/editor/editor.service';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -30,10 +26,35 @@ export class NewReportViewFacadeService {
   private readonly logger = inject(LoggerService);
 
   exampleInputJson = JSON.stringify({
-    event: 'page_view',
-    page_path: '$page_path',
-    page_title: '$page_title',
-    page_location: '$page_location'
+    event: 'add_payment_info',
+    ecommerce: {
+      currency: 'USD',
+      value: 30.03,
+      coupon: 'SUMMER_FUN',
+      payment_type: 'Credit Card',
+      items: [
+        {
+          item_id: 'SKU_12345',
+          item_name: 'Stan and Friends Tee',
+          affiliation: 'Google Merchandise Store',
+          coupon: 'SUMMER_FUN',
+          discount: 2.22,
+          index: 0,
+          item_brand: 'Google',
+          item_category: 'Apparel',
+          item_category2: 'Adult',
+          item_category3: 'Shirts',
+          item_category4: 'Crew',
+          item_category5: 'Short sleeve',
+          item_list_id: 'related_products',
+          item_list_name: 'Related Products',
+          item_variant: 'green',
+          location_id: 'ChIJIQBpAG2ahYAR_6128GcTUEo',
+          price: 10.01,
+          quantity: 3
+        }
+      ]
+    }
   });
 
   reportForm = this.fb.group({
@@ -111,90 +132,61 @@ export class NewReportViewFacadeService {
   }
 
   setEditorContent() {
-    combineLatest({
-      specEditor: this.editorService.editor$.specJsonEditor,
-      recordingEditor: this.editorService.editor$.recordingJsonEditor
-    })
-      .pipe(
-        takeUntilDestroyed(this.destroyedRef),
-        tap(({ specEditor, recordingEditor }) => {
-          const specContent = specEditor.state.doc.toString();
-          const recordingContent = recordingEditor.state.doc.toString();
-          this.editorService.setContent('specJson', specContent);
-          this.editorService.setContent('recordingJson', recordingContent);
-        })
-      )
-      .subscribe();
+    const specContent = this.editorService.contentSubjects.specJson();
+    const recordingContent = this.editorService.contentSubjects.recordingJson();
+    this.editorService.setContent('specJson', specContent);
+    this.editorService.setContent('recordingJson', recordingContent);
   }
 
   uploadReport(projectSlug: string) {
-    return combineLatest({
-      specEditor: this.editorService.editor$.specJsonEditor,
-      recordingEditor: this.editorService.editor$.recordingJsonEditor
-    }).pipe(
-      map(({ specEditor, recordingEditor }) => {
-        if (!this.reportForm.controls['testName'].value) {
-          this.showErrorDialog('Test name is required');
-          throw new Error('Test name is required');
+    const specEditor = this.editorService.editor$.specJsonEditor();
+    const recordingEditor = this.editorService.editor$.recordingJsonEditor();
+    const specContent = specEditor.state.doc.toString();
+    const recordingContent = recordingEditor.state.doc.toString();
+    const testName = specContent ? JSON.parse(specContent).event : '';
+    // cleaned legacy combineLatest-based editor content sync
+    const eventId = uuidv4();
+
+    if (specContent && projectSlug) {
+      // Validate JSON inputs and extract fields
+      let specParsed: StrictDataLayerEvent = {} as StrictDataLayerEvent;
+      let recordingParsed: Recording = {} as Recording;
+      try {
+        specParsed = JSON.parse(specContent) as StrictDataLayerEvent;
+      } catch {
+        this.showErrorDialog('Spec must be valid JSON.');
+        return EMPTY;
+      }
+      if (recordingContent && recordingContent.trim() !== '') {
+        try {
+          recordingParsed = JSON.parse(recordingContent) as Recording;
+        } catch {
+          this.showErrorDialog('Recording must be valid JSON.');
+          return EMPTY;
         }
+      }
 
-        const specContent = specEditor.state.doc.toString();
-        const recordingContent = recordingEditor.state.doc.toString();
-        const testName = this.reportForm.controls['testName'].value;
-        const eventId = uuidv4();
+      const eventName = (specParsed as { event?: string }).event ?? 'unknown';
+      const reportDetails: IReportDetails = new ReportDetailsDto({
+        eventId: eventId,
+        testName: testName,
+        eventName: eventName
+      });
 
-        if (specContent && projectSlug) {
-          const eventName = JSON.parse(specContent).event as string;
-          const reportDetails: IReportDetails = new ReportDetailsDto({
-            eventId: eventId,
-            testName: testName,
-            eventName: eventName
-          });
-
-          this.projectDataSourceService
-            .connect()
-            .pipe(
-              take(1),
-              tap((data) => {
-                this.projectDataSourceService.setData([...data, reportDetails]);
-                this.uploadSpecService.completeUpload();
-              }),
-              catchError((error) => {
-                this.logger.error('Error updating project data source:', error);
-                return throwError(() => error);
-              })
-            )
-            .subscribe();
-
-          return {
-            projectSlug,
-            eventId,
-            eventName,
-            specContent,
-            recordingContent,
-            reportDetails
-          };
-        } else {
-          this.showErrorDialog('Spec content is required and cannot be empty.');
-          throw new Error('Spec content is required and cannot be empty.');
-        }
-      }),
-      switchMap(
-        ({
-          projectSlug,
-          eventId,
-          eventName,
-          specContent,
-          recordingContent,
-          reportDetails
-        }) => {
-          return this.reportService
+      return this.projectDataSourceService.connect().pipe(
+        take(1),
+        tap((data) => {
+          this.projectDataSourceService.setData([...data, reportDetails]);
+          this.uploadSpecService.completeUpload();
+        }),
+        switchMap(() =>
+          this.reportService
             .addReport(
               projectSlug,
               eventId,
               reportDetails,
-              JSON.parse(recordingContent),
-              JSON.parse(specContent)
+              recordingParsed,
+              specParsed
             )
             .pipe(
               catchError((error) => {
@@ -202,10 +194,14 @@ export class NewReportViewFacadeService {
                 this.showErrorDialog('Failed to add report. Please try again.');
                 return throwError(() => error);
               })
-            );
-        }
-      )
-    );
+            )
+        )
+      );
+    }
+
+    this.showErrorDialog('Spec content is required and cannot be empty.');
+    return EMPTY;
+    // cleaned legacy combineLatest-based addReport flow
   }
 
   completeUpload() {

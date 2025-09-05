@@ -1,4 +1,5 @@
-import { Recording, Spec } from '@utils';
+import { ItemDef, Recording, Spec, TagConfig, TriggerConfig } from '@utils';
+import { exampleGtmJson } from '../gtm-json';
 
 const recording: Recording = {
   title: 'begin_checkout',
@@ -54,17 +55,42 @@ const recording: Recording = {
   ]
 };
 
+const tag = exampleGtmJson.containerVersion.tag.find(
+  (t) =>
+    t.parameter.find((p) => p.key === 'eventName')?.value === 'begin_checkout'
+);
+if (!tag) {
+  throw new Error(
+    'Tag with eventName "begin_checkout" not found in exampleGtmJson'
+  );
+}
+const normalizedTag: TagConfig = tag;
+
+const triggerNormalized = exampleGtmJson.containerVersion.trigger.find(
+  (t) => t.triggerId && (tag.firingTriggerId || []).includes(t.triggerId)
+) as unknown as TriggerConfig | undefined;
+
 const spec: Spec = {
-  event: 'begin_checkout',
-  ecommerce: {
-    currency: '$currency',
-    items: []
+  tag: normalizedTag,
+  trigger: triggerNormalized ? [triggerNormalized] : []
+};
+
+const fullItemDef: ItemDef = {
+  templateName: 'Begin Checkout Info Items',
+  itemId: 'begin_checkout',
+  fullItemDef: {
+    item_id: 'city001',
+    item_name: 'Switzerland',
+    item_category: 'Switzerland',
+    quantity: 1,
+    price: 799
   }
 };
 
 export const beginCheckoutExample = {
   eventName: 'begin_checkout',
-  testName: 'Standard Begin Checkout Test',
+  testName: normalizedTag.name,
   recording,
-  spec
+  spec,
+  fullItemDef
 };

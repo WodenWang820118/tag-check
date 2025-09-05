@@ -1,3 +1,4 @@
+import { TagConfig, TriggerConfig } from '../tag-build';
 import { Auditable } from './auditable.type';
 import { StrictDataLayerEvent } from './data-layer.type';
 
@@ -6,10 +7,14 @@ export type ProjectSpec = {
   specs: Spec[];
 };
 
+/**
+ * An individual spec for an event
+ * An event corresponds to a tag, which might contains multiple triggers
+ * The tag already have reference "name" attribute regarding variables
+ */
 export type Spec = {
-  event: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  tag: TagConfig;
+  trigger: TriggerConfig[];
 };
 
 export type SpecSchema = {
@@ -20,9 +25,21 @@ export type SpecSchema = {
 export type DataLayerSpec = {
   eventName: string;
   dataLayerSpec: StrictDataLayerEvent;
+  rawGtmTag: Spec;
 };
 
 export type DataLayerSpecSchema = {
   id: number;
 } & DataLayerSpec &
+  Auditable;
+
+export type ItemDef = {
+  templateName: string;
+  itemId: string;
+  fullItemDef: any;
+};
+
+export type ItemDefSchema = {
+  id: number;
+} & ItemDef &
   Auditable;

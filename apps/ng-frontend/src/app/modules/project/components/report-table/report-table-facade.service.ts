@@ -135,15 +135,9 @@ export class ReportTableFacadeService {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initializeData(paginator: MatPaginator, sort: MatSort, data: any) {
-    if (
-      !data['projectReport'] ||
-      !data['recordings'] ||
-      !data['projectSetting']
-    )
-      return;
-    const reports = data['projectReport'];
+    const reports = data['projectReport'] || [];
 
-    if (reports.length && paginator && sort) {
+    if (paginator && sort) {
       // Sort the data
       const injectReports = (reports as IReportDetails[]).sort((a, b) =>
         a.eventName.localeCompare(b.eventName)
@@ -183,10 +177,35 @@ export class ReportTableFacadeService {
   /** Toggle selection of all rows immutably to trigger signal updates */
   toggleAllRows(): void {
     const ds = this.reportTableDataSourceModelService.dataSource();
-    const current = this.reportTableDataSourceModelService.selection();
-    const allSelected = current.selected.length === ds.data.length;
-    const newSelected = allSelected ? [] : [...ds.data];
-    const newModel = new SelectionModel<IReportDetails>(true, newSelected);
+    const sel = this.reportTableDataSourceModelService.selection();
+
+    // Determine working dataset: filtered first, otherwise full data
+    const working =
+      (ds as unknown as { filteredData?: IReportDetails[] }).filteredData ??
+      ds.data;
+    // Align order with displayed sort
+    const sorted = ds.sort ? ds.sortData(working, ds.sort) : working;
+
+    // Compute current page slice
+    const pageIndex = ds.paginator?.pageIndex ?? 0;
+    const pageSize = ds.paginator?.pageSize ?? sorted.length;
+    const start = pageIndex * pageSize;
+    const end = Math.min(start + pageSize, sorted.length);
+    const pageRows = sorted.slice(start, end);
+
+    const allPageSelected = pageRows.every((r) => sel.isSelected(r));
+
+    let nextSelected: IReportDetails[];
+    if (allPageSelected) {
+      const pageSet = new Set(pageRows);
+      nextSelected = sel.selected.filter((r) => !pageSet.has(r));
+    } else {
+      const set = new Set(sel.selected);
+      pageRows.forEach((r) => set.add(r));
+      nextSelected = Array.from(set);
+    }
+
+    const newModel = new SelectionModel<IReportDetails>(true, nextSelected);
     this.reportTableDataSourceModelService.selection.set(newModel);
   }
 
@@ -204,7 +223,7 @@ export class ReportTableFacadeService {
 
   checkboxLabel(row?: IReportDetails): string {
     if (!row) {
-      return `${this.reportTableDataSourceModelService.isAllSelected() ? 'deselect' : 'select'} all`;
+      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
     }
     return `${
       this.reportTableDataSourceModelService.selection().isSelected(row)
@@ -225,7 +244,20 @@ export class ReportTableFacadeService {
     return this.reportTableDataSourceModelService.computedSelection;
   }
 
-  get isAllSelected() {
-    return this.reportTableDataSourceModelService.isAllSelected;
+  // Whether all rows on the current page are selected
+  isAllSelected(): boolean {
+    const ds = this.reportTableDataSourceModelService.dataSource();
+    const sel = this.reportTableDataSourceModelService.selection();
+
+    const working =
+      (ds as unknown as { filteredData?: IReportDetails[] }).filteredData ??
+      ds.data;
+    const sorted = ds.sort ? ds.sortData(working, ds.sort) : working;
+    const pageIndex = ds.paginator?.pageIndex ?? 0;
+    const pageSize = ds.paginator?.pageSize ?? sorted.length;
+    const start = pageIndex * pageSize;
+    const end = Math.min(start + pageSize, sorted.length);
+    const pageRows = sorted.slice(start, end);
+    return pageRows.length > 0 && pageRows.every((r) => sel.isSelected(r));
   }
 }

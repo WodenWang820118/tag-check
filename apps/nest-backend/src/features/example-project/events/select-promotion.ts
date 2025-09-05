@@ -1,7 +1,10 @@
-import { Recording, Spec } from '@utils';
+import { ItemDef, Recording, Spec, TagConfig, TriggerConfig } from '@utils';
+import { exampleGtmJson } from '../gtm-json';
+
+const EVENT_NAME = 'select_promotion';
 
 const recording: Recording = {
-  title: 'view_item',
+  title: EVENT_NAME,
   steps: [
     {
       type: 'setViewport',
@@ -33,28 +36,38 @@ const recording: Recording = {
   ]
 };
 
+const tag = exampleGtmJson.containerVersion.tag.find(
+  (t) => t.parameter.find((p) => p.key === 'eventName')?.value === EVENT_NAME
+);
+if (!tag) {
+  throw new Error(
+    `Tag with eventName "${EVENT_NAME}" not found in exampleGtmJson`
+  );
+}
+const normalizedTag: TagConfig = tag;
+
+const triggerNormalized = exampleGtmJson.containerVersion.trigger.find(
+  (t) => t.triggerId && (tag.firingTriggerId || []).includes(t.triggerId)
+) as unknown as TriggerConfig | undefined;
+
 const spec: Spec = {
-  event: 'select_promotion',
-  ecommerce: {
-    creative_name: '$creativeName',
-    creative_slot: '$creativeSlot',
-    promotion_id: '$promotionId',
-    promotion_name: '$promotionName',
-    items: [
-      {
-        item_id: 'city003',
-        item_name: 'Providence',
-        item_category: 'Providence',
-        price: 799,
-        quantity: 1
-      }
-    ]
+  tag: normalizedTag,
+  trigger: triggerNormalized ? [triggerNormalized] : []
+};
+
+const fullItemDef: ItemDef = {
+  templateName: 'Select Promotion Info Items',
+  itemId: 'select_promotion',
+  fullItemDef: {
+    item_id: 'city001',
+    item_name: 'Switzerland'
   }
 };
 
 export const selectPromotionExample = {
+  eventName: EVENT_NAME,
+  testName: normalizedTag.name,
   recording,
   spec,
-  eventName: 'select_promotion',
-  testName: 'Standard Select Promotion'
+  fullItemDef
 };

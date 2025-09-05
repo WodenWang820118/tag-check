@@ -1,7 +1,10 @@
-import { Recording, Spec } from '@utils';
+import { Recording, Spec, TagConfig, TriggerConfig } from '@utils';
+import { exampleGtmJson } from '../gtm-json';
+
+const EVENT_NAME = 'view_promotion';
 
 const recording: Recording = {
-  title: 'view_item',
+  title: EVENT_NAME,
   steps: [
     {
       type: 'setViewport',
@@ -33,28 +36,28 @@ const recording: Recording = {
   ]
 };
 
+const tag = exampleGtmJson.containerVersion.tag.find(
+  (t) => t.parameter.find((p) => p.key === 'eventName')?.value === EVENT_NAME
+);
+if (!tag) {
+  throw new Error(
+    `Tag with eventName "${EVENT_NAME}" not found in exampleGtmJson`
+  );
+}
+const normalizedTag: TagConfig = tag;
+
+const triggerNormalized = exampleGtmJson.containerVersion.trigger.find(
+  (t) => t.triggerId && (tag.firingTriggerId || []).includes(t.triggerId)
+) as unknown as TriggerConfig | undefined;
+
 const spec: Spec = {
-  event: 'view_promotion',
-  ecommerce: {
-    creative_name: '$creativeName',
-    creative_slot: '$creativeSlot',
-    promotion_id: '$promotionId',
-    promotion_name: '$promotionName',
-    items: [
-      {
-        item_id: 'city003',
-        item_name: 'Providence',
-        item_category: 'Providence',
-        price: 799,
-        quantity: 1
-      }
-    ]
-  }
+  tag: normalizedTag,
+  trigger: triggerNormalized ? [triggerNormalized] : []
 };
 
 export const viewPromotionExample = {
+  eventName: EVENT_NAME,
   recording,
   spec,
-  eventName: 'view_promotion',
-  testName: 'Standard View Promotion'
+  testName: normalizedTag.name
 };

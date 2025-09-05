@@ -10,5 +10,6 @@ export const environment = {
   settingsApiUrl: 'http://localhost:7070/settings',
   fileReportApiUrl: 'http://localhost:7070/file-reports',
   videoApiUrl: 'http://localhost:7070/videos',
+  gtmParserApiUrl: 'http://localhost:7070/gtm-parser',
   webSocketUrl: 'http://localhost:7002/events'
 };

@@ -8,7 +8,8 @@ import {
   CreateApplicationSettingDto,
   CreateAuthenticationSettingDto,
   CreateBrowserSettingDto,
-  CreateProjectDto
+  CreateProjectDto,
+  UpdateSpecDto
 } from '../../../shared';
 import {
   ApplicationSetting,
@@ -150,7 +151,7 @@ export class ProjectFacadeRepositoryService {
     return await this.browserRepositoryService.update(projectEntity, settings);
   }
 
-  async updateSpec(projectSlug: string, eventId: string, spec: Spec) {
+  async updateSpec(projectSlug: string, eventId: string, spec: UpdateSpecDto) {
     return await this.specRepositoryService.update(projectSlug, eventId, spec);
   }
 }

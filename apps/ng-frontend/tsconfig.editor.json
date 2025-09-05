@@ -18,5 +18,10 @@
     "src/**/*.spec.ts",
     "**/*.stories.ts",
     "**/*.stories.js"
-  ]
+  ],
+  "angularCompilerOptions": {
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
 }

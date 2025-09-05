@@ -13,27 +13,32 @@ import { EditorTypeEnum } from '@utils';
   selector: 'lib-editor',
   standalone: true,
   styles: [``],
-  template: `<div id="cm-editor" #editor></div>`,
+  template: `<div class="cm-editor" #editor></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditorComponent {
-  editorExtension = input<EditorTypeEnum>(EditorTypeEnum.INPUT_JSON);
+  // Make the extension required so we don't initialize with a wrong default
+  editorExtension = input.required<EditorTypeEnum>();
   content = input<string>('');
   editorElement = viewChild<ElementRef<HTMLDivElement>>('editor');
 
   constructor(private readonly editorService: EditorService) {
-    // Use effect to handle editor initialization
+    // Initialize editor only when the element and extension are available.
+    // Avoid reading `content()` here so this effect doesn't re-run on content changes.
     effect(() => {
-      // Get the current value of the editor element
       const element = this.editorElement();
+      const extension = this.editorExtension();
+      if (element && extension) {
+        this.editorService.initEditorView(extension, element);
+      }
+    });
 
-      // Only initialize if element exists
-      if (element) {
-        this.editorService.initEditorView(
-          this.editorExtension(),
-          element,
-          this.content()
-        );
+    // Separate effect to update content without re-initializing the editor
+    effect(() => {
+      const extension = this.editorExtension();
+      const content = this.content();
+      if (extension && content?.length) {
+        this.editorService.setContent(extension, content);
       }
     });
   }

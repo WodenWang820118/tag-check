@@ -10,6 +10,7 @@ import {
   SpecEntity,
   TestEventDetailEntity,
   TestEventEntity,
+  ItemDefEntity,
   TestImageEntity
 } from '../../../shared';
 import { ProjectRepositoryService } from '../../../core/repository/project/project-repository.service';
@@ -28,6 +29,7 @@ const entities = [
   RecordingEntity,
   SpecEntity,
   TestEventEntity,
+  ItemDefEntity,
   TestEventDetailEntity,
   TestImageEntity
 ];

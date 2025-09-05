@@ -3,7 +3,7 @@
 export const editorStyles = {
   '.cm-scroller': {
     overflow: 'auto',
-    height: '75vh',
+    height: '75vh'
   },
   '.cm-content': {
     textAlign: 'justify',
@@ -12,6 +12,6 @@ export const editorStyles = {
     padding: '1em',
     borderRadius: '3px',
     overflow: 'auto',
-    width: '25vw',
-  },
+    width: '100%'
+  }
 };

@@ -56,6 +56,16 @@ export class ProjectEntity extends AuditableEntity implements ProjectSchema {
   })
   measurementId?: string;
 
+  @Expose({ name: 'gtm_configuration_path' })
+  @Column({
+    name: 'gtm_configuration_path',
+    type: 'varchar',
+    length: 1024,
+    nullable: true,
+    comment: 'Path on disk to the GTM container configuration JSON file'
+  })
+  gtmConfigurationPath?: string;
+
   @OneToMany(() => TestEventEntity, (testEvent) => testEvent.project, {
     onDelete: 'CASCADE'
   })

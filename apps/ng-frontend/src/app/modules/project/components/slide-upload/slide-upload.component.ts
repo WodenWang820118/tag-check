@@ -1,9 +1,12 @@
-import { Component, effect, signal, viewChild } from '@angular/core';
+import { Component, signal, input } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { NewReportViewComponent } from '../new-report-view/new-report-view.component';
+import { UploadCardComponent } from '../upload-card/upload-card.component';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
+import { Ga4UploadComponent } from '../ga4-upload/ga4-upload.component';
 
 @Component({
   selector: 'app-slide-upload',
@@ -12,34 +15,42 @@ import { UploadSpecService } from '../../../../shared/services/upload-spec/uploa
     MatSidenavModule,
     MatIconModule,
     NewReportViewComponent,
-    MatButtonModule
+    MatButtonModule,
+    UploadCardComponent,
+    MatTabsModule,
+    Ga4UploadComponent
   ],
   templateUrl: './slide-upload.component.html',
   styleUrls: ['./slide-upload.component.scss']
 })
 export class SlideUploadComponent {
-  sidenav = viewChild.required<MatSidenav>('sidenav');
+  sidenav = input.required<MatSidenav>();
   loading = signal(true);
 
-  constructor(public uploadSpecService: UploadSpecService) {
-    effect(() => {
-      if (this.uploadSpecService.isStarted()) {
-        this.sidenav().toggle(true);
-      } else {
-        this.sidenav().toggle(false);
-      }
-    });
-  }
+  constructor(public uploadSpecService: UploadSpecService) {}
 
   toggleSidenav() {
-    this.adjustBodyOverflow();
+    const s = this.sidenav();
+    if (!s) return;
+    if (s.opened) {
+      this.closeIfOpen();
+    } else {
+      this.open();
+    }
   }
 
-  private adjustBodyOverflow() {
-    const sidenavInstance = this.sidenav();
-    if (sidenavInstance) {
-      sidenavInstance.toggle();
-      document.body.style.overflow = sidenavInstance.opened ? 'hidden' : 'auto';
+  open() {
+    const s = this.sidenav();
+    if (!s) return;
+    s.open();
+  }
+
+  closeIfOpen() {
+    const s = this.sidenav();
+    if (!s) return;
+    if (s.opened) {
+      s.close();
+      this.uploadSpecService.resetStart();
     }
   }
 

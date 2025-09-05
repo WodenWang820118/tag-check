@@ -1,5 +1,10 @@
-import { Injectable, signal } from '@angular/core';
-import { Spec, IReportDetails, ReportDetailsDto } from '@utils';
+import { computed, effect, Injectable, signal } from '@angular/core';
+import {
+  IReportDetails,
+  ReportDetailsDto,
+  GTMConfiguration,
+  StrictDataLayerEvent
+} from '@utils';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 import {
   forkJoin,
@@ -8,37 +13,54 @@ import {
   of,
   tap,
   Observable,
-  concatMap
+  concatMap,
+  take
 } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { v4 as uuidv4 } from 'uuid';
+import { GtmJsonParserService } from '../../../../shared/services/api/gtm-json-parser/gtm-json-parser.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UploadCardFacadeService {
   importedSpec = signal<string>('');
+  importedSpec$ = computed(() => this.importedSpec());
+
+  gtmConfiguration = signal<GTMConfiguration | null>(null);
+  gtmConfiguration$ = computed(() => this.gtmConfiguration());
+
+  projectSlug = signal<string>('');
+  projectSlug$ = computed(() => this.projectSlug());
 
   constructor(
     private readonly uploadSpecService: UploadSpecService,
-    private readonly route: ActivatedRoute,
-    private readonly reportService: ReportService
-  ) {}
+    private readonly reportService: ReportService,
+    private readonly gtmJsonParserService: GtmJsonParserService
+  ) {
+    effect(() => {
+      const gtmConfig = this.gtmConfiguration$();
+      const projectSlug = this.projectSlug$();
+      console.log('project slug: ', projectSlug);
+      if (gtmConfig && projectSlug) {
+        this.gtmJsonParserService
+          .uploadGtmJson(projectSlug, JSON.stringify(gtmConfig))
+          .pipe(take(1))
+          .subscribe();
+      }
+    });
+  }
 
-  onFileSelected(event: any) {
+  onFileSelected(projectSlug: string, event: any) {
     const file = event.target.files[0];
     const reader = new FileReader();
     reader.onload = () => {
       try {
         const result = reader.result as string;
-        const parsedSpec = JSON.parse(result) as Spec[];
+        this.projectSlug.set(projectSlug);
+        const parsedSpec = this.gtmJsonParserService.parseGtmJson(result);
 
-        if (this.uploadSpecService.existKeys(parsedSpec)) {
-          this.importedSpec.set(result);
-        } else {
-          alert('Invalid spec');
-        }
+        this.gtmConfiguration.set(parsedSpec);
       } catch (error) {
         console.error('Error parsing file:', error);
         alert('Error parsing file');
@@ -59,10 +81,9 @@ export class UploadCardFacadeService {
     this.uploadSpecService.completeUpload();
   }
 
-  // TODO: batch upload instead of one by one
   save(projectSlug: string): Observable<any> {
     try {
-      const specs = JSON.parse(this.importedSpec()) as Spec[];
+      const specs = JSON.parse(this.importedSpec()) as StrictDataLayerEvent[];
 
       // 1. Use .reduce() to create a dictionary of observables
       const requestsAsObject = specs.reduce(
@@ -70,14 +91,14 @@ export class UploadCardFacadeService {
           const eventId = uuidv4(); // This will be the key in our dictionary
           const reportDetails: IReportDetails = new ReportDetailsDto({
             eventId: eventId,
-            testName: spec.event,
-            eventName: 'Standard'
+            testName: `GA4 event - ${spec.event}`,
+            eventName: spec.event
           });
 
           const reportObservable = this.reportService
             .addReport(
               projectSlug,
-              `${spec.event}_${eventId}`,
+              `${eventId}`,
               reportDetails,
               JSON.parse('{}'),
               spec

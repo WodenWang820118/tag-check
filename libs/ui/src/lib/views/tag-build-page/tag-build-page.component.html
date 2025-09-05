@@ -1,30 +1,75 @@
-<div class="main-page pt-0 pb-12 px-[10rem]">
-  <div class="main-page__title text-left my-8">
-    <h1>Tag Build</h1>
-  </div>
+<main class="main-page pt-0 pb-12 px-4 sm:px-6 lg:px-12 xl:px-16">
+  <header class="main-page__title text-left my-4 sm:my-6 lg:my-8">
+    <mat-tab-group
+      mat-stretch-tabs="false"
+      mat-align-tabs="start"
+      [(selectedIndex)]="selectedIndex"
+    >
+      <mat-tab label="Tag Build"> </mat-tab>
+      <mat-tab label="Tag Extract (In Development)" disabled> </mat-tab>
+    </mat-tab-group>
+  </header>
 
-  <div
-    class="main-page__board flex flex-row flex-wrap justify-center items-stretch gap-16 mb-12"
+  <section
+    class="main-page__board flex flex-col md:flex-row md:flex-wrap justify-start items-stretch gap-6 lg:gap-8 xl:gap-12 mb-12 w-full"
+    aria-label="Tag Build workspace"
   >
+    <!-- Left: Input Editor Panel -->
     <div
-      class="main-page__board__item main-page__editor grow border border-gray-300 dark:border-gray-700"
+      class="main-page__board__item main-page__editor border border-gray-300 dark:border-gray-700 rounded-md bg-white/60 dark:bg-transparent w-full md:w-[48rem] xl:w-[54rem] shrink-0 shadow-sm mx-auto"
+      aria-label="Input JSON editor"
     >
-      @if (specs().length > 0) {
-        <lib-editor
-          content="{{ specs() | json }}"
-          [editorExtension]="inputExtension"
-        />
-      } @else {
-        <lib-editor content="[]" [editorExtension]="inputExtension" />
-      }
+      <div
+        class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200"
+      >
+        Input JSON
+      </div>
+      <div class="p-2">
+        <!-- If using Tag Extract (selectedIndex === TagBuildMode.TagExtract) input should be blank -->
+        @if (selectedIndex === TagBuildMode.TagBuild) {
+          @if (specs().length > 0) {
+            <lib-editor
+              [content]="specs() | json"
+              [editorExtension]="inputExtension"
+            >
+            </lib-editor>
+          } @else {
+            <lib-editor
+              [content]="[] | json"
+              [editorExtension]="inputExtension"
+            ></lib-editor>
+          }
+        } @else {
+          <lib-editor
+            [content]="[] | json"
+            [editorExtension]="inputExtension"
+          ></lib-editor>
+        }
+      </div>
     </div>
-    <div class="main-page__board__item grow">
-      <lib-functional-card> </lib-functional-card>
-    </div>
+
+    <!-- Middle: Actions Panel (fixed width) -->
     <div
-      class="main-page__board__item main-page__editor grow border border-gray-300 dark:border-gray-700"
+      class="main-page__board__item w-full md:basis-1/2 md:shrink-0 xl:flex-1 xl:min-w-[20rem] xl:shrink mx-auto"
     >
+      <lib-functional-card class="h-full w-full">
+        <lib-upload-action
+          class="functional-card__actions__item"
+          (uploadClick)="onUpload()"
+        ></lib-upload-action>
+      </lib-functional-card>
+    </div>
+
+    <!-- Right: Output Editor Panel -->
+    <div
+      class="main-page__board__item main-page__editor border border-gray-300 dark:border-gray-700 rounded-md bg-white/60 dark:bg-transparent w-full md:w-[48rem] xl:w-[54rem] shrink-0 shadow-sm mx-auto"
+      aria-label="Output JSON editor"
+    >
+      class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm
+      font-medium text-gray-700 dark:text-gray-200" > Output JSON
+    </div>
+    <div class="p-2">
       <lib-editor [editorExtension]="outputExtension"></lib-editor>
     </div>
-  </div>
-</div>
+  </section>
+</main>

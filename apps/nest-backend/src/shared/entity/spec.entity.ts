@@ -1,4 +1,4 @@
-import { DataLayerSpecSchema, StrictDataLayerEvent } from '@utils';
+import { Spec, StrictDataLayerEvent } from '@utils';
 import {
   Column,
   Entity,
@@ -10,7 +10,7 @@ import { AuditableEntity } from './common';
 import { TestEventEntity } from './test-event.entity';
 
 @Entity('spec')
-export class SpecEntity extends AuditableEntity implements DataLayerSpecSchema {
+export class SpecEntity extends AuditableEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -30,7 +30,16 @@ export class SpecEntity extends AuditableEntity implements DataLayerSpecSchema {
   @Column({
     name: 'data_layer_spec',
     type: 'json',
+    nullable: true,
     comment: 'Stores the data layer specification in JSON format'
   })
-  dataLayerSpec!: StrictDataLayerEvent;
+  dataLayerSpec?: StrictDataLayerEvent;
+
+  @Column({
+    name: 'raw_gtm_tag',
+    type: 'json',
+    nullable: true,
+    comment: 'Stores the raw GTM tag in JSON format'
+  })
+  rawGtmTag?: Spec;
 }

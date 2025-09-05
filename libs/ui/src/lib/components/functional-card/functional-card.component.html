@@ -6,17 +6,15 @@
       [color]="color()"
       (click)="convertCode()"
       class="functional-card__actions__item"
-      [disabled]="
-        this.editorFacadeService
-          .getInputJsonContent()()
-          .state.doc.toString() === '[]'
-      "
+      [disabled]="isConvertDisabled$()"
     >
       Convert
     </button>
     <ng-content select="lib-upload-action"></ng-content>
   </div>
-  <lib-advanced-expansion-panel
-    #accordionContainer
-  ></lib-advanced-expansion-panel>
+  @if (mode === tagBuildModeEnum.TagBuild) {
+    <lib-advanced-expansion-panel
+      #accordionContainer
+    ></lib-advanced-expansion-panel>
+  }
 </div>
