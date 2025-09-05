@@ -1,5 +1,5 @@
 import { Component, computed, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import {
   FrontFileReport,
   IReportDetails,
@@ -14,6 +14,8 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ReportTabComponent } from '../../components/report-tab/report-tab.component';
 import { TagManageTabComponent } from '../../components/tag-manage-tab/tag-manage-tab.component';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { SnackBarComponent } from '../../../../shared/components/snackbar/snackbar.component';
 
 @Component({
   selector: 'app-detail-view',
@@ -23,6 +25,7 @@ import { TagManageTabComponent } from '../../components/tag-manage-tab/tag-manag
     MatButtonModule,
     MatTabsModule,
     MatTooltipModule,
+    MatSnackBarModule,
     ReportTabComponent,
     TagManageTabComponent
   ],
@@ -43,7 +46,11 @@ import { TagManageTabComponent } from '../../components/tag-manage-tab/tag-manag
           </button>
           <!-- Title intentionally minimal to avoid duplication with card header -->
         </div>
-        <mat-tab-group mat-stretch-tabs="true" dynamicHeight>
+        <mat-tab-group
+          mat-stretch-tabs="true"
+          dynamicHeight
+          [selectedIndex]="selectedTabIndex"
+        >
           <mat-tab label="Tag Snapshot">
             <app-tag-manage-tab [tagSpec]="tagSpec$()"></app-tag-manage-tab>
           </mat-tab>
@@ -73,13 +80,16 @@ export class DetailViewComponent implements OnInit {
   imageBlob$ = computed(() => this.imageBlob());
   frontFileReport = signal([] as FrontFileReport[]);
   // testEventDetail$ moved into the ReportTabComponent
+  selectedTabIndex = 0; // 0: Tag Snapshot, 1: Reports
 
   constructor(
     private readonly router: Router,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
+    private readonly snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
+    // react to route data
     this.route.data.subscribe((data) => {
       console.log('Route data:', data);
       const fileReports = data['fileReports'] as FrontFileReport[];
@@ -110,6 +120,32 @@ export class DetailViewComponent implements OnInit {
       this.reportDetails.set(flattenedReportDetails);
       this.videoBlob.set(video.blob);
       this.imageBlob.set(image.blob);
+    });
+
+    // react to query params to select Reports tab and optionally show snackbar
+    this.route.queryParamMap.subscribe((params) => {
+      const tab = params.get('tab');
+      const snackbar = params.get('snackbar');
+      // select the Reports tab when requested
+      if (tab && tab.toLowerCase() === 'reports') {
+        this.selectedTabIndex = 1;
+      }
+      // show snackbar hint when navigating from add-recording prompt
+      if (snackbar === 'missingRecording') {
+        this.snackBar.openFromComponent(SnackBarComponent, {
+          duration: 5000,
+          data: 'Please add a Chrome Recording to this event before running tests.'
+        });
+        // Optionally remove the snackbar flag from URL to avoid showing again on refresh
+        // by replacing current URL without reloading component
+        const queryParams: Params = { ...this.route.snapshot.queryParams };
+        delete queryParams['snackbar'];
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams,
+          replaceUrl: true
+        });
+      }
     });
   }
 

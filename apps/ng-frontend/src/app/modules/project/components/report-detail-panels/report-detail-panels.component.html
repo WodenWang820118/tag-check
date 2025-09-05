@@ -181,11 +181,90 @@
       <mat-panel-description>
         <pre class="json">{{ reportDetails()?.dataLayer | json }}</pre>
       </mat-panel-description>
-      <!-- <mat-action-row
-        ><button mat-raised-button color="success" (click)="onDownload()">
-          Download
-        </button></mat-action-row
-      > -->
+    </mat-expansion-panel>
+    <mat-expansion-panel
+      #itemDefPanel
+      hideToggle
+      (opened)="switchItemDefEdit()"
+      (closed)="switchItemDefEdit()"
+    >
+      <mat-expansion-panel-header>
+        <mat-panel-title> Item Definition </mat-panel-title>
+        <mat-panel-description>
+          @if (!itemDefEditMode()) {
+            <button
+              mat-mini-fab
+              color="primary"
+              class="edit"
+              (click)="openPanelAndToggleItemDef(itemDefPanel, $event)"
+            >
+              <mat-icon class="icon-contrast" matTooltip="Edit">edit</mat-icon>
+            </button>
+          }
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+      <mat-panel-description>
+        @if (isItemDefLoading) {
+          <div class="loading-spinner">
+            <mat-progress-spinner
+              [mode]="'indeterminate'"
+            ></mat-progress-spinner>
+          </div>
+        } @else {
+          @if (!itemDefContent()) {
+            <p>No item definition found</p>
+          } @else if (!itemDefEditMode()) {
+            <ng-container>
+              <pre class="json">{{ itemDefContent() | json }}</pre>
+            </ng-container>
+          } @else {
+            <app-editor
+              [editorExtension]="'itemDefJson'"
+              [content]="
+                itemDefContent()?.fullItemDef || itemDefContent() | json
+              "
+            ></app-editor>
+          }
+        }
+      </mat-panel-description>
+      @if (itemDefEditMode()) {
+        <mat-action-row>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="itemDefFileInput.click()"
+          >
+            Upload
+          </button>
+          <input
+            hidden
+            (change)="onItemDefFileSelected($event)"
+            #itemDefFileInput
+            type="file"
+          />
+          <button
+            mat-raised-button
+            color="primary"
+            [disabled]="isJsonSyntaxError() || !(editItemId() || '').trim()"
+            (click)="
+              onItemDefUpdate(
+                editItemId() || '',
+                editTemplateName() || undefined
+              );
+              switchItemDefEditMode($event)
+            "
+          >
+            Save
+          </button>
+          <button
+            mat-raised-button
+            class="remark"
+            (click)="closePanelAndToggleItemDef(itemDefPanel, $event)"
+          >
+            Cancel
+          </button>
+        </mat-action-row>
+      }
     </mat-expansion-panel>
   </mat-accordion>
 </div>
