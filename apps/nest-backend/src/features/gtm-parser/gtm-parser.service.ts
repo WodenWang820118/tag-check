@@ -21,20 +21,43 @@ export class GtmParserService {
   // For now, we simply save and build from the provided GTM JSON.
   async uploadGtmJson(projectSlug: string, json: unknown) {
     try {
+      const hasContainerVersion = (obj: unknown): obj is GTMConfiguration =>
+        typeof obj === 'object' && obj !== null && 'containerVersion' in obj;
+
+      // Normalize input to a proper object; callers may send a stringified JSON
+      let gtmObject: GTMConfiguration;
+      try {
+        gtmObject =
+          typeof json === 'string'
+            ? (JSON.parse(json) as GTMConfiguration)
+            : (json as GTMConfiguration);
+      } catch (e) {
+        this.logger.warn(
+          'Received invalid JSON payload; will attempt to continue using saved file. Error: ' +
+            (e instanceof Error ? e.message : String(e))
+        );
+        // Fallback to an empty object; we will read from file after save
+        gtmObject = {} as GTMConfiguration;
+      }
+
       const folderPath =
         await this.folderPathService.getProjectConfigFolderPath(projectSlug);
       this.logger.log(`GTM JSON uploaded for project: ${projectSlug}`);
       const filePath = join(folderPath, 'gtm-container.json');
-      this.fileService.writeJsonFile(filePath, json);
+      // Always write a well-formed object to disk when available
+      this.fileService.writeJsonFile(filePath, gtmObject);
 
       // Try to parse and build events immediately
       try {
-        const gtm: GTMConfiguration =
-          (json as GTMConfiguration) ??
+        // Prefer the normalized object; if it's missing required fields, re-read from disk
+        const fromDisk =
           this.fileService.readJsonFile<GTMConfiguration>(filePath);
+        const gtm: GTMConfiguration = hasContainerVersion(gtmObject)
+          ? gtmObject
+          : fromDisk;
 
-        const tags = gtm.containerVersion.tag ?? [];
-        const triggers = gtm.containerVersion.trigger ?? [];
+        const tags = gtm.containerVersion?.tag ?? [];
+        const triggers = gtm.containerVersion?.trigger ?? [];
 
         const inputs: BuildEventInput[] = tags
           .map((t) => this.toBuildInput(t, triggers))
