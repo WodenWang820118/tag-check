@@ -1,8 +1,8 @@
 import { join } from 'path';
 import electronLog from 'electron-log';
-import * as environmentUtils from './environment-utils.js';
-import * as pathUtils from './path-utils.js';
-import log from 'electron-log/main.js';
+import * as environmentUtils from './environment-utils';
+import * as pathUtils from './path-utils';
+import log from 'electron-log/main';
 log.initialize();
 
 // For example, set a custom log file path based on your environment:
