@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { Credentials, Page } from 'puppeteer';
 import { WebAgentUtilsService } from './web-agent-utils.service';
@@ -16,6 +15,7 @@ export class WebAgentService {
     captureRequest: string,
     application: EventInspectionPresetDto['application']
   ) {
+    const captureFlag = captureRequest === 'true' || captureRequest === '1';
     const { dataLayer, destinationUrl } =
       await this.webAgentUtilsService.performTest(
         page,
@@ -23,7 +23,7 @@ export class WebAgentService {
         eventId,
         measurementId,
         credentials,
-        Boolean(captureRequest),
+        captureFlag,
         application
       );
     return {
@@ -41,6 +41,7 @@ export class WebAgentService {
     captureRequest: string,
     application: EventInspectionPresetDto['application']
   ) {
+    const captureFlag = captureRequest === 'true' || captureRequest === '1';
     const { dataLayer, eventRequest, destinationUrl } =
       await this.webAgentUtilsService.performTest(
         page,
@@ -48,7 +49,7 @@ export class WebAgentService {
         eventId,
         measurementId,
         credentials,
-        Boolean(captureRequest),
+        captureFlag,
         application
       );
     return {

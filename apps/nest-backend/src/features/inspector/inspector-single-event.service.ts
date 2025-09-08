@@ -8,6 +8,7 @@ import { InspectorUtilsService } from './inspector-utils.service';
 import { InspectDataLayerDto } from '../../shared/dto/inspect-data-layer.dto';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { SpecRepositoryService } from '../../core/repository/spec/spec-repository.service';
+import { ItemDefRepositoryService } from '../../core/repository/item-def/item-def-repository.service';
 @Injectable()
 export class InspectorSingleEventService {
   private readonly logger = new Logger(InspectorSingleEventService.name);
@@ -16,7 +17,8 @@ export class InspectorSingleEventService {
     private readonly fileService: FileService,
     private readonly requestProcessorService: RequestProcessorService,
     private readonly inspectorUtilsService: InspectorUtilsService,
-    private readonly specRepositoryService: SpecRepositoryService
+    private readonly specRepositoryService: SpecRepositoryService,
+    private readonly itemDefRepositoryService: ItemDefRepositoryService
   ) {}
 
   // inspect one event
@@ -35,6 +37,15 @@ export class InspectorSingleEventService {
         projectSlug,
         eventId
       );
+
+    const itemDef = await this.itemDefRepositoryService.getItemDefById(
+      projectSpec.eventName
+    );
+    const ecommerce = projectSpec.dataLayerSpec.ecommerce;
+    if (ecommerce?.items && itemDef) {
+      ecommerce.items = [itemDef.fullItemDef];
+    }
+
     // Create DTO for inspection parameters
     const dto: InspectDataLayerDto = {
       measurementId,

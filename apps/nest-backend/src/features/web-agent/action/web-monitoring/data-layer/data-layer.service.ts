@@ -36,7 +36,7 @@ export class DataLayerService {
         { timeout: 5000 }
       );
 
-      const dataLayer: any[] = await page.evaluate(() => {
+      const dataLayer: unknown[] = await page.evaluate(() => {
         return window.dataLayer
           ? JSON.parse(JSON.stringify(window.dataLayer))
           : [{ event: 'no data layer' }];
@@ -48,7 +48,7 @@ export class DataLayerService {
   }
 
   async updateSelfDataLayerAlgorithm(
-    dataLayer: any[],
+    dataLayer: unknown[],
     projectName: string,
     eventId: string
   ) {
@@ -63,19 +63,27 @@ export class DataLayerService {
     );
 
     // Ensure to read the file content before trying to parse it as JSON
-    const myDataLayer: any[] = this.fileService.readJsonFile(myDataLayerFile);
+    const myDataLayer: unknown[] =
+      this.fileService.readJsonFile(myDataLayerFile);
 
     dataLayer.forEach((dataLayerObject) => {
-      const existingIndex = myDataLayer.findIndex(
-        (myDataLayerObject: { event: any }) => {
-          return myDataLayerObject.event === dataLayerObject.event;
+      const existingIndex = myDataLayer.findIndex((myDataLayerObject: any) => {
+        // loosely compare by event property if present
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          return (
+            myDataLayerObject &&
+            (myDataLayerObject as any).event === (dataLayerObject as any).event
+          );
+        } catch {
+          return false;
         }
-      );
+      });
 
       if (existingIndex === -1) {
-        myDataLayer.push(dataLayerObject);
+        (myDataLayer as unknown[]).push(dataLayerObject);
       } else {
-        myDataLayer[existingIndex] = dataLayerObject;
+        (myDataLayer as unknown[])[existingIndex] = dataLayerObject;
       }
     });
 

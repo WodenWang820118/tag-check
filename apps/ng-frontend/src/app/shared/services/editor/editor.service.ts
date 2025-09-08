@@ -7,7 +7,7 @@ import { editorStyles } from './editor-style';
 import { linter, lintGutter } from '@codemirror/lint';
 import { jsonParseLinter } from '@codemirror/lang-json';
 
-export type EditorExtension = 'specJson' | 'recordingJson';
+export type EditorExtension = 'specJson' | 'recordingJson' | 'itemDefJson';
 type ExtensionArray = Extension[];
 type ThemeValue = string | number | null | ThemeDecl;
 interface ThemeDecl {
@@ -21,22 +21,28 @@ export type EditorThemeStyles = Record<string, ThemeDecl>;
 export class EditorService {
   editorExtensions: Record<EditorExtension, ExtensionArray> = {
     specJson: jsonLightEditorExtensions,
-    recordingJson: jsonLightEditorExtensions
+    recordingJson: jsonLightEditorExtensions,
+    itemDefJson: jsonLightEditorExtensions
   };
 
   contentSubjects = {
     specJson: signal<string>(''),
-    recordingJson: signal<string>('')
+    recordingJson: signal<string>(''),
+    itemDefJson: signal<string>('')
   };
 
   editorViewSubjects = {
     specJson: signal<EditorView>(new EditorView()),
-    recordingJson: signal<EditorView>(new EditorView())
+    recordingJson: signal<EditorView>(new EditorView()),
+    itemDefJson: signal<EditorView>(new EditorView())
   };
 
   editor$ = {
     specJsonEditor: computed(() => this.editorViewSubjects.specJson()),
-    recordingJsonEditor: computed(() => this.editorViewSubjects.recordingJson())
+    recordingJsonEditor: computed(() =>
+      this.editorViewSubjects.recordingJson()
+    ),
+    itemDefJsonEditor: computed(() => this.editorViewSubjects.itemDefJson())
   };
 
   isJsonSyntaxError = signal<boolean>(false);
@@ -44,12 +50,14 @@ export class EditorService {
 
   private readonly jsonSyntaxErrorByExt = {
     specJson: signal<boolean>(false),
-    recordingJson: signal<boolean>(false)
+    recordingJson: signal<boolean>(false),
+    itemDefJson: signal<boolean>(false)
   };
 
   jsonSyntaxError$ = {
     specJson: computed(() => this.jsonSyntaxErrorByExt.specJson()),
-    recordingJson: computed(() => this.jsonSyntaxErrorByExt.recordingJson())
+    recordingJson: computed(() => this.jsonSyntaxErrorByExt.recordingJson()),
+    itemDefJson: computed(() => this.jsonSyntaxErrorByExt.itemDefJson())
   } as const;
 
   initEditorView(
@@ -83,7 +91,7 @@ export class EditorService {
     // insert the raw content and mark syntax error state so the UI can react.
     let initialInsert = '';
     try {
-      if (content && content.trim()) {
+      if (content.trim()) {
         initialInsert = JSON.stringify(JSON.parse(content), null, 2);
         this.jsonSyntaxErrorByExt[extension].set(false);
       }
@@ -116,7 +124,7 @@ export class EditorService {
     console.log('New content:', content);
     // Defensive handling: if content is empty, clear the editor.
     const view = this.editorViewSubjects[extension]();
-    if (!content || !content.trim()) {
+    if (!content.trim()) {
       this.contentSubjects[extension].set('');
       view.dispatch({
         changes: { from: 0, to: view.state.doc.length, insert: '' }

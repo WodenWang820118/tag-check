@@ -1,8 +1,15 @@
 import { ReportDetailPanelsFacadeService } from './report-detail-panels-facade.service';
 import { JsonPipe } from '@angular/common';
-import { Component, computed, input, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  input,
+  OnInit,
+  signal
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { DataLayerSpec, IReportDetails } from '@utils';
+import { DataLayerSpec, IReportDetails, ItemDef } from '@utils';
 import {
   MatExpansionModule,
   MatExpansionPanel
@@ -12,6 +19,9 @@ import { ActivatedRoute } from '@angular/router';
 import { EditorComponent } from '../../../../shared/components/editor/editor.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { take, tap } from 'rxjs';
 @Component({
   selector: 'app-report-datail-panels',
   standalone: true,
@@ -22,7 +32,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatTooltipModule,
     EditorComponent,
     MatButtonModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatFormFieldModule,
+    MatInputModule
   ],
   templateUrl: './report-detail-panels.component.html',
   styleUrls: ['./report-detail-panels.component.scss']
@@ -39,9 +51,21 @@ export class ReportDetailPanelsComponent implements OnInit {
 
   // Edit mode signals
   specEdit = signal(false);
+  specEdit$ = computed(() => this.specEdit());
   recordingEdit = signal(false);
+  recordingEdit$ = computed(() => this.recordingEdit());
+  itemDefEdit = signal(false);
+  itemDefEdit$ = computed(() => this.itemDefEdit());
   specEditMode = signal(false);
+  specEditMode$ = computed(() => this.specEditMode());
   recordingEditMode = signal(false);
+  recordingEditMode$ = computed(() => this.recordingEditMode());
+  itemDefEditMode = signal(false);
+  itemDefEditMode$ = computed(() => this.itemDefEditMode());
+  editItemId = signal<string | null>(null);
+  editItemId$ = computed(() => this.editItemId());
+  editTemplateName = signal<string | null>(null);
+  editTemplateName$ = computed(() => this.editTemplateName());
 
   // Computed signals
   specContent = computed(() => {
@@ -63,19 +87,49 @@ export class ReportDetailPanelsComponent implements OnInit {
     return result;
   });
 
+  itemDefContent = computed(() => {
+    const itemDef = this.reportDetailPanelsFacadeService.itemDefContent$;
+    const temp = this.reportDetailPanelsFacadeService.tempItemDefContent$;
+    const result = temp || itemDef;
+    console.log('ItemDef Content: ', result);
+    return result;
+  });
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly reportDetailPanelsFacadeService: ReportDetailPanelsFacadeService
-  ) {}
+  ) {
+    effect(() => {
+      const spec = this.specContent();
+      if (!spec) {
+        return;
+      }
+      console.log('Spec changed, loading item definition for event: ', spec);
+      if (spec.event) {
+        this.reportDetailPanelsFacadeService.itemDefService
+          .getItemDefById(spec.event)
+          .pipe(
+            tap((itemDef) => {
+              console.log('Loaded item definition: ', itemDef);
+              if (itemDef) {
+                this.reportDetailPanelsFacadeService.setItemDefContent(itemDef);
+              }
+            })
+          )
+          .subscribe();
+      }
+    });
+  }
 
   ngOnInit(): void {
     // Load data
     this.route.data.subscribe((data) => {
-      console.log('Data: ', data);
+      console.log('Data in report detail panels: ', data);
       const projectSlug = data['projectSlug'];
       const eventId = data['eventId'];
       const spec = data['spec'] as DataLayerSpec;
       const recording = data['recording'];
+      // Load item definition for this spec event name and set content or a temp placeholder
 
       this.projectSlug.set(projectSlug);
       this.eventId.set(eventId);
@@ -95,6 +149,12 @@ export class ReportDetailPanelsComponent implements OnInit {
     event.stopPropagation();
     this.reportDetailPanelsFacadeService.setTempRecordingFileContent(null);
     this.recordingEditMode.update((prev) => !prev);
+  }
+
+  switchItemDefEditMode(event: Event) {
+    event.stopPropagation();
+    this.reportDetailPanelsFacadeService.setTempItemDefContent(null);
+    this.itemDefEditMode.update((prev) => !prev);
   }
 
   // Helpers to open/close a panel and toggle edit mode from the template.
@@ -145,6 +205,36 @@ export class ReportDetailPanelsComponent implements OnInit {
     this.recordingEditMode.update((prev) => !prev);
   }
 
+  openPanelAndToggleItemDef(
+    panel: MatExpansionPanel | undefined,
+    event: Event
+  ) {
+    event.stopPropagation();
+    try {
+      const current = event.currentTarget as HTMLElement | null;
+      const host = current?.closest('.mat-expansion-panel');
+      host?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch {
+      /* no-op */
+    }
+    if (panel) panel.open();
+    const existing = this.itemDefContent();
+    if (!existing) {
+      this.reportDetailPanelsFacadeService.setTempItemDefContent({
+        itemId: '',
+        templateName: '',
+        fullItemDef: {}
+      } as ItemDef);
+    } else {
+      this.reportDetailPanelsFacadeService.setTempItemDefContent(null);
+    }
+    // preload editable fields from current content
+    const current = this.itemDefContent();
+    this.editItemId.set(current?.itemId ?? null);
+    this.editTemplateName.set(current?.templateName ?? null);
+    this.itemDefEditMode.update((prev) => !prev);
+  }
+
   closePanelAndToggleRecording(
     panel: MatExpansionPanel | undefined,
     event: Event
@@ -157,6 +247,18 @@ export class ReportDetailPanelsComponent implements OnInit {
     this.recordingEditMode.update((prev) => !prev);
   }
 
+  closePanelAndToggleItemDef(
+    panel: MatExpansionPanel | undefined,
+    event: Event
+  ) {
+    event.stopPropagation();
+    if (panel) panel.close();
+    this.reportDetailPanelsFacadeService.setTempItemDefContent(null);
+    this.editItemId.set(null);
+    this.editTemplateName.set(null);
+    this.itemDefEditMode.update((prev) => !prev);
+  }
+
   switchSpecEdit() {
     this.specEdit.update((prev) => !prev);
   }
@@ -165,12 +267,20 @@ export class ReportDetailPanelsComponent implements OnInit {
     this.recordingEdit.update((prev) => !prev);
   }
 
+  switchItemDefEdit() {
+    this.itemDefEdit.update((prev) => !prev);
+  }
+
   onRecordingFileSelected(event: Event) {
     this.reportDetailPanelsFacadeService.onRecordingFileSelected(event);
   }
 
   onSpecFileSelected(event: Event) {
     this.reportDetailPanelsFacadeService.onSpecFileSelected(event);
+  }
+
+  onItemDefFileSelected(event: Event) {
+    this.reportDetailPanelsFacadeService.onItemDefFileSelected(event);
   }
 
   onSpecUpdate() {
@@ -194,6 +304,18 @@ export class ReportDetailPanelsComponent implements OnInit {
     );
   }
 
+  onItemDefUpdate(itemId: string, templateName?: string) {
+    this.reportDetailPanelsFacadeService.onItemDefUpdate(itemId, templateName);
+  }
+
+  onItemIdChange(value: string) {
+    this.editItemId.set(value);
+  }
+
+  onTemplateNameChange(value: string) {
+    this.editTemplateName.set(value);
+  }
+
   onDownload() {
     const projectSlug = this.projectSlug();
     const eventId = this.eventId();
@@ -213,5 +335,9 @@ export class ReportDetailPanelsComponent implements OnInit {
 
   get isRecordingLoading() {
     return this.reportDetailPanelsFacadeService.isRecordingLoading;
+  }
+
+  get isItemDefLoading() {
+    return this.reportDetailPanelsFacadeService.isItemDefLoading;
   }
 }
