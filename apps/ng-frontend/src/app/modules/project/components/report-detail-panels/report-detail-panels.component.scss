@@ -8,7 +8,8 @@
 }
 
 /* Establish stacking context to keep header above content */
-.mat-accordion, .mat-expansion-panel {
+.mat-accordion,
+.mat-expansion-panel {
   position: relative;
 }
 
@@ -19,7 +20,9 @@
   z-index: 0;
   max-height: 0;
   overflow: hidden;
-  transition: max-height 200ms ease, opacity 150ms ease;
+  transition:
+    max-height 200ms ease,
+    opacity 150ms ease;
 }
 
 /* When the panel is expanded by Angular Material keep full behaviour */
@@ -29,7 +32,9 @@
 }
 
 .mat-expansion-panel:not(.mat-expanded):hover .mat-expansion-panel-content,
-.mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:hover ~ .mat-expansion-panel-content {
+.mat-expansion-panel:not(.mat-expanded)
+  .mat-expansion-panel-header:hover
+  ~ .mat-expansion-panel-content {
   /* lightweight reveal on hover - tuned to show a snippet of content */
   max-height: 420px;
   overflow: auto;
@@ -55,7 +60,9 @@ button.edit {
   z-index: 3;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 140ms ease, transform 140ms ease;
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
 }
 
 .mat-expansion-panel-header:hover button.edit,
@@ -71,4 +78,29 @@ button.edit {
   align-items: center;
   width: 100%;
   min-height: 100px;
+}
+
+/* Scrollable raw request container */
+.raw-request-container {
+  max-height: 300px; /* adjust as needed */
+  overflow: auto;
+  padding: 8px 0;
+}
+
+.raw-request {
+  white-space: pre-wrap; /* keep line breaks but wrap long lines */
+  word-break: break-word;
+  margin: 0;
+  font-family: var(
+    --monospace-font,
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    'Roboto Mono',
+    'Courier New',
+    monospace
+  );
+  font-size: 13px;
+  line-height: 1.4;
 }

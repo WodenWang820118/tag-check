@@ -55,6 +55,8 @@ export class SingleEventInspectionService {
       url,
       eventInspectionPresetDto
     } = options;
+    // normalize headless flag the same way as PuppeteerUtilsService
+    const headlessFlag = headless === 'true' || headless === '1';
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
       headless,
       measurementId,
@@ -70,10 +72,7 @@ export class SingleEventInspectionService {
       eventId
     );
 
-    const recorder = await this.puppeteerUtilsService.startRecorder(
-      page,
-      folder
-    );
+    await this.puppeteerUtilsService.startRecorder(page, folder);
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     try {
@@ -87,14 +86,39 @@ export class SingleEventInspectionService {
           captureRequest,
           eventInspectionPresetDto
         );
-      await recorder.stop();
-      const pages = await browser.pages();
-      await Promise.all(pages.map((page) => page.close()));
-      await browser.close();
+
+      // stop recorder (if any) but in headful mode leave the browser running
+      await this.puppeteerUtilsService
+        .stopRecorder()
+        .catch((err) => this.logger.error(`Error stopping recorder: ${err}`));
+
+      if (headlessFlag) {
+        const pages = await browser.pages();
+        await Promise.all(pages.map((p) => p.close()));
+        await browser.close();
+      } else {
+        this.logger.log(
+          'Headful mode detected: leaving browser open for user interaction. Close it manually when done.'
+        );
+      }
+
       return data;
     } catch (error) {
       this.logger.error(error);
-      await this.puppeteerUtilsService.cleanup(browser, page);
+
+      // stop recorder to avoid dangling resources
+      await this.puppeteerUtilsService
+        .stopRecorder()
+        .catch((err) => this.logger.error(`Error stopping recorder: ${err}`));
+
+      if (headlessFlag) {
+        await this.puppeteerUtilsService.cleanup(browser, page);
+      } else {
+        this.logger.log(
+          'Headful mode detected and an error occurred: skipping automatic cleanup so the browser remains open for debugging.'
+        );
+      }
+
       throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

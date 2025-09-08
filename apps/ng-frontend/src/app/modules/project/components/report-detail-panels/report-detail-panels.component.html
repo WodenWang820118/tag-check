@@ -9,7 +9,7 @@
       <mat-expansion-panel-header>
         <mat-panel-title> Data Layer Spec </mat-panel-title>
         <mat-panel-description>
-          @if (!specEditMode()) {
+          @if (!specEditMode$()) {
             <button
               mat-mini-fab
               color="primary"
@@ -31,7 +31,7 @@
         } @else {
           @if (!specContent()) {
             <p>No Spec found</p>
-          } @else if (!specEditMode()) {
+          } @else if (!specEditMode$()) {
             <ng-container>
               <pre class="json">{{ specContent() | json }}</pre>
             </ng-container>
@@ -43,7 +43,7 @@
           }
         }
       </mat-panel-description>
-      @if (specEditMode()) {
+      @if (specEditMode$()) {
         <mat-action-row>
           <button
             mat-raised-button
@@ -86,7 +86,7 @@
       <mat-expansion-panel-header>
         <mat-panel-title> Chrome Recording </mat-panel-title>
         <mat-panel-description>
-          @if (!recordingEditMode()) {
+          @if (!recordingEditMode$()) {
             <button
               mat-mini-fab
               color="primary"
@@ -114,7 +114,7 @@
         } @else {
           @if (!recordingContent()) {
             <p>No recording found</p>
-          } @else if (!recordingEditMode()) {
+          } @else if (!recordingEditMode$()) {
             <ng-container>
               <pre class="json">{{ recordingContent() | json }}</pre>
             </ng-container>
@@ -126,7 +126,7 @@
           }
         }
       </mat-panel-description>
-      @if (recordingEditMode()) {
+      @if (recordingEditMode$()) {
         <mat-action-row>
           <button mat-raised-button color="primary" (click)="fileInput.click()">
             Upload
@@ -161,16 +161,11 @@
         <mat-panel-title> Raw Request </mat-panel-title>
       </mat-expansion-panel-header>
       <mat-panel-description>
-        <p>{{ reportDetails()?.rawRequest }}</p>
-      </mat-panel-description>
-    </mat-expansion-panel>
-
-    <mat-expansion-panel hideToggle>
-      <mat-expansion-panel-header>
-        <mat-panel-title> Request Data Layer </mat-panel-title>
-      </mat-expansion-panel-header>
-      <mat-panel-description>
-        <pre class="json">{{ reportDetails()?.reformedDataLayer | json }}</pre>
+        <div class="raw-request-container">
+          <pre class="raw-request" aria-label="Raw Request">
+            {{ reportDetails()?.rawRequest }}
+          </pre>
+        </div>
       </mat-panel-description>
     </mat-expansion-panel>
 
@@ -191,7 +186,7 @@
       <mat-expansion-panel-header>
         <mat-panel-title> Item Definition </mat-panel-title>
         <mat-panel-description>
-          @if (!itemDefEditMode()) {
+          @if (!itemDefEditMode$()) {
             <button
               mat-mini-fab
               color="primary"
@@ -213,21 +208,19 @@
         } @else {
           @if (!itemDefContent()) {
             <p>No item definition found</p>
-          } @else if (!itemDefEditMode()) {
+          } @else if (!itemDefEditMode$()) {
             <ng-container>
-              <pre class="json">{{ itemDefContent() | json }}</pre>
+              <pre class="json">{{ itemDefContent()?.fullItemDef | json }}</pre>
             </ng-container>
           } @else {
             <app-editor
               [editorExtension]="'itemDefJson'"
-              [content]="
-                itemDefContent()?.fullItemDef || itemDefContent() | json
-              "
+              [content]="itemDefContent()?.fullItemDef | json"
             ></app-editor>
           }
         }
       </mat-panel-description>
-      @if (itemDefEditMode()) {
+      @if (itemDefEditMode$()) {
         <mat-action-row>
           <button
             mat-raised-button

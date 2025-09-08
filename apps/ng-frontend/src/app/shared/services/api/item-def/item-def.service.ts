@@ -62,7 +62,7 @@ export class ItemDefService {
   }
 
   getItemDefById(itemId: string) {
-    if (!itemId) return of(null);
+    if (!itemId) return throwError(() => new Error('itemId is required'));
     return this.http
       .get<ItemDef>(
         `${environment.specApiUrl}/${encodeURIComponent(itemId)}/item-def`

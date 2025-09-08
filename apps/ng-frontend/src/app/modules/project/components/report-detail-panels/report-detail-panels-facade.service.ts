@@ -18,7 +18,7 @@ export class ReportDetailPanelsFacadeService {
     private readonly reportService: ReportService,
     private readonly recordingService: RecordingService,
     private readonly specService: SpecService,
-    private readonly itemDefService: ItemDefService,
+    public readonly itemDefService: ItemDefService,
     private readonly editorService: EditorService,
     private readonly dialog: MatDialog,
     private readonly utilsService: UtilsService

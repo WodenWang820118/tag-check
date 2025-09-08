@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-misused-promises */
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
-import { extractEventNameFromId } from '@utils';
 import {
   BehaviorSubject,
   catchError,
@@ -24,9 +21,9 @@ export class RequestInterceptorService {
     page: Page,
     projectSlug: string,
     eventId: string,
+    eventName: string,
     measurementId: string
   ) {
-    const eventName = extractEventNameFromId(eventId);
     await page.setCacheEnabled(false);
     await page.setBypassServiceWorker(true);
 
@@ -37,14 +34,28 @@ export class RequestInterceptorService {
 
     cdp.on('Network.requestWillBeSent', async (event) => {
       const requestUrl = event.request.url;
-      if (this.isMatchingGa4Request(requestUrl, eventName, measurementId)) {
+      const postData =
+        (event.request &&
+          (event.request as unknown as { postData?: string }).postData) ||
+        '';
+
+      if (
+        this.isMatchingGa4Request(
+          requestUrl,
+          postData,
+          eventName,
+          measurementId
+        )
+      ) {
         this.logger.log(`Request captured using CDP: ${requestUrl}`);
         this.setRawRequest(requestUrl);
         await cdp.send('Network.disable');
         try {
-          const latestDataLayer = await page.evaluate(() => window.dataLayer);
+          const latestDataLayer = await page.evaluate(
+            () => (window as any).dataLayer
+          );
           await this.dataLayerService.updateSelfDataLayerAlgorithm(
-            latestDataLayer,
+            latestDataLayer as any[],
             projectSlug,
             eventId
           );
@@ -52,27 +63,77 @@ export class RequestInterceptorService {
           this.logger.error(`Error updating data layer: ${error}`);
         }
       } else {
-        this.logger.warn(`CDP Request: ${requestUrl}`);
+        this.logger.debug(`CDP Request (non-matching): ${requestUrl}`);
       }
     });
   }
 
   private isMatchingGa4Request(
     url: string,
+    postData: string,
     eventName: string,
     measurementId: string
   ): boolean {
-    const decodedUrl = decodeURIComponent(url);
+    try {
+      // Parse URL safely
+      const parsed = new URL(url);
 
-    if (!decodedUrl.includes('google-analytics.com/g/collect')) {
+      if (
+        !parsed.hostname.includes('google-analytics.com') ||
+        !parsed.pathname.includes('/g/collect')
+      ) {
+        // Not a GA4 collect endpoint
+        return false;
+      }
+
+      const urlParams = parsed.searchParams;
+      const enParam = urlParams.get('en');
+      // check multiple possible measurement id param names
+      const tidParam =
+        urlParams.get('tid') ||
+        urlParams.get('measurement_id') ||
+        urlParams.get('mid');
+
+      if (enParam === eventName && tidParam === measurementId) return true;
+
+      // If request used POST, the payload may contain the params
+      if (postData) {
+        try {
+          // If body looks like JSON (Measurement Protocol v2 / mp/collect), try parsing
+          if (postData.trim().startsWith('{')) {
+            const bodyJson = JSON.parse(postData);
+            // event name often appears under events[0].name for MP v2
+            const bodyEventName =
+              (Array.isArray(bodyJson.events) && bodyJson.events[0]?.name) ||
+              '';
+            const bodyMeasurementId =
+              bodyJson.measurement_id || urlParams.get('measurement_id') || '';
+            if (
+              bodyEventName === eventName &&
+              bodyMeasurementId === measurementId
+            )
+              return true;
+          } else {
+            // Otherwise try parsing as URLSearchParams encoded body
+            const bodyParams = new URLSearchParams(postData);
+            const bodyEn = bodyParams.get('en');
+            const bodyTid =
+              bodyParams.get('tid') ||
+              bodyParams.get('measurement_id') ||
+              bodyParams.get('mid');
+            if (bodyEn === eventName && bodyTid === measurementId) return true;
+          }
+        } catch {
+          // ignore JSON / parsing errors and continue
+        }
+      }
+    } catch (err) {
+      // If URL parsing fails, log at debug level and don't crash.
+      this.logger.debug(`Failed to parse request URL for GA4 matching: ${err}`);
       return false;
     }
 
-    const urlParams = new URLSearchParams(new URL(decodedUrl).search);
-    const matchesEventName = urlParams.get('en') === eventName;
-    const matchesMeasurementId = urlParams.get('tid') === measurementId;
-
-    return matchesEventName && matchesMeasurementId;
+    return false;
   }
 
   setRawRequest(request: string) {

@@ -43,6 +43,9 @@ export class GtmOperatorService {
       this.abortController.signal
     );
 
+    // normalize headless flag consistently with PuppeteerUtilsService
+    const headlessFlag = query.headless === 'true' || query.headless === '1';
+
     // extract cookie setting logic to helper
     await this.applyCookies(browser, query.gtmUrl, eventInspectionPresetDto);
 
@@ -97,14 +100,27 @@ export class GtmOperatorService {
         );
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await recorder.stop();
-      const pages = await browser.pages();
-      await Promise.all(pages.map((page) => page.close()));
-      await browser.close();
+
+      if (headlessFlag) {
+        const pages = await browser.pages();
+        await Promise.all(pages.map((page) => page.close()));
+        await browser.close();
+      } else {
+        this.logger.log(
+          'Headful mode detected (GTM): leaving browser open for user interaction. Close it manually when done.'
+        );
+      }
       return data;
     } catch (error) {
       this.logger.error(error);
 
-      await this.puppeteerUtilsService.cleanup(browser, page);
+      if (headlessFlag) {
+        await this.puppeteerUtilsService.cleanup(browser, page);
+      } else {
+        this.logger.log(
+          'Headful mode detected (GTM) and an error occurred: skipping automatic cleanup so the browser remains open for debugging.'
+        );
+      }
       throw new InternalServerErrorException(
         'Failed to perform GTM validation'
       );

@@ -151,9 +151,9 @@ export class FileTableDataSourceFacadeService {
       message: event.message,
 
       // Test image
-      imageName: image.imageName,
-      imageSize: image.imageSize,
-      imageData: image.imageData
+      imageName: image?.imageName || '',
+      imageSize: image?.imageSize || 0,
+      imageData: image?.imageData || ''
     };
   }
 
