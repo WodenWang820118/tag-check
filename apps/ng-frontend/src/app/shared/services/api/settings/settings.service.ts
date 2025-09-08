@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import {
@@ -7,14 +7,7 @@ import {
   BrowserSetting,
   ProjectSetting
 } from '@utils';
-import {
-  BehaviorSubject,
-  catchError,
-  of,
-  Subject,
-  tap,
-  throwError
-} from 'rxjs';
+import { catchError, of, tap, throwError } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '../../../components/snackbar/snackbar.component';
 
@@ -22,10 +15,8 @@ import { SnackBarComponent } from '../../../components/snackbar/snackbar.compone
   providedIn: 'root'
 })
 export class SettingsService {
-  currentProject: Subject<ProjectSetting> = new BehaviorSubject(
-    {} as ProjectSetting
-  );
-  currentProject$ = this.currentProject.asObservable();
+  currentProject = signal<ProjectSetting>({} as ProjectSetting);
+  currentProject$ = computed(() => this.currentProject());
   constructor(
     private readonly http: HttpClient,
     private readonly _snackBar: MatSnackBar
@@ -135,6 +126,7 @@ export class SettingsService {
     projectSlug: string,
     settings: Partial<ApplicationSetting>
   ) {
+    console.log(`Updating application settings for ${projectSlug}`, settings);
     return this.http
       .put<ProjectSetting>(
         `${environment.settingsApiUrl}/${projectSlug}/application`,
@@ -187,7 +179,7 @@ export class SettingsService {
   }
 
   setCurrentProject(project: ProjectSetting) {
-    this.currentProject.next(project);
+    this.currentProject.set(project);
   }
 
   private isEmptyObject(obj: any) {

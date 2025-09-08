@@ -8,15 +8,60 @@
     <mat-card-content>
       <form [formGroup]="previewModeForm" class="gtm-preview-mode-form">
         <!-- users can use the accompany mode and the request check at the same time -->
-        <div class="gtm-preview-mode-form__field">
-          <mat-checkbox formControlName="isAccompanyMode"
-            >Activate Accompanied Mode</mat-checkbox
+        <div
+          class="gtm-preview-mode-form__field"
+          style="display: flex; flex-direction: column; gap: 0.5rem"
+        >
+          <div
+            class="gtm-preview-mode-form__checkbox"
+            style="display: flex; align-items: center; gap: 0.25rem"
           >
-          <mat-checkbox
-            formControlName="isRequestCheck"
-            matTooltip="Please provide a measurement ID to enable this feature."
-            >Activate Request Check</mat-checkbox
+            <mat-checkbox formControlName="isAccompanyMode"
+              >Activate Accompanied Mode</mat-checkbox
+            >
+            <button
+              mat-icon-button
+              type="button"
+              aria-label="Accompanied mode information"
+              matTooltip="Accompanied mode runs the audit together with a GTM Preview Mode URL. Enter the Preview Mode URL below; only then can you enable this option."
+            >
+              <mat-icon>info_outline</mat-icon>
+            </button>
+            <span id="accompany-desc" class="cdk-visually-hidden">
+              Accompanied mode runs the audit together with a GTM Preview Mode
+              URL. Enter the Preview Mode URL below; only then can you enable
+              this option.
+            </span>
+          </div>
+
+          <div
+            class="gtm-preview-mode-form__checkbox"
+            style="display: flex; align-items: center; gap: 0.25rem"
           >
+            <mat-checkbox formControlName="isRequestCheck"
+              >Activate Request Check</mat-checkbox
+            >
+
+            <button
+              mat-icon-button
+              type="button"
+              aria-label="Request check information"
+              [matTooltip]="requestCheckTooltip"
+              [matTooltipShowDelay]="200"
+              (click)="
+                previewModeForm.controls.isRequestCheck.disabled &&
+                  goToProjectInfo()
+              "
+            >
+              <mat-icon>info_outline</mat-icon>
+            </button>
+
+            <span id="request-desc" class="cdk-visually-hidden">
+              Request check validates network requests against the Measurement
+              ID set in Project Information. Provide a Measurement ID in project
+              settings to use this mode.
+            </span>
+          </div>
         </div>
         <mat-form-field
           class="gtm-preview-mode-form__field"
@@ -28,8 +73,8 @@
         <div class="gtm-preview-mode-form__field gtm-preview-mode-form__row">
           <mat-form-field appearance="outline" style="width: 100%">
             <mat-label>Preview Mode URL</mat-label>
-            <input matInput formControlName="url" />
-            @if (urlValue) {
+            <input matInput formControlName="gtmPreviewModeUrl" />
+            @if (previewModeForm.controls.gtmPreviewModeUrl.value) {
               <button
                 matSuffix
                 mat-icon-button

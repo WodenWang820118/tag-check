@@ -126,6 +126,7 @@
               mat-icon-button
               aria-label="add recording"
               [routerLink]="['./', element.eventId]"
+              [queryParams]="{ tab: 'reports', snackbar: 'missingRecording' }"
               matTooltipPosition="above"
               matTooltip="Please add recording to run test"
             >

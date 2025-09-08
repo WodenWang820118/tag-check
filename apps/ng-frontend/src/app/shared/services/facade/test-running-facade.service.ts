@@ -65,7 +65,6 @@ export class TestRunningFacadeService {
     project: ProjectSetting
   ) {
     const headless = project.browserSettings.headless;
-    console.log('project', project);
     const inspectEventDto = new EventInspectionPresetDto(project);
     // change the play button to a spinner
     this.isRunningTest.set(true);

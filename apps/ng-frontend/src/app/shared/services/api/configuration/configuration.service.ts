@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, catchError, of } from 'rxjs';
+import { catchError, of } from 'rxjs';
 import { SysConfiguration } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
@@ -11,9 +11,6 @@ import { environment } from '../../../../../environments/environment';
  * This service will communicate with SQLite3 databases
  */
 export class ConfigurationService {
-  rootSubject = new BehaviorSubject('');
-  root$ = this.rootSubject.asObservable();
-
   constructor(private readonly http: HttpClient) {}
 
   getConfigurations() {

@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-misused-promises */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, Logger } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
 import { join } from 'path';
@@ -21,17 +17,22 @@ export class PuppeteerUtilsService {
     eventInspectionPresetDto: EventInspectionPresetDto,
     signal: AbortSignal
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
     const stats = await PCR(options);
+    // normalize headless flag: callers may pass string 'true'/'false'
+    const headlessFlag = headless === 'true' || headless === '1';
+
     const browser: Browser = await stats.puppeteer.launch({
-      headless: !!headless,
+      headless: headlessFlag,
+      // enable devtools when measurementId present (useful for debugging)
       devtools: !!measurementId,
       acceptInsecureCerts: true,
       args:
-        eventInspectionPresetDto.puppeteerArgs ||
-        this.configsService.getBROWSER_ARGS(),
+        eventInspectionPresetDto.puppeteerArgs &&
+        eventInspectionPresetDto.puppeteerArgs.length > 0
+          ? eventInspectionPresetDto.puppeteerArgs
+          : this.configsService.getBROWSER_ARGS(),
       executablePath: stats.executablePath,
       defaultViewport: { width: 1400, height: 900 },
       signal: signal
@@ -77,7 +78,6 @@ export class PuppeteerUtilsService {
 
   async startRecorder(page: Page, folderPath: string): Promise<ScreenRecorder> {
     const recordingPath = join(folderPath, 'recording');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const ffmpegPath = require('ffmpeg-static');
     await page.bringToFront();
     this.recorder = await page.screencast({
