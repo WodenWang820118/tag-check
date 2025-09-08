@@ -11,6 +11,7 @@ import { Page, Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { RequestInterceptorService } from './action/request-interceptor/request-interceptor.service';
 import { catchError, firstValueFrom, map } from 'rxjs';
+import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 
 @Injectable()
 export class WebAgentUtilsService {
@@ -18,7 +19,8 @@ export class WebAgentUtilsService {
   constructor(
     private readonly actionService: ActionService,
     private readonly dataLayerService: DataLayerService,
-    private readonly requestInterceptorService: RequestInterceptorService
+    private readonly requestInterceptorService: RequestInterceptorService,
+    private readonly testEventRepositoryService: TestEventRepositoryService
   ) {}
 
   async performTest(
@@ -34,13 +36,15 @@ export class WebAgentUtilsService {
     await this.dataLayerService.initSelfDataLayer(projectSlug, eventId);
 
     if (credentials) await this.authenticate(page, credentials);
-
+    const testEventEntity =
+      await this.testEventRepositoryService.getEntityByEventId(eventId);
     // 2) capture the request if needed
     if (captureRequest) {
       await this.setupRequestInterception(
         page,
         projectSlug,
         eventId,
+        testEventEntity.eventName,
         measurementId
       );
     }
@@ -100,13 +104,19 @@ export class WebAgentUtilsService {
     page: Page,
     projectSlug: string,
     eventId: string,
+    eventName: string,
     measurementId: string
   ): Promise<void> {
     this.logger.log('Setting up interception', WebAgentUtilsService.name);
+    this.logger.log(
+      `Event Name: ${eventName}, Measurement ID: ${measurementId}`,
+      WebAgentUtilsService.name
+    );
     await this.requestInterceptorService.setupInterception(
       page,
       projectSlug,
       eventId,
+      eventName,
       measurementId
     );
   }

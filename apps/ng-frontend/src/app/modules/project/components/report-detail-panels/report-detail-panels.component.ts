@@ -1,6 +1,13 @@
 import { ReportDetailPanelsFacadeService } from './report-detail-panels-facade.service';
 import { JsonPipe } from '@angular/common';
-import { Component, computed, input, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  input,
+  OnInit,
+  signal
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { DataLayerSpec, IReportDetails, ItemDef } from '@utils';
 import {
@@ -14,6 +21,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { take, tap } from 'rxjs';
 @Component({
   selector: 'app-report-datail-panels',
   standalone: true,
@@ -43,13 +51,21 @@ export class ReportDetailPanelsComponent implements OnInit {
 
   // Edit mode signals
   specEdit = signal(false);
+  specEdit$ = computed(() => this.specEdit());
   recordingEdit = signal(false);
+  recordingEdit$ = computed(() => this.recordingEdit());
   itemDefEdit = signal(false);
+  itemDefEdit$ = computed(() => this.itemDefEdit());
   specEditMode = signal(false);
+  specEditMode$ = computed(() => this.specEditMode());
   recordingEditMode = signal(false);
+  recordingEditMode$ = computed(() => this.recordingEditMode());
   itemDefEditMode = signal(false);
+  itemDefEditMode$ = computed(() => this.itemDefEditMode());
   editItemId = signal<string | null>(null);
+  editItemId$ = computed(() => this.editItemId());
   editTemplateName = signal<string | null>(null);
+  editTemplateName$ = computed(() => this.editTemplateName());
 
   // Computed signals
   specContent = computed(() => {
@@ -82,24 +98,44 @@ export class ReportDetailPanelsComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly reportDetailPanelsFacadeService: ReportDetailPanelsFacadeService
-  ) {}
+  ) {
+    effect(() => {
+      const spec = this.specContent();
+      if (!spec) {
+        return;
+      }
+      console.log('Spec changed, loading item definition for event: ', spec);
+      if (spec.event) {
+        this.reportDetailPanelsFacadeService.itemDefService
+          .getItemDefById(spec.event)
+          .pipe(
+            tap((itemDef) => {
+              console.log('Loaded item definition: ', itemDef);
+              if (itemDef) {
+                this.reportDetailPanelsFacadeService.setItemDefContent(itemDef);
+              }
+            })
+          )
+          .subscribe();
+      }
+    });
+  }
 
   ngOnInit(): void {
     // Load data
     this.route.data.subscribe((data) => {
-      console.log('Data: ', data);
+      console.log('Data in report detail panels: ', data);
       const projectSlug = data['projectSlug'];
       const eventId = data['eventId'];
       const spec = data['spec'] as DataLayerSpec;
       const recording = data['recording'];
-      const itemDef: ItemDef | null = null; // no resolver yet
+      // Load item definition for this spec event name and set content or a temp placeholder
 
       this.projectSlug.set(projectSlug);
       this.eventId.set(eventId);
 
       this.reportDetailPanelsFacadeService.setRecordingFileContent(recording);
       this.reportDetailPanelsFacadeService.setSpecFileContent(spec);
-      this.reportDetailPanelsFacadeService.setItemDefContent(itemDef);
     });
   }
 
