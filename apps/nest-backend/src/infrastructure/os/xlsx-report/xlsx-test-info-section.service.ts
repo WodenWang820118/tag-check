@@ -4,7 +4,7 @@ import { FullTestEventResponseDto } from '../../../shared';
 
 @Injectable()
 export class XlsxTestInfoSectionService {
-  constructor() {}
+  // no constructor needed
 
   addTestInfoSection(
     worksheet: ExcelJS.Worksheet,
