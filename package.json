@@ -74,7 +74,8 @@
     "publish": "cross-env-shell NODE_ENV=prod \"pnpm run build-prod && electron-forge publish\"",
     "storybook": "-----------------storybook-----------------",
     "storybook-front": "nx storybook ng-frontend",
-    "build-storybook": "nx run ng-frontend:build-storybook"
+    "build-storybook": "nx run ng-frontend:build-storybook",
+    "lint-staged:run": "lint-staged"
   },
   "private": true,
   "devDependencies": {
@@ -274,5 +275,10 @@
   "engines": {
     "node": ">=22.13.0",
     "pnpm": ">=9.15.5"
+  },
+  "lint-staged": {
+    "ignore": [
+      "pnpm-lock.yaml"
+    ]
   }
 }
