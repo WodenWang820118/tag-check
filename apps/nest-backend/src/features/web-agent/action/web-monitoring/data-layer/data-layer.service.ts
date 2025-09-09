@@ -70,7 +70,7 @@ export class DataLayerService {
       const existingIndex = myDataLayer.findIndex((myDataLayerObject: any) => {
         // loosely compare by event property if present
         try {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+           
           return (
             myDataLayerObject &&
             (myDataLayerObject as any).event === (dataLayerObject as any).event

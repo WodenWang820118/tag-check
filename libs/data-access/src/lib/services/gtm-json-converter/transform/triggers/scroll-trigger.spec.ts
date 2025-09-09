@@ -68,7 +68,9 @@ describe('scrollTrigger', () => {
     vi.spyOn(eventUtils, 'isIncludeScroll').mockImplementation(() => {
       throw new Error('Test error');
     });
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+      /* no-op for test */
+    });
     const result = service.createScrollTrigger(
       'test-account',
       'test-container'

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+ 
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { ChangeOperation } from './utils';
