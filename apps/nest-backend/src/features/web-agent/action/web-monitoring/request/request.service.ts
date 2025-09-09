@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
+ 
 import { Injectable } from '@nestjs/common';
 import { ConfigsService } from '../../../../../core/configs/configs.service';
 import { Page } from 'puppeteer';

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+ 
 import { Injectable, Logger } from '@nestjs/common';
 import { SelectorSymbol, SelectorType } from '../action-utils';
 import { Page, ElementHandle, JSHandle } from 'puppeteer';

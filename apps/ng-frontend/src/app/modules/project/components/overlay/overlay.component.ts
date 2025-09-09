@@ -15,12 +15,11 @@ import { CdkOverlayOrigin, OverlayModule } from '@angular/cdk/overlay';
       <ng-content></ng-content>
     </ng-template>
   `,
-  styles: `
-  `,
-  encapsulation: ViewEncapsulation.None,
+  styles: ``,
+  encapsulation: ViewEncapsulation.None
 })
 export class OverlayComponent {
   @Input() trigger!: CdkOverlayOrigin;
   @Input() isOpen!: boolean;
-  constructor() {}
+  // empty constructor removed
 }

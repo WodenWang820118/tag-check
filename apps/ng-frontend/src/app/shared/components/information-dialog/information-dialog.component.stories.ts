@@ -19,7 +19,9 @@ import { APP_ROUTES } from '../../../app.routes';
 
 // Mock MatDialogRef
 const mockDialogRef = {
-  close: () => {}
+  close: () => {
+    /* no-op for storybook */
+  }
 };
 
 // Mock dialog data

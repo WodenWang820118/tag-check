@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+ 
 import { Injectable, Logger } from '@nestjs/common';
 import { StrictDataLayerEvent, BaseDataLayerEvent } from '@utils';
 import { ValidationResultDto } from '../../../shared/dto/validation-result.dto';

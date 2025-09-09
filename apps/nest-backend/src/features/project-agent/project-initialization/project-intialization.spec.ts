@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
+ 
 import { Test } from '@nestjs/testing';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';

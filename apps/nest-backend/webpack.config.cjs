@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-var-requires */
+ 
+ 
+ 
 const { composePlugins, withNx } = require('@nx/webpack');
 // const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
 

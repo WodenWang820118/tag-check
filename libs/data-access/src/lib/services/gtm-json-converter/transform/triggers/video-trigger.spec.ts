@@ -72,7 +72,9 @@ describe('VideoTrigger', () => {
       throw new Error('Test error');
     });
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+      /* no-op for test */
+    });
 
     const result = service.createVideoTrigger('test-account', 'test-container');
 
