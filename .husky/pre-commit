@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
-. "$(dirname "$0")/_/h"
+# Execute the husky helper as a subprocess so its internal `exit` doesn't
+# terminate this outer script (sourcing it with `.` can cause that).
+sh "$(dirname "$0")/_/h"
 
 pnpm run lint-staged:run && \
 pnpm run test:cov

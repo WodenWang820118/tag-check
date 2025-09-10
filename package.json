@@ -277,8 +277,14 @@
     "pnpm": ">=9.15.5"
   },
   "lint-staged": {
-    "ignore": [
-      "pnpm-lock.yaml"
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write",
+      "git add"
+    ],
+    "*.{css,scss,html,md,json}": [
+      "prettier --write",
+      "git add"
     ]
   }
 }
