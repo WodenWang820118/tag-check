@@ -25,7 +25,7 @@ export class DatabaseImportService {
       await queryRunner.connect();
       await queryRunner.startTransaction();
 
-      // Disable foreign key constraints temporarily
+      // Disable foreign key constraints temporarily (SQLite)
       await queryRunner.query('PRAGMA foreign_keys = OFF;');
 
       // Convert regular INSERT statements to INSERT OR REPLACE
@@ -42,7 +42,18 @@ export class DatabaseImportService {
 
       // Execute each statement sequentially
       for (const statement of statements) {
-        await queryRunner.query(statement);
+        // Skip wrapping transaction pragmas from dump; we manage transaction here
+        const stmt = statement.trim();
+        if (!stmt) continue;
+        const upper = stmt.toUpperCase();
+        if (
+          upper.startsWith('BEGIN TRANSACTION') ||
+          upper === 'COMMIT' ||
+          upper.startsWith('PRAGMA FOREIGN_KEYS')
+        ) {
+          continue;
+        }
+        await queryRunner.query(stmt);
       }
 
       // Re-enable foreign key constraints
