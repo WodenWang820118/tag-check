@@ -26,7 +26,7 @@ export class GtmOperatorService {
 
   async inspectSingleEventViaGtm(
     projectSlug: string,
-    eventName: string,
+    eventId: string,
     query: InspectGtmQueryDto,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
@@ -52,7 +52,7 @@ export class GtmOperatorService {
     const websiteUrl = this.extractBaseUrlFromGtmUrl(query.gtmUrl);
     const folder = await this.folderPathService.getInspectionEventFolderPath(
       projectSlug,
-      eventName
+      eventId
     );
 
     await this.operateGtmPreviewMode(page, query.gtmUrl);
@@ -92,7 +92,7 @@ export class GtmOperatorService {
         await this.eventInspectionPipelineService.singleEventInspectionRecipe(
           targetPage,
           projectSlug,
-          eventName,
+          eventId,
           query.measurementId,
           { username: query.username || '', password: query.password || '' },
           query.captureRequest || 'false',

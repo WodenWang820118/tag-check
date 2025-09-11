@@ -2,7 +2,7 @@ import { Injectable, effect, signal, computed } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
-import { take, tap } from 'rxjs';
+import { take, tap, switchMap, map } from 'rxjs';
 import { IReportDetails } from '@utils';
 import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
@@ -11,6 +11,7 @@ import { TestRunningFacadeService } from '../../../../shared/services/facade/tes
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Injectable({ providedIn: 'root' })
 export class ReportTableFacadeService {
@@ -37,7 +38,8 @@ export class ReportTableFacadeService {
     private readonly dialog: MatDialog,
     private readonly reportService: ReportService,
     private readonly testRunningFacadeService: TestRunningFacadeService,
-    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService
+    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService,
+    private readonly snackBar: MatSnackBar
   ) {
     effect(() => {
       const filterValue = this.projectDataSourceService.getFilterSignal();
@@ -66,19 +68,21 @@ export class ReportTableFacadeService {
           });
 
         // Update the data source with the same logic
-        this.reportTableDataSourceModelService.dataSource().data =
-          this.reportTableDataSourceModelService
-            .dataSource()
-            .data.map((item) => {
-              if (
-                this.reportTableDataSourceModelService
-                  .selection()
-                  .selected.includes(item)
-              ) {
-                item.stopNavigation = item.stopNavigation !== true;
-              }
-              return item;
-            });
+        const currentDsA = this.reportTableDataSourceModelService.dataSource();
+        const nextDataA = currentDsA.data.map((item) => {
+          if (
+            this.reportTableDataSourceModelService
+              .selection()
+              .selected.includes(item)
+          ) {
+            item.stopNavigation = item.stopNavigation !== true;
+          }
+          return item;
+        });
+        const newDsA = new MatTableDataSource<IReportDetails>([...nextDataA]);
+        newDsA.paginator = currentDsA.paginator;
+        newDsA.sort = currentDsA.sort;
+        this.reportTableDataSourceModelService.dataSource.set(newDsA);
 
         this.reportService
           .updateTestEvents(this.projectSlug(), testEvents)
@@ -105,16 +109,20 @@ export class ReportTableFacadeService {
 
         dialogRef.afterClosed().subscribe((result) => {
           if (result) {
-            const remainingReports = this.reportTableDataSourceModelService
-              .dataSource()
-              .data.filter(
-                (item) =>
-                  !this.reportTableDataSourceModelService
-                    .selection()
-                    .selected.includes(item)
-              );
-            this.reportTableDataSourceModelService.dataSource().data =
-              remainingReports;
+            const currentDsB =
+              this.reportTableDataSourceModelService.dataSource();
+            const remainingReports = currentDsB.data.filter(
+              (item) =>
+                !this.reportTableDataSourceModelService
+                  .selection()
+                  .selected.includes(item)
+            );
+            const newDsB = new MatTableDataSource<IReportDetails>([
+              ...remainingReports
+            ]);
+            newDsB.paginator = currentDsB.paginator;
+            newDsB.sort = currentDsB.sort;
+            this.reportTableDataSourceModelService.dataSource.set(newDsB);
             this.projectDataSourceService.setData(remainingReports);
 
             this.reportService
@@ -152,22 +160,12 @@ export class ReportTableFacadeService {
   }
 
   runTest(eventId: string) {
-    return this.testRunningFacadeService
-      .runTest(
-        eventId,
-        this.projectSlug(),
-        this.reportTableDataSourceModelService.dataSource()
-      )
-      .pipe(
-        take(1),
-        tap((updatedData) => {
-          if (updatedData) {
-            this.reportTableDataSourceModelService.dataSource().data = [
-              ...updatedData.data
-            ];
-          }
-        })
-      );
+    const projectSlug = this.projectSlug();
+    return this.testRunningFacadeService.runTest(
+      eventId,
+      projectSlug,
+      this.reportTableDataSourceModelService.dataSource()
+    );
   }
 
   hasRecording(eventId: string): boolean {
