@@ -9,12 +9,16 @@ import {
   forkJoin,
   Observable,
   of,
-  map
+  map,
+  throwError
 } from 'rxjs';
 import {
   IReportDetails,
   EventInspectionPresetDto,
-  ProjectSetting
+  ProjectSetting,
+  TestEvent,
+  TestEventDetail,
+  TestImage
 } from '@utils';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -50,8 +54,8 @@ export class TestRunningFacadeService {
       switchMap((project) =>
         this.chooseAndRunTest(eventId, projectSlug, project)
       ),
-      map((res) => this.updateReportDetails(res, testDataSource)),
-      catchError((error) => this.handleError(error)),
+      map((res) => this.updateReportDetails(eventId, res, testDataSource)),
+      catchError((error) => throwError(() => error)),
       finalize(() => {
         this.isRunningTest.set(false);
         this.eventRunningTest.set('');
@@ -145,25 +149,35 @@ export class TestRunningFacadeService {
   }
 
   private updateReportDetails(
-    res: any,
+    eventId: string,
+    res: {
+      testEvent: TestEvent;
+      testEventDetails: TestEventDetail;
+      testImage: TestImage;
+    }[],
     testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
   ) {
-    if (!res) return;
-    console.log('res', res[0]);
-    // TODO: maybe return a consistent eventId from the backend
-    // Spread the response directly without overriding eventId so matching works correctly
-    const updatedEvent: IReportDetails = {
-      ...res[0]
-    };
+    console.log('updateReportDetails called with eventId:', eventId);
+    console.log('updateReportDetails called with res:', res);
+    const result = res[0];
+
     testDataSource.data = testDataSource.data.map((event) =>
-      event.eventId === updatedEvent.eventId ? updatedEvent : event
+      event.eventId === eventId
+        ? {
+            // preserve the original identity
+            ...event,
+            passed: result.testEventDetails?.passed ?? false,
+            requestPassed: result.testEventDetails?.requestPassed ?? false
+          }
+        : event
     );
+    console.log('Updated testDataSource.data:', testDataSource.data);
     this.projectDataSourceService.setData(testDataSource.data);
     return testDataSource;
   }
 
-  private handleError(error: unknown): Observable<never> {
-    console.error('Error in test operation:', error);
-    return of();
-  }
+  // private handleError(error: unknown): Observable<never> {
+  //   console.error('Error in test operation:', error);
+  //   return throwError(() => error);
+  // }
 }

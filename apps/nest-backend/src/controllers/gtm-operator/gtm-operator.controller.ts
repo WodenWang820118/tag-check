@@ -33,21 +33,20 @@ export class GtmOperatorController {
     description: 'The name of the project to which the event belongs.'
   })
   @ApiParam({
-    name: 'eventName',
-    description: 'The name of the test associated with the event.'
+    name: 'eventId',
+    description: 'The event identifier.'
   })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
-  @Post('/gtm-operator/:projectSlug/:eventName')
-  @Log()
+  @Post('/gtm-operator/:projectSlug/:eventId')
   async inspectSingleEventViaGtm(
     @Param('projectSlug') projectSlug: string,
-    @Param('eventName') eventName: string,
+    @Param('eventId') eventId: string,
     @Query() query: InspectGtmQueryDto,
     @Body() eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     await this.gtmOperatorService.inspectSingleEventViaGtm(
       projectSlug,
-      eventName,
+      eventId,
       query,
       eventInspectionPresetDto
     );
@@ -55,8 +54,12 @@ export class GtmOperatorController {
     const abstractReport =
       await this.testReportFacadeRepositoryService.getReportDetail(
         projectSlug,
-        eventName
+        eventId
       );
+    this.logger.log(
+      JSON.stringify(abstractReport.testEventDetails, null, 2),
+      'Abstract Report: '
+    );
     return [abstractReport];
   }
 
