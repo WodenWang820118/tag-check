@@ -18,9 +18,9 @@ import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-chart.component';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReportTableFacadeService } from './report-table-facade.service';
 import { TableSortService } from '../../../../shared/services/utils/table-sort.service';
 
@@ -39,6 +39,7 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
     MatInputModule,
     MatCheckboxModule,
     MatBadgeModule,
+    MatSnackBarModule,
     ProgressPieChartComponent
   ],
   templateUrl: './report-table.component.html',
@@ -57,19 +58,30 @@ export class ReportTableComponent implements OnInit, OnDestroy {
     private readonly destroyRef: DestroyRef,
     private readonly facade: ReportTableFacadeService,
     private readonly tableSortService: TableSortService,
-    private readonly cdr: ChangeDetectorRef
+    private readonly cdr: ChangeDetectorRef,
+    private readonly snackBar: MatSnackBar
   ) {}
 
   ngOnInit() {
-    const paginator = this.paginator();
-    const sort = this.sort();
     this.routeDataSubscription = this.route.data
-      .pipe(takeUntilDestroyed(this.destroyRef))
       .pipe(
         tap((data) => {
           console.warn('data: ', data);
-          if (paginator && sort)
+          // Read the latest viewChild values at the time of data emission
+          const paginator = this.paginator();
+          const sort = this.sort();
+          if (paginator && sort) {
             this.facade.initializeData(paginator, sort, data);
+          } else {
+            // Defer once to allow view init to complete, then try again
+            queueMicrotask(() => {
+              const p = this.paginator();
+              const s = this.sort();
+              if (p && s) {
+                this.facade.initializeData(p, s, data);
+              }
+            });
+          }
         })
       )
       .subscribe();
@@ -113,10 +125,38 @@ export class ReportTableComponent implements OnInit, OnDestroy {
     this.facade
       .runTest(eventId)
       .pipe(take(1))
-      .subscribe(() => {
+      .subscribe((updatedData) => {
         // Ensure the material table updates immediately with new data
-        this.reportTable()?.renderRows();
-        this.cdr.detectChanges();
+        console.log('Test result received, updating table:', updatedData);
+        queueMicrotask(() => {
+          this.reportTable()?.renderRows();
+          this.cdr.detectChanges();
+        });
+
+        // Notify user of test result using MatSnackBar
+        try {
+          const row = updatedData?.data?.find((r) => r.eventId === eventId);
+          if (row) {
+            const dl = row.passed;
+            const req = row.requestPassed;
+            const status =
+              dl && req ? 'passed' : dl || req ? 'partial' : 'failed';
+            const message = `Test (${row.eventName}) ${status}. DataLayer: ${dl ? '✓' : '✗'}, Request: ${req ? '✓' : '✗'}`;
+            this.snackBar.open(message, 'Close', {
+              duration: 10000,
+              horizontalPosition: 'right',
+              verticalPosition: 'bottom',
+              panelClass:
+                status === 'passed'
+                  ? 'snackbar-success'
+                  : status === 'partial'
+                    ? 'snackbar-warn'
+                    : 'snackbar-error'
+            });
+          }
+        } catch {
+          // ignore snackbar errors
+        }
       });
   }
 

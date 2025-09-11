@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 import { GtmInspectionParams } from '../../utils/interfaces';
+import { TestEvent, TestEventDetail, TestImage } from '@utils';
 
 @Injectable({
   providedIn: 'root'
@@ -26,14 +27,20 @@ export class QaRequestService {
       queryParams.push(`captureRequest=${params.captureRequest}`);
     const queryString = queryParams.length ? '?' + queryParams.join('&') : '';
     return this.http
-      .post(
+      .post<
+        {
+          testEvent: TestEvent;
+          testEventDetails: TestEventDetail;
+          testImage: TestImage;
+        }[]
+      >(
         `${environment.dataLayerApiUrl}/${projectSlug}/${eventId}${queryString}`,
         params.eventInspectionPreset
       )
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
+          return throwError(() => new Error('Data layer inspection failed'));
         })
       );
   }
