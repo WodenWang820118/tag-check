@@ -1,6 +1,6 @@
 {
   "name": "tag-check",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "type": "module",
   "main": ".vite/build/main.mjs",
   "author": "Guan Xin Wang",
@@ -74,7 +74,8 @@
     "publish": "cross-env-shell NODE_ENV=prod \"pnpm run build-prod && electron-forge publish\"",
     "storybook": "-----------------storybook-----------------",
     "storybook-front": "nx storybook ng-frontend",
-    "build-storybook": "nx run ng-frontend:build-storybook"
+    "build-storybook": "nx run ng-frontend:build-storybook",
+    "lint-staged:run": "lint-staged"
   },
   "private": true,
   "devDependencies": {
@@ -274,5 +275,16 @@
   "engines": {
     "node": ">=22.13.0",
     "pnpm": ">=9.15.5"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write",
+      "git add"
+    ],
+    "*.{css,scss,html,md,json}": [
+      "prettier --write",
+      "git add"
+    ]
   }
 }

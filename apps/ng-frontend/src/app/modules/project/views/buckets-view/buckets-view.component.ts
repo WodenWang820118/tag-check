@@ -8,7 +8,7 @@ import { FileTableToolbarComponent } from '../../components/file-table-toolbar/f
   imports: [FileTableComponent, FileTableToolbarComponent],
   template: `
     <div class="bucket-view">
-      <div class="mat-elevation-z8">
+      <div class="mat-elevation-z4">
         <app-file-table-toolbar></app-file-table-toolbar>
         <app-file-table></app-file-table>
       </div>
@@ -23,7 +23,6 @@ import { FileTableToolbarComponent } from '../../components/file-table-toolbar/f
       flex-direction: column;
       height: 100%;
     }
-
-  `,
+  `
 })
 export class BucketsViewComponent {}

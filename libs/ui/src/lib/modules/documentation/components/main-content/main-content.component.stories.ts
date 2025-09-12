@@ -27,7 +27,9 @@ const mockMarkdownService = {
 };
 
 const mockViewportScroller = {
-  scrollToAnchor: () => {}
+  scrollToAnchor: () => {
+    /* no-op for storybook */
+  }
 };
 
 const meta: Meta<MainContentComponent> = {

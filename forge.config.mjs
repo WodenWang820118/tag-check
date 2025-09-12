@@ -1,12 +1,12 @@
-import { MakerSquirrel } from '@electron-forge/maker-squirrel';
-import { MakerDeb } from '@electron-forge/maker-deb';
-import { MakerRpm } from '@electron-forge/maker-rpm';
-import { FusesPlugin } from '@electron-forge/plugin-fuses';
-import { FuseV1Options, FuseVersion } from '@electron/fuses';
+// import { MakerSquirrel } from '@electron-forge/maker-squirrel';
+// import { MakerDeb } from '@electron-forge/maker-deb';
+// import { MakerRpm } from '@electron-forge/maker-rpm';
+// import { FusesPlugin } from '@electron-forge/plugin-fuses';
+// import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
 import { VitePlugin } from '@electron-forge/plugin-vite';
-import { writeFileSync } from 'fs';
+// import { writeFileSync } from 'fs';
 
 const config = {
   packagerConfig: {

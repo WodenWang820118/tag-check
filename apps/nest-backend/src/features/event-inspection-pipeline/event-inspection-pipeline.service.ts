@@ -187,11 +187,11 @@ export class EventInspectionPipelineService {
       latestTestImageId: testImage.id,
       message: testEventDetail.message
     };
-    Logger.debug('Updated info:', JSON.stringify(updatedInfo, null, 2));
     const updatedEvent = await this.testEventRepositoryService.updateTestEvent(
       testEvent.id,
       updatedInfo
     );
-    Logger.debug('Updated event:', JSON.stringify(updatedEvent, null, 2));
+    this.logger.debug('Updated info:', JSON.stringify(updatedInfo, null, 2));
+    this.logger.debug('Updated event:', JSON.stringify(updatedEvent, null, 2));
   }
 }

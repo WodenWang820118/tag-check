@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+ 
+ 
+ 
 import { Injectable, Logger } from '@nestjs/common';
 import { Browser, Page } from 'puppeteer';
 import { RequestService } from './request/request.service';
@@ -50,7 +50,7 @@ export class WebMonitoringService {
    * @returns A Promise resolving to an array of GTM IDs
    */
   async detectGtm(url: string) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+     
     const PCR = require('puppeteer-chromium-resolver');
     const options = {};
     const stats = await PCR(options);

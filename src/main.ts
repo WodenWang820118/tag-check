@@ -7,17 +7,15 @@ import * as fileUtils from './file-utils';
 import * as environmentUtils from './environment-utils';
 import * as backend from './backend';
 import * as frontend from './frontend';
-import { updateElectronApp } from 'update-electron-app';
-import { Database } from 'sqlite3';
+// import { updateElectronApp } from 'update-electron-app';
 import log from './logger';
 
-updateElectronApp({
-  updateInterval: '1 hour',
-  logger: log
-});
+// updateElectronApp({
+//   updateInterval: '1 hour',
+//   logger: log
+// });
 
 let server: ChildProcess;
-let db: Database;
 
 app.commandLine.appendSwitch('disable-gpu');
 app.commandLine.appendSwitch('use-gl', 'desktop');
@@ -74,13 +72,6 @@ app.on('before-quit', async () => {
   if (server) {
     server.kill();
   }
-  db.close((err) => {
-    if (err) {
-      log.error('Error closing the database:', err);
-    } else {
-      log.info('Database connection closed.');
-    }
-  });
   await new Promise((resolve) => {
     setTimeout(resolve, 1000);
   });

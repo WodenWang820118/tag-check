@@ -1,17 +1,17 @@
 import { Injectable, signal } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class UploadSpecService {
   isStarted = signal<boolean>(false);
   isUploaded = signal<boolean>(false);
   isOpenImportSidenav = signal<boolean>(false);
 
-  constructor() {}
+  // empty constructor removed
   existKeys(parsedSpec: any[]): boolean {
     for (const spec of parsedSpec) {
-      if (!spec.hasOwnProperty('event')) {
+      if (!Object.prototype.hasOwnProperty.call(spec, 'event')) {
         return false;
       }
     }

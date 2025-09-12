@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { ProjectEntity } from '../../../shared';
-import { createWriteStream, mkdirSync } from 'fs';
+import { createWriteStream, mkdirSync, renameSync, unlinkSync } from 'fs';
 import { dirname, join } from 'path';
 import { DataSource, EntityMetadata } from 'typeorm';
 
@@ -46,19 +46,27 @@ export class DatabaseDumpService {
 
     const projectId = projectEntity.id;
 
-    // Open a write stream for the SQL file
-    const writeStream = createWriteStream(outputPath);
+    // Write to a temporary file first, then atomically rename on success
+    const tempOutputPath = outputPath.endsWith('.tmp')
+      ? outputPath
+      : `${outputPath}.tmp`;
+
+    // Open a write stream for the temporary SQL file
+    const writeStream = createWriteStream(tempOutputPath);
 
     try {
       // Get metadata for all entities
       const entities = this.dataSource.entityMetadatas;
+
+      // Write header and schema for the involved tables (SQLite)
+      await this.dumpSchema(writeStream, entities);
 
       // Process each entity
       for (const entity of entities) {
         await this.dumpEntityData(writeStream, entity, projectId);
       }
 
-      // End transaction
+      // Finish the stream
       writeStream.end();
 
       // Wait for the write stream to finish
@@ -67,9 +75,18 @@ export class DatabaseDumpService {
         writeStream.on('error', (err) => reject(err));
       });
 
+      // Atomically move the temp file to the final destination
+      renameSync(tempOutputPath, outputPath);
+
       this.logger.log(`Database dump completed for project ${projectSlug}`);
     } catch (error) {
       writeStream.end();
+      // Best-effort cleanup of the temporary file
+      try {
+        unlinkSync(tempOutputPath);
+      } catch {
+        // ignore
+      }
       throw error;
     }
   }
@@ -174,5 +191,104 @@ export class DatabaseDumpService {
       );
     }
     writeStream.write('\n');
+  }
+
+  /**
+   * Writes the schema for all tables and related indexes/triggers used by the entities.
+   * Currently optimized for SQLite by querying sqlite_master. Other databases can be
+   * supported by extending this function based on the active driver.
+   */
+  private async dumpSchema(
+    writeStream: NodeJS.WritableStream,
+    entities: EntityMetadata[]
+  ): Promise<void> {
+    // Only implement for SQLite for now
+    const driverType = this.dataSource.options.type;
+    if (driverType !== 'sqlite') {
+      writeStream.write('-- Schema dump not implemented for this DB type.\n\n');
+      return;
+    }
+
+    const tableNames = this.getEntityTableNames(entities);
+
+    writeStream.write('-- === BEGIN SCHEMA ===\n');
+    writeStream.write('PRAGMA foreign_keys = OFF;\n');
+
+    await this.dumpCreateTables(writeStream, tableNames);
+    await this.dumpIndexes(writeStream, tableNames);
+    await this.dumpTriggers(writeStream, tableNames);
+
+    writeStream.write('PRAGMA foreign_keys = ON;\n');
+    writeStream.write('-- === END SCHEMA ===\n\n');
+  }
+
+  private getEntityTableNames(entities: EntityMetadata[]): string[] {
+    return Array.from(
+      new Set(
+        entities
+          .map((e) => e.tableName || e.name)
+          .filter((n): n is string => !!n && !n.startsWith('sqlite_'))
+      )
+    );
+  }
+
+  private async dumpCreateTables(
+    writeStream: NodeJS.WritableStream,
+    tableNames: string[]
+  ): Promise<void> {
+    for (const tbl of tableNames) {
+      const rows: Array<{ sql: string | null }> = await this.dataSource.query(
+        `SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?`,
+        [tbl]
+      );
+      const createSql = rows?.[0]?.sql;
+      if (createSql) {
+        const adjusted = createSql.replace(
+          /^\s*CREATE\s+TABLE\s+/i,
+          'CREATE TABLE IF NOT EXISTS '
+        );
+        writeStream.write(`${adjusted};\n`);
+      }
+    }
+  }
+
+  private async dumpIndexes(
+    writeStream: NodeJS.WritableStream,
+    tableNames: string[]
+  ): Promise<void> {
+    for (const tbl of tableNames) {
+      const idxRows: Array<{ sql: string | null }> =
+        await this.dataSource.query(
+          `SELECT sql FROM sqlite_master WHERE type = 'index' AND tbl_name = ? AND sql IS NOT NULL`,
+          [tbl]
+        );
+      for (const r of idxRows) {
+        if (r.sql) {
+          const adjusted = r.sql.replace(
+            /^\s*CREATE\s+INDEX\s+/i,
+            'CREATE INDEX IF NOT EXISTS '
+          );
+          writeStream.write(`${adjusted};\n`);
+        }
+      }
+    }
+  }
+
+  private async dumpTriggers(
+    writeStream: NodeJS.WritableStream,
+    tableNames: string[]
+  ): Promise<void> {
+    for (const tbl of tableNames) {
+      const trgRows: Array<{ sql: string | null }> =
+        await this.dataSource.query(
+          `SELECT sql FROM sqlite_master WHERE type = 'trigger' AND tbl_name = ?`,
+          [tbl]
+        );
+      for (const r of trgRows) {
+        if (r.sql) {
+          writeStream.write(`${r.sql};\n`);
+        }
+      }
+    }
   }
 }

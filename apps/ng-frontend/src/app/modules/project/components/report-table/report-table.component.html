@@ -1,4 +1,52 @@
-<div class="report-table">
+<div class="report-table mat-elevation-z0">
+  <!-- Legend and Status Filter -->
+  <div class="report-table__header">
+    <div class="legend" aria-label="status legend">
+      <mat-icon class="true-status" inline>check_circle</mat-icon>
+      <span>Passed</span>
+      <mat-icon class="false-status" inline>cancel</mat-icon>
+      <span>Failed</span>
+      <mat-icon class="pending-status" inline>hourglass_empty</mat-icon>
+      <span>Not run</span>
+    </div>
+    <div class="filters" aria-label="status filter">
+      <button
+        mat-stroked-button
+        [color]="statusFilter === 'all' ? 'primary' : null"
+        (click)="setStatusFilter('all')"
+      >
+        All
+      </button>
+      <button
+        mat-stroked-button
+        [color]="statusFilter === 'notRun' ? 'primary' : null"
+        (click)="setStatusFilter('notRun')"
+      >
+        Not run
+      </button>
+      <button
+        mat-stroked-button
+        [color]="statusFilter === 'failed' ? 'primary' : null"
+        (click)="setStatusFilter('failed')"
+      >
+        Failed
+      </button>
+      <button
+        mat-stroked-button
+        [color]="statusFilter === 'partial' ? 'primary' : null"
+        (click)="setStatusFilter('partial')"
+      >
+        Partial
+      </button>
+      <button
+        mat-stroked-button
+        [color]="statusFilter === 'passed' ? 'primary' : null"
+        (click)="setStatusFilter('passed')"
+      >
+        Passed
+      </button>
+    </div>
+  </div>
   <table
     mat-table
     [dataSource]="dataSource"
@@ -6,7 +54,50 @@
     matSort
     (matSortChange)="sortData($event)"
     #reportTable
+    class="w-full"
   >
+    <!-- Reusable tri-state status icon (Passed / Failed / Not run) -->
+    <ng-template
+      #triStateIcon
+      let-value="value"
+      let-updatedAt="updatedAt"
+      let-createdAt="createdAt"
+      let-label="label"
+      let-tooltipDisabled="tooltipDisabled"
+    >
+      <mat-icon
+        [ngClass]="{
+          'true-status': value === true && updatedAt > createdAt,
+          'false-status': value === false && updatedAt > createdAt,
+          'pending-status': updatedAt <= createdAt
+        }"
+        [matTooltip]="
+          (label || 'Status') +
+          ': ' +
+          (updatedAt > createdAt
+            ? value
+              ? 'Passed'
+              : 'Failed'
+            : 'Not run yet')
+        "
+        [matTooltipDisabled]="!!tooltipDisabled"
+        [attr.aria-label]="
+          (label || 'status') +
+          ' ' +
+          (updatedAt > createdAt
+            ? value
+              ? 'passed'
+              : 'failed'
+            : 'not run yet')
+        "
+      >
+        @if (updatedAt > createdAt) {
+          {{ value ? 'check_circle' : 'cancel' }}
+        } @else {
+          hourglass_empty
+        }
+      </mat-icon>
+    </ng-template>
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox
@@ -51,37 +142,92 @@
       </td>
     </ng-container>
 
-    <ng-container matColumnDef="passed">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Data Layer</th>
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
       <td mat-cell *matCellDef="let element">
-        <mat-icon
-          [ngClass]="{
-            'true-status': element.passed,
-            'false-status': !element.passed
-          }"
-        >
-          {{ element.passed ? 'check_circle' : 'cancel' }}
-        </mat-icon>
-      </td>
-    </ng-container>
-    <ng-container matColumnDef="requestPassed">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Request</th>
-      <td mat-cell *matCellDef="let element">
-        <mat-icon
-          [ngClass]="{
-            'true-status': element.requestPassed,
-            'false-status': !element.requestPassed
-          }"
-        >
-          {{ element.requestPassed ? 'check_circle' : 'cancel' }}
-        </mat-icon>
+        @if (element.updatedAt > element.createdAt) {
+          <div class="status-icons" aria-label="Status: data layer and request">
+            <mat-chip-set aria-label="Status chips">
+              <mat-chip
+                [color]="element.passed ? 'primary' : 'warn'"
+                [matTooltip]="
+                  element.passed ? 'Data layer: Passed' : 'Data layer: Failed'
+                "
+                selected
+              >
+                <div class="flex items-center gap-1">
+                  <ng-container
+                    [ngTemplateOutlet]="triStateIcon"
+                    [ngTemplateOutletContext]="{
+                      value: element.passed,
+                      updatedAt: element.updatedAt,
+                      createdAt: element.createdAt,
+                      label: 'Data layer',
+                      tooltipDisabled: true
+                    }"
+                  ></ng-container>
+                  <span class="ml-1">Data layer</span>
+                </div>
+              </mat-chip>
+              <mat-chip
+                [color]="element.requestPassed ? 'primary' : 'warn'"
+                [matTooltip]="
+                  element.requestPassed ? 'Request: Passed' : 'Request: Failed'
+                "
+                selected
+              >
+                <div class="flex items-center gap-1">
+                  <ng-container
+                    [ngTemplateOutlet]="triStateIcon"
+                    [ngTemplateOutletContext]="{
+                      value: element.requestPassed,
+                      updatedAt: element.updatedAt,
+                      createdAt: element.createdAt,
+                      label: 'Request',
+                      tooltipDisabled: true
+                    }"
+                  ></ng-container>
+                  <span class="ml-1">Request</span>
+                </div>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        } @else {
+          <div class="status-icons" aria-label="Status: not run yet">
+            <mat-chip-set aria-label="Status chips">
+              <mat-chip
+                [color]="'accent'"
+                [matTooltip]="'Status: Not run yet'"
+                selected
+              >
+                <div class="flex items-center gap-1">
+                  <ng-container
+                    [ngTemplateOutlet]="triStateIcon"
+                    [ngTemplateOutletContext]="{
+                      value: null,
+                      updatedAt: element.updatedAt,
+                      createdAt: element.createdAt,
+                      label: 'Status',
+                      tooltipDisabled: true
+                    }"
+                  ></ng-container>
+                  <span class="ml-1">Not run</span>
+                </div>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        }
       </td>
     </ng-container>
 
     <ng-container matColumnDef="completedTime">
       <th mat-header-cell mat-sort-header *matHeaderCellDef>Last QA Time</th>
       <td mat-cell *matCellDef="let element">
-        {{ element.updatedAt | date: 'medium' }}
+        @if (element.updatedAt > element.createdAt) {
+          {{ element.updatedAt | date: 'medium' }}
+        } @else {
+          <span class="muted" matTooltip="Not run yet">—</span>
+        }
       </td>
     </ng-container>
 
@@ -137,7 +283,11 @@
       </td>
     </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="columnsWithExpand"></tr>
+    <tr
+      mat-header-row
+      *matHeaderRowDef="columnsWithExpand"
+      class="bg-gray-50/60 dark:bg-slate-800/60"
+    ></tr>
     <tr
       mat-row
       *matRowDef="let element; columns: columnsWithExpand"

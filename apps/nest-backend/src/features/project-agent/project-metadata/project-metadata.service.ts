@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
+ 
 import { Injectable } from '@nestjs/common';
 import { ProjectService } from '../../../infrastructure/os/project/project.service';
 

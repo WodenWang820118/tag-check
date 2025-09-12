@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
+ 
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import {
   HttpException,

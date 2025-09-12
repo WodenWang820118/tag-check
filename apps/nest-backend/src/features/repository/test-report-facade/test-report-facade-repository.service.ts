@@ -157,7 +157,7 @@ export class TestReportFacadeRepositoryService {
       eventId
     );
 
-    const testEventDetail =
+    const testEventDetails =
       await this.testEventDetailRepositoryService.getBySlugAndEventId(
         projectSlug,
         eventId
@@ -170,7 +170,7 @@ export class TestReportFacadeRepositoryService {
 
     return {
       testEvent,
-      testEventDetail,
+      testEventDetails,
       testImage
     };
   }

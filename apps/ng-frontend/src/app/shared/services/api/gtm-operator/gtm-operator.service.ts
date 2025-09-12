@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { EventInspectionPreset } from '@utils';
-import { catchError, map, Observable, of } from 'rxjs';
+import {
+  EventInspectionPreset,
+  TestEvent,
+  TestEventDetail,
+  TestImage
+} from '@utils';
+import { catchError, map, Observable, of, throwError } from 'rxjs';
 
 interface GtmInspectionParams {
   gtmUrl: string;
@@ -42,14 +47,20 @@ export class GtmOperatorService {
     const queryString = queryParams.join('&');
 
     return this.http
-      .post(
+      .post<
+        {
+          testEvent: TestEvent;
+          testEventDetails: TestEventDetail;
+          testImage: TestImage;
+        }[]
+      >(
         `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventId}?${queryString}`,
         params.eventInspectionPreset
       )
       .pipe(
         catchError((error) => {
           console.error(error);
-          return of(null);
+          return throwError(() => new Error('GTM inspection failed'));
         })
       );
   }
