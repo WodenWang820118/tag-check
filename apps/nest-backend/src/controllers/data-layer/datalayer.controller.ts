@@ -8,8 +8,7 @@ import {
   Logger,
   Param,
   Post,
-  Query,
-  ValidationPipe
+  Query
 } from '@nestjs/common';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionControllerService } from './event-inspection-controller.service';
@@ -45,7 +44,7 @@ export class DataLayerController {
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
     @Query() query: InspectEventQueryDto,
-    @Body(ValidationPipe) eventInspectionPresetDto: EventInspectionPresetDto
+    @Body() eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     try {
       await this.eventInspectionControllerService.inspectSingleEvent(
