@@ -1,4 +1,4 @@
-import { DatePipe, NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
@@ -23,13 +23,13 @@ import { TestRunningFacadeService } from '../../../../shared/services/facade/tes
 import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-chart.component';
 import { ReportTableFacadeService } from './report-table-facade.service';
 import { TableSortService } from '../../../../shared/services/utils/table-sort.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
   selector: 'app-report-table',
   standalone: true,
   imports: [
-    DatePipe,
-    NgClass,
     MatTableModule,
     MatSortModule,
     MatIconModule,
@@ -40,7 +40,10 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
     MatCheckboxModule,
     MatBadgeModule,
     MatSnackBarModule,
-    ProgressPieChartComponent
+    ProgressPieChartComponent,
+    MatTooltipModule,
+    MatChipsModule,
+    CommonModule
   ],
   templateUrl: './report-table.component.html',
   styleUrls: ['./report-table.component.scss']
@@ -91,7 +94,30 @@ export class ReportTableComponent implements OnInit, OnDestroy {
     this.dataSource.data = this.tableSortService.sortData(
       sort,
       this.dataSource.data,
-      this.columns.map((col) => ({ name: col, type: 'string' }))
+      [
+        { name: 'testName', type: 'string' },
+        { name: 'eventName', type: 'string' },
+        {
+          name: 'status',
+          type: 'number',
+          accessor: (row: IReportDetails) => {
+            const run = (row?.updatedAt ?? 0) > (row?.createdAt ?? 0);
+            const dl = !!row?.passed;
+            const req = !!row?.requestPassed;
+            // Order: Passed (3) > Partial (2) > Failed (1) > Not run (0)
+            if (!run) return 0;
+            if (dl && req) return 3;
+            if (dl || req) return 2;
+            return 1;
+          }
+        },
+        {
+          name: 'completedTime',
+          type: 'date',
+          accessor: (row: IReportDetails) =>
+            (row?.updatedAt ?? 0) > (row?.createdAt ?? 0) ? row?.updatedAt : 0
+        }
+      ]
     );
   }
 
@@ -158,6 +184,15 @@ export class ReportTableComponent implements OnInit, OnDestroy {
           // ignore snackbar errors
         }
       });
+  }
+
+  // Status filter wrappers for the template
+  setStatusFilter(status: 'all' | 'notRun' | 'failed' | 'partial' | 'passed') {
+    this.facade.setStatusFilter(status);
+  }
+
+  get statusFilter() {
+    return this.facade.statusFilter();
   }
 
   toggleAllRows() {

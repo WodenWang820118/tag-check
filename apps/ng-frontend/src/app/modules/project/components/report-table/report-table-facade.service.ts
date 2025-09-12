@@ -2,7 +2,7 @@ import { Injectable, effect, signal, computed } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
-import { take, tap, switchMap, map } from 'rxjs';
+import { take, Subscription } from 'rxjs';
 import { IReportDetails } from '@utils';
 import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
@@ -18,8 +18,7 @@ export class ReportTableFacadeService {
   readonly columns = signal([
     'testName',
     'eventName',
-    'passed',
-    'requestPassed',
+    'status',
     'completedTime'
   ]);
 
@@ -32,6 +31,11 @@ export class ReportTableFacadeService {
   readonly expandedElement = signal<Report | null>(null);
   private readonly projectSlug = signal<string>('');
   private readonly hasRecordingMap: Map<string, boolean> = new Map();
+  private paginatorPageSubscription: Subscription | null = null;
+  // Status filter: all | notRun | failed | partial | passed
+  readonly statusFilter = signal<
+    'all' | 'notRun' | 'failed' | 'partial' | 'passed'
+  >('all');
 
   constructor(
     private readonly projectDataSourceService: ProjectDataSourceService,
@@ -41,12 +45,46 @@ export class ReportTableFacadeService {
     private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService,
     private readonly snackBar: MatSnackBar
   ) {
+    // Combine text filter and status filter into one dataSource.filter string
     effect(() => {
-      const filterValue = this.projectDataSourceService.getFilterSignal();
-      const currentDataSource =
-        this.reportTableDataSourceModelService.dataSource();
-      if (currentDataSource) {
-        currentDataSource.filter = filterValue;
+      const text = this.projectDataSourceService.getFilterSignal();
+      const status = this.statusFilter();
+      const ds = this.reportTableDataSourceModelService.dataSource();
+      if (ds) {
+        // Ensure custom filter predicate is set once
+        ds.filterPredicate = (data, filterStr) => {
+          let parsed: { text?: string; status?: string } = {};
+          try {
+            parsed = JSON.parse(filterStr || '{}');
+          } catch {
+            // Fallback: treat entire string as text filter
+            parsed = { text: filterStr || '' };
+          }
+          const t = (parsed.text || '').toLowerCase();
+          const s = (parsed.status || 'all') as ReturnType<
+            typeof this.statusFilter
+          >;
+
+          // Text match against key fields
+          const haystack =
+            `${data.testName ?? ''} ${data.eventName ?? ''}`.toLowerCase();
+          const textMatch = !t || haystack.includes(t);
+
+          // Status match
+          const run = (data?.updatedAt ?? 0) > (data?.createdAt ?? 0);
+          const dl = !!data?.passed;
+          const req = !!data?.requestPassed;
+          let statusKey: 'notRun' | 'failed' | 'partial' | 'passed';
+          if (!run) statusKey = 'notRun';
+          else if (dl && req) statusKey = 'passed';
+          else if (dl || req) statusKey = 'partial';
+          else statusKey = 'failed';
+
+          const statusMatch = s === 'all' || s === statusKey;
+          return textMatch && statusMatch;
+        };
+
+        ds.filter = JSON.stringify({ text, status });
       }
     });
 
@@ -141,8 +179,11 @@ export class ReportTableFacadeService {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  initializeData(paginator: MatPaginator, sort: MatSort, data: any) {
+  initializeData(
+    paginator: MatPaginator,
+    sort: MatSort,
+    data: Record<string, unknown>
+  ) {
     const reports = data['projectReport'] || [];
 
     if (paginator && sort) {
@@ -152,11 +193,116 @@ export class ReportTableFacadeService {
       );
       // Create data source and assign
       const dataSource = new MatTableDataSource(injectReports);
+
+      const slug = data['projectSlug'] as string | undefined;
+      // Try to restore saved page size and page index for this project from localStorage
+      this.restorePaginatorStateForProject(paginator, slug);
+
       dataSource.paginator = paginator;
       dataSource.sort = sort;
+      // Initialize filter predicate and filter value using current signals
+      dataSource.filterPredicate = this.createFilterPredicate();
+      dataSource.filter = JSON.stringify({
+        text: this.projectDataSourceService.getFilterSignal(),
+        status: this.statusFilter()
+      });
       this.reportTableDataSourceModelService.dataSource.set(dataSource);
-      this.projectSlug.set(data['projectSlug']);
+      this.projectSlug.set(data['projectSlug'] as string);
+
+      // Subscribe to paginator page events to persist pageSize changes per project
+      this.subscribeToPersistPaginatorState(paginator, slug);
     }
+  }
+
+  private getPageSizeKey(slug: string) {
+    return `reportTable.pageSize.${slug}`;
+  }
+
+  private restorePaginatorStateForProject(
+    paginator: MatPaginator,
+    slug?: string
+  ) {
+    if (!slug) return;
+    try {
+      const key = this.getPageSizeKey(slug);
+      const saved = localStorage.getItem(key);
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as {
+        pageSize?: number;
+        pageIndex?: number;
+      } | null;
+      if (!parsed) return;
+      if (
+        parsed.pageSize &&
+        Number.isFinite(parsed.pageSize) &&
+        parsed.pageSize > 0
+      ) {
+        paginator.pageSize = parsed.pageSize;
+      }
+      if (
+        parsed.pageIndex &&
+        Number.isFinite(parsed.pageIndex) &&
+        parsed.pageIndex >= 0
+      ) {
+        paginator.pageIndex = parsed.pageIndex;
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }
+
+  private subscribeToPersistPaginatorState(
+    paginator: MatPaginator,
+    slug?: string
+  ) {
+    if (this.paginatorPageSubscription) {
+      this.paginatorPageSubscription.unsubscribe();
+      this.paginatorPageSubscription = null;
+    }
+    if (!slug) return;
+    const key = this.getPageSizeKey(slug);
+    this.paginatorPageSubscription = paginator.page.subscribe(() => {
+      try {
+        const state = {
+          pageSize: paginator.pageSize,
+          pageIndex: paginator.pageIndex
+        };
+        localStorage.setItem(key, JSON.stringify(state));
+      } catch {
+        // ignore storage write errors
+      }
+    });
+  }
+
+  private createFilterPredicate() {
+    return (row: IReportDetails, filterStr: string) => {
+      let parsed: { text?: string; status?: string } = {};
+      try {
+        parsed = JSON.parse(filterStr || '{}');
+      } catch {
+        parsed = { text: filterStr || '' };
+      }
+      const t = (parsed.text || '').toLowerCase();
+      const s = (parsed.status || 'all') as ReturnType<
+        typeof this.statusFilter
+      >;
+
+      const haystack =
+        `${row.testName ?? ''} ${row.eventName ?? ''}`.toLowerCase();
+      const textMatch = !t || haystack.includes(t);
+
+      const run = (row?.updatedAt ?? 0) > (row?.createdAt ?? 0);
+      const dl = !!row?.passed;
+      const req = !!row?.requestPassed;
+      let statusKey: 'notRun' | 'failed' | 'partial' | 'passed';
+      if (!run) statusKey = 'notRun';
+      else if (dl && req) statusKey = 'passed';
+      else if (dl || req) statusKey = 'partial';
+      else statusKey = 'failed';
+      const statusMatch = s === 'all' || s === statusKey;
+
+      return textMatch && statusMatch;
+    };
   }
 
   runTest(eventId: string) {
@@ -240,6 +386,11 @@ export class ReportTableFacadeService {
 
   get selection() {
     return this.reportTableDataSourceModelService.computedSelection;
+  }
+
+  // Status filter API for component
+  setStatusFilter(status: 'all' | 'notRun' | 'failed' | 'partial' | 'passed') {
+    this.statusFilter.set(status);
   }
 
   // Whether all rows on the current page are selected
