@@ -8,8 +8,7 @@ import {
   Logger,
   Param,
   Post,
-  Query,
-  ValidationPipe
+  Query
 } from '@nestjs/common';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionControllerService } from './event-inspection-controller.service';
@@ -40,13 +39,18 @@ export class DataLayerController {
     description: 'The event Id of the test associated with the event.'
   })
   @ApiResponse({ status: 200, description: 'The inspected dataLayer results.' })
-  @Post('/:projectSlug/:eventId')
+  @Post(':projectSlug/:eventId')
   async inspectSingleEvent(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
     @Query() query: InspectEventQueryDto,
-    @Body(ValidationPipe) eventInspectionPresetDto: EventInspectionPresetDto
+    @Body() eventInspectionPresetDto: EventInspectionPresetDto
   ) {
+    this.logger.log(
+      `Inspecting single event: projectSlug=${projectSlug}, eventId=${eventId}, query=${JSON.stringify(
+        query
+      )}, eventInspectionPresetDto=${JSON.stringify(eventInspectionPresetDto)}`
+    );
     try {
       await this.eventInspectionControllerService.inspectSingleEvent(
         projectSlug,

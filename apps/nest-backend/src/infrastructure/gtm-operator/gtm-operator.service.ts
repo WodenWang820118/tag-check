@@ -7,8 +7,8 @@ import { CookieData, Page, Browser } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
 import { PuppeteerUtilsService } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
-import { FolderPathService } from '../os/path/folder-path/folder-path.service';
 import { InspectGtmQueryDto } from '../../controllers/gtm-operator/dto/inspect-gtm-query.dto';
+import { RecordingRepositoryService } from '../../core/repository/recording/recording-repository.service';
 
 @Injectable()
 export class GtmOperatorService {
@@ -17,7 +17,7 @@ export class GtmOperatorService {
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
     private readonly puppeteerUtilsService: PuppeteerUtilsService,
-    private readonly folderPathService: FolderPathService
+    private readonly recordingRepositoryService: RecordingRepositoryService
   ) {}
 
   initializeAbortController() {
@@ -50,11 +50,6 @@ export class GtmOperatorService {
     await this.applyCookies(browser, query.gtmUrl, eventInspectionPresetDto);
 
     const websiteUrl = this.extractBaseUrlFromGtmUrl(query.gtmUrl);
-    const folder = await this.folderPathService.getInspectionEventFolderPath(
-      projectSlug,
-      eventId
-    );
-
     await this.operateGtmPreviewMode(page, query.gtmUrl);
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -77,14 +72,19 @@ export class GtmOperatorService {
       throw new Error('Failed to find the target page');
     }
     try {
-      // let users to record it to navigate the target page
-      // it's valid to use the url.origin to ensure the screencast recorder work as expected
-      // without goto, the rest of the code will not work
+      // Apply the recorded viewport to the actual page we'll record (targetPage)
+      await this.puppeteerUtilsService.applyRecordedViewport(
+        targetPage,
+        projectSlug,
+        eventId
+      );
+      await targetPage.bringToFront();
       await targetPage.goto(origin);
 
       const recorder = await this.puppeteerUtilsService.startRecorder(
         targetPage,
-        folder
+        projectSlug,
+        eventId
       );
       await new Promise((resolve) => setTimeout(resolve, 2000));
 

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,6 +14,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { VideoDialogComponent } from '../../../../shared/components/video-dialog/video-dialog.component';
 
 @Component({
   selector: 'app-report-tab',
@@ -33,6 +35,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatExpansionModule,
     MatChipsModule,
     MatSnackBarModule,
+    MatDialogModule,
     // Shared/feature components
     CarouselComponent,
     ReportDetailPanelsComponent
@@ -158,6 +161,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
                     <app-carousel
                       [imageBlob]="imageBlob$()"
                       [videoBlob]="videoBlob$()"
+                      (videoClick)="openVideoDialog()"
                     ></app-carousel>
                   </div>
                 </mat-expansion-panel>
@@ -194,6 +198,7 @@ export class ReportTabComponent {
   );
   historyLinkCommands$ = computed(() => this.historyLinkCommands());
 
+  private readonly dialog = inject(MatDialog);
   constructor(private readonly snackBar: MatSnackBar) {}
 
   copyEventName() {
@@ -223,5 +228,18 @@ export class ReportTabComponent {
         verticalPosition: 'top'
       });
     }
+  }
+
+  openVideoDialog() {
+    const blob = this.videoBlob$();
+    if (!blob) return;
+    this.dialog.open(VideoDialogComponent, {
+      data: { blob },
+      width: '1420px',
+      height: '1200px',
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      panelClass: 'app-video-dialog-panel'
+    });
   }
 }

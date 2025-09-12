@@ -8,7 +8,6 @@ import {
 import { CookieData, Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '@utils';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
-import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
 import { PuppeteerUtilsService } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
 
 export interface InspectSingleEventOptions {
@@ -27,7 +26,6 @@ export class SingleEventInspectionService {
 
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
-    private readonly folderPathService: FolderPathService,
     private readonly puppeteerUtilsService: PuppeteerUtilsService
   ) {}
 
@@ -66,13 +64,13 @@ export class SingleEventInspectionService {
 
     // extract cookie setting logic to helper
     await this.applyCookies(browser, url, eventInspectionPresetDto);
-
-    const folder = await this.folderPathService.getInspectionEventFolderPath(
+    // Apply recorded viewport once per run using shared helper
+    await this.puppeteerUtilsService.applyRecordedViewport(
+      page,
       projectSlug,
       eventId
     );
-
-    await this.puppeteerUtilsService.startRecorder(page, folder);
+    await this.puppeteerUtilsService.startRecorder(page, projectSlug, eventId);
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     try {
