@@ -11,8 +11,22 @@
             />
           }
           @case (videoType) {
-            <video controls>
+            <video
+              controls
+              preload="metadata"
+              tabindex="0"
+              aria-label="Recorded test video. Press Enter to open in dialog."
+              (click)="onVideoClick()"
+              (keydown.enter)="onVideoClick()"
+              (keydown.space)="onVideoClick()"
+            >
               <source [src]="item.url" type="video/webm" />
+              <track kind="captions" srclang="en" label="English captions" />
+              <track
+                kind="descriptions"
+                srclang="en"
+                label="English descriptions"
+              />
             </video>
           }
         }

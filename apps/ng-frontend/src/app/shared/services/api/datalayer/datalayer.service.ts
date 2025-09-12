@@ -40,7 +40,7 @@ export class DataLayerService {
     let httpParams = new HttpParams();
     // include website URL
     if (websiteUrl) {
-      httpParams = httpParams.set('websiteUrl', websiteUrl);
+      httpParams = httpParams.set('url', new URL(websiteUrl).toString());
     }
     // set optional parameters
     if (headless !== undefined) {
@@ -72,7 +72,9 @@ export class DataLayerService {
         catchError((error) => {
           console.error(error);
           return throwError(
-            () => 'Error running data layer inspection: ' + error
+            () =>
+              'Error running data layer inspection: ' +
+              JSON.stringify(error, null, 2)
           );
         })
       );

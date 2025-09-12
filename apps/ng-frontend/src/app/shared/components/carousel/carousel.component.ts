@@ -4,6 +4,7 @@ import {
   inject,
   input,
   OnDestroy,
+  output,
   signal
 } from '@angular/core';
 import { CarouselItem, CarouselItemEnum } from '@utils';
@@ -20,6 +21,8 @@ export class CarouselComponent implements OnDestroy {
   private readonly objectUrls: string[] = [];
   imageBlob = input<Blob | null>(null);
   videoBlob = input<Blob | null>(null);
+  // Emits when the video item is clicked
+  videoClick = output<void>();
 
   // Helper method to generate a safe URL from a Blob.
   private getSafeUrl(blob: Blob): SafeUrl {
@@ -78,5 +81,9 @@ export class CarouselComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.objectUrls.forEach((url) => URL.revokeObjectURL(url));
+  }
+
+  onVideoClick(): void {
+    this.videoClick.emit();
   }
 }
