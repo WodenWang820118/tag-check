@@ -4,6 +4,7 @@ import {
   inject,
   input,
   OnDestroy,
+  output,
   signal
 } from '@angular/core';
 import { CarouselItem, CarouselItemEnum } from '@utils';
