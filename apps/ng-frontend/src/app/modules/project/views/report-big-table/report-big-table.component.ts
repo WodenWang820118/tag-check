@@ -42,7 +42,7 @@ import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
       </mat-sidenav>
 
       <mat-sidenav-content>
-        <div class="report-view mat-elevation-z8">
+        <div class="report-view mat-elevation-z4">
           <app-report-table-toolbar></app-report-table-toolbar>
           <app-report-table></app-report-table>
         </div>
