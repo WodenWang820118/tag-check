@@ -146,8 +146,7 @@ export class EventInspectionPipelineService {
       requestPassed: result.requestCheckResult.passed || false,
       rawRequest: result.rawRequest,
       destinationUrl: result.destinationUrl,
-      dataLayer: result.dataLayerResult.dataLayer,
-      reformedDataLayer: [] // placeholder for additional processing if needed
+      dataLayer: result.dataLayerResult.dataLayer
     };
   }
 
@@ -160,8 +159,7 @@ export class EventInspectionPipelineService {
       requestPassed: false,
       rawRequest: '',
       destinationUrl: '',
-      dataLayer: [],
-      reformedDataLayer: []
+      dataLayer: []
     };
   }
 

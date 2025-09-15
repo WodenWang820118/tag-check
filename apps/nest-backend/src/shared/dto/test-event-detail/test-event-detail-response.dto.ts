@@ -20,9 +20,6 @@ export class TestEventDetailResponseDto implements TestEventDetailSchema {
   rawRequest?: string;
 
   @Expose()
-  reformedDataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];
-
-  @Expose()
   destinationUrl!: string;
 
   @Expose()

@@ -29,7 +29,6 @@ export class ReportMapperService {
         passed: d?.passed ?? false,
         requestPassed: d?.requestPassed ?? false,
         rawRequest: d?.rawRequest,
-        reformedDataLayer: d?.reformedDataLayer,
         destinationUrl: d?.destinationUrl ?? '',
         dataLayer: d?.dataLayer,
         // Auditable

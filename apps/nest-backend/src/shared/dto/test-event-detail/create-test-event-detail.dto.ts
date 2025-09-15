@@ -29,10 +29,6 @@ export class CreateTestEventDetailDto implements TestEventDetail {
   @IsOptional()
   rawRequest?: string;
 
-  @IsOptional()
-  @IsJSON()
-  reformedDataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];
-
   @IsString()
   destinationUrl!: string;
 }

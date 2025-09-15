@@ -39,12 +39,6 @@ export class TestEventDetailEntity
   })
   rawRequest?: string;
 
-  @Column('json', {
-    name: 'reformed_data_layer',
-    nullable: true
-  })
-  reformedDataLayer?: StrictDataLayerEvent[] | BaseDataLayerEvent[];
-
   @Column({
     name: 'destination_url',
     type: 'varchar'

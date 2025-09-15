@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { FullTestEventResponseDto } from '../../../shared';
 import { XlsxUtilsService } from './xlsx-utils.service';
 
 @Injectable()
 export class XlsxTestDataSectionService {
+  private readonly logger = new Logger(XlsxTestDataSectionService.name);
   constructor(private readonly xlsxUtilsService: XlsxUtilsService) {}
 
   addTestDataSection(
@@ -23,7 +24,6 @@ export class XlsxTestDataSectionService {
       { header: 'Passed', key: 'passed', width: 10 },
       { header: 'Request Passed', key: 'requestPassed', width: 10 },
       { header: 'Raw Request', key: 'rawRequest', width: 40 },
-      { header: 'Reformed DataLayer', key: 'reformedDataLayer', width: 40 },
       { header: 'Destination URL', key: 'destinationUrl', width: 40 }
     ];
 
@@ -36,7 +36,6 @@ export class XlsxTestDataSectionService {
       'Passed',
       'Request Passed',
       'Raw Request',
-      'Reformed DataLayer',
       'Destination URL'
     ]);
 
@@ -56,54 +55,61 @@ export class XlsxTestDataSectionService {
       };
     });
 
-    // Prepare data row
-    const rowData = [
-      this.xlsxUtilsService.formatJsonForExcel(report.spec.dataLayerSpec || {}),
-      this.xlsxUtilsService.formatJsonForExcel(
-        report.testEventDetails?.dataLayer || {}
-      ),
-      report.testEventDetails?.passed || false,
-      report.testEventDetails?.requestPassed || false,
-      report.testEventDetails?.rawRequest || '',
-      this.xlsxUtilsService.formatJsonForExcel(
-        report.testEventDetails?.reformedDataLayer || {}
-      ),
-      report.testEventDetails?.destinationUrl || ''
-    ];
+    this.logger.log(
+      'report before adding test data section: ' +
+        JSON.stringify(report.testEventDetails, null, 2)
+    );
 
-    // Add the data row
-    const dataRow = worksheet.addRow(rowData);
+    // Normalize testEventDetails to an array to support both single object and array payloads
+    const detailsArray: any[] = Array.isArray((report as any).testEventDetails)
+      ? ((report as any).testEventDetails as any[])
+      : [(report as any).testEventDetails];
 
-    // Style the data row
-    dataRow.eachCell((cell, colNumber) => {
-      cell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' }
-      };
+    // Add one data row per detail entry
+    detailsArray.forEach((detail, index) => {
+      const rowData = [
+        this.xlsxUtilsService.formatJsonForExcel(report.spec.dataLayerSpec),
+        this.xlsxUtilsService.formatJsonForExcel(detail?.dataLayer),
+        // Keep booleans as booleans so conditional formatting works correctly
+        detail?.passed === true,
+        detail?.requestPassed === true,
+        detail?.rawRequest ?? '',
+        detail?.destinationUrl ?? ''
+      ];
 
-      // Add special formatting for boolean values
-      if (colNumber === 3 || colNumber === 4) {
-        // Passed and Request Passed columns
-        const value = cell.value as boolean;
-        cell.font = {
-          color: { argb: value ? '00008000' : '00FF0000' } // Green for true, red for false
+      // Add the data row
+      const dataRow = worksheet.addRow(rowData);
+
+      // Style the data row
+      dataRow.eachCell((cell, colNumber) => {
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
         };
-      }
 
-      // Add word wrap for JSON and long text
-      if (
-        colNumber === 1 ||
-        colNumber === 2 ||
-        colNumber === 5 ||
-        colNumber === 6
-      ) {
-        cell.alignment = { wrapText: true };
-      }
+        // Add special formatting for boolean values (Passed and Request Passed)
+        if (colNumber === 3 || colNumber === 4) {
+          const isTrue = cell.value === true || cell.value === 'true';
+          cell.font = {
+            color: { argb: isTrue ? '00008000' : '00FF0000' } // Green for true, red for false
+          };
+        }
+
+        // Add word wrap for JSON and long text
+        if (
+          colNumber === 1 ||
+          colNumber === 2 ||
+          colNumber === 5 ||
+          colNumber === 6
+        ) {
+          cell.alignment = { wrapText: true };
+        }
+      });
+
+      // Adjust row height for better readability
+      dataRow.height = 100;
     });
-
-    // Adjust row height for better readability
-    dataRow.height = 100;
   }
 }

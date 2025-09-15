@@ -1,20 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { join } from 'path';
 import { XlsxReportService } from '../../../infrastructure/os/xlsx-report/xlsx-report.service';
-import { TestReportFacadeRepositoryService } from '../../repository/test-report-facade/test-report-facade-repository.service';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 
 @Injectable()
 export class ProjectFileReportService {
+  private readonly logger = new Logger(ProjectFileReportService.name);
   constructor(
     private readonly folderService: FolderService,
     private readonly folderPathService: FolderPathService,
-    private readonly testResultService: TestReportFacadeRepositoryService,
     private readonly xlsxReportService: XlsxReportService,
-    private readonly testEventRepositoryService: TestEventRepositoryService,
-    private readonly testReportFacadeRepositoryService: TestReportFacadeRepositoryService
+    private readonly testEventRepositoryService: TestEventRepositoryService
   ) {}
 
   async getReportFolders(projectSlug: string) {
