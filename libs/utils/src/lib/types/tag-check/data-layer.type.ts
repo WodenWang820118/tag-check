@@ -67,7 +67,6 @@ export type ValidationResult = {
 export type RequestValidationResult = {
   requestPassed: boolean;
   rawRequest: string;
-  reformedDataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[];
   dataLayerSpec: StrictDataLayerEvent | BaseDataLayerEvent;
 };
 

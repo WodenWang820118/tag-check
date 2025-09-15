@@ -57,7 +57,6 @@ export class ProjectEventsBuilderService {
         rawRequest: '',
         destinationUrl: '',
         dataLayer: [],
-        reformedDataLayer: [],
         createdAt: new Date()
       };
 

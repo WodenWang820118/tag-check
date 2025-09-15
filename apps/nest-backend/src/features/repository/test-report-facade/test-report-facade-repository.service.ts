@@ -56,8 +56,7 @@ export class TestReportFacadeRepositoryService {
         requestPassed: false,
         rawRequest: '',
         destinationUrl: '',
-        dataLayer: [],
-        reformedDataLayer: []
+        dataLayer: []
       });
 
     const recordingCreation = this.recordingRepositoryService.create(

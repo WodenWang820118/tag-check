@@ -35,7 +35,6 @@ const MOCK_REPORTS: IReportDetails[] = [
     passed: false,
     requestPassed: false,
     rawRequest: '',
-    reformedDataLayer: [],
     destinationUrl: 'https://example.com',
     // Auditable
     createdAt: new Date(),
@@ -53,7 +52,6 @@ const MOCK_REPORTS: IReportDetails[] = [
     passed: true,
     requestPassed: true,
     rawRequest: '',
-    reformedDataLayer: [],
     destinationUrl: 'https://example.com',
     createdAt: new Date(),
     updatedAt: new Date(),
