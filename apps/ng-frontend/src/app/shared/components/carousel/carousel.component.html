@@ -4,30 +4,31 @@
       <div class="carousel-item" [class.active]="i === currentIndex()">
         @switch (item.type) {
           @case (imageType) {
-            <img
-              [src]="item.url"
-              [alt]="item.alt || ''"
-              class="detail__images__item"
-            />
+            <button
+              type="button"
+              class="reset-btn"
+              (click)="openPreview(i)"
+              [attr.aria-label]="item.alt || 'Open image preview'"
+            >
+              <img
+                [src]="item.url"
+                [alt]="item.alt || ''"
+                class="detail__images__item clickable"
+              />
+            </button>
           }
           @case (videoType) {
-            <video
-              controls
-              preload="metadata"
-              tabindex="0"
-              aria-label="Recorded test video. Press Enter to open in dialog."
-              (click)="onVideoClick()"
-              (keydown.enter)="onVideoClick()"
-              (keydown.space)="onVideoClick()"
+            <button
+              type="button"
+              class="reset-btn"
+              (click)="openPreview(i)"
+              aria-label="Open video preview"
             >
-              <source [src]="item.url" type="video/webm" />
-              <track kind="captions" srclang="en" label="English captions" />
-              <track
-                kind="descriptions"
-                srclang="en"
-                label="English descriptions"
-              />
-            </video>
+              <video class="clickable" muted>
+                <source [src]="item.url" type="video/webm" />
+                <track kind="captions" label="No captions available" />
+              </video>
+            </button>
           }
         }
       </div>
