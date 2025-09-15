@@ -4,6 +4,7 @@ import {
   inject,
   input,
   OnDestroy,
+  output,
   signal
 } from '@angular/core';
 import { CarouselItem, CarouselItemEnum } from '@utils';
@@ -90,15 +91,15 @@ export class CarouselComponent implements OnDestroy {
     const item = items[index];
     if (!item) return;
     // Determine the blob to pass for better download support
-    const blob =
-      item.type === CarouselItemEnum.Image
-        ? this.imageBlob()
-        : this.videoBlob();
+    item.type === CarouselItemEnum.Image ? this.imageBlob() : this.videoBlob();
     this.dialog.open(MediaPreviewDialogComponent, {
       data: {
         type: item.type,
         url: item.url as string,
-        blob: blob,
+        blob:
+          item.type === CarouselItemEnum.Image
+            ? this.imageBlob()
+            : this.videoBlob(),
         alt: item.alt,
         caption: item.caption
       },
