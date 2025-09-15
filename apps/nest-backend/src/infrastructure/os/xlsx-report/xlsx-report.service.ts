@@ -68,7 +68,6 @@ export class XlsxReportService {
             });
             imageRowOffset = 10; // Add offset for image space
           }
-          this.logger.log(`${JSON.stringify(report.spec, null, 2)}`);
           // Add test data section with proper column headers
           this.xlsxTestDataSectionService.addTestDataSection(
             worksheet,
