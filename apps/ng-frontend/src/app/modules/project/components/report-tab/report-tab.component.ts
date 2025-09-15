@@ -16,8 +16,6 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { ReportTabFacade } from './report-tab-facade.service';
-import { MatDialog } from '@angular/material/dialog';
-import { VideoDialogComponent } from '../../../../shared/components/video-dialog/video-dialog.component';
 
 @Component({
   selector: 'app-report-tab',
@@ -211,7 +209,6 @@ import { VideoDialogComponent } from '../../../../shared/components/video-dialog
                     <app-carousel
                       [imageBlob]="imageBlob$()"
                       [videoBlob]="videoBlob$()"
-                      (videoClick)="openVideoDialog()"
                     ></app-carousel>
                   </div>
                 </mat-expansion-panel>
@@ -267,10 +264,7 @@ export class ReportTabComponent {
     this.facade.getRecordingAvailable(this.videoBlob$())
   );
 
-  constructor(
-    private readonly facade: ReportTabFacade,
-    private readonly dialog: MatDialog
-  ) {}
+  constructor(private readonly facade: ReportTabFacade) {}
 
   copyEventName() {
     this.facade.copyEventName(this.reportDetails$());
@@ -298,16 +292,4 @@ export class ReportTabComponent {
   }
 
   // saveBlob/buildFileBase moved to facade
-  openVideoDialog() {
-    const blob = this.videoBlob$();
-    if (!blob) return;
-    this.dialog.open(VideoDialogComponent, {
-      data: { blob },
-      width: '1420px',
-      height: '1200px',
-      maxWidth: '95vw',
-      maxHeight: '95vh',
-      panelClass: 'app-video-dialog-panel'
-    });
-  }
 }
