@@ -15,6 +15,7 @@ export class XlsxRecordingSectionService {
     worksheet.addRow([]);
     worksheet.addRow([]);
 
+    this.logger.log('report: ' + JSON.stringify(report.recording, null, 2));
     // Add recording section header
     const recordingHeaderRow = worksheet.addRow(['Recording']);
     recordingHeaderRow.font = { bold: true, size: 14 };

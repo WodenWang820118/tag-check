@@ -1,6 +1,6 @@
 {
   "name": "tag-check",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "type": "module",
   "main": ".vite/build/main.mjs",
   "author": "Guan Xin Wang",

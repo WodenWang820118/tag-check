@@ -137,7 +137,6 @@ export class FileTableDataSourceFacadeService {
       requestPassed: details.requestPassed,
       dataLayer: details.dataLayer,
       rawRequest: details.rawRequest,
-      reformedDataLayer: details.reformedDataLayer,
       destinationUrl: details.destinationUrl,
 
       // Test event

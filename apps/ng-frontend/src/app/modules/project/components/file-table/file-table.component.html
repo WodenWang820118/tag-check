@@ -41,11 +41,11 @@
       <td mat-cell *matCellDef="let element">
         <mat-icon
           [ngClass]="{
-            'true-status': element.dataLayerState,
-            'false-status': !element.dataLayerState
+            'true-status': element.passed,
+            'false-status': !element.passed
           }"
         >
-          {{ element.dataLayerState ? 'check_circle' : 'cancel' }}
+          {{ element.passed ? 'check_circle' : 'cancel' }}
         </mat-icon>
       </td>
     </ng-container>

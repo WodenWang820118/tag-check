@@ -102,7 +102,7 @@ export class TestEventRepositoryService {
 
     return entities.map((entity) => {
       return plainToInstance(FullTestEventResponseDto, entity, {
-        enableImplicitConversion: true,
+        enableImplicitConversion: false,
         excludeExtraneousValues: false // true value will lead to missing fields such as dataLayerSpec
       });
     });

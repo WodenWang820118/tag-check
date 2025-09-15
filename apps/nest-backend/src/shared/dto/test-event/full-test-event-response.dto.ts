@@ -45,6 +45,7 @@ export class FullTestEventResponseDto implements FullTestEventSchema {
   project!: ProjectResponseDto;
 
   @Expose()
+  @Type(() => SpecResponseDto)
   spec!: SpecResponseDto;
 
   @Expose()
