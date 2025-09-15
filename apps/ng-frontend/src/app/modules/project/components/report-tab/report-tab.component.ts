@@ -168,9 +168,9 @@ import { ReportTabFacade } from './report-tab-facade.service';
               </button>
             </mat-form-field>
 
-            <app-report-datail-panels
+            <app-report-detail-panels
               [reportDetails]="reportDetails$()"
-            ></app-report-datail-panels>
+            ></app-report-detail-panels>
 
             <mat-form-field class="w-full mt-5" appearance="fill">
               <mat-label>Message</mat-label>

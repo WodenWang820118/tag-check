@@ -21,9 +21,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { take, tap } from 'rxjs';
+import { tap } from 'rxjs';
 @Component({
-  selector: 'app-report-datail-panels',
+  selector: 'app-report-detail-panels',
   standalone: true,
   imports: [
     JsonPipe,
@@ -101,6 +101,7 @@ export class ReportDetailPanelsComponent implements OnInit {
   ) {
     effect(() => {
       const spec = this.specContent();
+      console.log('this.reportDetails(): ', this.reportDetails());
       if (!spec) {
         return;
       }

@@ -100,7 +100,7 @@ export class DetailViewComponent implements OnInit {
 
       const reportDetailsObject = data['reportDetails'] as {
         testEvent: TestEvent;
-        testEventDetail: TestEventDetail;
+        testEventDetails: TestEventDetail;
         testImage: TestImage;
       };
 
@@ -108,7 +108,7 @@ export class DetailViewComponent implements OnInit {
       console.log('Report details object:', reportDetailsObject);
       const flattenedReportDetails: IReportDetails = {
         ...reportDetailsObject.testEvent,
-        ...reportDetailsObject.testEventDetail,
+        ...reportDetailsObject.testEventDetails,
         ...reportDetailsObject.testImage,
         position: 0,
         event: reportDetailsObject.testEvent.eventName,
