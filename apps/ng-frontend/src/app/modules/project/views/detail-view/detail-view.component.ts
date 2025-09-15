@@ -74,9 +74,9 @@ export class DetailViewComponent implements OnInit {
   reportDetails$ = computed(() => this.reportDetails());
   tagSpec = signal<TagSpec | undefined>(undefined);
   tagSpec$ = computed(() => this.tagSpec());
-  videoBlob = signal<Blob | null>(null);
+  videoBlob = signal<Blob | undefined>(undefined);
   videoBlob$ = computed(() => this.videoBlob());
-  imageBlob = signal<Blob | null>(null);
+  imageBlob = signal<Blob | undefined>(undefined);
   imageBlob$ = computed(() => this.imageBlob());
   frontFileReport = signal([] as FrontFileReport[]);
   // testEventDetail$ moved into the ReportTabComponent
@@ -115,8 +115,8 @@ export class DetailViewComponent implements OnInit {
         createdAt: new Date()
       };
       console.log('Flattened report details:', flattenedReportDetails);
-      const video = data['video'] as { blob: Blob | null };
-      const image = data['image'] as { blob: Blob | null };
+      const video = data['video'] as { blob: Blob | undefined };
+      const image = data['image'] as { blob: Blob | undefined };
       this.reportDetails.set(flattenedReportDetails);
       this.videoBlob.set(video.blob);
       this.imageBlob.set(image.blob);

@@ -13,7 +13,9 @@ import { IReportDetails, TagSpec, FrontFileReport } from '@utils';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatMenuModule } from '@angular/material/menu';
+import { ReportTabFacade } from './report-tab-facade.service';
 
 @Component({
   selector: 'app-report-tab',
@@ -33,10 +35,12 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     MatExpansionModule,
     MatChipsModule,
     MatSnackBarModule,
+    MatMenuModule,
     // Shared/feature components
     CarouselComponent,
     ReportDetailPanelsComponent
   ],
+  providers: [ReportTabFacade],
   template: `
     <mat-card appearance="outlined">
       <mat-card-header class="items-start">
@@ -59,14 +63,13 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
               {{ reportDetails$()?.passed ? 'Report passed' : 'Report failed' }}
             </output>
             <mat-chip-set aria-label="Report status">
-              <!-- TODO: color state -->
               <mat-chip
                 [color]="reportDetails$()?.passed ? 'primary' : 'warn'"
                 class="w-full"
               >
                 <div class="flex items-center gap-1">
                   {{ reportDetails$()?.passed ? 'Passed' : 'Failed' }}
-                  <mat-icon style="transform: scale(0.85);">{{
+                  <mat-icon style="transform: scale(0.85)">{{
                     reportDetails$()?.passed ? 'check_circle' : 'cancel'
                   }}</mat-icon>
                 </div>
@@ -74,16 +77,62 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
             </mat-chip-set>
 
             @if (testEventDetails$().length) {
+              <!-- History: icon-only button -->
               <button
-                mat-stroked-button
+                mat-icon-button
                 [routerLink]="historyLinkCommands$() ?? ['..', 'buckets']"
                 [queryParams]="{ event: reportDetails$()?.eventName }"
-                aria-label="View run history for this event"
-                class="whitespace-nowrap"
+                aria-label="View histories for this event"
+                matTooltip="History"
               >
-                <mat-icon class="mr-1.5" aria-hidden="true">history</mat-icon>
-                History
+                <mat-icon aria-hidden="true">history</mat-icon>
               </button>
+
+              <!-- Share button (icon only) -->
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="shareMenu"
+                aria-label="Share options"
+                matTooltip="Share"
+              >
+                <mat-icon>share</mat-icon>
+              </button>
+
+              <!-- Share menu overlay -->
+              <mat-menu #shareMenu="matMenu">
+                <button
+                  mat-menu-item
+                  type="button"
+                  (click)="shareSpreadsheet()"
+                  [disabled]="!projectSlug$() || !reportDetails$()?.eventId"
+                >
+                  <mat-icon aria-hidden="true">table_view</mat-icon>
+                  <span>Export spreadsheet (XLSX)</span>
+                </button>
+                <button
+                  mat-menu-item
+                  type="button"
+                  (click)="exportRecording()"
+                  [disabled]="!recordingAvailable$()"
+                >
+                  <mat-icon aria-hidden="true">movie</mat-icon>
+                  <span>Export recording (WEBM)</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button
+                  mat-menu-item
+                  type="button"
+                  (click)="exportEvent()"
+                  [disabled]="
+                    !reportDetails$()?.eventId ||
+                    !projectSlug$() ||
+                    !recordingAvailable$()
+                  "
+                >
+                  <mat-icon aria-hidden="true">download</mat-icon>
+                  <span>Export event (XLSX + WEBM)</span>
+                </button>
+              </mat-menu>
             }
           </div>
         </div>
@@ -137,7 +186,9 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
           <!-- Right: Media -->
           <section class="space-y-4 mt-10">
-            @if (imageBlob$() || videoBlob$()) {
+            @if (
+              (imageBlob$()?.size || 0) > 0 && (videoBlob$()?.size || 0) > 0
+            ) {
               <mat-accordion displayMode="flat">
                 <mat-expansion-panel
                   [expanded]="reportDetails$()?.passed === false"
@@ -163,10 +214,27 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
                 </mat-expansion-panel>
               </mat-accordion>
             } @else {
-              <p class="text-black/60 mt-2 flex items-center gap-2">
-                <mat-icon aria-hidden="true">image_not_supported</mat-icon>
-                No media captured for this run.
-              </p>
+              <mat-card appearance="outlined" class="mt-2 p-4">
+                <div class="flex items-start gap-3">
+                  <mat-icon aria-hidden="true" color="primary"
+                    >image_not_supported</mat-icon
+                  >
+                  <div class="min-w-0">
+                    <div class="text-2xl">No media available</div>
+                    <p class="text-xl text-black/70 m-0 mt-1">
+                      Screenshots and the test recording will appear here when
+                      captured.
+                    </p>
+                    <ul class="list-disc pl-5 text-xl text-black/70 mt-2">
+                      <li>Media capture may be disabled for this run.</li>
+                      <li>
+                        Some runs may not produce screenshots if nothing changed
+                        visually.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </mat-card>
             }
           </section>
         </div>
@@ -176,15 +244,13 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
   styleUrls: ['./report-tab.component.scss']
 })
 export class ReportTabComponent {
-  // Inputs as signals (Angular v17+)
   reportDetails = input<IReportDetails | undefined>(undefined);
   tagSpec = input<TagSpec | undefined>(undefined);
-  videoBlob = input<Blob | null>(null);
-  imageBlob = input<Blob | null>(null);
+  videoBlob = input<Blob | undefined>(undefined);
+  imageBlob = input<Blob | undefined>(undefined);
   frontFileReport = input<FrontFileReport[]>([]);
   historyLinkCommands = input<string[] | undefined>(undefined);
 
-  // Readonly accessors for template ergonomics
   reportDetails$ = computed(() => this.reportDetails());
   tagSpec$ = computed(() => this.tagSpec());
   videoBlob$ = computed(() => this.videoBlob());
@@ -193,35 +259,37 @@ export class ReportTabComponent {
     (this.frontFileReport() || []).flatMap((r) => r.testEventDetails)
   );
   historyLinkCommands$ = computed(() => this.historyLinkCommands());
+  projectSlug$ = computed(() => this.facade.getProjectSlugFromRoute());
+  recordingAvailable$ = computed(() =>
+    this.facade.getRecordingAvailable(this.videoBlob$())
+  );
 
-  constructor(private readonly snackBar: MatSnackBar) {}
+  constructor(private readonly facade: ReportTabFacade) {}
 
   copyEventName() {
-    const value = this.reportDetails$()?.eventName;
-    if (!value) return;
-    const write = navigator.clipboard?.writeText?.bind(navigator.clipboard);
-    if (write) {
-      write(value)
-        .then(() => {
-          this.snackBar.open('Event name copied', undefined, {
-            duration: 1500,
-            horizontalPosition: 'right',
-            verticalPosition: 'top'
-          });
-        })
-        .catch(() => {
-          this.snackBar.open('Unable to copy', undefined, {
-            duration: 1500,
-            horizontalPosition: 'right',
-            verticalPosition: 'top'
-          });
-        });
-    } else {
-      this.snackBar.open('Unable to copy', undefined, {
-        duration: 1500,
-        horizontalPosition: 'right',
-        verticalPosition: 'top'
-      });
-    }
+    this.facade.copyEventName(this.reportDetails$());
   }
+
+  // Share helpers
+
+  shareSpreadsheet() {
+    this.facade.shareSpreadsheet(this.reportDetails$());
+  }
+
+  // project slug + spreadsheet url helpers moved to facade
+
+  openRecording() {
+    // Deprecated: replaced by exportRecording()
+    this.exportRecording();
+  }
+
+  exportRecording() {
+    this.facade.exportRecording(this.reportDetails$(), this.videoBlob$());
+  }
+
+  exportEvent() {
+    this.facade.exportEvent(this.reportDetails$(), this.videoBlob$());
+  }
+
+  // saveBlob/buildFileBase moved to facade
 }
