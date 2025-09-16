@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { GtmInspectionParams } from '../../utils/interfaces';
 import { TestEvent, TestEventDetail, TestImage } from '@utils';
 
@@ -9,6 +9,8 @@ import { TestEvent, TestEventDetail, TestImage } from '@utils';
   providedIn: 'root'
 })
 export class QaRequestService {
+  private readonly isStopOperation = signal(false);
+  isStopOperation$ = computed(() => this.isStopOperation());
   constructor(private readonly http: HttpClient) {}
 
   runDataLayerWithRequestCheck(
@@ -40,16 +42,27 @@ export class QaRequestService {
       .pipe(
         catchError((error) => {
           console.error(error);
+          if (this.isStopOperation$()) {
+            return of([]);
+          }
           return throwError(() => new Error('Data layer inspection failed'));
         })
       );
   }
 
-  stopOperation(): Observable<string> {
+  stopOperation(): Observable<{ status: number; message: string }> {
     return this.http
-      .post<string>(`${environment.dataLayerApiUrl}/stop-operation`, {})
+      .post<{
+        status: number;
+        message: string;
+      }>(`${environment.dataLayerApiUrl}/stop-operation`, {})
       .pipe(
-        map((message) => message),
+        map((message) => {
+          if (message.status === 200) {
+            this.isStopOperation.set(true);
+          }
+          return message;
+        }),
         catchError((error) => {
           console.error('Error stopping operation:', error);
           throw error;
