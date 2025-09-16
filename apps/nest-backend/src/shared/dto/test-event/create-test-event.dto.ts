@@ -16,7 +16,7 @@ export class CreateTestEventDto implements TestEvent {
 
   @IsOptional()
   @IsString()
-  message?: string;
+  message!: string;
 
   @IsOptional()
   @IsBoolean()
