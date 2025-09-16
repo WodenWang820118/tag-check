@@ -20,7 +20,7 @@ export class AbstractTestEventResponseDto implements AbstractTestEvent {
   stopNavigation?: boolean;
 
   @Expose()
-  message?: string;
+  message!: string;
 
   @Expose()
   createdAt!: Date;

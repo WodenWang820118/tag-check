@@ -24,7 +24,7 @@ export class FullTestEventResponseDto implements FullTestEventSchema {
   stopNavigation?: boolean;
 
   @Expose()
-  message?: string;
+  message!: string;
 
   @Expose()
   createdAt!: Date;

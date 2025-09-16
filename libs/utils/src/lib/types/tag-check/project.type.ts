@@ -21,7 +21,8 @@ export type TestEvent = {
   testName: string;
   eventId: string;
   stopNavigation?: boolean;
-  message?: string;
+  message: string;
+  updatedAt?: Date;
 };
 
 export type TestEventSchema = {

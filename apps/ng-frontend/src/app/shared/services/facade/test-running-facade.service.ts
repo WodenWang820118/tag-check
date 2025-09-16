@@ -26,6 +26,7 @@ import { ProjectDataSourceService } from '../data-source/project-data-source.ser
 import { QaRequestService } from '../api/qa-request/qa-request.service';
 import { SettingsService } from '../api/settings/settings.service';
 import { GtmInspectionParams } from '../utils/interfaces';
+import { ReportTableDataSourceModelService } from '../../../modules/project/services/report-table-data-source-model/report-table-data-source-model.service';
 
 @Injectable({ providedIn: 'root' })
 export class TestRunningFacadeService {
@@ -41,7 +42,8 @@ export class TestRunningFacadeService {
     private readonly gtmOperatorService: GtmOperatorService,
     private readonly qaRequestService: QaRequestService,
     private readonly projectDataSourceService: ProjectDataSourceService,
-    private readonly settingsService: SettingsService
+    private readonly settingsService: SettingsService,
+    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService
   ) {}
 
   runTest(
@@ -160,24 +162,47 @@ export class TestRunningFacadeService {
     console.log('updateReportDetails called with eventId:', eventId);
     console.log('updateReportDetails called with res:', res);
     const result = res[0];
+    // Prefer the server-provided updatedAt if available; otherwise mark as now to indicate "run"
+    // Derive a Date for updatedAt: accept Date/number/string from server, otherwise use current time
+    const rawUpdatedAt: unknown = (
+      result?.testEvent as unknown as { updatedAt?: unknown }
+    )?.updatedAt;
+    let updatedAt: Date;
+    if (rawUpdatedAt instanceof Date) {
+      updatedAt = rawUpdatedAt;
+    } else if (
+      typeof rawUpdatedAt === 'number' ||
+      typeof rawUpdatedAt === 'string'
+    ) {
+      updatedAt = new Date(rawUpdatedAt);
+    } else {
+      updatedAt = new Date();
+    }
 
-    testDataSource.data = testDataSource.data.map((event) =>
+    const nextData = testDataSource.data.map((event) =>
       event.eventId === eventId
         ? {
             // preserve the original identity
             ...event,
             passed: result.testEventDetails?.passed ?? false,
-            requestPassed: result.testEventDetails?.requestPassed ?? false
+            requestPassed: result.testEventDetails?.requestPassed ?? false,
+            message: result.testEvent?.message ?? [],
+            updatedAt
           }
         : event
     );
-    console.log('Updated testDataSource.data:', testDataSource.data);
-    this.projectDataSourceService.setData(testDataSource.data);
-    return testDataSource;
-  }
 
-  // private handleError(error: unknown): Observable<never> {
-  //   console.error('Error in test operation:', error);
-  //   return throwError(() => error);
-  // }
+    // Replace the MatTableDataSource instance to trigger signal/reactivity
+    const newDs = new MatTableDataSource<IReportDetails>([...nextData]);
+    newDs.paginator = testDataSource.paginator;
+    newDs.sort = testDataSource.sort;
+    // Preserve current filter/predicate until effects re-apply
+    newDs.filterPredicate = testDataSource.filterPredicate;
+    newDs.filter = testDataSource.filter;
+
+    this.reportTableDataSourceModelService.dataSource.set(newDs);
+
+    console.log('Updated dataSource via signal:', newDs.data);
+    return newDs;
+  }
 }

@@ -71,7 +71,7 @@ export class TestEventEntity
   stopNavigation?: boolean;
 
   @Column({ name: 'message', nullable: true, type: 'text' })
-  message?: string;
+  message!: string;
 
   @Column({ name: 'latest_test_event_detail_id', nullable: true, type: 'int' })
   latestTestEventDetailId?: number | null;

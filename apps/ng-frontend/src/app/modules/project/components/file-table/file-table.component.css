@@ -5,3 +5,7 @@
 .false-status {
   color: red;
 }
+
+.pending-status {
+  color: #9e9e9e; /* grey for not run */
+}

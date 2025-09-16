@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { tap } from 'rxjs';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe, NgClass, CommonModule } from '@angular/common';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
 import { IReportDetails, TestImage } from '@utils';
 import { MatInputModule } from '@angular/material/input';
@@ -12,6 +12,8 @@ import { FileTableDataSourceFacadeService } from './file-table-data-source-facad
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TableSortService } from '../../../../shared/services/utils/table-sort.service';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-file-table',
@@ -24,7 +26,10 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
     DatePipe,
     MatInputModule,
     NgClass,
-    MatSortModule
+    MatSortModule,
+    MatChipsModule,
+    MatTooltipModule,
+    CommonModule
   ],
   templateUrl: './file-table.component.html',
   styleUrls: ['./file-table.component.css']
@@ -47,6 +52,7 @@ export class FileTableComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .pipe(
         tap((data) => {
+          console.log('Route data for file table:', data);
           if (paginator && sort)
             this.facade.initializeData(paginator, sort, data);
         })
@@ -58,7 +64,34 @@ export class FileTableComponent implements OnInit {
     this.dataSource.data = this.tableSortService.sortData(
       sort,
       this.dataSource.data,
-      this.columns.map((col) => ({ name: col, type: 'string' }))
+      [
+        { name: 'eventName', type: 'string' },
+        { name: 'testName', type: 'string' },
+        {
+          name: 'status',
+          type: 'number',
+          accessor: (row: IReportDetails & TestImage) => {
+            const u = row?.updatedAt ? new Date(row.updatedAt).getTime() : 0;
+            const c = row?.createdAt ? new Date(row.createdAt).getTime() : 0;
+            const run = u > c;
+            const dl = row?.passed === true;
+            const req = row?.requestPassed === true;
+            if (!run) return 0; // Not run
+            if (dl && req) return 3; // Passed
+            if (dl || req) return 2; // Partial
+            return 1; // Failed
+          }
+        },
+        {
+          name: 'completedTime',
+          type: 'date',
+          accessor: (row: IReportDetails & TestImage) => {
+            const u = row?.updatedAt ? new Date(row.updatedAt).getTime() : 0;
+            const c = row?.createdAt ? new Date(row.createdAt).getTime() : 0;
+            return u > c ? row?.updatedAt : 0;
+          }
+        }
+      ]
     );
   }
 
