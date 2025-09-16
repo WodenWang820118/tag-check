@@ -1,17 +1,14 @@
-import { Injectable, effect, signal, computed } from '@angular/core';
-import { SelectionModel } from '@angular/cdk/collections';
+import { Injectable, signal, computed } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatDialog } from '@angular/material/dialog';
-import { take, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { IReportDetails } from '@utils';
 import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
-import { ReportService } from '../../../../shared/services/api/report/report.service';
-import { InformationDialogComponent } from '../../../../shared/components/information-dialog/information-dialog.component';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ReportTableSelectionFacadeService } from './services/report-table-selection-facade/report-table-selection-facade.service';
+import { ReportTableEffectsFacadeService } from './services/report-table-effects-facade/report-table-effects-facade.service';
 
 @Injectable({ providedIn: 'root' })
 export class ReportTableFacadeService {
@@ -39,160 +36,44 @@ export class ReportTableFacadeService {
 
   constructor(
     private readonly projectDataSourceService: ProjectDataSourceService,
-    private readonly dialog: MatDialog,
-    private readonly reportService: ReportService,
     private readonly testRunningFacadeService: TestRunningFacadeService,
     private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService,
-    private readonly snackBar: MatSnackBar
+    private readonly selectionFacade: ReportTableSelectionFacadeService,
+    private readonly effectsFacade: ReportTableEffectsFacadeService
   ) {
-    // Combine text filter and status filter into one dataSource.filter string
-    effect(() => {
-      const text = this.projectDataSourceService.getFilterSignal();
-      const status = this.statusFilter();
-      const ds = this.reportTableDataSourceModelService.dataSource();
-      if (ds) {
-        // Ensure custom filter predicate is set once
-        ds.filterPredicate = (data, filterStr) => {
-          let parsed: { text?: string; status?: string } = {};
-          try {
-            parsed = JSON.parse(filterStr || '{}');
-          } catch {
-            // Fallback: treat entire string as text filter
-            parsed = { text: filterStr || '' };
-          }
-          const t = (parsed.text || '').toLowerCase();
-          const s = (parsed.status || 'all') as ReturnType<
-            typeof this.statusFilter
-          >;
-
-          // Text match against key fields
-          const haystack =
-            `${data.testName ?? ''} ${data.eventName ?? ''}`.toLowerCase();
-          const textMatch = !t || haystack.includes(t);
-
-          // Status match
-          const run = (data?.updatedAt ?? 0) > (data?.createdAt ?? 0);
-          const dl = !!data?.passed;
-          const req = !!data?.requestPassed;
-          let statusKey: 'notRun' | 'failed' | 'partial' | 'passed';
-          if (!run) statusKey = 'notRun';
-          else if (dl && req) statusKey = 'passed';
-          else if (dl || req) statusKey = 'partial';
-          else statusKey = 'failed';
-
-          const statusMatch = s === 'all' || s === statusKey;
-          return textMatch && statusMatch;
-        };
-
-        ds.filter = JSON.stringify({ text, status });
-      }
-    });
-
-    // 2b. Update Settings effect
-    effect(() => {
-      const preventSignal =
-        this.projectDataSourceService.getPreventNavigationSignal();
-      if (preventSignal) {
-        const testEvents = this.reportTableDataSourceModelService
-          .selection()
-          .selected.map((item) => {
-            // Handle the toggle logic properly
-            const newStopNavigation = item.stopNavigation !== true;
-
-            return {
-              ...item,
-              stopNavigation: newStopNavigation
-            };
-          });
-
-        // Update the data source with the same logic
-        const currentDsA = this.reportTableDataSourceModelService.dataSource();
-        const nextDataA = currentDsA.data.map((item) => {
-          if (
-            this.reportTableDataSourceModelService
-              .selection()
-              .selected.includes(item)
-          ) {
-            item.stopNavigation = item.stopNavigation !== true;
-          }
-          return item;
-        });
-        const newDsA = new MatTableDataSource<IReportDetails>([...nextDataA]);
-        newDsA.paginator = currentDsA.paginator;
-        newDsA.sort = currentDsA.sort;
-        this.reportTableDataSourceModelService.dataSource.set(newDsA);
-
-        this.reportService
-          .updateTestEvents(this.projectSlug(), testEvents)
-          .pipe(take(1))
-          .subscribe();
-
-        this.projectDataSourceService.setPreventNavigationSignal(false);
-      }
-    });
-
-    // 2c. Delete Confirmation effect
-    effect(() => {
-      const deletedSignal = this.projectDataSourceService.getDeletedSignal();
-      if (deletedSignal) {
-        const dialogRef = this.dialog.open(InformationDialogComponent, {
-          data: {
-            title: 'Delete Reports',
-            contents: 'Are you sure you want to delete the selected reports?',
-            action: 'Delete',
-            actionColor: 'warn',
-            consent: false
-          }
-        });
-
-        dialogRef.afterClosed().subscribe((result) => {
-          if (result) {
-            const currentDsB =
-              this.reportTableDataSourceModelService.dataSource();
-            const remainingReports = currentDsB.data.filter(
-              (item) =>
-                !this.reportTableDataSourceModelService
-                  .selection()
-                  .selected.includes(item)
-            );
-            const newDsB = new MatTableDataSource<IReportDetails>([
-              ...remainingReports
-            ]);
-            newDsB.paginator = currentDsB.paginator;
-            newDsB.sort = currentDsB.sort;
-            this.reportTableDataSourceModelService.dataSource.set(newDsB);
-            this.projectDataSourceService.setData(remainingReports);
-
-            this.reportService
-              .deleteBatchReports(
-                this.projectSlug(),
-                this.reportTableDataSourceModelService
-                  .selection()
-                  .selected.map((item) => item.eventId)
-              )
-              .pipe(take(1))
-              .subscribe();
-          }
-          this.projectDataSourceService.setDeletedSignal(false);
-        });
-      }
+    this.effectsFacade.initialize({
+      getStatus: () => this.statusFilter(),
+      getProjectSlug: () => this.projectSlug()
     });
   }
 
+  //#region Initialization
   initializeData(
     paginator: MatPaginator,
     sort: MatSort,
     data: Record<string, unknown>
   ) {
-    const reports = data['projectReport'] || [];
+    console.log('Initializing report table with data:', data);
+    const reports = (data['projectReport'] || []) as IReportDetails[];
+    const toDate = (
+      d: Date | string | number | undefined | null
+    ): Date | undefined => (d != null ? new Date(d) : undefined);
+    const normalize = (r: IReportDetails): IReportDetails => ({
+      ...r,
+      passed: r.passed === true,
+      requestPassed: r.requestPassed === true,
+      createdAt: toDate(r.createdAt) ?? new Date(0),
+      updatedAt: toDate(r.updatedAt)
+    });
+    const normalizedReports = reports.map(normalize);
 
     if (paginator && sort) {
       // Sort the data
-      const injectReports = (reports as IReportDetails[]).sort((a, b) =>
+      const injectReports = [...normalizedReports].sort((a, b) =>
         a.eventName.localeCompare(b.eventName)
       );
       // Create data source and assign
-      const dataSource = new MatTableDataSource(injectReports);
+      const dataSource = new MatTableDataSource([...injectReports]);
 
       const slug = data['projectSlug'] as string | undefined;
       // Try to restore saved page size and page index for this project from localStorage
@@ -213,7 +94,9 @@ export class ReportTableFacadeService {
       this.subscribeToPersistPaginatorState(paginator, slug);
     }
   }
+  //#endregion
 
+  //#region Paginator state persistence
   private getPageSizeKey(slug: string) {
     return `reportTable.pageSize.${slug}`;
   }
@@ -273,7 +156,9 @@ export class ReportTableFacadeService {
       }
     });
   }
+  //#endregion
 
+  //#region Filtering
   private createFilterPredicate() {
     return (row: IReportDetails, filterStr: string) => {
       let parsed: { text?: string; status?: string } = {};
@@ -291,9 +176,11 @@ export class ReportTableFacadeService {
         `${row.testName ?? ''} ${row.eventName ?? ''}`.toLowerCase();
       const textMatch = !t || haystack.includes(t);
 
-      const run = (row?.updatedAt ?? 0) > (row?.createdAt ?? 0);
-      const dl = !!row?.passed;
-      const req = !!row?.requestPassed;
+      const u = row?.updatedAt ? new Date(row.updatedAt).getTime() : 0;
+      const c = row?.createdAt ? new Date(row.createdAt).getTime() : 0;
+      const run = u > c;
+      const dl = row?.passed === true;
+      const req = row?.requestPassed === true;
       let statusKey: 'notRun' | 'failed' | 'partial' | 'passed';
       if (!run) statusKey = 'notRun';
       else if (dl && req) statusKey = 'passed';
@@ -304,7 +191,9 @@ export class ReportTableFacadeService {
       return textMatch && statusMatch;
     };
   }
+  //#endregion
 
+  //#region Actions
   runTest(eventId: string) {
     const projectSlug = this.projectSlug();
     return this.testRunningFacadeService.runTest(
@@ -318,62 +207,17 @@ export class ReportTableFacadeService {
     return this.hasRecordingMap.get(eventId) || false;
   }
 
-  /** Toggle selection of all rows immutably to trigger signal updates */
+  // Selection actions delegated to sub-facade
   toggleAllRows(): void {
-    const ds = this.reportTableDataSourceModelService.dataSource();
-    const sel = this.reportTableDataSourceModelService.selection();
-
-    // Determine working dataset: filtered first, otherwise full data
-    const working =
-      (ds as unknown as { filteredData?: IReportDetails[] }).filteredData ??
-      ds.data;
-    // Align order with displayed sort
-    const sorted = ds.sort ? ds.sortData(working, ds.sort) : working;
-
-    // Compute current page slice
-    const pageIndex = ds.paginator?.pageIndex ?? 0;
-    const pageSize = ds.paginator?.pageSize ?? sorted.length;
-    const start = pageIndex * pageSize;
-    const end = Math.min(start + pageSize, sorted.length);
-    const pageRows = sorted.slice(start, end);
-
-    const allPageSelected = pageRows.every((r) => sel.isSelected(r));
-
-    let nextSelected: IReportDetails[];
-    if (allPageSelected) {
-      const pageSet = new Set(pageRows);
-      nextSelected = sel.selected.filter((r) => !pageSet.has(r));
-    } else {
-      const set = new Set(sel.selected);
-      pageRows.forEach((r) => set.add(r));
-      nextSelected = Array.from(set);
-    }
-
-    const newModel = new SelectionModel<IReportDetails>(true, nextSelected);
-    this.reportTableDataSourceModelService.selection.set(newModel);
+    this.selectionFacade.toggleAllRows();
   }
 
-  /** Toggle selection of a single row immutably */
   toggleRow(row: IReportDetails) {
-    const prevModel = this.reportTableDataSourceModelService.selection();
-    const prevSelected = prevModel.selected;
-    const isSelected = prevModel.isSelected(row);
-    const newSelected = isSelected
-      ? prevSelected.filter((r) => r !== row)
-      : [...prevSelected, row];
-    const newModel = new SelectionModel<IReportDetails>(true, newSelected);
-    this.reportTableDataSourceModelService.selection.set(newModel);
+    this.selectionFacade.toggleRow(row);
   }
 
   checkboxLabel(row?: IReportDetails): string {
-    if (!row) {
-      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
-    }
-    return `${
-      this.reportTableDataSourceModelService.selection().isSelected(row)
-        ? 'deselect'
-        : 'select'
-    } row ${row.position + 1}`;
+    return this.selectionFacade.checkboxLabel(row);
   }
 
   get dataSource() {
@@ -393,20 +237,8 @@ export class ReportTableFacadeService {
     this.statusFilter.set(status);
   }
 
-  // Whether all rows on the current page are selected
   isAllSelected(): boolean {
-    const ds = this.reportTableDataSourceModelService.dataSource();
-    const sel = this.reportTableDataSourceModelService.selection();
-
-    const working =
-      (ds as unknown as { filteredData?: IReportDetails[] }).filteredData ??
-      ds.data;
-    const sorted = ds.sort ? ds.sortData(working, ds.sort) : working;
-    const pageIndex = ds.paginator?.pageIndex ?? 0;
-    const pageSize = ds.paginator?.pageSize ?? sorted.length;
-    const start = pageIndex * pageSize;
-    const end = Math.min(start + pageSize, sorted.length);
-    const pageRows = sorted.slice(start, end);
-    return pageRows.length > 0 && pageRows.every((r) => sel.isSelected(r));
+    return this.selectionFacade.isAllSelected();
   }
+  //#endregion
 }

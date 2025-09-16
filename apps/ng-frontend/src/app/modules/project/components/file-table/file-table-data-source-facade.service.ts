@@ -21,13 +21,7 @@ import { SelectionModel } from '@angular/cdk/collections';
   providedIn: 'root'
 })
 export class FileTableDataSourceFacadeService {
-  columns = signal([
-    'select',
-    'eventName',
-    'dataLayerState',
-    'requestState',
-    'createdAt'
-  ]);
+  columns = signal(['select', 'eventName', 'status', 'completedTime']);
   private readonly projectSlug = signal<string>('');
 
   constructor(
@@ -131,6 +125,14 @@ export class FileTableDataSourceFacadeService {
     event: TestEvent,
     image: TestImage
   ): IReportDetails & TestImage {
+    console.log(
+      'Mapping TestEventDetail:',
+      details,
+      'with event:',
+      event,
+      'and image:',
+      image
+    );
     return {
       // Test event details
       passed: details.passed,
@@ -146,6 +148,7 @@ export class FileTableDataSourceFacadeService {
       eventName: event.eventName,
       testName: event.testName,
       createdAt: details.createdAt,
+      updatedAt: event.updatedAt,
       stopNavigation: event.stopNavigation,
       message: event.message,
 

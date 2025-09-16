@@ -23,6 +23,7 @@ export class ReportDetailsDto implements OutputValidationResult {
   imageName!: string;
   imageData!: any; // should be the image buffer data
   imageSize!: number;
+  updatedAt?: Date;
 
   constructor(report: Partial<OutputValidationResult>) {
     Object.assign(this, report);
