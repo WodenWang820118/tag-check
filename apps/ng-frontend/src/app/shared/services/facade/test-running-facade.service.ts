@@ -159,6 +159,11 @@ export class TestRunningFacadeService {
     }[],
     testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
   ) {
+    if (!res || res.length === 0) {
+      console.warn('No results to update for eventId:', eventId);
+      return testDataSource;
+    }
+
     console.log('updateReportDetails called with eventId:', eventId);
     console.log('updateReportDetails called with res:', res);
     const result = res[0];

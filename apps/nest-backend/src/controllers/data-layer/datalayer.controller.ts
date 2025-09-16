@@ -114,7 +114,7 @@ export class DataLayerController {
   async stopOperation() {
     try {
       await this.eventInspectionControllerService.stopOperation();
-      return { message: 'Operation stopped successfully' };
+      return { status: 200, message: 'Operation stopped successfully' };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
