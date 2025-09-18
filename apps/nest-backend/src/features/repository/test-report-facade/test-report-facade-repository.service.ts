@@ -43,7 +43,9 @@ export class TestReportFacadeRepositoryService {
       eventId: data.eventId,
       testName: data.testName,
       eventName: data.eventName,
-      message: data.message
+      message: data.message,
+      createdAt: new Date(),
+      updatedAt: new Date()
     });
 
     // Get the test event entity by event id to be used in the following operations
@@ -107,7 +109,9 @@ export class TestReportFacadeRepositoryService {
         eventId: data.reportDetails.eventId,
         testName: data.reportDetails.testName,
         eventName: data.reportDetails.eventName,
-        message: data.reportDetails.message
+        message: data.reportDetails.message,
+        createdAt: new Date(),
+        updatedAt: new Date()
       });
 
       const testEvent =

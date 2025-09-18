@@ -1,10 +1,11 @@
-import { Exclude, Expose, Type } from 'class-transformer';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { FullTestEventSchema } from '@utils';
 import { TestEventDetailResponseDto } from '../test-event-detail';
 import { TestImageResponseDto } from '../test-image';
 import { ProjectResponseDto } from '../project';
 import { SpecResponseDto } from '../spec';
 import { RecordingResponseDto } from '../recording';
+import { TestImageEntity } from '../../entity';
 
 @Exclude()
 export class FullTestEventResponseDto implements FullTestEventSchema {
@@ -38,7 +39,7 @@ export class FullTestEventResponseDto implements FullTestEventSchema {
 
   @Expose()
   @Type(() => TestImageResponseDto)
-  testImage!: TestImageResponseDto;
+  testImage!: TestImageResponseDto[];
 
   @Expose()
   @Type(() => ProjectResponseDto)
@@ -51,4 +52,18 @@ export class FullTestEventResponseDto implements FullTestEventSchema {
   @Expose()
   @Type(() => RecordingResponseDto)
   recording!: RecordingResponseDto;
+
+  @Expose()
+  @Type(() => TestImageResponseDto)
+  @Transform(({ obj }) => {
+    const testImages = Array.isArray(obj.testImage)
+      ? (obj.testImage as TestImageEntity[])
+      : [];
+    const latestImage = testImages.find(
+      (img) => img.id === obj.latestTestImageId
+    );
+    console.log('Latest image:', latestImage?.imageName);
+    return latestImage ?? new TestImageResponseDto();
+  })
+  latestTestImage!: TestImageResponseDto;
 }

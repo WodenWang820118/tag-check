@@ -7,6 +7,9 @@ import {
 } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { FullTestEventResponseDto } from '../../../shared';
+import { XlsxReportGroupingService } from './services/xlsx-report-grouping.service';
+import { XlsxNameService } from './services/xlsx-name.service';
+import { XlsxImageService } from './services/xlsx-image.service';
 import { XlsxHeaderService } from './xlsx-header.service';
 import { XlsxTestInfoSectionService } from './xlsx-test-info-section.service';
 import { XlsxTestDataSectionService } from './xlsx-test-data-section.service';
@@ -21,80 +24,62 @@ export class XlsxReportService {
     private readonly xlsxTestInfoSectionService: XlsxTestInfoSectionService,
     private readonly xlsxTestDataSectionService: XlsxTestDataSectionService,
     private readonly xlsxSummarySectionService: XlsxSummarySectionService,
-    private readonly xlsxRecordingSectionService: XlsxRecordingSectionService
+    private readonly xlsxRecordingSectionService: XlsxRecordingSectionService,
+    private readonly groupingService: XlsxReportGroupingService,
+    private readonly nameService: XlsxNameService,
+    private readonly imageService: XlsxImageService
   ) {}
   async writeXlsxFile(reports: FullTestEventResponseDto[]) {
     try {
       const workbook = new ExcelJS.Workbook();
 
       // Group reports by project for better organization
-      const projectGroups = this.groupReportsByProject(reports);
+      const projectGroups = this.groupingService.groupReportsByProject(reports);
 
       for (const [, projectReports] of Object.entries(projectGroups)) {
         // Extract project info from the first report in the group
-        const projectInfo = this.extractProjectInfo(projectReports[0]);
+        const projectInfo = this.groupingService.extractProjectInfo(
+          projectReports[0]
+        );
 
         for (const report of projectReports) {
-          // Create sheet name using test name and event name
-          const worksheetName = `${report.testName} - ${report.eventName || 'No Event'}`;
+          // Create sheet name using test name and event name (<= 31 chars)
+          const rawWorksheetName = `${report.testName} - ${report.eventName || 'No Event'}`;
+          const worksheetName =
+            this.nameService.sanitiseWorksheetName(rawWorksheetName);
           const worksheet = workbook.addWorksheet(worksheetName);
 
-          // Add project header information (dashboard-like)
+          // Build all textual/data sections first. We'll place the image afterwards so we can anchor at bottom-right.
           this.xlsxHeaderService.addProjectHeader(
             worksheet,
             projectInfo,
             report
           );
-
-          // Add test information section
           this.xlsxTestInfoSectionService.addTestInfoSection(worksheet, report);
-
-          // Add test image if available
-          let imageRowOffset = 0;
-          if (report.testImage.imageData) {
-            // FIXME: Buffer incompatibility
-            const imageBuffer = Buffer.from(
-              report.testImage.imageData
-            ) as unknown as ExcelJS.Buffer;
-            const imageId = workbook.addImage({
-              buffer: imageBuffer,
-              extension: 'png'
-            });
-
-            // Position the image below the header sections
-            worksheet.addImage(imageId, {
-              tl: { col: 0, row: 12 },
-              ext: { width: 300, height: 150 }
-            });
-            imageRowOffset = 10; // Add offset for image space
-          }
-          // Add test data section with proper column headers
           this.xlsxTestDataSectionService.addTestDataSection(
             worksheet,
             report,
-            12 + imageRowOffset
+            worksheet.lastRow?.number || 1
           );
-
-          // Add summary section at the bottom
           this.xlsxSummarySectionService.addSummarySection(
             worksheet,
             report,
-            16 + imageRowOffset
+            worksheet.lastRow?.number || 1
           );
-
-          // Add recording section if available
           this.xlsxRecordingSectionService.addRecordingSection(
             worksheet,
             report
           );
+
+          // Attempt to add image to the right of the summary & recording sections (dynamically sized)
+          this.imageService.embedImage(workbook, worksheet, report);
         }
       }
 
       // Generate filename based on project info from the first report
-      const projectInfo = this.extractProjectInfo(reports[0]);
+      const projectInfo = this.groupingService.extractProjectInfo(reports[0]);
       const fileName = `${projectInfo.projectName}-${projectInfo.projectSlug}`;
 
-      // FIXME: Buffer incompatibility
       const buffer = (await workbook.xlsx.writeBuffer()) as unknown as Buffer;
 
       return new StreamableFile(buffer, {
@@ -108,40 +93,6 @@ export class XlsxReportService {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
-  }
-
-  private groupReportsByProject(
-    reports: FullTestEventResponseDto[]
-  ): Record<string, FullTestEventResponseDto[]> {
-    const groups: Record<string, FullTestEventResponseDto[]> = {};
-
-    for (const report of reports) {
-      const projectInfo = this.extractProjectInfo(report);
-      const key = `${projectInfo.projectName}-${projectInfo.projectSlug}`;
-
-      if (!groups[key]) {
-        groups[key] = [];
-      }
-
-      groups[key].push(report);
-    }
-
-    return groups;
-  }
-
-  private extractProjectInfo(report: FullTestEventResponseDto): {
-    projectName: string;
-    projectSlug: string;
-    projectDescription: string;
-    measurementId: string;
-  } {
-    return {
-      projectName: report.project.projectName || 'Unknown Project',
-      projectSlug: report.project.projectSlug || 'unknown-project',
-      projectDescription:
-        report.project.projectDescription || 'No description available',
-      measurementId: report.project.measurementId || 'No measurement ID'
-    };
   }
 
   private handleError(error: unknown, methodName: string) {

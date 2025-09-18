@@ -22,8 +22,7 @@ export type TestEvent = {
   eventId: string;
   stopNavigation?: boolean;
   message: string;
-  updatedAt?: Date;
-};
+} & Auditable;
 
 export type TestEventSchema = {
   id: number;
@@ -42,6 +41,6 @@ export type AbstractTestEvent = {
 
 export type FullTestEventSchema = {
   testEventDetails: TestEventDetailSchema;
-  testImage: TestImageSchema;
+  testImage: TestImageSchema[];
   project: ProjectSchema;
 } & TestEventSchema;
