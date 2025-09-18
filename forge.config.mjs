@@ -11,10 +11,10 @@ import { VitePlugin } from '@electron-forge/plugin-vite';
 const config = {
   packagerConfig: {
     asar: true,
-    ignore: [/^\/node_modules/, /^\/dist\/apps\/(?!nest-backend)/],
     extraResource: [
       './dist/apps/ng-frontend',
       './dist/apps/nest-backend/main.js',
+      './dist/apps/nest-backend/0.js', // necessary rspack chunk files
       './dist/apps/nest-backend/node_modules',
       './index.html'
     ],

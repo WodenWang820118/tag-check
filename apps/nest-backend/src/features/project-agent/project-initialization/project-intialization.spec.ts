@@ -1,4 +1,3 @@
- 
 import { Test } from '@nestjs/testing';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
@@ -6,7 +5,6 @@ import { FilePathService } from '../../../infrastructure/os/path/file-path/file-
 import { FileService } from '../../../infrastructure/os/file/file.service';
 import { ProjectInitializationService } from './project-initialization.service';
 import { join } from 'path';
-import { existsSync, rmdirSync } from 'fs';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 import { ConfigsService } from '../../../core/configs/configs.service';
 
