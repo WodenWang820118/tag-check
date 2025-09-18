@@ -1,8 +1,7 @@
- 
- 
- 
-const { composePlugins, withNx } = require('@nx/webpack');
-// const { sentryWebpackPlugin } = require('@sentry/webpack-plugin');
+const { withNx } = require('@nx/rspack');
+const { composePlugins } = require('@nx/rspack');
+
+// const { sentryWebpackPlugin } = require('@sentry/rspack-plugin');
 
 // Nx plugins for webpack.
 const config = composePlugins(
