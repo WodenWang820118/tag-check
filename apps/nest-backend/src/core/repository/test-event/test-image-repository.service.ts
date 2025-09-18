@@ -85,16 +85,17 @@ export class TestImageRepositoryService {
       throw new Error('No name provided');
     }
 
-    const blob = new Blob([data.imageData]);
+    // Convert incoming Uint8Array to Buffer for persistence
     const buffer = Buffer.from(data.imageData);
 
     const testImageEntity = new TestImageEntity();
     testImageEntity.imageName = data.imageName;
     testImageEntity.imageData = buffer;
-    testImageEntity.imageSize = blob.size; // Size in bytes
+    // Prefer an explicitly provided size, otherwise derive from the data
+    testImageEntity.imageSize = data.imageSize ?? buffer.length; // Size in bytes
     testImageEntity.testEvent = testEvent;
 
-    const entity = this.repository.save(testImageEntity);
+    const entity = await this.repository.save(testImageEntity);
     return plainToInstance(TestImageResponseDto, entity);
   }
 
