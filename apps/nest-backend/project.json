@@ -3,9 +3,10 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/nest-backend/src",
   "projectType": "application",
+  "tags": [],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "@nx/rspack:rspack",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
@@ -15,7 +16,9 @@
         "main": "apps/nest-backend/src/main.ts",
         "tsConfig": "apps/nest-backend/tsconfig.app.json",
         "generatePackageJson": true,
-        "webpackConfig": "apps/nest-backend/webpack.config.cjs"
+        "rspackConfig": "apps/nest-backend/rspack.config.cjs",
+        "outputHashing": "none",
+        "outputFileName": "main.js"
       },
       "configurations": {
         "development": {},
@@ -36,24 +39,6 @@
           "buildTarget": "nest-backend:build:production"
         }
       }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
-    },
-    "test": {
-      "executor": "@nx/vite:test",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
-      }
     }
-  },
-  "tags": []
+  }
 }
