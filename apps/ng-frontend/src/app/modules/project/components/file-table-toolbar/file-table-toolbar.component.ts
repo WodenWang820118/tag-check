@@ -1,4 +1,10 @@
-import { Component, OnDestroy, viewChild, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  viewChild,
+  signal,
+  computed
+} from '@angular/core';
 import {
   MatButtonToggleChange,
   MatButtonToggleModule
@@ -7,6 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { FileTableDataSourceService } from '../../../../shared/services/data-source/file-table-data-source.service';
+import { FileTableDataSourceModelService } from '../../services/file-table-data-source-model/file-table-data-source-model.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -33,9 +40,21 @@ export class FileTableToolbarComponent implements OnDestroy {
   isSearchVisible = signal(false);
   filterValue = signal('');
   searchInput = viewChild<HTMLInputElement>('searchInput');
+  // Whether at least one row is currently selected in the file table
+  hasSelection = computed(
+    () =>
+      this.fileTableDataSourceModelService.selection().selected.filter(Boolean)
+        .length > 0
+  );
+  // Whether the table currently has any data rows
+  hasData = computed(
+    () =>
+      (this.fileTableDataSourceModelService.dataSource()?.data?.length || 0) > 0
+  );
 
   constructor(
-    private readonly fileTableDataSourceService: FileTableDataSourceService
+    private readonly fileTableDataSourceService: FileTableDataSourceService,
+    private readonly fileTableDataSourceModelService: FileTableDataSourceModelService
   ) {}
 
   applyFilter(event: Event) {

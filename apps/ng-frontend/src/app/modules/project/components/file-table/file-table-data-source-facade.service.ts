@@ -147,7 +147,7 @@ export class FileTableDataSourceFacadeService {
       eventId: event.eventId,
       eventName: event.eventName,
       testName: event.testName,
-      createdAt: details.createdAt,
+      createdAt: event.createdAt,
       updatedAt: event.updatedAt,
       stopNavigation: event.stopNavigation,
       message: event.message,

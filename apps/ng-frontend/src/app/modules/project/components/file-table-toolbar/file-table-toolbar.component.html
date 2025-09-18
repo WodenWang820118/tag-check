@@ -6,6 +6,7 @@
     matTooltipPosition="above"
     aria-label="Delete"
     (click)="deleteSelected()"
+    [disabled]="!hasSelection()"
   >
     <mat-icon>delete_outline</mat-icon>
   </button>
@@ -16,6 +17,7 @@
     matTooltipPosition="above"
     aria-label="Download"
     (click)="downloadSelected()"
+    [disabled]="!hasSelection()"
   >
     <mat-icon>download</mat-icon>
   </button>
@@ -26,7 +28,11 @@
       #group="matButtonToggleGroup"
       (change)="onToggleChange($event)"
     >
-      <mat-button-toggle value="search" aria-label="search event">
+      <mat-button-toggle
+        value="search"
+        aria-label="search event"
+        [disabled]="!hasData()"
+      >
         <mat-icon>search</mat-icon>
       </mat-button-toggle>
     </mat-button-toggle-group>
