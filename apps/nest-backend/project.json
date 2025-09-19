@@ -11,14 +11,16 @@
       "defaultConfiguration": "production",
       "options": {
         "target": "node",
-        "compiler": "tsc",
+        "compiler": "swc",
         "outputPath": "dist/apps/nest-backend",
         "main": "apps/nest-backend/src/main.ts",
         "tsConfig": "apps/nest-backend/tsconfig.app.json",
         "generatePackageJson": true,
         "rspackConfig": "apps/nest-backend/rspack.config.cjs",
         "outputHashing": "none",
-        "outputFileName": "main.js"
+        "outputFileName": "main.js",
+        "externalDependencies": "all",
+        "skipTypeChecking": true
       },
       "configurations": {
         "development": {},
