@@ -1,5 +1,6 @@
 {
   "name": "tag-check",
+  "sideEffects": false,
   "version": "1.4.10",
   "type": "module",
   "main": ".vite/build/main.mjs",
