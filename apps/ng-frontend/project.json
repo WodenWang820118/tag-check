@@ -184,7 +184,6 @@
       "executor": "@analogjs/storybook-angular:start-storybook",
       "outputs": ["{options.outputDir}"],
       "options": {
-        "outputDir": "dist/storybook/ng-frontend",
         "configDir": "apps/ng-frontend/.storybook",
         "compodoc": false,
         "styles": [
