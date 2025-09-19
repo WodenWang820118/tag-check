@@ -181,7 +181,7 @@
       }
     },
     "build-storybook": {
-      "executor": "@analogjs/storybook-angular:start-storybook",
+      "executor": "@analogjs/storybook-angular:build-storybook",
       "outputs": ["{options.outputDir}"],
       "options": {
         "configDir": "apps/ng-frontend/.storybook",
