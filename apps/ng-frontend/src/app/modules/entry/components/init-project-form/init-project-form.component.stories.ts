@@ -17,6 +17,7 @@ import { provideRouter, Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
 import { ENTRY_ROUTES } from '../../../../modules/entry/routes';
+import { MatIconModule } from '@angular/material/icon';
 
 const meta: Meta<InitProjectFormComponent> = {
   component: InitProjectFormComponent,
@@ -25,6 +26,7 @@ const meta: Meta<InitProjectFormComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [
+        MatIconModule,
         MatCardModule,
         ReactiveFormsModule,
         FormsModule,
