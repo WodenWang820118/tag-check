@@ -7,7 +7,6 @@ import {
 import { InitProjectFormComponent } from './init-project-form.component';
 
 import { expect, within } from 'storybook/test';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule, FormBuilder } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -18,6 +17,7 @@ import { provideRouter, Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
 import { ENTRY_ROUTES } from '../../../../modules/entry/routes';
+import { MatIconModule } from '@angular/material/icon';
 
 const meta: Meta<InitProjectFormComponent> = {
   component: InitProjectFormComponent,
@@ -26,23 +26,19 @@ const meta: Meta<InitProjectFormComponent> = {
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
       imports: [
+        MatIconModule,
         MatCardModule,
         ReactiveFormsModule,
         FormsModule,
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
-        RouterLink,
-        () => import('@ui').then((m) => m.ErrorDialogComponent)
+        RouterLink
       ],
       providers: [FormBuilder, Router, ConfigurationService, MatDialog]
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(ENTRY_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(ENTRY_ROUTES)]
     })
   ]
 };
