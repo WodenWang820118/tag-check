@@ -7,7 +7,6 @@ import {
 import { InitProjectFormComponent } from './init-project-form.component';
 
 import { expect, within } from 'storybook/test';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule, FormBuilder } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -32,17 +31,12 @@ const meta: Meta<InitProjectFormComponent> = {
         MatFormFieldModule,
         MatInputModule,
         MatButtonModule,
-        RouterLink,
-        () => import('@ui').then((m) => m.ErrorDialogComponent)
+        RouterLink
       ],
       providers: [FormBuilder, Router, ConfigurationService, MatDialog]
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(ENTRY_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(ENTRY_ROUTES)]
     })
   ]
 };

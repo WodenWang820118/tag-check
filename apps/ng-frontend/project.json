@@ -165,7 +165,15 @@
         "port": 4400,
         "configDir": "apps/ng-frontend/.storybook",
         "browserTarget": "ng-frontend:build",
-        "compodoc": false
+        "compodoc": false,
+        "styles": [
+          "@angular/material/prebuilt-themes/indigo-pink.css",
+          "apps/ng-frontend/src/styles.css",
+          "apps/ng-tag-build/src/styles.scss",
+          "libs/shared-styles/src/index.scss",
+          "node_modules/prismjs/themes/prism-okaidia.css",
+          "node_modules/prismjs/plugins/command-line/prism-command-line.css"
+        ]
       },
       "configurations": {
         "ci": {
