@@ -5,6 +5,7 @@ import { FileService } from '../../infrastructure/os/file/file.service';
 import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
 import { ConfigsService } from '../../core/configs/configs.service';
 
+// Note: Not fully implemented yet
 @Injectable()
 export class GroupEventsInspectionService {
   private readonly logger = new Logger(GroupEventsInspectionService.name);
@@ -78,17 +79,6 @@ export class GroupEventsInspectionService {
     // the reason to use cache file is that there could be 20 tests running at the same time
     // one failed test will cause all other tests to fail in terms of test execution logic
     // therefore, we handle the result gathering logic in the xlsx-report.service.ts
-
-    // TODO: Prepare the data to be written to the xlsx file
-    // Keep the original implementation for memory
-    // await this.xlsxReportGroupEventsService.writeXlsxFileForAllTests(
-    //   operations,
-    //   `QA_report_all_.xlsx_${timestamp}.xlsx`,
-    //   'Sheet1',
-    //   projectName
-    // );
-
-    // TODO: 3.4 report to each test
     await this.projectAbstractReportService.writeProjectAbstractTestRsultJson(
       projectName,
       data.map((item) => item.dataLayerResult)

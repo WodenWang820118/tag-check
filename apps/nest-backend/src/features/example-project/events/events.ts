@@ -12,7 +12,6 @@ import { viewItemListExample } from './view-item-list';
 import { viewPromotionExample } from './view-promotion';
 import type { ItemDef, Recording, Spec } from '@utils';
 
-// TODO: build multiple event examples
 export type ExampleEvent = {
   eventName: string;
   testName: string;

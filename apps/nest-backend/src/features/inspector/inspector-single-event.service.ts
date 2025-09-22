@@ -104,7 +104,6 @@ export class InspectorSingleEventService {
     );
     const destinationUrl = result.destinationUrl;
     this.logger.log(`Destination URL: ${destinationUrl}`);
-    // TODO: cached file might be suitable to be stored in the DB
     await this.fileService.writeCacheFile(projectSlug, eventId, result);
     return {
       dataLayerResult,

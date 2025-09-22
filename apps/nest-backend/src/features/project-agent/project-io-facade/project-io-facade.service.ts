@@ -37,7 +37,6 @@ export class ProjectIoFacadeService {
 
     fileStream.on('close', () => {
       // Wait for the stream to close before deleting the folder
-      this.folderService.deleteFolder(tempFolder);
       this.cleanupTempFolder(tempFolder);
     });
 
@@ -48,8 +47,8 @@ export class ProjectIoFacadeService {
     projectSlug: string,
     zipFilePath: string,
     outputFolderPath: string
-  ) {
-    await this.projectIoService.unzipProject(
+  ): Promise<string> {
+    return await this.projectIoService.unzipProject(
       projectSlug,
       zipFilePath,
       outputFolderPath
