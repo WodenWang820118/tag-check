@@ -8,7 +8,6 @@ import { FileTableComponent } from './file-table.component';
 
 import { DatePipe, NgClass } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
@@ -37,11 +36,7 @@ const meta: Meta<FileTableComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(PROJECT_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

@@ -17,7 +17,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { APP_ROUTES } from '../../../app.routes';
 import { SettingsService } from '../../services/api/settings/settings.service';
@@ -44,11 +43,7 @@ const meta: Meta<GtmFormComponent> = {
       providers: [SettingsService]
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(APP_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
     })
   ]
 };

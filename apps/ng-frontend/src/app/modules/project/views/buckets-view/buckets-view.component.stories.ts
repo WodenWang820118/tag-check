@@ -7,7 +7,6 @@ import {
 import { BucketsViewComponent } from './buckets-view.component';
 
 import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { PROJECT_ROUTES } from '../../routes';
 import { FileTableToolbarComponent } from '../../components/file-table-toolbar/file-table-toolbar.component';
@@ -23,11 +22,7 @@ const meta: Meta<BucketsViewComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(PROJECT_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

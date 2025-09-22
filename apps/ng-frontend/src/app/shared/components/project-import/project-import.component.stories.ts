@@ -9,7 +9,6 @@ import { ProjectImportComponent } from './project-import.component';
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { APP_ROUTES } from '../../../app.routes';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
@@ -24,11 +23,7 @@ const meta: Meta<ProjectImportComponent> = {
       providers: [ProjectIoService]
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(APP_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
     })
   ]
 };

@@ -7,7 +7,6 @@ import {
 import { ReportDetailPanelsComponent } from './report-detail-panels.component';
 
 import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { PROJECT_ROUTES } from '../../routes';
 import { AsyncPipe, JsonPipe } from '@angular/common';
@@ -52,11 +51,7 @@ const meta: Meta<ReportDetailPanelsComponent> = {
       ]
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(PROJECT_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

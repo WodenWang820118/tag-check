@@ -8,7 +8,6 @@ import { ReportBigTableComponent } from './report-big-table.component';
 
 import { expect, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { PROJECT_ROUTES } from '../../routes';
 import { ReportTableToolbarComponent } from '../../components/report-table-toolbar/report-table-toolbar.component';
@@ -24,11 +23,7 @@ const meta: Meta<ReportBigTableComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(PROJECT_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

@@ -8,7 +8,6 @@ import { NewReportViewComponent } from './new-report-view.component';
 
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { PROJECT_ROUTES } from '../../routes';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -44,11 +43,7 @@ const meta: Meta<NewReportViewComponent> = {
       ]
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(PROJECT_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

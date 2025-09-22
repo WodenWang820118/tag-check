@@ -8,7 +8,6 @@ import { TagBuildViewComponent } from './tag-build-view.component';
 
 import { AsyncPipe } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { SettingsService } from '../../../shared/services/api/settings/settings.service';
 import { SpecService } from '../../../shared/services/api/spec/spec.service';
@@ -27,11 +26,7 @@ const meta: Meta<TagBuildViewComponent> = {
       providers: [SpecService, SettingsService]
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(TAG_BUILD_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(TAG_BUILD_ROUTES)]
     })
   ]
 };

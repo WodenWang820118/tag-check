@@ -7,7 +7,6 @@ import {
 import { HomeViewComponent } from './home-view.component';
 
 import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { ENTRY_ROUTES } from '../../routes';
 import { ProjectListComponent } from '../../components/project-list/project-list.component';
@@ -22,11 +21,7 @@ const meta: Meta<HomeViewComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(ENTRY_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(ENTRY_ROUTES)]
     })
   ]
 };

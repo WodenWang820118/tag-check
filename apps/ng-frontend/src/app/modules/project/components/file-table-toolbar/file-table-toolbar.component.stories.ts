@@ -11,7 +11,6 @@ import { expect, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { PROJECT_ROUTES } from '../../routes';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -41,11 +40,7 @@ const meta: Meta<FileTableToolbarComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(PROJECT_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
     })
   ],
   args: {

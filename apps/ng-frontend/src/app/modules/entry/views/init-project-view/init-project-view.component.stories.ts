@@ -7,7 +7,6 @@ import {
 import { InitProjectViewComponent } from './init-project-view.component';
 
 import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { ENTRY_ROUTES } from '../../routes';
 import { ProjectImportComponent } from '../../../../shared/components/project-import/project-import.component';
@@ -25,11 +24,7 @@ const meta: Meta<InitProjectViewComponent> = {
       providers: [FormBuilder, ConfigurationService]
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(ENTRY_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(ENTRY_ROUTES)]
     })
   ]
 };

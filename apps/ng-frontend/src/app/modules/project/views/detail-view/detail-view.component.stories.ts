@@ -7,7 +7,6 @@ import {
 import { DetailViewComponent } from './detail-view.component';
 
 import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, RouterLink } from '@angular/router';
 import { PROJECT_ROUTES } from '../../routes';
 import { AsyncPipe, DatePipe } from '@angular/common';
@@ -38,11 +37,7 @@ const meta: Meta<DetailViewComponent> = {
       providers: [ImageService, VideosService]
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(PROJECT_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

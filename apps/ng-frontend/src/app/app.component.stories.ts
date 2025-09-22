@@ -7,7 +7,6 @@ import {
 import { AppComponent } from './app.component';
 
 import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { RouterOutlet, provideRouter } from '@angular/router';
 import { APP_ROUTES } from './app.routes';
 import { ToolbarComponent } from './shared/components/toolbar/toolbar.component';
@@ -22,11 +21,7 @@ const meta: Meta<AppComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(APP_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
     })
   ]
 };
