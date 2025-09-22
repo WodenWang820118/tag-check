@@ -30,9 +30,7 @@ const meta: Meta<NewReportViewComponent> = {
         FormsModule,
         ReactiveFormsModule,
         MatInputModule,
-        MatButtonModule,
-        () => import('@ui').then((m) => m.ErrorDialogComponent),
-        () => import('@ui').then((m) => m.EditorComponent)
+        MatButtonModule
       ],
       providers: [
         RecordingService,

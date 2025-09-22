@@ -37,9 +37,7 @@ const meta: Meta<ReportDetailPanelsComponent> = {
         MatTooltipModule,
         MatButtonModule,
         MatFormFieldModule,
-        MatInputModule,
-        () => import('@ui').then((m) => m.EditorComponent),
-        () => import('@ui').then((m) => m.ErrorDialogComponent)
+        MatInputModule
       ],
       providers: [
         RecordingService,
