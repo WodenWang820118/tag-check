@@ -75,7 +75,7 @@ describe('DatabaseImportService', () => {
       const mockSqlContent = "INSERT INTO users VALUES (1, 'test');";
       (readFileSync as any).mockReturnValue(mockSqlContent);
 
-      // Mock query to throw an error
+      // Mock first query to throw a generic error (not rewriteable)
       const error = new Error('Database error');
       (mockQueryRunner.query as any).mockRejectedValueOnce(error);
 
@@ -89,10 +89,9 @@ describe('DatabaseImportService', () => {
         service.importProjectDatabase('path/to/sql/file.sql')
       ).rejects.toThrowError(HttpException);
 
-      // Verify logs
+      // Verify logs (implementation now logs only the path)
       expect(logSpy).toHaveBeenCalledWith(
-        'Importing database from path/to/sql/file.sql',
-        mockSqlContent
+        'Importing database from path/to/sql/file.sql'
       );
       expect(errorSpy).toHaveBeenCalledWith('Failed to import database', error);
 
@@ -117,6 +116,49 @@ describe('DatabaseImportService', () => {
 
       // Verify query runner was released
       expect(mockQueryRunner.release).toHaveBeenCalled();
+    });
+
+    it('should rewrite legacy INSERT with non-existent columns and succeed', async () => {
+      const mockSqlContent = `-- Data for entity: ProjectEntity (table: project)\nINSERT INTO "project" ("id", "project_slug", "testEvents") VALUES (1, 'slug', NULL);`;
+      (readFileSync as any).mockReturnValue(mockSqlContent);
+
+      // Simulate PRAGMA table_info(project) returning only id and project_slug
+      const pragmaRows = [{ name: 'id' }, { name: 'project_slug' }];
+
+      // First call: PRAGMA foreign_keys = OFF
+      // Second call: failing INSERT
+      // Third call: PRAGMA table_info(...)
+      // Fourth call: rewritten INSERT
+      // Fifth call: PRAGMA foreign_keys = ON
+      const noColumnErr = Object.assign(
+        new Error('SQLITE_ERROR: table project has no column named testEvents'),
+        {
+          code: 'SQLITE_ERROR'
+        }
+      );
+
+      (mockQueryRunner.query as any)
+        .mockResolvedValueOnce(undefined) // PRAGMA foreign_keys = OFF
+        .mockRejectedValueOnce(noColumnErr) // original INSERT fails
+        .mockResolvedValueOnce(pragmaRows) // PRAGMA table_info
+        .mockResolvedValueOnce(undefined) // rewritten INSERT succeeds
+        .mockResolvedValueOnce(undefined); // PRAGMA foreign_keys = ON
+
+      await expect(
+        service.importProjectDatabase('path/to/sql/file.sql')
+      ).resolves.toBeUndefined();
+
+      // Ensure rewritten INSERT attempted
+      const calls = (mockQueryRunner.query as any).mock.calls.map(
+        (c: any[]) => c[0]
+      );
+      expect(
+        calls.some((c: string) =>
+          /INSERT OR REPLACE INTO\s+"project"\s*\(\s*"id",\s*"project_slug"\s*\)\s*VALUES\s*\(/i.test(
+            c
+          )
+        )
+      ).toBe(true);
     });
   });
 });

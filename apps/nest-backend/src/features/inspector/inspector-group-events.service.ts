@@ -13,6 +13,7 @@ import { FilePathService } from '../../infrastructure/os/path/file-path/file-pat
 import { InspectorSingleEventService } from './inspector-single-event.service';
 import { InspectorUtilsService } from './inspector-utils.service';
 
+// Note: Not yet implemented
 @Injectable()
 export class InspectorGroupEventsService {
   private readonly logger = new Logger(InspectorGroupEventsService.name);
@@ -45,7 +46,6 @@ export class InspectorGroupEventsService {
       const operationBatch = operations.slice(i, i + concurrency);
 
       const batchPromises = operationBatch.map(async (operation) => {
-        // TODO: Refactor this to use a eventId instead of a testName
         const testName = operation.replace('.json', '');
         try {
           const page = await incognitoContext.newPage();

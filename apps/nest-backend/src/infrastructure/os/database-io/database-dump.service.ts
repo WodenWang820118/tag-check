@@ -172,20 +172,19 @@ export class DatabaseDumpService {
       `-- Data for entity: ${entity.name} (table: ${entity.tableName})\n`
     );
 
-    // Prepare columns and table identifier
-    const props = Object.keys(records[0] as Record<string, unknown>);
-    const columns = props
-      .map((prop) => {
-        const meta = entity.columns.find((c) => c.propertyName === prop);
-        return this.quoteIdentifier(meta?.databaseName ?? prop);
-      })
+    // Prepare columns strictly from TypeORM metadata to avoid relation props
+    const columnMetas = entity.columns;
+    const columns = columnMetas
+      .map((col) => this.quoteIdentifier(col.databaseName))
       .join(', ');
     const table = this.quoteIdentifier(entity.tableName);
 
     // Write each record as an INSERT
     for (const rec of records) {
       const row = rec as Record<string, unknown>;
-      const vals = props.map((prop) => this.quoteValue(row[prop]));
+      const vals = columnMetas.map((col) =>
+        this.quoteValue(row[col.propertyName as keyof typeof row])
+      );
       writeStream.write(
         `INSERT INTO ${table} (${columns}) VALUES (${vals.join(', ')});\n`
       );
@@ -264,9 +263,11 @@ export class DatabaseDumpService {
         );
       for (const r of idxRows) {
         if (r.sql) {
+          // Preserve UNIQUE if present while making the statement idempotent
           const adjusted = r.sql.replace(
-            /^\s*CREATE\s+INDEX\s+/i,
-            'CREATE INDEX IF NOT EXISTS '
+            /^\s*CREATE\s+(UNIQUE\s+)?INDEX\s+/i,
+            (_m, unique: string | undefined) =>
+              `CREATE ${unique ?? ''}INDEX IF NOT EXISTS `
           );
           writeStream.write(`${adjusted};\n`);
         }
@@ -286,7 +287,11 @@ export class DatabaseDumpService {
         );
       for (const r of trgRows) {
         if (r.sql) {
-          writeStream.write(`${r.sql};\n`);
+          const adjusted = r.sql.replace(
+            /^\s*CREATE\s+TRIGGER\s+/i,
+            'CREATE TRIGGER IF NOT EXISTS '
+          );
+          writeStream.write(`${adjusted};\n`);
         }
       }
     }

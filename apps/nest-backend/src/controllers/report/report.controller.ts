@@ -56,7 +56,6 @@ export class ReportController {
     @Param('eventId') eventId: string,
     @Body() report: IReportDetails
   ) {
-    // TODO: Unify the implmentation and use database for all reports
     this.logger.log(`updateReport: ${JSON.stringify(report, null, 2)}`);
 
     await this.projectAbstractReportService.writeSingleAbstractTestResultJson(

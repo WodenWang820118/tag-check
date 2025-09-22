@@ -29,7 +29,7 @@ export class GtmParserController {
         } catch (e: unknown) {
           this.logger.debug(
             'Request body is a string but not valid JSON; writing raw string; error: ' +
-              (e instanceof Error ? e.message : String(e))
+              (e instanceof Error ? e.message : JSON.stringify(e, null, 2))
           );
         }
       }
