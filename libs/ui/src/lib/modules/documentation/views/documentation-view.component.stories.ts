@@ -8,7 +8,6 @@ import { HelpCenterViewComponent } from './documentation-view.component';
 
 import { provideHttpClient } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, RouterOutlet } from '@angular/router';
 import { MarkdownModule } from 'ngx-markdown';
 import { TreeNodeService } from '../services/tree-node/tree-node.service';
@@ -27,7 +26,6 @@ const meta: Meta<HelpCenterViewComponent> = {
     }),
     applicationConfig({
       providers: [
-        provideAnimationsAsync(),
         provideHttpClient(),
         provideRouter(DOCS_ROUTES),
         importProvidersFrom(MarkdownModule.forRoot())

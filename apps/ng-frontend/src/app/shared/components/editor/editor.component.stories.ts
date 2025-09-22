@@ -7,7 +7,6 @@ import {
 import { EditorComponent } from './editor.component';
 
 import { provideHttpClient } from '@angular/common/http';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { EditorService } from '@data-access';
 import { APP_ROUTES } from '../../../app.routes';
@@ -22,11 +21,7 @@ const meta: Meta<EditorComponent> = {
       providers: [EditorService]
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(APP_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
     })
   ]
 };

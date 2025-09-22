@@ -8,7 +8,6 @@ import { ProjectListComponent } from './project-list.component';
 
 import { provideHttpClient } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { RouterLink, provideRouter } from '@angular/router';
 import { ENTRY_ROUTES } from '../../routes';
 import { AsyncPipe } from '@angular/common';
@@ -31,11 +30,7 @@ const meta: Meta<ProjectListComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(ENTRY_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(ENTRY_ROUTES)]
     })
   ]
 };

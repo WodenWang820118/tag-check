@@ -1,6 +1,5 @@
 import { LOCALE_ID, ApplicationConfig } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import {
   PreloadAllModules,
   provideRouter,
@@ -12,7 +11,6 @@ const appLang = localStorage.getItem('locale') || 'en';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideAnimations(), // required
     provideHttpClient(), // required
     provideRouter(routes, withPreloading(PreloadAllModules)),
     { provide: LOCALE_ID, useValue: appLang }

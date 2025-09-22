@@ -8,7 +8,6 @@ import { PaginatorButtonComponent } from './paginator-button.component';
 
 import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { APP_ROUTES } from '../../../app.routes';
 
@@ -22,11 +21,7 @@ const meta: Meta<PaginatorButtonComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(APP_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
     })
   ]
 };
