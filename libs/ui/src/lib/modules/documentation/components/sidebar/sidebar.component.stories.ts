@@ -9,7 +9,6 @@ import { SideBarComponent } from './sidebar.component';
 import { provideHttpClient } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter } from '@angular/router';
 import { TreeNodeService } from '../../services/tree-node/tree-node.service';
 import { MarkdownModule } from 'ngx-markdown';
@@ -28,7 +27,6 @@ const meta: Meta<SideBarComponent> = {
     }),
     applicationConfig({
       providers: [
-        provideAnimationsAsync(),
         provideHttpClient(),
         provideRouter(DOCS_ROUTES),
         importProvidersFrom(MarkdownModule.forRoot())

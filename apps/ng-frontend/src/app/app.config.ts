@@ -12,7 +12,6 @@ import {
   withPreloading
 } from '@angular/router';
 import { APP_ROUTES } from './app.routes';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient } from '@angular/common/http';
 import { MarkdownModule } from 'ngx-markdown';
 import * as Sentry from '@sentry/angular';
@@ -20,7 +19,6 @@ import * as Sentry from '@sentry/angular';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(APP_ROUTES, withPreloading(PreloadAllModules)),
-    provideAnimationsAsync(),
     provideHttpClient(),
     importProvidersFrom(
       MarkdownModule.forRoot({

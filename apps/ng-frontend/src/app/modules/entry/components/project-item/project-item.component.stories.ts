@@ -10,7 +10,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { RouterLink, provideRouter } from '@angular/router';
 import { ENTRY_ROUTES } from '../../routes';
 import { ProjectIoService } from '../../../../shared/services/api/project-io/project-io.service';
@@ -25,11 +24,7 @@ const meta: Meta<ProjectItemComponent> = {
       providers: [MatDialog, ProjectIoService]
     }),
     applicationConfig({
-      providers: [
-        provideAnimationsAsync(),
-        provideHttpClient(),
-        provideRouter(ENTRY_ROUTES)
-      ]
+      providers: [provideHttpClient(), provideRouter(ENTRY_ROUTES)]
     })
   ]
 };
