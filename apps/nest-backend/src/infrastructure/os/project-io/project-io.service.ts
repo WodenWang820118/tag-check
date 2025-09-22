@@ -5,8 +5,11 @@ import {
   constants,
   createReadStream,
   createWriteStream,
-  unlinkSync
+  unlinkSync,
+  readFileSync,
+  ReadStream
 } from 'fs';
+import { Writable } from 'stream';
 import * as unzipper from 'unzipper';
 import archiver from 'archiver';
 import { join } from 'path';
@@ -79,33 +82,34 @@ export class ProjectIoService {
     projectSlug: string,
     zipFilePath: string,
     outputFolderPath: string
-  ): Promise<void> {
+  ): Promise<string> {
     const outputPath = `${outputFolderPath}/${projectSlug}`;
-    let readStream: any = null;
-    let extractStream: any = null;
+    let readStream: ReadStream | null = null;
+    let extractStream: Writable | null = null;
 
     try {
       // Create streams
       this.logger.log(`Unzipping project ${projectSlug} to ${outputPath}`);
       this.logger.log(`Reading ZIP file from ${zipFilePath}`);
-      readStream = createReadStream(zipFilePath);
-      extractStream = unzipper.Extract({ path: outputPath });
+      const rs = createReadStream(zipFilePath);
+      const es = unzipper.Extract({ path: outputPath });
+      readStream = rs;
+      extractStream = es as unknown as Writable;
 
       // Extract the ZIP file
       await new Promise<void>((resolve, reject) => {
-        readStream
-          .pipe(extractStream)
+        rs.pipe(es)
           .on('close', () => {
             resolve();
           })
-          .on('error', (err: { message: any }) => {
+          .on('error', (err: unknown) => {
             // Create a new error with just the message to avoid circular references
             const errorMessage =
               err instanceof Error ? err.message : JSON.stringify(err, null, 2);
             reject(new Error(`Extraction error: ${errorMessage}`));
           });
 
-        readStream.on('error', (err: { message: any }) => {
+        rs.on('error', (err: unknown) => {
           // Create a new error with just the message to avoid circular references
           const errorMessage =
             err instanceof Error ? err.message : JSON.stringify(err, null, 2);
@@ -121,8 +125,16 @@ export class ProjectIoService {
         if (await this.fileExists(sqlDumpPath)) {
           this.logger.log(`Importing database from ${sqlDumpPath}`);
           await this.databaseIoService.importProjectDatabase(sqlDumpPath);
+
+          // After import, extract the project slug from the dump for return
+          const importedProjectSlug =
+            this.extractProjectSlugFromSqlDump(sqlDumpPath);
+
+          // Clean up the SQL file
           unlinkSync(sqlDumpPath);
           this.logger.log('Database import completed successfully');
+
+          return importedProjectSlug ?? projectSlug;
         } else {
           this.logger.warn(`No database dump file found at ${sqlDumpPath}`);
           throw new HttpException(
@@ -157,11 +169,10 @@ export class ProjectIoService {
       );
     } finally {
       // Ensure streams are properly closed
-      if (readStream) {
-        readStream.destroy();
-      }
+      if (readStream) readStream.destroy();
       if (extractStream) {
-        extractStream.end();
+        const ws: Writable = extractStream;
+        ws.end();
       }
     }
   }
@@ -178,5 +189,104 @@ export class ProjectIoService {
         resolve(false);
       }
     });
+  }
+
+  /**
+   * Parse the provided SQL dump file and extract the project slug from the
+   * INSERT statement for the `project` table. Returns undefined if not found.
+   */
+  private extractProjectSlugFromSqlDump(
+    sqlDumpPath: string
+  ): string | undefined {
+    try {
+      const sql = readFileSync(sqlDumpPath, 'utf8');
+      // Match INSERT INTO (or INSERT OR REPLACE INTO) for the project table
+      const insertRegex =
+        /INSERT\s+(?:OR\s+REPLACE\s+)?INTO\s+["`]?project["`]?\s*\(([^)]+)\)\s*VALUES\s*\(([^;]+)\)\s*;/i;
+      const match = insertRegex.exec(sql);
+      if (!match) return undefined;
+
+      const columnsRaw = match[1];
+      const valuesRaw = match[2];
+
+      const columns = columnsRaw
+        .split(',')
+        .map((c) => c.replace(/["`]/g, '').trim());
+      const slugIdx = columns.findIndex(
+        (c) => c.toLowerCase() === 'project_slug'
+      );
+      if (slugIdx < 0) return undefined;
+
+      const values = this.splitSqlValues(valuesRaw);
+      const rawSlug = values[slugIdx]?.trim();
+      if (!rawSlug) return undefined;
+      // Unwrap single quotes and unescape doubled quotes
+      if (rawSlug.startsWith("'") && rawSlug.endsWith("'")) {
+        const inner = rawSlug.slice(1, -1).replace(/''/g, "'");
+        return inner;
+      }
+      // NULL or other types are not valid slugs
+      return undefined;
+    } catch (e) {
+      this.logger.warn(`Unable to parse project slug from SQL dump: ${e}`);
+      return undefined;
+    }
+  }
+
+  /**
+   * Split a SQL VALUES list by commas, respecting quoted strings.
+   */
+  private splitSqlValues(valuesRaw: string): string[] {
+    const result: string[] = [];
+    let current = '';
+    let i = 0;
+    const len = valuesRaw.length;
+    while (i < len) {
+      const ch = valuesRaw[i];
+      if (ch === "'") {
+        const { text, next } = this.readQuoted(valuesRaw, i);
+        current += text;
+        i = next;
+        continue;
+      }
+      if (ch === ',') {
+        result.push(current.trim());
+        current = '';
+        i++;
+        continue;
+      }
+      current += ch;
+      i++;
+    }
+    if (current.length > 0) result.push(current.trim());
+    return result;
+  }
+
+  private readQuoted(
+    valuesRaw: string,
+    startIndex: number
+  ): { text: string; next: number } {
+    let i = startIndex;
+    const len = valuesRaw.length;
+    let text = '';
+    // Append opening quote
+    text += valuesRaw[i];
+    i++;
+    while (i < len) {
+      const ch = valuesRaw[i];
+      text += ch;
+      if (ch === "'") {
+        // doubled single-quote inside string literal
+        if (i + 1 < len && valuesRaw[i + 1] === "'") {
+          text += "'";
+          i += 2;
+          continue;
+        }
+        i++;
+        break;
+      }
+      i++;
+    }
+    return { text, next: i };
   }
 }

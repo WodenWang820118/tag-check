@@ -134,8 +134,6 @@ export class TestEventRepositoryService {
     }
   }
 
-  // TODO: verify it works as expected
-  // TODO: according to the star schema, this method should be refactored
   async updateTestEvents(projectSlug: string, data: UpdateTestEventDto[]) {
     // First fetch existing events with necessary relations
     const events = await this.repository.find({
