@@ -5,6 +5,11 @@ import { readFileSync } from 'fs';
 import { DataSource, QueryRunner } from 'typeorm';
 import { Logger, HttpException } from '@nestjs/common';
 import { DatabaseImportService } from './database-import.service';
+import { SqlIdempotencyService } from './sql-idempotency.service';
+import { SqlStatementParserService } from './sql-statement-parser.service';
+import { SqlExecutorService } from './sql-executor.service';
+import { InsertRewriterService } from './insert-rewriter.service';
+import { SqlUtilsService } from './sql-utils.service';
 
 // Mock the fs and path modules
 vi.mock('fs', () => ({
@@ -50,7 +55,14 @@ describe('DatabaseImportService', () => {
       .mockImplementation(() => void 0);
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [DatabaseImportService]
+      providers: [
+        DatabaseImportService,
+        SqlIdempotencyService,
+        SqlStatementParserService,
+        SqlExecutorService,
+        InsertRewriterService,
+        SqlUtilsService
+      ]
     })
       .useMocker((token) => {
         if (token === DataSource) {
