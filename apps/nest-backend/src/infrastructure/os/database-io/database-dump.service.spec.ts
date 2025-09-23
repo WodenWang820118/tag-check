@@ -1,19 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Writable } from 'stream';
-import { DatabaseDumpService } from './database-dump.service';
+import { DatabaseSerializationService } from './database-serialization.service';
+import { DatabaseDataDumpService } from './database-data-dump.service';
+import { DatabaseDumpOrchestratorService } from './database-dump-orchestrator.service';
 import { ProjectEntity } from '../../../shared/entity/project.entity';
 
 class StringWritable extends Writable {
   data = '';
-  _write(chunk: any, _enc: string, cb: () => void) {
+  _write(chunk: Buffer, _enc: BufferEncoding, cb: () => void) {
     this.data += chunk?.toString?.() ?? String(chunk);
     cb();
   }
 }
 
-describe('DatabaseDumpService (unit)', () => {
-  let service: DatabaseDumpService;
-  let fakeDataSource: any;
+describe('Database dump refactor (unit)', () => {
+  let serializer: DatabaseSerializationService;
+  let dataDump: DatabaseDataDumpService;
+  let orchestrator: DatabaseDumpOrchestratorService;
+  let fakeDataSource: {
+    options: { type: string };
+    entityMetadatas: any[];
+    getRepository: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     fakeDataSource = {
@@ -21,16 +29,29 @@ describe('DatabaseDumpService (unit)', () => {
       entityMetadatas: [],
       getRepository: vi.fn()
     };
-    service = new DatabaseDumpService(fakeDataSource as any);
+    serializer = new DatabaseSerializationService();
+    dataDump = new DatabaseDataDumpService(
+      fakeDataSource as unknown as any,
+      serializer
+    );
+    orchestrator = new DatabaseDumpOrchestratorService(
+      fakeDataSource as unknown as any,
+      new (class {
+        async dumpSchema(ws: NodeJS.WritableStream) {
+          ws.write('-- schema --\n');
+        }
+      })() as any,
+      dataDump
+    );
   });
 
   it('quoteIdentifier should escape double quotes', () => {
-    const out = (service as any).quoteIdentifier('a"b');
+    const out = serializer.quoteIdentifier('a"b');
     expect(out).toBe('"a""b"');
   });
 
   it('quoteValue should handle many types', () => {
-    const q = (service as any).quoteValue.bind(service);
+    const q = serializer.quoteValue.bind(serializer);
 
     expect(q(null)).toBe('NULL');
     expect(q(undefined)).toBe('NULL');
@@ -50,17 +71,25 @@ describe('DatabaseDumpService (unit)', () => {
 
   it('writeInsertStatements writes INSERTs and comment', async () => {
     const writer = new StringWritable();
-    const entity: any = {
+    const entity = {
       name: 'User',
       tableName: 'user',
       columns: [
         { propertyName: 'id', databaseName: 'id' },
         { propertyName: 'name', databaseName: 'name' }
       ]
+    } as unknown as {
+      name: string;
+      tableName: string;
+      columns: Array<{ propertyName: string; databaseName: string }>;
     };
     const records = [{ id: 1, name: "O'Hara" }];
 
-    await (service as any).writeInsertStatements(writer, entity, records);
+    await (dataDump as unknown as any).writeInsertStatements(
+      writer,
+      entity,
+      records
+    );
 
     // stream writes are synchronous in our StringWritable _write implementation
     expect(writer.data).toContain('-- Data for entity: User (table: user)');
@@ -71,23 +100,32 @@ describe('DatabaseDumpService (unit)', () => {
 
   it('dumpEntityData should call writeInsertStatements for entities with projectId column', async () => {
     const writer = new StringWritable();
-    const entity: any = {
+    const entity = {
       name: 'SomeEntity',
       tableName: 'some_entity',
       columns: [{ propertyName: 'projectId' }]
+    } as unknown as {
+      name: string;
+      tableName: string;
+      columns: Array<{ propertyName: string }>;
     };
 
     // repository that returns records filtered by projectId
     const repo = {
-      find: vi.fn(async (opts: any) => [{ projectId: 42, foo: 'bar' }])
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      find: vi.fn(async (_opts: unknown) => [{ projectId: 42, foo: 'bar' }])
     };
     fakeDataSource.getRepository.mockReturnValue(repo);
 
     const spy = vi
-      .spyOn(service as any, 'writeInsertStatements')
+      .spyOn(dataDump as unknown as any, 'writeInsertStatements')
       .mockResolvedValue(undefined);
 
-    await (service as any).dumpEntityData(writer, entity as any, 42);
+    await (dataDump as unknown as any).dumpEntityData(
+      writer,
+      entity as unknown as any,
+      42
+    );
 
     expect(repo.find).toHaveBeenCalledWith({ where: { projectId: 42 } });
     expect(spy).toHaveBeenCalled();
@@ -96,14 +134,14 @@ describe('DatabaseDumpService (unit)', () => {
   it('dumpProjectDatabase throws when project not found', async () => {
     // make getRepository(ProjectEntity).findOne return undefined/null
     const repoProject = { findOne: vi.fn(async () => null) };
-    fakeDataSource.getRepository.mockImplementation((arg: any) => {
+    fakeDataSource.getRepository.mockImplementation((arg: unknown) => {
       if (arg === ProjectEntity) return repoProject;
       return { find: async () => [] };
     });
 
     // call and expect rejection
     await expect(
-      service.dumpProjectDatabase('nonexistent-slug', 'test-dumps/out.sql')
+      orchestrator.dumpProjectDatabase('nonexistent-slug', 'test-dumps/out.sql')
     ).rejects.toThrow(/Project with projectSlug/);
   });
 });

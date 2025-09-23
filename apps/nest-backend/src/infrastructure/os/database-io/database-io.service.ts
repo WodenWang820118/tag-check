@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseDumpService } from './database-dump.service';
+import { DatabaseDumpOrchestratorService } from './database-dump-orchestrator.service';
 import { DatabaseImportService } from './database-import.service';
 
 @Injectable()
 export class DatabaseIoService {
   constructor(
-    private readonly databaseDumpService: DatabaseDumpService,
+    private readonly databaseDumpService: DatabaseDumpOrchestratorService,
     private readonly databaseImportService: DatabaseImportService
   ) {}
 
