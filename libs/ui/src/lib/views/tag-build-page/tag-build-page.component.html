@@ -65,11 +65,14 @@
       class="main-page__board__item main-page__editor border border-gray-300 dark:border-gray-700 rounded-md bg-white/60 dark:bg-transparent w-full md:w-[48rem] xl:w-[54rem] shrink-0 shadow-sm mx-auto"
       aria-label="Output JSON editor"
     >
-      class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm
-      font-medium text-gray-700 dark:text-gray-200" > Output JSON
-    </div>
-    <div class="p-2">
-      <lib-editor [editorExtension]="outputExtension"></lib-editor>
+      <div
+        class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200"
+      >
+        Output JSON
+      </div>
+      <div class="p-2">
+        <lib-editor [editorExtension]="outputExtension"></lib-editor>
+      </div>
     </div>
   </section>
 </main>
