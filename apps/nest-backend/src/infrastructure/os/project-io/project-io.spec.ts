@@ -1,5 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectIoService } from './project-io.service';
+import { ProjectCompressor } from './project-compressor.service';
+import { ProjectUnzipper } from './project-unzipper.service';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 
 describe('ProjectIoService', () => {
@@ -7,7 +9,7 @@ describe('ProjectIoService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProjectIoService],
+      providers: [ProjectIoService, ProjectCompressor, ProjectUnzipper]
     })
       .useMocker((token) => {
         if (typeof token === 'function') {

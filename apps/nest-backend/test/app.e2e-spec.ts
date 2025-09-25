@@ -8,7 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { testDbConfig } from './test-db.config.js';
 import { DataSource } from 'typeorm';
 import { vi } from 'vitest';
-import { entities } from './common/index.js';
 // TODO: run all endoint tests to ensure they are all working
 
 const rootProjectPath = join(__dirname, '..', '..', '..', 'tag_check_projects');
@@ -23,11 +22,7 @@ describe('App (e2e)', () => {
     process.env.NODE_ENV = 'test'; // Ensure test environment is set
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [
-        AppModule,
-        TypeOrmModule.forRoot(testDbConfig),
-        TypeOrmModule.forFeature(entities)
-      ],
+      imports: [AppModule, TypeOrmModule.forRoot(testDbConfig)],
       providers: []
     })
       .overrideProvider(DataSource)
@@ -41,9 +36,7 @@ describe('App (e2e)', () => {
     await dataSource.synchronize(true);
   });
 
-  afterAll(async () => {
-    await app.close();
-  });
+  // Single afterAll defined at bottom of file; removed duplicate to avoid double-closing the app
 
   describe('Environment', () => {
     it('should be the test environment', () => {
@@ -193,6 +186,8 @@ describe('App (e2e)', () => {
   // });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 });

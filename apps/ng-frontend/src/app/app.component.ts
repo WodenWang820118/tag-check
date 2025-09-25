@@ -12,11 +12,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   ],
   selector: 'app-root',
   template: `
-    @defer {
-      <app-toolbar [settings]="undefined" [projects]="undefined"></app-toolbar>
-    } @placeholder {
-      <div style="height: 60px"></div>
-    }
+    <app-toolbar [settings]="undefined" [projects]="undefined"></app-toolbar>
+
     @defer {
       <app-router-container></app-router-container>
     } @loading (minimum 600ms) {
