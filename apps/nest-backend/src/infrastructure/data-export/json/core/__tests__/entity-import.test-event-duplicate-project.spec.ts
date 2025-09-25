@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { EntityImportService } from '../entity-import.service';
+import { ImportRowProcessorService } from '../import-row-processor.service';
 import { RelationMapperService } from '../relation-mapper.service';
 import { IdMapRegistryService } from '../id-map-registry.service';
 import { RowMaterializerService } from '../row-materializer.service';
@@ -124,6 +125,7 @@ describe('EntityImportService duplicate project test events (composite uniquenes
       relationMapper,
       idMap
     );
+    const rowProcessor = new ImportRowProcessorService(testEventDup, idMap);
     service = new EntityImportService(
       materializer,
       relationMapper,
@@ -131,7 +133,8 @@ describe('EntityImportService duplicate project test events (composite uniquenes
       pkSvc,
       projImporter,
       testEventDup,
-      entityPersistence
+      entityPersistence,
+      rowProcessor
     );
     projectRepo = new MemRepo<ProjectRow>('id');
     eventRepo = new MemRepo<TestEventRow>('id');

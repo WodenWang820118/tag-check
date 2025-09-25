@@ -14,6 +14,7 @@ import { PrimaryKeyService } from './primary-key.service';
 import { ProjectImportService } from './project-import.service';
 import { TestEventDuplicateService } from './test-event-duplicate.service';
 import { EntityPersistenceService } from './entity-persistence.service';
+import { ImportRowProcessorService } from './import-row-processor.service';
 
 @Injectable()
 export class EntityImportService {
@@ -25,7 +26,8 @@ export class EntityImportService {
     private readonly pkService: PrimaryKeyService,
     private readonly projectImporter: ProjectImportService,
     private readonly testEventDupService: TestEventDuplicateService,
-    private readonly entityPersistence: EntityPersistenceService
+    private readonly entityPersistence: EntityPersistenceService,
+    private readonly rowProcessor: ImportRowProcessorService
   ) {}
 
   async prefetchExistingIdsIfNeeded(
@@ -134,74 +136,25 @@ export class EntityImportService {
       string,
       unknown
     >;
-    if (meta.name !== 'ProjectEntity' && ctx.newProjectId != null) {
-      if ('projectId' in materialized) {
-        materialized['projectId'] = ctx.newProjectId;
-      }
-    } else if (meta.name !== 'ProjectEntity' && ctx.newProjectId == null) {
-      this.logger.debug(
-        `Import order warning: importing ${meta.name} before new ProjectEntity primary key established.`
-      );
-    }
-    if (meta.name === 'TestEventEntity' && primaryIsSingle && primaryKeyProp) {
-      delete materialized[primaryKeyProp];
-    }
-    if (
-      this.testEventDupService.handleDuplicate(
-        meta,
-        raw,
-        materialized,
-        existingCompositeEventMap,
-        { primaryIsSingle, primaryKeyProp },
-        ctx.stats[name]
-      )
-    ) {
-      if (process.env.IMPORT_DEBUG) {
-        this.logger.debug(
-          `[IMPORT_DEBUG] Duplicate detected for ${meta.name}, composite key skip.`
-        );
-      }
-      return;
-    }
+    // Delegate pre-processing (assign project id, duplicate detection, PK collision handling)
+    const shouldSkip = await this.rowProcessor.preProcessRow({
+      raw,
+      materialized,
+      meta,
+      name,
+      pkInfo: { primaryIsSingle, primaryKeyProp },
+      existingIds,
+      existingCompositeEventMap,
+      ctx
+    });
+    if (shouldSkip) return;
+
     this.mapRelationsForRow(
       materialized,
       meta,
       ctx.newProjectId ?? ctx.exportedProjectId,
       ctx.idMaps
     );
-
-    if (primaryIsSingle && existingIds && primaryKeyProp) {
-      const pkVal = materialized[primaryKeyProp];
-      if (pkVal != null && existingIds.has(pkVal)) {
-        // Certain entities are 1:1 per parent and should be upserted, not skipped, even if their old PK collides.
-        const upsertEligible = new Set([
-          'ApplicationSettingEntity',
-          'AuthenticationSettingEntity',
-          'BrowserSettingEntity',
-          'RecordingEntity',
-          'SpecEntity',
-          'ItemDefEntity'
-        ]);
-        if (!upsertEligible.has(meta.name)) {
-          const oldPk = raw[primaryKeyProp];
-          if (oldPk != null) this.idMapRegistry.ensure(name).set(oldPk, pkVal);
-          ctx.stats[name].skipped++;
-          if (process.env.IMPORT_DEBUG) {
-            this.logger.debug(
-              `[IMPORT_DEBUG] Early skip due to existingId collision for ${meta.name} pkVal=${String(pkVal)}`
-            );
-          }
-          return;
-        }
-        if (process.env.IMPORT_DEBUG) {
-          this.logger.debug(
-            `[IMPORT_DEBUG] Collision on pk for upsert-eligible ${meta.name} pkVal=${String(pkVal)} allowing through to persistence.`
-          );
-        }
-        // For upsert-eligible entities, allow persistence layer to perform update path.
-      }
-    }
-
     await this.entityPersistence.persistEntityAndRegister(
       meta,
       repo,

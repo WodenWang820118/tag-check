@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { EntityImportService } from '../entity-import.service';
+import { ImportRowProcessorService } from '../import-row-processor.service';
 import { RelationMapperService } from '../relation-mapper.service';
 import { IdMapRegistryService } from '../id-map-registry.service';
 import { RowMaterializerService } from '../row-materializer.service';
@@ -122,6 +123,10 @@ describe('EntityImportService slug alternate key mapping', () => {
       relationMapper,
       idMapRegistry
     );
+    const rowProcessor = new ImportRowProcessorService(
+      testEventDup,
+      idMapRegistry
+    );
     service = new EntityImportService(
       materializer,
       relationMapper,
@@ -129,7 +134,8 @@ describe('EntityImportService slug alternate key mapping', () => {
       pkSvc,
       projImporter,
       testEventDup,
-      entityPersistence
+      entityPersistence,
+      rowProcessor
     );
     projectRepo = new FakeRepo<ProjectRow>('id');
     childRepo = new FakeRepo<ChildRow>('id');

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { EntityImportService } from '../entity-import.service';
+import { ImportRowProcessorService } from '../import-row-processor.service';
 import { RelationMapperService } from '../relation-mapper.service';
 import { IdMapRegistryService } from '../id-map-registry.service';
 import { RowMaterializerService } from '../row-materializer.service';
@@ -125,6 +126,10 @@ describe('EntityImportService __exportRef mapping', () => {
       relationMapper,
       idMapRegistry
     );
+    const rowProcessor = new ImportRowProcessorService(
+      testEventDup,
+      idMapRegistry
+    );
     service = new EntityImportService(
       materializer,
       relationMapper,
@@ -132,7 +137,8 @@ describe('EntityImportService __exportRef mapping', () => {
       pkSvc,
       projImporter,
       testEventDup,
-      entityPersistence
+      entityPersistence,
+      rowProcessor
     );
     projectRepo = new SimpleRepo<ProjectRow>('id');
     childRepo = new SimpleRepo<ChildRow>('id');

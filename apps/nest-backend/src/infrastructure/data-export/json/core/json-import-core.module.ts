@@ -10,6 +10,7 @@ import { PrimaryKeyService } from './primary-key.service';
 import { ProjectImportService } from './project-import.service';
 import { TestEventDuplicateService } from './test-event-duplicate.service';
 import { EntityPersistenceService } from './entity-persistence.service';
+import { ImportRowProcessorService } from './import-row-processor.service';
 import { ImportTransactionService } from './import-transaction.service';
 
 @Module({
@@ -21,6 +22,7 @@ import { ImportTransactionService } from './import-transaction.service';
     IdMapRegistryService,
     ProjectSlugService,
     EntityImportService,
+    ImportRowProcessorService,
     PrimaryKeyService,
     ProjectImportService,
     TestEventDuplicateService,
@@ -35,6 +37,7 @@ import { ImportTransactionService } from './import-transaction.service';
     IdMapRegistryService,
     ProjectSlugService,
     EntityImportService,
+    ImportRowProcessorService,
     PrimaryKeyService,
     ProjectImportService,
     TestEventDuplicateService,
