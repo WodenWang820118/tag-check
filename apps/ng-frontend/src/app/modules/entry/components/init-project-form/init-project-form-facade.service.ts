@@ -19,7 +19,7 @@ import {
 import { InstantErrorStateMatcher } from './helper';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import slugify from 'slugify';
+import slug from 'slug';
 @Injectable({
   providedIn: 'root'
 })
@@ -95,15 +95,14 @@ export class InitProjectFormFacadeService {
   }
 
   private formatProjectSlug(value: string): string {
-    // Use slugify to handle non-English characters
-    return slugify(value, {
+    // Use slug to handle non-English characters
+    return slug(value, {
       lower: true, // Convert to lowercase
-      strict: true, // Strip special characters except replacement
       locale: 'en', // Language for transliteration rules
       replacement: '-', // Replace spaces with hyphens
       remove: /[*+~.()'"!:@]/g, // Remove these chars
       trim: true // Trim leading and trailing replacement chars
-    });
+    } as any);
   }
 
   submitProject() {
