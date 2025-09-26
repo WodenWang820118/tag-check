@@ -65,7 +65,7 @@ class FakeMaterializer extends RowMaterializerService {
   }
 }
 class FakeProjectSlugService extends ProjectSlugService {
-  private used = new Set<string>();
+  private readonly used = new Set<string>();
   async ensureUnique(repo: unknown, slug: string) {
     try {
       const anyRepo = repo as { rows?: Array<Record<string, unknown>> };
@@ -130,7 +130,6 @@ describe('EntityImportService slug alternate key mapping', () => {
     service = new EntityImportService(
       materializer,
       relationMapper,
-      idMapRegistry,
       pkSvc,
       projImporter,
       testEventDup,

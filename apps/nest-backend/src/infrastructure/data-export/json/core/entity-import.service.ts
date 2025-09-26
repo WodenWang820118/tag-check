@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import { RowMaterializerService } from './row-materializer.service';
 import { RelationMapperService } from './relation-mapper.service';
-import { IdMapRegistryService } from './id-map-registry.service';
 import { ImportStats } from '../../interfaces/import-types';
 import { PrimaryKeyService } from './primary-key.service';
 import { ProjectImportService } from './project-import.service';
@@ -22,7 +21,6 @@ export class EntityImportService {
   constructor(
     private readonly materializer: RowMaterializerService,
     private readonly relationMapper: RelationMapperService,
-    private readonly idMapRegistry: IdMapRegistryService,
     private readonly pkService: PrimaryKeyService,
     private readonly projectImporter: ProjectImportService,
     private readonly testEventDupService: TestEventDuplicateService,

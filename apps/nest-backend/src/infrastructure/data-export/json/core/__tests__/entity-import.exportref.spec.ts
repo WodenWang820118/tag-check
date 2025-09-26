@@ -28,7 +28,7 @@ interface ChildRow {
 }
 
 // Narrow fake repo not pretending full TypeORM signatures
-class SimpleRepo<T extends Record<string, unknown>> {
+class SimpleRepo<T extends Record<string, unknown> = Record<string, unknown>> {
   rows: T[] = [];
   constructor(private readonly pk: keyof T) {}
   create(obj: T): T {
@@ -67,8 +67,11 @@ class SimpleMaterializer extends RowMaterializerService {
   }
 }
 class SimpleSlugService extends ProjectSlugService {
-  private used = new Set<string>();
-  async ensureUnique(repo: unknown, slug: string) {
+  private readonly used = new Set<string>();
+  async ensureUnique(
+    repo: Repository<Record<string, unknown>>,
+    baseSlug: string
+  ) {
     try {
       const anyRepo = repo as { rows?: Array<Record<string, unknown>> };
       if (Array.isArray(anyRepo?.rows)) {
@@ -80,10 +83,10 @@ class SimpleSlugService extends ProjectSlugService {
     } catch {
       /* ignore */
     }
-    let c = slug;
+    let c = baseSlug;
     let i = 2;
     while (this.used.has(c)) {
-      c = `${slug}-${i++}`;
+      c = `${baseSlug}-${i++}`;
     }
     this.used.add(c);
     return c;
@@ -133,7 +136,6 @@ describe('EntityImportService __exportRef mapping', () => {
     service = new EntityImportService(
       materializer,
       relationMapper,
-      idMapRegistry,
       pkSvc,
       projImporter,
       testEventDup,

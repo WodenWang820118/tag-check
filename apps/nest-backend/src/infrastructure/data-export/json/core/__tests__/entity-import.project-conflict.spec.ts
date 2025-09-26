@@ -25,7 +25,7 @@ interface PrimaryColumnLike {
   propertyName: string;
 }
 
-class FakeRepo<T extends { [k: string]: unknown }>
+class FakeRepo<T extends { [k: string]: unknown } = { [k: string]: unknown }>
   implements Partial<Repository<T>>
 {
   rows: T[] = [];
@@ -72,7 +72,7 @@ class FakeMaterializer extends RowMaterializerService {
 }
 
 class FakeProjectSlugService extends ProjectSlugService {
-  private used = new Set<string>();
+  private readonly used = new Set<string>();
   async ensureUnique(repo: unknown, slug: string): Promise<string> {
     // Seed used set from current repository rows (simulate real DB uniqueness check)
     try {
@@ -141,7 +141,6 @@ describe('EntityImportService project slug conflict integration', () => {
     service = new EntityImportService(
       materializer,
       relationMapper,
-      idMapRegistry,
       pkSvc,
       projImporter,
       testEventDup,

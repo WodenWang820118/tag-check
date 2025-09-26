@@ -25,9 +25,9 @@ interface TestEventRow {
   projectSlug?: string;
 }
 
-class MemRepo<T extends Record<string, unknown>> {
+class MemRepo<T extends Record<string, unknown> = Record<string, unknown>> {
   rows: T[] = [];
-  constructor(private pk: keyof T) {}
+  constructor(private readonly pk: keyof T) {}
   create(o: T): T {
     return { ...o };
   }
@@ -129,7 +129,6 @@ describe('EntityImportService duplicate project test events (composite uniquenes
     service = new EntityImportService(
       materializer,
       relationMapper,
-      idMap,
       pkSvc,
       projImporter,
       testEventDup,

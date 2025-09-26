@@ -25,9 +25,9 @@ interface TestEventRow {
   projectSlug?: string;
 }
 
-class MemRepo<T extends Record<string, unknown>> {
+class MemRepo<T extends Record<string, unknown> = Record<string, unknown>> {
   rows: T[] = [];
-  constructor(private pk: keyof T) {}
+  constructor(private readonly pk: keyof T) {}
   create(o: T): T {
     return { ...o };
   }
@@ -64,7 +64,7 @@ class PassMaterializer extends RowMaterializerService {
   }
 }
 class SlugService extends ProjectSlugService {
-  private used = new Set<string>();
+  private readonly used = new Set<string>();
   async ensureUnique(
     repo: { rows?: Array<Record<string, unknown>> },
     slug: string
@@ -129,7 +129,6 @@ describe('EntityImportService TestEventEntity pk collision ignored when composit
     service = new EntityImportService(
       materializer,
       relationMapper,
-      idMap,
       pkSvc,
       projImporter,
       testEventDup,
