@@ -12,6 +12,7 @@ import { TestEventDuplicateService } from './test-event-duplicate.service';
 import { EntityPersistenceService } from './entity-persistence.service';
 import { ImportRowProcessorService } from './import-row-processor.service';
 import { ImportTransactionService } from './import-transaction.service';
+import { SinglePerParentUpsertService } from './single-per-parent-upsert.service';
 
 @Module({
   providers: [
@@ -27,7 +28,8 @@ import { ImportTransactionService } from './import-transaction.service';
     ProjectImportService,
     TestEventDuplicateService,
     EntityPersistenceService,
-    ImportTransactionService
+    ImportTransactionService,
+    SinglePerParentUpsertService
   ],
   exports: [
     TopologicalSorterService,
@@ -42,7 +44,8 @@ import { ImportTransactionService } from './import-transaction.service';
     ProjectImportService,
     TestEventDuplicateService,
     EntityPersistenceService,
-    ImportTransactionService
+    ImportTransactionService,
+    SinglePerParentUpsertService
   ]
 })
 export class JsonImportCoreModule {}

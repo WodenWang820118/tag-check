@@ -9,6 +9,7 @@ import { PrimaryKeyService } from '../primary-key.service';
 import { ProjectImportService } from '../project-import.service';
 import { TestEventDuplicateService } from '../test-event-duplicate.service';
 import { EntityPersistenceService } from '../entity-persistence.service';
+import { SinglePerParentUpsertService } from '../single-per-parent-upsert.service';
 import { EntityMetadata, Repository } from 'typeorm';
 
 interface PrimaryColumnLike {
@@ -25,7 +26,7 @@ interface TestEventRow {
   projectSlug?: string;
 }
 
-class MemRepo<T extends Record<string, unknown> = Record<string, unknown>> {
+class MemRepo<T extends { [k: string]: unknown } = { [k: string]: unknown }> {
   rows: T[] = [];
   constructor(private readonly pk: keyof T) {}
   create(o: T): T {
@@ -63,7 +64,7 @@ class PassMaterializer extends RowMaterializerService {
   }
 }
 class SlugService extends ProjectSlugService {
-  private used = new Set<string>();
+  private readonly used = new Set<string>();
   async ensureUnique(
     repo: { rows?: Array<Record<string, unknown>> },
     slug: string
@@ -121,9 +122,11 @@ describe('EntityImportService duplicate project test events (composite uniquenes
       relationMapper
     );
     const testEventDup = new TestEventDuplicateService(idMap);
+    const upsertSvc = new SinglePerParentUpsertService(relationMapper, idMap);
     const entityPersistence = new EntityPersistenceService(
       relationMapper,
-      idMap
+      idMap,
+      upsertSvc
     );
     const rowProcessor = new ImportRowProcessorService(testEventDup, idMap);
     service = new EntityImportService(
