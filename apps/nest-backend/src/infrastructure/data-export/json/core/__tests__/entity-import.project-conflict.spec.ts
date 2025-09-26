@@ -9,6 +9,7 @@ import { PrimaryKeyService } from '../primary-key.service';
 import { ProjectImportService } from '../project-import.service';
 import { TestEventDuplicateService } from '../test-event-duplicate.service';
 import { EntityPersistenceService } from '../entity-persistence.service';
+import { SinglePerParentUpsertService } from '../single-per-parent-upsert.service';
 import { Repository, EntityMetadata } from 'typeorm';
 
 interface ProjectRow {
@@ -25,9 +26,7 @@ interface PrimaryColumnLike {
   propertyName: string;
 }
 
-class FakeRepo<T extends { [k: string]: unknown } = { [k: string]: unknown }>
-  implements Partial<Repository<T>>
-{
+class FakeRepo<T extends { [k: string]: unknown } = { [k: string]: unknown }> {
   rows: T[] = [];
   constructor(private readonly pk: keyof T) {}
   create(obj: T): T {
@@ -130,9 +129,14 @@ describe('EntityImportService project slug conflict integration', () => {
       relationMapper
     );
     const testEventDup = new TestEventDuplicateService(idMapRegistry);
-    const entityPersistence = new EntityPersistenceService(
+    const upsertSvc = new SinglePerParentUpsertService(
       relationMapper,
       idMapRegistry
+    );
+    const entityPersistence = new EntityPersistenceService(
+      relationMapper,
+      idMapRegistry,
+      upsertSvc
     );
     const rowProcessor = new ImportRowProcessorService(
       testEventDup,

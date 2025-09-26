@@ -36,112 +36,13 @@ export class RelationMapperService {
     projectId: unknown,
     idMaps?: Record<string, Map<unknown, unknown>>
   ) {
-    // Early: if a projectSlug is present and no projectId, resolve it immediately so downstream relation logic sees normalized project reference.
-    if (
-      materialized['projectSlug'] != null &&
-      materialized['projectId'] == null
-    ) {
-      const pk = this.lookup('ProjectEntity', materialized['projectSlug']);
-      if (pk != null) materialized['projectId'] = pk;
-    }
-    type MinimalRelation = {
-      isManyToOne?: boolean;
-      isOneToOneOwner?: boolean;
-      propertyName?: string;
-      joinColumns?: Array<{
-        databaseName?: string;
-        propertyName?: string;
-        name?: string;
-      }>;
-      inverseEntityMetadata?: { name?: string };
-    };
-    for (const r of meta.relations) {
-      const relation = r as unknown as MinimalRelation;
-      if (!(relation.isManyToOne || relation.isOneToOneOwner)) continue;
+    this.normalizeProjectReference(materialized);
 
-      const tryKeys = this.buildCandidateKeys(relation);
-      let fkVal = this.extractFkFromKeys(materialized, tryKeys);
+    // Map relations from TypeORM metadata
+    this.mapRelationFks(materialized, meta, projectId, idMaps);
 
-      fkVal ??= this.maybeTestEventFk(materialized, relation);
-
-      this.applyResolvedFk(materialized, relation, fkVal, projectId, idMaps);
-    }
-
-    // --- Generic *Id field remapping (post relation-specific logic) ---
-    // For any property that ends with 'Id' and whose value matches an old id in a known idMap,
-    // rewrite to the new id. This is a fallback for FKs not captured by TypeORM relation metadata.
-    if (idMaps) {
-      for (const [prop, value] of Object.entries(materialized)) {
-        if (!prop.endsWith('Id')) continue;
-        if (value == null) continue;
-        // Attempt to infer target entity name from prop (e.g., projectId -> ProjectEntity)
-        const base = prop.substring(0, prop.length - 2); // remove 'Id'
-        const candidateEntityNames = [
-          `${base.charAt(0).toUpperCase()}${base.slice(1)}Entity`,
-          `${base.charAt(0).toUpperCase()}${base.slice(1)}`
-        ];
-        let mapped: unknown = undefined;
-        for (const c of candidateEntityNames) {
-          const m = idMaps[c];
-          if (m && m.has(value)) {
-            mapped = m.get(value);
-            break;
-          }
-        }
-        if (mapped != null) {
-          materialized[prop] = mapped as unknown;
-        }
-      }
-
-      // Pass 2: resolve <entity>ExportRef -> <entity>Id if present
-      for (const [prop, value] of Object.entries(materialized)) {
-        if (!prop.endsWith('ExportRef')) continue;
-        if (value == null) continue;
-        const base = prop.substring(0, prop.length - 'ExportRef'.length);
-        const candidateEntityNames = [
-          `${base.charAt(0).toUpperCase()}${base.slice(1)}Entity`,
-          `${base.charAt(0).toUpperCase()}${base.slice(1)}`
-        ];
-        let mapped: unknown = undefined;
-        for (const c of candidateEntityNames) {
-          const direct = this.lookup(c, value);
-          if (direct != null) {
-            mapped = direct;
-            break;
-          }
-        }
-        if (mapped != null) {
-          const idProp = `${base}Id`;
-          if (!(idProp in materialized)) materialized[idProp] = mapped;
-        }
-      }
-
-      // Pass 3: detect embedded relation objects with __exportRef
-      for (const [prop, value] of Object.entries(materialized)) {
-        if (!value || typeof value !== 'object' || Array.isArray(value))
-          continue;
-        const refVal = (value as Record<string, unknown>)['__exportRef'];
-        if (refVal == null) continue;
-        // Try using prop name to infer entity
-        const candidateEntityNames = [
-          `${prop.charAt(0).toUpperCase()}${prop.slice(1)}Entity`,
-          `${prop.charAt(0).toUpperCase()}${prop.slice(1)}`
-        ];
-        for (const c of candidateEntityNames) {
-          const pk = this.lookup(c, refVal);
-          if (pk != null) {
-            (value as Record<string, unknown>)['id'] = pk;
-            // Also surface an <prop>Id if not already present to aid downstream logic
-            const idProp = `${prop}Id`;
-            if (!(idProp in materialized)) materialized[idProp] = pk;
-            break;
-          }
-        }
-      }
-
-      // Pass 4: if a standalone projectSlug is present on a row (legacy export style) and no projectId, resolve it.
-      // (Previously handled early)
-    }
+    // Generic field remapping passes
+    this.applyGenericRemapping(materialized, idMaps);
   }
 
   private buildCandidateKeys(relation: {
@@ -239,10 +140,9 @@ export class RelationMapperService {
         !Array.isArray(existing) &&
         !('id' in (existing as Record<string, unknown>)) &&
         // Some export formats might embed raw id under a different key
-        (('value' in (existing as Record<string, unknown>) &&
-          (typeof (existing as Record<string, unknown>).value === 'number' ||
-            typeof (existing as Record<string, unknown>).value ===
-              'string')) as boolean)
+        'value' in (existing as Record<string, unknown>) &&
+        (typeof (existing as Record<string, unknown>).value === 'number' ||
+          typeof (existing as Record<string, unknown>).value === 'string')
       ) {
         const val = (existing as Record<string, unknown>).value as
           | number
@@ -301,5 +201,139 @@ export class RelationMapperService {
       if (newId != null) return newId;
     }
     return undefined as unknown;
+  }
+
+  // --- Extracted helpers to reduce cognitive complexity ---
+
+  private normalizeProjectReference(materialized: Record<string, unknown>) {
+    if (
+      materialized['projectSlug'] != null &&
+      materialized['projectId'] == null
+    ) {
+      const pk = this.lookup('ProjectEntity', materialized['projectSlug']);
+      if (pk != null) materialized['projectId'] = pk;
+    }
+  }
+
+  private mapRelationFks(
+    materialized: Record<string, unknown>,
+    meta: EntityMetadata,
+    projectId: unknown,
+    idMaps?: Record<string, Map<unknown, unknown>>
+  ) {
+    type MinimalRelation = {
+      isManyToOne?: boolean;
+      isOneToOneOwner?: boolean;
+      propertyName?: string;
+      joinColumns?: Array<{
+        databaseName?: string;
+        propertyName?: string;
+        name?: string;
+      }>;
+      inverseEntityMetadata?: { name?: string };
+    };
+
+    for (const r of meta.relations) {
+      const relation = r as unknown as MinimalRelation;
+      if (!(relation.isManyToOne || relation.isOneToOneOwner)) continue;
+      this.mapSingleRelation(materialized, relation, projectId, idMaps);
+    }
+  }
+
+  private mapSingleRelation(
+    materialized: Record<string, unknown>,
+    relation: {
+      isManyToOne?: boolean;
+      isOneToOneOwner?: boolean;
+      propertyName?: string;
+      joinColumns?: Array<{
+        databaseName?: string;
+        propertyName?: string;
+        name?: string;
+      }>;
+      inverseEntityMetadata?: { name?: string };
+    },
+    projectId: unknown,
+    idMaps?: Record<string, Map<unknown, unknown>>
+  ) {
+    const tryKeys = this.buildCandidateKeys(relation);
+    let fkVal = this.extractFkFromKeys(materialized, tryKeys);
+    fkVal ??= this.maybeTestEventFk(materialized, relation);
+    this.applyResolvedFk(materialized, relation, fkVal, projectId, idMaps);
+  }
+
+  private applyGenericRemapping(
+    materialized: Record<string, unknown>,
+    idMaps?: Record<string, Map<unknown, unknown>>
+  ) {
+    if (!idMaps) return;
+    this.remapIdPropsUsingIdMaps(materialized, idMaps);
+    this.resolveExportRefProps(materialized);
+    this.resolveEmbeddedExportRefs(materialized);
+  }
+
+  private remapIdPropsUsingIdMaps(
+    materialized: Record<string, unknown>,
+    idMaps: Record<string, Map<unknown, unknown>>
+  ) {
+    for (const [prop, value] of Object.entries(materialized)) {
+      if (!prop.endsWith('Id')) continue;
+      if (value == null) continue;
+      const base = prop.substring(0, prop.length - 2); // remove 'Id'
+      const candidateEntityNames = this.candidateEntityNamesFromBase(base);
+      for (const c of candidateEntityNames) {
+        const m = idMaps[c];
+        if (m?.has(value)) {
+          materialized[prop] = m.get(value);
+          break;
+        }
+      }
+    }
+  }
+
+  private resolveExportRefProps(materialized: Record<string, unknown>) {
+    for (const [prop, value] of Object.entries(materialized)) {
+      if (!prop.endsWith('ExportRef')) continue;
+      if (value == null) continue;
+      const base = prop.substring(0, prop.length - 'ExportRef'.length);
+      const candidateEntityNames = this.candidateEntityNamesFromBase(base);
+      let mapped: unknown = undefined;
+      for (const c of candidateEntityNames) {
+        const direct = this.lookup(c, value);
+        if (direct != null) {
+          mapped = direct;
+          break;
+        }
+      }
+      if (mapped != null) {
+        const idProp = `${base}Id`;
+        if (!(idProp in materialized)) materialized[idProp] = mapped;
+      }
+    }
+  }
+
+  private resolveEmbeddedExportRefs(materialized: Record<string, unknown>) {
+    for (const [prop, value] of Object.entries(materialized)) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+      const refVal = (value as Record<string, unknown>)['__exportRef'];
+      if (refVal == null) continue;
+      const candidateEntityNames = this.candidateEntityNamesFromBase(prop);
+      for (const c of candidateEntityNames) {
+        const pk = this.lookup(c, refVal);
+        if (pk != null) {
+          (value as Record<string, unknown>)['id'] = pk;
+          const idProp = `${prop}Id`;
+          if (!(idProp in materialized)) materialized[idProp] = pk;
+          break;
+        }
+      }
+    }
+  }
+
+  private candidateEntityNamesFromBase(base: string): string[] {
+    return [
+      `${base.charAt(0).toUpperCase()}${base.slice(1)}Entity`,
+      `${base.charAt(0).toUpperCase()}${base.slice(1)}`
+    ];
   }
 }

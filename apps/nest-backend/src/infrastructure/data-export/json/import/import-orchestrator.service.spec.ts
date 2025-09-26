@@ -28,6 +28,7 @@ import { PrimaryKeyService } from '../core/primary-key.service';
 import { ProjectImportService } from '../core/project-import.service';
 import { TestEventDuplicateService } from '../core/test-event-duplicate.service';
 import { EntityPersistenceService } from '../core/entity-persistence.service';
+import { SinglePerParentUpsertService } from '../core/single-per-parent-upsert.service';
 import { ImportRowProcessorService } from '../core/import-row-processor.service';
 import { JsonProjectImportService } from './json-project-import.service';
 import { FixtureEnvelopeV1 } from '../../interfaces/fixture-types';
@@ -82,6 +83,7 @@ describe('ImportOrchestrator (fixture integration)', () => {
         PrimaryKeyService,
         ProjectImportService,
         TestEventDuplicateService,
+        SinglePerParentUpsertService,
         EntityPersistenceService,
         ImportRowProcessorService,
         JsonProjectImportService
