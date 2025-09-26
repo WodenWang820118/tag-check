@@ -5,14 +5,18 @@ import {
   OnGatewayDisconnect,
   WebSocketServer,
   SubscribeMessage,
-  MessageBody,
-  ConnectedSocket
+  MessageBody
 } from '@nestjs/websockets';
-import { Socket } from 'dgram';
 import { Server } from 'http';
 import { Logger } from '@nestjs/common';
 
-@WebSocketGateway(Number(process.env.WEB_SOCKET as unknown as string) || 7002, {
+// During test environment we bind to an ephemeral port 0 to avoid EADDRINUSE collisions
+const wsPort =
+  process.env.NODE_ENV === 'test'
+    ? 0
+    : Number(process.env.WEB_SOCKET as unknown as string) || 7002;
+
+@WebSocketGateway(wsPort, {
   transports: ['websocket'],
   namespace: 'events',
   cors: {
@@ -27,27 +31,24 @@ export class EventsGatewayService
   private readonly logger = new Logger(EventsGatewayService.name);
   @WebSocketServer() server!: Server;
 
-  afterInit(socket: Server) {
+  afterInit() {
     this.logger.log('The socket has been initialized');
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
+  handleConnection() {
     this.logger.log('Handle connection');
   }
 
-  handleDisconnect(client: Socket) {
+  handleDisconnect() {
     this.logger.log('Handle disconnect');
   }
 
   @SubscribeMessage('events')
-  handleEvent(
-    @MessageBody() data: string,
-    @ConnectedSocket() client: Socket
-  ): string {
+  handleEvent(@MessageBody() data: string): string {
     return data;
   }
 
-  sendToAll(event: string, message: any) {
+  sendToAll(event: string, message: unknown) {
     this.server.emit(event, message);
   }
 
@@ -55,7 +56,7 @@ export class EventsGatewayService
     this.server.emit('progressUpdate', { totalSteps, currentStep });
   }
 
-  sendEventCompleted(message: any) {
+  sendEventCompleted(message: unknown) {
     this.server.emit('eventCompleted', { message });
   }
 }

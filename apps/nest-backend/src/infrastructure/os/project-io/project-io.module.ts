@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ProjectIoService } from './project-io.service';
-import { DatabaseIoModule } from '../database-io/database-io.module';
+import { ProjectCompressor } from './project-compressor.service';
+import { ProjectUnzipper } from './project-unzipper.service';
 
 @Module({
-  imports: [DatabaseIoModule],
-  providers: [ProjectIoService],
-  exports: [ProjectIoService]
+  imports: [],
+  providers: [ProjectIoService, ProjectCompressor, ProjectUnzipper],
+  exports: [ProjectIoService, ProjectCompressor, ProjectUnzipper]
 })
 export class ProjectIoModule {}
