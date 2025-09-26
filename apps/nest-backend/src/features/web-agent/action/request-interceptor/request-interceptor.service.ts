@@ -140,10 +140,18 @@ export class RequestInterceptorService {
     this.rawRequest.next(request);
   }
 
-  getRawRequest() {
+  /**
+   * Returns an observable of the raw GA4 request URL captured by the interceptor.
+   * By default it waits (up to 15s) for a non-empty value (useful in production flows).
+   * Tests can pass a shorter timeout and/or disable the non-empty wait so they do not
+   * block for the full default timeout when asserting timeout behaviour or after a clear.
+   */
+  getRawRequest(options?: { timeoutMs?: number; waitForNonEmpty?: boolean }) {
+    const { timeoutMs = 15000, waitForNonEmpty = true } = options || {};
     return this.rawRequest.pipe(
-      timeout(15000),
-      first((request) => !!request),
+      timeout(timeoutMs),
+      // Only gate on non-empty if requested (mirrors previous semantics by default)
+      waitForNonEmpty ? first((request) => !!request) : first(),
       catchError((error) => {
         if (error instanceof TimeoutError) {
           this.logger.warn('Timeout occurred while waiting for raw request');

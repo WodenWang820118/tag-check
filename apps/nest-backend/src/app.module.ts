@@ -11,6 +11,7 @@ import { LoggingInterceptorModule } from './common/logging-interceptor/logging-i
 import { LoggingInterceptor } from './common/logging-interceptor/logging-interceptor.service';
 import { ConfigsModule } from './core/configs/configs.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import { EntitiesModule } from './infrastructure/database/entities.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 
     // Feature modules
     ControllerModule,
+    EntitiesModule,
 
     // Cross-cutting concerns
     AllExceptionsFilterModule,

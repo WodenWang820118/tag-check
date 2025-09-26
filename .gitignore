@@ -70,3 +70,7 @@ vite.config.*.timestamp*
 vitest.config.*.timestamp*
 .cursor\rules\nx-rules.mdc
 .github\instructions\nx.instructions.md
+
+# Ignore temporary test fixture folders
+tmp-facade-test/
+tmp-project-io-tests/

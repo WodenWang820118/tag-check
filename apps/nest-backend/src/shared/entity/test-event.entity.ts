@@ -7,7 +7,8 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
+  Index
 } from 'typeorm';
 import { ProjectEntity } from './project.entity';
 import { TestImageEntity } from './test-image.entity';
@@ -17,6 +18,8 @@ import { RecordingEntity } from './recording.entity';
 import { ItemDefEntity } from './item-def.entity';
 
 @Entity('test_event')
+// Composite uniqueness: a project can reuse an eventId used by another project.
+@Index(['project', 'eventId'], { unique: true })
 export class TestEventEntity
   extends AuditableEntity
   implements TestEventSchema
@@ -43,22 +46,20 @@ export class TestEventEntity
   @OneToOne(() => ItemDefEntity, (itemDef) => itemDef.testEvent, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'item_def_id' })
   itemDef!: ItemDefEntity;
 
   @OneToMany(() => TestEventDetailEntity, (detail) => detail.testEvent, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'test_event_detail_id' })
   testEventDetails!: TestEventDetailEntity[];
 
   @OneToMany(() => TestImageEntity, (testImage) => testImage.testEvent, {
     onDelete: 'CASCADE'
   })
-  @JoinColumn({ name: 'test_image_id' })
   testImage!: TestImageEntity[];
 
-  @Column({ name: 'event_id', unique: true, type: 'varchar' })
+  // eventId is only unique within the scope of a project now (composite index above)
+  @Column({ name: 'event_id', type: 'varchar' })
   eventId!: string;
 
   @Column({ name: 'test_name', type: 'varchar' })
