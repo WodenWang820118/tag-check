@@ -11,6 +11,21 @@ export class TopologicalSorterService {
     metasByName: Map<string, EntityMetadata>
   ): string[] {
     const entityNames = Object.keys(env.entities);
+    const { children, indegree } = this.buildGraph(entityNames, metasByName);
+    const ordered = this.performTopologicalSort(
+      entityNames,
+      children,
+      indegree
+    );
+    this.ensureCompleteOrdering(entityNames, ordered);
+    this.applyHeuristics(ordered);
+    return ordered;
+  }
+
+  private buildGraph(
+    entityNames: string[],
+    metasByName: Map<string, EntityMetadata>
+  ): { children: Map<string, Set<string>>; indegree: Map<string, number> } {
     const children: Map<string, Set<string>> = new Map();
     const indegree: Map<string, number> = new Map();
     entityNames.forEach((n) => {
@@ -18,74 +33,104 @@ export class TopologicalSorterService {
       indegree.set(n, 0);
     });
 
-    for (const potentialChild of entityNames) {
-      const meta = metasByName.get(potentialChild);
+    for (const childName of entityNames) {
+      const meta = metasByName.get(childName);
       if (!meta) continue;
-      for (const rel of meta.relations) {
-        const r: any = rel; // eslint-disable-line @typescript-eslint/no-explicit-any
-        const hasJoinColumns =
-          Array.isArray(r.joinColumns) && r.joinColumns.length > 0;
-        const isOwning = !!(
-          r.isManyToOne ||
-          r.isOneToOneOwner ||
-          r.relationType === 'many-to-one' ||
-          (r.relationType === 'one-to-one' && (r.isOwning || hasJoinColumns))
-        );
-        if (!isOwning) continue;
-        const parentName = rel.inverseEntityMetadata?.name;
-        if (!parentName) continue;
-        if (!entityNames.includes(parentName)) continue;
-        if (parentName === potentialChild) continue;
-        const set = children.get(parentName);
-        if (!set) continue;
-        if (!set.has(potentialChild)) {
-          set.add(potentialChild);
-          indegree.set(potentialChild, (indegree.get(potentialChild) || 0) + 1);
-        }
-      }
+      for (const rel of meta.relations)
+        this.processRelation(rel, childName, entityNames, children, indegree);
     }
+    return { children, indegree };
+  }
 
-    const queue: string[] = entityNames.filter(
-      (n) => (indegree.get(n) || 0) === 0
+  private processRelation(
+    rel: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+    childName: string,
+    entityNames: string[],
+    children: Map<string, Set<string>>,
+    indegree: Map<string, number>
+  ): void {
+    if (!this.isOwningSide(rel)) return;
+    const parentName = rel.inverseEntityMetadata?.name;
+    if (!parentName) return;
+    if (!entityNames.includes(parentName)) return;
+    if (parentName === childName) return;
+    const set = children.get(parentName);
+    if (!set) return;
+    if (!set.has(childName)) {
+      set.add(childName);
+      indegree.set(childName, (indegree.get(childName) || 0) + 1);
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private isOwningSide(rel: any): boolean {
+    // RelationMetadata API differences: use optional chaining defensively
+    const anyRel: any = rel; // eslint-disable-line @typescript-eslint/no-explicit-any
+    const hasJoinColumns =
+      Array.isArray(anyRel?.joinColumns) && anyRel.joinColumns.length > 0;
+    return Boolean(
+      anyRel?.isManyToOne ||
+        anyRel?.isOneToOneOwner ||
+        anyRel?.relationType === 'many-to-one' ||
+        (anyRel?.relationType === 'one-to-one' &&
+          (anyRel?.isOwning || hasJoinColumns))
     );
-    queue.sort();
+  }
 
+  private performTopologicalSort(
+    entityNames: string[],
+    children: Map<string, Set<string>>,
+    indegree: Map<string, number>
+  ): string[] {
+    const queue = entityNames.filter((n) => (indegree.get(n) || 0) === 0);
+    queue.sort((a, b) => a.localeCompare(b));
     const ordered: string[] = [];
     while (queue.length) {
       const n = queue.shift();
       if (!n) break;
       ordered.push(n);
       const kids = Array.from(children.get(n) || []);
-      kids.sort();
-      for (const k of kids) {
-        const current = indegree.get(k) ?? 0;
-        const next = current - 1;
-        indegree.set(k, next);
-        if (next === 0) {
-          const idx = queue.findIndex((q) => q.localeCompare(k) > 0);
-          if (idx === -1) queue.push(k);
-          else queue.splice(idx, 0, k);
-        }
-      }
-    }
-
-    if (ordered.length < entityNames.length) {
-      this.logger.warn(
-        'Cycle detected in entity dependency graph. Falling back to partial ordering.'
-      );
-      for (const n of entityNames) if (!ordered.includes(n)) ordered.push(n);
-    }
-    // Heuristic: ensure TestEventEntity precedes its typical dependents (Recording/Spec/ItemDef)
-    const projIdx = ordered.indexOf('ProjectEntity');
-    const testIdx = ordered.indexOf('TestEventEntity');
-    if (testIdx !== -1 && projIdx !== -1 && testIdx < projIdx) {
-      // move test event after project
-      ordered.splice(testIdx, 1);
-      ordered.splice(projIdx + 1, 0, 'TestEventEntity');
-    } else if (testIdx !== -1 && projIdx !== -1 && testIdx > projIdx + 1) {
-      ordered.splice(testIdx, 1);
-      ordered.splice(projIdx + 1, 0, 'TestEventEntity');
+      kids.sort((a, b) => a.localeCompare(b));
+      for (const k of kids) this.decrementIndegreeAndQueue(k, indegree, queue);
     }
     return ordered;
+  }
+
+  private decrementIndegreeAndQueue(
+    name: string,
+    indegree: Map<string, number>,
+    queue: string[]
+  ): void {
+    const current = indegree.get(name) ?? 0;
+    const next = current - 1;
+    indegree.set(name, next);
+    if (next === 0) this.insertSorted(queue, name);
+  }
+
+  private insertSorted(queue: string[], name: string): void {
+    const idx = queue.findIndex((q) => q.localeCompare(name) > 0);
+    if (idx === -1) queue.push(name);
+    else queue.splice(idx, 0, name);
+  }
+
+  private ensureCompleteOrdering(
+    entityNames: string[],
+    ordered: string[]
+  ): void {
+    if (ordered.length === entityNames.length) return;
+    this.logger.warn(
+      'Cycle detected in entity dependency graph. Falling back to partial ordering.'
+    );
+    for (const n of entityNames) if (!ordered.includes(n)) ordered.push(n);
+  }
+
+  private applyHeuristics(ordered: string[]): void {
+    const projIdx = ordered.indexOf('ProjectEntity');
+    const testIdx = ordered.indexOf('TestEventEntity');
+    if (projIdx === -1 || testIdx === -1) return;
+    if (testIdx === projIdx + 1) return; // already correct
+    // Move TestEventEntity immediately after ProjectEntity
+    ordered.splice(testIdx, 1);
+    ordered.splice(projIdx + 1, 0, 'TestEventEntity');
   }
 }

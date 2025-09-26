@@ -9,6 +9,7 @@ import { PrimaryKeyService } from '../primary-key.service';
 import { ProjectImportService } from '../project-import.service';
 import { TestEventDuplicateService } from '../test-event-duplicate.service';
 import { EntityPersistenceService } from '../entity-persistence.service';
+import { SinglePerParentUpsertService } from '../single-per-parent-upsert.service';
 import { EntityMetadata, Repository } from 'typeorm';
 
 interface PrimaryColumnLike {
@@ -28,7 +29,9 @@ interface ChildRow {
 }
 
 // Narrow fake repo not pretending full TypeORM signatures
-class SimpleRepo<T extends Record<string, unknown> = Record<string, unknown>> {
+class SimpleRepo<
+  T extends { [k: string]: unknown } = { [k: string]: unknown }
+> {
   rows: T[] = [];
   constructor(private readonly pk: keyof T) {}
   create(obj: T): T {
@@ -118,6 +121,10 @@ describe('EntityImportService __exportRef mapping', () => {
       new SimpleMaterializer() as unknown as RowMaterializerService;
     const slugSvc = new SimpleSlugService() as unknown as ProjectSlugService;
     const pkSvc = new PrimaryKeyService();
+    const upsertSvc = new SinglePerParentUpsertService(
+      relationMapper,
+      idMapRegistry
+    );
     const projImporter = new ProjectImportService(
       materializer,
       slugSvc,
@@ -127,7 +134,8 @@ describe('EntityImportService __exportRef mapping', () => {
     const testEventDup = new TestEventDuplicateService(idMapRegistry);
     const entityPersistence = new EntityPersistenceService(
       relationMapper,
-      idMapRegistry
+      idMapRegistry,
+      upsertSvc
     );
     const rowProcessor = new ImportRowProcessorService(
       testEventDup,
