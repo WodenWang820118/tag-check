@@ -176,15 +176,15 @@ export class ClickHandler implements ActionHandler {
       };
 
       const elements = document.querySelectorAll<HTMLElement>(sel);
-      elements.forEach((elem) =>
+      for (const elem of elements) {
         elem.addEventListener('click', (e) => {
           const target = e.target as Node;
           // Check if the target is the element itself or a descendant of the element
           if (target === elem || isDescendant(elem, target)) {
             e.preventDefault();
           }
-        })
-      );
+        });
+      }
     }, selector);
   }
 }

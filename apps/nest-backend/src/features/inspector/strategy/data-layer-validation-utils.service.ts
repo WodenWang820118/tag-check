@@ -67,13 +67,14 @@ export class DataLayerValidationUtilsService {
       );
     }
     if (typeof specValue === 'number') {
-      return specValue !== eventValue
-        ? this.createValidationError(
-            `Value for key "${key}" does not match the expected value`,
-            dataLayerSpec,
-            dataLayerObj
-          )
-        : null;
+      if (specValue === eventValue) {
+        return null;
+      }
+      return this.createValidationError(
+        `Value for key "${key}" does not match the expected value`,
+        dataLayerSpec,
+        dataLayerObj
+      );
     }
     return null;
   }
@@ -106,13 +107,14 @@ export class DataLayerValidationUtilsService {
       }
       return null;
     }
-    return specValue !== eventValue
-      ? this.createValidationError(
-          `Value for key "${key}" does not match the expected value`,
-          dataLayerSpec,
-          dataLayerObj
-        )
-      : null;
+    if (specValue === eventValue) {
+      return null;
+    }
+    return this.createValidationError(
+      `Value for key "${key}" does not match the expected value`,
+      dataLayerSpec,
+      dataLayerObj
+    );
   }
 
   private createPassedResult(

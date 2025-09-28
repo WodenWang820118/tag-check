@@ -1,4 +1,3 @@
- 
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import {
   HttpException,
@@ -46,13 +45,13 @@ export class ProjectAbstractReportService {
         mkdirSync(`${folderPath}`, { recursive: true });
       }
 
-      if (!existsSync(abstractPath)) {
-        this.fileService.writeJsonFile(abstractPath, data);
-      } else {
+      if (existsSync(abstractPath)) {
         const report =
           this.fileService.readJsonFile<IReportDetails>(abstractPath);
         const updatedReport = { ...report, ...data };
         this.fileService.writeJsonFile(abstractPath, updatedReport);
+      } else {
+        this.fileService.writeJsonFile(abstractPath, data);
       }
     } catch (error) {
       this.logger.error(error);
