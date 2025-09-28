@@ -125,18 +125,18 @@ export class RequestProcessorService {
     const item: BaseItem = {};
     const customKeys: { [index: string]: string } = {};
 
-    productFields.forEach((field) => {
+    for (const field of productFields) {
       const paramName = Object.keys(standardParameterMap).find((key) =>
         field.startsWith(key)
       );
 
       if (!paramName) {
         this.processCustomField(field, item, customKeys);
-        return;
+        continue;
       }
 
       item[standardParameterMap[paramName]] = field.split(paramName)[1];
-    });
+    }
 
     return item;
   }
