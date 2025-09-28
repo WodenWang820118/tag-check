@@ -99,7 +99,7 @@ export class MainContentComponent implements OnInit {
     // Create TOC entries from the heading elements
     const newToc = headElements.map((element) => {
       const text = element.textContent || '';
-      const id = text.toLowerCase().replace(/[^\w]+/g, '-');
+      const id = text.toLowerCase().replaceAll(/[^\w]+/g, '-');
 
       // Set the ID on the element for linking
       element.id = id;

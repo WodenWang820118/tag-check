@@ -135,7 +135,7 @@ export class MediaPreviewDialogComponent implements OnDestroy {
     } else {
       a.href = (this.data.url as string) ?? '';
     }
-    const ts = new Date().toISOString().replace(/[:.]/g, '-');
+    const ts = new Date().toISOString().replaceAll(/[:.]/g, '-');
     const base =
       this.data.type === CarouselItemEnum.Image ? 'screenshot' : 'recording';
     const ext = this.data.type === CarouselItemEnum.Image ? 'png' : 'webm';

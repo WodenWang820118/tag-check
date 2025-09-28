@@ -8,7 +8,7 @@ export class XlsxNameService {
     let cleaned = Array.from(name)
       .map((ch) => (INVALID.has(ch) ? ' ' : ch))
       .join('');
-    cleaned = cleaned.replace(/\s+/g, ' ').trim();
+    cleaned = cleaned.replaceAll(/\s+/g, ' ').trim();
     if (cleaned.length <= 31) return cleaned;
     return cleaned.slice(0, 15) + '…' + cleaned.slice(-15);
   }
