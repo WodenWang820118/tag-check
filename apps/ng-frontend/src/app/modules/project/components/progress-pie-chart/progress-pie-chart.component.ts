@@ -103,10 +103,10 @@ export class ProgressPieChartComponent {
       ),
       datasets: [
         {
-          data: Array(this.progressUpdateService.totalSteps$()).fill(1),
-          backgroundColor: Array(this.progressUpdateService.totalSteps$()).fill(
-            '#e0e0e0'
-          ),
+          data: new Array(this.progressUpdateService.totalSteps$()).fill(1),
+          backgroundColor: new Array(
+            this.progressUpdateService.totalSteps$()
+          ).fill('#e0e0e0'),
           borderWidth: 1
         }
       ]
@@ -156,7 +156,7 @@ export class ProgressPieChartComponent {
   private updateChart() {
     const chartInstance = this.chart();
     if (chartInstance?.data?.datasets) {
-      const newBackgroundColors = Array(
+      const newBackgroundColors = new Array(
         this.progressUpdateService.totalSteps$()
       )
         .fill('')
