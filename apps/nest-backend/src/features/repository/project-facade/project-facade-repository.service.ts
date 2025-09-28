@@ -15,8 +15,7 @@ import {
   ApplicationSetting,
   AuthenticationSetting,
   BrowserSetting,
-  ProjectSetting,
-  Spec
+  ProjectSetting
 } from '@utils';
 
 @Injectable()

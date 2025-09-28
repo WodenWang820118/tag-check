@@ -18,9 +18,9 @@ export class JsonProjectImportService implements ProjectImportProvider {
     if (!payload || typeof payload !== 'object') {
       throw new Error('Invalid payload');
     }
-    const env = payload as Partial<FixtureEnvelopeV1>;
+    const env = payload as FixtureEnvelopeV1;
     if (env.version !== 1) throw new Error('Unsupported fixture version');
     if (!env.entities) throw new Error('Missing entities');
-    return env as FixtureEnvelopeV1;
+    return env;
   }
 }

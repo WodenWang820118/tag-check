@@ -31,7 +31,7 @@ export class TestEventDuplicateService {
           relations: ['project']
         } as Record<string, unknown>)) as Array<Record<string, unknown>>;
         existing = fallback.map((fRaw) => {
-          const f = fRaw as Record<string, unknown>;
+          const f = fRaw;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const proj = f['project'] as Record<string, any> | undefined;
           return {
@@ -67,9 +67,9 @@ export class TestEventDuplicateService {
     raw: Record<string, unknown>,
     materialized: Record<string, unknown>,
     existingComposite: Map<string, unknown> | null,
-    pkInfo: { primaryIsSingle: boolean; primaryKeyProp?: string },
-    stats: { inserted: number; skipped: number }
+    pkInfo: { primaryIsSingle: boolean; primaryKeyProp?: string }
   ): boolean {
+    // Only concerned with TestEventEntity composite uniqueness checks
     if (meta.name !== 'TestEventEntity' || !existingComposite) return false;
     const incomingEventId = materialized['eventId'];
     const owningProjectId = materialized['projectId'];
@@ -80,6 +80,10 @@ export class TestEventDuplicateService {
     ) {
       const compositeKey = `${owningProjectId}::${incomingEventId}`;
       if (existingComposite.has(compositeKey)) {
+        // We intentionally DO NOT skip duplicates. The import semantics allow
+        // inserting another TestEvent row with the same (projectId, eventId).
+        // Still, if possible, wire the old -> existing pk mapping for downstream
+        // relations, but proceed with insertion.
         const existingPk = existingComposite.get(compositeKey);
         const { primaryIsSingle, primaryKeyProp } = pkInfo;
         if (primaryIsSingle && primaryKeyProp) {
@@ -88,8 +92,8 @@ export class TestEventDuplicateService {
             this.idMapRegistry.ensure(meta.name).set(oldPk, existingPk);
           }
         }
-        stats.skipped++;
-        return true;
+        // Do not mark as skipped; allow caller to continue with persist
+        return false;
       }
     }
     return false;

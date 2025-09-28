@@ -1,7 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, Observable, tap, throwError } from 'rxjs';
-import { DataLayerSpec, ProjectSpec, Spec } from '@utils';
+import { catchError, map, Observable, throwError } from 'rxjs';
+import { DataLayerSpec, ProjectSpec } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
