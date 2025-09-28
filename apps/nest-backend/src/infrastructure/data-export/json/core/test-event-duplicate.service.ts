@@ -92,8 +92,15 @@ export class TestEventDuplicateService {
             this.idMapRegistry.ensure(meta.name).set(oldPk, existingPk);
           }
         }
-        // Do not mark as skipped; allow caller to continue with persist
-        return false;
+        // If caller explicitly requested skipping duplicates (via either the
+        // original raw values or the materialized row), honor that and return
+        // true to indicate the row should be skipped. Otherwise, continue to
+        // allow insertion by returning false.
+        const skipFlagRaw = raw['skipIfDuplicate'];
+        const skipFlagMaterialized = materialized['skipIfDuplicate'];
+        const shouldSkip =
+          skipFlagRaw === true || skipFlagMaterialized === true;
+        return shouldSkip;
       }
     }
     return false;

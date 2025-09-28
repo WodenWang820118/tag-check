@@ -142,7 +142,7 @@ export class MediaPreviewDialogComponent implements OnDestroy {
     a.download = `${base}-${ts}.${ext}`;
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    a.remove();
   }
 
   ngOnDestroy(): void {
