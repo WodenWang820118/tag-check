@@ -93,7 +93,11 @@ export class EditorService {
 
   private cleanupHost(host: HTMLElement | null | undefined) {
     if (!host) return;
-    while (host.firstChild) host.removeChild(host.firstChild);
+    while (host.firstChild) {
+      const child = host.firstChild;
+      // ChildNode.remove() is widely supported on modern browsers and runtimes
+      child.remove();
+    }
   }
 
   private buildEditorView(

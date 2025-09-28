@@ -58,8 +58,8 @@ export class SpecExtractService {
       fixedString = fixedString.replaceAll("'", '"');
 
       // Handle mismatched quotes
-      fixedString = fixedString.replace(/"([^"]*)'(?![^"]*")/g, '"$1"');
-      fixedString = fixedString.replace(/(?<![^"]*')'([^"]*)"/g, '"$1"');
+      fixedString = fixedString.replaceAll(/"([^"]*)'(?![^"]*")/g, '"$1"');
+      fixedString = fixedString.replaceAll(/(?<![^"]*')'([^"]*)"/g, '"$1"');
 
       // Wrap unquoted property names with double quotes
       fixedString = fixedString.replaceAll(

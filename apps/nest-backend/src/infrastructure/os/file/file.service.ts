@@ -64,8 +64,11 @@ export class FileService {
     const regex = new RegExp(`${eventId}.*\\.xlsx$`, 'i');
     const files = this.folderService.readFolderFileNames(inspectionResultPath);
 
-    const filteredFiles = files.filter((file) => regex.test(file));
-    const filePath = join(inspectionResultPath, filteredFiles[0]);
+    const filteredFiles = files.find((file) => regex.test(file));
+    if (!filteredFiles) {
+      throw new NotFoundException('No matching files found');
+    }
+    const filePath = join(inspectionResultPath, filteredFiles);
     return new StreamableFile(createReadStream(filePath));
   }
 
