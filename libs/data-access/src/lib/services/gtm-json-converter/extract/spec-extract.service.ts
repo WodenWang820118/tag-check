@@ -37,7 +37,7 @@ export class SpecExtractService {
       let fixedString = inputString;
 
       // Remove multi-line comments first (/**/)
-      fixedString = fixedString.replace(/\/\*[\s\S]*?\*\//gm, '');
+      fixedString = fixedString.replaceAll(/\/\*[\s\S]*?\*\//gm, '');
 
       // Remove single-line comments that appear after JSON values
       const lines = fixedString.split('\n');
@@ -55,20 +55,20 @@ export class SpecExtractService {
       fixedString = lines.join('\n');
 
       // Replace single quotes with double quotes
-      fixedString = fixedString.replace(/'/g, '"');
+      fixedString = fixedString.replaceAll("'", '"');
 
       // Handle mismatched quotes
       fixedString = fixedString.replace(/"([^"]*)'(?![^"]*")/g, '"$1"');
       fixedString = fixedString.replace(/(?<![^"]*')'([^"]*)"/g, '"$1"');
 
       // Wrap unquoted property names with double quotes
-      fixedString = fixedString.replace(
+      fixedString = fixedString.replaceAll(
         /([{,]\s*)([a-zA-Z_]\w*)(\s*:)/g,
         '$1"$2"$3'
       );
 
       // Fix unquoted values (except true, false, and null) by wrapping them with quotes
-      fixedString = fixedString.replace(
+      fixedString = fixedString.replaceAll(
         /(:\s*)([^"{}[\],\s]+)(?=\s*[,\]}])/g,
         (match, p1, p2) => {
           if (['true', 'false', 'null'].includes(p2)) return match;
@@ -77,7 +77,7 @@ export class SpecExtractService {
       );
 
       // Remove any trailing commas
-      fixedString = fixedString.replace(/,\s*([\]}])/g, '$1');
+      fixedString = fixedString.replaceAll(/,\s*([\]}])/g, '$1');
 
       return fixedString;
     } catch (error) {

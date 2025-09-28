@@ -78,7 +78,7 @@ export class FileReportService {
         contentDisposition
       );
       if (matches?.[1]) {
-        return matches?.[1].replace(/['"]/g, '');
+        return matches?.[1].replaceAll(/['"]/g, '');
       }
     }
     return null;

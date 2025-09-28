@@ -73,7 +73,7 @@ export class TreeNodeService {
   }
 
   getSelectedTitle(nodeName: string): string {
-    return nodeName.toLowerCase().replace(/ /g, '-');
+    return nodeName.toLowerCase().replaceAll(' ', '-');
   }
 
   searchNodeById(id: number): TopicNode | null {

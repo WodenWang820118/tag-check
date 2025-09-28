@@ -255,12 +255,12 @@ export class ReportTabFacade {
       .toString()
       .trim()
       .toLowerCase()
-      .replace(/[^a-z0-9-_]+/g, '-');
+      .replaceAll(/[^a-z0-9-_]+/g, '-');
     const safeSlug = (projectSlug || '')
       .toString()
       .trim()
       .toLowerCase()
-      .replace(/[^a-z0-9-_]+/g, '-');
+      .replaceAll(/[^a-z0-9-_]+/g, '-');
     if (safeSlug) return `${safeSlug}_${safeEvent || 'event'}`;
     return safeEvent || 'event';
   }
