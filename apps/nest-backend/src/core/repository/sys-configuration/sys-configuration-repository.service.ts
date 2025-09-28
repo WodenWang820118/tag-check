@@ -38,7 +38,16 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
         where: { name: configName }
       });
 
-      if (!rootPath) {
+      if (rootPath) {
+        if (existsSync(rootPath.value)) {
+          this.logger.log('Valid root path configuration found');
+        } else {
+          // Path doesn't exist, update it
+          rootPath.value = configValue;
+          await this.configurationRepository.save(rootPath);
+          this.logger.log('Updated root path configuration with valid path');
+        }
+      } else {
         // Use insert or update (upsert) to handle potential race conditions
         await this.configurationRepository
           .createQueryBuilder()
@@ -53,13 +62,6 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
           .execute();
 
         this.logger.log('Root path configuration created or updated');
-      } else if (!existsSync(rootPath.value)) {
-        // Path doesn't exist, update it
-        rootPath.value = configValue;
-        await this.configurationRepository.save(rootPath);
-        this.logger.log('Updated root path configuration with valid path');
-      } else {
-        this.logger.log('Valid root path configuration found');
       }
     } catch (error) {
       this.logger.error('Failed to initialize configuration:', error);

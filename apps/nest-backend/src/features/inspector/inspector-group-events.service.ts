@@ -84,11 +84,11 @@ export class InspectorGroupEventsService {
       // Wait for the batch to complete
       const batchResults = await Promise.allSettled(batchPromises);
       // Extract results or errors
-      batchResults.forEach((result) => {
+      for (const result of batchResults) {
         results.push(
           result.status === 'fulfilled' ? result.value : result.reason
         );
-      });
+      }
 
       // Dispose of the incognito context after each batch
       await incognitoContext.close();

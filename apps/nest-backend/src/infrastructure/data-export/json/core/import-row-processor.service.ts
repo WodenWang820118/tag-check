@@ -83,54 +83,86 @@ export class ImportRowProcessorService {
     }
 
     // Existing ID collision handling (delegated)
-    if (pkInfo.primaryIsSingle && existingIds && pkInfo.primaryKeyProp) {
-      const pkVal = materialized[pkInfo.primaryKeyProp];
-      if (pkVal != null && existingIds.has(pkVal)) {
-        const rawOldPk = raw[pkInfo.primaryKeyProp];
-        const defaultUpsertEligible = new Set([
-          'ApplicationSettingEntity',
-          'AuthenticationSettingEntity',
-          'BrowserSettingEntity',
-          'RecordingEntity',
-          'SpecEntity',
-          'ItemDefEntity'
-        ]);
-        const shouldSkip = this.existingIdCollision
-          ? this.existingIdCollision.handleCollision({
-              metaName: meta.name,
-              pkVal,
-              rawPkVal: rawOldPk,
-              idMap: this.idMapRegistry
-                .ensure(name)
-                .set.bind(this.idMapRegistry.ensure(name)),
-              incrementSkipStat: () => ctx.stats[name].skipped++,
-              importDebug: Boolean(process.env.IMPORT_DEBUG)
-            })
-          : (() => {
-              if (!defaultUpsertEligible.has(meta.name)) {
-                if (rawOldPk != null)
-                  this.idMapRegistry.ensure(name).set(rawOldPk, pkVal);
-                ctx.stats[name].skipped++;
-                if (process.env.IMPORT_DEBUG) {
-                  this.logger.debug(
-                    `[IMPORT_DEBUG] Early skip (fallback) due to existingId collision for ${meta.name} pkVal=${String(pkVal)}`
-                  );
-                }
-                return true;
-              }
-              if (process.env.IMPORT_DEBUG) {
-                this.logger.debug(
-                  `[IMPORT_DEBUG] Collision on pk for upsert-eligible ${meta.name} (fallback), allowing through to persistence.`
-                );
-              }
-              return false;
-            })();
-
-        if (shouldSkip) return true;
-        // otherwise allow persistence to perform upsert
-      }
+    if (
+      pkInfo.primaryIsSingle &&
+      existingIds &&
+      pkInfo.primaryKeyProp &&
+      this.handleExistingIdCollision({
+        pkProp: pkInfo.primaryKeyProp,
+        materialized,
+        raw,
+        existingIds,
+        metaName: meta.name,
+        name,
+        ctx
+      })
+    ) {
+      return true;
     }
 
     return false;
+  }
+
+  private handleExistingIdCollision(params: {
+    pkProp: string;
+    materialized: Record<string, unknown>;
+    raw: Record<string, unknown>;
+    existingIds: Set<unknown>;
+    metaName: string;
+    name: string;
+    ctx: {
+      exportedProjectId: unknown;
+      newProjectId: unknown;
+      stats: Record<string, ImportStats>;
+      idMaps: Record<string, Map<unknown, unknown>>;
+    };
+  }): boolean {
+    const { pkProp, materialized, raw, existingIds, metaName, name, ctx } =
+      params;
+    const pkVal = materialized[pkProp];
+    if (pkVal == null || !existingIds.has(pkVal)) return false;
+
+    const rawOldPk = raw[pkProp];
+    const defaultUpsertEligible = new Set([
+      'ApplicationSettingEntity',
+      'AuthenticationSettingEntity',
+      'BrowserSettingEntity',
+      'RecordingEntity',
+      'SpecEntity',
+      'ItemDefEntity'
+    ]);
+
+    const shouldSkip = this.existingIdCollision
+      ? this.existingIdCollision.handleCollision({
+          metaName,
+          pkVal,
+          rawPkVal: rawOldPk,
+          idMap: this.idMapRegistry
+            .ensure(name)
+            .set.bind(this.idMapRegistry.ensure(name)),
+          incrementSkipStat: () => ctx.stats[name].skipped++,
+          importDebug: Boolean(process.env.IMPORT_DEBUG)
+        })
+      : (() => {
+          if (!defaultUpsertEligible.has(metaName)) {
+            if (rawOldPk != null)
+              this.idMapRegistry.ensure(name).set(rawOldPk, pkVal);
+            ctx.stats[name].skipped++;
+            if (process.env.IMPORT_DEBUG) {
+              this.logger.debug(
+                `[IMPORT_DEBUG] Early skip (fallback) due to existingId collision for ${metaName} pkVal=${String(pkVal)}`
+              );
+            }
+            return true;
+          }
+          if (process.env.IMPORT_DEBUG) {
+            this.logger.debug(
+              `[IMPORT_DEBUG] Collision on pk for upsert-eligible ${metaName} (fallback), allowing through to persistence.`
+            );
+          }
+          return false;
+        })();
+
+    return shouldSkip;
   }
 }
