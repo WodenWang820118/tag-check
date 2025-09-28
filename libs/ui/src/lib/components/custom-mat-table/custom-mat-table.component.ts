@@ -13,7 +13,7 @@ import { MatTableModule } from '@angular/material/table';
         @for (column of displayedColumns; track column) {
           <ng-container matColumnDef="{{ column }}">
             <th mat-header-cell *matHeaderCellDef>
-              {{ column.replace('__EMPTY', 'empty_title') }}
+              {{ column.replaceAll('__EMPTY', 'empty_title') }}
             </th>
             <td mat-cell *matCellDef="let element">
               @if (xlsxProcessService.isRenderingJson) {
