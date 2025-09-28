@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
+import { Ga4RequestMatcher } from './ga4-request-matcher.service';
 import {
   BehaviorSubject,
   catchError,
@@ -15,7 +16,10 @@ export class RequestInterceptorService {
   private readonly logger = new Logger(RequestInterceptorService.name);
   private readonly rawRequest = new BehaviorSubject<string>('');
 
-  constructor(private readonly dataLayerService: DataLayerService) {}
+  constructor(
+    private readonly dataLayerService: DataLayerService,
+    private readonly ga4RequestMatcher: Ga4RequestMatcher
+  ) {}
 
   async setupInterception(
     page: Page,
@@ -40,7 +44,7 @@ export class RequestInterceptorService {
         '';
 
       if (
-        this.isMatchingGa4Request(
+        this.ga4RequestMatcher.isMatchingGa4Request(
           requestUrl,
           postData,
           eventName,
@@ -68,73 +72,7 @@ export class RequestInterceptorService {
     });
   }
 
-  private isMatchingGa4Request(
-    url: string,
-    postData: string,
-    eventName: string,
-    measurementId: string
-  ): boolean {
-    try {
-      // Parse URL safely
-      const parsed = new URL(url);
-
-      if (
-        !parsed.hostname.includes('google-analytics.com') ||
-        !parsed.pathname.includes('/g/collect')
-      ) {
-        // Not a GA4 collect endpoint
-        return false;
-      }
-
-      const urlParams = parsed.searchParams;
-      const enParam = urlParams.get('en');
-      // check multiple possible measurement id param names
-      const tidParam =
-        urlParams.get('tid') ||
-        urlParams.get('measurement_id') ||
-        urlParams.get('mid');
-
-      if (enParam === eventName && tidParam === measurementId) return true;
-
-      // If request used POST, the payload may contain the params
-      if (postData) {
-        try {
-          // If body looks like JSON (Measurement Protocol v2 / mp/collect), try parsing
-          if (postData.trim().startsWith('{')) {
-            const bodyJson = JSON.parse(postData);
-            // event name often appears under events[0].name for MP v2
-            const bodyEventName =
-              (Array.isArray(bodyJson.events) && bodyJson.events[0]?.name) ||
-              '';
-            const bodyMeasurementId =
-              bodyJson.measurement_id || urlParams.get('measurement_id') || '';
-            if (
-              bodyEventName === eventName &&
-              bodyMeasurementId === measurementId
-            )
-              return true;
-          } else {
-            // Otherwise try parsing as URLSearchParams encoded body
-            const bodyParams = new URLSearchParams(postData);
-            const bodyEn = bodyParams.get('en');
-            const bodyTid =
-              bodyParams.get('tid') ||
-              bodyParams.get('measurement_id') ||
-              bodyParams.get('mid');
-            if (bodyEn === eventName && bodyTid === measurementId) return true;
-          }
-        } catch {
-          // ignore JSON / parsing errors and continue
-        }
-      }
-    } catch (err) {
-      // If URL parsing fails, log at debug level and don't crash.
-      this.logger.debug(`Failed to parse request URL for GA4 matching: ${err}`);
-      return false;
-    }
-
-    return false;
-  }
+  // Matching logic moved to Ga4RequestMatcher (SRP)
 
   setRawRequest(request: string) {
     this.rawRequest.next(request);

@@ -55,7 +55,7 @@ describe('TopologicalSorterService', () => {
   beforeEach(() => {
     service = new TopologicalSorterService();
     // Provide a noop implementation (return void) for warn
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     warnSpy = vi
       .spyOn(service['logger'] as any, 'warn')
       .mockImplementation(() => {

@@ -70,10 +70,9 @@ export class DataLayerService {
       const existingIndex = myDataLayer.findIndex((myDataLayerObject: any) => {
         // loosely compare by event property if present
         try {
-           
           return (
             myDataLayerObject &&
-            (myDataLayerObject as any).event === (dataLayerObject as any).event
+            myDataLayerObject.event === (dataLayerObject as any).event
           );
         } catch {
           return false;
@@ -81,9 +80,9 @@ export class DataLayerService {
       });
 
       if (existingIndex === -1) {
-        (myDataLayer as unknown[]).push(dataLayerObject);
+        myDataLayer.push(dataLayerObject);
       } else {
-        (myDataLayer as unknown[])[existingIndex] = dataLayerObject;
+        myDataLayer[existingIndex] = dataLayerObject;
       }
     });
 

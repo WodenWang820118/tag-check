@@ -54,7 +54,20 @@ export class StepExecutorUtilsService {
     application: EventInspectionPresetDto['application']
   ): Promise<void> {
     if (state.isFirstNavigation) {
-      await page.setUserAgent(this.configsService.getUSER_AGENT());
+      const ua = this.configsService.getUSER_AGENT();
+
+      // set the User-Agent HTTP header for outgoing requests
+      await page.setExtraHTTPHeaders({ 'user-agent': ua });
+
+      // ensure scripts see the same userAgent value by overriding navigator.userAgent on new documents
+      await page.evaluateOnNewDocument((userAgentValue) => {
+        Object.defineProperty(navigator, 'userAgent', {
+          get() {
+            return userAgentValue;
+          }
+        });
+      }, ua);
+
       await this.handleFirstNavigation(page, step, state, application);
     } else {
       await page.goto(step.url, { waitUntil: 'networkidle2' });

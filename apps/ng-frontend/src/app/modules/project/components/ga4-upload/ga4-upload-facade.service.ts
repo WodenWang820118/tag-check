@@ -50,7 +50,7 @@ export class Ga4UploadFacadeService {
     const reader = new FileReader();
     this.isParsing.set(true);
     reader.onload = () => {
-      const text = String(reader.result || '');
+      const text = JSON.stringify(reader.result || '', null, 2);
       this.rawJson.set(text);
       this.tryParse();
       this.isParsing.set(false);

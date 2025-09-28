@@ -1,15 +1,20 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { EntityMetadata } from 'typeorm';
 import { TestEventDuplicateService } from './test-event-duplicate.service';
 import { IdMapRegistryService } from './id-map-registry.service';
 import { ImportStats } from '../../interfaces/import-types';
+import { ProjectIdAssignerService } from './project-id-assigner.service';
+import { ExistingIdCollisionService } from './existing-id-collision.service';
 
 @Injectable()
 export class ImportRowProcessorService {
   private readonly logger = new Logger(ImportRowProcessorService.name);
   constructor(
     private readonly testEventDupService: TestEventDuplicateService,
-    private readonly idMapRegistry: IdMapRegistryService
+    private readonly idMapRegistry: IdMapRegistryService,
+    @Optional() private readonly projectIdAssigner?: ProjectIdAssignerService,
+    @Optional()
+    private readonly existingIdCollision?: ExistingIdCollisionService
   ) {}
 
   /**
@@ -43,16 +48,12 @@ export class ImportRowProcessorService {
       ctx
     } = params;
 
-    // Assign project id if applicable
-    if (meta.name !== 'ProjectEntity' && ctx.newProjectId != null) {
-      if ('projectId' in materialized) {
-        materialized['projectId'] = ctx.newProjectId;
-      }
-    } else if (meta.name !== 'ProjectEntity' && ctx.newProjectId == null) {
-      this.logger.debug(
-        `Import order warning: importing ${meta.name} before new ProjectEntity primary key established.`
-      );
-    }
+    // Assign project id if applicable (delegated)
+    this.projectIdAssigner?.assignIfApplicable({
+      materialized,
+      meta,
+      newProjectId: ctx.newProjectId
+    });
 
     // Special-case TestEventEntity: drop old primary key when single-column PK
     if (
@@ -70,23 +71,23 @@ export class ImportRowProcessorService {
         raw,
         materialized,
         existingCompositeEventMap,
-        pkInfo,
-        ctx.stats[name]
+        pkInfo
       )
     ) {
       if (process.env.IMPORT_DEBUG) {
         this.logger.debug(
-          `[IMPORT_DEBUG] Duplicate detected for ${meta.name}, composite key skip.`
+          `[IMPORT_DEBUG] Duplicate detected for ${meta.name}, allowing insertion (no skip).`
         );
       }
-      return true; // skip
+      // Do not return true; continue to allow persistence flow
     }
 
-    // Existing ID collision handling
+    // Existing ID collision handling (delegated)
     if (pkInfo.primaryIsSingle && existingIds && pkInfo.primaryKeyProp) {
       const pkVal = materialized[pkInfo.primaryKeyProp];
       if (pkVal != null && existingIds.has(pkVal)) {
-        const upsertEligible = new Set([
+        const rawOldPk = raw[pkInfo.primaryKeyProp];
+        const defaultUpsertEligible = new Set([
           'ApplicationSettingEntity',
           'AuthenticationSettingEntity',
           'BrowserSettingEntity',
@@ -94,23 +95,39 @@ export class ImportRowProcessorService {
           'SpecEntity',
           'ItemDefEntity'
         ]);
-        if (!upsertEligible.has(meta.name)) {
-          const oldPk = raw[pkInfo.primaryKeyProp];
-          if (oldPk != null) this.idMapRegistry.ensure(name).set(oldPk, pkVal);
-          ctx.stats[name].skipped++;
-          if (process.env.IMPORT_DEBUG) {
-            this.logger.debug(
-              `[IMPORT_DEBUG] Early skip due to existingId collision for ${meta.name} pkVal=${String(pkVal)}`
-            );
-          }
-          return true; // skip
-        }
-        if (process.env.IMPORT_DEBUG) {
-          this.logger.debug(
-            `[IMPORT_DEBUG] Collision on pk for upsert-eligible ${meta.name} pkVal=${String(pkVal)} allowing through to persistence.`
-          );
-        }
-        // allow persistence to perform upsert
+        const shouldSkip = this.existingIdCollision
+          ? this.existingIdCollision.handleCollision({
+              metaName: meta.name,
+              pkVal,
+              rawPkVal: rawOldPk,
+              idMap: this.idMapRegistry
+                .ensure(name)
+                .set.bind(this.idMapRegistry.ensure(name)),
+              incrementSkipStat: () => ctx.stats[name].skipped++,
+              importDebug: Boolean(process.env.IMPORT_DEBUG)
+            })
+          : (() => {
+              if (!defaultUpsertEligible.has(meta.name)) {
+                if (rawOldPk != null)
+                  this.idMapRegistry.ensure(name).set(rawOldPk, pkVal);
+                ctx.stats[name].skipped++;
+                if (process.env.IMPORT_DEBUG) {
+                  this.logger.debug(
+                    `[IMPORT_DEBUG] Early skip (fallback) due to existingId collision for ${meta.name} pkVal=${String(pkVal)}`
+                  );
+                }
+                return true;
+              }
+              if (process.env.IMPORT_DEBUG) {
+                this.logger.debug(
+                  `[IMPORT_DEBUG] Collision on pk for upsert-eligible ${meta.name} (fallback), allowing through to persistence.`
+                );
+              }
+              return false;
+            })();
+
+        if (shouldSkip) return true;
+        // otherwise allow persistence to perform upsert
       }
     }
 
