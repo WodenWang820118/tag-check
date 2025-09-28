@@ -1,4 +1,3 @@
- 
 import { Injectable } from '@nestjs/common';
 import { ConfigsService } from '../../../../../core/configs/configs.service';
 import { Page } from 'puppeteer';
@@ -13,7 +12,9 @@ export class RequestService {
     this.requests = []; // Reset the request list
 
     await page.setRequestInterception(true);
-    await page.setUserAgent(this.configsService.getUSER_AGENT());
+    await page.setExtraHTTPHeaders({
+      'user-agent': this.configsService.getUSER_AGENT()
+    });
 
     const requestHandler = async (request: {
       isInterceptResolutionHandled: () => any;

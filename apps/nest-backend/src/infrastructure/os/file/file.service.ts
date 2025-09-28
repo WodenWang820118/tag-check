@@ -55,7 +55,6 @@ export class FileService {
     return jsonFiles;
   }
 
-  // TODO: refactor; there might be multiple files
   async getEventReport(projectSlug: string, eventId: string) {
     const inspectionResultPath =
       await this.folderPathService.getInspectionEventFolderPath(

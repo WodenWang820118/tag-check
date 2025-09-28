@@ -4,6 +4,8 @@ import { RowMaterializerService } from './row-materializer.service';
 import { RelationMapperService } from './relation-mapper.service';
 import { PointerRepairService } from './pointer-repair.service';
 import { IdMapRegistryService } from './id-map-registry.service';
+import { ProjectIdAssignerService } from './project-id-assigner.service';
+import { ExistingIdCollisionService } from './existing-id-collision.service';
 import { ProjectSlugService } from './project-slug.service';
 import { EntityImportService } from './entity-import.service';
 import { PrimaryKeyService } from './primary-key.service';
@@ -21,6 +23,8 @@ import { SinglePerParentUpsertService } from './single-per-parent-upsert.service
     RelationMapperService,
     PointerRepairService,
     IdMapRegistryService,
+    ProjectIdAssignerService,
+    ExistingIdCollisionService,
     ProjectSlugService,
     EntityImportService,
     ImportRowProcessorService,
@@ -37,6 +41,8 @@ import { SinglePerParentUpsertService } from './single-per-parent-upsert.service
     RelationMapperService,
     PointerRepairService,
     IdMapRegistryService,
+    ProjectIdAssignerService,
+    ExistingIdCollisionService,
     ProjectSlugService,
     EntityImportService,
     ImportRowProcessorService,
