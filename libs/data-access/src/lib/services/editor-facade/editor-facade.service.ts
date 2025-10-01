@@ -74,7 +74,7 @@ export class EditorFacadeService {
     shouldInclude: boolean,
     eventNames: string[]
   ) {
-    eventNames.forEach((eventName) => {
+    for (const eventName of eventNames) {
       const eventIndex = json.findIndex(
         (item: any) => item.event === eventName
       );
@@ -84,7 +84,7 @@ export class EditorFacadeService {
       } else if (!shouldInclude && eventIndex !== -1) {
         json.splice(eventIndex, 1);
       }
-    });
+    }
     return json;
   }
 }

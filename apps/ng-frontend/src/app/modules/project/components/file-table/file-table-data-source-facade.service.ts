@@ -225,7 +225,9 @@ export class FileTableDataSourceFacadeService {
     } else {
       // Select union of existing selection and current page rows
       const set = new Set(sel.selected);
-      pageRows.forEach((r) => set.add(r));
+      for (const r of pageRows) {
+        set.add(r);
+      }
       nextSelected = Array.from(set);
     }
 

@@ -41,7 +41,9 @@ export class ReportTableSelectionFacadeService {
       );
     } else {
       const set = new Set(sel.selected);
-      pageRows.forEach((r: IReportDetails) => set.add(r));
+      for (const r of pageRows) {
+        set.add(r as IReportDetails);
+      }
       nextSelected = Array.from(set.values());
     }
 

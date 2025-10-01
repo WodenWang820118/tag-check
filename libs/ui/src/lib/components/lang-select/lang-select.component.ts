@@ -82,7 +82,7 @@ export class LangSelectComponent {
   }
 
   reloadPage() {
-    window.location.reload();
+    globalThis.location.reload();
   }
 
   getSelectedLanguage(): Language {

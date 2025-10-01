@@ -28,10 +28,10 @@ export class TopologicalSorterService {
   ): { children: Map<string, Set<string>>; indegree: Map<string, number> } {
     const children: Map<string, Set<string>> = new Map();
     const indegree: Map<string, number> = new Map();
-    entityNames.forEach((n) => {
+    for (const n of entityNames) {
       children.set(n, new Set());
       indegree.set(n, 0);
-    });
+    }
 
     for (const childName of entityNames) {
       const meta = metasByName.get(childName);

@@ -59,7 +59,7 @@ export class UtilsService {
     let paths: string[] = [];
 
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.hasOwn(obj, key)) {
         const path = prefix ? `${prefix}.${key}` : key;
         paths.push(path);
 

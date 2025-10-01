@@ -44,7 +44,7 @@ export class SinglePerParentUpsertService {
     if (relId == null) return false;
     if (process.env.IMPORT_DEBUG) {
       this.logger.debug(
-        `[IMPORT_DEBUG] Upsert check ${meta.name} relId=${String(relId)} rawPk=${ctx.primaryKeyProp ? ctx.raw[ctx.primaryKeyProp] : 'n/a'}`
+        `[IMPORT_DEBUG] Upsert check ${meta.name} relId=${JSON.stringify(relId)} rawPk=${ctx.primaryKeyProp ? ctx.raw[ctx.primaryKeyProp] : 'n/a'}`
       );
     }
     try {
@@ -54,7 +54,7 @@ export class SinglePerParentUpsertService {
       if (!existing) return false;
       if (process.env.IMPORT_DEBUG) {
         this.logger.debug(
-          `[IMPORT_DEBUG] Found existing ${meta.name} for relId=${String(relId)} performing update`
+          `[IMPORT_DEBUG] Found existing ${meta.name} for relId=${JSON.stringify(relId)} performing update`
         );
       }
       this.mapOldPkToExisting(meta, existing as Record<string, unknown>, ctx);

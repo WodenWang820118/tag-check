@@ -1,6 +1,15 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import {
+  catchError,
+  map,
+  Observable,
+  throwError,
+  from,
+  tap,
+  finalize,
+  of
+} from 'rxjs';
 import { DataLayerSpec, ProjectSpec } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
@@ -30,26 +39,31 @@ export class SpecService {
   }
 
   readSpecJsonFileContent(file: File): void {
-    const reader = new FileReader();
+    this.setLoading(true);
 
-    reader.onload = (e: any) => {
-      const fileContentString = e.target.result;
-
-      try {
-        this.tempSpecContent.set(JSON.parse(fileContentString));
-        setTimeout(() => {
-          this.setLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error('Error parsing file content', error);
-      }
-    };
-
-    reader.onerror = () => {
-      console.error('Error reading file content');
-    };
-
-    reader.readAsText(file);
+    from(file.text())
+      .pipe(
+        tap((text) => {
+          const fileContentString = String(text ?? '');
+          try {
+            this.tempSpecContent.set(JSON.parse(fileContentString));
+          } catch (error) {
+            console.error('Error parsing file content', error);
+            this.tempSpecContent.set(null);
+          }
+        }),
+        catchError((err) => {
+          console.error('Error reading file content', err);
+          this.tempSpecContent.set(null);
+          return of(null);
+        }),
+        finalize(() => {
+          setTimeout(() => {
+            this.setLoading(false);
+          }, 1000);
+        })
+      )
+      .subscribe();
   }
 
   getSpecs() {
