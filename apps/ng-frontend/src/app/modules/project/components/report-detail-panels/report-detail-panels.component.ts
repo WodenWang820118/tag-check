@@ -220,14 +220,14 @@ export class ReportDetailPanelsComponent implements OnInit {
     }
     if (panel) panel.open();
     const existing = this.itemDefContent();
-    if (!existing) {
+    if (existing) {
+      this.reportDetailPanelsFacadeService.setTempItemDefContent(null);
+    } else {
       this.reportDetailPanelsFacadeService.setTempItemDefContent({
         itemId: '',
         templateName: '',
         fullItemDef: {}
       } as ItemDef);
-    } else {
-      this.reportDetailPanelsFacadeService.setTempItemDefContent(null);
     }
     // preload editable fields from current content
     const current = this.itemDefContent();

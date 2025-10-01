@@ -87,11 +87,11 @@ export class GtmFormComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((val) => {
         const hasUrl = !!val && String(val).trim().length > 0;
-        if (!hasUrl) {
+        if (hasUrl) {
+          this.previewModeForm.controls.isAccompanyMode.enable();
+        } else {
           this.previewModeForm.controls.isAccompanyMode.setValue(false);
           this.previewModeForm.controls.isAccompanyMode.disable();
-        } else {
-          this.previewModeForm.controls.isAccompanyMode.enable();
         }
       });
   }

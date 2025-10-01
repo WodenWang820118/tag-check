@@ -57,7 +57,7 @@ export class ReportTableFacadeService {
     const reports = (data['projectReport'] || []) as IReportDetails[];
     const toDate = (
       d: Date | string | number | undefined | null
-    ): Date | undefined => (d != null ? new Date(d) : undefined);
+    ): Date | undefined => (d == null ? undefined : new Date(d));
     const normalize = (r: IReportDetails): IReportDetails => ({
       ...r,
       passed: r.passed === true,
