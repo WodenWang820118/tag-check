@@ -1,5 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+interface Ga4JsonBody {
+  events?: [{ name: string }];
+  measurement_id?: string;
+}
+
 @Injectable()
 export class Ga4RequestMatcher {
   private readonly logger = new Logger(Ga4RequestMatcher.name);
@@ -82,10 +87,14 @@ export class Ga4RequestMatcher {
     return false;
   }
 
-  private tryParseJson(postData: string): any | null {
+  private tryParseJson(postData: string): Ga4JsonBody | null {
     try {
       if (!postData.trim().startsWith('{')) return null;
-      return JSON.parse(postData);
+      const parsed = JSON.parse(postData);
+      if (typeof parsed === 'object' && parsed !== null) {
+        return parsed;
+      }
+      return null;
     } catch (err) {
       this.logger.debug(`GA4 body parsing error (json): ${err}`);
       return null;

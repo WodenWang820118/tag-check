@@ -48,14 +48,7 @@ export class EditorComponent implements OnDestroy {
       const content = this.editorContent();
       const editorElement = this.editor();
       if (editorElement && content) {
-        if (!this.editorView) {
-          this.editorView = this.editorService.initEditorView(
-            this.editorExtension(),
-            editorElement,
-            content,
-            this.stylesOverride()
-          );
-        } else {
+        if (this.editorView) {
           // Update existing editor content
           const transaction = this.editorView.state.update({
             changes: {
@@ -65,6 +58,13 @@ export class EditorComponent implements OnDestroy {
             }
           });
           this.editorView.dispatch(transaction);
+        } else {
+          this.editorView = this.editorService.initEditorView(
+            this.editorExtension(),
+            editorElement,
+            content,
+            this.stylesOverride()
+          );
         }
       }
     });

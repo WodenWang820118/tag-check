@@ -49,7 +49,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class FileUploadDialogComponent {
   selectedFile: File | null = null;
-  fileContent = signal<unknown | null>(null);
+  fileContent = signal<Record<string, unknown> | null>(null);
   fileContent$ = computed(() => this.fileContent());
 
   constructor(

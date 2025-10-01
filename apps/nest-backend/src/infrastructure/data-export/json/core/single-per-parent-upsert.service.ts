@@ -44,7 +44,7 @@ export class SinglePerParentUpsertService {
     if (relId == null) return false;
     if (process.env.IMPORT_DEBUG) {
       this.logger.debug(
-        `[IMPORT_DEBUG] Upsert check ${meta.name} relId=${JSON.stringify(relId)} rawPk=${ctx.primaryKeyProp ? ctx.raw[ctx.primaryKeyProp] : 'n/a'}`
+        `[IMPORT_DEBUG] Upsert check ${meta.name} relId=${JSON.stringify(relId)} rawPk=${ctx.primaryKeyProp ? JSON.stringify(ctx.raw[ctx.primaryKeyProp]) : 'n/a'}`
       );
     }
     try {
@@ -116,7 +116,9 @@ export class SinglePerParentUpsertService {
       this.logger.debug(
         `[IMPORT_DEBUG] Updated existing ${(existing as Record<string, unknown>).constructor?.name} id=${
           ctx.primaryKeyProp
-            ? (existing as Record<string, unknown>)[ctx.primaryKeyProp]
+            ? JSON.stringify(
+                (existing as Record<string, unknown>)[ctx.primaryKeyProp]
+              )
             : 'n/a'
         }`
       );

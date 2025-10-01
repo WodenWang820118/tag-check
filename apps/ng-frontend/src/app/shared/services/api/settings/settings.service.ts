@@ -49,15 +49,15 @@ export class SettingsService {
       )
       .pipe(
         tap((response) => {
-          if (!this.isEmptyObject(response)) {
+          if (this.isEmptyObject(response)) {
             this._snackBar.openFromComponent(SnackBarComponent, {
               duration: 5000,
-              data: 'Saved'
+              data: 'Error'
             });
           } else {
             this._snackBar.openFromComponent(SnackBarComponent, {
               duration: 5000,
-              data: 'Error'
+              data: 'Saved'
             });
           }
         }),
@@ -75,15 +75,15 @@ export class SettingsService {
       )
       .pipe(
         tap((response) => {
-          if (!this.isEmptyObject(response)) {
+          if (this.isEmptyObject(response)) {
             this._snackBar.openFromComponent(SnackBarComponent, {
               duration: 5000,
-              data: 'Saved'
+              data: 'Error'
             });
           } else {
             this._snackBar.openFromComponent(SnackBarComponent, {
               duration: 5000,
-              data: 'Error'
+              data: 'Saved'
             });
           }
         }),
@@ -104,15 +104,15 @@ export class SettingsService {
       )
       .pipe(
         tap((response) => {
-          if (!this.isEmptyObject(response)) {
+          if (this.isEmptyObject(response)) {
             this._snackBar.openFromComponent(SnackBarComponent, {
               duration: 5000,
-              data: 'Saved'
+              data: 'Error'
             });
           } else {
             this._snackBar.openFromComponent(SnackBarComponent, {
               duration: 5000,
-              data: 'Error'
+              data: 'Saved'
             });
           }
         }),
@@ -134,15 +134,15 @@ export class SettingsService {
       )
       .pipe(
         tap((response) => {
-          if (!this.isEmptyObject(response)) {
+          if (this.isEmptyObject(response)) {
             this._snackBar.openFromComponent(SnackBarComponent, {
               duration: 5000,
-              data: 'Saved'
+              data: 'Error'
             });
           } else {
             this._snackBar.openFromComponent(SnackBarComponent, {
               duration: 5000,
-              data: 'Error'
+              data: 'Saved'
             });
           }
         }),

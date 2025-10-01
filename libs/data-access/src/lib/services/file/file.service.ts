@@ -1,16 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@angular/core';
+import { from, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FileService {
-  loadFile(file: File): Promise<ArrayBuffer> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e: any) => resolve(e.target.result);
-      reader.onerror = reject;
-      reader.readAsArrayBuffer(file);
-    });
+  /**
+   * Read a File as an ArrayBuffer and return it as an Observable.
+   * This mirrors usage like `from(file.text())` across the codebase.
+   */
+  loadFile(file: File): Observable<ArrayBuffer> {
+    // File.arrayBuffer() returns a Promise<ArrayBuffer> — convert to Observable
+    return from(file.arrayBuffer());
   }
 }
