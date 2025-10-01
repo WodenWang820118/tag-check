@@ -78,7 +78,7 @@ export class TestEventDuplicateService {
       (typeof owningProjectId === 'number' ||
         typeof owningProjectId === 'string')
     ) {
-      const compositeKey = `${owningProjectId}::${incomingEventId}`;
+      const compositeKey = `${JSON.stringify(owningProjectId)}::${incomingEventId}`;
       if (existingComposite.has(compositeKey)) {
         // We intentionally DO NOT skip duplicates. The import semantics allow
         // inserting another TestEvent row with the same (projectId, eventId).

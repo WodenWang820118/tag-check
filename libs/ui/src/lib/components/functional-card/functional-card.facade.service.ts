@@ -55,7 +55,7 @@ export class FunctionalCardFacade {
     private readonly dialog: MatDialog
   ) {
     const dl = (
-      window as unknown as { dataLayer?: Array<Record<string, unknown>> }
+      globalThis as unknown as { dataLayer?: Array<Record<string, unknown>> }
     ).dataLayer;
     this.dataLayer = dl ?? [];
 

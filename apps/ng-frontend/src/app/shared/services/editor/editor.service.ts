@@ -213,8 +213,10 @@ export class EditorService {
     if (!overrides) return base;
     const result: EditorThemeStyles = { ...base };
     for (const selector of Object.keys(overrides)) {
+      // Only spread base properties when they exist to avoid creating
+      // unnecessary empty fallback objects when merging.
       result[selector] = {
-        ...(base[selector] ?? {}),
+        ...(base[selector] ? base[selector] : {}),
         ...overrides[selector]
       };
     }

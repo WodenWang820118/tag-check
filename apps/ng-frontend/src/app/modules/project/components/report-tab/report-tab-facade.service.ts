@@ -134,15 +134,15 @@ export class ReportTabFacade {
       .downloadFileReports(projectSlug, [eventId])
       .pipe(take(1))
       .subscribe((r) => {
-        if (!r) {
-          this.snackBar.open('Unable to download spreadsheet', undefined, {
-            duration: 1800,
+        if (r) {
+          this.snackBar.open('Spreadsheet downloaded', undefined, {
+            duration: 1400,
             horizontalPosition: 'right',
             verticalPosition: 'top'
           });
         } else {
-          this.snackBar.open('Spreadsheet downloaded', undefined, {
-            duration: 1400,
+          this.snackBar.open('Unable to download spreadsheet', undefined, {
+            duration: 1800,
             horizontalPosition: 'right',
             verticalPosition: 'top'
           });

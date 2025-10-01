@@ -108,9 +108,9 @@ export class ProjectIoFacadeService {
             `Multiple fixture files found in ${projectFolder}; using '${fixtures[0]}'`
           );
         }
-      } catch (scanErr) {
+      } catch (err) {
         this.logger.error(
-          `Failed scanning for fixture in ${projectFolder}: ${(scanErr as Error).message}`
+          `Failed scanning for fixture in ${projectFolder}: ${(err as Error).message}`
         );
       }
       if (!fixturePath || !existsSync(fixturePath)) {
