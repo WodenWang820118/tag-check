@@ -1,4 +1,4 @@
-# TagCheck (Beta)
+# TagCheck (Preview)
 
 ## Table of Contents
 
@@ -60,14 +60,16 @@ Designed for QA, development, and analytics teams, this free standalone tool lev
 
 ## Development
 
-This project uses LTS NodeJS v22.13.0 npm v10.9.2 for development. If cannot compile, please run `nx reset` and `rm -rf .nx` to reset the project. Please refer to the `package.json`'s `engines` field for the exact version.
+This project uses LTS NodeJS v22.19.0 npm v10.9.3 for development. If cannot compile, please run `nx reset` and `rm -rf .nx` to reset the project. Please refer to the `package.json`'s `engines` field for the exact version.
 
 ### Current Status
 
+- TagCheck in e2e testing phase and potential minor amendments are mandatory regarding user journey
 - TagBuild is already in [production stage](https://tag-build.vercel.app/) but subject to change by the Google Tag Manager team.
 - Documentation site is already in [production stage](https://tag-check-documentation.vercel.app/) but subject to change by users' feedback.
 
 ```mermaid
+%%{init: {'theme': 'neutral'}}%%
 graph TD
     subgraph A [User Journey]
         direction LR
@@ -94,10 +96,6 @@ graph TD
         D --> R2("Capture Verification Evidence")
         D --> R3("Export Project & Results")
     end
-
-    style B fill:#cce5ff,stroke:#333,stroke-width:2px
-    style C fill:#cce5ff,stroke:#333,stroke-width:2px
-    style D fill:#cce5ff,stroke:#333,stroke-width:2px
 ```
 
 ### Prerequisites
@@ -195,8 +193,8 @@ DEBUG=electron-forge:\* pnpm electron-forge make
 
 ### Actual project and end-to-end tests
 
-The example project is located at the `tag_check_projects` folder at the root directory. An example project is automatically built after app activation and utilized for end-to-end tests for both backend and frontend. Moreover, the project is also used for development purposes.
+The example project is located at the `tag_check_projects` folder generated the root directory after starting the backend server.
 
 ## Feedback and Contribution
 
-We welcome your feedback and contributions! If you have suggestions or encounter issues, please file them in the issues section. For those interested in contributing, check out our contribution guidelines (coming soon).
+We welcome your feedback and contributions! If you have suggestions or encounter issues, please file them in the issues section.
