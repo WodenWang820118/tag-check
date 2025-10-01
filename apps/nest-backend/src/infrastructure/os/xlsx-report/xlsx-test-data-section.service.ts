@@ -66,7 +66,7 @@ export class XlsxTestDataSectionService {
       : [(report as any).testEventDetails];
 
     // Add one data row per detail entry
-    detailsArray.forEach((detail, index) => {
+    for (const detail of detailsArray) {
       const rowData = [
         this.xlsxUtilsService.formatJsonForExcel(report.spec.dataLayerSpec),
         this.xlsxUtilsService.formatJsonForExcel(detail?.dataLayer),
@@ -110,6 +110,6 @@ export class XlsxTestDataSectionService {
 
       // Adjust row height for better readability
       dataRow.height = 100;
-    });
+    }
   }
 }

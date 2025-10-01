@@ -98,7 +98,7 @@ export class FileService {
       this.logger.error('Archive error: ' + err);
     });
 
-    testResults.forEach((testResult) => {
+    for (const testResult of testResults) {
       const fileName = `${testResult.id}_${testResult.createdAt}'.xlsx'`;
       if (!fileName) {
         throw new HttpException(
@@ -109,7 +109,7 @@ export class FileService {
       archive.append(createReadStream(join(projectSlug, fileName)), {
         name: fileName
       });
-    });
+    }
 
     archive.pipe(output);
     // Must await the archive.finalize() to ensure the archive is fully written

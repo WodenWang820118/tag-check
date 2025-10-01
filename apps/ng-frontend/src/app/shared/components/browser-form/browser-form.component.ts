@@ -90,11 +90,11 @@ export class BrowserFormComponent implements OnInit {
 
   loadInitialData() {
     const allSettings = this.getAllBrowserSettings();
-    allSettings.forEach((value) => {
+    for (const value of allSettings) {
       this.browserSettingsFormFormArray.push(
         this.createSettingFormGroup(value)
       );
-    });
+    }
   }
 
   getAllBrowserSettings(): string[] {

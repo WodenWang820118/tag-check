@@ -73,10 +73,8 @@ export class EventTag {
   }
 
   private buildTriggerIds(tag: Tag, triggers: Trigger[]): string[] {
-    return tag.triggers
-      .map((t) =>
-        this.parameterUtils.findTriggerIdByEventName(t.name, triggers)
-      )
-      .flat();
+    return tag.triggers.flatMap((t) =>
+      this.parameterUtils.findTriggerIdByEventName(t.name, triggers)
+    );
   }
 }

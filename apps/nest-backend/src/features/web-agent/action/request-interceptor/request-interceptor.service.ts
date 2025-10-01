@@ -56,10 +56,10 @@ export class RequestInterceptorService {
         await cdp.send('Network.disable');
         try {
           const latestDataLayer = await page.evaluate(
-            () => (window as any).dataLayer
+            () => (globalThis as unknown as { dataLayer?: unknown[] }).dataLayer
           );
           await this.dataLayerService.updateSelfDataLayerAlgorithm(
-            latestDataLayer as any[],
+            latestDataLayer ?? [],
             projectSlug,
             eventId
           );

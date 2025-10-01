@@ -61,11 +61,11 @@ export class XlsxDisplayService {
       })
       .filter((event: any) => event.Spec.event !== null);
 
-    this.xlsxHelper.unfixedableJsonString.forEach((jsonString) => {
+    for (const jsonString of this.xlsxHelper.unfixedableJsonString) {
       failedEvents.push({
         failedEvents: jsonString
       });
-    });
+    }
     this.displayedFailedEvents.set(failedEvents);
     this.displayedDataSource.set(combinedData);
     this.displayedColumns.set(['Spec']);

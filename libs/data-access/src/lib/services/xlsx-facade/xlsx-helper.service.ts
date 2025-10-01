@@ -73,11 +73,13 @@ export class XlsxHelper {
 
     // 2. Extract all non-empty values from the identified column
     for (const row of data) {
-      Object.keys(row).forEach((key, index) => {
+      const keys = Object.keys(row);
+      for (let index = 0; index < keys.length; index++) {
+        const key = keys[index];
         if (index > columnIndex && index <= lastColumnIndex) {
           delete row[key];
         }
-      });
+      }
     }
     return data;
   }

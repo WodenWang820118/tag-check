@@ -36,7 +36,7 @@ export class ExistingIdCollisionService {
       if (incrementSkipStat) incrementSkipStat();
       if (importDebug) {
         this.logger.debug(
-          `[IMPORT_DEBUG] Early skip due to existingId collision for ${metaName} pkVal=${String(pkVal)}`
+          `[IMPORT_DEBUG] Early skip due to existingId collision for ${metaName} pkVal=${JSON.stringify(pkVal)}`
         );
       }
       return true;
@@ -44,7 +44,7 @@ export class ExistingIdCollisionService {
 
     if (importDebug) {
       this.logger.debug(
-        `[IMPORT_DEBUG] Collision on pk for upsert-eligible ${metaName} pkVal=${String(pkVal)} allowing through to persistence.`
+        `[IMPORT_DEBUG] Collision on pk for upsert-eligible ${metaName} pkVal=${JSON.stringify(pkVal)} allowing through to persistence.`
       );
     }
 

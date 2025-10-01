@@ -96,9 +96,9 @@ export class TreeNodeService {
 
   getMaxId(): number {
     let maxId = 0;
-    this.nodeIndex.forEach((_, id) => {
+    for (const id of this.nodeIndex.keys()) {
       if (id > maxId) maxId = id;
-    });
+    }
     return maxId;
   }
 
