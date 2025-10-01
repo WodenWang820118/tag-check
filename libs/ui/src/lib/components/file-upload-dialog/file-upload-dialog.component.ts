@@ -62,10 +62,7 @@ export class FileUploadDialogComponent {
       if (fileContent !== null) {
         // Ensure the fileContent is a valid object (parsed JSON)
         if (typeof fileContent === 'object' && fileContent !== null) {
-          this.editorFacadeService.inputJsonContent = fileContent as Record<
-            string,
-            unknown
-          >;
+          this.editorFacadeService.inputJsonContent = fileContent;
           this.dialog.closeAll();
         } else {
           this.dialog.open(ErrorDialogComponent, {

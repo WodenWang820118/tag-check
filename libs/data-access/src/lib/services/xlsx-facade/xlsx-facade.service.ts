@@ -118,14 +118,14 @@ export class XlsxProcessFacade {
     // Ensure workbook$() returns an observable, not a direct value
     const workbook$ = this.xlsxProcessService.workbookService.workbook$();
     if (typeof workbook$?.pipe !== 'function') {
-      throw new Error('workbook$ must be an observable');
+      throw new TypeError('workbook$ must be an observable');
     }
     this.withWorkbookHandling(workbook$, 'switchSheet', name);
   }
 
   onAction(action: string, dataColumnName: string | null) {
     if (!dataColumnName) {
-      throw new Error('Data column name is required');
+      throw new TypeError('Data column name is required');
     }
 
     switch (action) {
