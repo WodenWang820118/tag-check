@@ -11,7 +11,7 @@ export class UploadSpecService {
   // empty constructor removed
   existKeys(parsedSpec: any[]): boolean {
     for (const spec of parsedSpec) {
-      if (!Object.prototype.hasOwnProperty.call(spec, 'event')) {
+      if (!Object.hasOwn(spec, 'event')) {
         return false;
       }
     }

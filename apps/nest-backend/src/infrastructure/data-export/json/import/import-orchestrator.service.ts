@@ -14,10 +14,10 @@ export class ImportOrchestrator {
   }
 
   private logStats(stats: Record<string, ImportStats>): void {
-    Object.entries(stats).forEach(([entity, { inserted, skipped }]) =>
+    for (const [entity, { inserted, skipped }] of Object.entries(stats)) {
       this.logger.log(
         `Imported ${entity}: inserted=${inserted} skipped=${skipped}`
-      )
-    );
+      );
+    }
   }
 }

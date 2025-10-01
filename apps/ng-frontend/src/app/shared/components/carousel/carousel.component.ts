@@ -81,7 +81,9 @@ export class CarouselComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    for (const url of this.objectUrls) {
+      URL.revokeObjectURL(url);
+    }
   }
 
   openPreview(index: number) {

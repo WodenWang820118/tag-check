@@ -41,10 +41,8 @@ export class FileTableToolbarComponent implements OnDestroy {
   filterValue = signal('');
   searchInput = viewChild<HTMLInputElement>('searchInput');
   // Whether at least one row is currently selected in the file table
-  hasSelection = computed(
-    () =>
-      this.fileTableDataSourceModelService.selection().selected.filter(Boolean)
-        .length > 0
+  hasSelection = computed(() =>
+    this.fileTableDataSourceModelService.selection().selected.some(Boolean)
   );
   // Whether the table currently has any data rows
   hasData = computed(

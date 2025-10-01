@@ -65,8 +65,6 @@ export class RelationMapperService {
     }
     if (relation.propertyName) {
       tryKeys.push(`${relation.propertyName}Id`);
-      tryKeys.push(`${relation.propertyName}_id`);
-      tryKeys.push(String(relation.propertyName));
     }
     return tryKeys;
   }
@@ -77,7 +75,7 @@ export class RelationMapperService {
   ): unknown {
     for (const key of tryKeys) {
       if (!key) continue;
-      if (!Object.prototype.hasOwnProperty.call(materialized, key)) continue;
+      if (!Object.hasOwn(materialized, key)) continue;
       const val = materialized[key];
       if (val == null) continue;
       if (
@@ -100,7 +98,7 @@ export class RelationMapperService {
       return undefined as unknown;
     const candidates = ['eventId', 'event_id', 'testEvent'] as const;
     for (const cand of candidates) {
-      if (!Object.prototype.hasOwnProperty.call(materialized, cand)) continue;
+      if (!Object.hasOwn(materialized, cand)) continue;
       const v = materialized[cand];
       if (v == null) continue;
       if (typeof v === 'string' || typeof v === 'number') return v as unknown;

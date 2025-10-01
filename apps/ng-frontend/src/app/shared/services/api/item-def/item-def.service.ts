@@ -1,6 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, of, throwError } from 'rxjs';
+import { catchError, of, throwError, from, tap, finalize } from 'rxjs';
 import { ItemDef } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
@@ -30,35 +30,40 @@ export class ItemDefService {
   }
 
   readItemDefJsonFileContent(file: File): void {
-    const reader = new FileReader();
+    this.setLoading(true);
 
-    reader.onload = (e: any) => {
-      const fileContentString = e.target.result;
-
-      try {
-        const parsed = JSON.parse(fileContentString);
-        // Accept either full DTO shape or just the fullItemDef object
-        const value: ItemDef = parsed?.fullItemDef
-          ? (parsed as ItemDef)
-          : ({
-              templateName: '',
-              itemId: '',
-              fullItemDef: parsed
-            } as ItemDef);
-        this.tempItemDefContent.set(value);
-        setTimeout(() => {
-          this.setLoading(false);
-        }, 1000);
-      } catch (error) {
-        console.error('Error parsing file content', error);
-      }
-    };
-
-    reader.onerror = () => {
-      console.error('Error reading file content');
-    };
-
-    reader.readAsText(file);
+    from(file.text())
+      .pipe(
+        tap((text) => {
+          const fileContentString = String(text ?? '');
+          try {
+            const parsed = JSON.parse(fileContentString);
+            // Accept either full DTO shape or just the fullItemDef object
+            const value: ItemDef = parsed?.fullItemDef
+              ? (parsed as ItemDef)
+              : ({
+                  templateName: '',
+                  itemId: '',
+                  fullItemDef: parsed
+                } as ItemDef);
+            this.tempItemDefContent.set(value);
+          } catch (error) {
+            console.error('Error parsing file content', error);
+            this.tempItemDefContent.set(null);
+          }
+        }),
+        catchError((err) => {
+          console.error('Error reading file content', err);
+          this.tempItemDefContent.set(null);
+          return of(null);
+        }),
+        finalize(() => {
+          setTimeout(() => {
+            this.setLoading(false);
+          }, 1000);
+        })
+      )
+      .subscribe();
   }
 
   getItemDefById(itemId: string) {

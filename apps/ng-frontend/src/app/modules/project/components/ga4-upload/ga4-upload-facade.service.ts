@@ -14,6 +14,8 @@ import {
   map,
   switchMap,
   tap,
+  from,
+  finalize,
   ObservableInput
 } from 'rxjs';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
@@ -47,19 +49,37 @@ export class Ga4UploadFacadeService {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
+
     this.isParsing.set(true);
-    reader.onload = () => {
-      const text = JSON.stringify(reader.result || '', null, 2);
-      this.rawJson.set(text);
-      this.tryParse();
-      this.isParsing.set(false);
-    };
-    reader.onerror = () => {
-      this.parseError.set('Failed to read file.');
-      this.isParsing.set(false);
-    };
-    reader.readAsText(file);
+    this.parseError.set(null);
+
+    // Use File.text() which returns a Promise<string> and wrap it with RxJS
+    // so we keep the method reactive and avoid async/await.
+    // File.text() uses the browser's decoder (UTF-8 by default).
+    from(file.text())
+      .pipe(
+        tap((text) => {
+          const txt = String(text ?? '');
+          this.rawJson.set(txt);
+          this.tryParse();
+        }),
+        catchError((err) => {
+          console.error('Failed to read file', err);
+          this.parseError.set('Failed to read file.');
+          this.events.set([]);
+          return of(null);
+        }),
+        finalize(() => {
+          this.isParsing.set(false);
+          // reset the input so selecting the same file fires change again
+          try {
+            input.value = '';
+          } catch {
+            // ignore if input not writable in some environments
+          }
+        })
+      )
+      .subscribe();
   }
 
   private tryParse() {

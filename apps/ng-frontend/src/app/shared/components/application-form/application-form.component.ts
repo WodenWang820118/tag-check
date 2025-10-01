@@ -190,17 +190,17 @@ export class ApplicationFormComponent implements OnInit {
   loadInitialData() {
     const allSettings = this.getAllSettingsFromLocalStorage();
     const allCookies = this.getAllSettingsFromCookies();
-    allSettings.forEach((setting) => {
+    for (const setting of allSettings) {
       this.localStorageFormArray.push(
         this.createSettingFormGroup(setting.key, JSON.stringify(setting.value))
       );
-    });
+    }
 
-    allCookies.forEach((setting) => {
+    for (const setting of allCookies) {
       this.cookieFormArray.push(
         this.createSettingFormGroup(setting.key, JSON.stringify(setting.value))
       );
-    });
+    }
   }
 
   createSettingFormGroup(key: string, value: string): FormGroup {

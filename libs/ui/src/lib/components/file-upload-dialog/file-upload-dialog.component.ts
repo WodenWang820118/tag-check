@@ -1,4 +1,5 @@
 import { Component, computed, effect, signal } from '@angular/core';
+import { from } from 'rxjs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { EventBusService, EditorFacadeService } from '@data-access';
@@ -116,39 +117,29 @@ export class FileUploadDialogComponent {
   }
 
   readJsonFileContent(file: File): void {
-    const reader = new FileReader();
-
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      const fileContentString = e.target?.result as string | null;
-
-      if (fileContentString === null) {
-        this.dialog.open(ErrorDialogComponent, {
-          data: { message: 'Error reading file content. Please try again.' }
-        });
-        return;
-      }
-
-      try {
-        // update the file content
-        this.fileContent.set(JSON.parse(fileContentString));
-      } catch (error) {
-        console.error('Error parsing JSON file:', error);
+    // Use the modern File.text() which returns a Promise<string>, convert to Observable
+    from(file.text()).subscribe({
+      next: (fileContentString: string) => {
+        try {
+          // update the file content
+          this.fileContent.set(JSON.parse(fileContentString));
+        } catch (error) {
+          console.error('Error parsing JSON file:', error);
+          this.dialog.open(ErrorDialogComponent, {
+            data: {
+              message: 'Error parsing JSON file. Please try again.'
+            }
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Error reading file:', err);
         this.dialog.open(ErrorDialogComponent, {
           data: {
-            message: 'Error parsing JSON file. Please try again.'
+            message: 'Error reading file. Please try again.'
           }
         });
       }
-    };
-
-    reader.onerror = () => {
-      this.dialog.open(ErrorDialogComponent, {
-        data: {
-          message: 'Error reading file. Please try again.'
-        }
-      });
-    };
-
-    reader.readAsText(file);
+    });
   }
 }

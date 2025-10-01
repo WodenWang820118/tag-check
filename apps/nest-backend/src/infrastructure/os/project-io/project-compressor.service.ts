@@ -35,7 +35,7 @@ export class ProjectCompressor {
           f.name ||
           (() => {
             const parts = f.path.split(/[/\\]/);
-            return parts[parts.length - 1] || 'extra-file';
+            return parts.at(-1) || 'extra-file';
           })();
         archive.file(f.path, { name: inferred });
       } catch (e) {

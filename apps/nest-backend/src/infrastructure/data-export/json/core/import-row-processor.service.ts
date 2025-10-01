@@ -150,7 +150,7 @@ export class ImportRowProcessorService {
             ctx.stats[name].skipped++;
             if (process.env.IMPORT_DEBUG) {
               this.logger.debug(
-                `[IMPORT_DEBUG] Early skip (fallback) due to existingId collision for ${metaName} pkVal=${String(pkVal)}`
+                `[IMPORT_DEBUG] Early skip (fallback) due to existingId collision for ${metaName} pkVal=${JSON.stringify(pkVal)}`
               );
             }
             return true;

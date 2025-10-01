@@ -28,13 +28,13 @@ async function initLanguage(locale: string): Promise<void> {
 
   // Extract translations from XLF
   const transUnits = xmlDoc.getElementsByTagName('trans-unit');
-  Array.from(transUnits).forEach((unit) => {
+  for (const unit of Array.from(transUnits)) {
     const id = unit.getAttribute('id');
     const target = unit.getElementsByTagName('source')[0].textContent;
     if (id && target) {
       translations.set(id, target);
     }
-  });
+  }
 
   console.log('Loaded translations:', translations);
 

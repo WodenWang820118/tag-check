@@ -91,10 +91,10 @@ export class ReportTabFacade {
           })();
 
           const link = document.createElement('a');
-          link.href = window.URL.createObjectURL(blob);
+          link.href = globalThis.URL.createObjectURL(blob);
           link.download = filename;
           link.click();
-          window.URL.revokeObjectURL(link.href);
+          globalThis.URL.revokeObjectURL(link.href);
           this.snackBar.open('Spreadsheet downloaded', undefined, {
             duration: 1400,
             horizontalPosition: 'right',
@@ -241,10 +241,10 @@ export class ReportTabFacade {
 
   private saveBlob(blob: Blob, fileName: string) {
     const link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
+    link.href = globalThis.URL.createObjectURL(blob);
     link.download = fileName;
     link.click();
-    window.URL.revokeObjectURL(link.href);
+    globalThis.URL.revokeObjectURL(link.href);
   }
 
   private buildFileBase(

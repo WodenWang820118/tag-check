@@ -17,7 +17,9 @@ import {
   Observable,
   concatMap,
   take,
-  switchMap
+  switchMap,
+  from,
+  finalize
 } from 'rxjs';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import { v4 as uuidv4 } from 'uuid';
@@ -79,20 +81,36 @@ export class UploadCardFacadeService {
       console.warn('No file selected');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const result = reader.result as string;
-        this.projectSlug.set(projectSlug);
-        const parsedSpec = this.gtmJsonParserService.parseGtmJson(result);
 
-        this.gtmConfiguration.set(parsedSpec);
-      } catch (error) {
-        console.error('Error parsing file:', error);
-        alert('Error parsing file');
-      }
-    };
-    reader.readAsText(file);
+    from(file.text())
+      .pipe(
+        tap((result) => {
+          try {
+            this.projectSlug.set(projectSlug);
+            const parsedSpec = this.gtmJsonParserService.parseGtmJson(
+              String(result ?? '')
+            );
+            this.gtmConfiguration.set(parsedSpec);
+          } catch (error) {
+            console.error('Error parsing file:', error);
+            // keep behavior similar to prior implementation
+            alert('Error parsing file');
+          }
+        }),
+        catchError((err) => {
+          console.error('Failed to read file', err);
+          alert('Failed to read file');
+          return of(null);
+        }),
+        finalize(() => {
+          try {
+            if (input) input.value = '';
+          } catch {
+            // ignore
+          }
+        })
+      )
+      .subscribe();
   }
 
   emitUploadComplete() {
@@ -161,7 +179,7 @@ export class UploadCardFacadeService {
           console.log('All specs processed:', results);
           this.emitUploadComplete();
           // Chain the timer, then reload
-          return timer(1500).pipe(tap(() => window.location.reload()));
+          return timer(1500).pipe(tap(() => globalThis.location.reload()));
         }),
         // This outer catchError is for catastrophic failures, not individual ones
         catchError((error) => {
