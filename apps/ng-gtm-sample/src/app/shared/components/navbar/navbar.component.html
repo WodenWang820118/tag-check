@@ -1,0 +1,78 @@
+<p-toolbar class="navbar-toolbar bg-white shadow px-4 py-2">
+  <ng-template pTemplate="start">
+    <a class="text-2xl font-bold mr-4 cursor-pointer" routerLink="/" href="/"
+      >GTM Travel Site</a
+    >
+    <button
+      pButton
+      type="button"
+      icon="pi pi-home"
+      class="p-button-text mr-2 hover:bg-gray-100"
+      label="Home"
+      (click)="navigateToHome()"
+    ></button>
+    <button
+      pButton
+      type="button"
+      icon="pi pi-map"
+      class="p-button-text mr-2 hover:bg-gray-100"
+      label="Destinations"
+      (click)="navigateToDestinations()"
+    ></button>
+  </ng-template>
+
+  <ng-template pTemplate="center">
+    <!-- Center content can be added here -->
+  </ng-template>
+
+  <ng-template pTemplate="end">
+    @if (!(authService.isLoggedIn()())) {
+    <button
+      pButton
+      type="button"
+      icon="pi pi-user"
+      label="Login"
+      class="p-button-text mr-2"
+      (click)="navigateToLogin()"
+    ></button>
+    } @if (authService.isLoggedIn()()) {
+    <button
+      pButton
+      type="button"
+      label="Logout"
+      class="p-button-text mr-2"
+      (click)="authService.logout()"
+    ></button>
+    <button
+      pButton
+      type="button"
+      label="Admin"
+      class="p-button-text mr-2"
+      (click)="navigateToAdmin()"
+    ></button>
+    <button
+      pButton
+      type="button"
+      label="Add Data"
+      class="p-button-text mr-2"
+      (click)="navigateToAddData()"
+    ></button>
+    }
+    <button
+      pButton
+      type="button"
+      icon="pi pi-shopping-cart"
+      class="p-button-text relative"
+      label="Cart"
+      (click)="trackViewCart(); navigateToBasket()"
+    >
+      @if (((numOfItemsInCart()) || 0) > 0) {
+      <span
+        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+      >
+        {{ numOfItemsInCart() }}
+      </span>
+      }
+    </button>
+  </ng-template>
+</p-toolbar>

@@ -1,0 +1,201 @@
+<div class="container mx-auto px-4 py-4">
+  <div id="destination_filters" class="flex justify-between items-center">
+    <div id="choix_categories" class="flex space-x-4">
+      <a
+        (click)="navigateToSearchResults('all')"
+        class="text-blue-600 hover:text-blue-800 font-medium"
+        >All Destination</a
+      >
+      <a
+        (click)="navigateToSearchResults('islands')"
+        class="text-blue-600 hover:text-blue-800 font-medium"
+        >Islands in the sun</a
+      >
+    </div>
+    <form
+      [formGroup]="searchForm"
+      id="search_destination"
+      class="flex items-center space-x-2"
+      (ngSubmit)="onSubmit(searchForm)"
+    >
+      <input
+        id="searchTerm"
+        formControlName="searchTerm"
+        type="search"
+        class="border border-gray-300 rounded px-3 py-2 w-full text-black"
+        placeholder="Destination..."
+      />
+      @if (searchForm.get('searchTerm')?.value) {
+      <button
+        type="submit"
+        class="bg-gray-200 text-gray-800 rounded px-4 py-2 ml-2 disabled:opacity-50"
+        [disabled]="!searchForm.get('searchTerm')?.value"
+      >
+        OK
+      </button>
+      } @else {
+      <button
+        type="submit"
+        class="bg-gray-200 text-gray-800 rounded px-4 py-2 ml-2 disabled:opacity-50"
+        disabled
+      >
+        OK
+      </button>
+      }
+    </form>
+  </div>
+  <div id="destinations" class="mt-4">
+    <div id="destinationsVideos"></div>
+    @defer (on viewport) {
+    <div
+      id="content-chooser"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
+      @for (destination of destinations$(); track destination) {
+      <div class="bg-white shadow rounded p-4 flex flex-col">
+        <div class="page-header mb-4">
+          <h3 class="text-xl font-semibold">
+            {{ destination.title }}
+            <small class="text-gray-500">{{ destination.smallTitle }}</small>
+          </h3>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          @if (windowSizeService.width$() > 480) {
+          <div>
+            <img
+              class="w-full rounded"
+              src="{{ destination.image1 || 'assets/images/placeholder.png' }}"
+              alt=""
+            />
+            <div
+              class="author mt-1"
+              [innerHTML]="
+                authorInforByPassed(destination.image1AuthorInfo)
+                  ? destination.image1AuthorInfo
+                  : ''
+              "
+            ></div>
+          </div>
+          <div>
+            <img
+              class="w-full rounded"
+              src="{{ destination.image2 || 'assets/images/placeholder.png' }}"
+              alt=""
+            />
+            <div
+              class="author mt-1"
+              [innerHTML]="
+                authorInforByPassed(destination.image2AuthorInfo)
+                  ? destination.image2AuthorInfo
+                  : ''
+              "
+            ></div>
+          </div>
+          <div>
+            <img
+              class="w-full rounded"
+              src="{{ destination.image3 || 'assets/images/placeholder.png' }}"
+              alt=""
+            />
+            <div
+              class="author mt-1"
+              [innerHTML]="
+                authorInforByPassed(destination.image3AuthorInfo)
+                  ? destination.image3AuthorInfo
+                  : ''
+              "
+            ></div>
+          </div>
+          } @else {
+          <div>
+            <img
+              class="w-full rounded"
+              src="{{ destination.image3 || 'assets/images/placeholder.png' }}"
+              alt=""
+            />
+            <div
+              class="author mt-1"
+              [innerHTML]="
+                authorInforByPassed(destination.image3AuthorInfo)
+                  ? destination.image3AuthorInfo
+                  : ''
+              "
+            ></div>
+          </div>
+          }
+        </div>
+        <div class="text-justify mb-4">
+          {{
+            destination.description
+              ? utilsService.truncateText(destination.description, 100)
+              : ""
+          }}
+        </div>
+        <div class="flex justify-end space-x-2">
+          <button
+            type="button"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            (click)="goToDetails(destination); selectItem(destination)"
+          >
+            Details
+          </button>
+          <button
+            type="button"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            (click)="showModal(destination.video)"
+          >
+            Video
+          </button>
+        </div>
+      </div>
+      }
+      <!-- pagination -->
+      <nav aria-label="Page navigation" class="col-span-full mt-8">
+        <ul class="flex justify-center space-x-2">
+          <li>
+            <button
+              type="button"
+              (click)="getPreviousDestinations()"
+              [disabled]="isPreviousDisabled()"
+              class="px-4 py-2 border rounded text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              (click)="getNextDestinations()"
+              class="px-4 py-2 border rounded text-gray-700"
+            >
+              Next
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    } @placeholder {
+    <div>Loading..</div>
+    }
+    <!-- PrimeNG Dialog for video player -->
+    <p-dialog
+      [(visible)]="videoDialogVisible"
+      modal
+      class="w-11/12 sm:w-8/12 md:w-6/12 lg:w-4/12 p-0"
+      [style]="{ padding: '0' }"
+      [baseZIndex]="10000"
+      (onHide)="closeModal()"
+    >
+      <youtube-player
+        #player
+        [id]="'yt-player-' + videoId$()"
+        class="w-full h-auto"
+        [videoId]="videoId$()"
+        [playerVars]="playerVars"
+        (stateChange)="onStateChange($event)"
+        disablePlaceholder="true"
+        placeholderButtonLabel="destination intro video"
+      ></youtube-player>
+    </p-dialog>
+  </div>
+</div>
