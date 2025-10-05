@@ -138,7 +138,6 @@
     "@nx/storybook": "21.6.3",
     "@nx/vite": "21.6.3",
     "@nx/web": "21.6.3",
-    "@nx/webpack": "21.6.3",
     "@nx/workspace": "21.6.3",
     "@playwright/test": "^1.36.0",
     "@rspack/cli": "^1.5.0",
@@ -217,7 +216,6 @@
     "vite-plugin-dts": "4.5.4",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.1.1",
-    "webpack-merge": "^6.0.1",
     "zone.js": "0.15.1"
   },
   "dependencies": {
@@ -243,7 +241,6 @@
     "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^11.1.6",
     "@primeuix/themes": "^1.2.5",
-    "@storybook/builder-webpack5": "9.1.2",
     "@tailwindcss/postcss": "^4.1.12",
     "archiver": "^7.0.1",
     "cache-manager": "^7.1.1",
