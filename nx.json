@@ -34,6 +34,11 @@
         "{projectRoot}/.storybook/**/*",
         "{projectRoot}/tsconfig.storybook.json"
       ]
+    },
+    "@angular/build:application": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "namedInputs": {
@@ -69,10 +74,10 @@
       }
     },
     "@nx/angular:application": {
-      "style": "scss",
+      "e2eTestRunner": "playwright",
       "linter": "eslint",
-      "unitTestRunner": "jest",
-      "e2eTestRunner": "playwright"
+      "style": "scss",
+      "unitTestRunner": "jest"
     },
     "@nx/angular:component": {
       "style": "scss"
@@ -118,6 +123,12 @@
         "previewTargetName": "preview",
         "buildDepsTargetName": "build-deps",
         "watchDepsTargetName": "watch-deps"
+      }
+    },
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "eslint:lint"
       }
     }
   ]

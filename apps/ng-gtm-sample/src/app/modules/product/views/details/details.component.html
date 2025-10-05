@@ -1,0 +1,94 @@
+<div
+  id="content-{{ (destination$())?.title?.toLowerCase() }}"
+  class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 bg-gray-50 text-gray-900"
+>
+  <div class="mb-6 border-b pb-4">
+    <h2 class="text-3xl font-bold mb-2 text-gray-900">
+      {{ (destination$())?.title }}
+      <small class="text-lg text-gray-600 block">{{ (destination$())?.smallTitle }}</small>
+      <br />
+      <a
+        class="all-destinations rwd-all-destinations"
+        (click)="navigateToDestinations()"
+        >All Destinations</a
+      >
+    </h2>
+  </div>
+  <div class="flex flex-col lg:flex-row space-y-6 lg:space-y-0 lg:space-x-6">
+    <div class="flex-1 p-4 bg-white rounded-lg shadow">
+      <h3 class="text-xl font-semibold text-gray-800 mb-2">Go to {{ (destination$())?.title }}</h3>
+      <div style="height: 66%">
+        <p class="text-gray-700">
+          {{ (destination$())?.description }}
+        </p>
+      </div>
+      <div class="mt-4">
+        <h4 class="text-xl font-semibold mb-2 text-gray-800">
+          ${{ (destination$())?.price }} / 6 Nights
+        </h4>
+        <div class="flex justify-end items-center space-x-2">
+          <!-- Replace select with PrimeNG AutoComplete -->
+          <p-autoComplete
+            [formControl]="numberOfPersonsControl"
+            [suggestions]="filteredPersons"
+            (completeMethod)="filterPersons($event)"
+            field="label"
+            dropdown="true"
+            [forceSelection]="true"
+            class="w-auto"
+          ></p-autoComplete>
+          <button
+            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+            data-name="{{ (destination$())?.title }}"
+            (click)="addToCart(destination$())"
+          >
+            Add to Cart
+          </button>
+        </div>
+      </div>
+    </div>
+  <div class="flex-1 p-4 bg-white rounded-lg shadow">
+      <!-- Main image -->
+      <div class="flex justify-center mb-4">
+        <div class="overflow-hidden rounded-lg">
+          <img
+            src="{{
+              (destination$())?.imageBig
+                ? (destination$())?.imageBig
+                : '../../../../../../../assets/images/placeholder.png'
+            }}"
+            alt=""
+            class="w-full h-auto object-cover"
+          />
+        </div>
+      </div>
+  <!-- Responsive additional images -->
+  @if (windowSizeService.width$() > 480) {
+        <div class="flex justify-center space-x-4">
+          <div class="overflow-hidden rounded-lg">
+            <img
+              src="{{ (destination$())?.image2
+                ? (destination$())?.image2
+                : '../../../../../../../assets/images/placeholder.png' }}"
+              alt=""
+              class="w-32 h-32 object-cover"
+            />
+          </div>
+          <div class="overflow-hidden rounded-lg">
+            <img
+              src="{{ (destination$())?.image3
+                ? (destination$())?.image3
+                : '../../../../../../../assets/images/placeholder.png' }}"
+              alt=""
+              class="w-32 h-32 object-cover"
+            />
+          </div>
+        </div>
+  } @else {
+        <div class="flex justify-center">
+          <!-- mobile placeholder or carousel could go here -->
+        </div>
+      }
+    </div>
+  </div>
+</div>

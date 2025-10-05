@@ -1,0 +1,86 @@
+<div class="add-data">
+  <form [formGroup]="destinationForm" (ngSubmit)="addDestination()">
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="country" class="form-label">Country</label>
+        <select formControlName="country" class="form-select" id="country">
+          @for (country of countries; track country.name.common) {
+          <option [value]="country.name.common">
+            {{ country.name.common }}
+          </option>
+          }
+        </select>
+        @if (destinationForm.controls.country.invalid &&
+        destinationForm.controls.country.touched) {
+        <div class="text-danger">Country is required.</div>
+        }
+      </div>
+      <div class="col-md-6 mb-3">
+        <label for="city" class="form-label">City</label>
+        <input
+          formControlName="city"
+          class="form-control"
+          id="city"
+          aria-describedby="cityHelp"
+        />
+        @if (destinationForm.controls.city.invalid &&
+        destinationForm.controls.city.touched) {
+        <div class="text-danger">City is required.</div>
+        }
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label for="lat" class="form-label">Latitude</label>
+        <input
+          formControlName="latitude"
+          class="form-control"
+          id="lat"
+          aria-describedby="latHelp"
+        />
+        @if (destinationForm.controls.latitude.invalid &&
+        destinationForm.controls.latitude.touched) {
+        <div class="text-danger">
+          @if (destinationForm.controls.latitude.hasError('required')) {
+          Latitude is required. } @if
+          (destinationForm.controls.latitude.hasError('invalidLatitude')) {
+          Latitude must be between -90 and 90. }
+        </div>
+        }
+      </div>
+      <div class="col-md-6 mb-3">
+        <label for="long" class="form-label">Longitude</label>
+        <input
+          formControlName="longitude"
+          class="form-control"
+          id="long"
+          aria-describedby="longHelp"
+        />
+        @if (destinationForm.controls.longitude.invalid &&
+        destinationForm.controls.longitude.touched) {
+        <div class="text-danger">
+          @if (destinationForm.controls.longitude.hasError('required')) {
+          Longitude is required. } @if
+          (destinationForm.controls.longitude.hasError('invalidLongitude')) {
+          Longitude must be between -180 and 180. }
+        </div>
+        }
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12 mb-3">
+        <label for="description" class="form-label"
+          >Description (Optional)</label
+        >
+        <textarea
+          formControlName="description"
+          class="form-control"
+          id="description"
+          rows="3"
+        ></textarea>
+      </div>
+    </div>
+    <!-- TODO: image upload -->
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>

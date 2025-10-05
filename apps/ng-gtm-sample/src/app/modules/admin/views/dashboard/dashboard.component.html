@@ -1,0 +1,66 @@
+<div class="row">
+  @for (sale of sales; track sale) {
+  <div class="{{ sale.design }} col-xl-4">
+    <app-card [hidHeader]="true">
+      <h6 class="mb-4">{{ sale.title }}</h6>
+      <div class="row d-flex align-items-center">
+        <div class="col-9">
+          <h3 class="f-w-300 d-flex align-items-center m-b-0">
+            <i class="feather {{ sale.icon }} f-30 m-r-10"></i>{{ sale.amount }}
+          </h3>
+        </div>
+        <div class="col-3 text-end">
+          <p class="m-b-0">{{ sale.percentage }}</p>
+        </div>
+      </div>
+      <div class="m-t-30">
+        <!-- <ngb-progressbar
+          type="text-primary"
+          height="7px"
+          [value]="sale.progress"
+        ></ngb-progressbar> -->
+      </div>
+    </app-card>
+  </div>
+  }
+  <div class="col-xl-8 col-md-6">
+    <app-card cardTitle="Users From United States">
+      <app-map></app-map>
+    </app-card>
+  </div>
+  <div class="col-xl-4 col-md-6">
+    <div class="card bg-c-blue">
+      <div class="card-header borderless">
+        <h5 class="text-white">Earnings</h5>
+      </div>
+      <div class="card-block" style="padding: 0 25px">
+        <div class="earning-text mb-0">
+          <h3 class="mb-2 text-white f-w-300">
+            $4295.36 <i class="feather icon-arrow-up teal accent-3"></i>
+          </h3>
+          <span class="text-uppercase text-white d-block">Total Earnings</span>
+        </div>
+        <div
+          id="widget-line-chart"
+          class="WidgetlineChart2 ChartShadow"
+          style="height: 180px"
+        ></div>
+      </div>
+    </div>
+    <div class="card">
+      @for (list of card; track list) {
+      <div class="card-block {{ list.design }}">
+        <div class="row d-flex align-items-center">
+          <div class="col-auto">
+            <i class="feather {{ list.icon }} f-30"></i>
+          </div>
+          <div class="col">
+            <h3 class="f-w-300">{{ list.number }}</h3>
+            <span class="d-block text-uppercase">{{ list.text }}</span>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>

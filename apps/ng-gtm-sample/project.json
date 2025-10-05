@@ -1,0 +1,97 @@
+{
+  "name": "ng-gtm-sample",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/ng-gtm-sample/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/ng-gtm-sample",
+        "browser": "apps/ng-gtm-sample/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/ng-gtm-sample/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/ng-gtm-sample/public"
+          },
+          {
+            "input": "apps/ng-gtm-sample/src/assets",
+            "glob": "**/*",
+            "output": "/assets/"
+          },
+          {
+            "input": "apps/ng-gtm-sample/src/favicon.ico",
+            "glob": "**/*",
+            "output": "/favicon.ico"
+          },
+          {
+            "input": "apps/ng-gtm-sample/src/manifest.webmanifest",
+            "glob": "**/*",
+            "output": "/manifest.webmanifest"
+          }
+        ],
+        "styles": ["apps/ng-gtm-sample/src/styles.css"]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "ng-gtm-sample:build:production"
+        },
+        "development": {
+          "buildTarget": "ng-gtm-sample:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular/build:extract-i18n",
+      "options": {
+        "buildTarget": "ng-gtm-sample:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "ng-gtm-sample:build",
+        "port": 4200,
+        "staticFilePath": "dist/apps/ng-gtm-sample/browser",
+        "spa": true
+      }
+    }
+  }
+}
