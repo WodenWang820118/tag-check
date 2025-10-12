@@ -72,5 +72,5 @@ vitest.config.*.timestamp*
 .github\instructions\nx.instructions.md
 
 # Ignore temporary test fixture folders
-tmp-facade-test/
-tmp-project-io-tests/
+*tmp-facade-test
+*tmp-project-io-tests
