@@ -1,11 +1,11 @@
-import { test, expect, Page, ElectronApplication } from '@playwright/test';
+import { test, Page, ElectronApplication } from '@playwright/test';
 import { _electron as electron } from 'playwright';
 
 test('should open the app', async () => {
   // Launch Electron app.
   test.setTimeout(120000);
   const electronApp: ElectronApplication = await electron.launch({
-    args: ['main.mjs'],
+    args: ['.vite/build/main.mjs'],
     env: {
       ...process.env,
       NODE_ENV: 'dev'
