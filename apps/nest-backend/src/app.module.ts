@@ -12,6 +12,7 @@ import { LoggingInterceptor } from './common/logging-interceptor/logging-interce
 import { ConfigsModule } from './core/configs/configs.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { EntitiesModule } from './infrastructure/database/entities.module';
+import { HealthModule } from './common/health/health.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { EntitiesModule } from './infrastructure/database/entities.module';
     }),
 
     // Core modules
+    HealthModule,
     ConfigsModule,
     DatabaseConfigModule,
 
