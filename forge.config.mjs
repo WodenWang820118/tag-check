@@ -14,7 +14,6 @@ const config = {
     extraResource: [
       './dist/apps/ng-frontend',
       './dist/apps/nest-backend/main.js',
-      './dist/apps/nest-backend/0.js', // necessary rspack chunk files
       './dist/apps/nest-backend/node_modules',
       './index.html'
     ],
