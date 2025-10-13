@@ -2,10 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 // For CI, you may want to set BASE_URL to the deployed application.
 const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
 
@@ -19,7 +16,7 @@ const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  ...nxE2EPreset(__filename, { testDir: './src/e2e' }),
+  ...nxE2EPreset(fileURLToPath(import.meta.url), { testDir: './src/e2e' }),
   testMatch: '**/*.e2e-spec.ts',
   testIgnore: ['**/*.spec.ts', '!**/*.e2e-spec.ts'], // Ignore all .spec.ts files except .e2e-spec.ts
   // rest of your config...
@@ -30,16 +27,23 @@ export default defineConfig({
     trace: 'on-first-retry'
   },
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'pnpm exec nx run e2e:serve',
-    url: 'http://localhost:4200',
-    reuseExistingServer: !process.env.CI,
-    cwd: workspaceRoot
-  },
+  webServer: process.env.TEST_ELECTRON
+    ? undefined
+    : {
+        command: 'pnpm exec nx run e2e:serve',
+        url: 'http://localhost:4200',
+        reuseExistingServer: !process.env.CI,
+        cwd: workspaceRoot
+      },
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] }
+    },
+    {
+      name: 'electron',
+      testMatch: '**/src/e2e/**/*.e2e-spec.ts',
+      testIgnore: ['**/apps/**/*.e2e-spec.ts']
     }
 
     // {

@@ -1,4 +1,4 @@
-import { NestFactory, LazyModuleLoader } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, INestApplication } from '@nestjs/common';
 import { writeFileSync } from 'fs';
@@ -24,14 +24,6 @@ async function bootstrap() {
 
     nestApp.use(json({ limit: '20mb' }));
     nestApp.use(urlencoded({ extended: true, limit: '20mb' }));
-
-    // Retrieve the LazyModuleLoader using its class reference
-    const lazyModuleLoader = nestApp.get(LazyModuleLoader);
-
-    const { HealthModule } = await import('./common/health/health.module');
-
-    // Use the official lazy loading method
-    await lazyModuleLoader.load(() => HealthModule);
 
     // Swagger documentation for non-prod environments
     if (process.env.NODE_ENV !== 'prod') {

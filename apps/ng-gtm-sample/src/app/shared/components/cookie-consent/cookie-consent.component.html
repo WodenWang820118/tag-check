@@ -1,0 +1,73 @@
+<p-dialog
+  styleClass="max-w-lg w-full"
+  [(visible)]="showModal"
+  [modal]="true"
+  [closeOnEscape]="false"
+  [dismissableMask]="false"
+  (onHide)="hide()"
+  header="Cookie Policy"
+>
+  <div class="p-6 space-y-6">
+    <div class="flex flex-col space-y-2 pb-4 border-b">
+      <div class="flex justify-between items-center">
+        <b>Analytics</b>
+        <p-toggleswitch
+          [(ngModel)]="analyticsModel"
+          (onChange)="acceptAnalytics($event)"
+        />
+      </div>
+      <div>
+        <div class="text-sm text-gray-600">
+          Analytics cookies track site usage and trends to improve your browsing
+          experience. They gather anonymous data on how you navigate and
+          interact with the site.
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col space-y-2 pb-4 border-b">
+      <div class="flex justify-between items-center">
+        <b>Measurement</b>
+        <p-toggleswitch
+          [(ngModel)]="measurementModel"
+          (onChange)="acceptMeasurement($event)"
+        />
+      </div>
+      <div class="text-sm text-gray-600">
+        Measurement cookies for performance measurement.
+      </div>
+    </div>
+    <div class="flex flex-col space-y-2 pb-4">
+      <div class="flex justify-between items-center">
+        <b>Audience</b>
+        <p-toggleswitch
+          [(ngModel)]="audienceModel"
+          (onChange)="acceptAudience($event)"
+        />
+      </div>
+      <div class="text-sm text-gray-600">
+        Audience cookies to share marketing content relevant to you.
+      </div>
+    </div>
+  </div>
+  <button
+    pButton
+    type="button"
+    label="Confirm"
+    class="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+    (click)="hide(); consent()"
+  ></button>
+</p-dialog>
+<!-- Sticky cookie settings button at bottom-left -->
+@if (showCookieConsent()) {
+<button
+  pButton
+  type="button"
+  icon="pi pi-cog"
+  severity="info"
+  raised="true"
+  rounded="true"
+  size="large"
+  (click)="switchModal()"
+  style="position: fixed; bottom: 10rem; left: 1rem; z-index: 1000"
+></button>
+}
