@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { BrowserSettingSchema } from '@utils';
+import type { BrowserSettingSchema } from '@utils';
 
 @Exclude()
 export class BrowserSettingResponseDto implements BrowserSettingSchema {

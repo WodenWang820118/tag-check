@@ -11,8 +11,8 @@
     "noFallthroughCasesInSwitch": true,
     "lib": ["ESNext", "dom"],
     "types": ["node"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext"
+    "module": "es2022",
+    "moduleResolution": "bundler"
   },
   "files": [],
   "include": [],

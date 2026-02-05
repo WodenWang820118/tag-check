@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { Spec, StrictDataLayerEvent } from '@utils';
+import type { Spec, StrictDataLayerEvent } from '@utils';
 
 @Exclude()
 export class AbstractSpecResponseDto {

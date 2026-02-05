@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { AuthenticationSchema } from '@utils';
+import type { AuthenticationSchema } from '@utils';
 
 @Exclude()
 export class AuthenticationSettingResponseDto implements AuthenticationSchema {

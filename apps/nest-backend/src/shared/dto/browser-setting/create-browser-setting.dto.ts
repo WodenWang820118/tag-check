@@ -1,4 +1,4 @@
-import { BrowserSetting } from '@utils';
+import type { BrowserSetting } from '@utils';
 import { IsArray, IsBoolean, IsString } from 'class-validator';
 
 export class CreateBrowserSettingDto implements BrowserSetting {

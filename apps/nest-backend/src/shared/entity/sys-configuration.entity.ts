@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { AuditableEntity } from './common';
-import { SysConfigurationSchema } from '@utils';
+import type { SysConfigurationSchema } from '@utils';
 
 @Entity('sys_configuration')
 export class SysConfigurationEntity

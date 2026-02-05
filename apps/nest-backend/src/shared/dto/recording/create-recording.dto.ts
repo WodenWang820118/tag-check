@@ -1,4 +1,4 @@
-import { Recording } from '@utils';
+import type { Recording } from '@utils';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateRecordingDto implements Recording {

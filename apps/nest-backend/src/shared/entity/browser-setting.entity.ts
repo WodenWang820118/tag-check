@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { ProjectEntity } from './project.entity';
-import { BrowserSettingSchema } from '@utils';
+import type { BrowserSettingSchema } from '@utils';
 import { AuditableEntity } from './common';
 
 @Entity('browser_setting')

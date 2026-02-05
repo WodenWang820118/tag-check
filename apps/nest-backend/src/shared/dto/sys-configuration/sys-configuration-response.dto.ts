@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { SysConfigurationSchema } from '@utils';
+import type { SysConfigurationSchema } from '@utils';
 
 @Exclude()
 export class SysConfigurationResponseDto implements SysConfigurationSchema {

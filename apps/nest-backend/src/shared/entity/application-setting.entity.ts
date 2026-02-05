@@ -1,4 +1,9 @@
-import { ApplicationSettingSchema, Cookie, Gtm, LocalStorage } from '@utils';
+import type {
+  ApplicationSettingSchema,
+  Cookie,
+  Gtm,
+  LocalStorage
+} from '@utils';
 import {
   Column,
   Entity,

@@ -1,4 +1,4 @@
-import { TestEvent } from '@utils';
+import type { TestEvent } from '@utils';
 import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { AuditableEntity } from '../../entity';
 

@@ -1,5 +1,10 @@
 import { Exclude, Expose } from 'class-transformer';
-import { ApplicationSettingSchema, Cookie, Gtm, LocalStorage } from '@utils';
+import type {
+  ApplicationSettingSchema,
+  Cookie,
+  Gtm,
+  LocalStorage
+} from '@utils';
 
 @Exclude()
 export class ApplicationSettingResponseDto implements ApplicationSettingSchema {

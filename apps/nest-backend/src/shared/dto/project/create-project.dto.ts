@@ -1,4 +1,4 @@
-import { Project } from '@utils';
+import type { Project } from '@utils';
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateProjectDto implements Project {
