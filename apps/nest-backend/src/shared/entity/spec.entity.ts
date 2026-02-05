@@ -1,4 +1,4 @@
-import { Spec, StrictDataLayerEvent } from '@utils';
+import type { Spec, StrictDataLayerEvent } from '@utils';
 import {
   Column,
   Entity,

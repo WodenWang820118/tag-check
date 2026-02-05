@@ -20,7 +20,7 @@
         "outputHashing": "none",
         "outputFileName": "main.js",
         "externalDependencies": "all",
-        "skipTypeChecking": true
+        "typeCheckOptions": false
       },
       "configurations": {
         "development": {},

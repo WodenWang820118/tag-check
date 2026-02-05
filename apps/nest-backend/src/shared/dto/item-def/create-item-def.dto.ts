@@ -1,4 +1,4 @@
-import { LocalStorage } from '@utils';
+import type { LocalStorage } from '@utils';
 import { IsJSON } from 'class-validator';
 
 export class CreateItemDefDto {

@@ -1,4 +1,4 @@
-import { AuthenticationSetting } from '@utils';
+import type { AuthenticationSetting } from '@utils';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateAuthenticationSettingDto implements AuthenticationSetting {

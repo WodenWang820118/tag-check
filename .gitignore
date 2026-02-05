@@ -74,3 +74,4 @@ vitest.config.*.timestamp*
 # Ignore temporary test fixture folders
 *tmp-facade-test
 *tmp-project-io-tests
+.main.mjs

@@ -1,4 +1,4 @@
-import { TestEventSchema } from '@utils';
+import type { TestEventSchema } from '@utils';
 import { AuditableEntity } from './common';
 import {
   Column,

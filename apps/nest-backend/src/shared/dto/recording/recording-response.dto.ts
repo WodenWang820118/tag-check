@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { RecordingSchema, Step } from '@utils';
+import type { RecordingSchema, Step } from '@utils';
 
 @Exclude()
 export class RecordingResponseDto implements RecordingSchema {

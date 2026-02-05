@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn
 } from 'typeorm';
 import { AuditableEntity } from './common';
-import { ProjectSchema } from '@utils';
+import type { ProjectSchema } from '@utils';
 import { AuthenticationSettingEntity } from './authentication-setting.entity';
 import { BrowserSettingEntity } from './browser-setting.entity';
 import { ApplicationSettingEntity } from './application-setting.entity';

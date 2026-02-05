@@ -1,4 +1,4 @@
-import { SysConfiguration } from '@utils';
+import type { SysConfiguration } from '@utils';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateSysConfigurationDto implements SysConfiguration {

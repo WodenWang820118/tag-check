@@ -1,4 +1,4 @@
-import { ProjectSchema } from '@utils';
+import type { ProjectSchema } from '@utils';
 import { Exclude, Expose } from 'class-transformer';
 import {
   ApplicationSettingEntity,

@@ -1,4 +1,4 @@
-import { RecordingSchema } from '@utils';
+import type { RecordingSchema } from '@utils';
 import {
   Column,
   Entity,

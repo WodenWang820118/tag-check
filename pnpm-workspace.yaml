@@ -1,9 +1,12 @@
 packages:
   - apps/**
   - libs/**
+
 onlyBuiltDependencies:
+  - '@firebase/util'
   - '@nestjs/core'
   - '@parcel/watcher'
+  - '@scarf/scarf'
   - '@swc/core'
   - core-js
   - core-js-pure
@@ -11,6 +14,7 @@ onlyBuiltDependencies:
   - electron-winstaller
   - esbuild
   - ffmpeg-static
+  - less
   - lmdb
   - msgpackr-extract
   - nx
