@@ -19,7 +19,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     importProvidersFrom(
       MarkdownModule.forRoot({
-        sanitize: SecurityContext.NONE
+        sanitize: SecurityContext.NONE as unknown as any
       })
     ),
     { provide: LOCALE_ID, useValue: appLang }

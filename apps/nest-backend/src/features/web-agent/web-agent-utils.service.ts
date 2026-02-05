@@ -162,7 +162,7 @@ export class WebAgentUtilsService {
       eventId
     );
     this.logger.log('Optimized data layer:', dataLayer);
-    return dataLayer.map(
+    return (dataLayer as any[]).map(
       (event: { [x: string]: any; 'gtm.uniqueEventId': string }) => {
         const { 'gtm.uniqueEventId': _, ...rest } = event;
         return rest;

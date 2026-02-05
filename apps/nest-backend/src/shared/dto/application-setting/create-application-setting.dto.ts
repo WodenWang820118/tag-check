@@ -1,4 +1,4 @@
-import { ApplicationSetting, Cookie, Gtm, LocalStorage } from '@utils';
+import type { ApplicationSetting, Cookie, Gtm, LocalStorage } from '@utils';
 import { IsJSON } from 'class-validator';
 
 export class CreateApplicationSettingDto implements ApplicationSetting {

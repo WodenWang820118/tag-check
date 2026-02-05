@@ -1,5 +1,5 @@
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { AbstractTestEvent, Recording, Spec } from '@utils';
+import type { AbstractTestEvent, Recording, Spec } from '@utils';
 import { TestEventDetailEntity } from '../../entity';
 
 @Exclude()

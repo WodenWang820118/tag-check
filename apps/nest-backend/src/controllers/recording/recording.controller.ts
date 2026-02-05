@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Logger, Param, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
-import { Recording } from '@utils';
+import type { Recording } from '@utils';
 import { ProjectRecordingService } from '../../features/project-agent/project-recording/project-recording.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { ProjectFacadeRepositoryService } from '../../features/repository/project-facade/project-facade-repository.service';

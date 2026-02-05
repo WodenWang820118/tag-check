@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { Spec, StrictDataLayerEvent, TagSpec } from '@utils';
+import type { Spec, StrictDataLayerEvent, TagSpec } from '@utils';
 
 @Exclude()
 export class SpecResponseDto implements TagSpec {

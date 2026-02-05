@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { TestImageSchema } from '@utils';
+import type { TestImageSchema } from '@utils';
 
 @Exclude()
 export class TestImageResponseDto implements TestImageSchema {

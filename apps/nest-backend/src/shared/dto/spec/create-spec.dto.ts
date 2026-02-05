@@ -1,4 +1,4 @@
-import { Spec, StrictDataLayerEvent, TagSpec } from '@utils';
+import type { Spec, StrictDataLayerEvent, TagSpec } from '@utils';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 // DTO used to create a SpecEntity; supports new GTM JSON and legacy dataLayerSpec

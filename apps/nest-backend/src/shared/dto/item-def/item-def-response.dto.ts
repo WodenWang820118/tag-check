@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer';
-import { LocalStorage } from '@utils';
+import type { LocalStorage } from '@utils';
 import { IsJSON } from 'class-validator';
 
 @Exclude()

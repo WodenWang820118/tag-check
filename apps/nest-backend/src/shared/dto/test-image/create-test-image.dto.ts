@@ -1,4 +1,4 @@
-import { TestImage } from '@utils';
+import type { TestImage } from '@utils';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateTestImageDto implements TestImage {

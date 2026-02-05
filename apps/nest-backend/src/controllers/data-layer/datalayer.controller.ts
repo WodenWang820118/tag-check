@@ -10,7 +10,7 @@ import {
   Post,
   Query
 } from '@nestjs/common';
-import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
+import type { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionControllerService } from './event-inspection-controller.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';

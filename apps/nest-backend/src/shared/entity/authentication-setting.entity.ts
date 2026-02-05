@@ -1,4 +1,4 @@
-import { AuthenticationSchema } from '@utils';
+import type { AuthenticationSchema } from '@utils';
 import {
   Column,
   Entity,

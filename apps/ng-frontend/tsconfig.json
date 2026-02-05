@@ -10,7 +10,9 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "lib": ["ESNext", "dom"],
-    "types": ["node"]
+    "types": ["node"],
+    "module": "es2022",
+    "moduleResolution": "bundler"
   },
   "files": [],
   "include": [],

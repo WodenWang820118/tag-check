@@ -1,5 +1,5 @@
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
-import { FullTestEventSchema } from '@utils';
+import type { FullTestEventSchema } from '@utils';
 import { TestEventDetailResponseDto } from '../test-event-detail';
 import { TestImageResponseDto } from '../test-image';
 import { ProjectResponseDto } from '../project';

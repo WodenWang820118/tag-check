@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsString, IsOptional } from 'class-validator';
-import {
+import type {
   StrictDataLayerEvent,
   BaseDataLayerEvent,
   ValidationResult
