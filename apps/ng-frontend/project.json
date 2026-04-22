@@ -165,19 +165,15 @@
       }
     },
     "storybook": {
-      "executor": "@analogjs/storybook-angular:start-storybook",
+      "executor": "@storybook/angular:start-storybook",
       "options": {
         "port": 4400,
         "configDir": "apps/ng-frontend/.storybook",
-        "compodoc": false,
-        "styles": [
-          "@angular/material/prebuilt-themes/indigo-pink.css",
-          "apps/ng-frontend/src/styles.css",
-          "apps/ng-tag-build/src/styles.scss",
-          "libs/shared-styles/src/index.scss",
-          "node_modules/prismjs/themes/prism-okaidia.css",
-          "node_modules/prismjs/plugins/command-line/prism-command-line.css"
-        ]
+        "browserTarget": "ng-frontend:build:development",
+        "tsConfig": "apps/ng-frontend/tsconfig.storybook.json",
+        "sourceMap": false,
+        "experimentalZoneless": false,
+        "compodoc": false
       },
       "configurations": {
         "ci": {
@@ -186,19 +182,15 @@
       }
     },
     "build-storybook": {
-      "executor": "@analogjs/storybook-angular:build-storybook",
+      "executor": "@storybook/angular:build-storybook",
       "outputs": ["{options.outputDir}"],
       "options": {
+        "outputDir": "dist/storybook/ng-frontend",
         "configDir": "apps/ng-frontend/.storybook",
-        "compodoc": false,
-        "styles": [
-          "@angular/material/prebuilt-themes/indigo-pink.css",
-          "apps/ng-frontend/src/styles.css",
-          "apps/ng-tag-build/src/styles.scss",
-          "libs/shared-styles/src/index.scss",
-          "node_modules/prismjs/themes/prism-okaidia.css",
-          "node_modules/prismjs/plugins/command-line/prism-command-line.css"
-        ]
+        "browserTarget": "ng-frontend:build:production",
+        "tsConfig": "apps/ng-frontend/tsconfig.storybook.json",
+        "experimentalZoneless": false,
+        "compodoc": false
       },
       "configurations": {
         "ci": {
