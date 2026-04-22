@@ -4,7 +4,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTableModule } from '@angular/material/table';
 import { MatDividerModule } from '@angular/material/divider';
-import { Parameter, TagSpec, TriggerConfig } from '@utils';
+import {
+  Parameter,
+  TagSpec,
+  TriggerConfig,
+  getParameterListItems,
+  getParameterMapValue,
+  getParameterValue
+} from '@utils';
 import { MatButtonModule } from '@angular/material/button';
 
 export interface EventParameter {
@@ -41,30 +48,33 @@ export class TagManageTabComponent {
 
   // Measurement ID: show standard template used by GoogleTag generator
   measurementId$ = computed(() => {
-    const parameter = this.tagConfig$()?.parameter ?? [];
-    const measurementIdOverride = parameter.find(
-      (p) => p.key === 'measurementIdOverride'
+    return (
+      getParameterValue(
+        this.tagConfig$()?.parameter,
+        'measurementIdOverride'
+      ) ?? ''
     );
-    return measurementIdOverride?.value ?? '';
   });
 
   // Google Tag reference name from the Event tag parameters (TAG_REFERENCE measurementId)
   googleTagName$ = computed(() => {
-    const params = this.tagConfig$()?.parameter ?? [];
-    const ref = params.find(
-      (p) => p.key === 'measurementId' && p.type === 'TAG_REFERENCE'
+    return (
+      getParameterValue(
+        this.tagConfig$()?.parameter,
+        'measurementId',
+        'TAG_REFERENCE'
+      ) ?? 'GoogleTag'
     );
-    return ref?.value ?? 'GoogleTag';
   });
 
   // Event name from the Event tag parameters or tagSpec fallback
   eventName$ = computed(() => {
-    const params = this.tagConfig$()?.parameter ?? [];
-    const nameParam = params.find(
-      (p) => p.key === 'eventName' && p.type === 'TEMPLATE'
-    );
     return (
-      (nameParam?.value as string | undefined) ||
+      getParameterValue(
+        this.tagConfig$()?.parameter,
+        'eventName',
+        'TEMPLATE'
+      ) ||
       this.tagSpec()?.eventName ||
       this.tagSpec()?.event ||
       ''
@@ -99,19 +109,10 @@ export class TagManageTabComponent {
     const listParam = params.find(
       (p) => p.key === 'eventSettingsTable' && p.type === 'LIST'
     );
-    const list = (listParam?.list ?? []) as Array<
-      | { type: string; map: Parameter[] }
-      | { type: string; value?: string; map?: Parameter[] }
-    >;
-    // Each item is a MAP with entries for 'parameter' and 'parameterValue'
-    return list
+    return getParameterListItems(listParam)
       .map((item) => {
-        const map: Parameter[] = (item?.map ?? []) as unknown as Parameter[];
-        const paramName = map.find((m) => m.key === 'parameter')?.value as
-          | string
-          | undefined;
-        const paramValue = map.find((m) => m.key === 'parameterValue')
-          ?.value as string | undefined;
+        const paramName = getParameterMapValue(item, 'parameter');
+        const paramValue = getParameterMapValue(item, 'parameterValue');
         if (!paramName || !paramValue) return undefined;
         return { parameter: paramName, value: paramValue } as EventParameter;
       })

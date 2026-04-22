@@ -1,35 +1,37 @@
-import { Spec } from '@utils';
+import {
+  StrictDataLayerEvent,
+  isStrictDataLayerEvent,
+  isStrictDataLayerEventArray
+} from '@utils';
 import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SpecExtractService {
-  preprocessInput(inputString: string) {
-    try {
-      // Attempt to parse the input JSON string
-      return JSON.parse(inputString) as Spec[];
-    } catch (error) {
-      // If parsing fails, attempt to fix common issues and try again
-      console.warn(
-        'JSON parsing failed, attempting to fix common issues:',
-        error
-      );
-      let fixedString = '';
-      fixedString = this.fixJsonString(inputString);
+  preprocessInput(inputString: string): StrictDataLayerEvent[] {
+    const parsedInput = this.parseInput(inputString);
 
-      // Attempt to parse the fixed string
-      try {
-        return JSON.parse(fixedString) as Spec[];
-      } catch (error) {
-        console.error(error);
-        return [
-          {
-            tag: { name: 'Error parsing spec JSON. Please check the format.' }
-          }
-        ] as Spec[];
-      }
+    try {
+      return this.normalizeSpecs(parsedInput);
+    } catch (error) {
+      console.error(error);
+      throw new Error('Error parsing spec JSON. Please check the format.');
     }
+  }
+
+  private normalizeSpecs(input: unknown): StrictDataLayerEvent[] {
+    if (isStrictDataLayerEventArray(input)) {
+      return input;
+    }
+
+    if (isStrictDataLayerEvent(input)) {
+      return [input];
+    }
+
+    throw new Error(
+      'Spec JSON must be an event object or an array of event objects.'
+    );
   }
 
   fixJsonString(inputString: string) {
@@ -54,12 +56,16 @@ export class SpecExtractService {
 
       fixedString = lines.join('\n');
 
-      // Replace single quotes with double quotes
-      fixedString = fixedString.replaceAll("'", '"');
-
-      // Handle mismatched quotes
-      fixedString = fixedString.replaceAll(/"([^"]*)'(?![^"]*")/g, '"$1"');
-      fixedString = fixedString.replaceAll(/(?<![^"]*')'([^"]*)"/g, '"$1"');
+      // Convert single-quoted JSON keys and string values without
+      // rewriting apostrophes inside already double-quoted content.
+      fixedString = fixedString.replaceAll(
+        /([{,]\s*)'([^']+)'(\s*:)/g,
+        '$1"$2"$3'
+      );
+      fixedString = fixedString.replaceAll(
+        /(:\s*)'([^']*)'(?=\s*[,}\]])/g,
+        '$1"$2"'
+      );
 
       // Wrap unquoted property names with double quotes
       fixedString = fixedString.replaceAll(
@@ -82,6 +88,25 @@ export class SpecExtractService {
       return fixedString;
     } catch (error) {
       throw new Error('Failed to fix JSON parsing issues: ' + error);
+    }
+  }
+
+  private parseInput(inputString: string): unknown {
+    try {
+      return JSON.parse(inputString) as unknown;
+    } catch (error) {
+      console.warn(
+        'JSON parsing failed, attempting to fix common issues:',
+        error
+      );
+      const fixedString = this.fixJsonString(inputString);
+
+      try {
+        return JSON.parse(fixedString) as unknown;
+      } catch (repairError) {
+        console.error(repairError);
+        throw new Error('Error parsing spec JSON. Please check the format.');
+      }
     }
   }
 }

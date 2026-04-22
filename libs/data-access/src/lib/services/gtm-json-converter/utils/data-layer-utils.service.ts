@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DataLayer, Spec } from '@utils';
+import { DataLayer, StrictDataLayerEvent } from '@utils';
 import { UtilsService } from './utils.service';
 
 @Injectable({
@@ -7,18 +7,15 @@ import { UtilsService } from './utils.service';
 })
 export class DataLayerUtils {
   constructor(private readonly utilsService: UtilsService) {}
-  getDataLayers(specs: Spec[]) {
+  getDataLayers(specs: StrictDataLayerEvent[]) {
     const dataLayers: DataLayer[] = [];
-    for (const spec of specs) {
-      const { event, ...rest } = spec as Record<string, unknown>;
-      const paths = this.utilsService.getAllObjectPaths(
-        rest as unknown as Record<string, unknown>
-      );
+    for (const { event, ...rest } of specs) {
+      const paths = this.utilsService.getAllObjectPaths(rest);
       const uniquedPaths = Array.from(new Set(paths));
       const filtered = uniquedPaths.filter(
         (dL) => !dL.includes('items.0') && dL !== 'ecommerce'
       );
-      dataLayers.push({ event: event as string, paths: filtered });
+      dataLayers.push({ event, paths: filtered });
     }
     return dataLayers;
   }

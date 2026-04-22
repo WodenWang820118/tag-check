@@ -1,5 +1,6 @@
-import { ItemDef, Recording, Spec, TagConfig, TriggerConfig } from '@utils';
+import { ItemDef, Recording } from '@utils';
 import { exampleGtmJson } from '../gtm-json';
+import { buildExampleEventSpec } from './helpers';
 
 const recording: Recording = {
   title: 'begin_checkout',
@@ -55,25 +56,8 @@ const recording: Recording = {
   ]
 };
 
-const tag = exampleGtmJson.containerVersion.tag.find(
-  (t) =>
-    t.parameter.find((p) => p.key === 'eventName')?.value === 'begin_checkout'
-);
-if (!tag) {
-  throw new Error(
-    'Tag with eventName "begin_checkout" not found in exampleGtmJson'
-  );
-}
-const normalizedTag: TagConfig = tag;
-
-const triggerNormalized = exampleGtmJson.containerVersion.trigger.find(
-  (t) => t.triggerId && (tag.firingTriggerId || []).includes(t.triggerId)
-) as unknown as TriggerConfig | undefined;
-
-const spec: Spec = {
-  tag: normalizedTag,
-  trigger: triggerNormalized ? [triggerNormalized] : []
-};
+const spec = buildExampleEventSpec(exampleGtmJson, 'begin_checkout');
+const normalizedTag = spec.tag;
 
 const fullItemDef: ItemDef = {
   templateName: 'Begin Checkout Info Items',
