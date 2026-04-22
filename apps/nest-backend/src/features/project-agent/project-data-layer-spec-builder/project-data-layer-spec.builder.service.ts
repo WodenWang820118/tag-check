@@ -1,14 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Spec, StrictDataLayerEvent } from '@utils';
+import {
+  Spec,
+  StrictDataLayerEvent,
+  getParameterListItems,
+  getParameterMapValue,
+  getParameterValue
+} from '@utils';
 
 @Injectable()
 export class ProjectDataLayerSpecBuilderService {
   private readonly logger = new Logger(ProjectDataLayerSpecBuilderService.name);
   buildDataLayerSpec(spec: Spec): StrictDataLayerEvent {
     // 1) Resolve event name from tag parameters, fallback to tag name suffix
-    const eventNameParam = spec.tag.parameter.find(
-      (p) => p.key === 'eventName' && typeof p.value === 'string'
-    )?.value as string | undefined;
+    const eventNameParam = getParameterValue(spec.tag.parameter, 'eventName');
 
     if (!eventNameParam) {
       this.logger.warn(`No eventName found for spec=${JSON.stringify(spec)}`);
@@ -23,25 +27,19 @@ export class ProjectDataLayerSpecBuilderService {
     //    TEMPLATE entries: { key: 'parameter', value: '<field>' }
     //                      { key: 'parameterValue', value: '<template or literal>' }
     const eventSettings = spec.tag.parameter.find(
-      (p) => p.key === 'eventSettingsTable' && Array.isArray(p.list)
+      (p) => p.key === 'eventSettingsTable' && p.type === 'LIST'
     );
 
-    if (!eventSettings?.list) {
+    if (!eventSettings) {
       return result; // No ecommerce mapping
     }
 
     // Use a flexible record to allow template strings for values, including items
     const ecommerce: Record<string, unknown> = {};
 
-    for (const entry of eventSettings.list) {
-      if (!entry || entry.type !== 'MAP' || !('map' in entry) || !entry.map)
-        continue;
-      // Find inner TEMPLATE params
-      const paramName = entry.map.find((m) => m.key === 'parameter')?.value as
-        | string
-        | undefined;
-      const paramValueTpl = entry.map.find((m) => m.key === 'parameterValue')
-        ?.value as string | undefined;
+    for (const entry of getParameterListItems(eventSettings)) {
+      const paramName = getParameterMapValue(entry, 'parameter');
+      const paramValueTpl = getParameterMapValue(entry, 'parameterValue');
       // Only map when both parameter and parameterValue exist
       if (!paramName || typeof paramName !== 'string') continue;
       if (typeof paramValueTpl !== 'string' || paramValueTpl.length === 0)

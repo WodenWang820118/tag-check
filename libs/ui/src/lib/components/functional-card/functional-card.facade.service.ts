@@ -13,7 +13,11 @@ import { containerName, gtmId, tagManagerUrl } from './test-data';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ConversionSuccessDialogComponent } from '../conversion-success-dialog/conversion-success-dialog.component';
-import { GTMContainerConfig, GTMConfiguration, Spec } from '@utils';
+import {
+  GTMContainerConfig,
+  GTMConfiguration,
+  StrictDataLayerEvent
+} from '@utils';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
 
 @Injectable({ providedIn: 'root' })
@@ -134,7 +138,7 @@ export class FunctionalCardFacade {
         this.setupConstructorService.isSendingEcommerceData$();
       const esvConent = this.esvEditorService.content$();
       let esvContent = null;
-      let json: Spec[] = [];
+      let json: StrictDataLayerEvent[] = [];
 
       try {
         if (esvConent !== '') {
@@ -209,14 +213,14 @@ export class FunctionalCardFacade {
   }
 
   private performConversion(
-    json: Spec[],
+    json: StrictDataLayerEvent[],
     googleTagName: string,
     measurementId: string,
     isSendingEcommerceData: 'true' | 'false',
     esvContent: { name: string; parameters: { [x: string]: string }[] }[]
   ) {
     // set input content for downstream presenters
-    this.editorFacadeService.inputJsonContent = json as unknown as string;
+    this.editorFacadeService.inputJsonContent = json;
 
     const { accountId, containerId } =
       this.utilsService.extractAccountAndContainerId(tagManagerUrl);
@@ -240,7 +244,7 @@ export class FunctionalCardFacade {
   }
 
   private postConversion(result: GTMConfiguration) {
-    this.editorFacadeService.outputJsonContent = result as unknown as string;
+    this.editorFacadeService.outputJsonContent = result;
     this.openSuccessConversionDialog(result);
 
     this.dataLayer.push({

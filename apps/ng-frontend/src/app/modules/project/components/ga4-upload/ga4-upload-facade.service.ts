@@ -4,8 +4,8 @@ import { ReportService } from '../../../../shared/services/api/report/report.ser
 import {
   ReportDetailsDto,
   StrictDataLayerEvent,
-  Spec,
-  Recording
+  Recording,
+  createPlaceholderSpec
 } from '@utils';
 import {
   catchError,
@@ -130,16 +130,7 @@ export class Ga4UploadFacadeService {
       });
 
       // minimal placeholder Spec so backend can persist rawGtmTag
-      const spec: Spec = {
-        tag: {
-          name: `GA4 event - ${eventName}`,
-          type: 'gaawe',
-          accountId: '',
-          containerId: '',
-          parameter: []
-        },
-        trigger: []
-      };
+      const spec = createPlaceholderSpec(`GA4 event - ${eventName}`);
 
       const recording: Recording = { title: eventName, steps: [] };
 

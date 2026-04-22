@@ -1,5 +1,4 @@
 import { TagTypeEnum } from '../../enums/tag-build';
-import { Spec, StrictDataLayerEvent } from '../tag-check';
 import { Parameter } from './common.type';
 import { Trigger } from './trigger.type';
 
@@ -53,10 +52,3 @@ export type GoogleTagConfig = {
 export type HTMLTagConfig = {
   type: TagTypeEnum.HTML;
 } & Omit<TagConfig, 'type'>;
-
-export type TagSpec = {
-  event: string;
-  eventName: string;
-  dataLayerSpec: StrictDataLayerEvent;
-  rawGtmTag: Spec;
-};
