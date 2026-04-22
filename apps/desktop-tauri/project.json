@@ -1,0 +1,46 @@
+{
+  "name": "desktop-tauri",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/desktop-tauri",
+  "tags": [],
+  "targets": {
+    "prepare-runtime": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "outputs": [
+        "{workspaceRoot}/dist/apps/nest-backend",
+        "{projectRoot}/src-tauri/binaries"
+      ],
+      "options": {
+        "command": "node --experimental-strip-types scripts/tauri/prepare-runtime.ts"
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["prepare-runtime"],
+      "options": {
+        "command": "pnpm exec tauri dev --config apps/desktop-tauri/src-tauri/tauri.conf.json"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["prepare-runtime"],
+      "outputs": ["{projectRoot}/src-tauri/target"],
+      "options": {
+        "command": "pnpm exec tauri build --config apps/desktop-tauri/src-tauri/tauri.conf.json --no-bundle"
+      }
+    },
+    "bundle": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["prepare-runtime"],
+      "outputs": ["{projectRoot}/src-tauri/target"],
+      "options": {
+        "command": "pnpm exec tauri build --config apps/desktop-tauri/src-tauri/tauri.conf.json -b nsis --ci"
+      }
+    }
+  }
+}

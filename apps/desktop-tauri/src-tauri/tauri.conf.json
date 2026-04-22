@@ -1,0 +1,45 @@
+{
+  "$schema": "../../../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Tag Check Desktop",
+  "version": "1.1.1",
+  "identifier": "com.wodenwang.tagcheck.desktop",
+  "build": {
+    "frontendDist": "../../../dist/apps/ng-frontend/browser",
+    "devUrl": "http://localhost:4200",
+    "beforeDevCommand": {
+      "script": "pnpm nx serve ng-frontend",
+      "wait": false
+    },
+    "beforeBuildCommand": "pnpm nx build ng-frontend --configuration production --base-href ./"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Tag Check",
+        "width": 1400,
+        "height": 900,
+        "resizable": true,
+        "fullscreen": false,
+        "visible": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "nsis",
+    "externalBin": ["binaries/node"],
+    "resources": {
+      "../../../dist/apps/nest-backend/": "backend/"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}
