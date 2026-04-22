@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 
-export interface SortableColumn {
+type SortableValue = string | number | boolean | Date | null | undefined;
+
+export interface SortableColumn<T> {
   name: string;
   type: 'string' | 'number' | 'date' | 'boolean';
-  accessor?: (item: any) => any;
+  accessor?: (item: T) => SortableValue;
 }
 
 @Injectable({
@@ -14,7 +16,7 @@ export class TableSortService {
   /**
    * Sorts data based on the provided sort configuration and column definitions
    */
-  sortData<T>(sort: Sort, data: T[], columns: SortableColumn[]): T[] {
+  sortData<T>(sort: Sort, data: T[], columns: SortableColumn<T>[]): T[] {
     if (!sort.active || sort.direction === '') {
       return data;
     }
@@ -33,32 +35,44 @@ export class TableSortService {
     });
   }
 
-  private getValueForComparison(item: any, column: SortableColumn): any {
+  private getValueForComparison<T>(
+    item: T,
+    column: SortableColumn<T>
+  ): SortableValue {
     if (column.accessor) {
       return column.accessor(item);
     }
-    return item[column.name];
+
+    const value = (item as Record<string, unknown>)[column.name];
+    if (
+      value == null ||
+      value instanceof Date ||
+      typeof value === 'string' ||
+      typeof value === 'number' ||
+      typeof value === 'boolean'
+    ) {
+      return value;
+    }
+
+    return JSON.stringify(value);
   }
 
   private compare(
-    a: any,
-    b: any,
+    a: SortableValue,
+    b: SortableValue,
     isAsc: boolean,
-    type: SortableColumn['type']
+    type: SortableColumn<unknown>['type']
   ): number {
-    // extract sort order instead of repeating nested ternaries
     const sortOrder = isAsc ? 1 : -1;
 
     switch (type) {
       case 'date': {
-        // ...existing date parsing code...
-        const dateA = a instanceof Date ? a : new Date(a);
-        const dateB = b instanceof Date ? b : new Date(b);
+        const dateA = a instanceof Date ? a : new Date(String(a ?? ''));
+        const dateB = b instanceof Date ? b : new Date(String(b ?? ''));
         return (dateA.getTime() - dateB.getTime()) * sortOrder;
       }
       case 'number':
-        // number comparison
-        return (Number(a) - Number(b)) * sortOrder;
+        return (Number(a ?? 0) - Number(b ?? 0)) * sortOrder;
       case 'boolean': {
         if (a === b) {
           return 0;
@@ -66,11 +80,7 @@ export class TableSortService {
         return (a ? -1 : 1) * sortOrder;
       }
       default: {
-        // string
-        if (a < b) {
-          return -1 * sortOrder;
-        }
-        return 1 * sortOrder;
+        return String(a ?? '').localeCompare(String(b ?? '')) * sortOrder;
       }
     }
   }
