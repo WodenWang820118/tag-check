@@ -5,6 +5,10 @@ import { pathToFileURL } from 'node:url';
 
 import { cacheProviderHealth } from './provider-health.ts';
 import {
+  createProviderTelemetryContext,
+  type ProviderTelemetryContext
+} from './provider-observability.ts';
+import {
   isCopilotUnavailableError,
   probeCopilotCliHealth,
   runCopilotReview
@@ -542,6 +546,15 @@ export function buildReviewPrompt(
   return reviewRules.join('\n');
 }
 
+export function createCheckpointReviewTelemetryContext(
+  execution: ReviewExecution
+): ProviderTelemetryContext {
+  return createProviderTelemetryContext({
+    callsite: 'checkpoint-review',
+    checkpoint: execution.checkpoint
+  });
+}
+
 export async function main(argv = process.argv.slice(2)): Promise<void> {
   const parsed = parseCliArgs(argv);
 
@@ -584,7 +597,8 @@ async function runReviewExecution(
     return runCopilotReview({
       model: execution.model,
       prompt,
-      repoRoot: process.cwd()
+      repoRoot: process.cwd(),
+      telemetryContext: createCheckpointReviewTelemetryContext(execution)
     });
   }
 
@@ -592,7 +606,8 @@ async function runReviewExecution(
     return runGeminiReview({
       model: execution.model ?? getDefaultGeminiModel(execution.checkpoint),
       prompt,
-      repoRoot: process.cwd()
+      repoRoot: process.cwd(),
+      telemetryContext: createCheckpointReviewTelemetryContext(execution)
     });
   }
 
@@ -739,14 +754,16 @@ async function probeReviewProviderHealth(execution: ReviewExecution) {
   if (execution.provider === 'copilot') {
     return probeCopilotCliHealth({
       model: getProviderHealthModel(execution),
-      repoRoot: process.cwd()
+      repoRoot: process.cwd(),
+      telemetryContext: createCheckpointReviewTelemetryContext(execution)
     });
   }
 
   if (execution.provider === 'gemini') {
     return probeGeminiCliHealth({
       model: execution.model ?? getDefaultGeminiModel(execution.checkpoint),
-      repoRoot: process.cwd()
+      repoRoot: process.cwd(),
+      telemetryContext: createCheckpointReviewTelemetryContext(execution)
     });
   }
 

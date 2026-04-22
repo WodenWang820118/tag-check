@@ -10,6 +10,10 @@ import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 
 import {
+  createProviderTelemetryContext,
+  type ProviderTelemetryContext
+} from './provider-observability.ts';
+import {
   isCopilotUnavailableError,
   probeCopilotCliHealth,
   runCopilotReview
@@ -279,6 +283,11 @@ const DEFAULT_SAMPLE_SEED = 20260419;
 const DEFAULT_SMALL_DIFF_THRESHOLD_CHARS = 1024;
 const LOCAL_REVIEWER_BUILD_TIMEOUT_MS = 5 * 60 * 1000;
 const LOCAL_REVIEWER_COMMAND_TIMEOUT_MS = 5 * 60 * 1000;
+const DEFAULT_EVALUATION_REPO_NAMES = [
+  'gx.law-prep',
+  'gx.go',
+  'local-reviewer-cli'
+] as const;
 const EVALUATION_KIND_ORDER: EvaluationSample['kind'][] = [
   'higher-risk',
   'small-ts',
@@ -702,9 +711,11 @@ export function runHybridGptReview(input: {
 }): HybridGptReview {
   const provider = 'copilot-gpt-5-mini' as const;
   const model = DEFAULT_HYBRID_GPT_MODEL;
+  const telemetryContext = createHybridGptTelemetryContext();
   const health = probeCopilotCliHealth({
     model,
-    repoRoot: input.repoRoot
+    repoRoot: input.repoRoot,
+    telemetryContext
   });
 
   if (!health.available) {
@@ -729,7 +740,8 @@ export function runHybridGptReview(input: {
         changedFiles: input.changedFiles,
         diffText: input.diffText
       }),
-      repoRoot: input.repoRoot
+      repoRoot: input.repoRoot,
+      telemetryContext
     });
     const parsed = parseHybridGptReview(rawOutput);
     return {
@@ -756,6 +768,12 @@ export function runHybridGptReview(input: {
       error: errorText
     };
   }
+}
+
+export function createHybridGptTelemetryContext(): ProviderTelemetryContext {
+  return createProviderTelemetryContext({
+    callsite: 'hybrid-gpt-review'
+  });
 }
 
 export function createHybridGptBypassReview(reason: string): HybridGptReview {
@@ -1120,7 +1138,9 @@ export function resolveEvaluationRepoTargets(
   requestedRepos: ReadonlyArray<string> = []
 ): EvaluationRepoTarget[] {
   const repoInputs =
-    requestedRepos.length > 0 ? requestedRepos : [basename(currentRepoRoot)];
+    requestedRepos.length > 0
+      ? requestedRepos
+      : [...DEFAULT_EVALUATION_REPO_NAMES];
   const resolvedTargets: EvaluationRepoTarget[] = [];
   const seenRoots = new Set<string>();
 
@@ -2135,16 +2155,16 @@ function resolveEvaluationRepoTarget(
   currentRepoRoot: string,
   repoInput: string
 ): EvaluationRepoTarget {
-  if (repoInput === basename(currentRepoRoot)) {
+  if (
+    (DEFAULT_EVALUATION_REPO_NAMES as readonly string[]).includes(repoInput)
+  ) {
     return {
       name: repoInput,
-      root: currentRepoRoot
+      root: resolve(currentRepoRoot, '..', repoInput)
     };
   }
 
-  const directRoot = resolve(currentRepoRoot, repoInput);
-  const siblingRoot = resolve(currentRepoRoot, '..', repoInput);
-  const root = existsSync(directRoot) ? directRoot : siblingRoot;
+  const root = resolve(currentRepoRoot, repoInput);
   return {
     name: basename(root),
     root

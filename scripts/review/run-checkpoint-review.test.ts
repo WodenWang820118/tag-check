@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   buildReviewPrompt,
+  createCheckpointReviewTelemetryContext,
   createReviewExecution,
   executeReviewFlow,
   getReviewExecutionPlan,
@@ -11,6 +12,7 @@ import {
   parseChangedFilesFromContext,
   type ReviewExecution
 } from './run-checkpoint-review.ts';
+import { createProviderObservationBucketKey } from './provider-observability.ts';
 
 test('parseCliArgs reads the supported checkpoint review flags', () => {
   const parsed = parseCliArgs([
@@ -113,8 +115,8 @@ test('parseChangedFilesFromContext reads the bullet list under the changed files
   assert.deepEqual(
     parseChangedFilesFromContext(lowRiskImplementationContext()),
     [
-      'apps/ng-frontend/src/app/app.component.html',
-      'apps/ng-frontend/src/app/app.component.scss'
+      'apps/law-prep-web/src/app/app.component.html',
+      'apps/law-prep-web/src/app/app.component.scss'
     ]
   );
 });
@@ -200,7 +202,7 @@ test('inferAutoReviewRisk does not collapse nested package json files into the r
       checkpoint: 'implementation',
       context: [
         'Changed files:',
-        '- apps/nest-backend/package.json',
+        '- apps/law-prep-ai-service/package.json',
         '',
         'Summary:',
         '- Update one workspace-local dependency only.'
@@ -217,7 +219,7 @@ test('inferAutoReviewRisk marks auth-heavy context as high risk', () => {
       checkpoint: 'implementation',
       context: [
         'Changed files:',
-        '- apps/ng-frontend/src/app/auth.guard.ts',
+        '- apps/law-prep-web/src/app/auth.guard.ts',
         '',
         'Summary:',
         '- Tighten auth session handling for login flow.'
@@ -234,7 +236,7 @@ test('inferAutoReviewRisk marks public-contract route changes as high risk', () 
       checkpoint: 'implementation',
       context: [
         'Changed files:',
-        '- apps/nest-backend/src/app/routes.py',
+        '- apps/law-prep-ai-service/src/app/routes.py',
         '',
         'Summary:',
         '- Adjust HTTP response shape.'
@@ -251,7 +253,7 @@ test('inferAutoReviewRisk marks plain api contract files as high risk', () => {
       checkpoint: 'implementation',
       context: [
         'Changed files:',
-        '- apps/nest-backend/src/app/api.ts',
+        '- apps/law-prep-ai-service/src/app/api.ts',
         '',
         'Summary:',
         '- Small API cleanup.'
@@ -279,7 +281,7 @@ test('inferAutoReviewRisk marks absolute control-plane paths as high risk', () =
       checkpoint: 'implementation',
       context: [
         'Changed files:',
-        '- C:\\software-dev\\tag-check\\.gemini\\settings.json',
+        '- C:\\software-dev\\gx.law-prep\\.gemini\\settings.json',
         '',
         'Summary:',
         '- Adjust reviewer runtime settings.'
@@ -313,8 +315,8 @@ test('inferAutoReviewRisk marks access-control and env config changes as high ri
       checkpoint: 'implementation',
       context: [
         'Changed files:',
-        '- apps/nest-backend/src/security/access-control.ts',
-        '- apps/nest-backend/src/config/env.ts',
+        '- apps/law-prep-engine/src/security/access-control.ts',
+        '- apps/law-prep-ai-service/src/config/env.ts',
         '',
         'Summary:',
         '- Tighten admin role checks and load provider keys from environment variables.'
@@ -331,8 +333,8 @@ test('inferAutoReviewRisk marks python and java process or network surfaces as h
       checkpoint: 'implementation',
       context: [
         'Changed files:',
-        '- apps/nest-backend/src/runtime/process_runner.py',
-        '- apps/nest-backend/src/clients/UpstreamClient.java',
+        '- apps/law-prep-ai-service/src/runtime/process_runner.py',
+        '- apps/law-prep-engine/src/clients/UpstreamClient.java',
         '',
         'Summary:',
         '- Use subprocess and the HTTP client for upstream requests.'
@@ -349,7 +351,7 @@ test('inferAutoReviewRisk marks permission policy changes as high risk', () => {
       checkpoint: 'implementation',
       context: [
         'Changed files:',
-        '- apps/nest-backend/src/security/PermissionPolicy.java',
+        '- apps/law-prep-engine/src/security/PermissionPolicy.java',
         '',
         'Summary:',
         '- Tighten permission policy checks.'
@@ -379,7 +381,7 @@ test('inferAutoReviewRisk requires the context changed-file list to match repo c
       checkpoint: 'implementation',
       context: lowRiskImplementationContext(),
       focus: 'general',
-      repoChangedFiles: ['apps/ng-frontend/src/app/other.component.ts'],
+      repoChangedFiles: ['apps/law-prep-web/src/app/other.component.ts'],
       repoDiffText: lowRiskRepositoryDiffText()
     }),
     'medium'
@@ -422,9 +424,9 @@ test('inferAutoReviewRisk requires each changed file to have real diff-header ev
       focus: 'general',
       repoChangedFiles: lowRiskRepositoryChangedFiles(),
       repoDiffText: [
-        'diff --git a/apps/ng-frontend/src/app/app.component.html b/apps/ng-frontend/src/app/app.component.html',
+        'diff --git a/apps/law-prep-web/src/app/app.component.html b/apps/law-prep-web/src/app/app.component.html',
         '@@',
-        '+See styles in apps/ng-frontend/src/app/app.component.scss'
+        '+See styles in apps/law-prep-web/src/app/app.component.scss'
       ].join('\n')
     }),
     'medium'
@@ -460,7 +462,7 @@ test('inferAutoReviewRisk requires the repo diff text to mention the repo change
 test('inferAutoReviewRisk keeps executable ui files at medium risk even with small matching diffs', () => {
   const context = [
     'Changed files:',
-    '- apps/ng-frontend/src/app/admin.page.ts',
+    '- apps/law-prep-web/src/app/admin.page.ts',
     '',
     'Summary:',
     '- Small UI flow tweak only.'
@@ -471,9 +473,9 @@ test('inferAutoReviewRisk keeps executable ui files at medium risk even with sma
       checkpoint: 'implementation',
       context,
       focus: 'general',
-      repoChangedFiles: ['apps/ng-frontend/src/app/admin.page.ts'],
+      repoChangedFiles: ['apps/law-prep-web/src/app/admin.page.ts'],
       repoDiffText: [
-        'diff --git a/apps/ng-frontend/src/app/admin.page.ts b/apps/ng-frontend/src/app/admin.page.ts',
+        'diff --git a/apps/law-prep-web/src/app/admin.page.ts b/apps/law-prep-web/src/app/admin.page.ts',
         '@@',
         "-const isAdmin = currentUser?.roles?.includes('admin');",
         '+const isAdmin = true;'
@@ -490,8 +492,8 @@ test('inferAutoReviewRisk matches normalized repo changed files when the repo pa
       context: lowRiskImplementationContext(),
       focus: 'general',
       repoChangedFiles: [
-        'C:\\software-dev\\tag-check\\apps\\ng-frontend\\src\\app\\app.component.html',
-        'C:\\software-dev\\tag-check\\apps\\ng-frontend\\src\\app\\app.component.scss'
+        'C:\\software-dev\\gx.law-prep\\apps\\law-prep-web\\src\\app\\app.component.html',
+        'C:\\software-dev\\gx.law-prep\\apps\\law-prep-web\\src\\app\\app.component.scss'
       ],
       repoDiffText: lowRiskRepositoryDiffText()
     }),
@@ -505,9 +507,9 @@ test('inferAutoReviewRisk keeps larger changed-file lists at medium risk', () =>
       checkpoint: 'implementation',
       context: [
         'Changed files:',
-        '- apps/ng-frontend/src/app/a.ts',
-        '- apps/ng-frontend/src/app/b.ts',
-        '- apps/ng-frontend/src/app/c.ts',
+        '- apps/law-prep-web/src/app/a.ts',
+        '- apps/law-prep-web/src/app/b.ts',
+        '- apps/law-prep-web/src/app/c.ts',
         '',
         'Summary:',
         '- Small refactor.'
@@ -535,7 +537,7 @@ test('inferAutoReviewRisk keeps refactor-heavy context at medium risk', () => {
       checkpoint: 'implementation',
       context: [
         'Changed files:',
-        '- apps/ng-frontend/src/app/app.component.ts',
+        '- apps/law-prep-web/src/app/app.component.ts',
         '',
         'Summary:',
         '- Refactor shared wiring for rollout safety.'
@@ -604,7 +606,7 @@ test('getReviewExecutionPlan keeps contract-like implementation reviews on the n
       checkpoint: 'implementation',
       context: [
         'Changed files:',
-        '- apps/nest-backend/src/app/routes.py',
+        '- apps/law-prep-ai-service/src/app/routes.py',
         '',
         'Summary:',
         '- Adjust HTTP response shape.'
@@ -632,7 +634,7 @@ test('getReviewExecutionPlan keeps api-like implementation reviews on the non-Co
       checkpoint: 'implementation',
       context: [
         'Changed files:',
-        '- apps/nest-backend/src/app/api.ts',
+        '- apps/law-prep-ai-service/src/app/api.ts',
         '',
         'Summary:',
         '- Small API cleanup.'
@@ -771,6 +773,33 @@ test('buildReviewPrompt includes the checkpoint, focus, and supplied context', (
   assert.match(prompt, /Checkpoint: implementation/);
   assert.match(prompt, /Primary focus: security/);
   assert.match(prompt, /Changed files: scripts\/review-gate\/shared\.ts/);
+});
+
+test('createCheckpointReviewTelemetryContext keeps checkpoint buckets distinct', () => {
+  const planBucket = createProviderObservationBucketKey({
+    ...createCheckpointReviewTelemetryContext(
+      execution('plan', 'copilot', 'general', 'claude-sonnet-4.6')
+    ),
+    model: 'claude-sonnet-4.6',
+    operation: 'review',
+    provider: 'copilot'
+  });
+  const implementationBucket = createProviderObservationBucketKey({
+    ...createCheckpointReviewTelemetryContext(
+      execution('implementation', 'copilot', 'general', 'claude-sonnet-4.6')
+    ),
+    model: 'claude-sonnet-4.6',
+    operation: 'review',
+    provider: 'copilot'
+  });
+
+  assert.notEqual(planBucket, implementationBucket);
+  assert.match(planBucket, /checkpoint-review/);
+  assert.match(planBucket, /\bplan\b/);
+  assert.doesNotMatch(planBucket, /\bimplementation\b/);
+  assert.match(implementationBucket, /checkpoint-review/);
+  assert.match(implementationBucket, /\bimplementation\b/);
+  assert.doesNotMatch(implementationBucket, /\bplan\b/);
 });
 
 test('executeReviewFlow fails fast for a single explicit unavailable provider', async () => {
@@ -1087,8 +1116,8 @@ function execution(
 function lowRiskImplementationContext(): string {
   return [
     'Changed files:',
-    '- apps/ng-frontend/src/app/app.component.html',
-    '- apps/ng-frontend/src/app/app.component.scss',
+    '- apps/law-prep-web/src/app/app.component.html',
+    '- apps/law-prep-web/src/app/app.component.scss',
     '',
     'Summary:',
     '- Small UI markup and style adjustment only.'
@@ -1097,18 +1126,18 @@ function lowRiskImplementationContext(): string {
 
 function lowRiskRepositoryChangedFiles(): string[] {
   return [
-    'apps/ng-frontend/src/app/app.component.html',
-    'apps/ng-frontend/src/app/app.component.scss'
+    'apps/law-prep-web/src/app/app.component.html',
+    'apps/law-prep-web/src/app/app.component.scss'
   ];
 }
 
 function lowRiskRepositoryDiffText(): string {
   return [
-    'diff --git a/apps/ng-frontend/src/app/app.component.html b/apps/ng-frontend/src/app/app.component.html',
+    'diff --git a/apps/law-prep-web/src/app/app.component.html b/apps/law-prep-web/src/app/app.component.html',
     '@@',
     '-<h1>Old copy</h1>',
     '+<h1>Updated copy</h1>',
-    'diff --git a/apps/ng-frontend/src/app/app.component.scss b/apps/ng-frontend/src/app/app.component.scss',
+    'diff --git a/apps/law-prep-web/src/app/app.component.scss b/apps/law-prep-web/src/app/app.component.scss',
     '@@',
     '-.hero { color: #333; }',
     '+.hero { color: #111; }'

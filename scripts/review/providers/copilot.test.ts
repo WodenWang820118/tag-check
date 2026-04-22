@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import test from 'node:test';
 
 import {
@@ -258,6 +258,7 @@ test('runCopilotReview falls back cleanly when the support probe fails', () => {
 test('runCopilotReview retries without reasoning flags when the review command rejects them', () => {
   const calls: string[][] = [];
   const cache = new Map<string, '--effort' | '--reasoning-effort' | null>();
+  const recorded: Array<Record<string, unknown>> = [];
   let reviewAttempt = 0;
   const review = runCopilotReview(
     {
@@ -266,6 +267,17 @@ test('runCopilotReview retries without reasoning flags when the review command r
       repoRoot: 'C:/repo'
     },
     {
+      now: (() => {
+        let current = 0;
+        return () => {
+          current += 100;
+          return current;
+        };
+      })(),
+      recordObservation(observation) {
+        recorded.push(observation as Record<string, unknown>);
+        return observation;
+      },
       reasoningEffortSupportCache: cache,
       runCommand: (input) => {
         calls.push([...input.args]);
@@ -302,7 +314,14 @@ test('runCopilotReview retries without reasoning flags when the review command r
   assert.equal(reviewCalls[0]?.includes('--reasoning-effort'), true);
   assert.equal(reviewCalls[1]?.includes('--reasoning-effort'), false);
   assert.equal(reviewCalls[1]?.includes('--effort'), false);
-  assert.equal(cache.has('C:\\repo'), false);
+  assert.equal(cache.get(resolve('C:/repo')), null);
+  assert.equal(recorded.length, 3);
+  assert.equal(recorded[0]?.operation, 'reasoning-help');
+  assert.equal(recorded[1]?.operation, 'review');
+  assert.equal(recorded[1]?.success, false);
+  assert.equal(recorded[1]?.errorCategory, 'unsupported-flag');
+  assert.equal(recorded[2]?.operation, 'review');
+  assert.equal(recorded[2]?.success, true);
 });
 
 test('probeCopilotCliHealth keeps the cheap path while runCopilotReview adds high reasoning effort only to review calls', () => {
@@ -387,4 +406,218 @@ test('probeCopilotCliHealth keeps the cheap path while runCopilotReview adds hig
   } finally {
     rmSync(repoRoot, { force: true, recursive: true });
   }
+});
+
+test('probeCopilotCliHealth records health-version and health-probe observations with checkpoint telemetry', () => {
+  const recorded: Array<Record<string, unknown>> = [];
+  const repoRoot = mkdtempSync(
+    join(tmpdir(), 'copilot-provider-observations-')
+  );
+
+  try {
+    const health = probeCopilotCliHealth(
+      {
+        model: 'gpt-5-mini',
+        repoRoot,
+        telemetryContext: {
+          callsite: 'checkpoint-review',
+          checkpoint: 'plan'
+        }
+      },
+      {
+        now: (() => {
+          let current = 0;
+          return () => {
+            current += 100;
+            return current;
+          };
+        })(),
+        recordObservation(observation) {
+          recorded.push(observation as Record<string, unknown>);
+          return observation;
+        },
+        runCommand: (input) => {
+          if (input.args[0] === '--version') {
+            return { status: 0, stdout: '1.0.0', stderr: '' };
+          }
+
+          return { status: 0, stdout: 'OK.', stderr: '' };
+        }
+      }
+    );
+
+    assert.equal(health.available, true);
+    assert.equal(recorded.length, 2);
+    assert.equal(recorded[0]?.operation, 'health-version');
+    assert.equal(recorded[0]?.callsite, 'checkpoint-review');
+    assert.equal(recorded[0]?.checkpoint, 'plan');
+    assert.equal(recorded[0]?.success, true);
+    assert.equal(recorded[0]?.errorCategory, null);
+    assert.equal(recorded[0]?.durationMs, 100);
+    assert.equal(recorded[0]?.timedOut, false);
+    assert.equal(recorded[1]?.operation, 'health-probe');
+    assert.equal(recorded[1]?.callsite, 'checkpoint-review');
+    assert.equal(recorded[1]?.checkpoint, 'plan');
+    assert.equal(recorded[1]?.success, true);
+    assert.equal(recorded[1]?.errorCategory, null);
+    assert.equal(recorded[1]?.durationMs, 100);
+    assert.equal(recorded[1]?.timedOut, false);
+  } finally {
+    rmSync(repoRoot, { force: true, recursive: true });
+  }
+});
+
+test('runCopilotReview records reasoning-help and review observations and preserves hybrid telemetry', () => {
+  const recorded: Array<Record<string, unknown>> = [];
+
+  const review = runCopilotReview(
+    {
+      model: 'gpt-5-mini',
+      prompt: 'Review this diff.',
+      repoRoot: 'C:/repo',
+      telemetryContext: {
+        callsite: 'hybrid-gpt-review'
+      }
+    },
+    {
+      now: (() => {
+        let current = 0;
+        return () => {
+          current += 100;
+          return current;
+        };
+      })(),
+      recordObservation(observation) {
+        recorded.push(observation as Record<string, unknown>);
+        return observation;
+      },
+      reasoningEffortSupportCache: new Map(),
+      runCommand: (input) => {
+        if (input.args[0] === '--help') {
+          return {
+            error: undefined,
+            status: 0,
+            stderr: '',
+            stdout: '  --reasoning-effort <level>'
+          };
+        }
+
+        return {
+          error: undefined,
+          status: 0,
+          stderr: '',
+          stdout: 'Reviewed.'
+        };
+      }
+    }
+  );
+
+  assert.equal(review, 'Reviewed.');
+  assert.equal(recorded.length, 2);
+  assert.equal(recorded[0]?.operation, 'reasoning-help');
+  assert.equal(recorded[0]?.callsite, 'hybrid-gpt-review');
+  assert.equal(recorded[0]?.checkpoint, undefined);
+  assert.equal(recorded[0]?.success, true);
+  assert.equal(recorded[0]?.errorCategory, null);
+  assert.equal(recorded[0]?.timedOut, false);
+  assert.equal(recorded[1]?.operation, 'review');
+  assert.equal(recorded[1]?.callsite, 'hybrid-gpt-review');
+  assert.equal(recorded[1]?.checkpoint, undefined);
+  assert.equal(recorded[1]?.success, true);
+  assert.equal(recorded[1]?.errorCategory, null);
+  assert.equal(recorded[1]?.durationMs, 100);
+  assert.equal(recorded[1]?.timedOut, false);
+});
+
+test('runCopilotReview records review timeouts before failing', () => {
+  const recorded: Array<Record<string, unknown>> = [];
+  const timeoutError = new Error('timed out');
+  timeoutError.name = 'TimeoutError';
+  const repoRoot = resolve('C:/repo');
+
+  assert.throws(
+    () =>
+      runCopilotReview(
+        {
+          model: 'gpt-5-mini',
+          prompt: 'Review this diff.',
+          repoRoot,
+          telemetryContext: {
+            callsite: 'checkpoint-review',
+            checkpoint: 'implementation'
+          }
+        },
+        {
+          now: (() => {
+            let current = 0;
+            return () => {
+              current += 100;
+              return current;
+            };
+          })(),
+          recordObservation(observation) {
+            recorded.push(observation as Record<string, unknown>);
+            return observation;
+          },
+          reasoningEffortSupportCache: new Map([[repoRoot, null]]),
+          runCommand: () => ({
+            error: timeoutError,
+            signal: 'SIGTERM',
+            status: null,
+            stderr: '',
+            stdout: ''
+          })
+        }
+      ),
+    /timed out/
+  );
+
+  assert.equal(recorded.length, 1);
+  assert.equal(recorded[0]?.operation, 'review');
+  assert.equal(recorded[0]?.callsite, 'checkpoint-review');
+  assert.equal(recorded[0]?.checkpoint, 'implementation');
+  assert.equal(recorded[0]?.durationMs, 100);
+  assert.equal(recorded[0]?.timedOut, true);
+  assert.equal(recorded[0]?.errorCategory, 'timeout');
+});
+
+test('runCopilotReview does not mark successful timeout-themed output as a timeout', () => {
+  const recorded: Array<Record<string, unknown>> = [];
+  const repoRoot = resolve('C:/repo');
+
+  const review = runCopilotReview(
+    {
+      model: 'gpt-5-mini',
+      prompt: 'Review timeout handling.',
+      repoRoot
+    },
+    {
+      now: (() => {
+        let current = 0;
+        return () => {
+          current += 100;
+          return current;
+        };
+      })(),
+      recordObservation(observation) {
+        recorded.push(observation as Record<string, unknown>);
+        return observation;
+      },
+      reasoningEffortSupportCache: new Map([[repoRoot, null]]),
+      runCommand: () => ({
+        error: undefined,
+        status: 0,
+        stderr: '',
+        stdout: 'Reviewed timeout handling successfully.'
+      })
+    }
+  );
+
+  assert.equal(review, 'Reviewed timeout handling successfully.');
+  assert.equal(recorded.length, 1);
+  assert.equal(recorded[0]?.operation, 'review');
+  assert.equal(recorded[0]?.success, true);
+  assert.equal(recorded[0]?.errorCategory, null);
+  assert.equal(recorded[0]?.durationMs, 100);
+  assert.equal(recorded[0]?.timedOut, false);
 });

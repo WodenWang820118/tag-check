@@ -5,15 +5,29 @@ import {
   getCachedProviderHealth,
   type ReviewProviderHealthResult
 } from '../provider-health.ts';
+import {
+  createProviderTelemetryContext,
+  recordProviderObservation,
+  type ProviderTelemetryContext
+} from '../provider-observability.ts';
+import {
+  getCopilotPolicyTimeoutMs,
+  COPILOT_HEALTH_TIMEOUT_MS,
+  COPILOT_REASONING_EFFORT_HELP_TIMEOUT_MS,
+  COPILOT_REVIEW_TIMEOUT_MS
+} from '../provider-policies.ts';
 import { runLocalCliCommand } from './local-cli.ts';
 
 interface CopilotReviewInput {
   model?: string;
   prompt: string;
   repoRoot?: string;
+  telemetryContext?: ProviderTelemetryContext;
 }
 
 interface CopilotProviderDependencies {
+  now?: () => number;
+  recordObservation?: typeof recordProviderObservation;
   reasoningEffortSupportCache?: Map<
     string,
     '--effort' | '--reasoning-effort' | null
@@ -22,9 +36,6 @@ interface CopilotProviderDependencies {
 }
 
 const COPILOT_HEALTH_PROMPT = 'Reply with exactly OK.';
-const COPILOT_HEALTH_TIMEOUT_MS = 30_000;
-const COPILOT_REVIEW_TIMEOUT_MS = 3 * 60 * 1000;
-const COPILOT_REASONING_EFFORT_HELP_TIMEOUT_MS = 15_000;
 const COPILOT_REASONING_EFFORT_LEVEL = 'high';
 const DEFAULT_REASONING_EFFORT_SUPPORT_CACHE = new Map<
   string,
@@ -45,17 +56,25 @@ export function probeCopilotCliHealth(
   input: {
     model?: string;
     repoRoot?: string;
+    telemetryContext?: ProviderTelemetryContext;
   } = {},
   dependencies: CopilotProviderDependencies = {}
 ): ReviewProviderHealthResult {
+  const now = dependencies.now ?? Date.now;
+  const recordObservation =
+    dependencies.recordObservation ?? recordProviderObservation;
   const runCommand = dependencies.runCommand ?? runLocalCliCommand;
   const repoRoot = input.repoRoot ?? process.cwd();
+  const telemetryContext = createProviderTelemetryContext(
+    input.telemetryContext
+  );
   const cached = getCachedProviderHealth('copilot', input.model, repoRoot);
   if (cached) {
     return cached;
   }
 
-  const checkedAtMs = Date.now();
+  const checkedAtMs = now();
+  const versionStartedAtMs = now();
   const versionResult = runCommand({
     command: 'copilot',
     windowsScriptName: 'copilot.ps1',
@@ -63,6 +82,27 @@ export function probeCopilotCliHealth(
     cwd: repoRoot,
     timeoutMs: COPILOT_HEALTH_TIMEOUT_MS
   });
+  recordObservation(
+    {
+      ...telemetryContext,
+      configuredTimeoutMs: getCopilotPolicyTimeoutMs('health-version'),
+      durationMs: now() - versionStartedAtMs,
+      errorCategory:
+        !versionResult.error && versionResult.status === 0
+          ? null
+          : classifyCopilotErrorCategory(
+              joinOutput(versionResult.stdout, versionResult.stderr),
+              versionResult.error?.message
+            ),
+      model: input.model,
+      operation: 'health-version',
+      promptChars: 0,
+      provider: 'copilot',
+      success: !versionResult.error && versionResult.status === 0,
+      timedOut: isCopilotTimedOut(versionResult)
+    },
+    repoRoot
+  );
 
   if (versionResult.error || versionResult.status !== 0) {
     return cacheProviderHealth(
@@ -77,6 +117,7 @@ export function probeCopilotCliHealth(
     );
   }
 
+  const probeStartedAtMs = now();
   const probeResult = runCommand({
     command: 'copilot',
     windowsScriptName: 'copilot.ps1',
@@ -93,6 +134,30 @@ export function probeCopilotCliHealth(
   const output = stripCopilotFooter(
     joinOutput(probeResult.stdout, probeResult.stderr)
   );
+  const probeSucceeded =
+    !probeResult.error &&
+    probeResult.status === 0 &&
+    /^OK\b/i.test(output.trim());
+  recordObservation(
+    {
+      ...telemetryContext,
+      configuredTimeoutMs: getCopilotPolicyTimeoutMs('health-probe'),
+      durationMs: now() - probeStartedAtMs,
+      errorCategory: probeSucceeded
+        ? null
+        : output.trim().length > 0 && probeResult.status === 0
+          ? 'unexpected-response'
+          : classifyCopilotErrorCategory(output, probeResult.error?.message),
+      model: input.model,
+      operation: 'health-probe',
+      promptChars: COPILOT_HEALTH_PROMPT.length,
+      provider: 'copilot',
+      success: probeSucceeded,
+      timedOut: isCopilotTimedOut(probeResult, output)
+    },
+    repoRoot
+  );
+
   if (!probeResult.error && probeResult.status === 0) {
     if (/^OK\b/i.test(output.trim())) {
       return cacheProviderHealth(
@@ -134,8 +199,14 @@ export function runCopilotReview(
   input: CopilotReviewInput,
   dependencies: CopilotProviderDependencies = {}
 ): string {
+  const now = dependencies.now ?? Date.now;
+  const recordObservation =
+    dependencies.recordObservation ?? recordProviderObservation;
   const runCommand = dependencies.runCommand ?? runLocalCliCommand;
   const repoRoot = input.repoRoot ?? process.cwd();
+  const telemetryContext = createProviderTelemetryContext(
+    input.telemetryContext
+  );
   const reasoningEffortSupportCache =
     dependencies.reasoningEffortSupportCache ??
     DEFAULT_REASONING_EFFORT_SUPPORT_CACHE;
@@ -143,13 +214,17 @@ export function runCopilotReview(
     {
       model: input.model,
       prompt: input.prompt,
-      repoRoot
+      repoRoot,
+      telemetryContext
     },
     {
+      now,
+      recordObservation,
       reasoningEffortSupportCache,
       runCommand
     }
   );
+  const reviewStartedAtMs = now();
   let result = runCommand({
     command: 'copilot',
     windowsScriptName: 'copilot.ps1',
@@ -166,7 +241,26 @@ export function runCopilotReview(
     ) &&
     isUnsupportedReasoningEffortError(output || result.error?.message)
   ) {
-    reasoningEffortSupportCache.delete(resolve(repoRoot));
+    recordObservation(
+      {
+        ...telemetryContext,
+        configuredTimeoutMs: getCopilotPolicyTimeoutMs('review'),
+        durationMs: now() - reviewStartedAtMs,
+        errorCategory: classifyCopilotErrorCategory(
+          output,
+          result.error?.message
+        ),
+        model: input.model,
+        operation: 'review',
+        promptChars: input.prompt.length,
+        provider: 'copilot',
+        success: false,
+        timedOut: isCopilotTimedOut(result, output)
+      },
+      repoRoot
+    );
+    reasoningEffortSupportCache.set(resolve(repoRoot), null);
+    const retryStartedAtMs = now();
     result = runCommand({
       command: 'copilot',
       windowsScriptName: 'copilot.ps1',
@@ -179,7 +273,63 @@ export function runCopilotReview(
       timeoutMs: COPILOT_REVIEW_TIMEOUT_MS
     });
     output = stripCopilotFooter(joinOutput(result.stdout, result.stderr));
+    const reviewDurationMs = now() - retryStartedAtMs;
+    recordObservation(
+      {
+        ...telemetryContext,
+        configuredTimeoutMs: getCopilotPolicyTimeoutMs('review'),
+        durationMs: reviewDurationMs,
+        errorCategory:
+          !result.error && result.status === 0 && output.trim().length > 0
+            ? null
+            : output.trim().length === 0 && !result.error && result.status === 0
+              ? 'empty-output'
+              : classifyCopilotErrorCategory(output, result.error?.message),
+        model: input.model,
+        operation: 'review',
+        promptChars: input.prompt.length,
+        provider: 'copilot',
+        success:
+          !result.error && result.status === 0 && output.trim().length > 0,
+        timedOut: isCopilotTimedOut(result, output)
+      },
+      repoRoot
+    );
+
+    if (result.error || result.status !== 0) {
+      throw new Error(
+        output || result.error?.message || 'Copilot review command failed.'
+      );
+    }
+
+    if (!output.trim()) {
+      throw new Error('Copilot review returned no output.');
+    }
+
+    return output.trim();
   }
+
+  const reviewSucceeded =
+    !result.error && result.status === 0 && output.trim().length > 0;
+  recordObservation(
+    {
+      ...telemetryContext,
+      configuredTimeoutMs: getCopilotPolicyTimeoutMs('review'),
+      durationMs: now() - reviewStartedAtMs,
+      errorCategory: reviewSucceeded
+        ? null
+        : output.trim().length === 0 && !result.error && result.status === 0
+          ? 'empty-output'
+          : classifyCopilotErrorCategory(output, result.error?.message),
+      model: input.model,
+      operation: 'review',
+      promptChars: input.prompt.length,
+      provider: 'copilot',
+      success: reviewSucceeded,
+      timedOut: isCopilotTimedOut(result, output)
+    },
+    repoRoot
+  );
 
   if (result.error || result.status !== 0) {
     throw new Error(
@@ -203,15 +353,25 @@ export function buildCopilotReviewCommandArgs(
     model: input.model,
     prompt: input.prompt
   });
+  const now = dependencies.now ?? Date.now;
+  const recordObservation =
+    dependencies.recordObservation ?? recordProviderObservation;
   const repoRoot = input.repoRoot ?? process.cwd();
+  const telemetryContext = createProviderTelemetryContext(
+    input.telemetryContext
+  );
   const reasoningEffortSupportCache =
     dependencies.reasoningEffortSupportCache ??
     DEFAULT_REASONING_EFFORT_SUPPORT_CACHE;
   const runCommand = dependencies.runCommand ?? runLocalCliCommand;
 
   const supportedFlag = supportsCopilotReasoningEffort({
+    model: input.model,
+    now,
+    recordObservation,
     reasoningEffortSupportCache,
     repoRoot,
+    telemetryContext,
     runCommand
   });
 
@@ -259,11 +419,15 @@ export function buildCopilotCommandArgs(input: {
 }
 
 function supportsCopilotReasoningEffort(input: {
+  model?: string;
+  now: () => number;
+  recordObservation: typeof recordProviderObservation;
   reasoningEffortSupportCache: Map<
     string,
     '--effort' | '--reasoning-effort' | null
   >;
   repoRoot: string;
+  telemetryContext: ProviderTelemetryContext;
   runCommand: typeof runLocalCliCommand;
 }): '--effort' | '--reasoning-effort' | null {
   const cacheKey = resolve(input.repoRoot);
@@ -272,6 +436,7 @@ function supportsCopilotReasoningEffort(input: {
     return cached;
   }
 
+  const startedAtMs = input.now();
   const helpResult = input.runCommand({
     command: 'copilot',
     windowsScriptName: 'copilot.ps1',
@@ -279,10 +444,29 @@ function supportsCopilotReasoningEffort(input: {
     cwd: input.repoRoot,
     timeoutMs: COPILOT_REASONING_EFFORT_HELP_TIMEOUT_MS
   });
+  const output = joinOutput(helpResult.stdout, helpResult.stderr);
+  input.recordObservation(
+    {
+      ...input.telemetryContext,
+      configuredTimeoutMs: getCopilotPolicyTimeoutMs('reasoning-help'),
+      durationMs: input.now() - startedAtMs,
+      errorCategory:
+        !helpResult.error && helpResult.status === 0
+          ? null
+          : classifyCopilotErrorCategory(output, helpResult.error?.message),
+      model: input.model,
+      operation: 'reasoning-help',
+      promptChars: 0,
+      provider: 'copilot',
+      success: !helpResult.error && helpResult.status === 0,
+      timedOut: isCopilotTimedOut(helpResult, output)
+    },
+    input.repoRoot
+  );
   if (helpResult.error || helpResult.status !== 0) {
     return null;
   }
-  const output = joinOutput(helpResult.stdout, helpResult.stderr);
+
   const supportedFlag = output.includes('--reasoning-effort')
     ? '--reasoning-effort'
     : output.includes('--effort')
@@ -340,6 +524,69 @@ function isUnsupportedReasoningEffortError(message?: string): boolean {
 
 function joinOutput(stdout?: string | null, stderr?: string | null): string {
   return [stdout, stderr].filter(Boolean).join('\n').trim();
+}
+
+function classifyCopilotErrorCategory(
+  output: string,
+  errorMessage?: string
+): string | null {
+  const message = [output, errorMessage].filter(Boolean).join('\n').trim();
+
+  if (!message) {
+    return null;
+  }
+
+  if (/\b(timeout|timed out|ETIMEDOUT)\b/i.test(message)) {
+    return 'timeout';
+  }
+
+  if (
+    /\b(quota|premium requests|billing|subscription|rate limit|429|entitlement)\b/i.test(
+      message
+    )
+  ) {
+    return 'capacity';
+  }
+
+  if (
+    /\b(not authenticated|authenticate|login|sign in|credential|token|required)\b/i.test(
+      message
+    )
+  ) {
+    return 'auth';
+  }
+
+  if (isUnsupportedReasoningEffortError(message)) {
+    return 'unsupported-flag';
+  }
+
+  if (
+    /\b(not installed|cannot be started locally|ENOENT|not recognized)\b/i.test(
+      message
+    )
+  ) {
+    return 'cli-unavailable';
+  }
+
+  if (/unexpected response/i.test(message)) {
+    return 'unexpected-response';
+  }
+
+  return 'runtime-error';
+}
+
+function isCopilotTimedOut(
+  result: ReturnType<typeof runLocalCliCommand>,
+  output = ''
+): boolean {
+  return (
+    result.error?.name === 'TimeoutError' ||
+    result.signal === 'SIGTERM' ||
+    ((Boolean(result.error) || result.status !== 0) &&
+      /\b(timeout|timed out|ETIMEDOUT)\b/i.test(
+        [output, result.error?.message].filter(Boolean).join('\n')
+      ))
+  );
 }
 
 function stripCopilotFooter(output: string): string {

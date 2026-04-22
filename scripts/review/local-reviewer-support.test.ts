@@ -16,6 +16,7 @@ import {
   buildCheckpointReviewContext,
   buildHybridPrefilterContext,
   buildHybridReviewReport,
+  createHybridGptTelemetryContext,
   createHybridGptBypassReview,
   buildPrefilterContext,
   buildPrefilterFailureContext,
@@ -37,10 +38,14 @@ import {
   type LocalReviewFinding,
   type LocalReviewReport
 } from './local-reviewer-support.ts';
+import {
+  createProviderObservationBucketKey,
+  createProviderTelemetryContext
+} from './provider-observability.ts';
 
 test('resolveLocalReviewerRepoRoot finds the sibling workspace', () => {
   const workspace = mkdtempSync(join(tmpdir(), 'local-reviewer-support-'));
-  const currentRepo = resolve(workspace, 'tag-check');
+  const currentRepo = resolve(workspace, 'gx.law-prep');
   const siblingRepo = resolve(workspace, 'local-reviewer-cli');
 
   try {
@@ -70,7 +75,7 @@ test('resolveLocalReviewerRepoRoot finds the sibling workspace', () => {
 
 test('resolveLocalReviewerRepoRoot respects LOCAL_REVIEWER_CLI_PATH overrides', () => {
   const workspace = mkdtempSync(join(tmpdir(), 'local-reviewer-support-env-'));
-  const currentRepo = resolve(workspace, 'tag-check');
+  const currentRepo = resolve(workspace, 'gx.law-prep');
   const siblingRepo = resolve(workspace, 'external', 'local-reviewer-cli');
 
   try {
@@ -121,17 +126,17 @@ test('createLocalReviewerEnv injects the Ollama defaults', () => {
 
 test('buildCheckpointReviewContext includes an explicit changed files section before the diff', () => {
   const context = buildCheckpointReviewContext({
-    changedFiles: ['apps/ng-frontend/src/app/app.component.ts'],
+    changedFiles: ['apps/law-prep-web/src/app/app.component.ts'],
     diffText:
-      'diff --git a/apps/ng-frontend/src/app/app.component.ts b/apps/ng-frontend/src/app/app.component.ts',
+      'diff --git a/apps/law-prep-web/src/app/app.component.ts b/apps/law-prep-web/src/app/app.component.ts',
     sample: {
       baseRef: 'abc123',
       commit: 'def456',
       committedAtEpoch: 0,
       fileCount: 1,
       kind: 'small-ts',
-      repoName: 'tag-check',
-      repoRoot: 'C:/software-dev/tag-check',
+      repoName: 'gx.law-prep',
+      repoRoot: 'C:/software-dev/gx.law-prep',
       subject: 'Update copy',
       totalChangedLines: 4
     }
@@ -139,7 +144,7 @@ test('buildCheckpointReviewContext includes an explicit changed files section be
 
   assert.match(
     context,
-    /Changed files:\n- apps\/ng-frontend\/src\/app\/app\.component\.ts\n\nDiff to review:/
+    /Changed files:\n- apps\/law-prep-web\/src\/app\/app\.component\.ts\n\nDiff to review:/
   );
 });
 
@@ -364,6 +369,33 @@ test('buildHybridReviewReport escalates when either GPT or local review blocks a
   );
 });
 
+test('createHybridGptTelemetryContext keeps hybrid GPT observations separate from checkpoint review buckets', () => {
+  const checkpointBucket = createProviderObservationBucketKey({
+    ...createProviderTelemetryContext({
+      callsite: 'checkpoint-review',
+      checkpoint: 'implementation'
+    }),
+    model: 'gpt-5-mini',
+    operation: 'review',
+    provider: 'copilot'
+  });
+  const hybridBucket = createProviderObservationBucketKey({
+    ...createHybridGptTelemetryContext(),
+    model: 'gpt-5-mini',
+    operation: 'review',
+    provider: 'copilot'
+  });
+
+  assert.notEqual(checkpointBucket, hybridBucket);
+  assert.match(checkpointBucket, /checkpoint-review/);
+  assert.match(checkpointBucket, /\bimplementation\b/);
+  assert.doesNotMatch(checkpointBucket, /hybrid-gpt-review/);
+  assert.match(hybridBucket, /hybrid-gpt-review/);
+  assert.match(hybridBucket, /:none:/);
+  assert.doesNotMatch(hybridBucket, /checkpoint-review/);
+  assert.doesNotMatch(hybridBucket, /\bimplementation\b/);
+});
+
 test('writePrefilterArtifacts persists both report and context', () => {
   const workspace = mkdtempSync(join(tmpdir(), 'local-reviewer-prefilter-'));
 
@@ -493,7 +525,7 @@ test('summarizeEvaluation writes evaluation artifacts and verdicts', () => {
       config: {
         abSampleCount: 0,
         jobs: 2,
-        repoNames: ['tag-check'],
+        repoNames: ['gx.law-prep'],
         rounds: 1,
         seed: 1,
         smallDiffThresholdChars: DEFAULT_SMALL_DIFF_THRESHOLD_CHARS
@@ -531,7 +563,7 @@ function sample(
     committedAtEpoch: 1,
     fileCount: 1,
     kind,
-    repoName: 'tag-check',
+    repoName: 'gx.law-prep',
     repoRoot: '/repo',
     subject: `sample ${commit}`,
     totalChangedLines: 10
