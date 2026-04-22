@@ -19,4 +19,4 @@
 - If the gate should be closed again, run `pnpm review:reset`.
 - For browser-verifiable UI proof requests, use `qa-verification`; when browser artifacts are needed, run `pnpm proofshot:check`, `pnpm proofshot:start:web`, and `pnpm proofshot:stop`, then review the resulting `proofshot-artifacts/` with the dedicated proofshot review prompt.
 - Run workspace tasks through `pnpm nx ...` and inspect project configuration before guessing targets or flags.
-- Keep repo topology in mind: Angular browser apps (`ng-frontend`, `ng-tag-build`, `ng-product-doc`), the `nest-backend` service, and the root-level Playwright/Electron packaging surface.
+- Keep repo topology in mind: Angular browser apps (`ng-frontend`, `ng-tag-build`, `ng-product-doc`), the `nest-backend` service, and the desktop Tauri packaging surface.
