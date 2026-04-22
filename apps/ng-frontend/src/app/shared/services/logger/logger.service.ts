@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 
@@ -16,6 +15,8 @@ export interface LoggerConfig {
   enableContext: boolean;
   contextMaxLength: number;
 }
+
+type LogMessage = unknown;
 
 @Injectable({
   providedIn: 'root'
@@ -76,7 +77,11 @@ export class LoggerService {
    * @param context Optional context for the log
    * @param optionalParams Additional parameters to log
    */
-  debug(message: any, context?: string, ...optionalParams: any[]): void {
+  debug(
+    message: LogMessage,
+    context?: string,
+    ...optionalParams: unknown[]
+  ): void {
     this.logWithLevel(LogLevel.DEBUG, message, context, optionalParams);
   }
 
@@ -86,7 +91,11 @@ export class LoggerService {
    * @param context Optional context for the log
    * @param optionalParams Additional parameters to log
    */
-  info(message: any, context?: string, ...optionalParams: any[]): void {
+  info(
+    message: LogMessage,
+    context?: string,
+    ...optionalParams: unknown[]
+  ): void {
     this.logWithLevel(LogLevel.INFO, message, context, optionalParams);
   }
 
@@ -96,7 +105,11 @@ export class LoggerService {
    * @param context Optional context for the log
    * @param optionalParams Additional parameters to log
    */
-  warn(message: any, context?: string, ...optionalParams: any[]): void {
+  warn(
+    message: LogMessage,
+    context?: string,
+    ...optionalParams: unknown[]
+  ): void {
     this.logWithLevel(LogLevel.WARN, message, context, optionalParams);
   }
 
@@ -106,7 +119,11 @@ export class LoggerService {
    * @param context Optional context for the log
    * @param optionalParams Additional parameters to log
    */
-  error(message: any, context?: string, ...optionalParams: any[]): void {
+  error(
+    message: LogMessage,
+    context?: string,
+    ...optionalParams: unknown[]
+  ): void {
     this.logWithLevel(LogLevel.ERROR, message, context, optionalParams);
   }
 
@@ -116,7 +133,11 @@ export class LoggerService {
    * @param context Optional context for the log
    * @param optionalParams Additional parameters to log
    */
-  log(message: any, context?: string, ...optionalParams: any[]): void {
+  log(
+    message: LogMessage,
+    context?: string,
+    ...optionalParams: unknown[]
+  ): void {
     this.logWithLevel(LogLevel.INFO, message, context, optionalParams);
   }
 
@@ -144,9 +165,9 @@ export class LoggerService {
    */
   private logWithLevel(
     level: LogLevel,
-    message: any,
+    message: LogMessage,
     context?: string,
-    optionalParams: any[] = []
+    optionalParams: unknown[] = []
   ): void {
     // Skip if logging is disabled for this level
     if (level < this.config.level) {
@@ -156,10 +177,13 @@ export class LoggerService {
     const timestamp = this.config.enableTimestamp ? this.getTimestamp() : null;
     const formattedContext = this.formatContext(context);
     const { consoleMethod, levelStyle } = this.getLevelSettings(level);
+    const logMethod = console[consoleMethod].bind(console) as (
+      ...args: unknown[]
+    ) => void;
 
     const parts: string[] = [];
     const stylesArr: string[] = [];
-    const values: any[] = [];
+    const values: string[] = [];
 
     if (timestamp) {
       parts.push('%c[%s]');
@@ -178,14 +202,7 @@ export class LoggerService {
 
     const format = parts.join(' ');
 
-    let messageText: string;
-    if (message instanceof Error) {
-      messageText = message.message;
-    } else if (typeof message === 'string') {
-      messageText = message;
-    } else {
-      messageText = 'Object:';
-    }
+    const messageText = this.formatMessage(message);
 
     const args = [
       format,
@@ -194,13 +211,33 @@ export class LoggerService {
       messageText,
       ...optionalParams
     ];
-    console[consoleMethod](...args);
+    logMethod(...args);
 
     if (message instanceof Error) {
-      console[consoleMethod](message.stack);
-    } else if (typeof message === 'object') {
-      console[consoleMethod](message);
+      logMethod(message.stack);
+    } else if (this.isObjectMessage(message)) {
+      logMethod(message);
     }
+  }
+
+  private formatMessage(message: LogMessage): string {
+    if (message instanceof Error) {
+      return message.message;
+    }
+
+    if (typeof message === 'string') {
+      return message;
+    }
+
+    if (this.isObjectMessage(message)) {
+      return 'Object:';
+    }
+
+    return String(message ?? '');
+  }
+
+  private isObjectMessage(message: LogMessage): message is object {
+    return typeof message === 'object' && message !== null;
   }
 
   /**

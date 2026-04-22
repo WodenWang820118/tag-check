@@ -152,7 +152,7 @@ export class SettingsService {
       );
   }
 
-  addSettings(projectSlug: string, settings: any) {
+  addSettings(projectSlug: string, settings: Partial<ProjectSetting>) {
     return this.http
       .post<ProjectSetting>(
         `${environment.settingsApiUrl}/${projectSlug}`,
@@ -182,7 +182,12 @@ export class SettingsService {
     this.currentProject.set(project);
   }
 
-  private isEmptyObject(obj: any) {
-    return obj && Object.keys(obj).length === 0 && obj.constructor === Object;
+  private isEmptyObject(obj: unknown): obj is Record<string, never> {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      !Array.isArray(obj) &&
+      Object.keys(obj).length === 0
+    );
   }
 }

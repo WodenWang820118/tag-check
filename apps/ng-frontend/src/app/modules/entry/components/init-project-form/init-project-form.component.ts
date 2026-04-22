@@ -1,5 +1,5 @@
 import { InitProjectFormFacadeService } from './init-project-form-facade.service';
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
@@ -23,14 +23,10 @@ import { RouterLink } from '@angular/router';
   templateUrl: `./init-project-form.component.html`,
   styleUrls: ['./init-project-form.component.scss']
 })
-export class InitProjectFormComponent implements OnInit {
+export class InitProjectFormComponent {
   constructor(
     private readonly initProjectFormFacadeService: InitProjectFormFacadeService
   ) {}
-
-  ngOnInit(): void {
-    this.initProjectFormFacadeService.observeProjectNameChanges();
-  }
 
   onSubmit() {
     this.initProjectFormFacadeService.submitProject().subscribe();

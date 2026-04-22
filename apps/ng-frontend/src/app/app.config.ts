@@ -1,7 +1,6 @@
 import {
   ApplicationConfig,
   ErrorHandler,
-  importProvidersFrom,
   provideAppInitializer,
   SecurityContext
 } from '@angular/core';
@@ -13,18 +12,19 @@ import {
 } from '@angular/router';
 import { APP_ROUTES } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
-import { MarkdownModule } from 'ngx-markdown';
+import { provideMarkdown, SANITIZE } from 'ngx-markdown';
 import * as Sentry from '@sentry/angular';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(APP_ROUTES, withPreloading(PreloadAllModules)),
     provideHttpClient(),
-    importProvidersFrom(
-      MarkdownModule.forRoot({
-        sanitize: SecurityContext.NONE as unknown as any
-      })
-    ),
+    provideMarkdown({
+      sanitize: {
+        provide: SANITIZE,
+        useValue: SecurityContext.NONE
+      }
+    }),
     {
       provide: ErrorHandler,
       useValue: Sentry.createErrorHandler({

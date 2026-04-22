@@ -1,3 +1,4 @@
+import { ComponentType } from '@angular/cdk/portal';
 import { DestroyRef, Injectable } from '@angular/core';
 import {
   FormBuilder,
@@ -20,13 +21,25 @@ import { InstantErrorStateMatcher } from './helper';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import slug from 'slug';
+
 @Injectable({
   providedIn: 'root'
 })
 export class InitProjectFormFacadeService {
-  errorDialogComponent = this.loadErrorDialogComponent();
+  // #region form state
+  errorDialogComponent: Promise<ComponentType<unknown> | null> =
+    this.loadErrorDialogComponent();
   validProjectNameMatcher = new InstantErrorStateMatcher();
   allowedSymbolsPattern = /^[a-zA-Z0-9-!'",\s]+$/;
+  private hasProjectNameObserver = false;
+  private readonly slugOptions: slug.Options = {
+    lower: true,
+    locale: 'en',
+    replacement: '-',
+    remove: /[*+~.()'"!:@]/g,
+    trim: true
+  };
+
   projectForm: FormGroup<{
     projectName: FormControl<string>;
     projectSlug: FormControl<string>;
@@ -48,33 +61,41 @@ export class InitProjectFormFacadeService {
     measurementId: '',
     projectDescription: ''
   });
+  // #endregion
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly projectService: ProjectService,
     private readonly configurationService: ConfigurationService,
     private readonly dialog: MatDialog,
-    private readonly destoryRef: DestroyRef,
+    private readonly destroyRef: DestroyRef,
     private readonly router: Router
   ) {
     this.observeProjectNameChanges();
   }
 
-  private async loadErrorDialogComponent() {
+  private async loadErrorDialogComponent(): Promise<ComponentType<unknown> | null> {
     try {
       const module = await import('@ui');
-      return module.ErrorDialogComponent;
+      return module.ErrorDialogComponent as ComponentType<unknown>;
     } catch (error) {
       console.error('Failed to load toolbar component:', error);
       return null;
     }
   }
 
+  // #region project name behavior
   observeProjectNameChanges(): void {
+    if (this.hasProjectNameObserver) {
+      return;
+    }
+
+    this.hasProjectNameObserver = true;
+
     this.projectForm.controls.projectName.valueChanges
       .pipe(
         distinctUntilChanged(),
-        takeUntilDestroyed(this.destoryRef),
+        takeUntilDestroyed(this.destroyRef),
         tap((value) => {
           if (!value) {
             this.projectForm.reset();
@@ -95,15 +116,9 @@ export class InitProjectFormFacadeService {
   }
 
   private formatProjectSlug(value: string): string {
-    // Use slug to handle non-English characters
-    return slug(value, {
-      lower: true, // Convert to lowercase
-      locale: 'en', // Language for transliteration rules
-      replacement: '-', // Replace spaces with hyphens
-      remove: /[*+~.()'"!:@]/g, // Remove these chars
-      trim: true // Trim leading and trailing replacement chars
-    } as any);
+    return slug(value, this.slugOptions);
   }
+  // #endregion
 
   submitProject() {
     if (this.projectForm.invalid) {
@@ -140,7 +155,7 @@ export class InitProjectFormFacadeService {
     );
   }
 
-  private async showErrorDialog(message: string) {
+  private async showErrorDialog(message: string): Promise<void> {
     const errorComponent = await this.errorDialogComponent;
     if (errorComponent !== null) {
       this.dialog.open(errorComponent, {
@@ -151,8 +166,12 @@ export class InitProjectFormFacadeService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private isEmptyObject(obj: any): boolean {
-    return obj && Object.keys(obj).length === 0 && obj.constructor === Object;
+  private isEmptyObject(obj: unknown): obj is Record<string, never> {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      !Array.isArray(obj) &&
+      Object.keys(obj).length === 0
+    );
   }
 }

@@ -9,7 +9,7 @@ export class UploadSpecService {
   isOpenImportSidenav = signal<boolean>(false);
 
   // empty constructor removed
-  existKeys(parsedSpec: any[]): boolean {
+  existKeys(parsedSpec: Array<{ event?: unknown }>): boolean {
     for (const spec of parsedSpec) {
       if (!Object.hasOwn(spec, 'event')) {
         return false;

@@ -85,7 +85,7 @@
     "test-back:e2e": "cross-env-shell WEB_SOCKET=7003 \"vitest --coverage --root=apps/nest-backend/test --watch=false\"",
     "test-back:unit": "vitest --root=apps/nest-backend --exclude=**/test/*e2e-spec.ts --watch=false",
     "test-electron": "pnpm run build && cross-env TEST_ELECTRON=1 pnpm exec playwright test \"src/e2e/app.e2e-spec.ts\"",
-    "test-front:e2e": "pnpm exec playwright test \"apps/ng-frontend/e2e/app.e2e-spec.ts\"",
+    "test-front:e2e": "pnpm nx run ng-frontend:e2e",
     "test:cov": "nx run-many --target=test --parallel=6 --coverage --verbose --exclude=**/nest-backend,**/e2e && pnpm run test-back:cov && node ./merge-coverage.mjs",
     "test:data-access": "nx test data-access --experimental-vm-modules",
     "test:e2e": "vitest run apps/nest-backend/test/app.e2e-spec.ts --root=apps/nest-backend --watch=false",

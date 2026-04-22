@@ -7,7 +7,7 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:application",
+      "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/ng-frontend",
@@ -93,7 +93,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@angular/build:dev-server",
       "configurations": {
         "production": {
           "buildTarget": "ng-frontend:build:production"
@@ -111,7 +111,7 @@
       "defaultConfiguration": "development"
     },
     "mock": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@angular/build:dev-server",
       "configurations": {
         "development": {
           "buildTarget": "ng-frontend:build:development",
@@ -126,7 +126,7 @@
       "defaultConfiguration": "development"
     },
     "staging": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@angular/build:dev-server",
       "configurations": {
         "development": {
           "buildTarget": "ng-frontend:build:development",
@@ -141,7 +141,7 @@
       "defaultConfiguration": "development"
     },
     "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "executor": "@angular/build:extract-i18n",
       "options": {
         "buildTarget": "ng-frontend:build"
       }
@@ -150,7 +150,12 @@
       "executor": "@nx/eslint:lint"
     },
     "test": {
-      "executor": "@analogjs/vitest-angular:test"
+      "executor": "@angular/build:unit-test",
+      "options": {
+        "buildTarget": "ng-frontend:build:development",
+        "tsConfig": "apps/ng-frontend/tsconfig.spec.json",
+        "runner": "vitest"
+      }
     },
     "serve-static": {
       "executor": "@nx/web:file-server",
