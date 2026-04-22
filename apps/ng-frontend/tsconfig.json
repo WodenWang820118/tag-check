@@ -27,7 +27,7 @@
       "path": "./tsconfig.editor.json"
     },
     {
-      "path": "./.storybook/tsconfig.json"
+      "path": "./tsconfig.storybook.json"
     }
   ],
   "extends": "../../tsconfig.base.json",

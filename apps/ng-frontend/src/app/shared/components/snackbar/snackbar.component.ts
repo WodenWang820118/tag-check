@@ -5,7 +5,7 @@ import {
   MatSnackBarAction,
   MatSnackBarActions,
   MatSnackBarLabel,
-  MatSnackBarRef,
+  MatSnackBarRef
 } from '@angular/material/snack-bar';
 
 @Component({
@@ -35,10 +35,10 @@ import {
     MatButtonModule,
     MatSnackBarLabel,
     MatSnackBarActions,
-    MatSnackBarAction,
-  ],
+    MatSnackBarAction
+  ]
 })
 export class SnackBarComponent {
   snackBarRef = inject(MatSnackBarRef);
-  constructor(@Inject(MAT_SNACK_BAR_DATA) public data: any) {}
+  constructor(@Inject(MAT_SNACK_BAR_DATA) public data: string) {}
 }

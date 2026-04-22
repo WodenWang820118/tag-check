@@ -6,14 +6,14 @@ import {
 } from '@storybook/angular';
 import { InitProjectFormComponent } from './init-project-form.component';
 
-import { expect, within } from 'storybook/test';
+import { expect, userEvent, within } from 'storybook/test';
 import { provideHttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule, FormBuilder } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { provideRouter, Router, RouterLink } from '@angular/router';
+import { provideRouter, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfigurationService } from '../../../../shared/services/api/configuration/configuration.service';
 import { ENTRY_ROUTES } from '../../../../modules/entry/routes';
@@ -35,7 +35,7 @@ const meta: Meta<InitProjectFormComponent> = {
         MatButtonModule,
         RouterLink
       ],
-      providers: [FormBuilder, Router, ConfigurationService, MatDialog]
+      providers: [FormBuilder, ConfigurationService, MatDialog]
     }),
     applicationConfig({
       providers: [provideHttpClient(), provideRouter(ENTRY_ROUTES)]
@@ -53,10 +53,10 @@ export const Form: Story = {
   args: {},
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    expect(canvas.getByText(/Project Name/gi)).toBeTruthy();
-    expect(canvas.getByText(/Measurement ID/gi)).toBeTruthy();
-    expect(canvas.getByText(/Description/gi)).toBeTruthy();
-    expect(canvas.getByText(/Spreadsheet/gi)).toBeTruthy();
+    expect(canvas.getByText(/Project Name/i)).toBeTruthy();
+    expect(canvas.getByText(/Generated Project Slug/i)).toBeTruthy();
+    expect(canvas.getByText(/Measurement ID/i)).toBeTruthy();
+    expect(canvas.getByText(/Project Description/i)).toBeTruthy();
   }
 };
 
@@ -64,14 +64,12 @@ export const ErrorMessage: Story = {
   args: {},
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const submitBtn = canvas.getByText(/Submit/gi);
+    const submitBtn = canvas.getByText(/Submit/i);
     expect(submitBtn).toBeTruthy();
-    submitBtn.click();
+    await userEvent.click(submitBtn);
 
-    const errorDialog = document.querySelector('.error-dialog');
-    if (!errorDialog) return;
-    const errorText = await within(errorDialog as HTMLElement).findByText(
-      /Error/i
+    const errorText = await within(document.body).findByText(
+      /Please fill in the required fields\./i
     );
     expect(errorText).toBeTruthy();
   }
