@@ -20,29 +20,97 @@ const binariesDir = join(
 );
 const backendDistDir = join(workspaceRoot, 'dist', 'apps', 'nest-backend');
 
-run(
-  process.execPath,
-  [resolveNxEntrypoint(), 'build', 'nest-backend'],
-  workspaceRoot
-);
-stopExistingDesktopSidecars();
-prepareNodeSidecar();
-prepareBackendRuntime();
+export interface BackendRuntimeInstallPlan {
+  fallbackCommand: 'install' | null;
+  removeLockfileBeforeFallback: boolean;
+  primaryCommand: 'ci' | 'install';
+}
 
-function prepareBackendRuntime() {
-  if (!existsSync(join(backendDistDir, 'package.json'))) {
+export interface PrepareBackendRuntimeDependencies {
+  backendDir?: string;
+  existsSyncFn?: typeof existsSync;
+  removePathFn?: typeof rmIfExists;
+  runFn?: typeof run;
+  tryRunFn?: typeof tryRun;
+  warnFn?: typeof console.warn;
+}
+
+export function getBackendRuntimeInstallPlan(
+  hasPackageLock: boolean
+): BackendRuntimeInstallPlan {
+  if (hasPackageLock) {
+    return {
+      fallbackCommand: 'install',
+      primaryCommand: 'ci',
+      removeLockfileBeforeFallback: true
+    };
+  }
+
+  return {
+    fallbackCommand: null,
+    primaryCommand: 'install',
+    removeLockfileBeforeFallback: false
+  };
+}
+
+export function main() {
+  run(
+    process.execPath,
+    [resolveNxEntrypoint(), 'build', 'nest-backend'],
+    workspaceRoot
+  );
+  stopExistingDesktopSidecars();
+  prepareNodeSidecar();
+  prepareBackendRuntime();
+}
+
+export function prepareBackendRuntime(
+  dependencies: PrepareBackendRuntimeDependencies = {}
+) {
+  const backendDir = dependencies.backendDir ?? backendDistDir;
+  const existsSyncFn = dependencies.existsSyncFn ?? existsSync;
+  const removePathFn = dependencies.removePathFn ?? rmIfExists;
+  const runFn = dependencies.runFn ?? run;
+  const tryRunFn = dependencies.tryRunFn ?? tryRun;
+  const warnFn = dependencies.warnFn ?? console.warn;
+
+  if (!existsSyncFn(join(backendDir, 'package.json'))) {
     throw new Error(
-      `Missing generated backend package.json in ${backendDistDir}`
+      `Missing generated backend package.json in ${backendDir}`
     );
   }
 
-  rmIfExists(join(backendDistDir, 'node_modules'));
-  rmIfExists(join(backendDistDir, 'package-lock.json'));
+  const packageLockPath = join(backendDir, 'package-lock.json');
+  removePathFn(join(backendDir, 'node_modules'));
+  const installPlan = getBackendRuntimeInstallPlan(existsSyncFn(packageLockPath));
+  const primaryArgs = [
+    resolveNpmEntrypoint(),
+    installPlan.primaryCommand,
+    '--omit=dev'
+  ];
 
-  run(
+  if (tryRunFn(process.execPath, primaryArgs, backendDir)) {
+    return;
+  }
+
+  if (!installPlan.fallbackCommand) {
+    throw new Error(
+      `Command failed: ${process.execPath} ${primaryArgs.join(' ')}`
+    );
+  }
+
+  removePathFn(join(backendDir, 'node_modules'));
+  if (installPlan.removeLockfileBeforeFallback) {
+    removePathFn(packageLockPath);
+  }
+
+  warnFn(
+    `npm ci failed in ${backendDir}. Falling back to npm install to regenerate runtime dependencies.`
+  );
+  runFn(
     process.execPath,
-    [resolveNpmEntrypoint(), 'install', '--omit=dev'],
-    backendDistDir
+    [resolveNpmEntrypoint(), installPlan.fallbackCommand, '--omit=dev'],
+    backendDir
   );
 }
 
@@ -104,7 +172,7 @@ function stopExistingDesktopSidecars() {
 
 function getRustTargetTriple() {
   const preferred = spawnSync(
-    resolveCommand('rustc'),
+    'rustc',
     ['--print', 'host-tuple'],
     {
       cwd: workspaceRoot,
@@ -116,7 +184,7 @@ function getRustTargetTriple() {
     return preferred.stdout.trim();
   }
 
-  const fallback = spawnSync(resolveCommand('rustc'), ['-vV'], {
+  const fallback = spawnSync('rustc', ['-vV'], {
     cwd: workspaceRoot,
     encoding: 'utf8'
   });
@@ -134,15 +202,6 @@ function getRustTargetTriple() {
 
   return match[1];
 }
-
-function resolveCommand(command: string) {
-  if (process.platform !== 'win32') {
-    return command;
-  }
-
-  return command;
-}
-
 function resolveNxEntrypoint() {
   return join(workspaceRoot, 'node_modules', 'nx', 'bin', 'nx.js');
 }
@@ -164,15 +223,19 @@ function rmIfExists(targetPath: string) {
 }
 
 function run(command: string, args: string[], cwd: string) {
+  if (!tryRun(command, args, cwd)) {
+    throw new Error(`Command failed: ${command} ${args.join(' ')}`);
+  }
+}
+
+function tryRun(command: string, args: string[], cwd: string) {
   const result = spawnSync(command, args, {
     cwd,
     shell: false,
     stdio: 'inherit'
   });
 
-  if (result.status !== 0) {
-    throw new Error(`Command failed: ${command} ${args.join(' ')}`);
-  }
+  return !result.error && result.status === 0;
 }
 
 function runBestEffort(command: string, args: string[], cwd: string) {
@@ -181,4 +244,17 @@ function runBestEffort(command: string, args: string[], cwd: string) {
     shell: false,
     stdio: 'ignore'
   });
+}
+
+function isExecutedDirectly(moduleUrl: string) {
+  const entrypoint = process.argv[1];
+  if (!entrypoint) {
+    return false;
+  }
+
+  return resolve(fileURLToPath(moduleUrl)) === resolve(entrypoint);
+}
+
+if (isExecutedDirectly(import.meta.url)) {
+  main();
 }

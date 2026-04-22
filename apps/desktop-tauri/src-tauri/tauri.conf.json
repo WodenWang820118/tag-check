@@ -7,10 +7,10 @@
     "frontendDist": "../../../dist/apps/ng-frontend/browser",
     "devUrl": "http://localhost:4200",
     "beforeDevCommand": {
-      "script": "pnpm nx serve ng-frontend",
+      "script": "pnpm nx run ng-frontend:serve:desktop",
       "wait": false
     },
-    "beforeBuildCommand": "pnpm nx build ng-frontend --configuration production --base-href ./"
+    "beforeBuildCommand": "pnpm nx build ng-frontend --configuration desktop-production --base-href ./"
   },
   "app": {
     "windows": [

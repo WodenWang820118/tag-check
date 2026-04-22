@@ -18,11 +18,10 @@ use tauri_plugin_shell::{
 const DATABASE_FILE_NAME: &str = "data.sqlite3";
 const DEFAULT_PORT: &str = "7001";
 const DEFAULT_WEB_SOCKET: &str = "7002";
-const DEV_HEALTH_PORTS: [u16; 3] = [7070, 6060, 7001];
+const HEALTH_PORTS: [u16; 1] = [7001];
 const HEALTH_TIMEOUT: Duration = Duration::from_secs(2);
 const LOG_FILE_NAME: &str = "desktop-tauri.log";
 const MAX_HEALTH_ATTEMPTS: usize = 30;
-const PROD_HEALTH_PORTS: [u16; 1] = [7001];
 const PROJECTS_DIR_NAME: &str = "tag_check_projects";
 
 #[derive(Default)]
@@ -210,10 +209,7 @@ fn resolve_backend_paths(
     fs::create_dir_all(&projects_path)?;
 
     let backend_dir = normalize_process_path(if tauri::is_dev() {
-        std::env::current_dir()?
-            .join("dist")
-            .join("apps")
-            .join("nest-backend")
+        resolve_dev_backend_dir()
     } else {
         app_handle
             .path()
@@ -238,6 +234,16 @@ fn resolve_backend_paths(
     })
 }
 
+fn resolve_dev_backend_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
+        .join("..")
+        .join("..")
+        .join("dist")
+        .join("apps")
+        .join("nest-backend")
+}
+
 fn stop_backend(app_handle: &AppHandle) {
     if let Ok(mut guard) = app_handle.state::<BackendProcess>().0.lock() {
         if let Some(child) = guard.take() {
@@ -251,15 +257,9 @@ fn stop_backend(app_handle: &AppHandle) {
 }
 
 fn wait_for_backend(app_handle: &AppHandle) -> bool {
-    let ports = if tauri::is_dev() {
-        DEV_HEALTH_PORTS.as_slice()
-    } else {
-        PROD_HEALTH_PORTS.as_slice()
-    };
-
     for _ in 0..MAX_HEALTH_ATTEMPTS {
-        for port in ports {
-            if check_backend_health(*port) {
+        for port in HEALTH_PORTS {
+            if check_backend_health(port) {
                 write_diagnostic_log(
                     app_handle,
                     &format!("health check passed on http://127.0.0.1:{port}/health"),
