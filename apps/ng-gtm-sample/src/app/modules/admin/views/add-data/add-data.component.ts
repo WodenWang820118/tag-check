@@ -10,11 +10,14 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { MessageModule } from 'primeng/message';
-
-type ImageSlot = 'imageBig' | 'image1' | 'image2' | 'image3';
+import { FirebaseDestinationUploadService } from '../../../../shared/services/firebase-destination-upload/firebase-destination-upload.service';
+import {
+  CreateDestinationDraft,
+  DestinationImageSlot
+} from '../../../../shared/models/create-destination-draft.model';
 
 interface MediaFieldConfig {
-  key: ImageSlot;
+  key: DestinationImageSlot;
   label: string;
   hint: string;
   authorControl:
@@ -37,12 +40,15 @@ interface MediaFieldConfig {
 })
 export class AddDataComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly firebaseDestinationUploadService = inject(
+    FirebaseDestinationUploadService
+  );
   countries: { label: string; value: string }[] = [];
   readonly uploadState = signal<'idle' | 'saving' | 'success' | 'error'>(
     'idle'
   );
   readonly uploadMessage = signal('');
-  readonly selectedFiles = signal<Record<ImageSlot, string | null>>({
+  readonly selectedFiles = signal<Record<DestinationImageSlot, File | null>>({
     imageBig: null,
     image1: null,
     image2: null,
@@ -70,7 +76,7 @@ export class AddDataComponent {
     {
       key: 'image3',
       label: 'Gallery image 3',
-      hint: 'Optional third supporting image for richer storytelling.',
+      hint: 'Third supporting image for richer storytelling on the detail page.',
       authorControl: 'image3AuthorInfo'
     }
   ];
@@ -82,7 +88,7 @@ export class AddDataComponent {
     latitude: ['', [Validators.required, latitudeValidator()]],
     longitude: ['', [Validators.required, longitudeValidator()]],
     description: ['', Validators.required],
-    price: ['', Validators.required],
+    price: ['', [Validators.required, Validators.min(1)]],
     video: [''],
     imageBigAuthorInfo: [''],
     image1AuthorInfo: [''],
@@ -121,32 +127,105 @@ export class AddDataComponent {
     return control.hasError(error) && control.touched;
   }
 
-  onFileSelected(slot: ImageSlot, event: Event) {
+  onFileSelected(slot: DestinationImageSlot, event: Event) {
     const input = event.target as HTMLInputElement;
-    const fileName = input.files?.[0]?.name ?? null;
+    const file = input.files?.[0] ?? null;
     this.selectedFiles.update((currentFiles) => ({
       ...currentFiles,
-      [slot]: fileName
+      [slot]: file
     }));
   }
 
-  selectedFileName(slot: ImageSlot) {
-    return this.selectedFiles()[slot] ?? 'No file selected yet';
+  selectedFileName(slot: DestinationImageSlot) {
+    return this.selectedFiles()[slot]?.name ?? 'No file selected yet';
+  }
+
+  hasMissingFiles() {
+    return this.mediaFields.some((mediaField) => !this.selectedFiles()[mediaField.key]);
+  }
+
+  private buildDraft(): CreateDestinationDraft | null {
+    const files = this.selectedFiles();
+
+    if (
+      !files.imageBig ||
+      !files.image1 ||
+      !files.image2 ||
+      !files.image3
+    ) {
+      return null;
+    }
+
+    const rawValue = this.destinationForm.getRawValue();
+
+    return {
+      country: rawValue.country ?? '',
+      city: rawValue.city ?? '',
+      title: rawValue.title ?? '',
+      smallTitle: rawValue.smallTitle ?? '',
+      latitude: Number(rawValue.latitude),
+      longitude: Number(rawValue.longitude),
+      description: rawValue.description ?? '',
+      price: Number(rawValue.price),
+      video: rawValue.video ?? '',
+      imageBigAuthorInfo: rawValue.imageBigAuthorInfo ?? '',
+      image1AuthorInfo: rawValue.image1AuthorInfo ?? '',
+      image2AuthorInfo: rawValue.image2AuthorInfo ?? '',
+      image3AuthorInfo: rawValue.image3AuthorInfo ?? '',
+      files: {
+        imageBig: files.imageBig,
+        image1: files.image1,
+        image2: files.image2,
+        image3: files.image3
+      }
+    };
   }
 
   addDestination() {
     this.destinationForm.markAllAsTouched();
-    if (this.destinationForm.invalid) {
+    if (this.destinationForm.invalid || this.hasMissingFiles()) {
       this.uploadState.set('error');
       this.uploadMessage.set(
-        'Please complete the highlighted fields before submitting this destination.'
+        'Please complete the highlighted fields and attach all four destination images before submitting.'
       );
       return;
     }
 
-    this.uploadState.set('success');
+    const draft = this.buildDraft();
+    if (!draft) {
+      this.uploadState.set('error');
+      this.uploadMessage.set(
+        'A required image is missing. Please attach the full media set before submitting.'
+      );
+      return;
+    }
+
+    this.uploadState.set('saving');
     this.uploadMessage.set(
-      'Destination draft validated successfully. Firebase persistence and media upload will be wired in the next phase.'
+      'Uploading destination assets and saving the Firestore document...'
     );
+
+    this.firebaseDestinationUploadService.upload(draft).subscribe({
+      next: () => {
+        this.uploadState.set('success');
+        this.uploadMessage.set(
+          'Destination created successfully. The admin cache has been refreshed for the new entry.'
+        );
+        this.destinationForm.reset();
+        this.selectedFiles.set({
+          imageBig: null,
+          image1: null,
+          image2: null,
+          image3: null
+        });
+      },
+      error: (error) => {
+        console.error('destination upload error', error);
+        this.uploadState.set('error');
+        this.uploadMessage.set(
+          'The destination could not be created. Please check your Firebase permissions and try again.'
+        );
+      }
+    });
   }
 }

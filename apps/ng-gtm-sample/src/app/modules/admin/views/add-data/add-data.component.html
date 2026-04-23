@@ -9,8 +9,8 @@
     </h2>
     <p class="sample-copy max-w-3xl">
       This form now mirrors the storefront content model, including metadata,
-      pricing, optional video, and the media slots that will be wired to
-      Firebase Storage in the next implementation phase.
+      pricing, optional video, and the media slots that are now wired to
+      Firebase Storage and Firestore.
     </p>
   </div>
 
@@ -161,8 +161,12 @@
               formControlName="price"
               class="w-full"
             />
-            @if (hasError('price')) {
+            @if (hasError('price', 'required')) {
               <div class="text-sm text-red-600">Price is required.</div>
+            } @else if (hasError('price', 'min')) {
+              <div class="text-sm text-red-600">
+                Price must be greater than zero.
+              </div>
             }
           </div>
 
@@ -268,18 +272,19 @@
 
           <div class="space-y-4 px-3 py-3">
             <div class="sample-inset-surface p-4 text-sm leading-6 text-slate-600">
-              This phase focuses on a production-ready admin form skeleton. The
-              next phase will connect Firebase persistence, Storage upload, and
-              cache refresh so newly staged destinations become visible across
-              the admin map and storefront.
+              Submitting this form uploads the four destination images to
+              Firebase Storage, stores the document in Firestore, and refreshes
+              the IndexedDB-backed catalog used by the admin map and storefront
+              search flow.
             </div>
 
             <button
               pButton
               type="submit"
-              label="Validate Destination Draft"
-              icon="pi pi-check"
+              label="Create Destination"
+              icon="pi pi-save"
               class="w-full"
+              [loading]="uploadState() === 'saving'"
             ></button>
           </div>
         </p-card>

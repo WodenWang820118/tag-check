@@ -1,51 +1,77 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { defer, from, Observable, of, take, tap } from 'rxjs';
+import {
+  defer,
+  from,
+  map,
+  Observable,
+  shareReplay,
+  switchMap,
+  take,
+  tap
+} from 'rxjs';
 import { Destination } from '../../models/destination.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IndexeddbDestinationService {
-  db: any;
+  private readonly dbReady$ = defer(() =>
+    from(import('../../../db-destinations')).pipe(
+      take(1),
+      tap((module) => {
+        console.log('IndexedDB: regular destinations initialized');
+        this.dbInitialized.set(true);
+      }),
+      map((module) => module.db),
+      shareReplay(1)
+    )
+  );
   private readonly dbInitialized = signal<boolean>(false);
   readonly dbInitialized$ = computed(() => this.dbInitialized());
 
   constructor() {
-    this.initializeIndexedDB()
-      .pipe(
-        take(1),
-        tap(() => {
-          console.log('IndexedDB: regular destinations initialized');
-          this.dbInitialized.set(true);
-        })
-      )
-      .subscribe();
-  }
-  private initializeIndexedDB() {
-    return defer(() => {
-      return from(import('../../../db-destinations')).pipe(
-        take(1),
-        tap((module) => {
-          this.db = module.db;
-        })
-      );
-    });
+    this.dbReady$.pipe(take(1)).subscribe();
   }
 
   getAllDestinations() {
-    const dbInitialized = this.dbInitialized$();
-    if (dbInitialized) {
-      return this.db.getDestinations() as Observable<Destination[]>;
-    }
-    return of([]);
+    return this.dbReady$.pipe(
+      switchMap(
+        (db) =>
+          db.getDestinations() as unknown as Observable<Destination[]>
+      )
+    );
   }
 
   addDestinations(destinations: Destination[]): Observable<string[]> {
-    const dbInitialized = this.dbInitialized$();
-    if (dbInitialized) {
-      console.log('Adding destinations to IndexedDB: ', destinations);
-      return this.db.addDestinations(destinations) as Observable<string[]>;
-    }
-    return of([]);
+    return this.dbReady$.pipe(
+      take(1),
+      switchMap((db) => {
+        console.log('Adding destinations to IndexedDB: ', destinations);
+        return db.addDestinations(destinations) as Observable<string[]>;
+      })
+    );
+  }
+
+  replaceDestinations(destinations: Destination[]): Observable<string[]> {
+    return this.dbReady$.pipe(
+      take(1),
+      switchMap(
+        (db) => db.replaceDestinations(destinations) as Observable<string[]>
+      )
+    );
+  }
+
+  upsertDestination(destination: Destination): Observable<string> {
+    return this.dbReady$.pipe(
+      take(1),
+      switchMap((db) => db.addDestination(destination) as Observable<string>)
+    );
+  }
+
+  clearDestinations(): Observable<void> {
+    return this.dbReady$.pipe(
+      take(1),
+      switchMap((db) => db.clearDestinations() as Observable<void>)
+    );
   }
 }

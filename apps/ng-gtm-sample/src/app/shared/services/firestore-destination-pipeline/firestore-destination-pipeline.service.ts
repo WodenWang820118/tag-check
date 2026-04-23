@@ -27,7 +27,6 @@ import {
 } from 'rxjs';
 import { FirebaseStorageService } from '../firebase-storage/firebase-storage.service';
 import { Destination } from '../../models/destination.model';
-import { IndexeddbFeaturedDestinationService } from '../indexeddb-featured-destination/indexeddb-featured-destination.service';
 import { IndexeddbDestinationService } from '../indexeddb-destination/indexeddb-destination.service';
 import { FIREBASE_FIRESTORE } from '../../../firebase/firebase.tokens';
 
@@ -45,60 +44,16 @@ export class FirestoreDestinationPipelineService {
 
   constructor(
     private readonly firebaseStorageService: FirebaseStorageService,
-    private readonly indexeddbFeaturedDestinationService: IndexeddbFeaturedDestinationService,
     private readonly indexeddbDestinationService: IndexeddbDestinationService
   ) {}
 
   getAllDestinationsData(): Observable<Destination[]> {
-    return combineLatest([
-      this.indexeddbDestinationService.getAllDestinations(),
-      this.indexeddbFeaturedDestinationService.getAllFeaturedDestinations(),
-    ]).pipe(
-      switchMap(([destinations, featuredDestinations]) => {
+    return this.indexeddbDestinationService.getAllDestinations().pipe(
+      switchMap((destinations) => {
         if (destinations.length > 0) {
-          return of(destinations.concat(featuredDestinations));
+          return of(destinations);
         } else {
-          return forkJoin({
-            regularDestinations: this.fetchDestinations(() =>
-              this.getAllDestinations()
-            ),
-            featuredDestinations: this.fetchDestinations(() =>
-              this.getAllFeaturedDestinations()
-            ),
-          }).pipe(
-            map(({ regularDestinations, featuredDestinations }) => {
-              console.log('Fetched destinations from Firestore');
-              console.log('Regular destinations:', regularDestinations);
-              console.log('Featured destinations:', featuredDestinations);
-              const allDestinations =
-                regularDestinations.concat(featuredDestinations);
-
-              if (regularDestinations.length > 0) {
-                this.indexeddbDestinationService
-                  .addDestinations(regularDestinations)
-                  .pipe(
-                    take(1),
-                    tap(() =>
-                      console.log('Added regular destinations to IndexedDB')
-                    )
-                  )
-                  .subscribe();
-              }
-
-              if (featuredDestinations.length > 0) {
-                this.indexeddbFeaturedDestinationService
-                  .addFeaturedDestinations(featuredDestinations)
-                  .pipe(
-                    take(1),
-                    tap(() =>
-                      console.log('Added featured destinations to IndexedDB')
-                    )
-                  )
-                  .subscribe();
-              }
-
-              return allDestinations;
-            }),
+          return this.refreshAllDestinationsCache().pipe(
             catchError((error) => {
               console.error('Error fetching destinations', error);
               return of([]);
@@ -106,6 +61,16 @@ export class FirestoreDestinationPipelineService {
           );
         }
       })
+    );
+  }
+
+  refreshAllDestinationsCache(): Observable<Destination[]> {
+    return this.fetchDestinations(() => this.getAllDestinations()).pipe(
+      switchMap((allDestinations) =>
+        this.indexeddbDestinationService
+          .replaceDestinations(allDestinations)
+          .pipe(map(() => allDestinations))
+      )
     );
   }
 
@@ -129,23 +94,15 @@ export class FirestoreDestinationPipelineService {
   }
 
   private getAllDestinations() {
-    // it gets the very first country, Afghanistan with all its cities
     return defer(() =>
       from(
         getDocs(
           query(
             collection(this.firestore, 'destinations'),
-            where('country', '==', 'Afghanistan'),
             orderBy('country')
           )
         )
       )
-    );
-  }
-
-  private getAllFeaturedDestinations() {
-    return defer(() =>
-      from(getDocs(query(collection(this.firestore, 'countries'))))
     );
   }
 
