@@ -2,7 +2,7 @@ import { ApplicationConfig, isDevMode } from '@angular/core';
 import {
   provideRouter,
   withPreloading,
-  PreloadAllModules,
+  PreloadAllModules
 } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -19,13 +19,20 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:30000',
+      registrationStrategy: 'registerWhenStable:30000'
     }),
-    provideAnimationsAsync(),
     providePrimeNG({
+      ripple: true,
+      inputVariant: 'filled',
       theme: {
         preset: Aura,
-      },
-    }),
-  ],
+        options: {
+          cssLayer: {
+            name: 'primeng',
+            order: 'theme, base, primeng, components, utilities'
+          }
+        }
+      }
+    })
+  ]
 };

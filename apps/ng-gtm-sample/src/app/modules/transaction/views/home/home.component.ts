@@ -10,20 +10,19 @@ import { RouterOutlet } from '@angular/router';
     FooterComponent,
     NavbarComponent,
     DisclaimerComponent,
-    RouterOutlet,
+    RouterOutlet
   ],
   template: `
-    <div class="flex flex-col min-h-screen">
+    <div class="sample-route-shell">
       <app-navbar class="w-full bg-white shadow-md"></app-navbar>
-      <main class="flex-grow max-w-7xl mx-auto px-4 py-8">
+      <main class="sample-main">
         <router-outlet></router-outlet>
       </main>
-      <app-footer class="w-full bg-gray-50 py-4"></app-footer>
-      <app-disclaimer
-        class="text-center text-xs text-gray-500 py-2"
-      ></app-disclaimer>
+      <footer class="sample-footer-area">
+        <app-footer></app-footer>
+        <app-disclaimer class="sample-shell pb-4 pt-1"></app-disclaimer>
+      </footer>
     </div>
-  `,
-  styles: [``],
+  `
 })
 export class HomeComponent {}

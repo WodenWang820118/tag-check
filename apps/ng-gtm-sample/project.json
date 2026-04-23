@@ -80,6 +80,21 @@
         "buildTarget": "ng-gtm-sample:build"
       }
     },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "production",
+        "^production",
+        {
+          "externalDependencies": ["typescript"]
+        }
+      ],
+      "options": {
+        "cwd": "apps/ng-gtm-sample",
+        "command": "node ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.app.json"
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint"
     },

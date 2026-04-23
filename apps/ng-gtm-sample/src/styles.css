@@ -1,3 +1,124 @@
-/* You can add global styles to this file, and also import other style files */
-@import "tailwindcss";
-@import "primeicons/primeicons.css";
+@layer theme, base, primeng, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'primeicons/primeicons.css';
+
+:root {
+  --sample-font-family: 'Segoe UI', 'Noto Sans', 'Helvetica Neue', sans-serif;
+  --sample-bg: #f3f6fb;
+  --sample-surface: rgba(255, 255, 255, 0.88);
+  --sample-surface-strong: #ffffff;
+  --sample-surface-muted: #eef4ff;
+  --sample-border: rgba(15, 23, 42, 0.08);
+  --sample-border-strong: rgba(37, 99, 235, 0.18);
+  --sample-text: #0f172a;
+  --sample-text-muted: #475569;
+  --sample-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+  --sample-shell-width: min(1200px, calc(100% - 2rem));
+  color: var(--sample-text);
+  font-family: var(--sample-font-family);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background: var(--sample-bg);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(
+        circle at top,
+        rgba(191, 219, 254, 0.45),
+        transparent 32%
+      ),
+      linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+    color: var(--sample-text);
+    font-family: var(--sample-font-family);
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+}
+
+@layer components {
+  .sample-page {
+    min-height: 100vh;
+  }
+
+  .sample-shell {
+    width: var(--sample-shell-width);
+    margin-inline: auto;
+  }
+
+  .sample-route-shell {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+
+  .sample-main {
+    flex: 1;
+    width: var(--sample-shell-width);
+    margin-inline: auto;
+    padding: 1.5rem 0 2.5rem;
+  }
+
+  .sample-footer-area {
+    margin-top: auto;
+    border-top: 1px solid var(--sample-border);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(14px);
+  }
+
+  .sample-panel {
+    border: 1px solid var(--sample-border);
+    border-radius: 1.5rem;
+    background: var(--sample-surface);
+    box-shadow: var(--sample-shadow);
+  }
+
+  .sample-section-title {
+    margin: 0;
+    font-size: clamp(1.5rem, 2vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  .sample-copy {
+    color: var(--sample-text-muted);
+    line-height: 1.65;
+  }
+
+  .sample-loading-shell {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(248, 250, 252, 0.78);
+    backdrop-filter: blur(10px);
+  }
+}
