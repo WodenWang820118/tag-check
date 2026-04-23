@@ -1,86 +1,289 @@
-<div class="add-data">
+<section class="space-y-6">
+  <div class="space-y-3">
+    <span class="sample-eyebrow">
+      <i class="pi pi-database text-sm"></i>
+      Destination Entry
+    </span>
+    <h2 class="sample-page-title text-slate-950">
+      Stage a new destination for the Firebase content pipeline.
+    </h2>
+    <p class="sample-copy max-w-3xl">
+      This form now mirrors the storefront content model, including metadata,
+      pricing, optional video, and the media slots that will be wired to
+      Firebase Storage in the next implementation phase.
+    </p>
+  </div>
+
+  @if (uploadState() === 'success') {
+    <p-message severity="success" [text]="uploadMessage()"></p-message>
+  } @else if (uploadState() === 'error') {
+    <p-message severity="error" [text]="uploadMessage()"></p-message>
+  } @else if (uploadState() === 'saving') {
+    <p-message severity="info" [text]="uploadMessage()"></p-message>
+  }
+
   <form [formGroup]="destinationForm" (ngSubmit)="addDestination()">
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <label for="country" class="form-label">Country</label>
-        <select formControlName="country" class="form-select" id="country">
-          @for (country of countries; track country.name.common) {
-          <option [value]="country.name.common">
-            {{ country.name.common }}
-          </option>
-          }
-        </select>
-        @if (destinationForm.controls.country.invalid &&
-        destinationForm.controls.country.touched) {
-        <div class="text-danger">Country is required.</div>
-        }
-      </div>
-      <div class="col-md-6 mb-3">
-        <label for="city" class="form-label">City</label>
-        <input
-          formControlName="city"
-          class="form-control"
-          id="city"
-          aria-describedby="cityHelp"
-        />
-        @if (destinationForm.controls.city.invalid &&
-        destinationForm.controls.city.touched) {
-        <div class="text-danger">City is required.</div>
-        }
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <label for="lat" class="form-label">Latitude</label>
-        <input
-          formControlName="latitude"
-          class="form-control"
-          id="lat"
-          aria-describedby="latHelp"
-        />
-        @if (destinationForm.controls.latitude.invalid &&
-        destinationForm.controls.latitude.touched) {
-        <div class="text-danger">
-          @if (destinationForm.controls.latitude.hasError('required')) {
-          Latitude is required. } @if
-          (destinationForm.controls.latitude.hasError('invalidLatitude')) {
-          Latitude must be between -90 and 90. }
+    <div class="grid gap-6 xl:grid-cols-[1.2fr_0.9fr]">
+      <p-card
+        styleClass="rounded-[1.75rem] border border-slate-200 shadow-sm"
+      >
+        <ng-template pTemplate="header">
+          <div class="border-b border-slate-200 px-6 py-5">
+            <div class="text-xl font-semibold text-slate-950">
+              Basic destination details
+            </div>
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+              Capture the destination metadata that powers the public product
+              list and detail page copy.
+            </p>
+          </div>
+        </ng-template>
+
+        <div class="grid gap-5 px-3 py-3 md:grid-cols-2">
+          <div class="space-y-2">
+            <label for="country" class="text-sm font-medium text-slate-600">
+              Country
+            </label>
+            <select
+              id="country"
+              formControlName="country"
+              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
+            >
+              <option value="">Select a country</option>
+              @for (country of countries; track country.value) {
+                <option [value]="country.value">{{ country.label }}</option>
+              }
+            </select>
+            @if (hasError('country')) {
+              <div class="text-sm text-red-600">Country is required.</div>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <label for="city" class="text-sm font-medium text-slate-600">
+              City
+            </label>
+            <input pInputText id="city" formControlName="city" class="w-full" />
+            @if (hasError('city')) {
+              <div class="text-sm text-red-600">City is required.</div>
+            }
+          </div>
+
+          <div class="space-y-2 md:col-span-2">
+            <label for="title" class="text-sm font-medium text-slate-600">
+              Title
+            </label>
+            <input
+              pInputText
+              id="title"
+              formControlName="title"
+              class="w-full"
+            />
+            @if (hasError('title')) {
+              <div class="text-sm text-red-600">Title is required.</div>
+            }
+          </div>
+
+          <div class="space-y-2 md:col-span-2">
+            <label
+              for="smallTitle"
+              class="text-sm font-medium text-slate-600"
+            >
+              Small title
+            </label>
+            <input
+              pInputText
+              id="smallTitle"
+              formControlName="smallTitle"
+              class="w-full"
+            />
+            @if (hasError('smallTitle')) {
+              <div class="text-sm text-red-600">
+                Small title is required.
+              </div>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <label for="lat" class="text-sm font-medium text-slate-600">
+              Latitude
+            </label>
+            <input
+              pInputText
+              id="lat"
+              type="number"
+              inputmode="decimal"
+              step="any"
+              formControlName="latitude"
+              class="w-full"
+            />
+            @if (hasError('latitude', 'required')) {
+              <div class="text-sm text-red-600">Latitude is required.</div>
+            } @else if (hasError('latitude', 'invalidLatitude')) {
+              <div class="text-sm text-red-600">
+                Latitude must be between -90 and 90.
+              </div>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <label for="longitude" class="text-sm font-medium text-slate-600">
+              Longitude
+            </label>
+            <input
+              pInputText
+              id="longitude"
+              type="number"
+              inputmode="decimal"
+              step="any"
+              formControlName="longitude"
+              class="w-full"
+            />
+            @if (hasError('longitude', 'required')) {
+              <div class="text-sm text-red-600">Longitude is required.</div>
+            } @else if (hasError('longitude', 'invalidLongitude')) {
+              <div class="text-sm text-red-600">
+                Longitude must be between -180 and 180.
+              </div>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <label for="price" class="text-sm font-medium text-slate-600">
+              Price
+            </label>
+            <input
+              pInputText
+              id="price"
+              type="number"
+              inputmode="decimal"
+              step="0.01"
+              formControlName="price"
+              class="w-full"
+            />
+            @if (hasError('price')) {
+              <div class="text-sm text-red-600">Price is required.</div>
+            }
+          </div>
+
+          <div class="space-y-2">
+            <label for="video" class="text-sm font-medium text-slate-600">
+              Video URL
+            </label>
+            <input
+              pInputText
+              id="video"
+              formControlName="video"
+              class="w-full"
+            />
+            <div class="text-xs text-slate-400">
+              Optional YouTube or promo video URL for the detail page modal.
+            </div>
+          </div>
+
+          <div class="space-y-2 md:col-span-2">
+            <label
+              for="description"
+              class="text-sm font-medium text-slate-600"
+            >
+              Description
+            </label>
+            <textarea
+              id="description"
+              formControlName="description"
+              rows="6"
+              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
+            ></textarea>
+            @if (hasError('description')) {
+              <div class="text-sm text-red-600">Description is required.</div>
+            }
+          </div>
         </div>
-        }
-      </div>
-      <div class="col-md-6 mb-3">
-        <label for="long" class="form-label">Longitude</label>
-        <input
-          formControlName="longitude"
-          class="form-control"
-          id="long"
-          aria-describedby="longHelp"
-        />
-        @if (destinationForm.controls.longitude.invalid &&
-        destinationForm.controls.longitude.touched) {
-        <div class="text-danger">
-          @if (destinationForm.controls.longitude.hasError('required')) {
-          Longitude is required. } @if
-          (destinationForm.controls.longitude.hasError('invalidLongitude')) {
-          Longitude must be between -180 and 180. }
-        </div>
-        }
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12 mb-3">
-        <label for="description" class="form-label"
-          >Description (Optional)</label
+      </p-card>
+
+      <div class="space-y-6">
+        <p-card
+          styleClass="rounded-[1.75rem] border border-slate-200 shadow-sm"
         >
-        <textarea
-          formControlName="description"
-          class="form-control"
-          id="description"
-          rows="3"
-        ></textarea>
+          <ng-template pTemplate="header">
+            <div class="border-b border-slate-200 px-6 py-5">
+              <div class="text-xl font-semibold text-slate-950">
+                Media staging
+              </div>
+              <p class="mt-2 text-sm leading-6 text-slate-500">
+                Select the image assets and credits that will later map to the
+                Firebase Storage upload pipeline.
+              </p>
+            </div>
+          </ng-template>
+
+          <div class="space-y-4 px-3 py-3">
+            @for (mediaField of mediaFields; track mediaField.key) {
+              <div class="sample-inset-surface space-y-3 p-4">
+                <div>
+                  <div class="text-base font-semibold text-slate-900">
+                    {{ mediaField.label }}
+                  </div>
+                  <div class="mt-1 text-sm leading-6 text-slate-500">
+                    {{ mediaField.hint }}
+                  </div>
+                </div>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  (change)="onFileSelected(mediaField.key, $event)"
+                  class="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-slate-950 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-slate-800"
+                />
+
+                <div class="text-sm text-slate-500">
+                  {{ selectedFileName(mediaField.key) }}
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-sm font-medium text-slate-600">
+                    Author / credit info
+                  </label>
+                  <input
+                    pInputText
+                    class="w-full"
+                    [formControlName]="mediaField.authorControl"
+                  />
+                </div>
+              </div>
+            }
+          </div>
+        </p-card>
+
+        <p-card
+          styleClass="rounded-[1.75rem] border border-slate-200 shadow-sm"
+        >
+          <ng-template pTemplate="header">
+            <div class="border-b border-slate-200 px-6 py-5">
+              <div class="text-xl font-semibold text-slate-950">
+                Submission status
+              </div>
+            </div>
+          </ng-template>
+
+          <div class="space-y-4 px-3 py-3">
+            <div class="sample-inset-surface p-4 text-sm leading-6 text-slate-600">
+              This phase focuses on a production-ready admin form skeleton. The
+              next phase will connect Firebase persistence, Storage upload, and
+              cache refresh so newly staged destinations become visible across
+              the admin map and storefront.
+            </div>
+
+            <button
+              pButton
+              type="submit"
+              label="Validate Destination Draft"
+              icon="pi pi-check"
+              class="w-full"
+            ></button>
+          </div>
+        </p-card>
       </div>
     </div>
-    <!-- TODO: image upload -->
-    <button type="submit" class="btn btn-primary">Submit</button>
   </form>
-</div>
+</section>

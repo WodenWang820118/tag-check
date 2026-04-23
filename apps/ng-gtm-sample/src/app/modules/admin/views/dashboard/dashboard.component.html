@@ -1,66 +1,126 @@
-<div class="row">
-  @for (sale of sales; track sale) {
-  <div class="{{ sale.design }} col-xl-4">
-    <app-card [hidHeader]="true">
-      <h6 class="mb-4">{{ sale.title }}</h6>
-      <div class="row d-flex align-items-center">
-        <div class="col-9">
-          <h3 class="f-w-300 d-flex align-items-center m-b-0">
-            <i class="feather {{ sale.icon }} f-30 m-r-10"></i>{{ sale.amount }}
-          </h3>
+<section class="space-y-6">
+  <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+      <span class="sample-eyebrow">
+        <i class="pi pi-chart-pie text-sm"></i>
+        Admin Dashboard
+      </span>
+      <h2 class="sample-page-title mt-3 text-slate-950">
+        Snapshot the current demo footprint before publishing new content.
+      </h2>
+      <p class="sample-copy mt-3 max-w-3xl">
+        This screen keeps the existing demo metrics, but recasts them into a
+        cleaner control room so the map and content-entry workflow are easier to
+        scan.
+      </p>
+    </div>
+
+    <button
+      pButton
+      type="button"
+      label="Add Destination"
+      icon="pi pi-plus"
+      (click)="navigateToAddData()"
+    ></button>
+  </div>
+
+  <div class="grid gap-4 xl:grid-cols-3">
+    @for (sale of sales; track sale.title) {
+      <app-card [hidHeader]="true">
+        <div class="space-y-5">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div
+                class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400"
+              >
+                {{ sale.eyebrow }}
+              </div>
+              <div class="mt-2 text-lg font-semibold text-slate-900">
+                {{ sale.title }}
+              </div>
+            </div>
+            <span
+              class="rounded-full px-3 py-1 text-sm font-semibold"
+              [class]="sale.accent"
+            >
+              {{ sale.percentage }}
+            </span>
+          </div>
+
+          <div class="text-4xl font-black tracking-tight text-slate-950">
+            {{ sale.amount }}
+          </div>
+
+          <div class="space-y-2">
+            <div class="h-2 overflow-hidden rounded-full bg-slate-200">
+              <div
+                class="h-full rounded-full bg-blue-600"
+                [style.width.%]="sale.progress"
+              ></div>
+            </div>
+            <div class="text-sm text-slate-500">
+              Simulated demo performance indicator: {{ sale.progress }}%
+            </div>
+          </div>
         </div>
-        <div class="col-3 text-end">
-          <p class="m-b-0">{{ sale.percentage }}</p>
-        </div>
-      </div>
-      <div class="m-t-30">
-        <!-- <ngb-progressbar
-          type="text-primary"
-          height="7px"
-          [value]="sale.progress"
-        ></ngb-progressbar> -->
+      </app-card>
+    }
+  </div>
+
+  <div class="grid gap-6 xl:grid-cols-[1.6fr_0.9fr]">
+    <app-card cardTitle="Destination Coverage">
+      <div class="space-y-4">
+        <p class="sample-copy text-sm">
+          Destination markers are rendered from the current Firestore-backed
+          sample catalog so the admin view reflects the same travel inventory as
+          the public storefront.
+        </p>
+        <app-map></app-map>
       </div>
     </app-card>
-  </div>
-  }
-  <div class="col-xl-8 col-md-6">
-    <app-card cardTitle="Users From United States">
-      <app-map></app-map>
-    </app-card>
-  </div>
-  <div class="col-xl-4 col-md-6">
-    <div class="card bg-c-blue">
-      <div class="card-header borderless">
-        <h5 class="text-white">Earnings</h5>
-      </div>
-      <div class="card-block" style="padding: 0 25px">
-        <div class="earning-text mb-0">
-          <h3 class="mb-2 text-white f-w-300">
-            $4295.36 <i class="feather icon-arrow-up teal accent-3"></i>
-          </h3>
-          <span class="text-uppercase text-white d-block">Total Earnings</span>
-        </div>
-        <div
-          id="widget-line-chart"
-          class="WidgetlineChart2 ChartShadow"
-          style="height: 180px"
-        ></div>
-      </div>
-    </div>
-    <div class="card">
-      @for (list of card; track list) {
-      <div class="card-block {{ list.design }}">
-        <div class="row d-flex align-items-center">
-          <div class="col-auto">
-            <i class="feather {{ list.icon }} f-30"></i>
+
+    <div class="space-y-6">
+      <app-card cardTitle="Revenue Summary">
+        <div class="rounded-[1.5rem] bg-slate-950 px-5 py-5 text-white">
+          <div
+            class="text-xs font-semibold uppercase tracking-[0.24em] text-blue-200"
+          >
+            Demo revenue
           </div>
-          <div class="col">
-            <h3 class="f-w-300">{{ list.number }}</h3>
-            <span class="d-block text-uppercase">{{ list.text }}</span>
-          </div>
+          <div class="mt-3 text-4xl font-black tracking-tight">$4,295.36</div>
+          <p class="mt-3 text-sm leading-6 text-slate-200">
+            Static sample earnings panel preserved from the original admin
+            dashboard, now restyled to match the Tailwind and PrimeNG shell.
+          </p>
         </div>
-      </div>
-      }
+      </app-card>
+
+      <app-card cardTitle="Quick Stats">
+        <div class="space-y-4">
+          @for (list of card; track list.text) {
+            <div
+              class="sample-inset-surface flex items-center gap-4 px-4 py-4"
+            >
+              <span
+                class="grid h-12 w-12 place-items-center rounded-2xl text-xl"
+                [class]="list.accent"
+              >
+                <i [class]="list.icon"></i>
+              </span>
+              <div>
+                <div class="text-2xl font-bold text-slate-950">
+                  {{ list.number }}
+                </div>
+                <div
+                  class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400"
+                >
+                  {{ list.text }}
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </app-card>
     </div>
   </div>
-</div>
+</section>
