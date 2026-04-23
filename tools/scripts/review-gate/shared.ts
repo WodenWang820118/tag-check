@@ -411,6 +411,6 @@ export function evaluateHookPermission(input: {
 export function buildDenyPayload(reason: string): string {
   return JSON.stringify({
     permissionDecision: 'deny',
-    permissionDecisionReason: `${reason} Use GitHub Copilot Claude to review the plan first, Gemini 2.5 Pro if the Claude path is unavailable, Copilot GPT-5 mini if Gemini is unavailable or you explicitly need the Copilot fallback path, or the Codex reviewer subagent if both local CLIs are unavailable, then run: node --experimental-strip-types scripts/review-gate/approve-pre-implementation.ts --reviewer <copilot-claude|copilot-gpt-5-mini|gemini-2.5-pro|codex-subagent> --focus general --summary "Approved after plan review".`
+    permissionDecisionReason: `${reason} Use GitHub Copilot Claude to review the plan first, Gemini 2.5 Pro if the Claude path is unavailable, Copilot GPT-5 mini if Gemini is unavailable or you explicitly need the Copilot fallback path, or the Codex reviewer subagent if both local CLIs are unavailable, then run: node --experimental-strip-types tools/scripts/review-gate/approve-pre-implementation.ts --reviewer <copilot-claude|copilot-gpt-5-mini|gemini-2.5-pro|codex-subagent> --focus general --summary "Approved after plan review".`
   });
 }

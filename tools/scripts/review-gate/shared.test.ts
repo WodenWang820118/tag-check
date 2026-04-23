@@ -56,12 +56,12 @@ test('validateReviewerId rejects reviewers outside the allowlist', () => {
 test('isReviewGateCommand only exempts the TypeScript review-gate entrypoints', () => {
   assert.equal(
     isReviewGateCommand(
-      'node --experimental-strip-types scripts/review-gate/status.ts'
+      'node --experimental-strip-types tools/scripts/review-gate/status.ts'
     ),
     true
   );
   assert.equal(
-    isReviewGateCommand('node scripts/review-gate/status.mjs'),
+    isReviewGateCommand('node tools/scripts/review-gate/status.mjs'),
     false
   );
   assert.equal(isReviewGateCommand('pnpm review:status'), true);
@@ -153,7 +153,7 @@ test('isMutatingToolUse fails closed for non-allowlisted shell commands', () => 
   assert.equal(
     isMutatingToolUse({
       toolName: 'powershell',
-      toolArgs: { command: 'node scripts/setup.js' }
+      toolArgs: { command: 'node tools/scripts/setup.js' }
     }),
     true
   );
@@ -245,7 +245,8 @@ test('isMutatingToolUse fails closed for non-allowlisted shell commands', () => 
     isMutatingToolUse({
       toolName: 'powershell',
       toolArgs: {
-        command: 'node --experimental-strip-types scripts/review-gate/status.ts'
+        command:
+          'node --experimental-strip-types tools/scripts/review-gate/status.ts'
       }
     }),
     false

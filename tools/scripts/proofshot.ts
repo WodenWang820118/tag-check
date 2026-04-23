@@ -5,7 +5,7 @@ import { existsSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const workspaceRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const workspaceRoot = resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const currentFile = fileURLToPath(import.meta.url);
 const artifactsDir = resolve(workspaceRoot, 'proofshot-artifacts');
 
@@ -116,7 +116,7 @@ export function runSubcommand(
 
   if (!subcommand) {
     throw new Error(
-      'Usage: node --experimental-strip-types scripts/proofshot.ts <check|start-web|stop|clean> [proofshot args]'
+      'Usage: node --experimental-strip-types tools/scripts/proofshot.ts <check|start-web|stop|clean> [proofshot args]'
     );
   }
 

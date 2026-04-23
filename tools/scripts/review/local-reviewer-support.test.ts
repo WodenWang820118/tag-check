@@ -193,7 +193,7 @@ test('getEscalationReasons detects high severity and sensitive paths', () => {
         severity: 'high',
         title: 'Shell execution',
         detail: 'Uses execSync.',
-        file_path: 'scripts/review.ts',
+        file_path: 'tools/scripts/review.ts',
         line: 3,
         recommendation: null,
         profile: 'typescript',

@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 
-export const workspaceRoot = resolve(scriptDir, '..', '..', '..');
+export const workspaceRoot = resolve(scriptDir, '..', '..', '..', '..');
 export const binariesDir = join(
   workspaceRoot,
   'apps',

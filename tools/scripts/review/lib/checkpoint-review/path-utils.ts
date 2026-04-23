@@ -7,22 +7,27 @@ export function normalizeReviewPath(candidate: string): string {
     .trim();
 
   const workspaceAnchors = [
-    '/apps/',
-    '/libs/',
-    '/packages/',
-    '/scripts/',
-    '/tools/',
-    '/docs/',
-    '/.agents/',
-    '/.github/',
-    '/.codex/',
-    '/.gemini/',
-    '/AGENTS.md',
-    '/sync-skills.ps1'
+    'apps/',
+    'libs/',
+    'packages/',
+    'tools/scripts/',
+    'tools/',
+    'scripts/',
+    'docs/',
+    '.agents/',
+    '.github/',
+    '.codex/',
+    '.gemini/',
+    'AGENTS.md',
+    'sync-skills.ps1'
   ];
 
   for (const anchor of workspaceAnchors) {
-    const index = normalized.indexOf(anchor);
+    if (normalized.startsWith(anchor)) {
+      return normalized;
+    }
+
+    const index = normalized.indexOf(`/${anchor}`);
     if (index >= 0) {
       return normalized.slice(index + 1);
     }
