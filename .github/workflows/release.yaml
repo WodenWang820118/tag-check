@@ -6,26 +6,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
-        node-version: ['24.x'] # LTS versions
-
+  build-desktop:
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install PNPM
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm install -g pnpm
+          node-version: '24.x'
+          cache: 'pnpm'
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install PNPM
+        run: npm install -g pnpm
       - name: Install dependencies
-        run: pnpm install
-      - name: Build Electron app
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm run publish # The electron-forge publish command will handle GitHub artifacts
+        run: pnpm install --frozen-lockfile
+      - name: Build Tauri desktop bundle
+        run: pnpm run bundle-tauri
+      - name: Upload Tauri bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tag-check-desktop-nsis
+          path: apps/desktop-tauri/src-tauri/target/release/bundle/nsis/*
+          if-no-files-found: error
 permissions:
   packages: write
   contents: write

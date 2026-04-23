@@ -78,6 +78,40 @@
             }
           ]
         },
+        "desktop": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/ng-frontend/src/environments/environment.ts",
+              "with": "apps/ng-frontend/src/environments/environment.desktop.ts"
+            }
+          ]
+        },
+        "desktop-production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "2kb",
+              "maximumError": "4kb"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/ng-frontend/src/environments/environment.ts",
+              "with": "apps/ng-frontend/src/environments/environment.desktop.production.ts"
+            }
+          ]
+        },
         "mock": {
           "optimization": false,
           "extractLicenses": false,
@@ -100,6 +134,12 @@
         },
         "development": {
           "buildTarget": "ng-frontend:build:development"
+        },
+        "desktop": {
+          "buildTarget": "ng-frontend:build:desktop"
+        },
+        "desktop-production": {
+          "buildTarget": "ng-frontend:build:desktop-production"
         },
         "mock": {
           "buildTarget": "ng-frontend:build:mock"

@@ -1,19 +1,20 @@
 import {
-  Component,
-  ElementRef,
   ChangeDetectionStrategy,
-  effect,
-  input,
-  viewChild,
+  Component,
   computed,
-  OnDestroy
+  effect,
+  ElementRef,
+  input,
+  OnDestroy,
+  output,
+  viewChild
 } from '@angular/core';
+import { EditorView } from '@codemirror/view';
 import {
   EditorExtension,
   EditorService,
   EditorThemeStyles
 } from '../../services/editor/editor.service';
-import { EditorView } from '@codemirror/view';
 
 @Component({
   selector: 'app-editor',
@@ -24,7 +25,6 @@ import { EditorView } from '@codemirror/view';
     </div>
   `,
   styles: [
-    // Make the host accept height from utility classes and let inner elements stretch
     ':host { display: block; }',
     '.root-wrapper { height: 100%; }',
     '#cm-editor { height: 100%; }'
@@ -36,10 +36,11 @@ export class EditorComponent implements OnDestroy {
   editMode = input<boolean>(false);
   content = input<string>();
   stylesOverride = input<EditorThemeStyles | undefined>(undefined);
-  private readonly editorContent = computed(() => {
-    const content = this.content();
-    return content;
-  });
+
+  contentChange = output<string>();
+  syntaxErrorChange = output<boolean>();
+
+  private readonly editorContent = computed(() => this.content());
   private readonly editor = viewChild<ElementRef<HTMLDivElement>>('editor');
   private editorView: EditorView | null = null;
 
@@ -47,26 +48,48 @@ export class EditorComponent implements OnDestroy {
     effect(() => {
       const content = this.editorContent();
       const editorElement = this.editor();
-      if (editorElement && content) {
-        if (this.editorView) {
-          // Update existing editor content
-          const transaction = this.editorView.state.update({
-            changes: {
-              from: 0,
-              to: this.editorView.state.doc.length,
-              insert: content
-            }
-          });
-          this.editorView.dispatch(transaction);
-        } else {
-          this.editorView = this.editorService.initEditorView(
-            this.editorExtension(),
-            editorElement,
-            content,
-            this.stylesOverride()
-          );
-        }
+
+      if (!editorElement || content === undefined) {
+        return;
       }
+
+      if (this.editorView) {
+        const transaction = this.editorView.state.update({
+          changes: {
+            from: 0,
+            to: this.editorView.state.doc.length,
+            insert: content
+          }
+        });
+        this.editorView.dispatch(transaction);
+        this.syntaxErrorChange.emit(
+          this.editorService.hasSyntaxError(content, this.editorExtension())
+        );
+        return;
+      }
+
+      this.editorView = this.editorService.initEditorView(
+        this.editorExtension(),
+        editorElement,
+        content,
+        this.stylesOverride(),
+        [
+          EditorView.updateListener.of((update) => {
+            if (!update.docChanged) {
+              return;
+            }
+
+            const nextContent = update.state.doc.toString();
+            this.contentChange.emit(nextContent);
+            this.syntaxErrorChange.emit(
+              this.editorService.hasSyntaxError(
+                nextContent,
+                this.editorExtension()
+              )
+            );
+          })
+        ]
+      );
     });
   }
 

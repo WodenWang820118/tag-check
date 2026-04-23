@@ -1,11 +1,12 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.project.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
+    "outDir": "./out-tsc/app",
     "types": []
   },
   "include": ["src/**/*.ts", "**/*.d.ts", "../../libs/**/*.d.ts"],
   "exclude": [
+    "out-tsc",
     "jest.config.ts",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",

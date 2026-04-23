@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "./tsconfig.project.json",
   "files": [],
   "include": [],
   "references": [
@@ -9,19 +9,5 @@
     {
       "path": "./tsconfig.spec.json"
     }
-  ],
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitOverride": false,
-    "noPropertyAccessFromIndexSignature": false,
-    "noImplicitReturns": false,
-    "noFallthroughCasesInSwitch": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "target": "ES2022"
-  }
+  ]
 }

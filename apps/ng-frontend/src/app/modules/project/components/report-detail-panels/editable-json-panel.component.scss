@@ -1,0 +1,75 @@
+.json {
+  overflow: auto;
+}
+
+.headers-align {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mat-accordion,
+.mat-expansion-panel {
+  position: relative;
+}
+
+.mat-expansion-panel-content {
+  position: relative;
+  z-index: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition:
+    max-height 200ms ease,
+    opacity 150ms ease;
+}
+
+.mat-expansion-panel.mat-expanded .mat-expansion-panel-content {
+  max-height: 9999px;
+  overflow: auto !important;
+}
+
+.mat-expansion-panel:not(.mat-expanded):hover .mat-expansion-panel-content,
+.mat-expansion-panel:not(.mat-expanded)
+  .mat-expansion-panel-header:hover
+  ~ .mat-expansion-panel-content {
+  max-height: 420px;
+  overflow: auto;
+}
+
+.mat-expansion-panel-header {
+  position: relative;
+  overflow: visible;
+  z-index: 2;
+}
+
+.mat-expansion-panel-header-description {
+  align-items: center;
+  gap: 1rem;
+}
+
+button.edit {
+  transform: scale(0.8) !important;
+  position: absolute;
+  right: 12px;
+  top: 3px;
+  z-index: 3;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.mat-expansion-panel-header:hover button.edit,
+.mat-expansion-panel-header:focus-within button.edit {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100px;
+}

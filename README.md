@@ -9,12 +9,11 @@
   - [Prerequisites](#prerequisites)
   - [Frontend (Angular)](#frontend-angular)
   - [Backend (NestJS)](#backend-nestjs)
-  - [Electron](#electron)
+  - [Desktop (Tauri)](#desktop-tauri)
   - [Storybook](#storybook)
 - [Build and Production](#build-and-production)
   - [Build](#build)
-  - [Package](#package)
-  - [Make](#make)
+  - [Desktop Bundle](#desktop-bundle)
 - [Feedback and Contribution](#feedback-and-contribution)
 
 Overall Project Health
@@ -41,7 +40,7 @@ This desktop application automates the Google Tag Manager (GTM) container review
 1. **GTM Container Review**: Load GTM preview mode, run Chrome recorder, and generate dataLayer correctness reports. Users can review tag configurations through GTM preview mode.
 2. **Production Analytics Validation**: Validate analytics on the production website, ensuring dataLayer accuracy.
 
-Designed for QA, development, and analytics teams, this free standalone tool leverages Angular, NestJS, and Electron.
+Designed for QA, development, and analytics teams, this free standalone tool leverages Angular, NestJS, and Tauri.
 
 ## Features
 
@@ -132,12 +131,12 @@ For development:
 pnpm run dev-back
 ```
 
-### Electron
+### Desktop (Tauri)
 
-For Electron development with a development server:
+For desktop development with the Tauri shell:
 
 ```bash
-pnpm run dev-electron
+pnpm run dev-tauri
 ```
 
 ### Storybook
@@ -163,33 +162,15 @@ Output folders (in `dist/apps`):
 - `ng-frontend`
 - `nest-backend`
 
-### Package
+### Desktop Bundle
 
-Build the Electron app:
-
-```bash
-pnpm run package
-```
-
-Output will be in the `out` folder.
-
-### Make
-
-Generate a OS-based zip file:
+Build the desktop installer bundle:
 
 ```bash
-pnpm run make
+pnpm run bundle-tauri
 ```
 
-The building efficiency depends on the machine performance. The first time running the app usually takes longer.
-
-### Debugging
-
-When debugging with unexpected crashes such as `electron-forge make`
-
-```bash
-DEBUG=electron-forge:\* pnpm electron-forge make
-```
+Current desktop packaging targets Windows NSIS via `apps/desktop-tauri`.
 
 ### Actual project and end-to-end tests
 

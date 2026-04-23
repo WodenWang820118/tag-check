@@ -133,7 +133,7 @@ Expected repo workflow:
 4. `pnpm proofshot:stop`
 5. review local `proofshot-artifacts/` with GitHub Copilot Claude using the dedicated proofshot review prompt
 
-`proofshot` is for browser UI flows in `ng-frontend` by default and may target `ng-tag-build` or `ng-product-doc` via `--project`. Do not route backend-only or Electron-shell-only tasks through it.
+`proofshot` is for browser UI flows in `ng-frontend` by default and may target `ng-tag-build` or `ng-product-doc` via `--project`. Do not route backend-only or desktop-shell-only tasks through it.
 
 ## Tool-Specific Expectations
 
@@ -175,7 +175,7 @@ Expected repo workflow:
 - `apps/nest-backend`: NestJS backend
 - `apps/ng-tag-build`: Angular tag-building UI
 - `apps/ng-product-doc`: Angular product documentation UI
-- `tag-check` root project and `src/e2e`: Playwright browser verification and Electron packaging/runtime
+- `tag-check` root project: shared workspace config, review tooling, and desktop Tauri packaging/runtime orchestration
 
 Use repo-specific reviewers and skills with that topology in mind.
 

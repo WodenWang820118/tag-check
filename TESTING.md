@@ -4,7 +4,7 @@
 
 ### 1.1 Project Description
 
-This project is a full-stack application built using the NX monorepo architecture, featuring an Angular frontend and a NestJS backend. The application is wrapped within Electron to provide a desktop application experience. The backend handles most of the business logic, while the frontend is responsible for the user interface and interactions.
+This project is a full-stack application built using the NX monorepo architecture, featuring an Angular frontend and a NestJS backend. The application is packaged with Tauri to provide a desktop application experience. The backend handles most of the business logic, while the frontend is responsible for the user interface and interactions.
 
 ### 1.2 Objective of the Testing Plan
 
@@ -28,28 +28,25 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 ### 3.1 Modules to be Tested
 
 - **Backend (NestJS):**
-
   - REST APIs
   - Business logic layers
   - Database interactions
   - Authentication and authorization mechanisms
 
 - **Frontend (Angular):**
-
   - UI components and templates
   - Services and state management
   - Form validations and user input handling
   - Routing and navigation
 
 - **Shared Libraries:**
-
   - Reusable components and services
   - Utility functions and helpers
   - Custom validators and directives
 
-- **Electron Integration:**
+- **Desktop (Tauri) Integration:**
   - Application packaging and distribution
-  - Native integrations and APIs
+  - Backend sidecar startup and runtime wiring
 
 ### 3.2 Features to be Tested
 
@@ -71,29 +68,24 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 ### 4.1 Testing Methodologies
 
 - **Unit Testing:**
-
   - Test individual units/components in isolation.
   - Tools: Jest for Angular and Vitest for NestJS
 
 - **Integration Testing:**
-
   - Test the interactions between integrated units/components.
   - Tools: Vitest for NestJS for OS-level integration testing
 
 - **End-to-End (E2E) Testing:**
-
   - Test the application flow from start to finish in a real-world scenario.
-  - Tools: Playwright (with expremental Electron support), Vitest with Supertest for API testing
+  - Tools: Playwright for browser flows, Vitest with Supertest for API testing
 
 - **User Interface Testing:**
-
   - Validate UI components render correctly and handle user interactions.
   - Tools: Jasmine (for Angular), Storybook (for component testing)
 
 - **Performance Testing:**
 
   (Need further discussion on the performance testing tools and methodologies)
-
   - Assess the application's responsiveness and stability under load.
   - Tools: k6, Artillery
 
@@ -104,20 +96,17 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 ### 4.2 Tools and Frameworks
 
 - **Testing Frameworks:**
-
   - Jest, Vitest (Unit and integration tests)
-  - Playwright (E2E tests with Electron support)
+  - Playwright (browser E2E tests)
   - Jasmine (Angular unit tests)
 
 - **Mocking and Stubbing:**
-
   - Supertest (HTTP mocking in Node.js)
   - Viest Mock Functions
 
 - **Continuous Integration:**
 
   (Need further discussion on the CI/CD tools and pipelines)
-
   - GitHub Actions / GitLab CI for automated testing pipelines
 
 ---
@@ -145,9 +134,9 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 - Write unit tests for services and state management logic.
 - Ensure at least 70% code coverage on the frontend.
 
-### E2E Testing and Electron Integration
+### E2E Testing and Desktop Verification
 
-- [x] Set up Playwright for E2E testing with Electron support.
+- [x] Set up Playwright for browser E2E testing and desktop verification where needed.
 - Define critical user journeys to test.
 - Write E2E tests covering:
   - User authentication flows
@@ -186,14 +175,12 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 ## 7. Test Environment
 
 - **Hardware Requirements:**
-
-  - A development machine with sufficient resources to run Electron applications and testing tools.
+  - A development machine with sufficient resources to run Tauri desktop builds and testing tools.
 
 - **Software Requirements:**
-
   - Node.js and pnpm
   - Latest versions of Angular and NestJS
-  - Electron
+  - Tauri CLI and Rust toolchain for desktop packaging
   - Testing frameworks and tools as listed above.
 
 - **Test Data:**
@@ -206,13 +193,11 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 - **Test Cases and Scripts:** Documented test cases for unit, integration, E2E, performance, and security tests.
 
 - **Test Reports:**
-
   - Code coverage reports.
   - Test execution results.
   - Performance and security assessment reports.
 
 - **Documentation:**
-
   - Testing strategy and methodology documentation.
   - Instructions for running tests and interpreting results.
 
@@ -226,7 +211,7 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 
 - **Time Constraints:** If certain tests take longer than expected, prioritize tests based on criticality.
 
-- **Technical Challenges:** Allocate time for learning and configuring new testing tools (e.g., Playwright with Electron).
+- **Technical Challenges:** Allocate time for learning and configuring new testing tools (e.g., Playwright browser flows and Tauri desktop verification).
 
 - **Test Flakiness:** Ensure tests are reliable and not prone to intermittent failures by avoiding asynchronous pitfalls and properly mocking dependencies.
 

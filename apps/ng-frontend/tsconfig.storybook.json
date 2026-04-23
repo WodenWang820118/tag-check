@@ -1,10 +1,10 @@
 {
-  "extends": "./tsconfig.app.json",
+  "extends": "./tsconfig.project.json",
   "compilerOptions": {
     "emitDecoratorMetadata": true,
     "module": "esnext",
     "moduleResolution": "bundler",
-    "outDir": "../../dist/out-tsc/storybook"
+    "outDir": "./out-tsc/storybook"
   },
   "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"],
   "include": [

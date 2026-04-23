@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.project.json",
   "include": [
     "src/**/*.ts",
     "../../libs/utils/src/lib/interfaces/setting.interface.ts",
@@ -18,10 +18,5 @@
     "src/**/*.spec.ts",
     "**/*.stories.ts",
     "**/*.stories.js"
-  ],
-  "angularCompilerOptions": {
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
-  }
+  ]
 }

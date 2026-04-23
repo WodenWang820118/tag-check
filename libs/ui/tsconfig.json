@@ -1,14 +1,5 @@
 {
-  "extends": "./../../tsconfig.base.json",
-  "compilerOptions": {
-    "target": "es2020",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
-  },
+  "extends": "./tsconfig.project.json",
   "files": [],
   "references": [
     {
@@ -17,11 +8,5 @@
     {
       "path": "./tsconfig.spec.json"
     }
-  ],
-  "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
-  }
+  ]
 }
