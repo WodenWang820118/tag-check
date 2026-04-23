@@ -1,5 +1,4 @@
-import { computed, Injectable, signal } from '@angular/core';
-import { firestore } from '../../../firebase/firestore';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import {
   collection,
   DocumentData,
@@ -30,9 +29,10 @@ import { FirebaseStorageService } from '../firebase-storage/firebase-storage.ser
 import { Destination } from '../../models/destination.model';
 import { IndexeddbFeaturedDestinationService } from '../indexeddb-featured-destination/indexeddb-featured-destination.service';
 import { IndexeddbDestinationService } from '../indexeddb-destination/indexeddb-destination.service';
+import { FIREBASE_FIRESTORE } from '../../../firebase/firebase.tokens';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class FirestoreDestinationPipelineService {
   private readonly lastVisibleDocs = signal<QueryDocumentSnapshot<
@@ -41,7 +41,7 @@ export class FirestoreDestinationPipelineService {
   > | null>(null);
   readonly lastVisibleDocs$ = computed(() => this.lastVisibleDocs());
   previousDocsStack: QueryDocumentSnapshot<DocumentData, DocumentData>[] = [];
-  db: any;
+  private readonly firestore = inject(FIREBASE_FIRESTORE);
 
   constructor(
     private readonly firebaseStorageService: FirebaseStorageService,
@@ -134,7 +134,7 @@ export class FirestoreDestinationPipelineService {
       from(
         getDocs(
           query(
-            collection(firestore, 'destinations'),
+            collection(this.firestore, 'destinations'),
             where('country', '==', 'Afghanistan'),
             orderBy('country')
           )
@@ -145,7 +145,7 @@ export class FirestoreDestinationPipelineService {
 
   private getAllFeaturedDestinations() {
     return defer(() =>
-      from(getDocs(query(collection(firestore, 'countries'))))
+      from(getDocs(query(collection(this.firestore, 'countries'))))
     );
   }
 
@@ -154,7 +154,7 @@ export class FirestoreDestinationPipelineService {
       from(
         getDocs(
           query(
-            collection(firestore, 'destinations'),
+            collection(this.firestore, 'destinations'),
             orderBy('country'),
             limit(queryLimit)
           )
@@ -179,7 +179,7 @@ export class FirestoreDestinationPipelineService {
       return from(
         getDocs(
           query(
-            collection(firestore, 'destinations'),
+            collection(this.firestore, 'destinations'),
             orderBy('country'),
             startAfter(lastVisible),
             limit(queryLimit)
@@ -208,7 +208,7 @@ export class FirestoreDestinationPipelineService {
       return from(
         getDocs(
           query(
-            collection(firestore, 'destinations'),
+            collection(this.firestore, 'destinations'),
             orderBy('country'),
             startAt(previousLastVisible),
             limit(2)
@@ -230,7 +230,7 @@ export class FirestoreDestinationPipelineService {
       from(
         getDocs(
           query(
-            collection(firestore, 'destinations'),
+            collection(this.firestore, 'destinations'),
             where('country', '>=', searchQuery),
             where('country', '<=', endTerm),
             limit(queryLimit)

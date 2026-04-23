@@ -39,6 +39,12 @@
       },
       "configurations": {
         "production": {
+          "fileReplacements": [
+            {
+              "replace": "apps/ng-gtm-sample/src/environments/environment.ts",
+              "with": "apps/ng-gtm-sample/src/environments/environment.production.ts"
+            }
+          ],
           "budgets": [
             {
               "type": "initial",

@@ -1,47 +1,57 @@
-import { catchError, defer, from, of } from 'rxjs';
-import { computed, Injectable, signal } from '@angular/core';
+import { catchError, defer, from, map, of } from 'rxjs';
+import {
+  computed,
+  DestroyRef,
+  inject,
+  Injectable,
+  NgZone,
+  signal
+} from '@angular/core';
 import { AnalyticsService } from '../analytics/analytics.service';
-import { signInWithPopup, GoogleAuthProvider, User } from 'firebase/auth';
-import { auth } from '../../../firebase/auth';
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signOut,
+  User
+} from 'firebase/auth';
+import { FIREBASE_AUTH } from '../../../firebase/firebase.tokens';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AuthService {
-  // private readonly user = new BehaviorSubject<User | undefined>(undefined);
+  private readonly firebaseAuth = inject(FIREBASE_AUTH);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly user = signal<User | undefined>(undefined);
   private readonly user$ = computed(() => this.user());
+  private readonly isLoggedIn$ = computed(() => Boolean(this.user()));
 
-  constructor(private readonly analyticsService: AnalyticsService) {}
+  constructor(
+    private readonly analyticsService: AnalyticsService,
+    private readonly ngZone: NgZone
+  ) {
+    const unsubscribe = onAuthStateChanged(this.firebaseAuth, (user) => {
+      this.ngZone.run(() => {
+        this.user.set(user ?? undefined);
+      });
+    });
+
+    this.destroyRef.onDestroy(unsubscribe);
+  }
 
   loginWithGoogle() {
     const provider = new GoogleAuthProvider();
     return defer(() =>
-      from(
-        signInWithPopup(auth, provider)
-          .then((result) => {
-            // This gives you a Google Access Token. You can use it to access the Google API.
-            const credential = GoogleAuthProvider.credentialFromResult(result);
-            const token = credential?.accessToken;
-            // The signed-in user info.
-            const user = result.user;
-            if (user) this.user.set(user);
-            // IdP data available using getAdditionalUserInfo(result)
-            // ...
-            this.analyticsService.trackEvent('login', { method: 'google' });
-          })
-          .catch((error) => {
-            // Handle Errors here.
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            // The email of the user's account used.
-            const email = error.customData.email;
-            // The AuthCredential type that was used.
-            const credential = GoogleAuthProvider.credentialFromError(error);
-            // ...
-          })
-      )
+      from(signInWithPopup(this.firebaseAuth, provider))
     ).pipe(
+      map((result) => {
+        this.ngZone.run(() => {
+          this.user.set(result.user);
+        });
+        this.analyticsService.trackEvent('login', { method: 'google' });
+        return result.user;
+      }),
       catchError((error) => {
         console.error('loginWithGoogle error', error);
         return of(undefined);
@@ -50,7 +60,7 @@ export class AuthService {
   }
 
   isLoggedIn() {
-    return this.user$;
+    return this.isLoggedIn$;
   }
 
   getUser() {
@@ -58,9 +68,8 @@ export class AuthService {
   }
 
   logout() {
-    this.user.set(undefined);
     return defer(() =>
-      from(auth.signOut()).pipe(
+      from(signOut(this.firebaseAuth)).pipe(
         catchError((error) => {
           console.error('logout error', error);
           return of(undefined);

@@ -1,16 +1,18 @@
 import { defer, from } from 'rxjs';
-import { Injectable } from '@angular/core';
-import { firestore } from '../../../firebase/firestore';
-import { doc, setDoc } from 'firebase/firestore';
+import { inject, Injectable } from '@angular/core';
+import { addDoc, collection } from 'firebase/firestore';
+import { FIREBASE_FIRESTORE } from '../../../firebase/firebase.tokens';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class FirebaseDestinationUploadService {
+  private readonly firestore = inject(FIREBASE_FIRESTORE);
+
   upload(data: any) {
     return defer(() =>
       from(
-        setDoc(doc(firestore, 'destinations'), {
+        addDoc(collection(this.firestore, 'destinations'), {
           country: data.country,
           city: data.city,
           latitude: data.latitude,
