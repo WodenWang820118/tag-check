@@ -2,7 +2,6 @@ import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {
   catchError,
-  map,
   Observable,
   throwError,
   from,
@@ -10,8 +9,13 @@ import {
   finalize,
   of
 } from 'rxjs';
-import { DataLayerSpec, ProjectSpec } from '@utils';
+import { DataLayerSpec, ProjectSpec, StrictDataLayerEvent } from '@utils';
 import { environment } from '../../../../../environments/environment';
+
+export type UpdateSpecRequest = {
+  event: string;
+  dataLayerSpec: StrictDataLayerEvent;
+};
 
 @Injectable({
   providedIn: 'root'
@@ -86,7 +90,11 @@ export class SpecService {
       );
   }
 
-  updateSpec(projectSlug: string, eventName: string, content: DataLayerSpec) {
+  updateSpec(
+    projectSlug: string,
+    eventName: string,
+    content: UpdateSpecRequest
+  ) {
     return this.http
       .put(`${environment.specApiUrl}/${projectSlug}/${eventName}`, {
         ...content
@@ -106,10 +114,6 @@ export class SpecService {
     return this.http
       .get<DataLayerSpec>(`${environment.specApiUrl}/${projectSlug}/${eventId}`)
       .pipe(
-        map((response) => {
-          console.log('Fetched event spec:', response);
-          return response;
-        }),
         catchError((error) => {
           console.error(error);
           return throwError(() => new Error('Failed to get spec details'));

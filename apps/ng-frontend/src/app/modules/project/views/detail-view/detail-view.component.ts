@@ -1,21 +1,64 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import {
+  ActivatedRoute,
+  convertToParamMap,
+  ParamMap,
+  Params,
+  Router
+} from '@angular/router';
+import { distinctUntilChanged, startWith } from 'rxjs';
+import {
+  DataLayerSpec,
   FrontFileReport,
   IReportDetails,
-  TagSpec,
+  Recording,
   TestEvent,
   TestEventDetail,
   TestImage
 } from '@utils';
-import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ReportTabComponent } from '../../components/report-tab/report-tab.component';
 import { TagManageTabComponent } from '../../components/tag-manage-tab/tag-manage-tab.component';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '../../../../shared/components/snackbar/snackbar.component';
+import {
+  ReportDetailRouteContext,
+  toTagSpec
+} from '../../components/report-detail.contracts';
+
+function buildFlattenedReportDetails(
+  reportDetailsObject:
+    | {
+        testEvent: TestEvent;
+        testEventDetails: TestEventDetail;
+        testImage: TestImage;
+      }
+    | undefined
+): IReportDetails | undefined {
+  if (!reportDetailsObject) {
+    return undefined;
+  }
+
+  return {
+    ...reportDetailsObject.testEvent,
+    ...reportDetailsObject.testEventDetails,
+    ...reportDetailsObject.testImage,
+    position: 0,
+    event: reportDetailsObject.testEvent.eventName
+  };
+}
+
+function serializeParamMap(params: ParamMap): string {
+  return JSON.stringify(
+    [...params.keys]
+      .sort()
+      .map((key) => [key, params.getAll(key)])
+  );
+}
 
 @Component({
   selector: 'app-detail-view',
@@ -44,7 +87,6 @@ import { SnackBarComponent } from '../../../../shared/components/snackbar/snackb
             <mat-icon aria-hidden="true">arrow_back</mat-icon>
             <span class="back-label">Back</span>
           </button>
-          <!-- Title intentionally minimal to avoid duplication with card header -->
         </div>
         <mat-tab-group
           mat-stretch-tabs="true"
@@ -52,16 +94,10 @@ import { SnackBarComponent } from '../../../../shared/components/snackbar/snackb
           [selectedIndex]="selectedTabIndex"
         >
           <mat-tab label="Tag Snapshot">
-            <app-tag-manage-tab [tagSpec]="tagSpec$()"></app-tag-manage-tab>
+            <app-tag-manage-tab [tagSpec]="tagSpec()"></app-tag-manage-tab>
           </mat-tab>
           <mat-tab label="Reports">
-            <app-report-tab
-              [reportDetails]="reportDetails$()"
-              [tagSpec]="tagSpec$()"
-              [videoBlob]="videoBlob$()"
-              [imageBlob]="imageBlob$()"
-              [frontFileReport]="frontFileReport()"
-            ></app-report-tab>
+            <app-report-tab [context]="routeContext()"></app-report-tab>
           </mat-tab>
         </mat-tab-group>
         <br />
@@ -70,17 +106,11 @@ import { SnackBarComponent } from '../../../../shared/components/snackbar/snackb
   `
 })
 export class DetailViewComponent implements OnInit {
-  reportDetails = signal<IReportDetails | undefined>(undefined);
-  reportDetails$ = computed(() => this.reportDetails());
-  tagSpec = signal<TagSpec | undefined>(undefined);
-  tagSpec$ = computed(() => this.tagSpec());
-  videoBlob = signal<Blob | undefined>(undefined);
-  videoBlob$ = computed(() => this.videoBlob());
-  imageBlob = signal<Blob | undefined>(undefined);
-  imageBlob$ = computed(() => this.imageBlob());
-  frontFileReport = signal([] as FrontFileReport[]);
-  // testEventDetail$ moved into the ReportTabComponent
-  selectedTabIndex = 0; // 0: Tag Snapshot, 1: Reports
+  private readonly destroyRef = inject(DestroyRef);
+
+  routeContext = signal<ReportDetailRouteContext | undefined>(undefined);
+  tagSpec = computed(() => toTagSpec(this.routeContext()?.spec));
+  selectedTabIndex = 0;
 
   constructor(
     private readonly router: Router,
@@ -89,67 +119,72 @@ export class DetailViewComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // react to route data
-    this.route.data.subscribe((data) => {
-      console.log('Route data:', data);
-      const fileReports = data['fileReports'] as FrontFileReport[];
-      const spec = data['spec'] as TagSpec;
+    this.route.data
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((data) => {
+        const spec = data['spec'] as DataLayerSpec;
+        const fileReports = (data['fileReports'] as FrontFileReport[] | null) ?? [];
+        const video = data['video'] as { blob: Blob | undefined };
+        const image = data['image'] as { blob: Blob | undefined };
+        const recording = (data['recording'] as Recording | null) ?? null;
+        const reportDetailsObject = data['reportDetails'] as
+          | {
+              testEvent: TestEvent;
+              testEventDetails: TestEventDetail;
+              testImage: TestImage;
+            }
+          | undefined;
 
-      this.frontFileReport.set(fileReports);
-      this.tagSpec.set(spec);
-
-      const reportDetailsObject = data['reportDetails'] as {
-        testEvent: TestEvent;
-        testEventDetails: TestEventDetail;
-        testImage: TestImage;
-      };
-
-      // Flatten the array of objects into a single object
-      console.log('Report details object:', reportDetailsObject);
-      const flattenedReportDetails: IReportDetails = {
-        ...reportDetailsObject.testEvent,
-        ...reportDetailsObject.testEventDetails,
-        ...reportDetailsObject.testImage,
-        position: 0,
-        event: reportDetailsObject.testEvent.eventName,
-        createdAt: new Date()
-      };
-      console.log('Flattened report details:', flattenedReportDetails);
-      const video = data['video'] as { blob: Blob | undefined };
-      const image = data['image'] as { blob: Blob | undefined };
-      this.reportDetails.set(flattenedReportDetails);
-      this.videoBlob.set(video.blob);
-      this.imageBlob.set(image.blob);
-    });
-
-    // react to query params to select Reports tab and optionally show snackbar
-    this.route.queryParamMap.subscribe((params) => {
-      const tab = params.get('tab');
-      const snackbar = params.get('snackbar');
-      // select the Reports tab when requested
-      if (tab && tab.toLowerCase() === 'reports') {
-        this.selectedTabIndex = 1;
-      }
-      // show snackbar hint when navigating from add-recording prompt
-      if (snackbar === 'missingRecording') {
-        this.snackBar.openFromComponent(SnackBarComponent, {
-          duration: 5000,
-          data: 'Please add a Chrome Recording to this event before running tests.'
+        this.routeContext.set({
+          projectSlug: (data['projectSlug'] as string | undefined) ?? '',
+          eventId: (data['eventId'] as string | undefined) ?? '',
+          spec,
+          recording,
+          reportDetails: buildFlattenedReportDetails(reportDetailsObject),
+          videoBlob: video?.blob,
+          imageBlob: image?.blob,
+          fileReports,
+          historyLinkCommands: ['..', 'buckets']
         });
-        // Optionally remove the snackbar flag from URL to avoid showing again on refresh
-        // by replacing current URL without reloading component
-        const queryParams: Params = { ...this.route.snapshot.queryParams };
-        delete queryParams['snackbar'];
-        this.router.navigate([], {
-          relativeTo: this.route,
-          queryParams,
-          replaceUrl: true
-        });
-      }
-    });
+      });
+
+    this.route.queryParamMap
+      .pipe(
+        startWith(convertToParamMap(this.route.snapshot.queryParams)),
+        distinctUntilChanged(
+          (previous, current) =>
+            serializeParamMap(previous) === serializeParamMap(current)
+        ),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((params) => this.handleQueryParams(params));
   }
 
   goBack() {
     this.router.navigate(['../'], { relativeTo: this.route });
+  }
+
+  private handleQueryParams(params: ParamMap) {
+    const tab = params.get('tab');
+    const snackbar = params.get('snackbar');
+
+    if (tab?.toLowerCase() === 'reports') {
+      this.selectedTabIndex = 1;
+    }
+
+    if (snackbar === 'missingRecording') {
+      this.snackBar.openFromComponent(SnackBarComponent, {
+        duration: 5000,
+        data: 'Please add a Chrome Recording to this event before running tests.'
+      });
+
+      const queryParams: Params = { ...this.route.snapshot.queryParams };
+      delete queryParams['snackbar'];
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams,
+        replaceUrl: true
+      });
+    }
   }
 }
