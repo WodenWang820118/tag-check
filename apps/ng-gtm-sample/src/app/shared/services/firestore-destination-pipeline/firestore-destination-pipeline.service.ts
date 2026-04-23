@@ -2,14 +2,16 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import {
   collection,
   DocumentData,
+  endBefore,
   getDocs,
   limit,
+  limitToLast,
   orderBy,
   query,
+  QueryConstraint,
   QueryDocumentSnapshot,
   QuerySnapshot,
   startAfter,
-  startAt,
   where,
 } from 'firebase/firestore';
 import {
@@ -34,12 +36,20 @@ import { FIREBASE_FIRESTORE } from '../../../firebase/firebase.tokens';
   providedIn: 'root'
 })
 export class FirestoreDestinationPipelineService {
+  private readonly firstVisibleDocs = signal<QueryDocumentSnapshot<
+    DocumentData,
+    DocumentData
+  > | null>(null);
   private readonly lastVisibleDocs = signal<QueryDocumentSnapshot<
     DocumentData,
     DocumentData
   > | null>(null);
   readonly lastVisibleDocs$ = computed(() => this.lastVisibleDocs());
   previousDocsStack: QueryDocumentSnapshot<DocumentData, DocumentData>[] = [];
+  private currentQueryLimit = 5;
+  private currentQueryBuilder: () => QueryConstraint[] = () => [
+    orderBy('country')
+  ];
   private readonly firestore = inject(FIREBASE_FIRESTORE);
 
   constructor(
@@ -76,18 +86,30 @@ export class FirestoreDestinationPipelineService {
 
   // TODO: cache the data locally
   getFirstDestinationsData(queryLimit = 5) {
+    this.currentQueryLimit = queryLimit;
+    this.currentQueryBuilder = () => [orderBy('country')];
     return this.fetchDestinations(() => this.getFirstDestinations(queryLimit));
   }
 
   getNextDestinationsData(queryLimit = 5) {
+    this.currentQueryLimit = queryLimit;
     return this.fetchDestinations(() => this.getNextDestinations(queryLimit));
   }
 
   getPreviousDestinationsData() {
-    return this.fetchDestinations(() => this.getPreviousDestinations());
+    return this.fetchDestinations(() =>
+      this.getPreviousDestinations(this.currentQueryLimit)
+    );
   }
 
   getSearchResultsData(searchQuery: string, queryLimit = 5) {
+    this.currentQueryLimit = queryLimit;
+    const endTerm = searchQuery + '\uf8ff';
+    this.currentQueryBuilder = () => [
+      where('country', '>=', searchQuery),
+      where('country', '<=', endTerm),
+      orderBy('country')
+    ];
     return this.fetchDestinations(() =>
       this.getSearchResults(searchQuery, queryLimit)
     );
@@ -110,17 +132,15 @@ export class FirestoreDestinationPipelineService {
     return defer(() =>
       from(
         getDocs(
-          query(
-            collection(this.firestore, 'destinations'),
-            orderBy('country'),
-            limit(queryLimit)
-          )
+          this.buildCurrentQuery(limit(queryLimit))
         )
       ).pipe(
         tap((documentSnapshots) => {
+          const firstVisible = documentSnapshots.docs[0] ?? null;
           const lastVisible =
-            documentSnapshots.docs[documentSnapshots.docs.length - 1];
-          this.previousDocsStack = [lastVisible];
+            documentSnapshots.docs[documentSnapshots.docs.length - 1] ?? null;
+          this.previousDocsStack = firstVisible ? [firstVisible] : [];
+          this.firstVisibleDocs.set(firstVisible);
           this.lastVisibleDocs.set(lastVisible);
         })
       )
@@ -135,69 +155,69 @@ export class FirestoreDestinationPipelineService {
       }
       return from(
         getDocs(
-          query(
-            collection(this.firestore, 'destinations'),
-            orderBy('country'),
-            startAfter(lastVisible),
-            limit(queryLimit)
-          )
+          this.buildCurrentQuery(startAfter(lastVisible), limit(queryLimit))
         )
       ).pipe(
         tap((documentSnapshots) => {
+          const firstVisible = documentSnapshots.docs[0] ?? null;
           const lastVisible =
-            documentSnapshots.docs[documentSnapshots.docs.length - 1];
-          this.previousDocsStack.push(lastVisible);
-          this.lastVisibleDocs.set(lastVisible);
+            documentSnapshots.docs[documentSnapshots.docs.length - 1] ?? null;
+          if (firstVisible) {
+            this.previousDocsStack.push(firstVisible);
+            this.firstVisibleDocs.set(firstVisible);
+          }
+          if (lastVisible) {
+            this.lastVisibleDocs.set(lastVisible);
+          }
         })
       );
     });
   }
 
-  private getPreviousDestinations() {
+  private getPreviousDestinations(queryLimit = 5) {
     return defer(() => {
       if (this.previousDocsStack.length < 2) {
         return of({} as QuerySnapshot<DocumentData, DocumentData>);
       }
-      // Remove the current last visible document
-      this.previousDocsStack.pop();
-      const previousLastVisible =
-        this.previousDocsStack[this.previousDocsStack.length - 1];
+      const currentFirstVisible = this.previousDocsStack.pop();
+      if (!currentFirstVisible) {
+        return of({} as QuerySnapshot<DocumentData, DocumentData>);
+      }
+
       return from(
         getDocs(
-          query(
-            collection(this.firestore, 'destinations'),
-            orderBy('country'),
-            startAt(previousLastVisible),
-            limit(2)
+          this.buildCurrentQuery(
+            endBefore(currentFirstVisible),
+            limitToLast(queryLimit)
           )
         )
       ).pipe(
         tap((documentSnapshots) => {
+          const firstVisible = documentSnapshots.docs[0] ?? null;
           const lastVisible =
-            documentSnapshots.docs[documentSnapshots.docs.length - 1];
+            documentSnapshots.docs[documentSnapshots.docs.length - 1] ?? null;
+          this.firstVisibleDocs.set(firstVisible);
           this.lastVisibleDocs.set(lastVisible);
+          if (firstVisible && this.previousDocsStack.length > 0) {
+            this.previousDocsStack[this.previousDocsStack.length - 1] =
+              firstVisible;
+          }
         })
       );
     });
   }
 
-  private getSearchResults(searchQuery: string, queryLimit = 2) {
-    const endTerm = searchQuery + '\uf8ff';
+  private getSearchResults(searchQuery: string, queryLimit = 5) {
     return defer(() =>
       from(
-        getDocs(
-          query(
-            collection(this.firestore, 'destinations'),
-            where('country', '>=', searchQuery),
-            where('country', '<=', endTerm),
-            limit(queryLimit)
-          )
-        )
+        getDocs(this.buildCurrentQuery(limit(queryLimit)))
       ).pipe(
         tap((documentSnapshots) => {
+          const firstVisible = documentSnapshots.docs[0] ?? null;
           const lastVisible =
-            documentSnapshots.docs[documentSnapshots.docs.length - 1];
-          this.previousDocsStack = [lastVisible];
+            documentSnapshots.docs[documentSnapshots.docs.length - 1] ?? null;
+          this.previousDocsStack = firstVisible ? [firstVisible] : [];
+          this.firstVisibleDocs.set(firstVisible);
           this.lastVisibleDocs.set(lastVisible);
         })
       )
@@ -209,11 +229,15 @@ export class FirestoreDestinationPipelineService {
   ): Observable<Destination[]> {
     return fetchMethod().pipe(
       switchMap((documents) => {
-        const data = documents.docs.map((doc) => {
+        const docs = documents.docs ?? [];
+        if (docs.length === 0) {
+          return of([]);
+        }
+
+        const data = docs.map((doc) => {
           return { ...doc.data(), id: doc.id };
         }) as Destination[];
         const destinationObservables = data.map((document) => {
-          console.log('Fetching images for document:', document);
           return forkJoin({
             image1: this.firebaseStorageService.getImage(document['image1']),
             image2: this.firebaseStorageService.getImage(document['image2']),
@@ -230,6 +254,14 @@ export class FirestoreDestinationPipelineService {
         });
         return forkJoin(destinationObservables);
       })
+    );
+  }
+
+  private buildCurrentQuery(...constraints: QueryConstraint[]) {
+    return query(
+      collection(this.firestore, 'destinations'),
+      ...this.currentQueryBuilder(),
+      ...constraints
     );
   }
 
