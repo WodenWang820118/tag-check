@@ -113,6 +113,43 @@
     line-height: 1.65;
   }
 
+  .sample-page-title {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+  }
+
+  .sample-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: #2563eb;
+  }
+
+  .sample-inset-surface {
+    border: 1px solid var(--sample-border);
+    border-radius: 1.25rem;
+    background: rgba(248, 250, 252, 0.82);
+  }
+
+  .sample-credit {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.45;
+    color: var(--sample-text-muted);
+  }
+
+  .sample-credit a {
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
   .sample-loading-shell {
     position: fixed;
     inset: 0;

@@ -1,16 +1,52 @@
-<div class="max-w-2xl mx-auto p-6" id="content">
-  <div class="mb-6 text-center">
-    <h1 class="text-3xl font-bold">Reservation Complete!</h1>
-    <p class="text-gray-600">You are almost at your destination.</p>
-  </div>
+<div class="grid place-items-center py-8" id="content">
+  <p-card
+    styleClass="w-full max-w-3xl rounded-[1.75rem] border border-slate-200 shadow-xl overflow-hidden"
+  >
+    <ng-template pTemplate="header">
+      <div class="bg-slate-950 px-8 py-8 text-white">
+        <div class="sample-eyebrow text-blue-200">
+          <i class="pi pi-check-circle text-sm"></i>
+          Reservation Complete
+        </div>
+        <h1 class="mt-4 text-3xl font-black tracking-tight">
+          Your sample booking is confirmed.
+        </h1>
+        <p class="mt-3 text-sm leading-6 text-slate-200">
+          You are almost at your destination. This confirmation page keeps the
+          original purchase/refund analytics flow intact.
+        </p>
+      </div>
+    </ng-template>
 
-  <div class="bg-blue-50 p-6 rounded-lg text-center" id="orderConfirmed">
-    <h2 class="text-2xl font-semibold mb-4">
-      Thank you for reserving your trip through GTM Travel Site for ${{ orderService.totalPrice$() }}. Enjoy!
-    </h2>
-    <div class="flex justify-center space-x-4">
-      <button pButton type="button" label="Back to Home" class="bg-gray-800" (click)="resetOrders()"></button>
-      <button pButton type="button" label="Cancel Order" class="bg-gray-800" (click)="cancelOrder()"></button>
+    <div class="space-y-5 px-2 py-2">
+      <div class="sample-inset-surface px-5 py-5 text-center">
+        <h2 class="text-2xl font-semibold text-slate-950" id="orderConfirmed">
+          Thank you for reserving your trip through GTM Travel Site for
+          {{ orderService.totalPrice$() | currency }}.
+        </h2>
+        <p class="sample-copy mt-3">Enjoy the rest of the demo journey.</p>
+      </div>
+
+      <div class="flex flex-col gap-3 sm:flex-row sm:justify-center">
+        <button
+          pButton
+          type="button"
+          label="Back to Home"
+          icon="pi pi-home"
+          severity="secondary"
+          [outlined]="true"
+          (click)="resetOrders()"
+        ></button>
+        <button
+          pButton
+          type="button"
+          label="Cancel Order"
+          icon="pi pi-undo"
+          severity="danger"
+          [outlined]="true"
+          (click)="cancelOrder()"
+        ></button>
+      </div>
     </div>
-  </div>
+  </p-card>
 </div>

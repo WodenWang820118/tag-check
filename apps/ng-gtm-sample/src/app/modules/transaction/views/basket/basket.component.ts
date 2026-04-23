@@ -1,14 +1,15 @@
-import { Component, inject } from '@angular/core';
-import { TableModule } from 'primeng/table';
-import { DataViewModule } from 'primeng/dataview';
-import { CardModule } from 'primeng/card';
+import { CurrencyPipe } from '@angular/common';
+import { Component, inject, OnInit } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { DataViewModule } from 'primeng/dataview';
 import { MessageModule } from 'primeng/message';
+import { TableModule } from 'primeng/table';
+import { AnalyticsService } from '../../../../shared/services/analytics/analytics.service';
 import { OrderService } from '../../../../shared/services/order/order.service';
 import { Order } from '../../../../shared/models/order.model';
 import { WindowSizeService } from '../../../../shared/services/window-size/window-size.service';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
-import { CurrencyPipe } from '@angular/common';
 
 @Component({
   selector: 'app-basket',
@@ -22,14 +23,23 @@ import { CurrencyPipe } from '@angular/common';
   ],
   templateUrl: './basket.component.html'
 })
-export class BasketComponent {
+export class BasketComponent implements OnInit {
   public readonly orderService = inject(OrderService);
-  basketItems$ = this.orderService.orders$;
+  readonly basketItems$ = this.orderService.orders$;
+  readonly cartTotal = this.orderService.calculateTotalPrice();
 
   constructor(
-    public windowSizeService: WindowSizeService,
+    public readonly windowSizeService: WindowSizeService,
+    private readonly analyticsService: AnalyticsService,
     private readonly navigationService: NavigationService
   ) {}
+
+  ngOnInit() {
+    const orders = this.orderService.orders$();
+    if (orders.length > 0) {
+      this.analyticsService.trackEvent('view_cart', orders);
+    }
+  }
 
   navigateToBeginCheckout() {
     this.navigationService.navigateToCheckout();
@@ -41,10 +51,6 @@ export class BasketComponent {
 
   removeFromCart(order: Order): void {
     this.orderService.removeFromCart(order);
-  }
-
-  calculateTotalPrice() {
-    return this.orderService.calculateTotalPrice();
   }
 
   beginCheckout() {

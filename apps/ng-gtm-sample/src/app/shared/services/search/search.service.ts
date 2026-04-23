@@ -25,6 +25,7 @@ export class SearchService {
             take(1),
             tap((data) => {
               this.searchResults.set(data);
+              this.trackViewItemList(data);
             })
           )
           .subscribe();
@@ -37,6 +38,7 @@ export class SearchService {
             take(1),
             tap((data) => {
               this.searchResults.set(data);
+              this.trackViewItemList(data);
             })
           )
           .subscribe();
@@ -49,6 +51,7 @@ export class SearchService {
           .subscribe((destinations: Destination[]) => {
             this.analyticsService.trackEvent('search', query);
             this.searchResults.set(destinations);
+            this.trackViewItemList(destinations);
           });
         break;
     }
@@ -61,8 +64,23 @@ export class SearchService {
         take(1),
         tap((data) => {
           this.searchResults.set(data);
+          this.trackViewItemList(data);
         })
       )
       .subscribe();
+  }
+
+  private trackViewItemList(destinations: Destination[]): void {
+    this.analyticsService.trackEvent('view_item_list', {
+      ecommerce: {
+        items: destinations.map((destination) => ({
+          item_id: destination.id,
+          item_name: destination.title,
+          item_category: destination.title,
+          price: destination.price,
+          quantity: 1
+        }))
+      }
+    });
   }
 }

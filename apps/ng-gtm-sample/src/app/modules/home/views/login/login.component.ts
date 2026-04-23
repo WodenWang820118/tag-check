@@ -1,73 +1,87 @@
-import { Component, effect, inject } from '@angular/core';
-import {
-  FormBuilder,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
+import { Component, effect } from '@angular/core';
 import { AuthService } from '../../../../shared/services/auth/auth.service';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
 import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, FormsModule, ButtonModule],
+  imports: [ButtonModule, CardModule, DividerModule],
   template: `
-    <div class="flex justify-center items-center min-h-screen bg-gray-100">
-      <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-        <h2 class="text-2xl font-semibold text-center mb-4">Sign In</h2>
-        <form [formGroup]="signInForm" (ngSubmit)="loginWithGoogle()">
-          <div class="mb-4">
-            <label for="username" class="block text-gray-700 mb-2"
-              >Username</label
-            >
-            <input
-              id="username"
-              formControlName="username"
-              type="text"
-              placeholder="Enter username"
-              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
-            />
+    <div class="grid min-h-[calc(100vh-9rem)] place-items-center py-10">
+      <p-card
+        styleClass="w-full max-w-xl rounded-[1.75rem] border border-slate-200 shadow-xl"
+      >
+        <ng-template pTemplate="header">
+          <div class="rounded-t-[1.75rem] bg-slate-950 px-8 py-8 text-white">
+            <div class="sample-eyebrow text-blue-200">
+              <i class="pi pi-lock text-sm"></i>
+              Admin Access
+            </div>
+            <h1 class="mt-4 text-3xl font-black tracking-tight">
+              Sign in with Google to manage demo data.
+            </h1>
+            <p class="mt-3 max-w-lg text-sm leading-6 text-slate-200">
+              The public storefront stays open, but the admin surface uses the
+              Google sign-in flow that is already wired into this sample.
+            </p>
           </div>
-          <div class="mb-4">
-            <label for="password" class="block text-gray-700 mb-2"
-              >Password</label
+        </ng-template>
+
+        <div class="space-y-6 px-2 py-2">
+          <div class="sample-inset-surface px-5 py-4">
+            <div
+              class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400"
             >
-            <input
-              id="password"
-              formControlName="password"
-              type="password"
-              placeholder="Enter password"
-              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
-            />
+              What this unlocks
+            </div>
+            <div class="mt-3 grid gap-3 text-sm text-slate-600">
+              <div class="flex items-start gap-3">
+                <i class="pi pi-database mt-0.5 text-blue-600"></i>
+                <span>
+                  Access the admin dashboard and the destination entry workflow.
+                </span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="pi pi-images mt-0.5 text-blue-600"></i>
+                <span>
+                  Preview the Firebase-backed content flow used by the demo
+                  site.
+                </span>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="pi pi-chart-line mt-0.5 text-blue-600"></i>
+                <span>
+                  Keep the GTM storefront behavior intact while testing admin
+                  actions.
+                </span>
+              </div>
+            </div>
           </div>
+
+          <p-divider align="center" type="solid">
+            <span
+              class="bg-white px-3 text-xs font-semibold uppercase tracking-[0.24em] text-slate-400"
+            >
+              Auth Provider
+            </span>
+          </p-divider>
+
           <button
-            type="submit"
-            class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Sign In
-          </button>
-        </form>
-        <div class="mt-4 text-center text-gray-500">or</div>
-        <button
-          pButton
-          type="button"
-          label="Sign in with Google"
-          icon="pi pi-google"
-          class="w-full mt-4 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center"
-          (click)="loginWithGoogle()"
-        ></button>
-      </div>
+            pButton
+            type="button"
+            label="Continue with Google"
+            icon="pi pi-google"
+            class="w-full"
+            (click)="loginWithGoogle()"
+          ></button>
+        </div>
+      </p-card>
     </div>
-  `,
-  styles: [``]
+  `
 })
 export class LoginComponent {
-  private readonly fb = inject(FormBuilder);
-  signInForm = this.fb.group({
-    username: ['', Validators.required],
-    password: ['', Validators.required]
-  });
   constructor(
     private readonly authService: AuthService,
     private readonly navigationService: NavigationService

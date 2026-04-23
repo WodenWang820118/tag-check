@@ -4,28 +4,30 @@ import {
   effect,
   OnInit,
   signal,
-  viewChild,
-  ViewEncapsulation,
+  viewChild
 } from '@angular/core';
 import {
   FormControl,
   FormGroup,
-  ReactiveFormsModule,
   FormsModule,
+  ReactiveFormsModule
 } from '@angular/forms';
-import { take, tap } from 'rxjs';
+import { DomSanitizer } from '@angular/platform-browser';
 import { YouTubePlayerModule } from '@angular/youtube-player';
+import { take, tap } from 'rxjs';
+import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { MessageModule } from 'primeng/message';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
 import { WindowSizeService } from '../../../../shared/services/window-size/window-size.service';
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
 import { DestinationService } from '../../../../shared/services/destination/destination.service';
 import { SearchService } from '../../../../shared/services/search/search.service';
 import { YoutubeService } from '../../../../shared/services/youtube/youtube.service';
-import { DomSanitizer } from '@angular/platform-browser';
 import { FirestoreDestinationPipelineService } from '../../../../shared/services/firestore-destination-pipeline/firestore-destination-pipeline.service';
 import { AnalyticsService } from '../../../../shared/services/analytics/analytics.service';
 import { Destination } from '../../../../shared/models/destination.model';
-import { DialogModule } from 'primeng/dialog';
 
 @Component({
   standalone: true,
@@ -35,35 +37,29 @@ import { DialogModule } from 'primeng/dialog';
     ReactiveFormsModule,
     FormsModule,
     DialogModule,
+    ButtonModule,
+    InputTextModule,
+    MessageModule
   ],
-  templateUrl: './destination.component.html',
-  encapsulation: ViewEncapsulation.None,
+  templateUrl: './destination.component.html'
 })
 export class DestinationComponent implements OnInit {
-  searchForm: FormGroup = new FormGroup({
-    searchTerm: new FormControl(''),
+  readonly searchForm = new FormGroup({
+    searchTerm: new FormControl('')
   });
 
   private readonly destinations = signal<Destination[]>([]);
-  destinations$ = computed(() => this.destinations());
+  readonly destinations$ = computed(() => this.destinations());
 
-  private readonly videoId = signal<string>('');
-  videoId$ = computed(() => this.videoId());
+  private readonly videoId = signal('');
+  readonly videoId$ = computed(() => this.videoId());
 
-  private readonly showVideoPlayer = signal<boolean>(false);
-  showVideoPlayer$ = computed(() => this.showVideoPlayer);
-  // Getter and setter for PrimeNG dialog two-way binding
-  get videoDialogVisible(): boolean {
-    return this.showVideoPlayer();
-  }
-  set videoDialogVisible(value: boolean) {
-    this.showVideoPlayer.set(value);
-  }
+  private readonly showVideoPlayer = signal(false);
+  readonly playerVars = {
+    enablejsapi: 1
+  };
 
   private readonly videoPlayer = viewChild<any>('player');
-  playerVars = {
-    enablejsapi: 1,
-  };
 
   constructor(
     private readonly destinationService: DestinationService,
@@ -78,10 +74,16 @@ export class DestinationComponent implements OnInit {
   ) {
     effect(() => {
       const searchResults = this.searchService.searchResults$();
-      if (searchResults.length) {
-        this.destinations.set(searchResults);
-      }
+      this.destinations.set(searchResults);
     });
+  }
+
+  get videoDialogVisible(): boolean {
+    return this.showVideoPlayer();
+  }
+
+  set videoDialogVisible(value: boolean) {
+    this.showVideoPlayer.set(value);
   }
 
   ngOnInit() {
@@ -111,7 +113,10 @@ export class DestinationComponent implements OnInit {
   }
 
   getPreviousDestinations() {
-    if (this.isPreviousDisabled()) return;
+    if (this.isPreviousDisabled()) {
+      return;
+    }
+
     this.firestoreDestinationPipelineService
       .getPreviousDestinationsData()
       .pipe(
@@ -132,9 +137,9 @@ export class DestinationComponent implements OnInit {
           item_name: destination.title,
           item_category: destination.title,
           price: destination.price,
-          quantity: 1,
-        })),
-      },
+          quantity: 1
+        }))
+      }
     });
   }
 
@@ -144,16 +149,12 @@ export class DestinationComponent implements OnInit {
     );
   }
 
-  navigateToHome() {
-    this.navigationService.navigateToHome();
-  }
-
-  goToDetails(destination: any): void {
+  goToDetails(destination: Destination): void {
     this.destinationService.changeDestination(destination);
     this.navigationService.navigateToDetail(destination.id);
   }
 
-  selectItem(destination: any): void {
+  selectItem(destination: Destination): void {
     this.destinationService.trackSelectItem(destination);
   }
 
@@ -162,8 +163,8 @@ export class DestinationComponent implements OnInit {
     this.navigationService.navigateToDestinationResults(query);
   }
 
-  onSubmit(f: FormGroup): void {
-    const query = f.value.searchTerm;
+  onSubmit(): void {
+    const query = this.searchForm.value.searchTerm ?? '';
     this.navigateToSearchResults(query);
   }
 
@@ -173,20 +174,28 @@ export class DestinationComponent implements OnInit {
 
   closeModal() {
     this.showVideoPlayer.set(false);
-    this.videoPlayer().pauseVideo();
+    this.videoPlayer()?.pauseVideo();
     this.youtubeService.stopProgressTracking();
   }
 
   showModal(url: string) {
+    if (!url) {
+      return;
+    }
+
     this.videoId.set(this.getVideoId(url));
     this.showVideoPlayer.set(true);
   }
 
-  onStateChange(event: any) {
+  onStateChange(event: unknown) {
     this.youtubeService.trackVideoEvent(event);
   }
 
+  getImageSrc(imageName: string | undefined) {
+    return imageName || 'assets/images/placeholder.png';
+  }
+
   authorInforByPassed(info: string) {
-    return this.sanitizer.bypassSecurityTrustHtml(info);
+    return info ? this.sanitizer.bypassSecurityTrustHtml(info) : '';
   }
 }

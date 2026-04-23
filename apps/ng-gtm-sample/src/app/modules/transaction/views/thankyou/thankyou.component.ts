@@ -1,18 +1,20 @@
+import { CurrencyPipe } from '@angular/common';
 import { Component } from '@angular/core';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
 import { OrderService } from '../../../../shared/services/order/order.service';
 import { AnalyticsService } from '../../../../shared/services/analytics/analytics.service';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
-import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-thankyou',
   standalone: true,
-  imports: [ButtonModule],
+  imports: [ButtonModule, CardModule, CurrencyPipe],
   templateUrl: './thankyou.component.html'
 })
 export class ThankyouComponent {
   constructor(
-    public orderService: OrderService,
+    public readonly orderService: OrderService,
     private readonly analyticsService: AnalyticsService,
     private readonly navigationService: NavigationService
   ) {}
@@ -22,7 +24,6 @@ export class ThankyouComponent {
     this.navigationService.navigateToHome();
   }
 
-  // the purchase event is tracked in the analytics service using URL to determine when to track the event
   trackRefund(): void {
     const orders = this.orderService.orders$();
     if (orders.length > 0) {
@@ -30,7 +31,6 @@ export class ThankyouComponent {
     }
   }
 
-  /** refund and then navigate home */
   cancelOrder(): void {
     this.trackRefund();
     this.resetOrders();

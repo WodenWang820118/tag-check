@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CheckoutFormManagerService } from '../../../../shared/services/checkout-form-manager/checkout-form-manager.service';
-import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
+import { CheckoutFormManagerService } from '../../../../shared/services/checkout-form-manager/checkout-form-manager.service';
+import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
 
 @Component({
   selector: 'app-payment-form',
@@ -11,15 +11,27 @@ import { ButtonModule } from 'primeng/button';
   imports: [ReactiveFormsModule, FormsModule, InputTextModule, ButtonModule],
   template: `
     @if (checkoutFormManager.isShippingFormSubmitted$()) {
-      <div class="container mx-auto p-4">
+      <div class="sample-panel p-6">
+        <div class="mb-5 space-y-2">
+          <div class="sample-eyebrow text-slate-400">
+            <i class="pi pi-wallet text-sm"></i>
+            Step 2
+          </div>
+          <h2 class="text-2xl font-bold tracking-tight text-slate-950">
+            Payment details
+          </h2>
+          <p class="sample-copy">
+            Completing this form simulates the
+            <code>add_payment_info</code> event before the final thank-you page.
+          </p>
+        </div>
+
         <form [formGroup]="paymentForm" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label
-                for="cardNum"
-                class="block text-sm font-medium text-gray-700"
-                >Card Number</label
-              >
+          <div class="grid gap-4 md:grid-cols-2">
+            <div class="space-y-2 md:col-span-2">
+              <label for="cardNum" class="text-sm font-medium text-slate-600">
+                Card Number
+              </label>
               <input
                 pInputText
                 formControlName="cardNum"
@@ -27,12 +39,13 @@ import { ButtonModule } from 'primeng/button';
                 class="w-full"
               />
             </div>
-            <div>
+            <div class="space-y-2">
               <label
                 for="expiration"
-                class="block text-sm font-medium text-gray-700"
-                >Expiration</label
+                class="text-sm font-medium text-slate-600"
               >
+                Expiration
+              </label>
               <input
                 pInputText
                 formControlName="expiration"
@@ -40,12 +53,10 @@ import { ButtonModule } from 'primeng/button';
                 class="w-full"
               />
             </div>
-            <div>
-              <label
-                for="security"
-                class="block text-sm font-medium text-gray-700"
-                >Security Code</label
-              >
+            <div class="space-y-2">
+              <label for="security" class="text-sm font-medium text-slate-600">
+                Security Code
+              </label>
               <input
                 pInputText
                 formControlName="security"
@@ -54,11 +65,13 @@ import { ButtonModule } from 'primeng/button';
               />
             </div>
           </div>
-          <div class="mt-4">
+
+          <div class="flex justify-end pt-2">
             <button
               pButton
               type="button"
               label="Place Order"
+              icon="pi pi-check"
               (click)="placeOrder()"
             ></button>
           </div>
@@ -69,6 +82,7 @@ import { ButtonModule } from 'primeng/button';
 })
 export class PaymentFormComponent implements OnInit {
   paymentForm!: FormGroup;
+
   constructor(
     public checkoutFormManager: CheckoutFormManagerService,
     private readonly navigationService: NavigationService
@@ -80,6 +94,7 @@ export class PaymentFormComponent implements OnInit {
 
   placeOrder() {
     this.checkoutFormManager.paymentFormComplete();
+    this.checkoutFormManager.completePurchase();
     this.navigationService.navigateToThankYou();
   }
 }

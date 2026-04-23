@@ -17,16 +17,8 @@ export class NavbarComponent {
   constructor(
     public readonly authService: AuthService,
     private readonly orderService: OrderService,
-    private readonly analyticsService: AnalyticsService,
     private readonly navigationService: NavigationService
-  ) {
-    // effect(() => {
-    //   const orders = this.orderService.orders$();
-    //   if (orders.length > 0) {
-    //     this.analyticsService.trackEvent('view_cart', orders);
-    //   }
-    // });
-  }
+  ) {}
 
   navigateToHome() {
     this.navigationService.navigateToHome();
@@ -38,6 +30,10 @@ export class NavbarComponent {
 
   navigateToLogin() {
     this.navigationService.navigateToLogin();
+  }
+
+  logout() {
+    this.authService.logout().subscribe();
   }
 
   navigateToAdmin() {
@@ -52,14 +48,11 @@ export class NavbarComponent {
     this.navigationService.navigateToBasket();
   }
 
-  trackViewCart(): void {
-    const orders = this.orderService.orders$();
-    if (orders.length > 0) {
-      this.analyticsService.trackEvent('view_cart', orders);
-    }
+  user() {
+    return this.authService.getUser()();
   }
 
-  numOfItemsInCart() {
+  cartItemCount() {
     return this.orderService.orders$().length;
   }
 }
