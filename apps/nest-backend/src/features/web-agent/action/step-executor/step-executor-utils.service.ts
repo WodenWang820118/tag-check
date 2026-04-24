@@ -96,6 +96,7 @@ export class StepExecutorUtilsService {
         this.logger.error(`Failed to find selector: ${selector}`);
       }
     }
+    // TODO(stage2): Move page lifecycle ownership to the orchestration layer.
     await page.close();
     throw new NotFoundException(
       'Failed to find any of the specified selectors'

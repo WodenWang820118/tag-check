@@ -3,6 +3,7 @@ import { WebAgentUtilsService } from './web-agent-utils.service';
 import { DataLayerService } from './action/web-monitoring/data-layer/data-layer.service';
 import { ActionService } from './action/action.service';
 import { RequestInterceptorService } from './action/request-interceptor/request-interceptor.service';
+import { Subject, of } from 'rxjs';
 
 // Sample data layer JSON as provided in the attachment
 const sampleDataLayer = [
@@ -87,7 +88,8 @@ describe('WebAgentUtilsService.getOptimizedDataLayer', () => {
     service = new WebAgentUtilsService(
       mockAction,
       mockDataLayerService as DataLayerService,
-      mockInterceptor
+      mockInterceptor,
+      {} as any
     );
   });
 
@@ -122,5 +124,184 @@ describe('WebAgentUtilsService.getOptimizedDataLayer', () => {
       'example-project',
       'event-id'
     );
+  });
+});
+
+describe('WebAgentUtilsService.performTest request capture', () => {
+  it('uses the per-interception handle instead of the legacy rawRequest subject', async () => {
+    const rawRequest =
+      'https://www.google-analytics.com/g/collect?v=2&en=purchase&tid=G-TEST';
+    const stop = vi.fn().mockResolvedValue(undefined);
+    const mockAction = {
+      performOperation: vi.fn().mockResolvedValue(undefined)
+    } as unknown as ActionService;
+    const mockDataLayerService = {
+      initSelfDataLayer: vi.fn().mockResolvedValue(undefined),
+      updateSelfDataLayer: vi.fn().mockResolvedValue(undefined),
+      getMyDataLayer: vi.fn().mockResolvedValue([])
+    } as unknown as DataLayerService;
+    const mockInterceptor = {
+      setupInterception: vi.fn().mockResolvedValue({
+        rawRequest$: of(rawRequest),
+        stop
+      }),
+      getRawRequest: vi.fn(),
+      clearRawRequest: vi.fn()
+    } as unknown as RequestInterceptorService;
+    const mockTestEventRepository = {
+      getEntityByEventId: vi.fn().mockResolvedValue({ eventName: 'purchase' })
+    };
+    const service = new WebAgentUtilsService(
+      mockAction,
+      mockDataLayerService,
+      mockInterceptor,
+      mockTestEventRepository as any
+    );
+    const page = {
+      authenticate: vi.fn().mockResolvedValue(undefined),
+      waitForNavigation: vi.fn().mockRejectedValue(new Error('no navigation')),
+      url: vi.fn(() => 'https://example.test/thank-you')
+    };
+
+    const result = await service.performTest(
+      page as any,
+      'project',
+      'event-id',
+      'G-TEST',
+      { username: '', password: '' },
+      true,
+      { localStorage: { data: [] }, cookie: { data: [] } } as any
+    );
+
+    expect(mockInterceptor.setupInterception).toHaveBeenCalledTimes(1);
+    expect(mockInterceptor.getRawRequest).not.toHaveBeenCalled();
+    expect(mockInterceptor.clearRawRequest).not.toHaveBeenCalled();
+    expect(stop).toHaveBeenCalledTimes(1);
+    expect(result.eventRequest).toBe(rawRequest);
+  });
+
+  it('does not set up request interception when captureRequest is false', async () => {
+    const mockAction = {
+      performOperation: vi.fn().mockResolvedValue(undefined)
+    } as unknown as ActionService;
+    const mockDataLayerService = {
+      initSelfDataLayer: vi.fn().mockResolvedValue(undefined),
+      updateSelfDataLayer: vi.fn().mockResolvedValue(undefined),
+      getMyDataLayer: vi.fn().mockResolvedValue([])
+    } as unknown as DataLayerService;
+    const mockInterceptor = {
+      setupInterception: vi.fn()
+    } as unknown as RequestInterceptorService;
+    const mockTestEventRepository = {
+      getEntityByEventId: vi.fn().mockResolvedValue({ eventName: 'purchase' })
+    };
+    const service = new WebAgentUtilsService(
+      mockAction,
+      mockDataLayerService,
+      mockInterceptor,
+      mockTestEventRepository as any
+    );
+    const page = {
+      authenticate: vi.fn().mockResolvedValue(undefined),
+      waitForNavigation: vi.fn().mockRejectedValue(new Error('no navigation')),
+      url: vi.fn(() => 'https://example.test/thank-you')
+    };
+
+    await service.performTest(
+      page as any,
+      'project',
+      'event-id',
+      'G-TEST',
+      { username: '', password: '' },
+      false,
+      { localStorage: { data: [] }, cookie: { data: [] } } as any
+    );
+
+    expect(mockInterceptor.setupInterception).not.toHaveBeenCalled();
+  });
+
+  it('stops request interception when the action fails', async () => {
+    const stop = vi.fn().mockResolvedValue(undefined);
+    const mockAction = {
+      performOperation: vi.fn().mockRejectedValue(new Error('action failed'))
+    } as unknown as ActionService;
+    const mockDataLayerService = {
+      initSelfDataLayer: vi.fn().mockResolvedValue(undefined)
+    } as unknown as DataLayerService;
+    const mockInterceptor = {
+      setupInterception: vi.fn().mockResolvedValue({
+        rawRequest$: of(''),
+        stop
+      })
+    } as unknown as RequestInterceptorService;
+    const mockTestEventRepository = {
+      getEntityByEventId: vi.fn().mockResolvedValue({ eventName: 'purchase' })
+    };
+    const service = new WebAgentUtilsService(
+      mockAction,
+      mockDataLayerService,
+      mockInterceptor,
+      mockTestEventRepository as any
+    );
+
+    await expect(
+      service.performTest(
+        { authenticate: vi.fn().mockResolvedValue(undefined) } as any,
+        'project',
+        'event-id',
+        'G-TEST',
+        { username: '', password: '' },
+        true,
+        { localStorage: { data: [] }, cookie: { data: [] } } as any
+      )
+    ).rejects.toThrow(/action failed/);
+
+    expect(stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('times out and stops request interception when no matching request is captured', async () => {
+    const stop = vi.fn().mockResolvedValue(undefined);
+    const mockAction = {
+      performOperation: vi.fn().mockResolvedValue(undefined)
+    } as unknown as ActionService;
+    const mockDataLayerService = {
+      initSelfDataLayer: vi.fn().mockResolvedValue(undefined),
+      updateSelfDataLayer: vi.fn().mockResolvedValue(undefined),
+      getMyDataLayer: vi.fn().mockResolvedValue([])
+    } as unknown as DataLayerService;
+    const mockInterceptor = {
+      setupInterception: vi.fn().mockResolvedValue({
+        rawRequest$: new Subject<string>(),
+        stop
+      })
+    } as unknown as RequestInterceptorService;
+    const mockTestEventRepository = {
+      getEntityByEventId: vi.fn().mockResolvedValue({ eventName: 'purchase' })
+    };
+    const service = new WebAgentUtilsService(
+      mockAction,
+      mockDataLayerService,
+      mockInterceptor,
+      mockTestEventRepository as any
+    );
+    const page = {
+      authenticate: vi.fn().mockResolvedValue(undefined),
+      waitForNavigation: vi.fn().mockRejectedValue(new Error('no navigation')),
+      url: vi.fn(() => 'https://example.test/thank-you')
+    };
+
+    const result = await service.performTest(
+      page as any,
+      'project',
+      'event-id',
+      'G-TEST',
+      { username: '', password: '' },
+      true,
+      { localStorage: { data: [] }, cookie: { data: [] } } as any,
+      { requestCaptureTimeoutMs: 10 }
+    );
+
+    expect(result.eventRequest).toBe('');
+    expect(stop).toHaveBeenCalledTimes(1);
   });
 });

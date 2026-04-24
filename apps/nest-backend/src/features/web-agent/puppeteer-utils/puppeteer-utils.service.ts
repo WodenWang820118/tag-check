@@ -10,7 +10,10 @@ import { FolderPathService } from '../../../infrastructure/os/path/folder-path/f
 @Injectable()
 export class PuppeteerUtilsService {
   private readonly logger = new Logger(PuppeteerUtilsService.name);
-  private recorder: ScreenRecorder | null = null;
+  private readonly recorderAbortListeners = new WeakMap<
+    ScreenRecorder,
+    { signal: AbortSignal; listener: () => void }
+  >();
 
   constructor(
     private readonly configsService: ConfigsService,
@@ -34,7 +37,9 @@ export class PuppeteerUtilsService {
     // Merge default browser args with any provided by the preset (last wins per flag)
     const defaultArgs = this.configsService.getBROWSER_ARGS?.() ?? [];
     const providedArgs = eventInspectionPresetDto?.puppeteerArgs ?? [];
-    const mergedArgs = this.mergePuppeteerArgs(defaultArgs, providedArgs);
+    const mergedArgs = this.filterPuppeteerArgs(
+      this.mergePuppeteerArgs(defaultArgs, providedArgs)
+    );
     this.logger.debug(
       `Launching Chromium with args: ${JSON.stringify(mergedArgs)}`
     );
@@ -70,10 +75,12 @@ export class PuppeteerUtilsService {
     }
   }
 
-  async cleanup(browser: Browser, page: Page) {
-    if (this.recorder) {
-      await this.stopRecorder();
-    }
+  async cleanup(
+    browser: Browser,
+    page: Page,
+    recorder?: ScreenRecorder | null
+  ) {
+    await this.stopRecorder(recorder);
 
     if (page) {
       await page
@@ -91,21 +98,20 @@ export class PuppeteerUtilsService {
   async startRecorder(
     page: Page,
     projectSlug: string,
-    eventId: string
+    eventId: string,
+    signal?: AbortSignal
   ): Promise<ScreenRecorder> {
-    // Prevent overlapping recorders
-    if (this.recorder) {
-      this.logger.warn(
-        'An existing recorder was active. Stopping it before starting a new one.'
-      );
-      try {
-        await this.stopRecorder();
-      } catch (e) {
-        this.logger.warn(
-          `Failed stopping previous recorder (continuing): ${e}`
-        );
-      }
+    if (signal?.aborted) {
+      throw new Error('Recording start aborted');
     }
+
+    let recorder: ScreenRecorder | null = null;
+    const abortListener = async () => {
+      if (recorder) {
+        await this.stopRecorder(recorder);
+      }
+    };
+    signal?.addEventListener('abort', abortListener);
 
     const folderPath =
       await this.folderPathService.getInspectionEventFolderPath(
@@ -160,29 +166,45 @@ export class PuppeteerUtilsService {
         );
       }
 
-      this.recorder = await page.screencast({
+      recorder = await page.screencast({
         ffmpegPath: ffmpegPath,
         path: `${recordingPath}.webm`
       });
+
+      if (signal) {
+        this.recorderAbortListeners.set(recorder, {
+          signal,
+          listener: abortListener
+        });
+      }
+
+      if (signal?.aborted) {
+        await this.stopRecorder(recorder);
+        throw new Error('Recording start aborted');
+      }
     } catch (e) {
       this.logger.error(
         `Failed to start screen recording via ffmpeg at ${outputFile}: ${e}`
       );
-      // Ensure partial recorder is cleaned up if any
-      try {
-        await this.stopRecorder();
-      } catch {
-        // ignore cleanup error
-      }
+      signal?.removeEventListener('abort', abortListener);
       throw e;
     }
-    return this.recorder;
+    return recorder;
   }
 
-  async stopRecorder() {
-    if (this.recorder) {
-      await this.recorder.stop();
-      this.recorder = null;
+  async stopRecorder(recorder?: ScreenRecorder | null) {
+    if (!recorder) return;
+
+    const registration = this.recorderAbortListeners.get(recorder);
+    if (registration) {
+      registration.signal.removeEventListener('abort', registration.listener);
+      this.recorderAbortListeners.delete(recorder);
+    }
+
+    try {
+      await recorder.stop();
+    } catch (err) {
+      this.logger.warn(`Error stopping recorder: ${err}`);
     }
   }
 
@@ -291,5 +313,44 @@ export class PuppeteerUtilsService {
       }
     }
     return result;
+  }
+
+  private filterPuppeteerArgs(args: string[]): string[] {
+    const dangerousFlags = new Set([
+      '--remote-debugging-port',
+      '--remote-debugging-address',
+      '--user-data-dir',
+      '--profile-directory',
+      '--disable-web-security',
+      '--allow-running-insecure-content',
+      '--load-extension',
+      '--disable-extensions-except',
+      '--host-resolver-rules',
+      '--proxy-server',
+      '--proxy-pac-url'
+    ]);
+
+    const filtered: string[] = [];
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
+      if (typeof arg !== 'string') continue;
+
+      const trimmed = arg.trim();
+      const key = trimmed.split('=')[0].toLowerCase();
+      if (dangerousFlags.has(key)) {
+        if (!trimmed.includes('=')) {
+          const next = args[i + 1]?.trim();
+          if (next && !next.startsWith('-')) {
+            i++;
+          }
+        }
+        this.logger.warn(`Dropping unsafe Chromium arg: ${key}`);
+        continue;
+      }
+
+      filtered.push(arg);
+    }
+
+    return filtered;
   }
 }
