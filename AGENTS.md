@@ -30,6 +30,48 @@ Adopt the following Karpathy-inspired behavioral overlay to improve agent precis
 
 These principles augment the repo's phase boundaries, review checkpoints, and gate rules. They do not replace the existing workflow.
 
+## Task Sizing and Progressive Delivery
+
+Every non-trivial plan must record `Task Size: <tiny|small|medium|large|huge>` with a short rationale once enough context is known. Classify by risk, verification boundary, rollback cost, and coordination needs first; file and project counts are heuristics, not permission to downgrade risk.
+
+Size classes:
+
+- `tiny`: typo, formatting-only, or a clearly mechanical one-line change. A second opinion is normally optional, but the agent should still request review when the impact is not fully understood, especially for workflow, configuration, generated, or governance files.
+- `small`: 1-2 files in one project/module, one behavior, no public contract, data-flow, persistent-state, auth, process-lifecycle, shell/filesystem/network, or external-integration change.
+- `medium`: 3-5 files or one project plus tests, with localized behavior or data-flow changes that remain reviewable and verifiable as one diff.
+- `large`: 6-10 files, 2-3 projects/modules, multiple coordinated behaviors, or changes to public contracts, persistent state, permissions/auth, process lifecycle, shell/filesystem/network behavior, or external integrations that can still be reviewed as one coherent plan and diff.
+- `huge`: more than 10 files, 4+ projects/modules, multiple independent behaviors, a phased rollout or migration need, an unclear verification boundary, or any task too risky or broad to review, verify, or rollback as one diff.
+
+Escalate to the highest applicable class when signals conflict. Low file count never downgrades public-contract, security, persistent-state, process-lifecycle, external-integration, or governance risk. If scope grows during work, stop, update the task size and plan, and rerun the required review/gate steps before continuing.
+
+Minimal verification is the smallest targeted check that can catch the likely failure mode introduced by the current change or phase. Record it before implementation starts. Prefer Nx project targets discovered through repo/Nx context, such as targeted tests, lint, build, or affected tasks for touched projects when appropriate. For docs or workflow-only changes, minimal verification can be diff/readthrough validation plus lightweight repo inspection; do not invent fake code tests. If no meaningful automated check exists, state that explicitly and use manual inspection plus review as evidence.
+
+Huge tasks must include a reviewable sub-plan before implementation. The sub-plan must live in the plan context and should be saved to a repo spec/plan file when work spans multiple sessions, agents, or days. Use this phase schema:
+
+```md
+### Phase N: <name>
+
+- Goal:
+- Scope:
+- Explicit non-goals:
+- Expected files/projects:
+- Dependencies/ordering:
+- Minimal verification:
+- Review checkpoint needs:
+- Commit message:
+- Rollback strategy:
+- Exit criteria:
+```
+
+Progressive delivery rules for huge tasks:
+
+- The full sub-plan must pass `Plan Review` before Phase 1 implementation, then the pre-implementation gate is opened for Phase 1.
+- Implement exactly one approved phase at a time. Do not start mutating the next phase until the current phase meets its exit criteria.
+- Before each phase commit, run the planned minimal verification, inspect `git status --short`, and ensure only phase-owned changes are included.
+- If a phase independently triggers implementation review rules, run `Implementation Review` before committing that phase. Phase commits do not bypass `Test Review`, `Implementation Review`, `pre-merge`, or release-readiness requirements.
+- After committing a phase, treat the next phase as a continuation checkpoint because the review gate is HEAD-bound. Confirm the worktree is clean, state the next phase goal, reference the approved sub-plan, record the completed phase commit hash, run `pnpm review:status`, and reopen the gate for the next phase with the same approved sub-plan and a continuation summary before mutating.
+- If the next phase materially differs from the approved sub-plan, update the plan and rerun `Plan Review` before reopening the gate.
+
 ## Phased Context Loading
 
 The agent must operate in distinct phases, loading context incrementally. A later-phase skill is not part of entry context unless a repo rule explicitly requires it.
@@ -45,20 +87,26 @@ The agent must operate in distinct phases, loading context incrementally. A late
 - **Workflow:**
   1. **Intent Gate:** If the prompt has 2 or more plausible high-impact interpretations, ask 1 decision question before repo exploration.
   2. **Bounded Discovery:** Otherwise, prefer repo truth over asking. Use at most 2 targeted commands or inspect at most 3 files to resolve discoverable facts.
-  3. **Clarification Budget:** After bounded discovery, ask at most 1 post-scan follow-up question if high-impact ambiguity remains. Together with the intent-gate question, the total clarification budget is 1 pre-scan question and 1 post-scan question. Budget exhaustion never authorizes proceeding through unresolved ambiguity that would change architecture, public contracts, security boundaries, persistent data, or require broad exploration.
-  4. **Workflow Selection:** Choose 1 primary next skill for the planning or repo-workflow phase.
+  3. **Task Size Gate:** Classify the task size once enough context is known. For non-trivial work, carry the classification and rationale into the selected planning workflow. Large or huge work normally routes to `spec-driven-development` or `planning-and-task-breakdown`, depending on whether a decision-ready spec already exists.
+  4. **Clarification Budget:** After bounded discovery, ask at most 1 post-scan follow-up question if high-impact ambiguity remains. Together with the intent-gate question, the total clarification budget is 1 pre-scan question and 1 post-scan question. Budget exhaustion never authorizes proceeding through unresolved ambiguity that would change architecture, public contracts, security boundaries, persistent data, or require broad exploration.
+  5. **Workflow Selection:** Choose 1 primary next skill for the planning or repo-workflow phase.
 
 ### Phase 2: Planning
 
 - Load 1 primary planning skill at a time.
 - Use `product-and-scope-review` first when the request is solution-framed, scope is unstable, or the real user outcome still needs to be clarified.
 - For feature work, the usual progression is `spec-driven-development` then `planning-and-task-breakdown`.
+- Every non-trivial spec or implementation plan must record task size, size rationale, minimal verification strategy, and review checkpoint needs.
+- Large plans must explain why the task can still be reviewed and verified as one coherent diff.
+- Huge plans must include the sub-plan schema from `Task Sizing and Progressive Delivery`, including phase-level verification, review checkpoint needs, commit messages, rollback strategy, and exit criteria.
 - Do not preload `incremental-implementation`, `test-driven-development`, `qa-verification`, or `code-review-and-quality` during planning.
 - Every non-trivial spec or plan must pass the `Plan Review` checkpoint before implementation starts.
 
 ### Phase 3: Implementation
 
 - Use `incremental-implementation` as the execution discipline for multi-file work.
+- For huge tasks, implement one approved sub-plan phase at a time and stop at each phase boundary for minimal verification, required review checkpoints, git status inspection, and a phase commit before continuing.
+- Reclassify and return to planning if implementation reveals materially larger scope, changed contracts, new persistence/security/process risk, or a phase that no longer matches the approved sub-plan.
 - Load specialist skills on demand for the current slice, such as `frontend-ui-engineering`, `api-and-interface-design`, `security-and-hardening`, or repo-specific Nx skills.
 - Load `.agents/stack-conventions.md` only when the task involves Angular, NestJS, or other stack-specific implementation details.
 - Keep checkpoint and release-closeout skills unloaded until the work reaches their checkpoint.
