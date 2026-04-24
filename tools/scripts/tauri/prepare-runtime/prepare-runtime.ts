@@ -1,0 +1,42 @@
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { main } from '../runtime-main/runtime-main.ts';
+
+export {
+  buildBackendApplication,
+  getBackendRuntimeInstallPlan,
+  prepareBackendRuntime,
+  type BackendRuntimeInstallPlan,
+  type BuildBackendApplicationDependencies,
+  type PrepareBackendRuntimeDependencies
+} from '../backend-runtime/backend-runtime.ts';
+export {
+  type PrepareRuntimeMainDependencies,
+  main
+} from '../runtime-main/runtime-main.ts';
+export {
+  getRustTargetTriple,
+  prepareNodeSidecar,
+  type PrepareNodeSidecarDependencies,
+  type RustTargetTripleDependencies
+} from '../node-sidecar/node-sidecar.ts';
+export {
+  buildStopExistingDesktopSidecarsScript,
+  getDefaultDesktopNodePaths,
+  stopExistingDesktopSidecars,
+  type WindowsCleanupDependencies
+} from '../windows-cleanup/windows-cleanup.ts';
+
+function isExecutedDirectly(moduleUrl: string) {
+  const entrypoint = process.argv[1];
+  if (!entrypoint) {
+    return false;
+  }
+
+  return resolve(fileURLToPath(moduleUrl)) === resolve(entrypoint);
+}
+
+if (isExecutedDirectly(import.meta.url)) {
+  main();
+}
