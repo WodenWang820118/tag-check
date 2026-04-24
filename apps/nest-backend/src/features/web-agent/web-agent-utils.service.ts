@@ -13,6 +13,7 @@ import { RequestInterceptorService } from './action/request-interceptor/request-
 import type { RequestInterceptionHandle } from './action/request-interceptor/request-interceptor.service';
 import {
   catchError,
+  defaultIfEmpty,
   firstValueFrom,
   map,
   of,
@@ -70,6 +71,9 @@ export class WebAgentUtilsService {
 
       // 4) capture the request if needed; otherwise, it's an empty string
       if (captureRequest) {
+        if (!requestInterception) {
+          throw new Error('Request interception handle is required');
+        }
         eventRequest = await this.captureEventRequest(
           requestInterception,
           options?.requestCaptureTimeoutMs
@@ -141,15 +145,17 @@ export class WebAgentUtilsService {
   }
 
   private async captureEventRequest(
-    requestInterception?: RequestInterceptionHandle | null,
+    requestInterception: RequestInterceptionHandle,
     timeoutMs = 15000
   ): Promise<string> {
-    const rawRequest$ =
-      requestInterception?.rawRequest$ ??
-      this.requestInterceptorService.getRawRequest();
+    if (!requestInterception) {
+      throw new Error('Request interception handle is required');
+    }
+
     const eventRequest = await firstValueFrom(
-      rawRequest$.pipe(
+      requestInterception.rawRequest$.pipe(
         timeout(timeoutMs),
+        defaultIfEmpty(''),
         map((request) => {
           if (request) {
             this.logger.log(
@@ -170,9 +176,6 @@ export class WebAgentUtilsService {
         })
       )
     );
-    if (!requestInterception) {
-      this.requestInterceptorService.clearRawRequest();
-    }
     return eventRequest;
   }
 

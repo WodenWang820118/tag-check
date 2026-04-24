@@ -3,7 +3,7 @@ import { WebAgentUtilsService } from './web-agent-utils.service';
 import { DataLayerService } from './action/web-monitoring/data-layer/data-layer.service';
 import { ActionService } from './action/action.service';
 import { RequestInterceptorService } from './action/request-interceptor/request-interceptor.service';
-import { Subject, of } from 'rxjs';
+import { EMPTY, Subject, of } from 'rxjs';
 
 // Sample data layer JSON as provided in the attachment
 const sampleDataLayer = [
@@ -303,5 +303,74 @@ describe('WebAgentUtilsService.performTest request capture', () => {
 
     expect(result.eventRequest).toBe('');
     expect(stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns an empty request when the interception handle completes without a request', async () => {
+    const stop = vi.fn().mockResolvedValue(undefined);
+    const mockAction = {
+      performOperation: vi.fn().mockResolvedValue(undefined)
+    } as unknown as ActionService;
+    const mockDataLayerService = {
+      initSelfDataLayer: vi.fn().mockResolvedValue(undefined),
+      updateSelfDataLayer: vi.fn().mockResolvedValue(undefined),
+      getMyDataLayer: vi.fn().mockResolvedValue([])
+    } as unknown as DataLayerService;
+    const mockInterceptor = {
+      setupInterception: vi.fn().mockResolvedValue({
+        rawRequest$: EMPTY,
+        stop
+      }),
+      getRawRequest: vi.fn(() => of('legacy-stale-request')),
+      clearRawRequest: vi.fn()
+    } as unknown as RequestInterceptorService;
+    const mockTestEventRepository = {
+      getEntityByEventId: vi.fn().mockResolvedValue({ eventName: 'purchase' })
+    };
+    const service = new WebAgentUtilsService(
+      mockAction,
+      mockDataLayerService,
+      mockInterceptor,
+      mockTestEventRepository as any
+    );
+    const page = {
+      authenticate: vi.fn().mockResolvedValue(undefined),
+      waitForNavigation: vi.fn().mockRejectedValue(new Error('no navigation')),
+      url: vi.fn(() => 'https://example.test/thank-you')
+    };
+
+    const result = await service.performTest(
+      page as any,
+      'project',
+      'event-id',
+      'G-TEST',
+      { username: '', password: '' },
+      true,
+      { localStorage: { data: [] }, cookie: { data: [] } } as any,
+      { requestCaptureTimeoutMs: 10 }
+    );
+
+    expect(result.eventRequest).toBe('');
+    expect(mockInterceptor.getRawRequest).not.toHaveBeenCalled();
+    expect(mockInterceptor.clearRawRequest).not.toHaveBeenCalled();
+    expect(stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('requires an interception handle instead of falling back to legacy raw request state', async () => {
+    const mockInterceptor = {
+      getRawRequest: vi.fn(() => of('legacy-stale-request')),
+      clearRawRequest: vi.fn()
+    } as unknown as RequestInterceptorService;
+    const service = new WebAgentUtilsService(
+      {} as unknown as ActionService,
+      {} as unknown as DataLayerService,
+      mockInterceptor,
+      {} as any
+    );
+
+    await expect(
+      (service as any).captureEventRequest(null, 10)
+    ).rejects.toThrow(/Request interception handle is required/);
+    expect(mockInterceptor.getRawRequest).not.toHaveBeenCalled();
+    expect(mockInterceptor.clearRawRequest).not.toHaveBeenCalled();
   });
 });
