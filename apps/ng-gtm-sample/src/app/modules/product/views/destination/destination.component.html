@@ -1,201 +1,219 @@
-<div class="container mx-auto px-4 py-4">
-  <div id="destination_filters" class="flex justify-between items-center">
-    <div id="choix_categories" class="flex space-x-4">
-      <a
+<div class="space-y-6">
+  <section
+    class="sample-panel flex flex-col gap-4 px-5 py-5 lg:flex-row lg:items-center lg:justify-between lg:px-6"
+  >
+    <div class="flex flex-wrap items-center gap-3">
+      <button
+        pButton
+        type="button"
+        label="All Destinations"
+        severity="secondary"
+        [outlined]="true"
         (click)="navigateToSearchResults('all')"
-        class="text-blue-600 hover:text-blue-800 font-medium"
-        >All Destination</a
-      >
-      <a
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Island Escapes"
+        severity="secondary"
+        [outlined]="true"
         (click)="navigateToSearchResults('islands')"
-        class="text-blue-600 hover:text-blue-800 font-medium"
-        >Islands in the sun</a
-      >
+      ></button>
     </div>
+
     <form
       [formGroup]="searchForm"
       id="search_destination"
-      class="flex items-center space-x-2"
-      (ngSubmit)="onSubmit(searchForm)"
+      class="sample-inset-surface flex w-full max-w-xl flex-col gap-3 px-3 py-3 sm:flex-row sm:items-center"
+      (ngSubmit)="onSubmit()"
     >
       <input
+        pInputText
         id="searchTerm"
         formControlName="searchTerm"
         type="search"
-        class="border border-gray-300 rounded px-3 py-2 w-full text-black"
-        placeholder="Destination..."
+        class="w-full"
+        placeholder="Search destinations..."
       />
-      @if (searchForm.get('searchTerm')?.value) {
       <button
+        pButton
         type="submit"
-        class="bg-gray-200 text-gray-800 rounded px-4 py-2 ml-2 disabled:opacity-50"
+        label="Search"
+        icon="pi pi-search"
         [disabled]="!searchForm.get('searchTerm')?.value"
-      >
-        OK
-      </button>
-      } @else {
-      <button
-        type="submit"
-        class="bg-gray-200 text-gray-800 rounded px-4 py-2 ml-2 disabled:opacity-50"
-        disabled
-      >
-        OK
-      </button>
-      }
+      ></button>
     </form>
-  </div>
-  <div id="destinations" class="mt-4">
-    <div id="destinationsVideos"></div>
-    @defer (on viewport) {
-    <div
-      id="content-chooser"
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-    >
-      @for (destination of destinations$(); track destination) {
-      <div class="bg-white shadow rounded p-4 flex flex-col">
-        <div class="page-header mb-4">
-          <h3 class="text-xl font-semibold">
-            {{ destination.title }}
-            <small class="text-gray-500">{{ destination.smallTitle }}</small>
-          </h3>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          @if (windowSizeService.width$() > 480) {
-          <div>
-            <img
-              class="w-full rounded"
-              src="{{ destination.image1 || 'assets/images/placeholder.png' }}"
-              alt=""
-            />
+  </section>
+
+  @if (destinations$().length > 0) {
+    <section id="content-chooser" class="grid gap-6 xl:grid-cols-3">
+      @for (destination of destinations$(); track destination.id) {
+        <article class="sample-panel overflow-hidden p-5">
+          <div class="flex h-full flex-col gap-5">
+            <div class="space-y-2">
+              <div class="sample-eyebrow text-slate-400">
+                <i class="pi pi-map-marker text-sm"></i>
+                Destination
+              </div>
+              <div>
+                <h3 class="text-2xl font-bold tracking-tight text-slate-900">
+                  {{ destination.title }}
+                </h3>
+                <p class="text-sm font-medium text-slate-500">
+                  {{ destination.smallTitle }}
+                </p>
+              </div>
+            </div>
+
+            @if (windowSizeService.width$() > 640) {
+              <div class="grid gap-3 sm:grid-cols-3">
+                <div class="overflow-hidden rounded-2xl">
+                  <img
+                    class="h-28 w-full object-cover"
+                    [src]="getImageSrc(destination.image1)"
+                    [alt]="destination.title"
+                  />
+                  <div
+                    class="sample-credit"
+                    [innerHTML]="
+                      authorInforByPassed(destination.image1AuthorInfo)
+                    "
+                  ></div>
+                </div>
+                <div class="overflow-hidden rounded-2xl">
+                  <img
+                    class="h-28 w-full object-cover"
+                    [src]="getImageSrc(destination.image2)"
+                    [alt]="destination.title"
+                  />
+                  <div
+                    class="sample-credit"
+                    [innerHTML]="
+                      authorInforByPassed(destination.image2AuthorInfo)
+                    "
+                  ></div>
+                </div>
+                <div class="overflow-hidden rounded-2xl">
+                  <img
+                    class="h-28 w-full object-cover"
+                    [src]="getImageSrc(destination.image3)"
+                    [alt]="destination.title"
+                  />
+                  <div
+                    class="sample-credit"
+                    [innerHTML]="
+                      authorInforByPassed(destination.image3AuthorInfo)
+                    "
+                  ></div>
+                </div>
+              </div>
+            } @else {
+              <div class="overflow-hidden rounded-[1.5rem]">
+                <img
+                  class="h-52 w-full object-cover"
+                  [src]="
+                    getImageSrc(destination.imageBig || destination.image3)
+                  "
+                  [alt]="destination.title"
+                />
+                <div
+                  class="sample-credit"
+                  [innerHTML]="
+                    authorInforByPassed(destination.image3AuthorInfo)
+                  "
+                ></div>
+              </div>
+            }
+
+            <p class="sample-copy flex-1">
+              {{
+                destination.description
+                  ? utilsService.truncateText(destination.description, 130)
+                  : 'Discover this route in the GTM sample storefront.'
+              }}
+            </p>
+
             <div
-              class="author mt-1"
-              [innerHTML]="
-                authorInforByPassed(destination.image1AuthorInfo)
-                  ? destination.image1AuthorInfo
-                  : ''
-              "
-            ></div>
+              class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4"
+            >
+              <span
+                class="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700"
+              >
+                From ${{ destination.price }}
+              </span>
+              <div class="flex flex-wrap gap-2">
+                <button
+                  pButton
+                  type="button"
+                  label="Details"
+                  icon="pi pi-arrow-right"
+                  (click)="goToDetails(destination); selectItem(destination)"
+                ></button>
+                <button
+                  pButton
+                  type="button"
+                  label="Video"
+                  icon="pi pi-play"
+                  severity="secondary"
+                  [outlined]="true"
+                  [disabled]="!destination.video"
+                  (click)="showModal(destination.video)"
+                ></button>
+              </div>
+            </div>
           </div>
-          <div>
-            <img
-              class="w-full rounded"
-              src="{{ destination.image2 || 'assets/images/placeholder.png' }}"
-              alt=""
-            />
-            <div
-              class="author mt-1"
-              [innerHTML]="
-                authorInforByPassed(destination.image2AuthorInfo)
-                  ? destination.image2AuthorInfo
-                  : ''
-              "
-            ></div>
-          </div>
-          <div>
-            <img
-              class="w-full rounded"
-              src="{{ destination.image3 || 'assets/images/placeholder.png' }}"
-              alt=""
-            />
-            <div
-              class="author mt-1"
-              [innerHTML]="
-                authorInforByPassed(destination.image3AuthorInfo)
-                  ? destination.image3AuthorInfo
-                  : ''
-              "
-            ></div>
-          </div>
-          } @else {
-          <div>
-            <img
-              class="w-full rounded"
-              src="{{ destination.image3 || 'assets/images/placeholder.png' }}"
-              alt=""
-            />
-            <div
-              class="author mt-1"
-              [innerHTML]="
-                authorInforByPassed(destination.image3AuthorInfo)
-                  ? destination.image3AuthorInfo
-                  : ''
-              "
-            ></div>
-          </div>
-          }
-        </div>
-        <div class="text-justify mb-4">
-          {{
-            destination.description
-              ? utilsService.truncateText(destination.description, 100)
-              : ""
-          }}
-        </div>
-        <div class="flex justify-end space-x-2">
-          <button
-            type="button"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            (click)="goToDetails(destination); selectItem(destination)"
-          >
-            Details
-          </button>
-          <button
-            type="button"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            (click)="showModal(destination.video)"
-          >
-            Video
-          </button>
-        </div>
-      </div>
+        </article>
       }
-      <!-- pagination -->
-      <nav aria-label="Page navigation" class="col-span-full mt-8">
-        <ul class="flex justify-center space-x-2">
-          <li>
-            <button
-              type="button"
-              (click)="getPreviousDestinations()"
-              [disabled]="isPreviousDisabled()"
-              class="px-4 py-2 border rounded text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Previous
-            </button>
-          </li>
-          <li>
-            <button
-              type="button"
-              (click)="getNextDestinations()"
-              class="px-4 py-2 border rounded text-gray-700"
-            >
-              Next
-            </button>
-          </li>
-        </ul>
-      </nav>
+    </section>
+
+    <div class="flex justify-center gap-3">
+      <button
+        pButton
+        type="button"
+        label="Previous"
+        icon="pi pi-arrow-left"
+        severity="secondary"
+        [outlined]="true"
+        [disabled]="isPreviousDisabled()"
+        (click)="getPreviousDestinations()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        label="Next"
+        icon="pi pi-arrow-right"
+        iconPos="right"
+        severity="secondary"
+        [outlined]="true"
+        (click)="getNextDestinations()"
+      ></button>
     </div>
-    } @placeholder {
-    <div>Loading..</div>
-    }
-    <!-- PrimeNG Dialog for video player -->
-    <p-dialog
-      [(visible)]="videoDialogVisible"
-      modal
-      class="w-11/12 sm:w-8/12 md:w-6/12 lg:w-4/12 p-0"
-      [style]="{ padding: '0' }"
-      [baseZIndex]="10000"
-      (onHide)="closeModal()"
-    >
-      <youtube-player
-        #player
-        [id]="'yt-player-' + videoId$()"
-        class="w-full h-auto"
-        [videoId]="videoId$()"
-        [playerVars]="playerVars"
-        (stateChange)="onStateChange($event)"
-        disablePlaceholder="true"
-        placeholderButtonLabel="destination intro video"
-      ></youtube-player>
-    </p-dialog>
-  </div>
+  } @else {
+    <div class="sample-panel mx-auto max-w-3xl p-8">
+      <p-message
+        severity="info"
+        text="No destinations match your search yet."
+      ></p-message>
+    </div>
+  }
+
+  <p-dialog
+    header="Destination Video"
+    [(visible)]="videoDialogVisible"
+    [modal]="true"
+    [style]="{ width: 'min(42rem, calc(100vw - 1.5rem))' }"
+    [baseZIndex]="10000"
+    (onHide)="closeModal()"
+  >
+    <youtube-player
+      #player
+      [id]="'yt-player-' + videoId$()"
+      class="w-full"
+      [videoId]="videoId$()"
+      [playerVars]="playerVars"
+      (stateChange)="onStateChange($event)"
+      disablePlaceholder="true"
+      placeholderButtonLabel="destination intro video"
+    ></youtube-player>
+  </p-dialog>
 </div>

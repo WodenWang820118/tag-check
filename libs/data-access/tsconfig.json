@@ -1,15 +1,5 @@
 {
-  "extends": "./../../tsconfig.base.json",
-  "compilerOptions": {
-    "target": "es2020",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "lib": ["ESNext", "dom", "dom.iterable", "webworker"]
-  },
+  "extends": "./tsconfig.project.json",
   "files": [],
   "include": [],
   "references": [

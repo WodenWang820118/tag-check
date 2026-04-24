@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, effect } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { UrlTrackerService } from './shared/services/url-tracker/url-tracker.service';
 import { LoadingService } from './shared/services/loading/loading.service';
@@ -6,11 +6,9 @@ import { LoadingService } from './shared/services/loading/loading.service';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
-  template: ` <router-outlet></router-outlet> `
+  template: `<div class="sample-page"><router-outlet></router-outlet></div>`
 })
-export class AppComponent implements AfterContentInit {
-  title = 'ng-gtm-integration-sample';
-
+export class AppComponent {
   constructor(
     private readonly urlTrackerService: UrlTrackerService,
     private readonly loadingService: LoadingService
@@ -24,9 +22,5 @@ export class AppComponent implements AfterContentInit {
       }
     });
     this.urlTrackerService.initializeUrlTracking();
-  }
-
-  ngAfterContentInit() {
-    globalThis.onload = () => {};
   }
 }

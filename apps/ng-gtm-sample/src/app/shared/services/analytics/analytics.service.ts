@@ -91,22 +91,6 @@ export class AnalyticsService {
     }
   }
 
-  trackPageViewECEvent(url: string): void {
-    if (url.includes('/checkout')) {
-      const checkoutOrders = this.checkoutOrders$();
-      if (checkoutOrders.length > 0) {
-        this.trackEvent('begin_checkout', checkoutOrders);
-      }
-    }
-
-    if (url.includes('/thankyou')) {
-      const checkoutOrders = this.checkoutOrders$();
-      if (checkoutOrders.length > 0) {
-        this.trackEvent('purchase', checkoutOrders);
-      }
-    }
-  }
-
   setCheckoutOrders(orders: Order[]): void {
     this.checkoutOrders.set(orders);
   }

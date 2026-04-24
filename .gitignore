@@ -69,7 +69,8 @@ coverage/
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
 .cursor\rules\nx-rules.mdc
-.github\instructions\nx.instructions.md
+.cache/
+proofshot-artifacts/
 
 # Ignore temporary test fixture folders
 *tmp-facade-test

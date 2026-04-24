@@ -8,7 +8,7 @@ Thank you for your interest in contributing to this project! We welcome contribu
 [Architecture](#architecture)
 
 - [Repository Structure](#repository-structure)
-- [Integration with Electron](#integration-with-electron)
+- [Integration with Tauri](#integration-with-tauri)
 - [CI/CD Pipeline](#cicd-pipeline)
 - [Monorepo Advantages](#monorepo-advantages)
 - [Future Considerations](#future-considerations)
@@ -28,18 +28,19 @@ We expect all contributors to adhere to our [Code of Conduct](./CODE_OF_CONDUCT.
 
 The project is structured into two primary components: the frontend and the backend. The frontend is developed using Angular and is contained within the `ng-frontend` directory. Conversely, the backend, built with NestJS, resides in the `nest-backend` directory. This separation facilitates clear delineation and management of the two core aspects of the application.
 
-### Integration with Electron
+### Integration with Tauri
 
-To facilitate a uniform user experience across various operating systems, the application will be encapsulated within an Electron shell for distribution. This approach enables the app to function seamlessly on Windows, macOS, and Linux, catering to a diverse user base that includes testers, marketers, and developers who need to verify Google Tags on their websites. By leveraging Electron, the application avoids the necessity for separate server hosting for its frontend and backend, thereby optimizing cost-efficiency.
+To deliver a standalone desktop experience, the application now runs inside a Tauri shell. The desktop runtime lives in `apps/desktop-tauri`, while `tools/scripts/tauri/prepare-runtime.ts` prepares the Nest backend sidecar and bundled Node runtime used by the desktop build.
 
-The Electron configuration is centralized in two key files:
+The desktop workflow is centered on:
 
-- `main.mjs`: Serves as the entry point for the Electron app, orchestrating the main process.
-- `forge.config.mjs`: Contains configuration settings for [Electron Forge](https://www.electronforge.io/), which aids in packaging and distributing the application.
+- `pnpm run dev-tauri`: Runs the Angular desktop build and launches the Tauri shell for local development.
+- `pnpm run build-tauri`: Builds the desktop app without producing an installer bundle.
+- `pnpm run bundle-tauri`: Produces the current Windows NSIS desktop bundle.
 
 ### CI/CD Pipeline
 
-Utilizing [GitHub Actions](https://github.com/marketplace/actions/electron-builder-action), the project will automate its build and deployment processes via Electron forge. The CI/CD configuration will be delineated in the `.github/workflows` directory, ensuring that the application remains in a consistently deployable state.
+GitHub Actions is used to build the Tauri desktop bundle from the `.github/workflows` directory. The current release path targets the Windows NSIS package produced by `desktop-tauri`.
 
 ### Monorepo Advantages
 
@@ -47,7 +48,7 @@ Adopting a monorepo structure simplifies dependency management and streamlines d
 
 ### Future Considerations
 
-As the project evolves, additional considerations will include enhancing the Electron app's security posture, optimizing its performance, and possibly extending its functionality. Monitoring and addressing the specific needs of the target user groups will be pivotal in guiding these enhancements.
+As the project evolves, additional considerations will include enhancing the desktop runtime's security posture, optimizing its performance, and possibly extending its functionality. Monitoring and addressing the specific needs of the target user groups will be pivotal in guiding these enhancements.
 
 ## Code Style
 

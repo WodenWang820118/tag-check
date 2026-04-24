@@ -2,7 +2,7 @@ import { AsyncPipe, NgComponentOutlet } from '@angular/common';
 import { Component, computed, OnDestroy, OnInit, signal } from '@angular/core';
 import { Subject, takeUntil, tap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { Spec } from '@utils';
+import { StrictDataLayerEvent } from '@utils';
 import { SpecService } from '../../../shared/services/api/spec/spec.service';
 
 @Component({
@@ -28,7 +28,7 @@ import { SpecService } from '../../../shared/services/api/spec/spec.service';
 })
 export class TagBuildViewComponent implements OnInit, OnDestroy {
   tagBuildPageComponent = this.loadTagBuildPageComponent();
-  projectSpecSignal = signal([] as Spec[]);
+  projectSpecSignal = signal([] as StrictDataLayerEvent[]);
   projectSpecSignal$ = computed(() => this.projectSpecSignal());
   destroy$ = new Subject<void>();
 

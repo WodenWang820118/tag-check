@@ -1,24 +1,5 @@
 {
-  "compilerOptions": {
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "sourceMap": true,
-    "declaration": false,
-    "downlevelIteration": true,
-    "experimentalDecorators": true,
-    "moduleResolution": "node10",
-    "importHelpers": true,
-    "target": "ES2022",
-    "useDefineForClassFields": false,
-    "skipLibCheck": true,
-    "lib": ["ESNext", "dom"],
-    "module": "ES2022"
-  },
+  "extends": "./tsconfig.project.json",
   "files": [],
   "include": [],
   "references": [
@@ -31,12 +12,5 @@
     {
       "path": "./tsconfig.editor.json"
     }
-  ],
-  "extends": "../../tsconfig.base.json",
-  "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
-  }
+  ]
 }

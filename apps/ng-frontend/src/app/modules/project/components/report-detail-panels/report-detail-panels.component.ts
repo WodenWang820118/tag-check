@@ -1,344 +1,469 @@
-import { ReportDetailPanelsFacadeService } from './report-detail-panels-facade.service';
-import { JsonPipe } from '@angular/common';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { Component, computed, DestroyRef, inject, input, signal } from '@angular/core';
+import { catchError, distinctUntilChanged, finalize, of, switchMap, take } from 'rxjs';
 import {
-  Component,
-  computed,
-  effect,
-  input,
-  OnInit,
-  signal
-} from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { DataLayerSpec, IReportDetails, ItemDef } from '@utils';
-import {
-  MatExpansionModule,
-  MatExpansionPanel
-} from '@angular/material/expansion';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { ActivatedRoute } from '@angular/router';
+  DataLayerSpec,
+  ItemDef,
+  Recording,
+  StrictDataLayerEvent
+} from '@utils';
 import { EditorComponent } from '../../../../shared/components/editor/editor.component';
-import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { tap } from 'rxjs';
+import {
+  EditableJsonPanelState,
+  ReportDetailRouteContext
+} from '../report-detail.contracts';
+import { ReportDetailPanelsFacadeService } from './report-detail-panels-facade.service';
+import { ReportDetailPanelsViewComponent } from './report-detail-panels-view.component';
+
+function stringifyJson(value: unknown): string {
+  if (value === undefined || value === null) {
+    return '';
+  }
+
+  return JSON.stringify(value, null, 2);
+}
+
+function parseJson<T>(content: string): T | null {
+  try {
+    return JSON.parse(content) as T;
+  } catch {
+    return null;
+  }
+}
+
+function isValidSpecContent(
+  spec: StrictDataLayerEvent | null
+): spec is StrictDataLayerEvent {
+  return !!spec && typeof spec.event === 'string' && spec.event.trim().length > 0;
+}
+
+function normalizeItemDefContent(
+  value: unknown,
+  fallbackItemId: string,
+  fallbackTemplateName = ''
+): ItemDef | null {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  if ('fullItemDef' in (value as Record<string, unknown>)) {
+    const itemDef = value as Partial<ItemDef>;
+    return {
+      itemId: itemDef.itemId ?? fallbackItemId,
+      templateName: itemDef.templateName ?? fallbackTemplateName,
+      fullItemDef: itemDef.fullItemDef ?? {}
+    };
+  }
+
+  return {
+    itemId: fallbackItemId,
+    templateName: fallbackTemplateName,
+    fullItemDef: value
+  };
+}
+
 @Component({
   selector: 'app-report-detail-panels',
   standalone: true,
   imports: [
-    JsonPipe,
-    MatIconModule,
-    MatExpansionModule,
-    MatTooltipModule,
-    EditorComponent,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatFormFieldModule,
-    MatInputModule
+    ReportDetailPanelsViewComponent,
+    EditorComponent
   ],
-  templateUrl: './report-detail-panels.component.html',
-  styleUrls: ['./report-detail-panels.component.scss']
+  providers: [ReportDetailPanelsFacadeService],
+  template: `
+    @if (context()) {
+      <app-report-detail-panels-view
+        [specPanel]="specPanelState()"
+        [recordingPanel]="recordingPanelState()"
+        [itemDefPanel]="itemDefPanelState()"
+        [rawRequest]="rawRequest()"
+        [dataLayerContent]="dataLayerContent()"
+        (specToggleEdit)="toggleSpecEdit()"
+        (specUploadRequested)="onSpecFileSelected($event)"
+        (specSaveRequested)="saveSpec()"
+        (specCancelRequested)="cancelSpecEdit()"
+        (recordingToggleEdit)="toggleRecordingEdit()"
+        (recordingUploadRequested)="onRecordingFileSelected($event)"
+        (recordingSaveRequested)="saveRecording()"
+        (recordingCancelRequested)="cancelRecordingEdit()"
+        (itemDefToggleEdit)="toggleItemDefEdit()"
+        (itemDefUploadRequested)="onItemDefFileSelected($event)"
+        (itemDefSaveRequested)="saveItemDef()"
+        (itemDefCancelRequested)="cancelItemDefEdit()"
+      >
+        @if (specEditMode()) {
+          <app-editor
+            spec-editor
+            [editorExtension]="'specJson'"
+            [content]="specDraftText()"
+            (contentChange)="onSpecDraftChange($event)"
+            (syntaxErrorChange)="specSyntaxError.set($event)"
+          ></app-editor>
+        }
+
+        @if (recordingEditMode()) {
+          <app-editor
+            recording-editor
+            [editorExtension]="'recordingJson'"
+            [content]="recordingDraftText()"
+            (contentChange)="onRecordingDraftChange($event)"
+            (syntaxErrorChange)="recordingSyntaxError.set($event)"
+          ></app-editor>
+        }
+
+        @if (itemDefEditMode()) {
+          <app-editor
+            item-def-editor
+            [editorExtension]="'itemDefJson'"
+            [content]="itemDefDraftText()"
+            (contentChange)="onItemDefDraftChange($event)"
+            (syntaxErrorChange)="itemDefSyntaxError.set($event)"
+          ></app-editor>
+        }
+      </app-report-detail-panels-view>
+    }
+  `
 })
-export class ReportDetailPanelsComponent implements OnInit {
-  // Input signals
-  reportDetails = input<IReportDetails | undefined>(undefined);
+export class ReportDetailPanelsComponent {
+  private readonly destroyRef = inject(DestroyRef);
 
-  // State signals
-  error = signal<string | null>(null);
-  loading = signal(false);
-  projectSlug = signal<string | null>(null);
-  eventId = signal<string | null>(null);
+  context = input<ReportDetailRouteContext | undefined>(undefined);
 
-  // Edit mode signals
-  specEdit = signal(false);
-  specEdit$ = computed(() => this.specEdit());
-  recordingEdit = signal(false);
-  recordingEdit$ = computed(() => this.recordingEdit());
-  itemDefEdit = signal(false);
-  itemDefEdit$ = computed(() => this.itemDefEdit());
+  specContent = signal<DataLayerSpec | null>(null);
+  specDraftText = signal('');
   specEditMode = signal(false);
-  specEditMode$ = computed(() => this.specEditMode());
+  specSyntaxError = signal(false);
+  specLoading = signal(false);
+
+  recordingContent = signal<Recording | null>(null);
+  recordingDraftText = signal('');
   recordingEditMode = signal(false);
-  recordingEditMode$ = computed(() => this.recordingEditMode());
+  recordingSyntaxError = signal(false);
+  recordingLoading = signal(false);
+
+  itemDefContent = signal<ItemDef | null>(null);
+  itemDefDraftText = signal('');
   itemDefEditMode = signal(false);
-  itemDefEditMode$ = computed(() => this.itemDefEditMode());
-  editItemId = signal<string | null>(null);
-  editItemId$ = computed(() => this.editItemId());
-  editTemplateName = signal<string | null>(null);
-  editTemplateName$ = computed(() => this.editTemplateName());
+  itemDefSyntaxError = signal(false);
+  itemDefLoading = signal(false);
+  editItemId = signal('');
+  editTemplateName = signal('');
 
-  // Computed signals
-  specContent = computed(() => {
-    const specFileContent = this.reportDetailPanelsFacadeService.specContent$;
-    const tempSpecFileContent =
-      this.reportDetailPanelsFacadeService.tempSpecContent$;
-    const result = tempSpecFileContent || specFileContent;
-    console.log('Spec Content: ', result);
-    return result?.dataLayerSpec;
-  });
+  itemDefLookupId = computed(() => this.specContent()?.dataLayerSpec.event ?? '');
+  rawRequest = computed(() => this.context()?.reportDetails?.rawRequest ?? '');
+  dataLayerContent = computed(() =>
+    stringifyJson(this.context()?.reportDetails?.dataLayer)
+  );
 
-  recordingContent = computed(() => {
-    const recordingFileContent =
-      this.reportDetailPanelsFacadeService.recordingContent$;
-    const tempRecordingFileContent =
-      this.reportDetailPanelsFacadeService.tempRecordingContent$;
-    const result = tempRecordingFileContent || recordingFileContent;
-    console.log('Recording Content: ', result);
-    return result;
-  });
+  specPanelState = computed<EditableJsonPanelState>(() => ({
+    title: 'Data Layer Spec',
+    content: stringifyJson(this.specContent()?.dataLayerSpec),
+    loading: this.specLoading(),
+    emptyMessage: 'No Spec found',
+    editMode: this.specEditMode(),
+    canSave: !this.specSyntaxError() && !!this.specDraftText().trim()
+  }));
 
-  itemDefContent = computed(() => {
-    const itemDef = this.reportDetailPanelsFacadeService.itemDefContent$;
-    const temp = this.reportDetailPanelsFacadeService.tempItemDefContent$;
-    const result = temp || itemDef;
-    console.log('ItemDef Content: ', result);
-    return result;
-  });
+  recordingPanelState = computed<EditableJsonPanelState>(() => ({
+    title: 'Chrome Recording',
+    content: stringifyJson(this.recordingContent()),
+    loading: this.recordingLoading(),
+    emptyMessage: 'No recording found',
+    editMode: this.recordingEditMode(),
+    canSave: !this.recordingSyntaxError() && !!this.recordingDraftText().trim()
+  }));
+
+  itemDefPanelState = computed<EditableJsonPanelState>(() => ({
+    title: 'Item Definition',
+    content: stringifyJson(this.itemDefContent()?.fullItemDef),
+    loading: this.itemDefLoading(),
+    emptyMessage: 'No item definition found',
+    editMode: this.itemDefEditMode(),
+    canSave:
+      !this.itemDefSyntaxError() &&
+      !!this.itemDefDraftText().trim() &&
+      !!this.editItemId().trim()
+  }));
 
   constructor(
-    private readonly route: ActivatedRoute,
     private readonly reportDetailPanelsFacadeService: ReportDetailPanelsFacadeService
   ) {
-    effect(() => {
-      const spec = this.specContent();
-      console.log('this.reportDetails(): ', this.reportDetails());
-      if (!spec) {
-        return;
+    toObservable(this.context)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((context) => {
+        if (!context) {
+          return;
+        }
+
+        this.syncContext(context);
+      });
+
+    toObservable(this.itemDefLookupId)
+      .pipe(
+        distinctUntilChanged(),
+        switchMap((itemId) => {
+          if (!itemId) {
+            this.itemDefLoading.set(false);
+            return of(null);
+          }
+
+          this.itemDefLoading.set(true);
+          return this.reportDetailPanelsFacadeService.getItemDefById(itemId).pipe(
+            catchError(() => of(null)),
+            finalize(() => this.itemDefLoading.set(false))
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((itemDef) => {
+        this.itemDefContent.set(itemDef);
+        this.editItemId.set(itemDef?.itemId ?? this.itemDefLookupId());
+        this.editTemplateName.set(itemDef?.templateName ?? '');
+
+        if (!this.itemDefEditMode()) {
+          this.itemDefDraftText.set(stringifyJson(itemDef?.fullItemDef));
+          this.itemDefSyntaxError.set(false);
+        }
+      });
+  }
+
+  toggleSpecEdit() {
+    this.specDraftText.set(stringifyJson(this.specContent()?.dataLayerSpec));
+    this.specSyntaxError.set(false);
+    this.specEditMode.update((value) => !value);
+  }
+
+  cancelSpecEdit() {
+    this.specDraftText.set(stringifyJson(this.specContent()?.dataLayerSpec));
+    this.specSyntaxError.set(false);
+    this.specEditMode.set(false);
+  }
+
+  toggleRecordingEdit() {
+    this.recordingDraftText.set(stringifyJson(this.recordingContent()));
+    this.recordingSyntaxError.set(false);
+    this.recordingEditMode.update((value) => !value);
+  }
+
+  cancelRecordingEdit() {
+    this.recordingDraftText.set(stringifyJson(this.recordingContent()));
+    this.recordingSyntaxError.set(false);
+    this.recordingEditMode.set(false);
+  }
+
+  toggleItemDefEdit() {
+    if (!this.itemDefEditMode()) {
+      this.editItemId.set(this.itemDefContent()?.itemId ?? this.itemDefLookupId());
+      this.editTemplateName.set(this.itemDefContent()?.templateName ?? '');
+      this.itemDefDraftText.set(stringifyJson(this.itemDefContent()?.fullItemDef));
+      this.itemDefSyntaxError.set(false);
+    }
+
+    this.itemDefEditMode.update((value) => !value);
+  }
+
+  cancelItemDefEdit() {
+    this.editItemId.set(this.itemDefContent()?.itemId ?? this.itemDefLookupId());
+    this.editTemplateName.set(this.itemDefContent()?.templateName ?? '');
+    this.itemDefDraftText.set(stringifyJson(this.itemDefContent()?.fullItemDef));
+    this.itemDefSyntaxError.set(false);
+    this.itemDefEditMode.set(false);
+  }
+
+  async onSpecFileSelected(event: Event) {
+    const file = this.getSelectedFile(event);
+    if (!file) {
+      return;
+    }
+
+    this.specLoading.set(true);
+    try {
+      const content = await this.reportDetailPanelsFacadeService.readFile(file);
+      const parsed = parseJson<StrictDataLayerEvent>(content);
+
+      this.specDraftText.set(parsed ? stringifyJson(parsed) : content);
+      this.specSyntaxError.set(!isValidSpecContent(parsed));
+    } finally {
+      this.resetFileInput(event);
+      this.specLoading.set(false);
+    }
+  }
+
+  async onRecordingFileSelected(event: Event) {
+    const file = this.getSelectedFile(event);
+    if (!file) {
+      return;
+    }
+
+    this.recordingLoading.set(true);
+    try {
+      const content = await this.reportDetailPanelsFacadeService.readFile(file);
+      const parsed = parseJson<Recording>(content);
+
+      this.recordingDraftText.set(parsed ? stringifyJson(parsed) : content);
+      this.recordingSyntaxError.set(!parsed);
+    } finally {
+      this.resetFileInput(event);
+      this.recordingLoading.set(false);
+    }
+  }
+
+  async onItemDefFileSelected(event: Event) {
+    const file = this.getSelectedFile(event);
+    if (!file) {
+      return;
+    }
+
+    this.itemDefLoading.set(true);
+    try {
+      const content = await this.reportDetailPanelsFacadeService.readFile(file);
+      const parsed = parseJson<unknown>(content);
+      const normalized = normalizeItemDefContent(
+        parsed,
+        this.editItemId() || this.itemDefLookupId(),
+        this.editTemplateName()
+      );
+
+      this.itemDefDraftText.set(
+        normalized ? stringifyJson(normalized.fullItemDef) : content
+      );
+      this.itemDefSyntaxError.set(!normalized);
+
+      if (normalized) {
+        this.editItemId.set(normalized.itemId);
+        this.editTemplateName.set(normalized.templateName);
       }
-      console.log('Spec changed, loading item definition for event: ', spec);
-      if (spec.event) {
-        this.reportDetailPanelsFacadeService.itemDefService
-          .getItemDefById(spec.event)
-          .pipe(
-            tap((itemDef) => {
-              console.log('Loaded item definition: ', itemDef);
-              if (itemDef) {
-                this.reportDetailPanelsFacadeService.setItemDefContent(itemDef);
-              }
-            })
-          )
-          .subscribe();
-      }
-    });
-  }
-
-  ngOnInit(): void {
-    // Load data
-    this.route.data.subscribe((data) => {
-      console.log('Data in report detail panels: ', data);
-      const projectSlug = data['projectSlug'];
-      const eventId = data['eventId'];
-      const spec = data['spec'] as DataLayerSpec;
-      const recording = data['recording'];
-      // Load item definition for this spec event name and set content or a temp placeholder
-
-      this.projectSlug.set(projectSlug);
-      this.eventId.set(eventId);
-
-      this.reportDetailPanelsFacadeService.setRecordingFileContent(recording);
-      this.reportDetailPanelsFacadeService.setSpecFileContent(spec);
-    });
-  }
-
-  switchSpecEditMode(event: Event) {
-    event.stopPropagation();
-    this.reportDetailPanelsFacadeService.setTempSpecFileContent(null);
-    this.specEditMode.update((prev) => !prev);
-  }
-
-  switchRecordingEditMode(event: Event) {
-    event.stopPropagation();
-    this.reportDetailPanelsFacadeService.setTempRecordingFileContent(null);
-    this.recordingEditMode.update((prev) => !prev);
-  }
-
-  switchItemDefEditMode(event: Event) {
-    event.stopPropagation();
-    this.reportDetailPanelsFacadeService.setTempItemDefContent(null);
-    this.itemDefEditMode.update((prev) => !prev);
-  }
-
-  // Helpers to open/close a panel and toggle edit mode from the template.
-  // `panel` is a template ref to the MatExpansionPanel. Keep type loose to avoid adding imports.
-  openPanelAndToggleSpec(panel: MatExpansionPanel | undefined, event: Event) {
-    event.stopPropagation();
-    // Scroll into view immediately using the button as anchor to avoid stale DOM refs
-    try {
-      const current = event.currentTarget as HTMLElement | null;
-      const host = current?.closest('.mat-expansion-panel');
-      host?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    } catch {
-      /* ignore DOM errors */
+    } finally {
+      this.resetFileInput(event);
+      this.itemDefLoading.set(false);
     }
-    if (panel) {
-      panel.open();
-    }
-    this.reportDetailPanelsFacadeService.setTempSpecFileContent(null);
-    this.specEditMode.update((prev) => !prev);
   }
 
-  closePanelAndToggleSpec(panel: MatExpansionPanel | undefined, event: Event) {
-    event.stopPropagation();
-    if (panel) {
-      panel.close();
-    }
-    this.reportDetailPanelsFacadeService.setTempSpecFileContent(null);
-    this.specEditMode.update((prev) => !prev);
-  }
+  saveSpec() {
+    const context = this.context();
+    const currentSpec = this.specContent();
+    const parsed = parseJson<StrictDataLayerEvent>(this.specDraftText());
 
-  openPanelAndToggleRecording(
-    panel: MatExpansionPanel | undefined,
-    event: Event
-  ) {
-    event.stopPropagation();
-    // Scroll immediately using the button element as anchor
-    try {
-      const current = event.currentTarget as HTMLElement | null;
-      const host = current?.closest('.mat-expansion-panel');
-      host?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    } catch {
-      /* ignore DOM errors */
-    }
-    if (panel) {
-      panel.open();
-    }
-    this.reportDetailPanelsFacadeService.setTempRecordingFileContent(null);
-    this.recordingEditMode.update((prev) => !prev);
-  }
-
-  openPanelAndToggleItemDef(
-    panel: MatExpansionPanel | undefined,
-    event: Event
-  ) {
-    event.stopPropagation();
-    try {
-      const current = event.currentTarget as HTMLElement | null;
-      const host = current?.closest('.mat-expansion-panel');
-      host?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    } catch {
-      /* no-op */
-    }
-    if (panel) panel.open();
-    const existing = this.itemDefContent();
-    if (existing) {
-      this.reportDetailPanelsFacadeService.setTempItemDefContent(null);
-    } else {
-      this.reportDetailPanelsFacadeService.setTempItemDefContent({
-        itemId: '',
-        templateName: '',
-        fullItemDef: {}
-      } as ItemDef);
-    }
-    // preload editable fields from current content
-    const current = this.itemDefContent();
-    this.editItemId.set(current?.itemId ?? null);
-    this.editTemplateName.set(current?.templateName ?? null);
-    this.itemDefEditMode.update((prev) => !prev);
-  }
-
-  closePanelAndToggleRecording(
-    panel: MatExpansionPanel | undefined,
-    event: Event
-  ) {
-    event.stopPropagation();
-    if (panel) {
-      panel.close();
-    }
-    this.reportDetailPanelsFacadeService.setTempRecordingFileContent(null);
-    this.recordingEditMode.update((prev) => !prev);
-  }
-
-  closePanelAndToggleItemDef(
-    panel: MatExpansionPanel | undefined,
-    event: Event
-  ) {
-    event.stopPropagation();
-    if (panel) panel.close();
-    this.reportDetailPanelsFacadeService.setTempItemDefContent(null);
-    this.editItemId.set(null);
-    this.editTemplateName.set(null);
-    this.itemDefEditMode.update((prev) => !prev);
-  }
-
-  switchSpecEdit() {
-    this.specEdit.update((prev) => !prev);
-  }
-
-  switchRecordingEdit() {
-    this.recordingEdit.update((prev) => !prev);
-  }
-
-  switchItemDefEdit() {
-    this.itemDefEdit.update((prev) => !prev);
-  }
-
-  onRecordingFileSelected(event: Event) {
-    this.reportDetailPanelsFacadeService.onRecordingFileSelected(event);
-  }
-
-  onSpecFileSelected(event: Event) {
-    this.reportDetailPanelsFacadeService.onSpecFileSelected(event);
-  }
-
-  onItemDefFileSelected(event: Event) {
-    this.reportDetailPanelsFacadeService.onItemDefFileSelected(event);
-  }
-
-  onSpecUpdate() {
-    const projectSlug = this.projectSlug();
-    const eventId = this.eventId();
-    if (!projectSlug || !eventId) {
+    if (!context || !currentSpec || !isValidSpecContent(parsed)) {
       return;
     }
-    this.reportDetailPanelsFacadeService.onSpecUpdate(projectSlug, eventId);
+
+    this.specLoading.set(true);
+    this.reportDetailPanelsFacadeService
+      .updateSpec(context.projectSlug, context.eventId, {
+        event: parsed.event,
+        dataLayerSpec: parsed
+      })
+      .pipe(
+        take(1),
+        finalize(() => this.specLoading.set(false))
+      )
+      .subscribe(() => {
+        this.specContent.set({
+          ...currentSpec,
+          eventName: parsed.event,
+          dataLayerSpec: parsed
+        });
+        this.specDraftText.set(stringifyJson(parsed));
+        this.specSyntaxError.set(false);
+        this.specEditMode.set(false);
+      });
   }
 
-  onRecordingUpdate() {
-    const projectSlug = this.projectSlug();
-    const eventId = this.eventId();
-    if (!projectSlug || !eventId) {
+  saveRecording() {
+    const context = this.context();
+    const parsed = parseJson<Recording>(this.recordingDraftText());
+
+    if (!context || !parsed) {
       return;
     }
-    this.reportDetailPanelsFacadeService.onRecordingUpdate(
-      projectSlug,
-      eventId
-    );
+
+    this.recordingLoading.set(true);
+    this.reportDetailPanelsFacadeService
+      .updateRecording(context.projectSlug, context.eventId, parsed)
+      .pipe(
+        take(1),
+        finalize(() => this.recordingLoading.set(false))
+      )
+      .subscribe(() => {
+        this.recordingContent.set(parsed);
+        this.recordingDraftText.set(stringifyJson(parsed));
+        this.recordingSyntaxError.set(false);
+        this.recordingEditMode.set(false);
+      });
   }
 
-  onItemDefUpdate(itemId: string, templateName?: string) {
-    this.reportDetailPanelsFacadeService.onItemDefUpdate(itemId, templateName);
-  }
+  saveItemDef() {
+    const parsed = parseJson<unknown>(this.itemDefDraftText());
+    const itemId = this.editItemId().trim();
+    const templateName = this.editTemplateName().trim();
+    const normalized = normalizeItemDefContent(parsed, itemId, templateName);
 
-  onItemIdChange(value: string) {
-    this.editItemId.set(value);
-  }
-
-  onTemplateNameChange(value: string) {
-    this.editTemplateName.set(value);
-  }
-
-  onDownload() {
-    const projectSlug = this.projectSlug();
-    const eventId = this.eventId();
-    if (!projectSlug || !eventId) {
+    if (!normalized || !itemId) {
       return;
     }
-    this.reportDetailPanelsFacadeService.onDownload(projectSlug, eventId);
+
+    this.itemDefLoading.set(true);
+    this.reportDetailPanelsFacadeService
+      .updateItemDef(itemId, {
+        fullItemDef: normalized.fullItemDef,
+        templateName: templateName || undefined
+      })
+      .pipe(
+        take(1),
+        finalize(() => this.itemDefLoading.set(false))
+      )
+      .subscribe(() => {
+        this.itemDefContent.set(normalized);
+        this.itemDefDraftText.set(stringifyJson(normalized.fullItemDef));
+        this.itemDefSyntaxError.set(false);
+        this.itemDefEditMode.set(false);
+      });
   }
 
-  get isJsonSyntaxError() {
-    return this.reportDetailPanelsFacadeService.isJsonSyntaxError;
+  onSpecDraftChange(content: string) {
+    this.specDraftText.set(content);
   }
 
-  get isSpecLoading() {
-    return this.reportDetailPanelsFacadeService.isSpecLoading;
+  onRecordingDraftChange(content: string) {
+    this.recordingDraftText.set(content);
   }
 
-  get isRecordingLoading() {
-    return this.reportDetailPanelsFacadeService.isRecordingLoading;
+  onItemDefDraftChange(content: string) {
+    this.itemDefDraftText.set(content);
   }
 
-  get isItemDefLoading() {
-    return this.reportDetailPanelsFacadeService.isItemDefLoading;
+  private syncContext(context: ReportDetailRouteContext) {
+    this.specContent.set(context.spec);
+    this.specDraftText.set(stringifyJson(context.spec.dataLayerSpec));
+    this.specSyntaxError.set(false);
+    this.specEditMode.set(false);
+    this.specLoading.set(false);
+
+    this.recordingContent.set(context.recording);
+    this.recordingDraftText.set(stringifyJson(context.recording));
+    this.recordingSyntaxError.set(false);
+    this.recordingEditMode.set(false);
+    this.recordingLoading.set(false);
+
+    this.itemDefContent.set(null);
+    this.itemDefDraftText.set('');
+    this.itemDefSyntaxError.set(false);
+    this.itemDefEditMode.set(false);
+    this.itemDefLoading.set(false);
+    this.editItemId.set(context.spec.dataLayerSpec.event ?? '');
+    this.editTemplateName.set('');
+  }
+
+  private getSelectedFile(event: Event): File | null {
+    const target = event.target as HTMLInputElement | null;
+    return target?.files?.[0] ?? null;
+  }
+
+  private resetFileInput(event: Event) {
+    const target = event.target as HTMLInputElement | null;
+    if (target) {
+      target.value = '';
+    }
   }
 }

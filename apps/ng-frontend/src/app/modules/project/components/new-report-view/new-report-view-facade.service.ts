@@ -1,4 +1,5 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
+import { ComponentType } from '@angular/cdk/portal';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import {
   IReportDetails,
@@ -21,8 +22,8 @@ import { LoggerService } from '../../../../shared/services/logger/logger.service
   providedIn: 'root'
 })
 export class NewReportViewFacadeService {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private errorDialogComponentPromise: Promise<any> | null = null;
+  private errorDialogComponentPromise: Promise<ComponentType<unknown> | null> | null =
+    null;
   private readonly logger = inject(LoggerService);
 
   exampleInputJson = JSON.stringify({
@@ -81,12 +82,11 @@ export class NewReportViewFacadeService {
     this.errorDialogComponentPromise = this.loadErrorDialogComponent();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async loadErrorDialogComponent(): Promise<any> {
+  private async loadErrorDialogComponent(): Promise<ComponentType<unknown> | null> {
     try {
       const module = await import('@ui');
       this.logger.info('ErrorDialogComponent loaded successfully');
-      return module.ErrorDialogComponent;
+      return module.ErrorDialogComponent as ComponentType<unknown>;
     } catch (error) {
       this.logger.error(`Failed to load ErrorDialogComponent:  ${error}`);
       return null;

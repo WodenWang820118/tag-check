@@ -1,5 +1,5 @@
 <p-dialog
-  styleClass="max-w-lg w-full"
+  styleClass="w-[min(42rem,calc(100vw-1.5rem))]"
   [(visible)]="showModal"
   [modal]="true"
   [closeOnEscape]="false"
@@ -7,67 +7,90 @@
   (onHide)="hide()"
   header="Cookie Policy"
 >
-  <div class="p-6 space-y-6">
-    <div class="flex flex-col space-y-2 pb-4 border-b">
-      <div class="flex justify-between items-center">
-        <b>Analytics</b>
+  <div class="space-y-4 p-2">
+    <div class="sample-inset-surface p-5">
+      <div class="mb-3 flex items-start justify-between gap-4">
+        <div>
+          <div class="text-base font-semibold text-slate-900">Analytics</div>
+          <div class="mt-1 text-sm text-slate-500">
+            Understand which journeys and events are being triggered across the
+            sample storefront.
+          </div>
+        </div>
         <p-toggleswitch
           [(ngModel)]="analyticsModel"
           (onChange)="acceptAnalytics($event)"
         />
       </div>
-      <div>
-        <div class="text-sm text-gray-600">
-          Analytics cookies track site usage and trends to improve your browsing
-          experience. They gather anonymous data on how you navigate and
-          interact with the site.
-        </div>
+      <div class="text-sm leading-6 text-slate-600">
+        Analytics cookies track site usage and trends to improve your browsing
+        experience. They gather anonymous data on how you navigate and interact
+        with the site.
       </div>
     </div>
-    <div class="flex flex-col space-y-2 pb-4 border-b">
-      <div class="flex justify-between items-center">
-        <b>Measurement</b>
+    <div class="sample-inset-surface p-5">
+      <div class="mb-3 flex items-start justify-between gap-4">
+        <div>
+          <div class="text-base font-semibold text-slate-900">Measurement</div>
+          <div class="mt-1 text-sm text-slate-500">
+            Power attribution and performance measurement events.
+          </div>
+        </div>
         <p-toggleswitch
           [(ngModel)]="measurementModel"
           (onChange)="acceptMeasurement($event)"
         />
       </div>
-      <div class="text-sm text-gray-600">
+      <div class="text-sm leading-6 text-slate-600">
         Measurement cookies for performance measurement.
       </div>
     </div>
-    <div class="flex flex-col space-y-2 pb-4">
-      <div class="flex justify-between items-center">
-        <b>Audience</b>
+    <div class="sample-inset-surface p-5">
+      <div class="mb-3 flex items-start justify-between gap-4">
+        <div>
+          <div class="text-base font-semibold text-slate-900">Audience</div>
+          <div class="mt-1 text-sm text-slate-500">
+            Control personalization and audience-building signals.
+          </div>
+        </div>
         <p-toggleswitch
           [(ngModel)]="audienceModel"
           (onChange)="acceptAudience($event)"
         />
       </div>
-      <div class="text-sm text-gray-600">
+      <div class="text-sm leading-6 text-slate-600">
         Audience cookies to share marketing content relevant to you.
       </div>
     </div>
   </div>
+  <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
+    <button
+      pButton
+      type="button"
+      label="Save Preferences"
+      severity="secondary"
+      [outlined]="true"
+      (click)="hide(); consent()"
+    ></button>
+    <button
+      pButton
+      type="button"
+      label="Allow All"
+      icon="pi pi-check"
+      (click)="acceptAll()"
+    ></button>
+  </div>
+</p-dialog>
+@if (showCookieConsent()) {
   <button
     pButton
     type="button"
-    label="Confirm"
-    class="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-    (click)="hide(); consent()"
+    icon="pi pi-cog"
+    severity="info"
+    [raised]="true"
+    [rounded]="true"
+    size="large"
+    (click)="switchModal()"
+    class="fixed bottom-8 left-4 z-[1000] shadow-xl"
   ></button>
-</p-dialog>
-<!-- Sticky cookie settings button at bottom-left -->
-@if (showCookieConsent()) {
-<button
-  pButton
-  type="button"
-  icon="pi pi-cog"
-  severity="info"
-  raised="true"
-  rounded="true"
-  size="large"
-  (click)="switchModal()"
-  style="position: fixed; bottom: 10rem; left: 1rem; z-index: 1000"
-></button>
 }

@@ -27,7 +27,7 @@ export class ConfigsService {
   private readonly DEFAULT_PROJECT_PATH = 'tag_check_projects';
   private readonly DEFAULT_DATABASE_PATH = 'data.sqlite3';
 
-  // the DATABASE_PATH and ROOT_PROJECT_PATH is set in the electron main process
+  // Desktop packaging can provide DATABASE_PATH and ROOT_PROJECT_PATH for the backend runtime.
   getDatabasePath(): string {
     const defaultDatabasePath = join(cwd(), '.db', this.DEFAULT_DATABASE_PATH);
     try {

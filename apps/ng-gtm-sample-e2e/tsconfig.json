@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "allowJs": true,
-    "outDir": "../../dist/out-tsc",
+    "outDir": "./out-tsc/e2e",
     "sourceMap": false,
     "module": "esnext",
     "strict": true,
@@ -20,5 +20,6 @@
     "src/**/*.test.ts",
     "src/**/*.test.js",
     "src/**/*.d.ts"
-  ]
+  ],
+  "exclude": ["out-tsc"]
 }

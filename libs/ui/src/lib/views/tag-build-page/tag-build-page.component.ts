@@ -5,7 +5,7 @@ import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog
 import { UploadActionComponent } from '../../components/upload-action/upload-action.component';
 import { FileUploadDialogComponent } from '../../components/file-upload-dialog/file-upload-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { EditorTypeEnum, Spec } from '@utils';
+import { EditorTypeEnum, StrictDataLayerEvent } from '@utils';
 import { JsonPipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TagBuildModeService, TagBuildMode } from '@data-access';
@@ -24,7 +24,7 @@ import { TagBuildModeService, TagBuildMode } from '@data-access';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagBuildPageComponent {
-  specs = input.required<Spec[]>();
+  specs = input.required<StrictDataLayerEvent[]>();
   inputExtension = EditorTypeEnum.INPUT_JSON;
   outputExtension = EditorTypeEnum.OUTPUT_JSON;
 

@@ -1,5 +1,6 @@
-import { Recording, Spec, TagConfig, TriggerConfig } from '@utils';
+import { Recording } from '@utils';
 import { exampleGtmJson } from '../gtm-json';
+import { buildExampleEventSpec } from './helpers';
 
 const VIEW_CART = 'view_cart';
 
@@ -50,24 +51,8 @@ const recording: Recording = {
   ]
 };
 
-const tag = exampleGtmJson.containerVersion.tag.find(
-  (t) => t.parameter.find((p) => p.key === 'eventName')?.value === VIEW_CART
-);
-if (!tag) {
-  throw new Error(
-    `Tag with eventName "${VIEW_CART}" not found in exampleGtmJson`
-  );
-}
-const normalizedTag: TagConfig = tag;
-
-const triggerNormalized = exampleGtmJson.containerVersion.trigger.find(
-  (t) => t.triggerId && (tag.firingTriggerId || []).includes(t.triggerId)
-) as unknown as TriggerConfig | undefined;
-
-const spec: Spec = {
-  tag: normalizedTag,
-  trigger: triggerNormalized ? [triggerNormalized] : []
-};
+const spec = buildExampleEventSpec(exampleGtmJson, VIEW_CART);
+const normalizedTag = spec.tag;
 
 export const viewCartExample = {
   eventName: VIEW_CART,

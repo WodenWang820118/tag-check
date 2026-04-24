@@ -46,4 +46,11 @@ export class CheckoutFormManagerService {
       this.analyticsService.trackEvent('add_payment_info', orders);
     }
   }
+
+  completePurchase() {
+    const orders = this.orderService.orders$();
+    if (orders.length > 0) {
+      this.analyticsService.trackEvent('purchase', orders);
+    }
+  }
 }

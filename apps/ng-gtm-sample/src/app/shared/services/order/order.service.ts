@@ -8,33 +8,30 @@ import { AnalyticsService } from '../analytics/analytics.service';
 })
 export class OrderService {
   private readonly _orders = signal<Order[]>([]);
-  private readonly _totalPrice = this.calculateTotalPrice();
   readonly orders$ = computed(() => this._orders());
-  readonly totalPrice$ = computed(() => this._totalPrice());
+  readonly totalPrice$ = this.calculateTotalPrice();
 
   constructor(private readonly analyticsService: AnalyticsService) {
     this.loadInitialData();
   }
 
   addToCart(destination: Destination, numOfPersons: number): void {
-    // destination$
     const order = this.createOrder(destination, numOfPersons);
     const currentOrders = this._orders();
     const duplicateOrderIndex = currentOrders.findIndex(
       (o) => o.id === order.id
     );
+    const updatedOrders =
+      duplicateOrderIndex !== -1
+        ? currentOrders.map((currentOrder, index) =>
+            index === duplicateOrderIndex
+              ? this.updateOrderQuantity(currentOrder, order.quantity)
+              : currentOrder
+          )
+        : [...currentOrders, order];
 
-    if (duplicateOrderIndex !== -1) {
-      currentOrders[duplicateOrderIndex] = this.updateOrderQuantity(
-        currentOrders[duplicateOrderIndex],
-        order.quantity
-      );
-    } else {
-      currentOrders.push(order);
-    }
-
-    this._orders.set(currentOrders);
-    this.storeOrders(currentOrders);
+    this._orders.set(updatedOrders);
+    this.storeOrders(updatedOrders);
     this.analyticsService.trackEvent('add_to_cart', [order]);
   }
 

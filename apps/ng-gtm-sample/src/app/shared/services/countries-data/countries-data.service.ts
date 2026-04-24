@@ -1,42 +1,53 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { defer, from, Observable, take } from 'rxjs';
+import { concatMap, defer, from, Observable, take, tap, toArray } from 'rxjs';
 import { Country, City } from 'country-state-city';
 import { Destination } from '../../models/destination.model';
 import { doc, setDoc, writeBatch } from 'firebase/firestore';
-import { firestore } from '../../../../app/firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
+import { FIREBASE_FIRESTORE } from '../../../firebase/firebase.tokens';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class CountriesDataService {
   private readonly jsonUrl = 'assets/countries.json'; // Path to the JSON file
   private readonly uploadProgress = signal<number>(0);
   readonly uploadProgress$ = computed(() => this.uploadProgress());
+  private readonly firestore = inject(FIREBASE_FIRESTORE);
 
   constructor(private readonly http: HttpClient) {}
 
   private batchUpload(destinations: Destination[]) {
     const chunkSize = 400; // Firestore allows up to 500 operations per batch, we use 400 to be safe
-    const totalChunks = Math.ceil(destinations.length / chunkSize);
-    let processedChunks = 0;
+    const chunks: Destination[][] = [];
 
     for (let i = 0; i < destinations.length; i += chunkSize) {
-      const chunk = destinations.slice(i, i + chunkSize);
-      this.uploadChunk(chunk).pipe(take(1)).subscribe();
-      processedChunks++;
-      this.uploadProgress.set((processedChunks / totalChunks) * 100);
+      chunks.push(destinations.slice(i, i + chunkSize));
     }
 
-    this.uploadProgress.set(100);
+    const totalChunks = chunks.length;
+
+    from(chunks)
+      .pipe(
+        concatMap((chunk, index) =>
+          this.uploadChunk(chunk).pipe(
+            take(1),
+            tap(() => {
+              this.uploadProgress.set(((index + 1) / totalChunks) * 100);
+            })
+          )
+        ),
+        toArray()
+      )
+      .subscribe();
   }
 
   private uploadChunk(chunk: Destination[]) {
-    const batch = writeBatch(firestore);
+    const batch = writeBatch(this.firestore);
 
     for (const destination of chunk) {
-      const docRef = doc(firestore, 'destinations', destination.id);
+      const docRef = doc(this.firestore, 'destinations', destination.id);
       batch.set(docRef, this.destinationToFirestoreObject(destination));
     }
 
@@ -76,7 +87,7 @@ export class CountriesDataService {
     return defer(() => {
       return from(
         setDoc(
-          doc(firestore, 'destinations', destination.id),
+          doc(this.firestore, 'destinations', destination.id),
           this.destinationToFirestoreObject(destination)
         )
       );

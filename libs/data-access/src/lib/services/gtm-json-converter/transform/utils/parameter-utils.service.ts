@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Parameter, ParameterMap, Trigger } from '@utils';
+import {
+  Parameter,
+  ParameterMap,
+  Trigger,
+  isParameterWithKeyValue
+} from '@utils';
 
 /**
  * Service for constructing GTM JSON parameters and utilities for data layer variables.
@@ -18,14 +23,8 @@ export class ParameterUtils {
    * @returns A {@link Parameter} of type LIST containing mapped parameters.
    */
   createListParameter(key: string, parameters: Parameter[]): Parameter {
-    // Guard against optional key/value in Parameter type
     const list = parameters
-      .filter(
-        (
-          param
-        ): param is Parameter & Required<Pick<Parameter, 'key' | 'value'>> =>
-          typeof param.key === 'string' && typeof param.value === 'string'
-      )
+      .filter(isParameterWithKeyValue)
       .map((param) =>
         this.createMapParameter(param.key, `{{DLV - ${param.value}}}`)
       );

@@ -6,7 +6,13 @@ import {
   ProjectEventsBuilderService,
   BuildEventInput
 } from '../project-agent/project-events-builder/project-events-builder.service';
-import { GTMConfiguration, TagConfig, TriggerConfig, Parameter } from '@utils';
+import {
+  GTMConfiguration,
+  TagConfig,
+  TriggerConfig,
+  getParameterValue,
+  isGTMConfiguration
+} from '@utils';
 
 @Injectable()
 export class GtmParserService {
@@ -21,40 +27,46 @@ export class GtmParserService {
   // For now, we simply save and build from the provided GTM JSON.
   async uploadGtmJson(projectSlug: string, json: unknown) {
     try {
-      const hasContainerVersion = (obj: unknown): obj is GTMConfiguration =>
-        typeof obj === 'object' && obj !== null && 'containerVersion' in obj;
-
       // Normalize input to a proper object; callers may send a stringified JSON
-      let gtmObject: GTMConfiguration;
+      let parsedPayload: unknown = json;
       try {
-        gtmObject =
-          typeof json === 'string'
-            ? (JSON.parse(json) as GTMConfiguration)
-            : (json as GTMConfiguration);
+        parsedPayload = typeof json === 'string' ? JSON.parse(json) : json;
       } catch (e) {
         this.logger.warn(
           'Received invalid JSON payload; will attempt to continue using saved file. Error: ' +
             (e instanceof Error ? e.message : String(e))
         );
-        // Fallback to an empty object; we will read from file after save
-        gtmObject = {} as GTMConfiguration;
+        parsedPayload = null;
       }
+      const gtmObject = isGTMConfiguration(parsedPayload)
+        ? parsedPayload
+        : null;
 
       const folderPath =
         await this.folderPathService.getProjectConfigFolderPath(projectSlug);
       this.logger.log(`GTM JSON uploaded for project: ${projectSlug}`);
       const filePath = join(folderPath, 'gtm-container.json');
-      // Always write a well-formed object to disk when available
-      this.fileService.writeJsonFile(filePath, gtmObject);
+      if (gtmObject) {
+        this.fileService.writeJsonFile(filePath, gtmObject);
+      } else {
+        this.logger.warn(
+          'Uploaded payload is not a valid GTM configuration; preserving the existing saved file.'
+        );
+      }
 
       // Try to parse and build events immediately
       try {
-        // Prefer the normalized object; if it's missing required fields, re-read from disk
-        const fromDisk =
-          this.fileService.readJsonFile<GTMConfiguration>(filePath);
-        const gtm: GTMConfiguration = hasContainerVersion(gtmObject)
-          ? gtmObject
-          : fromDisk;
+        // Prefer the normalized object; otherwise fall back to the existing saved file.
+        const fromDisk = this.fileService.readJsonFile<unknown>(filePath);
+        const gtm =
+          gtmObject ?? (isGTMConfiguration(fromDisk) ? fromDisk : null);
+
+        if (!gtm) {
+          this.logger.warn(
+            'Uploaded JSON saved but no valid GTM configuration was available to build events.'
+          );
+          return { saved: true };
+        }
 
         const tags = gtm.containerVersion?.tag ?? [];
         const triggers = gtm.containerVersion?.trigger ?? [];
@@ -96,9 +108,7 @@ export class GtmParserService {
     tag: TagConfig,
     allTriggers: TriggerConfig[]
   ): BuildEventInput | null {
-    const eventNameParam = tag.parameter?.find(
-      (p: Parameter) => p?.key === 'eventName' && typeof p.value === 'string'
-    )?.value as string | undefined;
+    const eventNameParam = getParameterValue(tag.parameter, 'eventName');
 
     if (!eventNameParam) return null;
 

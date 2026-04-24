@@ -7,6 +7,8 @@ export * from './project.type';
 export * from './recording.type';
 export * from './setting.type';
 export * from './spec.type';
+export * from './tag-spec.type';
+export * from './gtm-container-config.type';
 export * from './data-layer.type';
 export * from './auditable.type';
 export * from './file-report.type';

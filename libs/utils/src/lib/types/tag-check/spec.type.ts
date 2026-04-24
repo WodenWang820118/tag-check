@@ -4,7 +4,7 @@ import { StrictDataLayerEvent } from './data-layer.type';
 
 export type ProjectSpec = {
   projectSlug: string;
-  specs: Spec[];
+  specs: StrictDataLayerEvent[];
 };
 
 /**

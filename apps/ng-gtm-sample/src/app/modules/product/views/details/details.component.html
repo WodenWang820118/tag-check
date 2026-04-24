@@ -1,94 +1,127 @@
-<div
-  id="content-{{ (destination$())?.title?.toLowerCase() }}"
-  class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 bg-gray-50 text-gray-900"
->
-  <div class="mb-6 border-b pb-4">
-    <h2 class="text-3xl font-bold mb-2 text-gray-900">
-      {{ (destination$())?.title }}
-      <small class="text-lg text-gray-600 block">{{ (destination$())?.smallTitle }}</small>
-      <br />
-      <a
-        class="all-destinations rwd-all-destinations"
+@if (destination$(); as destination) {
+  <div class="space-y-6">
+    <div class="flex flex-wrap items-center gap-3">
+      <button
+        pButton
+        type="button"
+        label="All Destinations"
+        icon="pi pi-arrow-left"
+        severity="secondary"
+        [outlined]="true"
         (click)="navigateToDestinations()"
-        >All Destinations</a
+      ></button>
+      <span
+        class="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600"
       >
-    </h2>
-  </div>
-  <div class="flex flex-col lg:flex-row space-y-6 lg:space-y-0 lg:space-x-6">
-    <div class="flex-1 p-4 bg-white rounded-lg shadow">
-      <h3 class="text-xl font-semibold text-gray-800 mb-2">Go to {{ (destination$())?.title }}</h3>
-      <div style="height: 66%">
-        <p class="text-gray-700">
-          {{ (destination$())?.description }}
-        </p>
-      </div>
-      <div class="mt-4">
-        <h4 class="text-xl font-semibold mb-2 text-gray-800">
-          ${{ (destination$())?.price }} / 6 Nights
-        </h4>
-        <div class="flex justify-end items-center space-x-2">
-          <!-- Replace select with PrimeNG AutoComplete -->
-          <p-autoComplete
-            [formControl]="numberOfPersonsControl"
-            [suggestions]="filteredPersons"
-            (completeMethod)="filterPersons($event)"
-            field="label"
-            dropdown="true"
-            [forceSelection]="true"
-            class="w-auto"
-          ></p-autoComplete>
-          <button
-            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
-            data-name="{{ (destination$())?.title }}"
-            (click)="addToCart(destination$())"
-          >
-            Add to Cart
-          </button>
-        </div>
-      </div>
+        Featured stay
+      </span>
     </div>
-  <div class="flex-1 p-4 bg-white rounded-lg shadow">
-      <!-- Main image -->
-      <div class="flex justify-center mb-4">
-        <div class="overflow-hidden rounded-lg">
+
+    <div class="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+      <section class="sample-panel space-y-6 p-6">
+        <div class="space-y-3">
+          <div class="sample-eyebrow text-slate-400">
+            <i class="pi pi-map-marker text-sm"></i>
+            Destination Details
+          </div>
+          <div>
+            <h1 class="sample-page-title text-4xl text-slate-950">
+              {{ destination.title }}
+            </h1>
+            <p class="mt-2 text-lg font-medium text-slate-500">
+              {{ destination.smallTitle }}
+            </p>
+          </div>
+        </div>
+
+        <p class="sample-copy text-base">
+          {{ destination.description }}
+        </p>
+
+        <div
+          class="sample-inset-surface flex flex-col gap-4 px-5 py-5 lg:flex-row lg:items-end lg:justify-between"
+        >
+          <div>
+            <div
+              class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400"
+            >
+              Package
+            </div>
+            <div class="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+              {{ destination.price | currency }}
+            </div>
+            <div class="mt-1 text-sm text-slate-500">
+              Per booking for 6 nights
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="min-w-[14rem]">
+              <label
+                for="persons"
+                class="mb-2 block text-sm font-medium text-slate-600"
+              >
+                Travelers
+              </label>
+              <p-autoComplete
+                inputId="persons"
+                [formControl]="numberOfPersonsControl"
+                [suggestions]="filteredPersons"
+                (completeMethod)="filterPersons($event)"
+                field="label"
+                [dropdown]="true"
+                [forceSelection]="true"
+                class="w-full"
+              ></p-autoComplete>
+            </div>
+
+            <button
+              pButton
+              type="button"
+              label="Add to Cart"
+              icon="pi pi-shopping-cart"
+              class="sm:mt-7"
+              (click)="addToCart(destination)"
+            ></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="sample-panel space-y-4 p-4 md:p-5">
+        <div class="overflow-hidden rounded-[1.5rem]">
           <img
-            src="{{
-              (destination$())?.imageBig
-                ? (destination$())?.imageBig
-                : '../../../../../../../assets/images/placeholder.png'
-            }}"
-            alt=""
-            class="w-full h-auto object-cover"
+            [src]="getImageSrc(destination.imageBig)"
+            [alt]="destination.title"
+            class="h-[22rem] w-full object-cover"
           />
         </div>
-      </div>
-  <!-- Responsive additional images -->
-  @if (windowSizeService.width$() > 480) {
-        <div class="flex justify-center space-x-4">
-          <div class="overflow-hidden rounded-lg">
-            <img
-              src="{{ (destination$())?.image2
-                ? (destination$())?.image2
-                : '../../../../../../../assets/images/placeholder.png' }}"
-              alt=""
-              class="w-32 h-32 object-cover"
-            />
+
+        @if (windowSizeService.width$() > 480) {
+          <div class="grid grid-cols-2 gap-4">
+            <div class="overflow-hidden rounded-[1.25rem]">
+              <img
+                [src]="getImageSrc(destination.image2)"
+                [alt]="destination.title"
+                class="h-40 w-full object-cover"
+              />
+            </div>
+            <div class="overflow-hidden rounded-[1.25rem]">
+              <img
+                [src]="getImageSrc(destination.image3)"
+                [alt]="destination.title"
+                class="h-40 w-full object-cover"
+              />
+            </div>
           </div>
-          <div class="overflow-hidden rounded-lg">
-            <img
-              src="{{ (destination$())?.image3
-                ? (destination$())?.image3
-                : '../../../../../../../assets/images/placeholder.png' }}"
-              alt=""
-              class="w-32 h-32 object-cover"
-            />
-          </div>
-        </div>
-  } @else {
-        <div class="flex justify-center">
-          <!-- mobile placeholder or carousel could go here -->
-        </div>
-      }
+        }
+      </section>
     </div>
   </div>
-</div>
+} @else {
+  <div class="sample-panel mx-auto max-w-3xl p-8">
+    <p-message
+      severity="warn"
+      text="No destination is selected yet. Browse the destinations list first."
+    ></p-message>
+  </div>
+}

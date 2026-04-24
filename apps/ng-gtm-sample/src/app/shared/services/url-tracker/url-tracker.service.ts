@@ -20,8 +20,6 @@ export class UrlTrackerService {
         )
       )
       .subscribe((e: RouterEvent) => {
-        this.analyticsService.trackPageViewECEvent(e.url);
-
         if (e.url.includes('/destinations')) {
           this.analyticsService.trackEvent('page_view', {
             page_path: e.url,

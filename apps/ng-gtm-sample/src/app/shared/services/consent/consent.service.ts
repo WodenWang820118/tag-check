@@ -7,33 +7,50 @@ interface ConsentPreferences {
   ad_personalization: boolean;
 }
 
+const DEFAULT_CONSENT_PREFERENCES: ConsentPreferences = {
+  analytics_storage: false,
+  ad_storage: false,
+  ad_user_data: false,
+  ad_personalization: false
+};
+
 @Injectable({
   providedIn: 'root'
 })
 export class ConsentService {
-  private readonly consentPreferences = signal<ConsentPreferences>({
-    analytics_storage: false,
-    ad_storage: false,
-    ad_user_data: false,
-    ad_personalization: false
-  });
+  private readonly consentPreferences = signal<ConsentPreferences>(
+    DEFAULT_CONSENT_PREFERENCES
+  );
 
   readonly consentPreferences$ = computed(() => this.consentPreferences());
+  readonly analyticsConsentGiven$ = computed(() => {
+    const consentOptions = this.consentPreferences();
+    return (
+      consentOptions.analytics_storage &&
+      consentOptions.ad_storage &&
+      consentOptions.ad_user_data
+    );
+  });
+  readonly measurementConsentGiven$ = computed(() => {
+    const consentOptions = this.consentPreferences();
+    return consentOptions.ad_storage && consentOptions.ad_user_data;
+  });
+  readonly audienceConsentGiven$ = computed(() => {
+    const consentOptions = this.consentPreferences();
+    return (
+      consentOptions.ad_storage &&
+      consentOptions.ad_user_data &&
+      consentOptions.ad_personalization
+    );
+  });
 
   constructor() {}
 
   initConsentPreferences() {
-    const initialConsentPreferences = {
-      analytics_storage: false,
-      ad_storage: false,
-      ad_user_data: false,
-      ad_personalization: false
-    };
-
-    this.setConsetPreferences(initialConsentPreferences);
+    this.setConsentPreferences(DEFAULT_CONSENT_PREFERENCES);
   }
 
-  setConsetPreferences(consentPreferences: ConsentPreferences) {
+  setConsentPreferences(consentPreferences: ConsentPreferences) {
     localStorage.setItem(
       'consentPreferences',
       JSON.stringify(consentPreferences)
@@ -41,44 +58,12 @@ export class ConsentService {
     this.consentPreferences.set(consentPreferences);
   }
 
-  analyticsConsentGiven$() {
-    const analyticsConsentGiven$ = computed(() => {
-      const consentOptions = this.consentPreferences();
-      return (
-        consentOptions.analytics_storage &&
-        consentOptions.ad_storage &&
-        consentOptions.ad_user_data
-      );
-    });
-    return analyticsConsentGiven$;
-  }
-
-  measurementConsentGiven$() {
-    const measurementConsentGiven$ = computed(() => {
-      const consentOptions = this.consentPreferences();
-      return consentOptions.ad_storage && consentOptions.ad_user_data;
-    });
-    return measurementConsentGiven$;
-  }
-
-  audienceConsentGiven$() {
-    const audienceConsentGiven$ = computed(() => {
-      const consentOptions = this.consentPreferences();
-      return (
-        consentOptions.ad_storage &&
-        consentOptions.ad_user_data &&
-        consentOptions.ad_personalization
-      );
-    });
-    return audienceConsentGiven$;
-  }
-
   getConsentPreferences() {
     return JSON.parse(localStorage.getItem('consentPreferences') || '{}');
   }
 
   updateConsentPreferences(consentPreferences: ConsentPreferences) {
-    this.setConsetPreferences(consentPreferences);
+    this.setConsentPreferences(consentPreferences);
 
     const consentPreferencesDataLayer = {
       ad_storage: consentPreferences.ad_storage ? 'granted' : 'denied',

@@ -7,7 +7,7 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:application",
+      "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/ng-frontend",
@@ -78,6 +78,40 @@
             }
           ]
         },
+        "desktop": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/ng-frontend/src/environments/environment.ts",
+              "with": "apps/ng-frontend/src/environments/environment.desktop.ts"
+            }
+          ]
+        },
+        "desktop-production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "2kb",
+              "maximumError": "4kb"
+            }
+          ],
+          "optimization": true,
+          "outputHashing": "all",
+          "sourceMap": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/ng-frontend/src/environments/environment.ts",
+              "with": "apps/ng-frontend/src/environments/environment.desktop.production.ts"
+            }
+          ]
+        },
         "mock": {
           "optimization": false,
           "extractLicenses": false,
@@ -93,13 +127,19 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@angular/build:dev-server",
       "configurations": {
         "production": {
           "buildTarget": "ng-frontend:build:production"
         },
         "development": {
           "buildTarget": "ng-frontend:build:development"
+        },
+        "desktop": {
+          "buildTarget": "ng-frontend:build:desktop"
+        },
+        "desktop-production": {
+          "buildTarget": "ng-frontend:build:desktop-production"
         },
         "mock": {
           "buildTarget": "ng-frontend:build:mock"
@@ -111,7 +151,7 @@
       "defaultConfiguration": "development"
     },
     "mock": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@angular/build:dev-server",
       "configurations": {
         "development": {
           "buildTarget": "ng-frontend:build:development",
@@ -126,7 +166,7 @@
       "defaultConfiguration": "development"
     },
     "staging": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@angular/build:dev-server",
       "configurations": {
         "development": {
           "buildTarget": "ng-frontend:build:development",
@@ -141,7 +181,7 @@
       "defaultConfiguration": "development"
     },
     "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "executor": "@angular/build:extract-i18n",
       "options": {
         "buildTarget": "ng-frontend:build"
       }
@@ -150,7 +190,12 @@
       "executor": "@nx/eslint:lint"
     },
     "test": {
-      "executor": "@analogjs/vitest-angular:test"
+      "executor": "@angular/build:unit-test",
+      "options": {
+        "buildTarget": "ng-frontend:build:development",
+        "tsConfig": "apps/ng-frontend/tsconfig.spec.json",
+        "runner": "vitest"
+      }
     },
     "serve-static": {
       "executor": "@nx/web:file-server",
@@ -160,19 +205,15 @@
       }
     },
     "storybook": {
-      "executor": "@analogjs/storybook-angular:start-storybook",
+      "executor": "@storybook/angular:start-storybook",
       "options": {
         "port": 4400,
         "configDir": "apps/ng-frontend/.storybook",
-        "compodoc": false,
-        "styles": [
-          "@angular/material/prebuilt-themes/indigo-pink.css",
-          "apps/ng-frontend/src/styles.css",
-          "apps/ng-tag-build/src/styles.scss",
-          "libs/shared-styles/src/index.scss",
-          "node_modules/prismjs/themes/prism-okaidia.css",
-          "node_modules/prismjs/plugins/command-line/prism-command-line.css"
-        ]
+        "browserTarget": "ng-frontend:build:development",
+        "tsConfig": "apps/ng-frontend/tsconfig.storybook.json",
+        "sourceMap": false,
+        "experimentalZoneless": false,
+        "compodoc": false
       },
       "configurations": {
         "ci": {
@@ -181,19 +222,15 @@
       }
     },
     "build-storybook": {
-      "executor": "@analogjs/storybook-angular:build-storybook",
+      "executor": "@storybook/angular:build-storybook",
       "outputs": ["{options.outputDir}"],
       "options": {
+        "outputDir": "dist/storybook/ng-frontend",
         "configDir": "apps/ng-frontend/.storybook",
-        "compodoc": false,
-        "styles": [
-          "@angular/material/prebuilt-themes/indigo-pink.css",
-          "apps/ng-frontend/src/styles.css",
-          "apps/ng-tag-build/src/styles.scss",
-          "libs/shared-styles/src/index.scss",
-          "node_modules/prismjs/themes/prism-okaidia.css",
-          "node_modules/prismjs/plugins/command-line/prism-command-line.css"
-        ]
+        "browserTarget": "ng-frontend:build:production",
+        "tsConfig": "apps/ng-frontend/tsconfig.storybook.json",
+        "experimentalZoneless": false,
+        "compodoc": false
       },
       "configurations": {
         "ci": {

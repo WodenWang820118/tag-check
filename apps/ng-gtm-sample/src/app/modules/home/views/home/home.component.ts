@@ -11,29 +11,28 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     NavbarComponent,
     DisclaimerComponent,
     RouterOutlet,
-    ProgressSpinnerModule,
+    ProgressSpinnerModule
   ],
   template: `
     @defer {
-    <div class="flex flex-col min-h-screen">
-      <app-navbar class="bg-white shadow"></app-navbar>
-      <main class="flex-grow container mx-auto px-4 py-8">
-        <router-outlet></router-outlet>
-      </main>
-      <footer class="bg-white">
-        <app-footer></app-footer>
-        <app-disclaimer class="mt-2"></app-disclaimer>
-      </footer>
-    </div>
+      <div class="sample-route-shell">
+        <app-navbar class="bg-white shadow"></app-navbar>
+        <main class="sample-main">
+          <router-outlet></router-outlet>
+        </main>
+        <footer class="sample-footer-area">
+          <app-footer></app-footer>
+          <app-disclaimer class="sample-shell pb-4 pt-1"></app-disclaimer>
+        </footer>
+      </div>
     } @placeholder (minimum 1.5s) {
-    <div class="fixed inset-0 flex items-center justify-center">
-      <p-progress-spinner
-        ariaLabel="loading"
-        [style]="{ width: '100px', height: '100px' }"
-      />
-    </div>
+      <div class="sample-loading-shell">
+        <p-progress-spinner
+          ariaLabel="loading"
+          [style]="{ width: '100px', height: '100px' }"
+        />
+      </div>
     }
-  `,
-  styles: [``],
+  `
 })
 export class HomeComponent {}

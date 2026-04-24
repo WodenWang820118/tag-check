@@ -10,8 +10,6 @@ onlyBuiltDependencies:
   - '@swc/core'
   - core-js
   - core-js-pure
-  - electron
-  - electron-winstaller
   - esbuild
   - ffmpeg-static
   - less

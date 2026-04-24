@@ -3,37 +3,17 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-disclaimer',
   template: `
-    <div id="disclaimer">
-      <div class="container">
-        <span>This is a demo site designed to showcase GTM. </span>
-        <!-- <a href="#">Back to top</a> -->
-      </div>
+    <div
+      id="disclaimer"
+      class="flex flex-col gap-1 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <span>
+        This is a demo storefront built to showcase GTM event tracking flows.
+      </span>
+      <span class="font-medium text-slate-600">
+        Public routes and analytics behavior are intentionally preserved.
+      </span>
     </div>
-  `,
-  styles: [
-    `
-      #disclaimer {
-        margin: 0;
-        padding: 0;
-        background: #333 !important;
-        color: #fff;
-        padding: 10px 0;
-        font-weight: 100;
-      }
-
-      #disclaimer .container {
-        position: relative;
-      }
-
-      #disclaimer a {
-        position: absolute;
-        right: 0;
-      }
-
-      .clear {
-        clear: both;
-      }
-    `,
-  ],
+  `
 })
 export class DisclaimerComponent {}

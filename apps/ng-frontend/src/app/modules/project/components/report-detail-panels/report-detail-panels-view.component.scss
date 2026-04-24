@@ -1,0 +1,27 @@
+.json {
+  overflow: auto;
+}
+
+.raw-request-container {
+  max-height: 300px;
+  overflow: auto;
+  padding: 8px 0;
+}
+
+.raw-request {
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  font-family: var(
+    --monospace-font,
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Monaco,
+    'Roboto Mono',
+    'Courier New',
+    monospace
+  );
+  font-size: 13px;
+  line-height: 1.4;
+}

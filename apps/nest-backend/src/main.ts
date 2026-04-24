@@ -2,8 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, INestApplication } from '@nestjs/common';
 import { writeFileSync } from 'fs';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { app } from 'electron'; // It is for accessing the process.resourcesPath
 import * as path from 'path';
 import { json, urlencoded } from 'express';
 
@@ -27,9 +25,8 @@ async function bootstrap() {
 
     // Swagger documentation for non-prod environments
     if (process.env.NODE_ENV !== 'prod') {
-      const { SwaggerModule, DocumentBuilder } = await import(
-        '@nestjs/swagger'
-      );
+      const { SwaggerModule, DocumentBuilder } =
+        await import('@nestjs/swagger');
       const config = new DocumentBuilder()
         .setTitle('Nest TagCheck')
         .setDescription('The Nest TagCheck API description')
@@ -86,10 +83,7 @@ function handleFatalError(error: Error): void {
   Logger.error('Failed to start application:', error);
 
   try {
-    const errorLogPath =
-      process.env.NODE_ENV === 'prod' && process.resourcesPath
-        ? path.join(process.resourcesPath, 'error.log')
-        : path.join(__dirname, 'error.log');
+    const errorLogPath = resolveFatalErrorLogPath();
 
     writeFileSync(
       errorLogPath,
@@ -101,6 +95,22 @@ function handleFatalError(error: Error): void {
   }
 
   process.exit(1);
+}
+
+function resolveFatalErrorLogPath(): string {
+  if (process.env.NODE_ENV !== 'prod') {
+    return path.join(__dirname, 'error.log');
+  }
+
+  if (process.env.DATABASE_PATH) {
+    return path.join(path.dirname(process.env.DATABASE_PATH), 'error.log');
+  }
+
+  if (process.env.ROOT_PROJECT_PATH) {
+    return path.join(path.dirname(process.env.ROOT_PROJECT_PATH), 'error.log');
+  }
+
+  return path.join(process.cwd(), 'error.log');
 }
 
 // Bootstrap with error handling

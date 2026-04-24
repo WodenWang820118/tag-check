@@ -13,11 +13,11 @@ import { ButtonModule } from 'primeng/button';
   selector: 'app-carousel',
   imports: [CarouselModule, ButtonModule],
   template: `
-    <div class="container mx-auto px-6 border border-gray-300 rounded-lg p-4">
+    <div class="sample-panel overflow-hidden px-4 py-5 sm:px-6">
       <p-carousel
         [value]="destinations"
-        [numVisible]="3"
-        [numScroll]="3"
+        [numVisible]="1"
+        [numScroll]="1"
         [circular]="false"
         [responsiveOptions]="responsiveOptions"
         autoplayInterval="3000"
@@ -26,38 +26,67 @@ import { ButtonModule } from 'primeng/button';
       >
         <ng-template pTemplate="item" let-destination>
           <div
-            class="flex flex-col items-center cursor-pointer transition-shadow hover:shadow-lg border border-surface rounded-border m-2 p-4"
-            (click)="selectPromotion(destination); goToDetails(destination)"
+            class="grid gap-6 px-2 py-3 lg:grid-cols-[1.25fr_0.85fr] lg:items-center"
+            role="button"
+            tabindex="0"
+            (click)="activateDestination(destination)"
+            (keydown.enter)="activateDestination(destination, $event)"
+            (keydown.space)="activateDestination(destination, $event)"
           >
-            <div class="relative w-full h-48 md:h-56 mb-4">
+            <div class="relative overflow-hidden rounded-[1.75rem]">
               <img
                 [src]="destination.imageBig"
-                class="w-full h-full object-cover rounded"
-                alt=""
+                class="h-[18rem] w-full object-cover md:h-[24rem]"
+                [alt]="destination.title"
               />
               <div
-                class="absolute bottom-1 left-1 bg-black bg-opacity-60 text-white text-xs p-1 rounded max-w-xs break-words"
+                class="sample-credit absolute bottom-3 left-3 right-3 rounded-xl bg-slate-950/78 px-3 py-2 text-white"
                 (click)="preventDefault($event)"
                 [innerHTML]="
                   authorInforByPassed(destination.imageBigAuthorInfo)
                 "
               ></div>
             </div>
-            <div class="text-lg font-medium text-center w-full text-gray-800">
-              {{ destination.title }}
+            <div class="flex flex-col gap-4 px-2 lg:px-0">
+              <span class="sample-eyebrow">
+                <i class="pi pi-star-fill text-sm"></i>
+                Featured Destination
+              </span>
+              <div>
+                <h2 class="sample-page-title text-[2.5rem] text-slate-950">
+                  {{ destination.title }}
+                </h2>
+                <p class="sample-copy mt-3 max-w-xl text-base">
+                  {{ utilsService.truncateText(destination.description, 180) }}
+                </p>
+              </div>
+              <div class="flex flex-wrap items-center gap-3">
+                <button
+                  pButton
+                  type="button"
+                  label="Explore Details"
+                  icon="pi pi-arrow-right"
+                  (click)="activateDestination(destination, $event)"
+                ></button>
+                <span
+                  class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-600"
+                >
+                  Starting from {{ '$' + destination.price }}
+                </span>
+              </div>
             </div>
           </div>
         </ng-template>
       </p-carousel>
     </div>
-  `,
+  `
 })
 export class CarouselComponent implements AfterViewInit {
   destinations = destinations;
   responsiveOptions = [
-    { breakpoint: '1024px', numVisible: 3, numScroll: 3 },
-    { breakpoint: '768px', numVisible: 2, numScroll: 2 },
-    { breakpoint: '560px', numVisible: 1, numScroll: 1 },
+    { breakpoint: '1024px', numVisible: 1, numScroll: 1 },
+    { breakpoint: '768px', numVisible: 1, numScroll: 1 },
+    { breakpoint: '560px', numVisible: 1, numScroll: 1 }
   ];
   activeSlideIndex = 0;
 
@@ -90,8 +119,14 @@ export class CarouselComponent implements AfterViewInit {
     this.navigationService.navigateToDetail(destination.id);
   }
 
+  activateDestination(destination: any, event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    this.selectPromotion(destination);
+    this.goToDetails(destination);
+  }
+
   selectPromotion(destination: any): void {
-    console.log('selectPromotion', destination);
     this.analyticsService.trackEvent('select_promotion', destination);
   }
 

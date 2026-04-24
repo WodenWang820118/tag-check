@@ -1,6 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { ParameterUtils } from './parameter-utils.service';
-import { Parameter, ParameterMap, Trigger } from '@utils';
+import {
+  Parameter,
+  ParameterMap,
+  Trigger,
+  getParameterListItems,
+  getParameterMapValue
+} from '@utils';
 
 describe('ParameterUtils', () => {
   let service: ParameterUtils;
@@ -37,15 +43,38 @@ describe('ParameterUtils', () => {
     ];
 
     const result = service.createListParameter(key, parameters);
+    const list = getParameterListItems(result);
 
     expect(result.type).toBe('LIST');
     expect(result.key).toBe(key);
-    expect(result.list?.length).toBe(3);
-    expect(result.list?.[0].map?.[1]?.value).toBe('{{DLV - ecommerce.value}}');
-    expect(result.list?.[1].map?.[1]?.value).toBe(
+    expect(list).toHaveLength(3);
+    expect(getParameterMapValue(list[0], 'parameterValue')).toBe(
+      '{{DLV - ecommerce.value}}'
+    );
+    expect(getParameterMapValue(list[1], 'parameterValue')).toBe(
       '{{DLV - ecommerce.currency}}'
     );
-    expect(result.list?.[2].map?.[1]?.value).toBe('{{DLV - ecommerce.items}}');
+    expect(getParameterMapValue(list[2], 'parameterValue')).toBe(
+      '{{DLV - ecommerce.items}}'
+    );
+  });
+
+  it('should ignore parameters that do not have both a key and a value', () => {
+    const result = service.createListParameter('testKey', [
+      { type: 'v', key: 'value', value: 'ecommerce.value' },
+      { type: 'v', key: 'missingValue' },
+      { type: 'v', value: 'missingKey' }
+    ]);
+
+    expect(getParameterListItems(result)).toHaveLength(1);
+  });
+
+  it('should create an empty list parameter when no eligible entries are provided', () => {
+    const result = service.createListParameter('testKey', []);
+
+    expect(result.type).toBe('LIST');
+    expect(result.key).toBe('testKey');
+    expect(getParameterListItems(result)).toEqual([]);
   });
 
   it('should create a built-in list parameter correctly', () => {
@@ -69,8 +98,10 @@ describe('ParameterUtils', () => {
     const result = service.createMapParameter(name, value);
 
     expect(result.type).toBe('MAP');
+    expect(result.map[0].type).toBe('TEMPLATE');
     expect(result.map[0].key).toBe('parameter');
     expect(result.map[0].value).toBe(name);
+    expect(result.map[1].type).toBe('TEMPLATE');
     expect(result.map[1].key).toBe('parameterValue');
     expect(result.map[1].value).toBe(value);
   });
@@ -145,5 +176,33 @@ describe('ParameterUtils', () => {
     const result = service.findTriggerIdByEventName(eventName, triggers);
 
     expect(result).toEqual([]);
+  });
+
+  it('should return all matching trigger IDs for the same event name', () => {
+    const eventName = 'select_promotion';
+    const triggers: Trigger[] = [
+      {
+        name: 'select_promotion',
+        triggerId: '1'
+      },
+      {
+        name: 'page_view',
+        triggerId: '2'
+      },
+      {
+        name: 'select_promotion',
+        triggerId: '3'
+      }
+    ];
+
+    const result = service.findTriggerIdByEventName(eventName, triggers);
+
+    expect(result).toEqual(['1', '3']);
+  });
+
+  it('should return an empty array when no triggers are provided', () => {
+    expect(service.findTriggerIdByEventName('select_promotion', [])).toEqual(
+      []
+    );
   });
 });
