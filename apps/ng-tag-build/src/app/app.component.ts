@@ -2,6 +2,7 @@ import { AsyncPipe, NgComponentOutlet } from '@angular/common';
 import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { RouterOutlet } from '@angular/router';
+import type { ToolbarInputs } from '@ui';
 
 @Component({
   selector: 'app-root',
@@ -44,7 +45,7 @@ export class AppComponent implements OnInit {
   title = 'Tag Build';
   toolbarComponent = this.loadToolbarComponent();
   footerComponent = this.loadFooterComponent();
-  toolbarInputs = { title: this.title };
+  toolbarInputs = { title: this.title } satisfies ToolbarInputs;
 
   constructor(
     private readonly metaService: Meta,

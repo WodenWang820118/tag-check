@@ -1,7 +1,86 @@
-import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Component, inject, LOCALE_ID, OnInit } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { AsyncPipe, NgComponentOutlet } from '@angular/common';
-import { Meta } from '@angular/platform-browser';
+import { Meta, type MetaDefinition } from '@angular/platform-browser';
+import type { ToolbarInputs } from '@ui';
+
+const PRODUCT_DOC_META_TAGS: MetaDefinition[] = [
+  {
+    name: 'description',
+    content:
+      'TagCheck validates your GTM configuration to ensure accurate data measurement. Help digital marketers focus on insights rather than technical setup, reducing errors and streamlining tag management.'
+  },
+  // Keywords are less important for Google but kept for other engines.
+  {
+    name: 'keywords',
+    content:
+      'GTM Validation, Tag Audit, Google Tag Manager, TagCheck, Data Measurement, Tag Quality Assurance, Digital Analytics, Marketing Tags'
+  },
+  {
+    name: 'viewport',
+    content: 'width=device-width, initial-scale=1'
+  },
+  {
+    rel: 'canonical',
+    href: 'https://tag-check-documentation.vercel.app'
+  },
+  {
+    property: 'og:title',
+    content: 'TagCheck | GTM Validation & Audit Tool for Digital Marketers'
+  },
+  {
+    property: 'og:description',
+    content:
+      'Validate your GTM setup with TagCheck. Ensure accurate data measurement, reduce implementation errors, and focus on insights rather than technical configuration.'
+  },
+  {
+    property: 'og:url',
+    content: 'https://tag-check-documentation.vercel.app'
+  },
+  {
+    property: 'og:type',
+    content: 'website'
+  },
+  {
+    property: 'og:image',
+    content:
+      'https://tag-check-documentation.vercel.app/assets/images/tagcheck-og.png'
+  },
+  {
+    property: 'og:image:width',
+    content: '1200'
+  },
+  {
+    property: 'og:image:height',
+    content: '630'
+  },
+  {
+    name: 'twitter:card',
+    content: 'summary_large_image'
+  },
+  {
+    name: 'twitter:title',
+    content: 'TagCheck | GTM Validation & Audit Tool for Digital Marketers'
+  },
+  {
+    name: 'twitter:description',
+    content:
+      'Validate your GTM setup with TagCheck. Ensure accurate data measurement, reduce implementation errors, and focus on insights rather than technical configuration.'
+  },
+  {
+    name: 'twitter:image',
+    content:
+      'https://tag-check-documentation.vercel.app/assets/images/tagcheck-og.png'
+  },
+  {
+    'http-equiv': 'content-language',
+    content: 'en'
+  },
+  {
+    name: 'author',
+    content: 'TagCheck Team'
+  }
+];
 
 @Component({
   imports: [RouterOutlet, NgComponentOutlet, AsyncPipe],
@@ -43,23 +122,19 @@ import { Meta } from '@angular/platform-browser';
   ]
 })
 export class AppComponent implements OnInit {
+  private readonly metaService = inject(Meta);
+
   title = 'TagCheck';
   toolbarComponent = this.loadToolbarComponent();
   footerComponent = this.loadFooterComponent();
+  readonly locale = inject(LOCALE_ID);
   toolbarInputs = {
     title: this.title,
     aboutDisabled: true,
     objectivesDisabled: false
-  };
-
-  constructor(
-    private readonly router: Router,
-    private readonly metaService: Meta,
-    @Inject(LOCALE_ID) public locale: string
-  ) {}
+  } satisfies ToolbarInputs;
 
   ngOnInit() {
-    this.router.navigate(['/documentation']);
     this.addMetaTags();
   }
 
@@ -79,88 +154,6 @@ export class AppComponent implements OnInit {
   }
 
   addMetaTags(): void {
-    this.metaService.addTags([
-      {
-        name: 'description',
-        content:
-          'TagCheck validates your GTM configuration to ensure accurate data measurement. Help digital marketers focus on insights rather than technical setup, reducing errors and streamlining tag management.'
-      },
-      // Keywords (less important for Google but kept for other engines)
-      {
-        name: 'keywords',
-        content:
-          'GTM Validation, Tag Audit, Google Tag Manager, TagCheck, Data Measurement, Tag Quality Assurance, Digital Analytics, Marketing Tags'
-      },
-      // Essential viewport tag for mobile optimization
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1'
-      },
-      // Canonical URL with proper format
-      {
-        rel: 'canonical',
-        href: 'https://tag-check-documentation.vercel.app'
-      },
-      // Open Graph tags for social sharing
-      {
-        property: 'og:title',
-        content: 'TagCheck | GTM Validation & Audit Tool for Digital Marketers'
-      },
-      {
-        property: 'og:description',
-        content:
-          'Validate your GTM setup with TagCheck. Ensure accurate data measurement, reduce implementation errors, and focus on insights rather than technical configuration.'
-      },
-      {
-        property: 'og:url',
-        content: 'https://tag-check-documentation.vercel.app'
-      },
-      {
-        property: 'og:type',
-        content: 'website'
-      },
-      {
-        property: 'og:image',
-        content:
-          'https://tag-check-documentation.vercel.app/assets/images/tagcheck-og.png'
-      },
-      {
-        property: 'og:image:width',
-        content: '1200'
-      },
-      {
-        property: 'og:image:height',
-        content: '630'
-      },
-      // Twitter Card tags
-      {
-        name: 'twitter:card',
-        content: 'summary_large_image'
-      },
-      {
-        name: 'twitter:title',
-        content: 'TagCheck | GTM Validation & Audit Tool for Digital Marketers'
-      },
-      {
-        name: 'twitter:description',
-        content:
-          'Validate your GTM setup with TagCheck. Ensure accurate data measurement, reduce implementation errors, and focus on insights rather than technical configuration.'
-      },
-      {
-        name: 'twitter:image',
-        content:
-          'https://tag-check-documentation.vercel.app/assets/images/tagcheck-og.png'
-      },
-      // Language specification
-      {
-        'http-equiv': 'content-language',
-        content: 'en'
-      },
-      // Optional: Add author information
-      {
-        name: 'author',
-        content: 'TagCheck Team'
-      }
-    ]);
+    this.metaService.addTags(PRODUCT_DOC_META_TAGS);
   }
 }
