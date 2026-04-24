@@ -11,7 +11,6 @@ import { EcommerceEventValidationStrategy } from './strategy/ecommerce-event-val
 import { NonEcEventsValidationStrategy } from './strategy/non-ec-events-validation-strategy.service';
 import { InspectorUtilsService } from './inspector-utils.service';
 import { TestReportFacadeModule } from '../repository/test-report-facade/test-report-facade.module';
-import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
 
 const strategyService = {
   provide: STRATEGY_TYPE,
@@ -34,8 +33,7 @@ const services = [
   strategyService,
   InspectorUtilsService,
   EcommerceEventValidationStrategy,
-  NonEcEventsValidationStrategy,
-  TestReportFacadeRepositoryService
+  NonEcEventsValidationStrategy
 ];
 @Module({
   imports: [

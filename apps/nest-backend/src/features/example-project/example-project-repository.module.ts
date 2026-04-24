@@ -1,16 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ExampleProjectRepositoryService } from './example-project-repository.service';
 import { RepositoryModule } from '../../core/repository/repository.module';
-import { TestReportFacadeRepositoryService } from '../repository/test-report-facade/test-report-facade-repository.service';
 import { ProjectAgentModule } from '../project-agent/project-agent.module';
 import { ProjectInitializationService } from '../project-agent/project-initialization/project-initialization.service';
 import { ExampleEventsBuilderService } from './example-events-builder.service';
+import { TestReportFacadeModule } from '../repository/test-report-facade/test-report-facade.module';
 
-const modules = [RepositoryModule, ProjectAgentModule];
-const services = [
-  TestReportFacadeRepositoryService,
-  ProjectInitializationService
-];
+const modules = [RepositoryModule, ProjectAgentModule, TestReportFacadeModule];
+const services = [ProjectInitializationService];
 
 @Module({
   imports: [...modules],
