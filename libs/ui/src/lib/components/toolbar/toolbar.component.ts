@@ -7,6 +7,12 @@ import { MenuTabsComponent } from '../menu-tabs/menu-tabs.component';
 import { RouterLink } from '@angular/router';
 import { LangSelectComponent } from '../lang-select/lang-select.component';
 
+export interface ToolbarInputs {
+  title: string;
+  aboutDisabled?: boolean;
+  objectivesDisabled?: boolean;
+}
+
 @Component({
   selector: 'lib-toolbar',
   standalone: true,
