@@ -3,9 +3,7 @@
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
     "target": "es2020",
-    "types": ["node", "vitest/globals"],
-    "composite": true,
-    "declaration": true
+    "types": ["node", "vitest/globals"]
   },
   "files": [],
   "include": [
