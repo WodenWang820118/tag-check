@@ -1,5 +1,4 @@
-import { pathToFileURL } from 'node:url';
-
+import { isDirectEntrypoint } from '../../shared/paths.ts';
 import { main } from './main/main.ts';
 
 // Keep the executable file as a small public facade; the review policy and
@@ -29,10 +28,7 @@ export {
 } from './shared/shared.ts';
 export { main } from './main/main.ts';
 
-const isEntryPoint =
-  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
-
-if (isEntryPoint) {
+if (isDirectEntrypoint(import.meta.url)) {
   main().catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);

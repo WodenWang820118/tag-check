@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { readRequiredValue, readStdin } from '../../../shared/cli.ts';
 import type {
   ParsedCliArgs,
   ReviewCheckpoint,
@@ -93,19 +94,6 @@ export async function readReviewContext(contextFile?: string): Promise<string> {
   return readStdin();
 }
 
-function readRequiredValue(
-  argv: string[],
-  index: number,
-  flag: string
-): string {
-  const value = argv[index + 1];
-  if (!value) {
-    throw new Error(`Missing value for ${flag}.`);
-  }
-
-  return value;
-}
-
 function readCheckpointFlag(rawValue?: string): ReviewCheckpoint {
   if (
     rawValue === 'plan' ||
@@ -134,20 +122,4 @@ function readProviderFlag(rawValue?: string): ReviewProvider {
   throw new Error(
     `Unsupported provider "${rawValue ?? ''}". Expected one of: auto, copilot, gemini, codex.`
   );
-}
-
-function readStdin(): Promise<string> {
-  if (process.stdin.isTTY) {
-    return Promise.resolve('');
-  }
-
-  return new Promise((resolveInput, reject) => {
-    let buffer = '';
-    process.stdin.setEncoding('utf8');
-    process.stdin.on('data', (chunk) => {
-      buffer += chunk;
-    });
-    process.stdin.on('end', () => resolveInput(buffer));
-    process.stdin.on('error', reject);
-  });
 }

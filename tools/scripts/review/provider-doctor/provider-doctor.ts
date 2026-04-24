@@ -16,6 +16,7 @@ import {
   getGeminiCurrentPolicy,
   getGeminiPolicyTimeoutMs
 } from '../provider-policies/provider-policies.ts';
+import { isDirectEntrypoint } from '../../shared/paths.ts';
 
 export type ProviderDoctorFilter = 'all' | ProviderObservabilityProvider;
 
@@ -310,9 +311,7 @@ function formatDelayList(
   return values.map((value) => `${value}ms`).join(', ');
 }
 
-const isEntryPoint = process.argv[1]?.endsWith('provider-doctor.ts');
-
-if (isEntryPoint) {
+if (isDirectEntrypoint(import.meta.url)) {
   main().catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);

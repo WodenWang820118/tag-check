@@ -1,5 +1,10 @@
-import { spawnSync } from 'node:child_process';
 import { existsSync, rmSync } from 'node:fs';
+
+import {
+  runBestEffortSyncCommand,
+  runSyncCommandOrThrow,
+  tryRunSyncCommand
+} from '../../shared/process.ts';
 
 export type RemovePathFunction = (targetPath: string) => void;
 export type RunFunction = (
@@ -20,25 +25,28 @@ export function rmIfExists(targetPath: string) {
 }
 
 export function run(command: string, args: string[], cwd: string) {
-  if (!tryRun(command, args, cwd)) {
-    throw new Error(`Command failed: ${command} ${args.join(' ')}`);
-  }
+  runSyncCommandOrThrow({
+    command,
+    args,
+    cwd,
+    stdio: 'inherit'
+  });
 }
 
 export function tryRun(command: string, args: string[], cwd: string) {
-  const result = spawnSync(command, args, {
+  return tryRunSyncCommand({
+    command,
+    args,
     cwd,
-    shell: false,
     stdio: 'inherit'
   });
-
-  return !result.error && result.status === 0;
 }
 
 export function runBestEffort(command: string, args: string[], cwd: string) {
-  spawnSync(command, args, {
+  runBestEffortSyncCommand({
+    command,
+    args,
     cwd,
-    shell: false,
     stdio: 'ignore'
   });
 }

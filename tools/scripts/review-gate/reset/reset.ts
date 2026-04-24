@@ -1,5 +1,4 @@
-import { pathToFileURL } from 'node:url';
-
+import { isDirectEntrypoint } from '../../shared/paths.ts';
 import { getRepoContext, resetState } from '../shared/shared.ts';
 
 export function main(): void {
@@ -8,9 +7,6 @@ export function main(): void {
   console.log('Review gate state cleared.');
 }
 
-const isEntryPoint =
-  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
-
-if (isEntryPoint) {
+if (isDirectEntrypoint(import.meta.url)) {
   main();
 }
