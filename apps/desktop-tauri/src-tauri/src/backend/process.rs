@@ -1,4 +1,10 @@
-use std::{sync::Mutex, thread};
+use std::{
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc, Mutex,
+    },
+    thread,
+};
 
 use tauri::{AppHandle, Manager};
 use tauri_plugin_shell::{
@@ -7,10 +13,7 @@ use tauri_plugin_shell::{
 };
 
 use super::{
-    health::wait_for_backend,
-    paths::resolve_backend_paths,
-    DEFAULT_PORT,
-    DEFAULT_WEB_SOCKET,
+    health::wait_for_backend, paths::resolve_backend_paths, DEFAULT_PORT, DEFAULT_WEB_SOCKET,
 };
 use crate::diagnostics::write_diagnostic_log;
 
@@ -79,7 +82,9 @@ pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::er
         *state.0.lock().expect("backend mutex poisoned") = Some(child);
     }
 
+    let backend_terminated = Arc::new(AtomicBool::new(false));
     let diagnostics_handle = app_handle.clone();
+    let diagnostics_backend_terminated = Arc::clone(&backend_terminated);
     tauri::async_runtime::spawn(async move {
         let mut rx = rx;
         while let Some(event) = rx.recv().await {
@@ -111,6 +116,7 @@ pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::er
                     );
                 }
                 CommandEvent::Terminated(payload) => {
+                    diagnostics_backend_terminated.store(true, Ordering::Relaxed);
                     write_diagnostic_log(
                         &diagnostics_handle,
                         &format!(
@@ -122,11 +128,13 @@ pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::er
                 _ => {}
             }
         }
+        diagnostics_backend_terminated.store(true, Ordering::Relaxed);
     });
 
     let show_window_handle = app_handle.clone();
+    let health_backend_terminated = Arc::clone(&backend_terminated);
     thread::spawn(move || {
-        if wait_for_backend(&show_window_handle) {
+        if wait_for_backend(&show_window_handle, health_backend_terminated.as_ref()) {
             write_diagnostic_log(
                 &show_window_handle,
                 "health check succeeded, showing window",
