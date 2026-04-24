@@ -58,11 +58,15 @@ describe('process-utils', () => {
     const { run } = await import('./process-utils.ts');
 
     expect(() => run('node.exe', ['task.js'], 'workspace-root')).not.toThrow();
-    expect(spawnSync).toHaveBeenCalledWith('node.exe', ['task.js'], {
-      cwd: 'workspace-root',
-      shell: false,
-      stdio: 'inherit'
-    });
+    expect(spawnSync).toHaveBeenCalledWith(
+      'node.exe',
+      ['task.js'],
+      expect.objectContaining({
+        cwd: 'workspace-root',
+        shell: false,
+        stdio: 'inherit'
+      })
+    );
   });
 
   it('throws a command failure error when the process exits non-zero', async () => {
@@ -82,6 +86,25 @@ describe('process-utils', () => {
     );
   });
 
+  it('throws the spawn error message when the process cannot start', async () => {
+    const spawnSync = vi.fn(() => ({
+      error: new Error('spawn failed'),
+      status: null,
+      stderr: '',
+      stdout: ''
+    }));
+
+    vi.doMock('node:child_process', () => ({
+      spawnSync
+    }));
+
+    const { run } = await import('./process-utils.ts');
+
+    expect(() => run('missing.exe', [], 'workspace-root')).toThrow(
+      'spawn failed'
+    );
+  });
+
   it('returns false from tryRun when spawnSync reports an error', async () => {
     const spawnSync = vi.fn(() => ({
       error: new Error('spawn failed'),
@@ -95,11 +118,15 @@ describe('process-utils', () => {
     const { tryRun } = await import('./process-utils.ts');
 
     expect(tryRun('node.exe', ['task.js'], 'workspace-root')).toBe(false);
-    expect(spawnSync).toHaveBeenCalledWith('node.exe', ['task.js'], {
-      cwd: 'workspace-root',
-      shell: false,
-      stdio: 'inherit'
-    });
+    expect(spawnSync).toHaveBeenCalledWith(
+      'node.exe',
+      ['task.js'],
+      expect.objectContaining({
+        cwd: 'workspace-root',
+        shell: false,
+        stdio: 'inherit'
+      })
+    );
   });
 
   it('returns true from tryRun when the process exits cleanly', async () => {
@@ -147,11 +174,15 @@ describe('process-utils', () => {
     expect(() =>
       runBestEffort('powershell.exe', ['-NoProfile'], 'workspace-root')
     ).not.toThrow();
-    expect(spawnSync).toHaveBeenCalledWith('powershell.exe', ['-NoProfile'], {
-      cwd: 'workspace-root',
-      shell: false,
-      stdio: 'ignore'
-    });
+    expect(spawnSync).toHaveBeenCalledWith(
+      'powershell.exe',
+      ['-NoProfile'],
+      expect.objectContaining({
+        cwd: 'workspace-root',
+        shell: false,
+        stdio: 'ignore'
+      })
+    );
   });
 
   it('stays silent when runBestEffort succeeds', async () => {

@@ -1,5 +1,5 @@
-import { pathToFileURL } from 'node:url';
-
+import { readStdin } from '../../shared/cli.ts';
+import { isDirectEntrypoint } from '../../shared/paths.ts';
 import {
   buildDenyPayload,
   evaluateHookPermission,
@@ -26,21 +26,7 @@ export async function main(): Promise<void> {
   }
 }
 
-function readStdin(): Promise<string> {
-  return new Promise((resolve) => {
-    let buffer = '';
-    process.stdin.setEncoding('utf8');
-    process.stdin.on('data', (chunk) => {
-      buffer += chunk;
-    });
-    process.stdin.on('end', () => resolve(buffer));
-  });
-}
-
-const isEntryPoint =
-  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
-
-if (isEntryPoint) {
+if (isDirectEntrypoint(import.meta.url)) {
   main().catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);

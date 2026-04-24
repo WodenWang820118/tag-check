@@ -1,14 +1,21 @@
 /// <reference types="node" />
 
-import { spawnSync } from 'node:child_process';
 import { existsSync, rmSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const workspaceRoot = resolve(
-  fileURLToPath(new URL('../../..', import.meta.url))
-);
-const currentFile = fileURLToPath(import.meta.url);
+import {
+  getFlagValue,
+  hasFlag,
+  stripFlagWithValue,
+  stripNpmPassthroughSeparator
+} from '../shared/cli.ts';
+import {
+  isDirectEntrypoint,
+  resolveWorkspaceRootFromModuleUrl
+} from '../shared/paths.ts';
+import { quoteWindowsArg, runSyncCommand } from '../shared/process.ts';
+
+const workspaceRoot = resolveWorkspaceRootFromModuleUrl(import.meta.url, 3);
 const artifactsDir = resolve(workspaceRoot, 'proofshot-artifacts');
 
 // ProofShot is machine-level tooling, so this wrapper keeps repo defaults in
@@ -24,40 +31,7 @@ export const SUPPORTED_PROOFSHOT_PROJECTS = [
 export type SupportedProofshotProject =
   (typeof SUPPORTED_PROOFSHOT_PROJECTS)[number];
 
-export function normalizeExtraArgs(rawExtraArgs: string[]): string[] {
-  return rawExtraArgs[0] === '--' ? rawExtraArgs.slice(1) : rawExtraArgs;
-}
-
-export function hasFlag(args: ReadonlyArray<string>, flag: string): boolean {
-  return args.includes(flag);
-}
-
-export function getFlagValue(
-  args: ReadonlyArray<string>,
-  flag: string
-): string | undefined {
-  const index = args.indexOf(flag);
-  if (index === -1 || index === args.length - 1) {
-    return undefined;
-  }
-
-  return args[index + 1];
-}
-
-export function stripFlagWithValue(
-  args: ReadonlyArray<string>,
-  flag: string
-): string[] {
-  const output: string[] = [];
-  for (let index = 0; index < args.length; index += 1) {
-    if (args[index] === flag) {
-      index += 1;
-      continue;
-    }
-    output.push(args[index]!);
-  }
-  return output;
-}
+export { stripFlagWithValue } from '../shared/cli.ts';
 
 export function buildServeCommand(
   project: SupportedProofshotProject,
@@ -73,7 +47,7 @@ export function buildStartWebArgs(rawExtraArgs: ReadonlyArray<string>): {
   project: SupportedProofshotProject;
   runCommand: string | null;
 } {
-  const normalizedExtraArgs = normalizeExtraArgs([...rawExtraArgs]);
+  const normalizedExtraArgs = stripNpmPassthroughSeparator([...rawExtraArgs]);
   const projectInput =
     getFlagValue(normalizedExtraArgs, '--project') ?? DEFAULT_PROOFSHOT_PROJECT;
   const project = assertSupportedProject(projectInput);
@@ -116,7 +90,7 @@ export function runSubcommand(
   argv: ReadonlyArray<string> = process.argv
 ): void {
   const subcommand = argv[2];
-  const extraArgs = normalizeExtraArgs([...argv.slice(3)]);
+  const extraArgs = stripNpmPassthroughSeparator([...argv.slice(3)]);
 
   if (!subcommand) {
     throw new Error(
@@ -258,32 +232,21 @@ function spawnProofshot(
       .join(' ')
       .trim();
 
-    return spawnSync(commandLine, {
+    return runSyncCommand({
+      command: commandLine,
+      args: [],
       cwd: workspaceRoot,
-      stdio: captureOutput ? 'pipe' : 'inherit',
-      encoding: 'utf8',
-      shell: true
+      shell: true,
+      stdio: captureOutput ? 'pipe' : 'inherit'
     });
   }
 
-  return spawnSync(command, args, {
+  return runSyncCommand({
+    command,
+    args,
     cwd: workspaceRoot,
-    stdio: captureOutput ? 'pipe' : 'inherit',
-    encoding: 'utf8',
-    shell: false
+    stdio: captureOutput ? 'pipe' : 'inherit'
   });
-}
-
-function quoteWindowsArg(value: string): string {
-  if (value.length === 0) {
-    return '""';
-  }
-
-  if (!/[ \t"&()^<>|]/.test(value)) {
-    return value;
-  }
-
-  return `"${value.replace(/"/g, '\\"')}"`;
 }
 
 function assertSupportedProject(project: string): SupportedProofshotProject {
@@ -296,14 +259,10 @@ function assertSupportedProject(project: string): SupportedProofshotProject {
   );
 }
 
-function isMainModule(): boolean {
-  return Boolean(process.argv[1]) && resolve(process.argv[1]!) === currentFile;
-}
-
 if (!existsSync(workspaceRoot)) {
   throw new Error(`Workspace root not found: ${workspaceRoot}`);
 }
 
-if (isMainModule()) {
+if (isDirectEntrypoint(import.meta.url)) {
   runSubcommand();
 }

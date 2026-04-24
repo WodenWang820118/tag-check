@@ -1,6 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+
+import {
+  getRepoContext as getSharedRepoContext,
+  type RepoContext
+} from '../../shared/git.ts';
 
 const REVIEW_TTL_MS = 2 * 60 * 60 * 1000;
 
@@ -13,12 +17,10 @@ export const SUPPORTED_REVIEWERS = [
 
 export type SupportedReviewer = (typeof SUPPORTED_REVIEWERS)[number];
 
-export interface RepoContext {
-  root: string;
-  branch: string | null;
-  head: string | null;
-  dirty: boolean | null;
-  gitCommand: string | null;
+export type { RepoContext } from '../../shared/git.ts';
+
+export function getRepoContext(cwd = process.cwd()): RepoContext {
+  return getSharedRepoContext({ cwd });
 }
 
 export interface ReviewApproval {
@@ -54,76 +56,6 @@ interface HookInput {
 export interface HookPermissionResult {
   allow: boolean;
   reason?: string;
-}
-
-function trySpawn(command: string, args: string[], cwd: string): string | null {
-  const result = spawnSync(command, args, {
-    cwd,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'ignore']
-  });
-
-  if (result.error || result.status !== 0) {
-    return null;
-  }
-
-  return result.stdout.trim();
-}
-
-export function resolveGitCommand(): string | null {
-  const candidates =
-    process.platform === 'win32'
-      ? [
-          'git',
-          'C:\\Program Files\\Git\\cmd\\git.exe',
-          'C:\\Program Files\\Git\\bin\\git.exe'
-        ]
-      : ['git', '/usr/bin/git', '/usr/local/bin/git'];
-
-  for (const candidate of candidates) {
-    const output = trySpawn(candidate, ['--version'], process.cwd());
-    if (output) {
-      return candidate;
-    }
-  }
-
-  return null;
-}
-
-export function getRepoContext(cwd = process.cwd()): RepoContext {
-  const gitCommand = resolveGitCommand();
-
-  if (!gitCommand) {
-    return {
-      root: cwd,
-      branch: null,
-      head: null,
-      dirty: null,
-      gitCommand: null
-    };
-  }
-
-  const root =
-    trySpawn(gitCommand, ['rev-parse', '--show-toplevel'], cwd) ?? cwd;
-  const branch = trySpawn(
-    gitCommand,
-    ['rev-parse', '--abbrev-ref', 'HEAD'],
-    root
-  );
-  const head = trySpawn(gitCommand, ['rev-parse', 'HEAD'], root);
-  const dirtyOutput = trySpawn(
-    gitCommand,
-    ['status', '--porcelain', '--untracked-files=all'],
-    root
-  );
-
-  return {
-    root,
-    branch,
-    head,
-    dirty: dirtyOutput ? dirtyOutput.length > 0 : false,
-    gitCommand
-  };
 }
 
 export function getStatePath(repoRoot = process.cwd()): string {

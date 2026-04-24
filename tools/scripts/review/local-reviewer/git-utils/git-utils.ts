@@ -1,5 +1,6 @@
 import { basename, resolve } from 'node:path';
 
+import { runGitTextOrNull, runGitTextOrThrow } from '../../../shared/git.ts';
 import {
   type CommandResult,
   type EvaluationRepoTarget,
@@ -95,23 +96,12 @@ function runGitCommand(
   args: string[],
   dependencies: LocalReviewerDependencies
 ): CommandResult {
-  const result = dependencies.runProcess({
-    command: 'git',
+  return runGitTextOrThrow({
     args,
     cwd: repoRoot,
+    runner: dependencies.runProcess,
     timeoutMs: LOCAL_REVIEWER_COMMAND_TIMEOUT_MS
   });
-
-  if (result.error || result.status !== 0) {
-    throw new Error(
-      result.stderr.trim() ||
-        result.stdout.trim() ||
-        result.error?.message ||
-        `Git command failed: git ${args.join(' ')}`
-    );
-  }
-
-  return result;
 }
 
 function sampleRepoCommits(
@@ -252,16 +242,10 @@ function resolveParentCommit(
   commit: string,
   dependencies: LocalReviewerDependencies
 ): string | null {
-  const result = dependencies.runProcess({
-    command: 'git',
+  return runGitTextOrNull({
     args: ['rev-parse', `${commit}^`],
     cwd: repoRoot,
+    runner: dependencies.runProcess,
     timeoutMs: LOCAL_REVIEWER_COMMAND_TIMEOUT_MS
   });
-
-  if (result.error || result.status !== 0) {
-    return null;
-  }
-
-  return result.stdout.trim() || null;
 }

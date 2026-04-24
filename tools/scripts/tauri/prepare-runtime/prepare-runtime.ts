@@ -1,6 +1,4 @@
-import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
+import { isDirectEntrypoint } from '../../shared/paths.ts';
 import { main } from '../runtime-main/runtime-main.ts';
 
 export {
@@ -28,15 +26,6 @@ export {
   type WindowsCleanupDependencies
 } from '../windows-cleanup/windows-cleanup.ts';
 
-function isExecutedDirectly(moduleUrl: string) {
-  const entrypoint = process.argv[1];
-  if (!entrypoint) {
-    return false;
-  }
-
-  return resolve(fileURLToPath(moduleUrl)) === resolve(entrypoint);
-}
-
-if (isExecutedDirectly(import.meta.url)) {
+if (isDirectEntrypoint(import.meta.url)) {
   main();
 }

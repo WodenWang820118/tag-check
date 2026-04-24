@@ -1,9 +1,11 @@
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
-const scriptDir = dirname(fileURLToPath(import.meta.url));
+import { resolveWorkspaceRootFromModuleUrl } from '../../shared/paths.ts';
 
-export const workspaceRoot = resolve(scriptDir, '..', '..', '..', '..');
+export const workspaceRoot = resolveWorkspaceRootFromModuleUrl(
+  import.meta.url,
+  4
+);
 export const binariesDir = join(
   workspaceRoot,
   'apps',
