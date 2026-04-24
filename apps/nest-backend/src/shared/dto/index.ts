@@ -1,4 +1,5 @@
 export * from './event-inspection-preset.dto';
+export * from './gtm-operator';
 export * from './validation-result.dto';
 export * from './sys-configuration';
 export * from './test-image';

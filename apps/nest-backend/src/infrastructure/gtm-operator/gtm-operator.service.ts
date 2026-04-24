@@ -7,7 +7,7 @@ import { CookieData, Page, Browser } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
 import { PuppeteerUtilsService } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
-import { InspectGtmQueryDto } from '../../controllers/gtm-operator/dto/inspect-gtm-query.dto';
+import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import { RecordingRepositoryService } from '../../core/repository/recording/recording-repository.service';
 
 @Injectable()

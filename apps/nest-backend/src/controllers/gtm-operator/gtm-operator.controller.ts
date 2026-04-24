@@ -12,7 +12,7 @@ import {
 import { EventInspectionPresetDto } from '@utils';
 import { GtmOperatorService } from '../../infrastructure/gtm-operator/gtm-operator.service';
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
-import { InspectGtmQueryDto } from './dto/inspect-gtm-query.dto';
+import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 
 @Controller('datalayer')

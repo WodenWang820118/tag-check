@@ -7,6 +7,7 @@ import { ProjectAgentModule } from '../features/project-agent/project-agent.modu
 import { ExampleProjectRepositoryModule } from '../features/example-project/example-project-repository.module';
 import { GtmParserModule } from '../features/gtm-parser/gtm-parser.module';
 import { ProjectDataExportModule } from '../infrastructure/data-export/project-data-export.module';
+import { TestReportFacadeModule } from '../features/repository/test-report-facade/test-report-facade.module';
 
 // controllers
 import { ProjectWorkFlowController } from './project/project-workflow.controller';
@@ -27,13 +28,11 @@ import { GtmParserController } from './gtm-parser/gtm-parser.controller';
 import { EventInspectionControllerService } from './data-layer/event-inspection-controller.service';
 import { ProjectWorkFlowControllerService } from './project/project-workflow-controller.service';
 import { ConfigurationControllerService } from './configuration/configuration-controller.service';
-import { GtmParserService } from '../features/gtm-parser/gtm-parser.service';
 
 const services = [
   EventInspectionControllerService,
   ProjectWorkFlowControllerService,
-  ConfigurationControllerService,
-  GtmParserService
+  ConfigurationControllerService
 ];
 
 @Module({
@@ -43,6 +42,7 @@ const services = [
     GtmOperatorModule,
     ExampleProjectRepositoryModule,
     GtmParserModule,
+    TestReportFacadeModule,
     ProjectDataExportModule
   ],
   controllers: [

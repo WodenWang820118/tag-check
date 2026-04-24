@@ -15,7 +15,6 @@ import { FileService } from './file/file.service';
 import { ProjectIoService } from './project-io/project-io.service';
 import { FolderService } from './folder/folder.service';
 import { ImageService } from './image/image.service';
-import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 
 const modules = [
   PathModule,
@@ -33,8 +32,7 @@ const services = [
   FileService,
   FolderService,
   ImageService,
-  ProjectIoService,
-  TestReportFacadeRepositoryService
+  ProjectIoService
 ];
 @Module({
   imports: [...modules],
