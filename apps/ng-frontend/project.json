@@ -225,7 +225,7 @@
       "executor": "@storybook/angular:build-storybook",
       "outputs": ["{options.outputDir}"],
       "options": {
-        "outputDir": "dist/storybook/ng-frontend",
+        "outputDir": "storybook-static",
         "configDir": "apps/ng-frontend/.storybook",
         "browserTarget": "ng-frontend:build:production",
         "tsConfig": "apps/ng-frontend/tsconfig.storybook.json",
@@ -249,7 +249,7 @@
       "dependsOn": ["build-storybook"],
       "options": {
         "buildTarget": "ng-frontend:build-storybook",
-        "staticFilePath": "dist/storybook/ng-frontend",
+        "staticFilePath": "storybook-static",
         "spa": true
       },
       "configurations": {
