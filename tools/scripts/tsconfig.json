@@ -1,0 +1,8 @@
+{
+  "extends": "../tsconfig.tools.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals"]
+  },
+  // Spec files are intentionally included so colocated script tests get Vitest globals.
+  "include": ["**/*.ts"]
+}
