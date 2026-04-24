@@ -19,6 +19,36 @@
     }
   }
 
+  &__status {
+    border: 1px solid $border-color;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    padding: 0.75rem 0.875rem;
+
+    &--ready {
+      background: #eef8f0;
+      border-color: #8bc89a;
+      color: #1f5f2d;
+    }
+
+    &--review {
+      background: #fff4e5;
+      border-color: #e4aa5a;
+      color: #7a4a0c;
+    }
+
+    &__label {
+      font-weight: 600;
+    }
+
+    &__list {
+      margin: 0.5rem 0 0;
+      padding-left: 1rem;
+    }
+  }
+
   &__form {
     display: flex;
     flex-direction: column;

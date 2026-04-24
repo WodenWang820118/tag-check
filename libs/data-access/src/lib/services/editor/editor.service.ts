@@ -63,7 +63,7 @@ export class EditorService {
     const editorView = this.buildEditorView(extension, host, content);
 
     // Initialize default content for input JSON
-    if (extension === 'inputJson') {
+    if (extension === EditorTypeEnum.INPUT_JSON) {
       editorView.dispatch({
         changes: {
           from: 0,
@@ -112,17 +112,19 @@ export class EditorService {
           ...this.editorExtensions[extension],
           linter(jsonParseLinter()),
           lintGutter(),
+          this.syncContentOnDocChange(extension),
           EditorView.theme(editorStyles),
           placeholder(content || this.contents[extension]())
         ],
         parent: host
       });
     }
-    if (extension === 'outputJson') {
+    if (extension === EditorTypeEnum.OUTPUT_JSON) {
       console.log('Initializing output JSON editor');
       return new EditorView({
         extensions: [
           ...this.editorExtensions[extension],
+          this.syncContentOnDocChange(extension),
           EditorView.theme(editorStyles),
           placeholder(content || this.contents[extension]())
         ],
@@ -131,8 +133,19 @@ export class EditorService {
     }
     console.warn('Unknown editor extension:', extension);
     return new EditorView({
-      extensions: this.editorExtensions[extension],
+      extensions: [
+        ...(this.editorExtensions[extension] ?? []),
+        this.syncContentOnDocChange(extension)
+      ],
       parent: host
+    });
+  }
+
+  private syncContentOnDocChange(extension: EditorTypeEnum): Extension {
+    return EditorView.updateListener.of((update) => {
+      if (update.docChanged) {
+        this.contents[extension].set(update.state.doc.toString());
+      }
     });
   }
 

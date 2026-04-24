@@ -12,6 +12,32 @@
     </button>
     <ng-content select="lib-upload-action"></ng-content>
   </div>
+  @if (importReadiness(); as readiness) {
+    <div
+      class="functional-card__status"
+      [class.functional-card__status--ready]="readiness.canImport"
+      [class.functional-card__status--review]="!readiness.canImport"
+      role="status"
+    >
+      <div class="functional-card__status__label">
+        {{ importReadinessLabel() }}
+      </div>
+      @if (readiness.issues.length > 0) {
+        <ul class="functional-card__status__list">
+          @for (issue of readiness.issues; track issue) {
+            <li>{{ issue }}</li>
+          }
+        </ul>
+      }
+      @if (readiness.warnings.length > 0) {
+        <ul class="functional-card__status__list">
+          @for (warning of readiness.warnings; track warning) {
+            <li>{{ warning }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
   @if (mode === tagBuildModeEnum.TagBuild) {
     <lib-advanced-expansion-panel
       #accordionContainer

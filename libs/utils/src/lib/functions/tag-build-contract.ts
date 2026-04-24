@@ -282,6 +282,174 @@ export function isGTMConfiguration(value: unknown): value is GTMConfiguration {
   );
 }
 
+export interface GTMImportReadiness {
+  canImport: boolean;
+  issues: string[];
+  warnings: string[];
+}
+
+export function validateGTMImportReadiness(value: unknown): GTMImportReadiness {
+  const issues: string[] = [];
+  const warnings: string[] = [];
+
+  if (!isGTMConfiguration(value)) {
+    return {
+      canImport: false,
+      issues: ['Output is not a GTM container export JSON structure.'],
+      warnings
+    };
+  }
+
+  if (value.exportFormatVersion !== 2) {
+    issues.push('exportFormatVersion must be 2 for GTM import.');
+  }
+
+  if (value.exportTime.trim().length === 0) {
+    issues.push('exportTime must be present.');
+  }
+
+  const version = value.containerVersion;
+  const requiredVersionFields = [
+    'path',
+    'accountId',
+    'containerId',
+    'containerVersionId',
+    'fingerprint',
+    'tagManagerUrl'
+  ] as const;
+
+  for (const field of requiredVersionFields) {
+    if (!isNonEmptyString(version[field])) {
+      issues.push(`containerVersion.${field} must be present.`);
+    }
+  }
+
+  if (!isRecord(version.container)) {
+    issues.push('containerVersion.container must be present.');
+  } else {
+    validateContainerMetadata(version, issues, warnings);
+  }
+
+  validateContainerPath(version, issues);
+  validateVersionItems('tag', version.tag, version, issues);
+  validateVersionItems('trigger', version.trigger, version, issues);
+  validateVersionItems('variable', version.variable, version, issues);
+  validateVersionItems(
+    'builtInVariable',
+    version.builtInVariable,
+    version,
+    issues
+  );
+
+  if (version.tag.length === 0) {
+    warnings.push('The export has no tags.');
+  }
+
+  if (version.trigger.length === 0) {
+    warnings.push('The export has no triggers.');
+  }
+
+  return {
+    canImport: issues.length === 0,
+    issues,
+    warnings
+  };
+}
+
+function validateContainerMetadata(
+  version: GTMConfiguration['containerVersion'],
+  issues: string[],
+  warnings: string[]
+): void {
+  const container = version.container as unknown as JsonRecord;
+  const requiredContainerFields = [
+    'path',
+    'accountId',
+    'containerId',
+    'name',
+    'publicId',
+    'fingerprint',
+    'tagManagerUrl'
+  ] as const;
+
+  for (const field of requiredContainerFields) {
+    if (!isNonEmptyString(container[field])) {
+      issues.push(`containerVersion.container.${field} must be present.`);
+    }
+  }
+
+  if (container['accountId'] !== version.accountId) {
+    issues.push('container accountId must match containerVersion accountId.');
+  }
+
+  if (container['containerId'] !== version.containerId) {
+    issues.push(
+      'container containerId must match containerVersion containerId.'
+    );
+  }
+
+  if (
+    typeof container['publicId'] !== 'string' ||
+    !/^GTM-[A-Z0-9]+$/.test(container['publicId'])
+  ) {
+    issues.push('container publicId must look like a GTM container ID.');
+  }
+
+  if (
+    !Array.isArray(container['usageContext']) ||
+    !container['usageContext'].includes('WEB')
+  ) {
+    issues.push('container usageContext must include WEB.');
+  }
+
+  if (!Array.isArray(container['tagIds']) || container['tagIds'].length === 0) {
+    warnings.push('The export has no container tag IDs.');
+  }
+}
+
+function validateContainerPath(
+  version: GTMConfiguration['containerVersion'],
+  issues: string[]
+): void {
+  const containerPath = `accounts/${version.accountId}/containers/${version.containerId}`;
+  const versionPath = `${containerPath}/versions/${version.containerVersionId}`;
+
+  if (
+    isRecord(version.container) &&
+    typeof version.container['path'] === 'string' &&
+    version.container['path'] !== containerPath
+  ) {
+    issues.push('container path must match accountId and containerId.');
+  }
+
+  if (version.path !== versionPath) {
+    issues.push(
+      'containerVersion path must match accountId, containerId, and version ID.'
+    );
+  }
+}
+
+function validateVersionItems(
+  label: 'tag' | 'trigger' | 'variable' | 'builtInVariable',
+  items: Array<TagConfig | TriggerConfig | VariableConfig>,
+  version: GTMConfiguration['containerVersion'],
+  issues: string[]
+): void {
+  items.forEach((item, index) => {
+    if (item.accountId !== version.accountId) {
+      issues.push(`${label}[${index}].accountId must match the container.`);
+    }
+
+    if (item.containerId !== version.containerId) {
+      issues.push(`${label}[${index}].containerId must match the container.`);
+    }
+  });
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
 export function createPlaceholderTagConfig(input: {
   name: string;
   type?: TagConfig['type'];

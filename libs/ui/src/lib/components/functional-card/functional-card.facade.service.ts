@@ -16,7 +16,9 @@ import { ConversionSuccessDialogComponent } from '../conversion-success-dialog/c
 import {
   GTMContainerConfig,
   GTMConfiguration,
-  StrictDataLayerEvent
+  StrictDataLayerEvent,
+  validateGTMImportReadiness,
+  type GTMImportReadiness
 } from '@utils';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
 
@@ -24,13 +26,30 @@ import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/adv
 export class FunctionalCardFacade {
   private readonly dataLayer: Array<Record<string, unknown>>;
 
-  private readonly _isConvertDisabled = signal<boolean>(true);
+  private readonly _importReadiness = signal<GTMImportReadiness | null>(null);
+  readonly importReadiness = computed(() => this._importReadiness());
+  readonly importReadinessLabel = computed(() => {
+    const readiness = this._importReadiness();
+
+    if (!readiness) {
+      return 'Waiting for conversion';
+    }
+
+    if (readiness.canImport) {
+      return readiness.warnings.length > 0
+        ? 'GTM import-ready with warnings'
+        : 'GTM import-ready';
+    }
+
+    return 'Needs review before GTM import';
+  });
+
   readonly isConvertDisabled$ = computed(() => {
     const inputJson = this.editorFacadeService.inputJsonContent();
-    // disable when empty
-    if (!inputJson && this._isConvertDisabled()) return true;
+    if (!inputJson.trim()) {
+      return true;
+    }
 
-    // try to parse valid JSON; if invalid, disable
     try {
       const parsed = JSON.parse(inputJson);
       if (Array.isArray(parsed)) {
@@ -39,10 +58,8 @@ export class FunctionalCardFacade {
       if (parsed && typeof parsed === 'object') {
         return Object.keys(parsed).length === 0;
       }
-      // for primitives (string/number/etc), consider non-empty as enabled
-      return false;
+      return true;
     } catch (e) {
-      // invalid JSON -> disable
       console.warn('isConvertDisabled: invalid JSON', e);
       return true;
     }
@@ -63,21 +80,9 @@ export class FunctionalCardFacade {
     ).dataLayer;
     this.dataLayer = dl ?? [];
 
-    // keep in sync as the old component did; this gives an early enable when there is input array content
     effect(() => {
-      const inputContent = this.editorFacadeService.inputJsonContent();
-      try {
-        const inputContentObj = JSON.parse(inputContent);
-        if (
-          inputContentObj &&
-          Array.isArray(inputContentObj) &&
-          inputContentObj.length > 0
-        ) {
-          this._isConvertDisabled.set(false);
-        }
-      } catch {
-        // Invalid JSON, do nothing
-      }
+      this.editorFacadeService.inputJsonContent();
+      this._importReadiness.set(null);
     });
   }
 
@@ -244,8 +249,21 @@ export class FunctionalCardFacade {
   }
 
   private postConversion(result: GTMConfiguration) {
+    const readiness = validateGTMImportReadiness(result);
+
     this.editorFacadeService.outputJsonContent = result;
-    this.openSuccessConversionDialog(result);
+    this._importReadiness.set(readiness);
+
+    if (readiness.canImport) {
+      this.openSuccessConversionDialog(result);
+    } else {
+      this.openDialog({
+        message: [
+          'Conversion finished, but the JSON needs review before GTM import.',
+          ...readiness.issues
+        ].join('\n')
+      });
+    }
 
     this.dataLayer.push({
       event: 'btn_convert_click'
