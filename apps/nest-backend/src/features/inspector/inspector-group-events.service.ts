@@ -47,8 +47,9 @@ export class InspectorGroupEventsService {
 
       const batchPromises = operationBatch.map(async (operation) => {
         const testName = operation.replace('.json', '');
+        let page: Page | undefined;
         try {
-          const page = await incognitoContext.newPage();
+          page = await incognitoContext.newPage();
           const result =
             await this.inspectorSingleEventService.inspectDataLayer(
               page,
@@ -70,15 +71,17 @@ export class InspectorGroupEventsService {
             path: `${imageSavingFolder}.png`
           });
 
-          const pages = await browser.pages();
-          await Promise.all(pages.map((page: Page) => page.close()));
-          await browser.close();
           return result;
         } catch (error) {
           this.logger.log(error);
           await this.fileService.writeCacheFile(projectName, operation, error);
-          await incognitoContext.close();
           return { error: error };
+        } finally {
+          await page
+            ?.close()
+            .catch((error) =>
+              this.logger.error(`Error closing inspection page: ${error}`)
+            );
         }
       });
       // Wait for the batch to complete

@@ -3,6 +3,7 @@ import { RequestInterceptorService } from './request-interceptor.service';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
 import { Ga4RequestMatcher } from './ga4-request-matcher.service';
 import { firstValueFrom } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 
 describe('RequestInterceptorService', () => {
   let service: RequestInterceptorService;
@@ -97,4 +98,113 @@ describe('RequestInterceptorService', () => {
     );
     expect(afterClear).toBe('');
   });
+
+  it('isolates concurrent capture handles by predicate and CDP session', async () => {
+    const firstCdp = createMockCdpSession();
+    const secondCdp = createMockCdpSession();
+    const page = createMockPage(firstCdp, secondCdp);
+
+    const firstHandle = await service.setupInterception(
+      page as any,
+      'project',
+      'event-a',
+      'view_item',
+      'G-A'
+    );
+    const secondHandle = await service.setupInterception(
+      page as any,
+      'project',
+      'event-b',
+      'purchase',
+      'G-B'
+    );
+
+    const firstRequest = firstValueFrom(
+      (firstHandle as any).rawRequest$.pipe(timeout(500))
+    );
+    const secondRequest = firstValueFrom(
+      (secondHandle as any).rawRequest$.pipe(timeout(500))
+    );
+
+    firstCdp.emit('Network.requestWillBeSent', {
+      request: {
+        url: 'https://www.google-analytics.com/g/collect?en=view_item&tid=G-A'
+      }
+    });
+    secondCdp.emit('Network.requestWillBeSent', {
+      request: {
+        url: 'https://www.google-analytics.com/g/collect?en=purchase&tid=G-B'
+      }
+    });
+
+    await expect(firstRequest).resolves.toContain('view_item');
+    await expect(secondRequest).resolves.toContain('purchase');
+
+    await (firstHandle as any).stop();
+    await (firstHandle as any).stop();
+    expect(firstCdp.off).toHaveBeenCalledWith(
+      'Network.requestWillBeSent',
+      expect.any(Function)
+    );
+    expect(firstCdp.send).toHaveBeenCalledWith('Network.disable');
+    expect(firstCdp.detach).toHaveBeenCalledTimes(1);
+    expect(secondCdp.detach).not.toHaveBeenCalled();
+    expect((firstHandle as any).rawRequest$.isStopped).toBe(true);
+  });
+
+  it('replays a captured request to a subscriber that attaches after the CDP event', async () => {
+    const cdp = createMockCdpSession();
+    const page = createMockPage(cdp);
+
+    const handle = await service.setupInterception(
+      page as any,
+      'project',
+      'event-a',
+      'view_item',
+      'G-A'
+    );
+
+    cdp.emit('Network.requestWillBeSent', {
+      request: {
+        url: 'https://www.google-analytics.com/g/collect?en=view_item&tid=G-A'
+      }
+    });
+
+    await expect(
+      firstValueFrom((handle as any).rawRequest$.pipe(timeout(500)))
+    ).resolves.toContain('view_item');
+
+    await (handle as any).stop();
+  });
 });
+
+function createMockPage(
+  ...sessions: ReturnType<typeof createMockCdpSession>[]
+) {
+  let index = 0;
+  return {
+    setCacheEnabled: vi.fn().mockResolvedValue(undefined),
+    setBypassServiceWorker: vi.fn().mockResolvedValue(undefined),
+    evaluate: vi.fn().mockResolvedValue([]),
+    createCDPSession: vi.fn(async () => sessions[index++])
+  };
+}
+
+function createMockCdpSession() {
+  const handlers = new Map<string, (...args: any[]) => void>();
+  return {
+    send: vi.fn().mockResolvedValue(undefined),
+    detach: vi.fn().mockResolvedValue(undefined),
+    on: vi.fn((event: string, handler: (...args: any[]) => void) => {
+      handlers.set(event, handler);
+    }),
+    off: vi.fn((event: string, handler: (...args: any[]) => void) => {
+      if (handlers.get(event) === handler) {
+        handlers.delete(event);
+      }
+    }),
+    emit(event: string, payload: unknown) {
+      handlers.get(event)?.(payload);
+    }
+  };
+}

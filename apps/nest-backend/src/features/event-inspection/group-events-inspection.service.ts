@@ -9,6 +9,7 @@ import { ConfigsService } from '../../core/configs/configs.service';
 @Injectable()
 export class GroupEventsInspectionService {
   private readonly logger = new Logger(GroupEventsInspectionService.name);
+  // TODO(stage2): Replace singleton abort/browser routing with per-operation session IDs.
   private abortController: AbortController | null = null;
   private currentBrowser: Browser | null = null;
 
@@ -42,50 +43,69 @@ export class GroupEventsInspectionService {
       signal: signal
     });
 
-    // Set up an abort listener
-    signal.addEventListener(
-      'abort',
-      async () => {
-        try {
-          await this.cleanup();
-        } catch (error) {
-          this.logger.error(`Error during cleanup: ${error}`);
-        }
-      },
-      { once: true }
-    );
-    this.currentBrowser = browser;
-    const result =
-      await this.inspectorGroupEventsService.inspectProjectDataLayer(
-        browser,
-        projectName,
-        measurementId,
-        credentials,
-        captureRequest,
-        concurrency
+    try {
+      // Set up an abort listener
+      signal.addEventListener(
+        'abort',
+        async () => {
+          try {
+            await this.cleanup();
+          } catch (error) {
+            this.logger.error(`Error during cleanup: ${error}`);
+          }
+        },
+        { once: true }
       );
+      this.currentBrowser = browser;
+      const result =
+        await this.inspectorGroupEventsService.inspectProjectDataLayer(
+          browser,
+          projectName,
+          measurementId,
+          credentials,
+          captureRequest,
+          concurrency
+        );
 
-    // 3.2) construct the data to be written to the xlsx file
-    const data = result.map((item) => {
-      return {
-        dataLayerResult: item.dataLayerCheckResult,
-        requestCheckResult: item.requestCheckResult,
-        rawRequest: item.rawRequest,
-        destinationUrl: item.destinationUrl
-      };
-    });
+      // 3.2) construct the data to be written to the xlsx file
+      const data = result.map((item) => {
+        return {
+          dataLayerResult: item.dataLayerCheckResult,
+          requestCheckResult: item.requestCheckResult,
+          rawRequest: item.rawRequest,
+          destinationUrl: item.destinationUrl
+        };
+      });
 
-    // 3.3) write the data to the xlsx file using cache file
-    // the reason to use cache file is that there could be 20 tests running at the same time
-    // one failed test will cause all other tests to fail in terms of test execution logic
-    // therefore, we handle the result gathering logic in the xlsx-report.service.ts
-    await this.projectAbstractReportService.writeProjectAbstractTestRsultJson(
-      projectName,
-      data.map((item) => item.dataLayerResult)
-    );
-    const pages = await browser.pages();
-    await Promise.all(pages.map((page: Page) => page.close()));
-    return data;
+      // 3.3) write the data to the xlsx file using cache file
+      // the reason to use cache file is that there could be 20 tests running at the same time
+      // one failed test will cause all other tests to fail in terms of test execution logic
+      // therefore, we handle the result gathering logic in the xlsx-report.service.ts
+      await this.projectAbstractReportService.writeProjectAbstractTestRsultJson(
+        projectName,
+        data.map((item) => item.dataLayerResult)
+      );
+      return data;
+    } finally {
+      const pages = await browser.pages().catch(() => []);
+      await Promise.all(
+        pages.map((page: Page) =>
+          page
+            .close()
+            .catch((error) =>
+              this.logger.error(`Error closing group inspection page: ${error}`)
+            )
+        )
+      );
+      await browser
+        .close()
+        .catch((error: unknown) =>
+          this.logger.error(`Error closing group inspection browser: ${error}`)
+        );
+      if (this.currentBrowser === browser) {
+        this.currentBrowser = null;
+      }
+    }
   }
 
   stopOperation() {

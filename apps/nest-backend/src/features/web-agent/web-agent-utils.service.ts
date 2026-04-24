@@ -10,7 +10,15 @@ import { DataLayerService } from './action/web-monitoring/data-layer/data-layer.
 import { Page, Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { RequestInterceptorService } from './action/request-interceptor/request-interceptor.service';
-import { catchError, firstValueFrom, map } from 'rxjs';
+import type { RequestInterceptionHandle } from './action/request-interceptor/request-interceptor.service';
+import {
+  catchError,
+  firstValueFrom,
+  map,
+  of,
+  timeout,
+  TimeoutError
+} from 'rxjs';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 
 @Injectable()
@@ -30,9 +38,11 @@ export class WebAgentUtilsService {
     measurementId: string,
     credentials: Credentials,
     captureRequest: boolean,
-    application: EventInspectionPresetDto['application']
+    application: EventInspectionPresetDto['application'],
+    options?: { requestCaptureTimeoutMs?: number }
   ) {
     let eventRequest = '';
+    let requestInterception: RequestInterceptionHandle | null = null;
     await this.dataLayerService.initSelfDataLayer(projectSlug, eventId);
 
     if (credentials) await this.authenticate(page, credentials);
@@ -40,7 +50,7 @@ export class WebAgentUtilsService {
       await this.testEventRepositoryService.getEntityByEventId(eventId);
     // 2) capture the request if needed
     if (captureRequest) {
-      await this.setupRequestInterception(
+      requestInterception = await this.setupRequestInterception(
         page,
         projectSlug,
         eventId,
@@ -60,7 +70,10 @@ export class WebAgentUtilsService {
 
       // 4) capture the request if needed; otherwise, it's an empty string
       if (captureRequest) {
-        eventRequest = await this.captureEventRequest();
+        eventRequest = await this.captureEventRequest(
+          requestInterception,
+          options?.requestCaptureTimeoutMs
+        );
       }
 
       await this.waitForNavigation(page);
@@ -85,6 +98,12 @@ export class WebAgentUtilsService {
     } catch (error) {
       this.logger.error(`Failed to perform test: ${error}`);
       throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+    } finally {
+      await requestInterception
+        ?.stop()
+        .catch((error) =>
+          this.logger.warn(`Failed to stop request interception: ${error}`)
+        );
     }
   }
 
@@ -106,13 +125,13 @@ export class WebAgentUtilsService {
     eventId: string,
     eventName: string,
     measurementId: string
-  ): Promise<void> {
+  ): Promise<RequestInterceptionHandle> {
     this.logger.log('Setting up interception', WebAgentUtilsService.name);
     this.logger.log(
       `Event Name: ${eventName}, Measurement ID: ${measurementId}`,
       WebAgentUtilsService.name
     );
-    await this.requestInterceptorService.setupInterception(
+    return await this.requestInterceptorService.setupInterception(
       page,
       projectSlug,
       eventId,
@@ -121,9 +140,16 @@ export class WebAgentUtilsService {
     );
   }
 
-  private async captureEventRequest(): Promise<string> {
+  private async captureEventRequest(
+    requestInterception?: RequestInterceptionHandle | null,
+    timeoutMs = 15000
+  ): Promise<string> {
+    const rawRequest$ =
+      requestInterception?.rawRequest$ ??
+      this.requestInterceptorService.getRawRequest();
     const eventRequest = await firstValueFrom(
-      this.requestInterceptorService.getRawRequest().pipe(
+      rawRequest$.pipe(
+        timeout(timeoutMs),
         map((request) => {
           if (request) {
             this.logger.log(
@@ -135,12 +161,18 @@ export class WebAgentUtilsService {
           return '';
         }),
         catchError((error) => {
+          if (error instanceof TimeoutError) {
+            this.logger.warn('Timeout occurred while waiting for raw request');
+            return of('');
+          }
           this.logger.error(`Failed to capture request: ${error}`);
-          return '';
+          return of('');
         })
       )
     );
-    this.requestInterceptorService.clearRawRequest();
+    if (!requestInterception) {
+      this.requestInterceptorService.clearRawRequest();
+    }
     return eventRequest;
   }
 

@@ -3,7 +3,7 @@ import {
   InternalServerErrorException,
   Logger
 } from '@nestjs/common';
-import { CookieData, Page, Browser } from 'puppeteer';
+import { CookieData, Page, Browser, ScreenRecorder } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
 import { PuppeteerUtilsService } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
@@ -13,6 +13,7 @@ import { RecordingRepositoryService } from '../../core/repository/recording/reco
 @Injectable()
 export class GtmOperatorService {
   private readonly logger = new Logger(GtmOperatorService.name);
+  // TODO(stage2): Replace singleton abort routing with per-operation session IDs.
   abortController: AbortController | null = null;
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
@@ -71,6 +72,7 @@ export class GtmOperatorService {
     if (!targetPage) {
       throw new Error('Failed to find the target page');
     }
+    let recorder: ScreenRecorder | null = null;
     try {
       // Apply the recorded viewport to the actual page we'll record (targetPage)
       await this.puppeteerUtilsService.applyRecordedViewport(
@@ -81,10 +83,11 @@ export class GtmOperatorService {
       await targetPage.bringToFront();
       await targetPage.goto(origin);
 
-      const recorder = await this.puppeteerUtilsService.startRecorder(
+      recorder = await this.puppeteerUtilsService.startRecorder(
         targetPage,
         projectSlug,
-        eventId
+        eventId,
+        this.abortController.signal
       );
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -99,7 +102,7 @@ export class GtmOperatorService {
           eventInspectionPresetDto
         );
       await new Promise((resolve) => setTimeout(resolve, 2000));
-      await recorder.stop();
+      await this.puppeteerUtilsService.stopRecorder(recorder);
 
       if (headlessFlag) {
         const pages = await browser.pages();
@@ -115,8 +118,11 @@ export class GtmOperatorService {
       this.logger.error(error);
 
       if (headlessFlag) {
-        await this.puppeteerUtilsService.cleanup(browser, page);
+        await this.puppeteerUtilsService.cleanup(browser, page, recorder);
       } else {
+        await this.puppeteerUtilsService
+          .stopRecorder(recorder)
+          .catch((err) => this.logger.error(`Error stopping recorder: ${err}`));
         this.logger.log(
           'Headful mode detected (GTM) and an error occurred: skipping automatic cleanup so the browser remains open for debugging.'
         );

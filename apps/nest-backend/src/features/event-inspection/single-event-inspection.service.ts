@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
   Logger
 } from '@nestjs/common';
-import { CookieData, Credentials } from 'puppeteer';
+import { CookieData, Credentials, ScreenRecorder } from 'puppeteer';
 import { EventInspectionPresetDto } from '@utils';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
 import { PuppeteerUtilsService } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
@@ -22,6 +22,7 @@ export interface InspectSingleEventOptions {
 @Injectable()
 export class SingleEventInspectionService {
   private readonly logger = new Logger(SingleEventInspectionService.name);
+  // TODO(stage2): Replace singleton abort routing with per-operation session IDs.
   abortController: AbortController | null = null;
 
   constructor(
@@ -61,6 +62,7 @@ export class SingleEventInspectionService {
       eventInspectionPresetDto,
       this.abortController.signal
     );
+    let recorder: ScreenRecorder | null = null;
 
     // extract cookie setting logic to helper
     await this.applyCookies(browser, url, eventInspectionPresetDto);
@@ -70,7 +72,12 @@ export class SingleEventInspectionService {
       projectSlug,
       eventId
     );
-    await this.puppeteerUtilsService.startRecorder(page, projectSlug, eventId);
+    recorder = await this.puppeteerUtilsService.startRecorder(
+      page,
+      projectSlug,
+      eventId,
+      this.abortController.signal
+    );
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     try {
@@ -87,7 +94,7 @@ export class SingleEventInspectionService {
 
       // stop recorder (if any) but in headful mode leave the browser running
       await this.puppeteerUtilsService
-        .stopRecorder()
+        .stopRecorder(recorder)
         .catch((err) => this.logger.error(`Error stopping recorder: ${err}`));
 
       if (headlessFlag) {
@@ -104,14 +111,12 @@ export class SingleEventInspectionService {
     } catch (error) {
       this.logger.error(error);
 
-      // stop recorder to avoid dangling resources
-      await this.puppeteerUtilsService
-        .stopRecorder()
-        .catch((err) => this.logger.error(`Error stopping recorder: ${err}`));
-
       if (headlessFlag) {
-        await this.puppeteerUtilsService.cleanup(browser, page);
+        await this.puppeteerUtilsService.cleanup(browser, page, recorder);
       } else {
+        await this.puppeteerUtilsService
+          .stopRecorder(recorder)
+          .catch((err) => this.logger.error(`Error stopping recorder: ${err}`));
         this.logger.log(
           'Headful mode detected and an error occurred: skipping automatic cleanup so the browser remains open for debugging.'
         );

@@ -7,9 +7,22 @@ import {
   catchError,
   first,
   of,
+  ReplaySubject,
   timeout,
   TimeoutError
 } from 'rxjs';
+
+export interface RequestInterceptionHandle {
+  rawRequest$: ReplaySubject<string>;
+  stop(): Promise<void>;
+}
+
+interface CdpRequestWillBeSentEvent {
+  request: {
+    url: string;
+    postData?: string;
+  };
+}
 
 @Injectable()
 export class RequestInterceptorService {
@@ -27,16 +40,19 @@ export class RequestInterceptorService {
     eventId: string,
     eventName: string,
     measurementId: string
-  ) {
+  ): Promise<RequestInterceptionHandle> {
     await page.setCacheEnabled(false);
     await page.setBypassServiceWorker(true);
 
     const cdp = await page.createCDPSession();
+    const rawRequest$ = new ReplaySubject<string>(1);
+    let stopped = false;
+
     await cdp.send('Network.enable');
     await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
     await cdp.send('Network.setBypassServiceWorker', { bypass: true });
 
-    cdp.on('Network.requestWillBeSent', async (event) => {
+    const requestHandler = async (event: CdpRequestWillBeSentEvent) => {
       const requestUrl = event.request.url;
       const postData =
         (event.request &&
@@ -52,7 +68,7 @@ export class RequestInterceptorService {
         )
       ) {
         this.logger.log(`Request captured using CDP: ${requestUrl}`);
-        this.setRawRequest(requestUrl);
+        rawRequest$.next(requestUrl);
         await cdp.send('Network.disable');
         try {
           const latestDataLayer = await page.evaluate(
@@ -69,7 +85,37 @@ export class RequestInterceptorService {
       } else {
         this.logger.debug(`CDP Request (non-matching): ${requestUrl}`);
       }
-    });
+    };
+
+    cdp.on('Network.requestWillBeSent', requestHandler);
+
+    return {
+      rawRequest$,
+      stop: async () => {
+        if (stopped) return;
+        stopped = true;
+        const off =
+          (cdp as unknown as { off?: (event: string, cb: unknown) => void })
+            .off ??
+          (
+            cdp as unknown as {
+              removeListener?: (event: string, cb: unknown) => void;
+            }
+          ).removeListener;
+        off?.call(cdp, 'Network.requestWillBeSent', requestHandler);
+        await cdp
+          .send('Network.disable')
+          .catch((error) =>
+            this.logger.warn(`Failed to disable CDP network: ${error}`)
+          );
+        await (cdp as unknown as { detach?: () => Promise<void> })
+          .detach?.()
+          .catch((error) =>
+            this.logger.warn(`Failed to detach CDP session: ${error}`)
+          );
+        rawRequest$.complete();
+      }
+    };
   }
 
   // Matching logic moved to Ga4RequestMatcher (SRP)
@@ -83,6 +129,8 @@ export class RequestInterceptorService {
    * By default it waits (up to 15s) for a non-empty value (useful in production flows).
    * Tests can pass a shorter timeout and/or disable the non-empty wait so they do not
    * block for the full default timeout when asserting timeout behaviour or after a clear.
+   *
+   * @deprecated Use the handle returned by setupInterception instead.
    */
   getRawRequest(options?: { timeoutMs?: number; waitForNonEmpty?: boolean }) {
     const { timeoutMs = 15000, waitForNonEmpty = true } = options || {};
@@ -101,6 +149,7 @@ export class RequestInterceptorService {
     );
   }
 
+  /** @deprecated Use the handle returned by setupInterception instead. */
   clearRawRequest() {
     this.rawRequest.next('');
   }
