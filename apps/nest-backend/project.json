@@ -73,10 +73,7 @@
       "cache": false,
       "outputs": ["{workspaceRoot}/coverage/apps/nest-backend"],
       "options": {
-        "command": "pnpm exec vitest test --coverage --root=apps/nest-backend --watch=false",
-        "env": {
-          "WEB_SOCKET": "7003"
-        }
+        "command": "pnpm exec vitest test --coverage --root=apps/nest-backend --watch=false"
       }
     }
   }
