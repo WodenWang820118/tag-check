@@ -107,7 +107,6 @@ describe('ImportOrchestrator (fixture integration)', () => {
       const env = JSON.parse(raw) as FixtureEnvelopeV1;
 
       const { stats } = await txService.runWithinTransaction(env);
-      console.log('Import stats:', stats);
 
       const ds = moduleRef.get(DataSource);
 
@@ -126,12 +125,23 @@ describe('ImportOrchestrator (fixture integration)', () => {
       // Recording + ItemDef counts should match fixture lengths
       const recordingLen = env.entities['RecordingEntity']?.length ?? 0;
       const itemDefLen = env.entities['ItemDefEntity']?.length ?? 0;
+      const specLen = env.entities['SpecEntity']?.length ?? 0;
       await expect(countFor(RecordingEntity)).resolves.toBe(recordingLen);
       await expect(countFor(ItemDefEntity)).resolves.toBe(itemDefLen);
+      await expect(countFor(SpecEntity)).resolves.toBe(specLen);
+      await expect(countFor(TestEventDetailEntity)).resolves.toBe(0);
+      await expect(countFor(TestImageEntity)).resolves.toBe(0);
 
       // Test events count
       const testEventLen = env.entities['TestEventEntity']?.length ?? 0;
       await expect(countFor(TestEventEntity)).resolves.toBe(testEventLen);
+
+      for (const [entityName, rows] of Object.entries(env.entities)) {
+        expect(stats[entityName]).toEqual({
+          inserted: rows.length,
+          skipped: 0
+        });
+      }
     } catch (err) {
       console.error('Import orchestrator test failed:', err);
       throw err;

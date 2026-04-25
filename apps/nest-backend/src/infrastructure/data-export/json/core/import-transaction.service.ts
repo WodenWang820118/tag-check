@@ -32,10 +32,6 @@ export class ImportTransactionService {
         this.dataSource.entityMetadatas.map((m) => [m.name, m])
       );
       const insertionOrder = this.sorter.order(env, metasByName);
-      // Debug: log insertion order during tests
-      if (process.env.NODE_ENV !== 'prod') {
-        console.log('Import insertion order:', insertionOrder); // debug
-      }
       const stats: Record<string, ImportStats> = {};
       this.idMapRegistry.clear();
       const idMaps = this.idMapRegistry.getAll();
