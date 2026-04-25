@@ -8,24 +8,23 @@ export default defineConfig({
     environment: 'node',
     include: [
       '**/*.{test,spec,e2e-spec}.?(c|m)[jt]s?(x)',
-      './test/**/*.e2e-spec.ts',
+      './test/**/*.e2e-spec.ts'
     ],
     reporters: ['verbose'],
-    testTimeout: 120000,
+    testTimeout: 30000,
     coverage: {
-      enabled: true,
       reportsDirectory: '../../coverage/apps/nest-backend',
       provider: 'v8',
-      reporter: ['lcov'],
-    },
+      reporter: ['lcov']
+    }
   },
   esbuild: {
-    target: 'es2020',
+    target: 'es2020'
   },
   plugins: [
     nxViteTsPaths(),
     swc.vite({
-      module: { type: 'es6' },
-    }),
-  ],
+      module: { type: 'es6' }
+    })
+  ]
 });
