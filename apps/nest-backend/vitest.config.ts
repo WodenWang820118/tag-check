@@ -7,7 +7,7 @@ const isCi = process.env['CI'] === 'true';
 const reporterConfig = verboseTestLogs
   ? { reporters: ['verbose'] as const }
   : isCi
-    ? {}
+    ? { reporters: ['default'] as const }
     : { reporters: ['dot'] as const };
 
 export default defineConfig({
