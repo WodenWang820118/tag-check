@@ -6,12 +6,12 @@ import { FolderService } from '../../../infrastructure/os/folder/folder.service'
 import { JsonProjectExportService } from '../../../infrastructure/data-export/json/json-project-export.service';
 import { JsonProjectImportService } from '../../../infrastructure/data-export/json/json-project-import.service';
 import { StreamableFile } from '@nestjs/common';
-import { writeFileSync, existsSync, rmSync, mkdirSync } from 'fs';
+import { writeFileSync, existsSync, rmSync, mkdirSync, mkdtempSync } from 'fs';
+import { tmpdir } from 'os';
 import { join } from 'path';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
-// Simple in-memory temp root
-const tempRoot = join(process.cwd(), 'tmp-facade-test');
+let tempRoot: string;
 
 class FolderPathServiceMock {
   async getProjectFolderPath(slug: string) {
@@ -115,8 +115,7 @@ describe('ProjectIoFacadeService', () => {
   let importMock: JsonProjectImportServiceMock;
 
   beforeEach(async () => {
-    rmSync(tempRoot, { recursive: true, force: true });
-    mkdirSync(tempRoot, { recursive: true });
+    tempRoot = mkdtempSync(join(tmpdir(), 'tag-check-facade-'));
     const moduleRef = await Test.createTestingModule({
       providers: [
         ProjectIoFacadeService,
@@ -136,6 +135,10 @@ describe('ProjectIoFacadeService', () => {
 
     service = moduleRef.get(ProjectIoFacadeService);
     importMock = moduleRef.get(JsonProjectImportService);
+  });
+
+  afterEach(() => {
+    rmSync(tempRoot, { recursive: true, force: true });
   });
 
   it('should export a project including fixture file', async () => {

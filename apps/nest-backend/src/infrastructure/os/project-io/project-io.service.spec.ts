@@ -1,4 +1,4 @@
-import { describe, it, beforeEach, expect } from 'vitest';
+import { describe, it, beforeEach, afterEach, expect } from 'vitest';
 import { ProjectIoService } from './project-io.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectCompressor } from './project-compressor.service';
@@ -8,8 +8,10 @@ import {
   rmSync,
   writeFileSync,
   existsSync,
-  createWriteStream
+  createWriteStream,
+  mkdtempSync
 } from 'fs';
+import { tmpdir } from 'os';
 import { join } from 'path';
 import archiver from 'archiver';
 
@@ -38,18 +40,24 @@ async function createZip(
 }
 
 describe('ProjectIoService unzipProject', () => {
-  const root = join(process.cwd(), 'tmp-project-io-tests');
-  const output = root; // use same
+  let root: string;
+  let output: string;
   let service: ProjectIoService;
-  let moduleRef: TestingModule;
+  let moduleRef: TestingModule | undefined;
 
   beforeEach(async () => {
-    rmSync(root, { recursive: true, force: true });
-    mkdirSync(root, { recursive: true });
+    root = mkdtempSync(join(tmpdir(), 'tag-check-project-io-'));
+    output = root;
     moduleRef = await Test.createTestingModule({
       providers: [ProjectIoService, ProjectCompressor, ProjectUnzipper]
     }).compile();
     service = moduleRef.get(ProjectIoService);
+  });
+
+  afterEach(async () => {
+    await moduleRef?.close();
+    moduleRef = undefined;
+    rmSync(root, { recursive: true, force: true });
   });
 
   it('extracts to provided slug when no conflicts and no fixture', async () => {
