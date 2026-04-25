@@ -3,8 +3,8 @@ import { ProjectIoFacadeService } from './project-io-facade.service';
 import { ProjectIoService } from '../../../infrastructure/os/project-io/project-io.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
-import { JsonProjectExportService } from '../../../infrastructure/data-export/json/json-project-export.service';
-import { JsonProjectImportService } from '../../../infrastructure/data-export/json/json-project-import.service';
+import { JsonProjectExportService } from '../../../infrastructure/data-export/json/export/json-project-export.service';
+import { JsonProjectImportService } from '../../../infrastructure/data-export/json/import/json-project-import.service';
 import { StreamableFile } from '@nestjs/common';
 import { writeFileSync, existsSync, rmSync, mkdirSync, mkdtempSync } from 'fs';
 import { tmpdir } from 'os';
@@ -23,7 +23,10 @@ class FolderPathServiceMock {
 }
 
 class FolderServiceMock {
+  deletedPaths: string[] = [];
+
   deleteFolder(path: string) {
+    this.deletedPaths.push(path);
     try {
       rmSync(path, { recursive: true, force: true });
     } catch {
@@ -113,6 +116,7 @@ class JsonProjectImportServiceMock {
 describe('ProjectIoFacadeService', () => {
   let service: ProjectIoFacadeService;
   let importMock: JsonProjectImportServiceMock;
+  let folderMock: FolderServiceMock;
 
   beforeEach(async () => {
     tempRoot = mkdtempSync(join(tmpdir(), 'tag-check-facade-'));
@@ -135,6 +139,7 @@ describe('ProjectIoFacadeService', () => {
 
     service = moduleRef.get(ProjectIoFacadeService);
     importMock = moduleRef.get(JsonProjectImportService);
+    folderMock = moduleRef.get(FolderService);
   });
 
   afterEach(() => {
@@ -184,5 +189,16 @@ describe('ProjectIoFacadeService', () => {
     expect(importedSlug.startsWith(slug)).toBe(true);
     // Import should still have occurred using the original fixture filename (slug.fixture.json)
     expect(importMock.imported).toBeTruthy();
+  });
+
+  it('should delete the resolved project folder', async () => {
+    const slug = 'proj-delete';
+    const projectFolder = join(tempRoot, slug);
+    mkdirSync(projectFolder, { recursive: true });
+
+    await service.deleteProject(slug);
+
+    expect(folderMock.deletedPaths).toEqual([projectFolder]);
+    expect(existsSync(projectFolder)).toBe(false);
   });
 });

@@ -198,9 +198,16 @@ describe('EntityImportService (unit)', () => {
   it('processRow respects skip from rowProcessor', async () => {
     (
       rowProcessor.preProcessRow as unknown as {
-        mockResolvedValueOnce: (v: boolean) => void;
+        mockImplementationOnce: (
+          implementation: (
+            params: Parameters<ImportRowProcessorService['preProcessRow']>[0]
+          ) => Promise<boolean>
+        ) => void;
       }
-    ).mockResolvedValueOnce(true);
+    ).mockImplementationOnce(async ({ ctx, name }) => {
+      ctx.stats[name].skipped++;
+      return true;
+    });
     const m = meta('ChildEntity');
     const ctx = { exportedProjectId: 9, newProjectId: 9, stats, idMaps } as {
       exportedProjectId: number;
@@ -210,7 +217,7 @@ describe('EntityImportService (unit)', () => {
     };
     await service.importEntitiesFor('ChildEntity', [{ id: 222 }], m, repo, ctx);
     expect(persistence.persistEntityAndRegister).not.toHaveBeenCalled();
-    expect(stats.ChildEntity.skipped + stats.ChildEntity.inserted).toBe(0); // our mock does not increment skipped currently
+    expect(stats.ChildEntity).toEqual({ inserted: 0, skipped: 1 });
   });
 
   it('runInTransaction executes non-transactionally when datasource absent', async () => {
