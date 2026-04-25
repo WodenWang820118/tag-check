@@ -6,10 +6,17 @@ import { resolve } from 'path';
 
 async function getLcovFiles() {
   try {
+    const includeE2eCoverage = process.env.INCLUDE_E2E_COVERAGE === '1';
+    const ignore = [
+      'coverage/lcov.info',
+      'node_modules/**',
+      ...(includeE2eCoverage ? [] : ['coverage/apps/nest-backend-e2e/**'])
+    ];
     const files = await glob('coverage/**/lcov.info', {
-      ignore: ['coverage/lcov.info', 'node_modules/**']
+      ignore
     });
     files.sort();
+    console.log('Include e2e coverage:', includeE2eCoverage);
     console.log('Files found:', files);
     return files;
   } catch (error) {
