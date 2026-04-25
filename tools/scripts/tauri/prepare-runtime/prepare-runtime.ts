@@ -3,10 +3,15 @@ import { main } from '../runtime-main/runtime-main.ts';
 
 export {
   buildBackendApplication,
+  buildBackendRuntimeInstallStamp,
+  getBackendRuntimeStampPath,
   getBackendRuntimeInstallPlan,
+  hashFile,
   prepareBackendRuntime,
+  type BackendRuntimeInstallStamp,
   type BackendRuntimeInstallPlan,
   type BuildBackendApplicationDependencies,
+  type HashFileFunction,
   type PrepareBackendRuntimeDependencies
 } from '../backend-runtime/backend-runtime.ts';
 export {
@@ -14,6 +19,7 @@ export {
   main
 } from '../runtime-main/runtime-main.ts';
 export {
+  getNodeSidecarStampPath,
   getRustTargetTriple,
   prepareNodeSidecar,
   type PrepareNodeSidecarDependencies,

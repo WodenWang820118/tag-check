@@ -4,17 +4,84 @@ import { describe, expect, it } from 'vitest';
 
 import {
   buildBackendApplication,
+  getBackendRuntimeStampPath,
   getBackendRuntimeInstallPlan,
+  getNodeSidecarStampPath,
   buildStopExistingDesktopSidecarsScript,
   getDefaultDesktopNodePaths,
   getRustTargetTriple,
   main,
-  prepareBackendRuntime
+  prepareBackendRuntime,
+  type BackendRuntimeInstallStamp
 } from './prepare-runtime.ts';
 import {
   prepareNodeSidecar,
   stopExistingDesktopSidecars
 } from './prepare-runtime.ts';
+
+const npmRuntimeFlags = ['--omit=dev', '--no-audit', '--no-fund'];
+
+function hashTestFile(targetPath: string) {
+  return `hash:${targetPath}`;
+}
+
+const backendRuntimeTestDependencies = {
+  arch: 'x64',
+  hashFileFn: hashTestFile,
+  nodeVersion: 'v-test',
+  platform: 'win32' as NodeJS.Platform,
+  writeFileSyncFn() {
+    return undefined;
+  }
+};
+
+function createBackendRuntimeInstallStamp(
+  backendDir: string,
+  overrides: Partial<BackendRuntimeInstallStamp> = {}
+): BackendRuntimeInstallStamp {
+  return {
+    arch: backendRuntimeTestDependencies.arch,
+    nodeVersion: backendRuntimeTestDependencies.nodeVersion,
+    packageJsonHash: hashTestFile(join(backendDir, 'package.json')),
+    packageLockHash: null,
+    platform: backendRuntimeTestDependencies.platform,
+    version: 1,
+    ...overrides
+  };
+}
+
+const nodeSidecarTestDependencies = {
+  existsSyncFn() {
+    return false;
+  },
+  statSyncFn() {
+    return {
+      mtimeMs: 456,
+      size: 123
+    };
+  },
+  warnFn() {
+    return undefined;
+  },
+  writeFileSyncFn() {
+    return undefined;
+  }
+};
+
+function createNodeSidecarStamp(
+  sourcePath: string,
+  targetFileName: string,
+  overrides: Record<string, unknown> = {}
+) {
+  return JSON.stringify({
+    sourceMtimeMs: 456,
+    sourcePath,
+    sourceSize: 123,
+    targetFileName,
+    version: 1,
+    ...overrides
+  });
+}
 
 describe('getBackendRuntimeInstallPlan', () => {
   it('prefers npm ci when a dist lockfile already exists', () => {
@@ -38,6 +105,7 @@ describe('prepareBackendRuntime', () => {
   it('throws when the generated backend package.json is missing', () => {
     expect(() =>
       prepareBackendRuntime({
+        ...backendRuntimeTestDependencies,
         backendDir: 'backend-dist-test',
         existsSyncFn() {
           return false;
@@ -58,6 +126,296 @@ describe('prepareBackendRuntime', () => {
     ).toThrow('Missing generated backend package.json in backend-dist-test');
   });
 
+  it('skips runtime install when stamp matches and node_modules exists', () => {
+    const backendDir = 'backend-dist-test';
+    const packageJsonPath = join(backendDir, 'package.json');
+    const nodeModulesPath = join(backendDir, 'node_modules');
+    const stampPath = getBackendRuntimeStampPath(backendDir);
+    const readPaths: string[] = [];
+
+    prepareBackendRuntime({
+      ...backendRuntimeTestDependencies,
+      backendDir,
+      existsSyncFn(targetPath) {
+        return (
+          targetPath === packageJsonPath ||
+          targetPath === nodeModulesPath ||
+          targetPath === stampPath
+        );
+      },
+      readFileSyncFn(targetPath) {
+        readPaths.push(targetPath);
+        return JSON.stringify(createBackendRuntimeInstallStamp(backendDir));
+      },
+      removePathFn() {
+        throw new Error('removePathFn must not be called');
+      },
+      runFn() {
+        throw new Error('runFn must not be called');
+      },
+      tryRunFn() {
+        throw new Error('tryRunFn must not be called');
+      },
+      warnFn() {
+        throw new Error('warnFn must not be called');
+      },
+      writeFileSyncFn() {
+        throw new Error('writeFileSyncFn must not be called');
+      }
+    });
+
+    expect(readPaths).toEqual([stampPath]);
+  });
+
+  it('reinstalls when stamp matches but node_modules is missing', () => {
+    const backendDir = 'backend-dist-test';
+    const packageJsonPath = join(backendDir, 'package.json');
+    const nodeModulesPath = join(backendDir, 'node_modules');
+    const stampPath = getBackendRuntimeStampPath(backendDir);
+    const removedPaths: string[] = [];
+    const tryRunCalls: Array<{ args: string[]; command: string; cwd: string }> =
+      [];
+    const writtenFiles: Array<{ content: string; path: string }> = [];
+
+    prepareBackendRuntime({
+      ...backendRuntimeTestDependencies,
+      backendDir,
+      existsSyncFn(targetPath) {
+        return targetPath === packageJsonPath || targetPath === stampPath;
+      },
+      readFileSyncFn() {
+        throw new Error('readFileSyncFn must not be called');
+      },
+      removePathFn(targetPath) {
+        removedPaths.push(targetPath);
+      },
+      runFn() {
+        throw new Error('runFn must not be called');
+      },
+      tryRunFn(command, args, cwd) {
+        tryRunCalls.push({ args, command, cwd });
+        return true;
+      },
+      warnFn() {
+        return undefined;
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
+      }
+    });
+
+    expect(removedPaths).toEqual([nodeModulesPath]);
+    expect(tryRunCalls).toHaveLength(1);
+    expect(tryRunCalls[0]?.args[1]).toBe('install');
+    expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(stampPath);
+  });
+
+  it('reinstalls and rewrites the stamp when the existing stamp is invalid', () => {
+    const backendDir = 'backend-dist-test';
+    const packageJsonPath = join(backendDir, 'package.json');
+    const nodeModulesPath = join(backendDir, 'node_modules');
+    const stampPath = getBackendRuntimeStampPath(backendDir);
+    const writtenFiles: Array<{ content: string; path: string }> = [];
+    const tryRunCalls: Array<{ args: string[]; command: string; cwd: string }> =
+      [];
+
+    prepareBackendRuntime({
+      ...backendRuntimeTestDependencies,
+      backendDir,
+      existsSyncFn(targetPath) {
+        return (
+          targetPath === packageJsonPath ||
+          targetPath === nodeModulesPath ||
+          targetPath === stampPath
+        );
+      },
+      readFileSyncFn() {
+        return '{not-json';
+      },
+      removePathFn() {
+        return undefined;
+      },
+      runFn() {
+        throw new Error('runFn must not be called');
+      },
+      tryRunFn(command, args, cwd) {
+        tryRunCalls.push({ args, command, cwd });
+        return true;
+      },
+      warnFn() {
+        return undefined;
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
+      }
+    });
+
+    expect(tryRunCalls).toHaveLength(1);
+    expect(tryRunCalls[0]?.args[1]).toBe('install');
+    expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(stampPath);
+    expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
+      createBackendRuntimeInstallStamp(backendDir)
+    );
+  });
+
+  it('warns but does not fail when writing the backend install stamp fails', () => {
+    const backendDir = 'backend-dist-test';
+    const packageJsonPath = join(backendDir, 'package.json');
+    const stampPath = getBackendRuntimeStampPath(backendDir);
+    const warnings: string[] = [];
+
+    expect(() =>
+      prepareBackendRuntime({
+        ...backendRuntimeTestDependencies,
+        backendDir,
+        existsSyncFn(targetPath) {
+          return targetPath === packageJsonPath;
+        },
+        removePathFn() {
+          return undefined;
+        },
+        runFn() {
+          throw new Error('runFn must not be called');
+        },
+        tryRunFn() {
+          return true;
+        },
+        warnFn(message) {
+          warnings.push(message);
+        },
+        writeFileSyncFn() {
+          throw new Error('disk full');
+        }
+      })
+    ).not.toThrow();
+
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain(stampPath);
+    expect(warnings[0]).toContain('disk full');
+  });
+
+  it.each([
+    ['arch', { arch: 'arm64' }],
+    ['nodeVersion', { nodeVersion: 'v21.0.0' }],
+    ['packageJsonHash', { packageJsonHash: 'different-package-json-hash' }],
+    ['platform', { platform: 'linux' as NodeJS.Platform }]
+  ] satisfies Array<[string, Partial<BackendRuntimeInstallStamp>]>)(
+    'reinstalls when the existing stamp %s does not match',
+    (_fieldName, stampOverrides) => {
+      const backendDir = 'backend-dist-test';
+      const packageJsonPath = join(backendDir, 'package.json');
+      const nodeModulesPath = join(backendDir, 'node_modules');
+      const stampPath = getBackendRuntimeStampPath(backendDir);
+      const tryRunCalls: Array<{
+        args: string[];
+        command: string;
+        cwd: string;
+      }> = [];
+      const writtenFiles: Array<{ content: string; path: string }> = [];
+
+      prepareBackendRuntime({
+        ...backendRuntimeTestDependencies,
+        backendDir,
+        existsSyncFn(targetPath) {
+          return (
+            targetPath === packageJsonPath ||
+            targetPath === nodeModulesPath ||
+            targetPath === stampPath
+          );
+        },
+        readFileSyncFn() {
+          return JSON.stringify(
+            createBackendRuntimeInstallStamp(backendDir, stampOverrides)
+          );
+        },
+        removePathFn() {
+          return undefined;
+        },
+        runFn() {
+          throw new Error('runFn must not be called');
+        },
+        tryRunFn(command, args, cwd) {
+          tryRunCalls.push({ args, command, cwd });
+          return true;
+        },
+        warnFn() {
+          return undefined;
+        },
+        writeFileSyncFn(path, content) {
+          writtenFiles.push({ content, path });
+        }
+      });
+
+      expect(tryRunCalls).toHaveLength(1);
+      expect(tryRunCalls[0]?.cwd).toBe(backendDir);
+      expect(tryRunCalls[0]?.args[1]).toBe('install');
+      expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
+      expect(writtenFiles).toHaveLength(1);
+      expect(writtenFiles[0]?.path).toBe(stampPath);
+      expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
+        createBackendRuntimeInstallStamp(backendDir)
+      );
+    }
+  );
+
+  it('reinstalls when the package lock hash in the existing stamp does not match', () => {
+    const backendDir = 'backend-dist-test';
+    const packageJsonPath = join(backendDir, 'package.json');
+    const packageLockPath = join(backendDir, 'package-lock.json');
+    const nodeModulesPath = join(backendDir, 'node_modules');
+    const stampPath = getBackendRuntimeStampPath(backendDir);
+    const tryRunCalls: Array<{ args: string[]; command: string; cwd: string }> =
+      [];
+    const writtenFiles: Array<{ content: string; path: string }> = [];
+
+    prepareBackendRuntime({
+      ...backendRuntimeTestDependencies,
+      backendDir,
+      existsSyncFn(targetPath) {
+        return (
+          targetPath === packageJsonPath ||
+          targetPath === packageLockPath ||
+          targetPath === nodeModulesPath ||
+          targetPath === stampPath
+        );
+      },
+      readFileSyncFn() {
+        return JSON.stringify(
+          createBackendRuntimeInstallStamp(backendDir, {
+            packageLockHash: 'stale-package-lock-hash'
+          })
+        );
+      },
+      removePathFn() {
+        return undefined;
+      },
+      runFn() {
+        throw new Error('runFn must not be called');
+      },
+      tryRunFn(command, args, cwd) {
+        tryRunCalls.push({ args, command, cwd });
+        return true;
+      },
+      warnFn() {
+        return undefined;
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
+      }
+    });
+
+    expect(tryRunCalls).toHaveLength(1);
+    expect(tryRunCalls[0]?.cwd).toBe(backendDir);
+    expect(tryRunCalls[0]?.args[1]).toBe('ci');
+    expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(stampPath);
+  });
+
   it('returns early without fallback when npm ci succeeds with a lockfile', () => {
     const backendDir = 'backend-dist-test';
     const packageJsonPath = join(backendDir, 'package.json');
@@ -69,6 +427,7 @@ describe('prepareBackendRuntime', () => {
       command: string;
       cwd: string;
     }> = [];
+    const writtenFiles: Array<{ content: string; path: string }> = [];
     const runCalls: Array<{
       args: string[];
       command: string;
@@ -77,6 +436,7 @@ describe('prepareBackendRuntime', () => {
     const warnings: string[] = [];
 
     prepareBackendRuntime({
+      ...backendRuntimeTestDependencies,
       backendDir,
       existsSyncFn(targetPath) {
         existsCalls.push(targetPath);
@@ -94,11 +454,16 @@ describe('prepareBackendRuntime', () => {
       },
       warnFn(message) {
         warnings.push(message);
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
       }
     });
 
     expect(removedPaths).toEqual([join(backendDir, 'node_modules')]);
-    expect(existsCalls).toEqual([packageJsonPath, packageLockPath]);
+    expect(existsCalls).toEqual(
+      expect.arrayContaining([packageJsonPath, packageLockPath])
+    );
     expect(tryRunCalls).toHaveLength(1);
     expect(tryRunCalls[0]).toMatchObject({
       command: process.execPath,
@@ -106,9 +471,16 @@ describe('prepareBackendRuntime', () => {
     });
     expect(tryRunCalls[0]?.args[0]).toContain('npm-cli.js');
     expect(tryRunCalls[0]?.args[1]).toBe('ci');
-    expect(tryRunCalls[0]?.args[2]).toBe('--omit=dev');
+    expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
     expect(runCalls).toEqual([]);
     expect(warnings).toEqual([]);
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(getBackendRuntimeStampPath(backendDir));
+    expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
+      createBackendRuntimeInstallStamp(backendDir, {
+        packageLockHash: hashTestFile(packageLockPath)
+      })
+    );
   });
 
   it('uses an injected node executable when preparing runtime dependencies', () => {
@@ -119,8 +491,10 @@ describe('prepareBackendRuntime', () => {
       command: string;
       cwd: string;
     }> = [];
+    const writtenFiles: Array<{ content: string; path: string }> = [];
 
     prepareBackendRuntime({
+      ...backendRuntimeTestDependencies,
       backendDir,
       existsSyncFn(targetPath) {
         return targetPath === packageJsonPath;
@@ -138,6 +512,9 @@ describe('prepareBackendRuntime', () => {
       },
       warnFn() {
         return undefined;
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
       }
     });
 
@@ -146,6 +523,11 @@ describe('prepareBackendRuntime', () => {
       command: 'injected-node.exe',
       cwd: backendDir
     });
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(getBackendRuntimeStampPath(backendDir));
+    expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
+      createBackendRuntimeInstallStamp(backendDir)
+    );
   });
 
   it('retries with npm install after npm ci fails against a stale dist lockfile', () => {
@@ -166,8 +548,10 @@ describe('prepareBackendRuntime', () => {
     }> = [];
     const warnings: string[] = [];
     const existsCalls: string[] = [];
+    const writtenFiles: Array<{ content: string; path: string }> = [];
 
     prepareBackendRuntime({
+      ...backendRuntimeTestDependencies,
       backendDir,
       existsSyncFn(targetPath) {
         existsCalls.push(targetPath);
@@ -185,18 +569,23 @@ describe('prepareBackendRuntime', () => {
       },
       warnFn(message) {
         warnings.push(message);
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
       }
     });
 
     expect(tryRunCalls).toHaveLength(1);
-    expect(existsCalls).toEqual([packageJsonPath, packageLockPath]);
+    expect(existsCalls).toEqual(
+      expect.arrayContaining([packageJsonPath, packageLockPath])
+    );
     expect(tryRunCalls[0]).toMatchObject({
       command: process.execPath,
       cwd: backendDir
     });
     expect(tryRunCalls[0]?.args[0]).toContain('npm-cli.js');
     expect(tryRunCalls[0]?.args[1]).toBe('ci');
-    expect(tryRunCalls[0]?.args[2]).toBe('--omit=dev');
+    expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
     expect(removedPaths).toEqual([
       nodeModulesPath,
       nodeModulesPath,
@@ -209,10 +598,17 @@ describe('prepareBackendRuntime', () => {
     });
     expect(runCalls[0]?.args[0]).toContain('npm-cli.js');
     expect(runCalls[0]?.args[1]).toBe('install');
-    expect(runCalls[0]?.args[2]).toBe('--omit=dev');
+    expect(runCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
     expect(warnings).toEqual([
       `npm ci failed in ${backendDir}. Falling back to npm install to regenerate runtime dependencies.`
     ]);
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(getBackendRuntimeStampPath(backendDir));
+    expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
+      createBackendRuntimeInstallStamp(backendDir, {
+        packageLockHash: hashTestFile(packageLockPath)
+      })
+    );
   });
 
   it('returns early with npm install when no lockfile is present and install succeeds', () => {
@@ -231,8 +627,10 @@ describe('prepareBackendRuntime', () => {
     }> = [];
     const warnings: string[] = [];
     const existsCalls: string[] = [];
+    const writtenFiles: Array<{ content: string; path: string }> = [];
 
     prepareBackendRuntime({
+      ...backendRuntimeTestDependencies,
       backendDir,
       existsSyncFn(targetPath) {
         existsCalls.push(targetPath);
@@ -250,14 +648,19 @@ describe('prepareBackendRuntime', () => {
       },
       warnFn(message) {
         warnings.push(message);
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
       }
     });
 
     expect(removedPaths).toEqual([join(backendDir, 'node_modules')]);
-    expect(existsCalls).toEqual([
-      packageJsonPath,
-      join(backendDir, 'package-lock.json')
-    ]);
+    expect(existsCalls).toEqual(
+      expect.arrayContaining([
+        packageJsonPath,
+        join(backendDir, 'package-lock.json')
+      ])
+    );
     expect(tryRunCalls).toHaveLength(1);
     expect(tryRunCalls[0]).toMatchObject({
       command: process.execPath,
@@ -265,9 +668,14 @@ describe('prepareBackendRuntime', () => {
     });
     expect(tryRunCalls[0]?.args[0]).toContain('npm-cli.js');
     expect(tryRunCalls[0]?.args[1]).toBe('install');
-    expect(tryRunCalls[0]?.args[2]).toBe('--omit=dev');
+    expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
     expect(runCalls).toEqual([]);
     expect(warnings).toEqual([]);
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(getBackendRuntimeStampPath(backendDir));
+    expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
+      createBackendRuntimeInstallStamp(backendDir)
+    );
   });
 
   it('throws when npm install fails and no lockfile is available', () => {
@@ -282,6 +690,7 @@ describe('prepareBackendRuntime', () => {
 
     expect(() =>
       prepareBackendRuntime({
+        ...backendRuntimeTestDependencies,
         backendDir,
         existsSyncFn(targetPath) {
           return targetPath === packageJsonPath;
@@ -315,6 +724,7 @@ describe('prepareBackendRuntime', () => {
 
     expect(() =>
       prepareBackendRuntime({
+        ...backendRuntimeTestDependencies,
         backendDir,
         existsSyncFn(targetPath) {
           return (
@@ -511,6 +921,7 @@ describe('prepareNodeSidecar', () => {
     const copiedFiles: Array<{ from: string; to: string }> = [];
 
     const targetPath = prepareNodeSidecar({
+      ...nodeSidecarTestDependencies,
       binariesDirectory: 'binaries-dir',
       copyFileSyncFn(from, to) {
         copiedFiles.push({ from, to });
@@ -554,6 +965,7 @@ describe('prepareNodeSidecar', () => {
     const copiedFiles: Array<{ from: string; to: string }> = [];
 
     const targetPath = prepareNodeSidecar({
+      ...nodeSidecarTestDependencies,
       binariesDirectory: 'binaries-dir',
       copyFileSyncFn(from, to) {
         copiedFiles.push({ from, to });
@@ -590,6 +1002,7 @@ describe('prepareNodeSidecar', () => {
     const removedPaths: string[] = [];
 
     const targetPath = prepareNodeSidecar({
+      ...nodeSidecarTestDependencies,
       binariesDirectory: 'binaries-dir',
       copyFileSyncFn(from, to) {
         copiedFiles.push({ from, to });
@@ -626,42 +1039,387 @@ describe('prepareNodeSidecar', () => {
     );
   });
 
-  it('replaces an existing target sidecar before copying the fresh binary', () => {
+  it('copies over an existing target sidecar when the stamp does not match', () => {
     const copiedFiles: Array<{ from: string; to: string }> = [];
     const removedPaths: string[] = [];
+    const writtenFiles: Array<{ content: string; path: string }> = [];
+    const targetFileName = 'node-x86_64-pc-windows-msvc.exe';
+    const targetPath = join('binaries-dir', targetFileName);
+    const stampPath = getNodeSidecarStampPath('binaries-dir');
 
-    const targetPath = prepareNodeSidecar({
+    const result = prepareNodeSidecar({
+      ...nodeSidecarTestDependencies,
       binariesDirectory: 'binaries-dir',
       copyFileSyncFn(from, to) {
         copiedFiles.push({ from, to });
+      },
+      existsSyncFn(path) {
+        return path === targetPath || path === stampPath;
       },
       mkdirSyncFn() {
         return undefined;
       },
       nodeExecPath: 'node.exe',
       platform: 'win32',
+      readFileSyncFn() {
+        return createNodeSidecarStamp('node.exe', targetFileName, {
+          sourceSize: 999
+        });
+      },
       readdirSyncFn() {
-        return ['node-x86_64-pc-windows-msvc.exe'];
+        return [targetFileName];
       },
       removePathFn(targetPath) {
         removedPaths.push(targetPath);
       },
       targetTripleFn() {
         return 'x86_64-pc-windows-msvc';
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
       }
     });
 
-    expect(removedPaths).toEqual([
-      join('binaries-dir', 'node-x86_64-pc-windows-msvc.exe')
-    ]);
+    expect(removedPaths).toEqual([]);
     expect(copiedFiles).toEqual([
       {
         from: 'node.exe',
-        to: join('binaries-dir', 'node-x86_64-pc-windows-msvc.exe')
+        to: targetPath
       }
     ]);
-    expect(targetPath).toBe(
-      join('binaries-dir', 'node-x86_64-pc-windows-msvc.exe')
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(stampPath);
+    expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
+      JSON.parse(createNodeSidecarStamp('node.exe', targetFileName))
+    );
+    expect(result).toBe(targetPath);
+  });
+
+  it('skips copying when the target sidecar and source stat stamp match', () => {
+    const copiedFiles: Array<{ from: string; to: string }> = [];
+    const removedPaths: string[] = [];
+    const targetFileName = 'node-x86_64-pc-windows-msvc.exe';
+    const targetPath = join('binaries-dir', targetFileName);
+    const stampPath = getNodeSidecarStampPath('binaries-dir');
+
+    const result = prepareNodeSidecar({
+      ...nodeSidecarTestDependencies,
+      binariesDirectory: 'binaries-dir',
+      copyFileSyncFn(from, to) {
+        copiedFiles.push({ from, to });
+      },
+      existsSyncFn(path) {
+        return path === targetPath || path === stampPath;
+      },
+      mkdirSyncFn() {
+        return undefined;
+      },
+      nodeExecPath: 'node.exe',
+      platform: 'win32',
+      readFileSyncFn() {
+        return createNodeSidecarStamp('node.exe', targetFileName);
+      },
+      readdirSyncFn() {
+        return ['node-old.exe', targetFileName];
+      },
+      removePathFn(path) {
+        removedPaths.push(path);
+      },
+      targetTripleFn() {
+        return 'x86_64-pc-windows-msvc';
+      },
+      writeFileSyncFn() {
+        throw new Error('writeFileSyncFn must not be called');
+      }
+    });
+
+    expect(result).toBe(targetPath);
+    expect(copiedFiles).toEqual([]);
+    expect(removedPaths).toEqual([join('binaries-dir', 'node-old.exe')]);
+  });
+
+  it('copies when a matching sidecar stamp exists but the target is missing', () => {
+    const copiedFiles: Array<{ from: string; to: string }> = [];
+    const writtenFiles: Array<{ content: string; path: string }> = [];
+    const targetFileName = 'node-x86_64-pc-windows-msvc.exe';
+    const stampPath = getNodeSidecarStampPath('binaries-dir');
+
+    const result = prepareNodeSidecar({
+      ...nodeSidecarTestDependencies,
+      binariesDirectory: 'binaries-dir',
+      copyFileSyncFn(from, to) {
+        copiedFiles.push({ from, to });
+      },
+      existsSyncFn(path) {
+        return path === stampPath;
+      },
+      mkdirSyncFn() {
+        return undefined;
+      },
+      nodeExecPath: 'node.exe',
+      platform: 'win32',
+      readFileSyncFn() {
+        return createNodeSidecarStamp('node.exe', targetFileName);
+      },
+      readdirSyncFn() {
+        return [];
+      },
+      removePathFn() {
+        throw new Error('removePathFn must not be called');
+      },
+      targetTripleFn() {
+        return 'x86_64-pc-windows-msvc';
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
+      }
+    });
+
+    expect(result).toBe(join('binaries-dir', targetFileName));
+    expect(copiedFiles).toEqual([
+      {
+        from: 'node.exe',
+        to: join('binaries-dir', targetFileName)
+      }
+    ]);
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(stampPath);
+    expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
+      JSON.parse(createNodeSidecarStamp('node.exe', targetFileName))
+    );
+  });
+
+  it('copies and rewrites the node sidecar stamp when the existing stamp is invalid', () => {
+    const copiedFiles: Array<{ from: string; to: string }> = [];
+    const writtenFiles: Array<{ content: string; path: string }> = [];
+    const targetFileName = 'node-x86_64-pc-windows-msvc.exe';
+    const targetPath = join('binaries-dir', targetFileName);
+    const stampPath = getNodeSidecarStampPath('binaries-dir');
+
+    const result = prepareNodeSidecar({
+      ...nodeSidecarTestDependencies,
+      binariesDirectory: 'binaries-dir',
+      copyFileSyncFn(from, to) {
+        copiedFiles.push({ from, to });
+      },
+      existsSyncFn(path) {
+        return path === targetPath || path === stampPath;
+      },
+      mkdirSyncFn() {
+        return undefined;
+      },
+      nodeExecPath: 'node.exe',
+      platform: 'win32',
+      readFileSyncFn() {
+        return '{bad-json';
+      },
+      readdirSyncFn() {
+        return [targetFileName];
+      },
+      removePathFn() {
+        throw new Error('removePathFn must not be called');
+      },
+      targetTripleFn() {
+        return 'x86_64-pc-windows-msvc';
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
+      }
+    });
+
+    expect(result).toBe(targetPath);
+    expect(copiedFiles).toEqual([{ from: 'node.exe', to: targetPath }]);
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(stampPath);
+    expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
+      JSON.parse(createNodeSidecarStamp('node.exe', targetFileName))
+    );
+  });
+
+  it('warns but does not fail when writing the node sidecar stamp fails', () => {
+    const stampPath = getNodeSidecarStampPath('binaries-dir');
+    const warnings: string[] = [];
+
+    expect(() =>
+      prepareNodeSidecar({
+        ...nodeSidecarTestDependencies,
+        binariesDirectory: 'binaries-dir',
+        copyFileSyncFn() {
+          return undefined;
+        },
+        mkdirSyncFn() {
+          return undefined;
+        },
+        nodeExecPath: 'node.exe',
+        platform: 'win32',
+        readdirSyncFn() {
+          return [];
+        },
+        removePathFn() {
+          throw new Error('removePathFn must not be called');
+        },
+        targetTripleFn() {
+          return 'x86_64-pc-windows-msvc';
+        },
+        warnFn(message) {
+          warnings.push(message);
+        },
+        writeFileSyncFn() {
+          throw new Error('disk full');
+        }
+      })
+    ).not.toThrow();
+
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain(stampPath);
+    expect(warnings[0]).toContain('disk full');
+  });
+
+  it('copies when the node sidecar source path in the stamp does not match', () => {
+    const copiedFiles: Array<{ from: string; to: string }> = [];
+    const writtenFiles: Array<{ content: string; path: string }> = [];
+    const targetFileName = 'node-x86_64-pc-windows-msvc.exe';
+    const targetPath = join('binaries-dir', targetFileName);
+    const stampPath = getNodeSidecarStampPath('binaries-dir');
+
+    const result = prepareNodeSidecar({
+      ...nodeSidecarTestDependencies,
+      binariesDirectory: 'binaries-dir',
+      copyFileSyncFn(from, to) {
+        copiedFiles.push({ from, to });
+      },
+      existsSyncFn(path) {
+        return path === targetPath || path === stampPath;
+      },
+      mkdirSyncFn() {
+        return undefined;
+      },
+      nodeExecPath: 'node.exe',
+      platform: 'win32',
+      readFileSyncFn() {
+        return createNodeSidecarStamp('other-node.exe', targetFileName);
+      },
+      readdirSyncFn() {
+        return [targetFileName];
+      },
+      removePathFn() {
+        throw new Error('removePathFn must not be called');
+      },
+      targetTripleFn() {
+        return 'x86_64-pc-windows-msvc';
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
+      }
+    });
+
+    expect(result).toBe(targetPath);
+    expect(copiedFiles).toEqual([
+      {
+        from: 'node.exe',
+        to: targetPath
+      }
+    ]);
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(stampPath);
+    expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
+      JSON.parse(createNodeSidecarStamp('node.exe', targetFileName))
+    );
+  });
+
+  it('copies when the node sidecar source mtime in the stamp does not match', () => {
+    const copiedFiles: Array<{ from: string; to: string }> = [];
+    const writtenFiles: Array<{ content: string; path: string }> = [];
+    const targetFileName = 'node-x86_64-pc-windows-msvc.exe';
+    const targetPath = join('binaries-dir', targetFileName);
+    const stampPath = getNodeSidecarStampPath('binaries-dir');
+
+    const result = prepareNodeSidecar({
+      ...nodeSidecarTestDependencies,
+      binariesDirectory: 'binaries-dir',
+      copyFileSyncFn(from, to) {
+        copiedFiles.push({ from, to });
+      },
+      existsSyncFn(path) {
+        return path === targetPath || path === stampPath;
+      },
+      mkdirSyncFn() {
+        return undefined;
+      },
+      nodeExecPath: 'node.exe',
+      platform: 'win32',
+      readFileSyncFn() {
+        return createNodeSidecarStamp('node.exe', targetFileName, {
+          sourceMtimeMs: 999
+        });
+      },
+      readdirSyncFn() {
+        return [targetFileName];
+      },
+      removePathFn() {
+        throw new Error('removePathFn must not be called');
+      },
+      targetTripleFn() {
+        return 'x86_64-pc-windows-msvc';
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
+      }
+    });
+
+    expect(result).toBe(targetPath);
+    expect(copiedFiles).toEqual([{ from: 'node.exe', to: targetPath }]);
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(stampPath);
+    expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
+      JSON.parse(createNodeSidecarStamp('node.exe', targetFileName))
+    );
+  });
+
+  it('copies when the node sidecar target file name in the stamp does not match', () => {
+    const copiedFiles: Array<{ from: string; to: string }> = [];
+    const writtenFiles: Array<{ content: string; path: string }> = [];
+    const targetFileName = 'node-x86_64-pc-windows-msvc.exe';
+    const targetPath = join('binaries-dir', targetFileName);
+    const stampPath = getNodeSidecarStampPath('binaries-dir');
+
+    const result = prepareNodeSidecar({
+      ...nodeSidecarTestDependencies,
+      binariesDirectory: 'binaries-dir',
+      copyFileSyncFn(from, to) {
+        copiedFiles.push({ from, to });
+      },
+      existsSyncFn(path) {
+        return path === targetPath || path === stampPath;
+      },
+      mkdirSyncFn() {
+        return undefined;
+      },
+      nodeExecPath: 'node.exe',
+      platform: 'win32',
+      readFileSyncFn() {
+        return createNodeSidecarStamp('node.exe', 'node-old-target.exe');
+      },
+      readdirSyncFn() {
+        return [targetFileName];
+      },
+      removePathFn() {
+        throw new Error('removePathFn must not be called');
+      },
+      targetTripleFn() {
+        return 'x86_64-pc-windows-msvc';
+      },
+      writeFileSyncFn(path, content) {
+        writtenFiles.push({ content, path });
+      }
+    });
+
+    expect(result).toBe(targetPath);
+    expect(copiedFiles).toEqual([{ from: 'node.exe', to: targetPath }]);
+    expect(writtenFiles).toHaveLength(1);
+    expect(writtenFiles[0]?.path).toBe(stampPath);
+    expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
+      JSON.parse(createNodeSidecarStamp('node.exe', targetFileName))
     );
   });
 });
