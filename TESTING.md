@@ -69,7 +69,7 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 
 - **Unit Testing:**
   - Test individual units/components in isolation.
-  - Tools: Jest for Angular and Vitest for NestJS
+  - Tools: Analog Vitest Angular for Angular and Vitest for NestJS
 
 - **Integration Testing:**
   - Test the interactions between integrated units/components.
@@ -81,7 +81,7 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 
 - **User Interface Testing:**
   - Validate UI components render correctly and handle user interactions.
-  - Tools: Jasmine (for Angular), Storybook (for component testing)
+  - Tools: Analog Vitest Angular for Angular component tests, Storybook for component review
 
 - **Performance Testing:**
 
@@ -96,13 +96,12 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 ### 4.2 Tools and Frameworks
 
 - **Testing Frameworks:**
-  - Jest, Vitest (Unit and integration tests)
+  - Vitest and Analog Vitest Angular (unit and integration tests)
   - Playwright (browser E2E tests)
-  - Jasmine (Angular unit tests)
 
 - **Mocking and Stubbing:**
   - Supertest (HTTP mocking in Node.js)
-  - Viest Mock Functions
+  - Vitest mock functions
 
 - **Continuous Integration:**
 
@@ -119,13 +118,13 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 - [x] Review existing backend test coverage.
 - [x] Focus on the most critical and complex business logic components.
 - [x] Develop backend integration tests using Vitest to review OS-level interaction.
-- [x] Proivde a test coverage for the backend codebase available for SonarCloud.
+- [x] Provide test coverage for the backend codebase available for SonarCloud.
 - Write additional backend unit tests to achieve at least 80% code coverage.
 - Test API endpoints using SuperTest, including edge cases and error conditions.
 
 ### Frontend Unit Testing
 
-- [x] Configure testing tools for Angular (Jasmine).
+- [x] Configure testing tools for Angular (Analog Vitest Angular).
 - Identify key UI components and services to test.
 - Write unit tests for UI components, focusing on:
   - Component rendering
@@ -166,7 +165,7 @@ The objective of this testing plan is to outline a comprehensive strategy to ful
 
 ### 6.2 Tools
 
-- **Testing Tools:** Jest, Playwright, SuperTest, Jasmine, k6, OWASP ZAP
+- **Testing Tools:** Vitest, Analog Vitest Angular, Playwright, SuperTest, Storybook, k6, OWASP ZAP
 - **Development Tools:** Visual Studio Code, NX CLI
 - **CI/CD Platforms:** GitHub Actions
 
