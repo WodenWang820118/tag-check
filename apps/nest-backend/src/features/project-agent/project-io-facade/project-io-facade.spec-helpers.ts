@@ -30,8 +30,10 @@ export class FolderServiceMock {
 
 export class JsonProjectImportServiceMock {
   imported: unknown = null;
+  importCalls: unknown[] = [];
 
   async importProject(payload: unknown) {
+    this.importCalls.push(payload);
     this.imported = payload;
   }
 }
