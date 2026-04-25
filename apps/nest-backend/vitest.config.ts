@@ -15,10 +15,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     setupFiles: ['./src/test-setup.ts'],
-    include: [
-      '**/*.{test,spec,e2e-spec}.?(c|m)[jt]s?(x)',
-      './test/**/*.e2e-spec.ts'
-    ],
+    include: ['**/*.{test,spec,e2e-spec}.?(c|m)[jt]s?(x)'],
     ...reporterConfig,
     testTimeout: 30000,
     coverage: {
