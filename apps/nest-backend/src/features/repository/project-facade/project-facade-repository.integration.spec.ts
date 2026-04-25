@@ -19,7 +19,6 @@ import { ApplicationSettingRepositoryService } from '../../../core/repository/se
 import { AuthenticationSettingRepositoryService } from '../../../core/repository/settings/authentication-setting-repository.service';
 import { BrowserSettingRepositoryService } from '../../../core/repository/settings/browser-setting-repository.service';
 import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
-import { vi } from 'vitest';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 const entities = [
   ProjectEntity,
@@ -36,11 +35,6 @@ const entities = [
 describe('ProjectFacadeRepositoryService', () => {
   let service: ProjectFacadeRepositoryService;
   let module: TestingModule;
-
-  beforeAll(() => {
-    // Increase the timeout for the initial setup
-    vi.setConfig({ testTimeout: 30000 });
-  });
 
   const createTestingModule = async () => {
     return await Test.createTestingModule({
