@@ -60,6 +60,24 @@
       "options": {
         "command": "pnpm exec vitest --coverage --root=apps/nest-backend --exclude=\"**/test/*e2e-spec.ts\" --exclude=\"**/*.integration.spec.ts\" --watch=false"
       }
+    },
+    "test-e2e": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "pnpm exec vitest apps/nest-backend/test/app.e2e-spec.ts --root=apps/nest-backend --watch=false"
+      }
+    },
+    "test-e2e-coverage": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "outputs": ["{workspaceRoot}/coverage/apps/nest-backend"],
+      "options": {
+        "command": "pnpm exec vitest apps/nest-backend/test --coverage --root=apps/nest-backend --watch=false",
+        "env": {
+          "WEB_SOCKET": "7003"
+        }
+      }
     }
   }
 }
