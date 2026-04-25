@@ -153,11 +153,6 @@ export class ProjectIoFacadeService {
     }
   }
 
-  private inferSlugFromFixturePath(fixturePath: string): string {
-    const fileName = fixturePath.split(/[/\\]/).pop() ?? '';
-    return fileName.replace(/\.fixture\.json$/, '');
-  }
-
   private async tryImportFixture(
     fixturePath: string,
     finalSlug: string
