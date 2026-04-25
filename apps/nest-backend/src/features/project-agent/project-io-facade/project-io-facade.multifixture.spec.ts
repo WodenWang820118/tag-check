@@ -5,11 +5,12 @@ import { FolderPathService } from '../../../infrastructure/os/path/folder-path/f
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { JsonProjectExportService } from '../../../infrastructure/data-export/json/export/json-project-export.service';
 import { JsonProjectImportService } from '../../../infrastructure/data-export/json/import/json-project-import.service';
-import { mkdirSync, rmSync, writeFileSync, existsSync } from 'fs';
+import { mkdirSync, rmSync, writeFileSync, existsSync, mkdtempSync } from 'fs';
+import { tmpdir } from 'os';
 import { join } from 'path';
-import { describe, it, beforeEach, expect } from 'vitest';
+import { describe, it, beforeEach, afterEach, expect } from 'vitest';
 
-const tempRoot = join(process.cwd(), 'tmp-facade-test');
+let tempRoot: string;
 
 class FolderPathServiceMock {
   async getProjectFolderPath(slug: string) {
@@ -69,8 +70,7 @@ describe('ProjectIoFacadeService multi-fixture selection', () => {
   let service: ProjectIoFacadeService;
   let importSvc: JsonProjectImportServiceMock;
   beforeEach(async () => {
-    rmSync(tempRoot, { recursive: true, force: true });
-    mkdirSync(tempRoot, { recursive: true });
+    tempRoot = mkdtempSync(join(tmpdir(), 'tag-check-facade-'));
     const mod = await Test.createTestingModule({
       providers: [
         ProjectIoFacadeService,
@@ -89,6 +89,10 @@ describe('ProjectIoFacadeService multi-fixture selection', () => {
     }).compile();
     service = mod.get(ProjectIoFacadeService);
     importSvc = mod.get(JsonProjectImportService);
+  });
+
+  afterEach(() => {
+    rmSync(tempRoot, { recursive: true, force: true });
   });
 
   it('picks alphabetically first fixture', async () => {
