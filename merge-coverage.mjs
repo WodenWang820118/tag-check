@@ -1,12 +1,15 @@
 'use strict';
 
 import { glob } from 'glob';
-import { readFileSync, writeFileSync } from 'fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 
 async function getLcovFiles() {
   try {
-    const files = await glob('**/lcov.info', { ignore: 'node_modules/**' });
+    const files = await glob('coverage/**/lcov.info', {
+      ignore: ['coverage/lcov.info', 'node_modules/**']
+    });
+    files.sort();
     console.log('Files found:', files);
     return files;
   } catch (error) {
@@ -33,7 +36,9 @@ async function getLcovFiles() {
       return mergedReport + content;
     }, '');
 
-    const outputPath = resolve('./coverage/lcov.info');
+    const outputDir = resolve('./coverage');
+    const outputPath = resolve(outputDir, 'lcov.info');
+    mkdirSync(outputDir, { recursive: true });
     console.log('Writing merged report to:', outputPath);
     console.log('Merged report length:', mergedReport.length);
 
