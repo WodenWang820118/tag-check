@@ -65,7 +65,7 @@
       "executor": "nx:run-commands",
       "cache": false,
       "options": {
-        "command": "pnpm exec vitest apps/nest-backend/test/app.e2e-spec.ts --root=apps/nest-backend --watch=false"
+        "command": "pnpm exec vitest test/app.e2e-spec.ts --root=apps/nest-backend --watch=false"
       }
     },
     "test-e2e-coverage": {
@@ -73,7 +73,7 @@
       "cache": false,
       "outputs": ["{workspaceRoot}/coverage/apps/nest-backend"],
       "options": {
-        "command": "pnpm exec vitest apps/nest-backend/test --coverage --root=apps/nest-backend --watch=false",
+        "command": "pnpm exec vitest test --coverage --root=apps/nest-backend --watch=false",
         "env": {
           "WEB_SOCKET": "7003"
         }
