@@ -22,10 +22,11 @@ Execution-discipline skill for building changes in thin, verifiable slices.
 
 1. **Pick the Smallest Useful Slice:** Choose one complete, testable step instead of a wide partial rewrite.
 2. **Prefer the Simplest Viable Change:** Implement the minimum code that solves the slice. Do not add speculative abstractions, extra configurability, or future-proofing that the request does not need.
-3. **Keep Changes Surgical:** Avoid mixing feature work with adjacent cleanup, formatting churn, or unrelated refactors. Remove only the imports, variables, or helpers that the current slice made unused.
+3. **Keep Changes Surgical:** Avoid mixing feature work with adjacent cleanup, formatting churn, or unrelated refactors. Remove only the imports, variables, or helpers that the current slice made unused. When current-scope cleanup appears to meet Phase 3.5 triggers, finish the current slice first and route it through `refactoring-and-simplification` instead of mixing refactor work into the feature slice.
 4. **Verify Before Expanding:** Run the relevant tests or checks after each slice.
-5. **Carry Forward Only Stable State:** Leave the repo compilable and reviewable between slices.
-6. **Repeat Until Done:** Expand slice-by-slice instead of front-loading the entire feature.
+5. **Check Phase 3.5 Triggers:** After each green verification, evaluate whether the current change created large-file pressure, a third concrete copy of semantic duplication, mixed responsibility, hard-to-test logic, or current-change orphan code. If a trigger fires, load `refactoring-and-simplification` before the next slice.
+6. **Carry Forward Only Stable State:** Leave the repo compilable and reviewable between slices.
+7. **Repeat Until Done:** Expand slice-by-slice instead of front-loading the entire feature.
 
 ## Ask / Escalate
 

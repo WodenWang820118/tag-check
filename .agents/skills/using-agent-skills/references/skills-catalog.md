@@ -25,6 +25,7 @@ This is the repo-local catalog for `.agents/skills`.
 ## Checkpoint Skills
 
 - `test-driven-development`
+- `refactoring-and-simplification`
 - `code-review-and-quality`
 - `address-review-feedback`
 - `proofshot`
