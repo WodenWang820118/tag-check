@@ -1,17 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
-enum BrowserAction {
-  SETVIEWPORT = 'setViewport',
-  NAVIGATE = 'navigate',
-  WAITFORELEMENT = 'waitForElement',
-  KEYDOWN = 'keydown',
-  KEYUP = 'kkeyup'
-}
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
 import { ACTION_HANDLERS, ActionHandler } from '..//handlers/utils';
 import { StepExecutorUtilsService } from './step-executor-utils.service';
 import { EventInspectionPresetDto } from '../../../../shared/dto/event-inspection-preset.dto';
 import { Step } from '@utils';
+import { BrowserAction } from '../action-utils';
 
 @Injectable()
 export class StepExecutorService {
@@ -102,6 +96,13 @@ export class StepExecutorService {
       this.handlers[step.type] &&
       typeof this.handlers[step.type].handle === 'function'
     ) {
+      const navigationPromise = isLastStep
+        ? this.stepExecutorUtilsService.handleNavigationIfNeeded(
+            page,
+            isLastStep
+          )
+        : undefined;
+
       await this.handlers[step.type].handle(
         page,
         projectName,
@@ -109,10 +110,7 @@ export class StepExecutorService {
         step,
         isLastStep
       );
-      await this.stepExecutorUtilsService.handleNavigationIfNeeded(
-        page,
-        isLastStep
-      );
+      await navigationPromise;
       await this.dataLayerService.updateSelfDataLayer(
         page,
         projectName,

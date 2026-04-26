@@ -28,14 +28,20 @@ export class EvaluateHoverService {
         return false;
       }
 
-      await Promise.race([
-        page.evaluate(async () => {
-          await element.focus();
-        }, selector),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Timeout exceeded')), timeout)
-        )
-      ]);
+      try {
+        await Promise.race([
+          element.hover(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Timeout exceeded')), timeout)
+          )
+        ]);
+      } finally {
+        await element.dispose().catch((error) => {
+          this.logger.warn(
+            `Failed to dispose hovered element handle "${selector}": ${error}`
+          );
+        });
+      }
       return true;
     } catch (error) {
       this.logger.error(

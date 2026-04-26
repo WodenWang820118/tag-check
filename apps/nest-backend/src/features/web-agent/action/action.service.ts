@@ -24,21 +24,20 @@ export class ActionService {
       projectSlug,
       eventId
     );
-    const steps = operation.steps;
+    const steps = operation?.steps;
 
     if (!operation || !steps) return;
 
     let isLastStep = false;
     const lastStep = steps.length;
+    const state = {
+      isFirstNavigation: true
+    };
 
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
 
       if (i === steps.length - 1) isLastStep = true;
-
-      const state = {
-        isFirstNavigation: true
-      };
 
       this.logger.log(`Performing step ${i + 1} of ${lastStep}`);
       this.eventsGatewayService.sendProgressUpdate(lastStep, i + 1); // Send progress update
