@@ -135,14 +135,27 @@ export class GtmOperatorService {
 
   async operateGtmPreviewMode(page: Page, gtmUrl: string) {
     await page.goto(gtmUrl, { waitUntil: 'networkidle2' });
-    await page.$('#include-debug-param').then((el) => el?.click());
+    await this.clickRequiredPreviewControl(page, '#include-debug-param');
 
     // 3) Start tag manager preview mode
-    await page.$('#domain-start-button').then((el) => el?.click());
+    await this.clickRequiredPreviewControl(page, '#domain-start-button');
 
     const btnSelector = '.btn.btn--filled.wd-continue-debugging-button';
-    await page.waitForSelector(btnSelector, { visible: true });
-    await page.$(btnSelector).then((el) => el?.click());
+    await this.clickRequiredPreviewControl(page, btnSelector);
+  }
+
+  private async clickRequiredPreviewControl(
+    page: Page,
+    selector: string
+  ): Promise<void> {
+    try {
+      await page.waitForSelector(selector, { visible: true });
+      await page.click(selector);
+    } catch (error) {
+      throw new Error(
+        `Failed to operate GTM preview control "${selector}": ${error}`
+      );
+    }
   }
 
   extractBaseUrlFromGtmUrl(gtmUrl: string) {

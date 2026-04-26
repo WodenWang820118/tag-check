@@ -81,6 +81,84 @@ describe('GtmOperatorService recorder lifecycle', () => {
       recorder
     );
   });
+
+  it('leaves the browser open after a successful headful GTM inspection', async () => {
+    await service.inspectSingleEventViaGtm(
+      'project',
+      'event',
+      { ...createQuery(), headless: 'false' },
+      createPreset()
+    );
+
+    expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
+    expect(browser.close).not.toHaveBeenCalled();
+    expect(puppeteerUtils.cleanup).not.toHaveBeenCalled();
+  });
+
+  it('stops the recorder and skips cleanup after a failed headful GTM inspection', async () => {
+    pipeline.singleEventInspectionRecipe.mockRejectedValue(new Error('failed'));
+
+    await expect(
+      service.inspectSingleEventViaGtm(
+        'project',
+        'event',
+        { ...createQuery(), headless: 'false' },
+        createPreset()
+      )
+    ).rejects.toThrow('Failed to perform GTM validation');
+
+    expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
+    expect(puppeteerUtils.cleanup).not.toHaveBeenCalled();
+    expect(browser.close).not.toHaveBeenCalled();
+  });
+});
+
+describe('GtmOperatorService.operateGtmPreviewMode', () => {
+  it('waits for each required GTM preview control before clicking it', async () => {
+    const service = new GtmOperatorService({} as any, {} as any, {} as any);
+    const page = createPreviewPage();
+
+    await service.operateGtmPreviewMode(
+      page as any,
+      'https://tagassistant.google.com/#url=https%3A%2F%2Fexample.test'
+    );
+
+    expect(page.goto).toHaveBeenCalledWith(
+      'https://tagassistant.google.com/#url=https%3A%2F%2Fexample.test',
+      { waitUntil: 'networkidle2' }
+    );
+    expect(page.waitForSelector).toHaveBeenCalledWith('#include-debug-param', {
+      visible: true
+    });
+    expect(page.waitForSelector).toHaveBeenCalledWith('#domain-start-button', {
+      visible: true
+    });
+    expect(page.waitForSelector).toHaveBeenCalledWith(
+      '.btn.btn--filled.wd-continue-debugging-button',
+      { visible: true }
+    );
+    expect(page.click).toHaveBeenNthCalledWith(1, '#include-debug-param');
+    expect(page.click).toHaveBeenNthCalledWith(2, '#domain-start-button');
+    expect(page.click).toHaveBeenNthCalledWith(
+      3,
+      '.btn.btn--filled.wd-continue-debugging-button'
+    );
+  });
+
+  it('fails fast when a required GTM preview control is missing', async () => {
+    const service = new GtmOperatorService({} as any, {} as any, {} as any);
+    const page = createPreviewPage();
+    page.waitForSelector.mockRejectedValueOnce(new Error('missing control'));
+
+    await expect(
+      service.operateGtmPreviewMode(
+        page as any,
+        'https://tagassistant.google.com/#url=https%3A%2F%2Fexample.test'
+      )
+    ).rejects.toThrow(/Failed to operate GTM preview control/);
+
+    expect(page.click).not.toHaveBeenCalled();
+  });
 });
 
 function createQuery() {
@@ -118,5 +196,13 @@ function createMockPage() {
   return {
     bringToFront: vi.fn().mockResolvedValue(undefined),
     goto: vi.fn().mockResolvedValue(undefined)
+  };
+}
+
+function createPreviewPage() {
+  return {
+    goto: vi.fn().mockResolvedValue(undefined),
+    waitForSelector: vi.fn().mockResolvedValue({}),
+    click: vi.fn().mockResolvedValue(undefined)
   };
 }
