@@ -1,10 +1,14 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'vitest';
 
-import { probeGeminiCliHealth, runGeminiReview } from './gemini.ts';
+import {
+  buildGeminiReviewPrompt,
+  probeGeminiCliHealth,
+  runGeminiReview
+} from './gemini.ts';
 
 test('probeGeminiCliHealth records health-version and health-probe observations with checkpoint telemetry', async () => {
   const recorded: Array<Record<string, unknown>> = [];
@@ -46,6 +50,41 @@ test('probeGeminiCliHealth records health-version and health-probe observations 
     assert.equal(recorded[0]?.operation, 'health-version');
     assert.equal(recorded[1]?.operation, 'health-probe');
     assert.equal(recorded[1]?.checkpoint, 'test');
+  } finally {
+    rmSync(repoRoot, { force: true, recursive: true });
+  }
+});
+
+test('buildGeminiReviewPrompt falls back to GitHub agent profiles when Gemini commands are absent', () => {
+  const repoRoot = mkdtempSync(join(tmpdir(), 'gemini-profile-'));
+  try {
+    const profilePath = join(
+      repoRoot,
+      '.github',
+      'agents',
+      'security-reviewer.agent.md'
+    );
+    mkdirSync(join(profilePath, '..'), { recursive: true });
+    writeFileSync(
+      profilePath,
+      ['---', 'name: security-reviewer', '---', 'Security lens'].join('\n'),
+      'utf8'
+    );
+
+    const prompt = buildGeminiReviewPrompt({
+      checkpoint: 'implementation',
+      focus: 'shell network',
+      model: 'gemini-3-flash-preview',
+      prompt: 'Review this diff.',
+      repoRoot
+    });
+
+    assert.match(
+      prompt,
+      /Use the gemini reviewer specialist lens: security-reviewer/
+    );
+    assert.match(prompt, /Security lens/);
+    assert.match(prompt, /Review this diff/);
   } finally {
     rmSync(repoRoot, { force: true, recursive: true });
   }

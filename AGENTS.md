@@ -12,9 +12,9 @@ referenced workflow file for its named phase or checkpoint.
 ## Repository Instruction Map
 
 Use `.agents/workflows/` for control-plane rules, `.agents/skills/` for task
-capabilities, `.agents/reviewers/` for second-opinion lenses, and
-`.agents/references/` for stable repo facts. Tool bridges such as
-`.github/copilot-instructions.md`, `.gemini/settings.json`, and
+capabilities, `.agents/reviewers/common-review-contract.toml` for the shared
+review contract, and `.agents/references/` for stable repo facts. Tool bridges
+such as `.github/copilot-instructions.md`, `.gemini/settings.json`, and
 `.codex/config.toml` point back here.
 
 Instruction precedence:
@@ -22,13 +22,15 @@ Instruction precedence:
 1. Root hard rules in `AGENTS.md`.
 2. Details in workflow files explicitly referenced by `AGENTS.md`.
 3. Local repo and Nx skills in `.agents/skills`.
-4. Reviewer personas in `.agents/reviewers` for the active checkpoint.
+4. The shared review contract plus the active tool-native reviewer profile or
+   prompt for the checkpoint.
 5. Vendored or plugin-provided general-purpose skills.
 
 Context loading order: read this file, read
 `.agents/skills/using-agent-skills/SKILL.md`, load the workflow file required
-by the current phase/checkpoint, then load only the smallest relevant skill and
-reviewer persona.
+by the current phase/checkpoint, then load only the smallest relevant skill and,
+for review checkpoints, the shared contract plus the active tool-native
+reviewer profile or prompt.
 
 Do not recreate `.github/skills` or `.gemini/skills` copies unless a tool proves
 it cannot read `.agents/skills`.
@@ -80,7 +82,7 @@ The primary agent must not self-approve its own plan, code, or tests.
 
 Pre-implementation gate commands: inspect with `pnpm review:status`, approve
 with `pnpm review:approve-pre-implementation -- --reviewer <id> --focus <area>
---summary "<summary>"` after the plan review passes.
+--summary "<summary>"`, and reset with `pnpm review:reset`.
 
 ## Task Size Summary
 

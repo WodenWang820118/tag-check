@@ -2,6 +2,7 @@
 
 - `AGENTS.md` is the canonical repository instruction file. Follow it first.
 - The repo's Karpathy-inspired behavioral overlay lives in `AGENTS.md` and `.agents/references/behavioral-guidelines.md`. Keep this file as a bridge instead of duplicating those rules here.
+- For review checkpoints, apply `.agents/reviewers/common-review-contract.toml` plus the active tool-native reviewer profile or prompt.
 - For Angular and NestJS work, load the canonical stack conventions from `.agents/stack-conventions.md` through `AGENTS.md`.
 - Load `.agents/references/repo-map.md` when repo topology matters, and `.agents/references/proofshot-targets.md` for browser proof target routing.
 - Keep this file as a bridge, not a second source of truth.

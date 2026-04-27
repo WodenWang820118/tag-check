@@ -1,4 +1,4 @@
-import type { EvaluationSample, HybridReviewProfileName } from './types.ts';
+﻿import type { EvaluationSample, HybridReviewProfileName } from './types.ts';
 
 export const DEFAULT_OLLAMA_HOST = 'http://127.0.0.1:11434';
 export const DEFAULT_OLLAMA_KEEP_ALIVE = '10m';
@@ -13,7 +13,7 @@ export const DEFAULT_SMALL_DIFF_THRESHOLD_CHARS = 1024;
 export const LOCAL_REVIEWER_BUILD_TIMEOUT_MS = 5 * 60 * 1000;
 export const LOCAL_REVIEWER_COMMAND_TIMEOUT_MS = 5 * 60 * 1000;
 export const DEFAULT_EVALUATION_REPO_NAMES = [
-  'gx.law-prep',
+  'tag-check',
   'gx.go',
   'local-reviewer-cli'
 ] as const;

@@ -348,6 +348,8 @@ async function runReviewExecution(
 
   if (execution.provider === 'copilot') {
     return runCopilotReview({
+      checkpoint: execution.checkpoint,
+      focus: execution.focus,
       model: execution.model,
       prompt,
       repoRoot: process.cwd(),
@@ -357,6 +359,8 @@ async function runReviewExecution(
 
   if (execution.provider === 'gemini') {
     return runGeminiReview({
+      checkpoint: execution.checkpoint,
+      focus: execution.focus,
       model: execution.model ?? getDefaultGeminiModel(execution.checkpoint),
       prompt,
       repoRoot: process.cwd(),

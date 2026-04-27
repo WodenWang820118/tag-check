@@ -18,9 +18,13 @@ import {
   recordRequestStart,
   sleep
 } from '../../rate-limit/rate-limit.ts';
+import type { ReviewCheckpoint } from '../../checkpoint-review/shared/shared.ts';
+import { buildReviewPromptWithReviewerProfile } from '../../shared/reviewer-profile.ts';
 import { runLocalCliCommand } from '../local-cli/local-cli.ts';
 
 interface GeminiReviewInput {
+  checkpoint?: ReviewCheckpoint;
+  focus?: string;
   model: string;
   prompt: string;
   repoRoot?: string;
@@ -154,10 +158,21 @@ export async function runGeminiReview(
   return runGeminiTextCommand(
     {
       ...input,
-      operation: 'review-attempt'
+      operation: 'review-attempt',
+      prompt: buildGeminiReviewPrompt(input)
     },
     dependencies
   );
+}
+
+export function buildGeminiReviewPrompt(input: GeminiReviewInput): string {
+  return buildReviewPromptWithReviewerProfile({
+    checkpoint: input.checkpoint,
+    focus: input.focus,
+    prompt: input.prompt,
+    provider: 'gemini',
+    repoRoot: input.repoRoot
+  });
 }
 
 export function isGeminiUnavailableError(error: unknown): boolean {

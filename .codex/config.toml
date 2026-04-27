@@ -1,4 +1,6 @@
 
+# AGENTS.md is canonical; this file only declares Codex local MCP and agent entrypoints.
+
 mcp_servers.nx-mcp.command = 'npx'
 mcp_servers.nx-mcp.args = [
 	'nx',
