@@ -16,9 +16,13 @@ import {
   COPILOT_REASONING_EFFORT_HELP_TIMEOUT_MS,
   COPILOT_REVIEW_TIMEOUT_MS
 } from '../../provider-policies/provider-policies.ts';
+import type { ReviewCheckpoint } from '../../checkpoint-review/shared/shared.ts';
+import { buildReviewPromptWithReviewerProfile } from '../../shared/reviewer-profile.ts';
 import { runLocalCliCommand } from '../local-cli/local-cli.ts';
 
 interface CopilotReviewInput {
+  checkpoint?: ReviewCheckpoint;
+  focus?: string;
   model?: string;
   prompt: string;
   repoRoot?: string;
@@ -204,6 +208,10 @@ export function runCopilotReview(
     dependencies.recordObservation ?? recordProviderObservation;
   const runCommand = dependencies.runCommand ?? runLocalCliCommand;
   const repoRoot = input.repoRoot ?? process.cwd();
+  const reviewPrompt = buildCopilotReviewPrompt({
+    ...input,
+    repoRoot
+  });
   const telemetryContext = createProviderTelemetryContext(
     input.telemetryContext
   );
@@ -213,7 +221,7 @@ export function runCopilotReview(
   const reviewArgs = buildCopilotReviewCommandArgs(
     {
       model: input.model,
-      prompt: input.prompt,
+      prompt: reviewPrompt,
       repoRoot,
       telemetryContext
     },
@@ -252,7 +260,7 @@ export function runCopilotReview(
         ),
         model: input.model,
         operation: 'review',
-        promptChars: input.prompt.length,
+        promptChars: reviewPrompt.length,
         provider: 'copilot',
         success: false,
         timedOut: isCopilotTimedOut(result, output)
@@ -267,7 +275,7 @@ export function runCopilotReview(
       args: buildCopilotCommandArgs({
         experimental: true,
         model: input.model,
-        prompt: input.prompt
+        prompt: reviewPrompt
       }),
       cwd: repoRoot,
       timeoutMs: COPILOT_REVIEW_TIMEOUT_MS
@@ -287,7 +295,7 @@ export function runCopilotReview(
               : classifyCopilotErrorCategory(output, result.error?.message),
         model: input.model,
         operation: 'review',
-        promptChars: input.prompt.length,
+        promptChars: reviewPrompt.length,
         provider: 'copilot',
         success:
           !result.error && result.status === 0 && output.trim().length > 0,
@@ -323,7 +331,7 @@ export function runCopilotReview(
           : classifyCopilotErrorCategory(output, result.error?.message),
       model: input.model,
       operation: 'review',
-      promptChars: input.prompt.length,
+      promptChars: reviewPrompt.length,
       provider: 'copilot',
       success: reviewSucceeded,
       timedOut: isCopilotTimedOut(result, output)
@@ -348,10 +356,11 @@ export function buildCopilotReviewCommandArgs(
   input: CopilotReviewInput,
   dependencies: CopilotProviderDependencies = {}
 ): string[] {
+  const prompt = buildCopilotReviewPrompt(input);
   const args = buildCopilotCommandArgs({
     experimental: true,
     model: input.model,
-    prompt: input.prompt
+    prompt
   });
   const now = dependencies.now ?? Date.now;
   const recordObservation =
@@ -380,6 +389,16 @@ export function buildCopilotReviewCommandArgs(
   }
 
   return args;
+}
+
+export function buildCopilotReviewPrompt(input: CopilotReviewInput): string {
+  return buildReviewPromptWithReviewerProfile({
+    checkpoint: input.checkpoint,
+    focus: input.focus,
+    prompt: input.prompt,
+    provider: 'copilot',
+    repoRoot: input.repoRoot
+  });
 }
 
 export function buildCopilotCommandArgs(input: {

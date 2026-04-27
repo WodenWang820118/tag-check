@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { readRequiredValue, readStdin } from '../../../shared/cli.ts';
+import { readCommonReviewContract } from '../../shared/common-review-contract.ts';
 import type {
   ParsedCliArgs,
   ReviewCheckpoint,
@@ -56,16 +57,23 @@ export function parseCliArgs(argv: string[]): ParsedCliArgs {
 
 export function buildReviewPrompt(
   execution: ReviewExecution,
-  context: string
+  context: string,
+  options: { commonReviewContract?: string } = {}
 ): string {
+  const commonReviewContract =
+    options.commonReviewContract ?? readCommonReviewContract(process.cwd());
+  const commonReviewContractBlock = commonReviewContract.trim()
+    ? ['Shared review contract:', commonReviewContract.trim(), '']
+    : [];
   const reviewRules = [
     'You are the second-opinion reviewer for this repository.',
     `Checkpoint: ${execution.checkpoint}`,
     `Primary focus: ${execution.focus}`,
     execution.model ? `Requested model: ${execution.model}` : null,
     '',
+    ...commonReviewContractBlock,
     'Review rules:',
-    '- Findings first, ordered by severity',
+    '- Apply the shared review contract for severity labels, findings, verdict, and residual-risk format',
     '- Call out correctness, security risk, workflow violations, contract drift, and missing tests',
     execution.checkpoint === 'test'
       ? '- Focus on missing scenarios, weak assertions, and regression gaps'

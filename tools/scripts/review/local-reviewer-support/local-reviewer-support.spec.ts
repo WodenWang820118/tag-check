@@ -1,4 +1,4 @@
-import assert from 'node:assert/strict';
+﻿import assert from 'node:assert/strict';
 import {
   existsSync,
   mkdirSync,
@@ -45,7 +45,7 @@ import {
 
 test('resolveLocalReviewerRepoRoot finds the sibling workspace', () => {
   const workspace = mkdtempSync(join(tmpdir(), 'local-reviewer-support-'));
-  const currentRepo = resolve(workspace, 'gx.law-prep');
+  const currentRepo = resolve(workspace, 'tag-check');
   const siblingRepo = resolve(workspace, 'local-reviewer-cli');
 
   try {
@@ -75,7 +75,7 @@ test('resolveLocalReviewerRepoRoot finds the sibling workspace', () => {
 
 test('resolveLocalReviewerRepoRoot respects LOCAL_REVIEWER_CLI_PATH overrides', () => {
   const workspace = mkdtempSync(join(tmpdir(), 'local-reviewer-support-env-'));
-  const currentRepo = resolve(workspace, 'gx.law-prep');
+  const currentRepo = resolve(workspace, 'tag-check');
   const siblingRepo = resolve(workspace, 'external', 'local-reviewer-cli');
 
   try {
@@ -126,17 +126,17 @@ test('createLocalReviewerEnv injects the Ollama defaults', () => {
 
 test('buildCheckpointReviewContext includes an explicit changed files section before the diff', () => {
   const context = buildCheckpointReviewContext({
-    changedFiles: ['apps/law-prep-web/src/app/app.component.ts'],
+    changedFiles: ['apps/ng-frontend/src/app/app.component.ts'],
     diffText:
-      'diff --git a/apps/law-prep-web/src/app/app.component.ts b/apps/law-prep-web/src/app/app.component.ts',
+      'diff --git a/apps/ng-frontend/src/app/app.component.ts b/apps/ng-frontend/src/app/app.component.ts',
     sample: {
       baseRef: 'abc123',
       commit: 'def456',
       committedAtEpoch: 0,
       fileCount: 1,
       kind: 'small-ts',
-      repoName: 'gx.law-prep',
-      repoRoot: 'C:/software-dev/gx.law-prep',
+      repoName: 'tag-check',
+      repoRoot: 'C:/software-dev/tag-check',
       subject: 'Update copy',
       totalChangedLines: 4
     }
@@ -144,7 +144,7 @@ test('buildCheckpointReviewContext includes an explicit changed files section be
 
   assert.match(
     context,
-    /Changed files:\n- apps\/law-prep-web\/src\/app\/app\.component\.ts\n\nDiff to review:/
+    /Changed files:\n- apps\/ng-frontend\/src\/app\/app\.component\.ts\n\nDiff to review:/
   );
 });
 
@@ -525,7 +525,7 @@ test('summarizeEvaluation writes evaluation artifacts and verdicts', () => {
       config: {
         abSampleCount: 0,
         jobs: 2,
-        repoNames: ['gx.law-prep'],
+        repoNames: ['tag-check'],
         rounds: 1,
         seed: 1,
         smallDiffThresholdChars: DEFAULT_SMALL_DIFF_THRESHOLD_CHARS
@@ -563,7 +563,7 @@ function sample(
     committedAtEpoch: 1,
     fileCount: 1,
     kind,
-    repoName: 'gx.law-prep',
+    repoName: 'tag-check',
     repoRoot: '/repo',
     subject: `sample ${commit}`,
     totalChangedLines: 10

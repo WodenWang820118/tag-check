@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { test } from 'vitest';
 
 import {
   buildCopilotCommandArgs,
+  buildCopilotReviewPrompt,
   buildCopilotReviewCommandArgs,
   probeCopilotCliHealth,
   runCopilotReview
@@ -88,6 +89,42 @@ test('buildCopilotReviewCommandArgs adds high reasoning effort when the CLI supp
     '--reasoning-effort',
     'high'
   ]);
+});
+
+test('buildCopilotReviewPrompt adds the GitHub agent specialist lens for checkpoint reviews', () => {
+  const repoRoot = mkdtempSync(join(tmpdir(), 'copilot-profile-'));
+  try {
+    const profilePath = join(
+      repoRoot,
+      '.github',
+      'agents',
+      'architecture-reviewer.agent.md'
+    );
+    mkdirSync(join(profilePath, '..'), { recursive: true });
+    writeFileSync(
+      profilePath,
+      ['---', 'name: architecture-reviewer', '---', 'Architecture lens'].join(
+        '\n'
+      ),
+      'utf8'
+    );
+
+    const prompt = buildCopilotReviewPrompt({
+      checkpoint: 'plan',
+      focus: 'general',
+      prompt: 'Review this diff.',
+      repoRoot
+    });
+
+    assert.match(
+      prompt,
+      /Use the copilot reviewer specialist lens: architecture-reviewer/
+    );
+    assert.match(prompt, /Architecture lens/);
+    assert.match(prompt, /Review this diff/);
+  } finally {
+    rmSync(repoRoot, { force: true, recursive: true });
+  }
 });
 
 test('buildCopilotReviewCommandArgs uses the effort alias when the CLI only advertises --effort', () => {

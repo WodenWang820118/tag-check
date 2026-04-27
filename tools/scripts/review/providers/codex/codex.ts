@@ -6,14 +6,13 @@ import {
   getCachedProviderHealth,
   type ReviewProviderHealthResult
 } from '../../provider-health/provider-health.ts';
+import {
+  type ReviewerId,
+  resolveReviewerId
+} from '../../shared/reviewer-profile.ts';
 import { runLocalCliCommand } from '../local-cli/local-cli.ts';
 
 type ReviewCheckpoint = 'plan' | 'implementation' | 'test' | 'pre-merge';
-type CodexReviewerId =
-  | 'architecture-reviewer'
-  | 'security-reviewer'
-  | 'test-reviewer'
-  | 'ux-reviewer';
 
 interface CodexReviewInput {
   checkpoint: ReviewCheckpoint;
@@ -109,34 +108,8 @@ export function isCodexUnavailableError(error: unknown): boolean {
 export function resolveCodexReviewerId(input: {
   checkpoint: ReviewCheckpoint;
   focus: string;
-}): CodexReviewerId {
-  const focus = input.focus.toLowerCase();
-
-  if (
-    focus.includes('security') ||
-    focus.includes('auth') ||
-    focus.includes('secret') ||
-    focus.includes('shell') ||
-    focus.includes('network') ||
-    focus.includes('filesystem')
-  ) {
-    return 'security-reviewer';
-  }
-
-  if (input.checkpoint === 'test' || focus.includes('test')) {
-    return 'test-reviewer';
-  }
-
-  if (
-    focus.includes('ux') ||
-    focus.includes('ui') ||
-    focus.includes('accessibility') ||
-    focus.includes('responsive')
-  ) {
-    return 'ux-reviewer';
-  }
-
-  return 'architecture-reviewer';
+}): ReviewerId {
+  return resolveReviewerId(input);
 }
 
 export function runCodexReview(input: CodexReviewInput): string {
@@ -182,7 +155,7 @@ export function runCodexReview(input: CodexReviewInput): string {
 function buildCodexReviewPrompt(input: {
   prompt: string;
   repoRoot: string;
-  reviewerId: CodexReviewerId;
+  reviewerId: ReviewerId;
 }): string {
   const reviewerInstructions = readCodexReviewerInstructions(
     input.reviewerId,
@@ -193,9 +166,7 @@ function buildCodexReviewPrompt(input: {
     `Use the local Codex reviewer profile: ${input.reviewerId}.`,
     reviewerInstructions,
     '',
-    'Apply the reviewer profile exactly.',
-    'Start with findings ordered by severity.',
-    'If there are no material issues, say so explicitly and note residual risks.',
+    'Apply this reviewer profile together with the shared review contract already included in the review context.',
     '',
     'Context to review:',
     input.prompt.trim()
@@ -203,7 +174,7 @@ function buildCodexReviewPrompt(input: {
 }
 
 function readCodexReviewerInstructions(
-  reviewerId: CodexReviewerId,
+  reviewerId: ReviewerId,
   repoRoot: string
 ): string {
   const reviewerPath = path.join(
