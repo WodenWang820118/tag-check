@@ -2,6 +2,10 @@
 import { Injectable } from '@angular/core';
 import { EditorService } from '../editor/editor.service';
 import { EditorTypeEnum } from '@utils';
+import {
+  BUILT_IN_SCROLL_EVENT,
+  BUILT_IN_VIDEO_EVENTS
+} from '../gtm-json-converter/transform/utils/constant';
 
 @Injectable({
   providedIn: 'root'
@@ -34,17 +38,12 @@ export class EditorFacadeService {
 
   hasVideoTag(json: any) {
     if (!Array.isArray(json)) return false;
-    return json.some(
-      (item: any) =>
-        item.event === 'video_start' ||
-        item.event === 'video_progress' ||
-        item.event === 'video_complete'
-    );
+    return json.some((item: any) => BUILT_IN_VIDEO_EVENTS.includes(item.event));
   }
 
   hasScrollTag(json: any) {
     if (!Array.isArray(json)) return false;
-    return json.some((item: any) => item.event === 'scroll');
+    return json.some((item: any) => BUILT_IN_SCROLL_EVENT.includes(item.event));
   }
 
   updateJsonBasedOnForm(
@@ -57,8 +56,8 @@ export class EditorFacadeService {
   ): any {
     // Configuration object to map form properties to their respective events
     const eventConfig = {
-      includeVideoTag: ['video_start', 'video_progress', 'video_completion'],
-      includeScrollTag: ['scroll']
+      includeVideoTag: BUILT_IN_VIDEO_EVENTS as readonly string[],
+      includeScrollTag: BUILT_IN_SCROLL_EVENT as readonly string[]
       // more mappings can be added here in the future...
     };
 

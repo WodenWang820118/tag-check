@@ -64,7 +64,7 @@ describe('ConfigManager', () => {
     firingTriggerId: ['2147479553'],
     tagFiringOption: 'ONCE_PER_EVENT',
     monitoringMetadata: { type: 'MAP' },
-    consentSettings: { consentStatus: 'NOT_SET' }
+    consentSettings: { consentStatus: 'NOT_NEEDED' }
   };
 
   beforeEach(() => {

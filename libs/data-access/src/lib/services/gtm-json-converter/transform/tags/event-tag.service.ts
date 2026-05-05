@@ -1,16 +1,13 @@
 import { EventTagConfig, Parameter, Tag, TagTypeEnum, Trigger } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { EcParamsService } from '../../utils/ec-params.service';
+import { CONSENT_STATUS_NOT_NEEDED } from '../utils/constant';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EventTag {
-  constructor(
-    private readonly parameterUtils: ParameterUtils,
-    private readonly ecParamsService: EcParamsService
-  ) {}
+  constructor(private readonly parameterUtils: ParameterUtils) {}
 
   private processEcommerceData(
     tag: Tag,
@@ -45,7 +42,7 @@ export class EventTag {
         type: 'MAP'
       },
       consentSettings: {
-        consentStatus: 'NOT_SET'
+        consentStatus: CONSENT_STATUS_NOT_NEEDED
       }
     };
   }

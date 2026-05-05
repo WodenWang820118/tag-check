@@ -9,6 +9,7 @@ import {
 import { EventUtils } from '../../utils/event-utils.service';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
+import { CONSENT_STATUS_NOT_NEEDED } from '../utils/constant';
 
 @Injectable({
   providedIn: 'root'
@@ -82,7 +83,7 @@ export class VideoTag {
       firingTriggerId: [triggerId],
       tagFiringOption: 'ONCE_PER_EVENT',
       monitoringMetadata: { type: 'MAP' },
-      consentSettings: { consentStatus: 'NOT_SET' }
+      consentSettings: { consentStatus: CONSENT_STATUS_NOT_NEEDED }
     };
   }
 
@@ -112,7 +113,7 @@ export class VideoTag {
       firingTriggerId: [triggerId],
       tagFiringOption: 'ONCE_PER_EVENT',
       monitoringMetadata: { type: 'MAP' },
-      consentSettings: { consentStatus: 'NOT_SET' }
+      consentSettings: { consentStatus: CONSENT_STATUS_NOT_NEEDED }
     };
   }
 
