@@ -1,4 +1,3 @@
-import { isDirectEntrypoint } from '../../shared/paths.ts';
 import {
   createApproval,
   getRepoContext,
@@ -6,6 +5,7 @@ import {
   saveState,
   validateReviewerId
 } from '../shared/shared.ts';
+import { isMainModule } from '../../shared/entrypoint/entrypoint.ts';
 
 export function main(argv = process.argv.slice(2)): void {
   const options = parseArgs(argv);
@@ -36,6 +36,6 @@ export function main(argv = process.argv.slice(2)): void {
   console.log(`Expires: ${state.approval.expiresAt}`);
 }
 
-if (isDirectEntrypoint(import.meta.url)) {
+if (isMainModule(import.meta.url)) {
   main();
 }

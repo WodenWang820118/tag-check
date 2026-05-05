@@ -1,4 +1,4 @@
-import { isDirectEntrypoint } from '../../shared/paths.ts';
+import { isMainModule } from '../../shared/entrypoint/entrypoint.ts';
 import { getRepoContext, resetState } from '../shared/shared.ts';
 
 export function main(): void {
@@ -7,6 +7,6 @@ export function main(): void {
   console.log('Review gate state cleared.');
 }
 
-if (isDirectEntrypoint(import.meta.url)) {
+if (isMainModule(import.meta.url)) {
   main();
 }

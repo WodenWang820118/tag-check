@@ -12,48 +12,36 @@ The ideal review path:
    agent or prompt.
 4. The primary agent continues only after the review is addressed.
 
-If the scripted Copilot Claude path is unavailable, prefer Gemini CLI before
-Copilot GPT-5 mini where this workflow routes an automatic second reviewer.
-Otherwise use the matching tool-native reviewer profile, prompt, or Codex
-reviewer subagent.
-
 ## Required Checkpoints
 
 ### Plan Review
 
 Produce a spec or implementation plan, then send it to a second reviewer.
 
-Default: GitHub Copilot Claude Sonnet 4.6. If the normal Copilot Claude path is
-unavailable or quota exhausted, use `gemini-2.5-pro` before retrying with
-GitHub Copilot GPT-5 mini. If both local CLIs are unavailable, use the matching
-Codex reviewer subagent.
+Primary: GitHub Copilot Claude Sonnet 4.6.
+Fallback: `gemini-2.5-pro` (or `pnpm review:plan:risky` to pin it).
 
 ### Test Review
 
-After writing tests but before running the broad sign-off suite or using those
-tests as approval evidence, send the test strategy and assertions to a second
-reviewer.
+After writing tests but before using them as approval evidence, send the test
+strategy and assertions to a second reviewer.
 
-Default: use the repo wrapper `pnpm review:test`. If both local CLIs are
-unavailable, use the matching tool-native reviewer profile, prompt, or Codex
-reviewer subagent instead of silently self-approving.
+Primary: `pnpm review:test` (auto-routed).
+Fallback: the matching tool-native reviewer subagent.
 
 ### Implementation Review
 
-After the first working implementation, self-check, and reviewable verification
-story are ready, send the change to a second reviewer.
+After the first working implementation and self-check are ready, send the
+change to a second reviewer.
 
-Default: `pnpm review:implementation` keeps Gemini Flash Preview using the CLI
-model id `gemini-3-flash-preview` first for normal or sensitive implementation
-reviews. Its auto router may start with the matching Codex reviewer subagent
-only when the context contains an explicit small non-sensitive changed-file
-list, that list exactly matches the repo's current changed-file set, the scope
-is non-sensitive, and no review/governance surfaces are touched.
+Primary: `pnpm review:implementation` (Gemini Flash Preview via
+`gemini-3-flash-preview`).
+Fallback: GitHub Copilot GPT-5 mini, then the matching Codex reviewer
+subagent.
 
-Otherwise fall back in this order: GitHub Copilot GPT-5 mini, then the matching
-Codex reviewer subagent. Escalate to GitHub Copilot Claude when blocking
-findings remain or when the change touches auth, secrets, filesystem, shell
-execution, network behavior, or public contracts.
+**Sensitive changes** (auth, secrets, filesystem, shell execution, network
+behavior, or public contracts): escalate directly to GitHub Copilot Claude
+(`pnpm review:copilot`).
 
 ## Guardrails
 
@@ -70,9 +58,8 @@ execution, network behavior, or public contracts.
 - `pre-merge` is an additional wrapper mode only. It does not replace the
   required `implementation` checkpoint or the pre-implementation gate.
 - Before the first implementation change on a clean worktree, open the gate by
-  running `pnpm review:approve-pre-implementation -- --reviewer
-<copilot-claude|copilot-gpt-5-mini|gemini-2.5-pro|codex-subagent> --focus
-<area> --summary "<approval summary>"` after the plan review passes.
+  running `pnpm review:approve-pre-implementation -- --reviewer <id> --focus
+<area> --summary "<summary>"` after the plan review passes.
 - Use `pnpm review:status` to inspect the gate and `pnpm review:reset` to clear
   it manually when needed.
 
@@ -82,4 +69,5 @@ execution, network behavior, or public contracts.
 - `pnpm review:plan:risky`: risky plan review pinned to Gemini Pro.
 - `pnpm review:test`: normal test-review path.
 - `pnpm review:implementation`: normal implementation-review auto-routing path.
-- `pnpm review:copilot`: explicit Copilot escalation path.
+- `pnpm review:copilot`: explicit Copilot escalation path (required for
+  sensitive changes).

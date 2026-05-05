@@ -1,17 +1,17 @@
 # Reviewer Routing
 
 Use `.agents/reviewers/common-review-contract.toml` as the shared review
-contract for every checkpoint. Tool-native reviewer profiles and prompts
-provide the specialist lenses:
+contract for every checkpoint. Shared reviewer profiles live in
+`.agents/reviewers/<lens>-reviewer.md` and are the canonical source for
+role-specific checks (Focus, Guardrails, Additional checks). Tool-native bridge
+files load the shared profiles:
 
-- Codex: `.codex/agents/*.toml`
-- GitHub Copilot: `.github/agents/*.agent.md`
-- Gemini: `.gemini/commands/review/*.toml` when present; otherwise scripted
-  reviews reuse `.github/agents/*.agent.md` through the review wrapper.
+- Codex: `.codex/agents/*.toml` → loads `.agents/reviewers/<lens>-reviewer.md`
+- GitHub Copilot: `.github/agents/*.agent.md` → loads `.agents/reviewers/<lens>-reviewer.md`
+- Gemini: `.gemini/commands/review/*.toml` → loads `.agents/reviewers/<lens>-reviewer.md`
 
-Legacy `.agents/reviewers/*-reviewer.md` personas are removed. Do not recreate
-or load them; use the shared contract plus the active tool-native reviewer
-profile or prompt.
+Do not duplicate reviewer-specific Focus, Guardrails, or Additional checks into
+bridge files. Edit the shared profile instead.
 
 ## Default Reviewer Lenses
 
