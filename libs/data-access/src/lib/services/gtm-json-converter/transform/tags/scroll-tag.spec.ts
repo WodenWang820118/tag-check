@@ -180,7 +180,7 @@ describe('ScrollTag', () => {
             type: 'MAP'
           },
           consentSettings: {
-            consentStatus: 'NOT_SET'
+            consentStatus: 'NOT_NEEDED'
           }
         }
       ];

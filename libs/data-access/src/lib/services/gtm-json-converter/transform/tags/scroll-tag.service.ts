@@ -2,6 +2,7 @@ import { EventTagConfig, TagTypeEnum, Trigger, DataLayer } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
+import { CONSENT_STATUS_NOT_NEEDED } from '../utils/constant';
 
 @Injectable({
   providedIn: 'root'
@@ -59,7 +60,7 @@ export class ScrollTag {
           type: 'MAP'
         },
         consentSettings: {
-          consentStatus: 'NOT_SET'
+          consentStatus: CONSENT_STATUS_NOT_NEEDED
         }
       }
     ];

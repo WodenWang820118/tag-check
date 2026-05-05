@@ -8,7 +8,6 @@ import { DataLayerUtils } from '../utils/data-layer-utils.service';
 import { UtilsService } from '../utils/utils.service';
 import { EventUtils } from '../utils/event-utils.service';
 import { ParameterUtils } from './utils/parameter-utils.service';
-import { EcParamsService } from '../utils/ec-params.service';
 import { EventTag } from './tags/event-tag.service';
 import { GoogleTag } from './tags/google-tag.service';
 import { ScrollTag } from './tags/scroll-tag.service';
@@ -46,7 +45,6 @@ describe('TransformService', () => {
         UtilsService,
         EventUtils,
         ParameterUtils,
-        EcParamsService,
         EventTag,
         GoogleTag,
         ScrollTag,

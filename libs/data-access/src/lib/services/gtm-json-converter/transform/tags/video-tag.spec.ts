@@ -231,7 +231,7 @@ describe('VideoTag', () => {
           type: 'MAP'
         },
         consentSettings: {
-          consentStatus: 'NOT_SET'
+          consentStatus: 'NOT_NEEDED'
         }
       };
 
@@ -255,7 +255,7 @@ describe('VideoTag', () => {
           type: 'MAP'
         },
         consentSettings: {
-          consentStatus: 'NOT_SET'
+          consentStatus: 'NOT_NEEDED'
         }
       };
       expect(result).toEqual([expected, expectedHTMLScriptTag]);
