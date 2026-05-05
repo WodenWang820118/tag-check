@@ -1,4 +1,4 @@
-import { computed, Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, signal, WritableSignal } from '@angular/core';
 
 /**
  * Semantic enum for the tag-build page mode.
@@ -16,12 +16,9 @@ export class TagBuildModeService {
     TagBuildMode.TagBuild
   );
 
-  // Store the computed signal as a class property
-  private readonly _computedMode = computed(() => this._mode());
-
   // Read the current mode value
   get mode(): TagBuildMode {
-    return this._computedMode();
+    return this._mode();
   }
 
   // Set the current mode

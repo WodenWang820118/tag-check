@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import {
   ScrollDepthTriggerConfig,
   TriggerConfig,
-  TriggerTypeEnum
+  TriggerTypeEnum,
+  DataLayer
 } from '@utils';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
@@ -55,11 +56,13 @@ export class ScrollTrigger {
     };
   }
 
-  createScrollTrigger(accountId: string, containerId: string): TriggerConfig[] {
+  createScrollTrigger(
+    accountId: string,
+    containerId: string,
+    dataLayers: DataLayer[] = []
+  ): TriggerConfig[] {
     try {
-      // TODO: get the data from the UI
-      const data = [] as any;
-      if (this.eventUtils.isIncludeScroll(data)) {
+      if (this.eventUtils.isIncludeScroll(dataLayers)) {
         const _scrollTrigger = this.scrollTriggers({
           accountId,
           containerId

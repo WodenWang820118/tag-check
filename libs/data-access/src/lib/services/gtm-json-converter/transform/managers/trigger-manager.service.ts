@@ -46,11 +46,13 @@ export class TriggerManager {
     );
     const videoTriggers = this.videoTrigger.createVideoTrigger(
       accountId,
-      containerId
+      containerId,
+      dataLayer
     );
     const scrollTriggers = this.scrollTrigger.createScrollTrigger(
       accountId,
-      containerId
+      containerId,
+      dataLayer
     );
     return [...eventTriggers, ...videoTriggers, ...scrollTriggers];
   }

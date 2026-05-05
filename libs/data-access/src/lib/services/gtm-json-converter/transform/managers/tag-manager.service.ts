@@ -88,13 +88,15 @@ export class TagManager {
       googleTagName,
       accountId,
       containerId,
-      triggers
+      triggers,
+      dataLayers
     );
     const scrollTags = this.scrollTag.createScrollTag(
       googleTagName,
       accountId,
       containerId,
-      triggers
+      triggers,
+      dataLayers
     );
 
     return [configTag, ...eventTags, ...videoTags, ...scrollTags];
