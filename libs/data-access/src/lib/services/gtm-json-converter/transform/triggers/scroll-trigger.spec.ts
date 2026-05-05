@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ScrollTrigger } from './scroll-trigger.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { ScrollDepthTriggerConfig, TriggerTypeEnum } from '@utils';
+import { ScrollDepthTriggerConfig, TriggerTypeEnum, DataLayer } from '@utils';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('scrollTrigger', () => {
@@ -81,5 +81,29 @@ describe('scrollTrigger', () => {
       expect.any(Error)
     );
     consoleSpy.mockRestore();
+  });
+
+  it('should create a scroll trigger when data layers contain scroll event', () => {
+    const dataLayers: DataLayer[] = [{ event: 'scroll', paths: [] }];
+
+    const result = service.createScrollTrigger(
+      'test-account',
+      'test-container',
+      dataLayers
+    );
+
+    expect(result).toEqual([mockScrollTriggerConfig]);
+  });
+
+  it('should return empty array when data layers do NOT contain scroll event', () => {
+    const dataLayers: DataLayer[] = [{ event: 'page_view', paths: [] }];
+
+    const result = service.createScrollTrigger(
+      'test-account',
+      'test-container',
+      dataLayers
+    );
+
+    expect(result).toEqual([]);
   });
 });

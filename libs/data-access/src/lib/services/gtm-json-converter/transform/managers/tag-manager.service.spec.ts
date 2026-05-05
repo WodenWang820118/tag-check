@@ -99,8 +99,10 @@ describe('TagManager', () => {
       }
     });
 
-    it('should include scroll and video tags in the output', () => {
-      const dataLayers: DataLayer[] = [{ event: 'page_view', paths: [] }];
+    it('should NOT include scroll or video tags when no matching events exist', () => {
+      const dataLayers: DataLayer[] = [
+        { event: 'page_view', paths: ['page_location'] }
+      ];
       const triggers: Trigger[] = [{ name: 'page_view', triggerId: '1' }];
 
       const result = service.getTags(
@@ -114,13 +116,31 @@ describe('TagManager', () => {
       );
 
       const tagNames = result.map((t) => t.name);
-      // Should include scroll and video tags (even if they may be empty arrays
-      // because the underlying services check data layers)
       expect(tagNames).toEqual(
-        expect.arrayContaining([
-          'Google Tag',
-          expect.stringContaining('page_view')
+        expect.not.arrayContaining([
+          'GA4 event - scroll',
+          'GA4 event - Video'
         ])
+      );
+    });
+
+    it('should include scroll tag when data layers contain a scroll event', () => {
+      const dataLayers: DataLayer[] = [{ event: 'scroll', paths: [] }];
+      const triggers: Trigger[] = [{ name: 'scroll', triggerId: '99' }];
+
+      const result = service.getTags(
+        mockAccountId,
+        mockContainerId,
+        dataLayers,
+        triggers,
+        mockGoogleTagName,
+        mockMeasurementId,
+        'false'
+      );
+
+      const tagNames = result.map((t) => t.name);
+      expect(tagNames).toEqual(
+        expect.arrayContaining(['GA4 event - scroll'])
       );
     });
 

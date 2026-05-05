@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { VideoTrigger } from './video-trigger.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { TriggerTypeEnum, YouTubeVideoTriggerConfig } from '@utils';
+import { TriggerTypeEnum, YouTubeVideoTriggerConfig, DataLayer } from '@utils';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 describe('VideoTrigger', () => {
@@ -85,5 +85,29 @@ describe('VideoTrigger', () => {
     );
 
     consoleSpy.mockRestore();
+  });
+
+  it('should create a video trigger when data layers contain video event', () => {
+    const dataLayers: DataLayer[] = [{ event: 'video_start', paths: [] }];
+
+    const result = service.createVideoTrigger(
+      'test-account',
+      'test-container',
+      dataLayers
+    );
+
+    expect(result).toEqual([mockVideoTriggerConfig]);
+  });
+
+  it('should return empty array when data layers do NOT contain video event', () => {
+    const dataLayers: DataLayer[] = [{ event: 'page_view', paths: [] }];
+
+    const result = service.createVideoTrigger(
+      'test-account',
+      'test-container',
+      dataLayers
+    );
+
+    expect(result).toEqual([]);
   });
 });

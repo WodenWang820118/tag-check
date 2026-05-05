@@ -92,11 +92,7 @@ describe('TriggerManager', () => {
       expect(eventTrigger?.type).toBe('CUSTOM_EVENT');
     });
 
-    it('should produce only event triggers when no video/scroll data layers exist', () => {
-      // NOTE: ScrollTrigger.createScrollTrigger and VideoTrigger.createVideoTrigger
-      // currently hardcode `const data = [] as any;` so they never produce triggers.
-      // When that bug is fixed, this test should be updated to expect scroll/video
-      // triggers when data layers contain those events.
+    it('should NOT include scroll/video triggers when no matching data layers exist', () => {
       const dataLayers: DataLayer[] = [{ event: 'page_view', paths: [] }];
 
       const result = service.getTriggers(
@@ -107,6 +103,45 @@ describe('TriggerManager', () => {
 
       const names = result.map((t) => t.name);
       expect(names).toEqual(['event equals page_view']);
+    });
+
+    it('should include scroll trigger when data layers contain a scroll event', () => {
+      const dataLayers: DataLayer[] = [
+        { event: 'page_view', paths: [] },
+        { event: 'scroll', paths: [] }
+      ];
+
+      const result = service.getTriggers(
+        mockAccountId,
+        mockContainerId,
+        dataLayers
+      );
+
+      const names = result.map((t) => t.name);
+      expect(names).toEqual(
+        expect.arrayContaining(['event equals page_view', 'event scroll'])
+      );
+    });
+
+    it('should include video trigger when data layers contain a video event', () => {
+      const dataLayers: DataLayer[] = [
+        { event: 'page_view', paths: [] },
+        { event: 'video_start', paths: [] }
+      ];
+
+      const result = service.getTriggers(
+        mockAccountId,
+        mockContainerId,
+        dataLayers
+      );
+
+      const names = result.map((t) => t.name);
+      expect(names).toEqual(
+        expect.arrayContaining([
+          'event equals page_view',
+          'event youtube video'
+        ])
+      );
     });
 
     it('should assign sequential triggerIds to all trigger configs', () => {
@@ -151,9 +186,7 @@ describe('TriggerManager', () => {
         dataLayers
       );
 
-      // Currently only event triggers are produced (3 total).
-      // Scroll/video triggers are disabled due to hardcoded empty data in
-      // ScrollTrigger.createScrollTrigger and VideoTrigger.createVideoTrigger.
+      // 3 event triggers (no scroll/video events in data layers)
       expect(result).toHaveLength(3);
     });
 

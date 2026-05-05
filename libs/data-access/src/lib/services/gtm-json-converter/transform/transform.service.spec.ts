@@ -266,5 +266,77 @@ describe('TransformService', () => {
       expect(result.containerVersion.variable.length).toBeGreaterThan(0);
       expect(result.containerVersion.tag.length).toBeGreaterThan(0);
     });
+
+    it('should include scroll trigger and tag when specs contain scroll event', () => {
+      const specs: StrictDataLayerEvent[] = [
+        { event: 'page_view', page_location: '/home' },
+        { event: 'scroll' }
+      ];
+
+      const options = buildOptions({
+        gtmConfigGenerator: {
+          ...mockGtmConfig,
+          specs
+        }
+      } as ConvertOptions);
+
+      const result = service.convert(options);
+
+      const triggerNames = result.containerVersion.trigger.map((t) => t.name);
+      expect(triggerNames).toEqual(
+        expect.arrayContaining(['event scroll'])
+      );
+
+      const tagNames = result.containerVersion.tag.map((t) => t.name);
+      expect(tagNames).toEqual(
+        expect.arrayContaining(['GA4 event - scroll'])
+      );
+    });
+
+    it('should include video trigger and tags when specs contain video event', () => {
+      const specs: StrictDataLayerEvent[] = [
+        { event: 'page_view', page_location: '/home' },
+        { event: 'video_start' }
+      ];
+
+      const options = buildOptions({
+        gtmConfigGenerator: {
+          ...mockGtmConfig,
+          specs
+        }
+      } as ConvertOptions);
+
+      const result = service.convert(options);
+
+      const triggerNames = result.containerVersion.trigger.map((t) => t.name);
+      expect(triggerNames).toEqual(
+        expect.arrayContaining(['event youtube video'])
+      );
+
+      const tagNames = result.containerVersion.tag.map((t) => t.name);
+      expect(tagNames).toEqual(
+        expect.arrayContaining(['GA4 event - Video'])
+      );
+    });
+
+    it('should NOT include scroll/video triggers when specs lack those events', () => {
+      const specs: StrictDataLayerEvent[] = [
+        { event: 'page_view', page_location: '/home' }
+      ];
+
+      const options = buildOptions({
+        gtmConfigGenerator: {
+          ...mockGtmConfig,
+          specs
+        }
+      } as ConvertOptions);
+
+      const result = service.convert(options);
+
+      const triggerNames = result.containerVersion.trigger.map((t) => t.name);
+      expect(triggerNames).not.toEqual(
+        expect.arrayContaining(['event scroll', 'event youtube video'])
+      );
+    });
   });
 });

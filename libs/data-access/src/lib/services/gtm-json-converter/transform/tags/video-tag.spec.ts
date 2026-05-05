@@ -52,7 +52,7 @@ describe('VideoTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const triggers: Trigger[] = []; // No triggers matching 'event youtube video'
+      const triggers: Trigger[] = []; // No triggers matching video event names
 
       vi.spyOn(eventUtils, 'isIncludeVideo').mockReturnValue(true);
       vi.spyOn(console, 'error').mockImplementation(() => undefined); // Mock console.error
@@ -78,7 +78,7 @@ describe('VideoTag', () => {
       const containerId = 'container456';
       const triggers: Trigger[] = [
         {
-          name: 'event youtube video',
+          name: 'video_start',
           triggerId: 'trigger789'
         }
       ];
