@@ -9,7 +9,10 @@ import {
 import { EventUtils } from '../../utils/event-utils.service';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { CONSENT_STATUS_NOT_NEEDED, BUILT_IN_VIDEO_EVENTS } from '../utils/constant';
+import {
+  CONSENT_STATUS_NOT_NEEDED,
+  BUILT_IN_VIDEO_EVENTS
+} from '../utils/constant';
 
 @Injectable({
   providedIn: 'root'

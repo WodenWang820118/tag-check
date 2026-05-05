@@ -283,14 +283,10 @@ describe('TransformService', () => {
       const result = service.convert(options);
 
       const triggerNames = result.containerVersion.trigger.map((t) => t.name);
-      expect(triggerNames).toEqual(
-        expect.arrayContaining(['event scroll'])
-      );
+      expect(triggerNames).toEqual(expect.arrayContaining(['event scroll']));
 
       const tagNames = result.containerVersion.tag.map((t) => t.name);
-      expect(tagNames).toEqual(
-        expect.arrayContaining(['GA4 event - scroll'])
-      );
+      expect(tagNames).toEqual(expect.arrayContaining(['GA4 event - scroll']));
     });
 
     it('should include video trigger and tags when specs contain video event', () => {
@@ -314,9 +310,7 @@ describe('TransformService', () => {
       );
 
       const tagNames = result.containerVersion.tag.map((t) => t.name);
-      expect(tagNames).toEqual(
-        expect.arrayContaining(['GA4 event - Video'])
-      );
+      expect(tagNames).toEqual(expect.arrayContaining(['GA4 event - Video']));
     });
 
     it('should NOT include scroll/video triggers when specs lack those events', () => {
