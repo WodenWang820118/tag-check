@@ -1,12 +1,25 @@
+// region Imports
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+// endregion
 
-import {
-  getRepoContext as getSharedRepoContext,
-  type RepoContext
-} from '../../shared/git.ts';
-
+// region Constants
 const REVIEW_TTL_MS = 2 * 60 * 60 * 1000;
+const REVIEW_GATE_ENTRYPOINT_COMMAND_PATTERN =
+  /^\s*node(?:\.exe)?(?:\s+--experimental-strip-types)?\s+(?:\.?[\\/])?(?:tools[\\/]scripts|scripts)[\\/]review-gate[\\/](approve-pre-implementation|status|reset)[\\/]\1\.ts(?:\s+.*)?\s*$/i;
+const REVIEW_GATE_SCRIPT_ALIAS_PATTERN =
+  /^\s*(?:(?:npm|pnpm|yarn|bun)\s+)?review:(approve-pre-implementation|status|reset)(?:\s+--(?:\s+.*)?)?\s*$/i;
+const RISKY_SHELL_SYNTAX_PATTERNS = [
+  />{1,2}\s*\S/,
+  /<{1,2}\s*\S/,
+  /&&|\|\||;|&|[\r\n]/,
+  /\|(?!\|)/,
+  /\$\(/,
+  /`[^`]+`/,
+  /\b(powershell|pwsh)\b.*\s-(EncodedCommand|enc|e)\b/i
+];
+// endregion
 
 export const SUPPORTED_REVIEWERS = [
   'copilot-claude',
@@ -17,10 +30,12 @@ export const SUPPORTED_REVIEWERS = [
 
 export type SupportedReviewer = (typeof SUPPORTED_REVIEWERS)[number];
 
-export type { RepoContext } from '../../shared/git.ts';
-
-export function getRepoContext(cwd = process.cwd()): RepoContext {
-  return getSharedRepoContext({ cwd });
+export interface RepoContext {
+  root: string;
+  branch: string | null;
+  head: string | null;
+  dirty: boolean | null;
+  gitCommand: string | null;
 }
 
 export interface ReviewApproval {
@@ -56,6 +71,77 @@ interface HookInput {
 export interface HookPermissionResult {
   allow: boolean;
   reason?: string;
+}
+
+// region Core Actions
+function trySpawn(command: string, args: string[], cwd: string): string | null {
+  const result = spawnSync(command, args, {
+    cwd,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'ignore']
+  });
+
+  if (result.error || result.status !== 0) {
+    return null;
+  }
+
+  return result.stdout.trim();
+}
+
+export function resolveGitCommand(): string | null {
+  const candidates =
+    process.platform === 'win32'
+      ? [
+          'git',
+          'C:\\Program Files\\Git\\cmd\\git.exe',
+          'C:\\Program Files\\Git\\bin\\git.exe'
+        ]
+      : ['git', '/usr/bin/git', '/usr/local/bin/git'];
+
+  for (const candidate of candidates) {
+    const output = trySpawn(candidate, ['--version'], process.cwd());
+    if (output) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+export function getRepoContext(cwd = process.cwd()): RepoContext {
+  const gitCommand = resolveGitCommand();
+
+  if (!gitCommand) {
+    return {
+      root: cwd,
+      branch: null,
+      head: null,
+      dirty: null,
+      gitCommand: null
+    };
+  }
+
+  const root =
+    trySpawn(gitCommand, ['rev-parse', '--show-toplevel'], cwd) ?? cwd;
+  const branch = trySpawn(
+    gitCommand,
+    ['rev-parse', '--abbrev-ref', 'HEAD'],
+    root
+  );
+  const head = trySpawn(gitCommand, ['rev-parse', 'HEAD'], root);
+  const dirtyOutput = trySpawn(
+    gitCommand,
+    ['status', '--porcelain', '--untracked-files=all'],
+    root
+  );
+
+  return {
+    root,
+    branch,
+    head,
+    dirty: dirtyOutput ? dirtyOutput.length > 0 : false,
+    gitCommand
+  };
 }
 
 export function getStatePath(repoRoot = process.cwd()): string {
@@ -148,16 +234,31 @@ export function evaluateApproval(
   }
 
   if (
-    approval.reviewer &&
+    typeof approval.reviewer !== 'string' ||
     !(SUPPORTED_REVIEWERS as readonly string[]).includes(approval.reviewer)
   ) {
     return {
       valid: false,
-      reason: `Stored review approval used unsupported reviewer "${approval.reviewer}".`
+      reason: `Stored review approval used unsupported reviewer "${String(approval.reviewer)}".`
     };
   }
 
-  if (approval.expiresAt && Date.now() > Date.parse(approval.expiresAt)) {
+  if (typeof approval.expiresAt !== 'string') {
+    return {
+      valid: false,
+      reason: 'Stored review approval has an invalid expiration timestamp.'
+    };
+  }
+
+  const expiresAtMs = Date.parse(approval.expiresAt);
+  if (!Number.isFinite(expiresAtMs)) {
+    return {
+      valid: false,
+      reason: 'Stored review approval has an invalid expiration timestamp.'
+    };
+  }
+
+  if (Date.now() > expiresAtMs) {
     return {
       valid: false,
       reason: 'Pre-implementation review approval has expired.'
@@ -228,7 +329,15 @@ export function isMutatingToolUse({ toolName, toolArgs }: HookInput): boolean {
   const normalizedToolName = String(toolName ?? '').toLowerCase();
 
   if (
-    ['edit', 'create', 'delete', 'move', 'rename'].includes(normalizedToolName)
+    [
+      'edit',
+      'create',
+      'delete',
+      'move',
+      'rename',
+      'replace',
+      'write_file'
+    ].includes(normalizedToolName)
   ) {
     return true;
   }
@@ -253,19 +362,7 @@ export function isMutatingToolUse({ toolName, toolArgs }: HookInput): boolean {
     return false;
   }
 
-  const riskyShellSyntaxPatterns = [
-    />{1,2}\s*\S/,
-    /<{1,2}\s*\S/,
-    /(^|[\s)])(&&|\|\||;)(?=\s|$)/,
-    /\|(?!\|)/,
-    /\$\(/,
-    /`[^`]+`/,
-    /\b(powershell|pwsh)\b.*\s-(EncodedCommand|enc|e)\b/i
-  ];
-
-  if (
-    riskyShellSyntaxPatterns.some((pattern) => pattern.test(trimmedCommand))
-  ) {
+  if (hasRiskyShellSyntax(trimmedCommand)) {
     return true;
   }
 
@@ -295,43 +392,23 @@ export function isMutatingToolUse({ toolName, toolArgs }: HookInput): boolean {
 }
 
 export function isReviewGateCommand(command: string): boolean {
-  // Keep the hook escape hatch narrow: only the reviewed TypeScript gate
-  // entrypoints may bypass the mutation gate directly.
   const trimmedCommand = command.trim();
-  if (!trimmedCommand || hasShellControlSyntax(trimmedCommand)) {
+
+  if (hasRiskyShellSyntax(trimmedCommand)) {
     return false;
   }
 
-  if (
-    /^(?:pnpm|npm|yarn|bun)(?:\s+run)?\s+review:(approve-pre-implementation|status|reset)(?:\s+--(?:\s+.*)?)?$/i.test(
-      trimmedCommand
-    )
-  ) {
+  if (REVIEW_GATE_SCRIPT_ALIAS_PATTERN.test(trimmedCommand)) {
     return true;
   }
 
-  const nodeScriptMatch =
-    /^node(?:\.exe)?(?:\s+--experimental-strip-types)?\s+(?:"([^"]+)"|'([^']+)'|(\S+))(?:\s+.*)?$/i.exec(
-      trimmedCommand
-    );
-  const scriptPath =
-    nodeScriptMatch?.[1] ?? nodeScriptMatch?.[2] ?? nodeScriptMatch?.[3];
-
-  return scriptPath ? isAllowedReviewGateScriptPath(scriptPath) : false;
+  // Only allow repo-standard Node entrypoints as a complete command so shell
+  // chains cannot hide behind an otherwise-valid review-gate path.
+  return REVIEW_GATE_ENTRYPOINT_COMMAND_PATTERN.test(trimmedCommand);
 }
 
-function hasShellControlSyntax(command: string): boolean {
-  return /&&|\|\||;|\|(?!\|)|>{1,2}\s*\S|<{1,2}\s*\S|\$\(|`/.test(command);
-}
-
-function isAllowedReviewGateScriptPath(scriptPath: string): boolean {
-  const normalizedPath = scriptPath.replace(/\\/g, '/').replace(/^\.\//, '');
-
-  return [
-    'tools/scripts/review-gate/approve-pre-implementation/approve-pre-implementation.ts',
-    'tools/scripts/review-gate/status/status.ts',
-    'tools/scripts/review-gate/reset/reset.ts'
-  ].includes(normalizedPath);
+function hasRiskyShellSyntax(command: string): boolean {
+  return RISKY_SHELL_SYNTAX_PATTERNS.some((pattern) => pattern.test(command));
 }
 
 export function parseHookInput(rawInput: string): HookInput {
@@ -363,7 +440,7 @@ export function evaluateHookPermission(input: {
   }
 
   const evaluation = evaluateApproval(input.state, input.repoContext);
-  if (evaluation.valid === false) {
+  if (!evaluation.valid) {
     return {
       allow: false,
       reason: evaluation.reason
@@ -376,6 +453,7 @@ export function evaluateHookPermission(input: {
 export function buildDenyPayload(reason: string): string {
   return JSON.stringify({
     permissionDecision: 'deny',
-    permissionDecisionReason: `${reason} Use GitHub Copilot Claude to review the plan first, Gemini 2.5 Pro if the Claude path is unavailable, Copilot GPT-5 mini if Gemini is unavailable or you explicitly need the Copilot fallback path, or the Codex reviewer subagent if both local CLIs are unavailable, then run: node --experimental-strip-types tools/scripts/review-gate/approve-pre-implementation/approve-pre-implementation.ts --reviewer <copilot-claude|copilot-gpt-5-mini|gemini-2.5-pro|codex-subagent> --focus general --summary "Approved after plan review".`
+    permissionDecisionReason: `${reason} Pass plan review first (Copilot Claude or Gemini 2.5 Pro fallback), then approve the gate with: node tools/scripts/review-gate/approve-pre-implementation/approve-pre-implementation.ts --reviewer <copilot-claude|gemini-2.5-pro|codex-subagent> --focus <area> --summary "<summary>"`
   });
 }
+// endregion

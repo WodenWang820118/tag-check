@@ -1,6 +1,15 @@
 # Behavioral Guidelines
 
-This repository adapts Karpathy-inspired agent principles as a behavioral overlay on top of the phased workflow in `AGENTS.md`. Use these rules to reduce silent assumptions, overengineering, and broad diffs without creating a second workflow system.
+This repository adapts Karpathy-inspired agent principles as a behavioral
+overlay on top of the phased workflow in `AGENTS.md`. Use these rules to reduce
+silent assumptions, overengineering, and broad diffs without creating a second
+workflow system.
+
+> **"Karpathy-inspired"** refers to Andrej Karpathy's pragmatic software
+> development philosophy: think before coding, value simplicity over cleverness,
+> make surgical changes, and always know what success looks like before you
+> start. These principles originated from his writing on engineering discipline
+> and have been adapted here as concrete agent behaviors.
 
 ## Principles
 

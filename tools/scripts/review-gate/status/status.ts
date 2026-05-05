@@ -1,4 +1,4 @@
-import { isDirectEntrypoint } from '../../shared/paths.ts';
+import { isMainModule } from '../../shared/entrypoint/entrypoint.ts';
 import {
   evaluateApproval,
   getRepoContext,
@@ -15,7 +15,7 @@ export function main(): void {
   console.log(`HEAD: ${repoContext.head ?? 'unknown'}`);
   console.log(`Worktree: ${repoContext.dirty ? 'dirty' : 'clean'}`);
 
-  if (evaluation.valid === false) {
+  if (!evaluation.valid) {
     console.log('Gate: BLOCKED');
     console.log(`Reason: ${evaluation.reason}`);
     if (repoContext.dirty) {
@@ -38,6 +38,6 @@ export function main(): void {
   }
 }
 
-if (isDirectEntrypoint(import.meta.url)) {
+if (isMainModule(import.meta.url)) {
   main();
 }
