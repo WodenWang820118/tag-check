@@ -7,12 +7,13 @@ import {
 } from '@angular/router';
 import { routes } from './app.routes';
 
-const appLang = localStorage.getItem('locale') || 'en';
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(), // required
     provideRouter(routes, withPreloading(PreloadAllModules)),
-    { provide: LOCALE_ID, useValue: appLang }
+    {
+      provide: LOCALE_ID,
+      useFactory: () => localStorage.getItem('locale') || 'en'
+    }
   ]
 };
