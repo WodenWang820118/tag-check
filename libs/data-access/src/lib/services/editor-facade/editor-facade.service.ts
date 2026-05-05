@@ -71,7 +71,7 @@ export class EditorFacadeService {
   updateJsonForEvents(
     json: any[],
     shouldInclude: boolean,
-    eventNames: string[]
+    eventNames: ReadonlyArray<string>
   ) {
     for (const eventName of eventNames) {
       const eventIndex = json.findIndex(
