@@ -9,14 +9,13 @@ import {
 import { EventUtils } from '../../utils/event-utils.service';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { CONSENT_STATUS_NOT_NEEDED } from '../utils/constant';
+import { CONSENT_STATUS_NOT_NEEDED, BUILT_IN_VIDEO_EVENTS } from '../utils/constant';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VideoTag {
   // Constants for maintenance
-  private static readonly TRIGGER_NAME = 'event youtube video';
   private static readonly EVENT_TAG_NAME = 'GA4 event - Video';
   private static readonly HTML_TAG_NAME = 'cHTML - Youtube iframe API script';
   private static readonly EVENT_NAME_TEMPLATE = 'video_{{Video Status}}';
@@ -136,7 +135,10 @@ export class VideoTag {
       if (!this.eventUtils.isIncludeVideo(dataLayers)) {
         return [];
       }
-      const trigger = triggers.find((t) => t.name === VideoTag.TRIGGER_NAME);
+      // Match the trigger by data layer event name (e.g. 'video_start')
+      const trigger = triggers.find((t) =>
+        BUILT_IN_VIDEO_EVENTS.includes(t.name)
+      );
       if (!trigger?.triggerId) {
         throw new Error("Couldn't find matching trigger for video tag");
       }

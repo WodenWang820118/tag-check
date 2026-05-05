@@ -9,7 +9,7 @@ import { CONSENT_STATUS_NOT_NEEDED } from '../utils/constant';
 })
 export class ScrollTag {
   // Constants for easier maintenance
-  private static readonly TRIGGER_NAME = 'event scroll';
+  private static readonly TRIGGER_NAME = 'scroll';
   private static readonly TAG_NAME = 'GA4 event - scroll';
   private static readonly EVENT_NAME = 'scroll';
   private static readonly FINGERPRINT = '1690184079241';

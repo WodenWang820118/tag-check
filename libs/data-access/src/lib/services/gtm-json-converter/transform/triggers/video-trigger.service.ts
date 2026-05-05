@@ -1,4 +1,4 @@
-import { TriggerTypeEnum, YouTubeVideoTriggerConfig } from '@utils';
+import { TriggerTypeEnum, YouTubeVideoTriggerConfig, DataLayer } from '@utils';
 import { Injectable } from '@angular/core';
 import { EventUtils } from '../../utils/event-utils.service';
 
@@ -69,14 +69,11 @@ export class VideoTrigger {
 
   createVideoTrigger(
     accountId: string,
-    containerId: string
+    containerId: string,
+    dataLayers: DataLayer[] = []
   ): YouTubeVideoTriggerConfig[] {
-    // TODO: get the information whether the video is included in the data
     try {
-      const data = [] as any;
-      console.log('Creating video trigger...');
-      console.log('data: ', data);
-      if (this.eventUtils.isIncludeVideo(data)) {
+      if (this.eventUtils.isIncludeVideo(dataLayers)) {
         const _videoTrigger = this.videoTrigger({
           accountId,
           containerId
