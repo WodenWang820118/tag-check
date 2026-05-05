@@ -117,10 +117,7 @@ describe('TagManager', () => {
 
       const tagNames = result.map((t) => t.name);
       expect(tagNames).toEqual(
-        expect.not.arrayContaining([
-          'GA4 event - scroll',
-          'GA4 event - Video'
-        ])
+        expect.not.arrayContaining(['GA4 event - scroll', 'GA4 event - Video'])
       );
     });
 
@@ -139,9 +136,7 @@ describe('TagManager', () => {
       );
 
       const tagNames = result.map((t) => t.name);
-      expect(tagNames).toEqual(
-        expect.arrayContaining(['GA4 event - scroll'])
-      );
+      expect(tagNames).toEqual(expect.arrayContaining(['GA4 event - scroll']));
     });
 
     it('should propagate accountId and containerId to all tags', () => {
