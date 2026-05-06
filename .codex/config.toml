@@ -96,6 +96,30 @@ config_file = "agents/codebase-mapper.toml"
 nickname_candidates = ["Mapper", "Explorer"]
 
 ################################################################################
+# Domain-specific sub-agents
+################################################################################
+
+[agents.angular-frontend]
+description = "Angular 前端開發專用 sub-agent。Use when: Angular components, services, signals, routing, or Angular tests."
+config_file = "agents/angular-frontend.toml"
+nickname_candidates = ["Angular", "Frontend"]
+
+[agents.spring-boot-backend]
+description = "Spring Boot 後端開發專用 sub-agent。Use when: working with Java controllers, services, repositories, DTOs, or Maven builds."
+config_file = "agents/spring-boot-backend.toml"
+nickname_candidates = ["Java", "Spring", "Backend"]
+
+[agents.fastapi-service]
+description = "FastAPI/Python 服務開發專用 sub-agent。Use when: working with Python services, FastAPI routers, Pydantic models, or Poetry dependencies."
+config_file = "agents/fastapi-service.toml"
+nickname_candidates = ["Python", "FastAPI", "AI"]
+
+[agents.contract-validator]
+description = "跨 service contract 驗證專用 sub-agent。Use when: modifying contract files, checking cross-service type consistency, or validating shared schemas."
+config_file = "agents/contract-validator.toml"
+nickname_candidates = ["Contract", "Schema"]
+
+################################################################################
 # MCP
 ################################################################################
 

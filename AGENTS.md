@@ -141,6 +141,26 @@ First-load routing rules that must stay inline:
 Full lifecycle: `.agents/workflows/review-lifecycle.md`.
 Tool details: `.agents/workflows/tool-routing.md`.
 
+## Sub-agent Delegation
+
+Use sub-agents for context isolation when a task touches multiple technology
+stacks, crosses project boundaries, or benefits from a fresh context window.
+
+- **Domain-specific implementation**: delegate Angular work to
+  `angular-frontend`, Spring Boot work to `spring-boot-backend`, and FastAPI
+  work to `fastapi-service`. Each sub-agent operates in its own context window
+  and returns only a summary.
+- **Cross-service contract validation**: delegate contract verification to
+  `contract-validator` when modifying files in `contracts/`.
+- **Codebase exploration**: delegate read-only scoping to `codebase-mapper`
+  before multi-file changes.
+- **Review checkpoints**: delegate to `architecture-reviewer`,
+  `test-reviewer`, `security-reviewer`, or `ux-reviewer` as specified by the
+  review lifecycle.
+
+The main agent stays responsible for workflow orchestration, plan review,
+coordination, and final verification. Sub-agents handle focused execution.
+
 ## Phase Safeguards
 
 Use `product-and-scope-review` when scope is unstable. Feature work usually
