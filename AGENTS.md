@@ -49,6 +49,8 @@ it cannot read `.agents/skills`.
   screenshots, video proof, or explicit `proofshot` requests.
 - Load `.agents/workflows/tool-routing.md` when using or updating
   Copilot/Gemini/Codex review paths or bridge files.
+- Load `.agents/references/memory-practices.md` at phase boundaries during
+  large or huge tasks, before writing a session memory summary.
 
 Adding a new workflow file requires a matching load trigger in this file.
 
@@ -167,6 +169,8 @@ Full phase rules: `.agents/workflows/phased-workflow.md`.
 
 - Repo topology: `.agents/references/repo-map.md`.
 - Browser proofshot targets: `.agents/references/proofshot-targets.md`.
+- Memory practices for context window management:
+  `.agents/references/memory-practices.md`.
 - Stack conventions for Angular, NestJS, or Tauri:
   `.agents/stack-conventions.md`.
 
