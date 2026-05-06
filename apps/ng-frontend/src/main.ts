@@ -14,10 +14,43 @@ Sentry.init({
   defaultIntegrations: false
 });
 
+/** Signal to the Tauri shell that the Angular app has finished bootstrapping. */
+async function notifyAppReady(): Promise<void> {
+  // Only emit when running inside a Tauri webview
+  if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
+    const { emit } = await import('@tauri-apps/api/event');
+    await emit('app-ready');
+    console.log('Tauri app-ready event emitted');
+  }
+}
+
+/** Wait until Angular has had a chance to paint the first visible frame. */
+function waitForFirstPaint(): Promise<void> {
+  if (
+    typeof window === 'undefined' ||
+    typeof window.requestAnimationFrame !== 'function'
+  ) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => resolve());
+    });
+  });
+}
+
 // Bootstrap the application first
 bootstrapApplication(AppComponent, appConfig)
-  .then(() => {
+  .then(async () => {
     console.log('Application bootstrapped successfully');
+
+    // Wait for the first frame so the desktop splash only closes once the
+    // Angular shell has something visible to hand off to.
+    await waitForFirstPaint();
+
+    // Notify Tauri that the app is ready (closes the splash screen)
+    await notifyAppReady();
 
     // Load integrations after bootstrap completes
     loadSentryIntegrations();
