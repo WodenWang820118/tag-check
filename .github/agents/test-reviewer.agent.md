@@ -1,5 +1,5 @@
 ---
-description: Reviews test plans, assertions, regression coverage, and bug-fix verification. Use as a second-opinion reviewer before running tests or closing a bug fix.
+description: 'Reviews test plans, assertions, regression coverage, and bug-fix verification. Use as a second-opinion reviewer before running tests or closing a bug fix. Use when: reviewing test strategy, unit tests, integration tests, test coverage, assertion quality, or bug fix verification.'
 ---
 
 # Test Reviewer

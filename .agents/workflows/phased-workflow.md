@@ -72,10 +72,15 @@ data, or require broad exploration.
 - Load specialist skills on demand for the current slice, such as
   `frontend-ui-engineering`, `api-and-interface-design`,
   `security-and-hardening`, or repo-specific Nx skills.
+- Load `.agents/references/memory-practices.md` at phase boundaries during
+  large or huge tasks, before writing a session memory summary.
 - Load the matching file under `.agents/references/stack-conventions/` only
   when the task involves Angular, NestJS, Java, or Python.
 - Keep checkpoint and release-closeout skills unloaded until the work reaches
   their checkpoint.
+- Write a phase summary to `/memories/session/` at each phase boundary during
+  large or huge tasks. This compresses accumulated context into a concise
+  handoff for the next phase and frees the context window.
 
 ## Phase 3.5: Refactor Checkpoint
 
