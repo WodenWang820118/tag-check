@@ -1,5 +1,5 @@
 ---
-description: Reviews auth, secrets, filesystem, shell, network, and untrusted input changes for security risk. Use as the second-opinion reviewer for sensitive code paths.
+description: 'Reviews auth, secrets, filesystem, shell, network, and untrusted input changes for security risk. Use as the second-opinion reviewer for sensitive code paths. Use when: reviewing authentication, authorization, secrets handling, file I/O, shell commands, network calls, user input validation, or data sanitization.'
 ---
 
 # Security Reviewer
