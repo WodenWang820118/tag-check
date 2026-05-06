@@ -72,6 +72,10 @@ data, or require broad exploration.
 - Load specialist skills on demand for the current slice, such as
   `frontend-ui-engineering`, `api-and-interface-design`,
   `security-and-hardening`, or repo-specific Nx skills.
+- Delegate domain-specific implementation to sub-agents for context isolation:
+  use `angular-frontend` for Angular work, `spring-boot-backend` for Java work,
+  `fastapi-service` for Python work, and `contract-validator` for contract
+  changes. Each sub-agent operates with its own context window.
 - Load `.agents/references/memory-practices.md` at phase boundaries during
   large or huge tasks, before writing a session memory summary.
 - Load the matching file under `.agents/references/stack-conventions/` only
