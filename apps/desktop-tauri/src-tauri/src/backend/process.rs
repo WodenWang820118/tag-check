@@ -6,7 +6,7 @@ use std::{
     thread,
 };
 
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 use tauri_plugin_shell::{
     process::{CommandChild, CommandEvent},
     ShellExt,
@@ -142,6 +142,12 @@ pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::er
             if let Some(window) = show_window_handle.get_webview_window("main") {
                 let _ = window.show();
                 let _ = window.set_focus();
+            }
+            if let Err(error) = show_window_handle.emit("backend-ready", ()) {
+                write_diagnostic_log(
+                    &show_window_handle,
+                    &format!("failed to emit backend-ready event: {error}"),
+                );
             }
         } else {
             write_diagnostic_log(

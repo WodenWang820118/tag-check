@@ -239,6 +239,7 @@
     "@nestjs/websockets": "^11.1.13",
     "@primeuix/themes": "^2.0.3",
     "@tailwindcss/postcss": "^4.1.18",
+    "@tauri-apps/api": "^2.10.1",
     "archiver": "^7.0.1",
     "cache-manager": "^7.2.8",
     "class-transformer": "^0.5.1",
