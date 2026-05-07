@@ -451,9 +451,10 @@ export function evaluateHookPermission(input: {
 }
 
 export function buildDenyPayload(reason: string): string {
+  const reviewerList = SUPPORTED_REVIEWERS.join('|');
   return JSON.stringify({
     permissionDecision: 'deny',
-    permissionDecisionReason: `${reason} Pass plan review first (Copilot Claude or Gemini 2.5 Pro fallback), then approve the gate with: node tools/scripts/review-gate/approve-pre-implementation/approve-pre-implementation.ts --reviewer <copilot-claude|gemini-2.5-pro|codex-subagent> --focus <area> --summary "<summary>"`
+    permissionDecisionReason: `${reason} Pass plan review first (Copilot Claude first, Gemini 2.5 Pro fallback, Copilot GPT-5 mini fallback, or Codex fallback only when allowed), then approve the gate with: node tools/scripts/review-gate/approve-pre-implementation/approve-pre-implementation.ts --reviewer <${reviewerList}> --focus <area> --summary "<summary>"`
   });
 }
 // endregion
