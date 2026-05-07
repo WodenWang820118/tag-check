@@ -88,13 +88,13 @@ pub(crate) fn run() {
             let startup_state = Arc::new(SplashStartupState::default());
 
             // 1. Show splash screen immediately to give the user visual feedback
-            //    while the backend starts and the frontend bootstraps.
+            //    while the backend reaches startup data readiness.
             write_diagnostic_log(app_handle, "setup: creating splash window");
             create_splash_window(app_handle);
 
             // 2. Listen for both startup signals. The splash only closes after
-            //    the frontend has painted and the backend has passed health
-            //    checks and shown the main window.
+            //    the backend startup seed is complete and the main frontend has
+            //    painted.
             let frontend_listener_handle = app_handle.clone();
             let frontend_startup_state = Arc::clone(&startup_state);
             app_handle.listen("app-ready", move |_event| {
@@ -158,7 +158,7 @@ pub(crate) fn run() {
             });
 
             // 4. Start the backend (this forks a thread that waits for the
-            //    health check and then shows the main window).
+            //    startup-seed readiness check, then creates and loads main).
             write_diagnostic_log(app_handle, "setup: starting backend bootstrap");
             start_backend(app_handle.clone())?;
 
