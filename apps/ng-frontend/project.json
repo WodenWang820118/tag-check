@@ -22,6 +22,11 @@
             "input": "apps/ng-frontend/public"
           },
           {
+            "glob": "splash.html",
+            "input": "apps/ng-frontend/src",
+            "output": "/"
+          },
+          {
             "input": "libs/utils/src/lib/assets",
             "glob": "**/*",
             "output": "/assets/"
@@ -102,7 +107,15 @@
               "maximumError": "4kb"
             }
           ],
-          "optimization": true,
+          "optimization": {
+            "scripts": true,
+            "styles": {
+              "minify": true,
+              "removeSpecialComments": true,
+              "inlineCritical": false
+            },
+            "fonts": true
+          },
           "outputHashing": "all",
           "sourceMap": false,
           "fileReplacements": [

@@ -1,4 +1,3 @@
-use base64::Engine;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -9,49 +8,6 @@ use crate::{
     backend::{start_backend, stop_backend, BackendProcess, BACKEND_HEALTH_BUDGET},
     diagnostics::write_diagnostic_log,
 };
-
-/// Inline HTML for the splash screen, base64-encoded and loaded as a data: URL.
-const SPLASH_HTML: &str = r##"<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<title>Tag Check</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%}
-body{
-  background:linear-gradient(135deg,#1a237e 0%,#283593 50%,#3949ab 100%);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;
-  user-select:none;overflow:hidden;
-}
-.app-icon{
-  width:64px;height:64px;margin-bottom:24px;
-  background:rgba(255,255,255,0.15);
-  border-radius:16px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:32px;font-weight:300;
-}
-.app-name{font-size:26px;font-weight:600;letter-spacing:.5px;margin-bottom:36px}
-.spinner{
-  width:40px;height:40px;
-  border:3px solid rgba(255,255,255,0.2);
-  border-top-color:#fff;border-radius:50%;
-  animation:spin .75s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.status{margin-top:28px;font-size:13px;opacity:.65;animation:pulse 1.6s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.45}50%{opacity:.85}}
-</style>
-</head>
-<body>
-<div class="app-icon">&#10003;</div>
-<div class="app-name">Tag Check</div>
-<div class="spinner"></div>
-<div class="status">Loading&#8230;</div>
-</body>
-</html>"##;
-
 const SPLASH_TIMEOUT_MARGIN_SECS: u64 = 30;
 
 #[derive(Default)]
@@ -91,27 +47,17 @@ fn try_close_splash_window(
 
 /// Creates a small splash / loading window that appears immediately on launch.
 fn create_splash_window(app_handle: &tauri::AppHandle) {
-    let encoded = base64::engine::general_purpose::STANDARD.encode(SPLASH_HTML);
-    let data_url = format!("data:text/html;base64,{encoded}");
-
-    let url = match tauri::Url::parse(&data_url) {
-        Ok(u) => u,
-        Err(e) => {
-            write_diagnostic_log(
-                app_handle,
-                &format!("splash: failed to parse data URL: {e}"),
-            );
-            return;
-        }
-    };
-
-    match tauri::WebviewWindowBuilder::new(app_handle, "splash", WebviewUrl::External(url))
-        .title("Tag Check")
-        .inner_size(420.0, 320.0)
-        .resizable(false)
-        .decorations(false)
-        .center()
-        .build()
+    match tauri::WebviewWindowBuilder::new(
+        app_handle,
+        "splash",
+        WebviewUrl::App("splash.html".into()),
+    )
+    .title("Tag Check")
+    .inner_size(420.0, 320.0)
+    .resizable(false)
+    .decorations(false)
+    .center()
+    .build()
     {
         Ok(window) => {
             let _ = window.set_focus();
@@ -141,7 +87,7 @@ pub(crate) fn run() {
             let app_handle = app.handle();
             let startup_state = Arc::new(SplashStartupState::default());
 
-            // 1. Show splash screen immediately – gives the user visual feedback
+            // 1. Show splash screen immediately to give the user visual feedback
             //    while the backend starts and the frontend bootstraps.
             write_diagnostic_log(app_handle, "setup: creating splash window");
             create_splash_window(app_handle);
