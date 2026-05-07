@@ -183,10 +183,10 @@ pnpm run test:cov
 That command runs workspace `test` targets with coverage, runs backend unit
 coverage through `test-back:cov`, and writes the merged report to
 `coverage/lcov.info`. Backend integration and e2e coverage stay outside the
-Sonar path unless they are deliberately included later. `merge-coverage.mjs`
-therefore excludes backend e2e coverage by default; use
-`INCLUDE_E2E_COVERAGE=1 node merge-coverage.mjs` only when intentionally merging
-the separate e2e coverage artifact.
+Sonar path unless they are deliberately included later. The coverage merge tool
+under `tools/scripts/coverage-tools/merge-coverage/` excludes backend e2e coverage by
+default; use `INCLUDE_E2E_COVERAGE=1 pnpm run coverage:merge` only when
+intentionally merging the separate e2e coverage artifact.
 
 Current project inventory:
 
