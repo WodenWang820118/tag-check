@@ -10,9 +10,8 @@ export const entryMetadataResolver: ResolveFn<Project[]> = () => {
   const metadataService = inject(MetadataSourceService);
   const projectInfoService = inject(ProjectService);
 
-  return projectInfoService.getProjects().pipe(
+  return projectInfoService.getProjectsAfterStartupSeed().pipe(
     map((projects) => {
-      console.debug('projects: ', projects);
       metadataService.setData(projects);
       return projects;
     }),
