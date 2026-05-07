@@ -10,9 +10,18 @@ import { FileService } from '../../infrastructure/os/file/file.service';
 import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
 import { join } from 'path';
 
+export interface ExampleProjectStartupReadiness {
+  ready: boolean;
+  projectCount: number;
+}
+
 @Injectable()
 export class ExampleProjectRepositoryService implements OnModuleInit {
   private readonly logger = new Logger(ExampleProjectRepositoryService.name);
+  private startupReadiness: ExampleProjectStartupReadiness = {
+    ready: false,
+    projectCount: 0
+  };
   // Default constants for the example project. Move these here so they're
   // easy to change from a single place.
   private readonly DEFAULT_PROJECT_SLUG = 'example-project-slug';
@@ -49,14 +58,32 @@ export class ExampleProjectRepositoryService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    await this.buildExampleProject();
+    const startedAt = Date.now();
+    this.logger.log('Example project startup seed check started');
+    const projectCount = await this.buildExampleProject();
+    this.startupReadiness = { ready: true, projectCount };
+    this.logger.log(
+      `Example project startup seed check finished in ${
+        Date.now() - startedAt
+      }ms; ${projectCount} project(s) visible`
+    );
   }
 
-  async buildExampleProject() {
-    this.logger.debug('Building example project');
+  getStartupSeedReadiness(): ExampleProjectStartupReadiness {
+    return { ...this.startupReadiness };
+  }
+
+  async buildExampleProject(): Promise<number> {
+    this.logger.debug('Checking example project startup seed state');
     try {
       const projects = await this.projectRepositoryService.list();
-      if (projects.length > 0) return;
+      if (projects.length > 0) {
+        this.logger.log(
+          `Example project startup seed skipped; ${projects.length} project(s) already visible`
+        );
+        return projects.length;
+      }
+      this.logger.log('Example project startup seed creating example project');
 
       // 1. create a project with basic settings
       const projectSlug = this.DEFAULT_PROJECT_SLUG;
@@ -104,6 +131,17 @@ export class ExampleProjectRepositoryService implements OnModuleInit {
           gtmPreviewModeUrl: this.DEFAULT_GTM_PREVIEW_MODE_URL
         }
       });
+
+      const visibleProjects = await this.projectRepositoryService.list();
+      if (visibleProjects.length === 0) {
+        throw new Error(
+          'Example project startup seed completed but no projects are visible'
+        );
+      }
+      this.logger.log(
+        `Example project startup seed finished; ${visibleProjects.length} project(s) visible to project list`
+      );
+      return visibleProjects.length;
     } catch (error) {
       this.logger.error('Failed to build example project:', error);
       throw error;

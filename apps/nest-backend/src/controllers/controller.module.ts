@@ -23,6 +23,7 @@ import { ProjectIoController } from './project-io/project-io.controller';
 import { FileReportsController } from './file-reports/file-reports.controller';
 import { VideosController } from './videos/videos.controller';
 import { GtmParserController } from './gtm-parser/gtm-parser.controller';
+import { StartupReadinessController } from './startup/startup-readiness.controller';
 
 // services
 import { EventInspectionControllerService } from './data-layer/event-inspection-controller.service';
@@ -58,7 +59,8 @@ const services = [
     ProjectIoController,
     FileReportsController,
     VideosController,
-    GtmParserController
+    GtmParserController,
+    StartupReadinessController
   ],
   providers: [...services]
 })

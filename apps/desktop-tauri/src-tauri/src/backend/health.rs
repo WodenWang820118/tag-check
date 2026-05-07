@@ -13,16 +13,20 @@ use crate::diagnostics::write_diagnostic_log;
 const MAX_HEALTH_RESPONSE_BYTES: u64 = 8 * 1024;
 
 pub(super) fn wait_for_backend(app_handle: &AppHandle, backend_terminated: &AtomicBool) -> bool {
-    for _ in 0..MAX_HEALTH_ATTEMPTS {
+    write_diagnostic_log(app_handle, "waiting for backend startup seed readiness");
+
+    for attempt in 1..=MAX_HEALTH_ATTEMPTS {
         if backend_terminated.load(Ordering::Relaxed) {
             return false;
         }
 
         for port in HEALTH_PORTS {
-            if check_backend_health(port) {
+            if check_backend_startup_seed_readiness(port) {
                 write_diagnostic_log(
                     app_handle,
-                    &format!("health check passed on http://127.0.0.1:{port}/health"),
+                    &format!(
+                        "startup seed readiness passed on http://127.0.0.1:{port}/startup/project-seed-readiness after attempt {attempt}"
+                    ),
                 );
                 return true;
             }
@@ -38,7 +42,7 @@ pub(super) fn wait_for_backend(app_handle: &AppHandle, backend_terminated: &Atom
     false
 }
 
-fn check_backend_health(port: u16) -> bool {
+fn check_backend_startup_seed_readiness(port: u16) -> bool {
     let socket_address = match format!("127.0.0.1:{port}").to_socket_addrs() {
         Ok(mut addresses) => match addresses.next() {
             Some(address) => address,
@@ -56,7 +60,9 @@ fn check_backend_health(port: u16) -> bool {
     let _ = stream.set_write_timeout(Some(HEALTH_TIMEOUT));
 
     if stream
-        .write_all(b"GET /health HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n")
+        .write_all(
+            b"GET /startup/project-seed-readiness HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n",
+        )
         .is_err()
     {
         return false;
@@ -71,10 +77,10 @@ fn check_backend_health(port: u16) -> bool {
         return false;
     }
 
-    is_healthy_response(&response)
+    is_startup_seed_ready_response(&response)
 }
 
-fn is_healthy_response(response: &str) -> bool {
+fn is_startup_seed_ready_response(response: &str) -> bool {
     let Some((headers, body)) = response.split_once("\r\n\r\n") else {
         return false;
     };
@@ -95,74 +101,84 @@ fn is_healthy_response(response: &str) -> bool {
         return false;
     };
 
-    body.get("status").and_then(|status| status.as_str()) == Some("ok")
+    body.get("ready").is_some_and(|ready| ready == true)
+        && body
+            .get("projectCount")
+            .and_then(|project_count| project_count.as_u64())
+            .is_some_and(|project_count| project_count > 0)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::is_healthy_response;
+    use super::is_startup_seed_ready_response;
 
     #[test]
-    fn accepts_200_response_with_ok_json_status() {
-        assert!(is_healthy_response(
+    fn accepts_200_response_when_startup_seed_is_ready() {
+        assert!(is_startup_seed_ready_response(
+            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"ready\":true,\"projectCount\":1}"
+        ));
+    }
+
+    #[test]
+    fn rejects_response_until_startup_seed_is_ready() {
+        assert!(!is_startup_seed_ready_response(
+            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"ready\":false,\"projectCount\":0}"
+        ));
+    }
+
+    #[test]
+    fn rejects_ready_response_without_visible_projects() {
+        assert!(!is_startup_seed_ready_response(
+            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"ready\":true,\"projectCount\":0}"
+        ));
+    }
+
+    #[test]
+    fn rejects_non_200_response_even_when_startup_seed_is_ready() {
+        assert!(!is_startup_seed_ready_response(
+            "HTTP/1.1 500 Internal Server Error\r\nContent-Type: application/json\r\n\r\n{\"ready\":true,\"projectCount\":1}"
+        ));
+        assert!(!is_startup_seed_ready_response(
+            "HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\n\r\n{\"ready\":true,\"projectCount\":1}"
+        ));
+        assert!(!is_startup_seed_ready_response(
+            "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\"ready\":true,\"projectCount\":1}"
+        ));
+    }
+
+    #[test]
+    fn rejects_project_list_responses_without_readiness_contract() {
+        assert!(!is_startup_seed_ready_response(
+            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n[{\"projectSlug\":\"example-project-slug\"}]"
+        ));
+        assert!(!is_startup_seed_ready_response(
+            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n[]"
+        ));
+    }
+
+    #[test]
+    fn rejects_health_ok_without_startup_seed_readiness() {
+        assert!(!is_startup_seed_ready_response(
             "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"ok\"}"
-        ));
-        assert!(is_healthy_response(
-            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"ok\",\"version\":\"1.0\",\"pid\":123}"
-        ));
-    }
-
-    #[test]
-    fn rejects_non_200_response_even_when_body_is_ok() {
-        assert!(!is_healthy_response(
-            "HTTP/1.1 500 Internal Server Error\r\nContent-Type: application/json\r\n\r\n{\"status\":\"ok\"}"
-        ));
-        assert!(!is_healthy_response(
-            "HTTP/1.1 404 Not Found\r\nContent-Type: application/json\r\n\r\n{\"status\":\"ok\"}"
-        ));
-        assert!(!is_healthy_response(
-            "HTTP/1.1 201 Created\r\nContent-Type: application/json\r\n\r\n{\"status\":\"ok\"}"
-        ));
-    }
-
-    #[test]
-    fn rejects_200_response_with_unhealthy_status() {
-        assert!(!is_healthy_response(
-            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":\"starting\"}"
-        ));
-    }
-
-    #[test]
-    fn rejects_200_response_with_missing_status_field() {
-        assert!(!is_healthy_response(
-            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"healthy\":true}"
-        ));
-    }
-
-    #[test]
-    fn rejects_200_response_with_non_string_status() {
-        assert!(!is_healthy_response(
-            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":true}"
-        ));
-        assert!(!is_healthy_response(
-            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{\"status\":null}"
         ));
     }
 
     #[test]
     fn rejects_200_response_with_invalid_json() {
-        assert!(!is_healthy_response(
+        assert!(!is_startup_seed_ready_response(
             "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\nnot-json"
         ));
     }
 
     #[test]
     fn rejects_200_response_with_empty_body() {
-        assert!(!is_healthy_response("HTTP/1.1 200 OK\r\n\r\n"));
+        assert!(!is_startup_seed_ready_response("HTTP/1.1 200 OK\r\n\r\n"));
     }
 
     #[test]
     fn rejects_malformed_http_response() {
-        assert!(!is_healthy_response("{\"status\":\"ok\"}"));
+        assert!(!is_startup_seed_ready_response(
+            "[{\"projectSlug\":\"example-project-slug\"}]"
+        ));
     }
 }
