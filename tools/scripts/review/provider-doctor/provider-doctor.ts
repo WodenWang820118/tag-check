@@ -87,7 +87,7 @@ export function parseCliArgs(
 
 export function getUsageText(scriptName = 'provider-doctor.ts'): string {
   return [
-    `Usage: node --experimental-strip-types ${scriptName} [--provider <all|copilot|gemini>] [--json]`,
+    `Usage: node ${scriptName} [--provider <all|copilot|gemini>] [--json]`,
     '',
     'Options:',
     '  --provider <all|copilot|gemini>  Filter the report to a single provider (default: all)',

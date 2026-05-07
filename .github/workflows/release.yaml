@@ -17,8 +17,10 @@ jobs:
           cache: 'pnpm'
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-      - name: Install PNPM
-        run: npm install -g pnpm
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.0.8 --activate
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build Tauri desktop bundle
