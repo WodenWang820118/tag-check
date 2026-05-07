@@ -100,17 +100,20 @@ graph TD
 
 ### Prerequisites
 
-Install dependencies:
+Use Node 24 and activate the repository's pinned pnpm version:
 
 ```bash
-npm install -g pnpm
+corepack enable
+corepack prepare pnpm@11.0.8 --activate
 ```
+
+Install dependencies:
 
 ```bash
 pnpm install
 ```
 
-Approve the build for the listed packages warned by pnpm after installation:
+If pnpm reports newly blocked dependency build scripts, review and approve them:
 
 ```bash
 pnpm approve-builds

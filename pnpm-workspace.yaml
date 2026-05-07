@@ -2,6 +2,24 @@ packages:
   - apps/**
   - libs/**
 
+allowBuilds:
+  '@firebase/util': true
+  '@nestjs/core': true
+  '@parcel/watcher': true
+  '@scarf/scarf': true
+  '@swc/core': true
+  esbuild: true
+  ffmpeg-static: true
+  less: true
+  lmdb: true
+  msgpackr-extract: true
+  nx: true
+  protobufjs: true
+  puppeteer: true
+  puppeteer-chromium-resolver: true
+  sqlite3: true
+  unrs-resolver: true
+
 onlyBuiltDependencies:
   - '@firebase/util'
   - '@nestjs/core'

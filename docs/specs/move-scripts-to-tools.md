@@ -18,7 +18,7 @@ Move the repository root `scripts/` directory into `tools/scripts/` without refa
 - **Language/Framework:** TypeScript, Node.js, Nx workspace
 - **API (if applicable):** N/A
 - **Database (if applicable):** N/A
-- **Key Libraries/Dependencies:** Node `--experimental-strip-types`, Vitest, Nx run-commands
+- **Key Libraries/Dependencies:** Node 24 native TypeScript execution, Vitest, Nx run-commands
 
 ### Assumptions
 
@@ -65,7 +65,7 @@ Representative path update:
 
 ```json
 {
-  "review:status": "node --experimental-strip-types tools/scripts/review-gate/status/status.ts"
+  "review:status": "node tools/scripts/review-gate/status/status.ts"
 }
 ```
 

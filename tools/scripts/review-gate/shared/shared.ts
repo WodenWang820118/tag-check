@@ -7,7 +7,7 @@ import path from 'node:path';
 // region Constants
 const REVIEW_TTL_MS = 2 * 60 * 60 * 1000;
 const REVIEW_GATE_ENTRYPOINT_COMMAND_PATTERN =
-  /^\s*node(?:\.exe)?(?:\s+--experimental-strip-types)?\s+(?:\.?[\\/])?(?:tools[\\/]scripts|scripts)[\\/]review-gate[\\/](approve-pre-implementation|status|reset)[\\/]\1\.ts(?:\s+.*)?\s*$/i;
+  /^\s*node(?:\.exe)?\s+(?:\.?[\\/])?(?:tools[\\/]scripts|scripts)[\\/]review-gate[\\/](approve-pre-implementation|status|reset)[\\/]\1\.ts(?:\s+.*)?\s*$/i;
 const REVIEW_GATE_SCRIPT_ALIAS_PATTERN =
   /^\s*(?:(?:npm|pnpm|yarn|bun)\s+)?review:(approve-pre-implementation|status|reset)(?:\s+--(?:\s+.*)?)?\s*$/i;
 const RISKY_SHELL_SYNTAX_PATTERNS = [

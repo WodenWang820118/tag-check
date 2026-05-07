@@ -94,7 +94,7 @@ export function runSubcommand(
 
   if (!subcommand) {
     throw new Error(
-      'Usage: node --experimental-strip-types tools/scripts/proofshot/proofshot.ts <check|start-web|stop|clean> [proofshot args]'
+      'Usage: node tools/scripts/proofshot/proofshot.ts <check|start-web|stop|clean> [proofshot args]'
     );
   }
 

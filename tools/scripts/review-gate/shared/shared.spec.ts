@@ -58,6 +58,7 @@ test('isReviewGateCommand only exempts the TypeScript review-gate entrypoints', 
     'node tools/scripts/review-gate',
     'status.ts'
   ].join('/');
+  const stripTypesFlag = ['--experimental', 'strip-types'].join('-');
   const oldFlatExternalStatusCommand = [
     'evil scripts/review-gate',
     'status.ts'
@@ -85,10 +86,20 @@ test('isReviewGateCommand only exempts the TypeScript review-gate entrypoints', 
     true
   );
   assert.equal(
+    isReviewGateCommand('./tools/scripts/review-gate/status/status.ts'),
+    false
+  );
+  assert.equal(
     isReviewGateCommand(
-      'node --experimental-strip-types ./tools/scripts/review-gate/status/status.ts'
+      'node --watch ./tools/scripts/review-gate/status/status.ts'
     ),
-    true
+    false
+  );
+  assert.equal(
+    isReviewGateCommand(
+      `node ${stripTypesFlag} tools/scripts/review-gate/status/status.ts`
+    ),
+    false
   );
   assert.equal(
     isReviewGateCommand(
