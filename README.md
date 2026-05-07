@@ -100,17 +100,20 @@ graph TD
 
 ### Prerequisites
 
-Install dependencies:
+Use Node 24 and activate the repository's pinned pnpm version:
 
 ```bash
-npm install -g pnpm
+corepack enable
+corepack prepare pnpm@11.0.8 --activate
 ```
+
+Install dependencies:
 
 ```bash
 pnpm install
 ```
 
-Approve the build for the listed packages warned by pnpm after installation:
+If pnpm reports newly blocked dependency build scripts, review and approve them:
 
 ```bash
 pnpm approve-builds
@@ -183,10 +186,10 @@ pnpm run test:cov
 That command runs workspace `test` targets with coverage, runs backend unit
 coverage through `test-back:cov`, and writes the merged report to
 `coverage/lcov.info`. Backend integration and e2e coverage stay outside the
-Sonar path unless they are deliberately included later. `merge-coverage.mjs`
-therefore excludes backend e2e coverage by default; use
-`INCLUDE_E2E_COVERAGE=1 node merge-coverage.mjs` only when intentionally merging
-the separate e2e coverage artifact.
+Sonar path unless they are deliberately included later. The coverage merge tool
+under `tools/scripts/coverage-tools/merge-coverage/` excludes backend e2e coverage by
+default; use `INCLUDE_E2E_COVERAGE=1 pnpm run coverage:merge` only when
+intentionally merging the separate e2e coverage artifact.
 
 Current project inventory:
 
