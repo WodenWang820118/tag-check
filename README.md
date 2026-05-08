@@ -94,13 +94,13 @@ graph TD
 This repository pins its toolchain in `package.json`:
 
 - `Node.js 24.x`
-- `pnpm 10.28.2` via Corepack
+- `pnpm 11.0.8` via Corepack
 
 Recommended setup:
 
 ```bash
 corepack enable
-corepack prepare pnpm@10.28.2 --activate
+corepack prepare pnpm@11.0.8 --activate
 pnpm install
 ```
 
