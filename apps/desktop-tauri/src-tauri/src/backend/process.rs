@@ -75,6 +75,16 @@ pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::er
             "DATABASE_PATH".to_string(),
             backend_paths.database_path.to_string_lossy().into_owned(),
         ),
+        // Persistent V8 compile cache directory. After the first launch, Node
+        // re-uses cached bytecode and skips parsing the bundled main.js,
+        // which materially reduces cold start time on subsequent launches.
+        (
+            "NODE_COMPILE_CACHE".to_string(),
+            backend_paths
+                .compile_cache_dir
+                .to_string_lossy()
+                .into_owned(),
+        ),
     ];
     write_diagnostic_log(
         &app_handle,

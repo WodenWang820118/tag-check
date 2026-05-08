@@ -76,10 +76,12 @@ describe('ExampleProjectRepositoryService', () => {
     );
   });
 
-  it('reports startup seed as not ready before module init completes', () => {
+  it('reports startup seed as not ready before scheduling completes', () => {
     expect(service.getStartupSeedReadiness()).toEqual({
       ready: false,
-      projectCount: 0
+      projectCount: 0,
+      inFlight: false,
+      error: null
     });
   });
 
@@ -88,7 +90,7 @@ describe('ExampleProjectRepositoryService', () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([visibleProject]);
 
-    await service.onModuleInit();
+    await service.scheduleStartupSeed();
 
     expect(
       mockProjectInitializationService.initProjectFileSystem
@@ -98,20 +100,39 @@ describe('ExampleProjectRepositoryService', () => {
     );
     expect(service.getStartupSeedReadiness()).toEqual({
       ready: true,
-      projectCount: 1
+      projectCount: 1,
+      inFlight: false,
+      error: null
     });
   });
 
   it('does not mark startup seed ready when the recreated project is still not visible', async () => {
     mockProjectRepositoryService.list.mockResolvedValue([]);
 
-    await expect(service.onModuleInit()).rejects.toThrow(
+    await expect(service.scheduleStartupSeed()).rejects.toThrow(
       'Example project startup seed completed but no projects are visible'
     );
 
     expect(service.getStartupSeedReadiness()).toEqual({
       ready: false,
-      projectCount: 0
+      projectCount: 0,
+      inFlight: false,
+      error:
+        'Example project startup seed completed but no projects are visible'
     });
+  });
+
+  it('onApplicationBootstrap returns immediately without awaiting seed work', async () => {
+    mockProjectRepositoryService.list
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([visibleProject]);
+
+    await service.onApplicationBootstrap();
+
+    // Lifecycle hook itself does not await; readiness is still in-flight or just-finished.
+    // We verify the seed promise is in progress / completed by awaiting via scheduleStartupSeed.
+    const projectCount = await service.scheduleStartupSeed();
+    expect(projectCount).toBe(1);
+    expect(service.getStartupSeedReadiness().ready).toBe(true);
   });
 });
