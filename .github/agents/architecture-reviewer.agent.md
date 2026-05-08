@@ -1,5 +1,5 @@
 ---
-description: Reviews plans and complex changes for architecture, interfaces, state flow, and cross-file risk. Use as a second-opinion reviewer after planning or multi-file implementation.
+description: 'Reviews plans and complex changes for architecture, interfaces, state flow, and cross-file risk. Use as a second-opinion reviewer after planning or multi-file implementation. Use when: reviewing architecture, design decisions, module boundaries, dependency graphs, or cross-package contracts.'
 ---
 
 # Architecture Reviewer

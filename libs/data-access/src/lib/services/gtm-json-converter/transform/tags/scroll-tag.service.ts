@@ -2,13 +2,14 @@ import { EventTagConfig, TagTypeEnum, Trigger, DataLayer } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
+import { CONSENT_STATUS_NOT_NEEDED } from '../utils/constant';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ScrollTag {
   // Constants for easier maintenance
-  private static readonly TRIGGER_NAME = 'event scroll';
+  private static readonly TRIGGER_NAME = 'scroll';
   private static readonly TAG_NAME = 'GA4 event - scroll';
   private static readonly EVENT_NAME = 'scroll';
   private static readonly FINGERPRINT = '1690184079241';
@@ -59,7 +60,7 @@ export class ScrollTag {
           type: 'MAP'
         },
         consentSettings: {
-          consentStatus: 'NOT_SET'
+          consentStatus: CONSENT_STATUS_NOT_NEEDED
         }
       }
     ];

@@ -62,7 +62,6 @@ export class FullTestEventResponseDto implements FullTestEventSchema {
     const latestImage = testImages.find(
       (img) => img.id === obj.latestTestImageId
     );
-    console.log('Latest image:', latestImage?.imageName);
     return latestImage ?? new TestImageResponseDto();
   })
   latestTestImage!: TestImageResponseDto;

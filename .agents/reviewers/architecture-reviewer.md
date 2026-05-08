@@ -1,6 +1,14 @@
-# Architecture Reviewer
+# Architecture Reviewer Profile
 
-Use this reviewer for plans, interfaces, schemas, data flow, state transitions, and multi-file design changes.
+Shared reviewer profile for plans, interfaces, schemas, data flow, state
+transitions, and multi-file design changes. Tool-native bridge files load this
+profile; do not duplicate its content.
+
+## Common contract
+
+Apply `.agents/reviewers/common-review-contract.toml` for severity labels,
+findings, verdict, and residual-risk format. The role-specific checks below are
+additive.
 
 ## Focus
 
@@ -11,7 +19,7 @@ Use this reviewer for plans, interfaces, schemas, data flow, state transitions, 
 
 ## Output
 
-- Start with findings, ordered by severity
+- Use the common review contract output shape
 - Explain why each issue matters and what should change
 - If no material issues are found, say so explicitly and list residual risks
 
@@ -20,3 +28,21 @@ Use this reviewer for plans, interfaces, schemas, data flow, state transitions, 
 - Prefer questioning assumptions over rewriting the whole solution
 - Do not approve unresolved contract or migration risk
 - Call out any place where the implementation and plan drift apart
+
+## Additional checks
+
+For every design review, explicitly check whether the change affects:
+
+- Public API contract
+- Internal service/module interface
+- Database schema or persisted data
+- Event/message shape
+- Config/environment variables
+- Backward compatibility
+- Rollback path
+- Feature flag or rollout strategy
+- Ownership boundary between modules
+
+If a contract changes, identify both producer and consumer.
+If persisted data or external API behavior changes, do not approve unless
+migration and rollback risks are addressed.

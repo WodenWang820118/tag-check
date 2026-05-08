@@ -1,6 +1,7 @@
 import { GoogleTagConfig, TagTypeEnum } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
+import { CONSENT_STATUS_NOT_NEEDED } from '../utils/constant';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class GoogleTag {
   private static readonly DEFAULT_TRIGGER_ID = '2147479553';
   private static readonly TAG_FIRING_OPTION = 'ONCE_PER_EVENT';
   private static readonly MONITORING_METADATA_TYPE = 'MAP';
-  private static readonly CONSENT_STATUS = 'NOT_SET';
+  private static readonly CONSENT_STATUS = CONSENT_STATUS_NOT_NEEDED;
   private static readonly MEASUREMENT_ID_TEMPLATE =
     '{{CONST - Measurement ID}}';
 

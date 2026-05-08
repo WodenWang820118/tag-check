@@ -10,8 +10,9 @@ Before reviewing:
 
 1. Confirm the active Copilot model is a Claude-family model if available.
 2. Read [AGENTS.md](../../AGENTS.md).
-3. Open the latest `proofshot-artifacts/` session.
-4. Read `SUMMARY.md` and inspect the screenshots before giving conclusions.
+3. Read [`.agents/reviewers/common-review-contract.toml`](../../.agents/reviewers/common-review-contract.toml).
+4. Open the latest `proofshot-artifacts/` session.
+5. Read `SUMMARY.md` and inspect the screenshots before giving conclusions.
 
 Verification goal: `${input:goal:What user flow or UI change was being verified?}`
 
@@ -25,8 +26,7 @@ ${input:artifacts:Paste the relevant parts of SUMMARY.md or your notes from the 
 
 Review rules:
 
-- Findings first, ordered by severity
+- Apply the shared review contract for severity labels, findings, verdict, and residual-risk format
 - Focus on UX, correctness, console-visible issues, and missing states
 - Call out anything the proof artifacts fail to prove
 - If screenshots or summary are insufficient, say exactly what proof is missing
-- If there are no material findings, say so explicitly and note residual risks

@@ -1,10 +1,109 @@
 {
-  "mcpServers": {
-    "nx-mcp": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["nx", "mcp"]
+  "$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
+
+  "general": {
+    "preferredEditor": "code",
+    "defaultApprovalMode": "plan",
+    "enableNotifications": true,
+    "checkpointing": {
+      "enabled": true
+    },
+    "plan": {
+      "enabled": true,
+      "modelRouting": true
+    },
+    "sessionRetention": {
+      "enabled": true,
+      "maxAge": "30d",
+      "maxCount": 100
     }
   },
-  "contextFileName": "AGENTS.md"
+
+  "context": {
+    "fileName": ["AGENTS.md", "GEMINI.md"],
+    "includeDirectoryTree": true,
+    "loadMemoryFromIncludeDirectories": true,
+    "discoveryMaxDirs": 200,
+    "memoryBoundaryMarkers": [".git"],
+    "fileFiltering": {
+      "respectGitIgnore": true,
+      "respectGeminiIgnore": true,
+      "enableRecursiveFileSearch": true,
+      "enableFuzzySearch": true,
+      "customIgnoreFilePaths": [".geminiignore"]
+    }
+  },
+
+  "tools": {
+    "sandboxNetworkAccess": false,
+    "shell": {
+      "enableInteractiveShell": true,
+      "backgroundCompletionBehavior": "notify",
+      "inactivityTimeout": 600,
+      "enableShellOutputEfficiency": true
+    },
+    "useRipgrep": true,
+    "truncateToolOutputThreshold": 40000,
+
+    "allowed": [
+      "run_shell_command(git status)",
+      "run_shell_command(git diff)",
+      "run_shell_command(git branch)",
+      "run_shell_command(rg)"
+    ],
+
+    "confirmationRequired": [
+      "run_shell_command(git push)",
+      "run_shell_command(git add)",
+      "run_shell_command(git commit)",
+      "run_shell_command(pnpm install)",
+      "run_shell_command(npm install)"
+    ]
+  },
+
+  "mcp": {
+    "allowed": ["nx-mcp"]
+  },
+
+  "mcpServers": {
+    "nx-mcp": {
+      "command": "npx",
+      "args": ["nx", "mcp", "--minimal"],
+      "cwd": ".",
+      "timeout": 120000,
+      "trust": false
+    }
+  },
+
+  "experimental": {
+    "enableAgents": true,
+    "autoMemory": true
+  },
+
+  "agents": {
+    "overrides": {
+      "codebase_investigator": {
+        "modelConfig": {
+          "model": "gemini-3-flash-preview"
+        },
+        "runConfig": {
+          "maxTurns": 40,
+          "maxTimeMinutes": 15
+        }
+      },
+      "browser_agent": {
+        "enabled": false
+      }
+    },
+    "browser": {
+      "allowedDomains": ["github.com", "localhost", "127.0.0.1"],
+      "confirmSensitiveActions": true,
+      "blockFileUploads": true,
+      "maxActionsPerTask": 30
+    }
+  },
+
+  "privacy": {
+    "usageStatisticsEnabled": false
+  }
 }

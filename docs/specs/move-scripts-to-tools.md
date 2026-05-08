@@ -18,7 +18,7 @@ Move the repository root `scripts/` directory into `tools/scripts/` without refa
 - **Language/Framework:** TypeScript, Node.js, Nx workspace
 - **API (if applicable):** N/A
 - **Database (if applicable):** N/A
-- **Key Libraries/Dependencies:** Node `--experimental-strip-types`, Vitest, Nx run-commands
+- **Key Libraries/Dependencies:** Node 24 native TypeScript execution, Vitest, Nx run-commands
 
 ### Assumptions
 
@@ -37,8 +37,9 @@ Move the repository root `scripts/` directory into `tools/scripts/` without refa
 ```text
 tools/
   scripts/                          <-- Moved from repo root
-    proofshot.ts
-    proofshot.test.ts
+    proofshot/
+      proofshot.ts
+      proofshot.spec.ts
     review/
     review-gate/
     tauri/
@@ -64,13 +65,13 @@ Representative path update:
 
 ```json
 {
-  "review:status": "node --experimental-strip-types tools/scripts/review-gate/status.ts"
+  "review:status": "node tools/scripts/review-gate/status/status.ts"
 }
 ```
 
 ## 3. Testing Strategy
 
-- **Unit Tests:** Keep existing `*.test.ts` files under the moved tree runnable from their new location.
+- **Unit Tests:** Keep existing `*.spec.ts` files under the moved tree runnable from their new location.
 - **Integration Tests:** Validate the repo entrypoints that invoke moved scripts, focusing on review-gate and Tauri runtime preparation path resolution.
 - **End-to-End (E2E) Tests:** None for this task.
 
@@ -88,7 +89,7 @@ Representative path update:
 - [ ] A repository-wide audit of `scripts/` references is completed and every remaining valid reference intentionally points to `tools/scripts/` or is updated for the new location.
 - [ ] All current `package.json` command entrypoints that used `scripts/...` point to `tools/scripts/...`.
 - [ ] `apps/desktop-tauri/project.json` uses the new `tools/scripts/...` path.
-- [ ] `vitest.workspace.ts` includes tests from `tools/scripts/**/*.test.ts`.
+- [ ] `vitest.workspace.ts` includes tests from `tools/scripts/**/*.spec.ts`.
 - [ ] Documentation and workflow/config references that mention the moved paths are updated in the same pass.
 - [ ] No code path changes beyond path relocation are introduced.
 

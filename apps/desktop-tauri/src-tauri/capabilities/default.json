@@ -1,7 +1,12 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Allows the main window to manage the local backend sidecar.",
-  "windows": ["main"],
-  "permissions": ["core:default", "shell:allow-kill", "shell:allow-spawn"]
+  "description": "Allows the main and splash windows to communicate via events and manage the local backend sidecar.",
+  "windows": ["main", "splash"],
+  "permissions": [
+    "core:default",
+    "core:event:default",
+    "shell:allow-kill",
+    "shell:allow-spawn"
+  ]
 }

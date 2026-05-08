@@ -11,6 +11,11 @@ export const DOCS_ROUTES: Routes = [
       ),
     children: [
       {
+        path: '',
+        redirectTo: 'introduction',
+        pathMatch: 'full'
+      },
+      {
         path: ':name',
         loadComponent: () =>
           import('./components/main-content/main-content.component').then(

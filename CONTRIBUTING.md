@@ -30,7 +30,7 @@ The project is structured into two primary components: the frontend and the back
 
 ### Integration with Tauri
 
-To deliver a standalone desktop experience, the application now runs inside a Tauri shell. The desktop runtime lives in `apps/desktop-tauri`, while `tools/scripts/tauri/prepare-runtime.ts` prepares the Nest backend sidecar and bundled Node runtime used by the desktop build.
+To deliver a standalone desktop experience, the application now runs inside a Tauri shell. The desktop runtime lives in `apps/desktop-tauri`, while `tools/scripts/tauri/prepare-runtime/prepare-runtime.ts` prepares the Nest backend sidecar and bundled Node runtime used by the desktop build.
 
 The desktop workflow is centered on:
 

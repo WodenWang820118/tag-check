@@ -28,17 +28,25 @@ export class EvaluateClickService implements ClickOperation {
         return false;
       }
 
-      await Promise.race([
-        page.evaluate(async () => {
-          await element.click();
-        }, selector),
-        new Promise((_, reject) =>
-          setTimeout(
-            () => reject(new Error('Timeout exceeded Evaluation Clicking')),
-            timeout
+      try {
+        await Promise.race([
+          element.evaluate((el) => {
+            (el as HTMLElement).click();
+          }),
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error('Timeout exceeded Evaluation Clicking')),
+              timeout
+            )
           )
-        )
-      ]);
+        ]);
+      } finally {
+        await element.dispose().catch((error) => {
+          this.logger.warn(
+            `Failed to dispose clicked element handle "${selector}": ${error}`
+          );
+        });
+      }
       return true;
     } catch (error) {
       this.logger.error(

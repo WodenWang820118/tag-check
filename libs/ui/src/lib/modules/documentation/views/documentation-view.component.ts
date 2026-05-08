@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { SideBarComponent } from '../components/sidebar/sidebar.component';
-import { Router, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-documentation-view',
@@ -39,9 +39,4 @@ import { Router, RouterOutlet } from '@angular/router';
     `
   ]
 })
-export class HelpCenterViewComponent implements OnInit {
-  constructor(private readonly router: Router) {}
-  ngOnInit(): void {
-    this.router.navigate(['/documentation/introduction']);
-  }
-}
+export class HelpCenterViewComponent {}

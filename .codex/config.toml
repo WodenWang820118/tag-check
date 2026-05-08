@@ -1,28 +1,190 @@
+# .codex/config.toml
+# Bridge config. Canonical workflow, review routing, and gate rules live
+# in AGENTS.md and the referenced .agents/workflows files.
 
-mcp_servers.nx-mcp.command = 'npx'
-mcp_servers.nx-mcp.args = [
-	'nx',
-	'mcp',
-	'--minimal',
-]
-features.multi_agent = true
+################################################################################
+# Core defaults
+################################################################################
+
+model = "gpt-5.4"
+review_model = "gpt-5.5"
+model_context_window = 1000000
+model_auto_compact_token_limit = 64000
+
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "high"
+model_reasoning_summary = "concise"
+model_verbosity = "medium"
+
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "cached"
+file_opener = "vscode"
+
+project_root_markers = [".git", "nx.json", "package.json"]
+project_doc_max_bytes = 65536
+project_doc_fallback_filenames = ["CLAUDE.md"]
+tool_output_token_limit = 12000
+background_terminal_max_timeout = 600000
+
+################################################################################
+# Features
+################################################################################
+
+[features]
+multi_agent = true
+memories = true
+codex_hooks = true
+shell_snapshot = true
+enable_request_compression = true
+skill_mcp_dependency_install = true
+prevent_idle_sleep = false
+fast_mode = false
+apps = false
+
+################################################################################
+# Memories
+################################################################################
+
+[memories]
+use_memories = true
+generate_memories = true
+disable_on_external_context = true
+max_rollout_age_days = 30
+max_rollouts_per_startup = 8
+max_raw_memories_for_consolidation = 256
+min_rate_limit_remaining_percent = 25
+min_rollout_idle_hours = 3
+
+################################################################################
+# Multi-agent limits
+################################################################################
+
+[agents]
+max_threads = 6
+max_depth = 1
+job_max_runtime_seconds = 1800
 
 [agents.ci-monitor-subagent]
-description = 'CI helper for /monitor-ci. Fetches CI status, retrieves fix details, or updates self-healing fixes. Executes one MCP tool call and returns the result.'
-config_file = 'agents/ci-monitor-subagent.toml'
+description = "CI helper for /monitor-ci. Fetches CI status, retrieves fix details, or updates self-healing fixes. Executes one MCP tool call and returns the result."
+config_file = "agents/ci-monitor-subagent.toml"
+nickname_candidates = ["CI", "Build"]
 
 [agents.architecture-reviewer]
-description = 'Second-opinion reviewer for architecture, interfaces, and multi-file design risk.'
-config_file = 'agents/architecture-reviewer.toml'
-
-[agents.test-reviewer]
-description = 'Second-opinion reviewer for tests, assertions, regression coverage, and bug-fix validation.'
-config_file = 'agents/test-reviewer.toml'
+description = "Second-opinion reviewer for architecture, interfaces, and multi-file design risk."
+config_file = "agents/architecture-reviewer.toml"
+nickname_candidates = ["Architect", "Design"]
 
 [agents.security-reviewer]
-description = 'Second-opinion reviewer for auth, secrets, filesystem, shell, network, and untrusted input risk.'
-config_file = 'agents/security-reviewer.toml'
+description = "Second-opinion reviewer for auth, secrets, filesystem, shell, network, and untrusted input risk."
+config_file = "agents/security-reviewer.toml"
+nickname_candidates = ["Security", "Guard"]
+
+[agents.test-reviewer]
+description = "Second-opinion reviewer for tests, assertions, regression coverage, and bug-fix validation."
+config_file = "agents/test-reviewer.toml"
+nickname_candidates = ["Test", "Coverage"]
 
 [agents.ux-reviewer]
-description = 'Second-opinion reviewer for UX flows, accessibility, responsive behavior, and user-facing states.'
-config_file = 'agents/ux-reviewer.toml'
+description = "Second-opinion reviewer for UX flows, accessibility, responsive behavior, and user-facing states."
+config_file = "agents/ux-reviewer.toml"
+nickname_candidates = ["UX", "A11y"]
+
+[agents.codebase-mapper]
+description = "Read-only explorer that maps affected files, symbols, dependency paths, and Nx project boundaries before implementation."
+config_file = "agents/codebase-mapper.toml"
+nickname_candidates = ["Mapper", "Explorer"]
+
+################################################################################
+# Domain-specific sub-agents
+################################################################################
+
+[agents.angular-frontend]
+description = "Angular 前端開發專用 sub-agent。Use when: Angular components, services, signals, routing, or Angular tests."
+config_file = "agents/angular-frontend.toml"
+nickname_candidates = ["Angular", "Frontend"]
+
+[agents.spring-boot-backend]
+description = "Spring Boot 後端開發專用 sub-agent。Use when: working with Java controllers, services, repositories, DTOs, or Maven builds."
+config_file = "agents/spring-boot-backend.toml"
+nickname_candidates = ["Java", "Spring", "Backend"]
+
+[agents.fastapi-service]
+description = "FastAPI/Python 服務開發專用 sub-agent。Use when: working with Python services, FastAPI routers, Pydantic models, or Poetry dependencies."
+config_file = "agents/fastapi-service.toml"
+nickname_candidates = ["Python", "FastAPI", "AI"]
+
+[agents.contract-validator]
+description = "跨 service contract 驗證專用 sub-agent。Use when: modifying contract files, checking cross-service type consistency, or validating shared schemas."
+config_file = "agents/contract-validator.toml"
+nickname_candidates = ["Contract", "Schema"]
+
+################################################################################
+# MCP
+################################################################################
+
+[mcp_servers.nx-mcp]
+enabled = true
+required = false
+command = "npx"
+args = ["nx", "mcp", "--minimal"]
+startup_timeout_sec = 20
+tool_timeout_sec = 120
+
+################################################################################
+# Sandbox
+################################################################################
+
+[sandbox_workspace_write]
+network_access = false
+writable_roots = []
+exclude_tmpdir_env_var = false
+exclude_slash_tmp = false
+
+################################################################################
+# Shell environment
+################################################################################
+
+[shell_environment_policy]
+inherit = "all"
+ignore_default_excludes = false
+exclude = ["*TOKEN*", "*SECRET*", "*KEY*", "OPENAI_API_KEY", "ANTHROPIC_API_KEY"]
+set = { NODE_OPTIONS = "--max-old-space-size=4096" }
+
+################################################################################
+# UI / history / tools
+################################################################################
+
+[tui]
+notifications = ["agent-turn-complete", "approval-requested"]
+notification_condition = "unfocused"
+status_line = ["model-with-reasoning", "context-remaining", "git-branch", "current-dir"]
+
+[history]
+persistence = "save-all"
+max_bytes = 10485760
+
+[tools]
+view_image = true
+
+################################################################################
+# Profiles
+################################################################################
+
+[profiles.dev]
+model_reasoning_effort = "medium"
+plan_mode_reasoning_effort = "high"
+model_verbosity = "medium"
+web_search = "cached"
+
+[profiles.lite]
+model_reasoning_effort = "low"
+plan_mode_reasoning_effort = "medium"
+model_verbosity = "low"
+web_search = "disabled"
+
+[profiles.review]
+model_reasoning_effort = "high"
+plan_mode_reasoning_effort = "high"
+model_verbosity = "high"
+web_search = "cached"

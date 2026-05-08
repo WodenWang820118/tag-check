@@ -1,22 +1,34 @@
 # Copilot Bridge Instructions
 
-- `AGENTS.md` is the canonical repository instruction file. Follow it first.
-- For Angular, NestJS, Java, and Python tasks, use the canonical stack conventions in `.agents/stack-conventions.md` via `AGENTS.md`.
-- For this repository, GitHub Copilot Claude Sonnet 4.6 is the preferred scripted reviewer for plan reviews, test reviews, and escalated implementation reviews created in any tool.
-- Project skills live in `.agents/skills`. Do not recreate `.github/skills` copies.
-- Reviewer personas live in `.agents/reviewers`. Custom Copilot agents live in `.github/agents`.
-- A hard pre-implementation guardrail is configured in `.github/hooks/review-gate.json`.
-- For any non-trivial task, follow the phased workflow in `AGENTS.md` and load only the skills needed for the current phase instead of preloading the whole chain.
-- Use `product-and-scope-review` when the prompt is solution-framed, `qa-verification` when the implementation needs verification evidence, and `release-readiness` when the work needs a final handoff story.
-- Keep the review session on a Claude-family model when possible.
-- When using Copilot CLI, prefer a Claude-family orchestrator and run `/experimental` so Rubber Duck can provide a second opinion.
-- For plan, test, and non-low-risk implementation reviews, the auto-routed review wrappers should prefer Gemini CLI before Copilot GPT-5 mini. Low-risk `implementation` or `pre-merge` auto routing may try the matching Codex reviewer first only when the review context includes an explicit small non-sensitive changed-file list that exactly matches the repo's current changed-file set. Keep the Copilot-only fallback chain only when the review is explicitly pinned to `--provider copilot`.
-- Force a Rubber Duck or second-opinion review after a drafted plan, after any implementation review that was escalated from Gemini, and after tests are written but before they are executed.
-- If Rubber Duck is not available for the current model/account, use the matching reviewer in `.github/agents`.
-- If the user asks for `critique`, `review`, `second opinion`, or `rubber duck`, always trigger a second-opinion pass.
-- Use `pnpm review:plan` for the normal Copilot plan-review path, `pnpm review:test` for the normal Copilot test-review path, `pnpm review:implementation` for the normal implementation auto-routing path, and `pnpm review:copilot` when an implementation review needs explicit Copilot escalation.
-- If a plan review passes and implementation should begin, open the gate with `pnpm review:approve-pre-implementation -- --reviewer <copilot-claude|copilot-gpt-5-mini|gemini-2.5-pro|codex-subagent> --focus <area> --summary "<approval summary>"`.
-- If the gate should be closed again, run `pnpm review:reset`.
-- For browser-verifiable UI proof requests, use `qa-verification`; when browser artifacts are needed, run `pnpm proofshot:check`, `pnpm proofshot:start:web`, and `pnpm proofshot:stop`, then review the resulting `proofshot-artifacts/` with the dedicated proofshot review prompt.
-- Run workspace tasks through `pnpm nx ...` and inspect project configuration before guessing targets or flags.
-- Keep repo topology in mind: Angular browser apps (`ng-frontend`, `ng-tag-build`, `ng-product-doc`), the `nest-backend` service, and the desktop Tauri packaging surface.
+`AGENTS.md` is the canonical repository instruction file. Follow it first, then
+load only the workflow, skill, and review files it names for the active task.
+This bridge is an entry point only; it must not redefine workflow, provider
+routing, gate conditions, or review lifecycle rules.
+
+## First Reads
+
+- Read `AGENTS.md` before other repo instructions.
+- Project skills live in `.agents/skills`; the shared review contract lives in
+  `.agents/reviewers/common-review-contract.toml`; workflow rules live in
+  `.agents/workflows`.
+- For review checkpoints, use the shared contract plus the relevant
+  tool-native reviewer profile or prompt named by `AGENTS.md`.
+- Use repo review wrappers such as `pnpm review:*` only as directed by
+  `AGENTS.md` and its referenced workflows.
+
+## Repo Memory
+
+If a Copilot environment exposes a compatible memory tool and repo-relative
+`memories/repo/` files exist, load only the relevant files on demand. Treat
+missing memory support or a missing `memories/repo/` directory as non-blocking.
+
+Only write repo memory when the user explicitly asks to record a stable repo
+fact. Keep entries concise and do not duplicate `AGENTS.md` or
+`.agents/references/`.
+
+## Boundaries
+
+- Do not recreate `.github/skills` or `.gemini/skills` copies unless a tool
+  proves it cannot read `.agents/skills`.
+- Run workspace tasks through `pnpm nx ...` after loading the Nx guidance named
+  by `AGENTS.md`.

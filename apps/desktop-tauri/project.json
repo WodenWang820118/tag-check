@@ -13,7 +13,7 @@
         "{projectRoot}/src-tauri/binaries"
       ],
       "options": {
-        "command": "node --experimental-strip-types tools/scripts/tauri/prepare-runtime.ts"
+        "command": "node tools/scripts/tauri/prepare-runtime/prepare-runtime.ts"
       }
     },
     "dev": {

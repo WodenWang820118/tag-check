@@ -1,4 +1,3 @@
- 
 import { Injectable, Logger } from '@nestjs/common';
 import { SelectorSymbol, SelectorType } from '../action-utils';
 import { Page, ElementHandle, JSHandle } from 'puppeteer';
@@ -8,12 +7,12 @@ export class ActionUtilsService {
   private readonly logger = new Logger(ActionUtilsService.name);
   getSelectorType(selector: string) {
     try {
-      if (selector.startsWith(SelectorSymbol.CSSID)) {
+      if (this.isXPathSelector(selector)) {
+        return SelectorType.XPATH;
+      } else if (selector.startsWith(SelectorSymbol.CSSID)) {
         return SelectorType.ID;
       } else if (selector.startsWith(SelectorSymbol.CSSCLASS)) {
         return SelectorType.CLASS;
-      } else if (selector.startsWith(SelectorSymbol.XPATH)) {
-        return SelectorType.XPATH;
       } else if (selector.startsWith(SelectorSymbol.PIERCE)) {
         return SelectorType.PIERCE;
       } else if (selector.startsWith(SelectorSymbol.TEXT)) {
@@ -47,16 +46,10 @@ export class ActionUtilsService {
           return await this.getElementByAria(page, selector);
 
         case 'text':
-          return await this.getElementByText(
-            page,
-            selector.replace('text/', '')
-          );
+          return await page.$(this.withQueryPrefix(selector, 'text'));
 
         case 'xpath':
-          return await this.findElementByXPath(
-            page,
-            selector.replace('xpath/', '')
-          );
+          return await page.$(this.withQueryPrefix(selector, 'xpath'));
 
         case 'pierce':
           return await this.getElementByShadowDom(page, selector);
@@ -74,29 +67,44 @@ export class ActionUtilsService {
     page: Page,
     selector: string
   ): Promise<ElementHandle<Element> | null> {
-    // Use RegExp.exec() on the regex literal instead of string.match
-    const execResult = /aria\/(aria-\w+)\/(.+)/.exec(selector);
-    if (!execResult) {
-      throw new Error(`Invalid ARIA selector: ${selector}`);
+    const legacyAttributeSelector = /^aria\/(aria-\w+)\/(.+)$/.exec(selector);
+    if (legacyAttributeSelector) {
+      const [, ariaAttribute, ariaValue] = legacyAttributeSelector;
+      return await page.$(`[${ariaAttribute}="${ariaValue}"]`);
     }
 
-    const [, ariaAttribute, ariaValue] = execResult;
-    const constructedSelector = `[${ariaAttribute}="${ariaValue}"]`;
-    return await page.$(constructedSelector);
+    return await page.$(this.withQueryPrefix(selector, 'aria'));
   }
 
-  private async getElementByText(
-    page: Page,
-    text: string
-  ): Promise<ElementHandle<Element> | null> {
-    return await page.$(`text=${text}`);
+  private withQueryPrefix(selector: string, prefix: string): string {
+    return selector.startsWith(`${prefix}/`)
+      ? selector
+      : `${prefix}/${selector}`;
+  }
+
+  private isXPathSelector(selector: string): boolean {
+    return (
+      selector.startsWith(SelectorSymbol.XPATH) ||
+      selector.startsWith('/') ||
+      selector.startsWith('./')
+    );
   }
 
   private async getElementByShadowDom(
     page: Page,
     selector: string
   ): Promise<ElementHandle<Element> | null> {
-    const [shadowHostSelector, shadowDomSelector] = selector.split('/');
+    const body = selector.startsWith('pierce/')
+      ? selector.slice('pierce/'.length)
+      : selector;
+    const separatorIndex = body.indexOf('/');
+
+    if (separatorIndex === -1) {
+      return await page.$(this.withQueryPrefix(selector, 'pierce'));
+    }
+
+    const shadowHostSelector = body.slice(0, separatorIndex);
+    const shadowDomSelector = body.slice(separatorIndex + 1);
     if (!shadowHostSelector || !shadowDomSelector) {
       throw new Error(`Invalid shadow DOM selector: ${selector}`);
     }
@@ -110,11 +118,10 @@ export class ActionUtilsService {
       shadowDomSelector
     );
 
-    return this.convertJSHandleToElementHandle(page, jsHandle);
+    return this.convertJSHandleToElementHandle(jsHandle);
   }
 
   private async convertJSHandleToElementHandle(
-    page: Page,
     jsHandle: JSHandle
   ): Promise<ElementHandle<Element> | null> {
     if (jsHandle.asElement()) {
@@ -128,16 +135,6 @@ export class ActionUtilsService {
     return (
       obj && typeof obj.click === 'function' && typeof obj.focus === 'function'
     );
-  }
-
-  async findElementByXPath(page: Page, xpath: string) {
-    // TODO: deprecated page.$x; please handle it
-    const elements = await page.$$(xpath);
-    if (elements.length > 0) {
-      return elements[0]; // Assuming you want the first element found
-    } else {
-      return null; // No element found
-    }
   }
 
   queryShadowDom(selector: string, shadowHostSelector: string) {

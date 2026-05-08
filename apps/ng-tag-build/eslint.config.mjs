@@ -23,9 +23,9 @@ export default [
           prefix: 'app',
           style: 'kebab-case'
         }
-      ]
-    ,
+      ],
       '@angular-eslint/prefer-inject': 'off'
+    }
   },
   {
     files: ['**/*.html'],

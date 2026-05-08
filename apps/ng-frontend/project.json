@@ -22,6 +22,11 @@
             "input": "apps/ng-frontend/public"
           },
           {
+            "glob": "splash.html",
+            "input": "apps/ng-frontend/src",
+            "output": "/"
+          },
+          {
             "input": "libs/utils/src/lib/assets",
             "glob": "**/*",
             "output": "/assets/"
@@ -102,7 +107,15 @@
               "maximumError": "4kb"
             }
           ],
-          "optimization": true,
+          "optimization": {
+            "scripts": true,
+            "styles": {
+              "minify": true,
+              "removeSpecialComments": true,
+              "inlineCritical": false
+            },
+            "fonts": true
+          },
           "outputHashing": "all",
           "sourceMap": false,
           "fileReplacements": [
@@ -225,7 +238,7 @@
       "executor": "@storybook/angular:build-storybook",
       "outputs": ["{options.outputDir}"],
       "options": {
-        "outputDir": "dist/storybook/ng-frontend",
+        "outputDir": "storybook-static",
         "configDir": "apps/ng-frontend/.storybook",
         "browserTarget": "ng-frontend:build:production",
         "tsConfig": "apps/ng-frontend/tsconfig.storybook.json",
@@ -249,7 +262,7 @@
       "dependsOn": ["build-storybook"],
       "options": {
         "buildTarget": "ng-frontend:build-storybook",
-        "staticFilePath": "dist/storybook/ng-frontend",
+        "staticFilePath": "storybook-static",
         "spa": true
       },
       "configurations": {

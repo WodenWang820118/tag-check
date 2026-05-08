@@ -41,6 +41,40 @@
           "buildTarget": "nest-backend:build:production"
         }
       }
+    },
+    "test-unit": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec vitest --root=apps/nest-backend --exclude=\"**/test/*e2e-spec.ts\" --exclude=\"**/*.integration.spec.ts\" --watch=false"
+      }
+    },
+    "test-integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec vitest --root=apps/nest-backend --watch=false .integration.spec.ts"
+      }
+    },
+    "test-coverage": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/coverage/apps/nest-backend"],
+      "options": {
+        "command": "pnpm exec vitest --coverage --root=apps/nest-backend --exclude=\"**/test/*e2e-spec.ts\" --exclude=\"**/*.integration.spec.ts\" --watch=false"
+      }
+    },
+    "test-e2e": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "command": "pnpm exec vitest test/app.e2e-spec.ts --root=apps/nest-backend --watch=false"
+      }
+    },
+    "test-e2e-coverage": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "outputs": ["{workspaceRoot}/coverage/apps/nest-backend-e2e"],
+      "options": {
+        "command": "pnpm exec vitest test/app.e2e-spec.ts --coverage --coverage.reportsDirectory=../../coverage/apps/nest-backend-e2e --root=apps/nest-backend --watch=false"
+      }
     }
   }
 }

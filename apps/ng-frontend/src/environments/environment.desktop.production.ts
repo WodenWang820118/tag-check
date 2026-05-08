@@ -1,6 +1,8 @@
 export const environment = {
   production: true,
   projectApiUrl: 'http://localhost:7001/projects',
+  startupProjectSeedReadinessApiUrl:
+    'http://localhost:7001/startup/project-seed-readiness',
   recordingApiUrl: 'http://localhost:7001/recordings',
   configurationApiUrl: 'http://localhost:7001/configurations',
   specApiUrl: 'http://localhost:7001/specs',

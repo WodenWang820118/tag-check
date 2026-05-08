@@ -1,21 +1,47 @@
-use std::{sync::Mutex, thread};
+use std::{
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc, Mutex,
+    },
+    thread,
+};
 
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 use tauri_plugin_shell::{
     process::{CommandChild, CommandEvent},
     ShellExt,
 };
 
 use super::{
-    health::wait_for_backend,
-    paths::resolve_backend_paths,
-    DEFAULT_PORT,
-    DEFAULT_WEB_SOCKET,
+    health::wait_for_backend, paths::resolve_backend_paths, DEFAULT_PORT, DEFAULT_WEB_SOCKET,
 };
 use crate::diagnostics::write_diagnostic_log;
 
 #[derive(Default)]
 pub(crate) struct BackendProcess(Mutex<Option<CommandChild>>);
+
+fn create_or_show_main_window(app_handle: &AppHandle) -> tauri::Result<()> {
+    if let Some(window) = app_handle.get_webview_window("main") {
+        window.show()?;
+        window.set_focus()?;
+        return Ok(());
+    }
+
+    write_diagnostic_log(
+        app_handle,
+        "backend readiness satisfied, creating main window and loading frontend",
+    );
+    let window =
+        WebviewWindowBuilder::new(app_handle, "main", WebviewUrl::App("index.html".into()))
+            .title("Tag Check")
+            .inner_size(1400.0, 900.0)
+            .resizable(true)
+            .fullscreen(false)
+            .visible(true)
+            .build()?;
+    window.set_focus()?;
+    Ok(())
+}
 
 pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::error::Error>> {
     let backend_paths = resolve_backend_paths(&app_handle)?;
@@ -79,7 +105,9 @@ pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::er
         *state.0.lock().expect("backend mutex poisoned") = Some(child);
     }
 
+    let backend_terminated = Arc::new(AtomicBool::new(false));
     let diagnostics_handle = app_handle.clone();
+    let diagnostics_backend_terminated = Arc::clone(&backend_terminated);
     tauri::async_runtime::spawn(async move {
         let mut rx = rx;
         while let Some(event) = rx.recv().await {
@@ -111,6 +139,7 @@ pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::er
                     );
                 }
                 CommandEvent::Terminated(payload) => {
+                    diagnostics_backend_terminated.store(true, Ordering::Relaxed);
                     write_diagnostic_log(
                         &diagnostics_handle,
                         &format!(
@@ -122,25 +151,43 @@ pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::er
                 _ => {}
             }
         }
+        diagnostics_backend_terminated.store(true, Ordering::Relaxed);
     });
 
     let show_window_handle = app_handle.clone();
+    let health_backend_terminated = Arc::clone(&backend_terminated);
     thread::spawn(move || {
-        if wait_for_backend(&show_window_handle) {
+        if wait_for_backend(&show_window_handle, health_backend_terminated.as_ref()) {
             write_diagnostic_log(
                 &show_window_handle,
-                "health check succeeded, showing window",
+                "backend startup seed readiness succeeded",
             );
-            if let Some(window) = show_window_handle.get_webview_window("main") {
-                let _ = window.show();
-                let _ = window.set_focus();
+            if let Err(error) = create_or_show_main_window(&show_window_handle) {
+                write_diagnostic_log(
+                    &show_window_handle,
+                    &format!("failed to create main window after backend readiness: {error}"),
+                );
+                eprintln!(
+                    "[desktop-tauri] Failed to create main window after backend readiness: {error}"
+                );
+                stop_backend(&show_window_handle);
+                show_window_handle.exit(1);
+                return;
+            }
+            if let Err(error) = show_window_handle.emit("backend-ready", ()) {
+                write_diagnostic_log(
+                    &show_window_handle,
+                    &format!("failed to emit backend-ready event: {error}"),
+                );
             }
         } else {
             write_diagnostic_log(
                 &show_window_handle,
-                "timed out while waiting for backend health check; exiting app",
+                "timed out while waiting for backend startup seed readiness; exiting app",
             );
-            eprintln!("[desktop-tauri] Timed out while waiting for the backend health check.");
+            eprintln!(
+                "[desktop-tauri] Timed out while waiting for backend startup seed readiness."
+            );
             stop_backend(&show_window_handle);
             show_window_handle.exit(1);
         }

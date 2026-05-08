@@ -38,6 +38,11 @@ type ProjectSettingRecord = {
   };
 };
 
+type ApiMockOptions = {
+  initialProjects?: ProjectRecord[];
+  projectListResponses?: ProjectRecord[][];
+};
+
 const EXISTING_PROJECT: ProjectRecord = {
   id: 1,
   projectSlug: 'existing-project',
@@ -81,11 +86,10 @@ function createProjectSettings(project: ProjectRecord): ProjectSettingRecord {
 // #region API mocks
 async function installApiMocks(
   page: Page,
-  options?: {
-    initialProjects?: ProjectRecord[];
-  }
+  options?: ApiMockOptions
 ): Promise<void> {
   let projects = options?.initialProjects ?? [EXISTING_PROJECT];
+  let projectListRequestIndex = 0;
 
   await page.route('http://localhost:7070/**', async (route) => {
     const request = route.request();
@@ -94,7 +98,17 @@ async function installApiMocks(
     const method = request.method();
 
     if (method === 'GET' && pathname === '/projects') {
-      await route.fulfill(jsonResponse(projects));
+      // Extra polling requests keep receiving the final sequenced response.
+      const sequencedProjects =
+        options?.projectListResponses?.[
+          Math.min(
+            projectListRequestIndex,
+            options.projectListResponses.length - 1
+          )
+        ];
+
+      projectListRequestIndex += 1;
+      await route.fulfill(jsonResponse(sequencedProjects ?? projects));
       return;
     }
 
@@ -184,6 +198,18 @@ test('loads the home page and opens the init-project flow', async ({
 
   await expect(page).toHaveURL(/\/init-project$/);
   await expect(page.getByText('New Project')).toBeVisible();
+});
+
+test('shows the seeded project when the first home project list is empty', async ({
+  page
+}) => {
+  await installApiMocks(page, {
+    projectListResponses: [[], [EXISTING_PROJECT]]
+  });
+
+  await page.goto('/');
+
+  await expect(page.getByText('Existing Project')).toBeVisible();
 });
 
 test('generates a slug and shows validation feedback for invalid project names', async ({

@@ -25,7 +25,7 @@ Checkpoint skill for evaluating a reviewable change set before or during `Implem
 
 1. **Understand the Context:** Review the task, spec, and intended behavior before reading the diff.
 2. **Review Tests First:** Use the tests to confirm intended behavior, regression coverage, and edge-case handling.
-3. **Challenge Hidden Assumptions and Overreach:** Look for ambiguous requests that were resolved silently, premature abstraction, speculative flexibility, and drive-by refactors outside the task.
+3. **Challenge Hidden Assumptions and Overreach:** Look for ambiguous requests that were resolved silently, premature abstraction, speculative flexibility, and drive-by refactors outside the task. Confirm any Phase 3.5 refactor has a ledger, or that a skipped checkpoint has a one-line rationale; treat unrelated cleanup as overreach.
 4. **Review Across Five Axes:** Correctness, readability and simplicity, architecture, security, and performance.
 5. **Check Freshness and Challenge Assumptions:** Look for stale docs, incomplete release notes, and any failure mode that the happy path review missed.
 6. **Categorize Findings Clearly:** Use `Critical`, `Important`, or `Nitpick` so required changes are obvious.

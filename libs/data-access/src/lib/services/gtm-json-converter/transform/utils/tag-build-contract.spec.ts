@@ -17,6 +17,7 @@ import {
   isTrigger,
   isTriggerConfig,
   isVariableConfig,
+  validateGTMImportReadiness,
   TagTypeEnum,
   type TriggerConfig
 } from '@utils';
@@ -160,6 +161,178 @@ describe('tag-build contract helpers', () => {
         }
       })
     ).toBe(false);
+  });
+
+  it('validates GTM import readiness for a complete container export', () => {
+    const configuration = {
+      exportFormatVersion: 2,
+      exportTime: '2026-04-22 00:00:00',
+      containerVersion: {
+        path: 'accounts/account-1/containers/container-1/versions/0',
+        accountId: 'account-1',
+        containerId: 'container-1',
+        containerVersionId: '0',
+        container: {
+          path: 'accounts/account-1/containers/container-1',
+          accountId: 'account-1',
+          containerId: 'container-1',
+          name: 'validation',
+          publicId: 'GTM-WJ6N3RM',
+          usageContext: ['WEB'],
+          fingerprint: '1690281340453',
+          tagManagerUrl:
+            'https://tagmanager.google.com/#/container/accounts/account-1/containers/container-1/workspaces?apiLink=container',
+          features: {
+            supportUserPermissions: true,
+            supportEnvironments: true,
+            supportWorkspaces: true,
+            supportGtagConfigs: false,
+            supportBuiltInVariables: true,
+            supportClients: false,
+            supportFolders: true,
+            supportTags: true,
+            supportTemplates: true,
+            supportTriggers: true,
+            supportVariables: true,
+            supportVersions: true,
+            supportZones: true,
+            supportTransformations: false
+          },
+          tagIds: ['GTM-WJ6N3RM']
+        },
+        variable: [validVariable],
+        builtInVariable: [
+          {
+            name: 'Page URL',
+            type: 'PAGE_URL',
+            accountId: 'account-1',
+            containerId: 'container-1'
+          }
+        ],
+        trigger: [validTrigger],
+        tag: [
+          createPlaceholderTagConfig({
+            name: 'GA4 event - page_view',
+            accountId: 'account-1',
+            containerId: 'container-1'
+          })
+        ],
+        fingerprint: '1690374452646',
+        tagManagerUrl:
+          'https://tagmanager.google.com/#/versions/accounts/account-1/containers/container-1/versions/0?apiLink=version'
+      }
+    };
+
+    expect(validateGTMImportReadiness(configuration)).toEqual({
+      canImport: true,
+      issues: [],
+      warnings: []
+    });
+  });
+
+  it('reports non-GTM JSON as not ready for GTM import', () => {
+    expect(validateGTMImportReadiness({})).toEqual({
+      canImport: false,
+      issues: ['Output is not a GTM container export JSON structure.'],
+      warnings: []
+    });
+  });
+
+  it('does not throw when a shallow GTM shape is missing import fields', () => {
+    expect(
+      validateGTMImportReadiness({
+        exportFormatVersion: 2,
+        exportTime: '2026-04-22 00:00:00',
+        containerVersion: {
+          variable: [],
+          builtInVariable: [],
+          trigger: [],
+          tag: []
+        }
+      })
+    ).toEqual({
+      canImport: false,
+      issues: [
+        'containerVersion.path must be present.',
+        'containerVersion.accountId must be present.',
+        'containerVersion.containerId must be present.',
+        'containerVersion.containerVersionId must be present.',
+        'containerVersion.fingerprint must be present.',
+        'containerVersion.tagManagerUrl must be present.',
+        'containerVersion.container must be present.',
+        'containerVersion path must match accountId, containerId, and version ID.'
+      ],
+      warnings: ['The export has no tags.', 'The export has no triggers.']
+    });
+  });
+
+  it('reports GTM import readiness issues without claiming API upload success', () => {
+    const configuration = {
+      exportFormatVersion: 2,
+      exportTime: '2026-04-22 00:00:00',
+      containerVersion: {
+        path: 'accounts/account-1/containers/container-1/versions/0',
+        accountId: 'account-1',
+        containerId: 'container-1',
+        containerVersionId: '0',
+        container: {
+          path: 'accounts/account-1/containers/container-1',
+          accountId: 'account-1',
+          containerId: 'container-1',
+          name: 'validation',
+          publicId: 'NOT-A-GTM-ID',
+          usageContext: [],
+          fingerprint: '1690281340453',
+          tagManagerUrl:
+            'https://tagmanager.google.com/#/container/accounts/account-1/containers/container-1/workspaces?apiLink=container',
+          features: {
+            supportUserPermissions: true,
+            supportEnvironments: true,
+            supportWorkspaces: true,
+            supportGtagConfigs: false,
+            supportBuiltInVariables: true,
+            supportClients: false,
+            supportFolders: true,
+            supportTags: true,
+            supportTemplates: true,
+            supportTriggers: true,
+            supportVariables: true,
+            supportVersions: true,
+            supportZones: true,
+            supportTransformations: false
+          },
+          tagIds: []
+        },
+        variable: [],
+        builtInVariable: [],
+        trigger: [],
+        tag: [
+          createPlaceholderTagConfig({
+            name: 'GA4 event - page_view',
+            accountId: 'other-account',
+            containerId: 'container-1'
+          })
+        ],
+        fingerprint: '1690374452646',
+        tagManagerUrl:
+          'https://tagmanager.google.com/#/versions/accounts/account-1/containers/container-1/versions/0?apiLink=version'
+      }
+    };
+
+    const readiness = validateGTMImportReadiness(configuration);
+
+    expect(readiness).toEqual({
+      canImport: false,
+      issues: [
+        'container publicId must look like a GTM container ID.',
+        'container usageContext must include WEB.',
+        'tag[0].accountId must match the container.'
+      ],
+      warnings: [
+        'The export has no container tag IDs.',
+        'The export has no triggers.'
+      ]
+    });
   });
 
   it('validates parameter helpers at the guard layer directly', () => {

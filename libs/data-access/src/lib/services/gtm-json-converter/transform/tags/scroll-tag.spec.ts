@@ -48,7 +48,7 @@ describe('ScrollTag', () => {
       const configurationName = 'TestConfig';
       const accountId = 'account123';
       const containerId = 'container456';
-      const triggers: Trigger[] = []; // No triggers matching 'event scroll'
+      const triggers: Trigger[] = []; // No triggers matching 'scroll'
 
       vi.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(true);
       vi.spyOn(console, 'error').mockImplementation(() => undefined); // Mock console.error
@@ -74,7 +74,7 @@ describe('ScrollTag', () => {
       const containerId = 'container456';
       const triggers: Trigger[] = [
         {
-          name: 'event scroll',
+          name: 'scroll',
           triggerId: 'trigger789'
         }
       ];
@@ -180,7 +180,7 @@ describe('ScrollTag', () => {
             type: 'MAP'
           },
           consentSettings: {
-            consentStatus: 'NOT_SET'
+            consentStatus: 'NOT_NEEDED'
           }
         }
       ];

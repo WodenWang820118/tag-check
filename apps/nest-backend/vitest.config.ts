@@ -2,30 +2,35 @@ import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 
+const verboseTestLogs = process.env['TEST_LOGS'] === '1';
+const isCi = process.env['CI'] === 'true';
+const reporterConfig = verboseTestLogs
+  ? { reporters: ['verbose'] as const }
+  : isCi
+    ? { reporters: ['default'] as const }
+    : { reporters: ['dot'] as const };
+
 export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: [
-      '**/*.{test,spec,e2e-spec}.?(c|m)[jt]s?(x)',
-      './test/**/*.e2e-spec.ts',
-    ],
-    reporters: ['verbose'],
-    testTimeout: 120000,
+    setupFiles: ['./src/test-setup.ts'],
+    include: ['**/*.{test,spec,e2e-spec}.?(c|m)[jt]s?(x)'],
+    ...reporterConfig,
+    testTimeout: 30000,
     coverage: {
-      enabled: true,
       reportsDirectory: '../../coverage/apps/nest-backend',
       provider: 'v8',
-      reporter: ['lcov'],
-    },
+      reporter: ['lcov']
+    }
   },
   esbuild: {
-    target: 'es2020',
+    target: 'es2020'
   },
   plugins: [
     nxViteTsPaths(),
     swc.vite({
-      module: { type: 'es6' },
-    }),
-  ],
+      module: { type: 'es6' }
+    })
+  ]
 });

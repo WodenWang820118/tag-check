@@ -17,7 +17,7 @@ Remove the remaining Electron-specific implementation, tooling, and documentatio
 
 - `apps/desktop-tauri` is the only supported desktop application project.
 - Electron code under the repo root `src/` is legacy and no longer used by production or development flows.
-- Desktop packaging and release should use the existing Tauri targets and helper script `tools/scripts/tauri/prepare-runtime.ts`.
+- Desktop packaging and release should use the existing Tauri targets and helper script `tools/scripts/tauri/prepare-runtime/prepare-runtime.ts`.
 - Web and backend Nx projects must continue to build and test without Electron installed as a runtime dependency.
 - Electron-related historical references will only be cleaned in actively maintained files touched by this task; broader prose archaeology is out of scope.
 
@@ -46,7 +46,8 @@ docs/
     remove-electron-implementation.md
 tools/scripts/
   tauri/
-    prepare-runtime.ts            <-- Keep and preserve behavior
+    prepare-runtime/
+      prepare-runtime.ts          <-- Keep and preserve behavior
 src/
   main.ts                         <-- Remove legacy Electron main process
   preload.ts                      <-- Remove legacy Electron preload
@@ -101,7 +102,7 @@ The implementation should explicitly audit and update or remove these Electron-e
 
 ## 3. Testing Strategy
 
-- **Unit Tests:** Keep existing `tools/scripts/tauri/prepare-runtime.test.ts` passing because it protects the current Tauri runtime preparation flow.
+- **Unit Tests:** Keep existing `tools/scripts/tauri/prepare-runtime/prepare-runtime.spec.ts` passing because it protects the current Tauri runtime preparation flow.
 - **Integration Tests:** Validate changed build or packaging scripts by running the relevant Tauri/Nx targets or targeted dry-run-safe commands where possible.
 - **End-to-End (E2E) Tests:** Remove Electron-only Playwright coverage and ensure the shared Playwright config no longer advertises an Electron project.
 - **Dependency Verification:** Reinstall workspace dependencies after removing Electron packages and confirm the lockfile resolves cleanly.

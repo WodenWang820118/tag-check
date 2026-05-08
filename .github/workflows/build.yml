@@ -12,8 +12,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.28.2 --activate
       - name: Install dependencies
-        run: npm i -g pnpm && pnpm install
+        run: pnpm install --frozen-lockfile
+      - name: Backend integration tests
+        run: pnpm run test-back:integration
+        shell: bash
       - name: Test and coverage
         run: pnpm run test:cov
         shell: bash
@@ -23,6 +34,6 @@ jobs:
           name: coverage-report
           path: coverage/lcov.info
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
