@@ -16,6 +16,7 @@
         "main": "apps/nest-backend/src/main.ts",
         "tsConfig": "apps/nest-backend/tsconfig.app.json",
         "generatePackageJson": true,
+        "runtimeDependencies": ["sqlite3"],
         "rspackConfig": "apps/nest-backend/rspack.config.cjs",
         "outputHashing": "none",
         "outputFileName": "main.js",
