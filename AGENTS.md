@@ -125,7 +125,9 @@ provider is required.
 First-load routing rules that must stay inline:
 
 - Plan reviews prefer GitHub Copilot Claude Sonnet 4.6; fall back through the
-  repo wrapper path when unavailable.
+  repo wrapper path when unavailable. In Codex plan mode, invoke the
+  `grill-me` sub-agent first to co-create and stress-test the plan before
+  submitting it for Plan Review.
 - Implementation reviews normally start with Gemini Flash Preview
   `gemini-3-flash-preview`.
 - Codex-first implementation or pre-merge routing is allowed only with an
