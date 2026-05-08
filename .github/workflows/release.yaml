@@ -1,35 +1,278 @@
-name: Build and Release
+name: Desktop Release
 
 on:
   push:
-    branches: [main]
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Stable release tag to publish, for example v2.0.0
+        required: true
+        type: string
+      checkout_ref:
+        description: Branch, tag, or commit to check out before validating the requested release tag
+        required: true
+        type: string
+
+permissions:
+  contents: write
 
 jobs:
+  prepare-release:
+    runs-on: ubuntu-latest
+    outputs:
+      checkout_ref: ${{ steps.release_context.outputs.checkout_ref }}
+      release_tag: ${{ steps.release_context.outputs.release_tag }}
+    steps:
+      - name: Resolve requested release
+        id: release_context
+        run: |
+          node --input-type=module -e "
+          const eventName = process.env.GITHUB_EVENT_NAME;
+          const pushTag = process.env.GITHUB_REF_NAME?.trim() ?? '';
+          const dispatchTag = process.env.INPUT_RELEASE_TAG?.trim() ?? '';
+          const dispatchRef = process.env.INPUT_CHECKOUT_REF?.trim() ?? '';
+          const stableTagPattern = /^v\d+\.\d+\.\d+$/;
+
+          const releaseTag = eventName === 'push' ? pushTag : dispatchTag;
+          const checkoutRef = eventName === 'push' ? pushTag : dispatchRef;
+
+          if (!stableTagPattern.test(releaseTag)) {
+            throw new Error(\`Expected a stable release tag like v2.0.0, received \"\${releaseTag}\".\`);
+          }
+
+          if (!checkoutRef) {
+            throw new Error('A checkout ref is required for desktop releases.');
+          }
+
+          const outputPath = process.env.GITHUB_OUTPUT;
+          if (!outputPath) {
+            throw new Error('GITHUB_OUTPUT is not available.');
+          }
+
+          await import('node:fs/promises').then(({ appendFile }) =>
+            appendFile(
+              outputPath,
+              \`release_tag=\${releaseTag}\ncheckout_ref=\${checkoutRef}\n\`,
+              'utf8'
+            )
+          );
+
+          console.log(JSON.stringify({ releaseTag, checkoutRef }, null, 2));
+          "
+        env:
+          INPUT_CHECKOUT_REF: ${{ inputs.checkout_ref }}
+          INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
+
   build-desktop:
-    runs-on: windows-latest
+    needs: prepare-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            runner: windows-latest
+            nx_target: desktop-tauri:bundle-windows
+          - platform: macos
+            runner: macos-latest
+            nx_target: desktop-tauri:bundle-macos
+          - platform: linux
+            runner: ubuntu-latest
+            nx_target: desktop-tauri:bundle-linux
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.prepare-release.outputs.checkout_ref }}
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+          cache: 'pnpm'
+      - name: Verify checked-out ref matches release tag
+        run: |
+          node --input-type=module -e "
+          import { execFileSync } from 'node:child_process';
+
+          const releaseTag = process.env.RELEASE_TAG;
+          if (!releaseTag) {
+            throw new Error('RELEASE_TAG is required.');
+          }
+
+          const headCommit = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          const tagCommit = execFileSync('git', ['rev-list', '-n', '1', releaseTag], { encoding: 'utf8' }).trim();
+
+          if (!tagCommit) {
+            throw new Error(\`Unable to resolve release tag \${releaseTag}.\`);
+          }
+
+          if (headCommit !== tagCommit) {
+            throw new Error(
+              \`Checked-out HEAD \${headCommit} does not match \${releaseTag} commit \${tagCommit}.\`
+            );
+          }
+
+          console.log(\`Verified \${releaseTag} at \${headCommit}.\`);
+          "
+        env:
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
       - name: Setup pnpm
         run: |
           corepack enable
           corepack prepare pnpm@10.28.2 --activate
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Describe release context
+        id: release_context
+        run: node tools/scripts/tauri/release/release.ts describe --platform ${{ matrix.platform }} --release-tag ${{ needs.prepare-release.outputs.release_tag }}
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
       - name: Build Tauri desktop bundle
-        run: pnpm run bundle-tauri
+        run: pnpm nx run ${{ matrix.nx_target }}
+      - name: Validate assembled release artifact
+        run: |
+          node --input-type=module -e "
+          import { existsSync } from 'node:fs';
+          import { join } from 'node:path';
+
+          const platform = process.env.RELEASE_PLATFORM;
+          const assetFileName = process.env.ASSET_FILE_NAME;
+
+          if (!platform || !assetFileName) {
+            throw new Error('RELEASE_PLATFORM and ASSET_FILE_NAME are required.');
+          }
+
+          const releaseDirectory = join(process.cwd(), 'dist', 'release-assets', platform);
+          const manifestPath = join(releaseDirectory, 'release-manifest.json');
+          const assetPath = join(releaseDirectory, assetFileName);
+
+          for (const candidatePath of [releaseDirectory, manifestPath, assetPath]) {
+            if (!existsSync(candidatePath)) {
+              throw new Error(\`Expected \${candidatePath} to exist.\`);
+            }
+          }
+
+          console.log(JSON.stringify({ releaseDirectory, manifestPath, assetPath }, null, 2));
+          "
+        env:
+          ASSET_FILE_NAME: ${{ steps.release_context.outputs.asset_file_name }}
+          RELEASE_PLATFORM: ${{ matrix.platform }}
       - name: Upload Tauri bundle artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tag-check-desktop-nsis
-          path: apps/desktop-tauri/src-tauri/target/release/bundle/nsis/*
+          name: ${{ steps.release_context.outputs.artifact_name }}
+          path: dist/release-assets/${{ matrix.platform }}
           if-no-files-found: error
-permissions:
-  packages: write
-  contents: write
+
+  publish-release:
+    needs:
+      - prepare-release
+      - build-desktop
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ needs.prepare-release.outputs.checkout_ref }}
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          cache: 'pnpm'
+      - name: Verify checked-out ref matches release tag
+        run: |
+          node --input-type=module -e "
+          import { execFileSync } from 'node:child_process';
+
+          const releaseTag = process.env.RELEASE_TAG;
+          if (!releaseTag) {
+            throw new Error('RELEASE_TAG is required.');
+          }
+
+          const headCommit = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          const tagCommit = execFileSync('git', ['rev-list', '-n', '1', releaseTag], { encoding: 'utf8' }).trim();
+
+          if (!tagCommit) {
+            throw new Error(\`Unable to resolve release tag \${releaseTag}.\`);
+          }
+
+          if (headCommit !== tagCommit) {
+            throw new Error(
+              \`Checked-out HEAD \${headCommit} does not match \${releaseTag} commit \${tagCommit}.\`
+            );
+          }
+
+          console.log(\`Verified \${releaseTag} at \${headCommit}.\`);
+          "
+        env:
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.28.2 --activate
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Describe release context
+        id: release_context
+        run: node tools/scripts/tauri/release/release.ts describe --release-tag ${{ needs.prepare-release.outputs.release_tag }}
+      - name: Validate release notes exist
+        run: |
+          node --input-type=module -e "
+          import { existsSync } from 'node:fs';
+          import { join } from 'node:path';
+
+          const notesPath = join(
+            process.cwd(),
+            'docs',
+            'releases',
+            '${{ steps.release_context.outputs.release_version }}.md'
+          );
+
+          if (!existsSync(notesPath)) {
+            throw new Error(\`Missing \${notesPath}.\`);
+          }
+
+          console.log(\`Verified release notes at \${notesPath}.\`);
+          "
+      - name: Download desktop release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/downloaded-release-assets
+          pattern: tag-check-desktop-v${{ steps.release_context.outputs.release_version }}-*
+      - name: Assemble release payload
+        run: node tools/scripts/tauri/release/release.ts assemble --release-tag ${{ needs.prepare-release.outputs.release_tag }} --artifacts-root dist/downloaded-release-assets --output-dir dist/publish-release
+      - name: Validate checksum manifest
+        run: |
+          node --input-type=module -e "
+          import { existsSync } from 'node:fs';
+          import { join } from 'node:path';
+
+          const checksumPath = join(
+            process.cwd(),
+            'dist',
+            'publish-release',
+            'SHA256SUMS.txt'
+          );
+
+          if (!existsSync(checksumPath)) {
+            throw new Error(\`Missing \${checksumPath}.\`);
+          }
+
+          console.log(\`Verified checksum manifest at \${checksumPath}.\`);
+          "
+      - name: Publish draft GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: docs/releases/${{ steps.release_context.outputs.release_version }}.md
+          draft: true
+          fail_on_unmatched_files: true
+          files: dist/publish-release/*
+          tag_name: ${{ needs.prepare-release.outputs.release_tag }}

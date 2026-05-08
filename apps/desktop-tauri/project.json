@@ -37,9 +37,48 @@
       "executor": "nx:run-commands",
       "cache": false,
       "dependsOn": ["prepare-runtime"],
-      "outputs": ["{projectRoot}/src-tauri/target"],
+      "outputs": [
+        "{projectRoot}/src-tauri/target",
+        "{workspaceRoot}/dist/release-assets"
+      ],
       "options": {
-        "command": "pnpm exec tauri build --config apps/desktop-tauri/src-tauri/tauri.conf.json -b nsis --ci"
+        "command": "node tools/scripts/tauri/release/release.ts bundle"
+      }
+    },
+    "bundle-windows": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["prepare-runtime"],
+      "outputs": [
+        "{projectRoot}/src-tauri/target",
+        "{workspaceRoot}/dist/release-assets"
+      ],
+      "options": {
+        "command": "node tools/scripts/tauri/release/release.ts bundle --platform windows"
+      }
+    },
+    "bundle-macos": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["prepare-runtime"],
+      "outputs": [
+        "{projectRoot}/src-tauri/target",
+        "{workspaceRoot}/dist/release-assets"
+      ],
+      "options": {
+        "command": "node tools/scripts/tauri/release/release.ts bundle --platform macos"
+      }
+    },
+    "bundle-linux": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["prepare-runtime"],
+      "outputs": [
+        "{projectRoot}/src-tauri/target",
+        "{workspaceRoot}/dist/release-assets"
+      ],
+      "options": {
+        "command": "node tools/scripts/tauri/release/release.ts bundle --platform linux"
       }
     }
   }

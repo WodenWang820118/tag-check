@@ -205,10 +205,18 @@ pnpm run build-product-doc
 pnpm run build-ng-sample-site
 pnpm run build-tauri
 pnpm run bundle-tauri
+pnpm run bundle-tauri:windows
+pnpm run bundle-tauri:macos
+pnpm run bundle-tauri:linux
 ```
 
-Current desktop packaging targets Windows NSIS through
-`apps/desktop-tauri`.
+Desktop packaging now uses the Tauri release helper in `apps/desktop-tauri`.
+`pnpm run bundle-tauri` packages the current host platform, while the
+platform-specific scripts make the Windows NSIS, unsigned Apple Silicon macOS,
+and Linux AppImage release targets explicit.
+
+The cross-platform desktop release workflow, artifact names, and operator
+runbook live in [docs/desktop-release.md](./docs/desktop-release.md).
 
 ## Review Workflow
 
