@@ -1,5 +1,5 @@
 import { ProjectInitializationService } from './../project-agent/project-initialization/project-initialization.service';
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { CreateProjectDto } from '../../shared';
 import { Cookie, LocalStorage } from '@utils';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
@@ -13,15 +13,20 @@ import { join } from 'path';
 export interface ExampleProjectStartupReadiness {
   ready: boolean;
   projectCount: number;
+  inFlight: boolean;
+  error: string | null;
 }
 
 @Injectable()
-export class ExampleProjectRepositoryService implements OnModuleInit {
+export class ExampleProjectRepositoryService implements OnApplicationBootstrap {
   private readonly logger = new Logger(ExampleProjectRepositoryService.name);
   private startupReadiness: ExampleProjectStartupReadiness = {
     ready: false,
-    projectCount: 0
+    projectCount: 0,
+    inFlight: false,
+    error: null
   };
+  private startupSeedPromise: Promise<number> | null = null;
   // Default constants for the example project. Move these here so they're
   // easy to change from a single place.
   private readonly DEFAULT_PROJECT_SLUG = 'example-project-slug';
@@ -57,20 +62,91 @@ export class ExampleProjectRepositoryService implements OnModuleInit {
     private readonly folderPathService: FolderPathService
   ) {}
 
-  async onModuleInit(): Promise<void> {
+  async onApplicationBootstrap(): Promise<void> {
+    // Fire-and-forget: do NOT await. Seeding is decorative (creates the
+    // example project on first launch) and must not block app.listen() or
+    // request handling. Readiness is observable via getStartupSeedReadiness()
+    // and the StartupReadinessController.
+    void this.scheduleStartupSeed();
+  }
+
+  /**
+   * Internal entry point used by the lifecycle hook and by tests.
+   * Returns the in-flight promise so tests can await completion deterministically.
+   */
+  scheduleStartupSeed(): Promise<number> {
+    if (this.startupSeedPromise) {
+      return this.startupSeedPromise;
+    }
+    this.startupReadiness = {
+      ready: false,
+      projectCount: 0,
+      inFlight: true,
+      error: null
+    };
     const startedAt = Date.now();
-    this.logger.log('Example project startup seed check started');
-    const projectCount = await this.buildExampleProject();
-    this.startupReadiness = { ready: true, projectCount };
-    this.logger.log(
-      `Example project startup seed check finished in ${
-        Date.now() - startedAt
-      }ms; ${projectCount} project(s) visible`
-    );
+    this.logger.log('Example project startup seed scheduled (non-blocking)');
+    this.startupSeedPromise = (async () => {
+      try {
+        const projectCount = await this.buildExampleProject();
+        this.startupReadiness = {
+          ready: true,
+          projectCount,
+          inFlight: false,
+          error: null
+        };
+        this.logger.log(
+          `Example project startup seed finished in ${
+            Date.now() - startedAt
+          }ms; ${projectCount} project(s) visible`
+        );
+        return projectCount;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.startupReadiness = {
+          ready: false,
+          projectCount: 0,
+          inFlight: false,
+          error: message
+        };
+        this.logger.error(
+          `Example project startup seed failed after ${
+            Date.now() - startedAt
+          }ms: ${message}`
+        );
+        throw error;
+      }
+    })();
+    return this.startupSeedPromise;
   }
 
   getStartupSeedReadiness(): ExampleProjectStartupReadiness {
     return { ...this.startupReadiness };
+  }
+
+  /**
+   * Awaits the in-flight startup seed if one is running, otherwise schedules
+   * one and awaits it. Idempotent and safe to call from any consumer that
+   * needs the example project to exist before reading the project list.
+   *
+   * Errors during seeding are swallowed here so that callers (e.g. the
+   * project list endpoint) can degrade gracefully — the underlying error is
+   * already logged inside scheduleStartupSeed() and remains observable via
+   * getStartupSeedReadiness().error.
+   */
+  async ensureSeededOnce(): Promise<void> {
+    if (this.startupReadiness.ready) {
+      return;
+    }
+    if (this.startupReadiness.error !== null) {
+      // A previous seed attempt failed; do not retry on every request.
+      return;
+    }
+    try {
+      await this.scheduleStartupSeed();
+    } catch {
+      // Already logged + recorded in startupReadiness.error.
+    }
   }
 
   async buildExampleProject(): Promise<number> {
