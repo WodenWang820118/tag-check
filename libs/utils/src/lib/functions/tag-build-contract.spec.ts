@@ -119,7 +119,7 @@ describe('isParameter', () => {
     [undefined, 'undefined'],
     ['string', 'string'],
     [42, 'number']
-  ])('rejects non-records (%s)', (input) => {
+  ])('rejects non-records (%s)', (input, _label) => {
     expect(isParameter(input)).toBe(false);
   });
 

@@ -18,7 +18,6 @@ describe('ReportDetailsDto', () => {
 
   it('overrides defaults with values from the partial payload via Object.assign', () => {
     const dto = new ReportDetailsDto({
-      position: 7,
       eventId: 'evt-1',
       testName: 't',
       eventName: 'page_view',
@@ -26,8 +25,9 @@ describe('ReportDetailsDto', () => {
       requestPassed: true,
       message: 'ok'
     });
-    expect(dto.position).toBe(7);
+    expect(dto.position).toBe(0);
     expect(dto.eventId).toBe('evt-1');
+    expect(dto.testName).toBe('t');
     expect(dto.eventName).toBe('page_view');
     expect(dto.passed).toBe(true);
     expect(dto.requestPassed).toBe(true);
