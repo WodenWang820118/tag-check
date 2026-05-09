@@ -188,6 +188,22 @@ export function parseStableReleaseTag(releaseTag: string) {
   return match.groups.version;
 }
 
+export function parseStableVersion(version: string) {
+  const normalizedVersion = version.trim();
+
+  if (!/^\d+\.\d+\.\d+$/.test(normalizedVersion)) {
+    throw new Error(
+      `Expected a stable version like 2.0.0, received "${version}".`
+    );
+  }
+
+  return normalizedVersion;
+}
+
+export function buildStableReleaseTag(version: string) {
+  return `v${parseStableVersion(version)}`;
+}
+
 export function assertVersionAuthoritiesInSync(expectedVersion?: string) {
   const authorities = readVersionAuthorities();
   const discoveredVersions = new Set(Object.values(authorities));
@@ -534,11 +550,12 @@ export async function assembleReleaseAssets(
 
 async function describeRelease(args: string[]) {
   const platformInput = getArgumentValue('--platform', args);
-  const releaseTag = getArgumentValue('--release-tag', args);
-  const expectedVersion = releaseTag
-    ? parseStableReleaseTag(releaseTag)
+  const requestedReleaseTag = getArgumentValue('--release-tag', args);
+  const expectedVersion = requestedReleaseTag
+    ? parseStableReleaseTag(requestedReleaseTag)
     : undefined;
   const version = assertVersionAuthoritiesInSync(expectedVersion);
+  const releaseTag = buildStableReleaseTag(version);
   const platform = platformInput
     ? resolveReleasePlatform(platformInput)
     : undefined;
@@ -546,7 +563,7 @@ async function describeRelease(args: string[]) {
     assetFileName: platform ? buildAssetFileName(version, platform) : '',
     artifactName: platform ? buildArtifactName(version, platform) : '',
     platform: platform ?? '',
-    releaseTag: releaseTag ?? '',
+    releaseTag,
     version
   };
 
