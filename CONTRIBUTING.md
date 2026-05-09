@@ -36,11 +36,14 @@ The desktop workflow is centered on:
 
 - `pnpm run dev-tauri`: Runs the Angular desktop build and launches the Tauri shell for local development.
 - `pnpm run build-tauri`: Builds the desktop app without producing an installer bundle.
-- `pnpm run bundle-tauri`: Produces the current Windows NSIS desktop bundle.
+- `pnpm run bundle-tauri`: Produces the current host platform desktop bundle.
+- `pnpm run bundle-tauri:windows`: Produces the Windows x64 NSIS desktop bundle.
+- `pnpm run bundle-tauri:macos`: Produces the unsigned Apple Silicon macOS desktop bundle archive.
+- `pnpm run bundle-tauri:linux`: Produces the Linux x64 AppImage desktop bundle.
 
 ### CI/CD Pipeline
 
-GitHub Actions is used to build the Tauri desktop bundle from the `.github/workflows` directory. The current release path targets the Windows NSIS package produced by `desktop-tauri`.
+GitHub Actions is used to build and assemble the Tauri desktop release from the `.github/workflows` directory. The canonical runbook for version bumps, release triggers, artifact names, and draft GitHub Release publication lives in [docs/desktop-release.md](./docs/desktop-release.md).
 
 ### Monorepo Advantages
 

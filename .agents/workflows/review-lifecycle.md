@@ -21,6 +21,11 @@ Produce a spec or implementation plan, then send it to a second reviewer.
 Primary: GitHub Copilot Claude Sonnet 4.6.
 Fallback: `gemini-2.5-pro` (or `pnpm review:plan:risky` to pin it).
 
+**Codex plan mode**: before submitting the plan for review, invoke the
+`grill-me` sub-agent to co-create and stress-test the plan. Do not proceed
+to the Plan Review checkpoint until grill-me has no remaining
+high-impact unresolved questions.
+
 ### Test Review
 
 After writing tests but before using them as approval evidence, send the test
@@ -36,8 +41,7 @@ change to a second reviewer.
 
 Primary: `pnpm review:implementation` (Gemini Flash Preview via
 `gemini-3-flash-preview`).
-Fallback: GitHub Copilot GPT-5 mini, then the matching Codex reviewer
-subagent.
+Fallback: Codex grill-me sub-agent.
 
 **Sensitive changes** (auth, secrets, filesystem, shell execution, network
 behavior, or public contracts): escalate directly to GitHub Copilot Claude

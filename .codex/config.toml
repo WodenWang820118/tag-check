@@ -16,6 +16,15 @@ plan_mode_reasoning_effort = "high"
 model_reasoning_summary = "concise"
 model_verbosity = "medium"
 
+# Plan mode: invoke the grill-me sub-agent to co-create and stress-test
+# the plan before transitioning to implementation.
+plan_mode_instructions = """
+When entering plan mode for any non-trivial task:
+1. Invoke the `grill-me` sub-agent to interview you about the plan.
+2. Resolve every open assumption and decision branch before writing code.
+3. Do not approve the plan until grill-me has no remaining high-impact questions.
+"""
+
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 web_search = "cached"
@@ -94,6 +103,15 @@ nickname_candidates = ["UX", "A11y"]
 description = "Read-only explorer that maps affected files, symbols, dependency paths, and Nx project boundaries before implementation."
 config_file = "agents/codebase-mapper.toml"
 nickname_candidates = ["Mapper", "Explorer"]
+
+# Plan mode co-planner + checkpoint fallback reviewer.
+# Invoked automatically in plan mode to stress-test the plan before
+# implementation, and used as the fallback reviewer when Gemini and
+# Copilot paths are both unavailable.
+[agents.grill-me]
+description = "Plan mode co-planner and checkpoint fallback reviewer. Interviews the main agent relentlessly to resolve plan ambiguity, and reviews plans/tests/implementations when primary reviewer paths are unavailable."
+config_file = "agents/grill-me.toml"
+nickname_candidates = ["Grill", "Interrogate", "Plan"]
 
 ################################################################################
 # Domain-specific sub-agents

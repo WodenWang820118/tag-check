@@ -4,12 +4,14 @@ import { ProjectWorkFlowControllerService } from './project-workflow-controller.
 import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { CreateProjectDto } from '../../shared';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
+import { ExampleProjectRepositoryService } from '../../features/example-project/example-project-repository.service';
 
 @Controller('projects')
 export class ProjectWorkFlowController {
   constructor(
     private readonly projectRepositoryService: ProjectRepositoryService,
-    private readonly projectWorkFlowControllerService: ProjectWorkFlowControllerService
+    private readonly projectWorkFlowControllerService: ProjectWorkFlowControllerService,
+    private readonly exampleProjectRepositoryService: ExampleProjectRepositoryService
   ) {}
 
   @ApiOperation({
@@ -58,6 +60,11 @@ export class ProjectWorkFlowController {
   @Get()
   @Log()
   async getProjects() {
+    // On a cold launch the example-project seed runs fire-and-forget
+    // (P2 cold-start optimization), so the very first GET /projects must
+    // wait for it to finish to avoid returning an empty list to the UI.
+    // The seed service owns its own readiness state and idempotency.
+    await this.exampleProjectRepositoryService.ensureSeededOnce();
     return await this.projectRepositoryService.list();
   }
 }

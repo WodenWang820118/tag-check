@@ -1,7 +1,7 @@
 {
   "$schema": "../../../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Tag Check Desktop",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "identifier": "com.wodenwang.tagcheck.desktop",
   "build": {
     "frontendDist": "../../../dist/apps/ng-frontend/browser",
@@ -19,7 +19,6 @@
   },
   "bundle": {
     "active": true,
-    "targets": "nsis",
     "externalBin": ["binaries/node"],
     "resources": {
       "../../../dist/apps/nest-backend/": "backend/"

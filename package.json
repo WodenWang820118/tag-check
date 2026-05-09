@@ -1,7 +1,7 @@
 {
   "name": "tag-check",
   "sideEffects": false,
-  "version": "1.1.1",
+  "version": "2.0.0",
   "type": "module",
   "author": "Guan Xin Wang",
   "description": "A tool to verify Google Tag Manager implementations on websites",
@@ -42,7 +42,11 @@
     "build-tag-build": "nx build ng-tag-build --configuration production --optimization --source-map",
     "build-tauri": "nx run desktop-tauri:build",
     "bundle-tauri": "nx run desktop-tauri:bundle",
+    "bundle-tauri:windows": "nx run desktop-tauri:bundle-windows",
+    "bundle-tauri:macos": "nx run desktop-tauri:bundle-macos",
+    "bundle-tauri:linux": "nx run desktop-tauri:bundle-linux",
     "tauri:prepare-runtime": "node tools/scripts/tauri/prepare-runtime/prepare-runtime.ts",
+    "tauri:release": "node tools/scripts/tauri/release/release.ts",
     "tauri:size-report": "node tools/scripts/tauri/size-report/size-report.ts",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org guan-xin-wang --project tag-check ./dist/apps/ng-frontend/browser && sentry-cli sourcemaps upload --org guan-xin-wang --project tag-check ./dist/apps/ng-frontend/browser",
     "_____________SOURCE MAP EXPLORER____________": "--------------------------------------------------------",
@@ -201,7 +205,6 @@
     "sass-loader": "16.0.6",
     "socket.io-client": "^4.8.3",
     "source-map-explorer": "^2.5.3",
-    "sqlite3": "^5.1.7",
     "storybook": "10.2.6",
     "style-loader": "^4.0.0",
     "supertest": "^7.2.2",
@@ -266,6 +269,7 @@
     "puppeteer": "^24.36.1",
     "puppeteer-chromium-resolver": "^24.0.3",
     "rxjs": "^7.8.2",
+    "sqlite3": "^5.1.7",
     "slug": "^11.0.1",
     "tailwindcss": "^4.1.18",
     "tslib": "^2.8.1",
@@ -273,10 +277,10 @@
     "unzipper": "^0.12.3",
     "uuid": "^13.0.0"
   },
-  "packageManager": "pnpm@10.28.2",
+  "packageManager": "pnpm@11.0.8",
   "engines": {
     "node": "24.x",
-    "pnpm": ">=10.0.0 <11.0.0"
+    "pnpm": ">=11.0.0 <12.0.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

@@ -9,6 +9,11 @@ pub(super) struct BackendPaths {
     pub(super) database_path: PathBuf,
     pub(super) main_script_path: PathBuf,
     pub(super) projects_path: PathBuf,
+    /// Stable, per-installation directory used by Node.js's V8 compile cache
+    /// (see `module.enableCompileCache`). Persisting bytecode here lets every
+    /// launch after the first skip the V8 parse cost of the bundled main.js,
+    /// which is the dominant component of cold start time.
+    pub(super) compile_cache_dir: PathBuf,
 }
 
 pub(super) fn resolve_backend_paths(
@@ -19,6 +24,9 @@ pub(super) fn resolve_backend_paths(
 
     let projects_path = app_data_dir.join(PROJECTS_DIR_NAME);
     fs::create_dir_all(&projects_path)?;
+
+    let compile_cache_dir = app_data_dir.join("node-compile-cache");
+    fs::create_dir_all(&compile_cache_dir)?;
 
     let backend_dir = normalize_process_path(if tauri::is_dev() {
         resolve_dev_backend_dir()
@@ -41,6 +49,7 @@ pub(super) fn resolve_backend_paths(
         database_path: app_data_dir.join(DATABASE_FILE_NAME),
         main_script_path,
         projects_path,
+        compile_cache_dir,
     })
 }
 

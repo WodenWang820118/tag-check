@@ -58,6 +58,9 @@ data, or require broad exploration.
   `qa-verification`, or `code-review-and-quality` during planning.
 - Every non-trivial spec or plan must pass `Plan Review` before implementation
   starts.
+- **Codex plan mode**: invoke the `grill-me` sub-agent to co-create and
+  stress-test the plan before the Plan Review checkpoint. Do not submit for
+  Plan Review until grill-me has no remaining high-impact unresolved questions.
 
 ## Phase 3: Implementation
 
