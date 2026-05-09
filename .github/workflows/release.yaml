@@ -167,15 +167,20 @@ jobs:
             const canonicalTagSha = await getTagSha(releaseTag);
             const legacyTagSha = await getTagSha(legacyTag);
 
-            for (const [tag, sha] of [
-              [releaseTag, canonicalTagSha],
-              [legacyTag, legacyTagSha]
-            ]) {
-              if (sha && sha !== checkoutRef) {
-                throw new Error(
-                  `Existing tag ${tag} points to ${sha}, expected ${checkoutRef}.`
-                );
-              }
+            if (canonicalTagSha && canonicalTagSha !== checkoutRef) {
+              const skipReason = `Release tag ${releaseTag} already exists at ${canonicalTagSha}; skipping duplicate release for version ${releaseVersion}.`;
+              core.setOutput('should_release', 'false');
+              core.setOutput('skip_reason', skipReason);
+              core.notice(skipReason);
+              return;
+            }
+
+            if (legacyTagSha && legacyTagSha !== checkoutRef) {
+              const skipReason = `Legacy release tag ${legacyTag} already exists at ${legacyTagSha}; skipping duplicate release for version ${releaseVersion}.`;
+              core.setOutput('should_release', 'false');
+              core.setOutput('skip_reason', skipReason);
+              core.notice(skipReason);
+              return;
             }
 
             if (!canonicalTagSha) {
