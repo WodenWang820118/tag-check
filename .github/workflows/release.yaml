@@ -32,7 +32,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-          cache: 'pnpm'
       - name: Setup pnpm
         run: |
           corepack enable
@@ -227,7 +226,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-          cache: 'pnpm'
       - name: Install Linux system dependencies
         if: runner.os == 'Linux'
         run: |
@@ -296,7 +294,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-          cache: 'pnpm'
       - name: Setup pnpm
         run: |
           corepack enable
