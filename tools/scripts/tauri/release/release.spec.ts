@@ -14,6 +14,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   assembleReleaseAssets,
   assertVersionAuthoritiesInSync,
+  buildStableReleaseTag,
   buildArtifactName,
   buildAssetFileName,
   createChecksumFileContents,
@@ -144,6 +145,11 @@ describe('release helper', () => {
     expect(() => parseStableReleaseTag('v2.0.0-alpha')).toThrow(
       /stable release tag/
     );
+  });
+
+  it('builds canonical stable release tags from plain versions', () => {
+    expect(buildStableReleaseTag('2.0.0')).toBe('v2.0.0');
+    expect(() => buildStableReleaseTag('v2.0.0')).toThrow(/stable version/);
   });
 
   it('resolves canonical desktop artifact names', () => {
@@ -310,10 +316,17 @@ describe('release helper', () => {
       'utf8'
     );
 
-    expect(workflow).toContain("      - 'v*.*.*'");
+    expect(workflow).toContain('  push:');
+    expect(workflow).toContain('    branches:');
+    expect(workflow).toContain('      - main');
     expect(workflow).toContain('workflow_dispatch:');
-    expect(workflow).toContain('release_tag:');
     expect(workflow).toContain('checkout_ref:');
+    expect(workflow).toContain('should_release:');
+    expect(workflow).toContain('skip_reason:');
+    expect(workflow).toContain('const notesPath = join(');
+    expect(workflow).toContain("docs',");
+    expect(workflow).toContain("releases',");
+    expect(workflow).toContain('Missing \\${notesPath}.');
     expect(workflow).toContain('fail-fast: false');
     expect(workflow).toContain('platform: windows');
     expect(workflow).toContain('platform: macos');
@@ -325,11 +338,21 @@ describe('release helper', () => {
       /publish-release:\s+needs:\s+- prepare-release\s+- build-desktop/su
     );
     expect(workflow).toContain(
+      "if: ${{ needs.prepare-release.outputs.should_release == 'true' }}"
+    );
+    expect(workflow).toContain(
       'pattern: tag-check-desktop-v${{ steps.release_context.outputs.release_version }}-*'
     );
     expect(workflow).toContain(
       'node tools/scripts/tauri/release/release.ts assemble --release-tag ${{ needs.prepare-release.outputs.release_tag }} --artifacts-root dist/downloaded-release-assets --output-dir dist/publish-release'
     );
+    expect(workflow).toContain(
+      'Release already exists for ${existing.tag}; skipping duplicate draft creation.'
+    );
+    expect(workflow).toContain(
+      'Existing tag ${tag} points to ${sha}, expected ${checkoutRef}.'
+    );
+    expect(workflow).toContain('ref: `refs/tags/${releaseTag}`');
     expect(workflow).toContain('Validate checksum manifest');
     expect(workflow).toContain('uses: softprops/action-gh-release@v2');
     expect(workflow).toContain('draft: true');
