@@ -57,6 +57,13 @@ export interface ReleaseManifest {
   version: string;
 }
 
+export interface ReleaseArtifactValidationResult {
+  assetPath: string;
+  manifest: ReleaseManifest;
+  manifestPath: string;
+  releaseDirectory: string;
+}
+
 export interface TauriBundleCommand {
   args: string[];
   command: string;
@@ -457,6 +464,74 @@ function readReleaseManifest(manifestPath: string): ReleaseManifest {
   return readJsonFile<ReleaseManifest>(manifestPath);
 }
 
+export async function validateReleaseArtifact(
+  platform: ReleasePlatform,
+  expectedVersion: string,
+  assetsRoot = releaseAssetsRoot
+): Promise<ReleaseArtifactValidationResult> {
+  const releaseDirectory = join(assetsRoot, platform);
+  const manifestPath = join(releaseDirectory, releaseManifestFileName);
+  const expectedAssetFileName = buildAssetFileName(expectedVersion, platform);
+  const expectedArtifactName = buildArtifactName(expectedVersion, platform);
+
+  for (const candidatePath of [releaseDirectory, manifestPath]) {
+    if (!existsSync(candidatePath)) {
+      throw new Error(`Expected ${candidatePath} to exist.`);
+    }
+  }
+
+  const manifest = readReleaseManifest(manifestPath);
+
+  if (manifest.platform !== platform) {
+    throw new Error(
+      `Manifest ${manifestPath} declared platform ${manifest.platform} but ${platform} was expected.`
+    );
+  }
+
+  if (manifest.version !== expectedVersion) {
+    throw new Error(
+      `Manifest ${manifestPath} declared version ${manifest.version} but ${expectedVersion} was expected.`
+    );
+  }
+
+  if (manifest.assetFileName !== expectedAssetFileName) {
+    throw new Error(
+      `Manifest ${manifestPath} declared asset file ${manifest.assetFileName} but ${expectedAssetFileName} was expected.`
+    );
+  }
+
+  if (manifest.artifactName !== expectedArtifactName) {
+    throw new Error(
+      `Manifest ${manifestPath} declared artifact name ${manifest.artifactName} but ${expectedArtifactName} was expected.`
+    );
+  }
+
+  const assetPath = join(releaseDirectory, manifest.assetFileName);
+
+  if (!existsSync(assetPath)) {
+    throw new Error(
+      `Expected asset ${assetPath} referenced by ${manifestPath}.`
+    );
+  }
+
+  const computedSha = await hashFile(assetPath);
+  if (computedSha !== manifest.sha256) {
+    throw new Error(
+      `Checksum mismatch for ${assetPath}. Expected ${manifest.sha256}, computed ${computedSha}.`
+    );
+  }
+
+  return {
+    assetPath,
+    manifest: {
+      ...manifest,
+      sha256: computedSha
+    },
+    manifestPath,
+    releaseDirectory
+  };
+}
+
 function walkForFiles(targetPath: string, fileName: string): string[] {
   if (!existsSync(targetPath)) {
     return [];
@@ -676,6 +751,21 @@ async function assembleRelease(args: string[]) {
   );
 }
 
+async function validateReleaseArtifactCommand(args: string[]) {
+  const platform = resolveReleasePlatform(getArgumentValue('--platform', args));
+  const releaseTag = getArgumentValue('--release-tag', args);
+
+  if (!releaseTag) {
+    throw new Error('validate-artifact requires --release-tag <stable-tag>.');
+  }
+
+  const expectedVersion = parseStableReleaseTag(releaseTag);
+  assertVersionAuthoritiesInSync(expectedVersion);
+  const result = await validateReleaseArtifact(platform, expectedVersion);
+
+  console.log(JSON.stringify(result, null, 2));
+}
+
 async function main() {
   const [command, ...args] = process.argv.slice(2);
 
@@ -689,8 +779,13 @@ async function main() {
     case 'describe':
       await describeRelease(args);
       break;
+    case 'validate-artifact':
+      await validateReleaseArtifactCommand(args);
+      break;
     default:
-      throw new Error('Expected one of: describe, bundle, assemble.');
+      throw new Error(
+        'Expected one of: describe, bundle, assemble, validate-artifact.'
+      );
   }
 }
 
