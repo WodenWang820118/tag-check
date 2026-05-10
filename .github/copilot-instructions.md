@@ -1,22 +1,39 @@
 # Copilot Bridge Instructions
 
-- `AGENTS.md` is the canonical repository instruction file. Follow it first.
-- For Angular and NestJS tasks, use the canonical stack conventions in `.agents/stack-conventions.md` via `AGENTS.md`.
-- For this repository, GitHub Copilot Claude Sonnet 4.6 is the preferred scripted reviewer for plan reviews, test reviews, and escalated implementation reviews created in any tool.
-- Project skills live in `.agents/skills`. Do not recreate `.github/skills` copies.
-- Reviewer personas live in `.agents/reviewers`. Custom Copilot agents live in `.github/agents`.
-- A hard pre-implementation guardrail is configured in `.github/hooks/review-gate.json`.
-- For any non-trivial task, follow the phased workflow in `AGENTS.md` and load only the skills needed for the current phase instead of preloading the whole chain.
-- Use `product-and-scope-review` when the prompt is solution-framed, `qa-verification` when the implementation needs verification evidence, and `release-readiness` when the work needs a final handoff story.
-- Keep the review session on a Claude-family model when possible.
-- When using Copilot CLI, prefer a Claude-family orchestrator and run `/experimental` so Rubber Duck can provide a second opinion.
-- For plan, test, and non-low-risk implementation reviews, the auto-routed review wrappers should prefer Gemini CLI before Copilot GPT-5 mini. Low-risk `implementation` or `pre-merge` auto routing may try the matching Codex reviewer first only when the review context includes an explicit small non-sensitive changed-file list that exactly matches the repo's current changed-file set. Keep the Copilot-only fallback chain only when the review is explicitly pinned to `--provider copilot`.
-- Force a Rubber Duck or second-opinion review after a drafted plan, after any implementation review that was escalated from Gemini, and after tests are written but before they are executed.
-- If Rubber Duck is not available for the current model/account, use the matching reviewer in `.github/agents`.
-- If the user asks for `critique`, `review`, `second opinion`, or `rubber duck`, always trigger a second-opinion pass.
-- Use `pnpm review:plan` for the normal Copilot plan-review path, `pnpm review:test` for the normal Copilot test-review path, `pnpm review:implementation` for the normal implementation auto-routing path, and `pnpm review:copilot` when an implementation review needs explicit Copilot escalation.
-- If a plan review passes and implementation should begin, open the gate with `pnpm review:approve-pre-implementation -- --reviewer <copilot-claude|copilot-gpt-5-mini|gemini-2.5-pro|codex-subagent> --focus <area> --summary "<approval summary>"`.
-- If the gate should be closed again, run `pnpm review:reset`.
-- For browser-verifiable UI proof requests, use `qa-verification`; when browser artifacts are needed, run `pnpm proofshot:check`, `pnpm proofshot:start:web`, and `pnpm proofshot:stop`, then review the resulting `proofshot-artifacts/` with the dedicated proofshot review prompt. Load `.agents/references/proofshot-targets.md` for repo-specific target routing.
-- Run workspace tasks through `pnpm nx ...` and inspect project configuration before guessing targets or flags.
-- Load `.agents/references/repo-map.md` when repo topology matters.
+`AGENTS.md` is the canonical repository instruction file. Follow it first, then
+load the workflow file it names for the active phase or checkpoint.
+
+Minimum first-read rules for Copilot sessions:
+
+- For Angular, NestJS, and Tauri tasks, use .agents/stack-conventions.md via AGENTS.md.
+
+- Project skills live in `.agents/skills`; reviewer personas live in
+  `.agents/reviewers`; workflow rules live in `.agents/workflows`.
+- For non-trivial work, produce a plan, pass plan review, open the
+  pre-implementation gate, implement incrementally, run targeted verification,
+  and pass required review checkpoints before handoff.
+- Use `pnpm review:plan`, `pnpm review:test`, and
+  `pnpm review:implementation` for normal checkpoint routing.
+- Open the gate only after plan review with
+  `pnpm review:approve-pre-implementation -- --reviewer <id> --focus <area> --summary "<summary>"`.
+- GitHub Copilot Claude Sonnet 4.6 remains the preferred scripted reviewer for
+  plan reviews, test reviews, and escalated implementation reviews.
+- Implementation reviews normally start through the repo wrapper's Gemini Flash
+  path. Codex-first low-risk routing is allowed only when an explicit small
+  non-sensitive changed-file list exactly matches the repo's current changed
+  files and no review/governance, auth, secrets, filesystem, shell, network, or
+  public-contract surface is touched.
+- When using Copilot CLI and Rubber Duck is available, prefer a Claude-family
+  orchestrator and enable `/experimental`.
+- Force Rubber Duck or another second opinion after a drafted plan, after an
+  escalated multi-file implementation review, and after tests are written but
+  before they are executed.
+- If the user asks for `critique`, `review`, `second opinion`, or `rubber duck`,
+  always trigger a second-opinion pass.
+- For browser-verifiable proof requests, use `qa-verification`; when artifacts
+  are needed, follow `.agents/workflows/proofshot.md`.
+- Run workspace tasks through `pnpm nx ...`; load `nx-workspace` for Nx
+  exploration and `nx-generate` for scaffolding.
+
+Do not redefine provider routing, phase rules, or gate conditions here. Update
+`AGENTS.md` and the referenced workflow files instead.
