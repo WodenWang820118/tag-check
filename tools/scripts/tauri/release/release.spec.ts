@@ -22,6 +22,7 @@ import {
   parseStableReleaseTag,
   readVersionAuthorities,
   resolveReleasePlatform,
+  runPlatformRelease,
   type ReleaseManifest
 } from './release.ts';
 
@@ -61,7 +62,9 @@ afterEach(() => {
   vi.clearAllMocks();
   vi.doUnmock('../../shared/process.ts');
   vi.doUnmock('../node-sidecar/node-sidecar.ts');
+  vi.doUnmock('./release-assets.ts');
   vi.doUnmock('./release-contract.ts');
+  vi.doUnmock('./release.ts');
 });
 
 function createFixtureDirectory() {
@@ -218,6 +221,129 @@ async function loadBundleReleaseTestModule(
   };
 }
 
+async function loadReleaseEntrypointTestModule(
+  platform: 'windows' | 'macos' | 'linux',
+  options: {
+    prepareRuntimeError?: Error;
+    versionError?: Error;
+  } = {}
+) {
+  const bundleReleaseArtifact = vi.fn(async () => ({
+    assetPath: `dist/release-assets/${platform}/asset`,
+    manifest: {} as ReleaseManifest,
+    manifestPath: `dist/release-assets/${platform}/release-manifest.json`
+  }));
+  const runSyncCommandOrThrow = vi.fn(() => {
+    if (options.prepareRuntimeError) {
+      throw options.prepareRuntimeError;
+    }
+  });
+  const assertVersionAuthoritiesInSyncMock = vi.fn(() => {
+    if (options.versionError) {
+      throw options.versionError;
+    }
+
+    return fixtureVersion;
+  });
+
+  vi.resetModules();
+  vi.doMock('../../shared/process.ts', async () => {
+    const actual = await vi.importActual<
+      typeof import('../../shared/process.ts')
+    >('../../shared/process.ts');
+    return {
+      ...actual,
+      getPnpmCommand: () => 'pnpm.cmd',
+      runSyncCommandOrThrow
+    };
+  });
+  vi.doMock('./release-assets.ts', async () => {
+    const actual = await vi.importActual<typeof import('./release-assets.ts')>(
+      './release-assets.ts'
+    );
+    return {
+      ...actual,
+      bundleReleaseArtifact
+    };
+  });
+  vi.doMock('./release-contract.ts', async () => {
+    const actual = await vi.importActual<
+      typeof import('./release-contract.ts')
+    >('./release-contract.ts');
+    return {
+      ...actual,
+      assertVersionAuthoritiesInSync: assertVersionAuthoritiesInSyncMock
+    };
+  });
+
+  const releaseModule = await import('./release.ts');
+  const entrypointModule = await import(`./release-${platform}.ts`);
+
+  return {
+    assertVersionAuthoritiesInSyncMock,
+    bundleReleaseArtifact,
+    entrypointModule,
+    releaseModule,
+    runSyncCommandOrThrow
+  };
+}
+
+async function loadReleaseEntrypointRoutingTestModule(
+  platform: 'windows' | 'macos' | 'linux'
+) {
+  const runPlatformReleaseMock = vi.fn();
+
+  vi.resetModules();
+  vi.doMock('./release.ts', async () => {
+    const actual =
+      await vi.importActual<typeof import('./release.ts')>('./release.ts');
+    return {
+      ...actual,
+      runPlatformRelease: runPlatformReleaseMock
+    };
+  });
+
+  const entrypointModule = await import(`./release-${platform}.ts`);
+
+  return {
+    entrypointModule,
+    runPlatformReleaseMock
+  };
+}
+
+async function loadReleaseCliTestModule() {
+  const assembleReleaseAssetsMock = vi.fn(async () => []);
+  const assertVersionAuthoritiesInSyncMock = vi.fn(() => fixtureVersion);
+
+  vi.resetModules();
+  vi.doMock('./release-assets.ts', async () => {
+    const actual = await vi.importActual<typeof import('./release-assets.ts')>(
+      './release-assets.ts'
+    );
+    return {
+      ...actual,
+      assembleReleaseAssets: assembleReleaseAssetsMock
+    };
+  });
+  vi.doMock('./release-contract.ts', async () => {
+    const actual = await vi.importActual<
+      typeof import('./release-contract.ts')
+    >('./release-contract.ts');
+    return {
+      ...actual,
+      assertVersionAuthoritiesInSync: assertVersionAuthoritiesInSyncMock
+    };
+  });
+
+  const releaseModule = await import('./release.ts');
+
+  return {
+    assembleReleaseAssetsMock,
+    assertVersionAuthoritiesInSyncMock,
+    releaseModule
+  };
+}
+
 describe('release helper', () => {
   it('parses only stable release tags', () => {
     expect(parseStableReleaseTag('v2.0.0')).toBe('2.0.0');
@@ -331,6 +457,116 @@ describe('release helper', () => {
       bundleReleaseArtifact('windows', fixtureVersion)
     ).rejects.toThrow('tauri build failed');
     expect(runSyncCommandOrThrow).toHaveBeenCalledOnce();
+  });
+
+  it('prepares the runtime before bundling a platform release', async () => {
+    const {
+      assertVersionAuthoritiesInSyncMock,
+      bundleReleaseArtifact,
+      releaseModule,
+      runSyncCommandOrThrow
+    } = await loadReleaseEntrypointTestModule('windows');
+
+    await releaseModule.runPlatformRelease('windows');
+
+    expect(runSyncCommandOrThrow).toHaveBeenCalledWith({
+      args: ['nx', 'run', 'desktop-tauri:prepare-runtime'],
+      command: 'pnpm.cmd',
+      cwd: process.cwd(),
+      stdio: 'inherit'
+    });
+    expect(assertVersionAuthoritiesInSyncMock).toHaveBeenCalledOnce();
+    expect(bundleReleaseArtifact).toHaveBeenCalledWith(
+      'windows',
+      fixtureVersion
+    );
+  });
+
+  it('routes dedicated platform entrypoints through the shared release helper', async () => {
+    const windowsModule =
+      await loadReleaseEntrypointRoutingTestModule('windows');
+    await windowsModule.entrypointModule.main();
+    expect(windowsModule.runPlatformReleaseMock).toHaveBeenCalledWith(
+      'windows'
+    );
+
+    const macosModule = await loadReleaseEntrypointRoutingTestModule('macos');
+    await macosModule.entrypointModule.main();
+    expect(macosModule.runPlatformReleaseMock).toHaveBeenCalledWith('macos');
+
+    const linuxModule = await loadReleaseEntrypointRoutingTestModule('linux');
+    await linuxModule.entrypointModule.main();
+    expect(linuxModule.runPlatformReleaseMock).toHaveBeenCalledWith('linux');
+  });
+
+  it('propagates prepare-runtime failures before bundling a platform release', async () => {
+    const { bundleReleaseArtifact, releaseModule, runSyncCommandOrThrow } =
+      await loadReleaseEntrypointTestModule('windows', {
+        prepareRuntimeError: new Error('prepare runtime failed')
+      });
+
+    await expect(releaseModule.runPlatformRelease('windows')).rejects.toThrow(
+      'prepare runtime failed'
+    );
+    expect(runSyncCommandOrThrow).toHaveBeenCalledOnce();
+    expect(bundleReleaseArtifact).not.toHaveBeenCalled();
+  });
+
+  it('propagates version authority failures before bundling a platform release', async () => {
+    const {
+      assertVersionAuthoritiesInSyncMock,
+      bundleReleaseArtifact,
+      releaseModule
+    } = await loadReleaseEntrypointTestModule('windows', {
+      versionError: new Error('version mismatch')
+    });
+
+    await expect(releaseModule.runPlatformRelease('windows')).rejects.toThrow(
+      'version mismatch'
+    );
+    expect(assertVersionAuthoritiesInSyncMock).toHaveBeenCalledOnce();
+    expect(bundleReleaseArtifact).not.toHaveBeenCalled();
+  });
+
+  it('dispatches the assemble CLI through the shared release assembler', async () => {
+    const {
+      assembleReleaseAssetsMock,
+      assertVersionAuthoritiesInSyncMock,
+      releaseModule
+    } = await loadReleaseCliTestModule();
+    const originalArgv = process.argv;
+
+    process.argv = [
+      'node',
+      'tools/scripts/tauri/release/release.ts',
+      'assemble',
+      '--release-tag',
+      'v2.0.0',
+      '--artifacts-root',
+      'tmp/artifacts',
+      '--output-dir',
+      'tmp/publish'
+    ];
+
+    try {
+      await releaseModule.main();
+    } finally {
+      process.argv = originalArgv;
+    }
+
+    expect(assertVersionAuthoritiesInSyncMock).toHaveBeenCalledWith(
+      fixtureVersion
+    );
+    expect(assembleReleaseAssetsMock).toHaveBeenCalledWith(
+      'tmp/artifacts',
+      'tmp/publish',
+      fixtureVersion,
+      expect.any(Function)
+    );
+  });
+
+  it('re-exports the shared platform release helper', async () => {
+    expect(runPlatformRelease).toBeTypeOf('function');
   });
 
   it('formats checksum files in release order', () => {
@@ -494,9 +730,10 @@ describe('release helper', () => {
     expect(workflow).toContain('platform: windows');
     expect(workflow).toContain('platform: macos');
     expect(workflow).toContain('platform: linux');
-    expect(workflow).toContain('nx_target: desktop-tauri:bundle-windows');
-    expect(workflow).toContain('nx_target: desktop-tauri:bundle-macos');
-    expect(workflow).toContain('nx_target: desktop-tauri:bundle-linux');
+    expect(workflow).toContain('release_script: tauri:release:windows');
+    expect(workflow).toContain('release_script: tauri:release:macos');
+    expect(workflow).toContain('release_script: tauri:release:linux');
+    expect(workflow).toContain('run: pnpm run ${{ matrix.release_script }}');
     expect(workflow).toMatch(
       /publish-release:\s+needs:\s+- prepare-release\s+- build-desktop/su
     );
@@ -519,5 +756,56 @@ describe('release helper', () => {
     expect(workflow).toContain('Validate checksum manifest');
     expect(workflow).toContain('uses: softprops/action-gh-release@v2');
     expect(workflow).toContain('draft: true');
+  });
+
+  it('keeps package and Nx release wiring aligned with the platform entrypoints', () => {
+    const packageJson = JSON.parse(
+      readFileSync(join(process.cwd(), 'package.json'), 'utf8')
+    ) as {
+      scripts: Record<string, string>;
+    };
+    const desktopProject = JSON.parse(
+      readFileSync(
+        join(process.cwd(), 'apps', 'desktop-tauri', 'project.json'),
+        'utf8'
+      )
+    ) as {
+      targets: Record<
+        string,
+        { dependsOn?: string[]; options?: { command?: string } }
+      >;
+    };
+
+    expect(packageJson.scripts['tauri:release:windows']).toBe(
+      'node tools/scripts/tauri/release/release-windows.ts'
+    );
+    expect(packageJson.scripts['tauri:release:macos']).toBe(
+      'node tools/scripts/tauri/release/release-macos.ts'
+    );
+    expect(packageJson.scripts['tauri:release:linux']).toBe(
+      'node tools/scripts/tauri/release/release-linux.ts'
+    );
+    expect(packageJson.scripts['bundle-tauri:windows']).toBe(
+      'pnpm run tauri:release:windows'
+    );
+    expect(packageJson.scripts['bundle-tauri:macos']).toBe(
+      'pnpm run tauri:release:macos'
+    );
+    expect(packageJson.scripts['bundle-tauri:linux']).toBe(
+      'pnpm run tauri:release:linux'
+    );
+
+    expect(desktopProject.targets['bundle-windows'].options?.command).toBe(
+      'node tools/scripts/tauri/release/release-windows.ts'
+    );
+    expect(desktopProject.targets['bundle-macos'].options?.command).toBe(
+      'node tools/scripts/tauri/release/release-macos.ts'
+    );
+    expect(desktopProject.targets['bundle-linux'].options?.command).toBe(
+      'node tools/scripts/tauri/release/release-linux.ts'
+    );
+    expect(desktopProject.targets['bundle-windows'].dependsOn).toBeUndefined();
+    expect(desktopProject.targets['bundle-macos'].dependsOn).toBeUndefined();
+    expect(desktopProject.targets['bundle-linux'].dependsOn).toBeUndefined();
   });
 });

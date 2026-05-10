@@ -210,13 +210,13 @@ jobs:
         include:
           - platform: windows
             runner: windows-latest
-            nx_target: desktop-tauri:bundle-windows
+            release_script: tauri:release:windows
           - platform: macos
             runner: macos-latest
-            nx_target: desktop-tauri:bundle-macos
+            release_script: tauri:release:macos
           - platform: linux
             runner: ubuntu-latest
-            nx_target: desktop-tauri:bundle-linux
+            release_script: tauri:release:linux
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -245,7 +245,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Build Tauri desktop bundle
-        run: pnpm nx run ${{ matrix.nx_target }}
+        run: pnpm run ${{ matrix.release_script }}
       - name: Validate assembled release artifact
         run: |
           node --input-type=module -e "

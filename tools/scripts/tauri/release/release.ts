@@ -1,9 +1,9 @@
 import { writeFileSync } from 'node:fs';
 
+import { getPnpmCommand, runSyncCommandOrThrow } from '../../shared/process.ts';
 import { isDirectEntrypoint } from '../../shared/paths.ts';
 import {
   assembleReleaseAssets,
-  buildBundleCommandArgs,
   bundleReleaseArtifact as bundleReleaseArtifactForPlatform
 } from './release-assets.ts';
 import {
@@ -11,17 +11,11 @@ import {
   buildArtifactName,
   buildAssetFileName,
   buildStableReleaseTag,
-  createChecksumFileContents,
   downloadedReleaseAssetsRoot,
   parseStableReleaseTag,
   publishReleaseRoot,
-  readVersionAuthorities,
-  releaseArtifactDefinitions,
   resolveReleasePlatform,
-  type ReleaseArtifactDefinition,
-  type ReleaseManifest,
-  type ReleasePlatform,
-  type VersionAuthorities
+  type ReleasePlatform
 } from './release-contract.ts';
 
 export {
@@ -43,6 +37,12 @@ export {
   assembleReleaseAssets,
   buildBundleCommandArgs
 } from './release-assets.ts';
+
+const prepareRuntimeCommandArgs = [
+  'nx',
+  'run',
+  'desktop-tauri:prepare-runtime'
+];
 
 function getArgumentValue(flag: string, args: string[]) {
   const index = args.indexOf(flag);
@@ -104,8 +104,14 @@ async function describeRelease(args: string[]) {
   console.log(JSON.stringify(result, null, 2));
 }
 
-async function bundleRelease(args: string[]) {
-  const platform = resolveReleasePlatform(getArgumentValue('--platform', args));
+export async function runPlatformRelease(platform: ReleasePlatform) {
+  runSyncCommandOrThrow({
+    args: prepareRuntimeCommandArgs,
+    command: getPnpmCommand(),
+    cwd: process.cwd(),
+    stdio: 'inherit'
+  });
+
   const version = assertVersionAuthoritiesInSync();
   const { assetPath, manifestPath } = await bundleReleaseArtifactForPlatform(
     platform,
@@ -114,6 +120,11 @@ async function bundleRelease(args: string[]) {
   console.log(
     `Prepared ${platform} desktop release asset ${assetPath} and manifest ${manifestPath}.`
   );
+}
+
+async function bundleRelease(args: string[]) {
+  const platform = resolveReleasePlatform(getArgumentValue('--platform', args));
+  await runPlatformRelease(platform);
 }
 
 async function assembleRelease(args: string[]) {
@@ -141,7 +152,7 @@ async function assembleRelease(args: string[]) {
   );
 }
 
-async function main() {
+export async function main() {
   const [command, ...args] = process.argv.slice(2);
 
   switch (command) {

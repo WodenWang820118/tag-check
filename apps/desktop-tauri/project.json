@@ -36,7 +36,6 @@
     "bundle": {
       "executor": "nx:run-commands",
       "cache": false,
-      "dependsOn": ["prepare-runtime"],
       "outputs": [
         "{projectRoot}/src-tauri/target",
         "{workspaceRoot}/dist/release-assets"
@@ -48,37 +47,34 @@
     "bundle-windows": {
       "executor": "nx:run-commands",
       "cache": false,
-      "dependsOn": ["prepare-runtime"],
       "outputs": [
         "{projectRoot}/src-tauri/target",
         "{workspaceRoot}/dist/release-assets"
       ],
       "options": {
-        "command": "node tools/scripts/tauri/release/release.ts bundle --platform windows"
+        "command": "node tools/scripts/tauri/release/release-windows.ts"
       }
     },
     "bundle-macos": {
       "executor": "nx:run-commands",
       "cache": false,
-      "dependsOn": ["prepare-runtime"],
       "outputs": [
         "{projectRoot}/src-tauri/target",
         "{workspaceRoot}/dist/release-assets"
       ],
       "options": {
-        "command": "node tools/scripts/tauri/release/release.ts bundle --platform macos"
+        "command": "node tools/scripts/tauri/release/release-macos.ts"
       }
     },
     "bundle-linux": {
       "executor": "nx:run-commands",
       "cache": false,
-      "dependsOn": ["prepare-runtime"],
       "outputs": [
         "{projectRoot}/src-tauri/target",
         "{workspaceRoot}/dist/release-assets"
       ],
       "options": {
-        "command": "node tools/scripts/tauri/release/release.ts bundle --platform linux"
+        "command": "node tools/scripts/tauri/release/release-linux.ts"
       }
     }
   }
