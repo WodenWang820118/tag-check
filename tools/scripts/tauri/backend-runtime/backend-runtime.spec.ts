@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { join } from 'node:path';
 import {
+  buildBackendRuntimeNpmCommand,
   buildBackendRuntimeInstallStamp,
   getBackendRuntimeInstallPlan,
   getBackendRuntimeStampPath
@@ -20,6 +21,24 @@ describe('getBackendRuntimeInstallPlan', () => {
       fallbackCommand: null,
       primaryCommand: 'install',
       removeLockfileBeforeFallback: false
+    });
+  });
+});
+
+describe('buildBackendRuntimeNpmCommand', () => {
+  it('builds npm runtime install args without invoking npm through node', () => {
+    expect(buildBackendRuntimeNpmCommand('ci', 'linux')).toEqual({
+      args: ['ci', '--omit=dev', '--no-audit', '--no-fund'],
+      command: 'npm',
+      shell: false
+    });
+  });
+
+  it('uses shell execution for Windows npm shims', () => {
+    expect(buildBackendRuntimeNpmCommand('install', 'win32')).toEqual({
+      args: ['install', '--omit=dev', '--no-audit', '--no-fund'],
+      command: 'npm',
+      shell: true
     });
   });
 });

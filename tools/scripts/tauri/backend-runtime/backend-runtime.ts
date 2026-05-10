@@ -2,9 +2,9 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { getShellSafePackageManagerCommand } from '../../shared/process.ts';
 import {
   backendDistDir,
-  resolveNpmEntrypoint,
   resolveNxEntrypoint,
   workspaceRoot
 } from '../path-contract/path-contract.ts';
@@ -18,10 +18,18 @@ import {
 } from '../process-utils/process-utils.ts';
 
 export interface BackendRuntimeInstallPlan {
-  fallbackCommand: 'install' | null;
+  fallbackCommand: BackendRuntimeInstallCommand | null;
   removeLockfileBeforeFallback: boolean;
-  primaryCommand: 'ci' | 'install';
+  primaryCommand: BackendRuntimeInstallCommand;
 }
+
+export interface BackendRuntimePackageManagerCommand {
+  args: string[];
+  command: string;
+  shell: boolean;
+}
+
+export type BackendRuntimeInstallCommand = 'ci' | 'install';
 
 export interface BackendRuntimeInstallStamp {
   arch: string;
@@ -48,7 +56,6 @@ export interface PrepareBackendRuntimeDependencies {
   backendDir?: string;
   existsSyncFn?: typeof existsSync;
   hashFileFn?: HashFileFunction;
-  nodeExecPath?: string;
   nodeVersion?: string;
   platform?: NodeJS.Platform;
   readFileSyncFn?: ReadTextFileFunction;
@@ -80,6 +87,19 @@ export function getBackendRuntimeInstallPlan(
     fallbackCommand: null,
     primaryCommand: 'install',
     removeLockfileBeforeFallback: false
+  };
+}
+
+export function buildBackendRuntimeNpmCommand(
+  installCommand: BackendRuntimeInstallCommand,
+  platform: NodeJS.Platform = process.platform
+): BackendRuntimePackageManagerCommand {
+  const npmCommand = getShellSafePackageManagerCommand('npm', platform);
+
+  return {
+    args: [installCommand, '--omit=dev', '--no-audit', '--no-fund'],
+    command: npmCommand.command,
+    shell: npmCommand.shell
   };
 }
 
@@ -209,7 +229,6 @@ export function prepareBackendRuntime(
   const arch = dependencies.arch ?? process.arch;
   const existsSyncFn = dependencies.existsSyncFn ?? existsSync;
   const hashFileFn = dependencies.hashFileFn ?? hashFile;
-  const nodeExecPath = dependencies.nodeExecPath ?? process.execPath;
   const nodeVersion = dependencies.nodeVersion ?? process.version;
   const platform = dependencies.platform ?? process.platform;
   const readFileSyncFn =
@@ -257,15 +276,19 @@ export function prepareBackendRuntime(
   const installPlan = getBackendRuntimeInstallPlan(
     existsSyncFn(packageLockPath)
   );
-  const primaryArgs = [
-    resolveNpmEntrypoint(nodeExecPath),
+  const primaryCommand = buildBackendRuntimeNpmCommand(
     installPlan.primaryCommand,
-    '--omit=dev',
-    '--no-audit',
-    '--no-fund'
-  ];
+    platform
+  );
 
-  if (tryRunFn(nodeExecPath, primaryArgs, backendDir)) {
+  if (
+    tryRunFn(
+      primaryCommand.command,
+      primaryCommand.args,
+      backendDir,
+      primaryCommand.shell
+    )
+  ) {
     writeBackendRuntimeInstallStamp(
       stampPath,
       buildBackendRuntimeInstallStamp(backendDir, {
@@ -281,7 +304,9 @@ export function prepareBackendRuntime(
   }
 
   if (!installPlan.fallbackCommand) {
-    throw new Error(`Command failed: ${nodeExecPath} ${primaryArgs.join(' ')}`);
+    throw new Error(
+      `Command failed: ${primaryCommand.command} ${primaryCommand.args.join(' ')}`
+    );
   }
 
   removePathFn(join(backendDir, 'node_modules'));
@@ -292,16 +317,15 @@ export function prepareBackendRuntime(
   warnFn(
     `npm ci failed in ${backendDir}. Falling back to npm install to regenerate runtime dependencies.`
   );
+  const fallbackCommand = buildBackendRuntimeNpmCommand(
+    installPlan.fallbackCommand,
+    platform
+  );
   runFn(
-    nodeExecPath,
-    [
-      resolveNpmEntrypoint(nodeExecPath),
-      installPlan.fallbackCommand,
-      '--omit=dev',
-      '--no-audit',
-      '--no-fund'
-    ],
-    backendDir
+    fallbackCommand.command,
+    fallbackCommand.args,
+    backendDir,
+    fallbackCommand.shell
   );
   writeBackendRuntimeInstallStamp(
     stampPath,

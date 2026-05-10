@@ -1,9 +1,14 @@
 import { writeFileSync } from 'node:fs';
 
-import { getPnpmCommand, runSyncCommandOrThrow } from '../../shared/process.ts';
+import {
+  getShellSafePackageManagerCommand,
+  runSyncCommandOrThrow
+} from '../../shared/process.ts';
 import { isDirectEntrypoint } from '../../shared/paths.ts';
+import { workspaceRoot } from '../path-contract/path-contract.ts';
 import {
   assembleReleaseAssets,
+  validateReleaseArtifact,
   bundleReleaseArtifact as bundleReleaseArtifactForPlatform
 } from './release-assets.ts';
 import {
@@ -35,7 +40,12 @@ export {
 } from './release-contract.ts';
 export {
   assembleReleaseAssets,
-  buildBundleCommandArgs
+  buildBundleCommandArgs,
+  buildTauriBundleCommand,
+  pruneLinuxAppImageBackendPrebuilds,
+  validateReleaseArtifact,
+  type ReleaseArtifactValidationResult,
+  type TauriBundleCommand
 } from './release-assets.ts';
 
 const prepareRuntimeCommandArgs = [
@@ -105,10 +115,13 @@ async function describeRelease(args: string[]) {
 }
 
 export async function runPlatformRelease(platform: ReleasePlatform) {
+  const packageManagerCommand = getShellSafePackageManagerCommand('pnpm');
+
   runSyncCommandOrThrow({
     args: prepareRuntimeCommandArgs,
-    command: getPnpmCommand(),
-    cwd: process.cwd(),
+    command: packageManagerCommand.command,
+    cwd: workspaceRoot,
+    shell: packageManagerCommand.shell,
     stdio: 'inherit'
   });
 
@@ -120,6 +133,20 @@ export async function runPlatformRelease(platform: ReleasePlatform) {
   console.log(
     `Prepared ${platform} desktop release asset ${assetPath} and manifest ${manifestPath}.`
   );
+}
+
+async function validateReleaseArtifactCommand(args: string[]) {
+  const platform = resolveReleasePlatform(getArgumentValue('--platform', args));
+  const releaseTag = getArgumentValue('--release-tag', args);
+
+  if (!releaseTag) {
+    throw new Error('validate-artifact requires --release-tag <stable-tag>.');
+  }
+
+  const expectedVersion = parseStableReleaseTag(releaseTag);
+  assertVersionAuthoritiesInSync(expectedVersion);
+  const result = await validateReleaseArtifact(platform, expectedVersion);
+  console.log(JSON.stringify(result, null, 2));
 }
 
 async function bundleRelease(args: string[]) {
@@ -165,8 +192,13 @@ export async function main() {
     case 'describe':
       await describeRelease(args);
       break;
+    case 'validate-artifact':
+      await validateReleaseArtifactCommand(args);
+      break;
     default:
-      throw new Error('Expected one of: describe, bundle, assemble.');
+      throw new Error(
+        'Expected one of: describe, bundle, assemble, validate-artifact.'
+      );
   }
 }
 

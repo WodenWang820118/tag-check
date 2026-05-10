@@ -137,6 +137,11 @@ export const releasePlatformOrder: ReleasePlatform[] = [
   'macos',
   'linux'
 ];
+export const linuxAppImagePrebuildDirectories = new Set([
+  'linux-x64',
+  'linux-x64-glibc',
+  'linux-x64-gnu'
+]);
 
 function readJsonFile<T>(targetPath: string): T {
   return JSON.parse(readFileSync(targetPath, 'utf8')) as T;

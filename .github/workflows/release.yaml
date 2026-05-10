@@ -14,11 +14,15 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: desktop-release
+  cancel-in-progress: false
+
 jobs:
   prepare-release:
     runs-on: ubuntu-latest
     outputs:
-      checkout_ref: ${{ steps.release_context.outputs.checkout_ref }}
+      checkout_ref: ${{ steps.release_gate.outputs.checkout_ref }}
       release_tag: ${{ steps.release_context.outputs.release_tag }}
       release_version: ${{ steps.release_context.outputs.release_version }}
       should_release: ${{ steps.release_gate.outputs.should_release }}
@@ -32,7 +36,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-          cache: 'pnpm'
       - name: Setup pnpm
         run: |
           corepack enable
@@ -106,6 +109,8 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const legacyTag = releaseVersion;
+            const tagRefPath = (tag) => `tags/${tag}`;
+            const fullTagRef = (tag) => `refs/${tagRefPath(tag)}`;
 
             const getReleaseByTag = async (tag) => {
               try {
@@ -128,7 +133,7 @@ jobs:
                 const response = await github.rest.git.getRef({
                   owner,
                   repo,
-                  ref: `tags/${tag}`
+                  ref: tagRefPath(tag)
                 });
 
                 if (response.data.object.type === 'tag') {
@@ -159,6 +164,7 @@ jobs:
             if (releaseCandidates.length > 0) {
               const existing = releaseCandidates[0];
               const skipReason = `Release already exists for ${existing.tag}; skipping duplicate draft creation.`;
+              core.setOutput('checkout_ref', checkoutRef);
               core.setOutput('should_release', 'false');
               core.setOutput('skip_reason', skipReason);
               core.notice(skipReason);
@@ -168,33 +174,32 @@ jobs:
             const canonicalTagSha = await getTagSha(releaseTag);
             const legacyTagSha = await getTagSha(legacyTag);
 
-            for (const [tag, sha] of [
-              [releaseTag, canonicalTagSha],
-              [legacyTag, legacyTagSha]
-            ]) {
-              if (sha && sha !== checkoutRef) {
-                throw new Error(
-                  `Existing tag ${tag} points to ${sha}, expected ${checkoutRef}.`
-                );
-              }
-            }
-
-            if (!canonicalTagSha) {
+            if (canonicalTagSha === checkoutRef) {
+              core.notice(`Reusing existing ${releaseTag} at ${checkoutRef}.`);
+            } else if (canonicalTagSha) {
+              await github.rest.git.updateRef({
+                owner,
+                repo,
+                ref: tagRefPath(releaseTag),
+                sha: checkoutRef,
+                force: true
+              });
+              core.warning(`Moved ${releaseTag} from ${canonicalTagSha} to ${checkoutRef}.`);
+            } else {
               await github.rest.git.createRef({
                 owner,
                 repo,
-                ref: `refs/tags/${releaseTag}`,
+                ref: fullTagRef(releaseTag),
                 sha: checkoutRef
               });
               core.notice(`Created ${releaseTag} at ${checkoutRef}.`);
-            } else {
-              core.notice(`Reusing existing ${releaseTag} at ${checkoutRef}.`);
             }
 
             if (legacyTagSha) {
-              core.notice(`Legacy tag ${legacyTag} already exists at ${checkoutRef}.`);
+              core.notice(`Legacy tag ${legacyTag} already exists at ${legacyTagSha}; leaving it unchanged.`);
             }
 
+            core.setOutput('checkout_ref', checkoutRef);
             core.setOutput('should_release', 'true');
             core.setOutput('skip_reason', '');
       - name: Report skipped release
@@ -227,12 +232,29 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-          cache: 'pnpm'
       - name: Install Linux system dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y \
+            build-essential \
+            curl \
+            desktop-file-utils \
+            file \
+            libappindicator3-dev \
+            librsvg2-bin \
+            librsvg2-dev \
+            libssl-dev \
+            libwebkit2gtk-4.1-dev \
+            libxdo-dev \
+            patchelf \
+            squashfs-tools \
+            wget
+          sudo apt-get install -y libfuse2t64 || sudo apt-get install -y libfuse2
+          command -v desktop-file-validate
+          command -v file
+          command -v mksquashfs
+          command -v patchelf
       - name: Setup pnpm
         run: |
           corepack enable
@@ -247,33 +269,7 @@ jobs:
       - name: Build Tauri desktop bundle
         run: pnpm run ${{ matrix.release_script }}
       - name: Validate assembled release artifact
-        run: |
-          node --input-type=module -e "
-          import { existsSync } from 'node:fs';
-          import { join } from 'node:path';
-
-          const platform = process.env.RELEASE_PLATFORM;
-          const assetFileName = process.env.ASSET_FILE_NAME;
-
-          if (!platform || !assetFileName) {
-            throw new Error('RELEASE_PLATFORM and ASSET_FILE_NAME are required.');
-          }
-
-          const releaseDirectory = join(process.cwd(), 'dist', 'release-assets', platform);
-          const manifestPath = join(releaseDirectory, 'release-manifest.json');
-          const assetPath = join(releaseDirectory, assetFileName);
-
-          for (const candidatePath of [releaseDirectory, manifestPath, assetPath]) {
-            if (!existsSync(candidatePath)) {
-              throw new Error(\`Expected \${candidatePath} to exist.\`);
-            }
-          }
-
-          console.log(JSON.stringify({ releaseDirectory, manifestPath, assetPath }, null, 2));
-          "
-        env:
-          ASSET_FILE_NAME: ${{ steps.release_context.outputs.asset_file_name }}
-          RELEASE_PLATFORM: ${{ matrix.platform }}
+        run: node tools/scripts/tauri/release/release.ts validate-artifact --platform ${{ matrix.platform }} --release-tag ${{ needs.prepare-release.outputs.release_tag }}
       - name: Upload Tauri bundle artifact
         uses: actions/upload-artifact@v4
         with:
@@ -296,7 +292,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24.x'
-          cache: 'pnpm'
       - name: Setup pnpm
         run: |
           corepack enable

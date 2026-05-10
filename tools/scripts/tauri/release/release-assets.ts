@@ -12,18 +12,25 @@ import {
   statSync,
   writeFileSync
 } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
+import { basename, dirname, join, relative } from 'node:path';
 
 import archiver from 'archiver';
 
-import { getPnpmCommand, runSyncCommandOrThrow } from '../../shared/process.ts';
+import {
+  getShellSafePackageManagerCommand,
+  runSyncCommandOrThrow
+} from '../../shared/process.ts';
 import { getRustTargetTriple } from '../node-sidecar/node-sidecar.ts';
-import { workspaceRoot } from '../path-contract/path-contract.ts';
+import {
+  backendDistDir,
+  workspaceRoot
+} from '../path-contract/path-contract.ts';
 import {
   buildArtifactName,
   buildAssetFileName,
   checksumFileName,
   createChecksumFileContents,
+  linuxAppImagePrebuildDirectories,
   releaseArtifactDefinitions,
   releaseAssetsRoot,
   releaseManifestFileName,
@@ -37,6 +44,19 @@ export interface GithubOutputWriter {
   (entries: Record<string, string>): void;
 }
 
+export interface ReleaseArtifactValidationResult {
+  assetPath: string;
+  manifest: ReleaseManifest;
+  manifestPath: string;
+  releaseDirectory: string;
+}
+
+export interface TauriBundleCommand {
+  args: string[];
+  command: string;
+  shell: boolean;
+}
+
 function writeJsonFile(targetPath: string, value: unknown) {
   writeFileSync(targetPath, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
 }
@@ -45,8 +65,11 @@ function readJsonFile<T>(targetPath: string): T {
   return JSON.parse(readFileSync(targetPath, 'utf8')) as T;
 }
 
-function resolveReleaseDirectory(platform: ReleasePlatform) {
-  return join(releaseAssetsRoot, platform);
+function resolveReleaseDirectory(
+  platform: ReleasePlatform,
+  assetsRoot = releaseAssetsRoot
+) {
+  return join(assetsRoot, platform);
 }
 
 function removeAndRecreateDirectory(targetPath: string) {
@@ -182,7 +205,18 @@ function walkForFiles(targetPath: string, fileName: string): string[] {
 }
 
 export function buildBundleCommandArgs(platform: ReleasePlatform) {
-  return [
+  return buildTauriBundleCommand(platform).args;
+}
+
+export function buildTauriBundleCommand(
+  platform: ReleasePlatform,
+  hostPlatform: NodeJS.Platform = process.platform
+): TauriBundleCommand {
+  const packageManagerCommand = getShellSafePackageManagerCommand(
+    'pnpm',
+    hostPlatform
+  );
+  const args = [
     'exec',
     'tauri',
     'build',
@@ -192,6 +226,141 @@ export function buildBundleCommandArgs(platform: ReleasePlatform) {
     releaseArtifactDefinitions[platform].bundleTarget,
     '--ci'
   ];
+
+  if (platform === 'linux') {
+    args.push('--verbose');
+  }
+
+  return {
+    args,
+    command: packageManagerCommand.command,
+    shell: packageManagerCommand.shell
+  };
+}
+
+export async function validateReleaseArtifact(
+  platform: ReleasePlatform,
+  expectedVersion: string,
+  assetsRoot = releaseAssetsRoot
+): Promise<ReleaseArtifactValidationResult> {
+  const releaseDirectory = resolveReleaseDirectory(platform, assetsRoot);
+  const manifestPath = join(releaseDirectory, releaseManifestFileName);
+
+  if (!existsSync(releaseDirectory)) {
+    throw new Error(`Expected release directory ${releaseDirectory}.`);
+  }
+
+  if (!existsSync(manifestPath)) {
+    throw new Error(`Expected release manifest ${manifestPath}.`);
+  }
+
+  const manifest = readReleaseManifest(manifestPath);
+  const expectedAssetFileName = buildAssetFileName(expectedVersion, platform);
+  const expectedArtifactName = buildArtifactName(expectedVersion, platform);
+
+  if (manifest.platform !== platform) {
+    throw new Error(
+      `Manifest ${manifestPath} declared platform ${manifest.platform} but ${platform} was expected.`
+    );
+  }
+
+  if (manifest.version !== expectedVersion) {
+    throw new Error(
+      `Manifest ${manifestPath} declared version ${manifest.version} but ${expectedVersion} was expected.`
+    );
+  }
+
+  if (manifest.assetFileName !== expectedAssetFileName) {
+    throw new Error(
+      `Manifest ${manifestPath} declared asset file ${manifest.assetFileName} but ${expectedAssetFileName} was expected.`
+    );
+  }
+
+  if (manifest.artifactName !== expectedArtifactName) {
+    throw new Error(
+      `Manifest ${manifestPath} declared artifact name ${manifest.artifactName} but ${expectedArtifactName} was expected.`
+    );
+  }
+
+  const assetPath = join(releaseDirectory, manifest.assetFileName);
+
+  if (!existsSync(assetPath)) {
+    throw new Error(
+      `Expected asset ${assetPath} referenced by ${manifestPath}.`
+    );
+  }
+
+  const computedSha = await hashFile(assetPath);
+  if (computedSha !== manifest.sha256) {
+    throw new Error(
+      `Checksum mismatch for ${assetPath}. Expected ${manifest.sha256}, computed ${computedSha}.`
+    );
+  }
+
+  return {
+    assetPath,
+    manifest: {
+      ...manifest,
+      sha256: computedSha
+    },
+    manifestPath,
+    releaseDirectory
+  };
+}
+
+function isLinuxAppImagePrebuildDirectory(directoryName: string) {
+  return linuxAppImagePrebuildDirectories.has(directoryName);
+}
+
+function collectNativePrebuildDirectories(searchRoot: string) {
+  if (!existsSync(searchRoot)) {
+    return [];
+  }
+
+  const results: string[] = [];
+
+  for (const entry of readdirSync(searchRoot, { withFileTypes: true })) {
+    const entryPath = join(searchRoot, entry.name);
+
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    if (entry.name === 'prebuilds') {
+      results.push(entryPath);
+    }
+
+    results.push(...collectNativePrebuildDirectories(entryPath));
+  }
+
+  return results;
+}
+
+export function pruneLinuxAppImageBackendPrebuilds(
+  backendDirectory = backendDistDir
+) {
+  const removedPaths: string[] = [];
+
+  for (const prebuildDirectory of collectNativePrebuildDirectories(
+    backendDirectory
+  )) {
+    for (const entry of readdirSync(prebuildDirectory, {
+      withFileTypes: true
+    })) {
+      if (
+        !entry.isDirectory() ||
+        isLinuxAppImagePrebuildDirectory(entry.name)
+      ) {
+        continue;
+      }
+
+      const targetPath = join(prebuildDirectory, entry.name);
+      rmSync(targetPath, { force: true, recursive: true });
+      removedPaths.push(targetPath);
+    }
+  }
+
+  return removedPaths;
 }
 
 export async function bundleReleaseArtifact(
@@ -204,10 +373,31 @@ export async function bundleReleaseArtifact(
   const releaseDirectory = resolveReleaseDirectory(platform);
   removeAndRecreateDirectory(releaseDirectory);
 
+  if (platform === 'linux') {
+    const removedDirectories = pruneLinuxAppImageBackendPrebuilds();
+
+    if (removedDirectories.length > 0) {
+      console.log(
+        `Pruned ${removedDirectories.length} non-Linux x64 GNU backend native prebuild directories before Linux AppImage bundling.`
+      );
+
+      for (const removedDirectory of removedDirectories) {
+        console.log(
+          `Pruned backend native prebuild directory: ${relative(
+            backendDistDir,
+            removedDirectory
+          )}`
+        );
+      }
+    }
+  }
+
+  const bundleCommand = buildTauriBundleCommand(platform);
   runSyncCommandOrThrow({
-    args: buildBundleCommandArgs(platform),
-    command: getPnpmCommand(),
+    args: bundleCommand.args,
+    command: bundleCommand.command,
     cwd: workspaceRoot,
+    shell: bundleCommand.shell,
     stdio: 'inherit'
   });
 
