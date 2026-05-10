@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import {
+  existsSync,
   mkdtempSync,
   mkdirSync,
   readFileSync,
@@ -7,7 +8,7 @@ import {
   writeFileSync
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -20,6 +21,7 @@ import {
   buildTauriBundleCommand,
   createChecksumFileContents,
   parseStableReleaseTag,
+  pruneLinuxAppImageBackendPrebuilds,
   readVersionAuthorities,
   resolveReleasePlatform,
   validateReleaseArtifact,
@@ -68,6 +70,27 @@ function createFixtureDirectory() {
 
 function hashContent(content: string) {
   return createHash('sha256').update(content).digest('hex');
+}
+
+function writeBackendPrebuildFixture(
+  backendDirectory: string,
+  packageDirectory: string,
+  prebuildDirectories: string[]
+) {
+  const prebuildsDirectory = join(
+    backendDirectory,
+    'node_modules',
+    packageDirectory,
+    'prebuilds'
+  );
+
+  for (const prebuildDirectory of prebuildDirectories) {
+    const directory = join(prebuildsDirectory, prebuildDirectory);
+    mkdirSync(directory, { recursive: true });
+    writeFileSync(join(directory, 'native.node'), 'native binary fixture');
+  }
+
+  return prebuildsDirectory;
 }
 
 function createReleaseManifest(
@@ -209,6 +232,80 @@ describe('release helper', () => {
       ],
       shell: true
     });
+  });
+
+  it('prunes non-linux-x64 backend native prebuilds before AppImage bundling', () => {
+    const backendDirectory = createFixtureDirectory();
+    const bareFsPrebuildsDirectory = writeBackendPrebuildFixture(
+      backendDirectory,
+      'bare-fs',
+      [
+        'android-x64',
+        'darwin-arm64',
+        'linux-arm64',
+        'linux-x64',
+        'linux-x64-glibc',
+        'linux-x64-gnu',
+        'linux-x64-musl',
+        'win32-x64'
+      ]
+    );
+    const scopedPrebuildsDirectory = writeBackendPrebuildFixture(
+      backendDirectory,
+      join('@scope', 'native-runtime'),
+      ['linux-x64', 'linux-arm64']
+    );
+
+    const removedDirectories = pruneLinuxAppImageBackendPrebuilds(
+      backendDirectory
+    ).map((directory) => relative(backendDirectory, directory));
+
+    expect(existsSync(join(bareFsPrebuildsDirectory, 'linux-x64'))).toBe(true);
+    expect(existsSync(join(bareFsPrebuildsDirectory, 'linux-x64-glibc'))).toBe(
+      true
+    );
+    expect(existsSync(join(bareFsPrebuildsDirectory, 'linux-x64-gnu'))).toBe(
+      true
+    );
+    expect(existsSync(join(scopedPrebuildsDirectory, 'linux-x64'))).toBe(true);
+    expect(existsSync(join(bareFsPrebuildsDirectory, 'android-x64'))).toBe(
+      false
+    );
+    expect(existsSync(join(bareFsPrebuildsDirectory, 'darwin-arm64'))).toBe(
+      false
+    );
+    expect(existsSync(join(bareFsPrebuildsDirectory, 'linux-arm64'))).toBe(
+      false
+    );
+    expect(existsSync(join(bareFsPrebuildsDirectory, 'linux-x64-musl'))).toBe(
+      false
+    );
+    expect(existsSync(join(bareFsPrebuildsDirectory, 'win32-x64'))).toBe(false);
+    expect(existsSync(join(scopedPrebuildsDirectory, 'linux-arm64'))).toBe(
+      false
+    );
+    expect(removedDirectories).toEqual(
+      expect.arrayContaining([
+        join('node_modules', 'bare-fs', 'prebuilds', 'android-x64'),
+        join('node_modules', 'bare-fs', 'prebuilds', 'darwin-arm64'),
+        join('node_modules', 'bare-fs', 'prebuilds', 'linux-arm64'),
+        join('node_modules', 'bare-fs', 'prebuilds', 'linux-x64-musl'),
+        join('node_modules', 'bare-fs', 'prebuilds', 'win32-x64'),
+        join(
+          'node_modules',
+          '@scope',
+          'native-runtime',
+          'prebuilds',
+          'linux-arm64'
+        )
+      ])
+    );
+  });
+
+  it('treats missing backend node_modules as a no-op when pruning prebuilds', () => {
+    expect(
+      pruneLinuxAppImageBackendPrebuilds(createFixtureDirectory())
+    ).toEqual([]);
   });
 
   it('formats checksum files in release order', () => {
