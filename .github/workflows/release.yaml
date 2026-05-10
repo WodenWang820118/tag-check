@@ -239,7 +239,8 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev librsvg2-bin patchelf
+          sudo apt-get install -y libfuse2t64 || sudo apt-get install -y libfuse2
       - name: Setup pnpm
         run: |
           corepack enable
@@ -254,33 +255,7 @@ jobs:
       - name: Build Tauri desktop bundle
         run: pnpm nx run ${{ matrix.nx_target }}
       - name: Validate assembled release artifact
-        run: |
-          node --input-type=module -e "
-          import { existsSync } from 'node:fs';
-          import { join } from 'node:path';
-
-          const platform = process.env.RELEASE_PLATFORM;
-          const assetFileName = process.env.ASSET_FILE_NAME;
-
-          if (!platform || !assetFileName) {
-            throw new Error('RELEASE_PLATFORM and ASSET_FILE_NAME are required.');
-          }
-
-          const releaseDirectory = join(process.cwd(), 'dist', 'release-assets', platform);
-          const manifestPath = join(releaseDirectory, 'release-manifest.json');
-          const assetPath = join(releaseDirectory, assetFileName);
-
-          for (const candidatePath of [releaseDirectory, manifestPath, assetPath]) {
-            if (!existsSync(candidatePath)) {
-              throw new Error(\`Expected \${candidatePath} to exist.\`);
-            }
-          }
-
-          console.log(JSON.stringify({ releaseDirectory, manifestPath, assetPath }, null, 2));
-          "
-        env:
-          ASSET_FILE_NAME: ${{ steps.release_context.outputs.asset_file_name }}
-          RELEASE_PLATFORM: ${{ matrix.platform }}
+        run: node tools/scripts/tauri/release/release.ts validate-artifact --platform ${{ matrix.platform }} --release-tag ${{ needs.prepare-release.outputs.release_tag }}
       - name: Upload Tauri bundle artifact
         uses: actions/upload-artifact@v4
         with:

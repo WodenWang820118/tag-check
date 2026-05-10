@@ -22,6 +22,7 @@ import {
   parseStableReleaseTag,
   readVersionAuthorities,
   resolveReleasePlatform,
+  validateReleaseArtifact,
   type ReleaseManifest
 } from './release.ts';
 
@@ -98,6 +99,7 @@ function writeFixtureArtifact(
   platformDefinition: (typeof fixturePlatformDefinitions)[number],
   options: {
     assetContents?: string;
+    directoryName?: string;
     invalidManifestContents?: string;
     manifestOverrides?: Partial<ReleaseManifest>;
     skipAsset?: boolean;
@@ -107,7 +109,10 @@ function writeFixtureArtifact(
     fixtureVersion,
     platformDefinition.platform
   );
-  const artifactDirectory = join(artifactsRoot, artifactName);
+  const artifactDirectory = join(
+    artifactsRoot,
+    options.directoryName ?? artifactName
+  );
   const assetContents =
     options.assetContents ?? `${platformDefinition.content}\n`;
   const manifest = createReleaseManifest(
@@ -257,6 +262,133 @@ describe('release helper', () => {
     expect(assertVersionAuthoritiesInSync(fixtureVersion)).toBe(fixtureVersion);
   });
 
+  it('validates a platform release artifact produced by the bundle step', async () => {
+    const artifactsRoot = createFixtureDirectory();
+    const platformDefinition = fixturePlatformDefinitions[0];
+    const fixture = writeFixtureArtifact(artifactsRoot, platformDefinition, {
+      directoryName: platformDefinition.platform
+    });
+
+    const result = await validateReleaseArtifact(
+      platformDefinition.platform,
+      fixtureVersion,
+      artifactsRoot
+    );
+
+    expect(result.assetPath).toBe(fixture.assetPath);
+    expect(result.manifestPath).toBe(fixture.manifestPath);
+    expect(result.releaseDirectory).toBe(fixture.artifactDirectory);
+    expect(result.manifest).toEqual(fixture.manifest);
+  });
+
+  it('fails platform release validation when the manifest asset name is wrong', async () => {
+    const artifactsRoot = createFixtureDirectory();
+    const platformDefinition = fixturePlatformDefinitions[2];
+
+    writeFixtureArtifact(artifactsRoot, platformDefinition, {
+      directoryName: platformDefinition.platform,
+      manifestOverrides: {
+        assetFileName: 'wrong-linux-artifact.AppImage'
+      }
+    });
+
+    await expect(
+      validateReleaseArtifact(
+        platformDefinition.platform,
+        fixtureVersion,
+        artifactsRoot
+      )
+    ).rejects.toThrow(/declared asset file wrong-linux-artifact\.AppImage/u);
+  });
+
+  it('fails platform release validation when the asset is missing', async () => {
+    const artifactsRoot = createFixtureDirectory();
+    const platformDefinition = fixturePlatformDefinitions[1];
+
+    writeFixtureArtifact(artifactsRoot, platformDefinition, {
+      directoryName: platformDefinition.platform,
+      skipAsset: true
+    });
+
+    await expect(
+      validateReleaseArtifact(
+        platformDefinition.platform,
+        fixtureVersion,
+        artifactsRoot
+      )
+    ).rejects.toThrow(
+      /Expected asset .* referenced by .*release-manifest\.json/u
+    );
+  });
+
+  it('fails platform release validation when the release directory is missing', async () => {
+    const artifactsRoot = createFixtureDirectory();
+    const platformDefinition = fixturePlatformDefinitions[0];
+
+    await expect(
+      validateReleaseArtifact(
+        platformDefinition.platform,
+        fixtureVersion,
+        artifactsRoot
+      )
+    ).rejects.toThrow(/Expected .*windows.* to exist/u);
+  });
+
+  it('fails platform release validation when the manifest is missing', async () => {
+    const artifactsRoot = createFixtureDirectory();
+    const platformDefinition = fixturePlatformDefinitions[2];
+
+    mkdirSync(join(artifactsRoot, platformDefinition.platform), {
+      recursive: true
+    });
+
+    await expect(
+      validateReleaseArtifact(
+        platformDefinition.platform,
+        fixtureVersion,
+        artifactsRoot
+      )
+    ).rejects.toThrow(/Expected .*release-manifest\.json.* to exist/u);
+  });
+
+  it('fails platform release validation when the manifest is malformed JSON', async () => {
+    const artifactsRoot = createFixtureDirectory();
+    const platformDefinition = fixturePlatformDefinitions[0];
+
+    writeFixtureArtifact(artifactsRoot, platformDefinition, {
+      directoryName: platformDefinition.platform,
+      invalidManifestContents: '{"artifactName":'
+    });
+
+    await expect(
+      validateReleaseArtifact(
+        platformDefinition.platform,
+        fixtureVersion,
+        artifactsRoot
+      )
+    ).rejects.toThrow();
+  });
+
+  it('fails platform release validation when the checksum does not match', async () => {
+    const artifactsRoot = createFixtureDirectory();
+    const platformDefinition = fixturePlatformDefinitions[2];
+
+    writeFixtureArtifact(artifactsRoot, platformDefinition, {
+      directoryName: platformDefinition.platform,
+      manifestOverrides: {
+        sha256: hashContent('checksum-from-a-different-artifact\n')
+      }
+    });
+
+    await expect(
+      validateReleaseArtifact(
+        platformDefinition.platform,
+        fixtureVersion,
+        artifactsRoot
+      )
+    ).rejects.toThrow(/Checksum mismatch/u);
+  });
+
   it('assembles validated release assets from downloaded artifacts', async () => {
     const artifactsRoot = createFixtureDirectory();
     const outputDirectory = createFixtureDirectory();
@@ -372,6 +504,24 @@ describe('release helper', () => {
     expect(workflow).toContain('nx_target: desktop-tauri:bundle-windows');
     expect(workflow).toContain('nx_target: desktop-tauri:bundle-macos');
     expect(workflow).toContain('nx_target: desktop-tauri:bundle-linux');
+    expect(workflow).toContain('librsvg2-bin');
+    expect(workflow).toContain(
+      'sudo apt-get install -y libfuse2t64 || sudo apt-get install -y libfuse2'
+    );
+    expect(workflow).toContain(
+      'node tools/scripts/tauri/release/release.ts validate-artifact --platform ${{ matrix.platform }} --release-tag ${{ needs.prepare-release.outputs.release_tag }}'
+    );
+    expect(workflow).toMatch(
+      /- name: Validate assembled release artifact\r?\n\s+run: node tools\/scripts\/tauri\/release\/release\.ts validate-artifact --platform \$\{\{ matrix\.platform \}\} --release-tag \$\{\{ needs\.prepare-release\.outputs\.release_tag \}\}/u
+    );
+    expect(workflow).not.toMatch(
+      /- name: Validate assembled release artifact\r?\n\s+run: \|\r?\n\s+node --input-type=module -e/u
+    );
+    expect(workflow).not.toContain('ASSET_FILE_NAME:');
+    expect(workflow).not.toContain('RELEASE_PLATFORM:');
+    expect(workflow).not.toContain(
+      'const assetFileName = process.env.ASSET_FILE_NAME;'
+    );
     expect(workflow).toMatch(
       /publish-release:\s+needs:\s+- prepare-release\s+- build-desktop/su
     );
