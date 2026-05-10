@@ -187,7 +187,8 @@ describe('release helper', () => {
         'apps/desktop-tauri/src-tauri/tauri.conf.json',
         '--bundles',
         'appimage',
-        '--ci'
+        '--ci',
+        '--verbose'
       ],
       shell: false
     });
@@ -504,10 +505,16 @@ describe('release helper', () => {
     expect(workflow).toContain('nx_target: desktop-tauri:bundle-windows');
     expect(workflow).toContain('nx_target: desktop-tauri:bundle-macos');
     expect(workflow).toContain('nx_target: desktop-tauri:bundle-linux');
+    expect(workflow).toContain('desktop-file-utils');
+    expect(workflow).toContain('squashfs-tools');
     expect(workflow).toContain('librsvg2-bin');
     expect(workflow).toContain(
       'sudo apt-get install -y libfuse2t64 || sudo apt-get install -y libfuse2'
     );
+    expect(workflow).toContain('command -v desktop-file-validate');
+    expect(workflow).toContain('command -v file');
+    expect(workflow).toContain('command -v mksquashfs');
+    expect(workflow).toContain('command -v patchelf');
     expect(workflow).toContain(
       'node tools/scripts/tauri/release/release.ts validate-artifact --platform ${{ matrix.platform }} --release-tag ${{ needs.prepare-release.outputs.release_tag }}'
     );

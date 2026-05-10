@@ -281,19 +281,24 @@ export function buildTauriBundleCommand(
   hostPlatform: NodeJS.Platform = process.platform
 ): TauriBundleCommand {
   const pnpmCommand = getShellSafePackageManagerCommand('pnpm', hostPlatform);
+  const args = [
+    'exec',
+    'tauri',
+    'build',
+    '--config',
+    tauriConfigRelativePath,
+    '--bundles',
+    releaseArtifactDefinitions[platform].bundleTarget,
+    '--ci'
+  ];
+
+  if (platform === 'linux') {
+    args.push('--verbose');
+  }
 
   return {
     command: pnpmCommand.command,
-    args: [
-      'exec',
-      'tauri',
-      'build',
-      '--config',
-      tauriConfigRelativePath,
-      '--bundles',
-      releaseArtifactDefinitions[platform].bundleTarget,
-      '--ci'
-    ],
+    args,
     shell: pnpmCommand.shell
   };
 }
