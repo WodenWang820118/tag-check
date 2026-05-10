@@ -349,8 +349,18 @@ describe('release helper', () => {
     expect(workflow).toContain(
       'Release already exists for ${existing.tag}; skipping duplicate draft creation.'
     );
+    expect(workflow).toContain('let effectiveCheckoutRef = checkoutRef;');
     expect(workflow).toContain(
-      'Existing tag ${tag} points to ${sha}, expected ${checkoutRef}.'
+      "core.setOutput('checkout_ref', effectiveCheckoutRef);"
+    );
+    expect(workflow).toContain(
+      'Reusing existing ${releaseTag} at ${canonicalTagSha}.'
+    );
+    expect(workflow).toContain(
+      'Created canonical tag ${releaseTag} from legacy tag ${legacyTag} at ${legacyTagSha}.'
+    );
+    expect(workflow).toContain(
+      'Legacy tag ${legacyTag} already exists at ${legacyTagSha}.'
     );
     expect(workflow).toContain('ref: `refs/tags/${releaseTag}`');
     expect(workflow).toContain('Validate checksum manifest');
