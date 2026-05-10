@@ -14,6 +14,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: desktop-release
+  cancel-in-progress: false
+
 jobs:
   prepare-release:
     runs-on: ubuntu-latest
@@ -105,7 +109,8 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const legacyTag = releaseVersion;
-            let effectiveCheckoutRef = checkoutRef;
+            const tagRefPath = (tag) => `tags/${tag}`;
+            const fullTagRef = (tag) => `refs/${tagRefPath(tag)}`;
 
             const getReleaseByTag = async (tag) => {
               try {
@@ -128,7 +133,7 @@ jobs:
                 const response = await github.rest.git.getRef({
                   owner,
                   repo,
-                  ref: `tags/${tag}`
+                  ref: tagRefPath(tag)
                 });
 
                 if (response.data.object.type === 'tag') {
@@ -168,36 +173,36 @@ jobs:
             const canonicalTagSha = await getTagSha(releaseTag);
             const legacyTagSha = await getTagSha(legacyTag);
 
-            if (canonicalTagSha) {
-              effectiveCheckoutRef = canonicalTagSha;
-              core.notice(`Reusing existing ${releaseTag} at ${canonicalTagSha}.`);
-            } else if (legacyTagSha) {
-              effectiveCheckoutRef = legacyTagSha;
-              await github.rest.git.createRef({
+            if (canonicalTagSha === checkoutRef) {
+              core.notice(`Reusing existing ${releaseTag} at ${checkoutRef}.`);
+            } else if (canonicalTagSha) {
+              await github.rest.git.updateRef({
                 owner,
                 repo,
-                ref: `refs/tags/${releaseTag}`,
-                sha: legacyTagSha
+                ref: tagRefPath(releaseTag),
+                sha: checkoutRef,
+                force: true
               });
-              core.notice(
-                `Created canonical tag ${releaseTag} from legacy tag ${legacyTag} at ${legacyTagSha}.`
+              core.warning(
+                `Updated unreleased tag ${releaseTag} from ${canonicalTagSha} to ${checkoutRef} so the draft release builds the workflow trigger commit. If you fetched the old tag locally, run git fetch --tags --force.`
               );
             } else {
               await github.rest.git.createRef({
                 owner,
                 repo,
-                ref: `refs/tags/${releaseTag}`,
+                ref: fullTagRef(releaseTag),
                 sha: checkoutRef
               });
-              effectiveCheckoutRef = checkoutRef;
-              core.notice(`Created ${releaseTag} at ${checkoutRef}.`);
+              core.notice(`Created canonical tag ${releaseTag} at ${checkoutRef}.`);
             }
 
             if (legacyTagSha) {
-              core.notice(`Legacy tag ${legacyTag} already exists at ${legacyTagSha}.`);
+              core.notice(
+                `Legacy tag ${legacyTag} already exists at ${legacyTagSha}; leaving it unchanged.`
+              );
             }
 
-            core.setOutput('checkout_ref', effectiveCheckoutRef);
+            core.setOutput('checkout_ref', checkoutRef);
             core.setOutput('should_release', 'true');
             core.setOutput('skip_reason', '');
       - name: Report skipped release
