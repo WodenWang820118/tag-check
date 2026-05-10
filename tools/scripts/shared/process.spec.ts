@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   encodePowerShellCommand,
   getPnpmCommand,
+  getShellSafePackageManagerCommand,
   quoteWindowsArg,
   sanitizeEnv
 } from './process.ts';
@@ -10,6 +11,26 @@ describe('getPnpmCommand', () => {
   it('returns either pnpm or pnpm.cmd depending on platform', () => {
     const expected = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
     expect(getPnpmCommand()).toBe(expected);
+  });
+});
+
+describe('getShellSafePackageManagerCommand', () => {
+  it('runs package managers directly on POSIX hosts', () => {
+    expect(getShellSafePackageManagerCommand('npm', 'linux')).toEqual({
+      command: 'npm',
+      shell: false
+    });
+    expect(getShellSafePackageManagerCommand('pnpm', 'darwin')).toEqual({
+      command: 'pnpm',
+      shell: false
+    });
+  });
+
+  it('uses the Windows shell so package manager command shims resolve safely', () => {
+    expect(getShellSafePackageManagerCommand('pnpm', 'win32')).toEqual({
+      command: 'pnpm',
+      shell: true
+    });
   });
 });
 

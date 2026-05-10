@@ -69,6 +69,31 @@ describe('process-utils', () => {
     );
   });
 
+  it('forwards shell mode when running commands', async () => {
+    const spawnSync = vi.fn(() => ({
+      error: undefined,
+      status: 0
+    }));
+
+    vi.doMock('node:child_process', () => ({
+      spawnSync
+    }));
+
+    const { run } = await import('./process-utils.ts');
+
+    run('pnpm', ['exec', 'tauri'], 'workspace-root', true);
+
+    expect(spawnSync).toHaveBeenCalledWith(
+      'pnpm',
+      ['exec', 'tauri'],
+      expect.objectContaining({
+        cwd: 'workspace-root',
+        shell: true,
+        stdio: 'inherit'
+      })
+    );
+  });
+
   it('throws a command failure error when the process exits non-zero', async () => {
     const spawnSync = vi.fn(() => ({
       error: undefined,
@@ -129,6 +154,30 @@ describe('process-utils', () => {
     );
   });
 
+  it('forwards shell mode when best-effort probing commands', async () => {
+    const spawnSync = vi.fn(() => ({
+      error: undefined,
+      status: 0
+    }));
+
+    vi.doMock('node:child_process', () => ({
+      spawnSync
+    }));
+
+    const { tryRun } = await import('./process-utils.ts');
+
+    expect(tryRun('npm', ['install'], 'workspace-root', true)).toBe(true);
+    expect(spawnSync).toHaveBeenCalledWith(
+      'npm',
+      ['install'],
+      expect.objectContaining({
+        cwd: 'workspace-root',
+        shell: true,
+        stdio: 'inherit'
+      })
+    );
+  });
+
   it('returns true from tryRun when the process exits cleanly', async () => {
     const spawnSync = vi.fn(() => ({
       error: undefined,
@@ -180,6 +229,31 @@ describe('process-utils', () => {
       expect.objectContaining({
         cwd: 'workspace-root',
         shell: false,
+        stdio: 'ignore'
+      })
+    );
+  });
+
+  it('forwards shell mode when running best-effort commands', async () => {
+    const spawnSync = vi.fn(() => ({
+      error: undefined,
+      status: 0
+    }));
+
+    vi.doMock('node:child_process', () => ({
+      spawnSync
+    }));
+
+    const { runBestEffort } = await import('./process-utils.ts');
+
+    runBestEffort('pnpm', ['prune'], 'workspace-root', true);
+
+    expect(spawnSync).toHaveBeenCalledWith(
+      'pnpm',
+      ['prune'],
+      expect.objectContaining({
+        cwd: 'workspace-root',
+        shell: true,
         stdio: 'ignore'
       })
     );

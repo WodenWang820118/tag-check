@@ -1,4 +1,4 @@
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 
 import { resolveWorkspaceRootFromModuleUrl } from '../../shared/paths.ts';
 
@@ -22,14 +22,4 @@ export const backendDistDir = join(
 
 export function resolveNxEntrypoint(rootDir = workspaceRoot) {
   return join(rootDir, 'node_modules', 'nx', 'bin', 'nx.js');
-}
-
-export function resolveNpmEntrypoint(nodeExecPath = process.execPath) {
-  return join(
-    dirname(nodeExecPath),
-    'node_modules',
-    'npm',
-    'bin',
-    'npm-cli.js'
-  );
 }

@@ -17,6 +17,7 @@ import {
   buildStableReleaseTag,
   buildArtifactName,
   buildAssetFileName,
+  buildTauriBundleCommand,
   createChecksumFileContents,
   parseStableReleaseTag,
   readVersionAuthorities,
@@ -168,6 +169,40 @@ describe('release helper', () => {
     expect(resolveReleasePlatform(undefined, 'win32')).toBe('windows');
     expect(resolveReleasePlatform(undefined, 'darwin')).toBe('macos');
     expect(resolveReleasePlatform(undefined, 'linux')).toBe('linux');
+  });
+
+  it('builds a POSIX-safe Tauri bundle command', () => {
+    expect(buildTauriBundleCommand('linux', 'linux')).toEqual({
+      command: 'pnpm',
+      args: [
+        'exec',
+        'tauri',
+        'build',
+        '--config',
+        'apps/desktop-tauri/src-tauri/tauri.conf.json',
+        '--bundles',
+        'appimage',
+        '--ci'
+      ],
+      shell: false
+    });
+  });
+
+  it('builds a Windows shell-safe Tauri bundle command', () => {
+    expect(buildTauriBundleCommand('windows', 'win32')).toEqual({
+      command: 'pnpm',
+      args: [
+        'exec',
+        'tauri',
+        'build',
+        '--config',
+        'apps/desktop-tauri/src-tauri/tauri.conf.json',
+        '--bundles',
+        'nsis',
+        '--ci'
+      ],
+      shell: true
+    });
   });
 
   it('formats checksum files in release order', () => {

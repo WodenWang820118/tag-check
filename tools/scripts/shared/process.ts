@@ -27,6 +27,11 @@ export type SyncCommandRunner = (
   input: SyncCommandRunnerInput
 ) => CommandResult;
 
+export interface ShellSafeCommand {
+  command: string;
+  shell: boolean;
+}
+
 export function runSyncCommand(input: SyncCommandRunnerInput): CommandResult {
   const result = spawnSync(input.command, input.args, {
     cwd: input.cwd,
@@ -69,6 +74,16 @@ export function runBestEffortSyncCommand(input: SyncCommandRunnerInput): void {
 
 export function getPnpmCommand(): string {
   return process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
+}
+
+export function getShellSafePackageManagerCommand(
+  command: 'npm' | 'pnpm',
+  platform: NodeJS.Platform = process.platform
+): ShellSafeCommand {
+  return {
+    command,
+    shell: platform === 'win32'
+  };
 }
 
 export function sanitizeEnv(

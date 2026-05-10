@@ -206,8 +206,8 @@ describe('prepareBackendRuntime', () => {
 
     expect(removedPaths).toEqual([nodeModulesPath]);
     expect(tryRunCalls).toHaveLength(1);
-    expect(tryRunCalls[0]?.args[1]).toBe('install');
-    expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
+    expect(tryRunCalls[0]?.args[0]).toBe('install');
+    expect(tryRunCalls[0]?.args.slice(1)).toEqual(npmRuntimeFlags);
     expect(writtenFiles).toHaveLength(1);
     expect(writtenFiles[0]?.path).toBe(stampPath);
   });
@@ -253,8 +253,8 @@ describe('prepareBackendRuntime', () => {
     });
 
     expect(tryRunCalls).toHaveLength(1);
-    expect(tryRunCalls[0]?.args[1]).toBe('install');
-    expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
+    expect(tryRunCalls[0]?.args[0]).toBe('install');
+    expect(tryRunCalls[0]?.args.slice(1)).toEqual(npmRuntimeFlags);
     expect(writtenFiles).toHaveLength(1);
     expect(writtenFiles[0]?.path).toBe(stampPath);
     expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
@@ -352,8 +352,8 @@ describe('prepareBackendRuntime', () => {
 
       expect(tryRunCalls).toHaveLength(1);
       expect(tryRunCalls[0]?.cwd).toBe(backendDir);
-      expect(tryRunCalls[0]?.args[1]).toBe('install');
-      expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
+      expect(tryRunCalls[0]?.args[0]).toBe('install');
+      expect(tryRunCalls[0]?.args.slice(1)).toEqual(npmRuntimeFlags);
       expect(writtenFiles).toHaveLength(1);
       expect(writtenFiles[0]?.path).toBe(stampPath);
       expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
@@ -410,8 +410,8 @@ describe('prepareBackendRuntime', () => {
 
     expect(tryRunCalls).toHaveLength(1);
     expect(tryRunCalls[0]?.cwd).toBe(backendDir);
-    expect(tryRunCalls[0]?.args[1]).toBe('ci');
-    expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
+    expect(tryRunCalls[0]?.args[0]).toBe('ci');
+    expect(tryRunCalls[0]?.args.slice(1)).toEqual(npmRuntimeFlags);
     expect(writtenFiles).toHaveLength(1);
     expect(writtenFiles[0]?.path).toBe(stampPath);
   });
@@ -466,12 +466,11 @@ describe('prepareBackendRuntime', () => {
     );
     expect(tryRunCalls).toHaveLength(1);
     expect(tryRunCalls[0]).toMatchObject({
-      command: process.execPath,
+      command: 'npm',
       cwd: backendDir
     });
-    expect(tryRunCalls[0]?.args[0]).toContain('npm-cli.js');
-    expect(tryRunCalls[0]?.args[1]).toBe('ci');
-    expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
+    expect(tryRunCalls[0]?.args[0]).toBe('ci');
+    expect(tryRunCalls[0]?.args.slice(1)).toEqual(npmRuntimeFlags);
     expect(runCalls).toEqual([]);
     expect(warnings).toEqual([]);
     expect(writtenFiles).toHaveLength(1);
@@ -483,7 +482,7 @@ describe('prepareBackendRuntime', () => {
     );
   });
 
-  it('uses an injected node executable when preparing runtime dependencies', () => {
+  it('uses the npm command when preparing runtime dependencies', () => {
     const backendDir = 'backend-dist-test';
     const packageJsonPath = join(backendDir, 'package.json');
     const tryRunCalls: Array<{
@@ -499,7 +498,6 @@ describe('prepareBackendRuntime', () => {
       existsSyncFn(targetPath) {
         return targetPath === packageJsonPath;
       },
-      nodeExecPath: 'injected-node.exe',
       removePathFn() {
         return undefined;
       },
@@ -520,7 +518,7 @@ describe('prepareBackendRuntime', () => {
 
     expect(tryRunCalls).toHaveLength(1);
     expect(tryRunCalls[0]).toMatchObject({
-      command: 'injected-node.exe',
+      command: 'npm',
       cwd: backendDir
     });
     expect(writtenFiles).toHaveLength(1);
@@ -580,12 +578,11 @@ describe('prepareBackendRuntime', () => {
       expect.arrayContaining([packageJsonPath, packageLockPath])
     );
     expect(tryRunCalls[0]).toMatchObject({
-      command: process.execPath,
+      command: 'npm',
       cwd: backendDir
     });
-    expect(tryRunCalls[0]?.args[0]).toContain('npm-cli.js');
-    expect(tryRunCalls[0]?.args[1]).toBe('ci');
-    expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
+    expect(tryRunCalls[0]?.args[0]).toBe('ci');
+    expect(tryRunCalls[0]?.args.slice(1)).toEqual(npmRuntimeFlags);
     expect(removedPaths).toEqual([
       nodeModulesPath,
       nodeModulesPath,
@@ -593,12 +590,11 @@ describe('prepareBackendRuntime', () => {
     ]);
     expect(runCalls).toHaveLength(1);
     expect(runCalls[0]).toMatchObject({
-      command: process.execPath,
+      command: 'npm',
       cwd: backendDir
     });
-    expect(runCalls[0]?.args[0]).toContain('npm-cli.js');
-    expect(runCalls[0]?.args[1]).toBe('install');
-    expect(runCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
+    expect(runCalls[0]?.args[0]).toBe('install');
+    expect(runCalls[0]?.args.slice(1)).toEqual(npmRuntimeFlags);
     expect(warnings).toEqual([
       `npm ci failed in ${backendDir}. Falling back to npm install to regenerate runtime dependencies.`
     ]);
@@ -663,12 +659,11 @@ describe('prepareBackendRuntime', () => {
     );
     expect(tryRunCalls).toHaveLength(1);
     expect(tryRunCalls[0]).toMatchObject({
-      command: process.execPath,
+      command: 'npm',
       cwd: backendDir
     });
-    expect(tryRunCalls[0]?.args[0]).toContain('npm-cli.js');
-    expect(tryRunCalls[0]?.args[1]).toBe('install');
-    expect(tryRunCalls[0]?.args.slice(2)).toEqual(npmRuntimeFlags);
+    expect(tryRunCalls[0]?.args[0]).toBe('install');
+    expect(tryRunCalls[0]?.args.slice(1)).toEqual(npmRuntimeFlags);
     expect(runCalls).toEqual([]);
     expect(warnings).toEqual([]);
     expect(writtenFiles).toHaveLength(1);
@@ -708,7 +703,7 @@ describe('prepareBackendRuntime', () => {
           return undefined;
         }
       })
-    ).toThrow(`Command failed: ${process.execPath}`);
+    ).toThrow('Command failed: npm install --omit=dev --no-audit --no-fund');
 
     expect(removedPaths).toEqual([join(backendDir, 'node_modules')]);
     expect(runCalls).toEqual([]);
@@ -744,7 +739,7 @@ describe('prepareBackendRuntime', () => {
           warnings.push(message);
         }
       })
-    ).toThrow(`Command failed: ${process.execPath}`);
+    ).toThrow('Command failed: npm install --omit=dev --no-audit --no-fund');
 
     expect(removedPaths).toEqual([
       nodeModulesPath,
