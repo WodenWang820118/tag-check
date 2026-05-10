@@ -12,7 +12,7 @@ import {
   statSync,
   writeFileSync
 } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
+import { basename, dirname, join, relative } from 'node:path';
 
 import archiver from 'archiver';
 
@@ -22,7 +22,10 @@ import {
 } from '../../shared/process.ts';
 import { isDirectEntrypoint } from '../../shared/paths.ts';
 import { getRustTargetTriple } from '../node-sidecar/node-sidecar.ts';
-import { workspaceRoot } from '../path-contract/path-contract.ts';
+import {
+  backendDistDir,
+  workspaceRoot
+} from '../path-contract/path-contract.ts';
 
 export type ReleasePlatform = 'windows' | 'macos' | 'linux';
 
@@ -162,6 +165,11 @@ const releaseManifestFileName = 'release-manifest.json';
 const tauriConfigRelativePath = 'apps/desktop-tauri/src-tauri/tauri.conf.json';
 const checksumFileName = 'SHA256SUMS.txt';
 const releasePlatformOrder: ReleasePlatform[] = ['windows', 'macos', 'linux'];
+const linuxAppImagePrebuildDirectories = new Set([
+  'linux-x64',
+  'linux-x64-glibc',
+  'linux-x64-gnu'
+]);
 
 function readJsonFile<T>(targetPath: string): T {
   return JSON.parse(readFileSync(targetPath, 'utf8')) as T;
@@ -332,6 +340,68 @@ function removeAndRecreateDirectory(targetPath: string) {
 
 function ensureDirectory(targetPath: string) {
   mkdirSync(targetPath, { recursive: true });
+}
+
+function isLinuxAppImagePrebuildDirectory(directoryName: string) {
+  return linuxAppImagePrebuildDirectories.has(directoryName);
+}
+
+function collectNativePrebuildDirectories(searchRoot: string) {
+  if (!existsSync(searchRoot)) {
+    return [];
+  }
+
+  const prebuildDirectories: string[] = [];
+
+  for (const entry of readdirSync(searchRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const entryPath = join(searchRoot, entry.name);
+
+    if (entry.name === 'prebuilds') {
+      prebuildDirectories.push(entryPath);
+      continue;
+    }
+
+    prebuildDirectories.push(...collectNativePrebuildDirectories(entryPath));
+  }
+
+  return prebuildDirectories;
+}
+
+export function pruneLinuxAppImageBackendPrebuilds(
+  backendDirectory = backendDistDir
+) {
+  const nodeModulesDirectory = join(backendDirectory, 'node_modules');
+
+  if (!existsSync(nodeModulesDirectory)) {
+    return [];
+  }
+
+  const removedDirectories: string[] = [];
+
+  for (const prebuildDirectory of collectNativePrebuildDirectories(
+    nodeModulesDirectory
+  )) {
+    for (const entry of readdirSync(prebuildDirectory, {
+      withFileTypes: true
+    })) {
+      if (
+        !entry.isDirectory() ||
+        isLinuxAppImagePrebuildDirectory(entry.name)
+      ) {
+        continue;
+      }
+
+      const entryPath = join(prebuildDirectory, entry.name);
+      rmSync(entryPath, { force: true, recursive: true });
+      removedDirectories.push(entryPath);
+    }
+  }
+
+  return removedDirectories;
 }
 
 function getArgumentValue(flag: string, args: string[]) {
@@ -696,6 +766,25 @@ async function bundleReleaseArtifact(args: string[]) {
 
   const releaseDirectory = resolveReleaseDirectory(platform);
   removeAndRecreateDirectory(releaseDirectory);
+
+  if (platform === 'linux') {
+    const removedPrebuildDirectories = pruneLinuxAppImageBackendPrebuilds();
+
+    if (removedPrebuildDirectories.length > 0) {
+      console.log(
+        `Pruned ${removedPrebuildDirectories.length} non-Linux x64 GNU backend native prebuild directories before Linux AppImage bundling.`
+      );
+      for (const removedDirectory of removedPrebuildDirectories) {
+        console.log(
+          `Pruned backend native prebuild directory: ${relative(
+            backendDistDir,
+            removedDirectory
+          )}`
+        );
+      }
+    }
+  }
+
   const bundleCommand = buildTauriBundleCommand(platform);
 
   runSyncCommandOrThrow({
