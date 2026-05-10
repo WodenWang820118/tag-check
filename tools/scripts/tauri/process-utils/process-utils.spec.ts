@@ -69,31 +69,6 @@ describe('process-utils', () => {
     );
   });
 
-  it('forwards shell mode when running commands', async () => {
-    const spawnSync = vi.fn(() => ({
-      error: undefined,
-      status: 0
-    }));
-
-    vi.doMock('node:child_process', () => ({
-      spawnSync
-    }));
-
-    const { run } = await import('./process-utils.ts');
-
-    run('pnpm', ['exec', 'tauri'], 'workspace-root', true);
-
-    expect(spawnSync).toHaveBeenCalledWith(
-      'pnpm',
-      ['exec', 'tauri'],
-      expect.objectContaining({
-        cwd: 'workspace-root',
-        shell: true,
-        stdio: 'inherit'
-      })
-    );
-  });
-
   it('throws a command failure error when the process exits non-zero', async () => {
     const spawnSync = vi.fn(() => ({
       error: undefined,
@@ -108,6 +83,32 @@ describe('process-utils', () => {
 
     expect(() => run('node.exe', ['task.js'], 'workspace-root')).toThrow(
       'Command failed: node.exe task.js'
+    );
+  });
+
+  it('can run commands through a shell when requested', async () => {
+    const spawnSync = vi.fn(() => ({
+      error: undefined,
+      status: 0
+    }));
+
+    vi.doMock('node:child_process', () => ({
+      spawnSync
+    }));
+
+    const { run } = await import('./process-utils.ts');
+
+    expect(() =>
+      run('pnpm', ['exec', 'tauri'], 'workspace-root', true)
+    ).not.toThrow();
+    expect(spawnSync).toHaveBeenCalledWith(
+      'pnpm exec tauri',
+      [],
+      expect.objectContaining({
+        cwd: 'workspace-root',
+        shell: true,
+        stdio: 'inherit'
+      })
     );
   });
 
@@ -154,30 +155,6 @@ describe('process-utils', () => {
     );
   });
 
-  it('forwards shell mode when best-effort probing commands', async () => {
-    const spawnSync = vi.fn(() => ({
-      error: undefined,
-      status: 0
-    }));
-
-    vi.doMock('node:child_process', () => ({
-      spawnSync
-    }));
-
-    const { tryRun } = await import('./process-utils.ts');
-
-    expect(tryRun('npm', ['install'], 'workspace-root', true)).toBe(true);
-    expect(spawnSync).toHaveBeenCalledWith(
-      'npm',
-      ['install'],
-      expect.objectContaining({
-        cwd: 'workspace-root',
-        shell: true,
-        stdio: 'inherit'
-      })
-    );
-  });
-
   it('returns true from tryRun when the process exits cleanly', async () => {
     const spawnSync = vi.fn(() => ({
       error: undefined,
@@ -191,6 +168,30 @@ describe('process-utils', () => {
     const { tryRun } = await import('./process-utils.ts');
 
     expect(tryRun('node.exe', ['task.js'], 'workspace-root')).toBe(true);
+  });
+
+  it('can try commands through a shell when requested', async () => {
+    const spawnSync = vi.fn(() => ({
+      error: undefined,
+      status: 0
+    }));
+
+    vi.doMock('node:child_process', () => ({
+      spawnSync
+    }));
+
+    const { tryRun } = await import('./process-utils.ts');
+
+    expect(tryRun('npm', ['install'], 'workspace-root', true)).toBe(true);
+    expect(spawnSync).toHaveBeenCalledWith(
+      'npm install',
+      [],
+      expect.objectContaining({
+        cwd: 'workspace-root',
+        shell: true,
+        stdio: 'inherit'
+      })
+    );
   });
 
   it('returns false from tryRun when the process exits non-zero', async () => {
@@ -234,31 +235,6 @@ describe('process-utils', () => {
     );
   });
 
-  it('forwards shell mode when running best-effort commands', async () => {
-    const spawnSync = vi.fn(() => ({
-      error: undefined,
-      status: 0
-    }));
-
-    vi.doMock('node:child_process', () => ({
-      spawnSync
-    }));
-
-    const { runBestEffort } = await import('./process-utils.ts');
-
-    runBestEffort('pnpm', ['prune'], 'workspace-root', true);
-
-    expect(spawnSync).toHaveBeenCalledWith(
-      'pnpm',
-      ['prune'],
-      expect.objectContaining({
-        cwd: 'workspace-root',
-        shell: true,
-        stdio: 'ignore'
-      })
-    );
-  });
-
   it('stays silent when runBestEffort succeeds', async () => {
     const spawnSync = vi.fn(() => ({
       error: undefined,
@@ -274,5 +250,31 @@ describe('process-utils', () => {
     expect(() =>
       runBestEffort('powershell.exe', ['-NoProfile'], 'workspace-root')
     ).not.toThrow();
+  });
+
+  it('can run best-effort commands through a shell when requested', async () => {
+    const spawnSync = vi.fn(() => ({
+      error: undefined,
+      status: 0
+    }));
+
+    vi.doMock('node:child_process', () => ({
+      spawnSync
+    }));
+
+    const { runBestEffort } = await import('./process-utils.ts');
+
+    expect(() =>
+      runBestEffort('npm', ['install'], 'workspace-root', true)
+    ).not.toThrow();
+    expect(spawnSync).toHaveBeenCalledWith(
+      'npm install',
+      [],
+      expect.objectContaining({
+        cwd: 'workspace-root',
+        shell: true,
+        stdio: 'ignore'
+      })
+    );
   });
 });

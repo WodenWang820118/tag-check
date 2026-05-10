@@ -23,25 +23,33 @@ export interface SyncCommandRunnerInput {
   timeoutMs?: number;
 }
 
-export type SyncCommandRunner = (
-  input: SyncCommandRunnerInput
-) => CommandResult;
-
 export interface ShellSafeCommand {
   command: string;
   shell: boolean;
 }
 
+export type SyncCommandRunner = (
+  input: SyncCommandRunnerInput
+) => CommandResult;
+
 export function runSyncCommand(input: SyncCommandRunnerInput): CommandResult {
-  const result = spawnSync(input.command, input.args, {
-    cwd: input.cwd,
-    encoding: 'utf8',
-    env: sanitizeEnv(input.env),
-    input: input.input,
-    shell: input.shell ?? false,
-    stdio: input.stdio ?? ['pipe', 'pipe', 'pipe'],
-    timeout: input.timeoutMs
-  });
+  const shell = input.shell ?? false;
+  const shouldInlineShellArgs = shell && input.args.length > 0;
+  const result = spawnSync(
+    shouldInlineShellArgs
+      ? buildShellCommandLine(input.command, input.args)
+      : input.command,
+    shell ? [] : input.args,
+    {
+      cwd: input.cwd,
+      encoding: 'utf8',
+      env: sanitizeEnv(input.env),
+      input: input.input,
+      shell,
+      stdio: input.stdio ?? ['pipe', 'pipe', 'pipe'],
+      timeout: input.timeoutMs
+    }
+  );
 
   return {
     error: result.error,
@@ -155,6 +163,32 @@ export function quoteWindowsArg(value: string): string {
   }
 
   return `"${value.replace(/"/g, '\\"')}"`;
+}
+
+export function buildShellCommandLine(
+  command: string,
+  args: string[],
+  platform: NodeJS.Platform = process.platform
+): string {
+  return [command, ...args]
+    .map((part) => quoteShellArg(part, platform))
+    .join(' ');
+}
+
+function quoteShellArg(value: string, platform: NodeJS.Platform): string {
+  if (platform === 'win32') {
+    return quoteWindowsArg(value);
+  }
+
+  if (value.length === 0) {
+    return "''";
+  }
+
+  if (/^[A-Za-z0-9_./:=@+-]+$/.test(value)) {
+    return value;
+  }
+
+  return `'${value.replace(/'/g, "'\\''")}'`;
 }
 
 export function encodePowerShellCommand(command: string): string {

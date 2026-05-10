@@ -164,6 +164,7 @@ jobs:
             if (releaseCandidates.length > 0) {
               const existing = releaseCandidates[0];
               const skipReason = `Release already exists for ${existing.tag}; skipping duplicate draft creation.`;
+              core.setOutput('checkout_ref', checkoutRef);
               core.setOutput('should_release', 'false');
               core.setOutput('skip_reason', skipReason);
               core.notice(skipReason);
@@ -183,9 +184,7 @@ jobs:
                 sha: checkoutRef,
                 force: true
               });
-              core.warning(
-                `Updated unreleased tag ${releaseTag} from ${canonicalTagSha} to ${checkoutRef} so the draft release builds the workflow trigger commit. If you fetched the old tag locally, run git fetch --tags --force.`
-              );
+              core.warning(`Moved ${releaseTag} from ${canonicalTagSha} to ${checkoutRef}.`);
             } else {
               await github.rest.git.createRef({
                 owner,
@@ -193,13 +192,11 @@ jobs:
                 ref: fullTagRef(releaseTag),
                 sha: checkoutRef
               });
-              core.notice(`Created canonical tag ${releaseTag} at ${checkoutRef}.`);
+              core.notice(`Created ${releaseTag} at ${checkoutRef}.`);
             }
 
             if (legacyTagSha) {
-              core.notice(
-                `Legacy tag ${legacyTag} already exists at ${legacyTagSha}; leaving it unchanged.`
-              );
+              core.notice(`Legacy tag ${legacyTag} already exists at ${legacyTagSha}; leaving it unchanged.`);
             }
 
             core.setOutput('checkout_ref', checkoutRef);
@@ -218,13 +215,13 @@ jobs:
         include:
           - platform: windows
             runner: windows-latest
-            nx_target: desktop-tauri:bundle-windows
+            release_script: tauri:release:windows
           - platform: macos
             runner: macos-latest
-            nx_target: desktop-tauri:bundle-macos
+            release_script: tauri:release:macos
           - platform: linux
             runner: ubuntu-latest
-            nx_target: desktop-tauri:bundle-linux
+            release_script: tauri:release:linux
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
@@ -270,7 +267,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Build Tauri desktop bundle
-        run: pnpm nx run ${{ matrix.nx_target }}
+        run: pnpm run ${{ matrix.release_script }}
       - name: Validate assembled release artifact
         run: node tools/scripts/tauri/release/release.ts validate-artifact --platform ${{ matrix.platform }} --release-tag ${{ needs.prepare-release.outputs.release_tag }}
       - name: Upload Tauri bundle artifact

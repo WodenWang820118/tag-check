@@ -18,18 +18,9 @@ import {
 } from '../process-utils/process-utils.ts';
 
 export interface BackendRuntimeInstallPlan {
-  fallbackCommand: 'install' | null;
+  fallbackCommand: BackendRuntimeInstallCommand | null;
   removeLockfileBeforeFallback: boolean;
-  primaryCommand: 'ci' | 'install';
-}
-
-export interface BackendRuntimeInstallStamp {
-  arch: string;
-  nodeVersion: string;
-  packageJsonHash: string;
-  packageLockHash: string | null;
-  platform: NodeJS.Platform;
-  version: 1;
+  primaryCommand: BackendRuntimeInstallCommand;
 }
 
 export interface BackendRuntimePackageManagerCommand {
@@ -39,6 +30,15 @@ export interface BackendRuntimePackageManagerCommand {
 }
 
 export type BackendRuntimeInstallCommand = 'ci' | 'install';
+
+export interface BackendRuntimeInstallStamp {
+  arch: string;
+  nodeVersion: string;
+  packageJsonHash: string;
+  packageLockHash: string | null;
+  platform: NodeJS.Platform;
+  version: 1;
+}
 
 export type HashFileFunction = (targetPath: string) => string;
 export type ReadTextFileFunction = (
@@ -97,8 +97,8 @@ export function buildBackendRuntimeNpmCommand(
   const npmCommand = getShellSafePackageManagerCommand('npm', platform);
 
   return {
-    command: npmCommand.command,
     args: [installCommand, '--omit=dev', '--no-audit', '--no-fund'],
+    command: npmCommand.command,
     shell: npmCommand.shell
   };
 }
@@ -305,9 +305,7 @@ export function prepareBackendRuntime(
 
   if (!installPlan.fallbackCommand) {
     throw new Error(
-      `Command failed: ${primaryCommand.command} ${primaryCommand.args.join(
-        ' '
-      )}`
+      `Command failed: ${primaryCommand.command} ${primaryCommand.args.join(' ')}`
     );
   }
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildShellCommandLine,
   encodePowerShellCommand,
   getPnpmCommand,
   getShellSafePackageManagerCommand,
@@ -15,21 +16,25 @@ describe('getPnpmCommand', () => {
 });
 
 describe('getShellSafePackageManagerCommand', () => {
-  it('runs package managers directly on POSIX hosts', () => {
-    expect(getShellSafePackageManagerCommand('npm', 'linux')).toEqual({
-      command: 'npm',
-      shell: false
-    });
-    expect(getShellSafePackageManagerCommand('pnpm', 'darwin')).toEqual({
-      command: 'pnpm',
-      shell: false
-    });
-  });
-
-  it('uses the Windows shell so package manager command shims resolve safely', () => {
+  it('uses shell execution on Windows package manager shims', () => {
     expect(getShellSafePackageManagerCommand('pnpm', 'win32')).toEqual({
       command: 'pnpm',
       shell: true
+    });
+    expect(getShellSafePackageManagerCommand('npm', 'win32')).toEqual({
+      command: 'npm',
+      shell: true
+    });
+  });
+
+  it('keeps direct execution on non-Windows platforms', () => {
+    expect(getShellSafePackageManagerCommand('pnpm', 'linux')).toEqual({
+      command: 'pnpm',
+      shell: false
+    });
+    expect(getShellSafePackageManagerCommand('npm', 'darwin')).toEqual({
+      command: 'npm',
+      shell: false
     });
   });
 });
@@ -73,6 +78,20 @@ describe('quoteWindowsArg', () => {
       expect(quoteWindowsArg(value).endsWith('"')).toBe(true);
     }
   );
+});
+
+describe('buildShellCommandLine', () => {
+  it('quotes Windows command lines before shell execution', () => {
+    expect(
+      buildShellCommandLine('npm', ['install', 'two words', 'a&b'], 'win32')
+    ).toBe('npm install "two words" "a&b"');
+  });
+
+  it('quotes POSIX command lines before shell execution', () => {
+    expect(
+      buildShellCommandLine('pnpm', ['nx', 'run', "tag-check's:build"], 'linux')
+    ).toBe("pnpm nx run 'tag-check'\\''s:build'");
+  });
 });
 
 describe('encodePowerShellCommand', () => {

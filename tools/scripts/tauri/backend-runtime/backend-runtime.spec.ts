@@ -26,18 +26,18 @@ describe('getBackendRuntimeInstallPlan', () => {
 });
 
 describe('buildBackendRuntimeNpmCommand', () => {
-  it('uses npm directly on POSIX hosts', () => {
+  it('builds npm runtime install args without invoking npm through node', () => {
     expect(buildBackendRuntimeNpmCommand('ci', 'linux')).toEqual({
-      command: 'npm',
       args: ['ci', '--omit=dev', '--no-audit', '--no-fund'],
+      command: 'npm',
       shell: false
     });
   });
 
-  it('uses shell mode on Windows so npm command shims resolve safely', () => {
+  it('uses shell execution for Windows npm shims', () => {
     expect(buildBackendRuntimeNpmCommand('install', 'win32')).toEqual({
-      command: 'npm',
       args: ['install', '--omit=dev', '--no-audit', '--no-fund'],
+      command: 'npm',
       shell: true
     });
   });
