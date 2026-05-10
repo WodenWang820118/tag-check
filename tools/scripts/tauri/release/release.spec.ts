@@ -320,6 +320,9 @@ describe('release helper', () => {
     expect(workflow).toContain('    branches:');
     expect(workflow).toContain('      - main');
     expect(workflow).toContain('workflow_dispatch:');
+    expect(workflow).toContain('concurrency:');
+    expect(workflow).toContain('group: desktop-release');
+    expect(workflow).toContain('cancel-in-progress: false');
     expect(workflow).toContain('checkout_ref:');
     expect(workflow).toContain('should_release:');
     expect(workflow).toContain('skip_reason:');
@@ -349,20 +352,29 @@ describe('release helper', () => {
     expect(workflow).toContain(
       'Release already exists for ${existing.tag}; skipping duplicate draft creation.'
     );
-    expect(workflow).toContain('let effectiveCheckoutRef = checkoutRef;');
+    expect(workflow).not.toContain('let effectiveCheckoutRef = checkoutRef;');
+    expect(workflow).toContain("core.setOutput('checkout_ref', checkoutRef);");
+    expect(workflow).toContain('const tagRefPath = (tag) => `tags/${tag}`;');
     expect(workflow).toContain(
-      "core.setOutput('checkout_ref', effectiveCheckoutRef);"
+      'const fullTagRef = (tag) => `refs/${tagRefPath(tag)}`;'
     );
     expect(workflow).toContain(
-      'Reusing existing ${releaseTag} at ${canonicalTagSha}.'
+      'Reusing existing ${releaseTag} at ${checkoutRef}.'
     );
     expect(workflow).toContain(
-      'Created canonical tag ${releaseTag} from legacy tag ${legacyTag} at ${legacyTagSha}.'
+      'Updated unreleased tag ${releaseTag} from ${canonicalTagSha} to ${checkoutRef}'
+    );
+    expect(workflow).toContain('github.rest.git.updateRef({');
+    expect(workflow).toContain('ref: tagRefPath(releaseTag)');
+    expect(workflow).toContain('force: true');
+    expect(workflow).toContain('git fetch --tags --force');
+    expect(workflow).toContain(
+      'Created canonical tag ${releaseTag} at ${checkoutRef}.'
     );
     expect(workflow).toContain(
-      'Legacy tag ${legacyTag} already exists at ${legacyTagSha}.'
+      'Legacy tag ${legacyTag} already exists at ${legacyTagSha}; leaving it unchanged.'
     );
-    expect(workflow).toContain('ref: `refs/tags/${releaseTag}`');
+    expect(workflow).toContain('ref: fullTagRef(releaseTag)');
     expect(workflow).toContain('Validate checksum manifest');
     expect(workflow).toContain('uses: softprops/action-gh-release@v2');
     expect(workflow).toContain('draft: true');
