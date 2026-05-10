@@ -9,11 +9,12 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   assembleReleaseAssets,
   assertVersionAuthoritiesInSync,
+  buildBundleCommandArgs,
   buildStableReleaseTag,
   buildArtifactName,
   buildAssetFileName,
@@ -56,6 +57,11 @@ afterEach(() => {
   for (const directory of temporaryDirectories.splice(0)) {
     rmSync(directory, { force: true, recursive: true });
   }
+  vi.resetModules();
+  vi.clearAllMocks();
+  vi.doUnmock('../../shared/process.ts');
+  vi.doUnmock('../node-sidecar/node-sidecar.ts');
+  vi.doUnmock('./release-contract.ts');
 });
 
 function createFixtureDirectory() {
@@ -139,6 +145,79 @@ function writeFixtureArtifact(
   };
 }
 
+async function loadBundleReleaseTestModule(
+  options: {
+    buildError?: Error;
+    rawBundleContents?: string;
+    rustTargetTriple?: string;
+  } = {}
+) {
+  const rawBundleDirectory = createFixtureDirectory();
+  const releaseAssetsRoot = createFixtureDirectory();
+  const runSyncCommandOrThrow = vi.fn((input: unknown) => {
+    if (options.buildError) {
+      throw options.buildError;
+    }
+
+    mkdirSync(rawBundleDirectory, { recursive: true });
+    writeFileSync(
+      join(rawBundleDirectory, 'tag-check-installer.exe'),
+      options.rawBundleContents ?? 'bundled desktop asset',
+      'utf8'
+    );
+    return input;
+  });
+  const getRustTargetTriple = vi.fn(
+    () => options.rustTargetTriple ?? 'x86_64-pc-windows-msvc'
+  );
+
+  vi.resetModules();
+  vi.doMock('../../shared/process.ts', async () => {
+    const actual = await vi.importActual<
+      typeof import('../../shared/process.ts')
+    >('../../shared/process.ts');
+    return {
+      ...actual,
+      getPnpmCommand: () => 'pnpm.cmd',
+      runSyncCommandOrThrow
+    };
+  });
+  vi.doMock('../node-sidecar/node-sidecar.ts', async () => {
+    const actual = await vi.importActual<
+      typeof import('../node-sidecar/node-sidecar.ts')
+    >('../node-sidecar/node-sidecar.ts');
+    return {
+      ...actual,
+      getRustTargetTriple
+    };
+  });
+  vi.doMock('./release-contract.ts', async () => {
+    const actual = await vi.importActual<
+      typeof import('./release-contract.ts')
+    >('./release-contract.ts');
+    return {
+      ...actual,
+      releaseAssetsRoot,
+      releaseArtifactDefinitions: {
+        ...actual.releaseArtifactDefinitions,
+        windows: {
+          ...actual.releaseArtifactDefinitions.windows,
+          rawBundleDirectory
+        }
+      }
+    };
+  });
+
+  const module = await import('./release-assets.ts');
+
+  return {
+    ...module,
+    rawBundleDirectory,
+    releaseAssetsRoot,
+    runSyncCommandOrThrow
+  };
+}
+
 describe('release helper', () => {
   it('parses only stable release tags', () => {
     expect(parseStableReleaseTag('v2.0.0')).toBe('2.0.0');
@@ -168,6 +247,90 @@ describe('release helper', () => {
     expect(resolveReleasePlatform(undefined, 'win32')).toBe('windows');
     expect(resolveReleasePlatform(undefined, 'darwin')).toBe('macos');
     expect(resolveReleasePlatform(undefined, 'linux')).toBe('linux');
+  });
+
+  it('builds stable tauri bundle commands per platform', () => {
+    expect(buildBundleCommandArgs('windows')).toEqual([
+      'exec',
+      'tauri',
+      'build',
+      '--config',
+      'apps/desktop-tauri/src-tauri/tauri.conf.json',
+      '--bundles',
+      'nsis',
+      '--ci'
+    ]);
+    expect(buildBundleCommandArgs('macos').at(-2)).toBe('app');
+    expect(buildBundleCommandArgs('linux').at(-2)).toBe('appimage');
+  });
+
+  it('bundles windows artifacts with the expected tauri command and manifest', async () => {
+    const { bundleReleaseArtifact, releaseAssetsRoot, runSyncCommandOrThrow } =
+      await loadBundleReleaseTestModule({
+        rawBundleContents: 'bundled windows artifact'
+      });
+
+    const { assetPath, manifest, manifestPath } = await bundleReleaseArtifact(
+      'windows',
+      fixtureVersion
+    );
+
+    expect(runSyncCommandOrThrow).toHaveBeenCalledWith({
+      args: [
+        'exec',
+        'tauri',
+        'build',
+        '--config',
+        'apps/desktop-tauri/src-tauri/tauri.conf.json',
+        '--bundles',
+        'nsis',
+        '--ci'
+      ],
+      command: 'pnpm.cmd',
+      cwd: process.cwd(),
+      stdio: 'inherit'
+    });
+    expect(assetPath).toBe(
+      join(
+        releaseAssetsRoot,
+        'windows',
+        buildAssetFileName(fixtureVersion, 'windows')
+      )
+    );
+    expect(readFileSync(assetPath, 'utf8')).toBe('bundled windows artifact');
+    expect(manifest).toMatchObject({
+      artifactName: buildArtifactName(fixtureVersion, 'windows'),
+      assetFileName: buildAssetFileName(fixtureVersion, 'windows'),
+      bundleTarget: 'nsis',
+      platform: 'windows',
+      rustTargetTriple: 'x86_64-pc-windows-msvc',
+      version: fixtureVersion
+    });
+    expect(readFileSync(manifestPath, 'utf8')).toContain(
+      `"artifactName": "${buildArtifactName(fixtureVersion, 'windows')}"`
+    );
+  });
+
+  it('fails bundling on host mismatch before running the tauri build', async () => {
+    const { bundleReleaseArtifact, runSyncCommandOrThrow } =
+      await loadBundleReleaseTestModule();
+
+    await expect(
+      bundleReleaseArtifact('macos', fixtureVersion)
+    ).rejects.toThrow(/must be built on darwin/u);
+    expect(runSyncCommandOrThrow).not.toHaveBeenCalled();
+  });
+
+  it('propagates tauri build failures from the bundle command', async () => {
+    const { bundleReleaseArtifact, runSyncCommandOrThrow } =
+      await loadBundleReleaseTestModule({
+        buildError: new Error('tauri build failed')
+      });
+
+    await expect(
+      bundleReleaseArtifact('windows', fixtureVersion)
+    ).rejects.toThrow('tauri build failed');
+    expect(runSyncCommandOrThrow).toHaveBeenCalledOnce();
   });
 
   it('formats checksum files in release order', () => {
