@@ -18,7 +18,7 @@ jobs:
   prepare-release:
     runs-on: ubuntu-latest
     outputs:
-      checkout_ref: ${{ steps.release_context.outputs.checkout_ref }}
+      checkout_ref: ${{ steps.release_gate.outputs.checkout_ref }}
       release_tag: ${{ steps.release_context.outputs.release_tag }}
       release_version: ${{ steps.release_context.outputs.release_version }}
       should_release: ${{ steps.release_gate.outputs.should_release }}
@@ -105,6 +105,7 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const legacyTag = releaseVersion;
+            let effectiveCheckoutRef = checkoutRef;
 
             const getReleaseByTag = async (tag) => {
               try {
@@ -167,38 +168,36 @@ jobs:
             const canonicalTagSha = await getTagSha(releaseTag);
             const legacyTagSha = await getTagSha(legacyTag);
 
-            if (canonicalTagSha && canonicalTagSha !== checkoutRef) {
-              const skipReason = `Release tag ${releaseTag} already exists at ${canonicalTagSha}; skipping duplicate release for version ${releaseVersion}.`;
-              core.setOutput('should_release', 'false');
-              core.setOutput('skip_reason', skipReason);
-              core.notice(skipReason);
-              return;
-            }
-
-            if (legacyTagSha && legacyTagSha !== checkoutRef) {
-              const skipReason = `Legacy release tag ${legacyTag} already exists at ${legacyTagSha}; skipping duplicate release for version ${releaseVersion}.`;
-              core.setOutput('should_release', 'false');
-              core.setOutput('skip_reason', skipReason);
-              core.notice(skipReason);
-              return;
-            }
-
-            if (!canonicalTagSha) {
+            if (canonicalTagSha) {
+              effectiveCheckoutRef = canonicalTagSha;
+              core.notice(`Reusing existing ${releaseTag} at ${canonicalTagSha}.`);
+            } else if (legacyTagSha) {
+              effectiveCheckoutRef = legacyTagSha;
+              await github.rest.git.createRef({
+                owner,
+                repo,
+                ref: `refs/tags/${releaseTag}`,
+                sha: legacyTagSha
+              });
+              core.notice(
+                `Created canonical tag ${releaseTag} from legacy tag ${legacyTag} at ${legacyTagSha}.`
+              );
+            } else {
               await github.rest.git.createRef({
                 owner,
                 repo,
                 ref: `refs/tags/${releaseTag}`,
                 sha: checkoutRef
               });
+              effectiveCheckoutRef = checkoutRef;
               core.notice(`Created ${releaseTag} at ${checkoutRef}.`);
-            } else {
-              core.notice(`Reusing existing ${releaseTag} at ${checkoutRef}.`);
             }
 
             if (legacyTagSha) {
-              core.notice(`Legacy tag ${legacyTag} already exists at ${checkoutRef}.`);
+              core.notice(`Legacy tag ${legacyTag} already exists at ${legacyTagSha}.`);
             }
 
+            core.setOutput('checkout_ref', effectiveCheckoutRef);
             core.setOutput('should_release', 'true');
             core.setOutput('skip_reason', '');
       - name: Report skipped release
