@@ -239,8 +239,25 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev librsvg2-bin patchelf
+          sudo apt-get install -y \
+            build-essential \
+            curl \
+            desktop-file-utils \
+            file \
+            libappindicator3-dev \
+            librsvg2-bin \
+            librsvg2-dev \
+            libssl-dev \
+            libwebkit2gtk-4.1-dev \
+            libxdo-dev \
+            patchelf \
+            squashfs-tools \
+            wget
           sudo apt-get install -y libfuse2t64 || sudo apt-get install -y libfuse2
+          command -v desktop-file-validate
+          command -v file
+          command -v mksquashfs
+          command -v patchelf
       - name: Setup pnpm
         run: |
           corepack enable
