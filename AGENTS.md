@@ -14,7 +14,7 @@ Project skills live in `.agents/skills`, reviewer personas live in `.agents/revi
   4. vendored general-purpose skills in `.agents/skills`
 - Treat `.agents/skills` as the canonical skill directory for this repo.
 - Do not recreate `.github/skills` or `.gemini/skills` copies unless a tool proves it cannot read `.agents/skills`.
-- Use `using-agent-skills` to choose the smallest helpful workflow. For non-trivial work, the common path is `product-and-scope-review` when framing is unstable, then `spec-driven-development` -> `planning-and-task-breakdown` -> `incremental-implementation` -> `test-driven-development` -> `qa-verification` -> `code-review-and-quality` -> `release-readiness`, but load only the phases the task actually needs.
+- Use `using-agent-skills` to choose the smallest helpful workflow. For non-trivial work, the common path is `product-and-scope-review` when framing is unstable, then `spec-driven-development` -> `planning-and-task-breakdown` -> `incremental-implementation` -> `refactoring-and-simplification` (conditional; see Phase 3.5) -> `test-driven-development` -> `qa-verification` -> `code-review-and-quality` -> `release-readiness`, but load only the phases the task actually needs.
 - `.agents/skills/authoring-guide.md` defines the repo-local rules for writing or slimming skills.
 - A repo-level pre-implementation gate is enforced through `.github/hooks/review-gate.json`. On a clean worktree, Copilot will deny mutating tool calls until a plan review approval is recorded.
 - `proofshot` is an optional repo-local verification helper for browser-verifiable UI work. It does not replace tests, and it does not participate in the pre-implementation gate.
@@ -97,6 +97,7 @@ The agent must operate in distinct phases, loading context incrementally. A late
 - Use `product-and-scope-review` first when the request is solution-framed, scope is unstable, or the real user outcome still needs to be clarified.
 - For feature work, the usual progression is `spec-driven-development` then `planning-and-task-breakdown`.
 - Every non-trivial spec or implementation plan must record task size, size rationale, minimal verification strategy, and review checkpoint needs.
+- New or revised medium+ feature/spec plans must also record `Refactoring risk: <none|low|medium|high>` and `Preparatory refactor needed?: <yes|no>`. If risk is medium/high, plan a Refactor Checkpoint and verification target. If preparatory refactor is needed, load `refactoring-and-simplification` before feature implementation and keep that refactor behavior-preserving.
 - Large plans must explain why the task can still be reviewed and verified as one coherent diff.
 - Huge plans must include the sub-plan schema from `Task Sizing and Progressive Delivery`, including phase-level verification, review checkpoint needs, commit messages, rollback strategy, and exit criteria.
 - Do not preload `incremental-implementation`, `test-driven-development`, `qa-verification`, or `code-review-and-quality` during planning.
@@ -110,6 +111,22 @@ The agent must operate in distinct phases, loading context incrementally. A late
 - Load specialist skills on demand for the current slice, such as `frontend-ui-engineering`, `api-and-interface-design`, `security-and-hardening`, or repo-specific Nx skills.
 - Load `.agents/stack-conventions.md` only when the task involves Angular, NestJS, or other stack-specific implementation details.
 - Keep checkpoint and release-closeout skills unloaded until the work reaches their checkpoint.
+
+### Phase 3.5: Refactor Checkpoint
+
+- Load `.agents/skills/refactoring-and-simplification/SKILL.md` only after a completed implementation slice is verifiable and has passed its minimal check, or before feature implementation when the approved plan says `Preparatory refactor needed?: yes`.
+- Assess triggers only at slice-completion boundaries, never mid-write. Tiny single-file or mechanical changes skip this checkpoint.
+- Run the checkpoint only when the current change creates or worsens one of these conditions:
+  - large-file pressure: a non-generated source file exceeds 500 lines after the slice and the slice added 50+ net lines to it, or an existing non-generated source file that had at least 50 lines before the slice receives 100+ net new lines
+  - semantic duplication: the current change creates the third concrete copy of the same logic, state transition, validation, mapping, or UI/control pattern
+  - mixed responsibility: a component, store, or service gains a second distinct responsibility because of the current change
+  - hard-to-test logic: current-change logic is embedded in a UI, controller, or integration layer when an existing local pattern would place it in a service, helper, or store
+  - current-change orphan code: a helper function, module, or exported symbol created by the current change is fully unused; incidental unused imports or locals are normal slice cleanup, not a Phase 3.5 trigger
+- Behavior-preserving means existing relevant tests/checks still pass, interface signatures and external contracts are unchanged, data models and persistence behavior are unchanged, and the same minimal verification used before the refactor is rerun after the refactor.
+- If a planned preparatory refactor touches 2 or fewer files and remains behavior-preserving, run planned verification and continue to feature implementation.
+- If a planned preparatory refactor touches 3+ files or otherwise triggers implementation-review rules, run Implementation Review before feature implementation continues. If scope still matches the approved plan, do not run `pnpm review:reset`; after any preparatory-refactor commit, run `pnpm review:status`. If the HEAD-bound approval is no longer valid, reopen the gate with the same approved plan and a continuation summary before feature implementation continues.
+- If preparatory or checkpoint refactor scope materially expands, changes contracts, or crosses security, persistence, process-lifecycle, shell, filesystem, network, or external-integration risk, stop, run `pnpm review:reset`, update the plan, rerun Plan Review, and reopen the pre-implementation gate before further mutation.
+- Record a refactor ledger whenever a refactor is performed. Preferred location order is the existing repo-tracked plan/spec file, the commit message extended description when Phase 4 has not opened and no plan/spec exists, then the implementation review context or final handoff. If the checkpoint is considered but skipped, include a one-line rationale in the implementation review context or final handoff.
 
 ### Phase 4: Test, QA, and Review Checkpoints
 
@@ -142,7 +159,7 @@ If the scripted Copilot Claude path is unavailable in the current environment, p
 3. `Implementation review`: after the first working implementation, self-check, and reviewable verification story are ready, send the change to a second reviewer.
    Default: `pnpm review:implementation` keeps Gemini Flash Preview using the CLI model id `gemini-3-flash-preview` first for normal or sensitive implementation reviews. Its auto router may start with the matching Codex reviewer subagent only when the context contains an explicit small changed-file list, that list exactly matches the repo's current changed-file set, the scope is non-sensitive, and no review or governance surfaces are touched. Otherwise fall back in this order: GitHub Copilot GPT-5 mini, then the matching Codex reviewer subagent. Escalate to GitHub Copilot Claude when blocking findings remain or when the change touches auth, secrets, filesystem, shell execution, network behavior, or public contracts.
 
-For browser-verifiable `tag-check` UI tasks, `proofshot` can be used after implementation and before final sign-off, typically through `qa-verification`, to generate screenshots, session video, and a local proof summary for human review.
+Load `.agents/references/proofshot-targets.md` for repo-specific browser proofshot routing detail.
 
 ### Guardrails
 
@@ -162,8 +179,15 @@ Use the reviewer personas in `.agents/reviewers` as the default second-opinion s
 - Tests, bug fixes, regressions, assertions, and coverage: `test-reviewer.md`
 - Auth, secrets, filesystem, shell, process execution, network, untrusted input, or data exposure: `security-reviewer.md`
 - UI, UX flows, accessibility, copy, empty/loading/error states, and responsive behavior: `ux-reviewer.md`
+- Standard Phase 3.5 refactor review and cross-cutting refactor escalation: `architecture-reviewer.md`
 
 Use more than one reviewer if the task crosses categories.
+
+## Repo-Specific Context
+
+- Load `.agents/references/repo-map.md` when routing work, choosing reviewers, or discovering Nx targets.
+- Load `.agents/references/proofshot-targets.md` only for browser-verifiable proofshot routing.
+- Load `.agents/stack-conventions.md` only for Angular, NestJS, or other stack-specific implementation work.
 
 ## Visual Verification
 
@@ -181,7 +205,7 @@ Expected repo workflow:
 4. `pnpm proofshot:stop`
 5. review local `proofshot-artifacts/` with GitHub Copilot Claude using the dedicated proofshot review prompt
 
-`proofshot` is for browser UI flows in `ng-frontend` by default and may target `ng-tag-build` or `ng-product-doc` via `--project`. Do not route backend-only or desktop-shell-only tasks through it.
+Use `.agents/references/proofshot-targets.md` for repo-specific browser target routing.
 
 ## Tool-Specific Expectations
 
@@ -216,23 +240,6 @@ Expected repo workflow:
 - Use the configured reviewer subagents for plan, implementation, test, and UX/security review checkpoints.
 - Low-risk `implementation` and `pre-merge` auto routing may select Codex first only when the review context includes an explicit small non-sensitive changed-file list that exactly matches the repo's current changed-file set. Plan and test checkpoints remain Copilot-led unless fallback is required.
 - When Copilot CLI or Gemini CLI is not locally usable, the review wrappers should fall back to the matching Codex reviewer subagent instead of silently self-approving.
-
-## Repo Map
-
-- `apps/ng-frontend`: primary Angular frontend
-- `apps/nest-backend`: NestJS backend
-- `apps/ng-tag-build`: Angular tag-building UI
-- `apps/ng-product-doc`: Angular product documentation UI
-- `tag-check` root project: shared workspace config, review tooling, and desktop Tauri packaging/runtime orchestration
-
-Use repo-specific reviewers and skills with that topology in mind.
-
-## Stack Conventions
-
-- For Angular and NestJS implementation work, use `.agents/stack-conventions.md` as the canonical stack-conventions source after reading `AGENTS.md`.
-- Keep bridge files thin. They may point to the canonical conventions file, but they must not duplicate the full conventions body.
-- Angular guidance should reflect the repo's standalone-component, dependency-injection-first, `inject()`, and signal-first patterns.
-- NestJS guidance should reflect the repo's dependency-injection-first architecture plus the `common/`, `controllers/`, `core/`, `features/`, `infrastructure/`, and `shared/` split with thin controllers and service-led orchestration.
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
