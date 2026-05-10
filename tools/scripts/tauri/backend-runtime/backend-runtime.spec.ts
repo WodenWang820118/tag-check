@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { join } from 'node:path';
 import {
+  buildBackendRuntimeNpmCommand,
   buildBackendRuntimeInstallStamp,
   getBackendRuntimeInstallPlan,
   getBackendRuntimeStampPath
@@ -20,6 +21,24 @@ describe('getBackendRuntimeInstallPlan', () => {
       fallbackCommand: null,
       primaryCommand: 'install',
       removeLockfileBeforeFallback: false
+    });
+  });
+});
+
+describe('buildBackendRuntimeNpmCommand', () => {
+  it('uses npm directly on POSIX hosts', () => {
+    expect(buildBackendRuntimeNpmCommand('ci', 'linux')).toEqual({
+      command: 'npm',
+      args: ['ci', '--omit=dev', '--no-audit', '--no-fund'],
+      shell: false
+    });
+  });
+
+  it('uses shell mode on Windows so npm command shims resolve safely', () => {
+    expect(buildBackendRuntimeNpmCommand('install', 'win32')).toEqual({
+      command: 'npm',
+      args: ['install', '--omit=dev', '--no-audit', '--no-fund'],
+      shell: true
     });
   });
 });

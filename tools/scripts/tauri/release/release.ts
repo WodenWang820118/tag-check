@@ -16,7 +16,10 @@ import { basename, dirname, join } from 'node:path';
 
 import archiver from 'archiver';
 
-import { getPnpmCommand, runSyncCommandOrThrow } from '../../shared/process.ts';
+import {
+  getShellSafePackageManagerCommand,
+  runSyncCommandOrThrow
+} from '../../shared/process.ts';
 import { isDirectEntrypoint } from '../../shared/paths.ts';
 import { getRustTargetTriple } from '../node-sidecar/node-sidecar.ts';
 import { workspaceRoot } from '../path-contract/path-contract.ts';
@@ -52,6 +55,12 @@ export interface ReleaseManifest {
   rustTargetTriple: string;
   sha256: string;
   version: string;
+}
+
+export interface TauriBundleCommand {
+  args: string[];
+  command: string;
+  shell: boolean;
 }
 
 export const releaseArtifactDefinitions: Record<
@@ -258,6 +267,28 @@ export function resolveReleasePlatform(
   throw new Error(
     `Unable to infer a release platform for host platform "${hostPlatform}".`
   );
+}
+
+export function buildTauriBundleCommand(
+  platform: ReleasePlatform,
+  hostPlatform: NodeJS.Platform = process.platform
+): TauriBundleCommand {
+  const pnpmCommand = getShellSafePackageManagerCommand('pnpm', hostPlatform);
+
+  return {
+    command: pnpmCommand.command,
+    args: [
+      'exec',
+      'tauri',
+      'build',
+      '--config',
+      tauriConfigRelativePath,
+      '--bundles',
+      releaseArtifactDefinitions[platform].bundleTarget,
+      '--ci'
+    ],
+    shell: pnpmCommand.shell
+  };
 }
 
 export function buildArtifactName(version: string, platform: ReleasePlatform) {
@@ -585,20 +616,13 @@ async function bundleReleaseArtifact(args: string[]) {
 
   const releaseDirectory = resolveReleaseDirectory(platform);
   removeAndRecreateDirectory(releaseDirectory);
+  const bundleCommand = buildTauriBundleCommand(platform);
 
   runSyncCommandOrThrow({
-    args: [
-      'exec',
-      'tauri',
-      'build',
-      '--config',
-      tauriConfigRelativePath,
-      '--bundles',
-      releaseArtifactDefinitions[platform].bundleTarget,
-      '--ci'
-    ],
-    command: getPnpmCommand(),
+    args: bundleCommand.args,
+    command: bundleCommand.command,
     cwd: workspaceRoot,
+    shell: bundleCommand.shell,
     stdio: 'inherit'
   });
 
