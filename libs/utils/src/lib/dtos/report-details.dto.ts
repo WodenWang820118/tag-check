@@ -25,7 +25,7 @@ export class ReportDetailsDto implements OutputValidationResult {
   imageSize!: number;
   updatedAt?: Date;
 
-  constructor(report: Partial<OutputValidationResult>) {
+  constructor(report: Partial<ReportDetailsDto>) {
     Object.assign(this, report);
   }
 }
