@@ -48,13 +48,16 @@ token is intentionally omitted to avoid hidden contracts.
 
 ### Tag Build workspace (primary view)
 
-- Three columns on `$bp-laptop+`:
+- Three columns on `$bp-laptop+` (Tailwind `xl`, ≥ 1280 px):
   - Left/Right editor panels: `flex: 1 1 0; min-width: 0` so they share
     available width.
-  - Center actions: `flex: 0 0 clamp(18rem, 22%, 24rem)`.
-- On `$bp-pad` (768–1279 px): two-row layout — editors share a row at 50/50
-  with `min-width: 0`, actions card spans the full width below.
-- Below `$bp-pad`: single column.
+  - Center actions: `clamp(18rem, 22%, 24rem)`.
+- Below `$bp-laptop` (including 768 px tablet portrait): single
+  stacked column — Input → Actions → Output. Splitting the editors
+  side-by-side at 768 px would give each only ~360 px which is too
+  narrow for JSON content. The actions panel sits between the editors
+  so the logical "source → action → result" flow is consistent across
+  every breakpoint.
 - Outer `<main>` is `max-width: $container-max; margin-inline: auto`.
 
 ### Toolbar / nav
