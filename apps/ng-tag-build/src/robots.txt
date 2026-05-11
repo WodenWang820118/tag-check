@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tag-build.vercel.app/sitemap.xml

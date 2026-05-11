@@ -5,6 +5,26 @@
   "prefix": "app",
   "sourceRoot": "apps/ng-tag-build/src",
   "tags": [],
+  "i18n": {
+    "sourceLocale": {
+      "code": "en-US",
+      "subPath": ""
+    },
+    "locales": {
+      "zh-Hant": {
+        "translation": "apps/ng-tag-build/src/locale/messages.zh-hant.xlf",
+        "subPath": "zh-hant"
+      },
+      "zh-Hans": {
+        "translation": "apps/ng-tag-build/src/locale/messages.zh-hans.xlf",
+        "subPath": "zh-hans"
+      },
+      "ja": {
+        "translation": "apps/ng-tag-build/src/locale/messages.ja.xlf",
+        "subPath": "ja"
+      }
+    }
+  },
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:application",
@@ -13,11 +33,15 @@
         "outputPath": "dist/apps/ng-tag-build",
         "index": "apps/ng-tag-build/src/index.html",
         "browser": "apps/ng-tag-build/src/main.ts",
+        "server": "apps/ng-tag-build/src/main.server.ts",
+        "outputMode": "static",
         "polyfills": ["zone.js", "@angular/localize/init"],
         "tsConfig": "apps/ng-tag-build/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
           "apps/ng-tag-build/src/favicon.ico",
+          "apps/ng-tag-build/src/robots.txt",
+          "apps/ng-tag-build/src/sitemap.xml",
           "apps/ng-tag-build/src/locale",
           "apps/ng-tag-build/src/assets",
           {
@@ -49,7 +73,21 @@
               "maximumError": "4kb"
             }
           ],
+          "localize": true,
+          "i18nMissingTranslation": "error",
           "outputHashing": "all"
+        },
+        "zh-Hant": {
+          "localize": ["zh-Hant"],
+          "i18nMissingTranslation": "error"
+        },
+        "zh-Hans": {
+          "localize": ["zh-Hans"],
+          "i18nMissingTranslation": "error"
+        },
+        "ja": {
+          "localize": ["ja"],
+          "i18nMissingTranslation": "error"
         },
         "development": {
           "optimization": false,
@@ -83,6 +121,12 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"]
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "ng-tag-build:build"
+      }
     }
   }
 }

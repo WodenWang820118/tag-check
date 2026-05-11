@@ -1,5 +1,6 @@
 import { JsonPipe } from '@angular/common';
 import { Component, Inject, LOCALE_ID } from '@angular/core';
+import { getLocaleConfig } from '../../locale/locale-routing';
 
 @Component({
   selector: 'lib-about',
@@ -46,6 +47,7 @@ export class AboutComponent {
   constructor(@Inject(LOCALE_ID) private readonly locale: string) {}
 
   getLocalizedSvgPath(): string {
-    return `assets/i18n/${this.locale}/tag_build_system_${this.locale}.drawio.svg`;
+    const assetSegment = getLocaleConfig(this.locale).assetSegment;
+    return `/assets/i18n/${assetSegment}/tag_build_system_${assetSegment}.drawio.svg`;
   }
 }

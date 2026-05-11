@@ -24,7 +24,7 @@ describe('AboutComponent', () => {
   it('builds a localized SVG path from the active locale', () => {
     const fixture = TestBed.createComponent(AboutComponent);
     expect(fixture.componentInstance.getLocalizedSvgPath()).toBe(
-      'assets/i18n/en/tag_build_system_en.drawio.svg'
+      '/assets/i18n/en/tag_build_system_en.drawio.svg'
     );
   });
 
@@ -36,7 +36,7 @@ describe('AboutComponent', () => {
     });
     const fixture = TestBed.createComponent(AboutComponent);
     expect(fixture.componentInstance.getLocalizedSvgPath()).toBe(
-      'assets/i18n/ja/tag_build_system_ja.drawio.svg'
+      '/assets/i18n/ja/tag_build_system_ja.drawio.svg'
     );
   });
 

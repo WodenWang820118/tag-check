@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://tag-build.vercel.app/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-build.vercel.app/ja/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-build.vercel.app/" />
+  </url>
+  <url>
+    <loc>https://tag-build.vercel.app/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/about" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-build.vercel.app/ja/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-build.vercel.app/about" />
+  </url>
+  <url>
+    <loc>https://tag-build.vercel.app/objectives</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/objectives" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-build.vercel.app/ja/objectives" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-build.vercel.app/objectives" />
+  </url>
+  <url>
+    <loc>https://tag-build.vercel.app/zh-hant/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-build.vercel.app/ja/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-build.vercel.app/" />
+  </url>
+  <url>
+    <loc>https://tag-build.vercel.app/zh-hant/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/about" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-build.vercel.app/ja/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-build.vercel.app/about" />
+  </url>
+  <url>
+    <loc>https://tag-build.vercel.app/zh-hant/objectives</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/objectives" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-build.vercel.app/ja/objectives" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-build.vercel.app/objectives" />
+  </url>
+  <url>
+    <loc>https://tag-build.vercel.app/zh-hans/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-build.vercel.app/ja/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-build.vercel.app/" />
+  </url>
+  <url>
+    <loc>https://tag-build.vercel.app/zh-hans/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/about" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-build.vercel.app/ja/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-build.vercel.app/about" />
+  </url>
+  <url>
+    <loc>https://tag-build.vercel.app/zh-hans/objectives</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/objectives" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-build.vercel.app/ja/objectives" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-build.vercel.app/objectives" />
+  </url>
+  <url>
+    <loc>https://tag-build.vercel.app/ja/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-build.vercel.app/ja/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-build.vercel.app/" />
+  </url>
+  <url>
+    <loc>https://tag-build.vercel.app/ja/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/about" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-build.vercel.app/ja/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-build.vercel.app/about" />
+  </url>
+  <url>
+    <loc>https://tag-build.vercel.app/ja/objectives</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/objectives" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-build.vercel.app/ja/objectives" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-build.vercel.app/objectives" />
+  </url>
+</urlset>

@@ -1,4 +1,4 @@
-import { LOCALE_ID, ApplicationConfig } from '@angular/core';
+import { ApplicationConfig } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import {
   PreloadAllModules,
@@ -10,10 +10,6 @@ import { routes } from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideHttpClient(), // required
-    provideRouter(routes, withPreloading(PreloadAllModules)),
-    {
-      provide: LOCALE_ID,
-      useFactory: () => localStorage.getItem('locale') || 'en'
-    }
+    provideRouter(routes, withPreloading(PreloadAllModules))
   ]
 };

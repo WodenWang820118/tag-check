@@ -12,6 +12,21 @@
     },
     "test": {
       "executor": "@analogjs/vitest-angular:test"
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "production",
+        "^production",
+        {
+          "externalDependencies": ["typescript"]
+        }
+      ],
+      "options": {
+        "cwd": "libs/ui",
+        "command": "node ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.spec.json"
+      }
     }
   }
 }
