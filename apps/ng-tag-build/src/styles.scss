@@ -1,0 +1,24 @@
+/* Tailwind v4 pipeline for ng-tag-build.
+ *
+ * The PostCSS plugin (@tailwindcss/postcss, configured in .postcssrc.json)
+ * scans the project for utility usage and emits utilities at build time.
+ * Without these imports the `md:`/`lg:`/`xl:` classes used in the
+ * libs/ui templates produce no CSS and the layout collapses on tablet
+ * and laptop widths. See docs/specs/ng-tag-build-rwd.md for context.
+ *
+ * `preflight` is intentionally NOT imported because the app already ships
+ * Angular Material's prebuilt indigo-pink theme plus libs/shared-styles,
+ * and a global reset on top of those would visually regress existing
+ * components.
+ */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* Tell Tailwind v4 to scan templates from the workspace, not just this app.
+ * The libs/ui templates own the markup that uses these utilities, and
+ * Tailwind's auto-source-detection roots from the CSS file's directory,
+ * which would otherwise miss libs/ui entirely.
+ */
+@source '../../../libs/ui/src/**/*.{html,ts}';
+@source '../../../apps/ng-tag-build/src/**/*.{html,ts}';
