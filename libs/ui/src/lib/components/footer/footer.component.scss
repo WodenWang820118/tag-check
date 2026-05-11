@@ -5,6 +5,8 @@
   color: $text-light;
 
   &__container {
-    padding: 3rem 10rem;
+    max-width: $container-max;
+    margin-inline: auto;
+    padding: $space-block $space-gutter;
   }
 }

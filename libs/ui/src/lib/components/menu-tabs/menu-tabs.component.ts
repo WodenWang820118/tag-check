@@ -2,6 +2,8 @@ import { Router, RouterModule } from '@angular/router';
 import { Component, input } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ɵ$localize } from '@angular/localize';
 import { NgClass } from '@angular/common';
@@ -15,9 +17,17 @@ interface Link {
 @Component({
   selector: 'lib-menu-tabs',
   standalone: true,
-  imports: [MatTabsModule, MatIconModule, RouterModule, NgClass],
+  imports: [
+    MatTabsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatMenuModule,
+    RouterModule,
+    NgClass
+  ],
   template: `
-    <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+    <!-- Inline tab nav: visible on large viewports (laptop/desktop). -->
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="hidden lg:flex">
       <a
         mat-tab-link
         (click)="activeLink = links[0]; navigateTo(links[0].link)"
@@ -53,9 +63,51 @@ interface Link {
       </a>
     </nav>
     <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
+
+    <!-- Hamburger menu: visible below the laptop breakpoint. -->
+    <button
+      type="button"
+      mat-icon-button
+      class="lg:hidden nav-hamburger"
+      [matMenuTriggerFor]="mobileMenu"
+      aria-label="Open navigation menu"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #mobileMenu="matMenu">
+      @if (!aboutDisabled()) {
+        <a
+          mat-menu-item
+          (click)="activeLink = links[0]; navigateTo(links[0].link)"
+        >
+          <mat-icon>{{ links[0].icon }}</mat-icon>
+          <span>{{ links[0].nameKey }}</span>
+        </a>
+      }
+      @if (!objectivesDisabled()) {
+        <a
+          mat-menu-item
+          (click)="activeLink = links[1]; navigateTo(links[1].link)"
+        >
+          <mat-icon>{{ links[1].icon }}</mat-icon>
+          <span>{{ links[1].nameKey }}</span>
+        </a>
+      }
+      <a
+        mat-menu-item
+        href="https://github.com/WodenWang820118/tag-check"
+        (click)="activeLink = links[2]; navigateTo(links[2].link)"
+      >
+        <mat-icon svgIcon="github"></mat-icon>
+        <span>GitHub</span>
+      </a>
+    </mat-menu>
   `,
   styles: [
     `
+      :host {
+        display: contents;
+      }
       .nav-link-container {
         display: flex !important;
         align-items: center;
@@ -70,6 +122,9 @@ interface Link {
       .nav-text {
         display: flex;
         align-items: center;
+        color: white;
+      }
+      .nav-hamburger {
         color: white;
       }
       .hidden {
