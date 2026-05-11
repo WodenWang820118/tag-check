@@ -24,7 +24,7 @@ export class PageChangeService implements ChangeOperation {
 
       const isSelect = await page.evaluate((selector) => {
         const element = document.querySelector(selector);
-        return element && element.tagName.toLowerCase() === 'select';
+        return element?.tagName.toLowerCase() === 'select';
       }, selector);
 
       if (isSelect) {
@@ -34,7 +34,7 @@ export class PageChangeService implements ChangeOperation {
           page.select(selector, value),
           new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Timeout exceeded')), timeout)
-          ),
+          )
         ]);
       } else {
         this.logger.log('Typing the input element');
@@ -42,7 +42,7 @@ export class PageChangeService implements ChangeOperation {
           page.type(selector, value),
           new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Timeout exceeded')), timeout)
-          ),
+          )
         ]);
       }
 

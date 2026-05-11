@@ -25,9 +25,6 @@ export class FileTableDataSourceModelService {
   readonly isAllSelected = computed(() => {
     const ds = this.computedDataSource();
     const numSelected = this.computedSelection().selected.length;
-    console.log('data source:', ds.data);
-    console.log('selected:', this.computedSelection().selected);
-    console.log('is all selected:', numSelected === ds.data.length);
-    return ds && numSelected === ds.data.length;
+    return numSelected === ds?.data.length;
   });
 }

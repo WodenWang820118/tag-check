@@ -90,7 +90,7 @@ export class XlsxDisplayService {
       } catch (error) {
         this.dialog.open(ErrorDialogComponent, {
           data: {
-            message: `Failed to parse the following spec: ${spec}; ${error}`
+            message: `Failed to parse the following spec: ${JSON.stringify(spec)}; ${error}`
           }
         });
       }

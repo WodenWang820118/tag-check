@@ -4,11 +4,17 @@ import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 
 const verboseTestLogs = process.env['TEST_LOGS'] === '1';
 const isCi = process.env['CI'] === 'true';
-const reporterConfig = verboseTestLogs
-  ? { reporters: ['verbose'] as const }
-  : isCi
-    ? { reporters: ['default'] as const }
-    : { reporters: ['dot'] as const };
+const reporterConfig = resolveReporterConfig();
+
+function resolveReporterConfig() {
+  if (verboseTestLogs) {
+    return { reporters: ['verbose'] as const };
+  }
+  if (isCi) {
+    return { reporters: ['default'] as const };
+  }
+  return { reporters: ['dot'] as const };
+}
 
 export default defineConfig({
   test: {

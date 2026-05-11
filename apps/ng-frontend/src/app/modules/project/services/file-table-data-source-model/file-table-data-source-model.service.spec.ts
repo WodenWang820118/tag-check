@@ -4,10 +4,8 @@ import { FileTableDataSourceModelService } from './file-table-data-source-model.
 
 describe('FileTableDataSourceModelService', () => {
   let svc: FileTableDataSourceModelService;
-  let logSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     TestBed.configureTestingModule({});
     svc = TestBed.inject(FileTableDataSourceModelService);
   });
@@ -33,8 +31,12 @@ describe('FileTableDataSourceModelService', () => {
     expect(svc.isAllSelected()).toBe(true);
   });
 
-  it('logs the selection state on every isAllSelected read', () => {
-    svc.isAllSelected();
-    expect(logSpy).toHaveBeenCalled();
+  it('reports all-selected state without logging', () => {
+    const items = [{ a: 1 }, { a: 2 }] as any[];
+    svc.dataSource.set(new MatTableDataSource(items));
+    const sel = svc.computedSelection();
+    sel.select(...items);
+    svc.selection.set(sel);
+    expect(svc.isAllSelected()).toBe(true);
   });
 });

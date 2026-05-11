@@ -22,7 +22,7 @@ export interface InspectSingleEventOptions {
 @Injectable()
 export class SingleEventInspectionService {
   private readonly logger = new Logger(SingleEventInspectionService.name);
-  // TODO(stage2): Replace singleton abort routing with per-operation session IDs.
+  // NOTE(stage2): Replace singleton abort routing with per-operation session IDs.
   abortController: AbortController | null = null;
 
   constructor(

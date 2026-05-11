@@ -37,14 +37,17 @@ export class FirebaseDestinationUploadService {
             data,
             uploadedAssets
           );
-          const destination = this.toDestination(destinationId, data, uploadedAssets);
+          const destination = this.toDestination(
+            destinationId,
+            data,
+            uploadedAssets
+          );
 
           return from(setDoc(destinationRef, firestoreDocument)).pipe(
             switchMap(() =>
-              this.firestoreDestinationPipelineService.refreshAllDestinationsCache().pipe(
-                map(() => destination)
-              )
-            )
+              this.firestoreDestinationPipelineService.refreshAllDestinationsCache()
+            ),
+            map(() => destination)
           );
         })
       );
@@ -60,12 +63,15 @@ export class FirebaseDestinationUploadService {
     return forkJoin(
       slots.map(([slot, file]) => {
         const fileName = this.buildImageFileName(destinationId, slot, file);
-        return this.firebaseStorageService.uploadImage(file, fileName).pipe(
-          map((uploadedImage) => [slot, uploadedImage] as const)
-        );
+        return this.firebaseStorageService
+          .uploadImage(file, fileName)
+          .pipe(map((uploadedImage) => [slot, uploadedImage] as const));
       })
     ).pipe(
-      map((uploadedAssets) => Object.fromEntries(uploadedAssets) as UploadedDestinationAssets)
+      map(
+        (uploadedAssets) =>
+          Object.fromEntries(uploadedAssets) as UploadedDestinationAssets
+      )
     );
   }
 

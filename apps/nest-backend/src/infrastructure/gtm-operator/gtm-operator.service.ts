@@ -13,7 +13,7 @@ import { RecordingRepositoryService } from '../../core/repository/recording/reco
 @Injectable()
 export class GtmOperatorService {
   private readonly logger = new Logger(GtmOperatorService.name);
-  // TODO(stage2): Replace singleton abort routing with per-operation session IDs.
+  // NOTE(stage2): Replace singleton abort routing with per-operation session IDs.
   abortController: AbortController | null = null;
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,

@@ -1,7 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class LoadingService {
   private readonly loadingState = signal<boolean>(true);
@@ -12,6 +12,6 @@ export class LoadingService {
   }
 
   getLoadingState() {
-    return this.loadingState$;
+    return this.loadingState;
   }
 }

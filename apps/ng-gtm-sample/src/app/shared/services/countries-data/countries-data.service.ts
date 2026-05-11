@@ -79,7 +79,7 @@ export class CountriesDataService {
       title: destination.title,
       smallTitle: destination.smallTitle,
       price: destination.price,
-      video: destination.video,
+      video: destination.video
     };
   }
 
@@ -106,23 +106,14 @@ export class CountriesDataService {
     for (const city of cities) {
       for (const country of countries) {
         if (city.countryCode === country.isoCode) {
-          if (
-            city.latitude === '' ||
-            city.latitude === null ||
-            city.latitude === undefined
-          )
+          if (!city.latitude || !city.longitude) {
             continue;
-          else if (
-            city.longitude === '' ||
-            city.longitude === null ||
-            city.longitude === undefined
-          )
-            continue;
+          }
           const destination: Destination = {
             country: country.name,
             city: city.name,
-            latitude: parseFloat(city.latitude),
-            longitude: parseFloat(city.longitude),
+            latitude: Number.parseFloat(city.latitude),
+            longitude: Number.parseFloat(city.longitude),
             description: '',
             id: uuidv4(),
             image1: '',
@@ -136,7 +127,7 @@ export class CountriesDataService {
             title: `${city.name},`,
             smallTitle: `${country.name}`,
             price: Math.floor(Math.random() * 1000) + 1000,
-            video: '',
+            video: ''
           };
           allDestinations.push(destination);
         }

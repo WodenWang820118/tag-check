@@ -1,6 +1,5 @@
- 
 import { Injectable, OnDestroy } from '@angular/core';
-import { Subject, takeUntil, tap } from 'rxjs';
+import { firstValueFrom, Subject, takeUntil, tap } from 'rxjs';
 import { WebWorkerService } from '../../services/web-worker/web-worker.service';
 import { WorkbookService } from '../workbook/workbook.service';
 import { XlsxDisplayService } from '../xlsx-display/xlsx-display.service';
@@ -20,7 +19,7 @@ export class XlsxProcessService implements OnDestroy {
 
   async loadXlsxFile(file: File) {
     try {
-      const fileData = await this.fileService.loadFile(file);
+      const fileData = await firstValueFrom(this.fileService.loadFile(file));
       this.initializeDataProcessing();
 
       this.webWorkerService.postMessage('message', {

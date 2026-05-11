@@ -42,9 +42,7 @@ export class AuthService {
 
   loginWithGoogle() {
     const provider = new GoogleAuthProvider();
-    return defer(() =>
-      from(signInWithPopup(this.firebaseAuth, provider))
-    ).pipe(
+    return defer(() => from(signInWithPopup(this.firebaseAuth, provider))).pipe(
       map((result) => {
         this.ngZone.run(() => {
           this.user.set(result.user);
@@ -64,7 +62,7 @@ export class AuthService {
   }
 
   getUser() {
-    return this.user$;
+    return this.user;
   }
 
   logout() {

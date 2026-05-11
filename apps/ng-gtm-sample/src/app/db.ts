@@ -37,11 +37,13 @@ export class DataLayerDatabase extends Dexie {
         events.forEach((event) => {
           if (!event.eventName || !event.eventData) return;
           console.log('Syncing ecommerce from IndexedDB', event);
-          (globalThis as any).dataLayer.push({ ecommerce: null }); // Clear the previous ecommerce object (if any
-          (globalThis as any).dataLayer.push({
-            event: event.eventName,
-            ...event.eventData
-          });
+          (globalThis as any).dataLayer.push(
+            { ecommerce: null },
+            {
+              event: event.eventName,
+              ...event.eventData
+            }
+          );
           this.javascriptInterfaceService.logEvent(
             event.eventName,
             event.eventData

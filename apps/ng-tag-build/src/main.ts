@@ -3,8 +3,19 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { registerLocaleData } from '@angular/common';
 import { loadTranslations } from '@angular/localize';
 
+/** Allowed locale values validated against known supported locales. */
+const ALLOWED_LOCALES = new Set(['en', 'zh-hant', 'zh-hans', 'ja']);
+
+function sanitizeLocale(raw: string): string {
+  const normalized = raw.toLowerCase();
+  if (ALLOWED_LOCALES.has(normalized)) {
+    return normalized;
+  }
+  return 'en';
+}
+
 // Read locale from local storage before app initialization
-const appLang = localStorage.getItem('locale') || 'en';
+const appLang = sanitizeLocale(localStorage.getItem('locale') || 'en');
 
 // Init provided language
 initLanguage(appLang)

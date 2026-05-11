@@ -3,16 +3,13 @@ import { AnalyticsEventTracker } from '../../../models/analytics-event-tracker.m
 const promotions: string[] = [];
 
 export class ViewPromotionEventTracker implements AnalyticsEventTracker {
-  item_id: string;
-  constructor(private readonly eventName: string) {
-    this.item_id = '';
-  }
+  item_id = '';
+
+  constructor(private readonly eventName: string) {}
 
   private isPromotionTracked(newPromotion: any): boolean {
     // Assuming that each promotion has a unique 'id' property
-    return promotions.some(
-      (item_id) => item_id === newPromotion.ecommerce.items[0]['item_id']
-    );
+    return promotions.includes(newPromotion.ecommerce.items[0]['item_id']);
   }
 
   getProcessedData(rawEventData: any) {
@@ -27,10 +24,10 @@ export class ViewPromotionEventTracker implements AnalyticsEventTracker {
         items: [
           {
             item_id: rawEventData.id,
-            item_name: rawEventData.title,
-          },
-        ],
-      },
+            item_name: rawEventData.title
+          }
+        ]
+      }
     };
 
     if (!this.isPromotionTracked(event)) {
@@ -38,12 +35,12 @@ export class ViewPromotionEventTracker implements AnalyticsEventTracker {
       promotions.push(this.item_id);
 
       return {
-        eventData: event,
+        eventData: event
       };
     }
 
     return {
-      eventData: '',
+      eventData: ''
     };
   }
 }

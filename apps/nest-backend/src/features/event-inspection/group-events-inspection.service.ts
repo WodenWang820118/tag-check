@@ -9,7 +9,7 @@ import { ConfigsService } from '../../core/configs/configs.service';
 @Injectable()
 export class GroupEventsInspectionService {
   private readonly logger = new Logger(GroupEventsInspectionService.name);
-  // TODO(stage2): Replace singleton abort/browser routing with per-operation session IDs.
+  // NOTE(stage2): Replace singleton abort/browser routing with per-operation session IDs.
   private abortController: AbortController | null = null;
   private currentBrowser: Browser | null = null;
 

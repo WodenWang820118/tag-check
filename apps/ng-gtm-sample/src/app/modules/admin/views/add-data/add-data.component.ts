@@ -1,9 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import {
-  FormBuilder,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { latitudeValidator, longitudeValidator } from './validators';
 import { CountriesDataService } from '../../../../shared/services/countries-data/countries-data.service';
 import { InputTextModule } from 'primeng/inputtext';
@@ -96,9 +92,7 @@ export class AddDataComponent {
     image3AuthorInfo: ['']
   });
 
-  constructor(
-    private countriesDataService: CountriesDataService
-  ) {
+  constructor(private readonly countriesDataService: CountriesDataService) {
     this.countriesDataService.getCountries().subscribe((data: any[]) => {
       this.countries = data.map((country) => ({
         label: country.name.common,
@@ -141,18 +135,15 @@ export class AddDataComponent {
   }
 
   hasMissingFiles() {
-    return this.mediaFields.some((mediaField) => !this.selectedFiles()[mediaField.key]);
+    return this.mediaFields.some(
+      (mediaField) => !this.selectedFiles()[mediaField.key]
+    );
   }
 
   private buildDraft(): CreateDestinationDraft | null {
     const files = this.selectedFiles();
 
-    if (
-      !files.imageBig ||
-      !files.image1 ||
-      !files.image2 ||
-      !files.image3
-    ) {
+    if (!files.imageBig || !files.image1 || !files.image2 || !files.image3) {
       return null;
     }
 

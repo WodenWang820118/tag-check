@@ -24,7 +24,7 @@ export class ImageService {
         }),
         map((response) => {
           return {
-            blob: response.body ? response.body : new Blob()
+            blob: response.body ?? new Blob()
           };
         })
       );

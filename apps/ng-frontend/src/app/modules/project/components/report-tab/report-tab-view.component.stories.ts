@@ -1,5 +1,9 @@
-import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import {
+  applicationConfig,
+  type Meta,
+  type StoryObj
+} from '@storybook/angular';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { fn } from 'storybook/test';
 import { ReportTabViewComponent } from './report-tab-view.component';
 import { ReportTabViewModel } from '../report-detail.contracts';
@@ -30,7 +34,7 @@ const meta: Meta<ReportTabViewComponent> = {
   title: 'Modules/Project/Components/ReportTabViewComponent',
   decorators: [
     applicationConfig({
-      providers: [provideNoopAnimations()]
+      providers: [provideAnimations()]
     })
   ],
   render: (args) => ({
