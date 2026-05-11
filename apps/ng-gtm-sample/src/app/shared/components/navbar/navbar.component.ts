@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../shared/services/auth/auth.service';
-import { AnalyticsService } from '../../../shared/services/analytics/analytics.service';
 import { OrderService } from '../../services/order/order.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { ToolbarModule } from 'primeng/toolbar';

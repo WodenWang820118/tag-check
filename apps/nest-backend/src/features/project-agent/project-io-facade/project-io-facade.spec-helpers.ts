@@ -1,7 +1,13 @@
 import { Test } from '@nestjs/testing';
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { ProjectIoService } from '../../../infrastructure/os/project-io/project-io.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';

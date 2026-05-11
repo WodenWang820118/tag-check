@@ -22,13 +22,13 @@ export class OrderService {
       (o) => o.id === order.id
     );
     const updatedOrders =
-      duplicateOrderIndex !== -1
-        ? currentOrders.map((currentOrder, index) =>
+      duplicateOrderIndex === -1
+        ? [...currentOrders, order]
+        : currentOrders.map((currentOrder, index) =>
             index === duplicateOrderIndex
               ? this.updateOrderQuantity(currentOrder, order.quantity)
               : currentOrder
-          )
-        : [...currentOrders, order];
+          );
 
     this._orders.set(updatedOrders);
     this.storeOrders(updatedOrders);

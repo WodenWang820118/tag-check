@@ -259,9 +259,8 @@ export class PuppeteerUtilsService {
 
       const currentViewport = page.viewport?.();
       const needsResize =
-        !currentViewport ||
-        currentViewport.width !== safeWidth ||
-        currentViewport.height !== safeHeight;
+        currentViewport?.width !== safeWidth ||
+        currentViewport?.height !== safeHeight;
 
       if (!needsResize) return;
 

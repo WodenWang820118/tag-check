@@ -7,12 +7,6 @@ import { fileURLToPath } from 'node:url';
 const baseURL = process.env['BASE_URL'] || 'http://localhost:4202';
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// require('dotenv').config();
-
-/**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({

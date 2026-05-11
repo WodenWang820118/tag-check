@@ -61,7 +61,7 @@ export class FileService {
         projectSlug,
         eventId
       );
-    const regex = new RegExp(`${eventId}.*\\.xlsx$`, 'i');
+    const regex = new RegExp(String.raw`${eventId}.*\.xlsx$`, 'i');
     const files = this.folderService.readFolderFileNames(inspectionResultPath);
 
     const filteredFiles = files.find((file) => regex.test(file));

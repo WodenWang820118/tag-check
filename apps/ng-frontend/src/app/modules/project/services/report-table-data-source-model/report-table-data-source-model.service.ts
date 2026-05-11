@@ -17,6 +17,6 @@ export class ReportTableDataSourceModelService {
   isAllSelected = computed(() => {
     const ds = this.computedDataSource();
     const numSelected = this.computedSelection().selected.length;
-    return ds && numSelected === ds.data.length;
+    return numSelected === ds?.data.length;
   });
 }

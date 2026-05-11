@@ -1,5 +1,12 @@
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
 import {
   ActivatedRoute,
   convertToParamMap,
@@ -55,7 +62,7 @@ function buildFlattenedReportDetails(
 function serializeParamMap(params: ParamMap): string {
   return JSON.stringify(
     [...params.keys]
-      .sort()
+      .sort((a, b) => a.localeCompare(b))
       .map((key) => [key, params.getAll(key)])
   );
 }
@@ -123,7 +130,8 @@ export class DetailViewComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((data) => {
         const spec = data['spec'] as DataLayerSpec;
-        const fileReports = (data['fileReports'] as FrontFileReport[] | null) ?? [];
+        const fileReports =
+          (data['fileReports'] as FrontFileReport[] | null) ?? [];
         const video = data['video'] as { blob: Blob | undefined };
         const image = data['image'] as { blob: Blob | undefined };
         const recording = (data['recording'] as Recording | null) ?? null;

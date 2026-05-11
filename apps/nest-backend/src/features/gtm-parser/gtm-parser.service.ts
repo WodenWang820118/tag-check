@@ -7,7 +7,6 @@ import {
   BuildEventInput
 } from '../project-agent/project-events-builder/project-events-builder.service';
 import {
-  GTMConfiguration,
   TagConfig,
   TriggerConfig,
   getParameterValue,

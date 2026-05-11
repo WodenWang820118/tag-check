@@ -53,7 +53,7 @@ export class TestReportFacadeRepositoryService {
       await this.testEventRepositoryService.getEntityByEventId(eventId);
 
     const testEventDetailCreation =
-      await this.testEventDetailRepositoryService.create(testEventEntity, {
+      this.testEventDetailRepositoryService.create(testEventEntity, {
         passed: false,
         requestPassed: false,
         rawRequest: '',

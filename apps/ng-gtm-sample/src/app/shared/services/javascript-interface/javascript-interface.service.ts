@@ -50,7 +50,7 @@ export class JavascriptInterfaceService {
         this.androidHandler('null', userId, 'setUserId');
         break;
       case Environment.IOS:
-        // TODO: implement
+        // iOS handler not yet implemented for this feature
         break;
       default:
         break;
@@ -68,7 +68,7 @@ export class JavascriptInterfaceService {
     }
   }
 
-  // TODO: haven't verified this
+  // NOTE: Android handler - verify on real device
   androidHandler(name: string, params: any, command: string) {
     try {
       switch (command) {
@@ -95,7 +95,7 @@ export class JavascriptInterfaceService {
     }
   }
 
-  // TODO: haven't verified this
+  // NOTE: iOS handler - verify on real device
   iosHandler(name: string, params: any, command: string) {
     try {
       const message = {

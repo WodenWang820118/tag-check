@@ -1,5 +1,9 @@
-import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import {
+  applicationConfig,
+  type Meta,
+  type StoryObj
+} from '@storybook/angular';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { fn } from 'storybook/test';
 import { EditableJsonPanelState } from '../report-detail.contracts';
 import { ReportDetailPanelsViewComponent } from './report-detail-panels-view.component';
@@ -31,7 +35,7 @@ const meta: Meta<ReportDetailPanelsViewComponent> = {
   title: 'Modules/Project/Components/ReportDetailPanelsViewComponent',
   decorators: [
     applicationConfig({
-      providers: [provideNoopAnimations()]
+      providers: [provideAnimations()]
     })
   ],
   render: (args) => ({
@@ -80,7 +84,11 @@ const meta: Meta<ReportDetailPanelsViewComponent> = {
   args: {
     specPanel: createPanelState('Data Layer Spec'),
     recordingPanel: createPanelState('Chrome Recording', {
-      content: JSON.stringify({ title: 'Purchase recording', steps: [] }, null, 2)
+      content: JSON.stringify(
+        { title: 'Purchase recording', steps: [] },
+        null,
+        2
+      )
     }),
     itemDefPanel: createPanelState('Item Definition', {
       content: JSON.stringify({ item_name: 'Socks', item_id: 'sku-1' }, null, 2)

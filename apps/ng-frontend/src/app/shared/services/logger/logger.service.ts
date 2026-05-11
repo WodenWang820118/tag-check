@@ -16,8 +16,6 @@ export interface LoggerConfig {
   contextMaxLength: number;
 }
 
-type LogMessage = unknown;
-
 @Injectable({
   providedIn: 'root'
 })
@@ -78,7 +76,7 @@ export class LoggerService {
    * @param optionalParams Additional parameters to log
    */
   debug(
-    message: LogMessage,
+    message: unknown,
     context?: string,
     ...optionalParams: unknown[]
   ): void {
@@ -91,11 +89,7 @@ export class LoggerService {
    * @param context Optional context for the log
    * @param optionalParams Additional parameters to log
    */
-  info(
-    message: LogMessage,
-    context?: string,
-    ...optionalParams: unknown[]
-  ): void {
+  info(message: unknown, context?: string, ...optionalParams: unknown[]): void {
     this.logWithLevel(LogLevel.INFO, message, context, optionalParams);
   }
 
@@ -105,11 +99,7 @@ export class LoggerService {
    * @param context Optional context for the log
    * @param optionalParams Additional parameters to log
    */
-  warn(
-    message: LogMessage,
-    context?: string,
-    ...optionalParams: unknown[]
-  ): void {
+  warn(message: unknown, context?: string, ...optionalParams: unknown[]): void {
     this.logWithLevel(LogLevel.WARN, message, context, optionalParams);
   }
 
@@ -120,7 +110,7 @@ export class LoggerService {
    * @param optionalParams Additional parameters to log
    */
   error(
-    message: LogMessage,
+    message: unknown,
     context?: string,
     ...optionalParams: unknown[]
   ): void {
@@ -133,11 +123,7 @@ export class LoggerService {
    * @param context Optional context for the log
    * @param optionalParams Additional parameters to log
    */
-  log(
-    message: LogMessage,
-    context?: string,
-    ...optionalParams: unknown[]
-  ): void {
+  log(message: unknown, context?: string, ...optionalParams: unknown[]): void {
     this.logWithLevel(LogLevel.INFO, message, context, optionalParams);
   }
 
@@ -165,7 +151,7 @@ export class LoggerService {
    */
   private logWithLevel(
     level: LogLevel,
-    message: LogMessage,
+    message: unknown,
     context?: string,
     optionalParams: unknown[] = []
   ): void {
@@ -220,7 +206,7 @@ export class LoggerService {
     }
   }
 
-  private formatMessage(message: LogMessage): string {
+  private formatMessage(message: unknown): string {
     if (message instanceof Error) {
       return message.message;
     }
@@ -236,7 +222,7 @@ export class LoggerService {
     return String(message ?? '');
   }
 
-  private isObjectMessage(message: LogMessage): message is object {
+  private isObjectMessage(message: unknown): message is object {
     return typeof message === 'object' && message !== null;
   }
 

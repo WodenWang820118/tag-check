@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { XlsxProcessService } from './xlsx-process.service';
 import { WebWorkerService } from '../../services/web-worker/web-worker.service';
 import { WorkbookService } from '../workbook/workbook.service';
@@ -73,7 +73,7 @@ describe('XlsxProcessService', () => {
   });
 
   it('loadXlsxFile reads the file, posts readXlsx and stores filename', async () => {
-    file.loadFile.mockResolvedValueOnce('binary');
+    file.loadFile.mockImplementationOnce(() => of('binary'));
     await svc.loadXlsxFile({ name: 'a.xlsx' } as never);
     expect(file.loadFile).toHaveBeenCalled();
     expect(webWorker.postMessage).toHaveBeenCalledWith('message', {
@@ -85,7 +85,7 @@ describe('XlsxProcessService', () => {
 
   it('loadXlsxFile swallows file errors via console.error', async () => {
     const err = new Error('nope');
-    file.loadFile.mockRejectedValueOnce(err);
+    file.loadFile.mockImplementationOnce(() => throwError(() => err));
     const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     await svc.loadXlsxFile({ name: 'b.xlsx' } as never);
     expect(spy).toHaveBeenCalledWith(err);

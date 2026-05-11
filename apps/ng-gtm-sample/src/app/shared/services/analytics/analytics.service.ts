@@ -23,7 +23,9 @@ export class AnalyticsService {
         tap(() => {
           if (this.db) {
             (globalThis as any).dataLayer = (globalThis as any).dataLayer || [];
-            window.addEventListener('online', () => this.syncDataLayerEvents());
+            globalThis.addEventListener('online', () =>
+              this.syncDataLayerEvents()
+            );
           }
         })
       )
@@ -43,10 +45,10 @@ export class AnalyticsService {
 
   saveDataLayerEvent(eventName: string, eventData: any) {
     if (!eventName || !eventData) return of('');
-    if (!window.navigator.onLine) {
+    if (!globalThis.navigator?.onLine) {
       // Save to IndexedDB when offline
       const id = uuidv4();
-      const timestamp = new Date().getTime();
+      const timestamp = Date.now();
       const event: DataLayerEvent = { id, eventName, eventData, timestamp };
       return from(this.db.events.add(event)).pipe(
         tap(() => {
@@ -59,11 +61,13 @@ export class AnalyticsService {
 
       // ecommerce events require a different dataLayer structure
       if (eventData.ecommerce) {
-        (globalThis as any).dataLayer.push({ ecommerce: null }); // Clear the previous ecommerce object (if any
-        (globalThis as any).dataLayer.push({
-          event: eventName,
-          ...eventData
-        });
+        (globalThis as any).dataLayer.push(
+          { ecommerce: null },
+          {
+            event: eventName,
+            ...eventData
+          }
+        );
         this.javascriptInterfaceService.logEvent(eventName, eventData);
         return of('');
       }

@@ -17,7 +17,7 @@ export class VideosService {
       })
       .pipe(
         map((response) => ({
-          blob: response.body ? response.body : new Blob()
+          blob: response.body ?? new Blob()
         })),
         catchError((error) => {
           console.error('Error fetching video:', error);

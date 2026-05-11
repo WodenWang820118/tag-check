@@ -1,4 +1,4 @@
-import { computed, effect, Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { Destination } from '../../models/destination.model';
 import { AnalyticsService } from '../analytics/analytics.service';
 

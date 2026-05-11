@@ -12,7 +12,7 @@ import {
   QueryDocumentSnapshot,
   QuerySnapshot,
   startAfter,
-  where,
+  where
 } from 'firebase/firestore';
 import {
   of,
@@ -23,9 +23,7 @@ import {
   map,
   switchMap,
   Observable,
-  take,
-  combineLatest,
-  catchError,
+  catchError
 } from 'rxjs';
 import { FirebaseStorageService } from '../firebase-storage/firebase-storage.service';
 import { Destination } from '../../models/destination.model';
@@ -84,7 +82,7 @@ export class FirestoreDestinationPipelineService {
     );
   }
 
-  // TODO: cache the data locally
+  // Optimization: consider caching the data locally with IndexedDB
   getFirstDestinationsData(queryLimit = 5) {
     this.currentQueryLimit = queryLimit;
     this.currentQueryBuilder = () => [orderBy('country')];
@@ -119,10 +117,7 @@ export class FirestoreDestinationPipelineService {
     return defer(() =>
       from(
         getDocs(
-          query(
-            collection(this.firestore, 'destinations'),
-            orderBy('country')
-          )
+          query(collection(this.firestore, 'destinations'), orderBy('country'))
         )
       )
     );
@@ -130,11 +125,7 @@ export class FirestoreDestinationPipelineService {
 
   private getFirstDestinations(queryLimit = 5) {
     return defer(() =>
-      from(
-        getDocs(
-          this.buildCurrentQuery(limit(queryLimit))
-        )
-      ).pipe(
+      from(getDocs(this.buildCurrentQuery(limit(queryLimit)))).pipe(
         tap((documentSnapshots) => {
           const firstVisible = documentSnapshots.docs[0] ?? null;
           const lastVisible =
@@ -208,20 +199,7 @@ export class FirestoreDestinationPipelineService {
   }
 
   private getSearchResults(searchQuery: string, queryLimit = 5) {
-    return defer(() =>
-      from(
-        getDocs(this.buildCurrentQuery(limit(queryLimit)))
-      ).pipe(
-        tap((documentSnapshots) => {
-          const firstVisible = documentSnapshots.docs[0] ?? null;
-          const lastVisible =
-            documentSnapshots.docs[documentSnapshots.docs.length - 1] ?? null;
-          this.previousDocsStack = firstVisible ? [firstVisible] : [];
-          this.firstVisibleDocs.set(firstVisible);
-          this.lastVisibleDocs.set(lastVisible);
-        })
-      )
-    );
+    return this.getFirstDestinations(queryLimit);
   }
 
   private fetchDestinations(
@@ -242,13 +220,11 @@ export class FirestoreDestinationPipelineService {
             image1: this.firebaseStorageService.getImage(document['image1']),
             image2: this.firebaseStorageService.getImage(document['image2']),
             image3: this.firebaseStorageService.getImage(document['image3']),
-            imageBig: this.firebaseStorageService.getImage(
-              document['imageBig']
-            ),
+            imageBig: this.firebaseStorageService.getImage(document['imageBig'])
           }).pipe(
             map((images) => ({
               ...document,
-              ...images,
+              ...images
             }))
           );
         });

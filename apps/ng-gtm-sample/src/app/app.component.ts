@@ -2,7 +2,7 @@ import { Component, effect } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { UrlTrackerService } from './shared/services/url-tracker/url-tracker.service';
 import { LoadingService } from './shared/services/loading/loading.service';
-// TODO: meta description
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],

@@ -22,6 +22,17 @@ import {
 } from 'rxjs';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 
+export interface PerformTestParams {
+  page: Page;
+  projectSlug: string;
+  eventId: string;
+  measurementId: string;
+  credentials: Credentials;
+  captureRequest: boolean;
+  application: EventInspectionPresetDto['application'];
+  options?: { requestCaptureTimeoutMs?: number };
+}
+
 @Injectable()
 export class WebAgentUtilsService {
   private readonly logger = new Logger(WebAgentUtilsService.name);
@@ -32,16 +43,17 @@ export class WebAgentUtilsService {
     private readonly testEventRepositoryService: TestEventRepositoryService
   ) {}
 
-  async performTest(
-    page: Page,
-    projectSlug: string,
-    eventId: string,
-    measurementId: string,
-    credentials: Credentials,
-    captureRequest: boolean,
-    application: EventInspectionPresetDto['application'],
-    options?: { requestCaptureTimeoutMs?: number }
-  ) {
+  async performTest(params: PerformTestParams) {
+    const {
+      page,
+      projectSlug,
+      eventId,
+      measurementId,
+      credentials,
+      captureRequest,
+      application,
+      options
+    } = params;
     let eventRequest = '';
     let requestInterception: RequestInterceptionHandle | null = null;
     await this.dataLayerService.initSelfDataLayer(projectSlug, eventId);

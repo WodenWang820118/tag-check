@@ -324,10 +324,10 @@ export function validateGTMImportReadiness(value: unknown): GTMImportReadiness {
     }
   }
 
-  if (!isRecord(version.container)) {
-    issues.push('containerVersion.container must be present.');
-  } else {
+  if (isRecord(version.container)) {
     validateContainerMetadata(version, issues, warnings);
+  } else {
+    issues.push('containerVersion.container must be present.');
   }
 
   validateContainerPath(version, issues);

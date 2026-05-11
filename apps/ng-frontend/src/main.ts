@@ -17,7 +17,10 @@ Sentry.init({
 /** Signal to the Tauri shell that the Angular app has finished bootstrapping. */
 async function notifyAppReady(): Promise<void> {
   // Only emit when running inside a Tauri webview
-  if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
+  if (
+    typeof globalThis !== 'undefined' &&
+    '__TAURI_INTERNALS__' in globalThis
+  ) {
     const { emit } = await import('@tauri-apps/api/event');
     await emit('app-ready');
     console.log('Tauri app-ready event emitted');
@@ -27,15 +30,15 @@ async function notifyAppReady(): Promise<void> {
 /** Wait until Angular has had a chance to paint the first visible frame. */
 function waitForFirstPaint(): Promise<void> {
   if (
-    typeof window === 'undefined' ||
-    typeof window.requestAnimationFrame !== 'function'
+    typeof globalThis === 'undefined' ||
+    typeof globalThis.requestAnimationFrame !== 'function'
   ) {
     return Promise.resolve();
   }
 
   return new Promise((resolve) => {
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => resolve());
+    globalThis.requestAnimationFrame(() => {
+      globalThis.requestAnimationFrame(() => resolve());
     });
   });
 }

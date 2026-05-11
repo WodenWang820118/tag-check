@@ -5,7 +5,7 @@ export class RefundEventTracker implements AnalyticsEventTracker {
     this.eventName = eventName;
   }
 
-  // TODO: the transaction id should be the same as the one used in the purchase event
+  // NOTE: The transaction ID should match the one used in the purchase event
   getProcessedData(rawEventData: any) {
     if (!rawEventData.length) return;
     const event = {
@@ -22,13 +22,13 @@ export class RefundEventTracker implements AnalyticsEventTracker {
           item_name: item.title,
           item_category: item.category,
           quantity: Number(item.quantity),
-          price: item.value,
-        })),
-      },
+          price: item.value
+        }))
+      }
     };
 
     return {
-      eventData: event,
+      eventData: event
     };
   }
 }

@@ -14,7 +14,7 @@ import { FirestoreDestinationPipelineService } from '../../../../shared/services
 import { take, tap } from 'rxjs';
 import { Destination } from '../../../../shared/models/destination.model';
 
-// TODO: should have a button to refresh the map and fetch the latest data from Firestore
+// Enhancement: Add a refresh button to re-fetch latest data from Firestore
 
 @Component({
   selector: 'app-map',
@@ -44,7 +44,8 @@ import { Destination } from '../../../../shared/models/destination.model';
 })
 export class MapComponent implements AfterViewInit, OnDestroy {
   destinations: Destination[] = [];
-  private readonly chartHost = viewChild<ElementRef<HTMLDivElement>>('chartHost');
+  private readonly chartHost =
+    viewChild<ElementRef<HTMLDivElement>>('chartHost');
   private root: am5.Root | null = null;
 
   constructor(

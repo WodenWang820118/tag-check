@@ -1,5 +1,9 @@
-import { applicationConfig, type Meta, type StoryObj } from '@storybook/angular';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import {
+  applicationConfig,
+  type Meta,
+  type StoryObj
+} from '@storybook/angular';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { fn } from 'storybook/test';
 import { EditableJsonPanelState } from '../report-detail.contracts';
 import { EditableJsonPanelComponent } from './editable-json-panel.component';
@@ -23,7 +27,7 @@ const meta: Meta<EditableJsonPanelComponent> = {
   title: 'Modules/Project/Components/EditableJsonPanelComponent',
   decorators: [
     applicationConfig({
-      providers: [provideNoopAnimations()]
+      providers: [provideAnimations()]
     })
   ],
   render: (args) => ({
