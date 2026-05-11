@@ -3,7 +3,6 @@ import {
   type Meta,
   type StoryObj
 } from '@storybook/angular';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import { fn } from 'storybook/test';
 import { ReportTabViewComponent } from './report-tab-view.component';
 import { ReportTabViewModel } from '../report-detail.contracts';
@@ -34,7 +33,7 @@ const meta: Meta<ReportTabViewComponent> = {
   title: 'Modules/Project/Components/ReportTabViewComponent',
   decorators: [
     applicationConfig({
-      providers: [provideAnimations()]
+      providers: []
     })
   ],
   render: (args) => ({

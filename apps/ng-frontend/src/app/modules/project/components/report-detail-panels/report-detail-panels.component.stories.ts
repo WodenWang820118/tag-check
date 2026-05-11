@@ -3,7 +3,6 @@ import {
   type Meta,
   type StoryObj
 } from '@storybook/angular';
-import { provideAnimations } from '@angular/platform-browser/animations';
 import { fn } from 'storybook/test';
 import { EditableJsonPanelState } from '../report-detail.contracts';
 import { ReportDetailPanelsViewComponent } from './report-detail-panels-view.component';
@@ -35,7 +34,7 @@ const meta: Meta<ReportDetailPanelsViewComponent> = {
   title: 'Modules/Project/Components/ReportDetailPanelsViewComponent',
   decorators: [
     applicationConfig({
-      providers: [provideAnimations()]
+      providers: []
     })
   ],
   render: (args) => ({

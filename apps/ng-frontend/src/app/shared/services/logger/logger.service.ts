@@ -216,10 +216,14 @@ export class LoggerService {
     }
 
     if (this.isObjectMessage(message)) {
-      return 'Object:';
+      try {
+        return JSON.stringify(message);
+      } catch {
+        return 'Object:';
+      }
     }
 
-    return String(message ?? '');
+    return message === null || message === undefined ? '' : String(message);
   }
 
   private isObjectMessage(message: unknown): message is object {

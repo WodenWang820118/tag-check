@@ -29,6 +29,10 @@ async function initLanguage(locale: string): Promise<void> {
     // Default behavior, no changes required
     return;
   }
+  // Guard: only construct URLs with known-safe locale values
+  if (!ALLOWED_LOCALES.has(locale)) {
+    return;
+  }
   const response = await fetch(`/locale/messages.${locale}.xlf`);
   const xlfContent = await response.text();
 
