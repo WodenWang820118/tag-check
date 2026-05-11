@@ -1,0 +1,1 @@
+export { ObjectivesComponent } from '@ui';

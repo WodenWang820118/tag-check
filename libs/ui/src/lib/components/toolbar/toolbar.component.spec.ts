@@ -1,9 +1,9 @@
 import '@angular/localize/init';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { LOCALE_ID } from '@angular/core';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ToolBarComponent, type ToolbarInputs } from '../../../index';
 
@@ -12,7 +12,7 @@ describe('ToolbarInputs', () => {
     await TestBed.configureTestingModule({
       imports: [ToolBarComponent],
       providers: [
-        provideRouter([]),
+        { provide: LOCALE_ID, useValue: 'ja' },
         provideHttpClient(),
         provideHttpClientTesting(),
         provideNoopAnimations()
@@ -23,13 +23,19 @@ describe('ToolbarInputs', () => {
   it('supports the minimal toolbar contract', () => {
     const inputs: ToolbarInputs = { title: 'Tag Build' };
     const fixture = renderToolbar(inputs);
-    const [aboutLink, objectivesLink] = getMenuLinks(fixture);
+    const [appLink, aboutLink, objectivesLink, githubLink] = getMenuLinks(
+      fixture,
+      4
+    );
 
     expect(fixture.componentInstance.title()).toBe('Tag Build');
     expect(fixture.componentInstance.aboutDisabled()).toBe(false);
     expect(fixture.componentInstance.objectivesDisabled()).toBe(false);
-    expect(aboutLink.classList.contains('hidden')).toBe(false);
-    expect(objectivesLink.classList.contains('hidden')).toBe(false);
+    expect(getHomeLink(fixture).getAttribute('href')).toBe('/ja/');
+    expect(appLink.getAttribute('href')).toBe('/ja/app');
+    expect(aboutLink.getAttribute('href')).toBe('/ja/about');
+    expect(objectivesLink.getAttribute('href')).toBe('/ja/objectives');
+    expect(githubLink.getAttribute('target')).toBe('_blank');
   });
 
   it('supports optional toolbar visibility flags', () => {
@@ -39,13 +45,15 @@ describe('ToolbarInputs', () => {
       objectivesDisabled: false
     };
     const fixture = renderToolbar(inputs);
-    const [aboutLink, objectivesLink] = getMenuLinks(fixture);
 
     expect(fixture.componentInstance.title()).toBe('TagCheck');
     expect(fixture.componentInstance.aboutDisabled()).toBe(true);
     expect(fixture.componentInstance.objectivesDisabled()).toBe(false);
-    expect(aboutLink.classList.contains('hidden')).toBe(true);
-    expect(objectivesLink.classList.contains('hidden')).toBe(false);
+    expect(getMenuHrefs(fixture)).toEqual([
+      '/ja/app',
+      '/ja/objectives',
+      'https://github.com/WodenWang820118/tag-check'
+    ]);
   });
 
   it('hides both optional tabs when both visibility flags are true', () => {
@@ -55,10 +63,11 @@ describe('ToolbarInputs', () => {
       objectivesDisabled: true
     };
     const fixture = renderToolbar(inputs);
-    const [aboutLink, objectivesLink] = getMenuLinks(fixture);
 
-    expect(aboutLink.classList.contains('hidden')).toBe(true);
-    expect(objectivesLink.classList.contains('hidden')).toBe(true);
+    expect(getMenuHrefs(fixture)).toEqual([
+      '/ja/app',
+      'https://github.com/WodenWang820118/tag-check'
+    ]);
   });
 });
 
@@ -83,13 +92,32 @@ function renderToolbar(
 }
 
 function getMenuLinks(
-  fixture: ComponentFixture<ToolBarComponent>
+  fixture: ComponentFixture<ToolBarComponent>,
+  expectedLength?: number
 ): HTMLAnchorElement[] {
   const links = Array.from(
     fixture.nativeElement.querySelectorAll('lib-menu-tabs a')
   ) as HTMLAnchorElement[];
 
-  expect(links).toHaveLength(3);
+  if (expectedLength !== undefined) {
+    expect(links).toHaveLength(expectedLength);
+  }
 
   return links;
+}
+
+function getMenuHrefs(fixture: ComponentFixture<ToolBarComponent>): string[] {
+  return getMenuLinks(fixture).map((link) => link.getAttribute('href') ?? '');
+}
+
+function getHomeLink(
+  fixture: ComponentFixture<ToolBarComponent>
+): HTMLAnchorElement {
+  const link = fixture.nativeElement.querySelector(
+    'mat-toolbar > span a'
+  ) as HTMLAnchorElement | null;
+
+  expect(link).toBeTruthy();
+
+  return link as HTMLAnchorElement;
 }

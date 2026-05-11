@@ -1,4 +1,5 @@
 import { Component, Inject, LOCALE_ID } from '@angular/core';
+import { getLocaleConfig } from '../../locale/locale-routing';
 
 @Component({
   selector: 'lib-objectives',
@@ -9,6 +10,7 @@ import { Component, Inject, LOCALE_ID } from '@angular/core';
 export class ObjectivesComponent {
   constructor(@Inject(LOCALE_ID) private readonly locale: string) {}
   getLocalizedSvgPath(): string {
-    return `assets/i18n/${this.locale}/tag_check_system_${this.locale}.drawio.svg`;
+    const assetSegment = getLocaleConfig(this.locale).assetSegment;
+    return `/assets/i18n/${assetSegment}/tag_check_system_${assetSegment}.drawio.svg`;
   }
 }
