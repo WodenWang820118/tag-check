@@ -145,16 +145,16 @@ function createServiceHarness(
         requestCaptureTimeoutMs?: number;
       } = {}
     ) =>
-      service.performTest(
-        page as unknown as Page,
-        'project',
-        'event-id',
-        'G-TEST',
-        { username: '', password: '' },
-        options.captureRequest ?? true,
-        emptyApplication,
-        { requestCaptureTimeoutMs: options.requestCaptureTimeoutMs }
-      )
+      service.performTest({
+        page: page as unknown as Page,
+        projectSlug: 'project',
+        eventId: 'event-id',
+        measurementId: 'G-TEST',
+        credentials: { username: '', password: '' },
+        captureRequest: options.captureRequest ?? true,
+        application: emptyApplication,
+        options: { requestCaptureTimeoutMs: options.requestCaptureTimeoutMs }
+      })
   };
 }
 

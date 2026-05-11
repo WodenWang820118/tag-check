@@ -17,15 +17,15 @@ export class WebAgentService {
   ) {
     const captureFlag = captureRequest === 'true' || captureRequest === '1';
     const { dataLayer, destinationUrl } =
-      await this.webAgentUtilsService.performTest(
+      await this.webAgentUtilsService.performTest({
         page,
-        projectName,
+        projectSlug: projectName,
         eventId,
         measurementId,
         credentials,
-        captureFlag,
+        captureRequest: captureFlag,
         application
-      );
+      });
     return {
       dataLayer,
       destinationUrl
@@ -43,15 +43,15 @@ export class WebAgentService {
   ) {
     const captureFlag = captureRequest === 'true' || captureRequest === '1';
     const { dataLayer, eventRequest, destinationUrl } =
-      await this.webAgentUtilsService.performTest(
+      await this.webAgentUtilsService.performTest({
         page,
         projectSlug,
         eventId,
         measurementId,
         credentials,
-        captureFlag,
+        captureRequest: captureFlag,
         application
-      );
+      });
     return {
       dataLayer,
       eventRequest,
