@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/en/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/en/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/about" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/about" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/en/objectives</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/objectives" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/objectives" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/objectives" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/en/documentation/introduction</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/introduction" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/en/documentation/objective</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/objective" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/en/documentation/use-cases</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/use-cases" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/en/documentation/getting-started</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/getting-started" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/en/documentation/quality-assurance</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/quality-assurance" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/en/documentation/report-management</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/report-management" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/en/documentation/setting-details</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/setting-details" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hant/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hant/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/about" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/about" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hant/objectives</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/objectives" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/objectives" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/objectives" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/introduction</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/introduction" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/objective</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/objective" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/use-cases</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/use-cases" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/getting-started</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/getting-started" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/quality-assurance</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/quality-assurance" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/report-management</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/report-management" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/setting-details</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/setting-details" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hans/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hans/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/about" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/about" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hans/objectives</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/objectives" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/objectives" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/objectives" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/introduction</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/introduction" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/objective</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/objective" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/use-cases</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/use-cases" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/getting-started</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/getting-started" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/quality-assurance</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/quality-assurance" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/report-management</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/report-management" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/setting-details</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/setting-details" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/ja/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/ja/about</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/about" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/about" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/about" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/about" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/ja/objectives</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/objectives" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/objectives" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/objectives" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/objectives" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/ja/documentation/introduction</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/introduction" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/introduction" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/ja/documentation/objective</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/objective" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/objective" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/ja/documentation/use-cases</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/use-cases" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/use-cases" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/ja/documentation/getting-started</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/getting-started" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/getting-started" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/ja/documentation/quality-assurance</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/quality-assurance" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/quality-assurance" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/ja/documentation/report-management</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/report-management" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/report-management" />
+  </url>
+  <url>
+    <loc>https://tag-check-documentation.vercel.app/ja/documentation/setting-details</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://tag-check-documentation.vercel.app/ja/documentation/setting-details" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://tag-check-documentation.vercel.app/en/documentation/setting-details" />
+  </url>
+</urlset>

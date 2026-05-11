@@ -7,7 +7,7 @@
     "inlineSources": true,
     "composite": true,
     "useDefineForClassFields": false,
-    "types": []
+    "types": ["@angular/localize"]
   },
   "references": [{ "path": "../data-access/tsconfig.lib.json" }],
   "exclude": [

@@ -1,77 +1,38 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
 import { registerLocaleData } from '@angular/common';
-import { loadTranslations } from '@angular/localize';
+import { getLocaleFromPathname } from '@ui';
+import { appConfig } from './app/app.config';
 
-/** Allowed locale values validated against known supported locales. */
-const ALLOWED_LOCALES = new Set(['en', 'zh-hant', 'zh-hans', 'ja']);
+const appLocale = getLocaleFromPathname(globalThis.location?.pathname ?? '/');
+const appLang = appLocale.assetSegment;
 
-function sanitizeLocale(raw: string): string {
-  const normalized = raw.toLowerCase();
-  if (ALLOWED_LOCALES.has(normalized)) {
-    return normalized;
-  }
-  return 'en';
-}
-
-const appLang = sanitizeLocale(localStorage.getItem('locale') || 'en');
-
-// Init provided language
-initLanguage(appLang)
-  // Only load text after locale is initialized to translate static file
+initLocale(appLang)
   .then(() => import('./app/app.component'))
   .then((comp) => bootstrapApplication(comp.AppComponent, appConfig))
   .catch((err) => console.error(err));
 
-async function initLanguage(locale: string): Promise<void> {
-  if (locale === 'en') {
-    // Default behavior, no changes required
-    return;
-  }
-  // Guard: only construct URLs with known-safe locale values
-  if (!ALLOWED_LOCALES.has(locale)) {
-    return;
-  }
-  const response = await fetch(`/locale/messages.${locale}.xlf`);
-  const xlfContent = await response.text();
-
-  // Parse XLF content
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(xlfContent, 'text/xml');
-  const translations = new Map<string, string>();
-
-  // Extract translations from XLF
-  const transUnits = xmlDoc.getElementsByTagName('trans-unit');
-  for (const unit of Array.from(transUnits)) {
-    const id = unit.getAttribute('id');
-    const target = unit.getElementsByTagName('source')[0].textContent;
-    if (id && target) {
-      translations.set(id, target);
-    }
+async function initLocale(locale: string): Promise<void> {
+  const localeData = await loadLocaleData(locale);
+  if (localeData) {
+    registerLocaleData(localeData);
   }
 
-  console.log('Loaded translations:', translations);
+  persistLocalePreference(locale);
+}
 
-  // Load translations into Angular
-  $localize.locale = locale;
-  loadTranslations(Object.fromEntries(translations));
-
-  // Dynamic import of locale data based on selected language
-  let localeModule;
+async function loadLocaleData(locale: string): Promise<unknown | null> {
   switch (locale) {
     case 'zh-hant':
-      localeModule = await import(`@angular/common/locales/zh-Hant`);
-      break;
+      return (await import('@angular/common/locales/zh-Hant')).default;
     case 'zh-hans':
-      localeModule = await import(`@angular/common/locales/zh-Hans`);
-      break;
+      return (await import('@angular/common/locales/zh-Hans')).default;
     case 'ja':
-      localeModule = await import(`@angular/common/locales/ja`);
-      break;
+      return (await import('@angular/common/locales/ja')).default;
     default:
-      localeModule = await import(`@angular/common/locales/en`);
+      return null;
   }
-  // Register the locale data
-  console.log('Loaded locale:', localeModule.default);
-  registerLocaleData(localeModule.default);
+}
+
+function persistLocalePreference(locale: string): void {
+  globalThis.localStorage?.setItem('locale', locale);
 }

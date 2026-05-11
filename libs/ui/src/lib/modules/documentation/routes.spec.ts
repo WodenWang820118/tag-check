@@ -36,7 +36,9 @@ describe('DOCS_ROUTES', () => {
     );
 
     expect(shellRoute.loadComponent).toBeDefined();
+    expect(shellRoute.data).toMatchObject({ seoKey: 'documentation' });
     expect(contentRoute.loadComponent).toBeDefined();
+    expect(contentRoute.data).toMatchObject({ seoKey: 'documentation' });
     expect(contentRoute.resolve?.['data']).toBe(treeNodeResolver);
     expect(contentRoute.canDeactivate).toContain(treeNodeDeactivateGuard);
   });

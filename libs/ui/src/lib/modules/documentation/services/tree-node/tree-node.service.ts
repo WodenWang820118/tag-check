@@ -1,4 +1,11 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import {
+  Injectable,
+  PLATFORM_ID,
+  computed,
+  inject,
+  signal
+} from '@angular/core';
 import { TopicNode } from '@utils';
 import { TREE_DATA } from '../../tree-data';
 
@@ -7,6 +14,7 @@ import { TREE_DATA } from '../../tree-data';
 })
 export class TreeNodeService {
   private readonly CACHE_KEY = 'currentTreeNode';
+  private readonly platformId = inject(PLATFORM_ID);
 
   private readonly treeDataSignal = signal<TopicNode[]>(TREE_DATA);
   readonly treeData = computed(() => this.treeDataSignal());
@@ -82,7 +90,7 @@ export class TreeNodeService {
 
   setCurrentNode(node: TopicNode): void {
     this.currentNodeSignal.set(node);
-    localStorage.setItem(this.CACHE_KEY, JSON.stringify(node));
+    this.writeCache(node);
   }
 
   private buildNodeIndex(nodes: TopicNode[]): void {
@@ -103,6 +111,22 @@ export class TreeNodeService {
   }
 
   clearCache(): void {
-    localStorage.removeItem(this.CACHE_KEY);
+    this.removeCache();
+  }
+
+  private writeCache(node: TopicNode): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    globalThis.localStorage?.setItem(this.CACHE_KEY, JSON.stringify(node));
+  }
+
+  private removeCache(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    globalThis.localStorage?.removeItem(this.CACHE_KEY);
   }
 }

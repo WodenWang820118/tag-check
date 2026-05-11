@@ -1,159 +1,35 @@
-import { Component, inject, LOCALE_ID, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { AsyncPipe, NgComponentOutlet } from '@angular/common';
-import { Meta, type MetaDefinition } from '@angular/platform-browser';
-import type { ToolbarInputs } from '@ui';
-
-const PRODUCT_DOC_META_TAGS: MetaDefinition[] = [
-  {
-    name: 'description',
-    content:
-      'TagCheck validates your GTM configuration to ensure accurate data measurement. Help digital marketers focus on insights rather than technical setup, reducing errors and streamlining tag management.'
-  },
-  // Keywords are less important for Google but kept for other engines.
-  {
-    name: 'keywords',
-    content:
-      'GTM Validation, Tag Audit, Google Tag Manager, TagCheck, Data Measurement, Tag Quality Assurance, Digital Analytics, Marketing Tags'
-  },
-  {
-    name: 'viewport',
-    content: 'width=device-width, initial-scale=1'
-  },
-  {
-    rel: 'canonical',
-    href: 'https://tag-check-documentation.vercel.app'
-  },
-  {
-    property: 'og:title',
-    content: 'TagCheck | GTM Validation & Audit Tool for Digital Marketers'
-  },
-  {
-    property: 'og:description',
-    content:
-      'Validate your GTM setup with TagCheck. Ensure accurate data measurement, reduce implementation errors, and focus on insights rather than technical configuration.'
-  },
-  {
-    property: 'og:url',
-    content: 'https://tag-check-documentation.vercel.app'
-  },
-  {
-    property: 'og:type',
-    content: 'website'
-  },
-  {
-    property: 'og:image',
-    content:
-      'https://tag-check-documentation.vercel.app/assets/images/tagcheck-og.png'
-  },
-  {
-    property: 'og:image:width',
-    content: '1200'
-  },
-  {
-    property: 'og:image:height',
-    content: '630'
-  },
-  {
-    name: 'twitter:card',
-    content: 'summary_large_image'
-  },
-  {
-    name: 'twitter:title',
-    content: 'TagCheck | GTM Validation & Audit Tool for Digital Marketers'
-  },
-  {
-    name: 'twitter:description',
-    content:
-      'Validate your GTM setup with TagCheck. Ensure accurate data measurement, reduce implementation errors, and focus on insights rather than technical configuration.'
-  },
-  {
-    name: 'twitter:image',
-    content:
-      'https://tag-check-documentation.vercel.app/assets/images/tagcheck-og.png'
-  },
-  {
-    'http-equiv': 'content-language',
-    content: 'en'
-  },
-  {
-    name: 'author',
-    content: 'TagCheck Team'
-  }
-];
+import { FooterComponent, ToolBarComponent, type ToolbarInputs } from '@ui';
+import { SeoService } from './seo/seo.service';
 
 @Component({
-  imports: [RouterOutlet, NgComponentOutlet, AsyncPipe],
+  imports: [RouterOutlet, ToolBarComponent, FooterComponent],
   standalone: true,
   selector: 'app-root',
   template: `
-    <div class="app-container">
-      @if (toolbarComponent | async; as toolbar) {
-        <ng-container
-          [ngComponentOutlet]="toolbar"
-          [ngComponentOutletInputs]="toolbarInputs"
-        ></ng-container>
-      }
-      <div class="app-content">
-        <router-outlet />
-      </div>
+    <lib-toolbar [title]="toolbarInputs.title"></lib-toolbar>
+    <div class="app-content">
+      <router-outlet />
     </div>
-    @defer (on viewport) {
-      @if (footerComponent | async; as footer) {
-        <ng-container [ngComponentOutlet]="footer"></ng-container>
-      }
-    } @placeholder {
-      <div></div>
-    }
+    <lib-footer></lib-footer>
   `,
   styles: [
     `
-      .app-container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        overflow: hidden;
-      }
       .app-content {
-        flex: 1;
+        min-height: calc(100vh - 72px);
         overflow: hidden;
       }
     `
   ]
 })
 export class AppComponent implements OnInit {
-  private readonly metaService = inject(Meta);
+  private readonly seo = inject(SeoService);
 
-  title = 'TagCheck';
-  toolbarComponent = this.loadToolbarComponent();
-  footerComponent = this.loadFooterComponent();
-  readonly locale = inject(LOCALE_ID);
-  toolbarInputs = {
-    title: this.title,
-    aboutDisabled: true,
-    objectivesDisabled: false
-  } satisfies ToolbarInputs;
+  readonly title = 'TagCheck';
+  readonly toolbarInputs = { title: this.title } satisfies ToolbarInputs;
 
-  ngOnInit() {
-    this.addMetaTags();
-  }
-
-  private async loadToolbarComponent() {
-    try {
-      const module = await import('@ui');
-      return module.ToolBarComponent;
-    } catch (error) {
-      console.error('Failed to load toolbar component:', error);
-      return null;
-    }
-  }
-
-  private async loadFooterComponent() {
-    const module = await import('@ui');
-    return module.FooterComponent;
-  }
-
-  addMetaTags(): void {
-    this.metaService.addTags(PRODUCT_DOC_META_TAGS);
+  ngOnInit(): void {
+    this.seo.start();
   }
 }

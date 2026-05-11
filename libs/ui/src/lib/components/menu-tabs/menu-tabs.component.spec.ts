@@ -1,9 +1,9 @@
-import { DOCUMENT } from '@angular/common';
 import { LOCALE_ID } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter, Router } from '@angular/router';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { MenuTabsComponent } from './menu-tabs.component';
 
@@ -15,7 +15,13 @@ describe('MenuTabsComponent', () => {
         { provide: LOCALE_ID, useValue: 'zh-Hant' },
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideNoopAnimations()
+        provideNoopAnimations(),
+        provideRouter([
+          {
+            path: ':locale/about',
+            children: []
+          }
+        ])
       ]
     }).compileComponents();
   });
@@ -41,12 +47,8 @@ describe('MenuTabsComponent', () => {
     expect(fixture.componentInstance.objectivesDisabled()).toBe(false);
   });
 
-  it('marks the active tab from the logical route without the locale prefix', () => {
-    TestBed.inject(DOCUMENT).defaultView?.history.pushState(
-      {},
-      '',
-      '/zh-hant/about'
-    );
+  it('marks the active tab from the logical route without the locale prefix', async () => {
+    await TestBed.inject(Router).navigateByUrl('/zh-hant/about');
     const fixture = renderMenu();
 
     expect(fixture.componentInstance.isActive('/about')).toBe(true);

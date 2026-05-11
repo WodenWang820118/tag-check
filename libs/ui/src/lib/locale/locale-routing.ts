@@ -1,5 +1,5 @@
 export type SupportedLocaleCode = 'en-US' | 'zh-Hant' | 'zh-Hans' | 'ja';
-export type LocaleUrlSegment = '' | 'zh-hant' | 'zh-hans' | 'ja';
+export type LocaleUrlSegment = 'en' | 'zh-hant' | 'zh-hans' | 'ja';
 export type LocaleAssetSegment = 'en' | 'zh-hant' | 'zh-hans' | 'ja';
 export type LocaleHreflang = 'en' | 'zh-Hant' | 'zh-Hans' | 'ja';
 
@@ -14,7 +14,7 @@ export interface SupportedLocale {
 export const SUPPORTED_LOCALES = [
   {
     code: 'en-US',
-    urlSegment: '',
+    urlSegment: 'en',
     assetSegment: 'en',
     hreflang: 'en',
     label: 'English'
@@ -61,11 +61,9 @@ export function stripLocalePrefix(pathname: string): string {
   const normalizedPath = normalizePath(pathname);
   const segments = normalizedPath.split('/').filter(Boolean);
   const firstSegment = segments[0]?.toLowerCase();
-  const locale = SUPPORTED_LOCALES.find(
-    (supportedLocale) => supportedLocale.urlSegment === firstSegment
-  );
+  const locale = findLocaleByUrlSegment(firstSegment);
 
-  if (!locale?.urlSegment) {
+  if (!locale) {
     return normalizedPath;
   }
 
@@ -83,10 +81,6 @@ export function buildLocalizedPath(
     typeof locale === 'string' ? getLocaleConfig(locale) : locale;
   const normalizedPath = stripLocalePrefix(logicalPath);
 
-  if (!localeConfig.urlSegment) {
-    return normalizedPath;
-  }
-
   return normalizedPath === '/'
     ? `/${localeConfig.urlSegment}/`
     : `/${localeConfig.urlSegment}${normalizedPath}`;
@@ -96,9 +90,23 @@ export function getLogicalPath(pathname: string): string {
   return stripLocalePrefix(pathname);
 }
 
+export function getLocaleFromPathname(pathname: string): SupportedLocale {
+  const normalizedPath = normalizePath(pathname);
+  const firstSegment = normalizedPath
+    .split('/')
+    .filter(Boolean)[0]
+    ?.toLowerCase();
+
+  return findLocaleByUrlSegment(firstSegment) ?? DEFAULT_LOCALE;
+}
+
 export function isIndexableLogicalRoute(pathname: string): boolean {
   const logicalPath = stripLocalePrefix(pathname);
-  return INDEXABLE_LOGICAL_ROUTES.some((route) => route === logicalPath);
+  if (INDEXABLE_LOGICAL_ROUTES.some((route) => route === logicalPath)) {
+    return true;
+  }
+
+  return /^\/documentation\/[^/]+$/.test(logicalPath);
 }
 
 function normalizeLocale(locale: string | null | undefined): string {
@@ -118,6 +126,18 @@ function isLocaleMatch(
     normalizedHrefLang === normalizedLocale ||
     normalizedLocale.startsWith(`${normalizedCode}-`) ||
     normalizedLocale.startsWith(`${normalizedHrefLang}-`)
+  );
+}
+
+function findLocaleByUrlSegment(
+  urlSegment: string | undefined
+): SupportedLocale | undefined {
+  if (!urlSegment) {
+    return undefined;
+  }
+
+  return SUPPORTED_LOCALES.find(
+    (supportedLocale) => supportedLocale.urlSegment === urlSegment
   );
 }
 
