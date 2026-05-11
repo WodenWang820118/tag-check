@@ -5,6 +5,7 @@ import {
   computed,
   DestroyRef,
   inject,
+  PLATFORM_ID,
   OnInit,
   signal
 } from '@angular/core';
@@ -17,7 +18,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { NgScrollbarModule } from 'ngx-scrollbar';
-import { NgClass } from '@angular/common';
+import { DOCUMENT, NgClass, isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-contents',
@@ -40,20 +41,20 @@ export class MainContentComponent implements OnInit {
   public treeNodeService = inject(TreeNodeService);
   public route = inject(ActivatedRoute);
   private readonly destroyedRef = inject(DestroyRef);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly document = inject(DOCUMENT);
 
-  // Create writable signals for state
   private readonly fileNameSignal = signal<string>('');
+  private readonly contentSignal = signal<string>('');
   private readonly tocSignal = signal<{ id: string; text: string }[]>([]);
 
-  // Create computed signals for derived state
   readonly fileName = computed(() => this.fileNameSignal());
+  readonly content = computed(() => this.contentSignal());
   readonly toc = computed(() => this.tocSignal());
 
-  // Expose tree data and accessor for the template
   readonly treeData = this.treeNodeService.treeData;
   readonly childrenAccessor = this.treeNodeService.childrenAccessor;
 
-  // Expose navigation properties
   readonly currentNodeId = computed(() => this.treeNodeService.currentNodeId());
   readonly hasPrevious = computed(
     () => !!this.treeNodeService.getPreviousNode()
@@ -66,17 +67,18 @@ export class MainContentComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyedRef))
       .subscribe((data) => {
         const fullData = data['data'];
-        const fileName = fullData['fileName'] as string;
-        this.fileNameSignal.set(fileName);
-        console.log('Loaded markdown file:', fileName);
+        this.fileNameSignal.set((fullData['fileName'] as string) ?? '');
+        this.contentSignal.set((fullData['content'] as string) ?? '');
         this.tocSignal.set([]);
       });
   }
 
   scrollToSection(sectionId: string) {
-    console.log('Scrolling to section:', sectionId);
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
     this.activeSection = sectionId;
-    const element = document.getElementById(sectionId);
+    const element = this.document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -88,20 +90,17 @@ export class MainContentComponent implements OnInit {
   }
 
   onMarkdownReady() {
-    // Clear the TOC first
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
     this.tocSignal.set([]);
-
-    // Get all heading elements from the rendered markdown
-    const h1Elements = document.querySelectorAll('#markdown h1');
-    const h2Elements = document.querySelectorAll('#markdown h2');
+    const h1Elements = this.document.querySelectorAll('#markdown h1');
+    const h2Elements = this.document.querySelectorAll('#markdown h2');
     const headElements = Array.from(h1Elements).concat(Array.from(h2Elements));
 
-    // Create TOC entries from the heading elements
     const newToc = headElements.map((element) => {
       const text = element.textContent || '';
       const id = text.toLowerCase().replaceAll(/[^\w]+/g, '-');
-
-      // Set the ID on the element for linking
       element.id = id;
 
       return { id, text };

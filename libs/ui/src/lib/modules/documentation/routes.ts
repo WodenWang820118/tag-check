@@ -5,6 +5,7 @@ import { treeNodeDeactivateGuard } from './guards/documentation.guard';
 export const DOCS_ROUTES: Routes = [
   {
     path: '',
+    data: { seoKey: 'documentation' },
     loadComponent: () =>
       import('./views/documentation-view.component').then(
         (m) => m.HelpCenterViewComponent
@@ -17,6 +18,7 @@ export const DOCS_ROUTES: Routes = [
       },
       {
         path: ':name',
+        data: { seoKey: 'documentation' },
         loadComponent: () =>
           import('./components/main-content/main-content.component').then(
             (m) => m.MainContentComponent

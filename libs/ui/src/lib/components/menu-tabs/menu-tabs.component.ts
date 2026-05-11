@@ -1,9 +1,9 @@
-import { DOCUMENT } from '@angular/common';
 import { Component, Inject, LOCALE_ID, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
+import { Router } from '@angular/router';
 import {
   buildLocalizedPath,
   stripLocalePrefix
@@ -143,7 +143,7 @@ export class MenuTabsComponent {
 
   constructor(
     @Inject(LOCALE_ID) locale: string,
-    @Inject(DOCUMENT) private readonly document: Document
+    private readonly router: Router
   ) {
     this.appPath = buildLocalizedPath('/app', locale);
     this.aboutPath = buildLocalizedPath('/about', locale);
@@ -151,6 +151,6 @@ export class MenuTabsComponent {
   }
 
   isActive(logicalPath: string): boolean {
-    return stripLocalePrefix(this.document.location.pathname) === logicalPath;
+    return stripLocalePrefix(this.router.url) === logicalPath;
   }
 }

@@ -1,27 +1,34 @@
 import {
   ApplicationConfig,
-  importProvidersFrom,
+  inject,
   LOCALE_ID,
   provideZoneChangeDetection,
   SecurityContext
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { appRoutes } from './app.routes';
 import { provideHttpClient } from '@angular/common/http';
-import { MarkdownModule } from 'ngx-markdown';
-
-const appLang = localStorage.getItem('locale') || 'en';
+import { provideMarkdown, SANITIZE } from 'ngx-markdown';
+import { getLocaleFromPathname } from '@ui';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(appRoutes),
     provideHttpClient(),
-    importProvidersFrom(
-      MarkdownModule.forRoot({
-        sanitize: SecurityContext.NONE as unknown as any
-      })
-    ),
-    { provide: LOCALE_ID, useValue: appLang }
+    ...provideMarkdown({
+      sanitize: {
+        provide: SANITIZE,
+        useValue: SecurityContext.NONE
+      }
+    }),
+    {
+      provide: LOCALE_ID,
+      useFactory: () => {
+        const document = inject(DOCUMENT);
+        return getLocaleFromPathname(document.location?.pathname ?? '/').code;
+      }
+    }
   ]
 };

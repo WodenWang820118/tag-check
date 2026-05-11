@@ -57,11 +57,14 @@ export class LangSelectComponent {
   }
 
   changeLocale(nextLocale: SupportedLocaleCode): void {
-    this.selectedLocale = getLocaleConfig(nextLocale).code;
+    const nextLocaleConfig = getLocaleConfig(nextLocale);
+    this.selectedLocale = nextLocaleConfig.code;
 
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
+
+    globalThis.localStorage?.setItem('locale', nextLocaleConfig.assetSegment);
 
     const currentLocation = this.document.location;
     const logicalPath = stripLocalePrefix(currentLocation.pathname);

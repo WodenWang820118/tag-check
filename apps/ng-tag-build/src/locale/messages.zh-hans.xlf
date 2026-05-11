@@ -786,6 +786,86 @@
           <context context-type="linenumber">15,20</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="docs.sidebar.introduction" datatype="html">
+        <source>Introduction</source>
+        <target>介绍</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.section.getStarted" datatype="html">
+        <source>Get Started</source>
+        <target>开始使用</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.objective" datatype="html">
+        <source>Objective</source>
+        <target>目标</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.useCases" datatype="html">
+        <source>Use Cases</source>
+        <target>使用场景</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.gettingStarted" datatype="html">
+        <source>Getting Started</source>
+        <target>快速上手</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.section.projects" datatype="html">
+        <source>Projects</source>
+        <target>项目</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.qualityAssurance" datatype="html">
+        <source>Quality Assurance</source>
+        <target>质量保证</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.reportManagement" datatype="html">
+        <source>Report Management</source>
+        <target>报告管理</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.section.settings" datatype="html">
+        <source>Settings</source>
+        <target>设置</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.settingDetails" datatype="html">
+        <source>Setting Details</source>
+        <target>设置详情</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+      </trans-unit>
     </body>
   </file>
 </xliff>

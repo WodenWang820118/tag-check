@@ -5,6 +5,26 @@
   "prefix": "app",
   "sourceRoot": "apps/ng-product-doc/src",
   "tags": [],
+  "i18n": {
+    "sourceLocale": {
+      "code": "en-US",
+      "subPath": "en"
+    },
+    "locales": {
+      "zh-Hant": {
+        "translation": "apps/ng-product-doc/src/locale/messages.zh-hant.xlf",
+        "subPath": "zh-hant"
+      },
+      "zh-Hans": {
+        "translation": "apps/ng-product-doc/src/locale/messages.zh-hans.xlf",
+        "subPath": "zh-hans"
+      },
+      "ja": {
+        "translation": "apps/ng-product-doc/src/locale/messages.ja.xlf",
+        "subPath": "ja"
+      }
+    }
+  },
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:application",
@@ -13,6 +33,8 @@
         "outputPath": "dist/apps/ng-product-doc",
         "index": "apps/ng-product-doc/src/index.html",
         "browser": "apps/ng-product-doc/src/main.ts",
+        "server": "apps/ng-product-doc/src/main.server.ts",
+        "outputMode": "static",
         "polyfills": ["zone.js", "@angular/localize/init"],
         "tsConfig": "apps/ng-product-doc/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
@@ -21,6 +43,9 @@
             "glob": "**/*",
             "input": "apps/ng-product-doc/public"
           },
+          "apps/ng-product-doc/src/robots.txt",
+          "apps/ng-product-doc/src/sitemap.xml",
+          "apps/ng-product-doc/src/locale",
           {
             "input": "libs/utils/src/lib/assets",
             "glob": "**/*",
@@ -49,8 +74,8 @@
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "500kb",
-              "maximumError": "1mb"
+              "maximumWarning": "1.5mb",
+              "maximumError": "1.8mb"
             },
             {
               "type": "anyComponentStyle",
@@ -58,7 +83,21 @@
               "maximumError": "8kb"
             }
           ],
+          "localize": true,
+          "i18nMissingTranslation": "error",
           "outputHashing": "all"
+        },
+        "zh-Hant": {
+          "localize": ["zh-Hant"],
+          "i18nMissingTranslation": "error"
+        },
+        "zh-Hans": {
+          "localize": ["zh-Hans"],
+          "i18nMissingTranslation": "error"
+        },
+        "ja": {
+          "localize": ["ja"],
+          "i18nMissingTranslation": "error"
         },
         "development": {
           "optimization": false,
@@ -71,6 +110,15 @@
     "serve": {
       "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
+        "zh-Hant": {
+          "buildTarget": "ng-product-doc:build:zh-Hant"
+        },
+        "zh-Hans": {
+          "buildTarget": "ng-product-doc:build:zh-Hans"
+        },
+        "ja": {
+          "buildTarget": "ng-product-doc:build:ja"
+        },
         "production": {
           "buildTarget": "ng-product-doc:build:production"
         },
@@ -101,7 +149,7 @@
         "buildTarget": "ng-product-doc:build",
         "port": 4200,
         "staticFilePath": "dist/apps/ng-product-doc/browser",
-        "spa": true
+        "spa": false
       }
     }
   }

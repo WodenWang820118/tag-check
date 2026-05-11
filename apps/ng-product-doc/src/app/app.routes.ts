@@ -1,25 +1,40 @@
 import { Route } from '@angular/router';
+import {
+  AboutComponent,
+  DOCS_ROUTES,
+  LandingPageComponent,
+  ObjectivesComponent,
+  TagBuildAppComponent
+} from '@ui';
 
 export const appRoutes: Route[] = [
   {
+    path: '',
+    component: LandingPageComponent,
+    data: { seoKey: 'landing' }
+  },
+  {
+    path: 'app',
+    component: TagBuildAppComponent,
+    data: { seoKey: 'app' }
+  },
+  {
     path: 'documentation',
-    loadChildren: () => import('@ui').then((m) => m.DOCS_ROUTES)
+    children: DOCS_ROUTES,
+    data: { seoKey: 'documentation' }
   },
   {
     path: 'about',
-    loadComponent: () => import('@ui').then((m) => m.AboutComponent)
+    component: AboutComponent,
+    data: { seoKey: 'about' }
   },
   {
     path: 'objectives',
-    loadComponent: () => import('@ui').then((m) => m.ObjectivesComponent)
-  },
-  {
-    path: '',
-    redirectTo: 'documentation/introduction',
-    pathMatch: 'full'
+    component: ObjectivesComponent,
+    data: { seoKey: 'objectives' }
   },
   {
     path: '**',
-    redirectTo: 'documentation/introduction'
+    redirectTo: ''
   }
 ];

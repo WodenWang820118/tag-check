@@ -41,6 +41,7 @@
     "build-staging-front": "nx build ng-frontend --configuration=staging --base-href ./",
     "build-tag-build": "nx build ng-tag-build --configuration production --optimization --source-map",
     "i18n:ng-tag-build": "node tools/scripts/i18n/convert-ng-tag-build-xlf.ts",
+    "i18n:ng-product-doc": "node tools/scripts/i18n/convert-ng-product-doc-xlf.ts",
     "build-tauri": "nx run desktop-tauri:build",
     "bundle-tauri": "nx run desktop-tauri:bundle",
     "bundle-tauri:windows": "pnpm run tauri:release:windows",
