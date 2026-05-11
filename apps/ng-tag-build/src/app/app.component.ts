@@ -34,9 +34,22 @@ import type { ToolbarInputs } from '@ui';
   `,
   styles: [
     `
+      :host {
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+      }
       .app {
-        margin-top: 3rem;
-        padding: 3rem 3rem;
+        flex: 1 1 auto;
+        width: 100%;
+        padding-block: clamp(1rem, 3vw, 3rem);
+        /* Horizontal padding lives on the inner views so the workspace
+           page can stretch to its own max-w-[1440px] while content
+           pages stay narrow. The inner views also own the <main>
+           landmark to avoid duplicate landmarks at this shell level. */
+      }
+      .toolbar-placeholder {
+        min-height: 4rem;
       }
     `
   ]

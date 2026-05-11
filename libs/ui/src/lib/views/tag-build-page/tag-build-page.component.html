@@ -1,4 +1,6 @@
-<main class="main-page pt-0 pb-12 px-4 sm:px-6 lg:px-12 xl:px-16">
+<main
+  class="main-page mx-auto w-full max-w-[1440px] px-4 sm:px-6 lg:px-10 pt-0 pb-12"
+>
   <header class="main-page__title text-left my-4 sm:my-6 lg:my-8">
     <mat-tab-group
       mat-stretch-tabs="false"
@@ -11,12 +13,12 @@
   </header>
 
   <section
-    class="main-page__board flex flex-col md:flex-row md:flex-wrap justify-start items-stretch gap-6 lg:gap-8 xl:gap-12 mb-12 w-full"
+    class="main-page__board grid gap-6 lg:gap-8 mb-12 w-full grid-cols-1 xl:[grid-template-columns:minmax(0,1fr)_clamp(18rem,22%,24rem)_minmax(0,1fr)] xl:[grid-template-areas:'input_actions_output']"
     aria-label="Tag Build workspace"
   >
     <!-- Left: Input Editor Panel -->
     <div
-      class="main-page__board__item main-page__editor border border-gray-300 dark:border-gray-700 rounded-md bg-white/60 dark:bg-transparent w-full md:w-[48rem] xl:w-[54rem] shrink-0 shadow-sm mx-auto"
+      class="main-page__board__item main-page__editor min-w-0 w-full border border-gray-300 dark:border-gray-700 rounded-md bg-white/60 dark:bg-transparent shadow-sm xl:[grid-area:input]"
       aria-label="Input JSON editor"
     >
       <div
@@ -48,10 +50,8 @@
       </div>
     </div>
 
-    <!-- Middle: Actions Panel (fixed width) -->
-    <div
-      class="main-page__board__item w-full md:basis-1/2 md:shrink-0 xl:flex-1 xl:min-w-[20rem] xl:shrink mx-auto"
-    >
+    <!-- Middle: Actions Panel -->
+    <div class="main-page__board__item min-w-0 w-full xl:[grid-area:actions]">
       <lib-functional-card class="h-full w-full">
         <lib-upload-action
           class="functional-card__actions__item"
@@ -62,7 +62,7 @@
 
     <!-- Right: Output Editor Panel -->
     <div
-      class="main-page__board__item main-page__editor border border-gray-300 dark:border-gray-700 rounded-md bg-white/60 dark:bg-transparent w-full md:w-[48rem] xl:w-[54rem] shrink-0 shadow-sm mx-auto"
+      class="main-page__board__item main-page__editor min-w-0 w-full border border-gray-300 dark:border-gray-700 rounded-md bg-white/60 dark:bg-transparent shadow-sm xl:[grid-area:output]"
       aria-label="Output JSON editor"
     >
       <div
