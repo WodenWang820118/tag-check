@@ -26,8 +26,10 @@ interface Link {
     NgClass
   ],
   template: `
-    <!-- Inline tab nav: visible on large viewports (laptop/desktop). -->
-    <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="hidden lg:flex">
+    <!-- Inline tab nav: visible on large viewports (laptop/desktop).
+         The trailing-bang Tailwind utilities force important so Material's
+         unlayered baseline (.mat-mdc-tab-header) does not win the cascade. -->
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="hidden! lg:flex!">
       <a
         mat-tab-link
         (click)="activeLink = links[0]; navigateTo(links[0].link)"
@@ -64,11 +66,14 @@ interface Link {
     </nav>
     <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
 
-    <!-- Hamburger menu: visible below the laptop breakpoint. -->
+    <!-- Hamburger menu: visible below the laptop breakpoint. The
+         trailing-bang Tailwind utility forces important so Material's
+         unlayered .mat-mdc-icon-button (display: inline-block) does not
+         keep it visible at lg+. -->
     <button
       type="button"
       mat-icon-button
-      class="lg:hidden nav-hamburger"
+      class="lg:hidden! nav-hamburger"
       [matMenuTriggerFor]="mobileMenu"
       aria-label="Open navigation menu"
     >
@@ -126,9 +131,6 @@ interface Link {
       }
       .nav-hamburger {
         color: white;
-      }
-      .hidden {
-        display: none;
       }
     `
   ]

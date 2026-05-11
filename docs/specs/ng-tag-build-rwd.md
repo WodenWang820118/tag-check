@@ -1,6 +1,6 @@
 # ng-tag-build Responsive UI/UX Refactor
 
-Status: in progress
+Status: complete
 Owner: feat/ng-tag-build-rwd
 Scope: `apps/ng-tag-build` and the `libs/ui` views/components it consumes.
 Out of scope: `apps/ng-frontend`, `apps/ng-gtm-sample`, dark mode rework,
@@ -94,6 +94,44 @@ etc.) but the application's `styles` array in `apps/ng-tag-build/project.json`
 does not import any Tailwind layer, so those utilities never reach the
 production bundle. Stage 1 imports Tailwind into
 `apps/ng-tag-build/src/styles.scss` so existing and future utilities work.
+
+### Stage 1 follow-up (discovered during stage 6 QA)
+
+The first stage 1 attempt imported Tailwind from `styles.scss`. Sass inlined
+the `@import "tailwindcss/..."` statements before `@tailwindcss/postcss`
+could see them, so the JIT scanner never ran and **no responsive variants
+(`md:`, `lg:`, `xl:`) were emitted into the bundle** despite the utilities
+appearing in templates. Compiled `styles.css` contained zero
+`@media (min-width: ...)` rules from Tailwind.
+
+Fix:
+
+- Tailwind directives now live in a dedicated **pure CSS** entrypoint
+  `apps/ng-tag-build/src/tailwind.css` so PostCSS sees them untouched. The
+  file declares `@layer theme, base, components, utilities;` and uses
+  `@source` directives to scan `libs/ui/src/**` and
+  `apps/ng-tag-build/src/**`.
+- `apps/ng-tag-build/src/styles.scss` is reduced to a stub pointing at the
+  sibling tailwind entrypoint.
+- `apps/ng-tag-build/project.json` lists both files in `styles`.
+
+A second cascade conflict surfaced after that: Angular Material's baseline
+component styles are emitted **unlayered** from two places — the prebuilt
+theme `@angular/material/prebuilt-themes/indigo-pink.css` _and_ the
+`@include mat.all-component-themes(theme.$primary-theme)` inside
+`libs/shared-styles/src/styles/_styles.scss`. Per CSS Cascade L5, unlayered
+rules beat layered ones at equal specificity, so Tailwind utilities inside
+`@layer utilities` (e.g. `.lg\:hidden`) lose to Material defaults like
+`.mat-mdc-icon-button { display: inline-block }`. Wrapping a single source
+in `@layer material` is defeated by the other source's unlayered duplicates,
+and refactoring `libs/shared-styles` is out of scope for this branch.
+
+Practical workaround used in `MenuTabsComponent`: Tailwind v4's trailing
+`!` important suffix (`hidden! lg:flex!`, `lg:hidden!`) on the toggles that
+must override Material baselines. Component-scoped helpers like the inline
+`.hidden { display: none }` previously in MenuTabsComponent were removed
+because Angular ViewEncapsulation bumps their specificity above Tailwind's
+single-class utility selectors.
 
 ## Stages
 
