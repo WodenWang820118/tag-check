@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   HttpException,
+  Logger,
   NotFoundException,
   ArgumentsHost
 } from '@nestjs/common';
@@ -80,7 +81,7 @@ describe('AllExceptionsFilter', () => {
   it('swallows firestore failures so the response still completes', async () => {
     addDocMock.mockRejectedValueOnce(new Error('firestore down'));
     const errSpy = vi
-      .spyOn(console, 'error')
+      .spyOn(Logger, 'error')
       .mockImplementation(() => undefined);
     const { host, status } = buildHost({ url: '/q', method: 'GET' });
 

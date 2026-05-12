@@ -129,7 +129,10 @@ export class SpecRepositoryService {
       { testEvent: testEvent },
       newSpec
     );
-    Logger.log(JSON.stringify(entity), 'SpecRepositoryService.update');
+    Logger.log(
+      `SpecRepositoryService.update: entityId=${(entity as { id?: unknown }).id}, eventName=${newSpec.eventName}`,
+      'SpecRepositoryService.update'
+    );
     return plainToInstance(SpecResponseDto, entity);
   }
 }

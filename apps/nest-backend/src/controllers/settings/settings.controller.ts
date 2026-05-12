@@ -39,7 +39,7 @@ export class SettingsController {
     @Body() settings: Partial<ProjectSetting>
   ) {
     this.logger.log(
-      `updateProjectSettings - projectSlug=${projectSlug}, settings=${JSON.stringify(settings)}`
+      `updateProjectSettings - projectSlug=${projectSlug}, keys=${Object.keys(settings).join(',')}`
     );
     return await this.projectFacadeRepositoryService.updateProjectSettings(
       projectSlug,
@@ -53,7 +53,7 @@ export class SettingsController {
     @Body() settings: Partial<ApplicationSetting>
   ) {
     this.logger.log(
-      `updateApplicationSettings - projectSlug=${projectSlug}, settings=${JSON.stringify(settings)}`
+      `updateApplicationSettings - projectSlug=${projectSlug}, keys=${Object.keys(settings).join(',')}`
     );
     return await this.projectFacadeRepositoryService.updateApplicationSettings(
       projectSlug,
@@ -67,7 +67,7 @@ export class SettingsController {
     @Body() settings: Partial<AuthenticationSetting>
   ) {
     this.logger.log(
-      `updateAuthenticationSettings - projectSlug=${projectSlug}, settings=${JSON.stringify(settings)}`
+      `updateAuthenticationSettings - projectSlug=${projectSlug}, keys=${Object.keys(settings).join(',')}`
     );
     return await this.projectFacadeRepositoryService.updateAuthenticationSettings(
       projectSlug,
@@ -81,7 +81,7 @@ export class SettingsController {
     @Body() settings: Partial<BrowserSetting>
   ) {
     this.logger.log(
-      `updateBrowserSettings - projectSlug=${projectSlug}, settings=${JSON.stringify(settings)}`
+      `updateBrowserSettings - projectSlug=${projectSlug}, keys=${Object.keys(settings).join(',')}`
     );
     return await this.projectFacadeRepositoryService.updateBrowserSettings(
       projectSlug,

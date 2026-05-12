@@ -30,7 +30,7 @@ export class ReportController {
     const reports =
       await this.testEventRepositoryService.listReports(projectSlug);
     this.logger.log(
-      `getProjectEventReports: ${JSON.stringify(reports, null, 2)}`
+      `getProjectEventReports: projectSlug=${projectSlug}, count=${Array.isArray(reports) ? reports.length : 0}`
     );
     return reports;
   }
@@ -52,7 +52,9 @@ export class ReportController {
     @Param('eventId') eventId: string,
     @Body() report: IReportDetails
   ) {
-    this.logger.log(`updateReport: ${JSON.stringify(report, null, 2)}`);
+    this.logger.log(
+      `updateReport: projectSlug=${projectSlug}, eventId=${eventId}, keys=${Object.keys(report).join(',')}`
+    );
 
     await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
       projectSlug,
@@ -67,7 +69,9 @@ export class ReportController {
     @Param('eventId') eventId: string,
     @Body() reportData: CreateFullTestEventDto
   ) {
-    Logger.log(`addReport: ${JSON.stringify(reportData, null, 2)}`);
+    Logger.log(
+      `addReport: projectSlug=${projectSlug}, eventId=${eventId}, keys=${Object.keys(reportData as Record<string, unknown>).join(',')}`
+    );
     // Video isn't suitable to be saved in SQL DB as a blob
     // Use file system to save video instead
     await this.projectReportService.createEventReportFolder(

@@ -46,9 +46,7 @@ export class DataLayerController {
     @Body() eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     this.logger.log(
-      `Inspecting single event: projectSlug=${projectSlug}, eventId=${eventId}, query=${JSON.stringify(
-        query
-      )}, eventInspectionPresetDto=${JSON.stringify(eventInspectionPresetDto)}`
+      `Inspecting single event: projectSlug=${projectSlug}, eventId=${eventId}, queryKeys=${Object.keys(query).join(',')}, presetKeys=${Object.keys(eventInspectionPresetDto).join(',')}`
     );
     try {
       await this.eventInspectionControllerService.inspectSingleEvent(
