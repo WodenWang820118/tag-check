@@ -106,8 +106,41 @@
         "command": "node ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.app.json"
       }
     },
+    "seo-typecheck": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        {
+          "externalDependencies": ["typescript"]
+        }
+      ],
+      "options": {
+        "cwd": "apps/ng-gtm-sample",
+        "command": "node ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.seo.json"
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "verify-seo": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "production",
+        "^production",
+        "{projectRoot}/tests/seo/**/*",
+        "{projectRoot}/tsconfig.seo.json",
+        {
+          "externalDependencies": ["vitest"]
+        }
+      ],
+      "dependsOn": ["build", "seo-typecheck"],
+      "options": {
+        "cwd": "apps/ng-gtm-sample",
+        "command": "pnpm exec cross-env NG_GTM_SAMPLE_OUTPUT_PATH=../../dist/apps/ng-gtm-sample/browser vitest --config vitest.seo.config.ts run tests/seo/seo-prerender.spec.ts"
+      }
     },
     "serve-static": {
       "continuous": true,
