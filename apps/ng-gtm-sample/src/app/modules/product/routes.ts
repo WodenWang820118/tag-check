@@ -1,3 +1,5 @@
+import { destinationSlugGuard } from '../../shared/guards/destination-slug.guard';
+
 export const PRODUCT_ROUTES = [
   {
     path: '',
@@ -6,18 +8,21 @@ export const PRODUCT_ROUTES = [
     children: [
       {
         path: 'destinations',
+        data: { seoKey: 'destinations' },
         loadComponent: () =>
           import('./views/destination/destination.component').then(
             (m) => m.DestinationComponent
-          ),
+          )
       },
       {
-        path: 'details/:id',
+        path: 'details/:slug',
+        canActivate: [destinationSlugGuard],
+        data: { seoKey: 'destination-detail' },
         loadComponent: () =>
           import('./views/details/details.component').then(
             (m) => m.DetailsComponent
-          ),
-      },
-    ],
-  },
+          )
+      }
+    ]
+  }
 ];

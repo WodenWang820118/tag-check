@@ -6,14 +6,16 @@ export const HOME_ROUTES = [
     children: [
       {
         path: 'login',
+        data: { seoKey: 'login' },
         loadComponent: () =>
-          import('./views/login/login.component').then((m) => m.LoginComponent),
+          import('./views/login/login.component').then((m) => m.LoginComponent)
       },
       {
         path: '',
+        data: { seoKey: 'home' },
         loadComponent: () =>
-          import('./views/main/main.component').then((m) => m.MainComponent),
-      },
-    ],
-  },
+          import('./views/main/main.component').then((m) => m.MainComponent)
+      }
+    ]
+  }
 ];

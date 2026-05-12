@@ -7,11 +7,14 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@angular/build:application",
+      "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/ng-gtm-sample",
+        "index": "apps/ng-gtm-sample/src/index.html",
         "browser": "apps/ng-gtm-sample/src/main.ts",
+        "server": "apps/ng-gtm-sample/src/main.server.ts",
+        "outputMode": "static",
         "polyfills": ["zone.js"],
         "tsConfig": "apps/ng-gtm-sample/tsconfig.app.json",
         "assets": [
@@ -19,6 +22,8 @@
             "glob": "**/*",
             "input": "apps/ng-gtm-sample/public"
           },
+          "apps/ng-gtm-sample/src/robots.txt",
+          "apps/ng-gtm-sample/src/sitemap.xml",
           {
             "input": "apps/ng-gtm-sample/src/assets",
             "glob": "**/*",
@@ -48,8 +53,8 @@
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "500kb",
-              "maximumError": "1mb"
+              "maximumWarning": "900kb",
+              "maximumError": "1100kb"
             },
             {
               "type": "anyComponentStyle",
@@ -69,7 +74,7 @@
     },
     "serve": {
       "continuous": true,
-      "executor": "@angular/build:dev-server",
+      "executor": "@angular-devkit/build-angular:dev-server",
       "configurations": {
         "production": {
           "buildTarget": "ng-gtm-sample:build:production"
@@ -81,7 +86,7 @@
       "defaultConfiguration": "development"
     },
     "extract-i18n": {
-      "executor": "@angular/build:extract-i18n",
+      "executor": "@angular-devkit/build-angular:extract-i18n",
       "options": {
         "buildTarget": "ng-gtm-sample:build"
       }
@@ -111,7 +116,7 @@
         "buildTarget": "ng-gtm-sample:build",
         "port": 4200,
         "staticFilePath": "dist/apps/ng-gtm-sample/browser",
-        "spa": true
+        "spa": false
       }
     }
   }

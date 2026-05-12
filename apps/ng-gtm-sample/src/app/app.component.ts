@@ -1,5 +1,7 @@
-import { Component, effect } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Component, PLATFORM_ID, effect, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { SeoService } from './seo/seo.service';
 import { UrlTrackerService } from './shared/services/url-tracker/url-tracker.service';
 import { LoadingService } from './shared/services/loading/loading.service';
 
@@ -9,18 +11,37 @@ import { LoadingService } from './shared/services/loading/loading.service';
   template: `<div class="sample-page"><router-outlet></router-outlet></div>`
 })
 export class AppComponent {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly browser = isPlatformBrowser(this.platformId);
+
   constructor(
+    private readonly seoService: SeoService,
     private readonly urlTrackerService: UrlTrackerService,
     private readonly loadingService: LoadingService
   ) {
+    this.seoService.start();
+
     const loading = this.loadingService.getLoadingState();
     let didFire = false;
     effect(() => {
-      if (!loading() && !didFire) {
+      if (this.browser && !loading() && !didFire) {
         didFire = true;
-        (globalThis as any).dataLayer.push({ event: 'componentsLoaded' });
+        this.getDataLayer().push({
+          event: 'componentsLoaded'
+        });
       }
     });
-    this.urlTrackerService.initializeUrlTracking();
+
+    if (this.browser) {
+      this.urlTrackerService.initializeUrlTracking();
+    }
+  }
+
+  private getDataLayer(): Array<Record<string, unknown>> {
+    const scope = globalThis as unknown as {
+      dataLayer?: Array<Record<string, unknown>>;
+    };
+    scope.dataLayer ??= [];
+    return scope.dataLayer;
   }
 }

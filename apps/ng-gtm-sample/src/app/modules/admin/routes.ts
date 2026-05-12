@@ -8,18 +8,20 @@ export const ADMIN_ROUTES: Routes = [
     children: [
       {
         path: 'dashboard',
+        data: { seoKey: 'admin' },
         loadComponent: () =>
           import('./views/dashboard/dashboard.component').then(
             (m) => m.DashboardComponent
-          ),
+          )
       },
       {
         path: 'add-data',
+        data: { seoKey: 'admin' },
         loadComponent: () =>
           import('./views/add-data/add-data.component').then(
             (m) => m.AddDataComponent
-          ),
-      },
-    ],
-  },
+          )
+      }
+    ]
+  }
 ];
