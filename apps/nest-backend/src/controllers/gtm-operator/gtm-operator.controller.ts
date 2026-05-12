@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
 import { GtmOperatorService } from '../../infrastructure/gtm-operator/gtm-operator.service';
-import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 
@@ -57,8 +56,7 @@ export class GtmOperatorController {
         eventId
       );
     this.logger.log(
-      JSON.stringify(abstractReport.testEventDetails, null, 2),
-      'Abstract Report: '
+      `Abstract Report: eventId=${abstractReport.eventId}, detailsKeys=${Object.keys(abstractReport.testEventDetails || {}).join(',') || 'none'}`
     );
     return [abstractReport];
   }
@@ -70,7 +68,6 @@ export class GtmOperatorController {
       'This endpoint stops the current operation and returns the results of the operation.'
   })
   @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
-  @Log()
   stopOperation() {
     try {
       this.gtmOperatorService.stopOperation();

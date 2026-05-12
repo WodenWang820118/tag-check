@@ -2,7 +2,6 @@ import { Body, Controller, Get, Logger, Param, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import type { Recording } from '@utils';
 import { ProjectRecordingService } from '../../features/project-agent/project-recording/project-recording.service';
-import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { ProjectFacadeRepositoryService } from '../../features/repository/project-facade/project-facade-repository.service';
 import { RecordingRepositoryService } from '../../core/repository/recording/recording-repository.service';
 
@@ -34,7 +33,6 @@ export class RecordingController {
     description: 'The name of the event to which the recording belongs.'
   })
   @Get(':projectSlug/:eventId')
-  @Log()
   async getRecordingDetails(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
@@ -62,7 +60,6 @@ export class RecordingController {
     description: 'The updated recording.'
   })
   @Put(':projectSlug/:eventId')
-  @Log()
   async updateRecording(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,

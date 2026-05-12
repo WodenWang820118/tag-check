@@ -50,7 +50,7 @@ export class ApplicationSettingRepositoryService {
         }
       });
       this.logger.debug(
-        `application setting repository: updateApplicationSettings - projectSlug=${projectEntity.projectSlug}, existingSetting=${JSON.stringify(existingSetting, null, 2)}`
+        `application setting repository: updateApplicationSettings - projectSlug=${projectEntity.projectSlug}, existingKeys=${existingSetting ? Object.keys(existingSetting).join(',') : 'none'}`
       );
       if (existingSetting) {
         // Update existing setting

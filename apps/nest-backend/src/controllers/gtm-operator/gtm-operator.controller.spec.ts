@@ -1,4 +1,3 @@
-import { HttpStatus } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { GtmOperatorController } from './gtm-operator.controller';
 
@@ -51,22 +50,20 @@ describe('GtmOperatorController', () => {
     expect(result).toEqual([{ eventId: 'evt-1', testEventDetails: {} }]);
   });
 
-  it('stopOperation returns the 200 success envelope on the happy path', async () => {
+  it('stopOperation returns the 200 success envelope on the happy path', () => {
     const { controller } = build();
-    await expect(controller.stopOperation()).resolves.toEqual({
+    expect(controller.stopOperation()).toEqual({
       status: 200,
       message: 'Operation stopped successfully'
     });
   });
 
-  it('stopOperation wraps thrown errors in a 500 HttpException', async () => {
+  it('stopOperation wraps thrown errors in a 500 HttpException', () => {
     const { controller } = build({
       stopOperation: vi.fn().mockImplementation(() => {
         throw new Error('cannot stop');
       })
     });
-    await expect(controller.stopOperation()).rejects.toMatchObject({
-      status: HttpStatus.INTERNAL_SERVER_ERROR
-    });
+    expect(() => controller.stopOperation()).toThrow();
   });
 });

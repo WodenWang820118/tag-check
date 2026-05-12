@@ -4,6 +4,7 @@ import {
   ArgumentsHost,
   HttpException,
   Injectable,
+  Logger,
   NotFoundException,
   NotAcceptableException,
   InternalServerErrorException
@@ -62,14 +63,17 @@ export class AllExceptionsFilter implements ExceptionFilter {
         exception:
           exception instanceof Error
             ? exception.message
-            : JSON.stringify(exception, null, 2),
+            : JSON.stringify(exception),
         stack: exception instanceof Error ? exception.stack : undefined,
         path: request.url,
         method: request.method,
         status: status
       });
     } catch (error) {
-      console.error('Failed to log error to Firebase:', error);
+      Logger.error(
+        'Failed to log error to Firebase:',
+        error instanceof Error ? error.stack : String(error)
+      );
     }
   }
 }

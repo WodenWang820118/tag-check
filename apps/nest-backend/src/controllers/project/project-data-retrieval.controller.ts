@@ -9,7 +9,6 @@ import {
   StreamableFile,
   UseInterceptors
 } from '@nestjs/common';
-import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 import { FileService } from '../../infrastructure/os/file/file.service';
@@ -44,14 +43,12 @@ export class ProjectDataRetrievalController {
   }
 
   @Get(':projectSlug')
-  @Log()
   async getProject(@Param('projectSlug') projectSlug: string) {
     return this.projectRepositoryService.getBySlug(projectSlug);
   }
 
   @UseInterceptors(CacheInterceptor)
   @Get(':projectSlug/gtm-config')
-  // @Log()
   async getGtmConfig(@Param('projectSlug') projectSlug: string) {
     const gtmConfigPath =
       await this.projectRepositoryService.getGtmConfigBySlug(projectSlug);

@@ -56,6 +56,7 @@ function dirnamePath(p: string): string {
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, INestApplication } from '@nestjs/common';
+import { NativeLogger } from 'nestjs-pino';
 import { writeFileSync } from 'fs';
 import * as path from 'path';
 import { json, urlencoded } from 'express';
@@ -110,17 +111,14 @@ async function bootstrap() {
   const tBootstrapEnter = performance.now();
   const processUptimeAtBootstrapEnterMs = process.uptime() * 1000;
   try {
-    // Log levels: prod stays lean (no `debug`/`verbose`); other envs keep `debug`
-    // for richer diagnostics. `bufferLogs: true` defers log emission until the
-    // logger is fully configured, removing per-line console I/O during the
-    // most expensive part of startup (DI graph + onModuleInit).
-    const isProd = process.env.NODE_ENV === 'prod';
+    // `bufferLogs: true` defers log emission until the logger is fully
+    // configured (LoggerModule.forRoot + pino-http middleware), removing
+    // per-line console I/O during the most expensive part of startup.
+    // Log levels are controlled by pino (LOG_LEVEL env or 'info' default).
     const nestApp = await NestFactory.create(AppModule, {
-      logger: isProd
-        ? ['error', 'warn', 'log']
-        : ['error', 'warn', 'log', 'debug'],
       bufferLogs: true
     });
+    nestApp.useLogger(nestApp.get(NativeLogger));
     const tNestCreated = performance.now();
 
     // Configure CORS

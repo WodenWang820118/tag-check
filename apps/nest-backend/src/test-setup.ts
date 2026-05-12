@@ -17,6 +17,10 @@ if (!verboseTestLogs) {
   >;
 
   const silenceTestLogs = () => {
+    // Disable NestJS built-in logger. In production the backend is
+    // nestjs-pino NativeLogger (wired via app.useLogger in main.ts),
+    // but unit tests use Test.createTestingModule without LoggerModule
+    // so the built-in Logger is what matters here.
     Logger.overrideLogger(false);
 
     for (const method of loggerMethods) {
