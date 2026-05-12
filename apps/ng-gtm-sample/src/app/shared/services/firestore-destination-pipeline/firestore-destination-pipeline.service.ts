@@ -30,9 +30,7 @@ import { Destination } from '../../models/destination.model';
 import { IndexeddbDestinationService } from '../indexeddb-destination/indexeddb-destination.service';
 import { FIREBASE_FIRESTORE } from '../../../firebase/firebase.tokens';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class FirestoreDestinationPipelineService {
   private readonly firstVisibleDocs = signal<QueryDocumentSnapshot<
     DocumentData,

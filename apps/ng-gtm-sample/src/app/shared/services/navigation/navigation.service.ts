@@ -1,9 +1,13 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, Params } from '@angular/router';
 import { tap } from 'rxjs';
+import {
+  getPublicDestinationById,
+  getPublicDestinationBySlug
+} from '../destination/destination-catalog';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class NavigationService {
   private readonly source = signal<string | null>(null);
@@ -16,24 +20,27 @@ export class NavigationService {
     this.trackSource().subscribe();
   }
 
-  private getMergedQueryParams(additionalParams: any = {}) {
-    // Always include app_source if it's available
-    const queryParams: any = { app_source: this.source$() };
+  private getMergedQueryParams(additionalParams: Params = {}) {
+    const queryParams: Params = {};
+    const source = this.source$();
 
-    // Merge additionalParams only if they are explicitly provided
-    for (const key in additionalParams) {
-      if (additionalParams.hasOwnProperty(key)) {
-        queryParams[key] = additionalParams[key];
+    if (source) {
+      queryParams['app_source'] = source;
+    }
+
+    for (const [key, value] of Object.entries(additionalParams)) {
+      if (value !== undefined) {
+        queryParams[key] = value;
       }
     }
 
     return queryParams;
   }
 
-  private navigate(path: string, additionalParams: any = {}) {
+  private navigate(path: string, additionalParams: Params = {}) {
     console.log(`Navigating to: ${path}`, additionalParams);
     this.router.navigate([path], {
-      queryParams: this.getMergedQueryParams(additionalParams),
+      queryParams: this.getMergedQueryParams(additionalParams)
     });
   }
 
@@ -56,8 +63,13 @@ export class NavigationService {
     this.navigate('product/destinations');
   }
 
-  navigateToDetail(id: string) {
-    this.navigate(`product/details/${id}`);
+  navigateToDetail(destinationIdOrSlug: string) {
+    const destination =
+      getPublicDestinationById(destinationIdOrSlug) ??
+      getPublicDestinationBySlug(destinationIdOrSlug);
+    const slug = destination?.slug ?? destinationIdOrSlug;
+
+    this.navigate(`product/details/${slug}`);
   }
 
   navigateToBasket() {
@@ -87,7 +99,7 @@ export class NavigationService {
 
   navigateToDestinationResults(query: string) {
     this.navigate('product/destinations', {
-      search_term: query,
+      search_term: query
     });
   }
 }

@@ -7,9 +7,7 @@ import { doc, setDoc, writeBatch } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { FIREBASE_FIRESTORE } from '../../../firebase/firebase.tokens';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class CountriesDataService {
   private readonly jsonUrl = 'assets/countries.json'; // Path to the JSON file
   private readonly uploadProgress = signal<number>(0);

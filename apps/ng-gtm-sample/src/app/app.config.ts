@@ -1,8 +1,9 @@
 import { ApplicationConfig, isDevMode } from '@angular/core';
 import {
+  PreloadAllModules,
   provideRouter,
-  withPreloading,
-  PreloadAllModules
+  withInMemoryScrolling,
+  withPreloading
 } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -11,15 +12,19 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
-import { provideFirebaseClients } from './firebase/provide-firebase';
-import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes, withPreloading(PreloadAllModules)),
+    provideRouter(
+      routes,
+      withPreloading(PreloadAllModules),
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'enabled',
+        anchorScrolling: 'enabled'
+      })
+    ),
     provideHttpClient(),
     provideAnimations(),
-    provideFirebaseClients(environment.firebase),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000'

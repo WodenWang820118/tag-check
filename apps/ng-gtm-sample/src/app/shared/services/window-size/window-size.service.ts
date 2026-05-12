@@ -1,18 +1,34 @@
-import { computed, Injectable, signal } from '@angular/core';
-import { debounceTime, fromEvent, tap } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
+import {
+  computed,
+  Injectable,
+  PLATFORM_ID,
+  inject,
+  signal
+} from '@angular/core';
+import { EMPTY, debounceTime, fromEvent, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WindowSizeService {
-  private readonly width = signal<number>(globalThis.innerWidth);
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly width = signal<number>(
+    this.browser ? globalThis.innerWidth : 0
+  );
   width$ = computed(() => this.width());
 
   constructor() {
-    this.onResize().subscribe();
+    if (this.browser) {
+      this.onResize().subscribe();
+    }
   }
 
   onResize() {
+    if (!this.browser) {
+      return EMPTY;
+    }
+
     return fromEvent(globalThis, 'resize').pipe(
       debounceTime(100),
       tap((event) => {

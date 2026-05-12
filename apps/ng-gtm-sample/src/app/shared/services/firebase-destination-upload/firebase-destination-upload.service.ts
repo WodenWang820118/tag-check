@@ -15,9 +15,7 @@ type UploadedDestinationAssets = Record<
   { fileName: string; downloadUrl: string }
 >;
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class FirebaseDestinationUploadService {
   private readonly firestore = inject(FIREBASE_FIRESTORE);
   private readonly firebaseStorageService = inject(FirebaseStorageService);
