@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import type { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionControllerService } from './event-inspection-controller.service';
-import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 import { InspectEventQueryDto } from './dto/inspect-event-query.dto';
 
@@ -110,7 +109,6 @@ export class DataLayerController {
   })
   @ApiResponse({ status: 200, description: 'Operation stopped successfully.' })
   @Post('stop-operation')
-  @Log()
   async stopOperation() {
     try {
       await this.eventInspectionControllerService.stopOperation();

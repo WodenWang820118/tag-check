@@ -8,26 +8,21 @@ import {
   Post
 } from '@nestjs/common';
 import { ConfigurationControllerService } from './configuration-controller.service';
-import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
-
 @Controller('configurations')
 export class ConfigurationController {
   constructor(private readonly service: ConfigurationControllerService) {}
 
   @Get('/debug')
-  @Log()
   getError() {
     throw new Error('My first Sentry error!');
   }
 
   @Get()
-  @Log()
   async getConfigurations() {
     return await this.service.getConfigurations();
   }
 
   @Get(':name')
-  @Log()
   async getConfiguration(@Param('name') name: string) {
     try {
       const result = await this.service.getConfiguration(name);

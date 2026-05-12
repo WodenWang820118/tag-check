@@ -7,7 +7,6 @@ import {
   BrowserSetting,
   ProjectSetting
 } from '@utils';
-import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 import { ProjectFacadeRepositoryService } from '../../features/repository/project-facade/project-facade-repository.service';
 
@@ -30,13 +29,11 @@ export class SettingsController {
     description: 'The name of the project to which the event belongs.'
   })
   @Get(':projectSlug')
-  @Log()
   async getProjectSettings(@Param('projectSlug') projectSlug: string) {
     return await this.projectRepositoryService.getSettingBySlug(projectSlug);
   }
 
   @Put(':projectSlug/project')
-  @Log()
   async updateProjectSettings(
     @Param('projectSlug') projectSlug: string,
     @Body() settings: Partial<ProjectSetting>
@@ -51,7 +48,6 @@ export class SettingsController {
   }
 
   @Put(':projectSlug/application')
-  @Log()
   async updateApplicationSettings(
     @Param('projectSlug') projectSlug: string,
     @Body() settings: Partial<ApplicationSetting>
@@ -66,7 +62,6 @@ export class SettingsController {
   }
 
   @Put(':projectSlug/authentication')
-  @Log()
   async updateAuthenticationSettings(
     @Param('projectSlug') projectSlug: string,
     @Body() settings: Partial<AuthenticationSetting>
@@ -81,7 +76,6 @@ export class SettingsController {
   }
 
   @Put(':projectSlug/browser')
-  @Log()
   async updateBrowserSettings(
     @Param('projectSlug') projectSlug: string,
     @Body() settings: Partial<BrowserSetting>

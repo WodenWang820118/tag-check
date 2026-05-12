@@ -1,9 +1,3 @@
-import { Global, Logger, Module } from '@nestjs/common';
-import { LoggingInterceptor } from './logging-interceptor.service';
-
-@Global()
-@Module({
-  providers: [LoggingInterceptor, Logger],
-  exports: [LoggingInterceptor, Logger],
-})
-export class LoggingInterceptorModule {}
+// Removed: this module previously provided LoggingInterceptor and Logger.
+// Logger is now supplied by nestjs-pino LoggerModule.forRoot in app.module.ts.
+// Keep the module file as an empty placeholder to avoid breaking import paths.

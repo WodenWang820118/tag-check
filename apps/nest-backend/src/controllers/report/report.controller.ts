@@ -11,7 +11,6 @@ import {
 import type { IReportDetails } from '@utils';
 import { ProjectReportService } from '../../features/project-agent/project-report/project-report.service';
 import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
-import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 import { CreateFullTestEventDto, UpdateTestEventDto } from '../../shared';
@@ -27,7 +26,6 @@ export class ReportController {
   ) {}
 
   @Get(':projectSlug')
-  @Log()
   async getProjectEventReports(@Param('projectSlug') projectSlug: string) {
     const reports =
       await this.testEventRepositoryService.listReports(projectSlug);
@@ -38,7 +36,6 @@ export class ReportController {
   }
 
   @Delete(':projectSlug')
-  @Log()
   async deleteProjectEventReports(
     @Param('projectSlug') projectSlug: string,
     @Body() eventIds: string[]
@@ -50,7 +47,6 @@ export class ReportController {
   }
 
   @Put(':projectSlug/:eventId')
-  @Log()
   async updateReport(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
@@ -87,7 +83,6 @@ export class ReportController {
   }
 
   @Delete(':projectSlug/:eventId')
-  @Log()
   async deleteReport(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
