@@ -51,3 +51,47 @@ Verdict
 Residual risks
 - ...
 """
+
+must_refuse_when = """
+# Must Refuse When
+
+A reviewer MUST refuse to issue an approval (and instead reply with a
+"context required" findings list) when ANY of the following hold. Refusal is
+not a P-graded finding; it is a precondition.
+
+1. **Missing Changed files block** — implementation or pre-merge review
+   context lacks an explicit `Changed files:` bullet list.
+2. **Missing task size + rationale** — plan or implementation review context
+   lacks `Task Size: <tiny|small|medium|large|huge>` plus a one-line
+   classification rationale.
+3. **Missing verification plan** — a plan lacks a minimal verification
+   strategy, or an implementation review lacks the commands or test results
+   that were actually run.
+4. **Missing rollback path** — a medium+ task does not state a rollback
+   strategy (commit granularity, revert plan, feature flag, or migration
+   backout).
+5. **Same-family self-review** — the primary agent's family equals the
+   reviewer's family AND the task is medium+ or touches a sensitive surface.
+   Three families are recognized: Copilot, Gemini, Codex.
+6. **Missing grill-me evidence** — a medium+ or sensitive plan does not
+   include the cross-family `grill-me` end checklist (six items, with
+   concrete answers and no `high-impact` open question remaining).
+7. **maxFiles override without addendum** — the pre-implementation gate
+   carries an `overrideReason` (because the changed file count exceeded the
+   gate's `maxFiles`) but the plan does not include a matching addendum that
+   justifies the expansion.
+8. **Missing rotation log entry** — the gate state for this checkpoint does
+   not record `primaryFamily`, `grillerFamily`, and `reviewerFamily`.
+
+When refusing, structure the response as:
+
+```
+Review refused
+- Reason: <one-line summary referencing the rule number above>
+- Required to proceed:
+  - <concrete missing item 1>
+  - <concrete missing item 2>
+```
+
+Do not partially review or assume defaults.
+"""

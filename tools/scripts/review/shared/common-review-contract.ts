@@ -3,11 +3,11 @@ import path from 'node:path';
 
 export const COMMON_REVIEW_CONTRACT_PATHS = [
   path.join('.agents', 'reviewers', 'common-review-contract.toml'),
-  path.join('.codex', 'review', 'common-review-contract.toml')
+  path.join('.codex', 'review', 'common-review-contract.toml'),
 ] as const;
 
 export function resolveCommonReviewContractPath(
-  repoRoot: string
+  repoRoot: string,
 ): string | undefined {
   for (const contractPath of COMMON_REVIEW_CONTRACT_PATHS) {
     const resolvedPath = path.join(repoRoot, contractPath);
@@ -29,14 +29,14 @@ export function readCommonReviewContract(repoRoot: string): string {
 
   return extractTomlMultilineField(
     readFileSync(contractPath, 'utf8'),
-    'developer_instructions'
+    'developer_instructions',
   );
 }
 
 function extractTomlMultilineField(source: string, fieldName: string): string {
   const escapedFieldName = escapeRegExp(fieldName);
   const match = source.match(
-    new RegExp(`${escapedFieldName}\\s*=\\s*"""([\\s\\S]*?)"""`)
+    new RegExp(`${escapedFieldName}\\s*=\\s*"""([\\s\\S]*?)"""`),
   );
 
   return (match?.[1] ?? source).trim();

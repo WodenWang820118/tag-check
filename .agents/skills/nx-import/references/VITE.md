@@ -195,12 +195,12 @@ export default [
   ...vue.configs['flat/recommended'],
   {
     files: ['**/*.vue'],
-    languageOptions: { parser: vueParser, parserOptions: { parser: tsParser } }
+    languageOptions: { parser: vueParser, parserOptions: { parser: tsParser } },
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx', '**/*.vue'],
-    rules: { 'vue/multi-word-component-names': 'off' }
-  }
+    rules: { 'vue/multi-word-component-names': 'off' },
+  },
 ];
 ```
 

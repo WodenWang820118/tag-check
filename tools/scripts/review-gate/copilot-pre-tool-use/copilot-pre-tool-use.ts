@@ -4,7 +4,7 @@ import {
   evaluateHookPermission,
   getRepoContext,
   loadState,
-  parseHookInput
+  parseHookInput,
 } from '../shared/shared.ts';
 
 export async function main(): Promise<void> {
@@ -24,12 +24,12 @@ export async function main(): Promise<void> {
     const evaluation = evaluateHookPermission({
       hookInput,
       repoContext,
-      state
+      state,
     });
 
     if (!evaluation.allow) {
       process.stdout.write(
-        buildDenyPayload(evaluation.reason ?? 'Gate blocked.')
+        buildDenyPayload(evaluation.reason ?? 'Gate blocked.'),
       );
     }
   } catch {

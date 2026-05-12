@@ -2,20 +2,20 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { test } from 'vitest';
+import test from 'node:test';
 
 import {
   cacheProviderHealth,
   createProviderHealthCacheKey,
   getCachedProviderHealth,
-  getProviderHealthStatePath
+  getProviderHealthStatePath,
 } from './provider-health.ts';
 
 test('provider health cache keys include the model when present', () => {
   assert.equal(createProviderHealthCacheKey('copilot'), 'copilot');
   assert.equal(
     createProviderHealthCacheKey('gemini', 'gemini-3-flash-preview'),
-    'gemini:gemini-3-flash-preview'
+    'gemini:gemini-3-flash-preview',
   );
 });
 
@@ -25,7 +25,7 @@ test('provider health cache round-trips healthy and unhealthy entries', () => {
   try {
     assert.match(
       getProviderHealthStatePath(tempRoot),
-      /\.cache[\\/]reviews[\\/]provider-health-state\.json$/
+      /\.cache[\\/]reviews[\\/]provider-health-state\.json$/,
     );
 
     cacheProviderHealth(
@@ -33,9 +33,9 @@ test('provider health cache round-trips healthy and unhealthy entries', () => {
       'gemini-3-flash-preview',
       {
         available: true,
-        checkedAtMs: 1_000
+        checkedAtMs: 1_000,
       },
-      tempRoot
+      tempRoot,
     );
 
     cacheProviderHealth(
@@ -44,9 +44,9 @@ test('provider health cache round-trips healthy and unhealthy entries', () => {
       {
         available: false,
         checkedAtMs: 2_000,
-        reason: 'quota exhausted'
+        reason: 'quota exhausted',
       },
-      tempRoot
+      tempRoot,
     );
 
     assert.deepEqual(
@@ -54,13 +54,13 @@ test('provider health cache round-trips healthy and unhealthy entries', () => {
         'gemini',
         'gemini-3-flash-preview',
         tempRoot,
-        1_500
+        1_500,
       ),
       {
         available: true,
         checkedAtMs: 1_000,
-        source: 'cache'
-      }
+        source: 'cache',
+      },
     );
 
     assert.deepEqual(
@@ -69,8 +69,8 @@ test('provider health cache round-trips healthy and unhealthy entries', () => {
         available: false,
         checkedAtMs: 2_000,
         reason: 'quota exhausted',
-        source: 'cache'
-      }
+        source: 'cache',
+      },
     );
   } finally {
     rmSync(tempRoot, { force: true, recursive: true });

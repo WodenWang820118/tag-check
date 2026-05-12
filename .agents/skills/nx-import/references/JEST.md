@@ -46,7 +46,7 @@ module.exports = { ...nxPreset };
 ```ts
 export default {
   displayName: 'my-lib',
-  preset: '../../jest.preset.js'
+  preset: '../../jest.preset.js',
   // project-specific overrides
 };
 ```

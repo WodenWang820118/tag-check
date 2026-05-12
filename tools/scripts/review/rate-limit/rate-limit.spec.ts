@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { test } from 'vitest';
+import test from 'node:test';
 
 import {
   getInterRequestDelayMs,
@@ -10,7 +10,7 @@ import {
   getRateLimitStatePath,
   getRetryDelayMs,
   loadRateLimitState,
-  saveRateLimitState
+  saveRateLimitState,
 } from './rate-limit.ts';
 
 test('getInterRequestDelayMs waits only for the remaining start-to-start interval', () => {
@@ -20,18 +20,18 @@ test('getInterRequestDelayMs waits only for the remaining start-to-start interva
     getInterRequestDelayMs({
       model: 'gemini-2.5-pro',
       nowMs: now,
-      lastStartedAtMs: Date.UTC(2026, 3, 17, 9, 0, 5)
+      lastStartedAtMs: Date.UTC(2026, 3, 17, 9, 0, 5),
     }),
-    5000
+    5000,
   );
 
   assert.equal(
     getInterRequestDelayMs({
       model: 'gemini-3-flash-preview',
       nowMs: now,
-      lastStartedAtMs: Date.UTC(2026, 3, 17, 8, 59, 0)
+      lastStartedAtMs: Date.UTC(2026, 3, 17, 8, 59, 0),
     }),
-    0
+    0,
   );
 });
 
@@ -46,7 +46,7 @@ test('getRetryDelayMs follows the configured backoff schedule', () => {
   assert.equal(getRetryDelayMs('gemini-3-flash-preview', 4), 30000);
   assert.equal(
     getModelRateLimitPolicy('gemini-3.1-flash-preview').model,
-    'gemini-3-flash-preview'
+    'gemini-3-flash-preview',
   );
 });
 
@@ -64,20 +64,20 @@ test('rate-limit state round-trips through the workspace cache', () => {
       {
         models: {
           'gemini-2.5-pro': {
-            lastStartedAtMs: 1234
-          }
-        }
+            lastStartedAtMs: 1234,
+          },
+        },
       },
-      tempRoot
+      tempRoot,
     );
 
     const restored = loadRateLimitState(tempRoot);
     assert.deepEqual(restored, {
       models: {
         'gemini-2.5-pro': {
-          lastStartedAtMs: 1234
-        }
-      }
+          lastStartedAtMs: 1234,
+        },
+      },
     });
   } finally {
     rmSync(tempRoot, { force: true, recursive: true });
