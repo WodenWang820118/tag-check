@@ -1,208 +1,199 @@
 # Agent Workflow
 
-`AGENTS.md` is the repository-level entry point for coding agents.
-Tool-specific bridge files must defer to this file instead of redefining the
-workflow.
+This repository uses `AGENTS.md` as the single source of truth for agent behavior.
+Project skills live in `.agents/skills`, the shared review contract lives in `.agents/reviewers/common-review-contract.toml`, and tool-specific bridge files such as `.github/copilot-instructions.md` must defer to this file instead of redefining the workflow.
 
-Detailed workflow files under `.agents/workflows/` are authoritative when this
-file explicitly references them. If a root summary and a referenced workflow
-detail conflict, follow the root for entry/gating requirements and the
-referenced workflow file for its named phase or checkpoint.
+## Canonical Context
 
-## Repository Instruction Map
+- Follow `AGENTS.md` first, then load the smallest relevant set of skills.
+- The preferred review authority is GitHub Copilot running a Claude-family model for plan and test checkpoints. Use Gemini CLI as the default reviewer for non-low-risk implementation work, and allow Codex-first auto-routing only for deterministic low-risk `implementation` or `pre-merge` reviews where this file says so.
+- Skill precedence is fixed:
+  1. `AGENTS.md`
+  2. local Nx and repo skills in `.agents/skills`
+  3. the shared review contract plus the active tool-native reviewer profile or prompt
+  4. vendored general-purpose skills in `.agents/skills`
+- Treat `.agents/skills` as the canonical skill directory for this repo.
+- Do not recreate `.github/skills` or `.gemini/skills` copies unless a tool proves it cannot read `.agents/skills`.
+- Use `using-agent-skills` to choose the smallest helpful workflow. For non-trivial work, the common path is `product-and-scope-review` when framing is unstable, then `spec-driven-development` -> `planning-and-task-breakdown` -> `incremental-implementation` -> `test-driven-development` -> `qa-verification` -> `code-review-and-quality` -> `release-readiness`, but load only the phases the task actually needs.
+- `.agents/skills/authoring-guide.md` defines the repo-local rules for writing or slimming skills.
+- A repo-level pre-implementation gate is enforced through `.github/hooks/review-gate.json`. On a clean worktree, Copilot will deny mutating tool calls until a plan review approval is recorded.
+- `proofshot` is an optional repo-local verification helper for browser-verifiable UI work. It does not replace tests, and it does not participate in the pre-implementation gate.
 
-Use `.agents/workflows/` for control-plane rules, `.agents/skills/` for task
-capabilities, `.agents/reviewers/common-review-contract.toml` for the shared
-review contract, and `.agents/references/` for stable repo facts. Tool bridges
-such as `.github/copilot-instructions.md`, `.gemini/settings.json`, and
-`.codex/config.toml` point back here.
+## Phased Context Loading
 
-Instruction precedence:
+The agent must operate in distinct phases, loading context incrementally. A later-phase skill is not part of entry context unless a repo rule explicitly requires it.
 
-1. Root hard rules in `AGENTS.md`.
-2. Details in workflow files explicitly referenced by `AGENTS.md`.
-3. Local repo and Nx skills in `.agents/skills`.
-4. The shared review contract plus the active tool-native reviewer profile or
-   prompt for the checkpoint.
-5. Vendored or plugin-provided general-purpose skills.
+### Phase 1: Entry & Intent Discovery
 
-Context loading order: read this file, read
-`.agents/skills/using-agent-skills/SKILL.md`, load the workflow file required
-by the current phase/checkpoint, then load only the smallest relevant skill and,
-for review checkpoints, the shared contract plus the active tool-native
-reviewer profile or prompt.
+- **Default context loaded:**
+  1. `AGENTS.md` (this file)
+  2. `.agents/skills/using-agent-skills/SKILL.md`
+- **Repo-mandated exceptions:**
+  - Load `nx-workspace` immediately for Nx exploration, target discovery, or workspace debugging.
+  - Load `nx-generate` immediately for Nx scaffolding or setup work.
+- **Workflow:**
+  1. **Intent Gate:** If the prompt has 2 or more plausible high-impact interpretations, ask 1 decision question before repo exploration.
+  2. **Bounded Discovery:** Otherwise, prefer repo truth over asking. Use at most 2 targeted commands or inspect at most 3 files to resolve discoverable facts.
+  3. **Clarification Budget:** After bounded discovery, ask at most 1 follow-up question if high-impact ambiguity remains. Budget exhaustion never authorizes proceeding through unresolved ambiguity that would change architecture, public contracts, security boundaries, persistent data, or require broad exploration.
+  4. **Workflow Selection:** Choose 1 primary next skill for the planning or repo-workflow phase.
 
-Do not recreate `.github/skills` or `.gemini/skills` copies unless a tool proves
-it cannot read `.agents/skills`.
+### Phase 2: Planning
 
-## Workflow Loading Triggers
+- Load 1 primary planning skill at a time.
+- Use `product-and-scope-review` first when the request is solution-framed, scope is unstable, or the real user outcome still needs to be clarified.
+- For feature work, the usual progression is `spec-driven-development` then `planning-and-task-breakdown`.
+- Do not preload `incremental-implementation`, `test-driven-development`, `qa-verification`, or `code-review-and-quality` during planning.
+- Every non-trivial spec or plan must pass the `Plan Review` checkpoint before implementation starts.
 
-- Load `.agents/workflows/task-sizing.md` when classifying non-trivial work,
-  when scope changes, or when large/huge progressive delivery may apply.
-- Load `.agents/workflows/phased-workflow.md` before planning non-trivial work
-  and before implementation, refactor, test, QA, or release phases.
-- Load `.agents/workflows/review-lifecycle.md` before any plan, test,
-  implementation, or pre-merge checkpoint.
-- Load `.agents/workflows/reviewer-routing.md` when selecting reviewers or
-  specialist lenses.
-- Load `.agents/workflows/proofshot.md` only for browser-verifiable proof,
-  screenshots, video proof, or explicit `proofshot` requests.
-- Load `.agents/workflows/tool-routing.md` when using or updating
-  Copilot/Gemini/Codex review paths or bridge files.
-- Load `.agents/references/memory-practices.md` at phase boundaries during
-  large or huge tasks, before writing a session memory summary.
+### Phase 3: Implementation
 
-Adding a new workflow file requires a matching load trigger in this file.
+- Use `incremental-implementation` as the execution discipline for multi-file work.
+- Load specialist skills on demand for the current slice, such as `frontend-ui-engineering`, `api-and-interface-design`, `security-and-hardening`, or repo-specific Nx skills.
+- Load the matching file under `.agents/references/stack-conventions/` only when the task involves one of the repo's primary implementation stacks.
+- Keep checkpoint and release-closeout skills unloaded until the work reaches their checkpoint.
 
-## Behavioral Overlay
+### Phase 4: Test, QA, and Review Checkpoints
 
-- `Think Before Coding`: surface assumptions, present plausible
-  interpretations when ambiguity matters, and ask instead of silently choosing.
-- `Simplicity First`: prefer the minimum code and process change that solves
-  today's problem. Avoid speculative abstractions.
-- `Surgical Changes`: touch only the files and lines needed for the task.
-- `Goal-Driven Execution`: define success criteria, verification steps, and
-  checkpoints before declaring the work done.
+- Load `.agents/skills/test-driven-development/SKILL.md` when drafting or updating tests for changed behavior.
+- Load `.agents/skills/qa-verification/SKILL.md` when a completed change needs browser proof, smoke verification, report-only QA, or fix-enabled verification.
+- Use `.agents/skills/proofshot/SKILL.md` only as a browser-only helper when `qa-verification` or the user request calls for proof artifacts.
+- Load `.agents/skills/code-review-and-quality/SKILL.md` when preparing for or responding to implementation review.
+- Load `.agents/skills/release-readiness/SKILL.md` when the work needs docs freshness, a final verification story, or a clean handoff summary.
+- Apply `.agents/reviewers/common-review-contract.toml` for every review checkpoint, then use the active tool-native reviewer profile or prompt for specialist coverage. Do not recreate or load legacy `.agents/reviewers/*-reviewer.md` personas.
 
-These principles augment the phased workflow and review checkpoints. They do
-not replace them.
+## Mandatory Review Lifecycle
 
-## Non-Trivial Work Rule
+For any non-trivial task, the primary agent must use a second opinion before moving forward. "Non-trivial" means anything beyond a typo, formatting-only tweak, or a clearly mechanical one-line change.
 
-For anything beyond a typo, formatting-only tweak, or clearly mechanical
-one-line edit:
+The ideal review path is:
 
-- classify `Task Size: <tiny|small|medium|large|huge>` with rationale
-- produce a plan and define minimal verification before implementation
-- pass plan review and open the pre-implementation gate before mutating a clean
-  worktree
-- use incremental implementation for multi-file work
-- run targeted verification
-- pass every required review checkpoint before handoff
+1. plan or implementation is produced in the active tool
+2. the checkpoint is routed to the preferred reviewer for that stage
+3. the reviewer performs the checkpoint review using the matching reviewer agent or prompt
+4. the primary tool continues only after the review is addressed
 
-The primary agent must not self-approve its own plan, code, or tests.
+If the scripted Copilot Claude path is unavailable in the current environment, prefer Gemini CLI before the Codex grill-me sub-agent where this file routes an automatic second reviewer, otherwise use the matching tool-native reviewer profile, prompt, or Codex reviewer subagent.
 
-Pre-implementation gate commands: inspect with `pnpm review:status`, approve
-with `pnpm review:approve-pre-implementation -- --reviewer <id> --focus <area>
---summary "<summary>"`, and reset with `pnpm review:reset`.
+### Required checkpoints
 
-## Task Size Summary
+1. `Plan review`: produce a spec or implementation plan, then send it to a second reviewer.
+   Default: GitHub Copilot Claude Sonnet 4.6. If the normal Copilot Claude path is unavailable or quota exhausted, use `gemini-2.5-pro` before falling back to the Codex grill-me sub-agent. In Codex plan mode, invoke the grill-me sub-agent first to co-create and stress-test the plan before submitting for Plan Review.
+2. `Test review`: after writing tests but before running the broad sign-off suite or using those tests as approval evidence, send the test strategy and assertions to a second reviewer.
+   Default: GitHub Copilot Claude Sonnet 4.6. If the normal Copilot Claude path is unavailable or quota exhausted, use `gemini-2.5-pro` before falling back to the Codex grill-me sub-agent instead of silently self-approving.
+3. `Implementation review`: after the first working implementation, self-check, and reviewable verification story are ready, send the change to a second reviewer.
+   Default: `pnpm review:implementation` keeps Gemini Flash Preview using the CLI model id `gemini-3-flash-preview` first for normal or sensitive implementation reviews. Its auto router may start with the matching Codex reviewer subagent only when the context contains an explicit small changed-file list, that list exactly matches the repo's current changed-file set, the scope is non-sensitive, and no review or governance surfaces are touched. Otherwise fall back in this order: GitHub Copilot Claude Sonnet 4.6, then the Codex grill-me sub-agent. Escalate to GitHub Copilot Claude when blocking findings remain or when the change touches auth, secrets, filesystem, shell execution, network behavior, or public contracts.
 
-- `tiny`: typo, formatting-only, or mechanical one-line change.
-- `small`: 1-2 files in one module, one localized behavior, and no contract,
-  data-flow, persistence, auth, process, shell/filesystem/network, external
-  integration, or governance risk.
-- `medium`: 3-5 files or one project plus tests, localized behavior or
-  data-flow changes that remain reviewable as one diff.
-- `large`: 6-10 files, 2-3 projects/modules, coordinated behaviors, or
-  contract, persistence, permissions/auth, process, shell/filesystem/network,
-  external-integration, or governance/control-plane changes.
-- `huge`: more than 10 files, 4+ projects/modules, multiple independent
-  behaviors, migration/phased rollout need, unclear verification boundary, or
-  anything too risky to review, verify, or rollback as one diff.
+For browser-verifiable `ng-frontend` tasks, `proofshot` can be used after implementation and before final sign-off, typically through `qa-verification`, to generate screenshots, session video, and a local proof summary for human review.
 
-Escalate to the highest applicable class when signals conflict. Low file count
-never downgrades public-contract, security, persistent-state,
-process-lifecycle, external-integration, or governance risk.
+### Guardrails
 
-Full rules: `.agents/workflows/task-sizing.md`.
+- The primary agent must not self-approve its own plan, code, or tests.
+- If a reviewer reports a high-risk issue, stop, fix it, and re-run the relevant checkpoint before continuing.
+- Implementation review is mandatory when a task touches 3 or more files, changes data flow, updates permissions or auth, changes persistent state, modifies process lifecycle, or alters an external contract.
+- Pre-merge review must include the appropriate specialist reviewer for public APIs, auth, secrets, filesystem access, shell execution, or network behavior.
+- `pre-merge` is an additional wrapper mode only. It does not replace the required `implementation` checkpoint or the pre-implementation gate.
+- Before the first implementation change on a clean worktree, open the gate by running `pnpm review:approve-pre-implementation -- --reviewer <copilot-claude|gemini-2.5-pro|codex-subagent> --primary-family <copilot|gemini|codex> --task-size <tiny|small|medium|large|huge> --focus <area> --summary "<approval summary>"` after the plan review passes. The reviewer family must differ from `--primary-family`; same-family approvals require `--mode override --override-reason "<rationale>"`.
+- Use `pnpm review:status` to inspect the gate and `pnpm review:reset` to clear it manually when needed.
 
-## Required Reviews
+## Reviewer Routing
 
-- `Plan review`: required for every non-trivial plan before implementation.
-- `Test review`: required after writing tests and before relying on those tests
-  as approval evidence.
-- `Implementation review`: mandatory for 3+ files, data-flow changes,
-  auth/permissions, persistence, process lifecycle, filesystem/shell/network,
-  external or public contracts, or review/governance surfaces.
-- `pre-merge`: additional wrapper only; it does not replace implementation
-  review or the pre-implementation gate.
+Use `.agents/reviewers/common-review-contract.toml` as the shared review contract. Use tool-native reviewer profiles or prompts as specialist lenses.
 
-Use `pnpm review:plan`, `pnpm review:test`, and
-`pnpm review:implementation` unless the detailed workflow says a pinned
-provider is required.
+- Planning, schemas, APIs, state machines, migrations, or cross-file design: `architecture-reviewer`
+- Tests, bug fixes, regressions, assertions, and coverage: `test-reviewer`
+- Auth, secrets, filesystem, shell, process execution, network, untrusted input, or data exposure: `security-reviewer`
+- UI, UX flows, accessibility, copy, empty/loading/error states, and responsive behavior: `ux-reviewer`
 
-First-load routing rules that must stay inline:
+Use more than one reviewer if the task crosses categories.
 
-- Plan reviews prefer GitHub Copilot Claude Sonnet 4.6; fall back through the
-  repo wrapper path when unavailable. In Codex plan mode, invoke the
-  `grill-me` sub-agent first to co-create and stress-test the plan before
-  submitting it for Plan Review.
-- Implementation reviews normally start with Gemini Flash Preview
-  `gemini-3-flash-preview`.
-- Codex-first implementation or pre-merge routing is allowed only with an
-  explicit small non-sensitive changed-file list that exactly matches the repo's
-  current changed-file set and touches no review/governance, auth, secrets,
-  filesystem, shell, network, or public-contract surface.
-- Escalate blocking findings, auth, secrets, filesystem, shell execution,
-  network behavior, or public contracts to Copilot Claude.
-- Gemini scripted review throttling is `gemini-2.5-pro`: 38s start-to-start
-  with `35s -> 50s -> 75s` retry backoff; `gemini-3-flash-preview`: 22s
-  start-to-start with `20s -> 30s` retry backoff.
+## Visual Verification
 
-Full lifecycle: `.agents/workflows/review-lifecycle.md`.
-Tool details: `.agents/workflows/tool-routing.md`.
+Use `proofshot` only when the task is browser-verifiable and one of these is true:
 
-## Sub-agent Delegation
+- the user explicitly asks for `proofshot`
+- the user asks for screenshots, video proof, browser proof, or visual proof
+- `qa-verification` chooses the browser path because human-reviewable artifacts would materially reduce risk
 
-Use sub-agents for context isolation when a task touches multiple technology
-stacks, crosses project boundaries, or benefits from a fresh context window.
+Expected repo workflow:
 
-- **Domain-specific implementation**: delegate Angular work to
-  `angular-frontend`, Spring Boot work to `spring-boot-backend`, and FastAPI
-  work to `fastapi-service`. Each sub-agent operates in its own context window
-  and returns only a summary.
-- **Cross-service contract validation**: delegate contract verification to
-  `contract-validator` when modifying files in `contracts/`.
-- **Codebase exploration**: delegate read-only scoping to `codebase-mapper`
-  before multi-file changes.
-- **Review checkpoints**: delegate to `architecture-reviewer`,
-  `test-reviewer`, `security-reviewer`, or `ux-reviewer` as specified by the
-  review lifecycle.
+1. `pnpm proofshot:check`
+2. `pnpm proofshot:start:web -- --description "<flow>"`
+3. drive the browser with `proofshot exec ...` or compatible browser commands
+4. `pnpm proofshot:stop`
+5. review local `proofshot-artifacts/` with GitHub Copilot Claude using the dedicated proofshot review prompt
 
-The main agent stays responsible for workflow orchestration, plan review,
-coordination, and final verification. Sub-agents handle focused execution.
+`proofshot` is for `ng-frontend` UI flows only. Do not route backend-only, server-only, or non-browser library tasks through it.
 
-## Phase Safeguards
+## Tool-Specific Expectations
 
-Use `product-and-scope-review` when scope is unstable. Feature work usually
-flows through `spec-driven-development`, `planning-and-task-breakdown`, then
-`incremental-implementation`. New or revised medium+ plans record `Refactoring
-risk: <none|low|medium|high>` and `Preparatory refactor needed?: <yes|no>`.
-Load `refactoring-and-simplification` only at approved refactor checkpoints or
-after a completed implementation slice is verified.
+### GitHub Copilot
 
-Phase 3.5 refactor triggers that must stay inline:
+- `.github/copilot-instructions.md` is a bridge file. It must not override this workflow.
+- Prefer project skills from `.agents/skills`.
+- GitHub Copilot Claude Sonnet 4.6 is the preferred scripted reviewer for plan reviews, test reviews, and escalated implementation reviews.
+- Before using Copilot CLI for a scripted checkpoint review, confirm the local CLI is installed and that a constant low-cost probe still succeeds. Treat a failed probe as unavailability and fall back instead of sending the full review payload.
+- Copilot hooks in `.github/hooks/review-gate.json` are the hard guardrail for pre-implementation review on a clean worktree.
+- When using Copilot CLI and Rubber Duck is available, prefer a Claude-family orchestrator and enable `/experimental`.
+- For plan, test, and non-low-risk implementation reviews, the auto-routed review wrappers should prefer Gemini CLI before Copilot GPT-5 mini. Low-risk `implementation` or `pre-merge` auto routing may try the matching Codex reviewer first only when the review context includes an explicit small non-sensitive changed-file list that exactly matches the repo's current changed-file set. Keep the Copilot-only retry path only when the review is explicitly pinned to `--provider copilot`.
+- Trigger Rubber Duck critique after a plan is drafted, after an escalated multi-file implementation review, and after tests are written but before they are executed.
+- If Rubber Duck is unavailable, use the matching reviewer agent in `.github/agents` as the required second opinion.
+- If the user explicitly asks for a critique, review, second opinion, or Rubber Duck, force a second opinion even if the task is otherwise small.
+- For browser-verifiable UI proof requests, use `qa-verification` and the repo-local `proofshot` workflow when browser artifacts are the right evidence path.
 
-- large-file pressure: non-generated source exceeds 500 lines and the slice
-  added 50+ net lines, or an existing 50+ line source receives 100+ net lines
-- semantic duplication: the current change creates the third concrete copy of
-  the same logic or control pattern
-- mixed responsibility: a component, store, or service gains a second distinct
-  responsibility
-- hard-to-test logic: logic is embedded in UI/controller/integration when local
-  patterns would place it in a service, helper, or store
-- current-change orphan code: a helper/module/export created by this change is
-  fully unused
+### Gemini CLI
 
-Full phase rules: `.agents/workflows/phased-workflow.md`.
+- Keep `.gemini/settings.json` context loading ordered with `AGENTS.md` first. Tool-specific bridges such as `GEMINI.md` may load after it only when they stay thin and defer back to `AGENTS.md`.
+- Use `gemini-2.5-pro` for risky pre-implementation plan reviews and when Copilot quota or availability prevents the normal Copilot plan review path.
+- Use Gemini Flash Preview through the CLI model id `gemini-3-flash-preview` as the default implementation reviewer.
+- Before using Gemini CLI for a scripted checkpoint review, confirm the local CLI is installed and that a constant low-cost probe succeeds for the intended model. If the probe fails, fall back instead of sending the full review payload.
+- Apply adaptive throttling for scripted Gemini reviews: `gemini-2.5-pro` uses a 38s start-to-start target with `35s -> 50s -> 75s` retry backoff, and `gemini-3-flash-preview` uses a 22s start-to-start target with `20s -> 30s` retry backoff.
+- Apply `.agents/reviewers/common-review-contract.toml` as the shared review contract and use `.gemini/commands/review/*.toml` as Gemini-specific specialist lenses. Do not recreate or load legacy `.agents/reviewers/*-reviewer.md` personas.
 
-## Repo-Specific Context
+### Codex CLI
 
-- Repo topology: `.agents/references/repo-map.md`.
-- Browser proofshot targets: `.agents/references/proofshot-targets.md`.
-- Memory practices for context window management:
-  `.agents/references/memory-practices.md`.
-- Stack conventions for Angular, NestJS, or Tauri:
-  `.agents/stack-conventions.md`.
+- Keep using `.codex/config.toml` as the repo-local Codex config.
+- Prefer running Codex in WSL for this repository when possible.
+- For non-trivial work, use `pnpm review:plan`, `pnpm review:plan:risky`, `pnpm review:implementation`, and `pnpm review:test` to route checkpoint reviews through the repo-standard wrappers.
+- Use the configured reviewer subagents for plan, implementation, test, and UX/security review checkpoints.
+- Low-risk `implementation` and `pre-merge` auto routing may select Codex first only when the review context includes an explicit small non-sensitive changed-file list that exactly matches the repo's current changed-file set. Plan and test checkpoints remain Copilot-led unless fallback is required.
+- When Copilot CLI or Gemini CLI is not locally usable, the review wrappers should fall back to the matching Codex reviewer subagent instead of silently self-approving.
 
-## Nx Rules
+## Repo Map
 
-- Prefer `pnpm nx ...` and Nx targets over underlying tools.
-- Load `nx-workspace` before Nx exploration, target discovery, or workspace
-  debugging.
-- Load `nx-generate` before scaffolding, setup, or generator work.
-- Do not guess unfamiliar Nx flags; check Nx docs or `--help`.
+- `apps/ng-frontend`: Angular frontend application
+- `apps/nest-backend`: NestJS backend service
+- `apps/desktop-tauri`: Tauri desktop shell
+- `apps/ng-frontend-e2e`: Playwright e2e tests
+
+Use repo-specific reviewers and skills with that topology in mind.
+
+## Stack Conventions
+
+- For Angular and NestJS work, load the matching file under `.agents/references/stack-conventions/` after reading `AGENTS.md`.
+- Keep bridge files thin. They may point to the stack convention directory, but they must not duplicate the full conventions body.
+- Angular guidance should reflect standalone components, DI-first, `inject()`, and signal-first patterns.
+- NestJS guidance should reflect DI-first architecture with thin controllers and service-led orchestration.
 
 <!-- nx configuration start-->
 <!-- Leave the start & end comments to automatically receive updates. -->
+
+# General Guidelines for working with Nx
+
+- For navigating/exploring the workspace, invoke the `nx-workspace` skill first - it has patterns for querying projects, targets, and dependencies
+- When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
+- Prefix nx commands with the workspace's package manager (e.g., `pnpm nx build`, `npm exec nx test`) - avoids using globally installed CLI
+- You have access to the Nx MCP server and its tools, use them to help the user
+- For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not all plugins have this file - proceed without it if unavailable.
+- NEVER guess CLI flags - always check nx_docs or `--help` first when unsure
+
+## Scaffolding & Generators
+
+- For scaffolding tasks (creating apps, libs, project structure, setup), ALWAYS invoke the `nx-generate` skill FIRST before exploring or calling MCP tools
+
+## When to use nx_docs
+
+- USE for: advanced config options, unfamiliar flags, migration guides, plugin configuration, edge cases
+- DON'T USE for: basic generator syntax (`nx g @nx/react:app`), standard commands, things you already know
+- The `nx-generate` skill handles generator discovery internally - don't call nx_docs just to look up generator syntax
+
+<!-- nx configuration end-->

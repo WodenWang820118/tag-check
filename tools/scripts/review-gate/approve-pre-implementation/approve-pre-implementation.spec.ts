@@ -18,21 +18,21 @@ test('approve-pre-implementation rejects dirty worktrees without force', (contex
   try {
     const initResult = spawnSync('git', ['init'], {
       cwd: repoRoot,
-      encoding: 'utf8'
+      encoding: 'utf8',
     });
     assert.equal(initResult.status, 0);
     writeFileSync(join(repoRoot, 'dirty.txt'), 'dirty');
 
     const scriptPath = fileURLToPath(
-      new URL('./approve-pre-implementation.ts', import.meta.url)
+      new URL('./approve-pre-implementation.ts', import.meta.url),
     );
     const result = spawnSync(
       process.execPath,
       [scriptPath, '--reviewer', 'codex-subagent'],
       {
         cwd: repoRoot,
-        encoding: 'utf8'
-      }
+        encoding: 'utf8',
+      },
     );
 
     assert.equal(result.status, 1);

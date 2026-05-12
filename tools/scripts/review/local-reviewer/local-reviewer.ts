@@ -1,39 +1,53 @@
 import { basename } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { spawn } from 'node:child_process';
 import { availableParallelism, cpus } from 'node:os';
 
+import { isMainModule } from '../../shared/entrypoint/entrypoint.ts';
 import {
-  analyzeHybridHeuristics,
-  buildHybridPrefilterContext,
-  buildHybridReviewReport,
-  createHybridGptBypassReview,
-  buildPrefilterFailureContext,
-  collectRepoCommitCandidates,
   collectChangedFiles,
   collectDiffText,
+} from './diff-context/diff-context.ts';
+import {
   collectEvaluationSamples,
-  createLocalReviewerDependencies,
-  createLocalReviewerEnv,
-  DEFAULT_EVALUATION_AB_SAMPLE_COUNT,
-  DEFAULT_EVALUATION_ROUNDS,
-  MAX_HYBRID_GPT_DIFF_CHARS,
-  DEFAULT_SAMPLE_SEED,
-  DEFAULT_SMALL_DIFF_THRESHOLD_CHARS,
-  ensureLocalReviewerBuild,
+  collectRepoCommitCandidates,
   evaluateSampleWithCheckpointReview,
   evaluateSampleWithLocalReviewer,
-  getEscalationReasons,
-  planHybridLocalReview,
   resolveEvaluationRepoTargets,
-  resolveLocalReviewerRepoRoot,
-  runHybridGptReview,
-  runLocalReviewerDoctor,
-  runLocalReviewerReview,
   selectAbSamples,
   selectEvaluationSamples,
-  selectPaidReviewContext,
   summarizeEvaluation,
+} from './evaluation/evaluation.ts';
+import {
+  createLocalReviewerDependencies,
+  createLocalReviewerEnv,
+  resolveLocalReviewerRepoRoot,
+} from './environment/environment.ts';
+import {
+  analyzeHybridHeuristics,
+  buildHybridReviewReport,
+  createHybridGptBypassReview,
+  planHybridLocalReview,
+  runHybridGptReview,
+} from './hybrid-review/hybrid-review.ts';
+import {
+  buildHybridPrefilterContext,
+  buildPrefilterContext,
+  buildPrefilterFailureContext,
+  getEscalationReasons,
+  selectPaidReviewContext,
+  writePrefilterArtifacts,
+} from './prefilter/prefilter.ts';
+import {
+  ensureLocalReviewerBuild,
+  runLocalReviewerDoctor,
+  runLocalReviewerReview,
+} from './runner/runner.ts';
+import {
+  DEFAULT_EVALUATION_AB_SAMPLE_COUNT,
+  DEFAULT_EVALUATION_ROUNDS,
+  DEFAULT_SAMPLE_SEED,
+  DEFAULT_SMALL_DIFF_THRESHOLD_CHARS,
+  MAX_HYBRID_GPT_DIFF_CHARS,
   type EvaluationLocalResult,
   type EvaluationSample,
   type HybridDecisionBasis,
@@ -42,8 +56,7 @@ import {
   type HybridLocalReviewResult,
   type HybridReviewProfileName,
   type HybridReviewReport,
-  writePrefilterArtifacts
-} from '../local-reviewer-support/local-reviewer-support.ts';
+} from './shared/shared.ts';
 
 type LocalReviewerCommand = 'doctor' | 'evaluate' | 'prefilter' | 'staged';
 
@@ -92,7 +105,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
       dependencies,
       env,
       targetRepoRoot: repoRoot,
-      toolRepoRoot
+      toolRepoRoot,
     });
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return;
@@ -102,19 +115,19 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
     const diffText = collectDiffText({
       dependencies,
       repoRoot,
-      staged: true
+      staged: true,
     });
     const changedFiles = collectChangedFiles({
       dependencies,
       repoRoot,
-      staged: true
+      staged: true,
     });
     const report = await runHybridStagedReview({
       changedFiles,
       diffText,
       repoRoot,
       scriptPath: resolveScriptPath(),
-      toolRepoRoot
+      toolRepoRoot,
     });
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
     return;
@@ -124,12 +137,12 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
     const diffText = collectDiffText({
       dependencies,
       repoRoot,
-      staged: true
+      staged: true,
     });
     const changedFiles = collectChangedFiles({
       dependencies,
       repoRoot,
-      staged: true
+      staged: true,
     });
 
     try {
@@ -138,15 +151,15 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
         diffText,
         repoRoot,
         scriptPath: resolveScriptPath(),
-        toolRepoRoot
+        toolRepoRoot,
       });
       const contextMarkdown = buildHybridPrefilterContext({
-        report
+        report,
       });
       const reviewContextSelection = selectPaidReviewContext({
         diffText,
         prefilterContext: contextMarkdown,
-        smallDiffThresholdChars: parsed.smallDiffThresholdChars
+        smallDiffThresholdChars: parsed.smallDiffThresholdChars,
       });
       const payload = {
         recommended_escalation: report.recommended_escalation,
@@ -160,13 +173,13 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
         report,
         review_context_mode: reviewContextSelection.mode,
         small_diff_threshold_chars:
-          reviewContextSelection.smallDiffThresholdChars
+          reviewContextSelection.smallDiffThresholdChars,
       };
       const artifacts = writePrefilterArtifacts({
         repoRoot,
         contextMarkdown,
         reportPayload: payload,
-        reviewContextSelection
+        reviewContextSelection,
       });
 
       writePrefilterOutput({
@@ -180,7 +193,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
         recommendedEscalation: report.recommended_escalation,
         requestedProfiles: report.requested_profiles,
         reviewContextMode: reviewContextSelection.mode,
-        smallDiffThresholdChars: reviewContextSelection.smallDiffThresholdChars
+        smallDiffThresholdChars: reviewContextSelection.smallDiffThresholdChars,
       });
       return;
     } catch (error) {
@@ -190,24 +203,24 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
         fileCount: changedFiles.length,
         findings: [],
         changedFiles,
-        localReviewError: errorText
+        localReviewError: errorText,
       });
       const contextMarkdown = buildPrefilterFailureContext({
         changedFiles,
         diffText,
         escalationReasons,
-        localReviewError: errorText
+        localReviewError: errorText,
       });
       const reviewContextSelection = selectPaidReviewContext({
         diffText,
         forceFullDiff: true,
         prefilterContext: contextMarkdown,
-        smallDiffThresholdChars: parsed.smallDiffThresholdChars
+        smallDiffThresholdChars: parsed.smallDiffThresholdChars,
       });
       const payload = {
         recommended_escalation: true,
         escalation_reasons: escalationReasons,
-        gpt_provider: 'copilot-gpt-5-mini',
+        gpt_provider: 'codex',
         gpt_risk: null,
         gpt_confidence: null,
         local_mode: 'full',
@@ -217,27 +230,27 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
         report: null,
         review_context_mode: reviewContextSelection.mode,
         small_diff_threshold_chars:
-          reviewContextSelection.smallDiffThresholdChars
+          reviewContextSelection.smallDiffThresholdChars,
       };
       const artifacts = writePrefilterArtifacts({
         repoRoot,
         contextMarkdown,
         reportPayload: payload,
-        reviewContextSelection
+        reviewContextSelection,
       });
 
       writePrefilterOutput({
         artifacts,
         decisionBasis: 'local-fallback',
         gptConfidence: null,
-        gptProvider: 'copilot-gpt-5-mini',
+        gptProvider: 'codex',
         gptRisk: null,
         localMode: 'full',
         payload,
         recommendedEscalation: true,
         requestedProfiles: [],
         reviewContextMode: reviewContextSelection.mode,
-        smallDiffThresholdChars: reviewContextSelection.smallDiffThresholdChars
+        smallDiffThresholdChars: reviewContextSelection.smallDiffThresholdChars,
       });
       return;
     }
@@ -252,13 +265,13 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
           repoTargets,
           rounds: parsed.rounds,
           scriptPath: resolveScriptPath(),
-          seed: parsed.seed
+          seed: parsed.seed,
         })
       : collectEvaluationSamples({
           dependencies,
           repoTargets,
           rounds: parsed.rounds,
-          seed: parsed.seed
+          seed: parsed.seed,
         });
   const localResults =
     jobs > 1
@@ -267,7 +280,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
           samples,
           scriptPath: resolveScriptPath(),
           smallDiffThresholdChars: parsed.smallDiffThresholdChars,
-          toolRepoRoot
+          toolRepoRoot,
         })
       : samples.map((sample) =>
           evaluateSampleWithLocalReviewer({
@@ -275,8 +288,8 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
             env,
             sample,
             smallDiffThresholdChars: parsed.smallDiffThresholdChars,
-            toolRepoRoot
-          })
+            toolRepoRoot,
+          }),
         );
   const abSamples = selectAbSamples(samples, parsed.abSamples);
   const reviewerResults =
@@ -284,8 +297,8 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
       ? abSamples.map((sample) =>
           evaluateSampleWithCheckpointReview({
             dependencies,
-            sample
-          })
+            sample,
+          }),
         )
       : [];
   const output = summarizeEvaluation({
@@ -295,11 +308,11 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
       repoNames: repoTargets.map((repo) => repo.name),
       rounds: parsed.rounds,
       seed: parsed.seed,
-      smallDiffThresholdChars: parsed.smallDiffThresholdChars
+      smallDiffThresholdChars: parsed.smallDiffThresholdChars,
     },
     localResults,
     reviewerResults,
-    repoRoot
+    repoRoot,
   });
 
   process.stdout.write(`${output.summaryMarkdown}\n`);
@@ -309,14 +322,14 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
       `samples_path=${output.artifacts.samplesPath}`,
       `local_results_path=${output.artifacts.localResultsPath}`,
       `ab_results_path=${output.artifacts.abResultsPath}`,
-      `summary_path=${output.artifacts.summaryPath}`
-    ].join('\n')
+      `summary_path=${output.artifacts.summaryPath}`,
+    ].join('\n'),
   );
   process.stdout.write('\n');
 }
 
 export function parseCliArgs(
-  argv: string[] = process.argv.slice(2)
+  argv: string[] = process.argv.slice(2),
 ): ParsedLocalReviewerCliArgs {
   const command = parseCommand(argv[0]);
   const parsed: ParsedLocalReviewerCliArgs = {
@@ -326,7 +339,7 @@ export function parseCliArgs(
     repos: [],
     rounds: DEFAULT_EVALUATION_ROUNDS,
     seed: DEFAULT_SAMPLE_SEED,
-    smallDiffThresholdChars: DEFAULT_SMALL_DIFF_THRESHOLD_CHARS
+    smallDiffThresholdChars: DEFAULT_SMALL_DIFF_THRESHOLD_CHARS,
   };
 
   for (let index = 1; index < argv.length; index += 1) {
@@ -384,7 +397,7 @@ export function getUsageText(scriptName = 'local-reviewer.ts'): string {
     `  --seed <n>                        Deterministic sample seed for \`evaluate\` (default: ${DEFAULT_SAMPLE_SEED})`,
     `  --ab-samples <n>                  Optional paid-review A/B sample count for \`evaluate\` (default: ${DEFAULT_EVALUATION_AB_SAMPLE_COUNT})`,
     `  --jobs <n>                        Local parallel worker count for \`evaluate\` (default: ${getDefaultEvaluationJobs()})`,
-    '  --repo <path-or-name>             Additional evaluation repo target; repeatable'
+    '  --repo <path-or-name>             Additional evaluation repo target; repeatable',
   ].join('\n');
 }
 
@@ -424,8 +437,8 @@ export function writePrefilterOutput(input: {
       `decision_basis=${input.decisionBasis}`,
       `small_diff_threshold_chars=${input.smallDiffThresholdChars}`,
       '',
-      JSON.stringify(input.payload, null, 2)
-    ].join('\n')
+      JSON.stringify(input.payload, null, 2),
+    ].join('\n'),
   );
   process.stdout.write('\n');
 }
@@ -439,14 +452,14 @@ async function runHybridStagedReview(input: {
 }): Promise<HybridReviewReport> {
   const heuristics = analyzeHybridHeuristics({
     changedFiles: input.changedFiles,
-    diffText: input.diffText
+    diffText: input.diffText,
   });
 
   if (heuristics.file_count === 0 && input.diffText.trim().length === 0) {
     return buildHybridReviewReport({
       gptReview: {
-        provider: 'copilot-gpt-5-mini',
-        model: 'gpt-5-mini',
+        provider: 'codex',
+        model: null,
         status: 'completed',
         overall_risk: 'low',
         confidence: 'high',
@@ -454,10 +467,10 @@ async function runHybridStagedReview(input: {
         focus_profiles: [],
         findings: [],
         summary: 'No staged changes were detected.',
-        error: null
+        error: null,
       },
       heuristics,
-      localReviewResult: null
+      localReviewResult: null,
     });
   }
 
@@ -469,14 +482,14 @@ async function runHybridStagedReview(input: {
     input.diffText.length > MAX_HYBRID_GPT_DIFF_CHARS
       ? Promise.resolve(
           createHybridGptBypassReview(
-            `Skipped cloud GPT review because the diff exceeded the safe prompt budget (${input.diffText.length} > ${MAX_HYBRID_GPT_DIFF_CHARS} chars).`
-          )
+            `Skipped cloud GPT review because the diff exceeded the safe prompt budget (${input.diffText.length} > ${MAX_HYBRID_GPT_DIFF_CHARS} chars).`,
+          ),
         )
       : runHybridGptWorkerProcess({
           changedFiles: heuristics.changed_files,
           diffText: input.diffText,
           repoRoot: input.repoRoot,
-          scriptPath: input.scriptPath
+          scriptPath: input.scriptPath,
         });
   const earlyLocalPromise = forceFullLocal
     ? runHybridLocalWorkerProcess({
@@ -484,13 +497,13 @@ async function runHybridStagedReview(input: {
         repoRoot: input.repoRoot,
         requestedProfiles: heuristics.routed_profiles,
         scriptPath: input.scriptPath,
-        toolRepoRoot: input.toolRepoRoot
+        toolRepoRoot: input.toolRepoRoot,
       })
     : null;
   const gptReview = await gptPromise;
   const localPlan = planHybridLocalReview({
     gptReview,
-    heuristics
+    heuristics,
   });
 
   const localReviewResult =
@@ -502,14 +515,14 @@ async function runHybridStagedReview(input: {
             repoRoot: input.repoRoot,
             requestedProfiles: localPlan.requested_profiles,
             scriptPath: input.scriptPath,
-            toolRepoRoot: input.toolRepoRoot
+            toolRepoRoot: input.toolRepoRoot,
           })
         : null;
 
   return buildHybridReviewReport({
     gptReview,
     heuristics,
-    localReviewResult
+    localReviewResult,
   });
 }
 
@@ -524,13 +537,13 @@ async function runHybridGptWorkerProcess(input: {
       '__hybrid-gpt-review',
       '--changed-files-base64',
       Buffer.from(JSON.stringify(input.changedFiles), 'utf8').toString(
-        'base64'
+        'base64',
       ),
       '--diff-base64',
-      Buffer.from(input.diffText, 'utf8').toString('base64')
+      Buffer.from(input.diffText, 'utf8').toString('base64'),
     ],
     cwd: input.repoRoot,
-    scriptPath: input.scriptPath
+    scriptPath: input.scriptPath,
   });
 }
 
@@ -549,10 +562,10 @@ async function runHybridLocalWorkerProcess(input: {
       '--requested-profiles',
       input.requestedProfiles.join(','),
       '--tool-repo-root',
-      input.toolRepoRoot
+      input.toolRepoRoot,
     ],
     cwd: input.repoRoot,
-    scriptPath: input.scriptPath
+    scriptPath: input.scriptPath,
   });
 }
 
@@ -626,18 +639,18 @@ async function collectEvaluationSamplesInParallel(input: {
           '--repo-root',
           repoTarget.root,
           '--seed',
-          String(input.seed + index + 1)
+          String(input.seed + index + 1),
         ],
         cwd: process.cwd(),
-        scriptPath: input.scriptPath
-      })
+        scriptPath: input.scriptPath,
+      }),
     )
   ).flat();
 
   return selectEvaluationSamples({
     candidates,
     rounds: input.rounds,
-    seed: input.seed
+    seed: input.seed,
   });
 }
 
@@ -657,11 +670,11 @@ async function evaluateSamplesInParallel(input: {
         '--small-diff-threshold-chars',
         String(input.smallDiffThresholdChars),
         '--tool-repo-root',
-        input.toolRepoRoot
+        input.toolRepoRoot,
       ],
       cwd: process.cwd(),
-      scriptPath: input.scriptPath
-    })
+      scriptPath: input.scriptPath,
+    }),
   );
 }
 
@@ -672,7 +685,7 @@ async function runCollectCandidatesWorker(argv: string[]): Promise<void> {
     dependencies,
     repoName: parsed.repoName,
     repoRoot: parsed.repoRoot,
-    seed: parsed.seed
+    seed: parsed.seed,
   });
   process.stdout.write(`${JSON.stringify(payload)}\n`);
 }
@@ -685,10 +698,10 @@ async function runEvaluateSampleWorker(argv: string[]): Promise<void> {
     dependencies,
     env,
     sample: JSON.parse(
-      Buffer.from(parsed.sampleBase64, 'base64').toString('utf8')
+      Buffer.from(parsed.sampleBase64, 'base64').toString('utf8'),
     ) as EvaluationSample,
     smallDiffThresholdChars: parsed.smallDiffThresholdChars,
-    toolRepoRoot: parsed.toolRepoRoot
+    toolRepoRoot: parsed.toolRepoRoot,
   });
   process.stdout.write(`${JSON.stringify(payload)}\n`);
 }
@@ -697,10 +710,10 @@ async function runHybridGptWorker(argv: string[]): Promise<void> {
   const parsed = parseHybridGptWorkerArgs(argv);
   const payload = runHybridGptReview({
     changedFiles: JSON.parse(
-      Buffer.from(parsed.changedFilesBase64, 'base64').toString('utf8')
+      Buffer.from(parsed.changedFilesBase64, 'base64').toString('utf8'),
     ) as string[],
     diffText: Buffer.from(parsed.diffBase64, 'base64').toString('utf8'),
-    repoRoot: process.cwd()
+    repoRoot: process.cwd(),
   });
   process.stdout.write(`${JSON.stringify(payload)}\n`);
 }
@@ -718,13 +731,13 @@ async function runHybridLocalWorker(argv: string[]): Promise<void> {
       requestedProfiles,
       staged: true,
       targetRepoRoot: process.cwd(),
-      toolRepoRoot: parsed.toolRepoRoot
+      toolRepoRoot: parsed.toolRepoRoot,
     });
     const payload: HybridLocalReviewResult = {
       local_mode: parsed.localMode,
       requested_profiles: requestedProfiles,
       report,
-      error: null
+      error: null,
     };
     process.stdout.write(`${JSON.stringify(payload)}\n`);
   } catch (error) {
@@ -732,7 +745,7 @@ async function runHybridLocalWorker(argv: string[]): Promise<void> {
       local_mode: parsed.localMode,
       requested_profiles: requestedProfiles,
       report: null,
-      error: error instanceof Error ? error.message : String(error)
+      error: error instanceof Error ? error.message : String(error),
     };
     process.stdout.write(`${JSON.stringify(payload)}\n`);
   }
@@ -746,7 +759,7 @@ function parseCollectCandidatesArgs(argv: string[]): {
   const parsed = {
     repoName: '',
     repoRoot: '',
-    seed: DEFAULT_SAMPLE_SEED
+    seed: DEFAULT_SAMPLE_SEED,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -785,7 +798,7 @@ function parseEvaluateSampleArgs(argv: string[]): {
   const parsed = {
     sampleBase64: '',
     smallDiffThresholdChars: DEFAULT_SMALL_DIFF_THRESHOLD_CHARS,
-    toolRepoRoot: ''
+    toolRepoRoot: '',
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -822,7 +835,7 @@ function parseHybridGptWorkerArgs(argv: string[]): {
 } {
   const parsed = {
     changedFilesBase64: '',
-    diffBase64: ''
+    diffBase64: '',
   };
   let sawChangedFilesBase64 = false;
   let sawDiffBase64 = false;
@@ -833,7 +846,7 @@ function parseHybridGptWorkerArgs(argv: string[]): {
       parsed.changedFilesBase64 = readPossiblyEmptyStringFlag(
         argv,
         index,
-        current
+        current,
       );
       sawChangedFilesBase64 = true;
       index += 1;
@@ -864,7 +877,7 @@ function parseHybridLocalWorkerArgs(argv: string[]): {
   const parsed = {
     localMode: 'full' as Exclude<HybridLocalMode, 'skipped'>,
     requestedProfiles: '',
-    toolRepoRoot: ''
+    toolRepoRoot: '',
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -900,7 +913,7 @@ function parseHybridLocalWorkerArgs(argv: string[]): {
 }
 
 function parseRequestedProfiles(
-  requestedProfiles: string
+  requestedProfiles: string,
 ): HybridReviewProfileName[] {
   const values = requestedProfiles
     .split(',')
@@ -913,14 +926,14 @@ function parseRequestedProfiles(
       entry === 'nest' ||
       entry === 'typescript' ||
       entry === 'repo-habits' ||
-      entry === 'general'
+      entry === 'general',
   );
 }
 
 function readPossiblyEmptyStringFlag(
   argv: string[],
   index: number,
-  flag: string
+  flag: string,
 ): string {
   if (index + 1 >= argv.length) {
     throw new Error(`${getUsageText()}\n\nMissing value for ${flag}.`);
@@ -936,7 +949,7 @@ async function runJsonWorker<T>(input: {
 }): Promise<T> {
   const result = await runNodeWorker({
     args: [input.scriptPath, ...input.args],
-    cwd: input.cwd
+    cwd: input.cwd,
   });
 
   try {
@@ -945,7 +958,7 @@ async function runJsonWorker<T>(input: {
     throw new Error(
       `Worker returned non-JSON output: ${
         error instanceof Error ? error.message : String(error)
-      }`
+      }`,
     );
   }
 }
@@ -958,7 +971,7 @@ async function runNodeWorker(input: {
     const child = spawn('node', input.args, {
       cwd: input.cwd,
       env: process.env,
-      stdio: ['ignore', 'pipe', 'pipe']
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
     let stdout = '';
     let stderr = '';
@@ -976,15 +989,15 @@ async function runNodeWorker(input: {
       if (code === 0) {
         resolveResult({
           stderr: stderr.trim(),
-          stdout: stdout.trim()
+          stdout: stdout.trim(),
         });
         return;
       }
 
       reject(
         new Error(
-          stderr.trim() || stdout.trim() || `Worker exited with code ${code}.`
-        )
+          stderr.trim() || stdout.trim() || `Worker exited with code ${code}.`,
+        ),
       );
     });
   });
@@ -993,7 +1006,7 @@ async function runNodeWorker(input: {
 async function mapLimit<TItem, TResult>(
   items: ReadonlyArray<TItem>,
   limit: number,
-  mapper: (item: TItem, index: number) => Promise<TResult>
+  mapper: (item: TItem, index: number) => Promise<TResult>,
 ): Promise<TResult[]> {
   if (items.length === 0) {
     return [];
@@ -1010,10 +1023,10 @@ async function mapLimit<TItem, TResult>(
         nextIndex += 1;
         results[currentIndex] = await mapper(
           items[currentIndex]!,
-          currentIndex
+          currentIndex,
         );
       }
-    })
+    }),
   );
 
   return results;
@@ -1028,10 +1041,7 @@ function resolveScriptPath(): string {
   return scriptPath;
 }
 
-const isEntryPoint =
-  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
-
-if (isEntryPoint) {
+if (isMainModule(import.meta.url)) {
   main().catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);

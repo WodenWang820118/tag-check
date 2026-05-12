@@ -4,15 +4,17 @@ import path from 'node:path';
 import {
   cacheProviderHealth,
   getCachedProviderHealth,
-  type ReviewProviderHealthResult
+  type ReviewProviderHealthResult,
 } from '../../provider-health/provider-health.ts';
-import {
-  type ReviewerId,
-  resolveReviewerId
-} from '../../shared/reviewer-profile.ts';
+import { readCommonReviewContract } from '../../shared/common-review-contract.ts';
 import { runLocalCliCommand } from '../local-cli/local-cli.ts';
 
 type ReviewCheckpoint = 'plan' | 'implementation' | 'test' | 'pre-merge';
+type CodexReviewerId =
+  | 'architecture-reviewer'
+  | 'security-reviewer'
+  | 'test-reviewer'
+  | 'ux-reviewer';
 
 interface CodexReviewInput {
   checkpoint: ReviewCheckpoint;
@@ -29,7 +31,7 @@ export function probeCodexCliHealth(
   input: {
     model?: string;
     repoRoot?: string;
-  } = {}
+  } = {},
 ): ReviewProviderHealthResult {
   const repoRoot = input.repoRoot ?? process.cwd();
   const cached = getCachedProviderHealth('codex', undefined, repoRoot);
@@ -42,7 +44,7 @@ export function probeCodexCliHealth(
     command: 'codex',
     args: ['--version'],
     cwd: repoRoot,
-    timeoutMs: CODEX_HEALTH_TIMEOUT_MS
+    timeoutMs: CODEX_HEALTH_TIMEOUT_MS,
   });
 
   if (versionResult.error || versionResult.status !== 0) {
@@ -52,9 +54,9 @@ export function probeCodexCliHealth(
       {
         available: false,
         checkedAtMs,
-        reason: 'Codex CLI is not installed or cannot be started locally.'
+        reason: 'Codex CLI is not installed or cannot be started locally.',
       },
-      repoRoot
+      repoRoot,
     );
   }
 
@@ -62,7 +64,7 @@ export function probeCodexCliHealth(
     command: 'codex',
     args: ['login', 'status'],
     cwd: repoRoot,
-    timeoutMs: CODEX_HEALTH_TIMEOUT_MS
+    timeoutMs: CODEX_HEALTH_TIMEOUT_MS,
   });
 
   const loginOutput = joinOutput(loginResult.stdout, loginResult.stderr);
@@ -78,9 +80,9 @@ export function probeCodexCliHealth(
         available: false,
         checkedAtMs,
         reason:
-          loginOutput || 'Codex CLI is installed locally but is not logged in.'
+          loginOutput || 'Codex CLI is installed locally but is not logged in.',
       },
-      repoRoot
+      repoRoot,
     );
   }
 
@@ -89,9 +91,9 @@ export function probeCodexCliHealth(
     undefined,
     {
       available: true,
-      checkedAtMs
+      checkedAtMs,
     },
-    repoRoot
+    repoRoot,
   );
 }
 
@@ -101,27 +103,53 @@ export function isCodexUnavailableError(error: unknown): boolean {
   }
 
   return /\b(login|logged out|authenticate|not authenticated|quota|billing|429|rate limit|subscription|required)\b/i.test(
-    error.message
+    error.message,
   );
 }
 
 export function resolveCodexReviewerId(input: {
   checkpoint: ReviewCheckpoint;
   focus: string;
-}): ReviewerId {
-  return resolveReviewerId(input);
+}): CodexReviewerId {
+  const focus = input.focus.toLowerCase();
+
+  if (
+    focus.includes('security') ||
+    focus.includes('auth') ||
+    focus.includes('secret') ||
+    focus.includes('shell') ||
+    focus.includes('network') ||
+    focus.includes('filesystem')
+  ) {
+    return 'security-reviewer';
+  }
+
+  if (input.checkpoint === 'test' || focus.includes('test')) {
+    return 'test-reviewer';
+  }
+
+  if (
+    focus.includes('ux') ||
+    focus.includes('ui') ||
+    focus.includes('accessibility') ||
+    focus.includes('responsive')
+  ) {
+    return 'ux-reviewer';
+  }
+
+  return 'architecture-reviewer';
 }
 
 export function runCodexReview(input: CodexReviewInput): string {
   const repoRoot = input.repoRoot ?? process.cwd();
   const reviewerId = resolveCodexReviewerId({
     checkpoint: input.checkpoint,
-    focus: input.focus
+    focus: input.focus,
   });
   const prompt = buildCodexReviewPrompt({
     prompt: input.prompt,
     reviewerId,
-    repoRoot
+    repoRoot,
   });
 
   const args = ['exec', 'review', '--ephemeral', '--json', '-'];
@@ -134,13 +162,13 @@ export function runCodexReview(input: CodexReviewInput): string {
     args,
     cwd: repoRoot,
     input: prompt,
-    timeoutMs: CODEX_REVIEW_TIMEOUT_MS
+    timeoutMs: CODEX_REVIEW_TIMEOUT_MS,
   });
 
   const stderr = result.stderr ?? '';
   if (result.error || result.status !== 0) {
     throw new Error(
-      stderr.trim() || result.error?.message || 'Codex review command failed.'
+      stderr.trim() || result.error?.message || 'Codex review command failed.',
     );
   }
 
@@ -155,40 +183,45 @@ export function runCodexReview(input: CodexReviewInput): string {
 function buildCodexReviewPrompt(input: {
   prompt: string;
   repoRoot: string;
-  reviewerId: ReviewerId;
+  reviewerId: CodexReviewerId;
 }): string {
   const reviewerInstructions = readCodexReviewerInstructions(
     input.reviewerId,
-    input.repoRoot
+    input.repoRoot,
   );
+  const commonReviewContract = readCommonReviewContract(input.repoRoot);
+  const commonReviewContractBlock = commonReviewContract
+    ? ['Shared review contract:', commonReviewContract, '']
+    : [];
 
   return [
     `Use the local Codex reviewer profile: ${input.reviewerId}.`,
     reviewerInstructions,
     '',
-    'Apply this reviewer profile together with the shared review contract already included in the review context.',
+    ...commonReviewContractBlock,
+    'Apply the reviewer profile and shared review contract exactly.',
     '',
     'Context to review:',
-    input.prompt.trim()
+    input.prompt.trim(),
   ].join('\n');
 }
 
 function readCodexReviewerInstructions(
-  reviewerId: ReviewerId,
-  repoRoot: string
+  reviewerId: CodexReviewerId,
+  repoRoot: string,
 ): string {
   const reviewerPath = path.join(
     repoRoot,
     '.codex',
     'agents',
-    `${reviewerId}.toml`
+    `${reviewerId}.toml`,
   );
   const source = readFileSync(reviewerPath, 'utf8');
   const match = source.match(/developer_instructions = """([\s\S]*?)"""/);
 
   if (!match) {
     throw new Error(
-      `Unable to read Codex reviewer instructions: ${reviewerId}`
+      `Unable to read Codex reviewer instructions: ${reviewerId}`,
     );
   }
 

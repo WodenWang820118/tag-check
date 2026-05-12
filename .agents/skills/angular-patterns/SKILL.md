@@ -1,6 +1,6 @@
 ---
 name: angular-patterns
-description: Repo-specific Angular conventions and patterns for law-prep-web and law-prep-portfolio-viewer. Load when working with Angular components, services, DI, signals, routing, or tests.
+description: Repo-specific Angular conventions and patterns for law-prep-web. Load when working with Angular components, services, DI, signals, routing, or tests.
 ---
 
 # Angular Patterns
@@ -16,8 +16,7 @@ Repo-local Angular conventions for this Nx monorepo.
 
 ## Load / Do Not Load
 
-- Load this skill when the task touches Angular code in `apps/law-prep-web` or
-  `apps/law-prep-portfolio-viewer`.
+- Load this skill when the task touches Angular code in `apps/law-prep-web`.
 - Do not load for backend, AI-service, or desktop-only tasks.
 
 ## Core Workflow

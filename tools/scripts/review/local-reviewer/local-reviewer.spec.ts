@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
-import { test } from 'vitest';
+import test from 'node:test';
 
 import {
   getUsageText,
   parseCliArgs,
   writePrefilterOutput,
-  type ParsedLocalReviewerCliArgs
+  type ParsedLocalReviewerCliArgs,
 } from './local-reviewer.ts';
 
 test('parseCliArgs keeps estimate-only defaults for evaluate', () => {
@@ -36,7 +36,7 @@ test('parseCliArgs reads repeated repo flags and numeric overrides', () => {
     '--repo',
     'gx.go',
     '--repo',
-    '../local-reviewer-cli'
+    '../local-reviewer-cli',
   ]);
 
   assert.deepEqual(parsed, {
@@ -46,7 +46,7 @@ test('parseCliArgs reads repeated repo flags and numeric overrides', () => {
     repos: ['gx.go', '../local-reviewer-cli'],
     rounds: 40,
     seed: 7,
-    smallDiffThresholdChars: 2048
+    smallDiffThresholdChars: 2048,
   } satisfies ParsedLocalReviewerCliArgs);
 });
 
@@ -62,7 +62,7 @@ test('writePrefilterOutput includes hybrid additive fields without breaking key=
   const originalWrite = process.stdout.write;
   process.stdout.write = ((chunk: string | Uint8Array) => {
     writes.push(
-      typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString('utf8')
+      typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString('utf8'),
     );
     return true;
   }) as typeof process.stdout.write;
@@ -72,20 +72,20 @@ test('writePrefilterOutput includes hybrid additive fields without breaking key=
       artifacts: {
         contextPath: '/repo/context.md',
         reportPath: '/repo/report.json',
-        reviewContextPath: '/repo/review.md'
+        reviewContextPath: '/repo/review.md',
       },
       decisionBasis: 'gpt+local',
       gptConfidence: 'medium',
-      gptProvider: 'copilot-gpt-5-mini',
+      gptProvider: 'codex',
       gptRisk: 'low',
       localMode: 'targeted',
       payload: {
-        recommended_escalation: false
+        recommended_escalation: false,
       },
       recommendedEscalation: false,
       requestedProfiles: ['typescript'],
       reviewContextMode: 'prefilter-summary',
-      smallDiffThresholdChars: 1024
+      smallDiffThresholdChars: 1024,
     });
   } finally {
     process.stdout.write = originalWrite;
@@ -93,7 +93,7 @@ test('writePrefilterOutput includes hybrid additive fields without breaking key=
 
   const output = writes.join('');
   assert.match(output, /^recommended_escalation=false/m);
-  assert.match(output, /^gpt_provider=copilot-gpt-5-mini$/m);
+  assert.match(output, /^gpt_provider=codex$/m);
   assert.match(output, /^gpt_risk=low$/m);
   assert.match(output, /^gpt_confidence=medium$/m);
   assert.match(output, /^local_mode=targeted$/m);

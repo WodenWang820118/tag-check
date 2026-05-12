@@ -1,10 +1,8 @@
 import {
   getModelRateLimitPolicy,
-  normalizeGeminiModel
+  normalizeGeminiModel,
 } from '../rate-limit/rate-limit.ts';
 
-// Centralized provider policy keeps timeout and retry decisions out of the CLI
-// orchestration paths, where they are harder to audit during reviews.
 export type CopilotPolicyOperation =
   | 'health-version'
   | 'health-probe'
@@ -22,7 +20,7 @@ export const COPILOT_REASONING_EFFORT_HELP_TIMEOUT_MS = 15_000;
 export const GEMINI_HEALTH_TIMEOUT_MS = 45_000;
 
 export function getCopilotPolicyTimeoutMs(
-  operation: CopilotPolicyOperation
+  operation: CopilotPolicyOperation,
 ): number {
   if (operation === 'reasoning-help') {
     return COPILOT_REASONING_EFFORT_HELP_TIMEOUT_MS;
@@ -42,7 +40,7 @@ export function getGeminiPolicyTimeoutMs(input: {
   if (input.operation === 'review-attempt') {
     if (!input.model) {
       throw new Error(
-        'Gemini review-attempt policy requires a model to resolve the timeout.'
+        'Gemini review-attempt policy requires a model to resolve the timeout.',
       );
     }
 
@@ -61,6 +59,6 @@ export function getGeminiCurrentPolicy(model: string) {
     model: policy.model,
     requestTimeoutMs: policy.requestTimeoutMs,
     retryDelaysMs: [...policy.retryDelaysMs],
-    targetIntervalMs: policy.targetIntervalMs
+    targetIntervalMs: policy.targetIntervalMs,
   };
 }

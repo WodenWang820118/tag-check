@@ -1,22 +1,22 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { test } from 'vitest';
+import test from 'node:test';
 
+import type { ProviderObservationInput } from '../../provider-observability/provider-observability.ts';
 import {
   buildCopilotCommandArgs,
-  buildCopilotReviewPrompt,
   buildCopilotReviewCommandArgs,
   probeCopilotCliHealth,
-  runCopilotReview
+  runCopilotReview,
 } from './copilot.ts';
 
 test('buildCopilotCommandArgs uses non-interactive prompt mode and preserves prompt text', () => {
   const args = buildCopilotCommandArgs({
     experimental: true,
     model: 'gpt-5-mini',
-    prompt: 'Review this diff and list three findings.'
+    prompt: 'Review this diff and list three findings.',
   });
 
   assert.deepEqual(args, [
@@ -29,7 +29,7 @@ test('buildCopilotCommandArgs uses non-interactive prompt mode and preserves pro
     '--mode',
     'plan',
     '--model',
-    'gpt-5-mini'
+    'gpt-5-mini',
   ]);
   assert.equal(args.includes('--prompt=-'), false);
 });
@@ -38,7 +38,7 @@ test('buildCopilotCommandArgs can harden health probes with local-only settings'
   const args = buildCopilotCommandArgs({
     disableBuiltinMcps: true,
     disableCustomInstructions: true,
-    prompt: 'Reply with exactly OK.'
+    prompt: 'Reply with exactly OK.',
   });
 
   assert.deepEqual(args, [
@@ -50,7 +50,7 @@ test('buildCopilotCommandArgs can harden health probes with local-only settings'
     '--mode',
     'plan',
     '--no-custom-instructions',
-    '--disable-builtin-mcps'
+    '--disable-builtin-mcps',
   ]);
 });
 
@@ -59,7 +59,7 @@ test('buildCopilotReviewCommandArgs adds high reasoning effort when the CLI supp
     {
       model: 'claude-sonnet-4.6',
       prompt: 'Review this diff.',
-      repoRoot: 'C:/repo'
+      repoRoot: 'C:/repo',
     },
     {
       reasoningEffortSupportCache: new Map(),
@@ -70,9 +70,9 @@ test('buildCopilotReviewCommandArgs adds high reasoning effort when the CLI supp
         stdout:
           input.args[0] === '--help'
             ? '  --effort, --reasoning-effort <level>'
-            : ''
-      })
-    }
+            : '',
+      }),
+    },
   );
 
   assert.deepEqual(args, [
@@ -87,44 +87,8 @@ test('buildCopilotReviewCommandArgs adds high reasoning effort when the CLI supp
     '--model',
     'claude-sonnet-4.6',
     '--reasoning-effort',
-    'high'
+    'high',
   ]);
-});
-
-test('buildCopilotReviewPrompt adds the GitHub agent specialist lens for checkpoint reviews', () => {
-  const repoRoot = mkdtempSync(join(tmpdir(), 'copilot-profile-'));
-  try {
-    const profilePath = join(
-      repoRoot,
-      '.github',
-      'agents',
-      'architecture-reviewer.agent.md'
-    );
-    mkdirSync(join(profilePath, '..'), { recursive: true });
-    writeFileSync(
-      profilePath,
-      ['---', 'name: architecture-reviewer', '---', 'Architecture lens'].join(
-        '\n'
-      ),
-      'utf8'
-    );
-
-    const prompt = buildCopilotReviewPrompt({
-      checkpoint: 'plan',
-      focus: 'general',
-      prompt: 'Review this diff.',
-      repoRoot
-    });
-
-    assert.match(
-      prompt,
-      /Use the copilot reviewer specialist lens: architecture-reviewer/
-    );
-    assert.match(prompt, /Architecture lens/);
-    assert.match(prompt, /Review this diff/);
-  } finally {
-    rmSync(repoRoot, { force: true, recursive: true });
-  }
 });
 
 test('buildCopilotReviewCommandArgs uses the effort alias when the CLI only advertises --effort', () => {
@@ -132,7 +96,7 @@ test('buildCopilotReviewCommandArgs uses the effort alias when the CLI only adve
     {
       model: 'claude-sonnet-4.6',
       prompt: 'Review this diff.',
-      repoRoot: 'C:/repo'
+      repoRoot: 'C:/repo',
     },
     {
       reasoningEffortSupportCache: new Map(),
@@ -140,9 +104,9 @@ test('buildCopilotReviewCommandArgs uses the effort alias when the CLI only adve
         error: undefined,
         status: 0,
         stderr: '',
-        stdout: input.args[0] === '--help' ? '  --effort <level>' : ''
-      })
-    }
+        stdout: input.args[0] === '--help' ? '  --effort <level>' : '',
+      }),
+    },
   );
 
   assert.deepEqual(args, [
@@ -157,7 +121,7 @@ test('buildCopilotReviewCommandArgs uses the effort alias when the CLI only adve
     '--model',
     'claude-sonnet-4.6',
     '--effort',
-    'high'
+    'high',
   ]);
 });
 
@@ -166,7 +130,7 @@ test('buildCopilotReviewCommandArgs falls back cleanly when the CLI does not adv
     {
       model: 'gpt-5-mini',
       prompt: 'Review this diff.',
-      repoRoot: 'C:/repo'
+      repoRoot: 'C:/repo',
     },
     {
       reasoningEffortSupportCache: new Map(),
@@ -174,9 +138,9 @@ test('buildCopilotReviewCommandArgs falls back cleanly when the CLI does not adv
         error: undefined,
         status: 0,
         stderr: '',
-        stdout: 'Usage: copilot [options]'
-      })
-    }
+        stdout: 'Usage: copilot [options]',
+      }),
+    },
   );
 
   assert.equal(args.includes('--reasoning-effort'), false);
@@ -189,7 +153,7 @@ test('buildCopilotReviewCommandArgs falls back cleanly when the support probe fa
     {
       model: 'gpt-5-mini',
       prompt: 'Review this diff.',
-      repoRoot: 'C:/repo'
+      repoRoot: 'C:/repo',
     },
     {
       reasoningEffortSupportCache: cache,
@@ -197,9 +161,9 @@ test('buildCopilotReviewCommandArgs falls back cleanly when the support probe fa
         error: new Error('help failed'),
         status: 1,
         stderr: 'help failed',
-        stdout: ''
-      })
-    }
+        stdout: '',
+      }),
+    },
   );
 
   assert.equal(args.includes('--reasoning-effort'), false);
@@ -217,13 +181,13 @@ test('buildCopilotReviewCommandArgs retries after a transient support-probe fail
           error: new Error('help failed'),
           status: 1,
           stderr: 'help failed',
-          stdout: ''
+          stdout: '',
         }
       : {
           error: undefined,
           status: 0,
           stderr: '',
-          stdout: '  --reasoning-effort <level>'
+          stdout: '  --reasoning-effort <level>',
         };
   };
 
@@ -231,23 +195,23 @@ test('buildCopilotReviewCommandArgs retries after a transient support-probe fail
     {
       model: 'gpt-5-mini',
       prompt: 'Review this diff.',
-      repoRoot: 'C:/repo'
+      repoRoot: 'C:/repo',
     },
     {
       reasoningEffortSupportCache: cache,
-      runCommand
-    }
+      runCommand,
+    },
   );
   const secondArgs = buildCopilotReviewCommandArgs(
     {
       model: 'gpt-5-mini',
       prompt: 'Review this diff.',
-      repoRoot: 'C:/repo'
+      repoRoot: 'C:/repo',
     },
     {
       reasoningEffortSupportCache: cache,
-      runCommand
-    }
+      runCommand,
+    },
   );
 
   assert.equal(firstArgs.includes('--reasoning-effort'), false);
@@ -260,7 +224,7 @@ test('runCopilotReview falls back cleanly when the support probe fails', () => {
     {
       model: 'gpt-5-mini',
       prompt: 'Review this diff.',
-      repoRoot: 'C:/repo'
+      repoRoot: 'C:/repo',
     },
     {
       reasoningEffortSupportCache: new Map(),
@@ -271,7 +235,7 @@ test('runCopilotReview falls back cleanly when the support probe fails', () => {
             error: new Error('help failed'),
             status: 1,
             stderr: 'help failed',
-            stdout: ''
+            stdout: '',
           };
         }
 
@@ -279,10 +243,10 @@ test('runCopilotReview falls back cleanly when the support probe fails', () => {
           error: undefined,
           status: 0,
           stderr: '',
-          stdout: 'Reviewed.'
+          stdout: 'Reviewed.',
         };
-      }
-    }
+      },
+    },
   );
 
   assert.equal(review, 'Reviewed.');
@@ -295,13 +259,13 @@ test('runCopilotReview falls back cleanly when the support probe fails', () => {
 test('runCopilotReview retries without reasoning flags when the review command rejects them', () => {
   const calls: string[][] = [];
   const cache = new Map<string, '--effort' | '--reasoning-effort' | null>();
-  const recorded: Array<Record<string, unknown>> = [];
+  const recorded: ProviderObservationInput[] = [];
   let reviewAttempt = 0;
   const review = runCopilotReview(
     {
       model: 'gpt-5-mini',
       prompt: 'Review this diff.',
-      repoRoot: 'C:/repo'
+      repoRoot: 'C:/repo',
     },
     {
       now: (() => {
@@ -312,7 +276,7 @@ test('runCopilotReview retries without reasoning flags when the review command r
         };
       })(),
       recordObservation(observation) {
-        recorded.push(observation as Record<string, unknown>);
+        recorded.push(observation);
         return observation;
       },
       reasoningEffortSupportCache: cache,
@@ -323,7 +287,7 @@ test('runCopilotReview retries without reasoning flags when the review command r
             error: undefined,
             status: 0,
             stderr: '',
-            stdout: '  --reasoning-effort <level>'
+            stdout: '  --reasoning-effort <level>',
           };
         }
 
@@ -333,16 +297,16 @@ test('runCopilotReview retries without reasoning flags when the review command r
               error: undefined,
               status: 1,
               stderr: 'unknown option --reasoning-effort',
-              stdout: ''
+              stdout: '',
             }
           : {
               error: undefined,
               status: 0,
               stderr: '',
-              stdout: 'Reviewed after retry.'
+              stdout: 'Reviewed after retry.',
             };
-      }
-    }
+      },
+    },
   );
 
   assert.equal(review, 'Reviewed after retry.');
@@ -382,7 +346,7 @@ test('probeCopilotCliHealth keeps the cheap path while runCopilotReview adds hig
       return {
         status: 0,
         stdout: '  --effort, --reasoning-effort <level>',
-        stderr: ''
+        stderr: '',
       };
     }
 
@@ -397,29 +361,29 @@ test('probeCopilotCliHealth keeps the cheap path while runCopilotReview adds hig
     const health = probeCopilotCliHealth(
       {
         model: 'gpt-5-mini',
-        repoRoot
+        repoRoot,
       },
       {
-        runCommand
-      }
+        runCommand,
+      },
     );
     const review = runCopilotReview(
       {
         model: 'gpt-5-mini',
         prompt: 'Review this diff.',
-        repoRoot
+        repoRoot,
       },
       {
         reasoningEffortSupportCache: new Map(),
-        runCommand
-      }
+        runCommand,
+      },
     );
 
     assert.equal(health.available, true);
     assert.equal(review, 'Reviewed.');
 
     const probeCall = calls.find((entry) =>
-      entry.includes('--no-custom-instructions')
+      entry.includes('--no-custom-instructions'),
     );
     const reviewCall = calls.find((entry) => entry.includes('--experimental'));
     const helpCalls = calls.filter((entry) => entry[0] === '--help');
@@ -435,7 +399,7 @@ test('probeCopilotCliHealth keeps the cheap path while runCopilotReview adds hig
       '--no-custom-instructions',
       '--disable-builtin-mcps',
       '--model',
-      'gpt-5-mini'
+      'gpt-5-mini',
     ]);
     assert.ok(reviewCall);
     assert.equal(reviewCall?.includes('--reasoning-effort'), true);
@@ -446,9 +410,9 @@ test('probeCopilotCliHealth keeps the cheap path while runCopilotReview adds hig
 });
 
 test('probeCopilotCliHealth records health-version and health-probe observations with checkpoint telemetry', () => {
-  const recorded: Array<Record<string, unknown>> = [];
+  const recorded: ProviderObservationInput[] = [];
   const repoRoot = mkdtempSync(
-    join(tmpdir(), 'copilot-provider-observations-')
+    join(tmpdir(), 'copilot-provider-observations-'),
   );
 
   try {
@@ -458,8 +422,8 @@ test('probeCopilotCliHealth records health-version and health-probe observations
         repoRoot,
         telemetryContext: {
           callsite: 'checkpoint-review',
-          checkpoint: 'plan'
-        }
+          checkpoint: 'plan',
+        },
       },
       {
         now: (() => {
@@ -470,7 +434,7 @@ test('probeCopilotCliHealth records health-version and health-probe observations
           };
         })(),
         recordObservation(observation) {
-          recorded.push(observation as Record<string, unknown>);
+          recorded.push(observation);
           return observation;
         },
         runCommand: (input) => {
@@ -479,8 +443,8 @@ test('probeCopilotCliHealth records health-version and health-probe observations
           }
 
           return { status: 0, stdout: 'OK.', stderr: '' };
-        }
-      }
+        },
+      },
     );
 
     assert.equal(health.available, true);
@@ -505,7 +469,7 @@ test('probeCopilotCliHealth records health-version and health-probe observations
 });
 
 test('runCopilotReview records reasoning-help and review observations and preserves hybrid telemetry', () => {
-  const recorded: Array<Record<string, unknown>> = [];
+  const recorded: ProviderObservationInput[] = [];
 
   const review = runCopilotReview(
     {
@@ -513,8 +477,8 @@ test('runCopilotReview records reasoning-help and review observations and preser
       prompt: 'Review this diff.',
       repoRoot: 'C:/repo',
       telemetryContext: {
-        callsite: 'hybrid-gpt-review'
-      }
+        callsite: 'hybrid-gpt-review',
+      },
     },
     {
       now: (() => {
@@ -525,7 +489,7 @@ test('runCopilotReview records reasoning-help and review observations and preser
         };
       })(),
       recordObservation(observation) {
-        recorded.push(observation as Record<string, unknown>);
+        recorded.push(observation);
         return observation;
       },
       reasoningEffortSupportCache: new Map(),
@@ -535,7 +499,7 @@ test('runCopilotReview records reasoning-help and review observations and preser
             error: undefined,
             status: 0,
             stderr: '',
-            stdout: '  --reasoning-effort <level>'
+            stdout: '  --reasoning-effort <level>',
           };
         }
 
@@ -543,10 +507,10 @@ test('runCopilotReview records reasoning-help and review observations and preser
           error: undefined,
           status: 0,
           stderr: '',
-          stdout: 'Reviewed.'
+          stdout: 'Reviewed.',
         };
-      }
-    }
+      },
+    },
   );
 
   assert.equal(review, 'Reviewed.');
@@ -567,7 +531,7 @@ test('runCopilotReview records reasoning-help and review observations and preser
 });
 
 test('runCopilotReview records review timeouts before failing', () => {
-  const recorded: Array<Record<string, unknown>> = [];
+  const recorded: ProviderObservationInput[] = [];
   const timeoutError = new Error('timed out');
   timeoutError.name = 'TimeoutError';
   const repoRoot = resolve('C:/repo');
@@ -581,8 +545,8 @@ test('runCopilotReview records review timeouts before failing', () => {
           repoRoot,
           telemetryContext: {
             callsite: 'checkpoint-review',
-            checkpoint: 'implementation'
-          }
+            checkpoint: 'implementation',
+          },
         },
         {
           now: (() => {
@@ -593,7 +557,7 @@ test('runCopilotReview records review timeouts before failing', () => {
             };
           })(),
           recordObservation(observation) {
-            recorded.push(observation as Record<string, unknown>);
+            recorded.push(observation);
             return observation;
           },
           reasoningEffortSupportCache: new Map([[repoRoot, null]]),
@@ -602,11 +566,11 @@ test('runCopilotReview records review timeouts before failing', () => {
             signal: 'SIGTERM',
             status: null,
             stderr: '',
-            stdout: ''
-          })
-        }
+            stdout: '',
+          }),
+        },
       ),
-    /timed out/
+    /timed out/,
   );
 
   assert.equal(recorded.length, 1);
@@ -619,14 +583,14 @@ test('runCopilotReview records review timeouts before failing', () => {
 });
 
 test('runCopilotReview does not mark successful timeout-themed output as a timeout', () => {
-  const recorded: Array<Record<string, unknown>> = [];
+  const recorded: ProviderObservationInput[] = [];
   const repoRoot = resolve('C:/repo');
 
   const review = runCopilotReview(
     {
       model: 'gpt-5-mini',
       prompt: 'Review timeout handling.',
-      repoRoot
+      repoRoot,
     },
     {
       now: (() => {
@@ -637,7 +601,7 @@ test('runCopilotReview does not mark successful timeout-themed output as a timeo
         };
       })(),
       recordObservation(observation) {
-        recorded.push(observation as Record<string, unknown>);
+        recorded.push(observation);
         return observation;
       },
       reasoningEffortSupportCache: new Map([[repoRoot, null]]),
@@ -645,9 +609,9 @@ test('runCopilotReview does not mark successful timeout-themed output as a timeo
         error: undefined,
         status: 0,
         stderr: '',
-        stdout: 'Reviewed timeout handling successfully.'
-      })
-    }
+        stdout: 'Reviewed timeout handling successfully.',
+      }),
+    },
   );
 
   assert.equal(review, 'Reviewed timeout handling successfully.');

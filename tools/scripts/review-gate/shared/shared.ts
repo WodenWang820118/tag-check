@@ -7,7 +7,7 @@ import path from 'node:path';
 // region Constants
 const REVIEW_TTL_MS = 2 * 60 * 60 * 1000;
 const REVIEW_GATE_ENTRYPOINT_COMMAND_PATTERN =
-  /^\s*node(?:\.exe)?\s+(?:\.?[\\/])?(?:tools[\\/]scripts|scripts)[\\/]review-gate[\\/](approve-pre-implementation|status|reset)[\\/]\1\.ts(?:\s+.*)?\s*$/i;
+  /^\s*node(?:\.exe)?(?:\s+--experimental-strip-types)?\s+(?:\.?[\\/])?(?:tools[\\/]scripts|scripts)[\\/]review-gate[\\/](approve-pre-implementation|status|reset)[\\/]\1\.ts(?:\s+.*)?\s*$/i;
 const REVIEW_GATE_SCRIPT_ALIAS_PATTERN =
   /^\s*(?:(?:npm|pnpm|yarn|bun)\s+)?review:(approve-pre-implementation|status|reset)(?:\s+--(?:\s+.*)?)?\s*$/i;
 const RISKY_SHELL_SYNTAX_PATTERNS = [
@@ -17,18 +17,96 @@ const RISKY_SHELL_SYNTAX_PATTERNS = [
   /\|(?!\|)/,
   /\$\(/,
   /`[^`]+`/,
-  /\b(powershell|pwsh)\b.*\s-(EncodedCommand|enc|e)\b/i
+  /\b(powershell|pwsh)\b.*\s-(EncodedCommand|enc|e)\b/i,
 ];
 // endregion
 
 export const SUPPORTED_REVIEWERS = [
   'copilot-claude',
-  'copilot-gpt-5-mini',
   'gemini-2.5-pro',
-  'codex-subagent'
+  'codex-subagent',
 ] as const;
 
 export type SupportedReviewer = (typeof SUPPORTED_REVIEWERS)[number];
+
+export const PRIMARY_FAMILIES = ['copilot', 'gemini', 'codex'] as const;
+export type PrimaryFamily = (typeof PRIMARY_FAMILIES)[number];
+
+export const TASK_SIZES = ['tiny', 'small', 'medium', 'large', 'huge'] as const;
+export type TaskSize = (typeof TASK_SIZES)[number];
+
+export const REVIEW_GATE_MODES = ['standard', 'override'] as const;
+export type ReviewGateMode = (typeof REVIEW_GATE_MODES)[number];
+
+const REVIEWER_FAMILY: Record<SupportedReviewer, PrimaryFamily> = {
+  'copilot-claude': 'copilot',
+  'gemini-2.5-pro': 'gemini',
+  'codex-subagent': 'codex',
+};
+
+const DEFAULT_MAX_FILES_BY_SIZE: Record<TaskSize, number | null> = {
+  tiny: 1,
+  small: 2,
+  medium: 5,
+  large: 10,
+  huge: null,
+};
+
+export function getReviewerFamily(reviewer: SupportedReviewer): PrimaryFamily {
+  return REVIEWER_FAMILY[reviewer];
+}
+
+export function defaultMaxFilesForSize(size: TaskSize): number | null {
+  return DEFAULT_MAX_FILES_BY_SIZE[size];
+}
+
+export function validateFamily(value: string): PrimaryFamily {
+  if ((PRIMARY_FAMILIES as readonly string[]).includes(value)) {
+    return value as PrimaryFamily;
+  }
+  throw new Error(
+    `Unsupported primary family "${value}". Expected one of: ${PRIMARY_FAMILIES.join(', ')}.`,
+  );
+}
+
+export function validateTaskSize(value: string): TaskSize {
+  if ((TASK_SIZES as readonly string[]).includes(value)) {
+    return value as TaskSize;
+  }
+  throw new Error(
+    `Unsupported task size "${value}". Expected one of: ${TASK_SIZES.join(', ')}.`,
+  );
+}
+
+export function validateGateMode(value: string): ReviewGateMode {
+  if ((REVIEW_GATE_MODES as readonly string[]).includes(value)) {
+    return value as ReviewGateMode;
+  }
+  throw new Error(
+    `Unsupported gate mode "${value}". Expected one of: ${REVIEW_GATE_MODES.join(', ')}.`,
+  );
+}
+
+export function assertCrossFamilyReviewer(input: {
+  reviewer: SupportedReviewer;
+  primaryFamily: PrimaryFamily | null;
+  mode: ReviewGateMode;
+  overrideReason: string | null;
+}): void {
+  if (input.primaryFamily === null) {
+    return;
+  }
+  const reviewerFamily = getReviewerFamily(input.reviewer);
+  if (reviewerFamily !== input.primaryFamily) {
+    return;
+  }
+  if (input.mode === 'override' && input.overrideReason) {
+    return;
+  }
+  throw new Error(
+    `Reviewer "${input.reviewer}" (${reviewerFamily}) is in the same AI family as the primary agent (${input.primaryFamily}). Use a cross-family reviewer or rerun with --mode override --override-reason "<rationale>".`,
+  );
+}
 
 export interface RepoContext {
   root: string;
@@ -48,6 +126,11 @@ export interface ReviewApproval {
   branch: string | null;
   head: string | null;
   root: string;
+  primaryFamily: PrimaryFamily | null;
+  taskSize: TaskSize | null;
+  mode: ReviewGateMode;
+  maxFiles: number | null;
+  overrideReason: string | null;
 }
 
 export interface ReviewGateState {
@@ -60,6 +143,11 @@ export interface ParsedReviewGateArgs {
   focus: string;
   summary: string;
   force: boolean;
+  primaryFamily: string | null;
+  taskSize: string | null;
+  mode: string;
+  maxFiles: number | null;
+  overrideReason: string | null;
 }
 
 interface HookInput {
@@ -78,7 +166,7 @@ function trySpawn(command: string, args: string[], cwd: string): string | null {
   const result = spawnSync(command, args, {
     cwd,
     encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'ignore']
+    stdio: ['ignore', 'pipe', 'ignore'],
   });
 
   if (result.error || result.status !== 0) {
@@ -94,7 +182,7 @@ export function resolveGitCommand(): string | null {
       ? [
           'git',
           'C:\\Program Files\\Git\\cmd\\git.exe',
-          'C:\\Program Files\\Git\\bin\\git.exe'
+          'C:\\Program Files\\Git\\bin\\git.exe',
         ]
       : ['git', '/usr/bin/git', '/usr/local/bin/git'];
 
@@ -117,7 +205,7 @@ export function getRepoContext(cwd = process.cwd()): RepoContext {
       branch: null,
       head: null,
       dirty: null,
-      gitCommand: null
+      gitCommand: null,
     };
   }
 
@@ -126,13 +214,13 @@ export function getRepoContext(cwd = process.cwd()): RepoContext {
   const branch = trySpawn(
     gitCommand,
     ['rev-parse', '--abbrev-ref', 'HEAD'],
-    root
+    root,
   );
   const head = trySpawn(gitCommand, ['rev-parse', 'HEAD'], root);
   const dirtyOutput = trySpawn(
     gitCommand,
     ['status', '--porcelain', '--untracked-files=all'],
-    root
+    root,
   );
 
   return {
@@ -140,7 +228,7 @@ export function getRepoContext(cwd = process.cwd()): RepoContext {
     branch,
     head,
     dirty: dirtyOutput ? dirtyOutput.length > 0 : false,
-    gitCommand
+    gitCommand,
   };
 }
 
@@ -164,7 +252,7 @@ export function loadState(repoRoot = process.cwd()): ReviewGateState | null {
 
 export function saveState(
   state: ReviewGateState,
-  repoRoot = process.cwd()
+  repoRoot = process.cwd(),
 ): void {
   const statePath = getStatePath(repoRoot);
   fs.mkdirSync(path.dirname(statePath), { recursive: true });
@@ -184,7 +272,7 @@ export function validateReviewerId(reviewer: string): SupportedReviewer {
   }
 
   throw new Error(
-    `Unsupported reviewer "${reviewer}". Expected one of: ${SUPPORTED_REVIEWERS.join(', ')}.`
+    `Unsupported reviewer "${reviewer}". Expected one of: ${SUPPORTED_REVIEWERS.join(', ')}.`,
   );
 }
 
@@ -193,8 +281,17 @@ export function createApproval(input: {
   focus: string;
   summary: string;
   repoContext: RepoContext;
+  primaryFamily?: PrimaryFamily | null;
+  taskSize?: TaskSize | null;
+  mode?: ReviewGateMode;
+  maxFiles?: number | null;
+  overrideReason?: string | null;
 }): ReviewGateState {
   const approvedAt = new Date().toISOString();
+  const taskSize = input.taskSize ?? null;
+  const mode = input.mode ?? 'standard';
+  const resolvedMaxFiles =
+    input.maxFiles ?? (taskSize ? defaultMaxFilesForSize(taskSize) : null);
   return {
     version: 1,
     approval: {
@@ -206,14 +303,19 @@ export function createApproval(input: {
       expiresAt: new Date(Date.now() + REVIEW_TTL_MS).toISOString(),
       branch: input.repoContext.branch,
       head: input.repoContext.head,
-      root: input.repoContext.root
-    }
+      root: input.repoContext.root,
+      primaryFamily: input.primaryFamily ?? null,
+      taskSize,
+      mode,
+      maxFiles: resolvedMaxFiles,
+      overrideReason: input.overrideReason ?? null,
+    },
   };
 }
 
 export function evaluateApproval(
   state: ReviewGateState | null,
-  repoContext: RepoContext
+  repoContext: RepoContext,
 ):
   | { valid: true; approval: ReviewApproval }
   | { valid: false; reason: string } {
@@ -222,14 +324,14 @@ export function evaluateApproval(
   if (!approval) {
     return {
       valid: false,
-      reason: 'No pre-implementation review approval found.'
+      reason: 'No pre-implementation review approval found.',
     };
   }
 
   if (approval.type !== 'pre-implementation-review') {
     return {
       valid: false,
-      reason: 'Stored review approval is not a pre-implementation approval.'
+      reason: 'Stored review approval is not a pre-implementation approval.',
     };
   }
 
@@ -239,14 +341,14 @@ export function evaluateApproval(
   ) {
     return {
       valid: false,
-      reason: `Stored review approval used unsupported reviewer "${String(approval.reviewer)}".`
+      reason: `Stored review approval used unsupported reviewer "${String(approval.reviewer)}".`,
     };
   }
 
   if (typeof approval.expiresAt !== 'string') {
     return {
       valid: false,
-      reason: 'Stored review approval has an invalid expiration timestamp.'
+      reason: 'Stored review approval has an invalid expiration timestamp.',
     };
   }
 
@@ -254,14 +356,14 @@ export function evaluateApproval(
   if (!Number.isFinite(expiresAtMs)) {
     return {
       valid: false,
-      reason: 'Stored review approval has an invalid expiration timestamp.'
+      reason: 'Stored review approval has an invalid expiration timestamp.',
     };
   }
 
   if (Date.now() > expiresAtMs) {
     return {
       valid: false,
-      reason: 'Pre-implementation review approval has expired.'
+      reason: 'Pre-implementation review approval has expired.',
     };
   }
 
@@ -273,7 +375,7 @@ export function evaluateApproval(
     return {
       valid: false,
       reason:
-        'Pre-implementation review approval was granted on a different branch.'
+        'Pre-implementation review approval was granted on a different branch.',
     };
   }
 
@@ -281,44 +383,64 @@ export function evaluateApproval(
     return {
       valid: false,
       reason:
-        'Pre-implementation review approval was granted for a different HEAD commit.'
+        'Pre-implementation review approval was granted for a different HEAD commit.',
     };
   }
 
   return { valid: true, approval };
 }
 
+function parseMaxFilesValue(raw: string | undefined): number {
+  const value = raw ? Number.parseInt(raw, 10) : Number.NaN;
+  if (!Number.isFinite(value) || value < 0) {
+    throw new Error(`Invalid --max-files value "${raw ?? ''}".`);
+  }
+  return value;
+}
+
+const STRING_FLAG_TO_KEY: Record<string, keyof ParsedReviewGateArgs> = {
+  '--reviewer': 'reviewer',
+  '--focus': 'focus',
+  '--summary': 'summary',
+  '--primary-family': 'primaryFamily',
+  '--task-size': 'taskSize',
+  '--mode': 'mode',
+  '--override-reason': 'overrideReason',
+};
+
 export function parseArgs(argv: string[]): ParsedReviewGateArgs {
   const parsed: ParsedReviewGateArgs = {
     reviewer: 'copilot-claude',
     focus: 'general',
     summary: 'Approved after pre-implementation review.',
-    force: false
+    force: false,
+    primaryFamily: null,
+    taskSize: null,
+    mode: 'standard',
+    maxFiles: null,
+    overrideReason: null,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
     const current = argv[index];
 
-    if (current === '--reviewer') {
-      parsed.reviewer = argv[index + 1] ?? parsed.reviewer;
-      index += 1;
-      continue;
-    }
-
-    if (current === '--focus') {
-      parsed.focus = argv[index + 1] ?? parsed.focus;
-      index += 1;
-      continue;
-    }
-
-    if (current === '--summary') {
-      parsed.summary = argv[index + 1] ?? parsed.summary;
-      index += 1;
-      continue;
-    }
-
     if (current === '--force') {
       parsed.force = true;
+      continue;
+    }
+
+    if (current === '--max-files') {
+      parsed.maxFiles = parseMaxFilesValue(argv[index + 1]);
+      index += 1;
+      continue;
+    }
+
+    if (current && current in STRING_FLAG_TO_KEY) {
+      const next = argv[index + 1];
+      if (next !== undefined) {
+        (parsed as Record<string, unknown>)[STRING_FLAG_TO_KEY[current]] = next;
+      }
+      index += 1;
     }
   }
 
@@ -336,7 +458,7 @@ export function isMutatingToolUse({ toolName, toolArgs }: HookInput): boolean {
       'move',
       'rename',
       'replace',
-      'write_file'
+      'write_file',
     ].includes(normalizedToolName)
   ) {
     return true;
@@ -385,7 +507,7 @@ export function isMutatingToolUse({ toolName, toolArgs }: HookInput): boolean {
     /^(docker|podman)\s+(--version|version|info|images|ps|inspect)\b/i,
     /^go\s+(version|env|list)\b/i,
     /^java\s+-version\b/i,
-    /^dotnet\s+(--version|--info|--list-sdks|--list-runtimes)\b/i
+    /^dotnet\s+(--version|--info|--list-sdks|--list-runtimes)\b/i,
   ];
 
   return !readOnlyPatterns.some((pattern) => pattern.test(trimmedCommand));
@@ -426,7 +548,7 @@ export function parseHookInput(rawInput: string): HookInput {
 
   return {
     ...input,
-    toolArgs
+    toolArgs,
   };
 }
 
@@ -443,7 +565,7 @@ export function evaluateHookPermission(input: {
   if (!evaluation.valid) {
     return {
       allow: false,
-      reason: evaluation.reason
+      reason: evaluation.reason,
     };
   }
 
@@ -451,10 +573,9 @@ export function evaluateHookPermission(input: {
 }
 
 export function buildDenyPayload(reason: string): string {
-  const reviewerList = SUPPORTED_REVIEWERS.join('|');
   return JSON.stringify({
     permissionDecision: 'deny',
-    permissionDecisionReason: `${reason} Pass plan review first (Copilot Claude first, Gemini 2.5 Pro fallback, Copilot GPT-5 mini fallback, or Codex fallback only when allowed), then approve the gate with: node tools/scripts/review-gate/approve-pre-implementation/approve-pre-implementation.ts --reviewer <${reviewerList}> --focus <area> --summary "<summary>"`
+    permissionDecisionReason: `${reason} Pass plan review first (Copilot Claude or Gemini 2.5 Pro fallback), then approve the gate with: node tools/scripts/review-gate/approve-pre-implementation/approve-pre-implementation.ts --reviewer <copilot-claude|gemini-2.5-pro|codex-subagent> --focus <area> --summary "<summary>"`,
   });
 }
 // endregion

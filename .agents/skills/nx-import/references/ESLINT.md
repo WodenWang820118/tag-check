@@ -55,7 +55,7 @@ This causes `Parsing error: ESLint was configured to run on X using parserOption
 ```js
 // .eslintrc.js — also ignore the config file itself since module.exports isn't in tsconfig
 module.exports = {
-  ignorePatterns: ['dist/**', '.eslintrc.js']
+  ignorePatterns: ['dist/**', '.eslintrc.js'],
   // ...
 };
 ```
@@ -71,8 +71,8 @@ When a project uses `eslint.config.cjs` (CJS flat config), `eslint .` lints the 
 ```js
 module.exports = tseslint.config(
   {
-    ignores: ['dist/**', 'node_modules/**', 'eslint.config.cjs']
-  }
+    ignores: ['dist/**', 'node_modules/**', 'eslint.config.cjs'],
+  },
   // ...
 );
 ```
