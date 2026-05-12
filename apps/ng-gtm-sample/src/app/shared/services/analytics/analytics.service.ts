@@ -75,7 +75,7 @@ export class AnalyticsService {
       const dataLayer = this.getDataLayer();
 
       // ecommerce events require a different dataLayer structure
-      if (eventData.ecommerce) {
+      if (eventData['ecommerce']) {
         dataLayer.push(
           { ecommerce: null },
           {
@@ -108,7 +108,12 @@ export class AnalyticsService {
 
   private syncDataLayerEvents() {
     console.log('Syncing events from IndexedDB');
-    this.db.syncDataLayerEvents().subscribe();
+    const db = this.db;
+    if (!db) {
+      return;
+    }
+
+    db.syncDataLayerEvents().subscribe();
   }
 
   trackEvent(eventName: string, eventData: unknown) {
