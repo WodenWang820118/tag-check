@@ -3,9 +3,7 @@ import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { catchError, defer, from, map, of, switchMap } from 'rxjs';
 import { FIREBASE_STORAGE } from '../../../firebase/firebase.tokens';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class FirebaseStorageService {
   private readonly bucket = inject(FIREBASE_STORAGE);
 

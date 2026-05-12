@@ -1,3 +1,9 @@
+import { Routes } from '@angular/router';
+import { environment } from '../../../environments/environment';
+import { provideFirebaseApp } from '../../firebase/provide-firebase-app';
+import { provideFirebaseAuthClient } from '../../firebase/provide-firebase-auth';
+import { AuthService } from '../../shared/services/auth/auth.service';
+
 export const HOME_ROUTES = [
   {
     path: '',
@@ -7,6 +13,11 @@ export const HOME_ROUTES = [
       {
         path: 'login',
         data: { seoKey: 'login' },
+        providers: [
+          provideFirebaseApp(environment.firebase),
+          provideFirebaseAuthClient(),
+          AuthService
+        ],
         loadComponent: () =>
           import('./views/login/login.component').then((m) => m.LoginComponent)
       },
@@ -18,4 +29,4 @@ export const HOME_ROUTES = [
       }
     ]
   }
-];
+] as Routes;

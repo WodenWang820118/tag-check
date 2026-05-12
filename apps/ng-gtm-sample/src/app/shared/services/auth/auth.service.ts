@@ -17,9 +17,7 @@ import {
 } from 'firebase/auth';
 import { FIREBASE_AUTH } from '../../../firebase/firebase.tokens';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class AuthService {
   private readonly firebaseAuth = inject(FIREBASE_AUTH);
   private readonly destroyRef = inject(DestroyRef);

@@ -1,15 +1,15 @@
 import { Component } from '@angular/core';
-import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
+import { AdminNavbarComponent } from '../../../../shared/components/navbar/admin-navbar.component';
 import { RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
 
 @Component({
   selector: 'app-admin-home',
-  imports: [NavbarComponent, RouterOutlet, ButtonModule],
+  imports: [AdminNavbarComponent, RouterOutlet, ButtonModule],
   template: `
     <div class="sample-shell space-y-6 pb-10">
-      <app-navbar></app-navbar>
+      <app-admin-navbar></app-admin-navbar>
 
       <section
         class="sample-panel flex flex-col gap-5 px-6 py-6 lg:flex-row lg:items-end lg:justify-between"
