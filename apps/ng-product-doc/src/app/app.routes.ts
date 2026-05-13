@@ -3,32 +3,21 @@ import {
   type RedirectFunction,
   type Route
 } from '@angular/router';
-import {
-  AboutComponent,
-  DOCS_ROUTES,
-  ObjectivesComponent,
-  SUPPORTED_LOCALES,
-  buildLocalizedPath
-} from '@ui';
+import { AboutComponent, DOCS_ROUTES, ObjectivesComponent } from '@ui';
 import { LandingPageComponent } from './lazy-pages/landing-page';
 
 const DOCUMENTATION_ENTRY_PATH = 'documentation/introduction';
 
 export const appRoutes: Route[] = [
   ...createProductDocRoutes(),
-  ...SUPPORTED_LOCALES.map(({ urlSegment }) => ({
-    path: urlSegment,
-    children: createProductDocRoutes(urlSegment)
-  })),
   {
     path: '**',
     redirectTo: ''
   }
 ];
 
-function createProductDocRoutes(localeSegment?: string): Route[] {
-  const redirectToDocumentationEntry =
-    createDocumentationEntryRedirect(localeSegment);
+function createProductDocRoutes(): Route[] {
+  const redirectToDocumentationEntry = createDocumentationEntryRedirect();
 
   return [
     {
@@ -64,15 +53,13 @@ function createProductDocRoutes(localeSegment?: string): Route[] {
   ];
 }
 
-function createDocumentationEntryRedirect(
-  localeSegment?: string
-): RedirectFunction {
+function createDocumentationEntryRedirect(): RedirectFunction {
   return ({ fragment, queryParams }) => {
-    const documentationEntryPath = localeSegment
-      ? buildLocalizedPath(`/${DOCUMENTATION_ENTRY_PATH}`, localeSegment)
-      : `/${DOCUMENTATION_ENTRY_PATH}`;
-
-    return appendUrlState(documentationEntryPath, queryParams, fragment);
+    return appendUrlState(
+      `/${DOCUMENTATION_ENTRY_PATH}`,
+      queryParams,
+      fragment
+    );
   };
 }
 

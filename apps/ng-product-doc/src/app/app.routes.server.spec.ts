@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { serverRoutes } from './app.routes.server';
 
 describe('serverRoutes', () => {
-  it('marks docs and public pages as prerenderable for direct and localized URLs', () => {
+  it('marks docs and public pages as prerenderable inside each localized build root', () => {
     const prerenderRoutes = getServerPaths(RenderMode.Prerender);
 
     expect(prerenderRoutes).toEqual(
@@ -12,25 +12,23 @@ describe('serverRoutes', () => {
     );
 
     for (const { urlSegment } of SUPPORTED_LOCALES) {
-      expect(prerenderRoutes).toEqual(
-        expect.arrayContaining([
-          urlSegment,
-          `${urlSegment}/about`,
-          `${urlSegment}/objectives`,
-          `${urlSegment}/documentation/:name`
-        ])
+      expect(prerenderRoutes).not.toContain(urlSegment);
+      expect(prerenderRoutes).not.toContain(`${urlSegment}/about`);
+      expect(prerenderRoutes).not.toContain(`${urlSegment}/objectives`);
+      expect(prerenderRoutes).not.toContain(
+        `${urlSegment}/documentation/:name`
       );
     }
   });
 
-  it('keeps direct and localized app compatibility URLs client-rendered', () => {
+  it('keeps direct app compatibility URLs client-rendered', () => {
     const clientRoutes = getServerPaths(RenderMode.Client);
 
     expect(clientRoutes).toContain('app');
     expect(clientRoutes).toContain('app/**');
     for (const { urlSegment } of SUPPORTED_LOCALES) {
-      expect(clientRoutes).toContain(`${urlSegment}/app`);
-      expect(clientRoutes).toContain(`${urlSegment}/app/**`);
+      expect(clientRoutes).not.toContain(`${urlSegment}/app`);
+      expect(clientRoutes).not.toContain(`${urlSegment}/app/**`);
     }
     expect(clientRoutes).toContain('**');
   });
@@ -53,7 +51,7 @@ describe('serverRoutes', () => {
       route.path.endsWith('documentation/:name')
     );
 
-    expect(documentationRoutes).toHaveLength(SUPPORTED_LOCALES.length + 1);
+    expect(documentationRoutes).toHaveLength(1);
     for (const documentationRoute of documentationRoutes) {
       expect(documentationRoute.getPrerenderParams).toBeTypeOf('function');
       await expect(documentationRoute.getPrerenderParams?.()).resolves.toEqual(
