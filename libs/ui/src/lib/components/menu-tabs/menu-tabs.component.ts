@@ -8,6 +8,7 @@ import {
   buildLocalizedPath,
   stripLocalePrefix
 } from '../../locale/locale-routing';
+import { type SharedNavigationLink } from '../navigation-link';
 
 @Component({
   selector: 'lib-menu-tabs',
@@ -23,13 +24,25 @@ import {
     >
       <a
         mat-tab-link
-        [href]="appPath"
-        [active]="isActive('/app')"
+        [href]="primaryLink().href"
+        [active]="isLinkActive(primaryLink())"
         class="nav-link-container"
       >
-        <mat-icon class="nav-icon">build</mat-icon>
-        <span i18n="@@nav.app" class="nav-text">App</span>
+        <mat-icon class="nav-icon">{{ primaryLink().icon }}</mat-icon>
+        <span class="nav-text">{{ primaryLink().label }}</span>
       </a>
+
+      @if (docsLink(); as link) {
+        <a
+          mat-tab-link
+          [href]="link.href"
+          [active]="isLinkActive(link)"
+          class="nav-link-container"
+        >
+          <mat-icon class="nav-icon">{{ link.icon }}</mat-icon>
+          <span class="nav-text">{{ link.label }}</span>
+        </a>
+      }
 
       @if (!aboutDisabled()) {
         <a
@@ -79,10 +92,16 @@ import {
       <mat-icon>menu</mat-icon>
     </button>
     <mat-menu #mobileMenu="matMenu">
-      <a mat-menu-item [href]="appPath">
-        <mat-icon>build</mat-icon>
-        <span i18n="@@nav.app">App</span>
+      <a mat-menu-item [href]="primaryLink().href">
+        <mat-icon>{{ primaryLink().icon }}</mat-icon>
+        <span>{{ primaryLink().label }}</span>
       </a>
+      @if (docsLink(); as link) {
+        <a mat-menu-item [href]="link.href">
+          <mat-icon>{{ link.icon }}</mat-icon>
+          <span>{{ link.label }}</span>
+        </a>
+      }
       @if (!aboutDisabled()) {
         <a mat-menu-item [href]="aboutPath">
           <mat-icon>info</mat-icon>
@@ -135,9 +154,10 @@ import {
 })
 export class MenuTabsComponent {
   readonly githubUrl = 'https://github.com/WodenWang820118/tag-check';
-  readonly appPath: string;
   readonly aboutPath: string;
   readonly objectivesPath: string;
+  readonly primaryLink = input.required<SharedNavigationLink>();
+  readonly docsLink = input<SharedNavigationLink>();
   aboutDisabled = input<boolean>(false);
   objectivesDisabled = input<boolean>(false);
 
@@ -145,12 +165,33 @@ export class MenuTabsComponent {
     @Inject(LOCALE_ID) locale: string,
     private readonly router: Router
   ) {
-    this.appPath = buildLocalizedPath('/app', locale);
     this.aboutPath = buildLocalizedPath('/about', locale);
     this.objectivesPath = buildLocalizedPath('/objectives', locale);
   }
 
+  isLinkActive(link: SharedNavigationLink): boolean {
+    if (!link.logicalPath) {
+      return false;
+    }
+
+    const currentPath = stripLocalePrefix(this.router.url);
+
+    if (link.matchStrategy === 'prefix') {
+      return (
+        currentPath === link.logicalPath ||
+        currentPath.startsWith(`${link.logicalPath}/`)
+      );
+    }
+
+    return currentPath === link.logicalPath;
+  }
+
   isActive(logicalPath: string): boolean {
-    return stripLocalePrefix(this.router.url) === logicalPath;
+    return this.isLinkActive({
+      href: logicalPath,
+      label: '',
+      icon: '',
+      logicalPath
+    });
   }
 }

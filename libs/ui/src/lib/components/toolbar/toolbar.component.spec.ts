@@ -8,6 +8,20 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { ToolBarComponent, type ToolbarInputs } from '../../../index';
 
 describe('ToolbarInputs', () => {
+  const primaryLink = {
+    href: '/ja/app',
+    label: 'App',
+    icon: 'build',
+    logicalPath: '/app',
+    matchStrategy: 'exact'
+  } as const;
+
+  const docsLink = {
+    href: 'https://tag-check-documentation.vercel.app/ja/documentation/introduction',
+    label: 'Getting Started',
+    icon: 'menu_book'
+  } as const;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ToolBarComponent],
@@ -20,8 +34,11 @@ describe('ToolbarInputs', () => {
     }).compileComponents();
   });
 
-  it('supports the minimal toolbar contract', () => {
-    const inputs: ToolbarInputs = { title: 'Tag Build' };
+  it('supports the minimal toolbar contract with a host-provided primary link', () => {
+    const inputs: ToolbarInputs = {
+      title: 'Tag Build',
+      primaryLink
+    };
     const fixture = renderToolbar(inputs);
     const [appLink, aboutLink, objectivesLink, githubLink] = getMenuLinks(
       fixture,
@@ -41,6 +58,8 @@ describe('ToolbarInputs', () => {
   it('supports optional toolbar visibility flags', () => {
     const inputs: ToolbarInputs = {
       title: 'TagCheck',
+      primaryLink,
+      docsLink,
       aboutDisabled: true,
       objectivesDisabled: false
     };
@@ -51,6 +70,7 @@ describe('ToolbarInputs', () => {
     expect(fixture.componentInstance.objectivesDisabled()).toBe(false);
     expect(getMenuHrefs(fixture)).toEqual([
       '/ja/app',
+      'https://tag-check-documentation.vercel.app/ja/documentation/introduction',
       '/ja/objectives',
       'https://github.com/WodenWang820118/tag-check'
     ]);
@@ -59,6 +79,8 @@ describe('ToolbarInputs', () => {
   it('hides both optional tabs when both visibility flags are true', () => {
     const inputs: ToolbarInputs = {
       title: 'TagCheck',
+      primaryLink,
+      docsLink,
       aboutDisabled: true,
       objectivesDisabled: true
     };
@@ -66,6 +88,7 @@ describe('ToolbarInputs', () => {
 
     expect(getMenuHrefs(fixture)).toEqual([
       '/ja/app',
+      'https://tag-check-documentation.vercel.app/ja/documentation/introduction',
       'https://github.com/WodenWang820118/tag-check'
     ]);
   });
@@ -77,6 +100,10 @@ function renderToolbar(
   const fixture = TestBed.createComponent(ToolBarComponent);
 
   fixture.componentRef.setInput('title', inputs.title);
+  fixture.componentRef.setInput('primaryLink', inputs.primaryLink);
+  if ('docsLink' in inputs) {
+    fixture.componentRef.setInput('docsLink', inputs.docsLink);
+  }
   if ('aboutDisabled' in inputs) {
     fixture.componentRef.setInput('aboutDisabled', inputs.aboutDisabled);
   }

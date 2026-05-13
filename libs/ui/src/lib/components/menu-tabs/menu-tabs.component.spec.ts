@@ -7,6 +7,20 @@ import { provideRouter, Router } from '@angular/router';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { MenuTabsComponent } from './menu-tabs.component';
 
+const primaryLink = {
+  href: '/zh-hant/documentation/introduction',
+  label: 'Getting Started',
+  icon: 'menu_book',
+  logicalPath: '/documentation',
+  matchStrategy: 'prefix'
+} as const;
+
+const docsLink = {
+  href: 'https://tag-check-documentation.vercel.app/zh-hant/documentation/introduction',
+  label: 'Docs',
+  icon: 'menu_book'
+} as const;
+
 describe('MenuTabsComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -18,7 +32,7 @@ describe('MenuTabsComponent', () => {
         provideNoopAnimations(),
         provideRouter([
           {
-            path: ':locale/about',
+            path: ':locale/documentation/:name',
             children: []
           }
         ])
@@ -31,7 +45,8 @@ describe('MenuTabsComponent', () => {
     const links = getInlineMenuLinks(fixture);
 
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
-      '/zh-hant/app',
+      '/zh-hant/documentation/introduction',
+      'https://tag-check-documentation.vercel.app/zh-hant/documentation/introduction',
       '/zh-hant/about',
       '/zh-hant/objectives',
       'https://github.com/WodenWang820118/tag-check'
@@ -48,16 +63,26 @@ describe('MenuTabsComponent', () => {
   });
 
   it('marks the active tab from the logical route without the locale prefix', async () => {
-    await TestBed.inject(Router).navigateByUrl('/zh-hant/about');
+    await TestBed.inject(Router).navigateByUrl(
+      '/zh-hant/documentation/introduction'
+    );
     const fixture = renderMenu();
 
-    expect(fixture.componentInstance.isActive('/about')).toBe(true);
-    expect(fixture.componentInstance.isActive('/app')).toBe(false);
+    expect(fixture.componentInstance.isLinkActive(primaryLink)).toBe(true);
+    expect(
+      fixture.componentInstance.isLinkActive({
+        ...primaryLink,
+        logicalPath: '/app',
+        matchStrategy: 'exact'
+      })
+    ).toBe(false);
   });
 });
 
 function renderMenu(): ComponentFixture<MenuTabsComponent> {
   const fixture = TestBed.createComponent(MenuTabsComponent);
+  fixture.componentRef.setInput('primaryLink', primaryLink);
+  fixture.componentRef.setInput('docsLink', docsLink);
   fixture.detectChanges();
   return fixture;
 }
@@ -69,7 +94,7 @@ function getInlineMenuLinks(
     fixture.nativeElement.querySelectorAll('nav a')
   ) as HTMLAnchorElement[];
 
-  expect(links).toHaveLength(4);
+  expect(links).toHaveLength(5);
 
   return links;
 }

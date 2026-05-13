@@ -12,12 +12,8 @@
       implementation mistakes.
     </p>
     <div class="hero__actions" aria-label="Primary actions">
-      <a
-        class="button button--primary"
-        [href]="appPath"
-        i18n="@@landing.cta.primary"
-      >
-        Open Tag Build
+      <a class="button button--primary" [href]="primaryLink().href">
+        {{ primaryLink().label }}
       </a>
       <a
         class="button button--ghost"

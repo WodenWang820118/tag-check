@@ -6,9 +6,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MenuTabsComponent } from '../menu-tabs/menu-tabs.component';
 import { LangSelectComponent } from '../lang-select/lang-select.component';
 import { buildLocalizedPath } from '../../locale/locale-routing';
+import { type SharedNavigationLink } from '../navigation-link';
 
 export interface ToolbarInputs {
   title: string;
+  primaryLink: SharedNavigationLink;
+  docsLink?: SharedNavigationLink;
   aboutDisabled?: boolean;
   objectivesDisabled?: boolean;
 }
@@ -32,6 +35,8 @@ export interface ToolbarInputs {
       </span>
       <span class="spacer"></span>
       <lib-menu-tabs
+        [primaryLink]="primaryLink()"
+        [docsLink]="docsLink()"
         [aboutDisabled]="aboutDisabled()"
         [objectivesDisabled]="objectivesDisabled()"
       ></lib-menu-tabs>
@@ -49,6 +54,8 @@ export interface ToolbarInputs {
 })
 export class ToolBarComponent {
   title = input.required<string>();
+  primaryLink = input.required<SharedNavigationLink>();
+  docsLink = input<SharedNavigationLink>();
   aboutDisabled = input<boolean>(false);
   objectivesDisabled = input<boolean>(false);
   readonly homePath: string;
