@@ -4,7 +4,7 @@ import { dirname, join, resolve } from 'node:path';
 import { SUPPORTED_LOCALES } from '../../../../libs/ui/src/lib/locale/locale-routing.ts';
 import { isDirectEntrypoint } from '../../shared/paths.ts';
 
-export const DEFAULT_LOCALE_PATH = '/en';
+export const DEFAULT_LOCALE_PATH = '/en/';
 export const DEFAULT_DOCUMENTATION_PATH = '/documentation/introduction';
 export const DEFAULT_PRODUCT_DOC_LOCALE_SUBPATHS = SUPPORTED_LOCALES.map(
   ({ urlSegment }) => urlSegment
@@ -33,6 +33,12 @@ export function normalizeAbsolutePath(candidate: string): string {
   return `/${trimmed.replace(/^\/+/, '').replace(/\/+$/, '')}`;
 }
 
+export function normalizeDirectoryPath(candidate: string): string {
+  const normalizedPath = normalizeAbsolutePath(candidate);
+
+  return normalizedPath === '/' ? normalizedPath : `${normalizedPath}/`;
+}
+
 export function normalizePathSegment(candidate: string): string {
   return candidate.trim().replace(/^\/+/, '').replace(/\/+$/, '');
 }
@@ -56,7 +62,9 @@ export function serializeRedirectTargetForScript(target: string): string {
 }
 
 export function createRedirectHtml(target: string): string {
-  const normalizedTarget = normalizeAbsolutePath(target);
+  const normalizedTarget = target.trim().endsWith('/')
+    ? normalizeDirectoryPath(target)
+    : normalizeAbsolutePath(target);
   const escapedTarget = escapeHtml(normalizedTarget);
   const serializedTarget = serializeRedirectTargetForScript(normalizedTarget);
 
@@ -114,7 +122,7 @@ export async function writeProductDocRedirects(
       process.env.NG_PRODUCT_DOC_OUTPUT_PATH ??
       'dist/apps/ng-product-doc/browser'
   );
-  const rootRedirectTarget = normalizeAbsolutePath(
+  const rootRedirectTarget = normalizeDirectoryPath(
     options.rootRedirectTarget ??
       process.env.NG_PRODUCT_DOC_ROOT_REDIRECT ??
       DEFAULT_LOCALE_PATH

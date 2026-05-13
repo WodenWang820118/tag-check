@@ -8,9 +8,11 @@ import {
   buildLocaleDocumentationTarget,
   createRedirectHtml,
   DEFAULT_DOCUMENTATION_PATH,
+  DEFAULT_LOCALE_PATH,
   DEFAULT_PRODUCT_DOC_LOCALE_SUBPATHS,
   escapeHtml,
   normalizeAbsolutePath,
+  normalizeDirectoryPath,
   writeProductDocRedirects
 } from './write-root-redirect.ts';
 import { SUPPORTED_LOCALES } from '../../../../libs/ui/src/lib/locale/locale-routing.ts';
@@ -28,6 +30,8 @@ test('path helpers normalize locale-aware documentation targets', () => {
     normalizeAbsolutePath('documentation/introduction/'),
     '/documentation/introduction'
   );
+  assert.equal(normalizeDirectoryPath('en'), '/en/');
+  assert.equal(normalizeDirectoryPath('/zh-hant/'), '/zh-hant/');
   assert.equal(
     buildLocaleDocumentationTarget('zh-hant'),
     '/zh-hant/documentation/introduction'
@@ -81,7 +85,7 @@ test('writeProductDocRedirects emits root and locale app redirect entrypoints', 
 
   const result = await writeProductDocRedirects({
     outputDirectory,
-    rootRedirectTarget: '/en',
+    rootRedirectTarget: DEFAULT_LOCALE_PATH,
     documentationPath: DEFAULT_DOCUMENTATION_PATH
   });
 
@@ -100,7 +104,8 @@ test('writeProductDocRedirects emits root and locale app redirect entrypoints', 
   const rootHtml = readFileSync(result.rootIndexFile, 'utf8');
   const appHtml = readFileSync(result.appIndexFile, 'utf8');
 
-  assert.match(rootHtml, /url=\/en/);
+  assert.match(rootHtml, /url=\/en\//);
+  assert.match(rootHtml, /window\.location\.replace\("\/en\/"\)/);
   assert.match(appHtml, /\/en\/documentation\/introduction/);
 
   for (const localeSubpath of DEFAULT_PRODUCT_DOC_LOCALE_SUBPATHS) {
