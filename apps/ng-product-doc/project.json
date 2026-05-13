@@ -8,7 +8,7 @@
   "i18n": {
     "sourceLocale": {
       "code": "en-US",
-      "subPath": "en"
+      "subPath": ""
     },
     "locales": {
       "zh-Hant": {
@@ -146,21 +146,13 @@
     "build-static": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": [
-        "production",
-        "^production",
-        "{workspaceRoot}/tools/scripts/ng-product-doc/write-root-redirect/**/*"
-      ],
+      "inputs": ["production", "^production"],
       "outputs": ["{workspaceRoot}/dist/apps/ng-product-doc/browser"],
       "options": {
         "commands": [
           {
-            "command": "pnpm nx build ng-product-doc --configuration production --optimization --base-href ./",
+            "command": "pnpm nx build ng-product-doc --configuration production --optimization",
             "description": "Build the localized static site output."
-          },
-          {
-            "command": "node --experimental-strip-types tools/scripts/ng-product-doc/write-root-redirect/write-root-redirect.ts",
-            "description": "Write the deployment root redirect entrypoint."
           }
         ],
         "parallel": false

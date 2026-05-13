@@ -74,12 +74,13 @@ describe('appRoutes', () => {
     expect(appRoutes.at(-1)?.path).toBe('**');
   });
 
-  it('does not register locale-prefixed routes inside localized build roots', () => {
+  it('registers locale-prefixed routes for all supported locales for cross-locale link handling', () => {
     const topLevelRoutePaths = appRoutes.map((route) => route.path);
 
     for (const { urlSegment } of SUPPORTED_LOCALES) {
-      expect(topLevelRoutePaths).not.toContain(urlSegment);
+      expect(topLevelRoutePaths).toContain(urlSegment);
     }
+    expect(topLevelRoutePaths).not.toContain('xx-unsupported');
   });
 
   it('creates absolute legacy app redirects so SSR does not keep redirects under /app', () => {
@@ -141,12 +142,12 @@ describe('appRoutes', () => {
     );
   });
 
-  it('lets locale-prefixed paths fall through because routing is relative to the locale base path', async () => {
+  it('routes locale-prefixed legacy app URLs to the documentation entry', async () => {
     const { fixture, router } = await setupRouterTest('en-US');
 
     await navigate(fixture, router, '/en/app');
 
-    expect(router.url).toBe('/');
+    expect(router.url).toBe('/documentation/introduction');
   });
 });
 

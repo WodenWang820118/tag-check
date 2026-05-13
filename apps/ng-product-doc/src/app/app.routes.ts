@@ -3,13 +3,22 @@ import {
   type RedirectFunction,
   type Route
 } from '@angular/router';
-import { AboutComponent, DOCS_ROUTES, ObjectivesComponent } from '@ui';
+import {
+  AboutComponent,
+  DOCS_ROUTES,
+  ObjectivesComponent,
+  SUPPORTED_LOCALES
+} from '@ui';
 import { LandingPageComponent } from './lazy-pages/landing-page';
 
 const DOCUMENTATION_ENTRY_PATH = 'documentation/introduction';
 
 export const appRoutes: Route[] = [
   ...createProductDocRoutes(),
+  ...SUPPORTED_LOCALES.map(({ urlSegment }) => ({
+    path: urlSegment,
+    children: createProductDocRoutes()
+  })),
   {
     path: '**',
     redirectTo: ''

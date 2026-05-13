@@ -1,5 +1,6 @@
+import '@angular/localize/init';
 import { RenderMode } from '@angular/ssr';
-import { DOCUMENTATION_ROUTE_SLUGS, SUPPORTED_LOCALES } from '@ui';
+import { DOCUMENTATION_ROUTE_SLUGS } from '@ui';
 import { describe, expect, it } from 'vitest';
 import { serverRoutes } from './app.routes.server';
 
@@ -10,15 +11,6 @@ describe('serverRoutes', () => {
     expect(prerenderRoutes).toEqual(
       expect.arrayContaining(['', 'about', 'objectives', 'documentation/:name'])
     );
-
-    for (const { urlSegment } of SUPPORTED_LOCALES) {
-      expect(prerenderRoutes).not.toContain(urlSegment);
-      expect(prerenderRoutes).not.toContain(`${urlSegment}/about`);
-      expect(prerenderRoutes).not.toContain(`${urlSegment}/objectives`);
-      expect(prerenderRoutes).not.toContain(
-        `${urlSegment}/documentation/:name`
-      );
-    }
   });
 
   it('keeps direct app compatibility URLs client-rendered', () => {
@@ -26,10 +18,6 @@ describe('serverRoutes', () => {
 
     expect(clientRoutes).toContain('app');
     expect(clientRoutes).toContain('app/**');
-    for (const { urlSegment } of SUPPORTED_LOCALES) {
-      expect(clientRoutes).not.toContain(`${urlSegment}/app`);
-      expect(clientRoutes).not.toContain(`${urlSegment}/app/**`);
-    }
     expect(clientRoutes).toContain('**');
   });
 
