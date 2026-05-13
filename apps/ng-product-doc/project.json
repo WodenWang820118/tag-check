@@ -143,10 +143,33 @@
         "passWithNoTests": true
       }
     },
+    "build-static": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "production",
+        "^production",
+        "{workspaceRoot}/tools/scripts/ng-product-doc/write-root-redirect/**/*"
+      ],
+      "outputs": ["{workspaceRoot}/dist/apps/ng-product-doc/browser"],
+      "options": {
+        "commands": [
+          {
+            "command": "pnpm nx build ng-product-doc --configuration production --optimization --base-href ./",
+            "description": "Build the localized static site output."
+          },
+          {
+            "command": "node --experimental-strip-types tools/scripts/ng-product-doc/write-root-redirect/write-root-redirect.ts",
+            "description": "Write the deployment root redirect entrypoint."
+          }
+        ],
+        "parallel": false
+      }
+    },
     "serve-static": {
       "executor": "@nx/web:file-server",
       "options": {
-        "buildTarget": "ng-product-doc:build",
+        "buildTarget": "ng-product-doc:build-static",
         "port": 4200,
         "staticFilePath": "dist/apps/ng-product-doc/browser",
         "spa": false

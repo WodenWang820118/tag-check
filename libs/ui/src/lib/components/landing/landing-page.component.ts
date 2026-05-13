@@ -1,5 +1,6 @@
-import { Component, Inject, LOCALE_ID } from '@angular/core';
+import { Component, Inject, LOCALE_ID, input } from '@angular/core';
 import { buildLocalizedPath } from '../../locale/locale-routing';
+import { type SharedNavigationLink } from '../navigation-link';
 
 @Component({
   selector: 'lib-landing-page',
@@ -8,12 +9,11 @@ import { buildLocalizedPath } from '../../locale/locale-routing';
   styleUrls: ['./landing-page.component.scss']
 })
 export class LandingPageComponent {
-  readonly appPath: string;
+  readonly primaryLink = input.required<SharedNavigationLink>();
   readonly aboutPath: string;
   readonly objectivesPath: string;
 
   constructor(@Inject(LOCALE_ID) locale: string) {
-    this.appPath = buildLocalizedPath('/app', locale);
     this.aboutPath = buildLocalizedPath('/about', locale);
     this.objectivesPath = buildLocalizedPath('/objectives', locale);
   }

@@ -20,7 +20,7 @@ const KEYWORDS =
 const DOCS_TITLE_SUFFIX = $localize`:@@seo.docs.titleSuffix:TagCheck Documentation`;
 const DOCS_FALLBACK_LABEL = $localize`:@@seo.docs.fallbackLabel:Documentation`;
 
-type SeoKey = 'landing' | 'about' | 'objectives' | 'app' | 'documentation';
+type SeoKey = 'landing' | 'about' | 'objectives' | 'documentation';
 
 interface RouteSeoConfig {
   readonly logicalPath: string;
@@ -54,11 +54,6 @@ const ROUTE_SEO_COPY: Record<
     logicalPath: '/objectives',
     title: $localize`:@@seo.objectives.title:TagCheck Objectives | Better Measurement Quality`,
     description: $localize`:@@seo.objectives.description:See the product goals behind TagCheck, from reducing GTM setup risk to improving validation and handoff quality.`
-  },
-  app: {
-    logicalPath: '/app',
-    title: $localize`:@@seo.app.title:TagCheck App | GTM Validation Workspace`,
-    description: $localize`:@@seo.app.description:Open the interactive TagCheck workspace for GTM validation, report review, and implementation support.`
   }
 };
 

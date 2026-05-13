@@ -15,10 +15,10 @@ export class LandingPageComponent {
   private readonly locale = inject(LOCALE_ID);
 
   readonly primaryLink = {
-    href: buildLocalizedPath('/app', this.locale),
-    label: $localize`:@@landing.cta.primary:Open Tag Build`,
-    icon: 'build',
-    logicalPath: '/app',
-    matchStrategy: 'exact'
+    href: buildLocalizedPath('/documentation/introduction', this.locale),
+    label: $localize`:@@docs.sidebar.gettingStarted:Getting Started`,
+    icon: 'menu_book',
+    logicalPath: '/documentation',
+    matchStrategy: 'prefix'
   } as const;
 }

@@ -11,7 +11,7 @@ const CANONICAL_ORIGIN = 'https://tag-check-documentation.vercel.app';
 const LANDING_TITLE =
   'TagCheck | GTM Validation & Audit Tool for Digital Marketers';
 const DOCS_TITLE = 'Getting Started | TagCheck Documentation';
-const APP_TITLE = 'TagCheck App | GTM Validation Workspace';
+const INTRODUCTION_TITLE = 'Introduction | TagCheck Documentation';
 
 const SEO_LOCALE_CASES = [
   {
@@ -79,8 +79,8 @@ describe('SeoService', () => {
               },
               {
                 path: 'app',
-                component: SeoTestPageComponent,
-                data: { seoKey: 'app' }
+                redirectTo: 'documentation/introduction',
+                pathMatch: 'full'
               },
               {
                 path: 'documentation/:name',
@@ -138,14 +138,15 @@ describe('SeoService', () => {
         );
       });
 
-      it('marks the app workspace as non-indexable and removes landing schema markup', async () => {
+      it('redirects /app into the documentation entry and removes landing schema markup', async () => {
         await navigate('/');
         await navigate('/app');
 
-        expect(title.getTitle()).toBe(APP_TITLE);
-        expect(meta.getTag('name="robots"')?.content).toBe('noindex,follow');
+        expect(router.url).toBe('/documentation/introduction');
+        expect(title.getTitle()).toBe(INTRODUCTION_TITLE);
+        expect(meta.getTag('name="robots"')?.content).toBe('index,follow');
         expect(getCanonicalHref()).toBe(
-          `${CANONICAL_ORIGIN}/${localeCase.urlSegment}/app`
+          `${CANONICAL_ORIGIN}/${localeCase.urlSegment}/documentation/introduction`
         );
         expect(
           document.getElementById('tag-check-doc-landing-json-ld')
