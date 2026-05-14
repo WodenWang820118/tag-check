@@ -7,183 +7,59 @@ import { readCommonReviewContract } from '../shared/common-review-contract.ts';
 import { cacheProviderHealth } from '../provider-health/provider-health.ts';
 import {
   createProviderTelemetryContext,
-  type ProviderTelemetryContext,
+  type ProviderTelemetryContext
 } from '../provider-observability/provider-observability.ts';
 import {
   isCopilotUnavailableError,
   probeCopilotCliHealth,
-  runCopilotReview,
+  runCopilotReview
 } from '../providers/copilot/copilot.ts';
 import {
   isCodexUnavailableError,
   probeCodexCliHealth,
-  runCodexReview,
+  runCodexReview
 } from '../providers/codex/codex.ts';
 import {
   isGeminiUnavailableError,
   probeGeminiCliHealth,
-  runGeminiReview,
+  runGeminiReview
 } from '../providers/gemini/gemini.ts';
 
-export type ReviewCheckpoint = 'plan' | 'implementation' | 'test' | 'pre-merge';
-export type ReviewProvider = 'auto' | 'copilot' | 'gemini' | 'codex';
-export type ConcreteReviewProvider = Exclude<ReviewProvider, 'auto'>;
-export type ReviewRiskLevel = 'low' | 'medium' | 'high';
-
-const DEFAULT_COPILOT_CLAUDE_MODEL = 'claude-sonnet-4.6';
-const CHANGED_FILES_HEADING = 'changed files:';
-const LOW_RISK_MAX_CHANGED_FILES = 2;
-const REVIEW_CONTROL_PLANE_PATH_PATTERNS = [
-  /(^|\/)scripts\/review\//i,
-  /(^|\/)scripts\/review-gate\//i,
-  /(^|\/)tools\/scripts\/review\//i,
-  /(^|\/)tools\/scripts\/review-gate\//i,
-  /(^|\/)(scripts|tools\/scripts)\/package\.json$/i,
-  /(^|\/)ag(?:ents)?\.md$/i,
-  /(^|\/)\.agents\//i,
-  /(^|\/)\.github\//i,
-  /(^|\/)\.codex\//i,
-  /(^|\/)\.gemini\//i,
-  /(^|\/)sync-skills\.ps1$/i,
-] as const;
-const HIGH_RISK_PATH_PATTERNS = [
-  /(^|\/)(auth|security)(\/|\.|_|-)/i,
-  /(^|\/)(route|routes|router|controller|dto|schema|contract|contracts|api)(\/|\.|_|-)/i,
-  /(^|\/)(config|env|settings)(\/|\.|_|-)/i,
-  /(^|\/)(cli|runner|command)(\/|\.|_|-)/i,
-  /(^|\/)(io|store|storage|persist|persistence|repository)(\/|\.|_|-)/i,
-  /(^|\/)(net|network|transport|client|upstream)(\/|\.|_|-)/i,
-  /(^|\/)(serialization|serializer|serialize|payload)(\/|\.|_|-)/i,
-  /(^|\/)(permission|policy|rbac|role|access-control)(\/|\.|_|-)/i,
-] as const;
-const LOW_RISK_PATH_PATTERNS = [
-  /\.md$/i,
-  /\.(html|css|scss|less|svg|txt)$/i,
-] as const;
-const HIGH_RISK_FOCUS_PATTERNS = [
-  /\bsecurity\b/i,
-  /\bauth\b/i,
-  /\bsecret\b/i,
-  /\bshell\b/i,
-  /\bnetwork\b/i,
-  /\bfilesystem\b/i,
-  /\bcontract\b/i,
-  /\bapi\b/i,
-  /\bschema\b/i,
-  /\bmigration\b/i,
-  /\bdatabase\b/i,
-  /\bpersist(?:ent|ence)?\b/i,
-  /\bpermission\b/i,
-] as const;
-const LOW_RISK_FOCUS_BLOCK_PATTERNS = [
-  /\bsecurity\b/i,
-  /\bauth\b/i,
-  /\btest(?:s|ing)?\b/i,
-  /\barchitecture\b/i,
-  /\bcontract\b/i,
-  /\bapi\b/i,
-  /\bschema\b/i,
-  /\bmigration\b/i,
-] as const;
-const HIGH_RISK_CONTEXT_PATTERNS = [
-  /\bauth\b/i,
-  /\boauth\b/i,
-  /\blogin\b/i,
-  /\bsession\b/i,
-  /\bjwt\b/i,
-  /\bsecret\b/i,
-  /\btoken\b/i,
-  /\bpassword\b/i,
-  /\bcredential\b/i,
-  /\bfilesystem\b/i,
-  /\breadfile\b/i,
-  /\bwritefile\b/i,
-  /\bmkdir\b/i,
-  /\brename\b/i,
-  /\bchild_process\b/i,
-  /\bspawn(?:sync)?\b/i,
-  /\bexec(?:sync)?\b/i,
-  /\bpowershell\b/i,
-  /\bfetch\(/i,
-  /\baxios\b/i,
-  /\bhttp\./i,
-  /\bhttps\./i,
-  /\bwebhook\b/i,
-  /\broute(?:s)?\b/i,
-  /\brouter\b/i,
-  /\bhandler\b/i,
-  /\bendpoint\b/i,
-  /\bcontroller\b/i,
-  /\bdto\b/i,
-  /\bschema\b/i,
-  /\bcontract\b/i,
-  /\bgraphql\b/i,
-  /\bopenapi\b/i,
-  /\bpublic contract\b/i,
-  /\bresponse shape\b/i,
-  /\bpayload\b/i,
-  /\bsecurity\b/i,
-  /\baccess-control\b/i,
-  /\brbac\b/i,
-  /\brole\b/i,
-  /\bpermission\b/i,
-  /\bpolicy\b/i,
-  /\bmigration\b/i,
-  /\bdatabase\b/i,
-  /\bsql\b/i,
-  /\bstorage\b/i,
-  /\brepository\b/i,
-  /\bconfig\b/i,
-  /\benv(?:ironment)?\b/i,
-  /\bprovider keys?\b/i,
-  /\bapi[_-]?key\b/i,
-  /\bsubprocess\b/i,
-  /\bprocessbuilder\b/i,
-  /\brequests\b/i,
-  /\bhttpx\b/i,
-  /\burllib\b/i,
-  /\bhttp client\b/i,
-  /\bhttpclient\b/i,
-  /\bwebclient\b/i,
-  /\bresttemplate\b/i,
-  /\bupstream\b/i,
-] as const;
-const MEDIUM_RISK_CONTEXT_PATTERNS = [
-  /\brefactor\b/i,
-  /\brollout\b/i,
-  /\barchitecture\b/i,
-  /\bstate machine\b/i,
-  /\bmulti-file\b/i,
-] as const;
-
-export interface ParsedCliArgs {
-  checkpoint?: ReviewCheckpoint;
-  contextFile?: string;
-  focus: string;
-  model?: string;
-  provider: ReviewProvider;
-}
-
-export interface ReviewExecution {
-  checkpoint: ReviewCheckpoint;
-  focus: string;
-  model?: string;
-  provider: ConcreteReviewProvider;
-}
-
-export interface ReviewFlowDependencies {
-  cacheUnavailable: (execution: ReviewExecution, error: unknown) => void;
-  log: (message: string) => void;
-  probe: (
-    execution: ReviewExecution,
-  ) => Promise<{ available: boolean; reason?: string }>;
-  run: (execution: ReviewExecution, context: string) => Promise<string>;
-}
+export type {
+  ConcreteReviewProvider,
+  ParsedCliArgs,
+  ReviewCheckpoint,
+  ReviewExecution,
+  ReviewFlowDependencies,
+  ReviewProvider,
+  ReviewRiskLevel
+} from './contracts.ts';
+import type {
+  ConcreteReviewProvider,
+  ParsedCliArgs,
+  ReviewCheckpoint,
+  ReviewExecution,
+  ReviewFlowDependencies,
+  ReviewProvider,
+  ReviewRiskLevel
+} from './contracts.ts';
+import {
+  CHANGED_FILES_HEADING,
+  DEFAULT_COPILOT_CLAUDE_MODEL,
+  HIGH_RISK_CONTEXT_PATTERNS,
+  HIGH_RISK_FOCUS_PATTERNS,
+  HIGH_RISK_PATH_PATTERNS,
+  LOW_RISK_FOCUS_BLOCK_PATTERNS,
+  LOW_RISK_MAX_CHANGED_FILES,
+  LOW_RISK_PATH_PATTERNS,
+  MEDIUM_RISK_CONTEXT_PATTERNS,
+  REVIEW_CONTROL_PLANE_PATH_PATTERNS
+} from './constants.ts';
 
 export function parseCliArgs(argv: string[]): ParsedCliArgs {
   const parsed: ParsedCliArgs = {
     provider: 'auto',
-    focus: 'general',
+    focus: 'general'
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -242,7 +118,7 @@ export function createReviewExecution(input: {
         : undefined) ??
       (input.provider === 'gemini'
         ? getDefaultGeminiModel(input.checkpoint)
-        : undefined),
+        : undefined)
   };
 }
 
@@ -263,8 +139,8 @@ export function getReviewExecutionPlan(input: {
           checkpoint: input.checkpoint,
           provider: 'copilot',
           focus: input.focus,
-          model: input.model,
-        }),
+          model: input.model
+        })
       ];
     }
 
@@ -273,8 +149,8 @@ export function getReviewExecutionPlan(input: {
         checkpoint: input.checkpoint,
         provider: 'copilot',
         focus: input.focus,
-        model: DEFAULT_COPILOT_CLAUDE_MODEL,
-      }),
+        model: DEFAULT_COPILOT_CLAUDE_MODEL
+      })
     ];
   }
 
@@ -284,8 +160,8 @@ export function getReviewExecutionPlan(input: {
         checkpoint: input.checkpoint,
         provider: 'gemini',
         focus: input.focus,
-        model: input.model,
-      }),
+        model: input.model
+      })
     ];
   }
 
@@ -295,8 +171,8 @@ export function getReviewExecutionPlan(input: {
         checkpoint: input.checkpoint,
         provider: 'codex',
         focus: input.focus,
-        model: input.model,
-      }),
+        model: input.model
+      })
     ];
   }
 
@@ -306,7 +182,7 @@ export function getReviewExecutionPlan(input: {
     focus: input.focus,
     repoChangedFiles: input.repoChangedFiles ?? [],
     repoDiffText: input.repoDiffText ?? '',
-    repoHasUntrackedFiles: input.repoHasUntrackedFiles ?? false,
+    repoHasUntrackedFiles: input.repoHasUntrackedFiles ?? false
   });
 
   if (
@@ -318,20 +194,20 @@ export function getReviewExecutionPlan(input: {
       createReviewExecution({
         checkpoint: input.checkpoint,
         provider: 'codex',
-        focus: input.focus,
+        focus: input.focus
       }),
       createReviewExecution({
         checkpoint: input.checkpoint,
         provider: 'gemini',
         focus: input.focus,
-        model: getDefaultGeminiModel(input.checkpoint),
+        model: getDefaultGeminiModel(input.checkpoint)
       }),
       createReviewExecution({
         checkpoint: input.checkpoint,
         provider: 'copilot',
         focus: input.focus,
-        model: DEFAULT_COPILOT_CLAUDE_MODEL,
-      }),
+        model: DEFAULT_COPILOT_CLAUDE_MODEL
+      })
     ];
   }
 
@@ -344,19 +220,19 @@ export function getReviewExecutionPlan(input: {
         checkpoint: input.checkpoint,
         provider: 'gemini',
         focus: input.focus,
-        model: getDefaultGeminiModel(input.checkpoint),
+        model: getDefaultGeminiModel(input.checkpoint)
       }),
       createReviewExecution({
         checkpoint: input.checkpoint,
         provider: 'copilot',
         focus: input.focus,
-        model: DEFAULT_COPILOT_CLAUDE_MODEL,
+        model: DEFAULT_COPILOT_CLAUDE_MODEL
       }),
       createReviewExecution({
         checkpoint: input.checkpoint,
         provider: 'codex',
-        focus: input.focus,
-      }),
+        focus: input.focus
+      })
     ];
   }
 
@@ -366,19 +242,19 @@ export function getReviewExecutionPlan(input: {
         checkpoint: input.checkpoint,
         provider: 'copilot',
         focus: input.focus,
-        model: DEFAULT_COPILOT_CLAUDE_MODEL,
+        model: DEFAULT_COPILOT_CLAUDE_MODEL
       }),
       createReviewExecution({
         checkpoint: input.checkpoint,
         provider: 'gemini',
         focus: input.focus,
-        model: getDefaultGeminiModel(input.checkpoint),
+        model: getDefaultGeminiModel(input.checkpoint)
       }),
       createReviewExecution({
         checkpoint: input.checkpoint,
         provider: 'codex',
-        focus: input.focus,
-      }),
+        focus: input.focus
+      })
     ];
   }
 
@@ -387,19 +263,19 @@ export function getReviewExecutionPlan(input: {
       checkpoint: input.checkpoint,
       provider: 'copilot',
       focus: input.focus,
-      model: DEFAULT_COPILOT_CLAUDE_MODEL,
+      model: DEFAULT_COPILOT_CLAUDE_MODEL
     }),
     createReviewExecution({
       checkpoint: input.checkpoint,
       provider: 'gemini',
       focus: input.focus,
-      model: getDefaultGeminiModel(input.checkpoint),
+      model: getDefaultGeminiModel(input.checkpoint)
     }),
     createReviewExecution({
       checkpoint: input.checkpoint,
       provider: 'codex',
-      focus: input.focus,
-    }),
+      focus: input.focus
+    })
   ];
 }
 
@@ -444,7 +320,7 @@ export function inferAutoReviewRisk(input: {
   const normalizedFocus = input.focus.trim();
   const changedFiles = parseChangedFilesFromContext(input.context);
   const repoChangedFiles = normalizeReviewPathList(
-    input.repoChangedFiles ?? [],
+    input.repoChangedFiles ?? []
   );
   const repoDiffText = input.repoDiffText ?? '';
   const combinedText = `${normalizedFocus}\n${input.context}`;
@@ -453,10 +329,10 @@ export function inferAutoReviewRisk(input: {
     containsPattern(normalizedFocus, HIGH_RISK_FOCUS_PATTERNS) ||
     containsPattern(combinedText, HIGH_RISK_CONTEXT_PATTERNS) ||
     changedFiles.some((filePath) =>
-      matchesPathPattern(filePath, HIGH_RISK_PATH_PATTERNS),
+      matchesPathPattern(filePath, HIGH_RISK_PATH_PATTERNS)
     ) ||
     changedFiles.some((filePath) =>
-      isReviewControlPlanePath(filePath, input.context),
+      isReviewControlPlanePath(filePath, input.context)
     )
   ) {
     return 'high';
@@ -478,7 +354,7 @@ export function inferAutoReviewRisk(input: {
     !diffMentionsRepoChangedFiles(repoChangedFiles, repoDiffText) ||
     containsPattern(repoDiffText, HIGH_RISK_CONTEXT_PATTERNS) ||
     changedFiles.some(
-      (filePath) => !matchesPathPattern(filePath, LOW_RISK_PATH_PATTERNS),
+      (filePath) => !matchesPathPattern(filePath, LOW_RISK_PATH_PATTERNS)
     ) ||
     containsPattern(normalizedFocus, LOW_RISK_FOCUS_BLOCK_PATTERNS) ||
     containsPattern(combinedText, MEDIUM_RISK_CONTEXT_PATTERNS)
@@ -492,7 +368,7 @@ export function inferAutoReviewRisk(input: {
 export function buildReviewPrompt(
   execution: ReviewExecution,
   context: string,
-  options: { commonReviewContract?: string } = {},
+  options: { commonReviewContract?: string } = {}
 ): string {
   const commonReviewContract =
     options.commonReviewContract ?? readCommonReviewContract(process.cwd());
@@ -517,18 +393,18 @@ export function buildReviewPrompt(
       : null,
     '',
     'Context to review:',
-    context.trim(),
+    context.trim()
   ].filter(Boolean);
 
   return reviewRules.join('\n');
 }
 
 export function createCheckpointReviewTelemetryContext(
-  execution: ReviewExecution,
+  execution: ReviewExecution
 ): ProviderTelemetryContext {
   return createProviderTelemetryContext({
     callsite: 'checkpoint-review',
-    checkpoint: execution.checkpoint,
+    checkpoint: execution.checkpoint
   });
 }
 
@@ -537,14 +413,14 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
 
   if (!parsed.checkpoint) {
     throw new Error(
-      'Missing --checkpoint. Expected one of: plan, implementation, test, pre-merge.',
+      'Missing --checkpoint. Expected one of: plan, implementation, test, pre-merge.'
     );
   }
 
   const context = await readReviewContext(parsed.contextFile);
   if (!context.trim()) {
     throw new Error(
-      'Review context is required. Pass --context-file <path> or pipe the review context via stdin.',
+      'Review context is required. Pass --context-file <path> or pipe the review context via stdin.'
     );
   }
   const output = await executeReviewFlow(
@@ -556,9 +432,9 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
       provider: parsed.provider,
       repoChangedFiles: collectRepoChangedFiles(process.cwd()),
       repoDiffText: collectRepoDiffText(process.cwd()),
-      repoHasUntrackedFiles: collectRepoHasUntrackedFiles(process.cwd()),
+      repoHasUntrackedFiles: collectRepoHasUntrackedFiles(process.cwd())
     },
-    getDefaultReviewFlowDependencies(),
+    getDefaultReviewFlowDependencies()
   );
 
   process.stdout.write(`${output.trimEnd()}\n`);
@@ -566,7 +442,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
 
 async function runReviewExecution(
   execution: ReviewExecution,
-  context: string,
+  context: string
 ): Promise<string> {
   const prompt = buildReviewPrompt(execution, context);
 
@@ -575,7 +451,7 @@ async function runReviewExecution(
       model: execution.model,
       prompt,
       repoRoot: process.cwd(),
-      telemetryContext: createCheckpointReviewTelemetryContext(execution),
+      telemetryContext: createCheckpointReviewTelemetryContext(execution)
     });
   }
 
@@ -584,7 +460,7 @@ async function runReviewExecution(
       model: execution.model ?? getDefaultGeminiModel(execution.checkpoint),
       prompt,
       repoRoot: process.cwd(),
-      telemetryContext: createCheckpointReviewTelemetryContext(execution),
+      telemetryContext: createCheckpointReviewTelemetryContext(execution)
     });
   }
 
@@ -593,7 +469,7 @@ async function runReviewExecution(
     focus: execution.focus,
     model: execution.model,
     prompt,
-    repoRoot: process.cwd(),
+    repoRoot: process.cwd()
   });
 }
 
@@ -627,7 +503,7 @@ export async function executeReviewFlow(
     repoDiffText?: string;
     repoHasUntrackedFiles?: boolean;
   },
-  dependencies: ReviewFlowDependencies,
+  dependencies: ReviewFlowDependencies
 ): Promise<string> {
   const attempted: string[] = [];
   const executions = getReviewExecutionPlan({
@@ -638,7 +514,7 @@ export async function executeReviewFlow(
     provider: input.provider,
     repoChangedFiles: input.repoChangedFiles,
     repoDiffText: input.repoDiffText,
-    repoHasUntrackedFiles: input.repoHasUntrackedFiles,
+    repoHasUntrackedFiles: input.repoHasUntrackedFiles
   });
   const fallbackAllowed = executions.length > 1;
 
@@ -650,12 +526,12 @@ export async function executeReviewFlow(
       attempted.push(`${executionLabel}: ${health.reason ?? 'unavailable'}`);
       if (!fallbackAllowed) {
         throw new Error(
-          `${getProviderDisplayName(execution.provider)} review is unavailable: ${health.reason ?? 'health check failed.'}`,
+          `${getProviderDisplayName(execution.provider)} review is unavailable: ${health.reason ?? 'health check failed.'}`
         );
       }
 
       dependencies.log(
-        `${getExecutionDisplayName(execution)} review is unavailable: ${health.reason ?? 'health check failed.'}`,
+        `${getExecutionDisplayName(execution)} review is unavailable: ${health.reason ?? 'health check failed.'}`
       );
       continue;
     }
@@ -669,10 +545,10 @@ export async function executeReviewFlow(
       ) {
         dependencies.cacheUnavailable(execution, error);
         attempted.push(
-          `${executionLabel}: ${error instanceof Error ? error.message : String(error)}`,
+          `${executionLabel}: ${error instanceof Error ? error.message : String(error)}`
         );
         dependencies.log(
-          `${getExecutionDisplayName(execution)} review became unavailable during execution. Trying the next fallback.`,
+          `${getExecutionDisplayName(execution)} review became unavailable during execution. Trying the next fallback.`
         );
         continue;
       }
@@ -687,7 +563,7 @@ export async function executeReviewFlow(
 function readRequiredValue(
   argv: string[],
   index: number,
-  flag: string,
+  flag: string
 ): string {
   const value = argv[index + 1];
   if (!value) {
@@ -708,7 +584,7 @@ function readCheckpointFlag(rawValue?: string): ReviewCheckpoint {
   }
 
   throw new Error(
-    `Unsupported checkpoint "${rawValue ?? ''}". Expected one of: plan, implementation, test, pre-merge.`,
+    `Unsupported checkpoint "${rawValue ?? ''}". Expected one of: plan, implementation, test, pre-merge.`
   );
 }
 
@@ -723,7 +599,7 @@ function readProviderFlag(rawValue?: string): ReviewProvider {
   }
 
   throw new Error(
-    `Unsupported provider "${rawValue ?? ''}". Expected one of: auto, copilot, gemini, codex.`,
+    `Unsupported provider "${rawValue ?? ''}". Expected one of: auto, copilot, gemini, codex.`
   );
 }
 
@@ -732,7 +608,7 @@ async function probeReviewProviderHealth(execution: ReviewExecution) {
     return probeCopilotCliHealth({
       model: getProviderHealthModel(execution),
       repoRoot: process.cwd(),
-      telemetryContext: createCheckpointReviewTelemetryContext(execution),
+      telemetryContext: createCheckpointReviewTelemetryContext(execution)
     });
   }
 
@@ -740,13 +616,13 @@ async function probeReviewProviderHealth(execution: ReviewExecution) {
     return probeGeminiCliHealth({
       model: execution.model ?? getDefaultGeminiModel(execution.checkpoint),
       repoRoot: process.cwd(),
-      telemetryContext: createCheckpointReviewTelemetryContext(execution),
+      telemetryContext: createCheckpointReviewTelemetryContext(execution)
     });
   }
 
   return probeCodexCliHealth({
     model: getProviderHealthModel(execution),
-    repoRoot: process.cwd(),
+    repoRoot: process.cwd()
   });
 }
 
@@ -759,9 +635,9 @@ function getDefaultReviewFlowDependencies(): ReviewFlowDependencies {
         {
           available: false,
           checkedAtMs: Date.now(),
-          reason: error instanceof Error ? error.message : String(error),
+          reason: error instanceof Error ? error.message : String(error)
         },
-        process.cwd(),
+        process.cwd()
       );
     },
     log(message) {
@@ -770,13 +646,13 @@ function getDefaultReviewFlowDependencies(): ReviewFlowDependencies {
       }
     },
     probe: probeReviewProviderHealth,
-    run: runReviewExecution,
+    run: runReviewExecution
   };
 }
 
 function isRetryableProviderFailure(
   provider: ConcreteReviewProvider,
-  error: unknown,
+  error: unknown
 ): boolean {
   if (provider === 'copilot') {
     return isCopilotUnavailableError(error);
@@ -818,7 +694,7 @@ function formatExecutionLabel(execution: ReviewExecution): string {
 }
 
 function getProviderHealthModel(
-  execution: ReviewExecution,
+  execution: ReviewExecution
 ): string | undefined {
   if (execution.provider === 'codex') {
     return undefined;
@@ -835,13 +711,13 @@ function buildNoAvailableProvidersError(attempted: string[]): string {
   return [
     'No review provider was available for this checkpoint.',
     'Attempted providers:',
-    ...attempted.map((entry) => `- ${entry}`),
+    ...attempted.map((entry) => `- ${entry}`)
   ].join('\n');
 }
 
 function containsPattern(
   text: string,
-  patterns: ReadonlyArray<RegExp>,
+  patterns: ReadonlyArray<RegExp>
 ): boolean {
   return patterns.some((pattern) => pattern.test(text));
 }
@@ -859,7 +735,7 @@ function collectRepoChangedFiles(repoRoot: string): string[] {
 
 function collectRepoHasUntrackedFiles(repoRoot: string): boolean {
   return collectRepoStatusLines(repoRoot).some((line) =>
-    line.startsWith('?? '),
+    line.startsWith('?? ')
   );
 }
 
@@ -870,8 +746,8 @@ function collectRepoStatusLines(repoRoot: string): string[] {
     {
       cwd: repoRoot,
       encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    },
+      stdio: ['ignore', 'pipe', 'ignore']
+    }
   );
 
   if (result.error || result.status !== 0 || !result.stdout) {
@@ -887,7 +763,7 @@ function collectRepoStatusLines(repoRoot: string): string[] {
 function collectRepoDiffText(repoRoot: string): string {
   const commands = [
     ['diff', '--no-color', '--no-ext-diff'],
-    ['diff', '--no-color', '--no-ext-diff', '--cached'],
+    ['diff', '--no-color', '--no-ext-diff', '--cached']
   ];
 
   const outputs = commands
@@ -895,8 +771,8 @@ function collectRepoDiffText(repoRoot: string): string {
       spawnSync('git', args, {
         cwd: repoRoot,
         encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'ignore'],
-      }),
+        stdio: ['ignore', 'pipe', 'ignore']
+      })
     )
     .filter((result) => !result.error && result.status === 0)
     .map((result) => result.stdout?.trim() ?? '')
@@ -909,7 +785,7 @@ function isReviewControlPlanePath(filePath: string, context: string): boolean {
   const normalizedPath = normalizeReviewPath(filePath);
   if (
     REVIEW_CONTROL_PLANE_PATH_PATTERNS.some((pattern) =>
-      pattern.test(normalizedPath),
+      pattern.test(normalizedPath)
     )
   ) {
     return true;
@@ -951,7 +827,7 @@ function normalizeReviewPath(candidate: string): string {
     '/.codex/',
     '/.gemini/',
     '/AGENTS.md',
-    '/sync-skills.ps1',
+    '/sync-skills.ps1'
   ];
 
   for (const anchor of workspaceAnchors) {
@@ -970,7 +846,7 @@ function normalizeReviewPathList(paths: ReadonlyArray<string>): string[] {
 
 function matchesPathPattern(
   filePath: string,
-  patterns: ReadonlyArray<RegExp>,
+  patterns: ReadonlyArray<RegExp>
 ): boolean {
   const normalizedPath = normalizeReviewPath(filePath);
   return patterns.some((pattern) => pattern.test(normalizedPath));
@@ -978,7 +854,7 @@ function matchesPathPattern(
 
 function matchesRepoChangedFiles(
   contextChangedFiles: ReadonlyArray<string>,
-  repoChangedFiles: ReadonlyArray<string>,
+  repoChangedFiles: ReadonlyArray<string>
 ): boolean {
   if (contextChangedFiles.length === 0 || repoChangedFiles.length === 0) {
     return false;
@@ -996,20 +872,20 @@ function matchesRepoChangedFiles(
 
 function diffMentionsRepoChangedFiles(
   repoChangedFiles: ReadonlyArray<string>,
-  repoDiffText: string,
+  repoDiffText: string
 ): boolean {
   if (repoChangedFiles.length === 0 || repoDiffText.trim().length === 0) {
     return false;
   }
 
   return normalizeReviewPathList(repoChangedFiles).every((filePath) =>
-    diffContainsFileHeader(repoDiffText, filePath),
+    diffContainsFileHeader(repoDiffText, filePath)
   );
 }
 
 function diffContainsFileHeader(
   repoDiffText: string,
-  filePath: string,
+  filePath: string
 ): boolean {
   const escapedFilePath = escapeRegExp(filePath);
   const headerPatterns = [
@@ -1017,7 +893,7 @@ function diffContainsFileHeader(
     new RegExp(`^diff --git a/${escapedFilePath} b/dev/null$`, 'm'),
     new RegExp(`^diff --git a/dev/null b/${escapedFilePath}$`, 'm'),
     new RegExp(`^--- a/${escapedFilePath}$`, 'm'),
-    new RegExp(`^\\+\\+\\+ b/${escapedFilePath}$`, 'm'),
+    new RegExp(`^\\+\\+\\+ b/${escapedFilePath}$`, 'm')
   ];
 
   return headerPatterns.some((pattern) => pattern.test(repoDiffText));

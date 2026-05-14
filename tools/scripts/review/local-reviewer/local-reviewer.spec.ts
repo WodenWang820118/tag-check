@@ -4,9 +4,9 @@ import test from 'node:test';
 import {
   getUsageText,
   parseCliArgs,
-  writePrefilterOutput,
-  type ParsedLocalReviewerCliArgs,
-} from './local-reviewer.ts';
+  type ParsedLocalReviewerCliArgs
+} from './cli-args.ts';
+import { writePrefilterOutput } from './local-reviewer.ts';
 
 test('parseCliArgs keeps estimate-only defaults for evaluate', () => {
   const parsed = parseCliArgs(['evaluate']);
@@ -36,7 +36,7 @@ test('parseCliArgs reads repeated repo flags and numeric overrides', () => {
     '--repo',
     'gx.go',
     '--repo',
-    '../local-reviewer-cli',
+    '../local-reviewer-cli'
   ]);
 
   assert.deepEqual(parsed, {
@@ -46,7 +46,7 @@ test('parseCliArgs reads repeated repo flags and numeric overrides', () => {
     repos: ['gx.go', '../local-reviewer-cli'],
     rounds: 40,
     seed: 7,
-    smallDiffThresholdChars: 2048,
+    smallDiffThresholdChars: 2048
   } satisfies ParsedLocalReviewerCliArgs);
 });
 
@@ -62,7 +62,7 @@ test('writePrefilterOutput includes hybrid additive fields without breaking key=
   const originalWrite = process.stdout.write;
   process.stdout.write = ((chunk: string | Uint8Array) => {
     writes.push(
-      typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString('utf8'),
+      typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString('utf8')
     );
     return true;
   }) as typeof process.stdout.write;
@@ -72,7 +72,7 @@ test('writePrefilterOutput includes hybrid additive fields without breaking key=
       artifacts: {
         contextPath: '/repo/context.md',
         reportPath: '/repo/report.json',
-        reviewContextPath: '/repo/review.md',
+        reviewContextPath: '/repo/review.md'
       },
       decisionBasis: 'gpt+local',
       gptConfidence: 'medium',
@@ -80,12 +80,12 @@ test('writePrefilterOutput includes hybrid additive fields without breaking key=
       gptRisk: 'low',
       localMode: 'targeted',
       payload: {
-        recommended_escalation: false,
+        recommended_escalation: false
       },
       recommendedEscalation: false,
       requestedProfiles: ['typescript'],
       reviewContextMode: 'prefilter-summary',
-      smallDiffThresholdChars: 1024,
+      smallDiffThresholdChars: 1024
     });
   } finally {
     process.stdout.write = originalWrite;
