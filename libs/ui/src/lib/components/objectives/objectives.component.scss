@@ -1,37 +1,41 @@
 @use 'libs/shared-styles/src/variables.scss' as *;
 
 .objectives {
-  max-width: $content-max;
+  max-width: 1200px;
   margin: 0 auto;
-  padding-inline: $space-gutter;
+  padding-inline: clamp(2rem, 5vw, 4rem);
   padding-block: 1rem;
 
-  // Section styling
   &__section {
     margin-bottom: 2rem;
   }
 
-  // Figure and image styling
-  &__figure {
-    margin: 1rem 0;
+  &__achievement-layout {
+    display: grid;
+    grid-template-columns: 1fr min(38rem, 46%);
+    gap: 2.5rem;
+    align-items: start;
   }
 
   &__diagram {
-    float: right;
-    max-width: min(60%, 32rem);
-    margin: 0 0 1rem 1.25rem;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    height: auto;
+    position: sticky;
+    top: 2rem;
   }
 
-  // Content styling
+  &__diagram-caption {
+    margin-top: 0.5rem;
+    font-size: $font-size-caption;
+    color: var(--color-text-muted, #666);
+    text-align: center;
+  }
+
   &__content {
     margin-bottom: 1.5rem;
 
     p {
       margin-bottom: 1rem;
-      line-height: 1.6;
+      font-size: $font-size-body-read;
+      line-height: 1.7;
       text-align: justify;
       text-justify: inter-word;
     }
@@ -42,12 +46,13 @@
 
     li {
       margin-bottom: 0.5rem;
-      line-height: 1.4;
+      font-size: 1.6rem;
+      line-height: 1.5;
     }
   }
 
   a {
-    color: #2563eb; // Bright blue for good visibility
+    color: #2563eb;
     text-decoration: none;
     text-decoration-thickness: 0.1em;
     text-underline-offset: 0.2em;
@@ -55,54 +60,42 @@
     padding: 0.1em 0.2em;
     border-radius: 2px;
 
-    // Link state
     &:link {
       color: #2563eb;
     }
-
-    // Visited state
     &:visited {
-      color: #7c3aed; // Purple shade
+      color: #7c3aed;
     }
 
-    // Hover state
     &:hover {
-      color: #1e40af; // Darker blue
+      color: #1e40af;
       background-color: rgba(37, 99, 235, 0.1);
       text-decoration-thickness: 0.2em;
     }
 
-    // Focus state (for accessibility)
     &:focus {
       outline: 2px solid #2563eb;
       outline-offset: 2px;
       background-color: rgba(37, 99, 235, 0.1);
     }
 
-    // Active state
     &:active {
-      color: #1e3a8a; // Even darker blue
+      color: #1e3a8a;
       background-color: rgba(37, 99, 235, 0.2);
     }
   }
 
-  // Responsive breakpoints
   @media (max-width: ($bp-laptop - 1)) {
+    &__achievement-layout {
+      grid-template-columns: 1fr;
+    }
+
     &__diagram {
-      float: none;
-      max-width: 100%;
-      margin: 1rem 0;
-      display: block;
+      position: static;
     }
 
-    &__content {
-      p {
-        text-align: left;
-      }
-    }
-
-    &__code-container {
-      gap: 1rem;
+    &__content p {
+      text-align: left;
     }
   }
 
@@ -110,7 +103,7 @@
     padding-inline: 0.5rem;
 
     &__heading {
-      font-size: 1.25rem;
+      font-size: 2rem;
     }
 
     &__list {

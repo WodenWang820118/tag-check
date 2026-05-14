@@ -1,0 +1,28 @@
+/* Tailwind v4 entrypoint for ng-product-doc.
+ *
+ * Kept as a pure CSS file (not .scss) so the @tailwindcss/postcss plugin
+ * processes the @import / @source directives directly. Sass would otherwise
+ * inline the @import statements before PostCSS could expand them, which
+ * suppressed all responsive variants (md:, lg:, xl:) in the compiled
+ * stylesheet.
+ *
+ * preflight is intentionally NOT imported because Angular Material's
+ * prebuilt indigo-pink theme plus libs/shared-styles already provide a
+ * full baseline; a global reset on top of those would visually regress
+ * existing components.
+ *
+ * Note: Material's component baselines (e.g. `.mat-mdc-icon-button
+ * { display: inline-block }`) are emitted unlayered by both
+ * @angular/material/prebuilt-themes and libs/shared-styles' SCSS
+ * `mat.all-component-themes` mixin. Per the CSS Cascade, unlayered rules
+ * outrank any @layer at equal specificity, so where a Tailwind utility
+ * needs to override a Material baseline (e.g. `lg:hidden` on a
+ * `mat-icon-button`) use the `!` important suffix in the template.
+ */
+@layer theme, base, components, utilities;
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@source "../../../libs/ui/src/**/*.{html,ts}";
+@source "../../../apps/ng-product-doc/src/**/*.{html,ts}";

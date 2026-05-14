@@ -1,0 +1,68 @@
+:host {
+  display: block;
+}
+
+.mermaid-skeleton {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e4e4e4 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: mermaid-shimmer 1.5s ease-in-out infinite;
+}
+
+.mermaid-error {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  color: #555;
+  font-size: 1.4rem;
+
+  &__retry {
+    padding: 0.4rem 1rem;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    background: #fff;
+    color: #333;
+    cursor: pointer;
+    font-size: 1.4rem;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: #f5f5f5;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+    }
+  }
+}
+
+.mermaid-container {
+  width: 100%;
+  overflow-x: auto;
+
+  /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+  ::ng-deep svg {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+  }
+}
+
+@keyframes mermaid-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

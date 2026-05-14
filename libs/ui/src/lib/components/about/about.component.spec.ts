@@ -1,4 +1,3 @@
-import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -8,10 +7,7 @@ describe('AboutComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AboutComponent],
-      providers: [
-        { provide: LOCALE_ID, useValue: 'en' },
-        provideNoopAnimations()
-      ]
+      providers: [provideNoopAnimations()]
     }).compileComponents();
   });
 
@@ -21,23 +17,19 @@ describe('AboutComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('builds a localized SVG path from the active locale', () => {
+  it('builds a mermaid diagram definition containing the key nodes', () => {
     const fixture = TestBed.createComponent(AboutComponent);
-    expect(fixture.componentInstance.getLocalizedSvgPath()).toBe(
-      '/assets/i18n/en/tag_build_system_en.drawio.svg'
-    );
+    const diagram = fixture.componentInstance.tagBuildDiagram;
+    expect(diagram).toContain('flowchart TD');
+    expect(diagram).toContain('TagBuild');
+    expect(diagram).toContain('GTM');
   });
 
-  it('uses the configured locale token', () => {
-    TestBed.resetTestingModule();
-    TestBed.configureTestingModule({
-      imports: [AboutComponent],
-      providers: [{ provide: LOCALE_ID, useValue: 'ja' }]
-    });
+  it('exposes a non-empty aria label for the diagram', () => {
     const fixture = TestBed.createComponent(AboutComponent);
-    expect(fixture.componentInstance.getLocalizedSvgPath()).toBe(
-      '/assets/i18n/ja/tag_build_system_ja.drawio.svg'
-    );
+    expect(
+      fixture.componentInstance.tagBuildDiagramLabel.length
+    ).toBeGreaterThan(0);
   });
 
   it('exposes example payloads with the expected shape', () => {
