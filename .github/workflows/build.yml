@@ -28,6 +28,12 @@ jobs:
       - name: Test and coverage
         run: pnpm run test:cov
         shell: bash
+      - name: Backend e2e tests with coverage
+        run: pnpm run test-back:e2e:cov
+        shell: bash
+      - name: Merge coverage (unit + e2e)
+        run: INCLUDE_E2E_COVERAGE=1 pnpm run coverage:merge
+        shell: bash
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
