@@ -19,7 +19,7 @@ describe('ObjectivesComponent', () => {
   it('returns a localized SVG path that includes the active locale', () => {
     const fixture = TestBed.createComponent(ObjectivesComponent);
     expect(fixture.componentInstance.getLocalizedSvgPath()).toBe(
-      'assets/i18n/zh-hant/tag_check_system_zh-hant.drawio.svg'
+      '/assets/i18n/zh-hant/tag_check_system_zh-hant.drawio.svg'
     );
   });
 });

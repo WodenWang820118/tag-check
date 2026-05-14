@@ -1,0 +1,113 @@
+<p-toolbar class="sample-shell border-none bg-transparent px-0 py-5">
+  <ng-template pTemplate="start">
+    <div class="flex flex-wrap items-center gap-3">
+      <a
+        class="flex items-center gap-3 rounded-full border border-white/80 bg-white/90 px-4 py-2 shadow-sm transition-transform hover:-translate-y-0.5"
+        routerLink="/"
+        href="/"
+      >
+        <span
+          class="grid h-10 w-10 place-items-center rounded-full bg-blue-600 text-white"
+        >
+          <i class="pi pi-compass text-lg"></i>
+        </span>
+        <span class="leading-tight">
+          <span
+            class="block text-xs font-semibold uppercase tracking-[0.28em] text-blue-600"
+          >
+            GTM Demo
+          </span>
+          <span class="block text-lg font-black tracking-tight text-slate-900">
+            Travel Site
+          </span>
+        </span>
+      </a>
+
+      <div class="hidden h-8 w-px bg-slate-200 lg:block"></div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          pButton
+          type="button"
+          icon="pi pi-home"
+          label="Home"
+          severity="secondary"
+          text="true"
+          (click)="navigateToHome()"
+        ></button>
+        <button
+          pButton
+          type="button"
+          icon="pi pi-map"
+          label="Destinations"
+          severity="secondary"
+          text="true"
+          (click)="navigateToDestinations()"
+        ></button>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="end">
+    <div class="flex flex-wrap items-center justify-end gap-2">
+      @if (!user()) {
+        <button
+          pButton
+          type="button"
+          icon="pi pi-user"
+          label="Login"
+          severity="contrast"
+          [rounded]="true"
+          (click)="navigateToLogin()"
+        ></button>
+      } @else {
+        <button
+          pButton
+          type="button"
+          label="Admin"
+          icon="pi pi-chart-bar"
+          severity="secondary"
+          text="true"
+          (click)="navigateToAdmin()"
+        ></button>
+        <button
+          pButton
+          type="button"
+          label="Add Data"
+          icon="pi pi-plus"
+          severity="secondary"
+          text="true"
+          (click)="navigateToAddData()"
+        ></button>
+        <button
+          pButton
+          type="button"
+          label="Logout"
+          icon="pi pi-sign-out"
+          severity="secondary"
+          text="true"
+          (click)="logout()"
+        ></button>
+      }
+
+      <button
+        pButton
+        type="button"
+        icon="pi pi-shopping-cart"
+        label="Cart"
+        severity="contrast"
+        [rounded]="true"
+        class="relative"
+        (click)="navigateToBasket()"
+      >
+        @if (cartItemCount() > 0) {
+          <span
+            class="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[0.7rem] font-semibold text-white"
+          >
+            {{ cartItemCount() }}
+          </span>
+        }
+      </button>
+    </div>
+  </ng-template>
+</p-toolbar>

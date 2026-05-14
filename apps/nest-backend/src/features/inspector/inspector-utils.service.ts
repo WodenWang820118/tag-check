@@ -46,7 +46,10 @@ export class InspectorUtilsService {
         }
       }
     } catch (error) {
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error instanceof Error ? error.message : String(error),
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 

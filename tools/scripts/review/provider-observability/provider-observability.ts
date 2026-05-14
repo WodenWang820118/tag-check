@@ -4,7 +4,7 @@ import {
   readFileSync,
   rmSync,
   statSync,
-  writeFileSync
+  writeFileSync,
 } from 'node:fs';
 import path from 'node:path';
 
@@ -102,10 +102,8 @@ export interface GeminiBackoffRecommendationSummary {
   retrySessionCount: number;
 }
 
-export interface ProviderObservationInput extends Omit<
-  ProviderObservation,
-  'recordedAtMs'
-> {
+export interface ProviderObservationInput
+  extends Omit<ProviderObservation, 'recordedAtMs'> {
   recordedAtMs?: number;
 }
 
@@ -120,11 +118,11 @@ const OBSERVABILITY_LOCK_TIMEOUT_MS = 2_000;
 const OBSERVABILITY_LOCK_STALE_MS = 30_000;
 
 export function createProviderTelemetryContext(
-  input: Partial<ProviderTelemetryContext> = {}
+  input: Partial<ProviderTelemetryContext> = {},
 ): ProviderTelemetryContext {
   return {
     callsite: input.callsite ?? 'unspecified',
-    checkpoint: input.checkpoint
+    checkpoint: input.checkpoint,
   };
 }
 
@@ -140,23 +138,23 @@ export function createProviderObservationBucketKey(input: {
     input.callsite,
     input.checkpoint ?? 'none',
     input.operation,
-    input.model ?? 'default'
+    input.model ?? 'default',
   ].join(':');
 }
 
 export function getProviderObservabilityStatePath(
-  repoRoot = process.cwd()
+  repoRoot = process.cwd(),
 ): string {
   return path.join(
     repoRoot,
     '.cache',
     'reviews',
-    'provider-observability-state.json'
+    'provider-observability-state.json',
   );
 }
 
 export function loadProviderObservabilityState(
-  repoRoot = process.cwd()
+  repoRoot = process.cwd(),
 ): ProviderObservabilityState {
   const statePath = getProviderObservabilityStatePath(repoRoot);
 
@@ -166,7 +164,7 @@ export function loadProviderObservabilityState(
 
   try {
     return JSON.parse(
-      readFileSync(statePath, 'utf8')
+      readFileSync(statePath, 'utf8'),
     ) as ProviderObservabilityState;
   } catch {
     return { buckets: {} };
@@ -175,7 +173,7 @@ export function loadProviderObservabilityState(
 
 export function saveProviderObservabilityState(
   state: ProviderObservabilityState,
-  repoRoot = process.cwd()
+  repoRoot = process.cwd(),
 ): void {
   const statePath = getProviderObservabilityStatePath(repoRoot);
   mkdirSync(path.dirname(statePath), { recursive: true });
@@ -184,7 +182,7 @@ export function saveProviderObservabilityState(
 
 export function recordProviderObservation(
   input: ProviderObservationInput,
-  repoRoot = process.cwd()
+  repoRoot = process.cwd(),
 ): ProviderObservation {
   return withProviderObservabilityLock(repoRoot, () => {
     const state = loadProviderObservabilityState(repoRoot);
@@ -197,7 +195,7 @@ export function recordProviderObservation(
       model: observation.model,
       observations: [],
       operation: observation.operation,
-      provider: observation.provider
+      provider: observation.provider,
     };
 
     bucket.observations = [...bucket.observations, observation]
@@ -214,7 +212,7 @@ export function listProviderObservationBuckets(
   input: {
     provider?: ProviderObservabilityProvider;
     repoRoot?: string;
-  } = {}
+  } = {},
 ): ProviderObservationBucket[] {
   const state = loadProviderObservabilityState(input.repoRoot);
   return Object.values(state.buckets)
@@ -231,7 +229,7 @@ export function buildTimeoutRecommendationSummary(input: {
     .map((observation) => observation.durationMs)
     .sort((left, right) => left - right);
   const timeoutCount = input.observations.filter(
-    (observation) => observation.timedOut
+    (observation) => observation.timedOut,
   ).length;
 
   if (successfulDurations.length < MIN_TIMEOUT_RECOMMENDATION_SAMPLES) {
@@ -244,14 +242,14 @@ export function buildTimeoutRecommendationSummary(input: {
       sampleCount: input.observations.length,
       successCount: successfulDurations.length,
       timeoutCount,
-      timeoutRate: getRate(timeoutCount, input.observations.length)
+      timeoutRate: getRate(timeoutCount, input.observations.length),
     };
   }
 
   const p95DurationMs = percentile(successfulDurations, 0.95) ?? 0;
   const currentTimeoutMs = input.currentTimeoutMs;
   const recommendedTimeoutMs = roundUpToNearestFiveSeconds(
-    clamp(p95DurationMs * 1.2, currentTimeoutMs * 0.5, currentTimeoutMs * 2)
+    clamp(p95DurationMs * 1.2, currentTimeoutMs * 0.5, currentTimeoutMs * 2),
   );
 
   return {
@@ -263,12 +261,12 @@ export function buildTimeoutRecommendationSummary(input: {
     sampleCount: input.observations.length,
     successCount: successfulDurations.length,
     timeoutCount,
-    timeoutRate: getRate(timeoutCount, input.observations.length)
+    timeoutRate: getRate(timeoutCount, input.observations.length),
   };
 }
 
 export function buildGeminiReviewSessionSummaries(
-  observations: ReadonlyArray<ProviderObservation>
+  observations: ReadonlyArray<ProviderObservation>,
 ): GeminiReviewSessionSummary[] {
   const sessions = new Map<string, ProviderObservation[]>();
 
@@ -285,7 +283,7 @@ export function buildGeminiReviewSessionSummaries(
   return [...sessions.entries()]
     .map(([sessionId, attempts]) => {
       const sortedAttempts = [...attempts].sort(
-        (left, right) => left.recordedAtMs - right.recordedAtMs
+        (left, right) => left.recordedAtMs - right.recordedAtMs,
       );
       const lastAttempt = sortedAttempts.at(-1);
       const firstAttempt = sortedAttempts[0];
@@ -300,7 +298,7 @@ export function buildGeminiReviewSessionSummaries(
         firstAttemptCapacityError: firstAttempt?.capacityError === true,
         retryTriggeredByCapacity,
         sessionId,
-        success: lastAttempt?.success === true
+        success: lastAttempt?.success === true,
       };
     })
     .sort((left, right) => left.sessionId.localeCompare(right.sessionId));
@@ -312,11 +310,11 @@ export function buildGeminiIntervalRecommendationSummary(input: {
 }): GeminiIntervalRecommendationSummary {
   const sessionCount = input.sessions.length;
   const firstAttemptCapacityCount = input.sessions.filter(
-    (session) => session.firstAttemptCapacityError
+    (session) => session.firstAttemptCapacityError,
   ).length;
   const firstAttemptCapacityRate = getRate(
     firstAttemptCapacityCount,
-    sessionCount
+    sessionCount,
   );
 
   if (sessionCount < MIN_GEMINI_INTERVAL_RECOMMENDATION_SAMPLES) {
@@ -325,7 +323,7 @@ export function buildGeminiIntervalRecommendationSummary(input: {
       firstAttemptCapacityRate,
       insufficientData: true,
       recommendedIntervalMs: null,
-      sessionCount
+      sessionCount,
     };
   }
 
@@ -341,7 +339,7 @@ export function buildGeminiIntervalRecommendationSummary(input: {
     firstAttemptCapacityRate,
     insufficientData: false,
     recommendedIntervalMs: input.currentIntervalMs + incrementMs,
-    sessionCount
+    sessionCount,
   };
 }
 
@@ -350,11 +348,11 @@ export function buildGeminiBackoffRecommendationSummary(input: {
   sessions: ReadonlyArray<GeminiReviewSessionSummary>;
 }): GeminiBackoffRecommendationSummary {
   const retrySessions = input.sessions.filter(
-    (session) => session.retryTriggeredByCapacity
+    (session) => session.retryTriggeredByCapacity,
   );
   const retrySessionCount = retrySessions.length;
   const hardRetryCount = retrySessions.filter(
-    (session) => session.finalAttempt >= 2 || session.exhaustedRetries
+    (session) => session.finalAttempt >= 2 || session.exhaustedRetries,
   ).length;
   const hardRetryRate = getRate(hardRetryCount, retrySessionCount);
 
@@ -364,7 +362,7 @@ export function buildGeminiBackoffRecommendationSummary(input: {
       hardRetryRate,
       insufficientData: true,
       recommendedRetryDelaysMs: null,
-      retrySessionCount
+      retrySessionCount,
     };
   }
 
@@ -376,14 +374,14 @@ export function buildGeminiBackoffRecommendationSummary(input: {
     hardRetryRate,
     insufficientData: false,
     recommendedRetryDelaysMs: input.currentRetryDelaysMs.map((delayMs) =>
-      roundToNearestFiveSeconds(delayMs * multiplier)
+      roundToNearestFiveSeconds(delayMs * multiplier),
     ),
-    retrySessionCount
+    retrySessionCount,
   };
 }
 
 function normalizeObservation(
-  input: ProviderObservationInput
+  input: ProviderObservationInput,
 ): ProviderObservation {
   return {
     ...input,
@@ -393,20 +391,20 @@ function normalizeObservation(
     model: input.model,
     // Never store raw prompt text in observability state. Persist prompt length only.
     promptChars: input.promptChars,
-    recordedAtMs: input.recordedAtMs ?? Date.now()
+    recordedAtMs: input.recordedAtMs ?? Date.now(),
   };
 }
 
 function compareProviderObservationBuckets(
   left: ProviderObservationBucket,
-  right: ProviderObservationBucket
+  right: ProviderObservationBucket,
 ): number {
   return left.key.localeCompare(right.key);
 }
 
 function percentile(
   values: ReadonlyArray<number>,
-  value: number
+  value: number,
 ): number | null {
   if (values.length === 0) {
     return null;
@@ -438,13 +436,13 @@ function clamp(value: number, min: number, max: number): number {
 
 function withProviderObservabilityLock<T>(
   repoRoot: string,
-  operation: () => T
+  operation: () => T,
 ): T {
   const lockPath = path.join(
     repoRoot,
     '.cache',
     'reviews',
-    OBSERVABILITY_LOCK_DIR
+    OBSERVABILITY_LOCK_DIR,
   );
   mkdirSync(path.dirname(lockPath), { recursive: true });
   const startedAtMs = Date.now();
@@ -466,7 +464,7 @@ function withProviderObservabilityLock<T>(
 
       if (Date.now() - startedAtMs >= OBSERVABILITY_LOCK_TIMEOUT_MS) {
         throw new Error(
-          'Timed out while waiting for the provider observability cache lock.'
+          'Timed out while waiting for the provider observability cache lock.',
         );
       }
 

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
-import type { ReviewCheckpoint } from '../checkpoint-review/shared/shared.ts';
+import type { ReviewCheckpoint } from '../run-checkpoint-review/contracts.ts';
 
 export type ReviewerId =
   | 'architecture-reviewer'

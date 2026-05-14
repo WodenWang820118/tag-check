@@ -16,7 +16,6 @@ import { diskStorage } from 'multer';
 import { Express, Response } from 'express';
 import { SysConfigurationRepositoryService } from '../../core/repository/sys-configuration/sys-configuration-repository.service';
 import { ProjectIoFacadeService } from '../../features/project-agent/project-io-facade/project-io-facade.service';
-import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 
 @Controller('projects')
@@ -29,7 +28,6 @@ export class ProjectIoController {
   ) {}
 
   @Get('export/:projectSlug')
-  @Log()
   async exportProject(@Param('projectSlug') projectSlug: string) {
     return await this.projectIoFacadeService.exportProject(projectSlug);
   }
@@ -68,7 +66,10 @@ export class ProjectIoController {
       return response.status(200).json({ projectSlug: importedSlug });
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        error instanceof Error ? error.message : String(error),
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 

@@ -1,0 +1,129 @@
+<main class="landing">
+  <section class="hero" aria-labelledby="landing-title">
+    <p class="eyebrow" i18n="@@landing.hero.eyebrow">
+      GTM JSON builder for marketing teams
+    </p>
+    <h1 id="landing-title" i18n="@@landing.hero.title">
+      Build cleaner GA4 tag payloads without spreadsheet glue or server setup.
+    </h1>
+    <p class="hero__copy" i18n="@@landing.hero.description">
+      Tag Build turns event requirements into Google Tag Manager-ready JSON so
+      SEO specialists and digital marketers can move faster with fewer
+      implementation mistakes.
+    </p>
+    <div class="hero__actions" aria-label="Primary actions">
+      <a class="button button--primary" [href]="primaryLink().href">
+        {{ primaryLink().label }}
+      </a>
+      <a
+        class="button button--ghost"
+        [href]="aboutPath"
+        i18n="@@landing.cta.secondary"
+      >
+        See how it works
+      </a>
+    </div>
+    <dl class="proof">
+      <div>
+        <dt i18n="@@landing.proof.agency">Agency friendly</dt>
+        <dd i18n="@@landing.proof.agency.detail">No backend required</dd>
+      </div>
+      <div>
+        <dt i18n="@@landing.proof.ga4">GA4 aligned</dt>
+        <dd i18n="@@landing.proof.ga4.detail">Recommended event shape</dd>
+      </div>
+      <div>
+        <dt i18n="@@landing.proof.static">Static-first</dt>
+        <dd i18n="@@landing.proof.static.detail">Fast multilingual pages</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="workflow" aria-labelledby="workflow-title">
+    <div>
+      <p class="eyebrow" i18n="@@landing.workflow.eyebrow">The workflow</p>
+      <h2 id="workflow-title" i18n="@@landing.workflow.title">
+        From campaign brief to GTM-ready JSON in three calm steps.
+      </h2>
+      <p i18n="@@landing.workflow.description">
+        Keep the thinking in plain marketing language, then let the builder
+        format the payload for implementation and review.
+      </p>
+    </div>
+    <div class="steps">
+      <article>
+        <span>01</span>
+        <h3 i18n="@@landing.step.upload.title">Paste the event brief</h3>
+        <p i18n="@@landing.step.upload.description">
+          Start with the event name, commerce fields, and tracking variables
+          your team already uses.
+        </p>
+      </article>
+      <article>
+        <span>02</span>
+        <h3 i18n="@@landing.step.tune.title">Tune the payload shape</h3>
+        <p i18n="@@landing.step.tune.description">
+          Match GA4's recommended event structure while keeping
+          campaign-specific fields visible.
+        </p>
+      </article>
+      <article>
+        <span>03</span>
+        <h3 i18n="@@landing.step.export.title">Export with confidence</h3>
+        <p i18n="@@landing.step.export.description">
+          Copy structured JSON that is easier to review, hand off, and validate
+          inside GTM.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="benefits" aria-labelledby="benefits-title">
+    <p class="eyebrow" i18n="@@landing.benefits.eyebrow">Why it helps</p>
+    <h2 id="benefits-title" i18n="@@landing.benefits.title">
+      Less ceremony, more trustworthy tag work.
+    </h2>
+    <div class="cards">
+      <article>
+        <h3 i18n="@@landing.benefit.seo.title">Built for SEO handoffs</h3>
+        <p i18n="@@landing.benefit.seo.description">
+          Turn analytics requirements into implementation-ready JSON without
+          asking every stakeholder to learn GTM internals.
+        </p>
+      </article>
+      <article>
+        <h3 i18n="@@landing.benefit.agency.title">Useful without GCP</h3>
+        <p i18n="@@landing.benefit.agency.description">
+          Teams that cannot run Google Cloud sync jobs still get a structured,
+          repeatable build flow.
+        </p>
+      </article>
+      <article>
+        <h3 i18n="@@landing.benefit.validation.title">Ready for validation</h3>
+        <p i18n="@@landing.benefit.validation.description">
+          The same data shape supports future validation work in Tag Check, so
+          build and QA stay connected.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="learn" aria-labelledby="learn-title">
+    <div>
+      <p class="eyebrow" i18n="@@landing.learn.eyebrow">Go deeper</p>
+      <h2 id="learn-title" i18n="@@landing.learn.title">
+        Learn the system before opening the editor.
+      </h2>
+      <p i18n="@@landing.learn.description">
+        Review the architecture and objectives if you need a lightweight brief
+        for teammates before creating payloads.
+      </p>
+    </div>
+    <div class="learn__links">
+      <a [href]="aboutPath" i18n="@@landing.link.about">Read about Tag Build</a>
+      <a [href]="objectivesPath" i18n="@@landing.link.objectives">
+        View objectives
+      </a>
+    </div>
+  </section>
+</main>

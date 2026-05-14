@@ -1,4 +1,5 @@
 import {
+  DestroyRef,
   Component,
   computed,
   effect,
@@ -6,6 +7,7 @@ import {
   signal,
   viewChild
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormControl,
   FormGroup,
@@ -14,7 +16,7 @@ import {
 } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
 import { YouTubePlayerModule } from '@angular/youtube-player';
-import { take, tap } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
@@ -25,9 +27,11 @@ import { UtilsService } from '../../../../shared/services/utils/utils.service';
 import { DestinationService } from '../../../../shared/services/destination/destination.service';
 import { SearchService } from '../../../../shared/services/search/search.service';
 import { YoutubeService } from '../../../../shared/services/youtube/youtube.service';
-import { FirestoreDestinationPipelineService } from '../../../../shared/services/firestore-destination-pipeline/firestore-destination-pipeline.service';
 import { AnalyticsService } from '../../../../shared/services/analytics/analytics.service';
-import { Destination } from '../../../../shared/models/destination.model';
+import {
+  getPublicDestinationPage,
+  PublicDestination
+} from '../../../../shared/services/destination/destination-catalog';
 
 @Component({
   standalone: true,
@@ -48,8 +52,15 @@ export class DestinationComponent implements OnInit {
     searchTerm: new FormControl('')
   });
 
-  private readonly destinations = signal<Destination[]>([]);
-  readonly destinations$ = computed(() => this.destinations());
+  private readonly pageIndex = signal(0);
+  private readonly filteredDestinations = computed(() =>
+    this.searchService.searchResults$()
+  );
+  private readonly currentPage = computed(() =>
+    getPublicDestinationPage(this.pageIndex(), this.filteredDestinations())
+  );
+  readonly destinations$ = computed(() => this.currentPage().items);
+  readonly hasNextPage$ = computed(() => this.currentPage().hasNext);
 
   private readonly videoId = signal('');
   readonly videoId$ = computed(() => this.videoId());
@@ -69,12 +80,17 @@ export class DestinationComponent implements OnInit {
     public readonly searchService: SearchService,
     private readonly youtubeService: YoutubeService,
     private readonly sanitizer: DomSanitizer,
-    private readonly firestoreDestinationPipelineService: FirestoreDestinationPipelineService,
-    private readonly analyticsService: AnalyticsService
+    private readonly activatedRoute: ActivatedRoute,
+    private readonly analyticsService: AnalyticsService,
+    private readonly destroyRef: DestroyRef
   ) {
     effect(() => {
-      const searchResults = this.searchService.searchResults$();
-      this.destinations.set(searchResults);
+      const visibleDestinations = this.destinations$();
+      if (visibleDestinations.length === 0) {
+        return;
+      }
+
+      this.trackViewItemList(visibleDestinations);
     });
   }
 
@@ -87,29 +103,33 @@ export class DestinationComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.firestoreDestinationPipelineService
-      .getFirstDestinationsData()
-      .pipe(
-        take(1),
-        tap((destinations) => {
-          this.destinations.set(destinations);
-          this.trackViewItemList(destinations);
-        })
-      )
-      .subscribe();
+    this.activatedRoute.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const searchTerm = params.get('search_term') ?? '';
+        this.pageIndex.set(0);
+        this.searchForm.patchValue(
+          { searchTerm },
+          {
+            emitEvent: false
+          }
+        );
+
+        if (searchTerm) {
+          this.searchService.search(searchTerm);
+          return;
+        }
+
+        this.searchService.resetSearch();
+      });
   }
 
   getNextDestinations() {
-    this.firestoreDestinationPipelineService
-      .getNextDestinationsData()
-      .pipe(
-        take(1),
-        tap((destinations) => {
-          this.destinations.set(destinations);
-          this.trackViewItemList(destinations);
-        })
-      )
-      .subscribe();
+    if (!this.hasNextPage$()) {
+      return;
+    }
+
+    this.pageIndex.update((currentPageIndex) => currentPageIndex + 1);
   }
 
   getPreviousDestinations() {
@@ -117,19 +137,10 @@ export class DestinationComponent implements OnInit {
       return;
     }
 
-    this.firestoreDestinationPipelineService
-      .getPreviousDestinationsData()
-      .pipe(
-        take(1),
-        tap((destinations) => {
-          this.destinations.set(destinations);
-          this.trackViewItemList(destinations);
-        })
-      )
-      .subscribe();
+    this.pageIndex.update((currentPageIndex) => currentPageIndex - 1);
   }
 
-  trackViewItemList(destinations: Destination[]) {
+  trackViewItemList(destinations: PublicDestination[]) {
     this.analyticsService.trackEvent('view_item_list', {
       ecommerce: {
         items: destinations.map((destination) => ({
@@ -144,21 +155,24 @@ export class DestinationComponent implements OnInit {
   }
 
   isPreviousDisabled() {
-    return (
-      this.firestoreDestinationPipelineService.getPreviousDocsStackLength() < 2
-    );
+    return this.pageIndex() === 0;
   }
 
-  goToDetails(destination: Destination): void {
+  isNextDisabled() {
+    return !this.hasNextPage$();
+  }
+
+  goToDetails(destination: PublicDestination): void {
     this.destinationService.changeDestination(destination);
-    this.navigationService.navigateToDetail(destination.id);
+    this.navigationService.navigateToDetail(destination.slug);
   }
 
-  selectItem(destination: Destination): void {
+  selectItem(destination: PublicDestination): void {
     this.destinationService.trackSelectItem(destination);
   }
 
   navigateToSearchResults(query: string): void {
+    this.pageIndex.set(0);
     this.searchService.search(query);
     this.navigationService.navigateToDestinationResults(query);
   }

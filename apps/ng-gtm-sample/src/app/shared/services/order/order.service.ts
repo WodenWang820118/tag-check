@@ -1,4 +1,11 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import {
+  computed,
+  Injectable,
+  PLATFORM_ID,
+  inject,
+  signal
+} from '@angular/core';
 import { Destination } from '../../../shared/models/destination.model';
 import { Order } from '../../../shared/models/order.model';
 import { AnalyticsService } from '../analytics/analytics.service';
@@ -7,6 +14,7 @@ import { AnalyticsService } from '../analytics/analytics.service';
   providedIn: 'root'
 })
 export class OrderService {
+  private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly _orders = signal<Order[]>([]);
   readonly orders$ = computed(() => this._orders());
   readonly totalPrice$ = this.calculateTotalPrice();
@@ -62,12 +70,20 @@ export class OrderService {
   }
 
   private loadInitialData(): void {
+    if (!this.browser) {
+      this._orders.set([]);
+      return;
+    }
+
     const orders = JSON.parse(localStorage.getItem('orders') || '[]');
     this._orders.set(orders);
   }
 
   private storeOrders(orders: Order[]): void {
-    localStorage.setItem('orders', JSON.stringify(orders));
+    if (this.browser) {
+      localStorage.setItem('orders', JSON.stringify(orders));
+    }
+
     this.analyticsService.setCheckoutOrders(orders);
   }
 

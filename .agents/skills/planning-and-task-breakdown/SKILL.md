@@ -27,8 +27,9 @@ Planning skill for turning an approved spec into ordered, implementation-ready s
 2. **Map Dependencies:** Identify what must exist first, what can run in parallel, and what should stay sequential.
 3. **Slice for Verification:** Prefer thin vertical slices that can be implemented, tested, and reviewed without broad ambiguity.
 4. **Write Reviewable Tasks:** Give each task acceptance criteria, verification steps, and likely touch points.
-5. **Add Checkpoints:** Insert explicit review or verification checkpoints between major phases.
-6. **Stop at Decision-Complete:** The output should leave no hidden sequencing or interface decisions for implementation.
+5. **Record Refactor Pressure for Medium+ Work:** New or revised medium+ task breakdowns must include `Refactoring risk` and `Preparatory refactor needed?`. Existing in-flight specs are grandfathered until revised.
+6. **Add Checkpoints:** Insert explicit review or verification checkpoints between major phases, including Phase 3.5 when refactor risk is medium/high or a preparatory refactor is approved.
+7. **Stop at Decision-Complete:** The output should leave no hidden sequencing or interface decisions for implementation.
 
 ## Ask / Escalate
 

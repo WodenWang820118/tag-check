@@ -1,5 +1,9 @@
 export const environment = {
   production: false,
+  seo: {
+    siteOrigin: 'https://ng-gtm-integration-sample.vercel.app',
+    allowIndexing: false
+  },
   firebase: {
     apiKey: 'AIzaSyDICii4NRsaRPqn5QCZh5kaEPaxd9ZvLGQ',
     authDomain: 'ng-gtm-integration.firebaseapp.com',

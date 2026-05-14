@@ -1,12 +1,13 @@
 import {
   cacheProviderHealth,
   getCachedProviderHealth,
-  type ReviewProviderHealthResult
+  type ReviewProviderHealthResult,
 } from '../../provider-health/provider-health.ts';
 import {
   createProviderTelemetryContext,
   recordProviderObservation,
-  type ProviderTelemetryContext
+  type ProviderObservationInput,
+  type ProviderTelemetryContext,
 } from '../../provider-observability/provider-observability.ts';
 import { GEMINI_HEALTH_TIMEOUT_MS } from '../../provider-policies/provider-policies.ts';
 import {
@@ -16,15 +17,15 @@ import {
   getRetryDelayMs,
   loadRateLimitState,
   recordRequestStart,
-  sleep
+  sleep,
 } from '../../rate-limit/rate-limit.ts';
-import type { ReviewCheckpoint } from '../../checkpoint-review/shared/shared.ts';
-import { buildReviewPromptWithReviewerProfile } from '../../shared/reviewer-profile.ts';
-import { runLocalCliCommand } from '../local-cli/local-cli.ts';
+import {
+  runLocalCliCommand,
+  type LocalCliCommandInput,
+  type LocalCliCommandResult,
+} from '../local-cli/local-cli.ts';
 
 interface GeminiReviewInput {
-  checkpoint?: ReviewCheckpoint;
-  focus?: string;
   model: string;
   prompt: string;
   repoRoot?: string;
@@ -38,9 +39,12 @@ interface GeminiProviderDependencies {
   getRetryDelay?: typeof getRetryDelayMs;
   loadRateLimitState?: typeof loadRateLimitState;
   now?: () => number;
-  recordObservation?: typeof recordProviderObservation;
+  recordObservation?: (
+    input: ProviderObservationInput,
+    repoRoot?: string,
+  ) => unknown;
   recordRequestStart?: typeof recordRequestStart;
-  runCommand?: typeof runLocalCliCommand;
+  runCommand?: (input: LocalCliCommandInput) => LocalCliCommandResult;
   sleep?: typeof sleep;
 }
 
@@ -53,7 +57,7 @@ export async function probeGeminiCliHealth(
     repoRoot?: string;
     telemetryContext?: ProviderTelemetryContext;
   },
-  dependencies: GeminiProviderDependencies = {}
+  dependencies: GeminiProviderDependencies = {},
 ): Promise<ReviewProviderHealthResult> {
   const now = dependencies.now ?? Date.now;
   const recordObservation =
@@ -61,7 +65,7 @@ export async function probeGeminiCliHealth(
   const runCommand = dependencies.runCommand ?? runLocalCliCommand;
   const repoRoot = input.repoRoot ?? process.cwd();
   const telemetryContext = createProviderTelemetryContext(
-    input.telemetryContext
+    input.telemetryContext,
   );
   const cached = getCachedProviderHealth('gemini', input.model, repoRoot);
   if (cached) {
@@ -75,7 +79,7 @@ export async function probeGeminiCliHealth(
     windowsScriptName: 'gemini.ps1',
     args: ['--version'],
     cwd: repoRoot,
-    timeoutMs: GEMINI_HEALTH_TIMEOUT_MS
+    timeoutMs: GEMINI_HEALTH_TIMEOUT_MS,
   });
   recordObservation(
     {
@@ -87,16 +91,16 @@ export async function probeGeminiCliHealth(
           ? null
           : classifyGeminiErrorCategory(
               joinOutput(versionResult.stdout, versionResult.stderr),
-              versionResult.error?.message
+              versionResult.error?.message,
             ),
       model: input.model,
       operation: 'health-version',
       promptChars: 0,
       provider: 'gemini',
       success: !versionResult.error && versionResult.status === 0,
-      timedOut: isGeminiTimedOut(versionResult)
+      timedOut: isGeminiTimedOut(versionResult),
     },
-    repoRoot
+    repoRoot,
   );
 
   if (versionResult.error || versionResult.status !== 0) {
@@ -106,9 +110,9 @@ export async function probeGeminiCliHealth(
       {
         available: false,
         checkedAtMs,
-        reason: 'Gemini CLI is not installed or cannot be started locally.'
+        reason: 'Gemini CLI is not installed or cannot be started locally.',
       },
-      repoRoot
+      repoRoot,
     );
   }
 
@@ -120,9 +124,9 @@ export async function probeGeminiCliHealth(
         prompt: GEMINI_HEALTH_PROMPT,
         repoRoot,
         telemetryContext,
-        timeoutMs: GEMINI_HEALTH_TIMEOUT_MS
+        timeoutMs: GEMINI_HEALTH_TIMEOUT_MS,
       },
-      dependencies
+      dependencies,
     );
 
     return cacheProviderHealth(
@@ -133,9 +137,9 @@ export async function probeGeminiCliHealth(
         checkedAtMs,
         reason: /^OK\b/i.test(output.trim())
           ? undefined
-          : 'Gemini CLI probe returned an unexpected response.'
+          : 'Gemini CLI probe returned an unexpected response.',
       },
-      repoRoot
+      repoRoot,
     );
   } catch (error) {
     return cacheProviderHealth(
@@ -144,35 +148,24 @@ export async function probeGeminiCliHealth(
       {
         available: false,
         checkedAtMs,
-        reason: error instanceof Error ? error.message : String(error)
+        reason: error instanceof Error ? error.message : String(error),
       },
-      repoRoot
+      repoRoot,
     );
   }
 }
 
 export async function runGeminiReview(
   input: GeminiReviewInput,
-  dependencies: GeminiProviderDependencies = {}
+  dependencies: GeminiProviderDependencies = {},
 ): Promise<string> {
   return runGeminiTextCommand(
     {
       ...input,
       operation: 'review-attempt',
-      prompt: buildGeminiReviewPrompt(input)
     },
-    dependencies
+    dependencies,
   );
-}
-
-export function buildGeminiReviewPrompt(input: GeminiReviewInput): string {
-  return buildReviewPromptWithReviewerProfile({
-    checkpoint: input.checkpoint,
-    focus: input.focus,
-    prompt: input.prompt,
-    provider: 'gemini',
-    repoRoot: input.repoRoot
-  });
 }
 
 export function isGeminiUnavailableError(error: unknown): boolean {
@@ -180,8 +173,8 @@ export function isGeminiUnavailableError(error: unknown): boolean {
     return false;
   }
 
-  return /\b(not authenticated|authenticate|login|sign in|api key|quota|429|MODEL_CAPACITY_EXHAUSTED|RESOURCE_EXHAUSTED|rateLimitExceeded|No capacity available|Requested entity was not found)\b/i.test(
-    error.message
+  return /\b(timeout|timed out|ETIMEDOUT|not authenticated|authenticate|login|sign in|api key|quota|429|MODEL_CAPACITY_EXHAUSTED|RESOURCE_EXHAUSTED|rateLimitExceeded|No capacity available|Requested entity was not found)\b/i.test(
+    error.message,
   );
 }
 
@@ -193,7 +186,7 @@ function cleanGeminiOutput(output: string): string {
   return output
     .split(/\r?\n/)
     .map((line) =>
-      line.replace(/^MCP issues detected\. Run \/mcp list for status\.?/i, '')
+      line.replace(/^MCP issues detected\. Run \/mcp list for status\.?/i, ''),
     )
     .filter((line) => line.trim().length > 0)
     .join('\n')
@@ -202,7 +195,7 @@ function cleanGeminiOutput(output: string): string {
 
 function classifyGeminiErrorCategory(
   output: string,
-  errorMessage?: string
+  errorMessage?: string,
 ): string | null {
   const message = [output, errorMessage].filter(Boolean).join('\n').trim();
 
@@ -230,7 +223,7 @@ function classifyGeminiErrorCategory(
 
   if (
     /\b(not installed|cannot be started locally|ENOENT|not recognized)\b/i.test(
-      message
+      message,
     )
   ) {
     return 'cli-unavailable';
@@ -245,7 +238,7 @@ function classifyGeminiErrorCategory(
 
 function isGeminiCapacityError(output: string): boolean {
   return /\b429\b|MODEL_CAPACITY_EXHAUSTED|RESOURCE_EXHAUSTED|rateLimitExceeded|No capacity available/i.test(
-    output
+    output,
   );
 }
 
@@ -258,7 +251,7 @@ async function runGeminiTextCommand(
     operation: 'health-probe' | 'review-attempt';
     timeoutMs?: number;
   },
-  dependencies: GeminiProviderDependencies = {}
+  dependencies: GeminiProviderDependencies = {},
 ): Promise<string> {
   const acquireLock = dependencies.acquireLock ?? acquireGeminiLock;
   const getInterRequestDelay =
@@ -276,7 +269,7 @@ async function runGeminiTextCommand(
   const sleepFn = dependencies.sleep ?? sleep;
   const repoRoot = input.repoRoot ?? process.cwd();
   const telemetryContext = createProviderTelemetryContext(
-    input.telemetryContext
+    input.telemetryContext,
   );
   const releaseLock = await acquireLock(repoRoot);
 
@@ -287,7 +280,7 @@ async function runGeminiTextCommand(
     const waitBeforeStartMs = getInterRequestDelay({
       model: policy.model,
       nowMs: now(),
-      lastStartedAtMs: state.models[policy.model]?.lastStartedAtMs
+      lastStartedAtMs: state.models[policy.model]?.lastStartedAtMs,
     });
 
     if (waitBeforeStartMs > 0) {
@@ -313,15 +306,15 @@ async function runGeminiTextCommand(
           '--output-format',
           'text',
           '--prompt',
-          ' '
+          ' ',
         ],
         cwd: repoRoot,
         input: input.prompt,
-        timeoutMs: input.timeoutMs ?? policy.requestTimeoutMs
+        timeoutMs: input.timeoutMs ?? policy.requestTimeoutMs,
       });
       const durationMs = now() - attemptStartedAtMs;
       const output = cleanGeminiOutput(
-        joinOutput(result.stdout, result.stderr)
+        joinOutput(result.stdout, result.stderr),
       );
       const timedOut = isGeminiTimedOut(result, output);
       const capacityError = isGeminiCapacityError(output);
@@ -355,9 +348,9 @@ async function runGeminiTextCommand(
           sessionId,
           success: attemptSucceeded,
           timedOut,
-          waitBeforeStartMs: attempt === 0 ? waitBeforeStartMs : undefined
+          waitBeforeStartMs: attempt === 0 ? waitBeforeStartMs : undefined,
         },
-        repoRoot
+        repoRoot,
       );
 
       if (timedOut) {
@@ -384,13 +377,13 @@ async function runGeminiTextCommand(
 
       if (result.error || result.status !== 0) {
         throw new Error(
-          output || result.error?.message || 'Gemini review command failed.'
+          output || result.error?.message || 'Gemini review command failed.',
         );
       }
 
       if (!output.trim()) {
         throw new Error(
-          `Gemini review returned no output for model ${policy.model}.`
+          `Gemini review returned no output for model ${policy.model}.`,
         );
       }
 
@@ -403,16 +396,13 @@ async function runGeminiTextCommand(
   }
 }
 
-function isGeminiTimedOut(
-  result: ReturnType<typeof runLocalCliCommand>,
-  output = ''
-): boolean {
+function isGeminiTimedOut(result: LocalCliCommandResult, output = ''): boolean {
   return (
     result.error?.name === 'TimeoutError' ||
     result.signal === 'SIGTERM' ||
     ((Boolean(result.error) || result.status !== 0) &&
       /\b(timeout|timed out|ETIMEDOUT)\b/i.test(
-        [output, result.error?.message].filter(Boolean).join('\n')
+        [output, result.error?.message].filter(Boolean).join('\n'),
       ))
   );
 }

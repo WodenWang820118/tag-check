@@ -1,4 +1,5 @@
 import { Auditable } from './auditable.type';
+import { Step } from './action.type';
 
 export type ProjectRecording = {
   projectSlug: string;
@@ -7,8 +8,7 @@ export type ProjectRecording = {
 
 export type Recording = {
   title: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  steps: Record<string, any>[];
+  steps: Step[];
 };
 
 export type RecordingSchema = {

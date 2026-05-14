@@ -1,7 +1,7 @@
 import type { LocalReviewSeverity } from './types.ts';
 
 export function normalizeHybridPath(candidate: string): string {
-  return candidate.replaceAll('\\', '/').replace(/^\.\//, '').trim();
+  return candidate.trim().replaceAll('\\', '/').replace(/^\.\//, '');
 }
 
 export function normalizeLocalReviewSeverity(

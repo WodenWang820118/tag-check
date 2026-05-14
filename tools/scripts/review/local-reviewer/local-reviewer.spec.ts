@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import { test } from 'vitest';
+import test from 'node:test';
 
 import {
   getUsageText,
   parseCliArgs,
-  writePrefilterOutput,
   type ParsedLocalReviewerCliArgs
-} from './local-reviewer.ts';
+} from './cli-args.ts';
+import { writePrefilterOutput } from './local-reviewer.ts';
 
 test('parseCliArgs keeps estimate-only defaults for evaluate', () => {
   const parsed = parseCliArgs(['evaluate']);
@@ -76,7 +76,7 @@ test('writePrefilterOutput includes hybrid additive fields without breaking key=
       },
       decisionBasis: 'gpt+local',
       gptConfidence: 'medium',
-      gptProvider: 'copilot-gpt-5-mini',
+      gptProvider: 'codex',
       gptRisk: 'low',
       localMode: 'targeted',
       payload: {
@@ -93,7 +93,7 @@ test('writePrefilterOutput includes hybrid additive fields without breaking key=
 
   const output = writes.join('');
   assert.match(output, /^recommended_escalation=false/m);
-  assert.match(output, /^gpt_provider=copilot-gpt-5-mini$/m);
+  assert.match(output, /^gpt_provider=codex$/m);
   assert.match(output, /^gpt_risk=low$/m);
   assert.match(output, /^gpt_confidence=medium$/m);
   assert.match(output, /^local_mode=targeted$/m);

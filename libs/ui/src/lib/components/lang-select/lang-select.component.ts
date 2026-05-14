@@ -1,8 +1,15 @@
-import { MatSelectModule } from '@angular/material/select';
-import { Component, Inject, LOCALE_ID } from '@angular/core';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { Component, Inject, LOCALE_ID, PLATFORM_ID } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { Language, LanguageEnum } from '@utils';
+import { MatSelectModule } from '@angular/material/select';
+import {
+  buildLocalizedPath,
+  getLocaleConfig,
+  stripLocalePrefix,
+  SUPPORTED_LOCALES,
+  type SupportedLocaleCode
+} from '../../locale/locale-routing';
 
 @Component({
   selector: 'lib-lang-select',
@@ -15,15 +22,16 @@ import { Language, LanguageEnum } from '@utils';
       class="density-compact"
     >
       <mat-select
-        [(value)]="selectedLang"
-        (selectionChange)="changeLocale(); reloadPage()"
+        [value]="selectedLocale"
+        (selectionChange)="changeLocale($event.value)"
+        aria-label="Select language"
       >
         <mat-select-trigger>
           <mat-icon class="language-icon">language</mat-icon>
           {{ selectedLangLabel }}
         </mat-select-trigger>
         @for (lang of languages; track lang.code) {
-          <mat-option value="{{ lang.code }}">
+          <mat-option [value]="lang.code">
             {{ lang.label }}
           </mat-option>
         }
@@ -33,64 +41,34 @@ import { Language, LanguageEnum } from '@utils';
   styleUrls: ['./lang-select.component.scss']
 })
 export class LangSelectComponent {
-  selectedLang: 'en' | 'zh-hant' | 'zh-hans' | 'ja' = 'en';
-  languages: Language[] = [
-    { code: LanguageEnum.EN, label: 'English' },
-    {
-      code: LanguageEnum.ZH_HANT,
-      label: '繁體中文'
-    },
-    {
-      code: LanguageEnum.ZH_HANS,
-      label: '简体中文'
-    },
-    { code: LanguageEnum.JA, label: '日本語' }
-  ];
-  selectedLangLabel = 'English';
+  readonly languages = SUPPORTED_LOCALES;
+  selectedLocale: SupportedLocaleCode;
 
-  constructor(@Inject(LOCALE_ID) public locale: string) {
-    this.detectLocale();
+  constructor(
+    @Inject(LOCALE_ID) locale: string,
+    @Inject(DOCUMENT) private readonly document: Document,
+    @Inject(PLATFORM_ID) private readonly platformId: object
+  ) {
+    this.selectedLocale = getLocaleConfig(locale).code;
   }
 
-  detectLocale() {
-    const locale = localStorage.getItem('locale') || this.locale;
-    this.selectedLang = locale as 'en' | 'zh-hant' | 'zh-hans' | 'ja';
+  get selectedLangLabel(): string {
+    return getLocaleConfig(this.selectedLocale).label;
+  }
 
-    const browserLang = navigator.language;
-    if (browserLang.startsWith('en')) {
-      this.selectedLang = 'en';
-    } else if (browserLang.startsWith('zh-hans')) {
-      this.selectedLang = 'zh-hans';
-    } else if (browserLang.startsWith('zh-hant')) {
-      this.selectedLang = 'zh-hant';
-    } else if (browserLang.startsWith('ja')) {
-      this.selectedLang = 'ja';
+  changeLocale(nextLocale: SupportedLocaleCode): void {
+    const nextLocaleConfig = getLocaleConfig(nextLocale);
+    this.selectedLocale = nextLocaleConfig.code;
+
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
     }
 
-    this.detectLocaleLabel();
-  }
+    globalThis.localStorage?.setItem('locale', nextLocaleConfig.assetSegment);
 
-  detectLocaleLabel() {
-    this.selectedLangLabel =
-      this.languages.find((lang) => lang.code === this.selectedLang)?.label ||
-      'English';
-  }
-
-  changeLocale() {
-    localStorage.setItem('locale', this.selectedLang.toLowerCase());
-    this.selectedLangLabel = this.getSelectedLanguage().label;
-  }
-
-  reloadPage() {
-    globalThis.location.reload();
-  }
-
-  getSelectedLanguage(): Language {
-    return (
-      this.languages.find((lang) => lang.code === this.selectedLang) || {
-        code: LanguageEnum.EN,
-        label: 'English'
-      }
-    );
+    const currentLocation = this.document.location;
+    const logicalPath = stripLocalePrefix(currentLocation.pathname);
+    const nextPath = buildLocalizedPath(logicalPath, this.selectedLocale);
+    currentLocation.href = `${nextPath}${currentLocation.search}${currentLocation.hash}`;
   }
 }

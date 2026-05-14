@@ -1,344 +1,759 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="en-US" datatype="plaintext" original="ng2.template">
     <body>
-      <trans-unit id="uploadActionComponentUploadButton" datatype="ts">
-        <source>Upload</source>
+      <trans-unit id="seo.landing.title" datatype="html">
+        <source>Tag Build | Fast GTM JSON Builder for GA4 Teams</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/upload-action/upload-action.compontent.ts</context>
+          <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">77</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="functionalCardComponentConvertButton" datatype="ts">
-        <source>Upload</source>
+      <trans-unit id="seo.landing.description" datatype="html">
+        <source>Build Google Tag Manager-ready JSON for GA4 events with a static, multilingual workflow designed for SEO specialists and marketing teams.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/functional-card/functional-card.compontent.ts</context>
+          <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">78</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="advancedExpansionPanelComponentAdditionalTagsVariables" datatype="ts">
-        <source>Additional Built-in Tags/variables</source>
+      <trans-unit id="seo.about.title" datatype="html">
+        <source>About Tag Build | GA4 Tag Workflow</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+          <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">82</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="advancedExpansionPanelComponentIncludeVideoTag" datatype="ts">
-        <source>Include Video Tag</source>
+      <trans-unit id="seo.about.description" datatype="html">
+        <source>Learn how Tag Build helps marketers and SEO teams generate structured GTM payloads without complex Google Cloud infrastructure.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+          <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">83</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="advancedExpansionPanelComponentIncludeScrollTag" datatype="ts">
-        <source>Include Scroll Tag</source>
+      <trans-unit id="seo.objectives.title" datatype="html">
+        <source>Tag Build Objectives | Reliable GTM Handoffs</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+          <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">87</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="advancedExpansionPanelComponentGoogleTag" datatype="ts">
-        <source>Google Tag</source>
+      <trans-unit id="seo.objectives.description" datatype="html">
+        <source>Review Tag Build&apos;s goals for reducing tracking complexity, improving GTM handoffs, and connecting build work with validation.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+          <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">88</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="advancedExpansionPanelComponentGoogleTagHelpIcon" datatype="ts">
-        <source>Google Tag has a default name, but you can change it.
-          You can use an existing measurement ID or leave it empty with default placeholder value</source>
+      <trans-unit id="seo.app.title" datatype="html">
+        <source>Tag Build App | GTM JSON Editor</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+          <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">92</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="advancedExpansionPanelComponentGoogleTagName" datatype="ts">
-        <source>Google Tag Name</source>
+      <trans-unit id="seo.app.description" datatype="html">
+        <source>Open the client-side Tag Build editor to prepare GTM-ready JSON payloads for GA4 event implementation.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
+          <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">93</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="advancedExpansionPanelComponentGoogleTagMeasurementId" datatype="ts">
-        <source>Use Existing Measurement ID</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsv" datatype="ts">
-        <source>Ecommerce data &amp; Event Settings Variable</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsvHelpIcon" datatype="ts">
-        <source>Ecommerce data source is data layer by default</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="advancedExpansionPanelComponentSendECData" datatype="ts">
-        <source>Send Ecommerce Data</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="advancedExpansionPanelComponentAddESV" datatype="ts">
-        <source>Add Event Settings Variable</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <!-- Article -->
-      <trans-unit id="articleComponentTitleCustomEvents" datatype="ts">
-        <source>Custom Events</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/article/article.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="articleComponentContentCustomEvents" datatype="ts">
-        <source>Tag Build aims to save users' time and increase their productivity by
-          automating the GTM (Google Tag Manager) configuration process. This is
-          especially beneficial for digital marketers, web developers, and SEO
-          experts who need to manage and track multiple website tags, enabling
-          them to focus more on data analysis rather than tag implementations.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/article/article.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="articleComponentArray" datatype="ts">
-        <source>The expected input is an array of objects:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/article/article.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="articleComponentContentCustomEvents2" datatype="ts">
-        <source>Note that the dollar sign "$" is intended to refer to variables that can
-          be referenced in the document or specifications. You can replace the
-          "$variable_name" placeholders with actual values, or leave them empty.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/article/article.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="articleComponentTitleECAndESV" datatype="ts">
-        <source>Send Ecommerce Data and Event Settings Variable</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/article/article.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="articleComponentContentECAndESV" datatype="ts">
-        <source>By clicking the Send Ecommerce Data The system will remove
-          defined e-commrece event parameters for each tag and perform data
-          collection via the data layer.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/article/article.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="articleComponentContentECAndESV2" datatype="ts">
-        <source>By clicking the Add Event Settings Variable, there will an editor
-          for configuration.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/article/article.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <!-- Footer -->
-      <trans-unit id="footerComponentCreatedBy" datatype="ts">
-        <source>Created by:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="footerComponentAuthorName" datatype="ts">
-        <source>Guan Xin Wang</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="footerComponentContact" datatype="ts">
-        <source>Contant:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="footerComponentGitHub" datatype="ts">
-        <source>View on GitHub</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="footerComponentLastUpdated" datatype="ts">
-        <source>Last updated on: 2024-12-29</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/footer/footer.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="nav.about" datatype="ts">
-        <source>About</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="nav.objectives" datatype="ts">
-        <source>objectives</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="nav.github" datatype="ts">
-        <source>GitHub</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/menu-tabs/menu-tabs.compontent.ts</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="about.title">
+      <trans-unit id="about.title" datatype="html">
         <source>Understanding Tag Build</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">2,4</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="about.diagram.alt">
+      <trans-unit id="about.diagram.alt" datatype="html">
         <source>Tag Build System Diagram</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">7,11</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="about.description.main">
-        <source>Tag Build is an innovative tool designed specifically for digital marketers and SEO
-          professionals. It streamlines the process of generating JSON files for Google Tag Manager
-          (GTM), following GA4's recommended event structure to ensure optimal tracking
-          implementation.</source>
+      <trans-unit id="about.description.main" datatype="html">
+        <source> Tag Build is an innovative tool designed specifically for digital marketers and SEO professionals. It streamlines the process of generating JSON files for Google Tag Manager (GTM), following GA4&apos;s recommended event structure to ensure optimal tracking implementation. </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">14,21</context>
         </context-group>
+        <note priority="1" from="description">Description of Tag Build</note>
       </trans-unit>
-      <trans-unit id="about.description.challenges">
-        <source>While Google Tag Manager offers basic functionality for implementing GA4
-          events, the rapidly evolving nature of business and marketing requirements
-          often necessitates frequent updates and validation. Tag Build addresses
-          these challenges by providing a more efficient and maintainable solution.</source>
+      <trans-unit id="about.description.challenges" datatype="html">
+        <source> While Google Tag Manager offers basic functionality for implementing GA4 events, the rapidly evolving nature of business and marketing requirements often necessitates frequent updates and validation. Tag Build addresses these challenges by providing a more efficient and maintainable solution. </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">24,31</context>
         </context-group>
+        <note priority="1" from="description">Description of GTM challenges</note>
       </trans-unit>
-      <trans-unit id="about.section.why.title">
-        <source>Why Tag Build?</source>
+      <trans-unit id="about.section.why.title" datatype="html">
+        <source> Why Tag Build? </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">32,34</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="about.section.why.content">
-        <source>Traditional implementation methods using Google Cloud Platform (GCP)
-          servers can synchronize Google Sheets with GTM effectively. However, many
-          marketing agencies lack access to GCP resources, creating a need for a
-          more accessible solution. Tag Build bridges this gap by providing a
-          standalone tool that doesn't require complex infrastructure.</source>
+      <trans-unit id="about.section.why.content" datatype="html">
+        <source> Traditional implementation methods using Google Cloud Platform (GCP) servers can synchronize Google Sheets with GTM effectively. However, many marketing agencies lack access to GCP resources, creating a need for a more accessible solution. Tag Build bridges this gap by providing a standalone tool that doesn&apos;t require complex infrastructure. </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">35,40</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="about.section.benefits.title">
-        <source>Who Benefits?</source>
+      <trans-unit id="about.section.benefits.title" datatype="html">
+        <source> Who Benefits? </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">45,47</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="about.section.benefits.content">
-        <source> Tag Build is ideal for marketing professionals who want to streamline
-          their workflow and focus more on data analytics and business intelligence.
-          It's particularly valuable for teams looking to optimize their tracking
-          implementation while maintaining efficiency.</source>
+      <trans-unit id="about.section.benefits.content" datatype="html">
+        <source> Tag Build is ideal for marketing professionals who want to streamline their workflow and focus more on data analytics and business intelligence. It&apos;s particularly valuable for teams looking to optimize their tracking implementation while maintaining efficiency. </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">48,53</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="about.section.howworks.title">
-        <source>How It Works</source>
+      <trans-unit id="about.section.howworks.title" datatype="html">
+        <source> How It Works </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">57,59</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="about.section.howworks.intro">
-        <source>Explore the seamless integration between GA4 recommended events and Tag
-          Build's structured format:</source>
+      <trans-unit id="about.section.howworks.intro" datatype="html">
+        <source> Explore the seamless integration between GA4 recommended events and Tag Build&apos;s structured format: </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">61,64</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="objectives.achievement.title">
-        <source>Achievement</source>
+      <trans-unit id="advancedExpansionPanelComponentAdditionalTagsVariables" datatype="html">
+        <source> Additional Built-in Tags/variables </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.component.html</context>
+          <context context-type="linenumber">8,10</context>
         </context-group>
       </trans-unit>
-
-      <trans-unit id="objectives.diagram.alt">
+      <trans-unit id="advancedExpansionPanelComponentIncludeVideoTag" datatype="html">
+        <source>Include Video Tag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.component.html</context>
+          <context context-type="linenumber">17,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentIncludeScrollTag" datatype="html">
+        <source>Include Scroll Tag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.component.html</context>
+          <context context-type="linenumber">22,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTag" datatype="html">
+        <source> Google Tag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.component.html</context>
+          <context context-type="linenumber">31,33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTagHelpIcon" datatype="html">
+        <source>Google Tag has a default name, but you can change it.
+            You can use an existing measurement ID or leave it empty with default placeholder value</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.component.html</context>
+          <context context-type="linenumber">37,40</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTagName" datatype="html">
+        <source>Google Tag Name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.component.html</context>
+          <context context-type="linenumber">50,52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentGoogleTagMeasurementId" datatype="html">
+        <source>Use Existing Measurement ID</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.component.html</context>
+          <context context-type="linenumber">57,59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsv" datatype="html">
+        <source>Ecommerce data &amp; Event Settings Variable</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.component.html</context>
+          <context context-type="linenumber">67,69</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentEcommerceAndEsvHelpIcon" datatype="html">
+        <source>Ecommerce data source is data layer by default</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.component.html</context>
+          <context context-type="linenumber">74,76</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentSendECData" datatype="html">
+        <source>Send Ecommerce Data</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.component.html</context>
+          <context context-type="linenumber">87,90</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="advancedExpansionPanelComponentAddESV" datatype="html">
+        <source>Add Event Settings Variable</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/advanced-expansion-panel/advanced-expansion-panel.component.html</context>
+          <context context-type="linenumber">92,94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentTitleCustomEvents" datatype="html">
+        <source>Custom Events</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/article/article.component.ts</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentCustomEvents" datatype="html">
+        <source> Tag Build aims to save users&apos; time and increase their productivity by automating the GTM (Google Tag Manager) configuration process. This is especially beneficial for digital marketers, web developers, and SEO experts who need to manage and track multiple website tags, enabling them to focus more on data analysis rather than tag implementations. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/article/article.component.ts</context>
+          <context context-type="linenumber">12,17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentArray" datatype="html">
+        <source> The expected input is an array of objects: </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/article/article.component.ts</context>
+          <context context-type="linenumber">19,21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentCustomEvents2" datatype="html">
+        <source> Note that the dollar sign &quot;$&quot; is intended to refer to variables that can be referenced in the document or specifications. You can replace the &quot;$variable_name&quot; placeholders with actual values, or leave them empty. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/article/article.component.ts</context>
+          <context context-type="linenumber">24,28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentTitleECAndESV" datatype="html">
+        <source> Send Ecommerce Data and Event Settings Variable </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/article/article.component.ts</context>
+          <context context-type="linenumber">29,31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentECAndESV" datatype="html">
+        <source> By clicking the <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>Send Ecommerce Data<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/> The system will remove defined e-commrece event parameters for each tag and perform data collection via the data layer. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/article/article.component.ts</context>
+          <context context-type="linenumber">32,35</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="articleComponentContentECAndESV2" datatype="html">
+        <source> By clicking the <x id="START_BOLD_TEXT" ctype="x-b" equiv-text="&lt;b&gt;"/>Add Event Settings Variable<x id="CLOSE_BOLD_TEXT" ctype="x-b" equiv-text="&lt;/b&gt;"/>, there will an editor for configuration. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/article/article.component.ts</context>
+          <context context-type="linenumber">37,39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentCreatedBy" datatype="html">
+        <source>Created by:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/footer/footer.component.ts</context>
+          <context context-type="linenumber">10,13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentAuthorName" datatype="html">
+        <source>Guan Xin Wang</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/footer/footer.component.ts</context>
+          <context context-type="linenumber">17,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentContact" datatype="html">
+        <source>Contact:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/footer/footer.component.ts</context>
+          <context context-type="linenumber">21,22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentGitHub" datatype="html">
+        <source>View on GitHub</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/footer/footer.component.ts</context>
+          <context context-type="linenumber">33,35</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="footerComponentLastUpdated" datatype="html">
+        <source>Last updated on: 2026-05-11</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/footer/footer.component.ts</context>
+          <context context-type="linenumber">39,42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="functionalCardComponentConvertButton" datatype="html">
+        <source> Convert </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/functional-card/functional-card.component.html</context>
+          <context context-type="linenumber">11,13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.hero.eyebrow" datatype="html">
+        <source> GTM JSON builder for marketing teams </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">4,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.hero.title" datatype="html">
+        <source> Build cleaner GA4 tag payloads without spreadsheet glue or server setup. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">7,9</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.hero.description" datatype="html">
+        <source> Tag Build turns event requirements into Google Tag Manager-ready JSON so SEO specialists and digital marketers can move faster with fewer implementation mistakes. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">10,14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.cta.primary" datatype="html">
+        <source> Open Tag Build </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">16,18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.cta.secondary" datatype="html">
+        <source> See how it works </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">19,22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.proof.agency" datatype="html">
+        <source>Agency friendly</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">24,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.proof.agency.detail" datatype="html">
+        <source>No backend required</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">25,28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.proof.ga4" datatype="html">
+        <source>GA4 aligned</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">28,29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.proof.ga4.detail" datatype="html">
+        <source>Recommended event shape</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">29,32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.proof.static" datatype="html">
+        <source>Static-first</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">32,33</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.proof.static.detail" datatype="html">
+        <source>Fast multilingual pages</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">33,37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.workflow.eyebrow" datatype="html">
+        <source> The workflow </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">41,43</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.workflow.title" datatype="html">
+        <source> From campaign brief to GTM-ready JSON in three calm steps. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">44,46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.workflow.description" datatype="html">
+        <source> Keep the thinking in plain marketing language, then let the builder format the payload for implementation and review. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">47,51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.step.upload.title" datatype="html">
+        <source>Paste the event brief</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">54,55</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.step.upload.description" datatype="html">
+        <source> Start with the event name, commerce fields, and tracking variables your team already uses. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">56,59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.step.tune.title" datatype="html">
+        <source>Tune the payload shape</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">62,63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.step.tune.description" datatype="html">
+        <source> Match GA4&apos;s recommended event structure while keeping campaign-specific fields visible. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">64,67</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.step.export.title" datatype="html">
+        <source>Export with confidence</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">70,71</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.step.export.description" datatype="html">
+        <source> Copy structured JSON that is easier to review, hand off, and validate inside GTM. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">72,75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.benefits.eyebrow" datatype="html">
+        <source>Why it helps</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">80,81</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.benefits.title" datatype="html">
+        <source> Less ceremony, more trustworthy tag work. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">82,84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.benefit.seo.title" datatype="html">
+        <source>Built for SEO handoffs</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">86,87</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.benefit.seo.description" datatype="html">
+        <source> Turn analytics requirements into implementation-ready JSON without asking every stakeholder to learn GTM internals. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">88,91</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.benefit.agency.title" datatype="html">
+        <source>Useful without GCP</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">93,94</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.benefit.agency.description" datatype="html">
+        <source> Teams that cannot run Google Cloud sync jobs still get a structured, repeatable build flow. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">95,98</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.benefit.validation.title" datatype="html">
+        <source> Ready for validation </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">101,103</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.benefit.validation.description" datatype="html">
+        <source> The same data shape supports future validation work in Tag Check, so build and QA stay connected. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">104,108</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.learn.eyebrow" datatype="html">
+        <source>Go deeper</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">113,114</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.learn.title" datatype="html">
+        <source> Learn the system before opening the editor. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">115,117</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.learn.description" datatype="html">
+        <source> Review the architecture and objectives if you need a lightweight brief for teammates before creating payloads. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">118,122</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.link.about" datatype="html">
+        <source>Read about Tag Build</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">123,124</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.link.objectives" datatype="html">
+        <source> View objectives </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
+          <context context-type="linenumber">125,128</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="nav.app" datatype="html">
+        <source>App</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
+          <context context-type="linenumber">32,35</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
+          <context context-type="linenumber">85,87</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="nav.about" datatype="html">
+        <source>About</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
+          <context context-type="linenumber">43,45</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
+          <context context-type="linenumber">90,92</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="nav.objectives" datatype="html">
+        <source>Objectives</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
+          <context context-type="linenumber">55,58</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
+          <context context-type="linenumber">96,99</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="nav.github" datatype="html">
+        <source>GitHub</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
+          <context context-type="linenumber">67,69</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
+          <context context-type="linenumber">106,108</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.achievement.title" datatype="html">
+        <source> Achievement </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">4,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.diagram.alt" datatype="html">
         <source>Diagram showing the Tag Check System architecture and workflow</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">11,14</context>
         </context-group>
       </trans-unit>
-
-      <trans-unit id="objectives.achievement.intro">
-        <source>  The GTM Tag Build provides a user-friendly interface for digital
-        marketers and SEO experts to generate JSON files for Google Tag Manager.
-        This tool streamlines tag management by:</source>
+      <trans-unit id="objectives.achievement.intro" datatype="html">
+        <source> The GTM Tag Build provides a user-friendly interface for digital marketers and SEO experts to generate JSON files for Google Tag Manager. This tool streamlines tag management by: </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">16,20</context>
         </context-group>
       </trans-unit>
-
-      <trans-unit id="objectives.achievement.list.item1">
-        <source>Reducing technical complexities</source>
+      <trans-unit id="objectives.achievement.list.item1" datatype="html">
+        <source> Reducing technical complexities </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">22,24</context>
         </context-group>
       </trans-unit>
-
-      <trans-unit id="objectives.achievement.list.item2">
-        <source>Enabling effortless creation of accurate JSON files</source>
+      <trans-unit id="objectives.achievement.list.item2" datatype="html">
+        <source> Enabling effortless creation of accurate JSON files </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">25,27</context>
         </context-group>
       </trans-unit>
-
-      <trans-unit id="objectives.achievement.list.item3">
-        <source>Enhancing productivity</source>
+      <trans-unit id="objectives.achievement.list.item3" datatype="html">
+        <source> Enhancing productivity </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">28,30</context>
         </context-group>
       </trans-unit>
-
-      <trans-unit id="objectives.achievement.list.item4">
-        <source>Ensuring error-free tag management</source>
+      <trans-unit id="objectives.achievement.list.item4" datatype="html">
+        <source> Ensuring error-free tag management </source>
         <context-group purpose="location">
-          <context context-type="sourcefile">
-            libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">31,34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.goals.title" datatype="html">
+        <source>Goals</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">38,39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.goals.intro" datatype="html">
+        <source> While maintaining the core objective of simplifying tag management, our primary focus is on validation capabilities. Key validation aspects include: </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">41,44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.goals.list.item1" datatype="html">
+        <source> Verifying correct frontend tag implementation </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">47,49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.goals.list.item2" datatype="html">
+        <source>Ensuring proper tag firing</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">49,50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.goals.list.item3" datatype="html">
+        <source> Providing effective validation in fast-paced business environments </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">51,54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.goals.outro" datatype="html">
+        <source>To address these needs, our team has been devoting to the</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">56,59</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.goals.link.title" datatype="html">
+        <source>Visit Tag Check repository</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">61,64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="objectives.goals.outro2" datatype="html">
+        <source>system, which utilizes the same data structures as the GTM Tag Build. This integrated approach helps users validate and verify tag functionality with confidence.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">65,68</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="uploadActionComponentUploadButton" datatype="html">
+        <source> Upload </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/upload-action/upload-action.component.ts</context>
+          <context context-type="linenumber">15,20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.introduction" datatype="html">
+        <source>Introduction</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.section.getStarted" datatype="html">
+        <source>Get Started</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.objective" datatype="html">
+        <source>Objective</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.useCases" datatype="html">
+        <source>Use Cases</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.gettingStarted" datatype="html">
+        <source>Getting Started</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">30</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.section.projects" datatype="html">
+        <source>Projects</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.qualityAssurance" datatype="html">
+        <source>Quality Assurance</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.reportManagement" datatype="html">
+        <source>Report Management</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">47</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.section.settings" datatype="html">
+        <source>Settings</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="docs.sidebar.settingDetails" datatype="html">
+        <source>Setting Details</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
+          <context context-type="linenumber">59</context>
         </context-group>
       </trans-unit>
     </body>

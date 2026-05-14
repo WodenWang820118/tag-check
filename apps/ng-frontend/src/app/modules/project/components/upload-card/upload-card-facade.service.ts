@@ -1,4 +1,4 @@
-import { computed, effect, Injectable, signal } from '@angular/core';
+import { computed, effect, inject, Injectable, signal } from '@angular/core';
 import {
   IReportDetails,
   ReportDetailsDto,
@@ -31,6 +31,13 @@ import { ReportMapperService } from '../../services/report-mapper/report-mapper.
   providedIn: 'root'
 })
 export class UploadCardFacadeService {
+  private readonly uploadSpecService = inject(UploadSpecService);
+  private readonly reportService = inject(ReportService);
+  private readonly gtmJsonParserService = inject(GtmJsonParserService);
+  private readonly reportTableDataSourceModelService = inject(
+    ReportTableDataSourceModelService
+  );
+  private readonly reportMapper = inject(ReportMapperService);
   importedSpec = signal<string>('');
   importedSpec$ = computed(() => this.importedSpec());
 
@@ -40,13 +47,7 @@ export class UploadCardFacadeService {
   projectSlug = signal<string>('');
   projectSlug$ = computed(() => this.projectSlug());
 
-  constructor(
-    private readonly uploadSpecService: UploadSpecService,
-    private readonly reportService: ReportService,
-    private readonly gtmJsonParserService: GtmJsonParserService,
-    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService,
-    private readonly reportMapper: ReportMapperService
-  ) {
+  constructor() {
     effect(() => {
       const gtmConfig = this.gtmConfiguration$();
       const projectSlug = this.projectSlug$();
@@ -74,6 +75,7 @@ export class UploadCardFacadeService {
 
   // Mapping moved to ReportMapperService
 
+  /** Reads the selected GTM JSON file, parses it and triggers a report sync once GTM config and project slug are both set. */
   onFileSelected(projectSlug: string, event: Event) {
     const input = event.target as HTMLInputElement | null;
     const file = input?.files?.[0];
@@ -113,6 +115,7 @@ export class UploadCardFacadeService {
       .subscribe();
   }
 
+  /** Signals the upload-spec service that the current upload has completed. */
   emitUploadComplete() {
     this.uploadSpecService.completeUpload();
   }

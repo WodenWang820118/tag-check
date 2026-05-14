@@ -2,78 +2,124 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+
+export type {
+  HookInput,
+  HookPermissionResult,
+  ParsedReviewGateArgs,
+  PrimaryFamily,
+  RepoContext,
+  ReviewApproval,
+  ReviewGateMode,
+  ReviewGateState,
+  SupportedReviewer,
+  TaskSize
+} from './contracts.ts';
+export {
+  PRIMARY_FAMILIES,
+  REVIEW_GATE_MODES,
+  SUPPORTED_REVIEWERS,
+  TASK_SIZES
+} from './contracts.ts';
+import type {
+  HookInput,
+  HookPermissionResult,
+  ParsedReviewGateArgs,
+  PrimaryFamily,
+  RepoContext,
+  ReviewApproval,
+  ReviewGateMode,
+  ReviewGateState,
+  SupportedReviewer,
+  TaskSize
+} from './contracts.ts';
+import {
+  PRIMARY_FAMILIES,
+  REVIEW_GATE_MODES,
+  SUPPORTED_REVIEWERS,
+  TASK_SIZES
+} from './contracts.ts';
+import {
+  DEFAULT_MAX_FILES_BY_SIZE,
+  REVIEW_GATE_ENTRYPOINT_COMMAND_PATTERN,
+  REVIEW_GATE_SCRIPT_ALIAS_PATTERN,
+  REVIEW_TTL_MS,
+  REVIEWER_FAMILY,
+  RISKY_SHELL_SYNTAX_PATTERNS
+} from './constants.ts';
 // endregion
 
-// region Constants
-const REVIEW_TTL_MS = 2 * 60 * 60 * 1000;
-const REVIEW_GATE_ENTRYPOINT_COMMAND_PATTERN =
-  /^\s*node(?:\.exe)?\s+(?:\.?[\\/])?(?:tools[\\/]scripts|scripts)[\\/]review-gate[\\/](approve-pre-implementation|status|reset)[\\/]\1\.ts(?:\s+.*)?\s*$/i;
-const REVIEW_GATE_SCRIPT_ALIAS_PATTERN =
-  /^\s*(?:(?:npm|pnpm|yarn|bun)\s+)?review:(approve-pre-implementation|status|reset)(?:\s+--(?:\s+.*)?)?\s*$/i;
-const RISKY_SHELL_SYNTAX_PATTERNS = [
-  />{1,2}\s*\S/,
-  /<{1,2}\s*\S/,
-  /&&|\|\||;|&|[\r\n]/,
-  /\|(?!\|)/,
-  /\$\(/,
-  /`[^`]+`/,
-  /\b(powershell|pwsh)\b.*\s-(EncodedCommand|enc|e)\b/i
-];
-// endregion
+// region Reviewer / family utilities
 
-export const SUPPORTED_REVIEWERS = [
-  'copilot-claude',
-  'copilot-gpt-5-mini',
-  'gemini-2.5-pro',
-  'codex-subagent'
-] as const;
-
-export type SupportedReviewer = (typeof SUPPORTED_REVIEWERS)[number];
-
-export interface RepoContext {
-  root: string;
-  branch: string | null;
-  head: string | null;
-  dirty: boolean | null;
-  gitCommand: string | null;
+export function getReviewerFamily(reviewer: SupportedReviewer): PrimaryFamily {
+  return REVIEWER_FAMILY[reviewer];
 }
 
-export interface ReviewApproval {
-  type: 'pre-implementation-review';
+export function defaultMaxFilesForSize(size: TaskSize): number | null {
+  return DEFAULT_MAX_FILES_BY_SIZE[size];
+}
+
+export function validateFamily(value: string): PrimaryFamily {
+  if ((PRIMARY_FAMILIES as readonly string[]).includes(value)) {
+    return value as PrimaryFamily;
+  }
+  throw new Error(
+    `Unsupported primary family "${value}". Expected one of: ${PRIMARY_FAMILIES.join(', ')}.`
+  );
+}
+
+export function validateTaskSize(value: string): TaskSize {
+  if ((TASK_SIZES as readonly string[]).includes(value)) {
+    return value as TaskSize;
+  }
+  throw new Error(
+    `Unsupported task size "${value}". Expected one of: ${TASK_SIZES.join(', ')}.`
+  );
+}
+
+export function validateGateMode(value: string): ReviewGateMode {
+  if ((REVIEW_GATE_MODES as readonly string[]).includes(value)) {
+    return value as ReviewGateMode;
+  }
+  throw new Error(
+    `Unsupported gate mode "${value}". Expected one of: ${REVIEW_GATE_MODES.join(', ')}.`
+  );
+}
+
+export function assertCrossFamilyReviewer(input: {
   reviewer: SupportedReviewer;
-  focus: string;
-  summary: string;
-  approvedAt: string;
-  expiresAt: string;
-  branch: string | null;
-  head: string | null;
-  root: string;
+  primaryFamily: PrimaryFamily | null;
+  mode: ReviewGateMode;
+  overrideReason: string | null;
+}): void {
+  if (input.primaryFamily === null) {
+    return;
+  }
+  const reviewerFamily = getReviewerFamily(input.reviewer);
+  if (reviewerFamily !== input.primaryFamily) {
+    return;
+  }
+  if (input.mode === 'override' && input.overrideReason) {
+    return;
+  }
+  throw new Error(
+    `Reviewer "${input.reviewer}" (${reviewerFamily}) is in the same AI family as the primary agent (${input.primaryFamily}). Use a cross-family reviewer or rerun with --mode override --override-reason "<rationale>".`
+  );
 }
 
-export interface ReviewGateState {
-  version: 1;
-  approval: ReviewApproval;
-}
+export function validateReviewerId(reviewer: string): SupportedReviewer {
+  if ((SUPPORTED_REVIEWERS as readonly string[]).includes(reviewer)) {
+    return reviewer as SupportedReviewer;
+  }
 
-export interface ParsedReviewGateArgs {
-  reviewer: string;
-  focus: string;
-  summary: string;
-  force: boolean;
+  throw new Error(
+    `Unsupported reviewer "${reviewer}". Expected one of: ${SUPPORTED_REVIEWERS.join(', ')}.`
+  );
 }
+// endregion
 
-interface HookInput {
-  cwd?: string;
-  toolArgs?: { command?: string } | string;
-  toolName?: string;
-}
+// region Git utilities
 
-export interface HookPermissionResult {
-  allow: boolean;
-  reason?: string;
-}
-
-// region Core Actions
 function trySpawn(command: string, args: string[], cwd: string): string | null {
   const result = spawnSync(command, args, {
     cwd,
@@ -143,6 +189,9 @@ export function getRepoContext(cwd = process.cwd()): RepoContext {
     gitCommand
   };
 }
+// endregion
+
+// region State management
 
 export function getStatePath(repoRoot = process.cwd()): string {
   return path.join(repoRoot, '.cache', 'review-gate', 'state.json');
@@ -177,24 +226,26 @@ export function resetState(repoRoot = process.cwd()): void {
     fs.rmSync(statePath, { force: true });
   }
 }
+// endregion
 
-export function validateReviewerId(reviewer: string): SupportedReviewer {
-  if ((SUPPORTED_REVIEWERS as readonly string[]).includes(reviewer)) {
-    return reviewer as SupportedReviewer;
-  }
-
-  throw new Error(
-    `Unsupported reviewer "${reviewer}". Expected one of: ${SUPPORTED_REVIEWERS.join(', ')}.`
-  );
-}
+// region Approval lifecycle
 
 export function createApproval(input: {
   reviewer: SupportedReviewer;
   focus: string;
   summary: string;
   repoContext: RepoContext;
+  primaryFamily?: PrimaryFamily | null;
+  taskSize?: TaskSize | null;
+  mode?: ReviewGateMode;
+  maxFiles?: number | null;
+  overrideReason?: string | null;
 }): ReviewGateState {
   const approvedAt = new Date().toISOString();
+  const taskSize = input.taskSize ?? null;
+  const mode = input.mode ?? 'standard';
+  const resolvedMaxFiles =
+    input.maxFiles ?? (taskSize ? defaultMaxFilesForSize(taskSize) : null);
   return {
     version: 1,
     approval: {
@@ -206,7 +257,12 @@ export function createApproval(input: {
       expiresAt: new Date(Date.now() + REVIEW_TTL_MS).toISOString(),
       branch: input.repoContext.branch,
       head: input.repoContext.head,
-      root: input.repoContext.root
+      root: input.repoContext.root,
+      primaryFamily: input.primaryFamily ?? null,
+      taskSize,
+      mode,
+      maxFiles: resolvedMaxFiles,
+      overrideReason: input.overrideReason ?? null
     }
   };
 }
@@ -287,43 +343,69 @@ export function evaluateApproval(
 
   return { valid: true, approval };
 }
+// endregion
+
+// region CLI argument parsing
+
+function parseMaxFilesValue(raw: string | undefined): number {
+  const value = raw ? Number.parseInt(raw, 10) : Number.NaN;
+  if (!Number.isFinite(value) || value < 0) {
+    throw new Error(`Invalid --max-files value "${raw ?? ''}".`);
+  }
+  return value;
+}
+
+const STRING_FLAG_TO_KEY: Record<string, keyof ParsedReviewGateArgs> = {
+  '--reviewer': 'reviewer',
+  '--focus': 'focus',
+  '--summary': 'summary',
+  '--primary-family': 'primaryFamily',
+  '--task-size': 'taskSize',
+  '--mode': 'mode',
+  '--override-reason': 'overrideReason'
+};
 
 export function parseArgs(argv: string[]): ParsedReviewGateArgs {
   const parsed: ParsedReviewGateArgs = {
     reviewer: 'copilot-claude',
     focus: 'general',
     summary: 'Approved after pre-implementation review.',
-    force: false
+    force: false,
+    primaryFamily: null,
+    taskSize: null,
+    mode: 'standard',
+    maxFiles: null,
+    overrideReason: null
   };
 
   for (let index = 0; index < argv.length; index += 1) {
     const current = argv[index];
 
-    if (current === '--reviewer') {
-      parsed.reviewer = argv[index + 1] ?? parsed.reviewer;
-      index += 1;
-      continue;
-    }
-
-    if (current === '--focus') {
-      parsed.focus = argv[index + 1] ?? parsed.focus;
-      index += 1;
-      continue;
-    }
-
-    if (current === '--summary') {
-      parsed.summary = argv[index + 1] ?? parsed.summary;
-      index += 1;
-      continue;
-    }
-
     if (current === '--force') {
       parsed.force = true;
+      continue;
+    }
+
+    if (current === '--max-files') {
+      parsed.maxFiles = parseMaxFilesValue(argv[index + 1]);
+      index += 1;
+      continue;
+    }
+
+    if (current && current in STRING_FLAG_TO_KEY) {
+      const next = argv[index + 1];
+      if (next !== undefined) {
+        (parsed as Record<string, unknown>)[STRING_FLAG_TO_KEY[current]] = next;
+      }
+      index += 1;
     }
   }
 
   return parsed;
 }
+// endregion
+
+// region Hook permission evaluation
 
 export function isMutatingToolUse({ toolName, toolArgs }: HookInput): boolean {
   const normalizedToolName = String(toolName ?? '').toLowerCase();
@@ -366,7 +448,7 @@ export function isMutatingToolUse({ toolName, toolArgs }: HookInput): boolean {
     return true;
   }
 
-  // Fail closed for anything that is not on the read-only allowlist.
+  // Fail closed: only allow explicitly whitelisted read-only patterns.
   const readOnlyPatterns = [
     /^(Get-Content|type|cat)\b/i,
     /^(Get-ChildItem|ls|dir|tree)\b/i,
@@ -451,10 +533,9 @@ export function evaluateHookPermission(input: {
 }
 
 export function buildDenyPayload(reason: string): string {
-  const reviewerList = SUPPORTED_REVIEWERS.join('|');
   return JSON.stringify({
     permissionDecision: 'deny',
-    permissionDecisionReason: `${reason} Pass plan review first (Copilot Claude first, Gemini 2.5 Pro fallback, Copilot GPT-5 mini fallback, or Codex fallback only when allowed), then approve the gate with: node tools/scripts/review-gate/approve-pre-implementation/approve-pre-implementation.ts --reviewer <${reviewerList}> --focus <area> --summary "<summary>"`
+    permissionDecisionReason: `${reason} Pass plan review first (Copilot Claude or Gemini 2.5 Pro fallback), then approve the gate with: node tools/scripts/review-gate/approve-pre-implementation/approve-pre-implementation.ts --reviewer <copilot-claude|gemini-2.5-pro|codex-subagent> --focus <area> --summary "<summary>"`
   });
 }
 // endregion

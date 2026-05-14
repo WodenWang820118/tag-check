@@ -89,7 +89,7 @@ export class LoginComponent {
     effect(() => {
       const user = this.authService.getUser()();
       if (user) {
-        this.navigationService.navigateToHome();
+        this.navigationService.navigateToAdmin();
       }
     });
   }

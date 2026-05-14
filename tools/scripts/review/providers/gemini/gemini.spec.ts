@@ -1,17 +1,28 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { test } from 'vitest';
+import test from 'node:test';
 
+import type { ProviderObservationInput } from '../../provider-observability/provider-observability.ts';
 import {
-  buildGeminiReviewPrompt,
+  isGeminiUnavailableError,
   probeGeminiCliHealth,
-  runGeminiReview
+  runGeminiReview,
 } from './gemini.ts';
 
+test('isGeminiUnavailableError treats exhausted review timeouts as retryable provider unavailability', () => {
+  assert.equal(
+    isGeminiUnavailableError(
+      new Error('Gemini review timed out for model gemini-3-flash-preview.'),
+    ),
+    true,
+  );
+  assert.equal(isGeminiUnavailableError(new Error('ETIMEDOUT')), true);
+});
+
 test('probeGeminiCliHealth records health-version and health-probe observations with checkpoint telemetry', async () => {
-  const recorded: Array<Record<string, unknown>> = [];
+  const recorded: ProviderObservationInput[] = [];
   const repoRoot = mkdtempSync(join(tmpdir(), 'gemini-provider-health-'));
 
   try {
@@ -21,14 +32,14 @@ test('probeGeminiCliHealth records health-version and health-probe observations 
         repoRoot,
         telemetryContext: {
           callsite: 'checkpoint-review',
-          checkpoint: 'test'
-        }
+          checkpoint: 'test',
+        },
       },
       {
         acquireLock: async () => () => undefined,
         loadRateLimitState: () => ({ models: {} }),
         recordObservation(observation) {
-          recorded.push(observation as Record<string, unknown>);
+          recorded.push(observation);
           return observation;
         },
         recordRequestStart() {
@@ -41,8 +52,8 @@ test('probeGeminiCliHealth records health-version and health-probe observations 
 
           return { status: 0, stdout: 'OK.', stderr: '' };
         },
-        sleep: async () => undefined
-      }
+        sleep: async () => undefined,
+      },
     );
 
     assert.equal(health.available, true);
@@ -55,43 +66,8 @@ test('probeGeminiCliHealth records health-version and health-probe observations 
   }
 });
 
-test('buildGeminiReviewPrompt falls back to GitHub agent profiles when Gemini commands are absent', () => {
-  const repoRoot = mkdtempSync(join(tmpdir(), 'gemini-profile-'));
-  try {
-    const profilePath = join(
-      repoRoot,
-      '.github',
-      'agents',
-      'security-reviewer.agent.md'
-    );
-    mkdirSync(join(profilePath, '..'), { recursive: true });
-    writeFileSync(
-      profilePath,
-      ['---', 'name: security-reviewer', '---', 'Security lens'].join('\n'),
-      'utf8'
-    );
-
-    const prompt = buildGeminiReviewPrompt({
-      checkpoint: 'implementation',
-      focus: 'shell network',
-      model: 'gemini-3-flash-preview',
-      prompt: 'Review this diff.',
-      repoRoot
-    });
-
-    assert.match(
-      prompt,
-      /Use the gemini reviewer specialist lens: security-reviewer/
-    );
-    assert.match(prompt, /Security lens/);
-    assert.match(prompt, /Review this diff/);
-  } finally {
-    rmSync(repoRoot, { force: true, recursive: true });
-  }
-});
-
 test('runGeminiReview records a successful first attempt with wait-before-start metadata', async () => {
-  const recorded: Array<Record<string, unknown>> = [];
+  const recorded: ProviderObservationInput[] = [];
 
   const review = await runGeminiReview(
     {
@@ -100,15 +76,15 @@ test('runGeminiReview records a successful first attempt with wait-before-start 
       repoRoot: 'C:/repo',
       telemetryContext: {
         callsite: 'checkpoint-review',
-        checkpoint: 'implementation'
-      }
+        checkpoint: 'implementation',
+      },
     },
     {
       acquireLock: async () => () => undefined,
       getInterRequestDelay: () => 1_500,
       loadRateLimitState: () => ({ models: {} }),
       recordObservation(observation) {
-        recorded.push(observation as Record<string, unknown>);
+        recorded.push(observation);
         return observation;
       },
       recordRequestStart() {
@@ -118,10 +94,10 @@ test('runGeminiReview records a successful first attempt with wait-before-start 
         error: undefined,
         status: 0,
         stderr: '',
-        stdout: 'Reviewed.'
+        stdout: 'Reviewed.',
       }),
-      sleep: async () => undefined
-    }
+      sleep: async () => undefined,
+    },
   );
 
   assert.equal(review, 'Reviewed.');
@@ -133,7 +109,7 @@ test('runGeminiReview records a successful first attempt with wait-before-start 
 });
 
 test('runGeminiReview records capacity-triggered retries with retry delay metadata', async () => {
-  const recorded: Array<Record<string, unknown>> = [];
+  const recorded: ProviderObservationInput[] = [];
   let attempt = 0;
 
   const review = await runGeminiReview(
@@ -143,8 +119,8 @@ test('runGeminiReview records capacity-triggered retries with retry delay metada
       repoRoot: 'C:/repo',
       telemetryContext: {
         callsite: 'checkpoint-review',
-        checkpoint: 'implementation'
-      }
+        checkpoint: 'implementation',
+      },
     },
     {
       acquireLock: async () => () => undefined,
@@ -152,7 +128,7 @@ test('runGeminiReview records capacity-triggered retries with retry delay metada
       getRetryDelay: () => 20_000,
       loadRateLimitState: () => ({ models: {} }),
       recordObservation(observation) {
-        recorded.push(observation as Record<string, unknown>);
+        recorded.push(observation);
         return observation;
       },
       recordRequestStart() {
@@ -165,17 +141,17 @@ test('runGeminiReview records capacity-triggered retries with retry delay metada
               error: undefined,
               status: 1,
               stderr: '429 MODEL_CAPACITY_EXHAUSTED',
-              stdout: ''
+              stdout: '',
             }
           : {
               error: undefined,
               status: 0,
               stderr: '',
-              stdout: 'Reviewed.'
+              stdout: 'Reviewed.',
             };
       },
-      sleep: async () => undefined
-    }
+      sleep: async () => undefined,
+    },
   );
 
   assert.equal(review, 'Reviewed.');
@@ -187,7 +163,7 @@ test('runGeminiReview records capacity-triggered retries with retry delay metada
 });
 
 test('runGeminiReview records timeout retries before succeeding', async () => {
-  const recorded: Array<Record<string, unknown>> = [];
+  const recorded: ProviderObservationInput[] = [];
   let attempt = 0;
   const timeoutError = new Error('timed out');
   timeoutError.name = 'TimeoutError';
@@ -196,7 +172,7 @@ test('runGeminiReview records timeout retries before succeeding', async () => {
     {
       model: 'gemini-2.5-pro',
       prompt: 'Review this diff.',
-      repoRoot: 'C:/repo'
+      repoRoot: 'C:/repo',
     },
     {
       acquireLock: async () => () => undefined,
@@ -204,7 +180,7 @@ test('runGeminiReview records timeout retries before succeeding', async () => {
       getRetryDelay: () => 35_000,
       loadRateLimitState: () => ({ models: {} }),
       recordObservation(observation) {
-        recorded.push(observation as Record<string, unknown>);
+        recorded.push(observation);
         return observation;
       },
       recordRequestStart() {
@@ -218,17 +194,17 @@ test('runGeminiReview records timeout retries before succeeding', async () => {
               signal: 'SIGTERM',
               status: null,
               stderr: '',
-              stdout: ''
+              stdout: '',
             }
           : {
               error: undefined,
               status: 0,
               stderr: '',
-              stdout: 'Reviewed.'
+              stdout: 'Reviewed.',
             };
       },
-      sleep: async () => undefined
-    }
+      sleep: async () => undefined,
+    },
   );
 
   assert.equal(review, 'Reviewed.');
@@ -239,20 +215,20 @@ test('runGeminiReview records timeout retries before succeeding', async () => {
 });
 
 test('runGeminiReview does not mark successful timeout-themed output as a timeout', async () => {
-  const recorded: Array<Record<string, unknown>> = [];
+  const recorded: ProviderObservationInput[] = [];
 
   const review = await runGeminiReview(
     {
       model: 'gemini-2.5-pro',
       prompt: 'Review timeout handling.',
-      repoRoot: 'C:/repo'
+      repoRoot: 'C:/repo',
     },
     {
       acquireLock: async () => () => undefined,
       getInterRequestDelay: () => 0,
       loadRateLimitState: () => ({ models: {} }),
       recordObservation(observation) {
-        recorded.push(observation as Record<string, unknown>);
+        recorded.push(observation);
         return observation;
       },
       recordRequestStart() {
@@ -262,10 +238,10 @@ test('runGeminiReview does not mark successful timeout-themed output as a timeou
         error: undefined,
         status: 0,
         stderr: '',
-        stdout: 'Timeout handling review completed successfully.'
+        stdout: 'Timeout handling review completed successfully.',
       }),
-      sleep: async () => undefined
-    }
+      sleep: async () => undefined,
+    },
   );
 
   assert.equal(review, 'Timeout handling review completed successfully.');

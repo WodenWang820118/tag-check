@@ -4,7 +4,10 @@ import { DestinationService } from '../../../../shared/services/destination/dest
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
 import { AnalyticsService } from '../../../../shared/services/analytics/analytics.service';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
-import { destinations } from '../../../../shared/services/destination/destinations';
+import {
+  PublicDestination,
+  publicDestinations
+} from '../../../../shared/services/destination/destination-catalog';
 import { CarouselModule } from 'primeng/carousel';
 import { ButtonModule } from 'primeng/button';
 
@@ -82,7 +85,7 @@ import { ButtonModule } from 'primeng/button';
   `
 })
 export class CarouselComponent implements AfterViewInit {
-  destinations = destinations;
+  destinations = publicDestinations;
   responsiveOptions = [
     { breakpoint: '1024px', numVisible: 1, numScroll: 1 },
     { breakpoint: '768px', numVisible: 1, numScroll: 1 },
@@ -114,23 +117,23 @@ export class CarouselComponent implements AfterViewInit {
     );
   }
 
-  goToDetails(destination: any): void {
+  goToDetails(destination: PublicDestination): void {
     this.destinationService.changeDestination(destination);
-    this.navigationService.navigateToDetail(destination.id);
+    this.navigationService.navigateToDetail(destination.slug);
   }
 
-  activateDestination(destination: any, event?: Event): void {
+  activateDestination(destination: PublicDestination, event?: Event): void {
     event?.preventDefault();
     event?.stopPropagation();
     this.selectPromotion(destination);
     this.goToDetails(destination);
   }
 
-  selectPromotion(destination: any): void {
+  selectPromotion(destination: PublicDestination): void {
     this.analyticsService.trackEvent('select_promotion', destination);
   }
 
-  preventDefault(event: any): void {
+  preventDefault(event: Event): void {
     event.stopPropagation();
   }
 

@@ -7,6 +7,14 @@
 
 ---
 
+## Planning Metadata
+
+- **Task Size:** [tiny | small | medium | large | huge, with rationale]
+- **Refactoring risk:** [none | low | medium | high]
+- **Preparatory refactor needed?:** [yes | no]
+- **Minimal verification:** [smallest check that proves the likely failure mode]
+- **Review checkpoint needs:** [plan | test | implementation | specialist reviewers]
+
 ## 1. Objective
 
 A clear, high-level summary of the feature and the problem it solves. Answer the "what" and the "why."
@@ -52,7 +60,7 @@ Include a small, representative snippet of code that demonstrates the intended s
   selector: 'app-new-feature',
   templateUrl: './new-feature.component.html',
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule],
 })
 export class NewFeatureComponent {
   private readonly featureService = inject(FeatureService);

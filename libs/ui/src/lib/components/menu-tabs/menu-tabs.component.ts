@@ -1,61 +1,135 @@
-import { Router, RouterModule } from '@angular/router';
-import { Component, input } from '@angular/core';
+import { Component, Inject, LOCALE_ID, input } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
-import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
-import { DomSanitizer } from '@angular/platform-browser';
-import { ɵ$localize } from '@angular/localize';
-import { NgClass } from '@angular/common';
-
-interface Link {
-  nameKey: string; // Changed from name to nameKey for translation reference
-  icon: string;
-  link: string;
-}
+import { Router } from '@angular/router';
+import {
+  buildLocalizedPath,
+  stripLocalePrefix
+} from '../../locale/locale-routing';
+import { type SharedNavigationLink } from '../navigation-link';
 
 @Component({
   selector: 'lib-menu-tabs',
   standalone: true,
-  imports: [MatTabsModule, MatIconModule, RouterModule, NgClass],
+  imports: [MatTabsModule, MatIconModule, MatButtonModule, MatMenuModule],
   template: `
-    <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+    <!-- Inline tab nav: visible on large viewports (laptop/desktop). -->
+    <nav
+      mat-tab-nav-bar
+      [tabPanel]="tabPanel"
+      class="hidden! lg:flex!"
+      aria-label="Primary navigation"
+    >
       <a
         mat-tab-link
-        (click)="activeLink = links[0]; navigateTo(links[0].link)"
-        [active]="activeLink === links[0]"
-        [ngClass]="{ hidden: aboutDisabled() }"
+        [href]="primaryLink().href"
+        [active]="isLinkActive(primaryLink())"
+        class="nav-link-container"
       >
-        <mat-icon class="nav-icon">{{ links[0].icon }}</mat-icon>
-        <span i18n="@@nav.about" class="nav-text">{{ links[0].nameKey }}</span>
+        <mat-icon class="nav-icon">{{ primaryLink().icon }}</mat-icon>
+        <span class="nav-text">{{ primaryLink().label }}</span>
       </a>
+
+      @if (docsLink(); as link) {
+        <a
+          mat-tab-link
+          [href]="link.href"
+          [active]="isLinkActive(link)"
+          class="nav-link-container"
+        >
+          <mat-icon class="nav-icon">{{ link.icon }}</mat-icon>
+          <span class="nav-text">{{ link.label }}</span>
+        </a>
+      }
+
+      @if (!aboutDisabled()) {
+        <a
+          mat-tab-link
+          [href]="aboutPath"
+          [active]="isActive('/about')"
+          class="nav-link-container"
+        >
+          <mat-icon class="nav-icon">info</mat-icon>
+          <span i18n="@@nav.about" class="nav-text">About</span>
+        </a>
+      }
+
+      @if (!objectivesDisabled()) {
+        <a
+          mat-tab-link
+          [href]="objectivesPath"
+          [active]="isActive('/objectives')"
+          class="nav-link-container"
+        >
+          <mat-icon class="nav-icon">location_on</mat-icon>
+          <span i18n="@@nav.objectives" class="nav-text">Objectives</span>
+        </a>
+      }
 
       <a
         mat-tab-link
-        (click)="activeLink = links[1]; navigateTo(links[1].link)"
-        [active]="activeLink === links[1]"
-        class="nav-link-container"
-        [ngClass]="{ hidden: objectivesDisabled() }"
-      >
-        <mat-icon class="nav-icon">{{ links[1].icon }}</mat-icon>
-        <span i18n="@@nav.objectives" class="nav-text">{{
-          links[1].nameKey
-        }}</span>
-      </a>
-
-      <a
-        mat-tab-link
-        href="https://github.com/WodenWang820118/tag-check"
-        (click)="activeLink = links[2]; navigateTo(links[2].link)"
-        [active]="activeLink == links[2]"
+        [href]="githubUrl"
+        target="_blank"
+        rel="noopener noreferrer"
         class="nav-link-container"
       >
-        <mat-icon class="nav-icon" svgIcon="github"></mat-icon>
+        <mat-icon class="nav-icon">code</mat-icon>
         <span i18n="@@nav.github" class="nav-text">GitHub</span>
       </a>
     </nav>
     <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
+
+    <!-- Hamburger menu: visible below the laptop breakpoint. -->
+    <button
+      type="button"
+      mat-icon-button
+      class="lg:hidden! nav-hamburger"
+      [matMenuTriggerFor]="mobileMenu"
+      aria-label="Open navigation menu"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #mobileMenu="matMenu">
+      <a mat-menu-item [href]="primaryLink().href">
+        <mat-icon>{{ primaryLink().icon }}</mat-icon>
+        <span>{{ primaryLink().label }}</span>
+      </a>
+      @if (docsLink(); as link) {
+        <a mat-menu-item [href]="link.href">
+          <mat-icon>{{ link.icon }}</mat-icon>
+          <span>{{ link.label }}</span>
+        </a>
+      }
+      @if (!aboutDisabled()) {
+        <a mat-menu-item [href]="aboutPath">
+          <mat-icon>info</mat-icon>
+          <span i18n="@@nav.about">About</span>
+        </a>
+      }
+      @if (!objectivesDisabled()) {
+        <a mat-menu-item [href]="objectivesPath">
+          <mat-icon>location_on</mat-icon>
+          <span i18n="@@nav.objectives">Objectives</span>
+        </a>
+      }
+      <a
+        mat-menu-item
+        [href]="githubUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <mat-icon>code</mat-icon>
+        <span i18n="@@nav.github">GitHub</span>
+      </a>
+    </mat-menu>
   `,
   styles: [
     `
+      :host {
+        display: contents;
+      }
       .nav-link-container {
         display: flex !important;
         align-items: center;
@@ -72,57 +146,52 @@ interface Link {
         align-items: center;
         color: white;
       }
-      .hidden {
-        display: none;
+      .nav-hamburger {
+        color: white;
       }
     `
   ]
 })
 export class MenuTabsComponent {
-  links = [
-    {
-      nameKey: 'About',
-      icon: 'info',
-      link: '/about'
-    },
-    {
-      nameKey: 'Objectives',
-      icon: 'location_on',
-      link: '/objectives'
-    },
-    {
-      nameKey: 'Github',
-      icon: 'github',
-      link: '/github'
-    }
-  ];
-  activeLink: Link | null = null;
-  aboutDisabled = input<boolean>(true);
-  objectivesDisabled = input<boolean>();
+  readonly githubUrl = 'https://github.com/WodenWang820118/tag-check';
+  readonly aboutPath: string;
+  readonly objectivesPath: string;
+  readonly primaryLink = input.required<SharedNavigationLink>();
+  readonly docsLink = input<SharedNavigationLink>();
+  aboutDisabled = input<boolean>(false);
+  objectivesDisabled = input<boolean>(false);
 
   constructor(
-    private readonly matIconRegistry: MatIconRegistry,
-    private readonly domSanitizer: DomSanitizer,
+    @Inject(LOCALE_ID) locale: string,
     private readonly router: Router
   ) {
-    this.matIconRegistry.addSvgIcon(
-      'github',
-      this.domSanitizer.bypassSecurityTrustResourceUrl('assets/github.svg')
-    );
+    this.aboutPath = buildLocalizedPath('/about', locale);
+    this.objectivesPath = buildLocalizedPath('/objectives', locale);
   }
 
-  // Helper method to get translated name
-  getTranslatedName(key: string): string {
-    // This will be replaced by actual translations
-    const translations: { [key: string]: string } = {
-      about: ɵ$localize`:@@nav.about:About`,
-      objectives: ɵ$localize`:@@nav.objectives:Objectives`,
-      github: ɵ$localize`:@@nav.github:GitHub`
-    };
-    return translations[key] || key;
+  isLinkActive(link: SharedNavigationLink): boolean {
+    if (!link.logicalPath) {
+      return false;
+    }
+
+    const currentPath = stripLocalePrefix(this.router.url);
+
+    if (link.matchStrategy === 'prefix') {
+      return (
+        currentPath === link.logicalPath ||
+        currentPath.startsWith(`${link.logicalPath}/`)
+      );
+    }
+
+    return currentPath === link.logicalPath;
   }
 
-  navigateTo(link: string) {
-    this.router.navigate([link]);
+  isActive(logicalPath: string): boolean {
+    return this.isLinkActive({
+      href: logicalPath,
+      label: '',
+      icon: '',
+      logicalPath
+    });
   }
 }

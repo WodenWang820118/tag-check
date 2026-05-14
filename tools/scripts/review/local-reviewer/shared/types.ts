@@ -1,4 +1,4 @@
-import type { CommandResult } from '../../../shared/process.ts';
+export type { CommandResult } from '../../../shared/process.ts';
 
 export type LocalReviewSeverity =
   | 'critical'
@@ -185,8 +185,8 @@ export interface HybridGptFinding {
 }
 
 export interface HybridGptReview {
-  provider: 'copilot-gpt-5-mini';
-  model: 'gpt-5-mini';
+  provider: 'codex';
+  model: string | null;
   status: HybridGptReviewStatus;
   overall_risk: HybridRiskLevel | null;
   confidence: HybridConfidenceLevel | null;

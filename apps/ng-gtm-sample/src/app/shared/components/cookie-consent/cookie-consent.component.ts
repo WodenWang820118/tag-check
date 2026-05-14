@@ -40,10 +40,11 @@ export class CookieConsentComponent {
   showCookieConsentInput = input<boolean>(false);
 
   constructor(public consentService: ConsentService) {
-    if (localStorage.getItem('consentPreferences')) {
-      this.consentService.setConsentPreferences(
-        JSON.parse(localStorage.getItem('consentPreferences') || '{}')
-      );
+    const storedConsentPreferences =
+      this.consentService.loadStoredConsentPreferences();
+
+    if (storedConsentPreferences) {
+      this.consentService.setConsentPreferences(storedConsentPreferences);
     } else {
       this.consentService.initConsentPreferences();
     }

@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { v4 as uuidv4 } from 'uuid';
 import { ReportService } from '../../../../shared/services/api/report/report.service';
 import {
@@ -34,17 +34,19 @@ export class Ga4UploadFacadeService {
   isParsing$ = computed(() => this.isParsing());
   isSaving$ = computed(() => this.isSaving());
 
-  constructor(
-    private readonly reportService: ReportService,
-    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService,
-    private readonly reportMapper: ReportMapperService
-  ) {}
+  private readonly reportService = inject(ReportService);
+  private readonly reportTableDataSourceModelService = inject(
+    ReportTableDataSourceModelService
+  );
+  private readonly reportMapper = inject(ReportMapperService);
 
+  /** Sets the raw JSON string and triggers an immediate parse attempt. */
   setRawJson(content: string) {
     this.rawJson.set(content ?? '');
     this.tryParse();
   }
 
+  /** Reads the selected JSON file and attempts to parse it as a GA4 data layer event array. */
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];

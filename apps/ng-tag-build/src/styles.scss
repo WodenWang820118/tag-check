@@ -1,0 +1,7 @@
+/* App-level SCSS hooks for ng-tag-build.
+ *
+ * Tailwind utilities live in the sibling tailwind.css entrypoint so the
+ * @tailwindcss/postcss plugin can scan templates without Sass interfering
+ * with the @import / @source directives. See
+ * apps/ng-tag-build/src/tailwind.css and docs/specs/ng-tag-build-rwd.md.
+ */

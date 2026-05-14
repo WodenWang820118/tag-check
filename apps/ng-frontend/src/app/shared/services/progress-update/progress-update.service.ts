@@ -1,18 +1,21 @@
-import { computed, effect, Injectable, signal } from '@angular/core';
+import { Injectable, effect, inject, signal } from '@angular/core';
 import { WebSocketService } from '../web-socket/web-socket.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProgressUpdateService {
+  private readonly webSocketService = inject(WebSocketService);
+
   private readonly _currentStep = signal<number>(0);
   private readonly _totalSteps = signal<number>(0);
   private readonly _eventCompleted = signal<boolean>(false);
-  currentStep$ = computed(() => this._currentStep());
-  totalSteps$ = computed(() => this._totalSteps());
-  eventCompleted$ = computed(() => this._eventCompleted());
 
-  constructor(private readonly webSocketService: WebSocketService) {
+  readonly currentStep$ = this._currentStep.asReadonly();
+  readonly totalSteps$ = this._totalSteps.asReadonly();
+  readonly eventCompleted$ = this._eventCompleted.asReadonly();
+
+  constructor() {
     this.initializeSocketListeners();
   }
 

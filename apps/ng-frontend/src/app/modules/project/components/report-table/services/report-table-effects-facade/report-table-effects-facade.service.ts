@@ -1,4 +1,4 @@
-import { Injectable, effect } from '@angular/core';
+import { Injectable, effect, inject } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { take } from 'rxjs';
 import { IReportDetails } from '@utils';
@@ -21,12 +21,12 @@ export class ReportTableEffectsFacadeService {
   private getStatus!: () => Status;
   private getProjectSlug!: () => string;
 
-  constructor(
-    private readonly projectDataSourceService: ProjectDataSourceService,
-    private readonly dialog: MatDialog,
-    private readonly reportService: ReportService,
-    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService
-  ) {}
+  private readonly projectDataSourceService = inject(ProjectDataSourceService);
+  private readonly dialog = inject(MatDialog);
+  private readonly reportService = inject(ReportService);
+  private readonly reportTableDataSourceModelService = inject(
+    ReportTableDataSourceModelService
+  );
 
   //#region Initialize & effects
   initialize(opts: ReportTableEffectsInitOptions) {

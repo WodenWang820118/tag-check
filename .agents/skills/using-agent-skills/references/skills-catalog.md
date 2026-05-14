@@ -5,6 +5,7 @@ This is the repo-local catalog for `.agents/skills`.
 ## Entry & Routing
 
 - `using-agent-skills`
+- `agent-preflight` (mandatory pre-gate checklist for all non-trivial work)
 
 ## Planning & Execution
 
@@ -25,15 +26,13 @@ This is the repo-local catalog for `.agents/skills`.
 ## Checkpoint Skills
 
 - `test-driven-development`
-- `refactoring-and-simplification`
 - `code-review-and-quality`
 - `address-review-feedback`
 - `proofshot`
 
 ## Repo & Nx Skills
 
-- `nx-workspace` (includes workspace exploration and task execution; formerly
-  `nx-workspace` + `nx-run-tasks`)
+- `nx-workspace` (includes workspace exploration and task execution; formerly `nx-workspace` + `nx-run-tasks`)
 - `nx-generate`
 - `nx-plugins`
 - `nx-import`
@@ -42,8 +41,7 @@ This is the repo-local catalog for `.agents/skills`.
 
 ## Stack-Specific Skills
 
-- `angular-patterns` — Angular conventions for `law-prep-web` and
-  `law-prep-portfolio-viewer`
-- `spring-boot-patterns` — Java/Spring Boot conventions for `law-prep-engine`
-- `fastapi-patterns` — Python/FastAPI conventions for `law-prep-ai-service`
-- `nestjs-patterns` — NestJS conventions for backend services
+- `angular-patterns` ??Angular conventions
+- `spring-boot-patterns` ??Java/Spring Boot conventions
+- `fastapi-patterns` ??Python/FastAPI conventions
+- `nestjs-patterns` ??NestJS conventions

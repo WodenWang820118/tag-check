@@ -1,11 +1,8 @@
- 
- 
- 
 import {
   Injectable,
   Logger,
   NotFoundException,
-  InternalServerErrorException,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { ActionHandler, getFirstSelector } from './utils';
@@ -32,8 +29,8 @@ export class ChangeHandler implements ActionHandler {
     isLastStep: boolean,
     timeout = 3000
   ): Promise<void> {
-    const selectors = step.selectors;
-    const value = step.value;
+    const selectors = step.selectors ?? [];
+    const value = step.value!;
 
     for (const selector of selectors) {
       try {

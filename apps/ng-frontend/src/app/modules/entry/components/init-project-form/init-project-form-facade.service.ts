@@ -1,5 +1,5 @@
 import { ComponentType } from '@angular/cdk/portal';
-import { DestroyRef, Injectable } from '@angular/core';
+import { DestroyRef, inject, Injectable } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -26,6 +26,12 @@ import slug from 'slug';
   providedIn: 'root'
 })
 export class InitProjectFormFacadeService {
+  private readonly fb = inject(FormBuilder);
+  private readonly projectService = inject(ProjectService);
+  private readonly configurationService = inject(ConfigurationService);
+  private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
   // #region form state
   errorDialogComponent: Promise<ComponentType<unknown> | null> =
     this.loadErrorDialogComponent();
@@ -63,14 +69,7 @@ export class InitProjectFormFacadeService {
   });
   // #endregion
 
-  constructor(
-    private readonly fb: FormBuilder,
-    private readonly projectService: ProjectService,
-    private readonly configurationService: ConfigurationService,
-    private readonly dialog: MatDialog,
-    private readonly destroyRef: DestroyRef,
-    private readonly router: Router
-  ) {
+  constructor() {
     this.observeProjectNameChanges();
   }
 

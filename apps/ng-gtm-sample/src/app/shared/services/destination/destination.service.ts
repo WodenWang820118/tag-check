@@ -1,33 +1,23 @@
-import { computed, Injectable, signal } from '@angular/core';
+import {
+  computed,
+  inject,
+  Injectable,
+  PLATFORM_ID,
+  signal
+} from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { Destination } from '../../models/destination.model';
 import { AnalyticsService } from '../analytics/analytics.service';
 
-const EMPTY_DESTINATION: Destination = {
-  id: '',
-  country: '',
-  city: '',
-  description: '',
-  latitude: 0,
-  longitude: 0,
-  title: '',
-  smallTitle: '',
-  image1: '',
-  image1AuthorInfo: '',
-  image2: '',
-  image2AuthorInfo: '',
-  image3: '',
-  image3AuthorInfo: '',
-  imageBig: '',
-  imageBigAuthorInfo: '',
-  video: '',
-  price: 0
-};
+const DESTINATION_STORAGE_KEY = 'destination';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DestinationService {
-  private readonly destinationSource = signal<Destination>(
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
+  private readonly destinationSource = signal<Destination | null>(
     this.getStoredDestination()
   );
 
@@ -35,27 +25,44 @@ export class DestinationService {
 
   constructor(private readonly analyticsService: AnalyticsService) {}
 
-  changeDestination(destination: any): void {
+  changeDestination(
+    destination: Destination,
+    options: { persist?: boolean; trackViewItem?: boolean } = {}
+  ): void {
+    const { persist = true, trackViewItem = true } = options;
+
     this.destinationSource.set(destination);
-    localStorage.setItem('destination', JSON.stringify(destination));
-    this.analyticsService.trackEvent('view_item', destination);
-    this.trackSelectItem(destination);
+
+    if (persist && this.isBrowser) {
+      localStorage.setItem(
+        DESTINATION_STORAGE_KEY,
+        JSON.stringify(destination)
+      );
+    }
+
+    if (trackViewItem) {
+      this.analyticsService.trackEvent('view_item', destination);
+    }
   }
 
-  trackSelectItem(destination: any): void {
+  trackSelectItem(destination: Destination): void {
     this.analyticsService.trackEvent('select_item', destination);
   }
 
-  private getStoredDestination(): Destination {
-    const storedDestination = localStorage.getItem('destination');
+  private getStoredDestination(): Destination | null {
+    if (!this.isBrowser) {
+      return null;
+    }
+
+    const storedDestination = localStorage.getItem(DESTINATION_STORAGE_KEY);
     if (!storedDestination) {
-      return EMPTY_DESTINATION;
+      return null;
     }
 
     try {
       return JSON.parse(storedDestination) as Destination;
     } catch {
-      return EMPTY_DESTINATION;
+      return null;
     }
   }
 }

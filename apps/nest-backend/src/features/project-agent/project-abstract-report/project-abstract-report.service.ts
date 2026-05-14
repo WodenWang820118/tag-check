@@ -59,8 +59,7 @@ export class ProjectAbstractReportService {
     }
   }
 
-  // TODO: haven't verified the function
-  async writeProjectAbstractTestRsultJson(
+  async writeProjectAbstractTestResultJson(
     projectName: string,
     data: OutputValidationResult[]
   ) {

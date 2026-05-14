@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test } from 'vitest';
+import test from 'node:test';
 
 import { extractCodexAgentMessage, resolveCodexReviewerId } from './codex.ts';
 
@@ -7,33 +7,33 @@ test('resolveCodexReviewerId routes checkpoints and focus to the expected review
   assert.equal(
     resolveCodexReviewerId({
       checkpoint: 'plan',
-      focus: 'general'
+      focus: 'general',
     }),
-    'architecture-reviewer'
+    'architecture-reviewer',
   );
 
   assert.equal(
     resolveCodexReviewerId({
       checkpoint: 'implementation',
-      focus: 'security'
+      focus: 'security',
     }),
-    'security-reviewer'
+    'security-reviewer',
   );
 
   assert.equal(
     resolveCodexReviewerId({
       checkpoint: 'test',
-      focus: 'tests'
+      focus: 'tests',
     }),
-    'test-reviewer'
+    'test-reviewer',
   );
 
   assert.equal(
     resolveCodexReviewerId({
       checkpoint: 'implementation',
-      focus: 'ux accessibility'
+      focus: 'ux accessibility',
     }),
-    'ux-reviewer'
+    'ux-reviewer',
   );
 });
 
@@ -42,7 +42,7 @@ test('extractCodexAgentMessage returns the last completed agent message from JSO
     '{"type":"thread.started","thread_id":"1"}',
     '{"type":"item.completed","item":{"id":"a","type":"agent_message","text":"First"}}',
     '2026-04-17T10:00:00Z WARN something noisy',
-    '{"type":"item.completed","item":{"id":"b","type":"agent_message","text":"Final"}}'
+    '{"type":"item.completed","item":{"id":"b","type":"agent_message","text":"Final"}}',
   ].join('\n');
 
   assert.equal(extractCodexAgentMessage(output), 'Final');

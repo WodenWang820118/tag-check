@@ -33,7 +33,7 @@ Entry routing skill for minimal context loading. Use it to understand the reques
    - UI-heavy work: `frontend-ui-engineering`
    - API or contract work: `api-and-interface-design`
    - repo or Nx workflow: the specific repo skill, then exit this entry workflow
-5. **Checkpoint Timing:** `refactoring-and-simplification`, `test-driven-development`, and `code-review-and-quality` load only at their checkpoints, not during entry.
+5. **Checkpoint Timing:** `refactoring-and-simplification`, `test-driven-development`, and `code-review-and-quality` load only at their checkpoints, not during entry. Do not add the refactor checkpoint to entry workflow selection.
 
 ## Ask / Escalate
 
@@ -45,4 +45,4 @@ Entry routing skill for minimal context loading. Use it to understand the reques
 - Behavioral overlay: `../../references/behavioral-guidelines.md`
 - Skill catalog: `references/skills-catalog.md`
 - Reviewer routing and checkpoint defaults: `references/reviewer-routing.md`
-- Stack conventions: `.agents/stack-conventions.md`
+- Stack conventions: `.agents/references/stack-conventions/<stack>.md`

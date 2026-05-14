@@ -70,13 +70,13 @@ export class StepExecutorUtilsService {
 
       await this.handleFirstNavigation(page, step, state, application);
     } else {
-      await page.goto(step.url, { waitUntil: 'networkidle2' });
+      await page.goto(step.url!, { waitUntil: 'networkidle2' });
     }
     await this.handleNavigationIfNeeded(page, isLastStep, 2000);
   }
 
   async handleWaitForElement(page: Page, step: Step, timeout: number) {
-    for (const selector of step.selectors) {
+    for (const selector of step.selectors ?? []) {
       try {
         // sometimes SSR may send multiple SPA pages, so it's necessary to wait for navigation
         // but sometimes it's not necessary, so we do race
@@ -122,9 +122,9 @@ export class StepExecutorUtilsService {
     application: EventInspectionPresetDto['application']
   ): Promise<void> {
     await this.setLocalStorage(page, application);
-    await page.goto(step.url, { waitUntil: 'networkidle2' });
+    await page.goto(step.url!, { waitUntil: 'networkidle2' });
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    await page.goto(step.url, { waitUntil: 'networkidle2' });
+    await page.goto(step.url!, { waitUntil: 'networkidle2' });
     await this.verifyLocalStorageAndCookies(page);
     state.isFirstNavigation = false;
   }

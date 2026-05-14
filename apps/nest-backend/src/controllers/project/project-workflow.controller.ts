@@ -1,7 +1,6 @@
 import { ApiBody, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ProjectWorkFlowControllerService } from './project-workflow-controller.service';
-import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { CreateProjectDto } from '../../shared';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 import { ExampleProjectRepositoryService } from '../../features/example-project/example-project-repository.service';
@@ -29,7 +28,6 @@ export class ProjectWorkFlowController {
     type: Object
   })
   @Post('/init-project/:projectSlug')
-  @Log()
   async initProject(
     @Param('projectSlug') projectSlug: string,
     @Body() settings: CreateProjectDto
@@ -49,7 +47,6 @@ export class ProjectWorkFlowController {
     description: 'The name of the project to which the event belongs.'
   })
   @Get('/set-project')
-  @Log()
   async setProject(@Query('projectName') projectName: string) {
     await this.projectWorkFlowControllerService.setProject(projectName);
   }
@@ -58,7 +55,6 @@ export class ProjectWorkFlowController {
     summary: 'read all projects metadata'
   })
   @Get()
-  @Log()
   async getProjects() {
     // On a cold launch the example-project seed runs fire-and-forget
     // (P2 cold-start optimization), so the very first GET /projects must

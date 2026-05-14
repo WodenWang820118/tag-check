@@ -53,11 +53,13 @@ export class StepExecutorService {
         break;
       case BrowserAction.KEYDOWN:
         this.logger.log(`${step.type} ${step.key}`);
-        await page.keyboard.down(step.key);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await page.keyboard.down(step.key as any);
         break;
       case BrowserAction.KEYUP:
         this.logger.log(`${step.type} ${step.key}`);
-        await page.keyboard.up(step.key);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await page.keyboard.up(step.key as any);
         await this.stepExecutorUtilsService.handleKeyboardAction(
           page,
           projectSlug,

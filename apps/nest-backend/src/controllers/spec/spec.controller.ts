@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { ProjectSpecService } from '../../features/project-agent/project-spec/project-spec.service';
-import { Log } from '../../common/logging-interceptor/logging-interceptor.service';
 import { ProjectFacadeRepositoryService } from '../../features/repository/project-facade/project-facade-repository.service';
 import { SpecRepositoryService } from '../../core/repository/spec/spec-repository.service';
 import { ItemDefRepositoryService } from '../../core/repository/item-def/item-def-repository.service';
@@ -44,7 +43,6 @@ export class SpecController {
   }
 
   @Get(':projectSlug/:eventId')
-  @Log()
   async getSpec(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
@@ -56,7 +54,6 @@ export class SpecController {
   }
 
   @Post(':projectSlug')
-  @Log()
   async addSpec(
     @Param('projectSlug') projectSlug: string,
     @Body() spec: CreateSpecDto
@@ -65,7 +62,6 @@ export class SpecController {
   }
 
   @Put(':projectSlug/:eventid')
-  @Log()
   async updateSpec(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,

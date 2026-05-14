@@ -1,7 +1,10 @@
+@use 'libs/shared-styles/src/variables.scss' as *;
+
 .objectives {
-  max-width: 1000px;
+  max-width: $content-max;
   margin: 0 auto;
-  padding: 1rem;
+  padding-inline: $space-gutter;
+  padding-block: 1rem;
 
   // Section styling
   &__section {
@@ -15,10 +18,11 @@
 
   &__diagram {
     float: right;
-    max-width: 60%;
-    margin: 0 0 1rem 20px;
+    max-width: min(60%, 32rem);
+    margin: 0 0 1rem 1.25rem;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: auto;
   }
 
   // Content styling
@@ -83,7 +87,7 @@
   }
 
   // Responsive breakpoints
-  @media (max-width: 768px) {
+  @media (max-width: ($bp-laptop - 1)) {
     &__diagram {
       float: none;
       max-width: 100%;
@@ -103,7 +107,7 @@
   }
 
   @media (max-width: 480px) {
-    padding: 0.5rem;
+    padding-inline: 0.5rem;
 
     &__heading {
       font-size: 1.25rem;

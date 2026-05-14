@@ -81,7 +81,7 @@ export class GroupEventsInspectionService {
       // the reason to use cache file is that there could be 20 tests running at the same time
       // one failed test will cause all other tests to fail in terms of test execution logic
       // therefore, we handle the result gathering logic in the xlsx-report.service.ts
-      await this.projectAbstractReportService.writeProjectAbstractTestRsultJson(
+      await this.projectAbstractReportService.writeProjectAbstractTestResultJson(
         projectName,
         data.map((item) => item.dataLayerResult)
       );

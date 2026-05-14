@@ -12,6 +12,7 @@ import { Component } from '@angular/core';
         <a
           i18n="@@footerComponentAuthorName"
           href="https://www.linkedin.com/in/guan-xin-wang/"
+          rel="noopener noreferrer"
           target="_blank"
           >Guan Xin Wang</a
         >
@@ -23,7 +24,11 @@ import { Component } from '@angular/core';
         >
       </p>
       <p class="text-muted">
-        <a href="https://github.com/WodenWang820118/tag-check" target="_blank">
+        <a
+          href="https://github.com/WodenWang820118/tag-check"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
           <ng-container i18n="@@footerComponentGitHub"
             >View on GitHub</ng-container
           >
@@ -31,7 +36,7 @@ import { Component } from '@angular/core';
       </p>
       <p class="text-muted">
         <ng-container i18n="@@footerComponentLastUpdated"
-          >Last updated on: 2025-03-31</ng-container
+          >Last updated on: 2026-05-11</ng-container
         >
       </p>
     </div>
