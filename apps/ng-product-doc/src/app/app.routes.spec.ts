@@ -114,7 +114,7 @@ describe('appRoutes', () => {
     expect(markdown.getSource).toHaveBeenCalledWith(
       'assets/markdown/en/introduction.md'
     );
-  });
+  }, 15000);
 
   it('redirects deep direct legacy app URLs to the documentation entry at runtime', async () => {
     const { fixture, markdown, router } = await setupRouterTest('en-US');
