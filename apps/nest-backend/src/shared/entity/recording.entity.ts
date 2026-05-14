@@ -1,4 +1,4 @@
-import type { RecordingSchema } from '@utils';
+import type { RecordingSchema, Step } from '@utils';
 import {
   Column,
   Entity,
@@ -29,8 +29,7 @@ export class RecordingEntity
     type: 'json',
     comment: 'Array of recording steps containing action details'
   })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  steps!: any[];
+  steps!: Step[];
 
   @OneToOne(() => TestEventEntity, (testEvent) => testEvent.recording, {
     onDelete: 'CASCADE'

@@ -70,7 +70,7 @@ export class ReportController {
     @Body() reportData: CreateFullTestEventDto
   ) {
     Logger.log(
-      `addReport: projectSlug=${projectSlug}, eventId=${eventId}, keys=${Object.keys(reportData as Record<string, unknown>).join(',')}`
+      `addReport: projectSlug=${projectSlug}, eventId=${eventId}, keys=${Object.keys(reportData as unknown as Record<string, unknown>).join(',')}`
     );
     // Video isn't suitable to be saved in SQL DB as a blob
     // Use file system to save video instead

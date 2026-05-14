@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Project } from '@utils';
@@ -9,6 +9,7 @@ import { map } from 'rxjs';
   providedIn: 'root'
 })
 export class ProjectListFacadeService {
+  private readonly metadataSourceService = inject(MetadataSourceService);
   private readonly projectsSignal = signal<Project[]>([]);
   private readonly filterSignal = computed(() =>
     this.metadataSourceService.getFilterSignal().toLowerCase()
@@ -28,7 +29,7 @@ export class ProjectListFacadeService {
     return this.dataSource.connect();
   });
 
-  constructor(private readonly metadataSourceService: MetadataSourceService) {
+  constructor() {
     this.setupFilterPredicate();
   }
 
@@ -39,6 +40,7 @@ export class ProjectListFacadeService {
       );
   }
 
+  /** Loads and emits the full project list from the metadata source into the table data source. */
   initializeData(): void {
     this.metadataSourceService
       .getData()
@@ -49,6 +51,7 @@ export class ProjectListFacadeService {
       });
   }
 
+  /** Attaches a paginator to the table data source. */
   setPaginator(paginator: MatPaginator): void {
     this.dataSource.paginator = paginator;
   }

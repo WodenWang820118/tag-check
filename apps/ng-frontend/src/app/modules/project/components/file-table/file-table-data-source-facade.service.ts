@@ -1,4 +1,4 @@
-import { effect, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal } from '@angular/core';
 import { FileTableDataSourceService } from '../../../../shared/services/data-source/file-table-data-source.service';
 import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
 import { take } from 'rxjs';
@@ -21,15 +21,18 @@ import { SelectionModel } from '@angular/cdk/collections';
   providedIn: 'root'
 })
 export class FileTableDataSourceFacadeService {
+  private readonly fileTableDataSourceService = inject(
+    FileTableDataSourceService
+  );
+  private readonly fileTableDataSourceModelService = inject(
+    FileTableDataSourceModelService
+  );
+  private readonly fileReportService = inject(FileReportService);
+  private readonly dialog = inject(MatDialog);
   columns = signal(['select', 'eventName', 'status', 'completedTime']);
   private readonly projectSlug = signal<string>('');
 
-  constructor(
-    private readonly fileTableDataSourceService: FileTableDataSourceService,
-    private readonly fileTableDataSourceModelService: FileTableDataSourceModelService,
-    private readonly fileReportService: FileReportService,
-    private readonly dialog: MatDialog
-  ) {
+  constructor() {
     effect(() => {
       const filterValue = this.fileTableDataSourceService.getFilterSignal();
       const currentDataSource =

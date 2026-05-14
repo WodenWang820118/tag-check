@@ -66,7 +66,10 @@ export class ProjectIoController {
       return response.status(200).json({ projectSlug: importedSlug });
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        error instanceof Error ? error.message : String(error),
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 

@@ -1,16 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { latitudeValidator, longitudeValidator } from './validators';
-import { CountriesDataService } from '../../../../shared/services/countries-data/countries-data.service';
+import { Component, inject } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { MessageModule } from 'primeng/message';
-import { FirebaseDestinationUploadService } from '../../../../shared/services/firebase-destination-upload/firebase-destination-upload.service';
-import {
-  CreateDestinationDraft,
-  DestinationImageSlot
-} from '../../../../shared/models/create-destination-draft.model';
+import { DestinationImageSlot } from '../../../../shared/models/create-destination-draft.model';
+import { AddDataFacadeService } from './add-data-facade.service';
 
 interface MediaFieldConfig {
   key: DestinationImageSlot;
@@ -32,24 +27,13 @@ interface MediaFieldConfig {
     CardModule,
     MessageModule
   ],
+  providers: [AddDataFacadeService],
   templateUrl: './add-data.component.html'
 })
 export class AddDataComponent {
-  private readonly fb = inject(FormBuilder);
-  private readonly firebaseDestinationUploadService = inject(
-    FirebaseDestinationUploadService
-  );
-  countries: { label: string; value: string }[] = [];
-  readonly uploadState = signal<'idle' | 'saving' | 'success' | 'error'>(
-    'idle'
-  );
-  readonly uploadMessage = signal('');
-  readonly selectedFiles = signal<Record<DestinationImageSlot, File | null>>({
-    imageBig: null,
-    image1: null,
-    image2: null,
-    image3: null
-  });
+  private readonly facade = inject(AddDataFacadeService);
+
+  /** View-only config: labels and hints for the four destination image slots. */
   readonly mediaFields: MediaFieldConfig[] = [
     {
       key: 'imageBig',
@@ -76,147 +60,49 @@ export class AddDataComponent {
       authorControl: 'image3AuthorInfo'
     }
   ];
-  destinationForm = this.fb.group({
-    country: ['', Validators.required],
-    city: ['', Validators.required],
-    title: ['', Validators.required],
-    smallTitle: ['', Validators.required],
-    latitude: ['', [Validators.required, latitudeValidator()]],
-    longitude: ['', [Validators.required, longitudeValidator()]],
-    description: ['', Validators.required],
-    price: ['', [Validators.required, Validators.min(1)]],
-    video: [''],
-    imageBigAuthorInfo: [''],
-    image1AuthorInfo: [''],
-    image2AuthorInfo: [''],
-    image3AuthorInfo: ['']
-  });
 
-  constructor(private readonly countriesDataService: CountriesDataService) {
-    this.countriesDataService.getCountries().subscribe((data: any[]) => {
-      this.countries = data.map((country) => ({
-        label: country.name.common,
-        value: country.name.common
-      }));
-    });
+  // ── Public API proxied from facade (keeps template and spec bindings stable) ──
+
+  get destinationForm() {
+    return this.facade.destinationForm;
+  }
+  get uploadState() {
+    return this.facade.uploadState;
+  }
+  get uploadMessage() {
+    return this.facade.uploadMessage;
+  }
+  get selectedFiles() {
+    return this.facade.selectedFiles;
+  }
+  get countries() {
+    return this.facade.countries;
   }
 
-  control(name: keyof typeof this.destinationForm.controls) {
-    return this.destinationForm.controls[name];
+  control(name: keyof typeof this.facade.destinationForm.controls) {
+    return this.facade.control(name);
   }
 
   hasError(
-    name: keyof typeof this.destinationForm.controls,
+    name: keyof typeof this.facade.destinationForm.controls,
     error?: string
   ): boolean {
-    const control = this.control(name);
-    if (!control) {
-      return false;
-    }
-
-    if (!error) {
-      return control.invalid && control.touched;
-    }
-
-    return control.hasError(error) && control.touched;
+    return this.facade.hasError(name, error);
   }
 
   onFileSelected(slot: DestinationImageSlot, event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0] ?? null;
-    this.selectedFiles.update((currentFiles) => ({
-      ...currentFiles,
-      [slot]: file
-    }));
+    this.facade.onFileSelected(slot, event);
   }
 
   selectedFileName(slot: DestinationImageSlot) {
-    return this.selectedFiles()[slot]?.name ?? 'No file selected yet';
+    return this.facade.selectedFileName(slot);
   }
 
   hasMissingFiles() {
-    return this.mediaFields.some(
-      (mediaField) => !this.selectedFiles()[mediaField.key]
-    );
-  }
-
-  private buildDraft(): CreateDestinationDraft | null {
-    const files = this.selectedFiles();
-
-    if (!files.imageBig || !files.image1 || !files.image2 || !files.image3) {
-      return null;
-    }
-
-    const rawValue = this.destinationForm.getRawValue();
-
-    return {
-      country: rawValue.country ?? '',
-      city: rawValue.city ?? '',
-      title: rawValue.title ?? '',
-      smallTitle: rawValue.smallTitle ?? '',
-      latitude: Number(rawValue.latitude),
-      longitude: Number(rawValue.longitude),
-      description: rawValue.description ?? '',
-      price: Number(rawValue.price),
-      video: rawValue.video ?? '',
-      imageBigAuthorInfo: rawValue.imageBigAuthorInfo ?? '',
-      image1AuthorInfo: rawValue.image1AuthorInfo ?? '',
-      image2AuthorInfo: rawValue.image2AuthorInfo ?? '',
-      image3AuthorInfo: rawValue.image3AuthorInfo ?? '',
-      files: {
-        imageBig: files.imageBig,
-        image1: files.image1,
-        image2: files.image2,
-        image3: files.image3
-      }
-    };
+    return this.facade.hasMissingFiles();
   }
 
   addDestination() {
-    this.destinationForm.markAllAsTouched();
-    if (this.destinationForm.invalid || this.hasMissingFiles()) {
-      this.uploadState.set('error');
-      this.uploadMessage.set(
-        'Please complete the highlighted fields and attach all four destination images before submitting.'
-      );
-      return;
-    }
-
-    const draft = this.buildDraft();
-    if (!draft) {
-      this.uploadState.set('error');
-      this.uploadMessage.set(
-        'A required image is missing. Please attach the full media set before submitting.'
-      );
-      return;
-    }
-
-    this.uploadState.set('saving');
-    this.uploadMessage.set(
-      'Uploading destination assets and saving the Firestore document...'
-    );
-
-    this.firebaseDestinationUploadService.upload(draft).subscribe({
-      next: () => {
-        this.uploadState.set('success');
-        this.uploadMessage.set(
-          'Destination created successfully. The admin cache has been refreshed for the new entry.'
-        );
-        this.destinationForm.reset();
-        this.selectedFiles.set({
-          imageBig: null,
-          image1: null,
-          image2: null,
-          image3: null
-        });
-      },
-      error: (error) => {
-        console.error('destination upload error', error);
-        this.uploadState.set('error');
-        this.uploadMessage.set(
-          'The destination could not be created. Please check your Firebase permissions and try again.'
-        );
-      }
-    });
+    this.facade.addDestination();
   }
 }

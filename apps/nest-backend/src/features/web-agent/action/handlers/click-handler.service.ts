@@ -37,7 +37,7 @@ export class ClickHandler implements ActionHandler {
     const preventNavigation = false;
     const offsetX = step.offsetX;
     const offsetY = step.offsetY;
-    for (const selector of step.selectors) {
+    for (const selector of step.selectors ?? []) {
       const firstSelector = getFirstSelector(selector);
       try {
         const clicked = await this.clickElement(
@@ -76,8 +76,8 @@ export class ClickHandler implements ActionHandler {
     options: {
       preventNavigation: boolean;
       timeout?: number;
-      offsetX: number;
-      offsetY: number;
+      offsetX?: number;
+      offsetY?: number;
     }
   ): Promise<boolean> {
     const { preventNavigation, timeout = 3000, offsetX, offsetY } = options;

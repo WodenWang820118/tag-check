@@ -13,7 +13,6 @@ import {
   ProjectSetting
 } from '@utils';
 
-// DEPRECATED
 @Injectable()
 export class ProjectSettingService {
   constructor(

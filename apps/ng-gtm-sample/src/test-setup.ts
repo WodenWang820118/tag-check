@@ -1,4 +1,5 @@
 import '@angular/compiler';
+import '@angular/localize/init';
 import '@analogjs/vitest-angular/setup-zone';
 
 import {

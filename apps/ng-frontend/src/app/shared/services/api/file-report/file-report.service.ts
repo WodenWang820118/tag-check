@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
-import { catchError, map, of, throwError } from 'rxjs';
+import { map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { FrontFileReport, TestEventSchema } from '@utils';
+import { catchHttpError, rethrowHttpError } from '../http-error.utils';
 
 @Injectable({
   providedIn: 'root'
@@ -10,17 +11,26 @@ import { FrontFileReport, TestEventSchema } from '@utils';
 export class FileReportService {
   constructor(private readonly http: HttpClient) {}
 
+  /**
+   * Retrieves all file reports for a project.
+   *
+   * Returns `null` on HTTP failure so callers can treat a missing list as an
+   * empty state.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   */
   getFileReports(projectSlug: string) {
     return this.http
       .get<TestEventSchema[]>(`${environment.fileReportApiUrl}/${projectSlug}`)
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of(null);
-        })
-      );
+      .pipe(catchHttpError(null));
   }
 
+  /**
+   * Deletes file reports identified by their event IDs.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   * @param eventIds    - Array of event IDs to delete.
+   */
   deleteFileReport(projectSlug: string, eventIds: string[]) {
     return this.http
       .delete<FrontFileReport>(
@@ -29,12 +39,7 @@ export class FileReportService {
           params: { eventIds: eventIds }
         }
       )
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Error deleting file report'));
-        })
-      );
+      .pipe(rethrowHttpError('Error deleting file report'));
   }
 
   downloadFileReports(projectSlug: string, eventIds: string[]) {
@@ -64,10 +69,7 @@ export class FileReportService {
           this.saveFile(blob, filename);
           return response;
         }),
-        catchError((error) => {
-          console.error('Error downloading file:', error);
-          return of(null);
-        })
+        catchHttpError(null)
       );
   }
 

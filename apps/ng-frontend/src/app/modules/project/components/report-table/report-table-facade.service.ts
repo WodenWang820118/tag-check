@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Subscription } from 'rxjs';
 import { IReportDetails } from '@utils';
@@ -12,6 +12,13 @@ import { ReportTableEffectsFacadeService } from './services/report-table-effects
 
 @Injectable({ providedIn: 'root' })
 export class ReportTableFacadeService {
+  private readonly projectDataSourceService = inject(ProjectDataSourceService);
+  private readonly testRunningFacadeService = inject(TestRunningFacadeService);
+  private readonly reportTableDataSourceModelService = inject(
+    ReportTableDataSourceModelService
+  );
+  private readonly selectionFacade = inject(ReportTableSelectionFacadeService);
+  private readonly effectsFacade = inject(ReportTableEffectsFacadeService);
   readonly columns = signal([
     'testName',
     'eventName',
@@ -34,13 +41,7 @@ export class ReportTableFacadeService {
     'all' | 'notRun' | 'failed' | 'partial' | 'passed'
   >('all');
 
-  constructor(
-    private readonly projectDataSourceService: ProjectDataSourceService,
-    private readonly testRunningFacadeService: TestRunningFacadeService,
-    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService,
-    private readonly selectionFacade: ReportTableSelectionFacadeService,
-    private readonly effectsFacade: ReportTableEffectsFacadeService
-  ) {
+  constructor() {
     this.effectsFacade.initialize({
       getStatus: () => this.statusFilter(),
       getProjectSlug: () => this.projectSlug()
@@ -194,6 +195,7 @@ export class ReportTableFacadeService {
   //#endregion
 
   //#region Actions
+  /** Triggers a test run for the given event in the current project. */
   runTest(eventId: string) {
     const projectSlug = this.projectSlug();
     return this.testRunningFacadeService.runTest(
@@ -203,6 +205,7 @@ export class ReportTableFacadeService {
     );
   }
 
+  /** Returns true when a recording is associated with the given event. */
   hasRecording(eventId: string): boolean {
     return this.hasRecordingMap.get(eventId) || false;
   }
@@ -233,10 +236,12 @@ export class ReportTableFacadeService {
   }
 
   // Status filter API for component
+  /** Applies the given status filter to narrow the visible report rows. */
   setStatusFilter(status: 'all' | 'notRun' | 'failed' | 'partial' | 'passed') {
     this.statusFilter.set(status);
   }
 
+  /** Returns true when all visible rows are currently selected. */
   isAllSelected(): boolean {
     return this.selectionFacade.isAllSelected();
   }

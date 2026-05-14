@@ -91,7 +91,7 @@ describe('ProjectAbstractReportService', () => {
     });
   });
 
-  describe('writeProjectAbstractTestRsultJson()', () => {
+  describe('writeProjectAbstractTestResultJson()', () => {
     it('writes one file per matching event/dataLayerSpec.event pair', async () => {
       const ctx = build();
       ctx.folderService.readFolderFiles.mockReturnValue([
@@ -99,7 +99,7 @@ describe('ProjectAbstractReportService', () => {
         { name: 'add_to_cart', isDirectory: () => true },
         { name: 'ignore-file.txt', isDirectory: () => false }
       ]);
-      await ctx.service.writeProjectAbstractTestRsultJson('demo', [
+      await ctx.service.writeProjectAbstractTestResultJson('demo', [
         { dataLayerSpec: { event: 'page_view' } } as never,
         { dataLayerSpec: { event: 'unmatched' } } as never
       ]);

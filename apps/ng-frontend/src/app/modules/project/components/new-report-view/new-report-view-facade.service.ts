@@ -25,6 +25,15 @@ export class NewReportViewFacadeService {
   private errorDialogComponentPromise: Promise<ComponentType<unknown> | null> | null =
     null;
   private readonly logger = inject(LoggerService);
+  private readonly reportService = inject(ReportService);
+  private readonly destroyedRef = inject(DestroyRef);
+  private readonly editorService = inject(EditorService);
+  private readonly fb = inject(FormBuilder);
+  private readonly location = inject(Location);
+  private readonly dialog = inject(MatDialog);
+  private readonly recordingService = inject(RecordingService);
+  private readonly projectDataSourceService = inject(ProjectDataSourceService);
+  private readonly uploadSpecService = inject(UploadSpecService);
 
   exampleInputJson = JSON.stringify({
     event: 'add_payment_info',
@@ -63,17 +72,7 @@ export class NewReportViewFacadeService {
     testName: ['', Validators.required]
   });
 
-  constructor(
-    private readonly reportService: ReportService,
-    private readonly destroyedRef: DestroyRef,
-    private readonly editorService: EditorService,
-    private readonly fb: FormBuilder,
-    private readonly location: Location,
-    private readonly dialog: MatDialog,
-    private readonly recordingService: RecordingService,
-    private readonly projectDataSourceService: ProjectDataSourceService,
-    private readonly uploadSpecService: UploadSpecService
-  ) {
+  constructor() {
     // Initialize the component promise but don't await it yet
     this.initErrorDialogComponent();
   }

@@ -1,14 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {
-  catchError,
-  Observable,
-  throwError,
-  from,
-  tap,
-  finalize,
-  of
-} from 'rxjs';
+import { Observable, catchError, from, tap, finalize, of } from 'rxjs';
+import { rethrowHttpError } from '../http-error.utils';
 import { DataLayerSpec, ProjectSpec, StrictDataLayerEvent } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
@@ -70,26 +63,35 @@ export class SpecService {
       .subscribe();
   }
 
+  /**
+   * Retrieves all project specs.
+   *
+   * @returns Observable of {@link ProjectSpec} array, or an error on failure.
+   */
   getSpecs() {
-    return this.http.get<ProjectSpec[]>(environment.specApiUrl).pipe(
-      catchError((error) => {
-        console.error(error);
-        return throwError(() => new Error('Failed to get specs'));
-      })
-    );
+    return this.http
+      .get<ProjectSpec[]>(environment.specApiUrl)
+      .pipe(rethrowHttpError('Failed to get specs'));
   }
 
+  /**
+   * Retrieves the spec for a single project.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   */
   getProjectSpec(projectSlug: string) {
     return this.http
       .get<ProjectSpec>(`${environment.specApiUrl}/${projectSlug}`)
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to get project specs'));
-        })
-      );
+      .pipe(rethrowHttpError('Failed to get project specs'));
   }
 
+  /**
+   * Persists an updated spec event for a project.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   * @param eventName   - Name of the event to update.
+   * @param content     - Spec payload to write.
+   */
   updateSpec(
     projectSlug: string,
     eventName: string,
@@ -99,25 +101,21 @@ export class SpecService {
       .put(`${environment.specApiUrl}/${projectSlug}/${eventName}`, {
         ...content
       })
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to update spec'));
-        })
-      );
+      .pipe(rethrowHttpError('Failed to update spec'));
   }
 
+  /**
+   * Retrieves the data-layer spec for a specific test event.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   * @param eventId     - Test event identifier.
+   */
   getEventSpec(
     projectSlug: string,
     eventId: string
   ): Observable<DataLayerSpec> {
     return this.http
       .get<DataLayerSpec>(`${environment.specApiUrl}/${projectSlug}/${eventId}`)
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to get spec details'));
-        })
-      );
+      .pipe(rethrowHttpError('Failed to get spec details'));
   }
 }

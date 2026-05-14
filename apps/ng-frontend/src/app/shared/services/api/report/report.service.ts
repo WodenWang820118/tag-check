@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, forkJoin, of, throwError } from 'rxjs';
+import { Observable, catchError, forkJoin } from 'rxjs';
 import {
   IReportDetails,
   TestEventSchema,
@@ -11,48 +11,60 @@ import {
   StrictDataLayerEvent
 } from '@utils';
 import { environment } from '../../../../../environments/environment';
+import { catchHttpError, rethrowHttpError } from '../http-error.utils';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportService {
   constructor(private readonly http: HttpClient) {}
+  /**
+   * Fetches all abstract test events (reports) for a project.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   */
   getProjectReports(projectSlug: string) {
     return this.http
       .get<AbstractTestEvent[]>(`${environment.reportApiUrl}/${projectSlug}`)
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to get reports'));
-        })
-      );
+      .pipe(rethrowHttpError('Failed to get reports'));
   }
 
+  /**
+   * Bulk-updates test events for a project.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   * @param reports     - Array of report details to persist.
+   */
   updateTestEvents(projectSlug: string, reports: IReportDetails[]) {
     return this.http
       .put<TestEvent[]>(`${environment.reportApiUrl}/${projectSlug}`, reports)
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to update test event'));
-        })
-      );
+      .pipe(rethrowHttpError('Failed to update test event'));
   }
 
+  /**
+   * Updates a single abstract report.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   * @param report      - Updated report payload.
+   */
   updateReport(projectSlug: string, report: AbstractTestEvent) {
     return this.http
       .put<AbstractTestEvent>(
         `${environment.reportApiUrl}/${projectSlug}`,
         report
       )
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to update report'));
-        })
-      );
+      .pipe(rethrowHttpError('Failed to update report'));
   }
 
+  /**
+   * Creates a new test report for a single event.
+   *
+   * @param projectSlug   - URL-friendly project identifier.
+   * @param eventId       - Test event identifier.
+   * @param reportDetails - Report metadata payload.
+   * @param recording     - Associated recording.
+   * @param spec          - Strict data-layer event spec used for validation.
+   */
   addReport(
     projectSlug: string,
     eventId: string,
@@ -69,14 +81,19 @@ export class ReportService {
           spec
         }
       )
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to add report'));
-        })
-      );
+      .pipe(rethrowHttpError('Failed to add report'));
   }
 
+  /**
+   * Creates a full test report combining recording, spec, and data-layer spec.
+   *
+   * @param projectSlug   - URL-friendly project identifier.
+   * @param eventId       - Test event identifier.
+   * @param reportDetails - Report metadata payload.
+   * @param recording     - Associated recording.
+   * @param spec          - High-level spec.
+   * @param dataLayerSpec - Strict data-layer event spec.
+   */
   addFullReport(
     projectSlug: string,
     eventId: string,
@@ -95,25 +112,23 @@ export class ReportService {
           dataLayerSpec
         }
       )
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to add full report'));
-        })
-      );
+      .pipe(rethrowHttpError('Failed to add full report'));
   }
 
+  /**
+   * Downloads the XLSX report for a single event and triggers a browser
+   * file-save dialog. Failures are swallowed since the operation is
+   * fire-and-forget with no observable consumer.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   * @param eventName   - Name of the event whose report to download.
+   */
   downloadFile(projectSlug: string, eventName: string) {
     this.http
       .get(`${environment.reportApiUrl}/xlsx/${projectSlug}/${eventName}`, {
         responseType: 'blob'
       })
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of(null);
-        })
-      )
+      .pipe(catchHttpError(null))
       .subscribe((blob) => {
         if (blob) {
           // Create a new Blob object using the response data of the file
@@ -127,22 +142,35 @@ export class ReportService {
       });
   }
 
+  /**
+   * Deletes individual reports one at a time and waits for all deletions.
+   *
+   * Per-item failures return `null` so a single failing delete does not
+   * abort the remaining ones.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   * @param reports     - Array of report details whose events to delete.
+   */
   deleteReports(projectSlug: string, reports: IReportDetails[]) {
     const tasks = reports.map((report) =>
       this.http
         .delete<TestEventSchema>(
           `${environment.reportApiUrl}/${projectSlug}/${report.eventId}`
         )
-        .pipe(
-          catchError((error) => {
-            console.error(error);
-            return of(null);
-          })
-        )
+        .pipe(catchHttpError(null))
     );
     return forkJoin(tasks); // Waits for all DELETE operations to complete.
   }
 
+  /**
+   * Deletes multiple reports in a single batched request.
+   *
+   * Returns `null` on HTTP failure rather than throwing so callers can treat
+   * the result as an optional confirmation.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   * @param eventIds    - Array of event IDs to delete.
+   */
   deleteBatchReports(projectSlug: string, eventIds: string[]) {
     if (!projectSlug || !eventIds) throw new Error('Invalid arguments');
     console.log('Deleting reports:', eventIds);
@@ -150,14 +178,18 @@ export class ReportService {
       .delete<TestEventSchema>(`${environment.reportApiUrl}/${projectSlug}`, {
         body: eventIds
       })
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of(null);
-        })
-      );
+      .pipe(catchHttpError(null));
   }
 
+  /**
+   * Fetches the detailed report for a single test event.
+   *
+   * The original error is rethrown unchanged so consumers can inspect its
+   * status code and message directly.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   * @param eventId     - Test event identifier.
+   */
   getReportDetails(
     projectSlug: string,
     eventId: string
@@ -167,7 +199,7 @@ export class ReportService {
         `${environment.reportApiUrl}/${projectSlug}/${eventId}`
       )
       .pipe(
-        catchError((error) => {
+        catchError((error: unknown) => {
           console.error(error);
           throw error;
         })

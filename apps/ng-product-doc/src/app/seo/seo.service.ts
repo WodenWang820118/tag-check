@@ -1,15 +1,15 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, LOCALE_ID, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import {
+  AbstractSeoService,
   DOCUMENTATION_PAGES,
   SUPPORTED_LOCALES,
   buildLocalizedPath,
   getLocaleConfig,
   isIndexableLogicalRoute
 } from '@ui';
-import { filter } from 'rxjs';
 
 const CANONICAL_ORIGIN = 'https://tag-check-documentation.vercel.app';
 const OG_IMAGE_URL = `${CANONICAL_ORIGIN}/assets/images/tagcheck-og.png`;
@@ -58,32 +58,14 @@ const ROUTE_SEO_COPY: Record<
 };
 
 @Injectable({ providedIn: 'root' })
-export class SeoService {
+export class SeoService extends AbstractSeoService {
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
-  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly document = inject(DOCUMENT);
   private readonly locale = getLocaleConfig(inject(LOCALE_ID));
-  private started = false;
 
-  start(): void {
-    if (this.started) {
-      return;
-    }
-
-    this.started = true;
-    this.applyCurrentRouteSeo();
-    this.router.events
-      .pipe(
-        filter(
-          (event): event is NavigationEnd => event instanceof NavigationEnd
-        )
-      )
-      .subscribe(() => this.applyCurrentRouteSeo());
-  }
-
-  private applyCurrentRouteSeo(): void {
+  override applyCurrentRouteSeo(): void {
     const seo = this.getRouteSeo();
     const canonicalUrl = this.buildAbsoluteUrl(seo.logicalPath);
     const robots = isIndexableLogicalRoute(seo.logicalPath)

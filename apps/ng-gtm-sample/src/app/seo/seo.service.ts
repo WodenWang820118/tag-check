@@ -1,8 +1,8 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { AbstractSeoService } from '@ui';
 import { environment } from '../../environments/environment';
 import {
   getPublicDestinationBySlug,
@@ -75,31 +75,13 @@ const ROUTE_SEO_COPY: Record<
 };
 
 @Injectable({ providedIn: 'root' })
-export class SeoService {
+export class SeoService extends AbstractSeoService {
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
-  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly document = inject(DOCUMENT);
-  private started = false;
 
-  start(): void {
-    if (this.started) {
-      return;
-    }
-
-    this.started = true;
-    this.applyCurrentRouteSeo();
-    this.router.events
-      .pipe(
-        filter(
-          (event): event is NavigationEnd => event instanceof NavigationEnd
-        )
-      )
-      .subscribe(() => this.applyCurrentRouteSeo());
-  }
-
-  private applyCurrentRouteSeo(): void {
+  override applyCurrentRouteSeo(): void {
     const seo = this.getRouteSeo();
     const canonicalUrl = this.buildAbsoluteUrl(seo.logicalPath);
     const robots = environment.seo.allowIndexing

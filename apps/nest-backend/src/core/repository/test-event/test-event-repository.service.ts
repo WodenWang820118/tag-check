@@ -121,7 +121,10 @@ export class TestEventRepositoryService {
       const entity = await this.repository.save(testEvent);
       return plainToInstance(AbstractTestEventResponseDto, entity);
     } catch (error) {
-      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        error instanceof Error ? error.message : String(error),
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 
@@ -130,7 +133,10 @@ export class TestEventRepositoryService {
       const entity = await this.repository.update(id, data);
       return plainToInstance(AbstractTestEventResponseDto, entity);
     } catch (error) {
-      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        error instanceof Error ? error.message : String(error),
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 
@@ -252,7 +258,10 @@ export class TestEventRepositoryService {
       const entity = await this.repository.remove(await query.getMany());
       return plainToInstance(AbstractTestEventResponseDto, entity);
     } catch (error) {
-      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        error instanceof Error ? error.message : String(error),
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 }

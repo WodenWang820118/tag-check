@@ -41,7 +41,7 @@ describe('GroupEventsInspectionService browser ownership', () => {
       {} as any,
       inspectorGroupEventsService as any,
       {
-        writeProjectAbstractTestRsultJson: vi.fn().mockResolvedValue(undefined)
+        writeProjectAbstractTestResultJson: vi.fn().mockResolvedValue(undefined)
       } as any,
       { getBROWSER_ARGS: vi.fn(() => []) } as any
     );

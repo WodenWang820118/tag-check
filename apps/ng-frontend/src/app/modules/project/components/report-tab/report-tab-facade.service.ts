@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { take } from 'rxjs';
 import { IReportDetails } from '@utils';
@@ -7,16 +7,16 @@ import { VideosService } from '../../../../shared/services/api/videos/videos.ser
 
 @Injectable()
 export class ReportTabFacade {
-  constructor(
-    private readonly snackBar: MatSnackBar,
-    private readonly fileReportService: FileReportService,
-    private readonly videosService: VideosService
-  ) {}
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly fileReportService = inject(FileReportService);
+  private readonly videosService = inject(VideosService);
 
+  /** Returns true when a recording video blob is present and non-empty. */
   getRecordingAvailable(videoBlob: Blob | undefined): boolean {
     return !!(videoBlob && videoBlob.size > 0);
   }
 
+  /** Copies the given event name to the clipboard and shows a snack bar notification. */
   copyEventName(eventName: string | undefined) {
     if (!eventName) {
       return;
@@ -33,6 +33,7 @@ export class ReportTabFacade {
       .catch(() => this.openSnackBar('Unable to copy'));
   }
 
+  /** Downloads the spreadsheet for the given report, either by direct URL or via the file-report service. */
   shareSpreadsheet(
     projectSlug: string | undefined,
     details: IReportDetails | undefined

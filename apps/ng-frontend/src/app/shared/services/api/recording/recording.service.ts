@@ -1,8 +1,9 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, of, throwError, from, tap, finalize } from 'rxjs';
+import { catchError, of, from, tap, finalize } from 'rxjs';
 import { Recording } from '@utils';
 import { environment } from '../../../../../environments/environment';
+import { catchHttpError, rethrowHttpError } from '../http-error.utils';
 
 @Injectable({
   providedIn: 'root'
@@ -57,53 +58,63 @@ export class RecordingService {
       .subscribe();
   }
 
+  /**
+   * Fetches all recordings belonging to a project.
+   *
+   * Returns `null` on HTTP failure so callers can treat a missing recording
+   * list as an empty state rather than an unrecoverable error.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   */
   getProjectRecordings(projectSlug: string) {
     return this.http
       .get<Recording[]>(`${environment.recordingApiUrl}/${projectSlug}`)
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of(null);
-        })
-      );
+      .pipe(catchHttpError(null));
   }
 
+  /**
+   * Fetches only the names (identifiers) for a project's recordings.
+   *
+   * Returns `[]` on HTTP failure so UI list bindings stay functional.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   */
   getProjectRecordingNames(projectSlug: string) {
     return this.http
       .get<string[]>(`${environment.recordingApiUrl}/${projectSlug}/names`)
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of([]);
-        })
-      );
+      .pipe(catchHttpError([] as string[]));
   }
 
+  /**
+   * Fetches the full details of a single recording.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   * @param eventId     - Test event identifier.
+   * @returns Observable that errors with `'Failed to get recording details'`
+   *   when the request fails, so callers can surface it in the UI.
+   */
   getRecordingDetails(projectSlug: string, eventId: string) {
     if (!eventId || !projectSlug) return of({} as Recording);
     return this.http
       .get<Recording>(
         `${environment.recordingApiUrl}/${projectSlug}/${eventId}`
       )
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to get recording details'));
-        })
-      );
+      .pipe(rethrowHttpError('Failed to get recording details'));
   }
 
+  /**
+   * Persists an updated recording.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   * @param eventId     - Test event identifier.
+   * @param recording   - Full recording payload to persist.
+   */
   updateRecording(projectSlug: string, eventId: string, recording: Recording) {
     return this.http
       .put<Recording>(
         `${environment.recordingApiUrl}/${projectSlug}/${eventId}`,
         recording
       )
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to update recording'));
-        })
-      );
+      .pipe(rethrowHttpError('Failed to update recording'));
   }
 }

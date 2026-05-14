@@ -7,9 +7,10 @@ import {
   BrowserSetting,
   ProjectSetting
 } from '@utils';
-import { catchError, of, tap, throwError } from 'rxjs';
+import { catchError, tap, throwError } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '../../../components/snackbar/snackbar.component';
+import { catchHttpError } from '../http-error.utils';
 
 @Injectable({
   providedIn: 'root'
@@ -22,13 +23,15 @@ export class SettingsService {
     private readonly _snackBar: MatSnackBar
   ) {}
 
+  /**
+   * Fetches all project settings (used for the project list).
+   *
+   * Returns `[]` on HTTP failure so list consumers stay functional.
+   */
   getSettings() {
-    return this.http.get<ProjectSetting[]>(environment.reportApiUrl).pipe(
-      catchError((error) => {
-        console.error(error);
-        return of([]);
-      })
-    );
+    return this.http
+      .get<ProjectSetting[]>(environment.reportApiUrl)
+      .pipe(catchHttpError([] as ProjectSetting[]));
   }
 
   getProjectSettings(projectSlug: string) {
@@ -152,29 +155,38 @@ export class SettingsService {
       );
   }
 
+  /**
+   * Creates a new project settings entry.
+   *
+   * Returns `null` on HTTP failure so the caller can decide whether to
+   * retry or surface the error.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   * @param settings    - Partial settings object to persist.
+   */
   addSettings(projectSlug: string, settings: Partial<ProjectSetting>) {
     return this.http
       .post<ProjectSetting>(
         `${environment.settingsApiUrl}/${projectSlug}`,
         settings
       )
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of(null);
-        })
-      );
+      .pipe(catchHttpError(null));
   }
 
+  /**
+   * Loads settings for the given project and sets it as the current project.
+   *
+   * Returns `null` on HTTP failure — the current project is not updated in
+   * that case.
+   *
+   * @param projectSlug - URL-friendly project identifier.
+   */
   switchToProject(projectSlug: string) {
     return this.getProjectSettings(projectSlug).pipe(
       tap((project) => {
         this.setCurrentProject(project);
       }),
-      catchError((error) => {
-        console.error(error);
-        return of(null);
-      })
+      catchHttpError(null)
     );
   }
 

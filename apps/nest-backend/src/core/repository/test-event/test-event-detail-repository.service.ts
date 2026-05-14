@@ -75,7 +75,10 @@ export class TestEventDetailRepositoryService {
       const entity = await this.repository.save(testEventDetailEntity);
       return plainToInstance(TestEventDetailResponseDto, entity);
     } catch (error) {
-      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        error instanceof Error ? error.message : String(error),
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 

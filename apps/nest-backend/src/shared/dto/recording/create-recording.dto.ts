@@ -1,4 +1,4 @@
-import type { Recording } from '@utils';
+import type { Recording, Step } from '@utils';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateRecordingDto implements Recording {
@@ -8,5 +8,5 @@ export class CreateRecordingDto implements Recording {
 
   @IsNotEmpty()
   @IsString()
-  steps!: Record<string, any>[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  steps!: Step[];
 }

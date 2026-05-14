@@ -1,4 +1,3 @@
- 
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { FileService } from '../../../infrastructure/os/file/file.service';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
@@ -43,7 +42,10 @@ export class ProjectReportService {
       this.folderService.createFolder(eventFolderPath);
     } catch (error) {
       Logger.error(error);
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error instanceof Error ? error.message : String(error),
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 }

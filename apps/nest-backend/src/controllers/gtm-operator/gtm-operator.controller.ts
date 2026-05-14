@@ -56,7 +56,7 @@ export class GtmOperatorController {
         eventId
       );
     this.logger.log(
-      `Abstract Report: eventId=${abstractReport.eventId}, detailsKeys=${Object.keys(abstractReport.testEventDetails || {}).join(',') || 'none'}`
+      `Abstract Report: eventId=${abstractReport.testEvent?.eventId}, detailsKeys=${Object.keys(abstractReport.testEventDetails || {}).join(',') || 'none'}`
     );
     return [abstractReport];
   }

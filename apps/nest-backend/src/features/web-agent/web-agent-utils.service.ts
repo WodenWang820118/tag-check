@@ -22,15 +22,29 @@ import {
 } from 'rxjs';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 
+/**
+ * Parameters required to execute a single test run via {@link WebAgentUtilsService.performTest}.
+ */
 export interface PerformTestParams {
+  /** Puppeteer page instance on which actions are performed. */
   page: Page;
+  /** Slug that identifies the project owning this test event. */
   projectSlug: string;
+  /** Unique identifier for the test event being executed. */
   eventId: string;
+  /** GA4 measurement ID used to correlate the captured network request. */
   measurementId: string;
+  /** HTTP basic-auth credentials forwarded to the page before navigation. */
   credentials: Credentials;
+  /** When `true`, the service intercepts the outgoing GA4 hit and returns its raw payload. */
   captureRequest: boolean;
+  /** Target application descriptor that drives which action sequence to execute. */
   application: EventInspectionPresetDto['application'];
-  options?: { requestCaptureTimeoutMs?: number };
+  /** Optional tunables for this run. */
+  options?: {
+    /** Maximum milliseconds to wait for the GA4 network hit before returning an empty string. Defaults to 15 000 ms. */
+    requestCaptureTimeoutMs?: number;
+  };
 }
 
 @Injectable()
@@ -43,6 +57,27 @@ export class WebAgentUtilsService {
     private readonly testEventRepositoryService: TestEventRepositoryService
   ) {}
 
+  /**
+   * Executes a full test run for a single event and returns the captured telemetry.
+   *
+   * Sequence:
+   * 1. Initialise the data-layer snapshot baseline.
+   * 2. Optionally authenticate the page with the supplied credentials.
+   * 3. Optionally arm GA4 request interception.
+   * 4. Execute the recorded action sequence via {@link ActionService}.
+   * 5. Capture the intercepted GA4 hit (if `captureRequest` is `true`).
+   * 6. Wait for post-action navigation to settle.
+   * 7. Snapshot the final data layer and strip internal GTM keys.
+   *
+   * The request interception handle is always torn down in the `finally` block
+   * so it is safe to call even when the action sequence throws.
+   *
+   * @param params - All inputs needed for one test execution; see {@link PerformTestParams}.
+   * @returns An object containing `dataLayer` (stripped GTM events), `eventRequest`
+   *          (raw GA4 hit string, empty when not captured), and `destinationUrl`
+   *          (final page URL after all navigation).
+   * @throws {HttpException} with status 500 when the action sequence fails.
+   */
   async performTest(params: PerformTestParams) {
     const {
       page,
@@ -113,7 +148,10 @@ export class WebAgentUtilsService {
       };
     } catch (error) {
       this.logger.error(`Failed to perform test: ${error}`);
-      throw new HttpException(String(error), HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error instanceof Error ? error.message : String(error),
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     } finally {
       await requestInterception
         ?.stop()
@@ -123,6 +161,11 @@ export class WebAgentUtilsService {
     }
   }
 
+  /**
+   * Applies HTTP basic-auth credentials to the Puppeteer page.
+   *
+   * @throws {UnauthorizedException} when Puppeteer rejects the credentials.
+   */
   private async authenticate(
     page: Page,
     credentials: Credentials
@@ -135,6 +178,12 @@ export class WebAgentUtilsService {
     }
   }
 
+  /**
+   * Arms network request interception on the page so that the outgoing GA4 hit
+   * can be observed via {@link RequestInterceptionHandle.rawRequest$}.
+   *
+   * @returns A handle that exposes `rawRequest$` and a `stop()` teardown.
+   */
   private async setupRequestInterception(
     page: Page,
     projectSlug: string,
@@ -156,6 +205,16 @@ export class WebAgentUtilsService {
     );
   }
 
+  /**
+   * Waits for the first value emitted by the interception observable and
+   * returns the raw GA4 request payload as a string.
+   *
+   * Returns an empty string on timeout or when the observable completes without
+   * emitting — callers should treat an empty string as "no hit captured".
+   *
+   * @param requestInterception - Active interception handle from {@link setupRequestInterception}.
+   * @param timeoutMs - Milliseconds before giving up; defaults to 15 000.
+   */
   private async captureEventRequest(
     requestInterception: RequestInterceptionHandle,
     timeoutMs = 15000
@@ -191,6 +250,11 @@ export class WebAgentUtilsService {
     return eventRequest;
   }
 
+  /**
+   * Waits up to 5 s for the page to reach `networkidle0` after the action
+   * sequence completes. Navigation timeouts are swallowed because many test
+   * flows do not trigger a top-level navigation.
+   */
   private async waitForNavigation(page: Page): Promise<void> {
     try {
       await page.waitForNavigation({
@@ -203,6 +267,13 @@ export class WebAgentUtilsService {
     }
   }
 
+  /**
+   * Retrieves the data-layer snapshot for the event and removes the
+   * `gtm.uniqueEventId` key that GTM injects into every push, since that
+   * internal counter is not meaningful to callers.
+   *
+   * @returns The stripped data-layer event array.
+   */
   private async getOptimizedDataLayer(projectSlug: string, eventId: string) {
     const dataLayer = await this.dataLayerService.getMyDataLayer(
       projectSlug,

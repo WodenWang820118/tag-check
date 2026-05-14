@@ -70,7 +70,10 @@ export class RecordingRepositoryService {
       const entity = await this.repository.save(recordingEntity);
       return plainToInstance(RecordingResponseDto, entity);
     } catch (error) {
-      throw new HttpException(String(error), HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        error instanceof Error ? error.message : String(error),
+        HttpStatus.BAD_REQUEST
+      );
     }
   }
 

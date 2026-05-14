@@ -1,11 +1,9 @@
- 
- 
 import {
   Injectable,
   Logger,
   HttpException,
   HttpStatus,
-  InternalServerErrorException,
+  InternalServerErrorException
 } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { ActionHandler, getFirstSelector } from './utils';
@@ -31,7 +29,7 @@ export class HoverHandler implements ActionHandler {
   ): Promise<void> {
     let hoveredSuccessfully = false;
 
-    for (const selectorArray of step.selectors) {
+    for (const selectorArray of step.selectors ?? []) {
       const selector = getFirstSelector(selectorArray);
       try {
         // Attempt to hover over the element with the given selector
