@@ -74,14 +74,6 @@
           <context context-type="linenumber">2,4</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="about.diagram.alt" datatype="html">
-        <source>Tag Build System Diagram</source>
-        <target>Tag Build システム図</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
-          <context context-type="linenumber">7,11</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="about.description.main" datatype="html">
         <source> Tag Build is an innovative tool designed specifically for digital marketers and SEO professionals. It streamlines the process of generating JSON files for Google Tag Manager (GTM), following GA4&apos;s recommended event structure to ensure optimal tracking implementation. </source>
         <target>Tag Build は、デジタルマーケターとSEO専門家のために特別に設計された革新的なツールです。Google Tag Manager (GTM)
@@ -154,6 +146,14 @@
           <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
           <context context-type="linenumber">61,64</context>
         </context-group>
+      </trans-unit>
+      <trans-unit id="about.code.label.ga4" datatype="html">
+        <source>GA4 Event</source>
+        <target>GA4 イベント</target>
+      </trans-unit>
+      <trans-unit id="about.code.label.tagbuild" datatype="html">
+        <source>Tag Build</source>
+        <target>Tag Build 形式</target>
       </trans-unit>
       <trans-unit id="advancedExpansionPanelComponentAdditionalTagsVariables" datatype="html">
         <source> Additional Built-in Tags/variables </source>
@@ -670,14 +670,6 @@
           <context context-type="linenumber">4,6</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="objectives.diagram.alt" datatype="html">
-        <source>Diagram showing the Tag Check System architecture and workflow</source>
-        <target>タグチェックシステムのアーキテクチャとワークフローを示す図</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">11,14</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="objectives.achievement.intro" datatype="html">
         <source> The GTM Tag Build provides a user-friendly interface for digital marketers and SEO experts to generate JSON files for Google Tag Manager. This tool streamlines tag management by: </source>
         <target>GTM タグビルドは、デジタルマーケターやSEO専門家向けに、Google Tag
@@ -871,6 +863,82 @@
           <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
           <context context-type="linenumber">59</context>
         </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.node.specification" datatype="html">
+        <source>Specification</source>
+        <target>仕様</target>
+      </trans-unit>
+      <trans-unit id="diagram.node.ga4events" datatype="html">
+        <source>GA4 Events</source>
+        <target>GA4イベント</target>
+      </trans-unit>
+      <trans-unit id="diagram.node.gtmdocs" datatype="html">
+        <source>GTM Docs</source>
+        <target>GTMドキュメント</target>
+      </trans-unit>
+      <trans-unit id="diagram.node.website" datatype="html">
+        <source>website</source>
+        <target>ウェブサイト</target>
+      </trans-unit>
+      <trans-unit id="diagram.edge.outputs-json" datatype="html">
+        <source>Outputs JSON</source>
+        <target>JSONを出力</target>
+      </trans-unit>
+      <trans-unit id="diagram.edge.validates" datatype="html">
+        <source>validates</source>
+        <target>検証</target>
+      </trans-unit>
+      <trans-unit id="diagram.edge.reports-issues" datatype="html">
+        <source>reports issues</source>
+        <target>問題を報告</target>
+      </trans-unit>
+      <trans-unit id="diagram.edge.defines-events" datatype="html">
+        <source>defines events</source>
+        <target>イベントを定義</target>
+      </trans-unit>
+      <trans-unit id="diagram.subgraph.sources" datatype="html">
+        <source>Sources</source>
+        <target>ソース</target>
+      </trans-unit>
+      <trans-unit id="diagram.subgraph.tag-build" datatype="html">
+        <source>Tag Build</source>
+        <target>Tag Build</target>
+      </trans-unit>
+      <trans-unit id="diagram.subgraph.tag-check" datatype="html">
+        <source>Tag Check</source>
+        <target>Tag Check</target>
+      </trans-unit>
+      <trans-unit id="diagram.aria.tag-build" datatype="html">
+        <source>Tag Build workflow: GA4 Events and GTM Docs feed into Specification and TagBuild to produce GTM output</source>
+        <target>Tag Buildワークフロー：GA4イベントとGTMドキュメントが仕様とTagBuildに流れ、GTM出力を生成</target>
+      </trans-unit>
+      <trans-unit id="diagram.aria.tag-check" datatype="html">
+        <source>Tag Check workflow: TagBuild outputs GTM JSON that runs on the website; TagCheck monitors GTM and the website against the Specification to surface issues</source>
+        <target>Tag Checkワークフロー：TagBuildがウェブサイト上で動作するGTM JSONを出力；TagCheckは仙5様に基づきGTMとウェブサイトを監視し問題を報告</target>
+      </trans-unit>
+      <trans-unit id="diagram.edge.runs-on" datatype="html">
+        <source>runs on</source>
+        <target>上で動作</target>
+      </trans-unit>
+      <trans-unit id="diagram.edge.monitors" datatype="html">
+        <source>monitors</source>
+        <target>監視</target>
+      </trans-unit>
+      <trans-unit id="diagram.caption.tag-build" datatype="html">
+        <source>Fig. 1 — Tag Build workflow</source>
+        <target>図1 — Tag Buildワークフロー</target>
+      </trans-unit>
+      <trans-unit id="diagram.caption.tag-check" datatype="html">
+        <source>Fig. 2 — Tag Check workflow</source>
+        <target>図2 — Tag Checkワークフロー</target>
+      </trans-unit>
+      <trans-unit id="mermaid.error.message" datatype="html">
+        <source>Failed to load diagram.</source>
+        <target>図の読み込みに失敗しました。</target>
+      </trans-unit>
+      <trans-unit id="mermaid.error.retry" datatype="html">
+        <source>Retry</source>
+        <target>再試行</target>
       </trans-unit>
     </body>
   </file>

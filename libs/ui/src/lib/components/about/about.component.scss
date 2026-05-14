@@ -1,59 +1,109 @@
 @use 'libs/shared-styles/src/variables.scss' as *;
 
 .about {
-  max-width: $content-max;
+  max-width: 1200px;
   margin: 0 auto;
-  padding-inline: $space-gutter;
+  padding-inline: clamp(2rem, 5vw, 4rem);
   overflow: hidden;
 
+  &__layout {
+    display: grid;
+    grid-template-columns: 1fr min(42rem, 46%);
+    gap: 2.5rem;
+    align-items: start;
+  }
+
   &__diagram {
-    float: right;
-    max-width: min(63%, 36rem);
-    margin: 0 0 1rem 1.25rem;
-    border-radius: 5px;
-    height: auto;
+    position: sticky;
+    top: 2rem;
+  }
+
+  &__diagram-caption {
+    margin-top: 0.5rem;
+    font-size: $font-size-caption;
+    color: var(--color-text-muted, #666);
+    text-align: center;
   }
 
   &__description {
     margin-bottom: 1rem;
-    line-height: 1.6;
+    font-size: $font-size-body-read;
+    line-height: 1.7;
     text-align: justify;
     text-justify: inter-word;
   }
 
   &__section-content {
     margin-bottom: 1rem;
+    font-size: $font-size-body-read;
+    line-height: 1.7;
   }
 
   &__code-container {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
-    gap: clamp(1rem, 3vw, 5rem);
+    gap: 2rem;
+    align-items: stretch;
+  }
+
+  &__code-block {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+  }
+
+  &__code-label {
+    font-size: $font-size-caption;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #333;
   }
 
   &__code {
+    flex: 1;
     background-color: #f4f4f4;
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 10px;
+    padding: 1rem 1.2rem;
     font-family: monospace;
-    overflow: auto;
-    max-width: 100%;
+    font-size: 1.3rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 0;
   }
 
-  // Below the laptop breakpoint the floated diagram crowds the text;
-  // unfloat and stack so paragraphs stay readable on tablet portrait.
+  &__howworks {
+    margin-top: 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+
+  &__howworks-intro {
+    font-size: $font-size-body-read;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
   @media (max-width: ($bp-laptop - 1)) {
+    &__layout {
+      grid-template-columns: 1fr;
+    }
+
     &__diagram {
-      float: none;
-      max-width: 100%;
-      margin: 1rem 0;
-      display: block;
+      position: static;
     }
 
     &__description {
       text-align: left;
+    }
+  }
+
+  @media (max-width: ($bp-pad - 1)) {
+    &__code-container {
+      flex-direction: column;
     }
   }
 }

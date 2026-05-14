@@ -1,15 +1,18 @@
 import { JsonPipe } from '@angular/common';
-import { Component, Inject, LOCALE_ID } from '@angular/core';
-import { getLocaleConfig } from '../../locale/locale-routing';
+import { Component } from '@angular/core';
+import { MermaidDiagramComponent } from '../mermaid-diagram/mermaid-diagram.component';
 
 @Component({
   selector: 'lib-about',
   standalone: true,
-  imports: [JsonPipe],
+  imports: [JsonPipe, MermaidDiagramComponent],
   templateUrl: './about.component.html',
   styleUrls: ['./about.component.scss']
 })
 export class AboutComponent {
+  readonly tagBuildDiagram = this.buildTagBuildDiagram();
+  readonly tagBuildDiagramLabel = $localize`:@@diagram.aria.tag-build:Tag Build workflow: GA4 Events and GTM Docs feed into Specification and TagBuild to produce GTM output`;
+
   exampleInput = {
     comments: '----- usual event data -----',
     event: 'begin_checkout',
@@ -44,10 +47,28 @@ export class AboutComponent {
     this.exampleInput
   ];
 
-  constructor(@Inject(LOCALE_ID) private readonly locale: string) {}
+  private buildTagBuildDiagram(): string {
+    const spec = $localize`:@@diagram.node.specification:Specification`;
+    const ga4 = $localize`:@@diagram.node.ga4events:GA4 Events`;
+    const docs = $localize`:@@diagram.node.gtmdocs:GTM Docs`;
+    const outputsJson = $localize`:@@diagram.edge.outputs-json:Outputs JSON`;
+    const sources = $localize`:@@diagram.subgraph.sources:Sources`;
+    const tagBuild = $localize`:@@diagram.subgraph.tag-build:Tag Build`;
 
-  getLocalizedSvgPath(): string {
-    const assetSegment = getLocaleConfig(this.locale).assetSegment;
-    return `/assets/i18n/${assetSegment}/tag_build_system_${assetSegment}.drawio.svg`;
+    return `flowchart TD
+  subgraph src["${sources}"]
+    GA4["${ga4}"]
+    Docs["${docs}"]
+  end
+  subgraph proc["${tagBuild}"]
+    Spec["${spec}"]
+    TB["TagBuild"]
+  end
+  GTM["GTM"]
+  GA4  --> Spec
+  GA4  --> TB
+  Docs --> TB
+  Spec --> TB
+  TB   -->|"${outputsJson}"| GTM`;
   }
 }

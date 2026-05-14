@@ -24,3 +24,7 @@ $content-max: 1024px;
 // Fluid spacing tokens
 $space-gutter: clamp(1rem, 2vw, 2rem);
 $space-block: clamp(1.5rem, 3vw, 3rem);
+
+// Reading content typography tokens (base: html { font-size: 62.5% } → 1rem = 10px)
+$font-size-body-read: 1.7rem; // 17px — long-form reading paragraphs
+$font-size-caption: 1.4rem; // 14px — captions, secondary UI text
