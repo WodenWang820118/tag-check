@@ -777,6 +777,69 @@
           <context context-type="linenumber">59</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="about.code.label.ga4" datatype="html">
+        <source>GA4 Event</source>
+      </trans-unit>
+      <trans-unit id="about.code.label.tagbuild" datatype="html">
+        <source>Tag Build</source>
+      </trans-unit>
+      <trans-unit id="diagram.node.specification" datatype="html">
+        <source>Specification</source>
+      </trans-unit>
+      <trans-unit id="diagram.node.ga4events" datatype="html">
+        <source>GA4 Events</source>
+      </trans-unit>
+      <trans-unit id="diagram.node.gtmdocs" datatype="html">
+        <source>GTM Docs</source>
+      </trans-unit>
+      <trans-unit id="diagram.node.website" datatype="html">
+        <source>website</source>
+      </trans-unit>
+      <trans-unit id="diagram.edge.outputs-json" datatype="html">
+        <source>Outputs JSON</source>
+      </trans-unit>
+      <trans-unit id="diagram.edge.validates" datatype="html">
+        <source>validates</source>
+      </trans-unit>
+      <trans-unit id="diagram.edge.reports-issues" datatype="html">
+        <source>reports issues</source>
+      </trans-unit>
+      <trans-unit id="diagram.edge.defines-events" datatype="html">
+        <source>defines events</source>
+      </trans-unit>
+      <trans-unit id="diagram.subgraph.sources" datatype="html">
+        <source>Sources</source>
+      </trans-unit>
+      <trans-unit id="diagram.subgraph.tag-build" datatype="html">
+        <source>Tag Build</source>
+      </trans-unit>
+      <trans-unit id="diagram.subgraph.tag-check" datatype="html">
+        <source>Tag Check</source>
+      </trans-unit>
+      <trans-unit id="diagram.aria.tag-build" datatype="html">
+        <source>Tag Build workflow: GA4 Events and GTM Docs feed into Specification and TagBuild to produce GTM output</source>
+      </trans-unit>
+      <trans-unit id="diagram.aria.tag-check" datatype="html">
+        <source>Tag Check workflow: TagBuild outputs GTM JSON that runs on the website; TagCheck monitors GTM and the website against the Specification to surface issues</source>
+      </trans-unit>
+      <trans-unit id="diagram.edge.runs-on" datatype="html">
+        <source>runs on</source>
+      </trans-unit>
+      <trans-unit id="diagram.edge.monitors" datatype="html">
+        <source>monitors</source>
+      </trans-unit>
+      <trans-unit id="diagram.caption.tag-build" datatype="html">
+        <source>Fig. 1 — Tag Build workflow</source>
+      </trans-unit>
+      <trans-unit id="diagram.caption.tag-check" datatype="html">
+        <source>Fig. 2 — Tag Check workflow</source>
+      </trans-unit>
+      <trans-unit id="mermaid.error.message" datatype="html">
+        <source>Failed to load diagram.</source>
+      </trans-unit>
+      <trans-unit id="mermaid.error.retry" datatype="html">
+        <source>Retry</source>
+      </trans-unit>
     </body>
   </file>
 </xliff>

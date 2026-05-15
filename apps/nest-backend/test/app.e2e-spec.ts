@@ -1,3 +1,4 @@
+import { ExampleProjectRepositoryService } from '../src/features/example-project/example-project-repository.service';
 import request from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
@@ -38,6 +39,12 @@ describe('App (e2e)', () => {
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
     await dataSource.synchronize(true);
+
+    const exampleProjectRepositoryService =
+      moduleFixture.get<ExampleProjectRepositoryService>(
+        ExampleProjectRepositoryService
+      );
+    await exampleProjectRepositoryService.ensureSeededOnce();
   });
 
   // Single afterAll defined at bottom of file; removed duplicate to avoid double-closing the app
