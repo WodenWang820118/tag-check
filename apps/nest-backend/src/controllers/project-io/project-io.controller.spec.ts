@@ -2,6 +2,17 @@ import { HttpStatus } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { ProjectIoController } from './project-io.controller';
 
+// Prevent actual filesystem operations in unit tests
+vi.mock('node:stream/promises', () => ({
+  pipeline: vi.fn().mockResolvedValue(undefined)
+}));
+vi.mock('node:fs', () => ({
+  createWriteStream: vi.fn().mockReturnValue({})
+}));
+vi.mock('node:fs/promises', () => ({
+  unlink: vi.fn().mockResolvedValue(undefined)
+}));
+
 describe('ProjectIoController', () => {
   function build(overrides: Record<string, unknown> = {}) {
     const projectIoFacadeService = {
@@ -29,13 +40,15 @@ describe('ProjectIoController', () => {
     };
   }
 
-  function buildResponse() {
-    const json = vi.fn();
-    const status = vi.fn().mockReturnValue({ json });
-    return { status, json } as unknown as {
-      status: ReturnType<typeof vi.fn>;
-      json: ReturnType<typeof vi.fn>;
-    };
+  function buildRequest(filename = 'my-project.zip') {
+    const file = vi.fn().mockResolvedValue({ filename, file: {} });
+    return { file };
+  }
+
+  function buildReply() {
+    const send = vi.fn();
+    const code = vi.fn().mockReturnValue({ send });
+    return { code, send };
   }
 
   it('exportProject delegates to ProjectIoFacadeService.exportProject', async () => {
@@ -47,34 +60,41 @@ describe('ProjectIoController', () => {
 
   it('importProject responds with 200 and the imported project slug', async () => {
     const { controller, projectIoFacadeService } = build();
-    const response = buildResponse();
-    const file = {
-      originalname: 'my-project.zip',
-      path: '/tmp/my-project.zip'
-    } as never;
-    await controller.importProject(file, response as never);
+    const request = buildRequest('my-project.zip');
+    const { code, send } = buildReply();
+    await controller.importProject(request as never, { code } as never);
     expect(projectIoFacadeService.importProject).toHaveBeenCalledWith(
       'my-project',
-      '/tmp/my-project.zip',
+      expect.stringContaining('my-project.zip'),
       '/projects'
     );
-    expect(response.status).toHaveBeenCalledWith(200);
-    expect(response.json).toHaveBeenCalledWith({
-      projectSlug: 'imported-slug'
-    });
+    expect(code).toHaveBeenCalledWith(200);
+    expect(send).toHaveBeenCalledWith({ projectSlug: 'imported-slug' });
+  });
+
+  it('importProject sanitizes path-traversal filenames via basename', async () => {
+    const { controller, projectIoFacadeService } = build();
+    // Attacker sends '../etc/shadow.zip' — basename() should strip the directory
+    const request = buildRequest('../etc/shadow.zip');
+    const { code, send } = buildReply();
+    await controller.importProject(request as never, { code } as never);
+    // The slug and path must NOT contain '..' components
+    const [[slug, filePath]] = projectIoFacadeService.importProject.mock
+      .calls as [string, string, string][];
+    expect(slug).toBe('shadow');
+    expect(filePath).not.toContain('..');
+    expect(code).toHaveBeenCalledWith(200);
+    expect(send).toHaveBeenCalledWith({ projectSlug: 'imported-slug' });
   });
 
   it('importProject wraps thrown errors as 400 HttpException', async () => {
     const { controller } = build({
       importProject: vi.fn().mockRejectedValue(new Error('bad zip'))
     });
-    const response = buildResponse();
-    const file = {
-      originalname: 'my-project.zip',
-      path: '/tmp/my-project.zip'
-    } as never;
+    const request = buildRequest('my-project.zip');
+    const { code } = buildReply();
     await expect(
-      controller.importProject(file, response as never)
+      controller.importProject(request as never, { code } as never)
     ).rejects.toMatchObject({ status: HttpStatus.BAD_REQUEST });
   });
 

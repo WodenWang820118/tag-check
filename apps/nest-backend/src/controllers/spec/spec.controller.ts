@@ -21,14 +21,9 @@ export class SpecController {
 
   @Get(':itemId/item-def')
   async getItemDef(@Param('itemId') itemId: string) {
-    return await this.itemDefRepositoryService.getItemDefById(itemId);
-  }
-
-  @Get(':templateName/item-def')
-  async getItemDefByTemplateName(@Param('templateName') templateName: string) {
-    return await this.itemDefRepositoryService.getItemDefByTemplateName(
-      templateName
-    );
+    const byId = await this.itemDefRepositoryService.getItemDefById(itemId);
+    if (byId) return byId;
+    return await this.itemDefRepositoryService.getItemDefByTemplateName(itemId);
   }
 
   @Put(':itemId/item-def')
