@@ -9,7 +9,7 @@ import {
   NotAcceptableException,
   InternalServerErrorException
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { addDoc, collection } from 'firebase/firestore';
 import { FirebaseService } from '../../infrastructure/firebase/firebase.service';
 
@@ -19,8 +19,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
   constructor(private readonly firebaseService: FirebaseService) {}
   async catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
+    const response = ctx.getResponse<FastifyReply>();
+    const request = ctx.getRequest<FastifyRequest>();
     let status: number;
     let errorMessage: string | object;
 
@@ -40,7 +40,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Log the error to Firebase
     await this.logErrorToFirebase(exception, request, status);
 
-    response.status(status).json({
+    response.code(status).send({
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
@@ -50,7 +50,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
   private async logErrorToFirebase(
     exception: unknown,
-    request: Request,
+    request: FastifyRequest,
     status: number
   ) {
     try {

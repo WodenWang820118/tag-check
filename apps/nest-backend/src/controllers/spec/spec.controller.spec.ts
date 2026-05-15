@@ -53,9 +53,13 @@ describe('SpecController', () => {
     expect(result).toEqual({ id: 'item-1' });
   });
 
-  it('getItemDefByTemplateName delegates to ItemDefRepositoryService.getItemDefByTemplateName', async () => {
+  it('getItemDef falls back to getItemDefByTemplateName when ID lookup returns null', async () => {
     const { controller, itemDefRepositoryService } = build();
-    const result = await controller.getItemDefByTemplateName('tpl-1');
+    itemDefRepositoryService.getItemDefById.mockResolvedValue(null);
+    const result = await controller.getItemDef('tpl-1');
+    expect(itemDefRepositoryService.getItemDefById).toHaveBeenCalledWith(
+      'tpl-1'
+    );
     expect(
       itemDefRepositoryService.getItemDefByTemplateName
     ).toHaveBeenCalledWith('tpl-1');

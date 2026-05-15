@@ -59,7 +59,11 @@ import { Logger, INestApplication } from '@nestjs/common';
 import { NativeLogger } from 'nestjs-pino';
 import { writeFileSync } from 'fs';
 import * as path from 'path';
-import { json, urlencoded } from 'express';
+import {
+  FastifyAdapter,
+  NestFastifyApplication
+} from '@nestjs/platform-fastify';
+import multipart from '@fastify/multipart';
 
 const STARTUP_T_AFTER_IMPORTS_MS = performance.now();
 
@@ -115,13 +119,15 @@ async function bootstrap() {
     // configured (LoggerModule.forRoot + pino-http middleware), removing
     // per-line console I/O during the most expensive part of startup.
     // Log levels are controlled by pino (LOG_LEVEL env or 'info' default).
-    const nestApp = await NestFactory.create(AppModule, {
-      bufferLogs: true
-    });
+    const nestApp = await NestFactory.create<NestFastifyApplication>(
+      AppModule,
+      new FastifyAdapter({ bodyLimit: 20971520 }),
+      { bufferLogs: true }
+    );
     nestApp.useLogger(nestApp.get(NativeLogger));
     const tNestCreated = performance.now();
 
-    // Configure CORS
+    // Configure CORS (NestJS wraps @fastify/cors automatically)
     nestApp.enableCors({
       origin: '*',
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -129,8 +135,10 @@ async function bootstrap() {
       optionsSuccessStatus: 204
     });
 
-    nestApp.use(json({ limit: '20mb' }));
-    nestApp.use(urlencoded({ extended: true, limit: '20mb' }));
+    // Register @fastify/multipart before listen (plugin must be registered before app starts)
+    await nestApp.register(multipart, {
+      limits: { fileSize: 20 * 1024 * 1024 }
+    });
 
     // Swagger documentation for non-prod environments
     if (process.env.NODE_ENV !== 'prod') {
@@ -149,7 +157,8 @@ async function bootstrap() {
     // Port configuration with environment awareness
     const port = process.env.PORT || getDefaultPort();
 
-    await nestApp.listen(port);
+    // Fastify defaults to 127.0.0.1; must specify '0.0.0.0' for Tauri sidecar access
+    await nestApp.listen(port, '0.0.0.0');
     const tListen = performance.now();
     Logger.log(
       `Application is running on port ${port} in ${process.env.NODE_ENV || 'default'} mode`

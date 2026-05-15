@@ -13,7 +13,7 @@ export const REVIEW_TTL_MS = 2 * 60 * 60 * 1000;
  * can recognize them as review-gate commands rather than mutating tool use.
  */
 export const REVIEW_GATE_ENTRYPOINT_COMMAND_PATTERN =
-  /^\s*node(?:\.exe)?(?:\s+--experimental-strip-types)?\s+(?:\.?[\\/])?(?:tools[\\/]scripts|scripts)[\\/]review-gate[\\/](approve-pre-implementation|status|reset)[\\/]\1\.ts(?:\s+.*)?\s*$/i;
+  /^\s*node(?:\.exe)?\s+(?:\.?[\\/])?(?:tools[\\/]scripts|scripts)[\\/]review-gate[\\/](approve-pre-implementation|status|reset)[\\/]\1\.ts(?:\s+.*)?\s*$/i;
 
 /**
  * Matches the `pnpm review:<cmd>` alias form so the hook allows review-gate

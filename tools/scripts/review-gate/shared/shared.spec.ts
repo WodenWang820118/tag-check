@@ -538,9 +538,7 @@ describe('review-gate command detection', () => {
       true
     );
     assert.equal(
-      isReviewGateCommand(
-        'node --experimental-strip-types ./tools/scripts/review-gate/status/status.ts'
-      ),
+      isReviewGateCommand('node ./tools/scripts/review-gate/status/status.ts'),
       true
     );
     assert.equal(

@@ -95,6 +95,38 @@ For browser-verifiable `ng-frontend` tasks, `proofshot` can be used after implem
 - Before the first implementation change on a clean worktree, open the gate by running `pnpm review:approve-pre-implementation -- --reviewer <copilot-claude|gemini-2.5-pro|codex-subagent> --primary-family <copilot|gemini|codex> --task-size <tiny|small|medium|large|huge> --focus <area> --summary "<approval summary>"` after the plan review passes. The reviewer family must differ from `--primary-family`; same-family approvals require `--mode override --override-reason "<rationale>"`.
 - Use `pnpm review:status` to inspect the gate and `pnpm review:reset` to clear it manually when needed.
 
+### Cross-Family Grill-me Rule
+
+Before submitting a plan to Plan Review, invoke the `grill-me` skill
+(`.agents/skills/grill-me/SKILL.md`) when **any** of the following holds:
+
+- task size in `{medium, large, huge}`
+- `Refactoring risk` in `{medium, high}`
+- the change touches a sensitive surface (auth, secrets, filesystem, shell,
+  process execution, network, public contracts, persistent state, or
+  governance/control-plane files)
+
+The griller's AI family must differ from the primary agent's family. Three
+families are recognized:
+
+| Family  | Includes                                                         |
+| ------- | ---------------------------------------------------------------- |
+| Copilot | Copilot Claude, Copilot CLI GPT-_, `.github/agents/_`            |
+| Gemini  | `gemini-2.5-pro`, `gemini-3-flash-preview`, `.gemini/commands/*` |
+| Codex   | Codex CLI, `.codex/agents/*`, Codex `grill-me` sub-agent         |
+
+Grill exits only when all six items in the grill-me end checklist have
+concrete answers and no `high-impact` open question remains. The reviewer at
+the Plan Review checkpoint must refuse to sign if the grill summary is
+missing or incomplete (see `must_refuse_when` in
+`.agents/reviewers/common-review-contract.toml`).
+
+`small` and `tiny` tasks may skip cross-family `grill-me` unless the user
+explicitly asks for a critique.
+
+Full lifecycle: `.agents/workflows/review-lifecycle.md`.
+Reviewer routing matrix: `.agents/reviewers/routing-matrix.md`.
+
 ## Reviewer Routing
 
 Use `.agents/reviewers/common-review-contract.toml` as the shared review contract. Use tool-native reviewer profiles or prompts as specialist lenses.
@@ -123,6 +155,105 @@ Expected repo workflow:
 5. review local `proofshot-artifacts/` with GitHub Copilot Claude using the dedicated proofshot review prompt
 
 `proofshot` is for `ng-frontend` UI flows only. Do not route backend-only, server-only, or non-browser library tasks through it.
+
+## Sub-agent Delegation
+
+Task size determines delegation. Classify with `.agents/workflows/task-sizing.md`
+first, then apply the three-tier model below. Do not delegate blindly — size,
+domain fit, and cross-cutting risk all matter. This governs delegation
+strategy and sequencing, not whether delegation occurs. The
+orchestrator-only rule below is not optional.
+
+**The Main Thread is orchestrator-only for non-tiny domain tasks.**
+It plans, gates, and integrates — it must not directly write or edit Angular
+code unless a Tier 1 exception is explicitly recorded. Any direct
+implementation outside those exceptions is a protocol violation.
+
+### Tier 1: Main Agent Direct (tiny tasks)
+
+**Rule**: the main agent executes directly. Do NOT delegate.
+
+- `tiny` tasks: typo, formatting-only, mechanical one-line change.
+- Non-domain tasks of any size that require whole-workspace understanding:
+  workspace config (`nx.json`, `pnpm-workspace.yaml`), CI/CD, Docker/compose,
+  root-level docs, workflow files, bridge files.
+- Simple scoped reads (inspecting ≤2 files to answer a factual question).
+
+**Rationale**: round-trip overhead exceeds work; no context-isolation benefit;
+these tasks need the main agent's full workspace awareness.
+
+### Tier 2: Domain Sub-agent (small–medium, single-domain)
+
+**Rule**: delegate to the matching domain sub-agent. The Main Thread must not
+write or edit domain files directly for non-tiny tasks.
+
+| Task domain                                                              | Sub-agent          | When                             |
+| ------------------------------------------------------------------------ | ------------------ | -------------------------------- |
+| Angular (`apps/ng-frontend`, `apps/ng-tag-build`, `apps/ng-product-doc`) | `angular-frontend` | `small`–`medium`, single-project |
+
+The NestJS backend (`apps/nest-backend`) falls under the unknown-domain
+exception below for `small` tasks; the main agent handles it directly.
+
+Each sub-agent operates in its own context window and returns only a summary.
+The main agent reviews the summary for consistency before proceeding.
+If a sub-agent invocation fails or returns an error, stop and surface the
+failure to the user; do not fall back to direct implementation.
+
+#### Read-only Exploration & Investigation
+
+Use read-only sub-agents to protect the Main Thread context from code-heavy
+exploration.
+
+| Purpose                             | Sub-agent / role    | When to use                                                                                                                     |
+| ----------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Initial broad codebase mapping      | `codebase-mapper`   | Before implementation when affected files, Nx project boundaries, or cross-project impact are unclear                           |
+| Focused mid-task code investigation | `code-investigator` | During planning, implementation, debugging, or review when detailed code reading, call-chain tracing, or impact analysis needed |
+
+**`codebase-mapper`**: Use before implementation when the Main Thread needs a
+broad map of affected projects, files, symbols, dependency paths, and test
+gaps. It must not edit files.
+
+**`code-investigator`**: Use when the Main Thread needs focused code reading
+during the task. It must not edit files, approve gates, or implement changes.
+
+See `.agents/references/agent-roles.md` for the role → platform mapping for
+both `codebase-mapper` and `code-investigator`.
+
+#### Context Hygiene Rule
+
+The Main Thread must not perform deep read-heavy exploration itself when the
+question can be delegated to `codebase-mapper` or `code-investigator`.
+
+For non-trivial tasks, if the Main Thread needs to inspect more than roughly
+three implementation files just to understand the code path, it must delegate
+that investigation first and continue orchestration from the returned summary.
+
+**Special case — unknown domain (exception to orchestrator-only rule)**: if a
+`small` task doesn't clearly belong to a domain sub-agent (e.g., NestJS
+backend, shared utilities, workspace tool scripts), the main agent handles it
+directly. Do not force-fit into a domain sub-agent.
+
+### Tier 3: Main Agent Orchestrates (large+, cross-cutting)
+
+**Rule**: the main agent plans and coordinates; sub-agents execute isolated
+slices.
+
+- `large` or `huge` tasks: break into phases per
+  `.agents/workflows/phased-workflow.md`.
+- Cross-project changes: the main agent delegates each project's slice to its
+  domain sub-agent in sequence or parallel, then integrates.
+- Any task touching 2+ technology stacks: each stack gets its own sub-agent.
+
+The main agent owns the plan, phase gating, integration verification, and final
+handoff. Sub-agents own focused implementation within their slice.
+
+### Review Sub-agents (always via main agent)
+
+Review checkpoints delegate to `architecture-reviewer`, `test-reviewer`,
+`security-reviewer`, or `ux-reviewer` as specified by
+`.agents/workflows/review-lifecycle.md`. The main agent must never self-approve
+its own plan, code, or tests — always use a second reviewer for non-trivial
+work.
 
 ## Tool-Specific Expectations
 

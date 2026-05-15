@@ -3,9 +3,7 @@
 # terminate this outer script (sourcing it with `.` can cause that).
 sh "$(dirname "$0")/_/h"
 
-# test:cov merges unit coverage before backend e2e coverage exists.
-# Merge once more after the separate e2e coverage target writes its lcov file.
-pnpm run lint-staged:run && \
-pnpm run test:cov && \
-pnpm run test-back:e2e:cov && \
-INCLUDE_E2E_COVERAGE=1 node tools/scripts/coverage-tools/merge-coverage/merge-coverage.ts
+# Fast pre-commit: lint/format staged files, then unit-test only affected projects.
+# --base=HEAD intentionally includes unstaged edits to shared libs (overly broad is safe).
+# Full coverage, backend e2e, and SonarCloud coverage merge all run in CI.
+pnpm run lint-staged:run && pnpm run test:pre-commit

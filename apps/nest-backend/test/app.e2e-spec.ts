@@ -1,6 +1,10 @@
+import { ExampleProjectRepositoryService } from '../src/features/example-project/example-project-repository.service';
 import request from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import {
+  FastifyAdapter,
+  NestFastifyApplication
+} from '@nestjs/platform-fastify';
 import { AppModule } from '../src/app.module.js';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { join } from 'path';
@@ -13,7 +17,7 @@ import { vi } from 'vitest';
 const rootProjectPath = join(__dirname, '..', '..', '..', 'tag_check_projects');
 
 describe('App (e2e)', () => {
-  let app: INestApplication;
+  let app: NestFastifyApplication;
   let dataSource: DataSource;
 
   vi.setConfig({ testTimeout: 120000 });
@@ -29,11 +33,18 @@ describe('App (e2e)', () => {
       .useValue(dataSource)
       .compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication(new FastifyAdapter());
     await app.init();
+    await app.getHttpAdapter().getInstance().ready();
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
     await dataSource.synchronize(true);
+
+    const exampleProjectRepositoryService =
+      moduleFixture.get<ExampleProjectRepositoryService>(
+        ExampleProjectRepositoryService
+      );
+    await exampleProjectRepositoryService.ensureSeededOnce();
   });
 
   // Single afterAll defined at bottom of file; removed duplicate to avoid double-closing the app

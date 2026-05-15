@@ -18,16 +18,16 @@ import { AllExceptionsFilter } from './all-exceptions-filter.service';
 import { FirebaseService } from '../../infrastructure/firebase/firebase.service';
 
 function buildHost(req: { url: string; method: string }) {
-  const status = vi.fn().mockReturnThis();
-  const json = vi.fn().mockReturnThis();
-  const response = { status, json };
+  const send = vi.fn().mockReturnThis();
+  const code = vi.fn().mockReturnValue({ send });
+  const response = { code, send };
   const host = {
     switchToHttp: () => ({
       getResponse: () => response,
       getRequest: () => req
     })
   } as unknown as ArgumentsHost;
-  return { host, status, json };
+  return { host, code, send };
 }
 
 describe('AllExceptionsFilter', () => {
@@ -45,22 +45,22 @@ describe('AllExceptionsFilter', () => {
   });
 
   it('responds with the HttpException status and message body', async () => {
-    const { host, status, json } = buildHost({ url: '/x', method: 'GET' });
+    const { host, code, send } = buildHost({ url: '/x', method: 'GET' });
     await filter.catch(new NotFoundException('missing'), host);
 
-    expect(status).toHaveBeenCalledWith(404);
-    const body = json.mock.calls[0][0] as Record<string, unknown>;
+    expect(code).toHaveBeenCalledWith(404);
+    const body = send.mock.calls[0][0] as Record<string, unknown>;
     expect(body.statusCode).toBe(404);
     expect(body.path).toBe('/x');
     expect(body.message).toBeDefined();
   });
 
   it('uses 500 + Internal Server Error for unknown exceptions', async () => {
-    const { host, status, json } = buildHost({ url: '/y', method: 'POST' });
+    const { host, code, send } = buildHost({ url: '/y', method: 'POST' });
     await filter.catch(new Error('boom'), host);
 
-    expect(status).toHaveBeenCalledWith(500);
-    const body = json.mock.calls[0][0] as Record<string, unknown>;
+    expect(code).toHaveBeenCalledWith(500);
+    const body = send.mock.calls[0][0] as Record<string, unknown>;
     expect(body.message).toBe('Internal Server Error');
   });
 
@@ -83,11 +83,11 @@ describe('AllExceptionsFilter', () => {
     const errSpy = vi
       .spyOn(Logger, 'error')
       .mockImplementation(() => undefined);
-    const { host, status } = buildHost({ url: '/q', method: 'GET' });
+    const { host, code } = buildHost({ url: '/q', method: 'GET' });
 
     await filter.catch(new HttpException('e', 400), host);
 
-    expect(status).toHaveBeenCalledWith(400);
+    expect(code).toHaveBeenCalledWith(400);
     expect(errSpy).toHaveBeenCalled();
     errSpy.mockRestore();
   });

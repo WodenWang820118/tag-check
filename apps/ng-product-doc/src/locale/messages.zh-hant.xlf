@@ -890,6 +890,90 @@
           <context context-type="linenumber">59</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="about.code.label.ga4" datatype="html">
+        <source>GA4 Event</source>
+        <target>GA4 事件</target>
+      </trans-unit>
+      <trans-unit id="about.code.label.tagbuild" datatype="html">
+        <source>Tag Build</source>
+        <target>Tag Build 格式</target>
+      </trans-unit>
+      <trans-unit id="diagram.node.specification" datatype="html">
+        <source>Specification</source>
+        <target>規範</target>
+      </trans-unit>
+      <trans-unit id="diagram.node.ga4events" datatype="html">
+        <source>GA4 Events</source>
+        <target>GA4 事件</target>
+      </trans-unit>
+      <trans-unit id="diagram.node.gtmdocs" datatype="html">
+        <source>GTM Docs</source>
+        <target>GTM 文件</target>
+      </trans-unit>
+      <trans-unit id="diagram.node.website" datatype="html">
+        <source>website</source>
+        <target>網站</target>
+      </trans-unit>
+      <trans-unit id="diagram.edge.outputs-json" datatype="html">
+        <source>Outputs JSON</source>
+        <target>輸出 JSON</target>
+      </trans-unit>
+      <trans-unit id="diagram.edge.validates" datatype="html">
+        <source>validates</source>
+        <target>驗證</target>
+      </trans-unit>
+      <trans-unit id="diagram.edge.reports-issues" datatype="html">
+        <source>reports issues</source>
+        <target>回報問題</target>
+      </trans-unit>
+      <trans-unit id="diagram.edge.defines-events" datatype="html">
+        <source>defines events</source>
+        <target>定義事件</target>
+      </trans-unit>
+      <trans-unit id="diagram.subgraph.sources" datatype="html">
+        <source>Sources</source>
+        <target>資料來源</target>
+      </trans-unit>
+      <trans-unit id="diagram.subgraph.tag-build" datatype="html">
+        <source>Tag Build</source>
+        <target>Tag Build</target>
+      </trans-unit>
+      <trans-unit id="diagram.subgraph.tag-check" datatype="html">
+        <source>Tag Check</source>
+        <target>Tag Check</target>
+      </trans-unit>
+      <trans-unit id="diagram.aria.tag-build" datatype="html">
+        <source>Tag Build workflow: GA4 Events and GTM Docs feed into Specification and TagBuild to produce GTM output</source>
+        <target>Tag Build 工作流程：GA4 事件與 GTM 文件流入規範與 TagBuild，產出 GTM 輸出</target>
+      </trans-unit>
+      <trans-unit id="diagram.aria.tag-check" datatype="html">
+        <source>Tag Check workflow: TagBuild outputs GTM JSON that runs on the website; TagCheck monitors GTM and the website against the Specification to surface issues</source>
+        <target>Tag Check 工作流程：TagBuild 輸出運行於網站的 GTM JSON；TagCheck 依規範監測 GTM 與網站並回報問題</target>
+      </trans-unit>
+      <trans-unit id="diagram.edge.runs-on" datatype="html">
+        <source>runs on</source>
+        <target>運行於</target>
+      </trans-unit>
+      <trans-unit id="diagram.edge.monitors" datatype="html">
+        <source>monitors</source>
+        <target>監控</target>
+      </trans-unit>
+      <trans-unit id="diagram.caption.tag-build" datatype="html">
+        <source>Fig. 1 — Tag Build workflow</source>
+        <target>圖1 — Tag Build 工作流程</target>
+      </trans-unit>
+      <trans-unit id="diagram.caption.tag-check" datatype="html">
+        <source>Fig. 2 — Tag Check workflow</source>
+        <target>圖2 — Tag Check 工作流程</target>
+      </trans-unit>
+      <trans-unit id="mermaid.error.message" datatype="html">
+        <source>Failed to load diagram.</source>
+        <target>圖表載入失敗。</target>
+      </trans-unit>
+      <trans-unit id="mermaid.error.retry" datatype="html">
+        <source>Retry</source>
+        <target>重試</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
