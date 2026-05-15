@@ -52,6 +52,8 @@
     "tauri:release:windows": "node tools/scripts/tauri/release/release-windows.ts",
     "tauri:release:macos": "node tools/scripts/tauri/release/release-macos.ts",
     "tauri:release:linux": "node tools/scripts/tauri/release/release-linux.ts",
+    "version:sync": "node tools/scripts/tauri/release/release.ts sync-version",
+    "version:check": "node tools/scripts/tauri/release/release.ts check-version",
     "tauri:size-report": "node tools/scripts/tauri/size-report/size-report.ts",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org guan-xin-wang --project tag-check ./dist/apps/ng-frontend/browser && sentry-cli sourcemaps upload --org guan-xin-wang --project tag-check ./dist/apps/ng-frontend/browser",
     "_____________SOURCE MAP EXPLORER____________": "--------------------------------------------------------",

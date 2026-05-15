@@ -17,9 +17,12 @@ import {
   buildAssetFileName,
   buildStableReleaseTag,
   downloadedReleaseAssetsRoot,
+  parseStableVersion,
   parseStableReleaseTag,
   publishReleaseRoot,
+  readCanonicalVersion,
   resolveReleasePlatform,
+  syncVersionAuthorities,
   type ReleasePlatform
 } from './release-contract.ts';
 
@@ -30,9 +33,12 @@ export {
   buildStableReleaseTag,
   createChecksumFileContents,
   parseStableReleaseTag,
+  parseStableVersion,
+  readCanonicalVersion,
   readVersionAuthorities,
   releaseArtifactDefinitions,
   resolveReleasePlatform,
+  syncVersionAuthorities,
   type ReleaseArtifactDefinition,
   type ReleaseManifest,
   type ReleasePlatform,
@@ -114,6 +120,23 @@ async function describeRelease(args: string[]) {
   console.log(JSON.stringify(result, null, 2));
 }
 
+async function checkVersionAuthoritiesCommand(args: string[]) {
+  const expectedVersionInput = getArgumentValue('--version', args);
+  const version = assertVersionAuthoritiesInSync(
+    expectedVersionInput
+      ? parseStableVersion(expectedVersionInput)
+      : readCanonicalVersion()
+  );
+  console.log(JSON.stringify({ version }, null, 2));
+}
+
+async function syncVersionAuthoritiesCommand() {
+  const version = syncVersionAuthorities();
+  console.log(
+    `Synchronized package.json, tauri.conf.json, and Cargo.toml to VERSION ${version}.`
+  );
+}
+
 export async function runPlatformRelease(platform: ReleasePlatform) {
   const packageManagerCommand = getShellSafePackageManagerCommand('pnpm');
 
@@ -192,12 +215,18 @@ export async function main() {
     case 'describe':
       await describeRelease(args);
       break;
+    case 'check-version':
+      await checkVersionAuthoritiesCommand(args);
+      break;
     case 'validate-artifact':
       await validateReleaseArtifactCommand(args);
       break;
+    case 'sync-version':
+      await syncVersionAuthoritiesCommand();
+      break;
     default:
       throw new Error(
-        'Expected one of: describe, bundle, assemble, validate-artifact.'
+        'Expected one of: describe, bundle, assemble, validate-artifact, check-version, sync-version.'
       );
   }
 }

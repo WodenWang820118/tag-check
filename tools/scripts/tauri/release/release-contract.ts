@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { workspaceRoot } from '../path-contract/path-contract.ts';
@@ -23,6 +23,7 @@ export interface VersionAuthorities {
   cargoManifest: string;
   packageJson: string;
   tauriConfig: string;
+  versionFile: string;
 }
 
 export interface ReleaseManifest {
@@ -103,6 +104,7 @@ export const releaseArtifactDefinitions: Record<
 };
 
 export const packageJsonPath = join(workspaceRoot, 'package.json');
+export const versionFilePath = join(workspaceRoot, 'VERSION');
 export const tauriConfigPath = join(
   workspaceRoot,
   'apps',
@@ -147,11 +149,38 @@ function readJsonFile<T>(targetPath: string): T {
   return JSON.parse(readFileSync(targetPath, 'utf8')) as T;
 }
 
-export function readVersionAuthorities(): VersionAuthorities {
-  const packageJson = readJsonFile<{ version: string }>(packageJsonPath);
-  const tauriConfig = readJsonFile<{ version: string }>(tauriConfigPath);
+function writeJsonFile(targetPath: string, contents: unknown) {
+  writeFileSync(targetPath, `${JSON.stringify(contents, null, 2)}\n`, 'utf8');
+}
+
+function getCargoPackageSection(contents: string) {
+  const packageHeaderMatch = contents.match(/^\[package\]\s*$/m);
+
+  if (packageHeaderMatch?.index === undefined) {
+    throw new Error(
+      `Unable to locate the [package] section in ${cargoManifestPath}.`
+    );
+  }
+
+  const sectionStart = packageHeaderMatch.index + packageHeaderMatch[0].length;
+  const remainingContents = contents.slice(sectionStart);
+  const nextSectionMatch = remainingContents.match(/^\[[^\r\n]+\]\s*$/m);
+  const sectionEnd =
+    nextSectionMatch?.index === undefined
+      ? contents.length
+      : sectionStart + nextSectionMatch.index;
+
+  return {
+    section: contents.slice(sectionStart, sectionEnd),
+    sectionEnd,
+    sectionStart
+  };
+}
+
+function readCargoManifestVersion() {
   const cargoManifest = readFileSync(cargoManifestPath, 'utf8');
-  const cargoVersionMatch = cargoManifest.match(
+  const { section } = getCargoPackageSection(cargoManifest);
+  const cargoVersionMatch = section.match(
     /^version\s*=\s*"(?<version>[^"]+)"/m
   );
 
@@ -161,10 +190,39 @@ export function readVersionAuthorities(): VersionAuthorities {
     );
   }
 
+  return parseStableVersion(cargoVersionMatch.groups.version);
+}
+
+function updateCargoManifestVersion(contents: string, version: string) {
+  const { section, sectionEnd, sectionStart } =
+    getCargoPackageSection(contents);
+
+  if (!/^version\s*=\s*"[^"]+"/m.test(section)) {
+    throw new Error(
+      `Unable to update the package version in ${cargoManifestPath}.`
+    );
+  }
+
+  const nextSection = section.replace(
+    /^version\s*=\s*"[^"]+"/m,
+    `version = "${version}"`
+  );
+  return `${contents.slice(0, sectionStart)}${nextSection}${contents.slice(sectionEnd)}`;
+}
+
+export function readCanonicalVersion() {
+  return parseStableVersion(readFileSync(versionFilePath, 'utf8'));
+}
+
+export function readVersionAuthorities(): VersionAuthorities {
+  const packageJson = readJsonFile<{ version: string }>(packageJsonPath);
+  const tauriConfig = readJsonFile<{ version: string }>(tauriConfigPath);
+
   return {
-    cargoManifest: cargoVersionMatch.groups.version,
-    packageJson: packageJson.version,
-    tauriConfig: tauriConfig.version
+    cargoManifest: readCargoManifestVersion(),
+    packageJson: parseStableVersion(packageJson.version),
+    tauriConfig: parseStableVersion(tauriConfig.version),
+    versionFile: readCanonicalVersion()
   };
 }
 
@@ -198,15 +256,23 @@ export function buildStableReleaseTag(version: string) {
 
 export function assertVersionAuthoritiesInSync(expectedVersion?: string) {
   const authorities = readVersionAuthorities();
-  const discoveredVersions = new Set(Object.values(authorities));
+  const expectedAuthorityVersion = authorities.versionFile;
+  const consumerAuthorities = [
+    ['package.json', authorities.packageJson],
+    ['tauri.conf.json', authorities.tauriConfig],
+    ['Cargo.toml', authorities.cargoManifest]
+  ] as const;
+  const mismatchedAuthorities = consumerAuthorities.filter(
+    ([, version]) => version !== expectedAuthorityVersion
+  );
 
-  if (discoveredVersions.size !== 1) {
+  if (mismatchedAuthorities.length > 0) {
     throw new Error(
-      `Version authorities are out of sync: package.json=${authorities.packageJson}, tauri.conf.json=${authorities.tauriConfig}, Cargo.toml=${authorities.cargoManifest}.`
+      `Version authorities are out of sync: VERSION=${authorities.versionFile}, package.json=${authorities.packageJson}, tauri.conf.json=${authorities.tauriConfig}, Cargo.toml=${authorities.cargoManifest}.`
     );
   }
 
-  const [resolvedVersion] = [...discoveredVersions];
+  const resolvedVersion = expectedAuthorityVersion;
 
   if (expectedVersion && resolvedVersion !== expectedVersion) {
     throw new Error(
@@ -215,6 +281,29 @@ export function assertVersionAuthoritiesInSync(expectedVersion?: string) {
   }
 
   return resolvedVersion;
+}
+
+export function syncVersionAuthorities(version = readCanonicalVersion()) {
+  const normalizedVersion = parseStableVersion(version);
+  const packageJson = readJsonFile<Record<string, unknown>>(packageJsonPath);
+  const tauriConfig = readJsonFile<Record<string, unknown>>(tauriConfigPath);
+  const cargoManifest = readFileSync(cargoManifestPath, 'utf8');
+
+  writeJsonFile(packageJsonPath, {
+    ...packageJson,
+    version: normalizedVersion
+  });
+  writeJsonFile(tauriConfigPath, {
+    ...tauriConfig,
+    version: normalizedVersion
+  });
+  writeFileSync(
+    cargoManifestPath,
+    updateCargoManifestVersion(cargoManifest, normalizedVersion),
+    'utf8'
+  );
+
+  return normalizedVersion;
 }
 
 export function resolveReleasePlatform(

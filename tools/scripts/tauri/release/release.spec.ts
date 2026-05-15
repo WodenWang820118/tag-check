@@ -22,6 +22,7 @@ import {
   buildAssetFileName,
   createChecksumFileContents,
   parseStableReleaseTag,
+  readCanonicalVersion,
   pruneLinuxAppImageBackendPrebuilds,
   readVersionAuthorities,
   resolveReleasePlatform,
@@ -64,6 +65,7 @@ afterEach(() => {
   }
   vi.resetModules();
   vi.clearAllMocks();
+  vi.doUnmock('../path-contract/path-contract.ts');
   vi.doUnmock('../../shared/process.ts');
   vi.doUnmock('../node-sidecar/node-sidecar.ts');
   vi.doUnmock('./release-assets.ts');
@@ -75,6 +77,75 @@ function createFixtureDirectory() {
   const directory = mkdtempSync(join(tmpdir(), 'tag-check-release-'));
   temporaryDirectories.push(directory);
   return directory;
+}
+
+function createVersionWorkspaceFixture(
+  versions: {
+    cargoManifest?: string;
+    packageJson?: string;
+    tauriConfig?: string;
+    versionFile?: string;
+  } = {}
+) {
+  const workspaceRoot = createFixtureDirectory();
+  const desktopTauriRoot = join(
+    workspaceRoot,
+    'apps',
+    'desktop-tauri',
+    'src-tauri'
+  );
+  const resolvedVersions = {
+    cargoManifest: versions.cargoManifest ?? fixtureVersion,
+    packageJson: versions.packageJson ?? fixtureVersion,
+    tauriConfig: versions.tauriConfig ?? fixtureVersion,
+    versionFile: versions.versionFile ?? fixtureVersion
+  };
+
+  mkdirSync(desktopTauriRoot, { recursive: true });
+  writeFileSync(
+    join(workspaceRoot, 'package.json'),
+    `${JSON.stringify({ name: 'tag-check', version: resolvedVersions.packageJson }, null, 2)}\n`,
+    'utf8'
+  );
+  writeFileSync(
+    join(workspaceRoot, 'VERSION'),
+    `${resolvedVersions.versionFile}\n`,
+    'utf8'
+  );
+  writeFileSync(
+    join(desktopTauriRoot, 'tauri.conf.json'),
+    `${JSON.stringify({ productName: 'Tag Check Desktop', version: resolvedVersions.tauriConfig }, null, 2)}\n`,
+    'utf8'
+  );
+  writeFileSync(
+    join(desktopTauriRoot, 'Cargo.toml'),
+    [
+      '[package]',
+      'name = "desktop-tauri"',
+      `version = "${resolvedVersions.cargoManifest}"`,
+      'edition = "2021"',
+      ''
+    ].join('\n'),
+    'utf8'
+  );
+
+  return workspaceRoot;
+}
+
+async function loadReleaseContractWorkspaceModule(
+  versions: Parameters<typeof createVersionWorkspaceFixture>[0] = {}
+) {
+  const workspaceRoot = createVersionWorkspaceFixture(versions);
+
+  vi.resetModules();
+  vi.doMock('../path-contract/path-contract.ts', () => ({
+    workspaceRoot
+  }));
+
+  return {
+    releaseContractModule: await import('./release-contract.ts'),
+    workspaceRoot
+  };
 }
 
 function hashContent(content: string) {
@@ -749,13 +820,115 @@ describe('release helper', () => {
     );
   });
 
-  it('keeps the three version authorities in lockstep', () => {
+  it('keeps VERSION and consumer manifests in lockstep', () => {
+    const checkedInVersion = readCanonicalVersion();
+
     expect(readVersionAuthorities()).toEqual({
-      cargoManifest: fixtureVersion,
-      packageJson: fixtureVersion,
-      tauriConfig: fixtureVersion
+      cargoManifest: checkedInVersion,
+      packageJson: checkedInVersion,
+      tauriConfig: checkedInVersion,
+      versionFile: checkedInVersion
     });
-    expect(assertVersionAuthoritiesInSync(fixtureVersion)).toBe(fixtureVersion);
+    expect(assertVersionAuthoritiesInSync(checkedInVersion)).toBe(
+      checkedInVersion
+    );
+  });
+
+  it('fails when VERSION and a consumer manifest diverge', async () => {
+    const { releaseContractModule } = await loadReleaseContractWorkspaceModule({
+      cargoManifest: '2.1.0',
+      packageJson: '2.0.0',
+      tauriConfig: '2.1.0',
+      versionFile: '2.1.0'
+    });
+
+    expect(() =>
+      releaseContractModule.assertVersionAuthoritiesInSync()
+    ).toThrow(
+      'Version authorities are out of sync: VERSION=2.1.0, package.json=2.0.0, tauri.conf.json=2.1.0, Cargo.toml=2.1.0.'
+    );
+  });
+
+  it('rejects invalid VERSION contents before release work starts', async () => {
+    const { releaseContractModule } = await loadReleaseContractWorkspaceModule({
+      versionFile: '2.1.0-beta.1'
+    });
+
+    expect(() => releaseContractModule.readCanonicalVersion()).toThrow(
+      /stable version/
+    );
+  });
+
+  it('synchronizes package.json, tauri.conf.json, and Cargo.toml from VERSION', async () => {
+    const { releaseContractModule, workspaceRoot } =
+      await loadReleaseContractWorkspaceModule({
+        cargoManifest: '2.0.0',
+        packageJson: '2.0.0',
+        tauriConfig: '2.0.0',
+        versionFile: '2.1.0'
+      });
+
+    expect(releaseContractModule.syncVersionAuthorities()).toBe('2.1.0');
+    expect(releaseContractModule.readVersionAuthorities()).toEqual({
+      cargoManifest: '2.1.0',
+      packageJson: '2.1.0',
+      tauriConfig: '2.1.0',
+      versionFile: '2.1.0'
+    });
+    expect(
+      JSON.parse(readFileSync(join(workspaceRoot, 'package.json'), 'utf8'))
+    ).toMatchObject({
+      version: '2.1.0'
+    });
+    expect(
+      JSON.parse(
+        readFileSync(
+          join(
+            workspaceRoot,
+            'apps',
+            'desktop-tauri',
+            'src-tauri',
+            'tauri.conf.json'
+          ),
+          'utf8'
+        )
+      )
+    ).toMatchObject({
+      version: '2.1.0'
+    });
+    expect(
+      readFileSync(
+        join(workspaceRoot, 'apps', 'desktop-tauri', 'src-tauri', 'Cargo.toml'),
+        'utf8'
+      )
+    ).toContain('version = "2.1.0"');
+  });
+
+  it('keeps sync-version idempotent when Cargo.toml already matches VERSION', async () => {
+    const { releaseContractModule, workspaceRoot } =
+      await loadReleaseContractWorkspaceModule({
+        cargoManifest: '2.1.0',
+        packageJson: '2.1.0',
+        tauriConfig: '2.1.0',
+        versionFile: '2.1.0'
+      });
+    const cargoManifestPath = join(
+      workspaceRoot,
+      'apps',
+      'desktop-tauri',
+      'src-tauri',
+      'Cargo.toml'
+    );
+    const originalCargoManifest = readFileSync(cargoManifestPath, 'utf8');
+
+    expect(releaseContractModule.syncVersionAuthorities()).toBe('2.1.0');
+    expect(readFileSync(cargoManifestPath, 'utf8')).toBe(originalCargoManifest);
+    expect(releaseContractModule.readVersionAuthorities()).toEqual({
+      cargoManifest: '2.1.0',
+      packageJson: '2.1.0',
+      tauriConfig: '2.1.0',
+      versionFile: '2.1.0'
+    });
   });
 
   it('assembles validated release assets from downloaded artifacts', async () => {
