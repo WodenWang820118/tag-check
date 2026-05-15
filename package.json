@@ -1,7 +1,7 @@
 {
   "name": "tag-check",
   "sideEffects": false,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "author": "Guan Xin Wang",
   "description": "A tool to verify Google Tag Manager implementations on websites",
