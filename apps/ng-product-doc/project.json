@@ -152,6 +152,10 @@
       "options": {
         "commands": [
           {
+            "command": "node tools/scripts/update-sitemap-lastmod.ts",
+            "description": "Stamp sitemaps with today's lastmod date before building."
+          },
+          {
             "command": "pnpm nx build ng-product-doc --configuration production --optimization",
             "description": "Build the localized static site output."
           }

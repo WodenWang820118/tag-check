@@ -17,11 +17,11 @@
 - 專案資訊
 - 驗證
 - 預載資料
-- 瀏覽器設定
+- Browser Arguments
 - Google Tag Manager 與請求攔截設定
 - 專案匯入與匯出
 
-# TagCheck 的運作方式
+## TagCheck 的運作方式
 
 以下簡要說明 TagCheck 的核心運作流程。
 

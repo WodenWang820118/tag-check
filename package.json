@@ -39,7 +39,7 @@
     "build-staging": "pnpm run build-staging-front && pnpm run build-staging-back",
     "build-staging-back": "cross-env-shell NODE_ENV=staging \"nx build nest-backend\"",
     "build-staging-front": "nx build ng-frontend --configuration=staging --base-href ./",
-    "build-tag-build": "nx build ng-tag-build --configuration production --optimization --source-map",
+    "build-tag-build": "node tools/scripts/update-sitemap-lastmod.ts && nx build ng-tag-build --configuration production --optimization --source-map",
     "i18n:ng-tag-build": "node tools/scripts/i18n/convert-ng-tag-build-xlf.ts",
     "i18n:ng-product-doc": "node tools/scripts/i18n/convert-ng-product-doc-xlf.ts",
     "build-tauri": "nx run desktop-tauri:build",

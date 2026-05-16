@@ -36,6 +36,16 @@ const DOC_LABELS = DOCUMENTATION_PAGES.reduce<Record<string, string>>(
   {}
 );
 
+const DOC_DESCRIPTIONS: Record<string, string> = {
+  introduction: $localize`:@@seo.docs.description.introduction:Learn how TagCheck automates GTM tag audits using Chrome Recorder flows, Puppeteer, and JSON-based specifications.`,
+  objective: $localize`:@@seo.docs.description.objective:Understand the goals of TagCheck: create reusable audit projects, manage GTM validation, and produce structured reports.`,
+  'use-cases': $localize`:@@seo.docs.description.use-cases:Explore how TagCheck helps teams catch missing tags, wrong parameters, and GA4 event errors before they reach production.`,
+  'getting-started': $localize`:@@seo.docs.description.getting-started:Set up your first TagCheck project, record a user flow with Chrome Recorder, and run your first GTM tag audit.`,
+  'quality-assurance': $localize`:@@seo.docs.description.quality-assurance:Learn how TagCheck runs automated checks against GTM Preview, validates GA4 event parameters, and generates QA reports.`,
+  'report-management': $localize`:@@seo.docs.description.report-management:Review, export, and manage TagCheck audit reports including screenshots, video recordings, and data layer snapshots.`,
+  'setting-details': $localize`:@@seo.docs.description.setting-details:Configure TagCheck project settings: browser arguments, pre-load data, GTM Accompanied Mode, and project import/export.`
+};
+
 const ROUTE_SEO_COPY: Record<
   Exclude<SeoKey, 'documentation'>,
   RouteSeoConfig
@@ -88,11 +98,14 @@ export class SeoService extends AbstractSeoService {
     if (seoKey === 'documentation') {
       const slug = activeRoute.paramMap.get('name') ?? 'introduction';
       const label = DOC_LABELS[slug] ?? DOCS_FALLBACK_LABEL;
+      const description =
+        DOC_DESCRIPTIONS[slug] ??
+        $localize`:@@seo.docs.description:Read the ${label}:docLabel: guide in the TagCheck product documentation for GTM validation, workflows, and implementation details.`;
 
       return {
         logicalPath: `/documentation/${slug}`,
         title: `${label} | ${DOCS_TITLE_SUFFIX}`,
-        description: $localize`:@@seo.docs.description:Read the ${label}:docLabel: guide in the TagCheck product documentation for GTM validation, workflows, and implementation details.`
+        description
       };
     }
 
@@ -124,6 +137,7 @@ export class SeoService extends AbstractSeoService {
     });
     this.meta.updateTag({ property: 'og:url', content: canonicalUrl });
     this.meta.updateTag({ property: 'og:type', content: 'website' });
+    this.meta.updateTag({ property: 'og:site_name', content: 'TagCheck' });
     this.meta.updateTag({ property: 'og:image', content: OG_IMAGE_URL });
     this.meta.updateTag({ property: 'og:image:width', content: '1200' });
     this.meta.updateTag({ property: 'og:image:height', content: '630' });
@@ -192,12 +206,10 @@ export class SeoService extends AbstractSeoService {
 
     script.textContent = JSON.stringify({
       '@context': 'https://schema.org',
-      '@type': 'SoftwareApplication',
+      '@type': 'WebSite',
       name: 'TagCheck',
       url: canonicalUrl,
       description: seo.description,
-      applicationCategory: 'BusinessApplication',
-      operatingSystem: 'Any',
       inLanguage: this.locale.hreflang,
       image: OG_IMAGE_URL
     });

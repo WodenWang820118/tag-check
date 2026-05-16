@@ -4,7 +4,7 @@ Quality assurance is the process of confirming whether the acceptance criteria a
 
 ## Report creation
 
-Before auditing a test case, add a report entry for reference. Since the same event can be triggered in multiple places, the system creates an event ID for each report. If you have two `add_to_cart` events, the first test case needs a JSON specification. For example:
+Before auditing a test case, add a report entry for reference. Since the same event can be triggered in multiple places, the system creates an event ID for each report. When there are multiple `add_to_cart` test cases, one shared JSON specification covers all of them. For example:
 
 ```json
 {
@@ -39,20 +39,20 @@ Measurement specifications should stay consistent for the same event. Consistent
 
 ## Chrome recording
 
-Chrome Recorder captures CSS or ID selectors, XPath expressions, and other information needed to replay the flow. Common actions include clicking, hovering, typing, and selecting. After downloading the JSON recording from the browser, upload it to the system and TagCheck will use it during the audit. At the moment, TagCheck runs the flow with CSS and ID selectors.
+Chrome Recorder captures CSS or ID selectors, XPath expressions, and other information needed to replay the flow. Common actions include clicking, hovering, typing, and selecting. After downloading the JSON recording from the browser, upload it to the system and TagCheck will use it during the audit. Currently, TagCheck runs the flow with CSS and ID selectors.
 
 ## Google Tag Manager
 
-Google Tag Manager is a data collection tool that helps teams focus on tracking without directly editing the website codebase. TagCheck aims to reduce repetitive manual testing and support higher-quality QA against business requirements.
+Google Tag Manager is a tag management system that helps teams focus on tracking without directly editing the website codebase. TagCheck aims to reduce repetitive manual testing and support higher-quality QA against business requirements.
 
 ## Data layer
 
-The data layer is a JavaScript object that bridges user interactions and the data collection pipeline. For example, when a user clicks a button, the data layer receives the defined data and triggers the corresponding GTM tag. Inspecting the data layer is therefore one of the core ways to verify implementation quality.
+The data layer is a JavaScript object that bridges user interactions and the data collection pipeline. For example, when you click a button, the data layer receives the defined data and triggers the corresponding GTM tag. Inspecting the data layer is therefore one of the core ways to verify implementation quality.
 
 ## Request interception
 
-In most cases, checking the data layer is enough. There are still situations where an implementation appears correct in GTM Preview, but Google Analytics receives a transformed value instead. One example is array data being turned into strings. To reduce false positives, TagCheck can also audit outgoing requests. The application intercepts requests using the measurement ID configured in the project, rebuilds them into a data-layer-like object, and reuses the same validation logic against the spec.
+In most cases, checking the data layer is enough. There are still situations where an implementation appears correct in GTM Preview, but Google Analytics receives a transformed value instead. One example is array data being turned into strings. To reduce false positives, TagCheck can also audit outgoing requests. TagCheck intercepts requests using the measurement ID configured in the project, rebuilds them into a data-layer-like object, and reuses the same validation logic against the spec.
 
 ## GTM accompanied mode
 
-GTM accompanied mode lets you inspect tag firing alongside GTM Preview while automation is running. It is also useful when you want to audit an unpublished workspace. Provide the GTM container's shareable link and landing page URL so the system can open the preview session and run the audit.
+GTM Accompanied Mode lets you inspect tag firing alongside GTM Preview while automation is running. It is also useful when you want to audit an unpublished workspace. Provide the GTM container's shareable link and landing page URL so TagCheck can open the preview session and run the audit.

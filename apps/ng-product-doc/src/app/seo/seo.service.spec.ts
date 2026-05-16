@@ -128,7 +128,7 @@ describe('SeoService', () => {
 
         expect(title.getTitle()).toBe(DOCS_TITLE);
         expect(meta.getTag('name="description"')?.content).toContain(
-          'Getting Started'
+          'TagCheck project'
         );
         expect(getCanonicalHref()).toBe(
           `${CANONICAL_ORIGIN}/${localeCase.urlSegment}/documentation/getting-started`

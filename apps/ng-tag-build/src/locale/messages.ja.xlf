@@ -2,12 +2,28 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="en-US" datatype="plaintext" original="ng2.template" target-language="ja">
     <body>
+      <trans-unit id="nav.app" datatype="html">
+        <source>App</source>
+        <target>App</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-tag-build/src/app/app.component.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="landing.cta.primary" datatype="html">
+        <source>Open Tag Build</source>
+        <target> Tag Build を開く </target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-tag-build/src/app/lazy-pages/landing-page.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="seo.landing.title" datatype="html">
         <source>Tag Build | Fast GTM JSON Builder for GA4 Teams</source>
         <target>Tag Build | GA4 チーム向けの高速 GTM JSON ビルダー</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">63</context>
         </context-group>
       </trans-unit>
       <trans-unit id="seo.landing.description" datatype="html">
@@ -15,7 +31,7 @@
         <target>SEO 担当者とマーケティングチーム向けに設計された静的・多言語ワークフローで、GA4 イベント用の Google Tag Manager 対応 JSON を作成します。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
-          <context context-type="linenumber">78</context>
+          <context context-type="linenumber">64</context>
         </context-group>
       </trans-unit>
       <trans-unit id="seo.about.title" datatype="html">
@@ -23,7 +39,7 @@
         <target>Tag Build について | GA4 タグワークフロー</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
-          <context context-type="linenumber">82</context>
+          <context context-type="linenumber">68</context>
         </context-group>
       </trans-unit>
       <trans-unit id="seo.about.description" datatype="html">
@@ -31,7 +47,7 @@
         <target>複雑な Google Cloud インフラを維持しなくても、マーケターと SEO チームが構造化された GTM payload を生成できる Tag Build の仕組みを紹介します。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">69</context>
         </context-group>
       </trans-unit>
       <trans-unit id="seo.objectives.title" datatype="html">
@@ -39,7 +55,7 @@
         <target>Tag Build の目標 | 信頼できる GTM ハンドオフ</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">73</context>
         </context-group>
       </trans-unit>
       <trans-unit id="seo.objectives.description" datatype="html">
@@ -47,7 +63,7 @@
         <target>Tag Build がトラッキングの複雑さを減らし、GTM のハンドオフを改善し、ビルド作業と検証フローをつなげる方法を確認できます。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">74</context>
         </context-group>
       </trans-unit>
       <trans-unit id="seo.app.title" datatype="html">
@@ -55,7 +71,7 @@
         <target>Tag Build App | GTM JSON エディター</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
-          <context context-type="linenumber">92</context>
+          <context context-type="linenumber">78</context>
         </context-group>
       </trans-unit>
       <trans-unit id="seo.app.description" datatype="html">
@@ -63,7 +79,7 @@
         <target>client-side の Tag Build エディターを開き、GA4 イベント実装向けに GTM-ready な JSON payload を準備します。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-tag-build/src/app/seo/seo.service.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">79</context>
         </context-group>
       </trans-unit>
       <trans-unit id="about.title" datatype="html">
@@ -71,27 +87,24 @@
         <target>Tag Build について</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
-          <context context-type="linenumber">2,4</context>
+          <context context-type="linenumber">2,3</context>
         </context-group>
       </trans-unit>
       <trans-unit id="about.description.main" datatype="html">
-        <source> Tag Build is an innovative tool designed specifically for digital marketers and SEO professionals. It streamlines the process of generating JSON files for Google Tag Manager (GTM), following GA4&apos;s recommended event structure to ensure optimal tracking implementation. </source>
-        <target>Tag Build は、デジタルマーケターとSEO専門家のために特別に設計された革新的なツールです。Google Tag Manager (GTM)
-          用のJSONファイルを生成するプロセスを効率化し、GA4が推奨するイベント構造に従って最適なトラッキング実装を実現します。</target>
+        <source> Tag Build converts your GA4 event requirements into Google Tag Manager-ready JSON—without spreadsheets, server setup, or GTM internals knowledge. Teams hand off structured, reviewable payloads instead of ad-hoc configurations. </source>
+        <target>Tag Build は、GA4 のイベント要件を Google Tag Manager 対応 JSON に変換します。スプレッドシート、サーバー設定、GTM の内部知識は不要です。チームは場当たり的な設定ではなく、構造化されたレビュー可能なペイロードを引き渡せます。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
-          <context context-type="linenumber">14,21</context>
+          <context context-type="linenumber">9,16</context>
         </context-group>
         <note priority="1" from="description">Description of Tag Build</note>
       </trans-unit>
       <trans-unit id="about.description.challenges" datatype="html">
-        <source> While Google Tag Manager offers basic functionality for implementing GA4 events, the rapidly evolving nature of business and marketing requirements often necessitates frequent updates and validation. Tag Build addresses these challenges by providing a more efficient and maintainable solution. </source>
-        <target>Google Tag
-          Managerは、GA4イベントを実装するための基本的な機能を提供していますが、ビジネスやマーケティング要件の急速な進化により、頻繁な更新と検証が必要となることがあります。Tag
-          Buildは、より効率的で保守可能なソリューションを提供することで、これらの課題に対応します。</target>
+        <source> Tracking requirements change frequently. Without a structured build process, each GTM update risks inconsistent payloads and hard-to-diagnose gaps in your analytics reports. Tag Build keeps each event spec as a reviewable artifact so changes stay auditable. </source>
+        <target>トラッキング要件は頻繁に変わります。構造化されたビルドプロセスがなければ、GTM を更新するたびにペイロードが不統一になり、アナリティクスレポートのデバッグが困難になるリスクがあります。Tag Build は各イベントの仕様をレビュー可能なアーティファクトとして管理し、変更の経緯を追跡できるようにします。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
-          <context context-type="linenumber">24,31</context>
+          <context context-type="linenumber">19,25</context>
         </context-group>
         <note priority="1" from="description">Description of GTM challenges</note>
       </trans-unit>
@@ -100,17 +113,15 @@
         <target>なぜ Tag Build なのか？</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
-          <context context-type="linenumber">32,34</context>
+          <context context-type="linenumber">27,29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="about.section.why.content" datatype="html">
-        <source> Traditional implementation methods using Google Cloud Platform (GCP) servers can synchronize Google Sheets with GTM effectively. However, many marketing agencies lack access to GCP resources, creating a need for a more accessible solution. Tag Build bridges this gap by providing a standalone tool that doesn&apos;t require complex infrastructure. </source>
-        <target>Google Cloud Platform (GCP) サーバーを使用する従来の実装方法では、Google
-          SheetsとGTMを効果的に同期することができます。しかし、多くのマーケティング代理店はGCPリソースへのアクセス権を持っていないため、より利用しやすいソリューションが必要とされています。Tag
-          Buildは、複雑なインフラを必要としないスタンドアロンツールを提供することで、このギャップを埋めています。</target>
+        <source> GCP-based workflows can sync Google Sheets with GTM, but most agencies and in-house teams don&apos;t have GCP access or the engineering overhead to operate such workflows. Tag Build gives those teams the same structured build flow as a static, client-side tool—no cloud account required. </source>
+        <target>GCP ベースのワークフローでは Google Sheets と GTM を同期できますが、多くの代理店や社内チームには GCP へのアクセス権限や、それを運用するエンジニアリングコストがありません。Tag Build は、そうしたチームに同等の構造化ビルドフローを静的なクライアントサイドツールとして提供します。クラウドアカウントは不要です。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
-          <context context-type="linenumber">35,40</context>
+          <context context-type="linenumber">30,34</context>
         </context-group>
       </trans-unit>
       <trans-unit id="about.section.benefits.title" datatype="html">
@@ -118,17 +129,23 @@
         <target>対象者は？</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
-          <context context-type="linenumber">45,47</context>
+          <context context-type="linenumber">39,42</context>
         </context-group>
       </trans-unit>
       <trans-unit id="about.section.benefits.content" datatype="html">
-        <source> Tag Build is ideal for marketing professionals who want to streamline their workflow and focus more on data analytics and business intelligence. It&apos;s particularly valuable for teams looking to optimize their tracking implementation while maintaining efficiency. </source>
-        <target>
-          Tag
-          Buildは、ワークフローを効率化し、データ分析とビジネスインテリジェンスにより注力したいマーケティング専門家に最適です。効率性を維持しながらトラッキング実装を最適化したいチームにとって、特に価値のあるツールです。</target>
+        <source> Tag Build is built for SEO specialists, digital analytics teams, and marketing agencies that manage GTM implementations without dedicated engineering support. If your team reviews tracking plans in spreadsheets today, Tag Build gives you a faster, more structured path to GTM-ready output. </source>
+        <target>Tag Build は、専任エンジニアのサポートなしに GTM 実装を担う SEO 担当者、デジタルアナリティクスチーム、マーケティング代理店向けに設計されています。現在、トラッキング計画をスプレッドシートで管理しているチームなら、Tag Build でより速く、より構造化した GTM 対応の出力を得られます。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
-          <context context-type="linenumber">48,53</context>
+          <context context-type="linenumber">45,49</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.caption.tag-build" datatype="html">
+        <source> Fig. 1 — Tag Build workflow </source>
+        <target>図1 — Tag Buildワークフロー</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">63,65</context>
         </context-group>
       </trans-unit>
       <trans-unit id="about.section.howworks.title" datatype="html">
@@ -136,24 +153,112 @@
         <target>仕組み</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
-          <context context-type="linenumber">57,59</context>
+          <context context-type="linenumber">70,72</context>
         </context-group>
       </trans-unit>
       <trans-unit id="about.section.howworks.intro" datatype="html">
-        <source> Explore the seamless integration between GA4 recommended events and Tag Build&apos;s structured format: </source>
-        <target>GA4 推奨イベントと Tag Build の構造化フォーマット間のシームレスな統合をご覧ください：</target>
+        <source> See how a GA4 event spec maps to Tag Build&apos;s output format: </source>
+        <target>GA4 イベント仕様が Tag Build の出力フォーマットにどのように対応するかご覧ください：</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
-          <context context-type="linenumber">61,64</context>
+          <context context-type="linenumber">73,75</context>
         </context-group>
       </trans-unit>
       <trans-unit id="about.code.label.ga4" datatype="html">
-        <source>GA4 Event</source>
+        <source> GA4 Event </source>
         <target>GA4 イベント</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">78,80</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="about.code.label.tagbuild" datatype="html">
-        <source>Tag Build</source>
+        <source> Tag Build </source>
         <target>Tag Build 形式</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.html</context>
+          <context context-type="linenumber">87,89</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.aria.tag-build" datatype="html">
+        <source>Tag Build workflow: GA4 Events and GTM Docs feed into Specification and TagBuild to produce GTM output</source>
+        <target>Tag Buildワークフロー：GA4イベントとGTMドキュメントが仕様とTagBuildに流れ、GTM出力を生成</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.node.specification" datatype="html">
+        <source>Specification</source>
+        <target>仕様</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.node.ga4events" datatype="html">
+        <source>GA4 Events</source>
+        <target>GA4イベント</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.node.gtmdocs" datatype="html">
+        <source>GTM Docs</source>
+        <target>GTMドキュメント</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="linenumber">18</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.edge.outputs-json" datatype="html">
+        <source>Outputs JSON</source>
+        <target>JSONを出力</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.subgraph.sources" datatype="html">
+        <source>Sources</source>
+        <target>ソース</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="linenumber">55</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.subgraph.tag-build" datatype="html">
+        <source>Tag Build</source>
+        <target>Tag Build</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/about/about.component.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="advancedExpansionPanelComponentAdditionalTagsVariables" datatype="html">
         <source> Additional Built-in Tags/variables </source>
@@ -374,20 +479,12 @@
           <context context-type="linenumber">10,14</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="landing.cta.primary" datatype="html">
-        <source> Open Tag Build </source>
-        <target> Tag Build を開く </target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">16,18</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="landing.cta.secondary" datatype="html">
         <source> See how it works </source>
         <target> 仕組みを見る </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">19,22</context>
+          <context context-type="linenumber">23,26</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.proof.agency" datatype="html">
@@ -395,7 +492,7 @@
         <target>代理店向き</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">24,25</context>
+          <context context-type="linenumber">28,29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.proof.agency.detail" datatype="html">
@@ -403,7 +500,7 @@
         <target>バックエンド不要</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">25,28</context>
+          <context context-type="linenumber">29,32</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.proof.ga4" datatype="html">
@@ -411,7 +508,7 @@
         <target>GA4 に準拠</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">28,29</context>
+          <context context-type="linenumber">32,33</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.proof.ga4.detail" datatype="html">
@@ -419,7 +516,7 @@
         <target>推奨イベント構造</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">29,32</context>
+          <context context-type="linenumber">33,36</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.proof.static" datatype="html">
@@ -427,7 +524,7 @@
         <target>静的ファースト</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">32,33</context>
+          <context context-type="linenumber">36,37</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.proof.static.detail" datatype="html">
@@ -435,15 +532,15 @@
         <target>高速な多言語ページ</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">33,37</context>
+          <context context-type="linenumber">37,40</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.workflow.eyebrow" datatype="html">
-        <source> The workflow </source>
+        <source>The workflow</source>
         <target> ワークフロー </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">41,43</context>
+          <context context-type="linenumber">44,45</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.workflow.title" datatype="html">
@@ -451,7 +548,7 @@
         <target> campaign brief から GTM-ready JSON まで、落ち着いた 3 ステップで。 </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">44,46</context>
+          <context context-type="linenumber">46,48</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.workflow.description" datatype="html">
@@ -459,7 +556,7 @@
         <target> 考える部分はわかりやすいマーケティング言語のままにし、ビルダーが実装とレビューに適した payload へ整えます。 </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">47,51</context>
+          <context context-type="linenumber">49,53</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.step.upload.title" datatype="html">
@@ -467,7 +564,7 @@
         <target>イベント brief を貼り付ける</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">54,55</context>
+          <context context-type="linenumber">56,57</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.step.upload.description" datatype="html">
@@ -475,7 +572,7 @@
         <target> チームがすでに使っているイベント名、コマース項目、トラッキング変数から始められます。 </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">56,59</context>
+          <context context-type="linenumber">58,61</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.step.tune.title" datatype="html">
@@ -483,7 +580,7 @@
         <target>payload 構造を調整</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">62,63</context>
+          <context context-type="linenumber">64,65</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.step.tune.description" datatype="html">
@@ -491,7 +588,7 @@
         <target> GA4 の推奨イベント構造に合わせながら、campaign-specific な項目も見える状態に保ちます。 </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">64,67</context>
+          <context context-type="linenumber">66,69</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.step.export.title" datatype="html">
@@ -499,7 +596,7 @@
         <target>安心してエクスポート</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">70,71</context>
+          <context context-type="linenumber">72,73</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.step.export.description" datatype="html">
@@ -507,7 +604,7 @@
         <target> レビュー、引き継ぎ、GTM 内での検証がしやすい構造化 JSON をコピーできます。 </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">72,75</context>
+          <context context-type="linenumber">74,77</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.benefits.eyebrow" datatype="html">
@@ -515,7 +612,7 @@
         <target>役立つ理由</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">80,81</context>
+          <context context-type="linenumber">82,83</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.benefits.title" datatype="html">
@@ -523,7 +620,7 @@
         <target> 手続きは少なく、信頼できるタグ作業を多く。 </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">82,84</context>
+          <context context-type="linenumber">84,86</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.benefit.seo.title" datatype="html">
@@ -531,7 +628,7 @@
         <target>SEO ハンドオフ向けに設計</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">86,87</context>
+          <context context-type="linenumber">88,89</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.benefit.seo.description" datatype="html">
@@ -539,7 +636,7 @@
         <target> すべての関係者に GTM の内部仕様を覚えてもらわなくても、analytics 要件を実装可能な JSON に変換できます。 </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">88,91</context>
+          <context context-type="linenumber">90,93</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.benefit.agency.title" datatype="html">
@@ -547,7 +644,7 @@
         <target>GCP なしでも使える</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">93,94</context>
+          <context context-type="linenumber">95,96</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.benefit.agency.description" datatype="html">
@@ -555,15 +652,15 @@
         <target> Google Cloud の同期ジョブを実行できないチームでも、構造化され反復可能なビルドフローを利用できます。 </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">95,98</context>
+          <context context-type="linenumber">97,100</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.benefit.validation.title" datatype="html">
-        <source> Ready for validation </source>
+        <source>Ready for validation</source>
         <target>検証につなげやすい</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">101,103</context>
+          <context context-type="linenumber">102,103</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.benefit.validation.description" datatype="html">
@@ -571,7 +668,7 @@
         <target> 同じデータ構造が将来の Tag Check 検証にも使えるため、build と QA をつなげたまま進められます。 </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">104,108</context>
+          <context context-type="linenumber">104,107</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.learn.eyebrow" datatype="html">
@@ -595,7 +692,7 @@
         <target> payload を作成する前に、チーム向けの軽い brief が必要な場合は、アーキテクチャと目標を確認できます。 </target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/landing/landing-page.component.html</context>
-          <context context-type="linenumber">118,122</context>
+          <context context-type="linenumber">118,121</context>
         </context-group>
       </trans-unit>
       <trans-unit id="landing.link.about" datatype="html">
@@ -614,28 +711,16 @@
           <context context-type="linenumber">125,128</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="nav.app" datatype="html">
-        <source>App</source>
-        <target>App</target>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
-          <context context-type="linenumber">32,35</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
-          <context context-type="linenumber">85,87</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="nav.about" datatype="html">
         <source>About</source>
         <target>概要</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
-          <context context-type="linenumber">43,45</context>
+          <context context-type="linenumber">55,57</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
-          <context context-type="linenumber">90,92</context>
+          <context context-type="linenumber">108,110</context>
         </context-group>
       </trans-unit>
       <trans-unit id="nav.objectives" datatype="html">
@@ -643,11 +728,11 @@
         <target>目標</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
-          <context context-type="linenumber">55,58</context>
+          <context context-type="linenumber">67,69</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
-          <context context-type="linenumber">96,99</context>
+          <context context-type="linenumber">114,116</context>
         </context-group>
       </trans-unit>
       <trans-unit id="nav.github" datatype="html">
@@ -655,11 +740,27 @@
         <target>GitHub</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
-          <context context-type="linenumber">67,69</context>
+          <context context-type="linenumber">79,81</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/menu-tabs/menu-tabs.component.ts</context>
-          <context context-type="linenumber">106,108</context>
+          <context context-type="linenumber">124,126</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="mermaid.error.message" datatype="html">
+        <source>Failed to load diagram.</source>
+        <target>図の読み込みに失敗しました。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/mermaid-diagram/mermaid-diagram.component.ts</context>
+          <context context-type="linenumber">26,28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="mermaid.error.retry" datatype="html">
+        <source>Retry</source>
+        <target>再試行</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/mermaid-diagram/mermaid-diagram.component.ts</context>
+          <context context-type="linenumber">29,31</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.achievement.title" datatype="html">
@@ -671,44 +772,51 @@
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.achievement.intro" datatype="html">
-        <source> The GTM Tag Build provides a user-friendly interface for digital marketers and SEO experts to generate JSON files for Google Tag Manager. This tool streamlines tag management by: </source>
-        <target>GTM タグビルドは、デジタルマーケターやSEO専門家向けに、Google Tag
-          Manager用のJSONファイルを生成するための使いやすいインターフェースを提供します。このツールは以下の方法でタグ管理を効率化します：</target>
+        <source> Tag Build provides a structured interface for generating GTM-ready JSON from GA4 event specifications. It improves the tag implementation process by: </source>
+        <target>Tag Build は、GA4 イベント仕様から GTM 対応 JSON を生成するための構造化インターフェースを提供します。このツールはタグ実装プロセスを以下の方法で改善します：</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">16,20</context>
+          <context context-type="linenumber">9,13</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.achievement.list.item1" datatype="html">
-        <source> Reducing technical complexities </source>
-        <target>技術的な複雑さの軽減</target>
+        <source> Turning event specs into structured JSON without manual formatting </source>
+        <target>手動フォーマット不要でイベント仕様を構造化 JSON に変換</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">22,24</context>
+          <context context-type="linenumber">15,17</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.achievement.list.item2" datatype="html">
-        <source> Enabling effortless creation of accurate JSON files </source>
-        <target>正確なJSONファイルの簡単な作成</target>
+        <source> Producing GTM-compatible payloads aligned with GA4 recommended events </source>
+        <target>GA4 推奨イベントに準拠した GTM 対応ペイロードを生成</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">25,27</context>
+          <context context-type="linenumber">18,20</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.achievement.list.item3" datatype="html">
-        <source> Enhancing productivity </source>
-        <target>生産性の向上</target>
+        <source> Reducing back-and-forth between analytics planning and implementation </source>
+        <target>アナリティクス計画と実装の間の往復作業を削減</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">28,30</context>
+          <context context-type="linenumber">21,23</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.achievement.list.item4" datatype="html">
-        <source> Ensuring error-free tag management </source>
-        <target>エラーのないタグ管理の実現</target>
+        <source> Creating a reviewable build artifact that connects to Tag Check validation </source>
+        <target>Tag Check 検証に接続できるレビュー可能なビルドアーティファクトを作成</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">31,34</context>
+          <context context-type="linenumber">24,27</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.caption.tag-check" datatype="html">
+        <source> Fig. 2 — Tag Check workflow </source>
+        <target>図2 — Tag Checkワークフロー</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
+          <context context-type="linenumber">37,39</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.goals.title" datatype="html">
@@ -716,15 +824,15 @@
         <target>目標</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">38,39</context>
+          <context context-type="linenumber">44,45</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.goals.intro" datatype="html">
-        <source> While maintaining the core objective of simplifying tag management, our primary focus is on validation capabilities. Key validation aspects include: </source>
-        <target>タグ管理の簡素化という基本目標を維持しながら、私たちは検証機能に重点を置いています。主な検証の側面には以下が含まれます：</target>
+        <source> Tag Build&apos;s build output is designed to feed directly into Tag Check&apos;s validation pipeline, keeping build and QA in sync. Key validation aspects include: </source>
+        <target>Tag Build のビルド出力は、Tag Check の検証パイプラインに直接フィードするよう設計されており、ビルドと QA を常に同期させます。主な検証の側面には以下が含まれます：</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">41,44</context>
+          <context context-type="linenumber">47,51</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.goals.list.item1" datatype="html">
@@ -732,7 +840,7 @@
         <target>フロントエンドのタグ実装の正確性を確認</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">47,49</context>
+          <context context-type="linenumber">53,55</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.goals.list.item2" datatype="html">
@@ -740,7 +848,7 @@
         <target>タグの適切な発火を確保</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">49,50</context>
+          <context context-type="linenumber">55,56</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.goals.list.item3" datatype="html">
@@ -748,7 +856,7 @@
         <target>スピーディなビジネス環境での効果的な検証を提供</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">51,54</context>
+          <context context-type="linenumber">57,60</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.goals.outro" datatype="html">
@@ -756,7 +864,7 @@
         <target>これらのニーズに対応するため、私たちのチームは</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">56,59</context>
+          <context context-type="linenumber">62,65</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.goals.link.title" datatype="html">
@@ -764,7 +872,7 @@
         <target>Tag Check リポジトリを訪問</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">61,64</context>
+          <context context-type="linenumber">67,70</context>
         </context-group>
       </trans-unit>
       <trans-unit id="objectives.goals.outro2" datatype="html">
@@ -773,7 +881,47 @@
           と同じデータ構造を使用しており、この統合されたアプローチにより、ユーザーは自信を持ってタグ機能を検証できます。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.html</context>
-          <context context-type="linenumber">65,68</context>
+          <context context-type="linenumber">71,75</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.aria.tag-check" datatype="html">
+        <source>Tag Check workflow: TagBuild outputs GTM JSON that runs on the website; TagCheck monitors GTM and the website against the Specification to surface issues</source>
+        <target>Tag Checkワークフロー：TagBuildがウェブサイト上で動作するGTM JSONを出力；TagCheckは仙5様に基づきGTMとウェブサイトを監視し問題を報告</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.node.website" datatype="html">
+        <source>website</source>
+        <target>ウェブサイト</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.edge.defines-events" datatype="html">
+        <source>defines events</source>
+        <target>イベントを定義</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.edge.runs-on" datatype="html">
+        <source>runs on</source>
+        <target>上で動作</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="diagram.edge.monitors" datatype="html">
+        <source>monitors</source>
+        <target>監視</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">libs/ui/src/lib/components/objectives/objectives.component.ts</context>
+          <context context-type="linenumber">23</context>
         </context-group>
       </trans-unit>
       <trans-unit id="uploadActionComponentUploadButton" datatype="html">
@@ -863,82 +1011,6 @@
           <context context-type="sourcefile">libs/ui/src/lib/modules/documentation/tree-data.ts</context>
           <context context-type="linenumber">59</context>
         </context-group>
-      </trans-unit>
-      <trans-unit id="diagram.node.specification" datatype="html">
-        <source>Specification</source>
-        <target>仕様</target>
-      </trans-unit>
-      <trans-unit id="diagram.node.ga4events" datatype="html">
-        <source>GA4 Events</source>
-        <target>GA4イベント</target>
-      </trans-unit>
-      <trans-unit id="diagram.node.gtmdocs" datatype="html">
-        <source>GTM Docs</source>
-        <target>GTMドキュメント</target>
-      </trans-unit>
-      <trans-unit id="diagram.node.website" datatype="html">
-        <source>website</source>
-        <target>ウェブサイト</target>
-      </trans-unit>
-      <trans-unit id="diagram.edge.outputs-json" datatype="html">
-        <source>Outputs JSON</source>
-        <target>JSONを出力</target>
-      </trans-unit>
-      <trans-unit id="diagram.edge.validates" datatype="html">
-        <source>validates</source>
-        <target>検証</target>
-      </trans-unit>
-      <trans-unit id="diagram.edge.reports-issues" datatype="html">
-        <source>reports issues</source>
-        <target>問題を報告</target>
-      </trans-unit>
-      <trans-unit id="diagram.edge.defines-events" datatype="html">
-        <source>defines events</source>
-        <target>イベントを定義</target>
-      </trans-unit>
-      <trans-unit id="diagram.subgraph.sources" datatype="html">
-        <source>Sources</source>
-        <target>ソース</target>
-      </trans-unit>
-      <trans-unit id="diagram.subgraph.tag-build" datatype="html">
-        <source>Tag Build</source>
-        <target>Tag Build</target>
-      </trans-unit>
-      <trans-unit id="diagram.subgraph.tag-check" datatype="html">
-        <source>Tag Check</source>
-        <target>Tag Check</target>
-      </trans-unit>
-      <trans-unit id="diagram.aria.tag-build" datatype="html">
-        <source>Tag Build workflow: GA4 Events and GTM Docs feed into Specification and TagBuild to produce GTM output</source>
-        <target>Tag Buildワークフロー：GA4イベントとGTMドキュメントが仕様とTagBuildに流れ、GTM出力を生成</target>
-      </trans-unit>
-      <trans-unit id="diagram.aria.tag-check" datatype="html">
-        <source>Tag Check workflow: TagBuild outputs GTM JSON that runs on the website; TagCheck monitors GTM and the website against the Specification to surface issues</source>
-        <target>Tag Checkワークフロー：TagBuildがウェブサイト上で動作するGTM JSONを出力；TagCheckは仙5様に基づきGTMとウェブサイトを監視し問題を報告</target>
-      </trans-unit>
-      <trans-unit id="diagram.edge.runs-on" datatype="html">
-        <source>runs on</source>
-        <target>上で動作</target>
-      </trans-unit>
-      <trans-unit id="diagram.edge.monitors" datatype="html">
-        <source>monitors</source>
-        <target>監視</target>
-      </trans-unit>
-      <trans-unit id="diagram.caption.tag-build" datatype="html">
-        <source>Fig. 1 — Tag Build workflow</source>
-        <target>図1 — Tag Buildワークフロー</target>
-      </trans-unit>
-      <trans-unit id="diagram.caption.tag-check" datatype="html">
-        <source>Fig. 2 — Tag Check workflow</source>
-        <target>図2 — Tag Checkワークフロー</target>
-      </trans-unit>
-      <trans-unit id="mermaid.error.message" datatype="html">
-        <source>Failed to load diagram.</source>
-        <target>図の読み込みに失敗しました。</target>
-      </trans-unit>
-      <trans-unit id="mermaid.error.retry" datatype="html">
-        <source>Retry</source>
-        <target>再試行</target>
       </trans-unit>
     </body>
   </file>

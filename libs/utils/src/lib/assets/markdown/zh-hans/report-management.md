@@ -11,7 +11,8 @@
   - Raw Request
   - Request Data Layer
   - Data Layer
+  - Destination URL
 
-# Reports
+## Reports
 
 每次测试成功执行后，系统都会把 report 保存在应用中，并可通过侧边栏的 `Reports` 菜单查看或导出为 XLSX。导出内容会包含上述信息，但不含视频录制，并明确标示每个测试用例是通过还是失败。你也可以一次下载多份报告。

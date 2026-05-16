@@ -11,7 +11,8 @@
   - Raw Request
   - Request Data Layer
   - Data Layer
+  - Destination URL
 
-# Reports
+## Reports
 
 每次測試成功執行後，系統都會把 report 儲存在應用程式中，並可透過側邊欄的 `Reports` 選單檢視或匯出為 XLSX。匯出內容會包含上述資訊，但不含影片錄製，並且明確標示每個測試案例是通過還是失敗。你也可以一次下載多份報告。

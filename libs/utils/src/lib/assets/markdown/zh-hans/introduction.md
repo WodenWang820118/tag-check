@@ -17,11 +17,11 @@
 - 项目信息
 - 验证
 - 预载数据
-- 浏览器设置
+- Browser Arguments
 - Google Tag Manager 与请求拦截设置
 - 项目导入与导出
 
-# TagCheck 的工作方式
+## TagCheck 的工作方式
 
 下面简要说明 TagCheck 的核心工作流程。
 

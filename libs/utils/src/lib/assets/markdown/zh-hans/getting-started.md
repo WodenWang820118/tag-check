@@ -2,15 +2,15 @@
 
 TagCheck 可以帮助你统一量测规范，并将这些规范用于 GTM 相关网站或正式站点的标签验证。
 
-# 什么是 Google Tag Manager
+## 什么是 Google Tag Manager
 
 Google Tag Manager 是一套用来管理和部署营销标签的工具。你可以在不修改网站或 App 源代码的情况下，新增或更新追踪代码、像素与其他标签，并把数据发送到 Google Analytics、Facebook Pixel 等第三方服务。
 
-# 什么是 TagCheck
+## 什么是 TagCheck
 
 TagCheck 是一套帮助你管理 Google Tag Manager（GTM）标签审计项目的工具。你可以创建项目、加入标签，并执行审计来确认标签是否在正确场景下被使用，或是否根本没有被触发。之后你可以根据结果调整标签配置。
 
-# 创建项目与第一个测试用例
+## 创建项目与第一个测试用例
 
 每个项目都会有唯一的 project slug 作为识别，也可以填写后续在 Google Tag Manager 中会用到的项目信息。开始自动化之前，有两个必要条件：规范与录制流程。
 
@@ -77,7 +77,7 @@ TagCheck 会根据几种场景检查字段值：
 
 请将文件下载为 JSON，并上传到 TagCheck，或者直接把文本粘贴到编辑器中。
 
-# 执行测试
+## 执行测试
 
 表格右上角有一个播放按钮。点击后，系统会根据录制流程与标签配置执行测试。测试执行时会同步显示进度，而进度步数取决于录制文件中的操作数量。例如：
 
@@ -116,7 +116,7 @@ TagCheck 会根据几种场景检查字段值：
 }
 ```
 
-# 测试结果
+## 测试结果
 
 测试完成后，结果会立即更新，主要分成 data layer 与 request 两部分。
 
@@ -157,7 +157,7 @@ Data layer 是浏览器 `window` 对象下的一个数据对象。Google Tag Man
 
 一个典型例子是 `add_to_wishlist`，它属于 GA4 推荐事件，因此 `items` 会被正确收集；但像 `remove_from_wishlist` 并不是推荐事件，虽然 GTM Preview 仍会显示 `items`，实际发送到 Google Analytics 4 时却不一定会保留。通过 request 检查可以进一步确认真实发送的数据。
 
-# 报告
+## 报告
 
 每次测试执行后，系统都会自动生成报告，内容包括：
 
@@ -168,4 +168,4 @@ Data layer 是浏览器 `window` 对象下的一个数据对象。Google Tag Man
 - Destination URL：事件触发所在页面的网址
 - Screenshot：事件触发时的画面截图
 
-所有报告都可以从侧边栏的 reports 菜单下载。
+所有报告都可以从侧边栏的 Reports 菜单下载。

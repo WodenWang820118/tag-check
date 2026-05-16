@@ -2,15 +2,15 @@
 
 TagCheck 能協助你統一量測規格，並將這些規格用於 GTM 相關網站或正式站點的標記驗證。
 
-# 什麼是 Google Tag Manager
+## 什麼是 Google Tag Manager
 
 Google Tag Manager 是一套用來管理與部署行銷標記的工具。你可以在不修改網站或 App 原始碼的情況下，新增或更新追蹤碼、像素與其他標記，並把資料傳送到 Google Analytics、Facebook Pixel 等第三方服務。
 
-# 什麼是 TagCheck
+## 什麼是 TagCheck
 
 TagCheck 是一套協助你管理 Google Tag Manager（GTM）標記稽核專案的工具。你可以建立專案、加入標記，並執行稽核來確認標記是否在正確情境下被使用，或是否根本沒有被觸發。之後你可以根據結果回頭調整標記設定。
 
-# 建立專案與第一個測試案例
+## 建立專案與第一個測試案例
 
 每個專案都會有唯一的 project slug 作為識別，也可以填入後續在 Google Tag Manager 中會用到的專案資訊。開始自動化之前，有兩個必要條件：規格與錄製流程。
 
@@ -77,7 +77,7 @@ TagCheck 會依照幾種情境檢查欄位值：
 
 請將檔案下載為 JSON，並上傳到 TagCheck，或直接將文字貼到編輯器中。
 
-# 執行測試
+## 執行測試
 
 表格右上角有一個播放按鈕。點擊後，系統會依照錄製流程與標記設定執行測試。測試執行時會同步顯示進度，而進度步數取決於錄製檔中的操作數量。例如：
 
@@ -116,7 +116,7 @@ TagCheck 會依照幾種情境檢查欄位值：
 }
 ```
 
-# 測試結果
+## 測試結果
 
 測試完成後，結果會立即更新，主要分成 data layer 與 request 兩部分。
 
@@ -157,7 +157,7 @@ Data layer 是瀏覽器 `window` 物件底下的一個資料物件。Google Tag 
 
 一個典型例子是 `add_to_wishlist`，它屬於 GA4 建議事件，因此 `items` 會被正確收集；但像 `remove_from_wishlist` 並不是建議事件，雖然 GTM Preview 仍會顯示 `items`，實際送往 Google Analytics 4 時卻不一定會保留。透過 request 檢查可以進一步確認實際送出的資料。
 
-# 報告
+## 報告
 
 每次測試執行後，系統都會自動產生報告，內容包含：
 
@@ -168,4 +168,4 @@ Data layer 是瀏覽器 `window` 物件底下的一個資料物件。Google Tag 
 - Destination URL：事件觸發所在頁面的網址
 - Screenshot：事件觸發時的畫面截圖
 
-所有報告都可以從側邊欄的 reports 選單下載。
+所有報告都可以從側邊欄的 Reports 選單下載。

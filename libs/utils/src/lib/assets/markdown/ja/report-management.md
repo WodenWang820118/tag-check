@@ -11,7 +11,8 @@
   - Raw Request
   - Request Data Layer
   - Data Layer
+  - Destination URL
 
-# Reports
+## Reports
 
 各テストが正常に実行されると、アプリケーションは report を保存し、サイドバーの `Reports` メニューから確認したり、XLSX として書き出したりできます。書き出しには上記の情報が含まれますが、動画記録は含まれません。また、各テストケースが成功か失敗かも明確に表示されます。複数レポートをまとめてダウンロードすることもできます。
