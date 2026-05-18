@@ -3397,8 +3397,7 @@ export const exampleGtmJson = {
                   {
                     type: 'TEMPLATE',
                     key: 'key',
-                    value:
-                      'wodenwang820118\\.github\\.io\\/ng-gtm-integration-sample'
+                    value: 'wodenwang820118\\.github\\.io\\/ng-gtm-sample'
                   },
                   {
                     type: 'TEMPLATE',
@@ -3413,7 +3412,7 @@ export const exampleGtmJson = {
                   {
                     type: 'TEMPLATE',
                     key: 'key',
-                    value: 'gtm-integration-sample\\.netlify\\.app'
+                    value: 'gtm-sample\\.vercel\\.app'
                   },
                   {
                     type: 'TEMPLATE',

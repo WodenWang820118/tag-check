@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { getPublicDestinationBySlug } from '../../src/app/shared/services/destination/destination-catalog';
 
-const CANONICAL_ORIGIN = 'https://ng-gtm-integration-sample.vercel.app';
+const CANONICAL_ORIGIN = 'https://ng-gtm-sample.vercel.app';
 const APP_ROOT = resolve(__dirname, '../..');
 const DIST_BROWSER_ROOT = resolve(
   APP_ROOT,

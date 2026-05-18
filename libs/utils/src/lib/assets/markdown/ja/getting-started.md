@@ -55,7 +55,7 @@ TagCheck は主に次のパターンで値を検証します。
     },
     {
       "type": "navigate",
-      "url": "https://gtm-integration-sample.netlify.app/"
+      "url": "https://ng-gtm-sample.vercel.app/home"
     },
     {
       "type": "click",
@@ -96,7 +96,7 @@ TagCheck は主に次のパターンで値を検証します。
     },
     {
       "type": "navigate",
-      "url": "https://gtm-integration-sample.netlify.app/"
+      "url": "https://ng-gtm-sample.vercel.app/home"
     },
     {
       "type": "click",

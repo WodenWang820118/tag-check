@@ -39,15 +39,15 @@ const sampleDataLayer = [
     'gtm.newUrlFragment': '',
     'gtm.oldHistoryState': null,
     'gtm.newHistoryState': { navigationId: 1 },
-    'gtm.oldUrl': 'https://gtm-integration-sample.netlify.app/',
-    'gtm.newUrl': 'https://gtm-integration-sample.netlify.app/home',
+    'gtm.oldUrl': 'https://ng-gtm-sample.vercel.app/home',
+    'gtm.newUrl': 'https://ng-gtm-sample.vercel.app/home',
     'gtm.uniqueEventId': 8
   },
   {
     event: 'page_view',
     page_path: '/',
     page_title: 'Home',
-    page_location: 'https://gtm-integration-sample.netlify.app/home',
+    page_location: 'https://ng-gtm-sample.vercel.app/home',
     'gtm.uniqueEventId': 9
   },
   {

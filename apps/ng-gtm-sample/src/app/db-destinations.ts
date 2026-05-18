@@ -7,7 +7,7 @@ export class Destinations extends Dexie {
   featuredDestinations!: Table<Destination, string>;
 
   constructor() {
-    super('ng-gtm-integration');
+    super('ng-gtm-sample');
     this.version(4).stores({
       destinations: 'id, country, city, [country+city]',
       featuredDestinations: 'id, country, city, [country+city]'
@@ -26,7 +26,9 @@ export class Destinations extends Dexie {
 
   addDestinations(destinations: Destination[]) {
     return from(
-      Promise.all(destinations.map((destination) => this.destinations.put(destination)))
+      Promise.all(
+        destinations.map((destination) => this.destinations.put(destination))
+      )
     );
   }
 
@@ -67,7 +69,9 @@ export class Destinations extends Dexie {
   addFeaturedDestinations(destinations: Destination[]) {
     return from(
       Promise.all(
-        destinations.map((destination) => this.featuredDestinations.put(destination))
+        destinations.map((destination) =>
+          this.featuredDestinations.put(destination)
+        )
       )
     );
   }

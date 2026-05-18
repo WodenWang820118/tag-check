@@ -4,4 +4,4 @@ Disallow: /home/login
 Disallow: /transaction/
 Disallow: /admin/
 
-Sitemap: https://ng-gtm-integration-sample.vercel.app/sitemap.xml
+Sitemap: https://ng-gtm-sample.vercel.app/sitemap.xml

@@ -9,7 +9,7 @@ export class DataLayerDatabase extends Dexie {
   javascriptInterfaceService: JavascriptInterfaceService;
   envDetectorService: EnvDetectorService;
   constructor() {
-    super('ng-gtm-integration');
+    super('ng-gtm-sample');
     this.version(3).stores({
       events: '++id, eventName'
     });

@@ -6,7 +6,7 @@ import { Router, RouterOutlet, provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { SeoService } from './seo.service';
 
-const CANONICAL_ORIGIN = 'https://ng-gtm-integration-sample.vercel.app';
+const CANONICAL_ORIGIN = 'https://ng-gtm-sample.vercel.app';
 
 @Component({
   selector: 'app-seo-test-host',

@@ -36,7 +36,7 @@ describe('SEO static artifacts', () => {
     expect(robots).toContain('Disallow: /transaction/');
     expect(robots).toContain('Disallow: /admin/');
     expect(robots).toContain(
-      'Sitemap: https://ng-gtm-integration-sample.vercel.app/sitemap.xml'
+      'Sitemap: https://ng-gtm-sample.vercel.app/sitemap.xml'
     );
   });
 
@@ -44,16 +44,16 @@ describe('SEO static artifacts', () => {
     const sitemap = readFileSync(resolve(APP_SRC_ROOT, 'sitemap.xml'), 'utf8');
 
     expect(sitemap).toContain(
-      '<loc>https://ng-gtm-integration-sample.vercel.app/home</loc>'
+      '<loc>https://ng-gtm-sample.vercel.app/home</loc>'
     );
     expect(sitemap).toContain(
-      '<loc>https://ng-gtm-integration-sample.vercel.app/product/destinations</loc>'
+      '<loc>https://ng-gtm-sample.vercel.app/product/destinations</loc>'
     );
     expect(sitemap).toContain(
-      '<loc>https://ng-gtm-integration-sample.vercel.app/product/details/san-francisco</loc>'
+      '<loc>https://ng-gtm-sample.vercel.app/product/details/san-francisco</loc>'
     );
     expect(sitemap).toContain(
-      '<loc>https://ng-gtm-integration-sample.vercel.app/product/details/reunion</loc>'
+      '<loc>https://ng-gtm-sample.vercel.app/product/details/reunion</loc>'
     );
     expect(sitemap).not.toContain('/home/login');
     expect(sitemap).not.toContain('/transaction/');

@@ -55,7 +55,7 @@ TagCheck 會依照幾種情境檢查欄位值：
     },
     {
       "type": "navigate",
-      "url": "https://gtm-integration-sample.netlify.app/"
+      "url": "https://ng-gtm-sample.vercel.app/home"
     },
     {
       "type": "click",
@@ -96,7 +96,7 @@ TagCheck 會依照幾種情境檢查欄位值：
     },
     {
       "type": "navigate",
-      "url": "https://gtm-integration-sample.netlify.app/"
+      "url": "https://ng-gtm-sample.vercel.app/home"
     },
     {
       "type": "click",

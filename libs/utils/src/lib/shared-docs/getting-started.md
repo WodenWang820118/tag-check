@@ -55,7 +55,7 @@ The recording is a JSON fomatted file from Chrome recorder. TagCheck supports CS
     },
     {
       "type": "navigate",
-      "url": "https://gtm-integration-sample.netlify.app/"
+      "url": "https://ng-gtm-sample.vercel.app/home"
     },
     {
       "type": "click",
@@ -96,7 +96,7 @@ There's a play button on the top right corner of the table. Clicking it will run
     },
     {
       "type": "navigate", // step 2
-      "url": "https://gtm-integration-sample.netlify.app/"
+      "url": "https://ng-gtm-sample.vercel.app/home"
     },
     {
       "type": "click", // step 3

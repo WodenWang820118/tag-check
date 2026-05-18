@@ -45,7 +45,7 @@ import { CardModule } from 'primeng/card';
             ></button>
             <a
               class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:border-blue-200 hover:text-blue-700"
-              href="https://wodenwang820118.github.io/ng-gtm-integration-sample/?utm_source=ng-gtm-integration-sample&utm_medium=website&utm_campaign=app_download"
+              href="https://wodenwang820118.github.io/ng-gtm-sample/?utm_source=ng-gtm-sample&utm_medium=website&utm_campaign=app_download"
               target="_blank"
               rel="noreferrer"
             >
