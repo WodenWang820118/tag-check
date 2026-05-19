@@ -6,10 +6,10 @@
 # Core defaults
 ################################################################################
 
-model = "gpt-5.4"
+model = "gpt-5.5"
 review_model = "gpt-5.5"
 model_context_window = 1000000
-model_auto_compact_token_limit = 64000
+model_auto_compact_token_limit = 800000
 
 model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "high"
@@ -20,9 +20,39 @@ model_verbosity = "medium"
 # the plan before transitioning to implementation.
 plan_mode_instructions = """
 When entering plan mode for any non-trivial task:
-1. Invoke the `grill-me` sub-agent to interview you about the plan.
-2. Resolve every open assumption and decision branch before writing code.
-3. Do not approve the plan until grill-me has no remaining high-impact questions.
+1. Treat the root agent as the Main Thread Orchestrator.
+2. Invoke the `grill-me` sub-agent to interview you about the plan.
+3. If affected files are unclear, invoke `codebase-mapper`.
+4. If focused code reading is needed during planning or implementation, invoke
+   `code-investigator` instead of loading large code context into the Main Thread.
+5. If the task needs a genuinely broad read-only scan across many files,
+   contracts, logs, or documents, invoke `long-context-auditor`.
+6. Follow the repository's AGENTS.md delegation model for implementation slices.
+7. Resolve every open assumption and decision branch before writing code.
+8. Do not approve the plan until grill-me has no remaining high-impact questions.
+9. Record any delegation exception explicitly in the handoff.
+"""
+
+# General execution instructions (all modes).
+# AGENTS.md remains the canonical repository workflow and delegation source.
+instructions = """
+You are the Main Thread Orchestrator for this repository.
+
+Follow AGENTS.md first. For non-trivial work, classify task size, define a plan
+and minimal verification, then obey the repository's review and delegation rules.
+
+Orchestration defaults:
+- Use `codebase-mapper` for initial broad scope mapping when affected files,
+  project boundaries, or impact are unclear.
+- Use `code-investigator` for focused code reading beyond a small local surface.
+- Use `long-context-auditor` only for genuinely broad read-only audits.
+- Delegate implementation according to the repository's AGENTS.md sub-agent
+  model; do not force-fit unknown-domain work into an unrelated domain agent.
+- Record delegation used / sub-agents invoked / delegation exceptions in every
+  non-trivial handoff.
+- If a sub-agent invocation fails or returns an error, stop and surface the
+  failure to the user. Do not fall back to direct implementation unless AGENTS.md
+  explicitly allows a Tier 1 or unknown-domain exception.
 """
 
 approval_policy = "on-request"
@@ -73,6 +103,16 @@ min_rollout_idle_hours = 3
 max_threads = 6
 max_depth = 1
 job_max_runtime_seconds = 1800
+
+[agents.code-investigator]
+description = "Read-only focused code investigator for mid-task deep exploration, call-chain tracing, dependency analysis, and implementation impact analysis."
+config_file = "agents/code-investigator.toml"
+nickname_candidates = ["Investigator", "DeepExplorer", "CodeResearcher"]
+
+[agents.long-context-auditor]
+description = "Read-only long-context auditor for repo-wide consistency audits, cross-project contract impact scans, very large diff or migration review, long log summarization, generated-code audit, and corpus-wide evidence or document mapping."
+config_file = "agents/long-context-auditor.toml"
+nickname_candidates = ["Auditor", "LongContext", "RepoAudit"]
 
 [agents.ci-monitor-subagent]
 description = "CI helper for /monitor-ci. Fetches CI status, retrieves fix details, or updates self-healing fixes. Executes one MCP tool call and returns the result."
