@@ -109,11 +109,11 @@ Before submitting a plan to Plan Review, invoke the `grill-me` skill
 The griller's AI family must differ from the primary agent's family. Three
 families are recognized:
 
-| Family  | Includes                                                         |
-| ------- | ---------------------------------------------------------------- |
-| Copilot | Copilot Claude, Copilot CLI GPT-_, `.github/agents/_`            |
-| Gemini  | `gemini-2.5-pro`, `gemini-3-flash-preview`, `.gemini/commands/*` |
-| Codex   | Codex CLI, `.codex/agents/*`, Codex `grill-me` sub-agent         |
+| Family  | Includes                                                                                                                      |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Copilot | Copilot Claude, Copilot CLI GPT-_, `.github/agents/_`                                                                         |
+| Gemini  | Antigravity CLI (`agy`) preferred, Gemini CLI compatibility, `gemini-2.5-pro`, `gemini-3-flash-preview`, `.gemini/commands/*` |
+| Codex   | Codex CLI, `.codex/agents/*`, Codex `grill-me` sub-agent                                                                      |
 
 Grill exits only when all six items in the grill-me end checklist have
 concrete answers and no `high-impact` open question remains. The reviewer at

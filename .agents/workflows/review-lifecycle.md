@@ -19,7 +19,8 @@ The ideal review path:
 Produce a spec or implementation plan, then send it to a second reviewer.
 
 Primary: GitHub Copilot Claude Sonnet 4.6.
-Fallback: `gemini-2.5-pro` (or `pnpm review:plan:risky` to pin it).
+Fallback: `gemini-2.5-pro` through the Antigravity/Gemini compatibility
+provider (or `pnpm review:plan:risky` to pin it).
 
 **Codex plan mode**: before submitting the plan for review, invoke the
 `grill-me` sub-agent to co-create and stress-test the plan. Do not proceed
@@ -39,7 +40,7 @@ Fallback: the matching tool-native reviewer subagent.
 After the first working implementation and self-check are ready, send the
 change to a second reviewer.
 
-Primary: `pnpm review:implementation` (Gemini Flash Preview via
+Primary: `pnpm review:implementation` (Antigravity/Gemini Flash reviewer via
 `gemini-3-flash-preview`).
 Fallback: Codex grill-me sub-agent.
 
@@ -70,7 +71,8 @@ behavior, or public contracts): escalate directly to GitHub Copilot Claude
 ## Checkpoint Commands
 
 - `pnpm review:plan`: normal plan-review path.
-- `pnpm review:plan:risky`: risky plan review pinned to Gemini Pro.
+- `pnpm review:plan:risky`: risky plan review pinned to Gemini Pro through
+  the Antigravity/Gemini compatibility provider.
 - `pnpm review:test`: normal test-review path.
 - `pnpm review:implementation`: normal implementation-review auto-routing path.
 - `pnpm review:copilot`: explicit Copilot escalation path (required for
