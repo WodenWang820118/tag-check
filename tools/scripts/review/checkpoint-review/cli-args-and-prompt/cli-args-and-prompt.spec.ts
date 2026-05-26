@@ -15,7 +15,7 @@ describe('parseCliArgs', () => {
       '--provider',
       'gemini',
       '--model',
-      'gemini-3-flash-preview',
+      'gemini-3.5-flash-high',
       '--context-file',
       'ctx.txt'
     ]);
@@ -23,7 +23,7 @@ describe('parseCliArgs', () => {
       checkpoint: 'implementation',
       focus: 'security',
       provider: 'gemini',
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.5-flash-high',
       contextFile: 'ctx.txt'
     });
   });
@@ -56,7 +56,7 @@ describe('buildReviewPrompt', () => {
     checkpoint: 'implementation' as const,
     focus: 'security',
     provider: 'gemini' as const,
-    model: 'gemini-3-flash-preview'
+    model: 'gemini-3.5-flash-high'
   };
 
   it('includes the checkpoint, focus, model, and context in the prompt', () => {
@@ -65,7 +65,7 @@ describe('buildReviewPrompt', () => {
     });
     expect(prompt).toContain('Checkpoint: implementation');
     expect(prompt).toContain('Primary focus: security');
-    expect(prompt).toContain('Requested model: gemini-3-flash-preview');
+    expect(prompt).toContain('Requested model: gemini-3.5-flash-high');
     expect(prompt).toContain('diff text here');
   });
 

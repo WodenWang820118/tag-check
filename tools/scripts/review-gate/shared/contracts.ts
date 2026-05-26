@@ -2,7 +2,7 @@
 
 export const SUPPORTED_REVIEWERS = [
   'copilot-claude',
-  'gemini-2.5-pro',
+  'gemini-3.5-flash-high',
   'codex-subagent'
 ] as const;
 

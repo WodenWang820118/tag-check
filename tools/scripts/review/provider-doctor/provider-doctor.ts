@@ -10,14 +10,14 @@ import {
   type ProviderObservationBucket,
   type ProviderObservabilityOperation,
   type ProviderObservabilityProvider,
-  type TimeoutRecommendationSummary,
+  type TimeoutRecommendationSummary
 } from '../provider-observability/provider-observability.ts';
 import {
   getCopilotPolicyTimeoutMs,
   type CopilotPolicyOperation,
   getGeminiCurrentPolicy,
   getGeminiPolicyTimeoutMs,
-  type GeminiPolicyOperation,
+  type GeminiPolicyOperation
 } from '../provider-policies/provider-policies.ts';
 
 export type ProviderDoctorFilter = 'all' | ProviderObservabilityProvider;
@@ -49,11 +49,11 @@ export interface ProviderDoctorReport {
 }
 
 export function parseCliArgs(
-  argv: string[] = process.argv.slice(2),
+  argv: string[] = process.argv.slice(2)
 ): ParsedProviderDoctorArgs {
   const parsed: ParsedProviderDoctorArgs = {
     json: false,
-    provider: 'all',
+    provider: 'all'
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -72,7 +72,7 @@ export function parseCliArgs(
         rawValue !== 'gemini'
       ) {
         throw new Error(
-          `Unsupported --provider value "${rawValue ?? ''}". Expected one of: all, copilot, gemini.`,
+          `Unsupported --provider value "${rawValue ?? ''}". Expected one of: all, copilot, gemini.`
         );
       }
 
@@ -93,7 +93,7 @@ export function getUsageText(scriptName = 'provider-doctor.ts'): string {
     '',
     'Options:',
     '  --provider <all|copilot|gemini>  Filter the report to a single provider (default: all)',
-    '  --json                           Print the report as JSON',
+    '  --json                           Print the report as JSON'
   ].join('\n');
 }
 
@@ -103,18 +103,18 @@ export function buildProviderDoctorReport(input: {
 }): ProviderDoctorReport {
   const buckets = listProviderObservationBuckets({
     provider: input.provider === 'all' ? undefined : input.provider,
-    repoRoot: input.repoRoot,
+    repoRoot: input.repoRoot
   });
 
   return {
     buckets: buckets.map(buildBucketReport),
     generatedAt: new Date().toISOString(),
-    provider: input.provider,
+    provider: input.provider
   };
 }
 
 export function formatProviderDoctorReport(
-  report: ProviderDoctorReport,
+  report: ProviderDoctorReport
 ): string {
   if (report.buckets.length === 0) {
     return [
@@ -122,7 +122,7 @@ export function formatProviderDoctorReport(
       `Generated at: ${report.generatedAt}`,
       `Provider filter: ${report.provider}`,
       '',
-      'No provider observations recorded yet.',
+      'No provider observations recorded yet.'
     ].join('\n');
   }
 
@@ -130,7 +130,7 @@ export function formatProviderDoctorReport(
     'Provider observability doctor',
     `Generated at: ${report.generatedAt}`,
     `Provider filter: ${report.provider}`,
-    '',
+    ''
   ];
 
   for (const bucket of report.buckets) {
@@ -140,52 +140,52 @@ export function formatProviderDoctorReport(
 
     if (bucket.timeoutRecommendation) {
       sections.push(
-        `Timeout stats: success=${bucket.timeoutRecommendation.successCount}/${bucket.timeoutRecommendation.sampleCount}, timeouts=${bucket.timeoutRecommendation.timeoutCount} (${formatRate(bucket.timeoutRecommendation.timeoutRate)})`,
+        `Timeout stats: success=${bucket.timeoutRecommendation.successCount}/${bucket.timeoutRecommendation.sampleCount}, timeouts=${bucket.timeoutRecommendation.timeoutCount} (${formatRate(bucket.timeoutRecommendation.timeoutRate)})`
       );
       sections.push(
-        `Timeout p50/p95: ${formatMs(bucket.timeoutRecommendation.p50DurationMs)} / ${formatMs(bucket.timeoutRecommendation.p95DurationMs)}`,
+        `Timeout p50/p95: ${formatMs(bucket.timeoutRecommendation.p50DurationMs)} / ${formatMs(bucket.timeoutRecommendation.p95DurationMs)}`
       );
       sections.push(
-        `Current timeout: ${formatMs(bucket.timeoutRecommendation.currentTimeoutMs)}`,
+        `Current timeout: ${formatMs(bucket.timeoutRecommendation.currentTimeoutMs)}`
       );
       sections.push(
         bucket.timeoutRecommendation.insufficientData
           ? 'Recommended timeout: insufficient data'
-          : `Recommended timeout: ${formatMs(bucket.timeoutRecommendation.recommendedTimeoutMs)}`,
+          : `Recommended timeout: ${formatMs(bucket.timeoutRecommendation.recommendedTimeoutMs)}`
       );
     }
 
     if (bucket.geminiIntervalRecommendation) {
       sections.push(
-        `Gemini sessions: ${bucket.geminiIntervalRecommendation.sessionCount}`,
+        `Gemini sessions: ${bucket.geminiIntervalRecommendation.sessionCount}`
       );
       sections.push(
-        `First-attempt capacity rate: ${formatRate(bucket.geminiIntervalRecommendation.firstAttemptCapacityRate)}`,
+        `First-attempt capacity rate: ${formatRate(bucket.geminiIntervalRecommendation.firstAttemptCapacityRate)}`
       );
       sections.push(
-        `Current interval: ${formatMs(bucket.geminiIntervalRecommendation.currentIntervalMs)}`,
+        `Current interval: ${formatMs(bucket.geminiIntervalRecommendation.currentIntervalMs)}`
       );
       sections.push(
         bucket.geminiIntervalRecommendation.insufficientData
           ? 'Recommended interval: insufficient data'
-          : `Recommended interval: ${formatMs(bucket.geminiIntervalRecommendation.recommendedIntervalMs)}`,
+          : `Recommended interval: ${formatMs(bucket.geminiIntervalRecommendation.recommendedIntervalMs)}`
       );
     }
 
     if (bucket.geminiBackoffRecommendation) {
       sections.push(
-        `Capacity retry sessions: ${bucket.geminiBackoffRecommendation.retrySessionCount}`,
+        `Capacity retry sessions: ${bucket.geminiBackoffRecommendation.retrySessionCount}`
       );
       sections.push(
-        `Hard retry rate: ${formatRate(bucket.geminiBackoffRecommendation.hardRetryRate)}`,
+        `Hard retry rate: ${formatRate(bucket.geminiBackoffRecommendation.hardRetryRate)}`
       );
       sections.push(
-        `Current backoff: ${formatDelayList(bucket.geminiBackoffRecommendation.currentRetryDelaysMs)}`,
+        `Current backoff: ${formatDelayList(bucket.geminiBackoffRecommendation.currentRetryDelaysMs)}`
       );
       sections.push(
         bucket.geminiBackoffRecommendation.insufficientData
           ? 'Recommended backoff: insufficient data'
-          : `Recommended backoff: ${formatDelayList(bucket.geminiBackoffRecommendation.recommendedRetryDelaysMs)}`,
+          : `Recommended backoff: ${formatDelayList(bucket.geminiBackoffRecommendation.recommendedRetryDelaysMs)}`
       );
     }
 
@@ -198,7 +198,7 @@ export function formatProviderDoctorReport(
 export async function main(argv = process.argv.slice(2)): Promise<void> {
   const parsed = parseCliArgs(argv);
   const report = buildProviderDoctorReport({
-    provider: parsed.provider,
+    provider: parsed.provider
   });
   const output = parsed.json
     ? JSON.stringify(report, null, 2)
@@ -208,11 +208,11 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
 }
 
 function buildBucketReport(
-  bucket: ProviderObservationBucket,
+  bucket: ProviderObservationBucket
 ): ProviderDoctorBucketReport {
   const timeoutRecommendation = buildBucketTimeoutRecommendation(bucket);
   const capacityErrorCount = bucket.observations.filter(
-    (observation) => observation.capacityError,
+    (observation) => observation.capacityError
   ).length;
   const report: ProviderDoctorBucketReport = {
     bucketKey: bucket.key,
@@ -223,32 +223,34 @@ function buildBucketReport(
     operation: bucket.operation,
     provider: bucket.provider,
     sampleCount: bucket.observations.length,
-    timeoutRecommendation,
+    timeoutRecommendation
   };
 
   if (bucket.provider === 'gemini' && bucket.operation === 'review-attempt') {
-    const geminiPolicy = getGeminiCurrentPolicy(
-      bucket.model ?? 'gemini-2.5-pro',
+    const geminiPolicy = tryGetGeminiCurrentPolicy(
+      bucket.model ?? 'gemini-3.5-flash-high'
     );
-    const sessions = buildGeminiReviewSessionSummaries(bucket.observations);
-    report.geminiBackoffRecommendation =
-      buildGeminiBackoffRecommendationSummary({
-        currentRetryDelaysMs: geminiPolicy.retryDelaysMs,
-        sessions,
-      });
-    report.geminiIntervalRecommendation =
-      buildGeminiIntervalRecommendationSummary({
-        currentIntervalMs: geminiPolicy.targetIntervalMs,
-        sessions,
-      });
-    report.geminiSessionCount = sessions.length;
+    if (geminiPolicy) {
+      const sessions = buildGeminiReviewSessionSummaries(bucket.observations);
+      report.geminiBackoffRecommendation =
+        buildGeminiBackoffRecommendationSummary({
+          currentRetryDelaysMs: geminiPolicy.retryDelaysMs,
+          sessions
+        });
+      report.geminiIntervalRecommendation =
+        buildGeminiIntervalRecommendationSummary({
+          currentIntervalMs: geminiPolicy.targetIntervalMs,
+          sessions
+        });
+      report.geminiSessionCount = sessions.length;
+    }
   }
 
   return report;
 }
 
 function buildBucketTimeoutRecommendation(
-  bucket: ProviderObservationBucket,
+  bucket: ProviderObservationBucket
 ): TimeoutRecommendationSummary | undefined {
   let currentTimeoutMs: number;
 
@@ -263,20 +265,43 @@ function buildBucketTimeoutRecommendation(
       return undefined;
     }
 
-    currentTimeoutMs = getGeminiPolicyTimeoutMs({
+    const geminiTimeoutMs = tryGetGeminiPolicyTimeoutMs({
       model: bucket.model,
-      operation: bucket.operation,
+      operation: bucket.operation
     });
+    if (geminiTimeoutMs === undefined) {
+      return undefined;
+    }
+    currentTimeoutMs = geminiTimeoutMs;
   }
 
   return buildTimeoutRecommendationSummary({
     currentTimeoutMs,
-    observations: bucket.observations,
+    observations: bucket.observations
   });
 }
 
+function tryGetGeminiCurrentPolicy(model: string) {
+  try {
+    return getGeminiCurrentPolicy(model);
+  } catch {
+    return undefined;
+  }
+}
+
+function tryGetGeminiPolicyTimeoutMs(input: {
+  model?: string;
+  operation: GeminiPolicyOperation;
+}): number | undefined {
+  try {
+    return getGeminiPolicyTimeoutMs(input);
+  } catch {
+    return undefined;
+  }
+}
+
 function isCopilotPolicyOperation(
-  operation: ProviderObservabilityOperation,
+  operation: ProviderObservabilityOperation
 ): operation is CopilotPolicyOperation {
   return (
     operation === 'health-version' ||
@@ -287,7 +312,7 @@ function isCopilotPolicyOperation(
 }
 
 function isGeminiPolicyOperation(
-  operation: ProviderObservabilityOperation,
+  operation: ProviderObservabilityOperation
 ): operation is GeminiPolicyOperation {
   return (
     operation === 'health-version' ||
@@ -302,7 +327,7 @@ function describeBucket(bucket: ProviderDoctorBucketReport): string {
     bucket.callsite,
     bucket.checkpoint ?? 'no-checkpoint',
     bucket.operation,
-    bucket.model ?? 'default',
+    bucket.model ?? 'default'
   ].join(' / ');
 }
 
@@ -319,7 +344,7 @@ function formatMs(value: number | null | undefined): string {
 }
 
 function formatDelayList(
-  values: ReadonlyArray<number> | null | undefined,
+  values: ReadonlyArray<number> | null | undefined
 ): string {
   if (!values || values.length === 0) {
     return 'n/a';

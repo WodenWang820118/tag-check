@@ -1,4 +1,4 @@
-﻿import assert from 'node:assert/strict';
+import assert from 'node:assert/strict';
 import { test } from 'vitest';
 
 import {
@@ -45,7 +45,7 @@ test('getReviewExecutionPlan follows the repo checkpoint fallback rules', () => 
     }),
     [
       execution('plan', 'copilot', 'general', 'claude-sonnet-4.6'),
-      execution('plan', 'gemini', 'general', 'gemini-2.5-pro'),
+      execution('plan', 'gemini', 'general', 'gemini-3.5-flash-high'),
       execution('plan', 'copilot', 'general', 'gpt-5-mini'),
       execution('plan', 'codex', 'general')
     ]
@@ -59,12 +59,7 @@ test('getReviewExecutionPlan follows the repo checkpoint fallback rules', () => 
       provider: 'auto'
     }),
     [
-      execution(
-        'implementation',
-        'gemini',
-        'general',
-        'gemini-3-flash-preview'
-      ),
+      execution('implementation', 'gemini', 'general', 'gemini-3.5-flash-high'),
       execution('implementation', 'copilot', 'general', 'claude-sonnet-4.6'),
       execution('implementation', 'copilot', 'general', 'gpt-5-mini'),
       execution('implementation', 'codex', 'general')
@@ -80,7 +75,7 @@ test('getReviewExecutionPlan follows the repo checkpoint fallback rules', () => 
     }),
     [
       execution('test', 'copilot', 'tests', 'claude-sonnet-4.6'),
-      execution('test', 'gemini', 'tests', 'gemini-2.5-pro'),
+      execution('test', 'gemini', 'tests', 'gemini-3.5-flash-high'),
       execution('test', 'copilot', 'tests', 'gpt-5-mini'),
       execution('test', 'codex', 'tests')
     ]
@@ -561,12 +556,7 @@ test('getReviewExecutionPlan prefers Codex first for low-risk implementation rev
     }),
     [
       execution('implementation', 'codex', 'general'),
-      execution(
-        'implementation',
-        'gemini',
-        'general',
-        'gemini-3-flash-preview'
-      ),
+      execution('implementation', 'gemini', 'general', 'gemini-3.5-flash-high'),
       execution('implementation', 'copilot', 'general', 'claude-sonnet-4.6'),
       execution('implementation', 'copilot', 'general', 'gpt-5-mini')
     ]
@@ -588,12 +578,7 @@ test('getReviewExecutionPlan keeps high-risk implementation reviews on the non-C
       provider: 'auto'
     }),
     [
-      execution(
-        'implementation',
-        'gemini',
-        'general',
-        'gemini-3-flash-preview'
-      ),
+      execution('implementation', 'gemini', 'general', 'gemini-3.5-flash-high'),
       execution('implementation', 'copilot', 'general', 'claude-sonnet-4.6'),
       execution('implementation', 'copilot', 'general', 'gpt-5-mini'),
       execution('implementation', 'codex', 'general')
@@ -616,12 +601,7 @@ test('getReviewExecutionPlan keeps contract-like implementation reviews on the n
       provider: 'auto'
     }),
     [
-      execution(
-        'implementation',
-        'gemini',
-        'general',
-        'gemini-3-flash-preview'
-      ),
+      execution('implementation', 'gemini', 'general', 'gemini-3.5-flash-high'),
       execution('implementation', 'copilot', 'general', 'claude-sonnet-4.6'),
       execution('implementation', 'copilot', 'general', 'gpt-5-mini'),
       execution('implementation', 'codex', 'general')
@@ -644,12 +624,7 @@ test('getReviewExecutionPlan keeps api-like implementation reviews on the non-Co
       provider: 'auto'
     }),
     [
-      execution(
-        'implementation',
-        'gemini',
-        'general',
-        'gemini-3-flash-preview'
-      ),
+      execution('implementation', 'gemini', 'general', 'gemini-3.5-flash-high'),
       execution('implementation', 'copilot', 'general', 'claude-sonnet-4.6'),
       execution('implementation', 'copilot', 'general', 'gpt-5-mini'),
       execution('implementation', 'codex', 'general')
@@ -669,7 +644,7 @@ test('getReviewExecutionPlan prefers Codex first for low-risk pre-merge reviews'
     }),
     [
       execution('pre-merge', 'codex', 'general'),
-      execution('pre-merge', 'gemini', 'general', 'gemini-2.5-pro'),
+      execution('pre-merge', 'gemini', 'general', 'gemini-3.5-flash-high'),
       execution('pre-merge', 'copilot', 'general', 'claude-sonnet-4.6'),
       execution('pre-merge', 'copilot', 'general', 'gpt-5-mini')
     ]
@@ -691,7 +666,7 @@ test('getReviewExecutionPlan keeps risky pre-merge reviews on the non-Codex-firs
       provider: 'auto'
     }),
     [
-      execution('pre-merge', 'gemini', 'general', 'gemini-2.5-pro'),
+      execution('pre-merge', 'gemini', 'general', 'gemini-3.5-flash-high'),
       execution('pre-merge', 'copilot', 'general', 'claude-sonnet-4.6'),
       execution('pre-merge', 'copilot', 'general', 'gpt-5-mini'),
       execution('pre-merge', 'codex', 'general')
@@ -710,7 +685,7 @@ test('createReviewExecution applies provider-specific model defaults', () => {
       checkpoint: 'implementation',
       provider: 'gemini',
       focus: 'general',
-      model: 'gemini-3-flash-preview'
+      model: 'gemini-3.5-flash-high'
     }
   );
 
@@ -753,7 +728,7 @@ test('getReviewExecutionPlan keeps plan review on the existing default order eve
     }),
     [
       execution('plan', 'copilot', 'general', 'claude-sonnet-4.6'),
-      execution('plan', 'gemini', 'general', 'gemini-2.5-pro'),
+      execution('plan', 'gemini', 'general', 'gemini-3.5-flash-high'),
       execution('plan', 'copilot', 'general', 'gpt-5-mini'),
       execution('plan', 'codex', 'general')
     ]
@@ -766,7 +741,7 @@ test('buildReviewPrompt includes the checkpoint, focus, and supplied context', (
       checkpoint: 'implementation',
       provider: 'gemini',
       focus: 'security',
-      model: 'gemini-3-flash-preview'
+      model: 'gemini-3.5-flash-high'
     },
     'Changed files: tools/scripts/review-gate/shared/shared.ts',
     { commonReviewContract: 'Findings\n- No material issues found.' }
@@ -873,9 +848,9 @@ test('executeReviewFlow prefers Gemini before Copilot GPT-5 mini in auto routing
 
   assert.deepEqual(probed, [
     'copilot:claude-sonnet-4.6',
-    'gemini:gemini-2.5-pro'
+    'gemini:gemini-3.5-flash-high'
   ]);
-  assert.equal(output, 'gemini-2.5-pro');
+  assert.equal(output, 'gemini-3.5-flash-high');
 });
 
 test('executeReviewFlow falls back to Copilot GPT-5 mini before Codex after Gemini fails for test checkpoints', async () => {
@@ -914,7 +889,7 @@ test('executeReviewFlow falls back to Copilot GPT-5 mini before Codex after Gemi
 
   assert.deepEqual(probed, [
     'copilot:claude-sonnet-4.6',
-    'gemini:gemini-2.5-pro',
+    'gemini:gemini-3.5-flash-high',
     'copilot:gpt-5-mini',
     'codex:<none>'
   ]);
@@ -1035,7 +1010,7 @@ test('executeReviewFlow falls back from Codex to Gemini for low-risk implementat
     }
   );
 
-  assert.deepEqual(ran, ['codex:<none>', 'gemini:gemini-3-flash-preview']);
+  assert.deepEqual(ran, ['codex:<none>', 'gemini:gemini-3.5-flash-high']);
   assert.equal(output, 'gemini');
 });
 
@@ -1102,7 +1077,7 @@ test('executeReviewFlow reports all unavailable providers when auto routing is e
         }
       }
     ),
-    /Attempted providers:[\s\S]*copilot:claude-sonnet-4\.6: copilot down[\s\S]*gemini:gemini-2\.5-pro: gemini down[\s\S]*copilot:gpt-5-mini: copilot down[\s\S]*codex: codex down/
+    /Attempted providers:[\s\S]*copilot:claude-sonnet-4\.6: copilot down[\s\S]*gemini:gemini-3\.5-flash-high: gemini down[\s\S]*copilot:gpt-5-mini: copilot down[\s\S]*codex: codex down/
   );
 });
 

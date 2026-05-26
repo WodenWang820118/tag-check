@@ -1,3 +1,8 @@
+import { randomUUID } from 'node:crypto';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { homedir, tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import {
   cacheProviderHealth,
   getCachedProviderHealth,
@@ -44,6 +49,7 @@ interface GeminiProviderDependencies {
     repoRoot?: string
   ) => unknown;
   recordRequestStart?: typeof recordRequestStart;
+  readAgyTranscriptOutput?: typeof readAgyTranscriptOutput;
   runCommand?: (input: LocalCliCommandInput) => LocalCliCommandResult;
   sleep?: typeof sleep;
 }
@@ -54,13 +60,17 @@ interface GoogleReviewCliCommand {
   args: string[];
   command: string;
   input?: string;
+  logFilePath?: string;
   windowsScriptName?: string;
 }
 
 const GOOGLE_REVIEW_CLI_ENV = 'GX_LAW_PREP_REVIEW_GOOGLE_CLI';
-const AGY_REVIEW_TIMEOUT_MS = 30_000;
+const AGY_INLINE_PROMPT_MAX_CHARS =
+  process.platform === 'win32' ? 6_000 : 20_000;
 
 const GEMINI_HEALTH_PROMPT = 'Reply with exactly OK.';
+const AGY_EMPTY_OUTPUT_MESSAGE =
+  'Antigravity CLI returned no output. Ensure `agy --print` writes review text to stdout for non-interactive use, and that `~/.gemini/antigravity-cli/settings.json` selects "Gemini 3.5 Flash (High)".';
 let geminiSessionCounter = 0;
 
 export async function probeGeminiCliHealth(
@@ -137,7 +147,7 @@ export async function probeGeminiCliHealth(
         dependencies
       );
 
-      if (/^OK\b/i.test(output.trim())) {
+      if (isAcceptableGeminiHealthOutput(cli, output)) {
         return cacheProviderHealth(
           'gemini',
           input.model,
@@ -190,7 +200,7 @@ export function isGeminiUnavailableError(error: unknown): boolean {
     return false;
   }
 
-  return /\b(timeout|timed out|ETIMEDOUT|not authenticated|authenticate|login|sign in|api key|quota|429|MODEL_CAPACITY_EXHAUSTED|RESOURCE_EXHAUSTED|rateLimitExceeded|No capacity available|Requested entity was not found)\b/i.test(
+  return /\b(timeout|timed out|ETIMEDOUT|not authenticated|authenticate|login|sign in|api key|quota|429|MODEL_CAPACITY_EXHAUSTED|RESOURCE_EXHAUSTED|rateLimitExceeded|No capacity available|Requested entity was not found|no output|empty output)\b/i.test(
     error.message
   );
 }
@@ -263,6 +273,19 @@ function isGeminiModelNotFound(output: string): boolean {
   return /ModelNotFoundError|Requested entity was not found/i.test(output);
 }
 
+function isAcceptableGeminiHealthOutput(
+  cli: GoogleReviewCli,
+  output: string
+): boolean {
+  const trimmed = output.trim();
+
+  if (/^OK\b/i.test(trimmed)) {
+    return true;
+  }
+
+  return cli === 'agy' && trimmed.length > 0;
+}
+
 async function runGeminiTextCommand(
   input: GeminiReviewInput & {
     cliCandidates?: GoogleReviewCli[];
@@ -283,6 +306,8 @@ async function runGeminiTextCommand(
     dependencies.recordObservation ?? recordProviderObservation;
   const recordRequestStartFn =
     dependencies.recordRequestStart ?? recordRequestStart;
+  const readAgyTranscriptOutputFn =
+    dependencies.readAgyTranscriptOutput ?? readAgyTranscriptOutput;
   const runCommand = dependencies.runCommand ?? runLocalCliCommand;
   const sleepFn = dependencies.sleep ?? sleep;
   const repoRoot = input.repoRoot ?? process.cwd();
@@ -317,17 +342,23 @@ async function runGeminiTextCommand(
         cliCandidates: input.cliCandidates ?? getGoogleReviewCliCandidates(),
         model: policy.model,
         prompt: input.prompt,
+        readAgyTranscriptOutput: readAgyTranscriptOutputFn,
         runCommand,
         timeoutMs: input.timeoutMs ?? policy.requestTimeoutMs,
         cwd: repoRoot
       });
       const result = commandResult.result;
       const durationMs = now() - attemptStartedAtMs;
-      const output = cleanGeminiOutput(
+      const reviewOutput = cleanGeminiOutput(
+        commandResult.cli === 'agy'
+          ? (result.stdout ?? '')
+          : joinOutput(result.stdout, result.stderr)
+      );
+      const diagnosticOutput = cleanGeminiOutput(
         joinOutput(result.stdout, result.stderr)
       );
-      const timedOut = isGeminiTimedOut(result, output);
-      const capacityError = isGeminiCapacityError(output);
+      const timedOut = isGeminiTimedOut(result, diagnosticOutput);
+      const capacityError = isGeminiCapacityError(diagnosticOutput);
       const retryDelayMs =
         (timedOut || capacityError) && attempt < policy.retryDelaysMs.length
           ? getRetryDelay(policy.model, attempt)
@@ -336,8 +367,8 @@ async function runGeminiTextCommand(
         !result.error &&
         result.status === 0 &&
         !capacityError &&
-        !isGeminiModelNotFound(output) &&
-        output.trim().length > 0;
+        !isGeminiModelNotFound(diagnosticOutput) &&
+        reviewOutput.trim().length > 0;
       recordObservation(
         {
           ...telemetryContext,
@@ -347,9 +378,14 @@ async function runGeminiTextCommand(
           durationMs,
           errorCategory: attemptSucceeded
             ? null
-            : output.trim().length === 0 && !result.error && result.status === 0
+            : reviewOutput.trim().length === 0 &&
+                !result.error &&
+                result.status === 0
               ? 'empty-output'
-              : classifyGeminiErrorCategory(output, result.error?.message),
+              : classifyGeminiErrorCategory(
+                  diagnosticOutput,
+                  result.error?.message
+                ),
           model: policy.model,
           operation: input.operation,
           promptChars: input.prompt.length,
@@ -378,26 +414,28 @@ async function runGeminiTextCommand(
           continue;
         }
 
-        throw new Error(output);
+        throw new Error(diagnosticOutput);
       }
 
-      if (isGeminiModelNotFound(output)) {
-        throw new Error(output);
+      if (isGeminiModelNotFound(diagnosticOutput)) {
+        throw new Error(diagnosticOutput);
       }
 
       if (result.error || result.status !== 0) {
         throw new Error(
-          output || result.error?.message || 'Gemini review command failed.'
+          diagnosticOutput ||
+            result.error?.message ||
+            'Gemini review command failed.'
         );
       }
 
-      if (!output.trim()) {
+      if (!reviewOutput.trim()) {
         throw new Error(
-          `Gemini review returned no output for model ${policy.model}.`
+          `${AGY_EMPTY_OUTPUT_MESSAGE} Logical review model: ${policy.model}.`
         );
       }
 
-      return output.trim();
+      return reviewOutput.trim();
     }
 
     throw new Error(`Gemini review failed for model ${policy.model}.`);
@@ -414,10 +452,14 @@ function getGoogleReviewCliCandidates(): GoogleReviewCli[] {
   }
 
   if (configured === 'agy' || configured === 'antigravity') {
+    return ['agy'];
+  }
+
+  if (configured === 'legacy-fallback' || configured === 'agy,gemini') {
     return ['agy', 'gemini'];
   }
 
-  return ['agy', 'gemini'];
+  return ['agy'];
 }
 
 function buildGoogleReviewCliVersionCommand(
@@ -439,6 +481,7 @@ function buildGoogleReviewCliVersionCommand(
 
 function buildGoogleReviewCliTextCommand(input: {
   cli: GoogleReviewCli;
+  logFilePath?: string;
   model: string;
   prompt: string;
   timeoutMs: number;
@@ -446,12 +489,14 @@ function buildGoogleReviewCliTextCommand(input: {
   if (input.cli === 'agy') {
     return {
       args: [
+        ...(input.logFilePath ? ['--log-file', input.logFilePath] : []),
         '--print',
+        input.prompt,
         '--print-timeout',
-        formatAgyTimeout(input.timeoutMs),
-        input.prompt
+        formatAgyTimeout(input.timeoutMs)
       ],
-      command: 'agy'
+      command: 'agy',
+      logFilePath: input.logFilePath
     };
   }
 
@@ -477,6 +522,7 @@ function runGoogleReviewCliTextCommand(input: {
   cwd: string;
   model: string;
   prompt: string;
+  readAgyTranscriptOutput: typeof readAgyTranscriptOutput;
   runCommand: (input: LocalCliCommandInput) => LocalCliCommandResult;
   timeoutMs: number;
 }): { cli: GoogleReviewCli; result: LocalCliCommandResult } {
@@ -486,28 +532,49 @@ function runGoogleReviewCliTextCommand(input: {
   } | null = null;
 
   for (const cli of input.cliCandidates) {
-    const command = buildGoogleReviewCliTextCommand({
-      cli,
-      model: input.model,
-      prompt: input.prompt,
-      timeoutMs:
-        cli === 'agy'
-          ? Math.min(input.timeoutMs, AGY_REVIEW_TIMEOUT_MS)
-          : input.timeoutMs
-    });
-    const result = input.runCommand({
-      ...command,
-      cwd: input.cwd,
-      timeoutMs:
-        cli === 'agy'
-          ? Math.min(input.timeoutMs, AGY_REVIEW_TIMEOUT_MS)
-          : input.timeoutMs
-    });
-    lastResult = { cli, result };
-    const output = joinOutput(result.stdout, result.stderr);
+    const logFilePath = cli === 'agy' ? createAgyLogFilePath() : undefined;
+    const preparedPrompt =
+      cli === 'agy' ? prepareAgyPrompt(input.prompt) : { prompt: input.prompt };
+    try {
+      const command = buildGoogleReviewCliTextCommand({
+        cli,
+        logFilePath,
+        model: input.model,
+        prompt: preparedPrompt.prompt,
+        timeoutMs: input.timeoutMs
+      });
+      let result = input.runCommand({
+        ...command,
+        cwd: input.cwd,
+        timeoutMs: input.timeoutMs
+      });
 
-    if (!isFallbackEligibleGoogleCliFailure(cli, result, output)) {
-      return lastResult;
+      if (isEmptySuccessfulAgyResult(cli, result)) {
+        const transcriptOutput = logFilePath
+          ? input.readAgyTranscriptOutput({ logFilePath })
+          : null;
+
+        if (transcriptOutput) {
+          result = {
+            ...result,
+            stdout: transcriptOutput
+          };
+        }
+      }
+
+      lastResult = { cli, result };
+      const output = joinOutput(result.stdout, result.stderr);
+
+      if (!isFallbackEligibleGoogleCliFailure(cli, result, output)) {
+        return lastResult;
+      }
+    } finally {
+      if (logFilePath) {
+        removeAgyTempFile(logFilePath);
+      }
+      if (preparedPrompt.promptFilePath) {
+        removeAgyTempFile(preparedPrompt.promptFilePath);
+      }
     }
   }
 
@@ -523,6 +590,18 @@ function runGoogleReviewCliTextCommand(input: {
         stdout: ''
       }
     }
+  );
+}
+
+function isEmptySuccessfulAgyResult(
+  cli: GoogleReviewCli,
+  result: LocalCliCommandResult
+): boolean {
+  return (
+    cli === 'agy' &&
+    !result.error &&
+    result.status === 0 &&
+    (result.stdout ?? '').trim().length === 0
   );
 }
 
@@ -548,6 +627,121 @@ function isFallbackEligibleGoogleCliFailure(
 
 function formatAgyTimeout(timeoutMs: number): string {
   return `${Math.max(1, Math.ceil(timeoutMs / 1000))}s`;
+}
+
+function createAgyLogFilePath(): string {
+  return join(
+    tmpdir(),
+    `gx-law-prep-agy-${process.pid}-${Date.now()}-${randomUUID()}.log`
+  );
+}
+
+function prepareAgyPrompt(prompt: string): {
+  prompt: string;
+  promptFilePath?: string;
+} {
+  if (prompt.length <= AGY_INLINE_PROMPT_MAX_CHARS) {
+    return { prompt };
+  }
+
+  const promptFilePath = join(
+    tmpdir(),
+    `gx-law-prep-agy-prompt-${process.pid}-${Date.now()}-${randomUUID()}.md`
+  );
+  writeFileSync(promptFilePath, prompt, 'utf8');
+
+  return {
+    prompt: [
+      'The review context is too large for a safe CLI argument.',
+      `Read the UTF-8 Markdown file at ${promptFilePath}.`,
+      'Review only that file content and do not infer files from other repositories.',
+      'Return the checkpoint review findings and verdict.'
+    ].join(' '),
+    promptFilePath
+  };
+}
+
+function removeAgyTempFile(path: string): void {
+  try {
+    rmSync(path, { force: true });
+  } catch {
+    // Best-effort cleanup only; temp retention must not break review routing.
+  }
+}
+
+function readAgyTranscriptOutput(input: {
+  logFilePath: string;
+}): string | null {
+  const conversationId = readAgyConversationId(input.logFilePath);
+
+  if (!conversationId) {
+    return null;
+  }
+
+  const transcriptPath = join(
+    homedir(),
+    '.gemini',
+    'antigravity-cli',
+    'brain',
+    conversationId,
+    '.system_generated',
+    'logs',
+    'transcript.jsonl'
+  );
+
+  if (!existsSync(transcriptPath)) {
+    return null;
+  }
+
+  return extractCompletedAgyModelResponse(safeReadText(transcriptPath));
+}
+
+function readAgyConversationId(logFilePath: string): string | null {
+  const logText = safeReadText(logFilePath);
+  const match =
+    /\bPrint mode: conversation=([0-9a-f-]{36})\b/i.exec(logText) ??
+    /\bCreated conversation ([0-9a-f-]{36})\b/i.exec(logText);
+
+  return match?.[1] ?? null;
+}
+
+function extractCompletedAgyModelResponse(jsonl: string): string | null {
+  let output: string | null = null;
+
+  for (const line of jsonl.split(/\r?\n/)) {
+    if (!line.trim()) {
+      continue;
+    }
+
+    try {
+      const entry = JSON.parse(line) as Record<string, unknown>;
+      const content = entry.content;
+      const toolCalls = entry.tool_calls;
+
+      if (
+        entry.source === 'MODEL' &&
+        entry.type === 'PLANNER_RESPONSE' &&
+        entry.status === 'DONE' &&
+        typeof content === 'string' &&
+        content.trim().length > 0 &&
+        (!Array.isArray(toolCalls) || toolCalls.length === 0)
+      ) {
+        output = content.trim();
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return output;
+}
+
+function safeReadText(path: string): string {
+  try {
+    return readFileSync(path, 'utf8');
+  } catch {
+    return '';
+  }
 }
 
 function isGeminiTimedOut(result: LocalCliCommandResult, output = ''): boolean {

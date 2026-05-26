@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -14,7 +14,7 @@ import {
 test('isGeminiUnavailableError treats exhausted review timeouts as retryable provider unavailability', () => {
   assert.equal(
     isGeminiUnavailableError(
-      new Error('Gemini review timed out for model gemini-3-flash-preview.')
+      new Error('Gemini review timed out for model gemini-3.5-flash-high.')
     ),
     true
   );
@@ -28,7 +28,7 @@ test('probeGeminiCliHealth records health-version and health-probe observations 
   try {
     const health = await probeGeminiCliHealth(
       {
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.5-flash-high',
         repoRoot,
         telemetryContext: {
           callsite: 'checkpoint-review',
@@ -66,12 +66,48 @@ test('probeGeminiCliHealth records health-version and health-probe observations 
   }
 });
 
+test('probeGeminiCliHealth accepts non-empty Antigravity transcript output as available', async () => {
+  const repoRoot = mkdtempSync(join(tmpdir(), 'gemini-provider-health-agy-'));
+
+  try {
+    const health = await probeGeminiCliHealth(
+      {
+        model: 'gemini-3.5-flash-high',
+        repoRoot
+      },
+      {
+        acquireLock: async () => () => undefined,
+        loadRateLimitState: () => ({ models: {} }),
+        readAgyTranscriptOutput: () => 'Antigravity is available.',
+        recordObservation() {
+          return undefined;
+        },
+        recordRequestStart() {
+          return undefined;
+        },
+        runCommand: (input) => {
+          if (input.args[0] === '--version') {
+            return { status: 0, stdout: '1.0.0', stderr: '' };
+          }
+
+          return { status: 0, stdout: '', stderr: '' };
+        },
+        sleep: async () => undefined
+      }
+    );
+
+    assert.equal(health.available, true);
+  } finally {
+    rmSync(repoRoot, { force: true, recursive: true });
+  }
+});
+
 test('runGeminiReview records a successful first attempt with wait-before-start metadata', async () => {
   const recorded: ProviderObservationInput[] = [];
 
   const review = await runGeminiReview(
     {
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.5-flash-high',
       prompt: 'Review this diff.',
       repoRoot: 'C:/repo',
       telemetryContext: {
@@ -114,7 +150,7 @@ test('runGeminiReview records capacity-triggered retries with retry delay metada
 
   const review = await runGeminiReview(
     {
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.5-flash-high',
       prompt: 'Review this diff.',
       repoRoot: 'C:/repo',
       telemetryContext: {
@@ -173,7 +209,7 @@ test('runGeminiReview records timeout retries before succeeding', async () => {
   try {
     const review = await runGeminiReview(
       {
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.5-flash-high',
         prompt: 'Review this diff.',
         repoRoot: 'C:/repo'
       },
@@ -229,7 +265,7 @@ test('runGeminiReview does not mark successful timeout-themed output as a timeou
 
   const review = await runGeminiReview(
     {
-      model: 'gemini-2.5-pro',
+      model: 'gemini-3.5-flash-high',
       prompt: 'Review timeout handling.',
       repoRoot: 'C:/repo'
     },
@@ -264,7 +300,7 @@ test('runGeminiReview prefers Antigravity CLI print mode while preserving gemini
 
   const review = await runGeminiReview(
     {
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.5-flash-high',
       prompt: 'Review this diff.',
       repoRoot: 'C:/repo'
     },
@@ -298,23 +334,23 @@ test('runGeminiReview prefers Antigravity CLI print mode while preserving gemini
   assert.equal(review, 'Reviewed by agy.');
   assert.equal(commands.length, 1);
   assert.equal(commands[0]?.command, 'agy');
-  assert.deepEqual(commands[0]?.args.slice(0, 3), [
+  assert.equal(commands[0]?.args[0], '--log-file');
+  assert.match(commands[0]?.args[1] ?? '', /gx-law-prep-agy-/);
+  assert.deepEqual(commands[0]?.args.slice(2, 6), [
     '--print',
+    'Review this diff.',
     '--print-timeout',
-    '30s'
+    '300s'
   ]);
-  assert.equal(commands[0]?.args.at(-1), 'Review this diff.');
   assert.equal(commands[0]?.input, undefined);
 });
 
-test('runGeminiReview falls back to Gemini CLI when Antigravity CLI is unavailable', async () => {
-  const commands: string[] = [];
-  const timeoutError = new Error('timed out');
-  timeoutError.name = 'TimeoutError';
+test('runGeminiReview recovers Antigravity print output from transcript fallback', async () => {
+  const commands: Array<{ command: string; args: string[] }> = [];
 
   const review = await runGeminiReview(
     {
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.5-flash-high',
       prompt: 'Review this diff.',
       repoRoot: 'C:/repo'
     },
@@ -322,6 +358,10 @@ test('runGeminiReview falls back to Gemini CLI when Antigravity CLI is unavailab
       acquireLock: async () => () => undefined,
       getInterRequestDelay: () => 0,
       loadRateLimitState: () => ({ models: {} }),
+      readAgyTranscriptOutput(input) {
+        assert.match(input.logFilePath, /gx-law-prep-agy-/);
+        return 'Reviewed from transcript.';
+      },
       recordObservation() {
         return undefined;
       },
@@ -329,33 +369,226 @@ test('runGeminiReview falls back to Gemini CLI when Antigravity CLI is unavailab
         return undefined;
       },
       runCommand: (input) => {
-        commands.push(input.command);
-        if (input.command === 'agy') {
-          return {
-            error: timeoutError,
-            signal: 'SIGTERM',
-            status: null,
-            stderr: '',
-            stdout: ''
-          };
-        }
-
-        assert.equal(input.command, 'gemini');
-        assert.equal(input.windowsScriptName, 'gemini.ps1');
-        assert.equal(input.input, 'Review this diff.');
+        commands.push({
+          args: input.args,
+          command: input.command
+        });
         return {
           error: undefined,
           status: 0,
           stderr: '',
-          stdout: 'Reviewed by gemini.'
+          stdout: ''
         };
       },
       sleep: async () => undefined
     }
   );
 
-  assert.equal(review, 'Reviewed by gemini.');
-  assert.deepEqual(commands, ['agy', 'gemini']);
+  assert.equal(review, 'Reviewed from transcript.');
+  assert.equal(commands.length, 1);
+  assert.equal(commands[0]?.command, 'agy');
+  assert.equal(commands[0]?.args[0], '--log-file');
+});
+
+test('runGeminiReview writes oversized Antigravity prompts to a temporary context file', async () => {
+  let promptFilePath: string | undefined;
+  const longPrompt = 'Review this diff.\n'.repeat(2_000);
+
+  const review = await runGeminiReview(
+    {
+      model: 'gemini-3.5-flash-high',
+      prompt: longPrompt,
+      repoRoot: 'C:/repo'
+    },
+    {
+      acquireLock: async () => () => undefined,
+      getInterRequestDelay: () => 0,
+      loadRateLimitState: () => ({ models: {} }),
+      readAgyTranscriptOutput: () => 'Reviewed from transcript.',
+      recordObservation() {
+        return undefined;
+      },
+      recordRequestStart() {
+        return undefined;
+      },
+      runCommand: (input) => {
+        const promptArg = input.args[3] ?? '';
+        const match = /file at (.+?\.md)\./.exec(promptArg);
+        promptFilePath = match?.[1];
+        assert.match(promptArg, /too large for a safe CLI argument/);
+        assert.ok(promptFilePath);
+        assert.equal(readFileSync(promptFilePath, 'utf8'), longPrompt);
+
+        return {
+          error: undefined,
+          status: 0,
+          stderr: '',
+          stdout: ''
+        };
+      },
+      sleep: async () => undefined
+    }
+  );
+
+  assert.equal(review, 'Reviewed from transcript.');
+  assert.ok(promptFilePath);
+  assert.equal(existsSync(promptFilePath), false);
+});
+
+test('runGeminiReview treats Antigravity stderr as diagnostics when stdout is empty', async () => {
+  const review = await runGeminiReview(
+    {
+      model: 'gemini-3.5-flash-high',
+      prompt: 'Review this diff.',
+      repoRoot: 'C:/repo'
+    },
+    {
+      acquireLock: async () => () => undefined,
+      getInterRequestDelay: () => 0,
+      loadRateLimitState: () => ({ models: {} }),
+      readAgyTranscriptOutput: () => 'Reviewed from transcript.',
+      recordObservation() {
+        return undefined;
+      },
+      recordRequestStart() {
+        return undefined;
+      },
+      runCommand: () => ({
+        error: undefined,
+        status: 0,
+        stderr: 'Update available.',
+        stdout: ''
+      }),
+      sleep: async () => undefined
+    }
+  );
+
+  assert.equal(review, 'Reviewed from transcript.');
+
+  await assert.rejects(
+    () =>
+      runGeminiReview(
+        {
+          model: 'gemini-3.5-flash-high',
+          prompt: 'Review this diff.',
+          repoRoot: 'C:/repo'
+        },
+        {
+          acquireLock: async () => () => undefined,
+          getInterRequestDelay: () => 0,
+          loadRateLimitState: () => ({ models: {} }),
+          readAgyTranscriptOutput: () => null,
+          recordObservation() {
+            return undefined;
+          },
+          recordRequestStart() {
+            return undefined;
+          },
+          runCommand: () => ({
+            error: undefined,
+            status: 0,
+            stderr: 'Update available.',
+            stdout: ''
+          }),
+          sleep: async () => undefined
+        }
+      ),
+    /Antigravity CLI returned no output/
+  );
+});
+
+test('runGeminiReview reports empty Antigravity output as actionable provider unavailability', async () => {
+  await assert.rejects(
+    () =>
+      runGeminiReview(
+        {
+          model: 'gemini-3.5-flash-high',
+          prompt: 'Review this diff.',
+          repoRoot: 'C:/repo'
+        },
+        {
+          acquireLock: async () => () => undefined,
+          getInterRequestDelay: () => 0,
+          loadRateLimitState: () => ({ models: {} }),
+          readAgyTranscriptOutput: () => null,
+          recordObservation() {
+            return undefined;
+          },
+          recordRequestStart() {
+            return undefined;
+          },
+          runCommand: () => ({
+            error: undefined,
+            status: 0,
+            stderr: '',
+            stdout: ''
+          }),
+          sleep: async () => undefined
+        }
+      ),
+    /Antigravity CLI returned no output/
+  );
+});
+
+test('runGeminiReview falls back to Gemini CLI only when legacy fallback is explicitly enabled', async () => {
+  const previous = process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI;
+  process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI = 'legacy-fallback';
+  const commands: string[] = [];
+  const timeoutError = new Error('timed out');
+  timeoutError.name = 'TimeoutError';
+
+  try {
+    const review = await runGeminiReview(
+      {
+        model: 'gemini-3.5-flash-high',
+        prompt: 'Review this diff.',
+        repoRoot: 'C:/repo'
+      },
+      {
+        acquireLock: async () => () => undefined,
+        getInterRequestDelay: () => 0,
+        loadRateLimitState: () => ({ models: {} }),
+        recordObservation() {
+          return undefined;
+        },
+        recordRequestStart() {
+          return undefined;
+        },
+        runCommand: (input) => {
+          commands.push(input.command);
+          if (input.command === 'agy') {
+            return {
+              error: timeoutError,
+              signal: 'SIGTERM',
+              status: null,
+              stderr: '',
+              stdout: ''
+            };
+          }
+
+          assert.equal(input.command, 'gemini');
+          assert.equal(input.windowsScriptName, 'gemini.ps1');
+          assert.equal(input.input, 'Review this diff.');
+          return {
+            error: undefined,
+            status: 0,
+            stderr: '',
+            stdout: 'Reviewed by gemini.'
+          };
+        },
+        sleep: async () => undefined
+      }
+    );
+
+    assert.equal(review, 'Reviewed by gemini.');
+    assert.deepEqual(commands, ['agy', 'gemini']);
+  } finally {
+    if (previous === undefined) {
+      delete process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI;
+    } else {
+      process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI = previous;
+    }
+  }
 });
 
 test('GX_LAW_PREP_REVIEW_GOOGLE_CLI=gemini disables Antigravity preference', async () => {
@@ -366,7 +599,7 @@ test('GX_LAW_PREP_REVIEW_GOOGLE_CLI=gemini disables Antigravity preference', asy
   try {
     const review = await runGeminiReview(
       {
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.5-flash-high',
         prompt: 'Review this plan.',
         repoRoot: 'C:/repo'
       },
@@ -404,7 +637,9 @@ test('GX_LAW_PREP_REVIEW_GOOGLE_CLI=gemini disables Antigravity preference', asy
   }
 });
 
-test('probeGeminiCliHealth falls back to Gemini CLI health probe when Antigravity CLI is missing', async () => {
+test('probeGeminiCliHealth falls back to Gemini CLI health probe when legacy fallback is explicitly enabled', async () => {
+  const previous = process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI;
+  process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI = 'legacy-fallback';
   const commands: string[] = [];
   const repoRoot = mkdtempSync(
     join(tmpdir(), 'gemini-provider-health-fallback-')
@@ -413,7 +648,7 @@ test('probeGeminiCliHealth falls back to Gemini CLI health probe when Antigravit
   try {
     const health = await probeGeminiCliHealth(
       {
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.5-flash-high',
         repoRoot
       },
       {
@@ -454,6 +689,11 @@ test('probeGeminiCliHealth falls back to Gemini CLI health probe when Antigravit
       'gemini:--model'
     ]);
   } finally {
+    if (previous === undefined) {
+      delete process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI;
+    } else {
+      process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI = previous;
+    }
     rmSync(repoRoot, { force: true, recursive: true });
   }
 });

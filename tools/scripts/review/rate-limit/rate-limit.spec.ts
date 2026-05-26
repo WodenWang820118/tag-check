@@ -10,7 +10,7 @@ import {
   getRateLimitStatePath,
   getRetryDelayMs,
   loadRateLimitState,
-  saveRateLimitState,
+  saveRateLimitState
 } from './rate-limit.ts';
 
 test('getInterRequestDelayMs waits only for the remaining start-to-start interval', () => {
@@ -18,35 +18,35 @@ test('getInterRequestDelayMs waits only for the remaining start-to-start interva
 
   assert.equal(
     getInterRequestDelayMs({
-      model: 'gemini-2.5-pro',
+      model: 'gemini-3.5-flash-high',
       nowMs: now,
-      lastStartedAtMs: Date.UTC(2026, 3, 17, 9, 0, 5),
+      lastStartedAtMs: Date.UTC(2026, 3, 17, 9, 0, 5)
     }),
-    5000,
+    12000
   );
 
   assert.equal(
     getInterRequestDelayMs({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3.5-flash-high',
       nowMs: now,
-      lastStartedAtMs: Date.UTC(2026, 3, 17, 8, 59, 0),
+      lastStartedAtMs: Date.UTC(2026, 3, 17, 8, 59, 0)
     }),
-    0,
+    0
   );
 });
 
 test('getRetryDelayMs follows the configured backoff schedule', () => {
-  assert.equal(getRetryDelayMs('gemini-2.5-pro', 0), 35000);
-  assert.equal(getRetryDelayMs('gemini-2.5-pro', 1), 50000);
-  assert.equal(getRetryDelayMs('gemini-2.5-pro', 2), 75000);
-  assert.equal(getRetryDelayMs('gemini-2.5-pro', 99), 75000);
-
-  assert.equal(getRetryDelayMs('gemini-3-flash-preview', 0), 20000);
-  assert.equal(getRetryDelayMs('gemini-3-flash-preview', 1), 30000);
-  assert.equal(getRetryDelayMs('gemini-3-flash-preview', 4), 30000);
+  assert.equal(getRetryDelayMs('gemini-3.5-flash-high', 0), 45000);
+  assert.equal(getRetryDelayMs('gemini-3.5-flash-high', 1), 65000);
+  assert.equal(getRetryDelayMs('gemini-3.5-flash-high', 2), 95000);
+  assert.equal(getRetryDelayMs('gemini-3.5-flash-high', 99), 95000);
+  assert.equal(
+    getModelRateLimitPolicy('gemini-3.5-flash-high').model,
+    'gemini-3.5-flash-high'
+  );
   assert.equal(
     getModelRateLimitPolicy('gemini-3.1-flash-preview').model,
-    'gemini-3-flash-preview',
+    'gemini-3.5-flash-high'
   );
 });
 
@@ -54,8 +54,8 @@ test('rate-limit state round-trips through the workspace cache', () => {
   const tempRoot = mkdtempSync(join(tmpdir(), 'review-rate-limit-'));
 
   try {
-    const policy = getModelRateLimitPolicy('gemini-2.5-pro');
-    assert.equal(policy.targetIntervalMs, 38000);
+    const policy = getModelRateLimitPolicy('gemini-3.5-flash-high');
+    assert.equal(policy.targetIntervalMs, 45000);
 
     const statePath = getRateLimitStatePath(tempRoot);
     assert.match(statePath, /\.cache[\\/]reviews[\\/]rate-limit-state\.json$/);
@@ -63,21 +63,21 @@ test('rate-limit state round-trips through the workspace cache', () => {
     saveRateLimitState(
       {
         models: {
-          'gemini-2.5-pro': {
-            lastStartedAtMs: 1234,
-          },
-        },
+          'gemini-3.5-flash-high': {
+            lastStartedAtMs: 1234
+          }
+        }
       },
-      tempRoot,
+      tempRoot
     );
 
     const restored = loadRateLimitState(tempRoot);
     assert.deepEqual(restored, {
       models: {
-        'gemini-2.5-pro': {
-          lastStartedAtMs: 1234,
-        },
-      },
+        'gemini-3.5-flash-high': {
+          lastStartedAtMs: 1234
+        }
+      }
     });
   } finally {
     rmSync(tempRoot, { force: true, recursive: true });

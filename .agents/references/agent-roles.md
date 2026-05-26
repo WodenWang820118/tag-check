@@ -50,11 +50,11 @@ Cross-family grill of a plan or design. See `.agents/skills/grill-me/SKILL.md`.
 
 Default plan review. See `.agents/workflows/review-lifecycle.md`.
 
-| Platform           | Concrete agent / wrapper                    |
-| ------------------ | ------------------------------------------- |
-| Copilot            | Copilot Claude Sonnet 4.6                   |
-| Antigravity/Gemini | `gemini-2.5-pro` (`pnpm review:plan:risky`) |
-| Codex CLI          | Codex reviewer subagent (fallback only)     |
+| Platform           | Concrete agent / wrapper                           |
+| ------------------ | -------------------------------------------------- |
+| Copilot            | Copilot Claude Sonnet 4.6                          |
+| Antigravity/Gemini | `gemini-3.5-flash-high` (`pnpm review:plan:risky`) |
+| Codex CLI          | Codex reviewer subagent (fallback only)            |
 
 ### `implementation-reviewer`
 
@@ -62,7 +62,7 @@ Default implementation review.
 
 | Platform           | Concrete agent / wrapper                                     |
 | ------------------ | ------------------------------------------------------------ |
-| Antigravity/Gemini | `gemini-3-flash-preview` (`pnpm review:implementation`)      |
+| Antigravity/Gemini | `gemini-3.5-flash-high` (`pnpm review:implementation`)       |
 | Copilot            | Copilot Claude (`pnpm review:copilot`, sensitive escalation) |
 | Codex CLI          | Codex reviewer subagent (fallback only)                      |
 

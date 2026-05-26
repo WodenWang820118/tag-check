@@ -36,14 +36,14 @@ describe('createReviewExecution', () => {
         provider: 'gemini',
         focus: 'f'
       }).model
-    ).toBe('gemini-3-flash-preview');
+    ).toBe('gemini-3.5-flash-high');
     expect(
       createReviewExecution({
         checkpoint: 'pre-merge',
         provider: 'gemini',
         focus: 'f'
       }).model
-    ).toBe('gemini-2.5-pro');
+    ).toBe('gemini-3.5-flash-high');
   });
 
   it('leaves the codex model undefined when not supplied', () => {

@@ -44,7 +44,7 @@ Agent preflight
 - Refactoring risk: <none|low|medium|high>
 - Sensitive surface: <yes|no>  (categories: ...)
 - Grill-me required: <yes|no>  (griller family if yes: <copilot|gemini|codex>)
-- Cross-family reviewer: <copilot-claude|gemini-2.5-pro|codex-subagent>
+- Cross-family reviewer: <copilot-claude|gemini-3.5-flash-high|codex-subagent>
 - Gate mode: <standard|override>  (override reason if any: ...)
 - Max files cap: <number|unbounded>
 - Gate command:

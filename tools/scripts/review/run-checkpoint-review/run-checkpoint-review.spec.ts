@@ -578,7 +578,7 @@ describe('review execution plan', () => {
         }),
         [
           execution('plan', 'copilot', 'general', 'claude-sonnet-4.6'),
-          execution('plan', 'gemini', 'general', 'gemini-2.5-pro'),
+          execution('plan', 'gemini', 'general', 'gemini-3.5-flash-high'),
           execution('plan', 'codex', 'general')
         ]
       );
@@ -594,7 +594,7 @@ describe('review execution plan', () => {
         }),
         [
           execution('plan', 'copilot', 'general', 'claude-sonnet-4.6'),
-          execution('plan', 'gemini', 'general', 'gemini-2.5-pro'),
+          execution('plan', 'gemini', 'general', 'gemini-3.5-flash-high'),
           execution('plan', 'codex', 'general')
         ]
       );
@@ -613,7 +613,7 @@ describe('review execution plan', () => {
             'implementation',
             'gemini',
             'general',
-            'gemini-3-flash-preview'
+            'gemini-3.5-flash-high'
           ),
           execution(
             'implementation',
@@ -636,7 +636,7 @@ describe('review execution plan', () => {
         }),
         [
           execution('test', 'copilot', 'tests', 'claude-sonnet-4.6'),
-          execution('test', 'gemini', 'tests', 'gemini-2.5-pro'),
+          execution('test', 'gemini', 'tests', 'gemini-3.5-flash-high'),
           execution('test', 'codex', 'tests')
         ]
       );
@@ -687,7 +687,7 @@ describe('review execution plan', () => {
             'implementation',
             'gemini',
             'general',
-            'gemini-3-flash-preview'
+            'gemini-3.5-flash-high'
           ),
           execution('implementation', 'copilot', 'general', 'claude-sonnet-4.6')
         ]
@@ -706,7 +706,7 @@ describe('review execution plan', () => {
         }),
         [
           execution('pre-merge', 'codex', 'general'),
-          execution('pre-merge', 'gemini', 'general', 'gemini-2.5-pro'),
+          execution('pre-merge', 'gemini', 'general', 'gemini-3.5-flash-high'),
           execution('pre-merge', 'copilot', 'general', 'claude-sonnet-4.6')
         ]
       );
@@ -734,7 +734,7 @@ describe('review execution plan', () => {
             'implementation',
             'gemini',
             'general',
-            'gemini-3-flash-preview'
+            'gemini-3.5-flash-high'
           ),
           execution(
             'implementation',
@@ -766,7 +766,7 @@ describe('review execution plan', () => {
             'implementation',
             'gemini',
             'general',
-            'gemini-3-flash-preview'
+            'gemini-3.5-flash-high'
           ),
           execution(
             'implementation',
@@ -798,7 +798,7 @@ describe('review execution plan', () => {
             'implementation',
             'gemini',
             'general',
-            'gemini-3-flash-preview'
+            'gemini-3.5-flash-high'
           ),
           execution(
             'implementation',
@@ -826,7 +826,7 @@ describe('review execution plan', () => {
           provider: 'auto'
         }),
         [
-          execution('pre-merge', 'gemini', 'general', 'gemini-2.5-pro'),
+          execution('pre-merge', 'gemini', 'general', 'gemini-3.5-flash-high'),
           execution('pre-merge', 'copilot', 'general', 'claude-sonnet-4.6'),
           execution('pre-merge', 'codex', 'general')
         ]
@@ -849,7 +849,7 @@ describe('review execution creation', () => {
         checkpoint: 'implementation',
         provider: 'gemini',
         focus: 'general',
-        model: 'gemini-3-flash-preview'
+        model: 'gemini-3.5-flash-high'
       }
     );
     assert.deepEqual(
@@ -890,7 +890,7 @@ describe('review prompt construction', () => {
         checkpoint: 'implementation',
         provider: 'gemini',
         focus: 'security',
-        model: 'gemini-3-flash-preview'
+        model: 'gemini-3.5-flash-high'
       },
       'Changed files: tools/scripts/review-gate/shared/shared.ts',
       { commonReviewContract: '# Common Review Contract\nUse P0-P3 findings.' }
@@ -1004,9 +1004,9 @@ describe('review flow execution', () => {
       );
       assert.deepEqual(probed, [
         'copilot:claude-sonnet-4.6',
-        'gemini:gemini-2.5-pro'
+        'gemini:gemini-3.5-flash-high'
       ]);
-      assert.equal(output, 'gemini-2.5-pro');
+      assert.equal(output, 'gemini-3.5-flash-high');
     });
 
     test('falls back to Codex after Copilot and Gemini both fail', async () => {
@@ -1033,7 +1033,7 @@ describe('review flow execution', () => {
       );
       assert.deepEqual(probed, [
         'copilot:claude-sonnet-4.6',
-        'gemini:gemini-2.5-pro',
+        'gemini:gemini-3.5-flash-high',
         'codex:<none>'
       ]);
       assert.equal(output, 'codex');
@@ -1126,7 +1126,7 @@ describe('review flow execution', () => {
           }
         }
       );
-      assert.deepEqual(ran, ['codex:<none>', 'gemini:gemini-3-flash-preview']);
+      assert.deepEqual(ran, ['codex:<none>', 'gemini:gemini-3.5-flash-high']);
       assert.equal(output, 'gemini');
     });
 
@@ -1177,7 +1177,7 @@ describe('review flow execution', () => {
             }
           }
         ),
-        /Attempted providers:[\s\S]*copilot:claude-sonnet-4\.6: copilot down[\s\S]*gemini:gemini-2\.5-pro: gemini down[\s\S]*codex: codex down/
+        /Attempted providers:[\s\S]*copilot:claude-sonnet-4\.6: copilot down[\s\S]*gemini:gemini-3\.5-flash-high: gemini down[\s\S]*codex: codex down/
       );
     });
   });

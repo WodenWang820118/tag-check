@@ -83,7 +83,7 @@
     "review:checkpoint": "node tools/scripts/review/run-checkpoint-review/run-checkpoint-review.ts",
     "review:providers:doctor": "node tools/scripts/review/provider-doctor/provider-doctor.ts",
     "review:plan": "node tools/scripts/review/run-checkpoint-review/run-checkpoint-review.ts --checkpoint plan --provider auto --focus general",
-    "review:plan:risky": "node tools/scripts/review/run-checkpoint-review/run-checkpoint-review.ts --checkpoint plan --provider gemini --model gemini-2.5-pro --focus general",
+    "review:plan:risky": "node tools/scripts/review/run-checkpoint-review/run-checkpoint-review.ts --checkpoint plan --provider gemini --model gemini-3.5-flash-high --focus general",
     "review:implementation": "node tools/scripts/review/run-checkpoint-review/run-checkpoint-review.ts --checkpoint implementation --provider auto --focus general",
     "review:test": "node tools/scripts/review/run-checkpoint-review/run-checkpoint-review.ts --checkpoint test --provider auto --focus tests",
     "review:local:doctor": "node tools/scripts/review/local-reviewer/local-reviewer.ts doctor",
