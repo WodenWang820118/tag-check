@@ -49,12 +49,12 @@ describe('CLI arg parsing', () => {
       '--focus',
       'security',
       '--summary',
-      'Approved after Gemini review',
+      'Approved after Antigravity review',
       '--force'
     ]);
     assert.equal(gemini.reviewer, 'gemini-3.5-flash-high');
     assert.equal(gemini.focus, 'security');
-    assert.equal(gemini.summary, 'Approved after Gemini review');
+    assert.equal(gemini.summary, 'Approved after Antigravity review');
     assert.equal(gemini.force, true);
 
     assert.equal(
@@ -1088,12 +1088,12 @@ describe('hook permission evaluation', () => {
 // ── Deny payload ──────────────────────────────────────────────────────────────
 
 describe('deny payload', () => {
-  test('names Copilot, then Gemini, then Codex as the review path', () => {
+  test('names Copilot, then Antigravity, then Codex as the review path', () => {
     const payload = JSON.parse(buildDenyPayload('Gate blocked.'));
     assert.equal(payload.permissionDecision, 'deny');
     assert.match(payload.permissionDecisionReason, /^Gate blocked\./);
     assert.match(payload.permissionDecisionReason, /Copilot/i);
-    assert.match(payload.permissionDecisionReason, /Gemini 3\.5 Flash High/i);
+    assert.match(payload.permissionDecisionReason, /Antigravity CLI/i);
     assert.match(payload.permissionDecisionReason, /Codex/i);
     assert.match(
       payload.permissionDecisionReason,

@@ -91,7 +91,7 @@
     "review:local:prefilter": "node tools/scripts/review/local-reviewer/local-reviewer.ts prefilter",
     "review:evaluate:local": "node tools/scripts/review/local-reviewer/local-reviewer.ts evaluate",
     "review:copilot": "node tools/scripts/review/run-checkpoint-review/run-checkpoint-review.ts --provider copilot",
-    "review:gemini": "node tools/scripts/review/run-checkpoint-review/run-checkpoint-review.ts --provider gemini",
+    "review:agy": "node tools/scripts/review/run-checkpoint-review/run-checkpoint-review.ts --provider gemini",
     "test": "vitest run",
     "coverage:merge": "node tools/scripts/coverage-tools/merge-coverage/merge-coverage.ts",
     "test-back:cov": "pnpm nx run nest-backend:test-coverage",

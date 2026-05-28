@@ -14,7 +14,7 @@ import {
 test('isGeminiUnavailableError treats exhausted review timeouts as retryable provider unavailability', () => {
   assert.equal(
     isGeminiUnavailableError(
-      new Error('Gemini review timed out for model gemini-3.5-flash-high.')
+      new Error('Antigravity review timed out for model gemini-3.5-flash-high.')
     ),
     true
   );
@@ -200,7 +200,7 @@ test('runGeminiReview records capacity-triggered retries with retry delay metada
 
 test('runGeminiReview records timeout retries before succeeding', async () => {
   const previous = process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI;
-  process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI = 'gemini';
+  process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI = 'agy';
   const recorded: ProviderObservationInput[] = [];
   let attempt = 0;
   const timeoutError = new Error('timed out');
@@ -530,58 +530,47 @@ test('runGeminiReview reports empty Antigravity output as actionable provider un
   );
 });
 
-test('runGeminiReview falls back to Gemini CLI only when legacy fallback is explicitly enabled', async () => {
+test('runGeminiReview throws fail-fast error for legacy or unsupported CLI values', async () => {
   const previous = process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI;
-  process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI = 'legacy-fallback';
-  const commands: string[] = [];
-  const timeoutError = new Error('timed out');
-  timeoutError.name = 'TimeoutError';
 
   try {
-    const review = await runGeminiReview(
-      {
-        model: 'gemini-3.5-flash-high',
-        prompt: 'Review this diff.',
-        repoRoot: 'C:/repo'
-      },
-      {
-        acquireLock: async () => () => undefined,
-        getInterRequestDelay: () => 0,
-        loadRateLimitState: () => ({ models: {} }),
-        recordObservation() {
-          return undefined;
-        },
-        recordRequestStart() {
-          return undefined;
-        },
-        runCommand: (input) => {
-          commands.push(input.command);
-          if (input.command === 'agy') {
-            return {
-              error: timeoutError,
-              signal: 'SIGTERM',
-              status: null,
-              stderr: '',
-              stdout: ''
-            };
-          }
-
-          assert.equal(input.command, 'gemini');
-          assert.equal(input.windowsScriptName, 'gemini.ps1');
-          assert.equal(input.input, 'Review this diff.');
-          return {
-            error: undefined,
-            status: 0,
-            stderr: '',
-            stdout: 'Reviewed by gemini.'
-          };
-        },
-        sleep: async () => undefined
-      }
-    );
-
-    assert.equal(review, 'Reviewed by gemini.');
-    assert.deepEqual(commands, ['agy', 'gemini']);
+    for (const legacyValue of [
+      'gemini',
+      'legacy-fallback',
+      'agy,gemini',
+      'unsupported-val'
+    ]) {
+      process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI = legacyValue;
+      await assert.rejects(
+        () =>
+          runGeminiReview(
+            {
+              model: 'gemini-3.5-flash-high',
+              prompt: 'Review this diff.',
+              repoRoot: 'C:/repo'
+            },
+            {
+              acquireLock: async () => () => undefined,
+              getInterRequestDelay: () => 0,
+              loadRateLimitState: () => ({ models: {} }),
+              recordObservation() {
+                return undefined;
+              },
+              recordRequestStart() {
+                return undefined;
+              },
+              runCommand: () => ({
+                error: undefined,
+                status: 0,
+                stderr: '',
+                stdout: 'Reviewed.'
+              }),
+              sleep: async () => undefined
+            }
+          ),
+        /Legacy Gemini CLI execution is retired|Unsupported review CLI/
+      );
+    }
   } finally {
     if (previous === undefined) {
       delete process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI;
@@ -591,103 +580,48 @@ test('runGeminiReview falls back to Gemini CLI only when legacy fallback is expl
   }
 });
 
-test('GX_LAW_PREP_REVIEW_GOOGLE_CLI=gemini disables Antigravity preference', async () => {
+test('probeGeminiCliHealth throws fail-fast error for legacy or unsupported CLI values', async () => {
   const previous = process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI;
-  process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI = 'gemini';
-  const commands: string[] = [];
-
-  try {
-    const review = await runGeminiReview(
-      {
-        model: 'gemini-3.5-flash-high',
-        prompt: 'Review this plan.',
-        repoRoot: 'C:/repo'
-      },
-      {
-        acquireLock: async () => () => undefined,
-        getInterRequestDelay: () => 0,
-        loadRateLimitState: () => ({ models: {} }),
-        recordObservation() {
-          return undefined;
-        },
-        recordRequestStart() {
-          return undefined;
-        },
-        runCommand: (input) => {
-          commands.push(input.command);
-          return {
-            error: undefined,
-            status: 0,
-            stderr: '',
-            stdout: 'Reviewed by forced gemini.'
-          };
-        },
-        sleep: async () => undefined
-      }
-    );
-
-    assert.equal(review, 'Reviewed by forced gemini.');
-    assert.deepEqual(commands, ['gemini']);
-  } finally {
-    if (previous === undefined) {
-      delete process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI;
-    } else {
-      process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI = previous;
-    }
-  }
-});
-
-test('probeGeminiCliHealth falls back to Gemini CLI health probe when legacy fallback is explicitly enabled', async () => {
-  const previous = process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI;
-  process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI = 'legacy-fallback';
-  const commands: string[] = [];
   const repoRoot = mkdtempSync(
-    join(tmpdir(), 'gemini-provider-health-fallback-')
+    join(tmpdir(), 'gemini-provider-health-fail-fast-')
   );
 
   try {
-    const health = await probeGeminiCliHealth(
-      {
-        model: 'gemini-3.5-flash-high',
-        repoRoot
-      },
-      {
-        acquireLock: async () => () => undefined,
-        loadRateLimitState: () => ({ models: {} }),
-        recordObservation() {
-          return undefined;
-        },
-        recordRequestStart() {
-          return undefined;
-        },
-        runCommand: (input) => {
-          commands.push(`${input.command}:${input.args[0]}`);
-          if (input.command === 'agy') {
-            return {
-              error: new Error('ENOENT'),
-              status: null,
-              stderr: '',
-              stdout: ''
-            };
-          }
-
-          return {
-            error: undefined,
-            status: 0,
-            stderr: '',
-            stdout: input.args[0] === '--version' ? '0.42.0' : 'OK.'
-          };
-        },
-        sleep: async () => undefined
-      }
-    );
-
-    assert.equal(health.available, true);
-    assert.deepEqual(commands, [
-      'agy:--version',
-      'gemini:--version',
-      'gemini:--model'
-    ]);
+    for (const legacyValue of [
+      'gemini',
+      'legacy-fallback',
+      'agy,gemini',
+      'unsupported-val'
+    ]) {
+      process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI = legacyValue;
+      await assert.rejects(
+        () =>
+          probeGeminiCliHealth(
+            {
+              model: 'gemini-3.5-flash-high',
+              repoRoot
+            },
+            {
+              acquireLock: async () => () => undefined,
+              loadRateLimitState: () => ({ models: {} }),
+              recordObservation() {
+                return undefined;
+              },
+              recordRequestStart() {
+                return undefined;
+              },
+              runCommand: () => ({
+                error: undefined,
+                status: 0,
+                stderr: '',
+                stdout: 'OK.'
+              }),
+              sleep: async () => undefined
+            }
+          ),
+        /Legacy Gemini CLI execution is retired|Unsupported review CLI/
+      );
+    }
   } finally {
     if (previous === undefined) {
       delete process.env.GX_LAW_PREP_REVIEW_GOOGLE_CLI;

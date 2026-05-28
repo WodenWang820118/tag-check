@@ -811,7 +811,7 @@ test('executeReviewFlow fails fast for a single explicit unavailable provider', 
         }
       }
     ),
-    /Gemini CLI review is unavailable: quota exhausted/
+    /Antigravity CLI review is unavailable: quota exhausted/
   );
 });
 

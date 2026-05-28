@@ -13,11 +13,11 @@ Read-only codebase mapping: identify affected files, symbols, Nx project
 boundaries, cross-cutting coupling. Does not modify files. Use before
 multi-file changes when scope is unclear.
 
-| Platform           | Concrete agent                                                   |
-| ------------------ | ---------------------------------------------------------------- |
-| Copilot (this)     | `Explore` sub-agent                                              |
-| Codex CLI          | `codebase-mapper` (`.codex/agents/codebase-mapper.toml`)         |
-| Antigravity/Gemini | `agy` preferred; grep + read tooling (no dedicated mapper agent) |
+| Platform       | Concrete agent                                                   |
+| -------------- | ---------------------------------------------------------------- |
+| Copilot (this) | `Explore` sub-agent                                              |
+| Codex CLI      | `codebase-mapper` (`.codex/agents/codebase-mapper.toml`)         |
+| Antigravity    | `agy` preferred; grep + read tooling (no dedicated mapper agent) |
 
 ### `code-investigator` (read-only)
 
@@ -30,41 +30,41 @@ This differs from `code-explorer` / `codebase-mapper`:
 - `codebase-mapper`: broad initial map before implementation.
 - `code-investigator`: focused deep dive during the task.
 
-| Platform           | Concrete agent                                                             |
-| ------------------ | -------------------------------------------------------------------------- |
-| Copilot            | `Explore` sub-agent, with focused investigation prompt                     |
-| Codex CLI          | `code-investigator` (`.codex/agents/code-investigator.toml`)               |
-| Antigravity/Gemini | `agy` preferred; grep + read tooling with read-only instruction (advisory) |
+| Platform    | Concrete agent                                                             |
+| ----------- | -------------------------------------------------------------------------- |
+| Copilot     | `Explore` sub-agent, with focused investigation prompt                     |
+| Codex CLI   | `code-investigator` (`.codex/agents/code-investigator.toml`)               |
+| Antigravity | `agy` preferred; grep + read tooling with read-only instruction (advisory) |
 
 ### `griller` (interactive interview)
 
 Cross-family grill of a plan or design. See `.agents/skills/grill-me/SKILL.md`.
 
-| Platform           | Concrete agent                                       |
-| ------------------ | ---------------------------------------------------- |
-| Copilot            | `grill-me` skill (loaded into main agent)            |
-| Codex CLI          | `grill-me` sub-agent (`.codex/agents/grill-me.toml`) |
-| Antigravity/Gemini | `grill-me` skill (loaded into main agent)            |
+| Platform    | Concrete agent                                       |
+| ----------- | ---------------------------------------------------- |
+| Copilot     | `grill-me` skill (loaded into main agent)            |
+| Codex CLI   | `grill-me` sub-agent (`.codex/agents/grill-me.toml`) |
+| Antigravity | `grill-me` skill (loaded into main agent)            |
 
 ### `plan-reviewer`
 
 Default plan review. See `.agents/workflows/review-lifecycle.md`.
 
-| Platform           | Concrete agent / wrapper                           |
-| ------------------ | -------------------------------------------------- |
-| Copilot            | Copilot Claude Sonnet 4.6                          |
-| Antigravity/Gemini | `gemini-3.5-flash-high` (`pnpm review:plan:risky`) |
-| Codex CLI          | Codex reviewer subagent (fallback only)            |
+| Platform    | Concrete agent / wrapper                           |
+| ----------- | -------------------------------------------------- |
+| Copilot     | Copilot Claude Sonnet 4.6                          |
+| Antigravity | `gemini-3.5-flash-high` (`pnpm review:plan:risky`) |
+| Codex CLI   | Codex reviewer subagent (fallback only)            |
 
 ### `implementation-reviewer`
 
 Default implementation review.
 
-| Platform           | Concrete agent / wrapper                                     |
-| ------------------ | ------------------------------------------------------------ |
-| Antigravity/Gemini | `gemini-3.5-flash-high` (`pnpm review:implementation`)       |
-| Copilot            | Copilot Claude (`pnpm review:copilot`, sensitive escalation) |
-| Codex CLI          | Codex reviewer subagent (fallback only)                      |
+| Platform    | Concrete agent / wrapper                                     |
+| ----------- | ------------------------------------------------------------ |
+| Antigravity | `gemini-3.5-flash-high` (`pnpm review:implementation`)       |
+| Copilot     | Copilot Claude (`pnpm review:copilot`, sensitive escalation) |
+| Codex CLI   | Codex reviewer subagent (fallback only)                      |
 
 ### `domain-implementer` — Angular
 

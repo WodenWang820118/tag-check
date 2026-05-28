@@ -20,18 +20,17 @@ workflow.
 
 ## Antigravity CLI / Gemini compatibility
 
-- Prefer Antigravity CLI (`agy`) for Google-family terminal reviews; keep
+- Use Antigravity CLI (`agy`) exclusively for Google-family terminal reviews; keep
   `gemini` as the stable provider/script compatibility alias.
-- Set `GX_LAW_PREP_REVIEW_GOOGLE_CLI=gemini` to force the legacy Gemini CLI
-  path while debugging Antigravity-specific failures.
+- Legacy Gemini CLI is retired; the environment variable `GX_LAW_PREP_REVIEW_GOOGLE_CLI`
+  must select `agy` / `antigravity` or be left unset. Fallbacks to the Gemini executable are disabled.
 - Keep `.gemini/settings.json` context loading ordered with `AGENTS.md` first
-  for legacy Gemini CLI. Antigravity workspace MCP servers live in
+  for Antigravity family config compatibility. Antigravity workspace MCP servers live in
   `.agents/mcp_config.json`; remote servers use `serverUrl` rather than `url`.
 - `gemini-3.5-flash-high`: plan review fallback and risky plan reviews.
 - `gemini-3.5-flash-high`: primary implementation reviewer.
 - Confirm CLI availability with a low-cost probe before sending full review
-  payload. If `agy` fails or is unavailable, fall back to Gemini CLI and then
-  the next review provider.
+  payload. If `agy` fails or is unavailable, fall back directly to the next review provider.
 - Apply `.agents/reviewers/common-review-contract.toml` plus the shared
   reviewer profile for each Google-family produced review.
 

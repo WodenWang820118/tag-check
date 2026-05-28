@@ -54,7 +54,7 @@ interface GeminiProviderDependencies {
   sleep?: typeof sleep;
 }
 
-type GoogleReviewCli = 'agy' | 'gemini';
+type GoogleReviewCli = 'agy';
 
 interface GoogleReviewCliCommand {
   args: string[];
@@ -175,8 +175,8 @@ export async function probeGeminiCliHealth(
       checkedAtMs,
       reason:
         failures.length > 0
-          ? `No Antigravity/Gemini reviewer CLI is available. ${failures.join('; ')}`
-          : 'No Antigravity/Gemini reviewer CLI is configured.'
+          ? `No Antigravity reviewer CLI is available. ${failures.join('; ')}`
+          : 'No Antigravity reviewer CLI is configured.'
     },
     repoRoot
   );
@@ -405,7 +405,9 @@ async function runGeminiTextCommand(
           continue;
         }
 
-        throw new Error(`Gemini review timed out for model ${policy.model}.`);
+        throw new Error(
+          `Antigravity review timed out for model ${policy.model}.`
+        );
       }
 
       if (capacityError) {
@@ -425,7 +427,7 @@ async function runGeminiTextCommand(
         throw new Error(
           diagnosticOutput ||
             result.error?.message ||
-            'Gemini review command failed.'
+            'Antigravity review command failed.'
         );
       }
 
@@ -438,7 +440,7 @@ async function runGeminiTextCommand(
       return reviewOutput.trim();
     }
 
-    throw new Error(`Gemini review failed for model ${policy.model}.`);
+    throw new Error(`Antigravity review failed for model ${policy.model}.`);
   } finally {
     releaseLock();
   }
@@ -447,73 +449,54 @@ async function runGeminiTextCommand(
 function getGoogleReviewCliCandidates(): GoogleReviewCli[] {
   const configured = process.env[GOOGLE_REVIEW_CLI_ENV]?.trim().toLowerCase();
 
-  if (configured === 'gemini') {
-    return ['gemini'];
+  if (!configured) {
+    return ['agy'];
   }
 
   if (configured === 'agy' || configured === 'antigravity') {
     return ['agy'];
   }
 
-  if (configured === 'legacy-fallback' || configured === 'agy,gemini') {
-    return ['agy', 'gemini'];
+  if (
+    configured === 'gemini' ||
+    configured === 'legacy-fallback' ||
+    configured === 'agy,gemini'
+  ) {
+    throw new Error(
+      `Legacy Gemini CLI execution is retired. The environment variable ${GOOGLE_REVIEW_CLI_ENV} must be set to 'agy' or 'antigravity' (or left unset).`
+    );
   }
 
-  return ['agy'];
+  throw new Error(
+    `Unsupported review CLI "${configured}". Legacy Gemini CLI is retired. Use 'agy' or 'antigravity'.`
+  );
 }
 
 function buildGoogleReviewCliVersionCommand(
   cli: GoogleReviewCli
 ): GoogleReviewCliCommand {
-  if (cli === 'agy') {
-    return {
-      args: ['--version'],
-      command: 'agy'
-    };
-  }
-
   return {
     args: ['--version'],
-    command: 'gemini',
-    windowsScriptName: 'gemini.ps1'
+    command: cli
   };
 }
 
 function buildGoogleReviewCliTextCommand(input: {
   cli: GoogleReviewCli;
   logFilePath?: string;
-  model: string;
   prompt: string;
   timeoutMs: number;
 }): GoogleReviewCliCommand {
-  if (input.cli === 'agy') {
-    return {
-      args: [
-        ...(input.logFilePath ? ['--log-file', input.logFilePath] : []),
-        '--print',
-        input.prompt,
-        '--print-timeout',
-        formatAgyTimeout(input.timeoutMs)
-      ],
-      command: 'agy',
-      logFilePath: input.logFilePath
-    };
-  }
-
   return {
     args: [
-      '--model',
-      input.model,
-      '--approval-mode',
-      'plan',
-      '--output-format',
-      'text',
-      '--prompt',
-      ' '
+      ...(input.logFilePath ? ['--log-file', input.logFilePath] : []),
+      '--print',
+      input.prompt,
+      '--print-timeout',
+      formatAgyTimeout(input.timeoutMs)
     ],
-    command: 'gemini',
-    input: input.prompt,
-    windowsScriptName: 'gemini.ps1'
+    command: input.cli,
+    logFilePath: input.logFilePath
   };
 }
 
@@ -532,14 +515,12 @@ function runGoogleReviewCliTextCommand(input: {
   } | null = null;
 
   for (const cli of input.cliCandidates) {
-    const logFilePath = cli === 'agy' ? createAgyLogFilePath() : undefined;
-    const preparedPrompt =
-      cli === 'agy' ? prepareAgyPrompt(input.prompt) : { prompt: input.prompt };
+    const logFilePath = createAgyLogFilePath();
+    const preparedPrompt = prepareAgyPrompt(input.prompt);
     try {
       const command = buildGoogleReviewCliTextCommand({
         cli,
         logFilePath,
-        model: input.model,
         prompt: preparedPrompt.prompt,
         timeoutMs: input.timeoutMs
       });
@@ -549,10 +530,8 @@ function runGoogleReviewCliTextCommand(input: {
         timeoutMs: input.timeoutMs
       });
 
-      if (isEmptySuccessfulAgyResult(cli, result)) {
-        const transcriptOutput = logFilePath
-          ? input.readAgyTranscriptOutput({ logFilePath })
-          : null;
+      if (isEmptySuccessfulAgyResult(result)) {
+        const transcriptOutput = input.readAgyTranscriptOutput({ logFilePath });
 
         if (transcriptOutput) {
           result = {
@@ -563,15 +542,9 @@ function runGoogleReviewCliTextCommand(input: {
       }
 
       lastResult = { cli, result };
-      const output = joinOutput(result.stdout, result.stderr);
-
-      if (!isFallbackEligibleGoogleCliFailure(cli, result, output)) {
-        return lastResult;
-      }
+      return lastResult;
     } finally {
-      if (logFilePath) {
-        removeAgyTempFile(logFilePath);
-      }
+      removeAgyTempFile(logFilePath);
       if (preparedPrompt.promptFilePath) {
         removeAgyTempFile(preparedPrompt.promptFilePath);
       }
@@ -580,11 +553,9 @@ function runGoogleReviewCliTextCommand(input: {
 
   return (
     lastResult ?? {
-      cli: 'gemini',
+      cli: 'agy',
       result: {
-        error: new Error(
-          'No Antigravity/Gemini reviewer CLI candidates configured.'
-        ),
+        error: new Error('No Antigravity reviewer CLI candidates configured.'),
         status: null,
         stderr: '',
         stdout: ''
@@ -593,35 +564,11 @@ function runGoogleReviewCliTextCommand(input: {
   );
 }
 
-function isEmptySuccessfulAgyResult(
-  cli: GoogleReviewCli,
-  result: LocalCliCommandResult
-): boolean {
+function isEmptySuccessfulAgyResult(result: LocalCliCommandResult): boolean {
   return (
-    cli === 'agy' &&
     !result.error &&
     result.status === 0 &&
     (result.stdout ?? '').trim().length === 0
-  );
-}
-
-function isFallbackEligibleGoogleCliFailure(
-  cli: GoogleReviewCli,
-  result: LocalCliCommandResult,
-  output: string
-): boolean {
-  if (cli !== 'agy') {
-    return false;
-  }
-
-  if (!result.error && result.status === 0 && output.trim().length > 0) {
-    return false;
-  }
-
-  return (
-    /\b(timeout|timed out|ETIMEDOUT|not authenticated|authenticate|login|sign in|api key|not installed|cannot be started locally|ENOENT|not recognized)\b/i.test(
-      [output, result.error?.message].filter(Boolean).join('\n')
-    ) || output.trim().length === 0
   );
 }
 

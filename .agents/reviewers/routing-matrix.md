@@ -14,7 +14,7 @@ Three families participate in cross-family checks:
 
 - **Copilot**: GitHub Copilot Claude Sonnet, Copilot GPT-_ via Copilot CLI,
   `.github/agents/_.agent.md` reviewers.
-- **Gemini**: Antigravity CLI (`agy`) preferred, legacy Gemini CLI compatibility,
+- **Gemini**: Antigravity CLI (`agy`) only,
   `gemini-3.5-flash-high`, `gemini-3.5-flash-high`,
   `.gemini/commands/review/*.toml` reviewers.
 - **Codex**: Codex CLI, `.codex/agents/*.toml` reviewers, including the
@@ -49,16 +49,16 @@ Otherwise it is optional.
 
 ## Reviewer Wrapper Quick Reference
 
-| Wrapper                                  | Use                                                               |
-| ---------------------------------------- | ----------------------------------------------------------------- |
-| `pnpm review:plan`                       | Default plan review (auto-routed)                                 |
-| `pnpm review:plan:risky`                 | Risky plan, pinned to `gemini-3.5-flash-high`                     |
-| `pnpm review:test`                       | Test-strategy review                                              |
-| `pnpm review:implementation`             | Default implementation review (Antigravity/Gemini 3.5 Flash High) |
-| `pnpm review:copilot`                    | Sensitive escalation, Copilot Claude                              |
-| `pnpm review:approve-pre-implementation` | Open the pre-implementation gate                                  |
-| `pnpm review:status`                     | Inspect gate state                                                |
-| `pnpm review:reset`                      | Clear stale gate state                                            |
+| Wrapper                                  | Use                                             |
+| ---------------------------------------- | ----------------------------------------------- |
+| `pnpm review:plan`                       | Default plan review (auto-routed)               |
+| `pnpm review:plan:risky`                 | Risky plan, pinned to `gemini-3.5-flash-high`   |
+| `pnpm review:test`                       | Test-strategy review                            |
+| `pnpm review:implementation`             | Default implementation review (Antigravity CLI) |
+| `pnpm review:copilot`                    | Sensitive escalation, Copilot Claude            |
+| `pnpm review:approve-pre-implementation` | Open the pre-implementation gate                |
+| `pnpm review:status`                     | Inspect gate state                              |
+| `pnpm review:reset`                      | Clear stale gate state                          |
 
 ## Notes
 
