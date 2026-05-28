@@ -23,6 +23,7 @@ describe('SEO prerender artifacts', () => {
       'index,follow'
     );
     expect(getCanonicalHref(document)).toBe(`${CANONICAL_ORIGIN}/home`);
+    expectPwaMetadata(document);
     expect(getMetaContent(document, 'meta[property="og:url"]')).toBe(
       `${CANONICAL_ORIGIN}/home`
     );
@@ -46,6 +47,7 @@ describe('SEO prerender artifacts', () => {
     expect(getCanonicalHref(document)).toBe(
       `${CANONICAL_ORIGIN}/product/destinations`
     );
+    expectPwaMetadata(document);
     expect(getMetaContent(document, 'meta[property="og:url"]')).toBe(
       `${CANONICAL_ORIGIN}/product/destinations`
     );
@@ -81,6 +83,7 @@ describe('SEO prerender artifacts', () => {
     expect(getCanonicalHref(document)).toBe(
       `${CANONICAL_ORIGIN}/product/details/${destination.slug}`
     );
+    expectPwaMetadata(document);
     expect(getMetaContent(document, 'meta[property="og:url"]')).toBe(
       `${CANONICAL_ORIGIN}/product/details/${destination.slug}`
     );
@@ -102,10 +105,57 @@ describe('SEO prerender artifacts', () => {
       'noindex,follow'
     );
     expect(getCanonicalHref(document)).toBe(`${CANONICAL_ORIGIN}/404`);
+    expectPwaMetadata(document);
     expect(getHeadingText(document)).toBe('Page not found');
     expect(getBodyText(document)).toContain('Go to home');
   });
+
+  it('emits service worker and manifest artifacts without HTML fallbacks', () => {
+    const serviceWorker = readDistArtifact('ngsw-worker.js');
+    const ngsw = parseNgswManifest();
+    const manifest = parseJsonArtifact<WebManifest>('manifest.webmanifest');
+
+    expectNotHtmlFallback('ngsw-worker.js', serviceWorker);
+    expectNotHtmlFallback('ngsw.json', readDistArtifact('ngsw.json'));
+    expectNotHtmlFallback(
+      'manifest.webmanifest',
+      readDistArtifact('manifest.webmanifest')
+    );
+
+    expect(serviceWorker).toContain('ngsw');
+    expect(ngsw.configVersion).toBe(1);
+    expect(manifest.start_url).toBe('home');
+    expect(manifest.theme_color).toBe('#2563eb');
+  });
+
+  it('caches the static CSR shell and prerendered offline routes in ngsw.json', () => {
+    const ngsw = parseNgswManifest();
+    const appShell = getAssetGroup(ngsw, 'app-shell');
+    const staticAssets = getAssetGroup(ngsw, 'static-assets');
+
+    expect(ngsw.index).toBe('/index.csr.html');
+    expect(appShell.urls).toContain('/index.csr.html');
+    expect(appShell.urls).toContain('/manifest.webmanifest');
+    expect(staticAssets.urls).toContain('/home/index.html');
+    expect(staticAssets.urls).toContain('/404/index.html');
+  });
 });
+
+interface NgswManifest {
+  configVersion: number;
+  index: string;
+  assetGroups: NgswAssetGroup[];
+}
+
+interface NgswAssetGroup {
+  name: string;
+  urls: string[];
+}
+
+interface WebManifest {
+  start_url: string;
+  theme_color: string;
+}
 
 function readPrerenderedDocument(...routeSegments: string[]): Document {
   const filePath = resolve(DIST_BROWSER_ROOT, ...routeSegments, 'index.html');
@@ -120,6 +170,47 @@ function readPrerenderedDocument(...routeSegments: string[]): Document {
   return new DOMParser().parseFromString(html, 'text/html');
 }
 
+function readDistArtifact(...segments: string[]): string {
+  const filePath = resolve(DIST_BROWSER_ROOT, ...segments);
+
+  expect(existsSync(filePath), `Expected dist artifact at ${filePath}.`).toBe(
+    true
+  );
+
+  return readFileSync(filePath, 'utf8');
+}
+
+function parseNgswManifest(): NgswManifest {
+  return parseJsonArtifact<NgswManifest>('ngsw.json');
+}
+
+function parseJsonArtifact<T>(...segments: string[]): T {
+  return JSON.parse(readDistArtifact(...segments)) as T;
+}
+
+function getAssetGroup(ngsw: NgswManifest, groupName: string): NgswAssetGroup {
+  const assetGroup = ngsw.assetGroups.find(({ name }) => name === groupName);
+
+  expect(assetGroup, `Expected ngsw asset group "${groupName}".`).toBeTruthy();
+  if (!assetGroup) {
+    throw new Error(`Expected ngsw asset group "${groupName}".`);
+  }
+
+  return assetGroup;
+}
+
+function expectNotHtmlFallback(artifactName: string, content: string): void {
+  expect(
+    content,
+    `Expected ${artifactName} to be its generated artifact, not an HTML fallback.`
+  ).not.toMatch(/^\s*(?:<!doctype html>|<html[\s>])/i);
+}
+
+function expectPwaMetadata(document: Document): void {
+  expect(getManifestHref(document)).toBe('manifest.webmanifest');
+  expect(getMetaContent(document, 'meta[name="theme-color"]')).toBe('#2563eb');
+}
+
 function getMetaContent(document: Document, selector: string): string | null {
   return document.querySelector<HTMLMetaElement>(selector)?.content ?? null;
 }
@@ -128,6 +219,14 @@ function getCanonicalHref(document: Document): string | null {
   return (
     document
       .querySelector<HTMLLinkElement>('link[rel="canonical"]')
+      ?.getAttribute('href') ?? null
+  );
+}
+
+function getManifestHref(document: Document): string | null {
+  return (
+    document
+      .querySelector<HTMLLinkElement>('link[rel="manifest"]')
       ?.getAttribute('href') ?? null
   );
 }
