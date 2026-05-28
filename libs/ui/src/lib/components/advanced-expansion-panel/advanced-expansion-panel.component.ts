@@ -127,10 +127,10 @@ export class AdvancedExpansionPanelComponent implements OnInit {
     // const esvValue = JSON.stringify(
     //   [
     //     {
-    //       name: 'Google Tag G-8HK542DQMG Event Settings',
+    //       name: 'Google Tag G-8HKQR5ZBSK Event Settings',
     //       parameters: [
     //         {
-    //           page_referrer: '{{page_referrer for G-8HK542DQMG Tags | String}}'
+    //           page_referrer: '{{page_referrer for G-8HKQR5ZBSK Tags | String}}'
     //         }
     //       ]
     //     }

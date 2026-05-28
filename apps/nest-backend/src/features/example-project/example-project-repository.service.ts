@@ -32,7 +32,7 @@ export class ExampleProjectRepositoryService implements OnApplicationBootstrap {
   private readonly DEFAULT_PROJECT_SLUG = 'example-project-slug';
   private readonly DEFAULT_PROJECT_NAME = 'Example Project';
   private readonly DEFAULT_PROJECT_DESCRIPTION = 'This is an example project';
-  private readonly DEFAULT_MEASUREMENT_ID = 'G-8HK542DQMG';
+  private readonly DEFAULT_MEASUREMENT_ID = 'G-8HKQR5ZBSK';
   private readonly DEFAULT_GTM_FILENAME = 'gtm-container.json';
   private readonly DEFAULT_WEBSITE_URL =
     'https://ng-gtm-sample.vercel.app/home';

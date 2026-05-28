@@ -3402,7 +3402,7 @@ export const exampleGtmJson = {
                   {
                     type: 'TEMPLATE',
                     key: 'value',
-                    value: 'G-8HK542DQMG'
+                    value: 'G-8HKQR5ZBSK'
                   }
                 ]
               },
@@ -3417,7 +3417,7 @@ export const exampleGtmJson = {
                   {
                     type: 'TEMPLATE',
                     key: 'value',
-                    value: 'G-8HK542DQMG'
+                    value: 'G-8HKQR5ZBSK'
                   }
                 ]
               }
@@ -4096,7 +4096,7 @@ export const exampleGtmJson = {
         accountId: '6140708819',
         containerId: '168785492',
         variableId: '194',
-        name: 'page_referrer for G-8HK542DQMG Tags | String',
+        name: 'page_referrer for G-8HKQR5ZBSK Tags | String',
         type: 'jsm',
         parameter: [
           {
@@ -4113,7 +4113,7 @@ export const exampleGtmJson = {
         accountId: '6140708819',
         containerId: '168785492',
         variableId: '195',
-        name: 'Google Tag G-8HK542DQMG Event Settings',
+        name: 'Google Tag G-8HKQR5ZBSK Event Settings',
         type: 'gtes',
         parameter: [
           {
@@ -4131,7 +4131,7 @@ export const exampleGtmJson = {
                   {
                     type: 'TEMPLATE',
                     key: 'parameterValue',
-                    value: '{{page_referrer for G-8HK542DQMG Tags | String}}'
+                    value: '{{page_referrer for G-8HKQR5ZBSK Tags | String}}'
                   }
                 ]
               }
@@ -4353,7 +4353,7 @@ export const exampleGtmJson = {
           {
             type: 'TEMPLATE',
             key: 'value',
-            value: 'G-8HK542DQMG'
+            value: 'G-8HKQR5ZBSK'
           }
         ],
         fingerprint: '1734756121031',

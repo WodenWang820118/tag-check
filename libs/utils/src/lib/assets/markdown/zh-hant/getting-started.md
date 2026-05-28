@@ -128,7 +128,7 @@ Data layer 是瀏覽器 `window` 物件底下的一個資料物件。Google Tag 
 
 當啟用 `Check Request` 並填入 measurement ID 後，TagCheck 會依照 measurement ID 與 event name 攔截請求，拆解 URL 參數，並重組成類似 data layer 的物件。例如：
 
-'https://www.google-analytics.com/g/collect?v=2&tid=G-8HK542DQMG<br />&gtm=45je4410v9171567282z89168785492za200&\_p=1712224628461&gcs=G111&gcd=13r3r3r3q7&npa=1&dma=0&cid=485839296.1712224634<br />&ul=en-us&sr=2195x1235&uaa=x86&uab=64&uafvl=Chromium%3B121.0.6167.85%7CNot%2520A(Brand%3B99.0.0.0&uamb=0&uam=<br />&uap=Windows&uapv=15.0.0&uaw=0&pscdl=noapi&\_s=5&dr=&dl=&cu=USD&sid=1712224634&sct=1&seg=1&dt=Ng%20GTM%20Integration%20App<br />&en=add_to_cart&pr1=idcity001~ nmSwitzerland ~ lndestinations ~ caSwitzerland ~ qt1 ~ pr799&epn.value=799<br />&ep.promotion_id=city001&ep.promotion_name=Switzerland&ep.creative_name=travel_slide&ep.creative_slot=featured_attributor&\_et=8682&tfd=30981'
+'https://www.google-analytics.com/g/collect?v=2&tid=G-8HKQR5ZBSK<br />&gtm=45je4410v9171567282z89168785492za200&\_p=1712224628461&gcs=G111&gcd=13r3r3r3q7&npa=1&dma=0&cid=485839296.1712224634<br />&ul=en-us&sr=2195x1235&uaa=x86&uab=64&uafvl=Chromium%3B121.0.6167.85%7CNot%2520A(Brand%3B99.0.0.0&uamb=0&uam=<br />&uap=Windows&uapv=15.0.0&uaw=0&pscdl=noapi&\_s=5&dr=&dl=&cu=USD&sid=1712224634&sct=1&seg=1&dt=Ng%20GTM%20Integration%20App<br />&en=add_to_cart&pr1=idcity001~ nmSwitzerland ~ lndestinations ~ caSwitzerland ~ qt1 ~ pr799&epn.value=799<br />&ep.promotion_id=city001&ep.promotion_name=Switzerland&ep.creative_name=travel_slide&ep.creative_slot=featured_attributor&\_et=8682&tfd=30981'
 
 會轉換成：
 
