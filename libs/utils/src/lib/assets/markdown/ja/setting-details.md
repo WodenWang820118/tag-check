@@ -23,7 +23,7 @@
 
 - GTM Accompanied Mode
 
-  このモードでは監査と同時に GTM Preview を実行し、タグが期待どおり発火しているかを確認できます。公開済みタグの監査にも便利です。
+  このモードでは監査と同時に GTM Preview を実行し、タグが期待どおり発火しているかを確認できます。未公開ワークスペースの監査にも便利です。
 
 - GTM URL and Shareable Link
 

@@ -4,7 +4,7 @@
 
 ## 创建报告
 
-在审计测试用例之前，先创建可供参考的 report。由于同一个事件可能在多个位置被触发，系统会为每一份报告创建 event ID。如果你有两个 `add_to_cart` 事件，第一个测试用例就需要先创建 JSON 规范，例如：
+在审计测试用例之前，先创建可供参考的 report。由于同一个事件可能在多个位置被触发，系统会为每一份报告分配 event ID。当存在多个 `add_to_cart` 测试用例时，一份共享的 JSON 规范可置入所有用例。例如：
 
 ```json
 {
@@ -43,7 +43,7 @@ Chrome Recorder 会记录 CSS/ID selector、XPath 与其他定位信息，用来
 
 ## Google Tag Manager
 
-Google Tag Manager 是一套数据收集工具，让团队能在不直接修改网站代码的情况下，专注于追踪设计本身。TagCheck 的目标，就是减少重复的手动测试，并协助 QA 更稳定地对照业务需求验证标签实现。
+Google Tag Manager 是一套代码管理系统，让团队能在不直接修改网站代码的情况下，专注于追踪设计本身。TagCheck 的目标，就是减少重复的手动测试，并协助 QA 更稳定地对照业务需求验证标签实现。
 
 ## Data layer
 

@@ -84,7 +84,7 @@
     "overrides": {
       "codebase_investigator": {
         "modelConfig": {
-          "model": "gemini-3-flash-preview"
+          "model": "gemini-3.5-flash-high"
         },
         "runConfig": {
           "maxTurns": 40,

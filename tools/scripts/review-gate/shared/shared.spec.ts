@@ -45,16 +45,16 @@ describe('CLI arg parsing', () => {
   test('accepts Gemini and Codex reviewers via --reviewer', () => {
     const gemini = parseArgs([
       '--reviewer',
-      'gemini-2.5-pro',
+      'gemini-3.5-flash-high',
       '--focus',
       'security',
       '--summary',
-      'Approved after Gemini review',
+      'Approved after Antigravity review',
       '--force'
     ]);
-    assert.equal(gemini.reviewer, 'gemini-2.5-pro');
+    assert.equal(gemini.reviewer, 'gemini-3.5-flash-high');
     assert.equal(gemini.focus, 'security');
-    assert.equal(gemini.summary, 'Approved after Gemini review');
+    assert.equal(gemini.summary, 'Approved after Antigravity review');
     assert.equal(gemini.force, true);
 
     assert.equal(
@@ -101,7 +101,10 @@ describe('CLI arg parsing', () => {
 describe('reviewer validation', () => {
   test('accepts all supported reviewer ids', () => {
     assert.equal(validateReviewerId('copilot-claude'), 'copilot-claude');
-    assert.equal(validateReviewerId('gemini-2.5-pro'), 'gemini-2.5-pro');
+    assert.equal(
+      validateReviewerId('gemini-3.5-flash-high'),
+      'gemini-3.5-flash-high'
+    );
     assert.equal(validateReviewerId('codex-subagent'), 'codex-subagent');
   });
 
@@ -141,7 +144,7 @@ describe('field validators', () => {
 describe('AI family lookup', () => {
   test('maps each supported reviewer to its family', () => {
     assert.equal(getReviewerFamily('copilot-claude'), 'copilot');
-    assert.equal(getReviewerFamily('gemini-2.5-pro'), 'gemini');
+    assert.equal(getReviewerFamily('gemini-3.5-flash-high'), 'gemini');
     assert.equal(getReviewerFamily('codex-subagent'), 'codex');
   });
 
@@ -183,7 +186,7 @@ describe('cross-family constraint', () => {
 
   test('allows cross-family reviewer without override', () => {
     assertCrossFamilyReviewer({
-      reviewer: 'gemini-2.5-pro',
+      reviewer: 'gemini-3.5-flash-high',
       primaryFamily: 'copilot',
       mode: 'standard',
       overrideReason: null
@@ -214,7 +217,7 @@ describe('cross-family constraint', () => {
 describe('approval creation', () => {
   test('records new schema fields and resolves max-files from task size', () => {
     const state = createApproval({
-      reviewer: 'gemini-2.5-pro',
+      reviewer: 'gemini-3.5-flash-high',
       focus: 'general',
       summary: 'ok',
       repoContext: {
@@ -1085,12 +1088,12 @@ describe('hook permission evaluation', () => {
 // ── Deny payload ──────────────────────────────────────────────────────────────
 
 describe('deny payload', () => {
-  test('names Copilot, then Gemini, then Codex as the review path', () => {
+  test('names Copilot, then Antigravity, then Codex as the review path', () => {
     const payload = JSON.parse(buildDenyPayload('Gate blocked.'));
     assert.equal(payload.permissionDecision, 'deny');
     assert.match(payload.permissionDecisionReason, /^Gate blocked\./);
     assert.match(payload.permissionDecisionReason, /Copilot/i);
-    assert.match(payload.permissionDecisionReason, /Gemini 2\.5 Pro/i);
+    assert.match(payload.permissionDecisionReason, /Antigravity CLI/i);
     assert.match(payload.permissionDecisionReason, /Codex/i);
     assert.match(
       payload.permissionDecisionReason,

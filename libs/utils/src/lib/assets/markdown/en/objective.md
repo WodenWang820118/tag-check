@@ -1,10 +1,10 @@
 # Objectives
 
-The objective of this project is to let users create and manage their own Google Tag Manager (GTM) tag audit projects. The user can create a project, add tags to it, and then run an audit on the tags. The audit will check if the tags are used in the correct context and if they are used at all. The user can then review the audit results and make changes to the tags if necessary.
+The objective of TagCheck is to let you create and manage your own Google Tag Manager (GTM) tag audit projects. You can create a project, add tags to it, and then run an audit on the tags. You can then review the audit results and make changes to the tags if necessary.
 
 ## Google Tag Manager
 
-Google Tag Manager is a tag management system that allows users to manage and deploy tags on their websites without having to modify the code. Tags are snippets of code that are used to collect data from the website and send it to third-party services like Google Analytics, Facebook Pixel, etc.
+Google Tag Manager is a tag management system that allows you to manage and deploy tags on your websites without having to modify the code. Tags are snippets of code that are used to collect data from the website and send it to third-party services like Google Analytics, Facebook Pixel, etc.
 
 ## Audit
 
@@ -13,6 +13,6 @@ The audit will check if the tags are used in the correct context and if they are
 Failure reasons can include:
 
 - The tag is not firing at all
-- The tag is firing, but with incorrect/misplaced parameters
+- The tag is firing, but with incorrect or misplaced parameters
 
-TagCheck enables you to audit the project with automation.
+TagCheck enables you to audit your project using automation.

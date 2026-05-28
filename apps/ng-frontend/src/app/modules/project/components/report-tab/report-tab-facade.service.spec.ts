@@ -150,11 +150,15 @@ describe('ReportTabFacade', () => {
       'storybook-project',
       ['evt-1']
     );
-    expect(snackBar.open).toHaveBeenCalledWith('Spreadsheet downloaded', undefined, {
-      duration: 1400,
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    });
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'Spreadsheet downloaded',
+      undefined,
+      {
+        duration: 1400,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      }
+    );
   });
 
   it('downloads spreadsheets from a direct report url', async () => {
@@ -167,7 +171,7 @@ describe('ReportTabFacade', () => {
     const originalCreateElement = document.createElement.bind(document);
 
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:spreadsheet');
-    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
     createElement.mockImplementation(((tagName: string) => {
       if (tagName === 'a') {
         return {
@@ -181,13 +185,10 @@ describe('ReportTabFacade', () => {
     }) as typeof document.createElement);
     vi.stubGlobal('fetch', fetchMock);
 
-    service.shareSpreadsheet(
-      undefined,
-      {
-        eventId: 'evt-1',
-        xlsxUrl: 'https://example.com/report.xlsx'
-      } as never
-    );
+    service.shareSpreadsheet(undefined, {
+      eventId: 'evt-1',
+      xlsxUrl: 'https://example.com/report.xlsx'
+    } as never);
     await Promise.resolve();
     await Promise.resolve();
 
@@ -195,11 +196,15 @@ describe('ReportTabFacade', () => {
       credentials: 'include'
     });
     expect(click).toHaveBeenCalled();
-    expect(snackBar.open).toHaveBeenCalledWith('Spreadsheet downloaded', undefined, {
-      duration: 1400,
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    });
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'Spreadsheet downloaded',
+      undefined,
+      {
+        duration: 1400,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      }
+    );
   });
 
   it('shows an error when a direct-url spreadsheet export fails', async () => {
@@ -211,13 +216,10 @@ describe('ReportTabFacade', () => {
       })
     );
 
-    service.shareSpreadsheet(
-      undefined,
-      {
-        eventId: 'evt-1',
-        xlsxUrl: 'https://example.com/report.xlsx'
-      } as never
-    );
+    service.shareSpreadsheet(undefined, {
+      eventId: 'evt-1',
+      xlsxUrl: 'https://example.com/report.xlsx'
+    } as never);
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(snackBar.open).toHaveBeenCalledWith(
@@ -237,7 +239,7 @@ describe('ReportTabFacade', () => {
     const originalCreateElement = document.createElement.bind(document);
 
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:video');
-    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
     createElement.mockImplementation(((tagName: string) => {
       if (tagName === 'a') {
         return {
@@ -261,15 +263,23 @@ describe('ReportTabFacade', () => {
 
     expect(videosService.getVideo).not.toHaveBeenCalled();
     expect(click).toHaveBeenCalled();
-    expect(snackBar.open).toHaveBeenCalledWith('Recording downloaded', undefined, {
-      duration: 1400,
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    });
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'Recording downloaded',
+      undefined,
+      {
+        duration: 1400,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      }
+    );
   });
 
   it('shows an error when recording export is missing project or event context', () => {
-    service.exportRecording(undefined, { eventId: undefined } as never, undefined);
+    service.exportRecording(
+      undefined,
+      { eventId: undefined } as never,
+      undefined
+    );
 
     expect(snackBar.open).toHaveBeenCalledWith(
       'Unable to download recording (missing project or event)',
@@ -293,7 +303,7 @@ describe('ReportTabFacade', () => {
       })
     );
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:video');
-    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
     createElement.mockImplementation(((tagName: string) => {
       if (tagName === 'a') {
         return {
@@ -320,11 +330,15 @@ describe('ReportTabFacade', () => {
       'evt-1'
     );
     expect(click).toHaveBeenCalled();
-    expect(snackBar.open).toHaveBeenCalledWith('Recording downloaded', undefined, {
-      duration: 1400,
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    });
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'Recording downloaded',
+      undefined,
+      {
+        duration: 1400,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      }
+    );
   });
 
   it('shows a no-recording message when the videos service returns an empty blob', () => {
@@ -343,11 +357,15 @@ describe('ReportTabFacade', () => {
       undefined
     );
 
-    expect(snackBar.open).toHaveBeenCalledWith('No recording available', undefined, {
-      duration: 1500,
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    });
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'No recording available',
+      undefined,
+      {
+        duration: 1500,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      }
+    );
   });
 
   it('shows an error when the videos service fails to export a recording', () => {
@@ -405,7 +423,7 @@ describe('ReportTabFacade', () => {
     const originalCreateElement = document.createElement.bind(document);
 
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:excel-url');
-    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
     createElement.mockImplementation(((tagName: string) => {
       if (tagName === 'a') {
         return {
@@ -419,13 +437,10 @@ describe('ReportTabFacade', () => {
     }) as typeof document.createElement);
     vi.stubGlobal('fetch', fetchMock);
 
-    service.shareSpreadsheet(
-      undefined,
-      {
-        eventId: 'evt-1',
-        excelUrl: 'https://example.com/report.xlsx'
-      } as never
-    );
+    service.shareSpreadsheet(undefined, {
+      eventId: 'evt-1',
+      excelUrl: 'https://example.com/report.xlsx'
+    } as never);
     await Promise.resolve();
     await Promise.resolve();
 
@@ -433,11 +448,15 @@ describe('ReportTabFacade', () => {
       credentials: 'include'
     });
     expect(click).toHaveBeenCalled();
-    expect(snackBar.open).toHaveBeenCalledWith('Spreadsheet downloaded', undefined, {
-      duration: 1400,
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    });
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'Spreadsheet downloaded',
+      undefined,
+      {
+        duration: 1400,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      }
+    );
   });
 
   it('supports spreadsheet downloads via the reportXlsxUrl alias', async () => {
@@ -450,7 +469,7 @@ describe('ReportTabFacade', () => {
     const originalCreateElement = document.createElement.bind(document);
 
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:report-xlsx-url');
-    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
     createElement.mockImplementation(((tagName: string) => {
       if (tagName === 'a') {
         return {
@@ -464,13 +483,10 @@ describe('ReportTabFacade', () => {
     }) as typeof document.createElement);
     vi.stubGlobal('fetch', fetchMock);
 
-    service.shareSpreadsheet(
-      undefined,
-      {
-        eventId: 'evt-1',
-        reportXlsxUrl: 'https://example.com/report.xlsx'
-      } as never
-    );
+    service.shareSpreadsheet(undefined, {
+      eventId: 'evt-1',
+      reportXlsxUrl: 'https://example.com/report.xlsx'
+    } as never);
     await Promise.resolve();
     await Promise.resolve();
 
@@ -478,11 +494,15 @@ describe('ReportTabFacade', () => {
       credentials: 'include'
     });
     expect(click).toHaveBeenCalled();
-    expect(snackBar.open).toHaveBeenCalledWith('Spreadsheet downloaded', undefined, {
-      duration: 1400,
-      horizontalPosition: 'right',
-      verticalPosition: 'top'
-    });
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'Spreadsheet downloaded',
+      undefined,
+      {
+        duration: 1400,
+        horizontalPosition: 'right',
+        verticalPosition: 'top'
+      }
+    );
   });
 
   it('fans out event export to spreadsheet and recording exports', () => {

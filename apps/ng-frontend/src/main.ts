@@ -3,6 +3,15 @@ import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 import * as Sentry from '@sentry/angular';
 
+type DiagnosticErrorCause = {
+  operation?: unknown;
+  method?: unknown;
+  status?: unknown;
+  url?: unknown;
+  path?: unknown;
+  requestId?: unknown;
+};
+
 // Initialize Sentry with minimal configuration
 Sentry.init({
   dsn: 'https://a91fc0202870cb01de7a67884b3f0d45@o4507047390019584.ingest.us.sentry.io/4507892845838336',
@@ -11,8 +20,45 @@ Sentry.init({
   tracePropagationTargets: ['localhost', /^https:\/\/yourserver\.io\/api/],
   replaysSessionSampleRate: 0.1,
   replaysOnErrorSampleRate: 1.0,
-  defaultIntegrations: false
+  defaultIntegrations: false,
+  beforeSend(event, hint) {
+    const httpDiagnostics = extractHttpDiagnostics(hint.originalException);
+    if (httpDiagnostics) {
+      event.contexts = {
+        ...event.contexts,
+        httpDiagnostics
+      };
+    }
+    return event;
+  }
 });
+
+function extractHttpDiagnostics(
+  exception: unknown
+): DiagnosticErrorCause | null {
+  if (!(exception instanceof Error)) {
+    return null;
+  }
+
+  const cause = exception.cause;
+  if (!isDiagnosticErrorCause(cause)) {
+    return null;
+  }
+
+  return Object.fromEntries(
+    Object.entries(cause).filter(
+      ([, value]) => typeof value === 'string' || typeof value === 'number'
+    )
+  ) as DiagnosticErrorCause;
+}
+
+function isDiagnosticErrorCause(cause: unknown): cause is DiagnosticErrorCause {
+  return (
+    typeof cause === 'object' &&
+    cause !== null &&
+    ('requestId' in cause || 'operation' in cause || 'status' in cause)
+  );
+}
 
 /** Signal to the Tauri shell that the Angular app has finished bootstrapping. */
 async function notifyAppReady(): Promise<void> {

@@ -5,6 +5,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DataLayerService } from '../../action/web-monitoring/data-layer/data-layer.service';
 import { ConfigsService } from '../../../../core/configs/configs.service';
 import { Step } from '@utils';
+import { preloadApplicationLocalStorage } from '../../browser-state-preload.util';
 
 @Injectable()
 export class StepExecutorUtilsService {
@@ -121,28 +122,11 @@ export class StepExecutorUtilsService {
     state: any,
     application: EventInspectionPresetDto['application']
   ): Promise<void> {
-    await this.setLocalStorage(page, application);
+    await preloadApplicationLocalStorage(page, application);
     await page.goto(step.url!, { waitUntil: 'networkidle2' });
     await new Promise((resolve) => setTimeout(resolve, 2000));
     await page.goto(step.url!, { waitUntil: 'networkidle2' });
     await this.verifyLocalStorageAndCookies(page);
     state.isFirstNavigation = false;
-  }
-
-  private async setLocalStorage(
-    page: Page,
-    application: EventInspectionPresetDto['application']
-  ): Promise<void> {
-    if (application?.localStorage) {
-      await page.evaluateOnNewDocument((appLocalStorage) => {
-        for (const setting of appLocalStorage.data) {
-          let value = setting.value;
-          if (typeof value === 'object') {
-            value = JSON.stringify(value);
-          }
-          localStorage.setItem(setting.key, value);
-        }
-      }, application.localStorage);
-    }
   }
 }

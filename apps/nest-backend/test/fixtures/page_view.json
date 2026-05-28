@@ -12,12 +12,12 @@
     },
     {
       "type": "navigate",
-      "url": "https://gtm-integration-sample.netlify.app",
+      "url": "https://ng-gtm-sample.vercel.app/home",
       "assertedEvents": [
         {
           "type": "navigation",
-          "url": "https://gtm-integration-sample.netlify.app/home",
-          "title": "Ng GTM Integration App"
+          "url": "https://ng-gtm-sample.vercel.app/home",
+          "title": "Ng GTM Sample App"
         }
       ]
     }

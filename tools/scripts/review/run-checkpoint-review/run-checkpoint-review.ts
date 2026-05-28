@@ -488,8 +488,8 @@ async function readReviewContext(contextFile?: string): Promise<string> {
 
 function getDefaultGeminiModel(checkpoint: ReviewCheckpoint): string {
   return checkpoint === 'implementation'
-    ? 'gemini-3-flash-preview'
-    : 'gemini-2.5-pro';
+    ? 'gemini-3.5-flash-high'
+    : 'gemini-3.5-flash-high';
 }
 
 export async function executeReviewFlow(
@@ -671,7 +671,7 @@ function getProviderDisplayName(provider: ConcreteReviewProvider): string {
   }
 
   if (provider === 'gemini') {
-    return 'Gemini CLI';
+    return 'Antigravity CLI';
   }
 
   return 'Codex reviewer';

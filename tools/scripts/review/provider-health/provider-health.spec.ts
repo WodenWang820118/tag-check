@@ -8,14 +8,14 @@ import {
   cacheProviderHealth,
   createProviderHealthCacheKey,
   getCachedProviderHealth,
-  getProviderHealthStatePath,
+  getProviderHealthStatePath
 } from './provider-health.ts';
 
 test('provider health cache keys include the model when present', () => {
   assert.equal(createProviderHealthCacheKey('copilot'), 'copilot');
   assert.equal(
-    createProviderHealthCacheKey('gemini', 'gemini-3-flash-preview'),
-    'gemini:gemini-3-flash-preview',
+    createProviderHealthCacheKey('gemini', 'gemini-3.5-flash-high'),
+    'gemini:gemini-3.5-flash-high'
   );
 });
 
@@ -25,17 +25,17 @@ test('provider health cache round-trips healthy and unhealthy entries', () => {
   try {
     assert.match(
       getProviderHealthStatePath(tempRoot),
-      /\.cache[\\/]reviews[\\/]provider-health-state\.json$/,
+      /\.cache[\\/]reviews[\\/]provider-health-state\.json$/
     );
 
     cacheProviderHealth(
       'gemini',
-      'gemini-3-flash-preview',
+      'gemini-3.5-flash-high',
       {
         available: true,
-        checkedAtMs: 1_000,
+        checkedAtMs: 1_000
       },
-      tempRoot,
+      tempRoot
     );
 
     cacheProviderHealth(
@@ -44,23 +44,23 @@ test('provider health cache round-trips healthy and unhealthy entries', () => {
       {
         available: false,
         checkedAtMs: 2_000,
-        reason: 'quota exhausted',
+        reason: 'quota exhausted'
       },
-      tempRoot,
+      tempRoot
     );
 
     assert.deepEqual(
       getCachedProviderHealth(
         'gemini',
-        'gemini-3-flash-preview',
+        'gemini-3.5-flash-high',
         tempRoot,
-        1_500,
+        1_500
       ),
       {
         available: true,
         checkedAtMs: 1_000,
-        source: 'cache',
-      },
+        source: 'cache'
+      }
     );
 
     assert.deepEqual(
@@ -69,8 +69,8 @@ test('provider health cache round-trips healthy and unhealthy entries', () => {
         available: false,
         checkedAtMs: 2_000,
         reason: 'quota exhausted',
-        source: 'cache',
-      },
+        source: 'cache'
+      }
     );
   } finally {
     rmSync(tempRoot, { force: true, recursive: true });

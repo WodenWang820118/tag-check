@@ -18,10 +18,9 @@ import { SearchEventTracker } from './analytics-events/search';
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AnalyticsEventTrackerFactory {
-  constructor() {}
   public createEvent(eventName: string): AnalyticsEventTracker {
     switch (eventName) {
       case 'add_to_cart':

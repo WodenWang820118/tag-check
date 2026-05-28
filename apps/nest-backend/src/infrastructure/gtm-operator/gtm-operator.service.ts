@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger
@@ -9,6 +10,7 @@ import { EventInspectionPipelineService } from '../../features/event-inspection-
 import { PuppeteerUtilsService } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import { RecordingRepositoryService } from '../../core/repository/recording/recording-repository.service';
+import { preloadApplicationLocalStorage } from '../../features/web-agent/browser-state-preload.util';
 
 @Injectable()
 export class GtmOperatorService {
@@ -46,34 +48,31 @@ export class GtmOperatorService {
 
     // normalize headless flag consistently with PuppeteerUtilsService
     const headlessFlag = query.headless === 'true' || query.headless === '1';
-
-    // extract cookie setting logic to helper
-    await this.applyCookies(browser, query.gtmUrl, eventInspectionPresetDto);
-
-    const websiteUrl = this.extractBaseUrlFromGtmUrl(query.gtmUrl);
-    await this.operateGtmPreviewMode(page, query.gtmUrl);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    const pages = await browser.pages();
-    for (const subPage of pages) {
-      if (subPage.url() === 'about:blank') {
-        await subPage.close();
-      }
-    }
-
-    const target = await browser.waitForTarget(
-      (target: { url: () => string | string[] }) =>
-        target.url().includes(new URL(websiteUrl).origin)
-    );
-
-    const url = new URL(target.url());
-    const origin = url.origin;
-    const targetPage = await target.asPage(); // for using the screencast error-free
-    if (!targetPage) {
-      throw new Error('Failed to find the target page');
-    }
     let recorder: ScreenRecorder | null = null;
     try {
+      const websiteUrl = this.getPreviewTargetUrl(query.gtmUrl);
+      await this.applyCookies(browser, websiteUrl, eventInspectionPresetDto);
+      await this.operateGtmPreviewMode(page, query.gtmUrl);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const pages = await browser.pages();
+      for (const subPage of pages) {
+        if (subPage.url() === 'about:blank') {
+          await subPage.close();
+        }
+      }
+
+      const target = await browser.waitForTarget(
+        (target: { url: () => string | string[] }) =>
+          target.url().includes(new URL(websiteUrl).origin)
+      );
+
+      const targetUrl = target.url();
+      const targetPage = await target.asPage(); // for using the screencast error-free
+      if (!targetPage) {
+        throw new Error('Failed to find the target page');
+      }
+
       // Apply the recorded viewport to the actual page we'll record (targetPage)
       await this.puppeteerUtilsService.applyRecordedViewport(
         targetPage,
@@ -81,7 +80,11 @@ export class GtmOperatorService {
         eventId
       );
       await targetPage.bringToFront();
-      await targetPage.goto(origin);
+      await preloadApplicationLocalStorage(
+        targetPage,
+        eventInspectionPresetDto.application
+      );
+      await targetPage.goto(targetUrl);
 
       recorder = await this.puppeteerUtilsService.startRecorder(
         targetPage,
@@ -127,6 +130,9 @@ export class GtmOperatorService {
           'Headful mode detected (GTM) and an error occurred: skipping automatic cleanup so the browser remains open for debugging.'
         );
       }
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       throw new InternalServerErrorException(
         'Failed to perform GTM validation'
       );
@@ -170,6 +176,25 @@ export class GtmOperatorService {
     }
 
     return '';
+  }
+
+  private getPreviewTargetUrl(gtmUrl: string): string {
+    try {
+      const websiteUrl = this.extractBaseUrlFromGtmUrl(gtmUrl);
+      if (!websiteUrl) {
+        throw new BadRequestException(
+          'GTM preview URL must include a target website URL'
+        );
+      }
+
+      return websiteUrl;
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      throw new BadRequestException('Invalid GTM preview URL');
+    }
   }
 
   stopOperation() {

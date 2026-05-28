@@ -421,7 +421,7 @@ function getProviderDisplayName(provider: ConcreteReviewProvider): string {
   }
 
   if (provider === 'gemini') {
-    return 'Gemini CLI';
+    return 'Antigravity CLI';
   }
 
   return 'Codex reviewer';

@@ -6,14 +6,28 @@ import {
   Body,
   Post,
   Logger,
-  Delete
+  Delete,
+  Req,
+  Res
 } from '@nestjs/common';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { IReportDetails } from '@utils';
 import { ProjectReportService } from '../../features/project-agent/project-report/project-report.service';
 import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 import { CreateFullTestEventDto, UpdateTestEventDto } from '../../shared';
+
+type ReportDiagnosticRequest = FastifyRequest & {
+  id?: string;
+  diagnosticContext?: {
+    operation?: string;
+    projectSlug?: string;
+  };
+};
+
+const REQUEST_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 @Controller('reports')
 export class ReportController {
@@ -26,11 +40,31 @@ export class ReportController {
   ) {}
 
   @Get(':projectSlug')
-  async getProjectEventReports(@Param('projectSlug') projectSlug: string) {
+  async getProjectEventReports(
+    @Param('projectSlug') projectSlug: string,
+    @Req() request?: ReportDiagnosticRequest,
+    @Res({ passthrough: true }) response?: FastifyReply
+  ) {
+    if (request) {
+      request.diagnosticContext = {
+        ...(request.diagnosticContext ?? {}),
+        operation: 'reports.list',
+        projectSlug
+      };
+    }
     const reports =
       await this.testEventRepositoryService.listReports(projectSlug);
+    const requestId = resolveReportRequestId(request);
+    if (requestId) {
+      response?.header('x-request-id', requestId);
+    }
     this.logger.log(
-      `getProjectEventReports: projectSlug=${projectSlug}, count=${Array.isArray(reports) ? reports.length : 0}`
+      JSON.stringify({
+        operation: 'reports.list',
+        projectSlug,
+        requestId,
+        count: Array.isArray(reports) ? reports.length : 0
+      })
     );
     return reports;
   }
@@ -53,7 +87,7 @@ export class ReportController {
     @Body() report: IReportDetails
   ) {
     this.logger.log(
-      `updateReport: projectSlug=${projectSlug}, eventId=${eventId}, keys=${Object.keys(report).join(',')}`
+      `updateReport: projectSlug=${projectSlug}, eventId=${eventId}, keys=${Object.keys(report || {}).join(',')}`
     );
 
     await this.projectAbstractReportService.writeSingleAbstractTestResultJson(
@@ -70,7 +104,7 @@ export class ReportController {
     @Body() reportData: CreateFullTestEventDto
   ) {
     Logger.log(
-      `addReport: projectSlug=${projectSlug}, eventId=${eventId}, keys=${Object.keys(reportData as unknown as Record<string, unknown>).join(',')}`
+      `addReport: projectSlug=${projectSlug}, eventId=${eventId}, keys=${Object.keys((reportData || {}) as unknown as Record<string, unknown>).join(',')}`
     );
     // Video isn't suitable to be saved in SQL DB as a blob
     // Use file system to save video instead
@@ -127,4 +161,15 @@ export class ReportController {
       events
     );
   }
+}
+
+function resolveReportRequestId(
+  request: ReportDiagnosticRequest | undefined
+): string | undefined {
+  const header = request?.headers['x-request-id'];
+  const headerRequestId = Array.isArray(header) ? header[0] : header;
+  return typeof headerRequestId === 'string' &&
+    REQUEST_ID_PATTERN.test(headerRequestId)
+    ? headerRequestId
+    : request?.id;
 }

@@ -4,6 +4,8 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://tag-check-documentation.vercel.app/en/</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/" />
@@ -12,6 +14,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/en/about</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/about" />
@@ -20,6 +24,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/en/objectives</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/objectives" />
@@ -28,6 +34,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/en/documentation/introduction</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/introduction" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/introduction" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/introduction" />
@@ -36,6 +44,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/en/documentation/objective</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/objective" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/objective" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/objective" />
@@ -44,6 +54,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/en/documentation/use-cases</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/use-cases" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/use-cases" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/use-cases" />
@@ -52,6 +64,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/en/documentation/getting-started</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/getting-started" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/getting-started" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/getting-started" />
@@ -60,6 +74,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/en/documentation/quality-assurance</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/quality-assurance" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/quality-assurance" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/quality-assurance" />
@@ -68,6 +84,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/en/documentation/report-management</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/report-management" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/report-management" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/report-management" />
@@ -76,6 +94,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/en/documentation/setting-details</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/setting-details" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/setting-details" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/setting-details" />
@@ -84,6 +104,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hant/</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/" />
@@ -92,6 +114,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hant/about</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/about" />
@@ -100,6 +124,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hant/objectives</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/objectives" />
@@ -108,6 +134,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/introduction</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/introduction" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/introduction" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/introduction" />
@@ -116,6 +144,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/objective</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/objective" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/objective" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/objective" />
@@ -124,6 +154,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/use-cases</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/use-cases" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/use-cases" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/use-cases" />
@@ -132,6 +164,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/getting-started</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/getting-started" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/getting-started" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/getting-started" />
@@ -140,6 +174,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/quality-assurance</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/quality-assurance" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/quality-assurance" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/quality-assurance" />
@@ -148,6 +184,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/report-management</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/report-management" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/report-management" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/report-management" />
@@ -156,6 +194,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hant/documentation/setting-details</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/setting-details" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/setting-details" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/setting-details" />
@@ -164,6 +204,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hans/</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/" />
@@ -172,6 +214,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hans/about</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/about" />
@@ -180,6 +224,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hans/objectives</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/objectives" />
@@ -188,6 +234,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/introduction</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/introduction" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/introduction" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/introduction" />
@@ -196,6 +244,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/objective</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/objective" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/objective" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/objective" />
@@ -204,6 +254,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/use-cases</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/use-cases" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/use-cases" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/use-cases" />
@@ -212,6 +264,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/getting-started</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/getting-started" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/getting-started" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/getting-started" />
@@ -220,6 +274,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/quality-assurance</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/quality-assurance" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/quality-assurance" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/quality-assurance" />
@@ -228,6 +284,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/report-management</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/report-management" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/report-management" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/report-management" />
@@ -236,6 +294,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/zh-hans/documentation/setting-details</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/setting-details" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/setting-details" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/setting-details" />
@@ -244,6 +304,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/ja/</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/" />
@@ -252,6 +314,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/ja/about</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/about" />
@@ -260,6 +324,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/ja/objectives</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/objectives" />
@@ -268,6 +334,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/ja/documentation/introduction</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/introduction" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/introduction" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/introduction" />
@@ -276,6 +344,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/ja/documentation/objective</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/objective" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/objective" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/objective" />
@@ -284,6 +354,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/ja/documentation/use-cases</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/use-cases" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/use-cases" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/use-cases" />
@@ -292,6 +364,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/ja/documentation/getting-started</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/getting-started" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/getting-started" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/getting-started" />
@@ -300,6 +374,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/ja/documentation/quality-assurance</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/quality-assurance" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/quality-assurance" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/quality-assurance" />
@@ -308,6 +384,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/ja/documentation/report-management</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/report-management" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/report-management" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/report-management" />
@@ -316,6 +394,8 @@
   </url>
   <url>
     <loc>https://tag-check-documentation.vercel.app/ja/documentation/setting-details</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-check-documentation.vercel.app/en/documentation/setting-details" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-check-documentation.vercel.app/zh-hant/documentation/setting-details" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-check-documentation.vercel.app/zh-hans/documentation/setting-details" />

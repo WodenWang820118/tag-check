@@ -4,6 +4,8 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://tag-build.vercel.app/</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/" />
@@ -12,6 +14,8 @@
   </url>
   <url>
     <loc>https://tag-build.vercel.app/about</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/about" />
@@ -20,6 +24,8 @@
   </url>
   <url>
     <loc>https://tag-build.vercel.app/objectives</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/objectives" />
@@ -28,6 +34,8 @@
   </url>
   <url>
     <loc>https://tag-build.vercel.app/zh-hant/</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/" />
@@ -36,6 +44,8 @@
   </url>
   <url>
     <loc>https://tag-build.vercel.app/zh-hant/about</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/about" />
@@ -44,6 +54,8 @@
   </url>
   <url>
     <loc>https://tag-build.vercel.app/zh-hant/objectives</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/objectives" />
@@ -52,6 +64,8 @@
   </url>
   <url>
     <loc>https://tag-build.vercel.app/zh-hans/</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/" />
@@ -60,6 +74,8 @@
   </url>
   <url>
     <loc>https://tag-build.vercel.app/zh-hans/about</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/about" />
@@ -68,6 +84,8 @@
   </url>
   <url>
     <loc>https://tag-build.vercel.app/zh-hans/objectives</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/objectives" />
@@ -76,6 +94,8 @@
   </url>
   <url>
     <loc>https://tag-build.vercel.app/ja/</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/" />
@@ -84,6 +104,8 @@
   </url>
   <url>
     <loc>https://tag-build.vercel.app/ja/about</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/about" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/about" />
@@ -92,6 +114,8 @@
   </url>
   <url>
     <loc>https://tag-build.vercel.app/ja/objectives</loc>
+    <lastmod>2026-05-16</lastmod>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://tag-build.vercel.app/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hant" href="https://tag-build.vercel.app/zh-hant/objectives" />
     <xhtml:link rel="alternate" hreflang="zh-Hans" href="https://tag-build.vercel.app/zh-hans/objectives" />

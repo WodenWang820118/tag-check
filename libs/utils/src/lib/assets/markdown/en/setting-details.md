@@ -23,7 +23,7 @@ This section contains several GTM-related settings.
 
 - GTM Accompanied Mode
 
-  This mode runs GTM Preview alongside the audit so you can confirm whether tags fire as expected. It is also useful when auditing published tags.
+  This mode runs GTM Preview alongside the audit so you can confirm whether tags fire as expected. It is also useful when auditing an unpublished workspace.
 
 - GTM URL and Shareable Link
 
@@ -43,8 +43,8 @@ This section includes two parts:
 
 ## Pre-load data
 
-Pre-load data is loaded into the application before tests run, especially local storage and cookies. A common use case is loading consent cookies so analytics collection is enabled before automation starts.
+Pre-load data is applied to the application before tests run, covering local storage and cookies. A common use case is loading consent cookies so analytics collection is enabled before automation starts.
 
 ## Project IO
 
-This feature lets you import and export projects. Projects are transferred as zip files.
+This feature lets you import and export projects. Projects are transferred as ZIP files.

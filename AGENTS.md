@@ -6,7 +6,7 @@ Project skills live in `.agents/skills`, the shared review contract lives in `.a
 ## Canonical Context
 
 - Follow `AGENTS.md` first, then load the smallest relevant set of skills.
-- The preferred review authority is GitHub Copilot running a Claude-family model for plan and test checkpoints. Use Gemini CLI as the default reviewer for non-low-risk implementation work, and allow Codex-first auto-routing only for deterministic low-risk `implementation` or `pre-merge` reviews where this file says so.
+- The preferred review authority is GitHub Copilot running a Claude-family model for plan and test checkpoints. Use Antigravity CLI (`agy`) as the default reviewer for non-low-risk implementation work, and allow Codex-first auto-routing only for deterministic low-risk `implementation` or `pre-merge` reviews where this file says so.
 - Skill precedence is fixed:
   1. `AGENTS.md`
   2. local Nx and repo skills in `.agents/skills`
@@ -72,16 +72,16 @@ The ideal review path is:
 3. the reviewer performs the checkpoint review using the matching reviewer agent or prompt
 4. the primary tool continues only after the review is addressed
 
-If the scripted Copilot Claude path is unavailable in the current environment, prefer Gemini CLI before the Codex grill-me sub-agent where this file routes an automatic second reviewer, otherwise use the matching tool-native reviewer profile, prompt, or Codex reviewer subagent.
+If the scripted Copilot Claude path is unavailable in the current environment, prefer Antigravity CLI (`agy`) before the Codex grill-me sub-agent where this file routes an automatic second reviewer, otherwise use the matching tool-native reviewer profile, prompt, or Codex reviewer subagent.
 
 ### Required checkpoints
 
 1. `Plan review`: produce a spec or implementation plan, then send it to a second reviewer.
-   Default: GitHub Copilot Claude Sonnet 4.6. If the normal Copilot Claude path is unavailable or quota exhausted, use `gemini-2.5-pro` before falling back to the Codex grill-me sub-agent. In Codex plan mode, invoke the grill-me sub-agent first to co-create and stress-test the plan before submitting for Plan Review.
+   Default: GitHub Copilot Claude Sonnet 4.6. If the normal Copilot Claude path is unavailable or quota exhausted, use `gemini-3.5-flash-high` before falling back to the Codex grill-me sub-agent. In Codex plan mode, invoke the grill-me sub-agent first to co-create and stress-test the plan before submitting for Plan Review.
 2. `Test review`: after writing tests but before running the broad sign-off suite or using those tests as approval evidence, send the test strategy and assertions to a second reviewer.
-   Default: GitHub Copilot Claude Sonnet 4.6. If the normal Copilot Claude path is unavailable or quota exhausted, use `gemini-2.5-pro` before falling back to the Codex grill-me sub-agent instead of silently self-approving.
+   Default: GitHub Copilot Claude Sonnet 4.6. If the normal Copilot Claude path is unavailable or quota exhausted, use `gemini-3.5-flash-high` before falling back to the Codex grill-me sub-agent instead of silently self-approving.
 3. `Implementation review`: after the first working implementation, self-check, and reviewable verification story are ready, send the change to a second reviewer.
-   Default: `pnpm review:implementation` keeps Gemini Flash Preview using the CLI model id `gemini-3-flash-preview` first for normal or sensitive implementation reviews. Its auto router may start with the matching Codex reviewer subagent only when the context contains an explicit small changed-file list, that list exactly matches the repo's current changed-file set, the scope is non-sensitive, and no review or governance surfaces are touched. Otherwise fall back in this order: GitHub Copilot Claude Sonnet 4.6, then the Codex grill-me sub-agent. Escalate to GitHub Copilot Claude when blocking findings remain or when the change touches auth, secrets, filesystem, shell execution, network behavior, or public contracts.
+   Default: `pnpm review:implementation` keeps Antigravity CLI (`agy`) with the logical model id `gemini-3.5-flash-high` first for normal or sensitive implementation reviews. Its auto router may start with the matching Codex reviewer subagent only when the context contains an explicit small changed-file list, that list exactly matches the repo's current changed-file set, the scope is non-sensitive, and no review or governance surfaces are touched. Otherwise fall back in this order: GitHub Copilot Claude Sonnet 4.6, then the Codex grill-me sub-agent. Escalate to GitHub Copilot Claude when blocking findings remain or when the change touches auth, secrets, filesystem, shell execution, network behavior, or public contracts.
 
 For browser-verifiable `ng-frontend` tasks, `proofshot` can be used after implementation and before final sign-off, typically through `qa-verification`, to generate screenshots, session video, and a local proof summary for human review.
 
@@ -92,7 +92,7 @@ For browser-verifiable `ng-frontend` tasks, `proofshot` can be used after implem
 - Implementation review is mandatory when a task touches 3 or more files, changes data flow, updates permissions or auth, changes persistent state, modifies process lifecycle, or alters an external contract.
 - Pre-merge review must include the appropriate specialist reviewer for public APIs, auth, secrets, filesystem access, shell execution, or network behavior.
 - `pre-merge` is an additional wrapper mode only. It does not replace the required `implementation` checkpoint or the pre-implementation gate.
-- Before the first implementation change on a clean worktree, open the gate by running `pnpm review:approve-pre-implementation -- --reviewer <copilot-claude|gemini-2.5-pro|codex-subagent> --primary-family <copilot|gemini|codex> --task-size <tiny|small|medium|large|huge> --focus <area> --summary "<approval summary>"` after the plan review passes. The reviewer family must differ from `--primary-family`; same-family approvals require `--mode override --override-reason "<rationale>"`.
+- Before the first implementation change on a clean worktree, open the gate by running `pnpm review:approve-pre-implementation -- --reviewer <copilot-claude|gemini-3.5-flash-high|codex-subagent> --primary-family <copilot|gemini|codex> --task-size <tiny|small|medium|large|huge> --focus <area> --summary "<approval summary>"` after the plan review passes. The reviewer family must differ from `--primary-family`; same-family approvals require `--mode override --override-reason "<rationale>"`.
 - Use `pnpm review:status` to inspect the gate and `pnpm review:reset` to clear it manually when needed.
 
 ### Cross-Family Grill-me Rule
@@ -109,11 +109,11 @@ Before submitting a plan to Plan Review, invoke the `grill-me` skill
 The griller's AI family must differ from the primary agent's family. Three
 families are recognized:
 
-| Family  | Includes                                                         |
-| ------- | ---------------------------------------------------------------- |
-| Copilot | Copilot Claude, Copilot CLI GPT-_, `.github/agents/_`            |
-| Gemini  | `gemini-2.5-pro`, `gemini-3-flash-preview`, `.gemini/commands/*` |
-| Codex   | Codex CLI, `.codex/agents/*`, Codex `grill-me` sub-agent         |
+| Family  | Includes                                                                                             |
+| ------- | ---------------------------------------------------------------------------------------------------- |
+| Copilot | Copilot Claude, Copilot CLI GPT-_, `.github/agents/_`                                                |
+| Gemini  | Antigravity CLI (`agy`) only, `gemini-3.5-flash-high`, `gemini-3.5-flash-high`, `.gemini/commands/*` |
+| Codex   | Codex CLI, `.codex/agents/*`, Codex `grill-me` sub-agent                                             |
 
 Grill exits only when all six items in the grill-me end checklist have
 concrete answers and no `high-impact` open question remains. The reviewer at
@@ -265,19 +265,19 @@ work.
 - Before using Copilot CLI for a scripted checkpoint review, confirm the local CLI is installed and that a constant low-cost probe still succeeds. Treat a failed probe as unavailability and fall back instead of sending the full review payload.
 - Copilot hooks in `.github/hooks/review-gate.json` are the hard guardrail for pre-implementation review on a clean worktree.
 - When using Copilot CLI and Rubber Duck is available, prefer a Claude-family orchestrator and enable `/experimental`.
-- For plan, test, and non-low-risk implementation reviews, the auto-routed review wrappers should prefer Gemini CLI before Copilot GPT-5 mini. Low-risk `implementation` or `pre-merge` auto routing may try the matching Codex reviewer first only when the review context includes an explicit small non-sensitive changed-file list that exactly matches the repo's current changed-file set. Keep the Copilot-only retry path only when the review is explicitly pinned to `--provider copilot`.
+- For plan, test, and non-low-risk implementation reviews, the auto-routed review wrappers should prefer Antigravity CLI (`agy`) before Copilot GPT-5 mini. Low-risk `implementation` or `pre-merge` auto routing may try the matching Codex reviewer first only when the review context includes an explicit small non-sensitive changed-file list that exactly matches the repo's current changed-file set. Keep the Copilot-only retry path only when the review is explicitly pinned to `--provider copilot`.
 - Trigger Rubber Duck critique after a plan is drafted, after an escalated multi-file implementation review, and after tests are written but before they are executed.
 - If Rubber Duck is unavailable, use the matching reviewer agent in `.github/agents` as the required second opinion.
 - If the user explicitly asks for a critique, review, second opinion, or Rubber Duck, force a second opinion even if the task is otherwise small.
 - For browser-verifiable UI proof requests, use `qa-verification` and the repo-local `proofshot` workflow when browser artifacts are the right evidence path.
 
-### Gemini CLI
+### Antigravity CLI (`agy`)
 
 - Keep `.gemini/settings.json` context loading ordered with `AGENTS.md` first. Tool-specific bridges such as `GEMINI.md` may load after it only when they stay thin and defer back to `AGENTS.md`.
-- Use `gemini-2.5-pro` for risky pre-implementation plan reviews and when Copilot quota or availability prevents the normal Copilot plan review path.
-- Use Gemini Flash Preview through the CLI model id `gemini-3-flash-preview` as the default implementation reviewer.
-- Before using Gemini CLI for a scripted checkpoint review, confirm the local CLI is installed and that a constant low-cost probe succeeds for the intended model. If the probe fails, fall back instead of sending the full review payload.
-- Apply adaptive throttling for scripted Gemini reviews: `gemini-2.5-pro` uses a 38s start-to-start target with `35s -> 50s -> 75s` retry backoff, and `gemini-3-flash-preview` uses a 22s start-to-start target with `20s -> 30s` retry backoff.
+- Use `gemini-3.5-flash-high` for risky pre-implementation plan reviews and when Copilot quota or availability prevents the normal Copilot plan review path.
+- Use Antigravity CLI (`agy`) through the logical model id `gemini-3.5-flash-high` as the default implementation reviewer.
+- Before using Antigravity CLI for a scripted checkpoint review, confirm the local CLI is installed and that a constant low-cost probe succeeds for the intended model. If the probe fails, fall back instead of sending the full review payload.
+- Apply adaptive throttling for scripted Antigravity reviews: `gemini-3.5-flash-high` uses a 38s start-to-start target with `35s -> 50s -> 75s` retry backoff, and `gemini-3.5-flash-high` uses a 22s start-to-start target with `20s -> 30s` retry backoff.
 - Apply `.agents/reviewers/common-review-contract.toml` as the shared review contract and use `.gemini/commands/review/*.toml` as Gemini-specific specialist lenses. Do not recreate or load legacy `.agents/reviewers/*-reviewer.md` personas.
 
 ### Codex CLI
@@ -287,7 +287,7 @@ work.
 - For non-trivial work, use `pnpm review:plan`, `pnpm review:plan:risky`, `pnpm review:implementation`, and `pnpm review:test` to route checkpoint reviews through the repo-standard wrappers.
 - Use the configured reviewer subagents for plan, implementation, test, and UX/security review checkpoints.
 - Low-risk `implementation` and `pre-merge` auto routing may select Codex first only when the review context includes an explicit small non-sensitive changed-file list that exactly matches the repo's current changed-file set. Plan and test checkpoints remain Copilot-led unless fallback is required.
-- When Copilot CLI or Gemini CLI is not locally usable, the review wrappers should fall back to the matching Codex reviewer subagent instead of silently self-approving.
+- When Copilot CLI or Antigravity CLI is not locally usable, the review wrappers should fall back to the matching Codex reviewer subagent instead of silently self-approving.
 
 ## Repo Map
 

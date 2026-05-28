@@ -18,11 +18,11 @@ const viewItemRecording: Recording = {
     },
     {
       type: 'navigate',
-      url: 'https://ng-gtm-integration-sample.vercel.app/home',
+      url: 'https://ng-gtm-sample.vercel.app/home',
       assertedEvents: [
         {
           type: 'navigation',
-          url: 'https://ng-gtm-integration-sample.vercel.app/home',
+          url: 'https://ng-gtm-sample.vercel.app/home',
           title: 'Ng GTM Integration App'
         }
       ]

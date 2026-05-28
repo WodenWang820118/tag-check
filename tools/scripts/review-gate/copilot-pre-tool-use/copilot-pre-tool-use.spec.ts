@@ -9,7 +9,7 @@ import {
   createApproval,
   evaluateHookPermission,
   isMutatingToolUse,
-  parseHookInput,
+  parseHookInput
 } from '../shared/shared.ts';
 
 // endregion
@@ -28,7 +28,7 @@ test('parseHookInput normalises Copilot tool-use JSON with nested string args', 
   const raw = JSON.stringify({
     toolName: 'bash',
     toolArgs: JSON.stringify({ command: 'git apply patch.diff' }),
-    cwd: '/workspace',
+    cwd: '/workspace'
   });
 
   const parsed = parseHookInput(raw);
@@ -36,21 +36,21 @@ test('parseHookInput normalises Copilot tool-use JSON with nested string args', 
   assert.deepEqual(parsed, {
     toolName: 'bash',
     toolArgs: { command: 'git apply patch.diff' },
-    cwd: '/workspace',
+    cwd: '/workspace'
   });
 });
 
 test('parseHookInput handles plain-string toolArgs from older hook formats', () => {
   const raw = JSON.stringify({
     toolName: 'bash',
-    toolArgs: 'echo hello',
+    toolArgs: 'echo hello'
   });
 
   const parsed = parseHookInput(raw);
 
   assert.deepEqual(parsed, {
     toolName: 'bash',
-    toolArgs: { command: 'echo hello' },
+    toolArgs: { command: 'echo hello' }
   });
 });
 
@@ -70,8 +70,8 @@ test('full hook flow allows read-only commands regardless of gate state', () => 
   const hookInput = parseHookInput(
     JSON.stringify({
       toolName: 'read_file',
-      toolArgs: { filePath: 'AGENTS.md' },
-    }),
+      toolArgs: { filePath: 'AGENTS.md' }
+    })
   );
 
   // read_file is never mutating
@@ -84,9 +84,9 @@ test('full hook flow allows read-only commands regardless of gate state', () => 
       branch: 'feature/x',
       head: 'abc123',
       dirty: true,
-      gitCommand: 'git',
+      gitCommand: 'git'
     },
-    state: null,
+    state: null
   });
 
   assert.deepEqual(result, { allow: true });
@@ -104,14 +104,14 @@ test('full hook flow blocks mutating edit tools when gate has no approval', () =
       branch: 'feature/x',
       head: 'abc123',
       dirty: false,
-      gitCommand: 'git',
+      gitCommand: 'git'
     },
-    state: null,
+    state: null
   });
 
   assert.deepEqual(result, {
     allow: false,
-    reason: 'No pre-implementation review approval found.',
+    reason: 'No pre-implementation review approval found.'
   });
 });
 
@@ -121,21 +121,21 @@ test('full hook flow allows mutating commands when a valid approval exists', () 
     branch: 'feature/x',
     head: 'abc123',
     dirty: false,
-    gitCommand: 'git',
+    gitCommand: 'git'
   } as const;
 
   const approval = createApproval({
     reviewer: 'copilot-claude',
     focus: 'general',
     summary: 'Approved after plan review',
-    repoContext,
+    repoContext
   });
 
   const hookInput = parseHookInput(
     JSON.stringify({
       toolName: 'bash',
-      toolArgs: JSON.stringify({ command: 'pnpm install' }),
-    }),
+      toolArgs: JSON.stringify({ command: 'pnpm install' })
+    })
   );
 
   assert.equal(isMutatingToolUse(hookInput), true);
@@ -143,7 +143,7 @@ test('full hook flow allows mutating commands when a valid approval exists', () 
   const result = evaluateHookPermission({
     hookInput,
     repoContext,
-    state: approval,
+    state: approval
   });
 
   assert.deepEqual(result, { allow: true });
@@ -155,14 +155,14 @@ test('full hook flow blocks shell mutations when approval has expired', () => {
     branch: 'feature/x',
     head: 'abc123',
     dirty: false,
-    gitCommand: 'git',
+    gitCommand: 'git'
   } as const;
 
   const approval = createApproval({
     reviewer: 'copilot-claude',
     focus: 'general',
     summary: 'Approved after plan review',
-    repoContext,
+    repoContext
   });
 
   // Simulate an expired approval
@@ -170,26 +170,26 @@ test('full hook flow blocks shell mutations when approval has expired', () => {
     ...approval,
     approval: {
       ...approval.approval,
-      expiresAt: '2000-01-01T00:00:00.000Z',
-    },
+      expiresAt: '2000-01-01T00:00:00.000Z'
+    }
   };
 
   const hookInput = parseHookInput(
     JSON.stringify({
       toolName: 'bash',
-      toolArgs: JSON.stringify({ command: 'rm -rf node_modules' }),
-    }),
+      toolArgs: JSON.stringify({ command: 'rm -rf node_modules' })
+    })
   );
 
   const result = evaluateHookPermission({
     hookInput,
     repoContext,
-    state: expiredApproval,
+    state: expiredApproval
   });
 
   assert.deepEqual(result, {
     allow: false,
-    reason: 'Pre-implementation review approval has expired.',
+    reason: 'Pre-implementation review approval has expired.'
   });
 });
 
@@ -199,9 +199,9 @@ test('full hook flow allows review-gate commands even without approval', () => {
       toolName: 'bash',
       toolArgs: JSON.stringify({
         command:
-          'node tools/scripts/review-gate/approve-pre-implementation/approve-pre-implementation.ts --reviewer copilot-claude',
-      }),
-    }),
+          'node tools/scripts/review-gate/approve-pre-implementation/approve-pre-implementation.ts --reviewer copilot-claude'
+      })
+    })
   );
 
   // review-gate commands are exempt from mutating classification
@@ -214,9 +214,9 @@ test('full hook flow allows review-gate commands even without approval', () => {
       branch: 'feature/x',
       head: 'abc123',
       dirty: true,
-      gitCommand: 'git',
+      gitCommand: 'git'
     },
-    state: null,
+    state: null
   });
 
   assert.deepEqual(result, { allow: true });
@@ -234,16 +234,16 @@ test('buildDenyPayload produces valid JSON with all required fields', () => {
   assert.match(payload.permissionDecisionReason, /^Gate blocked\./);
   // Must guide the agent through the correct resolution path
   assert.match(payload.permissionDecisionReason, /Copilot/i);
-  assert.match(payload.permissionDecisionReason, /Gemini 2\.5 Pro/i);
+  assert.match(payload.permissionDecisionReason, /Antigravity CLI/i);
   assert.match(payload.permissionDecisionReason, /approve-pre-implementation/);
   // Must include the full set of supported reviewers
   assert.match(payload.permissionDecisionReason, /copilot-claude/);
-  assert.match(payload.permissionDecisionReason, /gemini-2\.5-pro/);
+  assert.match(payload.permissionDecisionReason, /gemini-3\.5-flash-high/);
   assert.match(payload.permissionDecisionReason, /codex-subagent/);
   assert.doesNotMatch(
     payload.permissionDecisionReason,
     /gpt-5-mini/i,
-    'Retired reviewer id must not appear in the deny payload.',
+    'Retired reviewer id must not appear in the deny payload.'
   );
 });
 

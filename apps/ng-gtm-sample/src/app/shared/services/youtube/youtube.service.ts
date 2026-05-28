@@ -6,7 +6,6 @@ import { Injectable, OnDestroy } from '@angular/core';
 export class YoutubeService implements OnDestroy {
   private progressInterval: any;
   private readonly youtubeEventRecords: Map<number, boolean> = new Map();
-  constructor() {}
 
   trackVideoEvent(event: any): void {
     const playerState = event.target.getPlayerState();

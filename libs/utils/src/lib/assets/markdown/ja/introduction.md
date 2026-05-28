@@ -17,11 +17,11 @@
 - プロジェクト情報
 - 認証
 - プリロードデータ
-- ブラウザ設定
+- Browser Arguments
 - Google Tag Manager とリクエスト傍受の設定
 - プロジェクトの入出力
 
-# TagCheck の仕組み
+## TagCheck の仕組み
 
 以下では、TagCheck の基本的な動作を簡潔に説明します。
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, forkJoin } from 'rxjs';
+import { HttpClient, HttpContext } from '@angular/common/http';
+import { Observable, forkJoin } from 'rxjs';
 import {
   IReportDetails,
   TestEventSchema,
@@ -12,6 +12,7 @@ import {
 } from '@utils';
 import { environment } from '../../../../../environments/environment';
 import { catchHttpError, rethrowHttpError } from '../http-error.utils';
+import { API_OPERATION_CONTEXT } from '../api-request-id.interceptor';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +26,9 @@ export class ReportService {
    */
   getProjectReports(projectSlug: string) {
     return this.http
-      .get<AbstractTestEvent[]>(`${environment.reportApiUrl}/${projectSlug}`)
+      .get<AbstractTestEvent[]>(`${environment.reportApiUrl}/${projectSlug}`, {
+        context: new HttpContext().set(API_OPERATION_CONTEXT, 'reports.list')
+      })
       .pipe(rethrowHttpError('Failed to get reports'));
   }
 
@@ -184,8 +187,8 @@ export class ReportService {
   /**
    * Fetches the detailed report for a single test event.
    *
-   * The original error is rethrown unchanged so consumers can inspect its
-   * status code and message directly.
+   * Failures are rethrown with a friendly message plus sanitized diagnostic
+   * metadata so Sentry can correlate the frontend error with backend logs.
    *
    * @param projectSlug - URL-friendly project identifier.
    * @param eventId     - Test event identifier.
@@ -196,13 +199,14 @@ export class ReportService {
   ): Observable<IReportDetails> {
     return this.http
       .get<IReportDetails>(
-        `${environment.reportApiUrl}/${projectSlug}/${eventId}`
+        `${environment.reportApiUrl}/${projectSlug}/${eventId}`,
+        {
+          context: new HttpContext().set(
+            API_OPERATION_CONTEXT,
+            'reports.detail'
+          )
+        }
       )
-      .pipe(
-        catchError((error: unknown) => {
-          console.error(error);
-          throw error;
-        })
-      );
+      .pipe(rethrowHttpError('Failed to get report details'));
   }
 }

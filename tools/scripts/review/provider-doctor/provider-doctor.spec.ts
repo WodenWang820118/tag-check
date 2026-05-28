@@ -7,14 +7,14 @@ import test from 'node:test';
 import {
   buildProviderDoctorReport,
   formatProviderDoctorReport,
-  parseCliArgs,
+  parseCliArgs
 } from './provider-doctor.ts';
 import { recordProviderObservation } from '../provider-observability/provider-observability.ts';
 
 test('parseCliArgs supports provider filtering and json output', () => {
   assert.deepEqual(parseCliArgs(['--provider', 'gemini', '--json']), {
     json: true,
-    provider: 'gemini',
+    provider: 'gemini'
   });
 });
 
@@ -26,22 +26,22 @@ test('buildProviderDoctorReport respects the provider filter', () => {
       baseObservation({
         model: 'claude-sonnet-4.6',
         operation: 'health-probe',
-        provider: 'copilot',
+        provider: 'copilot'
       }),
-      tempRoot,
+      tempRoot
     );
     recordProviderObservation(
       baseObservation({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.5-flash-high',
         operation: 'health-probe',
-        provider: 'gemini',
+        provider: 'gemini'
       }),
-      tempRoot,
+      tempRoot
     );
 
     const report = buildProviderDoctorReport({
       provider: 'gemini',
-      repoRoot: tempRoot,
+      repoRoot: tempRoot
     });
 
     assert.equal(report.buckets.length, 1);
@@ -64,17 +64,17 @@ test('formatProviderDoctorReport includes timeout recommendations when enough da
           operation: 'health-probe',
           provider: 'copilot',
           success: true,
-          timedOut: false,
+          timedOut: false
         }),
-        tempRoot,
+        tempRoot
       );
     }
 
     const text = formatProviderDoctorReport(
       buildProviderDoctorReport({
         provider: 'copilot',
-        repoRoot: tempRoot,
-      }),
+        repoRoot: tempRoot
+      })
     );
 
     assert.match(text, /Recommended timeout: 15000ms/);
@@ -97,17 +97,17 @@ test('formatProviderDoctorReport reports insufficient data instead of guessing',
           operation: 'health-probe',
           provider: 'copilot',
           success: true,
-          timedOut: false,
+          timedOut: false
         }),
-        tempRoot,
+        tempRoot
       );
     }
 
     const text = formatProviderDoctorReport(
       buildProviderDoctorReport({
         provider: 'copilot',
-        repoRoot: tempRoot,
-      }),
+        repoRoot: tempRoot
+      })
     );
 
     assert.match(text, /Recommended timeout: insufficient data/);
@@ -128,15 +128,15 @@ test('buildProviderDoctorReport exposes structured JSON-friendly data for gemini
           capacityError: index < 2,
           configuredTimeoutMs: 180_000,
           durationMs: 9_000,
-          model: 'gemini-3-flash-preview',
+          model: 'gemini-3.5-flash-high',
           operation: 'review-attempt',
           provider: 'gemini',
           recordedAtMs: index * 10 + 1,
           sessionId,
           success: index >= 2,
-          timedOut: false,
+          timedOut: false
         }),
-        tempRoot,
+        tempRoot
       );
 
       if (index < 2) {
@@ -145,31 +145,31 @@ test('buildProviderDoctorReport exposes structured JSON-friendly data for gemini
             attempt: 1,
             configuredTimeoutMs: 180_000,
             durationMs: 10_000,
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-3.5-flash-high',
             operation: 'review-attempt',
             provider: 'gemini',
             recordedAtMs: index * 10 + 2,
             sessionId,
             success: true,
-            timedOut: false,
+            timedOut: false
           }),
-          tempRoot,
+          tempRoot
         );
       }
     }
 
     const report = buildProviderDoctorReport({
       provider: 'gemini',
-      repoRoot: tempRoot,
+      repoRoot: tempRoot
     });
 
     assert.equal(
       report.buckets[0]?.geminiIntervalRecommendation?.recommendedIntervalMs,
-      32_000,
+      55_000
     );
     assert.equal(
       report.buckets[0]?.geminiBackoffRecommendation?.insufficientData,
-      true,
+      true
     );
   } finally {
     rmSync(tempRoot, { force: true, recursive: true });
@@ -177,7 +177,7 @@ test('buildProviderDoctorReport exposes structured JSON-friendly data for gemini
 });
 
 function baseObservation(
-  input: Partial<Parameters<typeof recordProviderObservation>[0]> = {},
+  input: Partial<Parameters<typeof recordProviderObservation>[0]> = {}
 ) {
   return {
     callsite: 'checkpoint-review' as const,
@@ -191,6 +191,6 @@ function baseObservation(
     recordedAtMs: 1,
     success: true,
     timedOut: false,
-    ...input,
+    ...input
   };
 }

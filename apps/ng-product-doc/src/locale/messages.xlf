@@ -79,6 +79,55 @@
           <context context-type="linenumber">114</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="seo.docs.description.introduction" datatype="html">
+        <source>Learn how TagCheck automates GTM tag audits using Chrome Recorder flows, Puppeteer, and JSON-based specifications.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="seo.docs.description.objective" datatype="html">
+        <source>Understand the goals of TagCheck: create reusable audit projects, manage GTM validation, and produce structured reports.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="seo.docs.description.use-cases" datatype="html">
+        <source>Explore how TagCheck helps teams catch missing tags, wrong parameters, and GA4 event errors before they reach production.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="seo.docs.description.getting-started" datatype="html">
+        <source>Set up your first TagCheck project, record a user flow with Chrome Recorder, and run your first GTM tag audit.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="seo.docs.description.quality-assurance" datatype="html">
+        <source>Learn how TagCheck runs automated checks against GTM Preview, validates GA4 event parameters, and generates QA reports.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="seo.docs.description.report-management" datatype="html">
+        <source>Review, export, and manage TagCheck audit reports including screenshots, video recordings, and data layer snapshots.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="seo.docs.description.setting-details" datatype="html">
+        <source>Configure TagCheck project settings: browser arguments, pre-load data, GTM Accompanied Mode, and project import/export.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="about.title" datatype="html">
         <source>Understanding Tag Build</source>
         <context-group purpose="location">

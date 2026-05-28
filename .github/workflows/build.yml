@@ -22,6 +22,9 @@ jobs:
           corepack prepare pnpm@11.0.8 --activate
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Update sitemap lastmod
+        run: node tools/scripts/update-sitemap-lastmod.ts
+        shell: bash
       - name: Backend integration tests
         run: pnpm run test-back:integration
         shell: bash

@@ -13,24 +13,20 @@ export interface ModelRateLimitPolicy {
 }
 
 const GEMINI_MODEL_ALIASES: Record<string, string> = {
-  'gemini-3.1-flash-preview': 'gemini-3-flash-preview',
+  'gemini-3-flash-preview': 'gemini-3.5-flash-high',
+  'gemini-3.1-flash-preview': 'gemini-3.5-flash-high'
 };
 
 const MODEL_POLICIES: Record<string, Omit<ModelRateLimitPolicy, 'model'>> = {
-  'gemini-2.5-pro': {
-    targetIntervalMs: 38000,
-    retryDelaysMs: [35000, 50000, 75000],
-    requestTimeoutMs: 5 * 60 * 1000,
-  },
-  'gemini-3-flash-preview': {
-    targetIntervalMs: 22000,
-    retryDelaysMs: [20000, 30000],
-    requestTimeoutMs: 3 * 60 * 1000,
-  },
+  'gemini-3.5-flash-high': {
+    targetIntervalMs: 45_000,
+    retryDelaysMs: [45_000, 65_000, 95_000],
+    requestTimeoutMs: 5 * 60 * 1000
+  }
 };
 
 const DEFAULT_STATE: RateLimitState = {
-  models: {},
+  models: {}
 };
 
 const GEMINI_LOCK_STALE_MS = 10 * 60 * 1000;
@@ -49,7 +45,7 @@ export function getModelRateLimitPolicy(model: string): ModelRateLimitPolicy {
 
   return {
     model: normalizedModel,
-    ...policy,
+    ...policy
   };
 }
 
@@ -66,10 +62,10 @@ export function loadRateLimitState(repoRoot = process.cwd()): RateLimitState {
 
   try {
     const raw = JSON.parse(
-      fs.readFileSync(statePath, 'utf8'),
+      fs.readFileSync(statePath, 'utf8')
     ) as Partial<RateLimitState>;
     return {
-      models: raw.models ?? {},
+      models: raw.models ?? {}
     };
   } catch {
     return structuredClone(DEFAULT_STATE);
@@ -78,7 +74,7 @@ export function loadRateLimitState(repoRoot = process.cwd()): RateLimitState {
 
 export function saveRateLimitState(
   state: RateLimitState,
-  repoRoot = process.cwd(),
+  repoRoot = process.cwd()
 ): void {
   const statePath = getRateLimitStatePath(repoRoot);
   fs.mkdirSync(path.dirname(statePath), { recursive: true });
@@ -98,7 +94,7 @@ export function getInterRequestDelayMs(input: {
 
   return Math.max(
     0,
-    policy.targetIntervalMs - (input.nowMs - input.lastStartedAtMs),
+    policy.targetIntervalMs - (input.nowMs - input.lastStartedAtMs)
   );
 }
 
@@ -110,12 +106,12 @@ export function getRetryDelayMs(model: string, attempt: number): number {
 export function recordRequestStart(
   model: string,
   startedAtMs: number,
-  repoRoot = process.cwd(),
+  repoRoot = process.cwd()
 ): void {
   const normalizedModel = normalizeGeminiModel(model);
   const state = loadRateLimitState(repoRoot);
   state.models[normalizedModel] = {
-    lastStartedAtMs: startedAtMs,
+    lastStartedAtMs: startedAtMs
   };
   saveRateLimitState(state, repoRoot);
 }
@@ -126,14 +122,14 @@ export function getGeminiLockPath(repoRoot = process.cwd()): string {
 
 export async function acquireGeminiLock(
   repoRoot = process.cwd(),
-  waitTimeoutMs = 5 * 60 * 1000,
+  waitTimeoutMs = 5 * 60 * 1000
 ): Promise<() => void> {
   const lockPath = getGeminiLockPath(repoRoot);
   fs.mkdirSync(path.dirname(lockPath), { recursive: true });
 
   const lockToken = JSON.stringify({
     pid: process.pid,
-    createdAtMs: Date.now(),
+    createdAtMs: Date.now()
   });
   const startedWaitingAtMs = Date.now();
 

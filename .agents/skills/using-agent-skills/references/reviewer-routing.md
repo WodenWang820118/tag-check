@@ -7,16 +7,16 @@ This document holds the checkpoint routing details that should not be duplicated
 For any non-trivial task, get a second opinion before moving forward. The primary agent must not self-approve its own plan, code, or tests.
 
 1. **Plan Review:** After producing a spec or implementation plan.
-   Default provider order: Copilot Claude -> `gemini-2.5-pro` -> Codex reviewer subagent.
+   Default provider order: Copilot Claude -> `gemini-3.5-flash-high` -> Codex reviewer subagent.
    **Cross-family `grill-me` (mandatory for medium+ / sensitive plans)**:
    invoke `grill-me` (`.agents/skills/grill-me/SKILL.md`) using a griller from
    a different AI family than the primary agent before submitting for Plan
    Review. Trigger conditions and the six-item end checklist are defined in
    `AGENTS.md` Cross-Family `grill-me` Rule.
 2. **Test Review:** After writing tests and before running the broad sign-off suite or using those tests as approval evidence.
-   Default provider order: Copilot Claude -> `gemini-2.5-pro` -> Codex reviewer subagent.
+   Default provider order: Copilot Claude -> `gemini-3.5-flash-high` -> Codex reviewer subagent.
 3. **Implementation Review:** After the first working implementation, self-check, and reviewable verification story are ready.
-   `--provider auto` keeps `gemini-3-flash-preview` first for normal or sensitive `implementation` reviews. Low-risk `implementation` and `pre-merge` reviews may route to Codex first only when the context provides an explicit small changed-file list, that list exactly matches the repo's current changed-file set, the scope is non-sensitive, and no review/governance surfaces are touched. When that low-risk gate does not apply, the provider order is `gemini-3-flash-preview` -> Copilot Claude -> Codex reviewer subagent for `implementation`, and `gemini-2.5-pro` -> Copilot Claude -> Codex reviewer subagent for `pre-merge`. `pre-merge` is an additional wrapper mode only and does not replace the required `implementation` checkpoint. The Copilot CLI GPT-5-mini reviewer was removed from auto-routing as of 2026-05; do not reintroduce it.
+   `--provider auto` keeps `gemini-3.5-flash-high` first for normal or sensitive `implementation` reviews. Low-risk `implementation` and `pre-merge` reviews may route to Codex first only when the context provides an explicit small changed-file list, that list exactly matches the repo's current changed-file set, the scope is non-sensitive, and no review/governance surfaces are touched. When that low-risk gate does not apply, the provider order is `gemini-3.5-flash-high` -> Copilot Claude -> Codex reviewer subagent for `implementation`, and `gemini-3.5-flash-high` -> Copilot Claude -> Codex reviewer subagent for `pre-merge`. `pre-merge` is an additional wrapper mode only and does not replace the required `implementation` checkpoint. The Copilot CLI GPT-5-mini reviewer was removed from auto-routing as of 2026-05; do not reintroduce it.
 
 ## Reviewer Routing
 

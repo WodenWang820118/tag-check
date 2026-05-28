@@ -18,28 +18,34 @@ workflow.
 - If the user explicitly asks for a critique, review, or second opinion, force
   a second opinion even if the task is otherwise small.
 
-## Gemini CLI
+## Antigravity CLI / Gemini compatibility
 
-- Keep `.gemini/settings.json` context loading ordered with `AGENTS.md` first.
-- `gemini-2.5-pro`: plan review fallback and risky plan reviews.
-- `gemini-3-flash-preview`: primary implementation reviewer.
+- Use Antigravity CLI (`agy`) exclusively for Google-family terminal reviews; keep
+  `gemini` as the stable provider/script compatibility alias.
+- Legacy Gemini CLI is retired; the environment variable `GX_LAW_PREP_REVIEW_GOOGLE_CLI`
+  must select `agy` / `antigravity` or be left unset. Fallbacks to the Gemini executable are disabled.
+- Keep `.gemini/settings.json` context loading ordered with `AGENTS.md` first
+  for Antigravity family config compatibility. Antigravity workspace MCP servers live in
+  `.agents/mcp_config.json`; remote servers use `serverUrl` rather than `url`.
+- `gemini-3.5-flash-high`: plan review fallback and risky plan reviews.
+- `gemini-3.5-flash-high`: primary implementation reviewer.
 - Confirm CLI availability with a low-cost probe before sending full review
-  payload. If the probe fails, fall back.
+  payload. If `agy` fails or is unavailable, fall back directly to the next review provider.
 - Apply `.agents/reviewers/common-review-contract.toml` plus the shared
-  reviewer profile for each Gemini-produced review.
+  reviewer profile for each Google-family produced review.
 
 ## Codex CLI
 
 - Keep using `.codex/config.toml` as the repo-local Codex config.
-- Codex reviewer subagents are the fallback path when Copilot or Gemini CLI
-  are unavailable. Do not silently self-approve.
+- Codex reviewer subagents are the fallback path when Copilot and the
+  Antigravity `agy` provider are unavailable. Do not silently self-approve.
 - `codebase-mapper` is read-only and does not replace Plan Review.
 
 ## OpenCode
 
 - `opencode.json` at the repo root is a thin MCP-only config. Do not add
   workflow rules or provider routing to it.
-- Route checkpoint reviews through Copilot CLI, Gemini CLI, or the matching
+- Route checkpoint reviews through Copilot CLI, the Antigravity `agy` provider, or the matching
   `.github/agents` reviewer when working in OpenCode.
 
 ## Bridge Minimum Inline Rule Set

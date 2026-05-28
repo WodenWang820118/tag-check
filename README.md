@@ -76,7 +76,33 @@ graph TD
   payloads, and event screenshots
 - Archive projects as `.zip` files so they can move between users and machines
 
-![System](./libs/utils/src/lib/assets/i18n/en/tag_check_system_en.drawio.svg)
+```mermaid
+%%{init: {'theme': 'neutral'}}%%
+flowchart LR
+    subgraph Build ["Step 1 — Plan & Build"]
+        direction TB
+        Spec["Tracking Specification"]
+        TB["Tag Build"]
+        Spec --> TB
+    end
+    subgraph Deploy ["Step 2 — Deploy"]
+        direction TB
+        GTM["Google Tag Manager"]
+        Site["Website"]
+        GTM -->|"tags fire on"| Site
+    end
+    subgraph Verify ["Step 3 — Verify & Report"]
+        direction TB
+        TC["Tag Check"]
+        Rep["Reports & Evidence"]
+        TC --> Rep
+    end
+
+    TB      -->|"GTM-ready JSON"| GTM
+    Spec    -.->|"defines expected behavior"| TC
+    GTM     -.->|"GTM preview mode"| TC
+    Site    -->|"actual tag events"| TC
+```
 
 ## Quality Snapshot
 

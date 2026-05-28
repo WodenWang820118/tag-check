@@ -111,6 +111,84 @@ describe('GtmOperatorService recorder lifecycle', () => {
     expect(puppeteerUtils.cleanup).not.toHaveBeenCalled();
     expect(browser.close).not.toHaveBeenCalled();
   });
+
+  it('applies preset cookies to the preview target host instead of Tag Assistant', async () => {
+    await service.inspectSingleEventViaGtm(
+      'project',
+      'event',
+      createQuery(),
+      createPreset({
+        cookie: [{ key: 'consent_cookie', value: 'accepted' }]
+      })
+    );
+
+    expect(browser.setCookie).toHaveBeenCalledWith({
+      name: 'consent_cookie',
+      value: 'accepted',
+      domain: 'example.test'
+    });
+  });
+
+  it('preloads localStorage before the GTM target page is navigated for inspection', async () => {
+    const callOrder: string[] = [];
+    targetPage = createMockPage(callOrder);
+    browser = createMockBrowser(targetPage);
+    puppeteerUtils.startBrowser.mockResolvedValue({
+      browser,
+      page: openerPage
+    });
+
+    const preset = createPreset({
+      localStorage: [
+        { key: 'consent', value: 'true' },
+        {
+          key: 'consentPreferences',
+          value: { necessary: true, analytics: true }
+        }
+      ]
+    });
+
+    await service.inspectSingleEventViaGtm(
+      'project',
+      'event',
+      createQuery(),
+      preset
+    );
+
+    expect(targetPage.evaluateOnNewDocument).toHaveBeenCalledWith(
+      expect.any(Function),
+      preset.application.localStorage
+    );
+    expect(callOrder).toEqual([
+      'bringToFront',
+      'evaluateOnNewDocument',
+      'goto'
+    ]);
+    expect(targetPage.goto).toHaveBeenCalledWith(
+      'https://example.test/product?gtm_debug=TAGASSISTANT'
+    );
+  });
+
+  it('cleans up and rejects invalid GTM preview URLs before inspection continues', async () => {
+    await expect(
+      service.inspectSingleEventViaGtm(
+        'project',
+        'event',
+        {
+          ...createQuery(),
+          gtmUrl: 'https://tagassistant.google.com/#source=TAG_MANAGER'
+        },
+        createPreset()
+      )
+    ).rejects.toThrow('GTM preview URL must include a target website URL');
+
+    expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(
+      browser,
+      openerPage,
+      null
+    );
+    expect(service.operateGtmPreviewMode).not.toHaveBeenCalled();
+  });
 });
 
 describe('GtmOperatorService.operateGtmPreviewMode', () => {
@@ -161,6 +239,28 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
   });
 });
 
+describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
+  it('returns the decoded website URL from the GTM preview hash', () => {
+    const service = new GtmOperatorService({} as any, {} as any, {} as any);
+
+    expect(
+      service.extractBaseUrlFromGtmUrl(
+        'https://tagassistant.google.com/#url=https%3A%2F%2Fexample.test%2Fproduct%3Ffoo%3Dbar&source=TAG_MANAGER'
+      )
+    ).toBe('https://example.test/product?foo=bar');
+  });
+
+  it('returns an empty string when the GTM preview hash has no target url', () => {
+    const service = new GtmOperatorService({} as any, {} as any, {} as any);
+
+    expect(
+      service.extractBaseUrlFromGtmUrl(
+        'https://tagassistant.google.com/#source=TAG_MANAGER'
+      )
+    ).toBe('');
+  });
+});
+
 function createQuery() {
   return {
     headless: 'true',
@@ -170,11 +270,14 @@ function createQuery() {
   } as any;
 }
 
-function createPreset() {
+function createPreset(options?: {
+  cookie?: Array<{ key: string; value: unknown }>;
+  localStorage?: Array<{ key: string; value: unknown }>;
+}) {
   return {
     application: {
-      localStorage: { data: [] },
-      cookie: { data: [] }
+      localStorage: { data: options?.localStorage ?? [] },
+      cookie: { data: options?.cookie ?? [] }
     },
     puppeteerArgs: []
   } as any;
@@ -186,16 +289,23 @@ function createMockBrowser(targetPage: ReturnType<typeof createMockPage>) {
     close: vi.fn().mockResolvedValue(undefined),
     setCookie: vi.fn().mockResolvedValue(undefined),
     waitForTarget: vi.fn().mockResolvedValue({
-      url: vi.fn(() => 'https://example.test/product'),
+      url: vi.fn(() => 'https://example.test/product?gtm_debug=TAGASSISTANT'),
       asPage: vi.fn().mockResolvedValue(targetPage)
     })
   };
 }
 
-function createMockPage() {
+function createMockPage(callOrder?: string[]) {
   return {
-    bringToFront: vi.fn().mockResolvedValue(undefined),
-    goto: vi.fn().mockResolvedValue(undefined)
+    bringToFront: vi.fn().mockImplementation(async () => {
+      callOrder?.push('bringToFront');
+    }),
+    evaluateOnNewDocument: vi.fn().mockImplementation(async () => {
+      callOrder?.push('evaluateOnNewDocument');
+    }),
+    goto: vi.fn().mockImplementation(async () => {
+      callOrder?.push('goto');
+    })
   };
 }
 

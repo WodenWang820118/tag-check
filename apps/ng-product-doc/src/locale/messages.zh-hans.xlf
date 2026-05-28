@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="seo.landing.title" datatype="html">
         <source>TagCheck | GTM Validation &amp; Audit Tool for Digital Marketers</source>
-        <target>Tag Build | 面向 GA4 团队的快速 GTM JSON 构建器</target>
+        <target>TagCheck | 面向数字营销团队的 GTM 验证与审计工具</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
           <context context-type="linenumber">42</context>
@@ -28,7 +28,7 @@
       </trans-unit>
       <trans-unit id="seo.landing.description" datatype="html">
         <source>Validate your GTM setup with TagCheck and keep marketing measurement accurate, reviewable, and easier to hand off.</source>
-        <target>使用静态、多语言的工作流程，为 GA4 事件创建可直接交给 Google Tag Manager 的 JSON，专为 SEO 专家和营销团队设计。</target>
+        <target>使用 TagCheck 验证你的 GTM 设置，确保营销数据准确、可审核，并轻松完成交付。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
           <context context-type="linenumber">43</context>
@@ -36,7 +36,7 @@
       </trans-unit>
       <trans-unit id="seo.about.title" datatype="html">
         <source>About TagCheck | GTM Validation Workflow</source>
-        <target>关于 Tag Build | GA4 标签工作流程</target>
+        <target>关于 TagCheck | GTM 验证工作流程</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
           <context context-type="linenumber">47</context>
@@ -44,7 +44,7 @@
       </trans-unit>
       <trans-unit id="seo.about.description" datatype="html">
         <source>Learn how TagCheck helps digital teams audit Google Tag Manager setups and reduce measurement errors before launch.</source>
-        <target>了解 Tag Build 如何帮助营销人员和 SEO 团队，无需维护复杂的 Google Cloud 基础设施，也能生成结构化 GTM payload。</target>
+        <target>了解 TagCheck 如何帮助数字团队审计 Google Tag Manager 设置，并在上线前减少数据追踪错误。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
           <context context-type="linenumber">48</context>
@@ -52,7 +52,7 @@
       </trans-unit>
       <trans-unit id="seo.objectives.title" datatype="html">
         <source>TagCheck Objectives | Better Measurement Quality</source>
-        <target>Tag Build 目标 | 可靠的 GTM 交付</target>
+        <target>TagCheck 目标 | 提升数据质量</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
           <context context-type="linenumber">52</context>
@@ -60,7 +60,7 @@
       </trans-unit>
       <trans-unit id="seo.objectives.description" datatype="html">
         <source>See the product goals behind TagCheck, from reducing GTM setup risk to improving validation and handoff quality.</source>
-        <target>查看 Tag Build 如何降低跟踪复杂度、改善 GTM 交付，并把构建工作与验证流程连接起来。</target>
+        <target>了解 TagCheck 背后的产品目标，从降低 GTM 配置风险到提升验证和交付质量。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
           <context context-type="linenumber">53</context>
@@ -68,7 +68,7 @@
       </trans-unit>
       <trans-unit id="seo.app.title" datatype="html">
         <source>TagCheck App | GTM Validation Workspace</source>
-        <target>Tag Build App | GTM JSON 编辑器</target>
+        <target>TagCheck 应用 | GTM 验证工作区</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
           <context context-type="linenumber">57</context>
@@ -76,7 +76,7 @@
       </trans-unit>
       <trans-unit id="seo.app.description" datatype="html">
         <source>Open the interactive TagCheck workspace for GTM validation, report review, and implementation support.</source>
-        <target>打开 client-side Tag Build 编辑器，为 GA4 事件实现准备可交付给 GTM 的 JSON payload。</target>
+        <target>打开 TagCheck 互动式工作区，进行 GTM 验证、报告查看与实施支持。</target>
         <context-group purpose="location">
           <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
           <context context-type="linenumber">58</context>
@@ -89,8 +89,62 @@
           <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
           <context context-type="linenumber">114</context>
         </context-group>
+      </trans-unit>      <trans-unit id="seo.docs.description.introduction" datatype="html">
+        <source>Learn how TagCheck automates GTM tag audits using Chrome Recorder flows, Puppeteer, and JSON-based specifications.</source>
+        <target>了解 TagCheck 如何使用 Chrome Recorder 流程、Puppeteer 和 JSON 规范自动化 GTM 标签审计。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
       </trans-unit>
-      <trans-unit id="about.title" datatype="html">
+      <trans-unit id="seo.docs.description.objective" datatype="html">
+        <source>Understand the goals of TagCheck: create reusable audit projects, manage GTM validation, and produce structured reports.</source>
+        <target>了解 TagCheck 的目标：创建可复用的审计项目、管理 GTM 验证并生成结构化报告。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="seo.docs.description.use-cases" datatype="html">
+        <source>Explore how TagCheck helps teams catch missing tags, wrong parameters, and GA4 event errors before they reach production.</source>
+        <target>探索 TagCheck 如何帮助团队在上线前发现缺失标签、错误参数和 GA4 事件异常。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">48</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="seo.docs.description.getting-started" datatype="html">
+        <source>Set up your first TagCheck project, record a user flow with Chrome Recorder, and run your first GTM tag audit.</source>
+        <target>创建你的第一个 TagCheck 项目，使用 Chrome Recorder 录制用户流程，并运行首次 GTM 标签审计。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="seo.docs.description.quality-assurance" datatype="html">
+        <source>Learn how TagCheck runs automated checks against GTM Preview, validates GA4 event parameters, and generates QA reports.</source>
+        <target>了解 TagCheck 如何对 GTM 预览运行自动检查、验证 GA4 事件参数并生成 QA 报告。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="seo.docs.description.report-management" datatype="html">
+        <source>Review, export, and manage TagCheck audit reports including screenshots, video recordings, and data layer snapshots.</source>
+        <target>审阅、导出并管理 TagCheck 的审计报告，包含截图、视频录制和数据层快照。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="seo.docs.description.setting-details" datatype="html">
+        <source>Configure TagCheck project settings: browser arguments, pre-load data, GTM Accompanied Mode, and project import/export.</source>
+        <target>配置 TagCheck 项目设置：浏览器参数、预加载数据、GTM 伴随模式及项目导入/导出。</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">apps/ng-product-doc/src/app/seo/seo.service.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+      </trans-unit>      <trans-unit id="about.title" datatype="html">
         <source>Understanding Tag Build</source>
         <target>了解 Tag Build</target>
         <context-group purpose="location">

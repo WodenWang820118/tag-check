@@ -13,7 +13,7 @@ import {
   getProviderObservabilityStatePath,
   loadProviderObservabilityState,
   recordProviderObservation,
-  type ProviderObservation,
+  type ProviderObservation
 } from './provider-observability.ts';
 
 test('provider observability state round-trips through the workspace cache', () => {
@@ -22,7 +22,7 @@ test('provider observability state round-trips through the workspace cache', () 
   try {
     assert.match(
       getProviderObservabilityStatePath(tempRoot),
-      /\.cache[\\/]reviews[\\/]provider-observability-state\.json$/,
+      /\.cache[\\/]reviews[\\/]provider-observability-state\.json$/
     );
 
     recordProviderObservation(
@@ -36,9 +36,9 @@ test('provider observability state round-trips through the workspace cache', () 
         promptChars: 17,
         provider: 'copilot',
         success: true,
-        timedOut: false,
+        timedOut: false
       }),
-      tempRoot,
+      tempRoot
     );
 
     const state = loadProviderObservabilityState(tempRoot);
@@ -49,7 +49,7 @@ test('provider observability state round-trips through the workspace cache', () 
           checkpoint: 'plan',
           model: 'claude-sonnet-4.6',
           operation: 'health-probe',
-          provider: 'copilot',
+          provider: 'copilot'
         })
       ];
 
@@ -77,9 +77,9 @@ test('provider observability retains only the most recent 100 observations per b
           provider: 'copilot',
           recordedAtMs: index,
           success: true,
-          timedOut: false,
+          timedOut: false
         }),
-        tempRoot,
+        tempRoot
       );
     }
 
@@ -90,7 +90,7 @@ test('provider observability retains only the most recent 100 observations per b
           checkpoint: 'implementation',
           model: 'claude-sonnet-4.6',
           operation: 'health-probe',
-          provider: 'copilot',
+          provider: 'copilot'
         })
       ];
 
@@ -106,12 +106,12 @@ test('createProviderObservationBucketKey separates buckets by callsite', () => {
   const checkpointReviewKey = createProviderObservationBucketKey({
     callsite: 'checkpoint-review',
     operation: 'review',
-    provider: 'gemini',
+    provider: 'gemini'
   });
   const hybridReviewKey = createProviderObservationBucketKey({
     callsite: 'hybrid-gpt-review',
     operation: 'review',
-    provider: 'gemini',
+    provider: 'gemini'
   });
 
   assert.notEqual(checkpointReviewKey, hybridReviewKey);
@@ -131,9 +131,9 @@ test('timeout recommendation respects the upper clamp', () => {
         promptChars: 120,
         provider: 'copilot',
         success: true,
-        timedOut: false,
-      }),
-    ),
+        timedOut: false
+      })
+    )
   });
 
   assert.equal(summary.recommendedTimeoutMs, 20_000);
@@ -153,9 +153,9 @@ test('timeout recommendation rounds up to the nearest 5s increment', () => {
         promptChars: 120,
         provider: 'copilot',
         success: true,
-        timedOut: false,
-      }),
-    ),
+        timedOut: false
+      })
+    )
   });
 
   assert.equal(summary.recommendedTimeoutMs, 15_000);
@@ -175,9 +175,9 @@ test('timeout recommendation uses successful durations only and rounds up with h
         promptChars: 120,
         provider: 'copilot',
         success: true,
-        timedOut: false,
-      }),
-    ),
+        timedOut: false
+      })
+    )
   });
 
   assert.equal(summary.insufficientData, false);
@@ -198,13 +198,13 @@ test('gemini interval recommendation raises the interval when first-attempt capa
               checkpoint: 'implementation',
               configuredTimeoutMs: 180_000,
               durationMs: 10_000,
-              model: 'gemini-3-flash-preview',
+              model: 'gemini-3.5-flash-high',
               operation: 'review-attempt',
               promptChars: 50,
               provider: 'gemini',
               sessionId: `session-${index}`,
               success: false,
-              timedOut: false,
+              timedOut: false
             }),
             observation({
               attempt: 1,
@@ -212,14 +212,14 @@ test('gemini interval recommendation raises the interval when first-attempt capa
               checkpoint: 'implementation',
               configuredTimeoutMs: 180_000,
               durationMs: 12_000,
-              model: 'gemini-3-flash-preview',
+              model: 'gemini-3.5-flash-high',
               operation: 'review-attempt',
               promptChars: 50,
               provider: 'gemini',
               sessionId: `session-${index}`,
               success: true,
-              timedOut: false,
-            }),
+              timedOut: false
+            })
           ]
         : [
             observation({
@@ -228,21 +228,21 @@ test('gemini interval recommendation raises the interval when first-attempt capa
               checkpoint: 'implementation',
               configuredTimeoutMs: 180_000,
               durationMs: 9_000,
-              model: 'gemini-3-flash-preview',
+              model: 'gemini-3.5-flash-high',
               operation: 'review-attempt',
               promptChars: 50,
               provider: 'gemini',
               sessionId: `session-${index}`,
               success: true,
-              timedOut: false,
-            }),
-          ],
-    ).flat(),
+              timedOut: false
+            })
+          ]
+    ).flat()
   );
 
   const summary = buildGeminiIntervalRecommendationSummary({
     currentIntervalMs: 22_000,
-    sessions,
+    sessions
   });
 
   assert.equal(summary.insufficientData, false);
@@ -263,13 +263,13 @@ test('gemini interval recommendation uses the middle threshold for modest first-
               checkpoint: 'implementation',
               configuredTimeoutMs: 180_000,
               durationMs: 10_000,
-              model: 'gemini-3-flash-preview',
+              model: 'gemini-3.5-flash-high',
               operation: 'review-attempt',
               promptChars: 50,
               provider: 'gemini',
               sessionId: `session-${index}`,
               success: false,
-              timedOut: false,
+              timedOut: false
             }),
             observation({
               attempt: 1,
@@ -277,14 +277,14 @@ test('gemini interval recommendation uses the middle threshold for modest first-
               checkpoint: 'implementation',
               configuredTimeoutMs: 180_000,
               durationMs: 12_000,
-              model: 'gemini-3-flash-preview',
+              model: 'gemini-3.5-flash-high',
               operation: 'review-attempt',
               promptChars: 50,
               provider: 'gemini',
               sessionId: `session-${index}`,
               success: true,
-              timedOut: false,
-            }),
+              timedOut: false
+            })
           ]
         : [
             observation({
@@ -293,21 +293,21 @@ test('gemini interval recommendation uses the middle threshold for modest first-
               checkpoint: 'implementation',
               configuredTimeoutMs: 180_000,
               durationMs: 9_000,
-              model: 'gemini-3-flash-preview',
+              model: 'gemini-3.5-flash-high',
               operation: 'review-attempt',
               promptChars: 50,
               provider: 'gemini',
               sessionId: `session-${index}`,
               success: true,
-              timedOut: false,
-            }),
-          ],
-    ).flat(),
+              timedOut: false
+            })
+          ]
+    ).flat()
   );
 
   const summary = buildGeminiIntervalRecommendationSummary({
     currentIntervalMs: 22_000,
-    sessions,
+    sessions
   });
 
   assert.equal(summary.firstAttemptCapacityRate, 0.1);
@@ -323,20 +323,20 @@ test('gemini interval recommendation keeps the interval unchanged below the firs
         checkpoint: 'implementation',
         configuredTimeoutMs: 180_000,
         durationMs: 9_000,
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.5-flash-high',
         operation: 'review-attempt',
         promptChars: 50,
         provider: 'gemini',
         sessionId: `session-${index}`,
         success: true,
-        timedOut: false,
-      }),
-    ]).flat(),
+        timedOut: false
+      })
+    ]).flat()
   );
 
   const summary = buildGeminiIntervalRecommendationSummary({
     currentIntervalMs: 22_000,
-    sessions,
+    sessions
   });
 
   assert.equal(summary.firstAttemptCapacityRate, 0);
@@ -349,12 +349,12 @@ test('gemini backoff recommendation scales when capacity retries often require t
     ...retrySession('b', true, 2),
     ...retrySession('c', false, 2),
     ...retrySession('d', true, 1),
-    ...retrySession('e', true, 1),
+    ...retrySession('e', true, 1)
   ]);
 
   const summary = buildGeminiBackoffRecommendationSummary({
     currentRetryDelaysMs: [20_000, 30_000],
-    sessions,
+    sessions
   });
 
   assert.equal(summary.insufficientData, false);
@@ -369,12 +369,12 @@ test('gemini backoff recommendation uses the middle multiplier for moderate hard
     ...retrySession('b', true, 2),
     ...retrySession('c', true, 1),
     ...retrySession('d', true, 1),
-    ...retrySession('e', true, 1),
+    ...retrySession('e', true, 1)
   ]);
 
   const summary = buildGeminiBackoffRecommendationSummary({
     currentRetryDelaysMs: [20_000, 30_000],
-    sessions,
+    sessions
   });
 
   assert.equal(summary.hardRetryRate, 0.4);
@@ -387,12 +387,12 @@ test('gemini backoff recommendation keeps the existing schedule when hard retrie
     ...retrySession('b', true, 1),
     ...retrySession('c', true, 1),
     ...retrySession('d', true, 1),
-    ...retrySession('e', true, 1),
+    ...retrySession('e', true, 1)
   ]);
 
   const summary = buildGeminiBackoffRecommendationSummary({
     currentRetryDelaysMs: [20_000, 30_000],
-    sessions,
+    sessions
   });
 
   assert.equal(summary.hardRetryRate, 0.2);
@@ -411,19 +411,19 @@ function observation(
       | 'provider'
       | 'success'
       | 'timedOut'
-    >,
+    >
 ): ProviderObservation {
   return {
     errorCategory: null,
     recordedAtMs: input.recordedAtMs ?? 1,
-    ...input,
+    ...input
   };
 }
 
 function retrySession(
   sessionId: string,
   success: boolean,
-  finalAttempt: number,
+  finalAttempt: number
 ): ProviderObservation[] {
   const observations: ProviderObservation[] = [];
 
@@ -436,15 +436,15 @@ function retrySession(
         checkpoint: 'implementation',
         configuredTimeoutMs: 300_000,
         durationMs: 10_000 + attempt,
-        model: 'gemini-2.5-pro',
+        model: 'gemini-3.5-flash-high',
         operation: 'review-attempt',
         promptChars: 50,
         provider: 'gemini',
         recordedAtMs: attempt + 1,
         sessionId,
         success: success && attempt === finalAttempt,
-        timedOut: false,
-      }),
+        timedOut: false
+      })
     );
   }
 

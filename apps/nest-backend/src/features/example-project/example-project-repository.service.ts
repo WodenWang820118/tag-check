@@ -32,14 +32,14 @@ export class ExampleProjectRepositoryService implements OnApplicationBootstrap {
   private readonly DEFAULT_PROJECT_SLUG = 'example-project-slug';
   private readonly DEFAULT_PROJECT_NAME = 'Example Project';
   private readonly DEFAULT_PROJECT_DESCRIPTION = 'This is an example project';
-  private readonly DEFAULT_MEASUREMENT_ID = 'G-8HK542DQMG';
+  private readonly DEFAULT_MEASUREMENT_ID = 'G-8HKQR5ZBSK';
   private readonly DEFAULT_GTM_FILENAME = 'gtm-container.json';
   private readonly DEFAULT_WEBSITE_URL =
-    'https://ng-gtm-integration-sample.vercel.app/home';
+    'https://ng-gtm-sample.vercel.app/home';
   private readonly DEFAULT_TAG_MANAGER_URL =
     'https://tagmanager.google.com/#/container/accounts/6140708819/containers/168785492/workspaces/52';
   private readonly DEFAULT_GTM_PREVIEW_MODE_URL =
-    'https://tagassistant.google.com/#/?id=GTM-NBMX2DWS&url=https%3A%2F%2Fng-gtm-integration-sample.vercel.app%2Fhome%3Fgtm_debug%3D1757377220341&source=TAG_MANAGER&gtm_auth=eLtZEClHVwwGkk2zpmmJ1w&gtm_preview=env-272';
+    'https://tagassistant.google.com/#/?id=GTM-NBMX2DWS&url=https%3A%2F%2Fng-gtm-sample.vercel.app%2Fhome%3Fgtm_debug%3D1757377220341&source=TAG_MANAGER&gtm_auth=eLtZEClHVwwGkk2zpmmJ1w&gtm_preview=env-272';
   // Default localStorage seed for the example project. Centralized here
   // so it can be modified easily and tested.
   private readonly DEFAULT_LOCAL_STORAGE: LocalStorage = {

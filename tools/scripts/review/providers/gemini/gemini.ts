@@ -1,13 +1,18 @@
+import { randomUUID } from 'node:crypto';
+import { existsSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { homedir, tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import {
   cacheProviderHealth,
   getCachedProviderHealth,
-  type ReviewProviderHealthResult,
+  type ReviewProviderHealthResult
 } from '../../provider-health/provider-health.ts';
 import {
   createProviderTelemetryContext,
   recordProviderObservation,
   type ProviderObservationInput,
-  type ProviderTelemetryContext,
+  type ProviderTelemetryContext
 } from '../../provider-observability/provider-observability.ts';
 import { GEMINI_HEALTH_TIMEOUT_MS } from '../../provider-policies/provider-policies.ts';
 import {
@@ -17,12 +22,12 @@ import {
   getRetryDelayMs,
   loadRateLimitState,
   recordRequestStart,
-  sleep,
+  sleep
 } from '../../rate-limit/rate-limit.ts';
 import {
   runLocalCliCommand,
   type LocalCliCommandInput,
-  type LocalCliCommandResult,
+  type LocalCliCommandResult
 } from '../local-cli/local-cli.ts';
 
 interface GeminiReviewInput {
@@ -41,14 +46,31 @@ interface GeminiProviderDependencies {
   now?: () => number;
   recordObservation?: (
     input: ProviderObservationInput,
-    repoRoot?: string,
+    repoRoot?: string
   ) => unknown;
   recordRequestStart?: typeof recordRequestStart;
+  readAgyTranscriptOutput?: typeof readAgyTranscriptOutput;
   runCommand?: (input: LocalCliCommandInput) => LocalCliCommandResult;
   sleep?: typeof sleep;
 }
 
+type GoogleReviewCli = 'agy';
+
+interface GoogleReviewCliCommand {
+  args: string[];
+  command: string;
+  input?: string;
+  logFilePath?: string;
+  windowsScriptName?: string;
+}
+
+const GOOGLE_REVIEW_CLI_ENV = 'GX_LAW_PREP_REVIEW_GOOGLE_CLI';
+const AGY_INLINE_PROMPT_MAX_CHARS =
+  process.platform === 'win32' ? 6_000 : 20_000;
+
 const GEMINI_HEALTH_PROMPT = 'Reply with exactly OK.';
+const AGY_EMPTY_OUTPUT_MESSAGE =
+  'Antigravity CLI returned no output. Ensure `agy --print` writes review text to stdout for non-interactive use, and that `~/.gemini/antigravity-cli/settings.json` selects "Gemini 3.5 Flash (High)".';
 let geminiSessionCounter = 0;
 
 export async function probeGeminiCliHealth(
@@ -57,7 +79,7 @@ export async function probeGeminiCliHealth(
     repoRoot?: string;
     telemetryContext?: ProviderTelemetryContext;
   },
-  dependencies: GeminiProviderDependencies = {},
+  dependencies: GeminiProviderDependencies = {}
 ): Promise<ReviewProviderHealthResult> {
   const now = dependencies.now ?? Date.now;
   const recordObservation =
@@ -65,7 +87,7 @@ export async function probeGeminiCliHealth(
   const runCommand = dependencies.runCommand ?? runLocalCliCommand;
   const repoRoot = input.repoRoot ?? process.cwd();
   const telemetryContext = createProviderTelemetryContext(
-    input.telemetryContext,
+    input.telemetryContext
   );
   const cached = getCachedProviderHealth('gemini', input.model, repoRoot);
   if (cached) {
@@ -73,98 +95,103 @@ export async function probeGeminiCliHealth(
   }
 
   const checkedAtMs = now();
-  const versionStartedAtMs = now();
-  const versionResult = runCommand({
-    command: 'gemini',
-    windowsScriptName: 'gemini.ps1',
-    args: ['--version'],
-    cwd: repoRoot,
-    timeoutMs: GEMINI_HEALTH_TIMEOUT_MS,
-  });
-  recordObservation(
-    {
-      ...telemetryContext,
-      configuredTimeoutMs: GEMINI_HEALTH_TIMEOUT_MS,
-      durationMs: now() - versionStartedAtMs,
-      errorCategory:
-        !versionResult.error && versionResult.status === 0
-          ? null
-          : classifyGeminiErrorCategory(
-              joinOutput(versionResult.stdout, versionResult.stderr),
-              versionResult.error?.message,
-            ),
-      model: input.model,
-      operation: 'health-version',
-      promptChars: 0,
-      provider: 'gemini',
-      success: !versionResult.error && versionResult.status === 0,
-      timedOut: isGeminiTimedOut(versionResult),
-    },
-    repoRoot,
-  );
+  const failures: string[] = [];
 
-  if (versionResult.error || versionResult.status !== 0) {
-    return cacheProviderHealth(
-      'gemini',
-      input.model,
+  for (const cli of getGoogleReviewCliCandidates()) {
+    const versionStartedAtMs = now();
+    const versionResult = runCommand({
+      ...buildGoogleReviewCliVersionCommand(cli),
+      cwd: repoRoot,
+      timeoutMs: GEMINI_HEALTH_TIMEOUT_MS
+    });
+    recordObservation(
       {
-        available: false,
-        checkedAtMs,
-        reason: 'Gemini CLI is not installed or cannot be started locally.',
-      },
-      repoRoot,
-    );
-  }
-
-  try {
-    const output = await runGeminiTextCommand(
-      {
+        ...telemetryContext,
+        configuredTimeoutMs: GEMINI_HEALTH_TIMEOUT_MS,
+        durationMs: now() - versionStartedAtMs,
+        errorCategory:
+          !versionResult.error && versionResult.status === 0
+            ? null
+            : classifyGeminiErrorCategory(
+                joinOutput(versionResult.stdout, versionResult.stderr),
+                versionResult.error?.message
+              ),
         model: input.model,
-        operation: 'health-probe',
-        prompt: GEMINI_HEALTH_PROMPT,
-        repoRoot,
-        telemetryContext,
-        timeoutMs: GEMINI_HEALTH_TIMEOUT_MS,
+        operation: 'health-version',
+        promptChars: 0,
+        provider: 'gemini',
+        success: !versionResult.error && versionResult.status === 0,
+        timedOut: isGeminiTimedOut(versionResult)
       },
-      dependencies,
+      repoRoot
     );
 
-    return cacheProviderHealth(
-      'gemini',
-      input.model,
-      {
-        available: /^OK\b/i.test(output.trim()),
-        checkedAtMs,
-        reason: /^OK\b/i.test(output.trim())
-          ? undefined
-          : 'Gemini CLI probe returned an unexpected response.',
-      },
-      repoRoot,
-    );
-  } catch (error) {
-    return cacheProviderHealth(
-      'gemini',
-      input.model,
-      {
-        available: false,
-        checkedAtMs,
-        reason: error instanceof Error ? error.message : String(error),
-      },
-      repoRoot,
-    );
+    if (versionResult.error || versionResult.status !== 0) {
+      failures.push(
+        `${cli}: ${joinOutput(versionResult.stdout, versionResult.stderr) || versionResult.error?.message || 'not installed'}`
+      );
+      continue;
+    }
+
+    try {
+      const output = await runGeminiTextCommand(
+        {
+          cliCandidates: [cli],
+          model: input.model,
+          operation: 'health-probe',
+          prompt: GEMINI_HEALTH_PROMPT,
+          repoRoot,
+          telemetryContext,
+          timeoutMs: GEMINI_HEALTH_TIMEOUT_MS
+        },
+        dependencies
+      );
+
+      if (isAcceptableGeminiHealthOutput(cli, output)) {
+        return cacheProviderHealth(
+          'gemini',
+          input.model,
+          {
+            available: true,
+            checkedAtMs
+          },
+          repoRoot
+        );
+      }
+
+      failures.push(`${cli}: unexpected probe response`);
+    } catch (error) {
+      failures.push(
+        `${cli}: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
   }
+
+  return cacheProviderHealth(
+    'gemini',
+    input.model,
+    {
+      available: false,
+      checkedAtMs,
+      reason:
+        failures.length > 0
+          ? `No Antigravity reviewer CLI is available. ${failures.join('; ')}`
+          : 'No Antigravity reviewer CLI is configured.'
+    },
+    repoRoot
+  );
 }
 
 export async function runGeminiReview(
   input: GeminiReviewInput,
-  dependencies: GeminiProviderDependencies = {},
+  dependencies: GeminiProviderDependencies = {}
 ): Promise<string> {
   return runGeminiTextCommand(
     {
       ...input,
-      operation: 'review-attempt',
+      operation: 'review-attempt'
     },
-    dependencies,
+    dependencies
   );
 }
 
@@ -173,8 +200,8 @@ export function isGeminiUnavailableError(error: unknown): boolean {
     return false;
   }
 
-  return /\b(timeout|timed out|ETIMEDOUT|not authenticated|authenticate|login|sign in|api key|quota|429|MODEL_CAPACITY_EXHAUSTED|RESOURCE_EXHAUSTED|rateLimitExceeded|No capacity available|Requested entity was not found)\b/i.test(
-    error.message,
+  return /\b(timeout|timed out|ETIMEDOUT|not authenticated|authenticate|login|sign in|api key|quota|429|MODEL_CAPACITY_EXHAUSTED|RESOURCE_EXHAUSTED|rateLimitExceeded|No capacity available|Requested entity was not found|no output|empty output)\b/i.test(
+    error.message
   );
 }
 
@@ -186,7 +213,7 @@ function cleanGeminiOutput(output: string): string {
   return output
     .split(/\r?\n/)
     .map((line) =>
-      line.replace(/^MCP issues detected\. Run \/mcp list for status\.?/i, ''),
+      line.replace(/^MCP issues detected\. Run \/mcp list for status\.?/i, '')
     )
     .filter((line) => line.trim().length > 0)
     .join('\n')
@@ -195,7 +222,7 @@ function cleanGeminiOutput(output: string): string {
 
 function classifyGeminiErrorCategory(
   output: string,
-  errorMessage?: string,
+  errorMessage?: string
 ): string | null {
   const message = [output, errorMessage].filter(Boolean).join('\n').trim();
 
@@ -223,7 +250,7 @@ function classifyGeminiErrorCategory(
 
   if (
     /\b(not installed|cannot be started locally|ENOENT|not recognized)\b/i.test(
-      message,
+      message
     )
   ) {
     return 'cli-unavailable';
@@ -238,7 +265,7 @@ function classifyGeminiErrorCategory(
 
 function isGeminiCapacityError(output: string): boolean {
   return /\b429\b|MODEL_CAPACITY_EXHAUSTED|RESOURCE_EXHAUSTED|rateLimitExceeded|No capacity available/i.test(
-    output,
+    output
   );
 }
 
@@ -246,12 +273,26 @@ function isGeminiModelNotFound(output: string): boolean {
   return /ModelNotFoundError|Requested entity was not found/i.test(output);
 }
 
+function isAcceptableGeminiHealthOutput(
+  cli: GoogleReviewCli,
+  output: string
+): boolean {
+  const trimmed = output.trim();
+
+  if (/^OK\b/i.test(trimmed)) {
+    return true;
+  }
+
+  return cli === 'agy' && trimmed.length > 0;
+}
+
 async function runGeminiTextCommand(
   input: GeminiReviewInput & {
+    cliCandidates?: GoogleReviewCli[];
     operation: 'health-probe' | 'review-attempt';
     timeoutMs?: number;
   },
-  dependencies: GeminiProviderDependencies = {},
+  dependencies: GeminiProviderDependencies = {}
 ): Promise<string> {
   const acquireLock = dependencies.acquireLock ?? acquireGeminiLock;
   const getInterRequestDelay =
@@ -265,11 +306,13 @@ async function runGeminiTextCommand(
     dependencies.recordObservation ?? recordProviderObservation;
   const recordRequestStartFn =
     dependencies.recordRequestStart ?? recordRequestStart;
+  const readAgyTranscriptOutputFn =
+    dependencies.readAgyTranscriptOutput ?? readAgyTranscriptOutput;
   const runCommand = dependencies.runCommand ?? runLocalCliCommand;
   const sleepFn = dependencies.sleep ?? sleep;
   const repoRoot = input.repoRoot ?? process.cwd();
   const telemetryContext = createProviderTelemetryContext(
-    input.telemetryContext,
+    input.telemetryContext
   );
   const releaseLock = await acquireLock(repoRoot);
 
@@ -280,7 +323,7 @@ async function runGeminiTextCommand(
     const waitBeforeStartMs = getInterRequestDelay({
       model: policy.model,
       nowMs: now(),
-      lastStartedAtMs: state.models[policy.model]?.lastStartedAtMs,
+      lastStartedAtMs: state.models[policy.model]?.lastStartedAtMs
     });
 
     if (waitBeforeStartMs > 0) {
@@ -295,29 +338,27 @@ async function runGeminiTextCommand(
       const attemptStartedAtMs = now();
       recordRequestStartFn(policy.model, attemptStartedAtMs, repoRoot);
 
-      const result = runCommand({
-        command: 'gemini',
-        windowsScriptName: 'gemini.ps1',
-        args: [
-          '--model',
-          policy.model,
-          '--approval-mode',
-          'plan',
-          '--output-format',
-          'text',
-          '--prompt',
-          ' ',
-        ],
-        cwd: repoRoot,
-        input: input.prompt,
+      const commandResult = runGoogleReviewCliTextCommand({
+        cliCandidates: input.cliCandidates ?? getGoogleReviewCliCandidates(),
+        model: policy.model,
+        prompt: input.prompt,
+        readAgyTranscriptOutput: readAgyTranscriptOutputFn,
+        runCommand,
         timeoutMs: input.timeoutMs ?? policy.requestTimeoutMs,
+        cwd: repoRoot
       });
+      const result = commandResult.result;
       const durationMs = now() - attemptStartedAtMs;
-      const output = cleanGeminiOutput(
-        joinOutput(result.stdout, result.stderr),
+      const reviewOutput = cleanGeminiOutput(
+        commandResult.cli === 'agy'
+          ? (result.stdout ?? '')
+          : joinOutput(result.stdout, result.stderr)
       );
-      const timedOut = isGeminiTimedOut(result, output);
-      const capacityError = isGeminiCapacityError(output);
+      const diagnosticOutput = cleanGeminiOutput(
+        joinOutput(result.stdout, result.stderr)
+      );
+      const timedOut = isGeminiTimedOut(result, diagnosticOutput);
+      const capacityError = isGeminiCapacityError(diagnosticOutput);
       const retryDelayMs =
         (timedOut || capacityError) && attempt < policy.retryDelaysMs.length
           ? getRetryDelay(policy.model, attempt)
@@ -326,8 +367,8 @@ async function runGeminiTextCommand(
         !result.error &&
         result.status === 0 &&
         !capacityError &&
-        !isGeminiModelNotFound(output) &&
-        output.trim().length > 0;
+        !isGeminiModelNotFound(diagnosticOutput) &&
+        reviewOutput.trim().length > 0;
       recordObservation(
         {
           ...telemetryContext,
@@ -337,9 +378,14 @@ async function runGeminiTextCommand(
           durationMs,
           errorCategory: attemptSucceeded
             ? null
-            : output.trim().length === 0 && !result.error && result.status === 0
+            : reviewOutput.trim().length === 0 &&
+                !result.error &&
+                result.status === 0
               ? 'empty-output'
-              : classifyGeminiErrorCategory(output, result.error?.message),
+              : classifyGeminiErrorCategory(
+                  diagnosticOutput,
+                  result.error?.message
+                ),
           model: policy.model,
           operation: input.operation,
           promptChars: input.prompt.length,
@@ -348,9 +394,9 @@ async function runGeminiTextCommand(
           sessionId,
           success: attemptSucceeded,
           timedOut,
-          waitBeforeStartMs: attempt === 0 ? waitBeforeStartMs : undefined,
+          waitBeforeStartMs: attempt === 0 ? waitBeforeStartMs : undefined
         },
-        repoRoot,
+        repoRoot
       );
 
       if (timedOut) {
@@ -359,7 +405,9 @@ async function runGeminiTextCommand(
           continue;
         }
 
-        throw new Error(`Gemini review timed out for model ${policy.model}.`);
+        throw new Error(
+          `Antigravity review timed out for model ${policy.model}.`
+        );
       }
 
       if (capacityError) {
@@ -368,31 +416,278 @@ async function runGeminiTextCommand(
           continue;
         }
 
-        throw new Error(output);
+        throw new Error(diagnosticOutput);
       }
 
-      if (isGeminiModelNotFound(output)) {
-        throw new Error(output);
+      if (isGeminiModelNotFound(diagnosticOutput)) {
+        throw new Error(diagnosticOutput);
       }
 
       if (result.error || result.status !== 0) {
         throw new Error(
-          output || result.error?.message || 'Gemini review command failed.',
+          diagnosticOutput ||
+            result.error?.message ||
+            'Antigravity review command failed.'
         );
       }
 
-      if (!output.trim()) {
+      if (!reviewOutput.trim()) {
         throw new Error(
-          `Gemini review returned no output for model ${policy.model}.`,
+          `${AGY_EMPTY_OUTPUT_MESSAGE} Logical review model: ${policy.model}.`
         );
       }
 
-      return output.trim();
+      return reviewOutput.trim();
     }
 
-    throw new Error(`Gemini review failed for model ${policy.model}.`);
+    throw new Error(`Antigravity review failed for model ${policy.model}.`);
   } finally {
     releaseLock();
+  }
+}
+
+function getGoogleReviewCliCandidates(): GoogleReviewCli[] {
+  const configured = process.env[GOOGLE_REVIEW_CLI_ENV]?.trim().toLowerCase();
+
+  if (!configured) {
+    return ['agy'];
+  }
+
+  if (configured === 'agy' || configured === 'antigravity') {
+    return ['agy'];
+  }
+
+  if (
+    configured === 'gemini' ||
+    configured === 'legacy-fallback' ||
+    configured === 'agy,gemini'
+  ) {
+    throw new Error(
+      `Legacy Gemini CLI execution is retired. The environment variable ${GOOGLE_REVIEW_CLI_ENV} must be set to 'agy' or 'antigravity' (or left unset).`
+    );
+  }
+
+  throw new Error(
+    `Unsupported review CLI "${configured}". Legacy Gemini CLI is retired. Use 'agy' or 'antigravity'.`
+  );
+}
+
+function buildGoogleReviewCliVersionCommand(
+  cli: GoogleReviewCli
+): GoogleReviewCliCommand {
+  return {
+    args: ['--version'],
+    command: cli
+  };
+}
+
+function buildGoogleReviewCliTextCommand(input: {
+  cli: GoogleReviewCli;
+  logFilePath?: string;
+  prompt: string;
+  timeoutMs: number;
+}): GoogleReviewCliCommand {
+  return {
+    args: [
+      ...(input.logFilePath ? ['--log-file', input.logFilePath] : []),
+      '--print',
+      input.prompt,
+      '--print-timeout',
+      formatAgyTimeout(input.timeoutMs)
+    ],
+    command: input.cli,
+    logFilePath: input.logFilePath
+  };
+}
+
+function runGoogleReviewCliTextCommand(input: {
+  cliCandidates: GoogleReviewCli[];
+  cwd: string;
+  model: string;
+  prompt: string;
+  readAgyTranscriptOutput: typeof readAgyTranscriptOutput;
+  runCommand: (input: LocalCliCommandInput) => LocalCliCommandResult;
+  timeoutMs: number;
+}): { cli: GoogleReviewCli; result: LocalCliCommandResult } {
+  let lastResult: {
+    cli: GoogleReviewCli;
+    result: LocalCliCommandResult;
+  } | null = null;
+
+  for (const cli of input.cliCandidates) {
+    const logFilePath = createAgyLogFilePath();
+    const preparedPrompt = prepareAgyPrompt(input.prompt);
+    try {
+      const command = buildGoogleReviewCliTextCommand({
+        cli,
+        logFilePath,
+        prompt: preparedPrompt.prompt,
+        timeoutMs: input.timeoutMs
+      });
+      let result = input.runCommand({
+        ...command,
+        cwd: input.cwd,
+        timeoutMs: input.timeoutMs
+      });
+
+      if (isEmptySuccessfulAgyResult(result)) {
+        const transcriptOutput = input.readAgyTranscriptOutput({ logFilePath });
+
+        if (transcriptOutput) {
+          result = {
+            ...result,
+            stdout: transcriptOutput
+          };
+        }
+      }
+
+      lastResult = { cli, result };
+      return lastResult;
+    } finally {
+      removeAgyTempFile(logFilePath);
+      if (preparedPrompt.promptFilePath) {
+        removeAgyTempFile(preparedPrompt.promptFilePath);
+      }
+    }
+  }
+
+  return (
+    lastResult ?? {
+      cli: 'agy',
+      result: {
+        error: new Error('No Antigravity reviewer CLI candidates configured.'),
+        status: null,
+        stderr: '',
+        stdout: ''
+      }
+    }
+  );
+}
+
+function isEmptySuccessfulAgyResult(result: LocalCliCommandResult): boolean {
+  return (
+    !result.error &&
+    result.status === 0 &&
+    (result.stdout ?? '').trim().length === 0
+  );
+}
+
+function formatAgyTimeout(timeoutMs: number): string {
+  return `${Math.max(1, Math.ceil(timeoutMs / 1000))}s`;
+}
+
+function createAgyLogFilePath(): string {
+  return join(
+    tmpdir(),
+    `gx-law-prep-agy-${process.pid}-${Date.now()}-${randomUUID()}.log`
+  );
+}
+
+function prepareAgyPrompt(prompt: string): {
+  prompt: string;
+  promptFilePath?: string;
+} {
+  if (prompt.length <= AGY_INLINE_PROMPT_MAX_CHARS) {
+    return { prompt };
+  }
+
+  const promptFilePath = join(
+    tmpdir(),
+    `gx-law-prep-agy-prompt-${process.pid}-${Date.now()}-${randomUUID()}.md`
+  );
+  writeFileSync(promptFilePath, prompt, 'utf8');
+
+  return {
+    prompt: [
+      'The review context is too large for a safe CLI argument.',
+      `Read the UTF-8 Markdown file at ${promptFilePath}.`,
+      'Review only that file content and do not infer files from other repositories.',
+      'Return the checkpoint review findings and verdict.'
+    ].join(' '),
+    promptFilePath
+  };
+}
+
+function removeAgyTempFile(path: string): void {
+  try {
+    rmSync(path, { force: true });
+  } catch {
+    // Best-effort cleanup only; temp retention must not break review routing.
+  }
+}
+
+function readAgyTranscriptOutput(input: {
+  logFilePath: string;
+}): string | null {
+  const conversationId = readAgyConversationId(input.logFilePath);
+
+  if (!conversationId) {
+    return null;
+  }
+
+  const transcriptPath = join(
+    homedir(),
+    '.gemini',
+    'antigravity-cli',
+    'brain',
+    conversationId,
+    '.system_generated',
+    'logs',
+    'transcript.jsonl'
+  );
+
+  if (!existsSync(transcriptPath)) {
+    return null;
+  }
+
+  return extractCompletedAgyModelResponse(safeReadText(transcriptPath));
+}
+
+function readAgyConversationId(logFilePath: string): string | null {
+  const logText = safeReadText(logFilePath);
+  const match =
+    /\bPrint mode: conversation=([0-9a-f-]{36})\b/i.exec(logText) ??
+    /\bCreated conversation ([0-9a-f-]{36})\b/i.exec(logText);
+
+  return match?.[1] ?? null;
+}
+
+function extractCompletedAgyModelResponse(jsonl: string): string | null {
+  let output: string | null = null;
+
+  for (const line of jsonl.split(/\r?\n/)) {
+    if (!line.trim()) {
+      continue;
+    }
+
+    try {
+      const entry = JSON.parse(line) as Record<string, unknown>;
+      const content = entry.content;
+      const toolCalls = entry.tool_calls;
+
+      if (
+        entry.source === 'MODEL' &&
+        entry.type === 'PLANNER_RESPONSE' &&
+        entry.status === 'DONE' &&
+        typeof content === 'string' &&
+        content.trim().length > 0 &&
+        (!Array.isArray(toolCalls) || toolCalls.length === 0)
+      ) {
+        output = content.trim();
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return output;
+}
+
+function safeReadText(path: string): string {
+  try {
+    return readFileSync(path, 'utf8');
+  } catch {
+    return '';
   }
 }
 
@@ -402,7 +697,7 @@ function isGeminiTimedOut(result: LocalCliCommandResult, output = ''): boolean {
     result.signal === 'SIGTERM' ||
     ((Boolean(result.error) || result.status !== 0) &&
       /\b(timeout|timed out|ETIMEDOUT)\b/i.test(
-        [output, result.error?.message].filter(Boolean).join('\n'),
+        [output, result.error?.message].filter(Boolean).join('\n')
       ))
   );
 }

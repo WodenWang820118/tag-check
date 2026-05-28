@@ -42,7 +42,7 @@ export const REVIEWER_FAMILY: Readonly<
   Record<SupportedReviewer, PrimaryFamily>
 > = {
   'copilot-claude': 'copilot',
-  'gemini-2.5-pro': 'gemini',
+  'gemini-3.5-flash-high': 'gemini',
   'codex-subagent': 'codex'
 };
 

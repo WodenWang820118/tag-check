@@ -95,7 +95,7 @@ export class SeoService extends AbstractSeoService {
     this.meta.updateTag({
       name: 'keywords',
       content:
-        'Google Tag Manager, GTM Automation, Tag Build, GA4, JSON Configuration, SEO Tools'
+        'Google Tag Manager, GTM Automation, Tag Build, GA4, JSON Configuration, GA4 implementation'
     });
     this.meta.updateTag({ property: 'og:title', content: seo.title });
     this.meta.updateTag({
@@ -104,6 +104,7 @@ export class SeoService extends AbstractSeoService {
     });
     this.meta.updateTag({ property: 'og:url', content: canonicalUrl });
     this.meta.updateTag({ property: 'og:type', content: 'website' });
+    this.meta.updateTag({ property: 'og:site_name', content: 'Tag Build' });
     this.meta.updateTag({ property: 'og:image', content: OG_IMAGE_URL });
     this.meta.updateTag({ property: 'og:image:width', content: '1200' });
     this.meta.updateTag({ property: 'og:image:height', content: '630' });
@@ -177,6 +178,12 @@ export class SeoService extends AbstractSeoService {
       operatingSystem: 'Any',
       inLanguage: this.locale.hreflang,
       image: OG_IMAGE_URL,
+      featureList: [
+        'GA4 event JSON builder',
+        'Google Tag Manager JSON export',
+        'Multilingual workflow support',
+        'Client-side, no server required'
+      ],
       offers: {
         '@type': 'Offer',
         price: '0',

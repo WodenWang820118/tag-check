@@ -8,14 +8,14 @@ import {
 describe('getDefaultGeminiModel', () => {
   it('returns the flash-preview model for implementation reviews', () => {
     expect(getDefaultGeminiModel('implementation')).toBe(
-      'gemini-3-flash-preview'
+      'gemini-3.5-flash-high'
     );
   });
 
-  it('returns the gemini-2.5-pro model for plan, test, and pre-merge reviews', () => {
-    expect(getDefaultGeminiModel('plan')).toBe('gemini-2.5-pro');
-    expect(getDefaultGeminiModel('test')).toBe('gemini-2.5-pro');
-    expect(getDefaultGeminiModel('pre-merge')).toBe('gemini-2.5-pro');
+  it('returns the gemini-3.5-flash-high model for plan, test, and pre-merge reviews', () => {
+    expect(getDefaultGeminiModel('plan')).toBe('gemini-3.5-flash-high');
+    expect(getDefaultGeminiModel('test')).toBe('gemini-3.5-flash-high');
+    expect(getDefaultGeminiModel('pre-merge')).toBe('gemini-3.5-flash-high');
   });
 });
 

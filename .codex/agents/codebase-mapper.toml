@@ -27,4 +27,9 @@ will be touched and what risks exist, without making any changes.
 6. Suggested implementation sequence (read-only recommendation)
 
 ## Guardrails
+
+- Do not suggest implementation details beyond sequencing
+- Do not run commands that modify state (no git add/commit, no installs)
+- Do not open the pre-implementation gate; that remains with the primary agent
+- If a symbol or boundary is ambiguous, say so explicitly rather than guessing
 """
