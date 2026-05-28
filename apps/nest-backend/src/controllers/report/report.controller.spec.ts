@@ -1,7 +1,12 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Logger } from '@nestjs/common';
 import { ReportController } from './report.controller';
 
 describe('ReportController', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   function build() {
     const projectReportService = {
       createEventReportFolder: vi.fn().mockResolvedValue(undefined)
@@ -38,11 +43,82 @@ describe('ReportController', () => {
 
   it('getProjectEventReports delegates to TestEventRepositoryService.listReports', async () => {
     const { controller, testEventRepositoryService } = build();
-    const result = await controller.getProjectEventReports('proj-1');
+    const logSpy = vi
+      .spyOn(Logger.prototype, 'log')
+      .mockImplementation(() => undefined);
+    const request = {
+      id: 'req-1',
+      headers: { 'x-request-id': '11111111-1111-4111-8111-111111111111' }
+    } as never;
+    const response = { header: vi.fn() } as never;
+    const result = await controller.getProjectEventReports(
+      'proj-1',
+      request,
+      response
+    );
     expect(testEventRepositoryService.listReports).toHaveBeenCalledWith(
       'proj-1'
     );
     expect(result).toEqual([{ eventId: 'evt-1' }]);
+    expect(request).toMatchObject({
+      diagnosticContext: {
+        operation: 'reports.list',
+        projectSlug: 'proj-1'
+      }
+    });
+    expect(logSpy).toHaveBeenCalledWith(
+      JSON.stringify({
+        operation: 'reports.list',
+        projectSlug: 'proj-1',
+        requestId: '11111111-1111-4111-8111-111111111111',
+        count: 1
+      })
+    );
+    expect(response.header).toHaveBeenCalledWith(
+      'x-request-id',
+      '11111111-1111-4111-8111-111111111111'
+    );
+  });
+
+  it('getProjectEventReports ignores malformed client request ids in logs and response headers', async () => {
+    const { controller } = build();
+    const logSpy = vi
+      .spyOn(Logger.prototype, 'log')
+      .mockImplementation(() => undefined);
+    const request = {
+      id: 'req-safe',
+      headers: { 'x-request-id': 'oversized-or-malformed-request-id' }
+    } as never;
+    const response = { header: vi.fn() } as never;
+
+    await controller.getProjectEventReports('proj-1', request, response);
+
+    expect(logSpy).toHaveBeenCalledWith(
+      JSON.stringify({
+        operation: 'reports.list',
+        projectSlug: 'proj-1',
+        requestId: 'req-safe',
+        count: 1
+      })
+    );
+    expect(response.header).toHaveBeenCalledWith('x-request-id', 'req-safe');
+  });
+
+  it('getProjectEventReports preserves repository failures after attaching diagnostic context', async () => {
+    const { controller, testEventRepositoryService } = build();
+    const error = new Error('db down');
+    testEventRepositoryService.listReports.mockRejectedValueOnce(error);
+    const request = { id: 'req-2', headers: {} } as never;
+
+    await expect(
+      controller.getProjectEventReports('proj-2', request)
+    ).rejects.toBe(error);
+    expect(request).toMatchObject({
+      diagnosticContext: {
+        operation: 'reports.list',
+        projectSlug: 'proj-2'
+      }
+    });
   });
 
   it('deleteProjectEventReports delegates to TestEventRepositoryService.deleteByProjectSlugAndEventIds', async () => {

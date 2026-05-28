@@ -1,4 +1,70 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, OperatorFunction, catchError, of, throwError } from 'rxjs';
+
+export interface HttpDiagnosticMetadata {
+  operation?: string;
+  method?: string;
+  status?: number;
+  url?: string;
+  path?: string;
+  requestId?: string;
+}
+
+const httpDiagnosticMetadataByError = new WeakMap<
+  object,
+  HttpDiagnosticMetadata
+>();
+
+export function setHttpDiagnosticMetadata(
+  error: object,
+  metadata: HttpDiagnosticMetadata
+): void {
+  httpDiagnosticMetadataByError.set(error, removeUndefined(metadata));
+}
+
+export function getHttpDiagnosticMetadata(
+  error: unknown,
+  operation?: string
+): HttpDiagnosticMetadata | undefined {
+  if (!(error instanceof HttpErrorResponse)) {
+    return undefined;
+  }
+
+  const interceptorMetadata = httpDiagnosticMetadataByError.get(error);
+  const baseMetadata: HttpDiagnosticMetadata = interceptorMetadata ?? {
+    status: error.status,
+    ...sanitizeUrlPath(error.url ?? undefined)
+  };
+
+  return removeUndefined({
+    ...baseMetadata,
+    operation: operation ?? baseMetadata.operation
+  });
+}
+
+function removeUndefined(
+  metadata: HttpDiagnosticMetadata
+): HttpDiagnosticMetadata {
+  return Object.fromEntries(
+    Object.entries(metadata).filter(([, value]) => value !== undefined)
+  ) as HttpDiagnosticMetadata;
+}
+
+function sanitizeUrlPath(
+  url: string | undefined
+): Pick<HttpDiagnosticMetadata, 'url' | 'path'> {
+  if (!url) {
+    return {};
+  }
+
+  try {
+    const parsed = new URL(url, globalThis.location?.origin ?? 'http://local');
+    return { url: parsed.pathname, path: parsed.pathname };
+  } catch {
+    const path = url.split(/[?#]/, 1)[0];
+    return path ? { url: path, path } : {};
+  }
+}
 
 /**
  * Creates an RxJS `catchError` operator that logs the error to the console
@@ -44,12 +110,20 @@ export function catchHttpError<T, F>(fallback: F): OperatorFunction<T, T | F> {
  * @example
  * return this.http.get<Spec>(url).pipe(rethrowHttpError('Failed to load spec'));
  */
-export function rethrowHttpError<T>(message: string): OperatorFunction<T, T> {
+export function rethrowHttpError<T>(
+  message: string,
+  options: { operation?: string } = {}
+): OperatorFunction<T, T> {
   return (source: Observable<T>) =>
     source.pipe(
       catchError((error: unknown) => {
         console.error(error);
-        return throwError(() => new Error(message));
+        return throwError(
+          () =>
+            new Error(message, {
+              cause: getHttpDiagnosticMetadata(error, options.operation)
+            })
+        );
       })
     );
 }

@@ -112,6 +112,18 @@ async function installApiMocks(
       return;
     }
 
+    if (method === 'GET' && pathname === '/startup/project-seed-readiness') {
+      await route.fulfill(
+        jsonResponse({
+          ready: true,
+          projectCount: projects.length,
+          inFlight: false,
+          error: null
+        })
+      );
+      return;
+    }
+
     if (method === 'POST' && pathname.startsWith('/projects/init-project/')) {
       const payload = (request.postDataJSON() ?? {}) as Partial<ProjectRecord>;
       const pathProjectSlug = pathname.split('/').pop() ?? 'new-project';

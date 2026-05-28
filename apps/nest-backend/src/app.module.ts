@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ControllerModule } from './controllers/controller.module';
@@ -13,6 +13,48 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { EntitiesModule } from './infrastructure/database/entities.module';
 import { HealthModule } from './common/health/health.module';
 import { randomUUID } from 'node:crypto';
+
+const REQUEST_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function normalizeClientRequestId(
+  header: string | string[] | number | undefined
+): string | undefined {
+  const value = Array.isArray(header) ? header[0] : header;
+  if (typeof value !== 'string') return undefined;
+  if (REQUEST_ID_PATTERN.test(value)) {
+    return value;
+  }
+
+  Logger.warn(
+    `Rejected malformed x-request-id header; length=${value.length}`,
+    'RequestId'
+  );
+  return undefined;
+}
+
+function readRequestId(req: {
+  id?: unknown;
+  headers?: Record<string, string | string[] | number | undefined>;
+}): string | undefined {
+  const headerRequestId = normalizeClientRequestId(
+    req.headers?.['x-request-id']
+  );
+  return headerRequestId === undefined
+    ? req.id === undefined
+      ? undefined
+      : String(req.id)
+    : String(headerRequestId);
+}
+
+function sanitizeHttpPath(rawUrl: string | undefined): string | undefined {
+  if (!rawUrl) return rawUrl;
+  try {
+    return new URL(rawUrl, 'http://localhost').pathname;
+  } catch {
+    return rawUrl.split('?')[0] || rawUrl;
+  }
+}
 
 @Module({
   imports: [
@@ -49,24 +91,40 @@ import { randomUUID } from 'node:crypto';
       pinoHttp: {
         // Use x-request-id header when present; auto-generate otherwise
         genReqId: (req) =>
-          (req.headers['x-request-id'] as string | undefined) || randomUUID(),
+          normalizeClientRequestId(req.headers['x-request-id']) || randomUUID(),
         // Redact sensitive headers; never log request/response bodies
         redact: {
           paths: [
             'req.headers.authorization',
             'req.headers.cookie',
+            'req.headers["x-api-key"]',
             'res.headers["set-cookie"]'
           ],
           remove: true
         },
+        serializers: {
+          req: (req) => ({
+            id: readRequestId(req),
+            method: req.method,
+            url: sanitizeHttpPath(req.url)
+          })
+        },
         // Only log method, url, statusCode, responseTime, and request id
         customSuccessObject: (req, res, val) => ({
-          req: { id: req.id, method: req.method, url: req.url },
+          req: {
+            id: readRequestId(req),
+            method: req.method,
+            url: sanitizeHttpPath(req.url)
+          },
           res: { statusCode: res.statusCode },
           responseTime: val.responseTime
         }),
         customErrorObject: (req, res, error, val) => ({
-          req: { id: req.id, method: req.method, url: req.url },
+          req: {
+            id: readRequestId(req),
+            method: req.method,
+            url: sanitizeHttpPath(req.url)
+          },
           res: { statusCode: res.statusCode },
           responseTime: val.responseTime,
           err: {
@@ -76,7 +134,11 @@ import { randomUUID } from 'node:crypto';
           }
         }),
         customReceivedObject: (req) => ({
-          req: { id: req.id, method: req.method, url: req.url }
+          req: {
+            id: readRequestId(req),
+            method: req.method,
+            url: sanitizeHttpPath(req.url)
+          }
         })
       }
     })

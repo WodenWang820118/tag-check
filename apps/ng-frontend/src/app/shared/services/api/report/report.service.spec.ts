@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { API_OPERATION_CONTEXT } from '../api-request-id.interceptor';
 import { ReportService } from './report.service';
 
 describe('ReportService', () => {
@@ -18,6 +19,21 @@ describe('ReportService', () => {
   });
 
   afterEach(() => vi.restoreAllMocks());
+
+  it('getProjectReports sets the reports.list operation context', async () => {
+    httpClient.get.mockReturnValueOnce(of([]));
+
+    await firstValueFrom(service.getProjectReports('s'));
+
+    expect(httpClient.get).toHaveBeenCalledWith(
+      `${environment.reportApiUrl}/s`,
+      expect.objectContaining({ context: expect.anything() })
+    );
+    const options = httpClient.get.mock.calls[0][1] as {
+      context: { get: (token: typeof API_OPERATION_CONTEXT) => string };
+    };
+    expect(options.context.get(API_OPERATION_CONTEXT)).toBe('reports.list');
+  });
 
   it('getProjectReports rethrows wrapped errors', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
@@ -168,11 +184,15 @@ describe('ReportService', () => {
     );
   });
 
-  it('getReportDetails rethrows the underlying error', async () => {
+  it('getReportDetails rethrows a friendly error', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     httpClient.get.mockReturnValueOnce(throwError(() => new Error('x')));
     await expect(
       firstValueFrom(service.getReportDetails('s', 'a'))
-    ).rejects.toThrow('x');
+    ).rejects.toThrow('Failed to get report details');
+    const options = httpClient.get.mock.calls[0][1] as {
+      context: { get: (token: typeof API_OPERATION_CONTEXT) => string };
+    };
+    expect(options.context.get(API_OPERATION_CONTEXT)).toBe('reports.detail');
   });
 });

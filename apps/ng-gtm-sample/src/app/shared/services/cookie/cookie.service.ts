@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class CookieService {
   createCookie(
     name: string,
     value: string,
     days?: number,
-    path: string = '/',
+    path = '/',
     domain?: string,
-    secure: boolean = false
+    secure = false
   ): void {
     let expires = '';
     if (days) {
@@ -55,15 +55,15 @@ export class CookieService {
     name: string,
     value: string,
     days?: number,
-    path: string = '/',
+    path = '/',
     domain?: string,
-    secure: boolean = false
+    secure = false
   ): void {
     // Updating a cookie is the same as creating a new one with the same name
     this.createCookie(name, value, days, path, domain, secure);
   }
 
-  deleteCookie(name: string, path: string = '/', domain?: string): void {
+  deleteCookie(name: string, path = '/', domain?: string): void {
     // Deleting a cookie is done by setting its expiration date to a past date
     document.cookie =
       name +

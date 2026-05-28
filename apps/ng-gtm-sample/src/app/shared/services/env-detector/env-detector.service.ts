@@ -5,8 +5,6 @@ import { Environment } from './utils';
   providedIn: 'root'
 })
 export class EnvDetectorService {
-  constructor() {}
-
   getPlatform(): Environment {
     if ((globalThis as any).flutter_inappwebview) {
       return Environment.FLUTTER;
