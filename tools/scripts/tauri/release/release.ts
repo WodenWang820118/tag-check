@@ -133,7 +133,7 @@ async function checkVersionAuthoritiesCommand(args: string[]) {
 async function syncVersionAuthoritiesCommand() {
   const version = syncVersionAuthorities();
   console.log(
-    `Synchronized package.json, tauri.conf.json, and Cargo.toml to VERSION ${version}.`
+    `Synchronized VERSION, package.json, tauri.conf.json, and Cargo.toml to version ${version}.`
   );
 }
 

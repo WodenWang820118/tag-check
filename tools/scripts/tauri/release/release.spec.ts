@@ -859,26 +859,29 @@ describe('release helper', () => {
     );
   });
 
-  it('synchronizes package.json, tauri.conf.json, and Cargo.toml from VERSION', async () => {
+  it('synchronizes VERSION, package.json, tauri.conf.json, and Cargo.toml to the latest authority version', async () => {
     const { releaseContractModule, workspaceRoot } =
       await loadReleaseContractWorkspaceModule({
-        cargoManifest: '2.0.0',
+        cargoManifest: '2.1.0',
         packageJson: '2.0.0',
-        tauriConfig: '2.0.0',
-        versionFile: '2.1.0'
+        tauriConfig: '2.2.0',
+        versionFile: '2.0.1'
       });
 
-    expect(releaseContractModule.syncVersionAuthorities()).toBe('2.1.0');
+    expect(releaseContractModule.syncVersionAuthorities()).toBe('2.2.0');
     expect(releaseContractModule.readVersionAuthorities()).toEqual({
-      cargoManifest: '2.1.0',
-      packageJson: '2.1.0',
-      tauriConfig: '2.1.0',
-      versionFile: '2.1.0'
+      cargoManifest: '2.2.0',
+      packageJson: '2.2.0',
+      tauriConfig: '2.2.0',
+      versionFile: '2.2.0'
     });
+    expect(readFileSync(join(workspaceRoot, 'VERSION'), 'utf8')).toBe(
+      '2.2.0\n'
+    );
     expect(
       JSON.parse(readFileSync(join(workspaceRoot, 'package.json'), 'utf8'))
     ).toMatchObject({
-      version: '2.1.0'
+      version: '2.2.0'
     });
     expect(
       JSON.parse(
@@ -894,14 +897,78 @@ describe('release helper', () => {
         )
       )
     ).toMatchObject({
-      version: '2.1.0'
+      version: '2.2.0'
     });
     expect(
       readFileSync(
         join(workspaceRoot, 'apps', 'desktop-tauri', 'src-tauri', 'Cargo.toml'),
         'utf8'
       )
-    ).toContain('version = "2.1.0"');
+    ).toContain('version = "2.2.0"');
+  });
+
+  it('uses numeric semver ordering when selecting the latest version authority', async () => {
+    const { releaseContractModule } = await loadReleaseContractWorkspaceModule({
+      cargoManifest: '2.9.9',
+      packageJson: '2.10.0',
+      tauriConfig: '2.0.0',
+      versionFile: '2.1.0'
+    });
+
+    expect(releaseContractModule.syncVersionAuthorities()).toBe('2.10.0');
+    expect(releaseContractModule.readVersionAuthorities()).toEqual({
+      cargoManifest: '2.10.0',
+      packageJson: '2.10.0',
+      tauriConfig: '2.10.0',
+      versionFile: '2.10.0'
+    });
+  });
+
+  it('ignores malformed version authorities when a stable version can be recovered', async () => {
+    const { releaseContractModule } = await loadReleaseContractWorkspaceModule({
+      cargoManifest: '2.1.0-beta.1',
+      packageJson: '2.3.0',
+      tauriConfig: 'invalid',
+      versionFile: '2.2.0'
+    });
+
+    expect(releaseContractModule.syncVersionAuthorities()).toBe('2.3.0');
+    expect(releaseContractModule.readVersionAuthorities()).toEqual({
+      cargoManifest: '2.3.0',
+      packageJson: '2.3.0',
+      tauriConfig: '2.3.0',
+      versionFile: '2.3.0'
+    });
+  });
+
+  it('fails to synchronize when no stable version authority can be recovered', async () => {
+    const { releaseContractModule } = await loadReleaseContractWorkspaceModule({
+      cargoManifest: 'invalid',
+      packageJson: 'invalid',
+      tauriConfig: 'invalid',
+      versionFile: 'invalid'
+    });
+
+    expect(() => releaseContractModule.syncVersionAuthorities()).toThrow(
+      'Unable to synchronize versions because no stable version authority was found.'
+    );
+  });
+
+  it('allows explicit sync-version callers to choose the target version', async () => {
+    const { releaseContractModule } = await loadReleaseContractWorkspaceModule({
+      cargoManifest: '2.3.0',
+      packageJson: '2.2.0',
+      tauriConfig: '2.1.0',
+      versionFile: '2.0.0'
+    });
+
+    expect(releaseContractModule.syncVersionAuthorities('2.1.1')).toBe('2.1.1');
+    expect(releaseContractModule.readVersionAuthorities()).toEqual({
+      cargoManifest: '2.1.1',
+      packageJson: '2.1.1',
+      tauriConfig: '2.1.1',
+      versionFile: '2.1.1'
+    });
   });
 
   it('keeps sync-version idempotent when Cargo.toml already matches VERSION', async () => {
