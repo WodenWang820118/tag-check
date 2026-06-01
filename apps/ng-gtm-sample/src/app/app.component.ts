@@ -4,6 +4,7 @@ import { RouterOutlet } from '@angular/router';
 import { SeoService } from './seo/seo.service';
 import { UrlTrackerService } from './shared/services/url-tracker/url-tracker.service';
 import { LoadingService } from './shared/services/loading/loading.service';
+import { ConsentService } from './shared/services/consent/consent.service';
 
 @Component({
   selector: 'app-root',
@@ -13,12 +14,12 @@ import { LoadingService } from './shared/services/loading/loading.service';
 export class AppComponent {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly browser = isPlatformBrowser(this.platformId);
+  private readonly seoService = inject(SeoService);
+  private readonly urlTrackerService = inject(UrlTrackerService);
+  private readonly loadingService = inject(LoadingService);
+  private readonly consentService = inject(ConsentService);
 
-  constructor(
-    private readonly seoService: SeoService,
-    private readonly urlTrackerService: UrlTrackerService,
-    private readonly loadingService: LoadingService
-  ) {
+  constructor() {
     this.seoService.start();
 
     const loading = this.loadingService.getLoadingState();
