@@ -101,6 +101,7 @@
     "test-back:unit": "pnpm nx run nest-backend:test-unit",
     "test-front:e2e": "pnpm nx run ng-frontend:e2e",
     "test:pre-commit": "nx affected --target=test --base=HEAD --parallel=6",
+    "test:release-tools": "vitest run tools/scripts/tauri/release/release.spec.ts",
     "test:cov": "nx run-many --target=test --parallel=6 --coverage --verbose --exclude=**/nest-backend,**/e2e && pnpm run test-back:cov && pnpm run coverage:merge",
     "test:data-access": "nx test data-access --experimental-vm-modules",
     "test:e2e": "pnpm run test-back:e2e",

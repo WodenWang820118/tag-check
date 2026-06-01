@@ -215,14 +215,13 @@ export function readCanonicalVersion() {
 }
 
 export function readVersionAuthorities(): VersionAuthorities {
-  const packageJson = readJsonFile<{ version: string }>(packageJsonPath);
-  const tauriConfig = readJsonFile<{ version: string }>(tauriConfigPath);
+  const authorities = readRawVersionAuthorities();
 
   return {
-    cargoManifest: readCargoManifestVersion(),
-    packageJson: parseStableVersion(packageJson.version),
-    tauriConfig: parseStableVersion(tauriConfig.version),
-    versionFile: readCanonicalVersion()
+    cargoManifest: parseStableVersion(authorities.cargoManifest),
+    packageJson: parseStableVersion(authorities.packageJson),
+    tauriConfig: parseStableVersion(authorities.tauriConfig),
+    versionFile: parseStableVersion(authorities.versionFile)
   };
 }
 
@@ -283,12 +282,79 @@ export function assertVersionAuthoritiesInSync(expectedVersion?: string) {
   return resolvedVersion;
 }
 
-export function syncVersionAuthorities(version = readCanonicalVersion()) {
-  const normalizedVersion = parseStableVersion(version);
+function readRawVersionAuthorities(): VersionAuthorities {
+  const packageJson = readJsonFile<{ version: string }>(packageJsonPath);
+  const tauriConfig = readJsonFile<{ version: string }>(tauriConfigPath);
+  const cargoManifest = readFileSync(cargoManifestPath, 'utf8');
+  const { section } = getCargoPackageSection(cargoManifest);
+  const cargoVersionMatch = section.match(
+    /^version\s*=\s*"(?<version>[^"]+)"/m
+  );
+
+  if (!cargoVersionMatch?.groups?.version) {
+    throw new Error(
+      `Unable to read the package version from ${cargoManifestPath}.`
+    );
+  }
+
+  return {
+    cargoManifest: cargoVersionMatch.groups.version,
+    packageJson: packageJson.version,
+    tauriConfig: tauriConfig.version,
+    versionFile: readFileSync(versionFilePath, 'utf8')
+  };
+}
+
+function tryParseStableVersion(version: string) {
+  try {
+    return parseStableVersion(version);
+  } catch {
+    return undefined;
+  }
+}
+
+function compareStableVersions(left: string, right: string) {
+  const leftParts = left.split('.').map(Number);
+  const rightParts = right.split('.').map(Number);
+
+  for (let index = 0; index < leftParts.length; index += 1) {
+    const difference = leftParts[index] - rightParts[index];
+
+    if (difference !== 0) {
+      return difference;
+    }
+  }
+
+  return 0;
+}
+
+function resolveLatestStableVersionAuthority() {
+  const validVersions = Object.values(readRawVersionAuthorities())
+    .map(tryParseStableVersion)
+    .filter((version): version is string => Boolean(version));
+
+  if (validVersions.length === 0) {
+    throw new Error(
+      'Unable to synchronize versions because no stable version authority was found.'
+    );
+  }
+
+  return validVersions.reduce((latestVersion, candidateVersion) =>
+    compareStableVersions(candidateVersion, latestVersion) > 0
+      ? candidateVersion
+      : latestVersion
+  );
+}
+
+export function syncVersionAuthorities(version?: string) {
+  const normalizedVersion = version
+    ? parseStableVersion(version)
+    : resolveLatestStableVersionAuthority();
   const packageJson = readJsonFile<Record<string, unknown>>(packageJsonPath);
   const tauriConfig = readJsonFile<Record<string, unknown>>(tauriConfigPath);
   const cargoManifest = readFileSync(cargoManifestPath, 'utf8');
 
+  writeFileSync(versionFilePath, `${normalizedVersion}\n`, 'utf8');
   writeJsonFile(packageJsonPath, {
     ...packageJson,
     version: normalizedVersion
