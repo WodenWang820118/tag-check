@@ -2,6 +2,7 @@
   styleClass="w-[min(42rem,calc(100vw-1.5rem))]"
   [(visible)]="showModal"
   [modal]="true"
+  [closable]="false"
   [closeOnEscape]="false"
   [dismissableMask]="false"
   (onHide)="hide()"
@@ -17,10 +18,7 @@
             sample storefront.
           </div>
         </div>
-        <p-toggleswitch
-          [(ngModel)]="analyticsModel"
-          (onChange)="acceptAnalytics($event)"
-        />
+        <p-toggleswitch [(ngModel)]="analyticsModel" />
       </div>
       <div class="text-sm leading-6 text-slate-600">
         Analytics cookies track site usage and trends to improve your browsing
@@ -36,10 +34,7 @@
             Power attribution and performance measurement events.
           </div>
         </div>
-        <p-toggleswitch
-          [(ngModel)]="measurementModel"
-          (onChange)="acceptMeasurement($event)"
-        />
+        <p-toggleswitch [(ngModel)]="measurementModel" />
       </div>
       <div class="text-sm leading-6 text-slate-600">
         Measurement cookies for performance measurement.
@@ -53,10 +48,7 @@
             Control personalization and audience-building signals.
           </div>
         </div>
-        <p-toggleswitch
-          [(ngModel)]="audienceModel"
-          (onChange)="acceptAudience($event)"
-        />
+        <p-toggleswitch [(ngModel)]="audienceModel" />
       </div>
       <div class="text-sm leading-6 text-slate-600">
         Audience cookies to share marketing content relevant to you.
@@ -70,7 +62,7 @@
       label="Save Preferences"
       severity="secondary"
       [outlined]="true"
-      (click)="hide(); consent()"
+      (click)="savePreferences()"
     ></button>
     <button
       pButton

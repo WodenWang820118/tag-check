@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   effect,
+  inject,
   input,
   signal
 } from '@angular/core';
@@ -10,10 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
-import {
-  ToggleSwitchChangeEvent,
-  ToggleSwitchModule
-} from 'primeng/toggleswitch';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 
 @Component({
   selector: 'app-cookie-consent',
@@ -39,20 +37,14 @@ export class CookieConsentComponent {
   showModalInput = input<boolean>(false);
   showCookieConsentInput = input<boolean>(false);
 
-  constructor(public consentService: ConsentService) {
-    const storedConsentPreferences =
-      this.consentService.loadStoredConsentPreferences();
+  readonly consentService = inject(ConsentService);
 
-    if (storedConsentPreferences) {
-      this.consentService.setConsentPreferences(storedConsentPreferences);
-    } else {
-      this.consentService.initConsentPreferences();
-    }
-
+  constructor() {
     effect(() => {
-      this.analyticsModel = this.consentService.analyticsConsentGiven$();
-      this.measurementModel = this.consentService.measurementConsentGiven$();
-      this.audienceModel = this.consentService.audienceConsentGiven$();
+      const categories = this.consentService.consentCategories$();
+      this.analyticsModel = categories.analytics;
+      this.measurementModel = categories.measurement;
+      this.audienceModel = categories.audience;
     });
 
     effect(() => {
@@ -77,40 +69,27 @@ export class CookieConsentComponent {
     this.showCookieConsent.set(false);
   }
 
-  acceptAnalytics(event: ToggleSwitchChangeEvent) {
-    this.updateConsentModels({ analytics: event.checked });
-  }
-
-  acceptMeasurement(event: ToggleSwitchChangeEvent) {
-    this.updateConsentModels({ measurement: event.checked });
-  }
-
-  acceptAudience(event: ToggleSwitchChangeEvent) {
-    this.updateConsentModels({ audience: event.checked });
-  }
-
-  acceptCookies(event: ToggleSwitchChangeEvent) {
-    this.updateConsentModels({
-      analytics: event.checked,
-      measurement: event.checked,
-      audience: event.checked
+  savePreferences() {
+    this.consentService.updateConsentCategories({
+      analytics: this.analyticsModel,
+      measurement: this.measurementModel,
+      audience: this.audienceModel
     });
-    this.hide();
     this.consent();
+    this.hide();
   }
 
   acceptAll() {
-    this.consentService.updateConsentPreferences({
-      ad_storage: true,
-      analytics_storage: true,
-      ad_user_data: true,
-      ad_personalization: true
-    });
     this.analyticsModel = true;
     this.measurementModel = true;
     this.audienceModel = true;
-    this.hide();
+    this.consentService.updateConsentCategories({
+      analytics: true,
+      measurement: true,
+      audience: true
+    });
     this.consent();
+    this.hide();
   }
 
   switchModal() {
@@ -119,23 +98,5 @@ export class CookieConsentComponent {
 
   consent() {
     this.consentService.hasConsent();
-  }
-
-  private updateConsentModels(input: {
-    analytics?: boolean;
-    measurement?: boolean;
-    audience?: boolean;
-  }) {
-    const analytics = input.analytics ?? this.analyticsModel;
-    const measurement = input.measurement ?? this.measurementModel;
-    const audience = input.audience ?? this.audienceModel;
-    const grantsSharedStorage = analytics || measurement || audience;
-
-    this.consentService.updateConsentPreferences({
-      analytics_storage: analytics,
-      ad_storage: grantsSharedStorage,
-      ad_user_data: grantsSharedStorage,
-      ad_personalization: audience
-    });
   }
 }
