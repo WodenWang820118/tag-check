@@ -35,6 +35,8 @@ import {
 
 const temporaryDirectories: string[] = [];
 const fixtureVersion = '2.0.0';
+const originalArch = process.arch;
+const originalPlatform = process.platform;
 const fixturePlatformDefinitions = [
   {
     bundleTarget: 'nsis',
@@ -62,6 +64,14 @@ const fixturePlatformDefinitions = [
 }>;
 
 afterEach(() => {
+  Object.defineProperty(process, 'arch', {
+    configurable: true,
+    value: originalArch
+  });
+  Object.defineProperty(process, 'platform', {
+    configurable: true,
+    value: originalPlatform
+  });
   for (const directory of temporaryDirectories.splice(0)) {
     rmSync(directory, { force: true, recursive: true });
   }
@@ -225,13 +235,25 @@ function writeFixtureArtifact(
   };
 }
 
+// Bundle tests default to a Windows host so they remain hermetic on Linux CI.
+// Pass hostPlatform/hostArch explicitly when adding non-Windows host assertions.
 async function loadBundleReleaseTestModule(
   options: {
     buildError?: Error;
+    hostArch?: NodeJS.Architecture;
+    hostPlatform?: NodeJS.Platform;
     rawBundleContents?: string;
     rustTargetTriple?: string;
   } = {}
 ) {
+  Object.defineProperty(process, 'arch', {
+    configurable: true,
+    value: options.hostArch ?? 'x64'
+  });
+  Object.defineProperty(process, 'platform', {
+    configurable: true,
+    value: options.hostPlatform ?? 'win32'
+  });
   const rawBundleDirectory = createFixtureDirectory();
   const releaseAssetsRoot = createFixtureDirectory();
   const runSyncCommandOrThrow = vi.fn((input: unknown) => {
