@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
   buildBackendApplication,
@@ -18,8 +18,33 @@ import {
   prepareNodeSidecar,
   stopExistingDesktopSidecars
 } from './prepare-runtime.ts';
+import { runWithPuppeteerDownloadSkipped } from '../backend-runtime/backend-runtime.ts';
 
 const npmRuntimeFlags = ['--omit=dev', '--no-audit', '--no-fund'];
+const puppeteerSkipDownloadEnv = 'PUPPETEER_SKIP_DOWNLOAD';
+let hadOriginalPuppeteerSkipDownload: boolean;
+let originalPuppeteerSkipDownload: string | undefined;
+
+function resetPuppeteerSkipDownloadEnv() {
+  if (
+    hadOriginalPuppeteerSkipDownload &&
+    originalPuppeteerSkipDownload !== undefined
+  ) {
+    process.env[puppeteerSkipDownloadEnv] = originalPuppeteerSkipDownload;
+  } else {
+    delete process.env[puppeteerSkipDownloadEnv];
+  }
+}
+
+beforeEach(() => {
+  hadOriginalPuppeteerSkipDownload = puppeteerSkipDownloadEnv in process.env;
+  originalPuppeteerSkipDownload = process.env[puppeteerSkipDownloadEnv];
+  delete process.env[puppeteerSkipDownloadEnv];
+});
+
+afterEach(() => {
+  resetPuppeteerSkipDownloadEnv();
+});
 
 function hashTestFile(targetPath: string) {
   return `hash:${targetPath}`;
@@ -49,6 +74,41 @@ function createBackendRuntimeInstallStamp(
     ...overrides
   };
 }
+
+describe('runWithPuppeteerDownloadSkipped', () => {
+  it('sets PUPPETEER_SKIP_DOWNLOAD only while the callback runs', () => {
+    const result = runWithPuppeteerDownloadSkipped(() => {
+      expect(process.env.PUPPETEER_SKIP_DOWNLOAD).toBe('true');
+      return 'completed';
+    });
+
+    expect(result).toBe('completed');
+    expect(puppeteerSkipDownloadEnv in process.env).toBe(false);
+  });
+
+  it('restores a pre-existing PUPPETEER_SKIP_DOWNLOAD value', () => {
+    process.env.PUPPETEER_SKIP_DOWNLOAD = 'pre-existing-value';
+
+    runWithPuppeteerDownloadSkipped(() => {
+      expect(process.env.PUPPETEER_SKIP_DOWNLOAD).toBe('true');
+    });
+
+    expect(process.env.PUPPETEER_SKIP_DOWNLOAD).toBe('pre-existing-value');
+  });
+
+  it('restores PUPPETEER_SKIP_DOWNLOAD after the callback throws', () => {
+    process.env.PUPPETEER_SKIP_DOWNLOAD = 'pre-existing-value';
+
+    expect(() =>
+      runWithPuppeteerDownloadSkipped(() => {
+        expect(process.env.PUPPETEER_SKIP_DOWNLOAD).toBe('true');
+        throw new Error('install failed');
+      })
+    ).toThrow('install failed');
+
+    expect(process.env.PUPPETEER_SKIP_DOWNLOAD).toBe('pre-existing-value');
+  });
+});
 
 const nodeSidecarTestDependencies = {
   existsSyncFn() {
@@ -489,6 +549,7 @@ describe('prepareBackendRuntime', () => {
       args: string[];
       command: string;
       cwd: string;
+      puppeteerSkipDownload: string | undefined;
     }> = [];
     const writtenFiles: Array<{ content: string; path: string }> = [];
 
@@ -505,7 +566,12 @@ describe('prepareBackendRuntime', () => {
         throw new Error('runFn must not be called');
       },
       tryRunFn(command, args, cwd) {
-        tryRunCalls.push({ args, command, cwd });
+        tryRunCalls.push({
+          args,
+          command,
+          cwd,
+          puppeteerSkipDownload: process.env.PUPPETEER_SKIP_DOWNLOAD
+        });
         return true;
       },
       warnFn() {
@@ -519,8 +585,10 @@ describe('prepareBackendRuntime', () => {
     expect(tryRunCalls).toHaveLength(1);
     expect(tryRunCalls[0]).toMatchObject({
       command: 'npm',
-      cwd: backendDir
+      cwd: backendDir,
+      puppeteerSkipDownload: 'true'
     });
+    expect(puppeteerSkipDownloadEnv in process.env).toBe(false);
     expect(writtenFiles).toHaveLength(1);
     expect(writtenFiles[0]?.path).toBe(getBackendRuntimeStampPath(backendDir));
     expect(JSON.parse(writtenFiles[0]?.content ?? '{}')).toEqual(
@@ -529,6 +597,7 @@ describe('prepareBackendRuntime', () => {
   });
 
   it('retries with npm install after npm ci fails against a stale dist lockfile', () => {
+    process.env.PUPPETEER_SKIP_DOWNLOAD = 'pre-existing-value';
     const backendDir = 'backend-dist-test';
     const packageJsonPath = join(backendDir, 'package.json');
     const packageLockPath = join(backendDir, 'package-lock.json');
@@ -538,11 +607,13 @@ describe('prepareBackendRuntime', () => {
       args: string[];
       command: string;
       cwd: string;
+      puppeteerSkipDownload: string | undefined;
     }> = [];
     const runCalls: Array<{
       args: string[];
       command: string;
       cwd: string;
+      puppeteerSkipDownload: string | undefined;
     }> = [];
     const warnings: string[] = [];
     const existsCalls: string[] = [];
@@ -559,10 +630,20 @@ describe('prepareBackendRuntime', () => {
         removedPaths.push(targetPath);
       },
       runFn(command, args, cwd) {
-        runCalls.push({ args, command, cwd });
+        runCalls.push({
+          args,
+          command,
+          cwd,
+          puppeteerSkipDownload: process.env.PUPPETEER_SKIP_DOWNLOAD
+        });
       },
       tryRunFn(command, args, cwd) {
-        tryRunCalls.push({ args, command, cwd });
+        tryRunCalls.push({
+          args,
+          command,
+          cwd,
+          puppeteerSkipDownload: process.env.PUPPETEER_SKIP_DOWNLOAD
+        });
         return false;
       },
       warnFn(message) {
@@ -579,7 +660,8 @@ describe('prepareBackendRuntime', () => {
     );
     expect(tryRunCalls[0]).toMatchObject({
       command: 'npm',
-      cwd: backendDir
+      cwd: backendDir,
+      puppeteerSkipDownload: 'true'
     });
     expect(tryRunCalls[0]?.args[0]).toBe('ci');
     expect(tryRunCalls[0]?.args.slice(1)).toEqual(npmRuntimeFlags);
@@ -591,7 +673,8 @@ describe('prepareBackendRuntime', () => {
     expect(runCalls).toHaveLength(1);
     expect(runCalls[0]).toMatchObject({
       command: 'npm',
-      cwd: backendDir
+      cwd: backendDir,
+      puppeteerSkipDownload: 'true'
     });
     expect(runCalls[0]?.args[0]).toBe('install');
     expect(runCalls[0]?.args.slice(1)).toEqual(npmRuntimeFlags);
@@ -605,6 +688,7 @@ describe('prepareBackendRuntime', () => {
         packageLockHash: hashTestFile(packageLockPath)
       })
     );
+    expect(process.env.PUPPETEER_SKIP_DOWNLOAD).toBe('pre-existing-value');
   });
 
   it('returns early with npm install when no lockfile is present and install succeeds', () => {
@@ -697,6 +781,7 @@ describe('prepareBackendRuntime', () => {
           runCalls.push({ args, command, cwd });
         },
         tryRunFn() {
+          expect(process.env.PUPPETEER_SKIP_DOWNLOAD).toBe('true');
           return false;
         },
         warnFn() {
@@ -707,9 +792,11 @@ describe('prepareBackendRuntime', () => {
 
     expect(removedPaths).toEqual([join(backendDir, 'node_modules')]);
     expect(runCalls).toEqual([]);
+    expect(puppeteerSkipDownloadEnv in process.env).toBe(false);
   });
 
   it('propagates when the fallback npm install also fails', () => {
+    process.env.PUPPETEER_SKIP_DOWNLOAD = 'pre-existing-value';
     const backendDir = 'backend-dist-test';
     const packageJsonPath = join(backendDir, 'package.json');
     const packageLockPath = join(backendDir, 'package-lock.json');
@@ -730,9 +817,11 @@ describe('prepareBackendRuntime', () => {
           removedPaths.push(targetPath);
         },
         runFn(command, args) {
+          expect(process.env.PUPPETEER_SKIP_DOWNLOAD).toBe('true');
           throw new Error(`Command failed: ${command} ${args.join(' ')}`);
         },
         tryRunFn() {
+          expect(process.env.PUPPETEER_SKIP_DOWNLOAD).toBe('true');
           return false;
         },
         warnFn(message) {
@@ -749,6 +838,7 @@ describe('prepareBackendRuntime', () => {
     expect(warnings).toEqual([
       `npm ci failed in ${backendDir}. Falling back to npm install to regenerate runtime dependencies.`
     ]);
+    expect(process.env.PUPPETEER_SKIP_DOWNLOAD).toBe('pre-existing-value');
   });
 });
 

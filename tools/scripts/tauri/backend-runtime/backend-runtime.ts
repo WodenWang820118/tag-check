@@ -103,6 +103,28 @@ export function buildBackendRuntimeNpmCommand(
   };
 }
 
+/**
+ * Temporarily mutates the process-wide environment for synchronous npm installs.
+ * Keep this wrapper synchronous; Promise-returning callbacks would restore the
+ * variable before the install process finishes.
+ */
+export function runWithPuppeteerDownloadSkipped<T>(callback: () => T): T {
+  const hadOriginalValue = 'PUPPETEER_SKIP_DOWNLOAD' in process.env;
+  const originalValue = process.env.PUPPETEER_SKIP_DOWNLOAD;
+
+  process.env.PUPPETEER_SKIP_DOWNLOAD = 'true';
+
+  try {
+    return callback();
+  } finally {
+    if (hadOriginalValue && originalValue !== undefined) {
+      process.env.PUPPETEER_SKIP_DOWNLOAD = originalValue;
+    } else {
+      delete process.env.PUPPETEER_SKIP_DOWNLOAD;
+    }
+  }
+}
+
 export function hashFile(targetPath: string) {
   return createHash('sha256').update(readFileSync(targetPath)).digest('hex');
 }
@@ -282,11 +304,13 @@ export function prepareBackendRuntime(
   );
 
   if (
-    tryRunFn(
-      primaryCommand.command,
-      primaryCommand.args,
-      backendDir,
-      primaryCommand.shell
+    runWithPuppeteerDownloadSkipped(() =>
+      tryRunFn(
+        primaryCommand.command,
+        primaryCommand.args,
+        backendDir,
+        primaryCommand.shell
+      )
     )
   ) {
     writeBackendRuntimeInstallStamp(
@@ -321,11 +345,13 @@ export function prepareBackendRuntime(
     installPlan.fallbackCommand,
     platform
   );
-  runFn(
-    fallbackCommand.command,
-    fallbackCommand.args,
-    backendDir,
-    fallbackCommand.shell
+  runWithPuppeteerDownloadSkipped(() =>
+    runFn(
+      fallbackCommand.command,
+      fallbackCommand.args,
+      backendDir,
+      fallbackCommand.shell
+    )
   );
   writeBackendRuntimeInstallStamp(
     stampPath,
