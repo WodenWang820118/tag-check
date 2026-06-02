@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import {
+  existsSync,
   mkdtempSync,
   mkdirSync,
   readFileSync,
@@ -12,6 +13,7 @@ import { join, relative } from 'node:path';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { workspaceRoot } from '../path-contract/path-contract.ts';
 import {
   assembleReleaseAssets,
   assertVersionAuthoritiesInSync,
@@ -831,6 +833,26 @@ describe('release helper', () => {
     });
     expect(assertVersionAuthoritiesInSync(checkedInVersion)).toBe(
       checkedInVersion
+    );
+  });
+
+  it('keeps checked-in release notes aligned with VERSION', () => {
+    const checkedInVersion = readCanonicalVersion();
+    const releaseNotesPath = join(
+      workspaceRoot,
+      'docs',
+      'releases',
+      `${checkedInVersion}.md`
+    );
+
+    expect(existsSync(releaseNotesPath)).toBe(true);
+    const releaseNotes = readFileSync(releaseNotesPath, 'utf8');
+    expect(releaseNotes.trim().length).toBeGreaterThan(0);
+    expect(releaseNotes).toMatch(
+      new RegExp(
+        `^# Tag Check v?${checkedInVersion.replaceAll('.', '\\.')}$`,
+        'm'
+      )
     );
   });
 

@@ -28,6 +28,9 @@ jobs:
       - name: Backend integration tests
         run: pnpm run test-back:integration
         shell: bash
+      - name: Release tooling tests
+        run: pnpm run test:release-tools
+        shell: bash
       - name: Test and coverage
         run: pnpm run test:cov
         shell: bash
