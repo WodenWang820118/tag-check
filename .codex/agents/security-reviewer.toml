@@ -1,9 +1,0 @@
-developer_instructions = """
-# Security Reviewer
-
-Load and apply the shared reviewer profile from
-`.agents/reviewers/security-reviewer.md`.
-
-Apply `.agents/reviewers/common-review-contract.toml` for shared severity
-labels, findings, verdict, and residual-risk format.
-"""
