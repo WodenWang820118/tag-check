@@ -1,16 +1,10 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import {
-  ActivatedRoute,
-  convertToParamMap,
-  Router
-} from '@angular/router';
-import {
-  BehaviorSubject,
-} from 'rxjs';
+import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DataLayerSpec } from '@utils';
 import { ReportDetailRouteContext } from '../../components/report-detail.contracts';
@@ -22,6 +16,7 @@ import { DetailViewComponent } from './detail-view.component';
 @Component({
   selector: 'app-report-tab',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: ''
 })
 class MockReportTabComponent {
@@ -31,6 +26,7 @@ class MockReportTabComponent {
 @Component({
   selector: 'app-tag-manage-tab',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: ''
 })
 class MockTagManageTabComponent {
@@ -235,20 +231,21 @@ describe('DetailViewComponent', () => {
       snackbar: 'missingRecording'
     };
 
-    (fixture.componentInstance as never as {
-      handleQueryParams: (params: ReturnType<typeof convertToParamMap>) => void;
-    }).handleQueryParams(
+    (
+      fixture.componentInstance as never as {
+        handleQueryParams: (
+          params: ReturnType<typeof convertToParamMap>
+        ) => void;
+      }
+    ).handleQueryParams(
       convertToParamMap({ tab: 'reports', snackbar: 'missingRecording' })
     );
     await Promise.resolve();
 
-    expect(snackBar.openFromComponent).toHaveBeenCalledWith(
-      SnackBarComponent,
-      {
-        duration: 5000,
-        data: 'Please add a Chrome Recording to this event before running tests.'
-      }
-    );
+    expect(snackBar.openFromComponent).toHaveBeenCalledWith(SnackBarComponent, {
+      duration: 5000,
+      data: 'Please add a Chrome Recording to this event before running tests.'
+    });
     expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: {

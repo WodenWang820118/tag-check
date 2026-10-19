@@ -9,7 +9,7 @@ export class ViewItemListEventTracker implements AnalyticsEventTracker {
     if (!rawEventData.ecommerce.items.length) return;
 
     return {
-      eventData: rawEventData,
+      eventData: rawEventData
     };
   }
 }

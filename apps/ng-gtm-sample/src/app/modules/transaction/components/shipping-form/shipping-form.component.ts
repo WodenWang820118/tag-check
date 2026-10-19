@@ -1,18 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideTruck } from '@ng-icons/lucide';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmLabel } from '@spartan-ng/helm/label';
 import { CheckoutFormManagerService } from '../../../../shared/services/checkout-form-manager/checkout-form-manager.service';
 
 @Component({
   selector: 'app-shipping-form',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, InputTextModule, ButtonModule],
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    HlmButton,
+    HlmInput,
+    HlmLabel,
+    NgIcon
+  ],
+  providers: [provideIcons({ lucideTruck })],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="sample-panel p-6">
       <div class="mb-5 space-y-2">
         <div class="sample-eyebrow text-slate-400">
-          <i class="pi pi-truck text-sm"></i>
+          <ng-icon name="lucideTruck" class="text-sm" />
           Step 1
         </div>
         <h2 class="text-2xl font-bold tracking-tight text-slate-950">
@@ -31,39 +43,76 @@ import { CheckoutFormManagerService } from '../../../../shared/services/checkout
       >
         <div class="grid gap-4 md:grid-cols-2">
           <div class="space-y-2">
-            <label for="name" class="text-sm font-medium text-slate-600">
+            <label
+              hlmLabel
+              for="name"
+              class="text-sm font-medium text-slate-600"
+            >
               Name
             </label>
-            <input pInputText formControlName="name" id="name" class="w-full" />
-          </div>
-          <div class="space-y-2">
-            <label for="address" class="text-sm font-medium text-slate-600">
-              Address
-            </label>
             <input
-              pInputText
-              formControlName="address"
-              id="address"
-              class="w-full"
+              hlmInput
+              formControlName="name"
+              id="name"
+              class="w-full bg-white"
+              data-testid="shipping-name"
             />
           </div>
           <div class="space-y-2">
-            <label for="zip" class="text-sm font-medium text-slate-600">
-              Zip Code
+            <label
+              hlmLabel
+              for="address"
+              class="text-sm font-medium text-slate-600"
+            >
+              Address
             </label>
-            <input pInputText formControlName="zip" id="zip" class="w-full" />
+            <input
+              hlmInput
+              formControlName="address"
+              id="address"
+              class="w-full bg-white"
+              data-testid="shipping-address"
+            />
           </div>
           <div class="space-y-2">
-            <label for="city" class="text-sm font-medium text-slate-600">
+            <label
+              hlmLabel
+              for="zip"
+              class="text-sm font-medium text-slate-600"
+            >
+              Zip Code
+            </label>
+            <input
+              hlmInput
+              formControlName="zip"
+              id="zip"
+              class="w-full bg-white"
+              data-testid="shipping-zip"
+            />
+          </div>
+          <div class="space-y-2">
+            <label
+              hlmLabel
+              for="city"
+              class="text-sm font-medium text-slate-600"
+            >
               City
             </label>
-            <input pInputText formControlName="city" id="city" class="w-full" />
+            <input
+              hlmInput
+              formControlName="city"
+              id="city"
+              class="w-full bg-white"
+              data-testid="shipping-city"
+            />
           </div>
         </div>
 
         @if (!checkoutFormManager.isShippingFormSubmitted()) {
           <div class="flex justify-end pt-2">
-            <button pButton type="submit" label="Continue"></button>
+            <button hlmBtn type="submit" data-testid="shipping-continue">
+              Continue
+            </button>
           </div>
         }
       </form>

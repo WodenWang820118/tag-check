@@ -8,7 +8,7 @@ import {
 import { DOCUMENT } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { appRoutes } from './app.routes';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideMarkdown, SANITIZE } from 'ngx-markdown';
 import { getLocaleFromPathname } from '@ui';
 
@@ -16,7 +16,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(appRoutes),
-    provideHttpClient(),
+    provideHttpClient(withXhr()),
     ...provideMarkdown({
       sanitize: {
         provide: SANITIZE,

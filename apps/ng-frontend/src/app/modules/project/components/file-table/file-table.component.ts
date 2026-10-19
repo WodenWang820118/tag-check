@@ -1,4 +1,10 @@
-import { Component, viewChild, OnInit, DestroyRef } from '@angular/core';
+import {
+  Component,
+  viewChild,
+  OnInit,
+  DestroyRef,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { tap } from 'rxjs';
@@ -32,6 +38,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     CommonModule
   ],
   templateUrl: './file-table.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./file-table.component.css']
 })
 export class FileTableComponent implements OnInit {

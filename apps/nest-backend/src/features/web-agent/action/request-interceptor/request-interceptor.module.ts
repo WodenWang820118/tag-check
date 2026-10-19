@@ -6,6 +6,6 @@ import { HandlerModule } from '../handlers/handler.module';
 @Module({
   imports: [DataLayerModule, HandlerModule],
   providers: [DataLayerService],
-  exports: [],
+  exports: []
 })
 export class RequestInterceptorModule {}

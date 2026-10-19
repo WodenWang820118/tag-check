@@ -5,13 +5,13 @@ import {
   buildCheckpointReviewContext,
   collectChangedFiles,
   collectDiffText,
-  runGitCommand,
+  runGitCommand
 } from '../diff-context/diff-context.ts';
 import { getPnpmCommand } from '../environment/environment.ts';
 import {
   buildPrefilterContext,
   getEscalationReasons,
-  selectPaidReviewContext,
+  selectPaidReviewContext
 } from '../prefilter/prefilter.ts';
 import { runLocalReviewerReview } from '../runner/runner.ts';
 import {
@@ -28,12 +28,12 @@ import {
   type EvaluationSample,
   type LocalReviewerDependencies,
   type LocalReviewerEvaluationConfig,
-  type LocalReviewReport,
+  type LocalReviewReport
 } from '../shared/shared.ts';
 
 export function resolveEvaluationRepoTargets(
   currentRepoRoot: string,
-  requestedRepos: ReadonlyArray<string> = [],
+  requestedRepos: ReadonlyArray<string> = []
 ): EvaluationRepoTarget[] {
   const repoInputs =
     requestedRepos.length > 0
@@ -54,7 +54,7 @@ export function resolveEvaluationRepoTargets(
         !existsSync(resolve(target.root, 'package.json')))
     ) {
       throw new Error(
-        `Unable to find an evaluation repository at ${target.root}.`,
+        `Unable to find an evaluation repository at ${target.root}.`
       );
     }
 
@@ -78,14 +78,14 @@ export function collectEvaluationSamples(input: {
       repo.root,
       repo.name,
       input.dependencies,
-      seed + index + 1,
-    ),
+      seed + index + 1
+    )
   );
 
   return selectEvaluationSamples({
     candidates,
     rounds,
-    seed,
+    seed
   });
 }
 
@@ -99,13 +99,13 @@ export function collectRepoCommitCandidates(input: {
     input.repoRoot,
     input.repoName,
     input.dependencies,
-    input.seed,
+    input.seed
   );
 }
 
 export function selectAbSamples(
   samples: ReadonlyArray<EvaluationSample>,
-  desiredCount = 4,
+  desiredCount = 4
 ): EvaluationSample[] {
   if (desiredCount <= 0) {
     return [];
@@ -118,7 +118,7 @@ export function selectAbSamples(
     'multi-file-refactor',
     'workspace-config',
     'higher-risk',
-    'general',
+    'general'
   ];
 
   for (const kind of preferredOrder) {
@@ -168,18 +168,18 @@ export function summarizeEvaluation(input: {
   writeFileSync(
     localResultsPath,
     JSON.stringify(input.localResults, null, 2),
-    'utf8',
+    'utf8'
   );
   writeFileSync(
     abResultsPath,
     JSON.stringify(input.reviewerResults, null, 2),
-    'utf8',
+    'utf8'
   );
 
   const summaryMarkdown = renderEvaluationSummary(
     input.localResults,
     input.reviewerResults,
-    input.config,
+    input.config
   );
   writeFileSync(summaryPath, `${summaryMarkdown.trim()}\n`, 'utf8');
 
@@ -188,9 +188,9 @@ export function summarizeEvaluation(input: {
       abResultsPath,
       localResultsPath,
       samplesPath,
-      summaryPath,
+      summaryPath
     },
-    summaryMarkdown,
+    summaryMarkdown
   };
 }
 
@@ -207,7 +207,7 @@ export function evaluateSampleWithLocalReviewer(input: {
     dependencies: input.dependencies,
     headRef: input.sample.commit,
     repoRoot: input.sample.repoRoot,
-    staged: false,
+    staged: false
   });
   const diffLength = diffText.length;
 
@@ -219,7 +219,7 @@ export function evaluateSampleWithLocalReviewer(input: {
       headRef: input.sample.commit,
       staged: false,
       targetRepoRoot: input.sample.repoRoot,
-      toolRepoRoot: input.toolRepoRoot,
+      toolRepoRoot: input.toolRepoRoot
     });
     const contextMarkdown = buildPrefilterContext({
       diffText,
@@ -227,21 +227,21 @@ export function evaluateSampleWithLocalReviewer(input: {
         diffText,
         fileCount: input.sample.fileCount,
         findings: report.findings,
-        changedFiles: report.context.files.map((file) => file.path),
+        changedFiles: report.context.files.map((file) => file.path)
       }),
       findings: report.findings,
-      report,
+      report
     });
     const escalationReasons = getEscalationReasons({
       diffText,
       fileCount: input.sample.fileCount,
       findings: report.findings,
-      changedFiles: report.context.files.map((file) => file.path),
+      changedFiles: report.context.files.map((file) => file.path)
     });
     const reviewContextSelection = selectPaidReviewContext({
       diffText,
       prefilterContext: contextMarkdown,
-      smallDiffThresholdChars: input.smallDiffThresholdChars,
+      smallDiffThresholdChars: input.smallDiffThresholdChars
     });
 
     return {
@@ -259,7 +259,7 @@ export function evaluateSampleWithLocalReviewer(input: {
       reviewContextMode: reviewContextSelection.mode,
       sample: input.sample,
       success: true,
-      summaryLength: contextMarkdown.length,
+      summaryLength: contextMarkdown.length
     };
   } catch (error) {
     const errorText = error instanceof Error ? error.message : String(error);
@@ -277,13 +277,13 @@ export function evaluateSampleWithLocalReviewer(input: {
         fileCount: input.sample.fileCount,
         findings: [],
         changedFiles: [],
-        localReviewError: errorText,
+        localReviewError: errorText
       }),
       reviewContextLength: diffLength,
       reviewContextMode: 'full-diff',
       sample: input.sample,
       success: false,
-      summaryLength: 0,
+      summaryLength: 0
     };
   }
 }
@@ -298,7 +298,7 @@ export function evaluateSampleWithCheckpointReview(input: {
     dependencies: input.dependencies,
     headRef: input.sample.commit,
     repoRoot: input.sample.repoRoot,
-    staged: false,
+    staged: false
   });
   const context = buildCheckpointReviewContext({
     changedFiles,
@@ -307,9 +307,9 @@ export function evaluateSampleWithCheckpointReview(input: {
       dependencies: input.dependencies,
       headRef: input.sample.commit,
       repoRoot: input.sample.repoRoot,
-      staged: false,
+      staged: false
     }),
-    sample: input.sample,
+    sample: input.sample
   });
 
   const result = input.dependencies.runProcess({
@@ -317,7 +317,7 @@ export function evaluateSampleWithCheckpointReview(input: {
     args: ['review:implementation', '--', '--focus', 'general'],
     cwd: input.sample.repoRoot,
     input: context,
-    timeoutMs: LOCAL_REVIEWER_COMMAND_TIMEOUT_MS,
+    timeoutMs: LOCAL_REVIEWER_COMMAND_TIMEOUT_MS
   });
 
   return {
@@ -330,34 +330,34 @@ export function evaluateSampleWithCheckpointReview(input: {
     output: result.stdout.trim(),
     providerAvailable: result.status === 0,
     sample: input.sample,
-    success: result.status === 0,
+    success: result.status === 0
   };
 }
 
 function renderEvaluationSummary(
   localResults: ReadonlyArray<EvaluationLocalResult>,
   reviewerResults: ReadonlyArray<EvaluationReviewerResult>,
-  config: LocalReviewerEvaluationConfig,
+  config: LocalReviewerEvaluationConfig
 ): string {
   const total = localResults.length;
   const successful = localResults.filter((result) => result.success).length;
   const parseable = localResults.filter(
-    (result) => result.jsonParseable,
+    (result) => result.jsonParseable
   ).length;
   const escalated = localResults.filter(
-    (result) => result.recommendedEscalation,
+    (result) => result.recommendedEscalation
   ).length;
   const localMedianMs = median(localResults.map((result) => result.durationMs));
   const findingMedian = median(
-    localResults.map((result) => result.findingsCount),
+    localResults.map((result) => result.findingsCount)
   );
   const baselineDiffChars = localResults.reduce(
     (sum, result) => sum + result.diffLength,
-    0,
+    0
   );
   const paidReviewContextChars = localResults.reduce(
     (sum, result) => sum + result.paidReviewContextLength,
-    0,
+    0
   );
   const actualContextRatios = localResults
     .filter((result) => result.recommendedEscalation && result.diffLength > 0)
@@ -376,7 +376,7 @@ function renderEvaluationSummary(
     const reviewer = reviewerResults.find(
       (entry) =>
         entry.sample.repoName === result.sample.repoName &&
-        entry.sample.commit === result.sample.commit,
+        entry.sample.commit === result.sample.commit
     );
     const paidContext = result.recommendedEscalation
       ? `${result.reviewContextMode} (${result.paidReviewContextLength})`
@@ -402,7 +402,7 @@ function renderEvaluationSummary(
     '',
     '| Repo | Kind | Commit | Local Result | Findings | Escalate | Paid Context | Verdict |',
     '| --- | --- | --- | --- | --- | --- | --- | --- |',
-    ...sampleLines,
+    ...sampleLines
   ].join('\n');
 }
 
@@ -410,15 +410,15 @@ function sampleRepoCommits(
   repoRoot: string,
   repoName: string,
   dependencies: LocalReviewerDependencies,
-  seed: number,
+  seed: number
 ): EvaluationSample[] {
   const sinceDate = new Date(
-    Date.now() - 60 * 24 * 60 * 60 * 1000,
+    Date.now() - 60 * 24 * 60 * 60 * 1000
   ).toISOString();
   const logResult = runGitCommand(
     repoRoot,
     ['log', '--since', sinceDate, '--no-merges', '--format=%H%x1f%ct%x1f%s'],
-    dependencies,
+    dependencies
   );
 
   const candidates = logResult.stdout
@@ -435,7 +435,7 @@ function sampleRepoCommits(
       const numstat = runGitCommand(
         repoRoot,
         ['diff', '--numstat', baseRef, commit],
-        dependencies,
+        dependencies
       ).stdout;
       const parsed = parseNumstat(numstat);
       if (parsed.binary || parsed.fileCount === 0 || parsed.fileCount > 20) {
@@ -451,7 +451,7 @@ function sampleRepoCommits(
         repoName,
         repoRoot,
         subject: subject ?? '<no subject>',
-        totalChangedLines: parsed.totalChangedLines,
+        totalChangedLines: parsed.totalChangedLines
       } satisfies EvaluationSample;
     })
     .filter((sample): sample is EvaluationSample => sample !== null);
@@ -461,13 +461,13 @@ function sampleRepoCommits(
 
 function classifySample(
   files: string[],
-  totalChangedLines: number,
+  totalChangedLines: number
 ): EvaluationSample['kind'] {
   if (
     files.some((file) =>
       /(package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|nx\.json|tsconfig|project\.json|\.ya?ml|\.json|\.toml|README\.md)$/i.test(
-        file,
-      ),
+        file
+      )
     )
   ) {
     return 'workspace-config';
@@ -476,8 +476,8 @@ function classifySample(
   if (
     files.some((file) =>
       /(auth|secret|token|password|migration|database|schema|controller|dto)/i.test(
-        file,
-      ),
+        file
+      )
     )
   ) {
     return 'higher-risk';
@@ -488,7 +488,7 @@ function classifySample(
   }
 
   const codeFiles = files.filter((file) =>
-    /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/i.test(file),
+    /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/i.test(file)
   );
   if (
     codeFiles.length === files.length &&
@@ -503,21 +503,21 @@ function classifySample(
 
 function resolveEvaluationRepoTarget(
   currentRepoRoot: string,
-  repoInput: string,
+  repoInput: string
 ): EvaluationRepoTarget {
   if (
     (DEFAULT_EVALUATION_REPO_NAMES as readonly string[]).includes(repoInput)
   ) {
     return {
       name: repoInput,
-      root: resolve(currentRepoRoot, '..', repoInput),
+      root: resolve(currentRepoRoot, '..', repoInput)
     };
   }
 
   const root = resolve(currentRepoRoot, repoInput);
   return {
     name: basename(root),
-    root,
+    root
   };
 }
 
@@ -537,7 +537,7 @@ export function selectEvaluationSamples(input: {
   for (const [index, kind] of EVALUATION_KIND_ORDER.entries()) {
     const pool = shuffleWithSeed(
       input.candidates.filter((sample) => sample.kind === kind),
-      input.seed + index + 11,
+      input.seed + index + 11
     );
     for (const sample of pool.slice(0, quotas[kind])) {
       const key = `${sample.repoName}:${sample.commit}`;
@@ -552,9 +552,9 @@ export function selectEvaluationSamples(input: {
   if (selected.length < input.rounds) {
     const remaining = shuffleWithSeed(
       input.candidates.filter(
-        (sample) => !chosenKeys.has(`${sample.repoName}:${sample.commit}`),
+        (sample) => !chosenKeys.has(`${sample.repoName}:${sample.commit}`)
       ),
-      input.seed + 101,
+      input.seed + 101
     );
     selected.push(...remaining.slice(0, input.rounds - selected.length));
   }
@@ -563,14 +563,14 @@ export function selectEvaluationSamples(input: {
 }
 
 function buildSoftSampleQuotas(
-  rounds: number,
+  rounds: number
 ): Record<EvaluationSample['kind'], number> {
   const quotas = Object.fromEntries(
-    EVALUATION_KIND_ORDER.map((kind) => [kind, 0]),
+    EVALUATION_KIND_ORDER.map((kind) => [kind, 0])
   ) as Record<EvaluationSample['kind'], number>;
   const totals = EVALUATION_KIND_ORDER.map((kind) => ({
     exact: (rounds * EVALUATION_KIND_WEIGHTS[kind]) / DEFAULT_EVALUATION_ROUNDS,
-    kind,
+    kind
   }));
 
   let allocated = 0;
@@ -596,7 +596,7 @@ function buildSoftSampleQuotas(
 
 function interleaveEvaluationSamples(
   samples: ReadonlyArray<EvaluationSample>,
-  seed: number,
+  seed: number
 ): EvaluationSample[] {
   const queues = new Map<EvaluationSample['kind'], EvaluationSample[]>();
   for (const [index, kind] of EVALUATION_KIND_ORDER.entries()) {
@@ -604,8 +604,8 @@ function interleaveEvaluationSamples(
       kind,
       shuffleWithSeed(
         samples.filter((sample) => sample.kind === kind),
-        seed + index + 151,
-      ),
+        seed + index + 151
+      )
     );
   }
 
@@ -656,20 +656,20 @@ function parseNumstat(stdout: string): {
     binary,
     fileCount: files.length,
     files,
-    totalChangedLines,
+    totalChangedLines
   };
 }
 
 function resolveParentCommit(
   repoRoot: string,
   commit: string,
-  dependencies: LocalReviewerDependencies,
+  dependencies: LocalReviewerDependencies
 ): string | null {
   const result = dependencies.runProcess({
     command: 'git',
     args: ['rev-parse', `${commit}^`],
     cwd: repoRoot,
-    timeoutMs: LOCAL_REVIEWER_COMMAND_TIMEOUT_MS,
+    timeoutMs: LOCAL_REVIEWER_COMMAND_TIMEOUT_MS
   });
 
   if (result.error || result.status !== 0) {
@@ -705,7 +705,7 @@ function shortHash(commit: string): string {
 
 function deriveVerdict(
   localResult: EvaluationLocalResult,
-  reviewerResult?: EvaluationReviewerResult,
+  reviewerResult?: EvaluationReviewerResult
 ): 'usable-prefilter' | 'needs-escalation' | 'misleading' {
   if (!localResult.success || localResult.recommendedEscalation) {
     return 'needs-escalation';
@@ -714,7 +714,7 @@ function deriveVerdict(
   if (
     reviewerResult?.success &&
     /\b(critical|high|blocking|security risk|public contract)\b/i.test(
-      reviewerResult.output,
+      reviewerResult.output
     )
   ) {
     return 'misleading';

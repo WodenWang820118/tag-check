@@ -6,7 +6,7 @@ import { test } from 'node:test';
 import { ensureLocalReviewerBuild, runLocalReviewerReview } from './runner.ts';
 import type {
   CommandResult,
-  LocalReviewerDependencies,
+  LocalReviewerDependencies
 } from '../shared/shared.ts';
 
 // endregion
@@ -15,7 +15,7 @@ test('ensureLocalReviewerBuild runs the local-reviewer Nx build target', () => {
   const { calls, dependencies } = createDependencies({
     status: 0,
     stderr: '',
-    stdout: '',
+    stdout: ''
   });
 
   ensureLocalReviewerBuild('C:/tools/local-reviewer-cli', dependencies);
@@ -30,7 +30,7 @@ test('runLocalReviewerReview passes staged mode and requested profiles through e
   const { calls, dependencies } = createDependencies({
     status: 0,
     stderr: '',
-    stdout: JSON.stringify({ summary: 'ok', findings: [] }),
+    stdout: JSON.stringify({ summary: 'ok', findings: [] })
   });
 
   const report = runLocalReviewerReview({
@@ -38,7 +38,7 @@ test('runLocalReviewerReview passes staged mode and requested profiles through e
     requestedProfiles: ['typescript', 'repo-habits'],
     staged: true,
     targetRepoRoot: 'C:/repo',
-    toolRepoRoot: 'C:/tools/local-reviewer-cli',
+    toolRepoRoot: 'C:/tools/local-reviewer-cli'
   });
 
   assert.equal(report.summary, 'ok');
@@ -46,7 +46,7 @@ test('runLocalReviewerReview passes staged mode and requested profiles through e
   assert.deepEqual(calls[0].args.slice(-2), ['--staged', '--json']);
   assert.equal(
     calls[0].env?.LOCAL_REVIEWER_REQUESTED_PROFILES,
-    'typescript,repo-habits',
+    'typescript,repo-habits'
   );
 });
 
@@ -54,7 +54,7 @@ test('runLocalReviewerReview requires staged mode or base/head refs', () => {
   const { dependencies } = createDependencies({
     status: 0,
     stderr: '',
-    stdout: '{}',
+    stdout: '{}'
   });
 
   assert.throws(
@@ -63,9 +63,9 @@ test('runLocalReviewerReview requires staged mode or base/head refs', () => {
         dependencies,
         staged: false,
         targetRepoRoot: 'C:/repo',
-        toolRepoRoot: 'C:/tools/local-reviewer-cli',
+        toolRepoRoot: 'C:/tools/local-reviewer-cli'
       }),
-    /requires either staged=true or base\/head refs/,
+    /requires either staged=true or base\/head refs/
   );
 });
 
@@ -82,7 +82,7 @@ function createDependencies(result: CommandResult): {
       runProcess: (input) => {
         calls.push(input);
         return result;
-      },
-    },
+      }
+    }
   };
 }

@@ -1,7 +1,7 @@
 <section class="space-y-6">
   <div class="space-y-3">
     <span class="sample-eyebrow">
-      <i class="pi pi-database text-sm"></i>
+      <ng-icon name="lucideDatabase" class="text-sm" />
       Destination Entry
     </span>
     <h2 class="sample-page-title text-slate-950">
@@ -15,69 +15,94 @@
   </div>
 
   @if (uploadState() === 'success') {
-    <p-message severity="success" [text]="uploadMessage()"></p-message>
+    <div hlmAlert class="border-emerald-200 bg-emerald-50 text-emerald-900">
+      <ng-icon name="lucideCircleCheck" />
+      <p hlmAlertDescription>{{ uploadMessage() }}</p>
+    </div>
   } @else if (uploadState() === 'error') {
-    <p-message severity="error" [text]="uploadMessage()"></p-message>
+    <div hlmAlert variant="destructive" class="border-red-200 bg-red-50">
+      <ng-icon name="lucideCircleAlert" />
+      <p hlmAlertDescription>{{ uploadMessage() }}</p>
+    </div>
   } @else if (uploadState() === 'saving') {
-    <p-message severity="info" [text]="uploadMessage()"></p-message>
+    <div hlmAlert class="border-blue-200 bg-blue-50 text-blue-900">
+      <ng-icon name="lucideInfo" />
+      <p hlmAlertDescription>{{ uploadMessage() }}</p>
+    </div>
   }
 
   <form [formGroup]="destinationForm" (ngSubmit)="addDestination()">
     <div class="grid gap-6 xl:grid-cols-[1.2fr_0.9fr]">
-      <p-card
-        styleClass="rounded-[1.75rem] border border-slate-200 shadow-sm"
-      >
-        <ng-template pTemplate="header">
-          <div class="border-b border-slate-200 px-6 py-5">
-            <div class="text-xl font-semibold text-slate-950">
-              Basic destination details
-            </div>
-            <p class="mt-2 text-sm leading-6 text-slate-500">
-              Capture the destination metadata that powers the public product
-              list and detail page copy.
-            </p>
+      <section hlmCard class="gap-0 rounded-[1.75rem] pt-0 text-base shadow-sm">
+        <div class="border-b border-slate-200 px-6 py-5">
+          <div class="text-xl font-semibold text-slate-950">
+            Basic destination details
           </div>
-        </ng-template>
+          <p class="mt-2 text-sm leading-6 text-slate-500">
+            Capture the destination metadata that powers the public product list
+            and detail page copy.
+          </p>
+        </div>
 
-        <div class="grid gap-5 px-3 py-3 md:grid-cols-2">
+        <div class="grid gap-5 px-6 pt-6 md:grid-cols-2">
           <div class="space-y-2">
-            <label for="country" class="text-sm font-medium text-slate-600">
+            <label
+              hlmLabel
+              for="country"
+              class="text-sm font-medium text-slate-600"
+            >
               Country
             </label>
-            <select
-              id="country"
+            <hlm-native-select
+              selectId="country"
               formControlName="country"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
+              class="w-full"
+              selectClass="bg-white"
             >
-              <option value="">Select a country</option>
+              <option hlmNativeSelectOption value="">Select a country</option>
               @for (country of countries; track country.value) {
-                <option [value]="country.value">{{ country.label }}</option>
+                <option hlmNativeSelectOption [value]="country.value">
+                  {{ country.label }}
+                </option>
               }
-            </select>
+            </hlm-native-select>
             @if (hasError('country')) {
               <div class="text-sm text-red-600">Country is required.</div>
             }
           </div>
 
           <div class="space-y-2">
-            <label for="city" class="text-sm font-medium text-slate-600">
+            <label
+              hlmLabel
+              for="city"
+              class="text-sm font-medium text-slate-600"
+            >
               City
             </label>
-            <input pInputText id="city" formControlName="city" class="w-full" />
+            <input
+              hlmInput
+              id="city"
+              formControlName="city"
+              class="w-full bg-white"
+            />
             @if (hasError('city')) {
               <div class="text-sm text-red-600">City is required.</div>
             }
           </div>
 
           <div class="space-y-2 md:col-span-2">
-            <label for="title" class="text-sm font-medium text-slate-600">
+            <label
+              hlmLabel
+              for="title"
+              class="text-sm font-medium text-slate-600"
+            >
               Title
             </label>
             <input
-              pInputText
+              hlmInput
               id="title"
               formControlName="title"
-              class="w-full"
+              class="w-full bg-white"
             />
             @if (hasError('title')) {
               <div class="text-sm text-red-600">Title is required.</div>
@@ -86,36 +111,39 @@
 
           <div class="space-y-2 md:col-span-2">
             <label
+              hlmLabel
               for="smallTitle"
               class="text-sm font-medium text-slate-600"
             >
               Small title
             </label>
             <input
-              pInputText
+              hlmInput
               id="smallTitle"
               formControlName="smallTitle"
-              class="w-full"
+              class="w-full bg-white"
             />
             @if (hasError('smallTitle')) {
-              <div class="text-sm text-red-600">
-                Small title is required.
-              </div>
+              <div class="text-sm text-red-600">Small title is required.</div>
             }
           </div>
 
           <div class="space-y-2">
-            <label for="lat" class="text-sm font-medium text-slate-600">
+            <label
+              hlmLabel
+              for="lat"
+              class="text-sm font-medium text-slate-600"
+            >
               Latitude
             </label>
             <input
-              pInputText
+              hlmInput
               id="lat"
               type="number"
               inputmode="decimal"
               step="any"
               formControlName="latitude"
-              class="w-full"
+              class="w-full bg-white"
             />
             @if (hasError('latitude', 'required')) {
               <div class="text-sm text-red-600">Latitude is required.</div>
@@ -127,17 +155,21 @@
           </div>
 
           <div class="space-y-2">
-            <label for="longitude" class="text-sm font-medium text-slate-600">
+            <label
+              hlmLabel
+              for="longitude"
+              class="text-sm font-medium text-slate-600"
+            >
               Longitude
             </label>
             <input
-              pInputText
+              hlmInput
               id="longitude"
               type="number"
               inputmode="decimal"
               step="any"
               formControlName="longitude"
-              class="w-full"
+              class="w-full bg-white"
             />
             @if (hasError('longitude', 'required')) {
               <div class="text-sm text-red-600">Longitude is required.</div>
@@ -149,17 +181,21 @@
           </div>
 
           <div class="space-y-2">
-            <label for="price" class="text-sm font-medium text-slate-600">
+            <label
+              hlmLabel
+              for="price"
+              class="text-sm font-medium text-slate-600"
+            >
               Price
             </label>
             <input
-              pInputText
+              hlmInput
               id="price"
               type="number"
               inputmode="decimal"
               step="0.01"
               formControlName="price"
-              class="w-full"
+              class="w-full bg-white"
             />
             @if (hasError('price', 'required')) {
               <div class="text-sm text-red-600">Price is required.</div>
@@ -171,14 +207,18 @@
           </div>
 
           <div class="space-y-2">
-            <label for="video" class="text-sm font-medium text-slate-600">
+            <label
+              hlmLabel
+              for="video"
+              class="text-sm font-medium text-slate-600"
+            >
               Video URL
             </label>
             <input
-              pInputText
+              hlmInput
               id="video"
               formControlName="video"
-              class="w-full"
+              class="w-full bg-white"
             />
             <div class="text-xs text-slate-400">
               Optional YouTube or promo video URL for the detail page modal.
@@ -187,41 +227,42 @@
 
           <div class="space-y-2 md:col-span-2">
             <label
+              hlmLabel
               for="description"
               class="text-sm font-medium text-slate-600"
             >
               Description
             </label>
             <textarea
+              hlmTextarea
               id="description"
               formControlName="description"
               rows="6"
-              class="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
+              class="min-h-36 bg-white"
             ></textarea>
             @if (hasError('description')) {
               <div class="text-sm text-red-600">Description is required.</div>
             }
           </div>
         </div>
-      </p-card>
+      </section>
 
       <div class="space-y-6">
-        <p-card
-          styleClass="rounded-[1.75rem] border border-slate-200 shadow-sm"
+        <section
+          hlmCard
+          class="gap-0 rounded-[1.75rem] pt-0 text-base shadow-sm"
         >
-          <ng-template pTemplate="header">
-            <div class="border-b border-slate-200 px-6 py-5">
-              <div class="text-xl font-semibold text-slate-950">
-                Media staging
-              </div>
-              <p class="mt-2 text-sm leading-6 text-slate-500">
-                Select the image assets and credits that will later map to the
-                Firebase Storage upload pipeline.
-              </p>
+          <div class="border-b border-slate-200 px-6 py-5">
+            <div class="text-xl font-semibold text-slate-950">
+              Media staging
             </div>
-          </ng-template>
+            <p class="mt-2 text-sm leading-6 text-slate-500">
+              Select the image assets and credits that will later map to the
+              Firebase Storage upload pipeline.
+            </p>
+          </div>
 
-          <div class="space-y-4 px-3 py-3">
+          <div class="space-y-4 px-6 pt-6">
             @for (mediaField of mediaFields; track mediaField.key) {
               <div class="sample-inset-surface space-y-3 p-4">
                 <div>
@@ -245,33 +286,39 @@
                 </div>
 
                 <div class="space-y-2">
-                  <label class="text-sm font-medium text-slate-600">
+                  <label
+                    hlmLabel
+                    class="text-sm font-medium text-slate-600"
+                    [for]="mediaField.authorControl"
+                  >
                     Author / credit info
                   </label>
                   <input
-                    pInputText
-                    class="w-full"
+                    hlmInput
+                    class="w-full bg-white"
+                    [id]="mediaField.authorControl"
                     [formControlName]="mediaField.authorControl"
                   />
                 </div>
               </div>
             }
           </div>
-        </p-card>
+        </section>
 
-        <p-card
-          styleClass="rounded-[1.75rem] border border-slate-200 shadow-sm"
+        <section
+          hlmCard
+          class="gap-0 rounded-[1.75rem] pt-0 text-base shadow-sm"
         >
-          <ng-template pTemplate="header">
-            <div class="border-b border-slate-200 px-6 py-5">
-              <div class="text-xl font-semibold text-slate-950">
-                Submission status
-              </div>
+          <div class="border-b border-slate-200 px-6 py-5">
+            <div class="text-xl font-semibold text-slate-950">
+              Submission status
             </div>
-          </ng-template>
+          </div>
 
-          <div class="space-y-4 px-3 py-3">
-            <div class="sample-inset-surface p-4 text-sm leading-6 text-slate-600">
+          <div class="space-y-4 px-6 pt-6">
+            <div
+              class="sample-inset-surface p-4 text-sm leading-6 text-slate-600"
+            >
               Submitting this form uploads the four destination images to
               Firebase Storage, stores the document in Firestore, and refreshes
               the IndexedDB-backed catalog used by the admin map and storefront
@@ -279,15 +326,21 @@
             </div>
 
             <button
-              pButton
+              hlmBtn
               type="submit"
-              label="Create Destination"
-              icon="pi pi-save"
               class="w-full"
-              [loading]="uploadState() === 'saving'"
-            ></button>
+              data-testid="create-destination"
+              [disabled]="uploadState() === 'saving'"
+            >
+              @if (uploadState() === 'saving') {
+                <hlm-spinner />
+              } @else {
+                <ng-icon name="lucideSave" />
+              }
+              Create Destination
+            </button>
           </div>
-        </p-card>
+        </section>
       </div>
     </div>
   </form>

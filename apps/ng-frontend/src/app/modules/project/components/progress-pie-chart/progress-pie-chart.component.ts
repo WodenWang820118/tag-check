@@ -3,7 +3,8 @@ import {
   signal,
   effect,
   viewChild,
-  ElementRef
+  ElementRef,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {
   Chart,
@@ -32,6 +33,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
       ></mat-progress-spinner>
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: ['canvas { max-width: 30px; max-height: 30px; }']
 })
 export class ProgressPieChartComponent {

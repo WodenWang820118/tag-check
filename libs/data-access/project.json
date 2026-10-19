@@ -4,11 +4,8 @@
   "sourceRoot": "libs/data-access/src",
   "prefix": "lib",
   "projectType": "library",
+  "tags": ["scope:frontend", "type:data-access"],
   "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
-    },
     "test": {
       "executor": "@analogjs/vitest-angular:test"
     }

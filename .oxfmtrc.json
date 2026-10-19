@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "tabWidth": 2,
+  "singleQuote": true,
+  "trailingComma": "none",
+  "printWidth": 80,
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "dist",
+    "node_modules",
+    "coverage",
+    ".angular",
+    ".docusaurus/",
+    ".nx/self-healing",
+    "pnpm-lock.yaml",
+    "apps/desktop-tauri/src-tauri/gen",
+    "apps/*/src/assets",
+    "apps/*/public"
+  ]
+}

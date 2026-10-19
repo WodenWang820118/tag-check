@@ -15,3 +15,5 @@ export * from './lib/dtos/report-details.dto';
 // Functions
 export * from './lib/functions/utils';
 export * from './lib/functions/tag-build-contract';
+export * from './lib/functions/ga4-reference';
+export * from './lib/functions/gtm-container-export';

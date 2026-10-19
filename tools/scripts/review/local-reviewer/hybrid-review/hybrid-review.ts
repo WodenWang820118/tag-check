@@ -1,11 +1,11 @@
 import {
   createProviderTelemetryContext,
-  type ProviderTelemetryContext,
+  type ProviderTelemetryContext
 } from '../../provider-observability/provider-observability.ts';
 import {
   isCodexUnavailableError,
   probeCodexCliHealth,
-  runCodexReview,
+  runCodexReview
 } from '../../providers/codex/codex.ts';
 import {
   DEFAULT_HYBRID_GPT_MODEL,
@@ -31,7 +31,7 @@ import {
   type HybridRiskLevel,
   type LocalReviewFinding,
   type LocalReviewReport,
-  type LocalReviewSeverity,
+  type LocalReviewSeverity
 } from '../shared/shared.ts';
 
 export function analyzeHybridHeuristics(input: {
@@ -46,8 +46,8 @@ export function analyzeHybridHeuristics(input: {
     routed_profiles: routeHybridProfiles(normalizedPaths),
     sensitive_categories: detectSensitiveReviewAreas({
       changedFiles: normalizedPaths,
-      diffText: input.diffText,
-    }),
+      diffText: input.diffText
+    })
   };
 }
 
@@ -59,7 +59,7 @@ export function runHybridGptReview(input: {
   const provider = 'codex' as const;
   const model = DEFAULT_HYBRID_GPT_MODEL;
   const health = probeCodexCliHealth({
-    repoRoot: input.repoRoot,
+    repoRoot: input.repoRoot
   });
 
   if (!health.available) {
@@ -73,7 +73,7 @@ export function runHybridGptReview(input: {
       focus_profiles: [],
       findings: [],
       summary: null,
-      error: health.reason ?? 'Codex CLI is unavailable.',
+      error: health.reason ?? 'Codex CLI is unavailable.'
     };
   }
 
@@ -83,9 +83,9 @@ export function runHybridGptReview(input: {
       focus: 'general',
       prompt: buildHybridGptPrompt({
         changedFiles: input.changedFiles,
-        diffText: input.diffText,
+        diffText: input.diffText
       }),
-      repoRoot: input.repoRoot,
+      repoRoot: input.repoRoot
     });
     const parsed = parseHybridGptReview(rawOutput);
     return {
@@ -93,7 +93,7 @@ export function runHybridGptReview(input: {
       model,
       status: 'completed',
       error: null,
-      ...parsed,
+      ...parsed
     };
   } catch (error) {
     const errorText = error instanceof Error ? error.message : String(error);
@@ -107,14 +107,14 @@ export function runHybridGptReview(input: {
       focus_profiles: [],
       findings: [],
       summary: null,
-      error: errorText,
+      error: errorText
     };
   }
 }
 
 export function createHybridGptTelemetryContext(): ProviderTelemetryContext {
   return createProviderTelemetryContext({
-    callsite: 'hybrid-gpt-review',
+    callsite: 'hybrid-gpt-review'
   });
 }
 
@@ -129,7 +129,7 @@ export function createHybridGptBypassReview(reason: string): HybridGptReview {
     focus_profiles: [],
     findings: [],
     summary: null,
-    error: reason,
+    error: reason
   };
 }
 
@@ -143,14 +143,14 @@ export function planHybridLocalReview(input: {
   ) {
     return {
       local_mode: 'full',
-      requested_profiles: input.heuristics.routed_profiles,
+      requested_profiles: input.heuristics.routed_profiles
     };
   }
 
   if (input.gptReview.status !== 'completed') {
     return {
       local_mode: 'full',
-      requested_profiles: input.heuristics.routed_profiles,
+      requested_profiles: input.heuristics.routed_profiles
     };
   }
 
@@ -160,7 +160,7 @@ export function planHybridLocalReview(input: {
   ) {
     const requestedProfiles = selectRequestedHybridProfiles({
       gptFocusProfiles: input.gptReview.focus_profiles,
-      routedProfiles: input.heuristics.routed_profiles,
+      routedProfiles: input.heuristics.routed_profiles
     });
 
     return {
@@ -168,13 +168,13 @@ export function planHybridLocalReview(input: {
         requestedProfiles.length === input.heuristics.routed_profiles.length
           ? 'full'
           : 'targeted',
-      requested_profiles: requestedProfiles,
+      requested_profiles: requestedProfiles
     };
   }
 
   return {
     local_mode: 'skipped',
-    requested_profiles: [],
+    requested_profiles: []
   };
 }
 
@@ -189,13 +189,13 @@ export function buildHybridReviewReport(input: {
   const requestedProfiles = input.localReviewResult?.requested_profiles ?? [];
   const mergedFindings = mergeHybridFindings({
     gptFindings: input.gptReview.findings,
-    localFindings: localReview?.findings ?? [],
+    localFindings: localReview?.findings ?? []
   });
   const escalationReasons = getHybridEscalationReasons({
     gptReview: input.gptReview,
     heuristics: input.heuristics,
     localFindings: localReview?.findings ?? [],
-    localReviewError,
+    localReviewError
   });
 
   return {
@@ -217,9 +217,9 @@ export function buildHybridReviewReport(input: {
       gptReview: input.gptReview,
       localReview,
       localReviewError,
-      localMode,
+      localMode
     }),
-    local_review_error: localReviewError,
+    local_review_error: localReviewError
   };
 }
 
@@ -245,12 +245,12 @@ function buildHybridGptPrompt(input: {
     `Routed local profiles: ${routedProfiles.join(', ')}`,
     '',
     'Diff to review:',
-    input.diffText.trim(),
+    input.diffText.trim()
   ].join('\n');
 }
 
 function parseHybridGptReview(
-  rawOutput: string,
+  rawOutput: string
 ): Omit<HybridGptReview, 'error' | 'model' | 'provider' | 'status'> {
   const payload = extractJsonObject(rawOutput);
   const parsed = JSON.parse(payload) as Record<string, unknown>;
@@ -263,11 +263,11 @@ function parseHybridGptReview(
     confidence,
     needs_local_deep_review: normalizeBoolean(
       parsed.needs_local_deep_review,
-      'needs_local_deep_review',
+      'needs_local_deep_review'
     ),
     focus_profiles: normalizeHybridProfileList(parsed.focus_profiles),
     findings: normalizeHybridGptFindings(parsed.findings),
-    summary,
+    summary
   };
 }
 
@@ -315,7 +315,7 @@ function normalizeHybridConfidence(value: unknown): HybridConfidenceLevel {
 function normalizeRequiredText(value: unknown, fieldName: string): string {
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new Error(
-      `Hybrid GPT review returned an invalid ${fieldName} value.`,
+      `Hybrid GPT review returned an invalid ${fieldName} value.`
     );
   }
 
@@ -325,7 +325,7 @@ function normalizeRequiredText(value: unknown, fieldName: string): string {
 function normalizeBoolean(value: unknown, fieldName: string): boolean {
   if (typeof value !== 'boolean') {
     throw new Error(
-      `Hybrid GPT review returned a non-boolean ${fieldName} value.`,
+      `Hybrid GPT review returned a non-boolean ${fieldName} value.`
     );
   }
 
@@ -345,9 +345,9 @@ function normalizeHybridProfileList(value: unknown): HybridReviewProfileName[] {
           item === 'nest' ||
           item === 'typescript' ||
           item === 'repo-habits' ||
-          item === 'general',
-      ),
-    ),
+          item === 'general'
+      )
+    )
   );
 }
 
@@ -359,7 +359,7 @@ function normalizeHybridGptFindings(value: unknown): HybridGptFinding[] {
   return value.map((entry, index) => {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
       throw new Error(
-        `Hybrid GPT review returned an invalid finding at index ${index}.`,
+        `Hybrid GPT review returned an invalid finding at index ${index}.`
       );
     }
 
@@ -369,11 +369,11 @@ function normalizeHybridGptFindings(value: unknown): HybridGptFinding[] {
       title: normalizeRequiredText(finding.title, `findings[${index}].title`),
       detail: normalizeRequiredText(
         finding.detail,
-        `findings[${index}].detail`,
+        `findings[${index}].detail`
       ),
       file_path: normalizeOptionalText(finding.file_path),
       line: normalizeOptionalLineNumber(finding.line),
-      recommendation: normalizeOptionalText(finding.recommendation),
+      recommendation: normalizeOptionalText(finding.recommendation)
     };
   });
 }
@@ -412,7 +412,7 @@ function normalizeOptionalLineNumber(value: unknown): number | null {
 }
 
 function routeHybridProfiles(
-  changedFiles: ReadonlyArray<string>,
+  changedFiles: ReadonlyArray<string>
 ): HybridReviewProfileName[] {
   const routed = new Set<HybridReviewProfileName>();
 
@@ -451,7 +451,7 @@ function routeHybridProfileForPath(filePath: string): HybridReviewProfileName {
 
 function matchesAnyPattern(
   normalizedPath: string,
-  patterns: ReadonlyArray<RegExp>,
+  patterns: ReadonlyArray<RegExp>
 ): boolean {
   return patterns.some((pattern) => pattern.test(normalizedPath));
 }
@@ -462,7 +462,7 @@ function detectSensitiveReviewAreas(input: {
 }): HybridHeuristics['sensitive_categories'] {
   const combinedText = `${input.changedFiles.join('\n')}\n${input.diffText}`;
   return SENSITIVE_REVIEW_AREAS.filter(({ pattern }) =>
-    pattern.test(combinedText),
+    pattern.test(combinedText)
   ).map(({ category }) => category);
 }
 
@@ -472,12 +472,12 @@ function selectRequestedHybridProfiles(input: {
 }): HybridReviewProfileName[] {
   const routed = new Set(input.routedProfiles);
   const intersection = input.gptFocusProfiles.filter((profile) =>
-    routed.has(profile),
+    routed.has(profile)
   );
 
   if (intersection.length > 0) {
     return HYBRID_PROFILE_ORDER.filter((profile) =>
-      intersection.includes(profile),
+      intersection.includes(profile)
     );
   }
 
@@ -501,7 +501,7 @@ function mergeHybridFindings(input: {
       profile: null,
       rationale: null,
       evidence: null,
-      source: 'gpt',
+      source: 'gpt'
     });
     const key = buildHybridFindingKey(normalized);
     if (!seen.has(key)) {
@@ -513,7 +513,7 @@ function mergeHybridFindings(input: {
   for (const finding of input.localFindings) {
     const normalized = normalizeHybridMergedFinding({
       ...finding,
-      source: 'local',
+      source: 'local'
     });
     const key = buildHybridFindingKey(normalized);
     if (!seen.has(key)) {
@@ -528,7 +528,7 @@ function mergeHybridFindings(input: {
       high: 1,
       medium: 2,
       low: 3,
-      info: 4,
+      info: 4
     } as const;
     const severityDelta =
       severityOrder[left.severity] - severityOrder[right.severity];
@@ -537,7 +537,7 @@ function mergeHybridFindings(input: {
     }
 
     const fileDelta = (left.file_path ?? '').localeCompare(
-      right.file_path ?? '',
+      right.file_path ?? ''
     );
     if (fileDelta !== 0) {
       return fileDelta;
@@ -553,7 +553,7 @@ function mergeHybridFindings(input: {
 }
 
 function normalizeHybridMergedFinding(
-  finding: LocalReviewFinding & { source: 'gpt' | 'local' },
+  finding: LocalReviewFinding & { source: 'gpt' | 'local' }
 ): HybridMergedFinding {
   return {
     severity: finding.severity,
@@ -565,7 +565,7 @@ function normalizeHybridMergedFinding(
     profile: finding.profile?.trim() || null,
     rationale: finding.rationale?.trim() || null,
     evidence: finding.evidence?.trim() || null,
-    source: finding.source,
+    source: finding.source
   };
 }
 
@@ -575,7 +575,7 @@ function buildHybridFindingKey(finding: HybridMergedFinding): string {
     finding.file_path,
     finding.line,
     finding.title.toLowerCase(),
-    finding.detail.toLowerCase(),
+    finding.detail.toLowerCase()
   ]);
 }
 
@@ -594,7 +594,7 @@ function getHybridEscalationReasons(input: {
   if (
     input.localFindings.some(
       (finding) =>
-        finding.severity === 'critical' || finding.severity === 'high',
+        finding.severity === 'critical' || finding.severity === 'high'
     )
   ) {
     reasons.push('local reviewer reported a critical/high finding');
@@ -603,8 +603,8 @@ function getHybridEscalationReasons(input: {
   if (input.heuristics.sensitive_categories.length > 0) {
     reasons.push(
       `sensitive area detected: ${Array.from(
-        new Set(input.heuristics.sensitive_categories),
-      ).join(', ')}`,
+        new Set(input.heuristics.sensitive_categories)
+      ).join(', ')}`
     );
   }
 

@@ -1,4 +1,4 @@
-import { Component, output } from '@angular/core';
+import { Component, output, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 
 @Component({
@@ -15,6 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
       Upload
     </button>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: []
 })
 export class UploadActionComponent {

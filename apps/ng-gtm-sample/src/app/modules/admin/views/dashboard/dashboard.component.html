@@ -2,7 +2,7 @@
   <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
     <div>
       <span class="sample-eyebrow">
-        <i class="pi pi-chart-pie text-sm"></i>
+        <ng-icon name="lucideChartPie" class="text-sm" />
         Admin Dashboard
       </span>
       <h2 class="sample-page-title mt-3 text-slate-950">
@@ -16,12 +16,14 @@
     </div>
 
     <button
-      pButton
+      hlmBtn
       type="button"
-      label="Add Destination"
-      icon="pi pi-plus"
+      data-testid="dashboard-add-destination"
       (click)="navigateToAddData()"
-    ></button>
+    >
+      <ng-icon name="lucidePlus" />
+      Add Destination
+    </button>
   </div>
 
   <div class="grid gap-4 xl:grid-cols-3">
@@ -90,7 +92,7 @@
           <div class="mt-3 text-4xl font-black tracking-tight">$4,295.36</div>
           <p class="mt-3 text-sm leading-6 text-slate-200">
             Static sample earnings panel preserved from the original admin
-            dashboard, now restyled to match the Tailwind and PrimeNG shell.
+            dashboard, now restyled to match the Tailwind and Spartan NG shell.
           </p>
         </div>
       </app-card>
@@ -98,14 +100,12 @@
       <app-card cardTitle="Quick Stats">
         <div class="space-y-4">
           @for (list of card; track list.text) {
-            <div
-              class="sample-inset-surface flex items-center gap-4 px-4 py-4"
-            >
+            <div class="sample-inset-surface flex items-center gap-4 px-4 py-4">
               <span
                 class="grid h-12 w-12 place-items-center rounded-2xl text-xl"
                 [class]="list.accent"
               >
-                <i [class]="list.icon"></i>
+                <ng-icon [name]="list.icon" />
               </span>
               <div>
                 <div class="text-2xl font-bold text-slate-950">

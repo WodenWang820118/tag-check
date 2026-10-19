@@ -7,7 +7,7 @@ export class PageViewEventTracker implements AnalyticsEventTracker {
 
   getProcessedData(rawEventData: any) {
     return {
-      eventData: rawEventData,
+      eventData: rawEventData
     };
   }
 }

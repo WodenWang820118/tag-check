@@ -12,7 +12,7 @@ import {
 import { Destination } from '../../models/destination.model';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class IndexeddbFeaturedDestinationService {
   private readonly dbReady$ = defer(() =>

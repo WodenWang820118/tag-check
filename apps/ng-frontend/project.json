@@ -4,7 +4,7 @@
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "apps/ng-frontend/src",
-  "tags": [],
+  "tags": ["scope:frontend", "type:app"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
@@ -198,9 +198,6 @@
       "options": {
         "buildTarget": "ng-frontend:build"
       }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
     },
     "test": {
       "executor": "@angular/build:unit-test",

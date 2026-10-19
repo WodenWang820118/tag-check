@@ -8,7 +8,7 @@ import {
   validateFamily,
   validateGateMode,
   validateReviewerId,
-  validateTaskSize,
+  validateTaskSize
 } from '../shared/shared.ts';
 import { isMainModule } from '../../shared/entrypoint/entrypoint.ts';
 
@@ -24,7 +24,7 @@ export function main(argv = process.argv.slice(2)): void {
 
   if (mode === 'override' && !options.overrideReason) {
     console.error(
-      'Cannot use --mode override without --override-reason "<rationale>".',
+      'Cannot use --mode override without --override-reason "<rationale>".'
     );
     process.exit(1);
   }
@@ -34,7 +34,7 @@ export function main(argv = process.argv.slice(2)): void {
       reviewer,
       primaryFamily,
       mode,
-      overrideReason: options.overrideReason,
+      overrideReason: options.overrideReason
     });
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
@@ -43,7 +43,7 @@ export function main(argv = process.argv.slice(2)): void {
 
   if (repoContext.dirty && !options.force) {
     console.error(
-      'Cannot open the pre-implementation gate while the worktree is dirty. Clean or reset the worktree first, or rerun with --force if you intentionally need to override this.',
+      'Cannot open the pre-implementation gate while the worktree is dirty. Clean or reset the worktree first, or rerun with --force if you intentionally need to override this.'
     );
     process.exit(1);
   }
@@ -60,7 +60,7 @@ export function main(argv = process.argv.slice(2)): void {
     taskSize,
     mode,
     maxFiles: resolvedMaxFiles,
-    overrideReason: options.overrideReason,
+    overrideReason: options.overrideReason
   });
 
   saveState(state, repoContext.root);
@@ -72,7 +72,7 @@ export function main(argv = process.argv.slice(2)): void {
   console.log(`HEAD: ${state.approval.head ?? 'unknown'}`);
   console.log(`Mode: ${state.approval.mode}`);
   console.log(
-    `Primary family: ${state.approval.primaryFamily ?? 'unspecified'}`,
+    `Primary family: ${state.approval.primaryFamily ?? 'unspecified'}`
   );
   console.log(`Task size: ${state.approval.taskSize ?? 'unspecified'}`);
   console.log(`Max files: ${state.approval.maxFiles ?? 'unbounded'}`);

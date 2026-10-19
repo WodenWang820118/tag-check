@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, DestroyRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  DestroyRef,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -37,6 +42,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatTooltipModule
   ],
   templateUrl: './gtm-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./gtm-form.component.scss']
 })
 export class GtmFormComponent implements OnInit {

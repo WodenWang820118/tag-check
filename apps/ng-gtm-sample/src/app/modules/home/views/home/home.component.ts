@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
 import { FooterComponent } from '../../../../shared/components/footer/footer.component';
 import { NavbarComponent } from '../../../../shared/components/navbar/navbar.component';
 import { DisclaimerComponent } from '../../../../shared/components/disclaimer/disclaimer.component';
 import { RouterOutlet } from '@angular/router';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
 @Component({
   selector: 'app-home',
   imports: [
@@ -11,8 +11,9 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     NavbarComponent,
     DisclaimerComponent,
     RouterOutlet,
-    ProgressSpinnerModule
+    HlmSpinner
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @defer {
       <div class="sample-route-shell">
@@ -22,14 +23,14 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
         </main>
         <footer class="sample-footer-area">
           <app-footer></app-footer>
-          <app-disclaimer class="sample-shell pb-4 pt-1"></app-disclaimer>
+          <app-disclaimer class="sample-shell pt-1 pb-4"></app-disclaimer>
         </footer>
       </div>
     } @placeholder (minimum 1.5s) {
       <div class="sample-loading-shell">
-        <p-progress-spinner
-          ariaLabel="loading"
-          [style]="{ width: '100px', height: '100px' }"
+        <hlm-spinner
+          aria-label="loading"
+          class="text-[100px] text-emerald-500"
         />
       </div>
     }

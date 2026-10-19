@@ -4,7 +4,7 @@
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "apps/ng-gtm-sample/src",
-  "tags": [],
+  "tags": ["scope:frontend", "type:app"],
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:application",
@@ -111,9 +111,6 @@
         "cwd": "apps/ng-gtm-sample",
         "command": "node ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.seo.json"
       }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
     },
     "verify-seo": {
       "executor": "nx:run-commands",

@@ -7,7 +7,7 @@ import {
 import { SideNavListComponent } from './side-nav-list.component';
 
 import { NgClass } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink, RouterLinkActive, provideRouter } from '@angular/router';
@@ -37,7 +37,7 @@ const meta: Meta<SideNavListComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

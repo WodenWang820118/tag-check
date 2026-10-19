@@ -21,7 +21,7 @@ export class PageClickService implements ClickOperation {
             () => reject(new Error('Timeout exceeded Page Clicking')),
             timeout
           )
-        ),
+        )
       ]);
       return true;
     } catch (error) {

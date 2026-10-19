@@ -11,7 +11,7 @@ import {
   type HybridReviewReport,
   type LocalReviewFinding,
   type LocalReviewReport,
-  type PaidReviewContextSelection,
+  type PaidReviewContextSelection
 } from '../shared/shared.ts';
 
 export function buildHybridPrefilterContext(input: {
@@ -69,10 +69,10 @@ export function buildHybridPrefilterContext(input: {
     'focus:',
     ...deriveSuggestedReviewFocus(
       input.report.merged_findings,
-      input.report.escalation_reasons,
+      input.report.escalation_reasons
     )
       .slice(0, 4)
-      .map((line) => `- ${line}`),
+      .map((line) => `- ${line}`)
   ].join('\n');
 }
 
@@ -92,7 +92,7 @@ export function getEscalationReasons(input: {
   if (
     input.findings.some(
       (finding) =>
-        finding.severity === 'critical' || finding.severity === 'high',
+        finding.severity === 'critical' || finding.severity === 'high'
     )
   ) {
     reasons.push('local reviewer reported a critical/high finding');
@@ -104,12 +104,12 @@ export function getEscalationReasons(input: {
 
   const combinedText = `${input.changedFiles.join('\n')}\n${input.diffText}`;
   const categories = SENSITIVE_REVIEW_AREAS.filter(({ pattern }) =>
-    pattern.test(combinedText),
+    pattern.test(combinedText)
   ).map(({ category }) => category);
 
   if (categories.length > 0) {
     reasons.push(
-      `sensitive area detected: ${Array.from(new Set(categories)).join(', ')}`,
+      `sensitive area detected: ${Array.from(new Set(categories)).join(', ')}`
     );
   }
 
@@ -161,7 +161,7 @@ export function buildPrefilterContext(input: {
     'focus:',
     ...deriveSuggestedReviewFocus(input.findings, input.escalationReasons)
       .slice(0, 4)
-      .map((line) => `- ${line}`),
+      .map((line) => `- ${line}`)
   ].join('\n');
 }
 
@@ -190,7 +190,7 @@ export function buildPrefilterFailureContext(input: {
       : ['- none']),
     ...(input.changedFiles.length > condensedFiles.length
       ? [
-          `- ... ${input.changedFiles.length - condensedFiles.length} more file(s)`,
+          `- ... ${input.changedFiles.length - condensedFiles.length} more file(s)`
         ]
       : []),
     '',
@@ -199,7 +199,7 @@ export function buildPrefilterFailureContext(input: {
     '',
     'focus:',
     '- Review the full diff because the local reviewer runtime failed',
-    '- Investigate the local runtime failure before trusting prefilter results',
+    '- Investigate the local runtime failure before trusting prefilter results'
   ].join('\n');
 }
 
@@ -226,7 +226,7 @@ export function selectPaidReviewContext(input: {
       contextText: diffText,
       mode: 'full-diff',
       originalDiffLength,
-      smallDiffThresholdChars,
+      smallDiffThresholdChars
     };
   }
 
@@ -235,7 +235,7 @@ export function selectPaidReviewContext(input: {
     contextText: prefilterContext,
     mode: 'prefilter-summary',
     originalDiffLength,
-    smallDiffThresholdChars,
+    smallDiffThresholdChars
   };
 }
 
@@ -254,13 +254,13 @@ export function writePrefilterArtifacts(input: {
   writeFileSync(
     reportPath,
     JSON.stringify(input.reportPayload, null, 2),
-    'utf8',
+    'utf8'
   );
   writeFileSync(contextPath, `${input.contextMarkdown.trim()}\n`, 'utf8');
   writeFileSync(
     reviewContextPath,
     `${input.reviewContextSelection.contextText.trim()}\n`,
-    'utf8',
+    'utf8'
   );
 
   return { contextPath, reportPath, reviewContextPath };
@@ -270,7 +270,7 @@ function deriveSuggestedReviewFocus(
   findings: ReadonlyArray<
     Pick<LocalReviewFinding, 'detail' | 'profile' | 'recommendation'>
   >,
-  escalationReasons: ReadonlyArray<string>,
+  escalationReasons: ReadonlyArray<string>
 ): string[] {
   const focus = new Set<string>();
 

@@ -23,44 +23,51 @@ const recording: Recording = {
         {
           type: 'navigation',
           url: 'https://ng-gtm-sample.vercel.app/home',
-          title: 'Ng GTM Integration App'
+          title: 'Travel With GTM | Demo Travel Catalog'
         }
       ]
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['div:nth-of-type(8) img']],
-      offsetY: 109,
-      offsetX: 213
+      selectors: [['[data-testid="promotion-dot-city001"]']],
+      offsetY: 3,
+      offsetX: 16
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main div > button']],
-      offsetY: 10.28125,
-      offsetX: 76.1875
+      selectors: [['[data-testid="promotion-explore-city001"]']],
+      offsetY: 18,
+      offsetX: 69
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['button.relative']],
-      offsetY: 8,
-      offsetX: 43.71875
+      selectors: [['[data-testid="add-to-cart"]']],
+      offsetY: 18,
+      offsetX: 58
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main span.p-button-label']],
-      offsetY: 14,
-      offsetX: 40.765625
+      selectors: [['[data-testid="nav-cart"]']],
+      offsetY: 20,
+      offsetX: 41
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main span']],
-      offsetY: 10,
-      offsetX: 41.953125
+      selectors: [['[data-testid="begin-checkout"]']],
+      offsetY: 18,
+      offsetX: 51
+    },
+    {
+      type: 'click',
+      target: 'main',
+      selectors: [['[data-testid="shipping-continue"]']],
+      offsetY: 18,
+      offsetX: 39
     }
   ]
 };

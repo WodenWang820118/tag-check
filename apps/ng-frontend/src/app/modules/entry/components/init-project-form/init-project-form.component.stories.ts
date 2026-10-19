@@ -7,7 +7,7 @@ import {
 import { InitProjectFormComponent } from './init-project-form.component';
 
 import { expect, userEvent, within } from 'storybook/test';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule, FormBuilder } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -38,7 +38,7 @@ const meta: Meta<InitProjectFormComponent> = {
       providers: [FormBuilder, ConfigurationService, MatDialog]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(ENTRY_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(ENTRY_ROUTES)]
     })
   ]
 };

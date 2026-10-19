@@ -7,14 +7,14 @@ import {
   indentWithTab,
   history,
   defaultKeymap,
-  historyKeymap,
+  historyKeymap
 } from '@codemirror/commands';
 
 const commonExtensions = [
   basicSetup,
   keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
   history(),
-  new Compartment().of(EditorState.tabSize.of(2)),
+  new Compartment().of(EditorState.tabSize.of(2))
 ];
 
 export const jsonLightEditorExtensions = [...commonExtensions, json()];

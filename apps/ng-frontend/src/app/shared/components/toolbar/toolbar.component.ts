@@ -1,6 +1,14 @@
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { Project, ProjectSetting } from '@utils';
-import { Component, effect, input, model, output, signal } from '@angular/core';
+import {
+  Component,
+  effect,
+  input,
+  model,
+  output,
+  signal,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,6 +41,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatTooltipModule
   ],
   templateUrl: './toolbar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './toolbar.component.scss'
 })
 export class ToolbarComponent {

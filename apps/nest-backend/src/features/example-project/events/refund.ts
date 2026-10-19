@@ -21,58 +21,65 @@ const recording: Recording = {
         {
           type: 'navigation',
           url: 'https://ng-gtm-sample.vercel.app/home',
-          title: 'Ng GTM Integration App'
+          title: 'Travel With GTM | Demo Travel Catalog'
         }
       ]
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['div:nth-of-type(5) img']],
-      offsetY: 43,
-      offsetX: 141
+      selectors: [['[data-testid="promotion-dot-city001"]']],
+      offsetY: 3,
+      offsetX: 16
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main div > button']],
-      offsetY: 26.921875,
-      offsetX: 71.6875
+      selectors: [['[data-testid="promotion-explore-city001"]']],
+      offsetY: 18,
+      offsetX: 69
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['button.relative > span.p-button-label']],
-      offsetY: 12,
-      offsetX: 17.71875
+      selectors: [['[data-testid="add-to-cart"]']],
+      offsetY: 18,
+      offsetX: 58
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main span.p-button-label']],
-      offsetY: 13.109375,
-      offsetX: 40.765625
+      selectors: [['[data-testid="nav-cart"]']],
+      offsetY: 20,
+      offsetX: 41
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main button']],
-      offsetY: 24,
-      offsetX: 86.953125
+      selectors: [['[data-testid="begin-checkout"]']],
+      offsetY: 18,
+      offsetX: 51
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main span']],
-      offsetY: 10,
-      offsetX: 84.453125
+      selectors: [['[data-testid="shipping-continue"]']],
+      offsetY: 18,
+      offsetX: 39
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main button:nth-of-type(2)']],
-      offsetY: 28,
-      offsetX: 112.609375
+      selectors: [['[data-testid="place-order"]']],
+      offsetY: 18,
+      offsetX: 58
+    },
+    {
+      type: 'click',
+      target: 'main',
+      selectors: [['[data-testid="cancel-order"]']],
+      offsetY: 18,
+      offsetX: 63
     }
   ]
 };

@@ -5,6 +5,6 @@ import { ProjectAbstractReportModule } from '../project-abstract-report/project-
 @Module({
   imports: [ProjectAbstractReportModule],
   providers: [ProjectReportService],
-  exports: [ProjectReportService],
+  exports: [ProjectReportService]
 })
 export class ProjectReportModule {}

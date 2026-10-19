@@ -1,12 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { AdminNavbarComponent } from '../../../../shared/components/navbar/admin-navbar.component';
 import { RouterOutlet } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideBriefcase,
+  lucideChartColumn,
+  lucidePlus
+} from '@ng-icons/lucide';
+import { HlmButton } from '@spartan-ng/helm/button';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
 
 @Component({
   selector: 'app-admin-home',
-  imports: [AdminNavbarComponent, RouterOutlet, ButtonModule],
+  imports: [AdminNavbarComponent, RouterOutlet, HlmButton, NgIcon],
+  providers: [provideIcons({ lucideBriefcase, lucideChartColumn, lucidePlus })],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="sample-shell space-y-6 pb-10">
       <app-admin-navbar></app-admin-navbar>
@@ -16,7 +24,7 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
       >
         <div class="space-y-3">
           <span class="sample-eyebrow">
-            <i class="pi pi-briefcase text-sm"></i>
+            <ng-icon name="lucideBriefcase" class="text-sm" />
             Admin Workspace
           </span>
           <div>
@@ -33,21 +41,24 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
 
         <div class="flex flex-wrap gap-3">
           <button
-            pButton
+            hlmBtn
             type="button"
-            label="Dashboard"
-            icon="pi pi-chart-bar"
+            data-testid="admin-dashboard"
             (click)="navigateToDashboard()"
-          ></button>
+          >
+            <ng-icon name="lucideChartColumn" />
+            Dashboard
+          </button>
           <button
-            pButton
+            hlmBtn
+            variant="outline"
             type="button"
-            label="Add Destination"
-            icon="pi pi-plus"
-            severity="secondary"
-            [outlined]="true"
+            data-testid="admin-add-destination"
             (click)="navigateToAddData()"
-          ></button>
+          >
+            <ng-icon name="lucidePlus" />
+            Add Destination
+          </button>
         </div>
       </section>
 

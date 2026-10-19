@@ -1,7 +1,11 @@
 <mat-toolbar color="primary">
   <mat-toolbar-row>
     @if (this.snav()) {
-      <button mat-icon-button aria-label="Toggle menu" (click)="this.snav()?.toggle()">
+      <button
+        mat-icon-button
+        aria-label="Toggle menu"
+        (click)="this.snav()?.toggle()"
+      >
         <mat-icon>menu</mat-icon>
       </button>
     }

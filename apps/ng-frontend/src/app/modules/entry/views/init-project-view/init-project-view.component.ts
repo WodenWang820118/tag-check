@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { InitProjectFormComponent } from '../../components/init-project-form/init-project-form.component';
 import { ProjectImportComponent } from '../../../../shared/components/project-import/project-import.component';
 
@@ -6,6 +6,7 @@ import { ProjectImportComponent } from '../../../../shared/components/project-im
   selector: 'app-init-project-view',
   standalone: true,
   imports: [InitProjectFormComponent, ProjectImportComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="py-4 px-40">
       <div class="flex flex-col gap-12">

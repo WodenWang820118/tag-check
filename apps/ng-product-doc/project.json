@@ -4,7 +4,7 @@
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "apps/ng-product-doc/src",
-  "tags": [],
+  "tags": ["scope:frontend", "type:app"],
   "i18n": {
     "sourceLocale": {
       "code": "en-US",
@@ -134,9 +134,6 @@
       "options": {
         "buildTarget": "ng-product-doc:build"
       }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
     },
     "test": {
       "executor": "@analogjs/vitest-angular:test",

@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { ProgressPieChartComponent } from './progress-pie-chart.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { PROJECT_ROUTES } from '../../routes';
 import { ProgressUpdateService } from '../../../../shared/services/progress-update/progress-update.service';
@@ -21,7 +21,7 @@ const meta: Meta<ProgressPieChartComponent> = {
       providers: [ProgressUpdateService]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

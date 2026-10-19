@@ -7,20 +7,20 @@ import {
   type HybridReviewProfileName,
   type LocalReviewDoctorReport,
   type LocalReviewerDependencies,
-  type LocalReviewReport,
+  type LocalReviewReport
 } from '../shared/shared.ts';
 
 export function ensureLocalReviewerBuild(
   toolRepoRoot: string,
   dependencies: LocalReviewerDependencies,
-  env: NodeJS.ProcessEnv = process.env,
+  env: NodeJS.ProcessEnv = process.env
 ): void {
   const result = dependencies.runProcess({
     command: getPnpmCommand(),
     args: ['nx', 'build', 'local-reviewer'],
     cwd: toolRepoRoot,
     env,
-    timeoutMs: LOCAL_REVIEWER_BUILD_TIMEOUT_MS,
+    timeoutMs: LOCAL_REVIEWER_BUILD_TIMEOUT_MS
   });
 
   if (result.error || result.status !== 0) {
@@ -28,7 +28,7 @@ export function ensureLocalReviewerBuild(
       result.stderr.trim() ||
         result.stdout.trim() ||
         result.error?.message ||
-        'Failed to build local-reviewer-cli.',
+        'Failed to build local-reviewer-cli.'
     );
   }
 }
@@ -44,7 +44,7 @@ export function runLocalReviewerDoctor(input: {
     env: input.env,
     targetRepoRoot: input.targetRepoRoot,
     toolRepoRoot: input.toolRepoRoot,
-    subcommandArgs: ['doctor', '--json'],
+    subcommandArgs: ['doctor', '--json']
   });
 
   return payload;
@@ -67,7 +67,7 @@ export function runLocalReviewerReview(input: {
     subcommandArgs.push('--base', input.baseRef, '--head', input.headRef);
   } else {
     throw new Error(
-      'Review mode requires either staged=true or base/head refs.',
+      'Review mode requires either staged=true or base/head refs.'
     );
   }
   subcommandArgs.push('--json');
@@ -76,11 +76,11 @@ export function runLocalReviewerReview(input: {
     dependencies: input.dependencies,
     env: buildLocalReviewerRequestedProfilesEnv(
       input.env,
-      input.requestedProfiles,
+      input.requestedProfiles
     ),
     targetRepoRoot: input.targetRepoRoot,
     toolRepoRoot: input.toolRepoRoot,
-    subcommandArgs,
+    subcommandArgs
   });
 }
 
@@ -99,15 +99,15 @@ function runLocalReviewerJsonCommand<T>(input: {
         'packages',
         'local-reviewer',
         'bin',
-        'local-reviewer.js',
+        'local-reviewer.js'
       ),
       '--repo-root',
       input.targetRepoRoot,
-      ...input.subcommandArgs,
+      ...input.subcommandArgs
     ],
     cwd: input.toolRepoRoot,
     env: input.env,
-    timeoutMs: LOCAL_REVIEWER_COMMAND_TIMEOUT_MS,
+    timeoutMs: LOCAL_REVIEWER_COMMAND_TIMEOUT_MS
   });
 
   if (result.error || result.status !== 0) {
@@ -115,7 +115,7 @@ function runLocalReviewerJsonCommand<T>(input: {
       result.stderr.trim() ||
         result.stdout.trim() ||
         result.error?.message ||
-        'local-reviewer execution failed.',
+        'local-reviewer execution failed.'
     );
   }
 
@@ -125,14 +125,14 @@ function runLocalReviewerJsonCommand<T>(input: {
     throw new Error(
       `local-reviewer returned non-JSON output: ${
         error instanceof Error ? error.message : String(error)
-      }`,
+      }`
     );
   }
 }
 
 function buildLocalReviewerRequestedProfilesEnv(
   env: NodeJS.ProcessEnv | undefined,
-  requestedProfiles: ReadonlyArray<HybridReviewProfileName> | undefined,
+  requestedProfiles: ReadonlyArray<HybridReviewProfileName> | undefined
 ): NodeJS.ProcessEnv | undefined {
   if (!env && (!requestedProfiles || requestedProfiles.length === 0)) {
     return undefined;
@@ -144,6 +144,6 @@ function buildLocalReviewerRequestedProfilesEnv(
 
   return {
     ...(env ?? {}),
-    LOCAL_REVIEWER_REQUESTED_PROFILES: requestedProfiles.join(','),
+    LOCAL_REVIEWER_REQUESTED_PROFILES: requestedProfiles.join(',')
   };
 }

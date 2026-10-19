@@ -9,12 +9,12 @@ import {
   DEFAULT_SMALL_DIFF_THRESHOLD_CHARS,
   type EvaluationLocalResult,
   type LocalReviewFinding,
-  type LocalReviewReport,
+  type LocalReviewReport
 } from '../shared/shared.ts';
 import {
   selectAbSamples,
   selectEvaluationSamples,
-  summarizeEvaluation,
+  summarizeEvaluation
 } from './evaluation.ts';
 
 test('selectAbSamples prefers typed coverage before filling the remainder', () => {
@@ -23,12 +23,12 @@ test('selectAbSamples prefers typed coverage before filling the remainder', () =
     sample('multi-file-refactor', 'b'),
     sample('workspace-config', 'c'),
     sample('higher-risk', 'd'),
-    sample('general', 'e'),
+    sample('general', 'e')
   ]);
 
   assert.deepEqual(
     results.map((entry) => entry.kind),
-    ['small-ts', 'multi-file-refactor', 'workspace-config', 'higher-risk'],
+    ['small-ts', 'multi-file-refactor', 'workspace-config', 'higher-risk']
   );
 });
 
@@ -39,10 +39,10 @@ test('selectEvaluationSamples backfills with remaining kinds when a soft quota i
       sample('small-ts', 'b'),
       sample('general', 'c'),
       sample('general', 'd'),
-      sample('multi-file-refactor', 'e'),
+      sample('multi-file-refactor', 'e')
     ],
     rounds: 4,
-    seed: 1,
+    seed: 1
   });
 
   assert.equal(selected.length, 4);
@@ -50,7 +50,7 @@ test('selectEvaluationSamples backfills with remaining kinds when a soft quota i
     'general',
     'multi-file-refactor',
     'small-ts',
-    'small-ts',
+    'small-ts'
   ]);
 });
 
@@ -78,9 +78,9 @@ test('summarizeEvaluation writes evaluation artifacts and verdicts', () => {
           diffText: '@@\n+const value = 1;',
           escalationReasons: [],
           findings: [],
-          report,
-        }).length,
-      },
+          report
+        }).length
+      }
     ];
 
     const output = summarizeEvaluation({
@@ -90,18 +90,18 @@ test('summarizeEvaluation writes evaluation artifacts and verdicts', () => {
         repoNames: ['gx.law-prep'],
         rounds: 1,
         seed: 1,
-        smallDiffThresholdChars: DEFAULT_SMALL_DIFF_THRESHOLD_CHARS,
+        smallDiffThresholdChars: DEFAULT_SMALL_DIFF_THRESHOLD_CHARS
       },
       localResults,
       reviewerResults: [],
-      repoRoot: workspace,
+      repoRoot: workspace
     });
 
     assert.match(output.summaryMarkdown, /usable-prefilter/);
     assert.match(output.summaryMarkdown, /Local parallel jobs: 2/);
     assert.match(
       output.summaryMarkdown,
-      /Estimated paid review context chars: 0\/20/,
+      /Estimated paid review context chars: 0\/20/
     );
     assert.equal(existsSync(output.artifacts.summaryPath), true);
     assert.equal(existsSync(output.artifacts.samplesPath), true);
@@ -117,7 +117,7 @@ function sample(
     | 'workspace-config'
     | 'higher-risk'
     | 'general',
-  commit: string,
+  commit: string
 ) {
   return {
     baseRef: 'base',
@@ -128,7 +128,7 @@ function sample(
     repoName: 'gx.law-prep',
     repoRoot: '/repo',
     subject: `sample ${commit}`,
-    totalChangedLines: 10,
+    totalChangedLines: 10
   };
 }
 
@@ -148,9 +148,9 @@ function reviewReport(findings: LocalReviewFinding[]): LocalReviewReport {
           status: 'modified',
           old_path: null,
           language: 'typescript',
-          patch: '@@\n+const value = 1;\n',
-        },
-      ],
+          patch: '@@\n+const value = 1;\n'
+        }
+      ]
     },
     profiles: [{ name: 'typescript', description: 'TypeScript' }],
     findings,
@@ -158,6 +158,6 @@ function reviewReport(findings: LocalReviewFinding[]): LocalReviewReport {
     summary: 'Reviewed 1 file(s).',
     model_used: 'qwen3:8b',
     runtime_provider: 'ollama',
-    advisory_only: true,
+    advisory_only: true
   };
 }

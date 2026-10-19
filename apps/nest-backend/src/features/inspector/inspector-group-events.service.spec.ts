@@ -27,8 +27,7 @@ describe('InspectorGroupEventsService browser lifecycle', () => {
       fileService as any,
       filePathService as any,
       inspectorSingleEventService as any,
-      { determineStrategy: vi.fn() } as any,
-      {}
+      { isDataLayerCorrect: vi.fn() } as any
     );
   });
 

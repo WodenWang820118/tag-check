@@ -2,8 +2,8 @@
 
 This directory contains the `data-access` Nx project.
 
-Use the repository root [AGENTS.md](../../AGENTS.md) as the canonical source
-for workflow, review gates, reviewer routing, and skill selection.
+Use the repository root [AGENTS.md](../../AGENTS.md) for workspace commands,
+boundary rules, and conventions.
 
 Local purpose: Shared data-access logic and integration helpers used across the
 workspace.

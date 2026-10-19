@@ -1,5 +1,10 @@
 import { DatePipe } from '@angular/common';
-import { Component, input, output } from '@angular/core';
+import {
+  Component,
+  input,
+  output,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -30,6 +35,7 @@ import { ReportTabViewModel } from '../report-detail.contracts';
     MatMenuModule,
     CarouselComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mat-card appearance="outlined">
       <mat-card-header class="items-start">

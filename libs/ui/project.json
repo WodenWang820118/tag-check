@@ -4,12 +4,8 @@
   "sourceRoot": "libs/ui/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:frontend", "type:feature"],
   "targets": {
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
-    },
     "test": {
       "executor": "@analogjs/vitest-angular:test"
     },

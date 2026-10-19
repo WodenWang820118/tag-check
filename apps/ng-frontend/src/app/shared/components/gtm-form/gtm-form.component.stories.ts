@@ -7,7 +7,7 @@ import {
 import { GtmFormComponent } from './gtm-form.component';
 
 import { CommonModule } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -43,7 +43,7 @@ const meta: Meta<GtmFormComponent> = {
       providers: [SettingsService]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(APP_ROUTES)]
     })
   ]
 };

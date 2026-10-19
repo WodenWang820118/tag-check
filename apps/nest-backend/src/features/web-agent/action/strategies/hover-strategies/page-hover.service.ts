@@ -17,7 +17,7 @@ export class PageHoverService {
         page.hover(selector),
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Timeout exceeded')), timeout)
-        ),
+        )
       ]);
       return true;
     } catch (error) {

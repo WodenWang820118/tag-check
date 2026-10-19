@@ -17,13 +17,13 @@ test('buildCheckpointReviewContext includes an explicit changed files section be
       repoName: 'gx.law-prep',
       repoRoot: 'C:/software-dev/gx.law-prep',
       subject: 'Update copy',
-      totalChangedLines: 4,
-    },
+      totalChangedLines: 4
+    }
   });
 
   assert.match(
     context,
-    /Changed files:\n- apps\/law-prep-web\/src\/app\/app\.component\.ts\n\nDiff to review:/,
+    /Changed files:\n- apps\/law-prep-web\/src\/app\/app\.component\.ts\n\nDiff to review:/
   );
 });
 
@@ -40,8 +40,8 @@ test('buildCheckpointReviewContext preserves the section shape for empty changed
       repoName: 'gx.law-prep',
       repoRoot: 'C:/software-dev/gx.law-prep',
       subject: 'Empty diff',
-      totalChangedLines: 0,
-    },
+      totalChangedLines: 0
+    }
   });
 
   assert.match(context, /Changed files:\n\nDiff to review:\n$/);

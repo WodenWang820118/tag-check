@@ -6,7 +6,7 @@ import test from 'node:test';
 
 import {
   readCommonReviewContract,
-  resolveCommonReviewContractPath,
+  resolveCommonReviewContractPath
 } from './common-review-contract.ts';
 
 test('resolveCommonReviewContractPath prefers the shared .agents reviewer contract', () => {
@@ -15,22 +15,17 @@ test('resolveCommonReviewContractPath prefers the shared .agents reviewer contra
     writeContract(
       repoRoot,
       path.join('.codex', 'review', 'common-review-contract.toml'),
-      'old contract',
+      'old contract'
     );
     writeContract(
       repoRoot,
       path.join('.agents', 'reviewers', 'common-review-contract.toml'),
-      'new contract',
+      'new contract'
     );
 
     assert.equal(
       resolveCommonReviewContractPath(repoRoot),
-      path.join(
-        repoRoot,
-        '.agents',
-        'reviewers',
-        'common-review-contract.toml',
-      ),
+      path.join(repoRoot, '.agents', 'reviewers', 'common-review-contract.toml')
     );
     assert.equal(readCommonReviewContract(repoRoot), 'new contract');
   } finally {
@@ -44,12 +39,12 @@ test('readCommonReviewContract falls back to the legacy Codex review path', () =
     writeContract(
       repoRoot,
       path.join('.codex', 'review', 'common-review-contract.toml'),
-      'legacy contract',
+      'legacy contract'
     );
 
     assert.equal(
       resolveCommonReviewContractPath(repoRoot),
-      path.join(repoRoot, '.codex', 'review', 'common-review-contract.toml'),
+      path.join(repoRoot, '.codex', 'review', 'common-review-contract.toml')
     );
     assert.equal(readCommonReviewContract(repoRoot), 'legacy contract');
   } finally {
@@ -74,13 +69,13 @@ function makeTempRepo(): string {
 function writeContract(
   repoRoot: string,
   relativePath: string,
-  developerInstructions: string,
+  developerInstructions: string
 ): void {
   const filePath = path.join(repoRoot, relativePath);
   mkdirSync(path.dirname(filePath), { recursive: true });
   writeFileSync(
     filePath,
     `developer_instructions = """\n${developerInstructions}\n"""\n`,
-    'utf8',
+    'utf8'
   );
 }

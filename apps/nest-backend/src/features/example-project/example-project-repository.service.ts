@@ -5,6 +5,7 @@ import { Cookie, LocalStorage } from '@utils';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 import { ApplicationSettingRepositoryService } from '../../core/repository/settings/application-setting-repository.service';
 import { ExampleEventsBuilderService } from './example-events-builder.service';
+import { ExampleRecordingsRefreshService } from './example-recordings-refresh.service';
 import { exampleGtmJson } from './gtm-json';
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
@@ -59,7 +60,8 @@ export class ExampleProjectRepositoryService implements OnApplicationBootstrap {
     private readonly exampleEventsBuilderService: ExampleEventsBuilderService,
     private readonly applicationSettingRepositoryService: ApplicationSettingRepositoryService,
     private readonly fileService: FileService,
-    private readonly folderPathService: FolderPathService
+    private readonly folderPathService: FolderPathService,
+    private readonly exampleRecordingsRefreshService: ExampleRecordingsRefreshService
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -154,6 +156,13 @@ export class ExampleProjectRepositoryService implements OnApplicationBootstrap {
     try {
       const projects = await this.projectRepositoryService.list();
       if (projects.length > 0) {
+        if (
+          projects.some(
+            (project) => project.projectSlug === this.DEFAULT_PROJECT_SLUG
+          )
+        ) {
+          await this.refreshExampleRecordings();
+        }
         this.logger.log(
           `Example project startup seed skipped; ${projects.length} project(s) already visible`
         );
@@ -221,6 +230,17 @@ export class ExampleProjectRepositoryService implements OnApplicationBootstrap {
     } catch (error) {
       this.logger.error('Failed to build example project:', error);
       throw error;
+    }
+  }
+
+  /** Never fails the startup seed: the example project is decorative. */
+  private async refreshExampleRecordings(): Promise<void> {
+    try {
+      await this.exampleRecordingsRefreshService.refresh(
+        this.DEFAULT_PROJECT_SLUG
+      );
+    } catch (error) {
+      this.logger.warn(`Failed to refresh example recordings: ${error}`);
     }
   }
 

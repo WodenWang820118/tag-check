@@ -1,6 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { GTMConfiguration, isGTMConfiguration } from '@utils';
+import {
+  GTMConfiguration,
+  GtmImportSummary,
+  parseGtmContainerExport
+} from '@utils';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
@@ -9,16 +13,17 @@ import { environment } from '../../../../../environments/environment';
 export class GtmJsonParserService {
   constructor(private readonly httpClient: HttpClient) {}
 
-  parseGtmJson(json: string) {
-    const result = JSON.parse(json) as unknown;
-    if (!isGTMConfiguration(result)) {
-      throw new Error('Invalid GTM configuration JSON.');
+  /** Parses a Tag Manager container export; throws with a reason the user can act on. */
+  parseGtmJson(json: string): GTMConfiguration {
+    const { container, error } = parseGtmContainerExport(json);
+    if (!container) {
+      throw new Error(error);
     }
-    return result;
+    return container;
   }
 
   uploadGtmJson(projectSlug: string, json: GTMConfiguration) {
-    return this.httpClient.post(
+    return this.httpClient.post<GtmImportSummary>(
       `${environment.gtmParserApiUrl}/upload/${projectSlug}`,
       json
     );

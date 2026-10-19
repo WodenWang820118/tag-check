@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { HlmDialog } from '@spartan-ng/helm/dialog';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ConsentCategories,
@@ -169,16 +170,13 @@ describe('CookieConsentComponent', () => {
       TestBed.createComponent(CookieConsentComponent);
     fixture.detectChanges();
 
-    const dialog = fixture.debugElement.query(By.css('p-dialog'))
-      .componentInstance as {
-      closable: boolean;
-      closeOnEscape: boolean;
-      dismissableMask: boolean;
-    };
+    // disableClose blocks Escape and backdrop clicks; the template also hides
+    // the dialog's own close button, so only the two preference actions close it.
+    const dialog = fixture.debugElement
+      .query(By.directive(HlmDialog))
+      .injector.get(HlmDialog);
 
-    expect(dialog.closable).toBe(false);
-    expect(dialog.closeOnEscape).toBe(false);
-    expect(dialog.dismissableMask).toBe(false);
+    expect(dialog.disableClose()).toBe(true);
   });
 
   it('commits local models only when Save Preferences is confirmed', async () => {

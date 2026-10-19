@@ -5,7 +5,8 @@ import {
   effect,
   OnInit,
   signal,
-  viewChild
+  viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -17,10 +18,19 @@ import {
 import { DomSanitizer } from '@angular/platform-browser';
 import { YouTubePlayerModule } from '@angular/youtube-player';
 import { ActivatedRoute } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { DialogModule } from 'primeng/dialog';
-import { InputTextModule } from 'primeng/inputtext';
-import { MessageModule } from 'primeng/message';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideArrowLeft,
+  lucideArrowRight,
+  lucideInfo,
+  lucideMapPin,
+  lucidePlay,
+  lucideSearch
+} from '@ng-icons/lucide';
+import { HlmAlertImports } from '@spartan-ng/helm/alert';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmDialogImports } from '@spartan-ng/helm/dialog';
+import { HlmInput } from '@spartan-ng/helm/input';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
 import { WindowSizeService } from '../../../../shared/services/window-size/window-size.service';
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
@@ -40,11 +50,23 @@ import {
     YouTubePlayerModule,
     ReactiveFormsModule,
     FormsModule,
-    DialogModule,
-    ButtonModule,
-    InputTextModule,
-    MessageModule
+    HlmAlertImports,
+    HlmButton,
+    HlmDialogImports,
+    HlmInput,
+    NgIcon
   ],
+  providers: [
+    provideIcons({
+      lucideArrowLeft,
+      lucideArrowRight,
+      lucideInfo,
+      lucideMapPin,
+      lucidePlay,
+      lucideSearch
+    })
+  ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './destination.component.html'
 })
 export class DestinationComponent implements OnInit {

@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { BrowserFormComponent } from './browser-form.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -37,7 +37,7 @@ const meta: Meta<BrowserFormComponent> = {
       providers: [SettingsService]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(APP_ROUTES)]
     })
   ]
 };

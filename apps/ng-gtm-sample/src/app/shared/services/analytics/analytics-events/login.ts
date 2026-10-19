@@ -7,7 +7,7 @@ export class LoginEventTracker implements AnalyticsEventTracker {
 
   getProcessedData(rawEventData: any) {
     return {
-      eventData: rawEventData,
+      eventData: rawEventData
     };
   }
 }

@@ -14,6 +14,8 @@ import { ProjectVideoModule } from './project-video/project-video.module';
 import { ProjectImageModule } from './project-image/project-image.module';
 import { ProjectFacadeRepositoryModule } from '../repository/project-facade/project-facade-repository.module';
 import { ProjectDataLayerSpecBuilderModule } from './project-data-layer-spec-builder/project-data-layer-spec.builder.module';
+import { ProjectGtmContainerModule } from './project-gtm-container/project-gtm-container.module';
+import { TestReportFacadeModule } from '../repository/test-report-facade/test-report-facade.module';
 
 // services
 import { ProjectAbstractReportService } from './project-abstract-report/project-abstract-report.service';
@@ -43,7 +45,9 @@ const modules = [
   ProjectImageModule,
   ProjectFileReportModule,
   ProjectVideoModule,
-  ProjectDataLayerSpecBuilderModule
+  ProjectDataLayerSpecBuilderModule,
+  ProjectGtmContainerModule,
+  TestReportFacadeModule
 ];
 
 const services = [

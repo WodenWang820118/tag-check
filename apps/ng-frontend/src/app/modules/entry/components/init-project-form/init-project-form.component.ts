@@ -1,5 +1,5 @@
 import { InitProjectFormFacadeService } from './init-project-form-facade.service';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
@@ -21,6 +21,7 @@ import { RouterLink } from '@angular/router';
     RouterLink
   ],
   templateUrl: `./init-project-form.component.html`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./init-project-form.component.scss']
 })
 export class InitProjectFormComponent {

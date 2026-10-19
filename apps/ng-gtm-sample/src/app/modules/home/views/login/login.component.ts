@@ -1,57 +1,67 @@
-import { Component, effect } from '@angular/core';
+import { Component, effect, ChangeDetectionStrategy } from '@angular/core';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideChartLine,
+  lucideDatabase,
+  lucideImages,
+  lucideLock
+} from '@ng-icons/lucide';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmCard } from '@spartan-ng/helm/card';
+import { HlmSeparator } from '@spartan-ng/helm/separator';
 import { AuthService } from '../../../../shared/services/auth/auth.service';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'app-login',
-  imports: [ButtonModule, CardModule, DividerModule],
+  imports: [HlmButton, HlmCard, HlmSeparator, NgIcon],
+  providers: [
+    provideIcons({ lucideChartLine, lucideDatabase, lucideImages, lucideLock })
+  ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="grid min-h-[calc(100vh-9rem)] place-items-center py-10">
-      <p-card
-        styleClass="w-full max-w-xl rounded-[1.75rem] border border-slate-200 shadow-xl"
+      <section
+        hlmCard
+        class="w-full max-w-xl gap-0 rounded-[1.75rem] pt-0 text-base shadow-xl"
       >
-        <ng-template pTemplate="header">
-          <div class="rounded-t-[1.75rem] bg-slate-950 px-8 py-8 text-white">
-            <div class="sample-eyebrow text-blue-200">
-              <i class="pi pi-lock text-sm"></i>
-              Admin Access
-            </div>
-            <h1 class="mt-4 text-3xl font-black tracking-tight">
-              Sign in with Google to manage demo data.
-            </h1>
-            <p class="mt-3 max-w-lg text-sm leading-6 text-slate-200">
-              The public storefront stays open, but the admin surface uses the
-              Google sign-in flow that is already wired into this sample.
-            </p>
+        <div class="rounded-t-[1.75rem] bg-slate-950 px-8 py-8 text-white">
+          <div class="sample-eyebrow text-blue-200">
+            <ng-icon name="lucideLock" class="text-sm" />
+            Admin Access
           </div>
-        </ng-template>
+          <h1 class="mt-4 text-3xl font-black tracking-tight">
+            Sign in with Google to manage demo data.
+          </h1>
+          <p class="mt-3 max-w-lg text-sm leading-6 text-slate-200">
+            The public storefront stays open, but the admin surface uses the
+            Google sign-in flow that is already wired into this sample.
+          </p>
+        </div>
 
-        <div class="space-y-6 px-2 py-2">
+        <div class="space-y-6 px-8 pt-6">
           <div class="sample-inset-surface px-5 py-4">
             <div
-              class="text-sm font-semibold uppercase tracking-[0.24em] text-slate-400"
+              class="text-sm font-semibold tracking-[0.24em] text-slate-400 uppercase"
             >
               What this unlocks
             </div>
             <div class="mt-3 grid gap-3 text-sm text-slate-600">
               <div class="flex items-start gap-3">
-                <i class="pi pi-database mt-0.5 text-blue-600"></i>
+                <ng-icon name="lucideDatabase" class="mt-0.5 text-blue-600" />
                 <span>
                   Access the admin dashboard and the destination entry workflow.
                 </span>
               </div>
               <div class="flex items-start gap-3">
-                <i class="pi pi-images mt-0.5 text-blue-600"></i>
+                <ng-icon name="lucideImages" class="mt-0.5 text-blue-600" />
                 <span>
                   Preview the Firebase-backed content flow used by the demo
                   site.
                 </span>
               </div>
               <div class="flex items-start gap-3">
-                <i class="pi pi-chart-line mt-0.5 text-blue-600"></i>
+                <ng-icon name="lucideChartLine" class="mt-0.5 text-blue-600" />
                 <span>
                   Keep the GTM storefront behavior intact while testing admin
                   actions.
@@ -60,24 +70,33 @@ import { DividerModule } from 'primeng/divider';
             </div>
           </div>
 
-          <p-divider align="center" type="solid">
+          <div class="flex items-center gap-3">
+            <hlm-separator class="flex-1" />
             <span
-              class="bg-white px-3 text-xs font-semibold uppercase tracking-[0.24em] text-slate-400"
+              class="text-xs font-semibold tracking-[0.24em] text-slate-400 uppercase"
             >
               Auth Provider
             </span>
-          </p-divider>
+            <hlm-separator class="flex-1" />
+          </div>
 
           <button
-            pButton
+            hlmBtn
             type="button"
-            label="Continue with Google"
-            icon="pi pi-google"
             class="w-full"
+            data-testid="login-google"
             (click)="loginWithGoogle()"
-          ></button>
+          >
+            <svg viewBox="0 0 24 24" class="size-4" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M21.35 11.1H12v2.98h5.35c-.23 1.43-1.65 4.2-5.35 4.2a5.9 5.9 0 0 1 0-11.8c1.84 0 3.07.78 3.78 1.46l2.58-2.49C16.72 3.92 14.6 3 12 3a9 9 0 1 0 0 18c5.2 0 8.64-3.65 8.64-8.8 0-.59-.06-1.04-.14-1.48Z"
+              />
+            </svg>
+            Continue with Google
+          </button>
         </div>
-      </p-card>
+      </section>
     </div>
   `
 })

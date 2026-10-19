@@ -2,6 +2,6 @@ import { Module } from '@nestjs/common';
 import { RequestProcessorService } from './request-processor.service';
 
 @Module({
-  providers: [RequestProcessorService],
+  providers: [RequestProcessorService]
 })
 export class RequestProcessorModule {}

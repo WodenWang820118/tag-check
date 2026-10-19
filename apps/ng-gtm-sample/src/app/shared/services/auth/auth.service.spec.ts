@@ -17,10 +17,12 @@ const authMockState = vi.hoisted(() => ({
 
 vi.mock('firebase/auth', () => ({
   GoogleAuthProvider: class GoogleAuthProvider {},
-  onAuthStateChanged: vi.fn((_auth: unknown, callback: (user: unknown) => void) => {
-    authMockState.callback = callback;
-    return authMockState.unsubscribe;
-  }),
+  onAuthStateChanged: vi.fn(
+    (_auth: unknown, callback: (user: unknown) => void) => {
+      authMockState.callback = callback;
+      return authMockState.unsubscribe;
+    }
+  ),
   signInWithPopup: vi.fn(),
   signOut: vi.fn()
 }));

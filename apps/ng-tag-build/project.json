@@ -4,7 +4,7 @@
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "apps/ng-tag-build/src",
-  "tags": [],
+  "tags": ["scope:frontend", "type:app"],
   "i18n": {
     "sourceLocale": {
       "code": "en-US",
@@ -118,13 +118,9 @@
       },
       "defaultConfiguration": "development"
     },
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
-    },
     "test": {
       "executor": "@analogjs/vitest-angular:test",
-      "outputs": ["{options.reportsDirectory}"],
+      "outputs": ["{workspaceRoot}/coverage/apps/ng-tag-build"],
       "options": {
         "reportsDirectory": "../../coverage/apps/ng-tag-build"
       }

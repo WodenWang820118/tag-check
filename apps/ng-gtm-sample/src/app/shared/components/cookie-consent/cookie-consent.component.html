@@ -1,88 +1,110 @@
-<p-dialog
-  styleClass="w-[min(42rem,calc(100vw-1.5rem))]"
-  [(visible)]="showModal"
-  [modal]="true"
-  [closable]="false"
-  [closeOnEscape]="false"
-  [dismissableMask]="false"
-  (onHide)="hide()"
-  header="Cookie Policy"
+<hlm-dialog
+  [state]="showModal() ? 'open' : 'closed'"
+  [disableClose]="true"
+  (closed)="hide()"
 >
-  <div class="space-y-4 p-2">
-    <div class="sample-inset-surface p-5">
-      <div class="mb-3 flex items-start justify-between gap-4">
-        <div>
-          <div class="text-base font-semibold text-slate-900">Analytics</div>
-          <div class="mt-1 text-sm text-slate-500">
-            Understand which journeys and events are being triggered across the
-            sample storefront.
+  <hlm-dialog-content
+    *hlmDialogPortal="let ctx"
+    class="max-h-[calc(100vh-2rem)] w-[min(42rem,calc(100vw-1.5rem))] overflow-y-auto text-base sm:max-w-none"
+    data-testid="cookie-consent-dialog"
+    [showCloseButton]="false"
+  >
+    <hlm-dialog-header>
+      <h2 hlmDialogTitle class="text-xl font-semibold">Cookie Policy</h2>
+    </hlm-dialog-header>
+    <div class="space-y-4">
+      <div class="sample-inset-surface p-5">
+        <div class="mb-3 flex items-start justify-between gap-4">
+          <div>
+            <div class="text-base font-semibold text-slate-900">Analytics</div>
+            <div class="mt-1 text-sm text-slate-500">
+              Understand which journeys and events are being triggered across
+              the sample storefront.
+            </div>
           </div>
+          <hlm-switch
+            aria-label="Analytics cookies"
+            data-testid="consent-analytics"
+            [(ngModel)]="analyticsModel"
+          />
         </div>
-        <p-toggleswitch [(ngModel)]="analyticsModel" />
+        <div class="text-sm leading-6 text-slate-600">
+          Analytics cookies track site usage and trends to improve your browsing
+          experience. They gather anonymous data on how you navigate and
+          interact with the site.
+        </div>
       </div>
-      <div class="text-sm leading-6 text-slate-600">
-        Analytics cookies track site usage and trends to improve your browsing
-        experience. They gather anonymous data on how you navigate and interact
-        with the site.
+      <div class="sample-inset-surface p-5">
+        <div class="mb-3 flex items-start justify-between gap-4">
+          <div>
+            <div class="text-base font-semibold text-slate-900">
+              Measurement
+            </div>
+            <div class="mt-1 text-sm text-slate-500">
+              Power attribution and performance measurement events.
+            </div>
+          </div>
+          <hlm-switch
+            aria-label="Measurement cookies"
+            data-testid="consent-measurement"
+            [(ngModel)]="measurementModel"
+          />
+        </div>
+        <div class="text-sm leading-6 text-slate-600">
+          Measurement cookies for performance measurement.
+        </div>
+      </div>
+      <div class="sample-inset-surface p-5">
+        <div class="mb-3 flex items-start justify-between gap-4">
+          <div>
+            <div class="text-base font-semibold text-slate-900">Audience</div>
+            <div class="mt-1 text-sm text-slate-500">
+              Control personalization and audience-building signals.
+            </div>
+          </div>
+          <hlm-switch
+            aria-label="Audience cookies"
+            data-testid="consent-audience"
+            [(ngModel)]="audienceModel"
+          />
+        </div>
+        <div class="text-sm leading-6 text-slate-600">
+          Audience cookies to share marketing content relevant to you.
+        </div>
       </div>
     </div>
-    <div class="sample-inset-surface p-5">
-      <div class="mb-3 flex items-start justify-between gap-4">
-        <div>
-          <div class="text-base font-semibold text-slate-900">Measurement</div>
-          <div class="mt-1 text-sm text-slate-500">
-            Power attribution and performance measurement events.
-          </div>
-        </div>
-        <p-toggleswitch [(ngModel)]="measurementModel" />
-      </div>
-      <div class="text-sm leading-6 text-slate-600">
-        Measurement cookies for performance measurement.
-      </div>
-    </div>
-    <div class="sample-inset-surface p-5">
-      <div class="mb-3 flex items-start justify-between gap-4">
-        <div>
-          <div class="text-base font-semibold text-slate-900">Audience</div>
-          <div class="mt-1 text-sm text-slate-500">
-            Control personalization and audience-building signals.
-          </div>
-        </div>
-        <p-toggleswitch [(ngModel)]="audienceModel" />
-      </div>
-      <div class="text-sm leading-6 text-slate-600">
-        Audience cookies to share marketing content relevant to you.
-      </div>
-    </div>
-  </div>
-  <div class="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
-    <button
-      pButton
-      type="button"
-      label="Save Preferences"
-      severity="secondary"
-      [outlined]="true"
-      (click)="savePreferences()"
-    ></button>
-    <button
-      pButton
-      type="button"
-      label="Allow All"
-      icon="pi pi-check"
-      (click)="acceptAll()"
-    ></button>
-  </div>
-</p-dialog>
+    <hlm-dialog-footer class="gap-3">
+      <button
+        hlmBtn
+        variant="outline"
+        type="button"
+        data-testid="consent-save"
+        (click)="savePreferences()"
+      >
+        Save Preferences
+      </button>
+      <button
+        hlmBtn
+        type="button"
+        data-testid="consent-allow-all"
+        (click)="acceptAll()"
+      >
+        <ng-icon name="lucideCheck" />
+        Allow All
+      </button>
+    </hlm-dialog-footer>
+  </hlm-dialog-content>
+</hlm-dialog>
 @if (showCookieConsent()) {
   <button
-    pButton
+    hlmBtn
+    size="icon-lg"
     type="button"
-    icon="pi pi-cog"
-    severity="info"
-    [raised]="true"
-    [rounded]="true"
-    size="large"
+    aria-label="Cookie settings"
+    data-testid="cookie-settings"
     (click)="switchModal()"
-    class="fixed bottom-8 left-4 z-[1000] shadow-xl"
-  ></button>
+    class="fixed bottom-8 left-4 z-[1000] size-12 rounded-full bg-sky-500 text-white shadow-xl hover:bg-sky-600"
+  >
+    <ng-icon name="lucideSettings" class="text-xl" />
+  </button>
 }

@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-disclaimer',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
       id="disclaimer"

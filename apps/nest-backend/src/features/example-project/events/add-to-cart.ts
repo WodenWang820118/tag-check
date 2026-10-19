@@ -21,23 +21,30 @@ const recording: Recording = {
         {
           type: 'navigation',
           url: 'https://ng-gtm-sample.vercel.app/home',
-          title: 'Ng GTM Integration App'
+          title: 'Travel With GTM | Demo Travel Catalog'
         }
       ]
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['div.p-carousel-item-end img']],
-      offsetY: 134,
+      selectors: [['[data-testid="promotion-dot-city001"]']],
+      offsetY: 3,
+      offsetX: 16
+    },
+    {
+      type: 'click',
+      target: 'main',
+      selectors: [['[data-testid="promotion-explore-city001"]']],
+      offsetY: 18,
       offsetX: 69
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main div > button']],
-      offsetY: 23.609375,
-      offsetX: 46.1875
+      selectors: [['[data-testid="add-to-cart"]']],
+      offsetY: 18,
+      offsetX: 58
     }
   ]
 };

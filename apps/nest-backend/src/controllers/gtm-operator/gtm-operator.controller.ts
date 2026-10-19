@@ -10,7 +10,7 @@ import {
   Query
 } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
-import { GtmOperatorService } from '../../infrastructure/gtm-operator/gtm-operator.service';
+import { GtmOperatorService } from '../../features/gtm-operator/gtm-operator.service';
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 

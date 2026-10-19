@@ -1,4 +1,11 @@
-import { Component, OnDestroy, effect, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  effect,
+  signal,
+  viewChild,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { ReportTableComponent } from '../../components/report-table/report-table.component';
 import { ReportTableToolbarComponent } from '../../components/report-table-toolbar/report-table-toolbar.component';
 import { SlideUploadComponent } from '../../components/slide-upload/slide-upload.component';
@@ -49,6 +56,7 @@ import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host mat-sidenav-container {

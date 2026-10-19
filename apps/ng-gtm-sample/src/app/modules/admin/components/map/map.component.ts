@@ -3,7 +3,8 @@ import {
   Component,
   ElementRef,
   OnDestroy,
-  viewChild
+  viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import * as am5 from '@amcharts/amcharts5';
 import * as am5map from '@amcharts/amcharts5/map';
@@ -19,6 +20,7 @@ import { Destination } from '../../../../shared/models/destination.model';
 @Component({
   selector: 'app-map',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="space-y-4">
       <div

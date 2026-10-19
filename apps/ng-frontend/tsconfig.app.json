@@ -2,7 +2,8 @@
   "extends": "./tsconfig.project.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": ["@angular/localize"]
+    "types": ["@angular/localize"],
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*.ts", "**/*.d.ts", "../../libs/**/*.d.ts"],
   "exclude": [
@@ -12,5 +13,13 @@
     "src/**/*.spec.ts",
     "**/*.stories.ts",
     "**/*.stories.js"
-  ]
+  ],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

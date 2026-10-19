@@ -13,7 +13,11 @@
         <section aria-labelledby="website-url-heading">
           <h2 id="website-url-heading">Website URL</h2>
           <mat-form-field class="application-form__field" appearance="outline">
-            <input matInput formControlName="websiteUrl" placeholder="Website URL" />
+            <input
+              matInput
+              formControlName="websiteUrl"
+              placeholder="Website URL"
+            />
           </mat-form-field>
         </section>
 
@@ -39,7 +43,10 @@
                 >
                   <input matInput formControlName="value" />
                 </mat-form-field>
-                <button mat-icon-button (click)="removeLocalStorageSetting(idx)">
+                <button
+                  mat-icon-button
+                  (click)="removeLocalStorageSetting(idx)"
+                >
                   <mat-icon>remove_circle_outline</mat-icon>
                 </button>
               </div>
@@ -95,7 +102,11 @@
             }
           </div>
           <mat-card-actions align="start">
-            <button mat-raised-button color="action" (click)="addCookieSetting()">
+            <button
+              mat-raised-button
+              color="action"
+              (click)="addCookieSetting()"
+            >
               Add cookie
             </button>
           </mat-card-actions>

@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { PaginatorButtonComponent } from './paginator-button.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { provideRouter } from '@angular/router';
 import { APP_ROUTES } from '../../../app.routes';
@@ -21,7 +21,7 @@ const meta: Meta<PaginatorButtonComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(APP_ROUTES)]
     })
   ]
 };

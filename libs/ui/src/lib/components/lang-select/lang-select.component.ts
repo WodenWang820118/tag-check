@@ -1,5 +1,11 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { Component, Inject, LOCALE_ID, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  Inject,
+  LOCALE_ID,
+  PLATFORM_ID,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
@@ -38,6 +44,7 @@ import {
       </mat-select>
     </mat-form-field>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./lang-select.component.scss']
 })
 export class LangSelectComponent {

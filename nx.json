@@ -6,19 +6,29 @@
   "targetDefaults": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["production", "^production"],
+      "inputs": [
+        "production",
+        "^production",
+        "{workspaceRoot}/pnpm-workspace.yaml",
+        {
+          "json": "{workspaceRoot}/package.json",
+          "fields": [
+            "packageManager",
+            "pnpm.onlyBuiltDependencies",
+            "pnpm.neverBuiltDependencies",
+            "pnpm.allowBuilds",
+            "pnpm.supportedArchitectures",
+            "pnpm.patchedDependencies"
+          ]
+        },
+        {
+          "runtime": "node -e \"try{console.log('pnpm major '+require('child_process').execSync('pnpm --version',{stdio:['ignore','pipe','ignore']}).toString().trim().split('.')[0])}catch{console.log('pnpm major unavailable')}\""
+        }
+      ],
       "cache": true
     },
     "test": {
       "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.mjs"],
-      "cache": true
-    },
-    "lint": {
-      "inputs": [
-        "default",
-        "{workspaceRoot}/eslint.config.mjs",
-        "{workspaceRoot}/.eslintignore"
-      ],
       "cache": true
     },
     "e2e": {
@@ -27,7 +37,8 @@
     },
     "@angular-devkit/build-angular:application": {
       "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "inputs": ["production", "^production"],
+      "cache": true
     },
     "build-storybook": {
       "cache": true,
@@ -53,8 +64,6 @@
       "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s",
-      "!{projectRoot}/eslint.config.[cm]js",
-      "!{projectRoot}/eslint.config.mjs",
       "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
       "!{projectRoot}/.storybook/**/*",
       "!{projectRoot}/tsconfig.storybook.json"
@@ -65,7 +74,7 @@
     "@nx/react": {
       "application": {
         "style": "none",
-        "linter": "eslint",
+        "linter": "none",
         "bundler": "vite",
         "babel": true
       },
@@ -74,12 +83,12 @@
       },
       "library": {
         "style": "none",
-        "linter": "eslint"
+        "linter": "none"
       }
     },
     "@nx/angular:application": {
       "e2eTestRunner": "playwright",
-      "linter": "eslint",
+      "linter": "none",
       "style": "scss",
       "unitTestRunner": "jest"
     },
@@ -87,7 +96,7 @@
       "style": "scss"
     },
     "@nx/angular:library": {
-      "linter": "eslint",
+      "linter": "none",
       "unitTestRunner": "jest"
     }
   },
@@ -96,10 +105,15 @@
       "plugin": "@nx/vite/plugin",
       "options": {
         "buildTargetName": "build",
-        "testTargetName": "test",
         "serveTargetName": "serve",
         "previewTargetName": "preview",
         "serveStaticTargetName": "serve-static"
+      }
+    },
+    {
+      "plugin": "@nx/vitest",
+      "options": {
+        "testTargetName": "test"
       }
     },
     {
@@ -127,6 +141,12 @@
         "previewTargetName": "preview",
         "buildDepsTargetName": "build-deps",
         "watchDepsTargetName": "watch-deps"
+      }
+    },
+    {
+      "plugin": "@nx/oxlint",
+      "options": {
+        "targetName": "lint"
       }
     }
   ]

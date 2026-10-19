@@ -23,16 +23,16 @@ const recording: Recording = {
         {
           type: 'navigation',
           url: 'https://ng-gtm-sample.vercel.app/home',
-          title: 'Ng GTM Integration App'
+          title: 'Travel With GTM | Demo Travel Catalog'
         }
       ]
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['#viewDestination span']],
-      offsetY: 2,
-      offsetX: 106.078125
+      selectors: [['[data-testid="browse-destinations"]']],
+      offsetY: 18,
+      offsetX: 86
     }
   ]
 };

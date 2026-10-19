@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { ProjectListComponent } from './project-list.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { RouterLink, provideRouter } from '@angular/router';
 import { ENTRY_ROUTES } from '../../routes';
@@ -30,7 +30,7 @@ const meta: Meta<ProjectListComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(ENTRY_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(ENTRY_ROUTES)]
     })
   ]
 };

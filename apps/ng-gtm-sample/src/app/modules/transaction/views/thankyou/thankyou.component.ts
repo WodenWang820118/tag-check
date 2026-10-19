@@ -1,7 +1,9 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component } from '@angular/core';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideCircleCheck, lucideHouse, lucideUndo2 } from '@ng-icons/lucide';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmCard } from '@spartan-ng/helm/card';
 import { OrderService } from '../../../../shared/services/order/order.service';
 import { AnalyticsService } from '../../../../shared/services/analytics/analytics.service';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
@@ -9,7 +11,9 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
 @Component({
   selector: 'app-thankyou',
   standalone: true,
-  imports: [ButtonModule, CardModule, CurrencyPipe],
+  imports: [HlmButton, HlmCard, NgIcon, CurrencyPipe],
+  providers: [provideIcons({ lucideCircleCheck, lucideHouse, lucideUndo2 })],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './thankyou.component.html'
 })
 export class ThankyouComponent {

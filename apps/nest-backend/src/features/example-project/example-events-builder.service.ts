@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { VariableConfig } from '@utils';
 import { events } from './events/events';
+import { exampleGtmJson } from './gtm-json';
 import {
   ProjectEventsBuilderService,
   BuildEventInput
@@ -25,6 +27,10 @@ export class ExampleEventsBuilderService {
         fullItemDef
       })
     );
-    await this.projectEventsBuilderService.buildEvents(projectSlug, inputs);
+    const { variable, builtInVariable } = exampleGtmJson.containerVersion;
+    await this.projectEventsBuilderService.buildEvents(projectSlug, inputs, [
+      ...variable,
+      ...builtInVariable
+    ] as VariableConfig[]);
   }
 }

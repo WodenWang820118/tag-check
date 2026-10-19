@@ -1,14 +1,31 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { OrderService } from '../../services/order/order.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
-import { ToolbarModule } from 'primeng/toolbar';
-import { ButtonModule } from 'primeng/button';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideCompass,
+  lucideHouse,
+  lucideMap,
+  lucideShoppingCart,
+  lucideUser
+} from '@ng-icons/lucide';
+import { HlmButton } from '@spartan-ng/helm/button';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterModule, ToolbarModule, ButtonModule],
+  imports: [RouterModule, HlmButton, NgIcon],
+  providers: [
+    provideIcons({
+      lucideCompass,
+      lucideHouse,
+      lucideMap,
+      lucideShoppingCart,
+      lucideUser
+    })
+  ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './navbar.component.html'
 })
 export class NavbarComponent {

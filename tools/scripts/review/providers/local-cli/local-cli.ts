@@ -20,14 +20,14 @@ export interface LocalCliCommandResult {
 }
 
 export function runLocalCliCommand(
-  input: LocalCliCommandInput,
+  input: LocalCliCommandInput
 ): LocalCliCommandResult {
   const options = {
     cwd: input.cwd,
     encoding: 'utf8' as const,
     input: input.input,
     stdio: ['pipe', 'pipe', 'pipe'] as ['pipe', 'pipe', 'pipe'],
-    timeout: input.timeoutMs,
+    timeout: input.timeoutMs
   };
 
   if (process.platform === 'win32' && input.windowsScriptName) {
@@ -45,10 +45,10 @@ export function runLocalCliCommand(
             'Bypass',
             '-File',
             scriptPath,
-            ...input.args,
+            ...input.args
           ],
-          options,
-        ),
+          options
+        )
       );
     }
   }
@@ -63,7 +63,7 @@ export function resolveWindowsPowerShellPath(): string | null {
 
   const candidates = [
     'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
-    'C:\\Program Files\\PowerShell\\7\\pwsh.exe',
+    'C:\\Program Files\\PowerShell\\7\\pwsh.exe'
   ];
 
   return candidates.find((candidate) => existsSync(candidate)) ?? null;
@@ -76,7 +76,7 @@ export function resolveWindowsScriptPath(scriptName: string): string | null {
 
   const candidates = [
     process.env.APPDATA ? join(process.env.APPDATA, 'npm', scriptName) : null,
-    process.env.NVM_SYMLINK ? join(process.env.NVM_SYMLINK, scriptName) : null,
+    process.env.NVM_SYMLINK ? join(process.env.NVM_SYMLINK, scriptName) : null
   ].filter((candidate): candidate is string => Boolean(candidate));
 
   for (const candidate of candidates) {
@@ -87,7 +87,7 @@ export function resolveWindowsScriptPath(scriptName: string): string | null {
 
   const whereResult = spawnSync('where.exe', [scriptName], {
     encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
+    stdio: ['ignore', 'pipe', 'pipe']
   });
 
   if (whereResult.error || whereResult.status !== 0) {
@@ -103,13 +103,13 @@ export function resolveWindowsScriptPath(scriptName: string): string | null {
 }
 
 function normalizeSpawnResult(
-  result: SpawnSyncReturns<string>,
+  result: SpawnSyncReturns<string>
 ): LocalCliCommandResult {
   return {
     error: result.error ? (result.error as Error) : undefined,
     signal: result.signal,
     status: result.status,
     stderr: result.stderr ?? '',
-    stdout: result.stdout ?? '',
+    stdout: result.stdout ?? ''
   };
 }

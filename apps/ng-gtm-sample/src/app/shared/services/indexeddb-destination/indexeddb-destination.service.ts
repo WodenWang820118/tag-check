@@ -12,7 +12,7 @@ import {
 import { Destination } from '../../models/destination.model';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class IndexeddbDestinationService {
   private readonly dbReady$ = defer(() =>
@@ -36,8 +36,7 @@ export class IndexeddbDestinationService {
   getAllDestinations() {
     return this.dbReady$.pipe(
       switchMap(
-        (db) =>
-          db.getDestinations() as unknown as Observable<Destination[]>
+        (db) => db.getDestinations() as unknown as Observable<Destination[]>
       )
     );
   }

@@ -6,7 +6,7 @@ export class HealthController {
   check() {
     return {
       status: 'ok',
-      message: 'Backend is up and running',
+      message: 'Backend is up and running'
     };
   }
 }

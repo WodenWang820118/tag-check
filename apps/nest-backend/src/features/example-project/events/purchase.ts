@@ -23,58 +23,58 @@ const recording: Recording = {
         {
           type: 'navigation',
           url: 'https://ng-gtm-sample.vercel.app/home',
-          title: 'Ng GTM Integration App'
+          title: 'Travel With GTM | Demo Travel Catalog'
         }
       ]
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['div.p-carousel-item-end img']],
-      offsetY: 130,
-      offsetX: 149
+      selectors: [['[data-testid="promotion-dot-city001"]']],
+      offsetY: 3,
+      offsetX: 16
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main div > button']],
-      offsetY: 32.609375,
-      offsetX: 54.1875
+      selectors: [['[data-testid="promotion-explore-city001"]']],
+      offsetY: 18,
+      offsetX: 69
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['button.relative > span.p-button-label']],
+      selectors: [['[data-testid="add-to-cart"]']],
+      offsetY: 18,
+      offsetX: 58
+    },
+    {
+      type: 'click',
+      target: 'main',
+      selectors: [['[data-testid="nav-cart"]']],
       offsetY: 20,
-      offsetX: 9.71875
+      offsetX: 41
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main span.p-button-label']],
-      offsetY: 17,
-      offsetX: 41.765625
+      selectors: [['[data-testid="begin-checkout"]']],
+      offsetY: 18,
+      offsetX: 51
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main span']],
-      offsetY: 11,
-      offsetX: 52.953125
+      selectors: [['[data-testid="shipping-continue"]']],
+      offsetY: 18,
+      offsetX: 39
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main span']],
-      offsetY: 7,
-      offsetX: 59.953125
-    },
-    {
-      type: 'click',
-      target: 'main',
-      selectors: [['main button:nth-of-type(1) > span']],
-      offsetY: 6,
-      offsetX: 43.578125
+      selectors: [['[data-testid="place-order"]']],
+      offsetY: 18,
+      offsetX: 58
     }
   ]
 };

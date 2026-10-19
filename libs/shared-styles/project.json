@@ -4,16 +4,13 @@
   "sourceRoot": "libs/shared-styles/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:frontend", "type:ui"],
   "targets": {
     "test": {
       "executor": "@analogjs/vitest-angular:test",
       "options": {
         "passWithNoTests": true
       }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
     }
   }
 }

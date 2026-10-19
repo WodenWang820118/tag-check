@@ -3,27 +3,27 @@ import test from 'node:test';
 
 import {
   createProviderObservationBucketKey,
-  createProviderTelemetryContext,
+  createProviderTelemetryContext
 } from '../../provider-observability/provider-observability.ts';
 import {
   analyzeHybridHeuristics,
   buildHybridReviewReport,
   createHybridGptBypassReview,
   createHybridGptTelemetryContext,
-  planHybridLocalReview,
+  planHybridLocalReview
 } from './hybrid-review.ts';
 import { buildHybridPrefilterContext } from '../prefilter/prefilter.ts';
 import {
   MAX_HYBRID_GPT_DIFF_CHARS,
   type HybridGptReview,
   type LocalReviewFinding,
-  type LocalReviewReport,
+  type LocalReviewReport
 } from '../shared/shared.ts';
 
 test('planHybridLocalReview skips local execution for a confident low-risk GPT review', () => {
   const heuristics = analyzeHybridHeuristics({
     changedFiles: ['src/utils.ts'],
-    diffText: '@@\n+export const value = 1;\n',
+    diffText: '@@\n+export const value = 1;\n'
   });
 
   const plan = planHybridLocalReview({
@@ -32,20 +32,20 @@ test('planHybridLocalReview skips local execution for a confident low-risk GPT r
       confidence: 'high',
       focus_profiles: ['typescript'],
       needs_local_deep_review: false,
-      overall_risk: 'low',
-    }),
+      overall_risk: 'low'
+    })
   });
 
   assert.deepEqual(plan, {
     local_mode: 'skipped',
-    requested_profiles: [],
+    requested_profiles: []
   });
 });
 
 test('planHybridLocalReview falls back to full local review when GPT is unavailable', () => {
   const heuristics = analyzeHybridHeuristics({
     changedFiles: ['src/utils.ts'],
-    diffText: '@@\n+export const value = 1;\n',
+    diffText: '@@\n+export const value = 1;\n'
   });
 
   const plan = planHybridLocalReview({
@@ -57,19 +57,19 @@ test('planHybridLocalReview falls back to full local review when GPT is unavaila
       needs_local_deep_review: true,
       overall_risk: null,
       status: 'unavailable',
-      summary: null,
-    }),
+      summary: null
+    })
   });
 
   assert.deepEqual(plan, {
     local_mode: 'full',
-    requested_profiles: ['typescript'],
+    requested_profiles: ['typescript']
   });
 });
 
 test('createHybridGptBypassReview marks oversized diffs for local fallback', () => {
   const review = createHybridGptBypassReview(
-    `Diff exceeded ${MAX_HYBRID_GPT_DIFF_CHARS} chars.`,
+    `Diff exceeded ${MAX_HYBRID_GPT_DIFF_CHARS} chars.`
   );
 
   assert.equal(review.status, 'runtime-error');
@@ -80,7 +80,7 @@ test('createHybridGptBypassReview marks oversized diffs for local fallback', () 
 test('planHybridLocalReview forces full local review for sensitive changes before GPT focus narrowing', () => {
   const heuristics = analyzeHybridHeuristics({
     changedFiles: ['src/auth.service.ts'],
-    diffText: '@@\n+const token = process.env.API_KEY;\n',
+    diffText: '@@\n+const token = process.env.API_KEY;\n'
   });
 
   const plan = planHybridLocalReview({
@@ -89,20 +89,20 @@ test('planHybridLocalReview forces full local review for sensitive changes befor
       confidence: 'high',
       focus_profiles: ['general'],
       needs_local_deep_review: false,
-      overall_risk: 'low',
-    }),
+      overall_risk: 'low'
+    })
   });
 
   assert.deepEqual(plan, {
     local_mode: 'full',
-    requested_profiles: ['angular'],
+    requested_profiles: ['angular']
   });
 });
 
 test('planHybridLocalReview narrows the local run to GPT focus profiles when confidence is low', () => {
   const heuristics = analyzeHybridHeuristics({
     changedFiles: ['README.md', 'src/utils.ts'],
-    diffText: '@@\n+docs and code\n',
+    diffText: '@@\n+docs and code\n'
   });
 
   const plan = planHybridLocalReview({
@@ -111,20 +111,20 @@ test('planHybridLocalReview narrows the local run to GPT focus profiles when con
       confidence: 'low',
       focus_profiles: ['repo-habits'],
       needs_local_deep_review: true,
-      overall_risk: 'medium',
-    }),
+      overall_risk: 'medium'
+    })
   });
 
   assert.deepEqual(plan, {
     local_mode: 'targeted',
-    requested_profiles: ['repo-habits'],
+    requested_profiles: ['repo-habits']
   });
 });
 
 test('buildHybridReviewReport escalates when either GPT or local review blocks and deduplicates merged findings', () => {
   const heuristics = analyzeHybridHeuristics({
     changedFiles: ['src/auth.service.ts'],
-    diffText: '@@\n+execSync("whoami")\n',
+    diffText: '@@\n+execSync("whoami")\n'
   });
   const report = buildHybridReviewReport({
     heuristics,
@@ -137,12 +137,12 @@ test('buildHybridReviewReport escalates when either GPT or local review blocks a
           detail: 'Uses execSync.',
           file_path: 'src/auth.service.ts',
           line: 3,
-          recommendation: 'Avoid shell execution.',
-        },
+          recommendation: 'Avoid shell execution.'
+        }
       ],
       focus_profiles: ['angular'],
       needs_local_deep_review: true,
-      overall_risk: 'high',
+      overall_risk: 'high'
     }),
     localReviewResult: {
       local_mode: 'full',
@@ -157,17 +157,17 @@ test('buildHybridReviewReport escalates when either GPT or local review blocks a
           recommendation: 'Avoid shell execution.',
           profile: 'typescript',
           rationale: null,
-          evidence: null,
-        },
+          evidence: null
+        }
       ]),
-      error: null,
-    },
+      error: null
+    }
   });
 
   assert.equal(report.recommended_escalation, true);
   assert.match(
     report.escalation_reasons.join(' '),
-    /GPT reviewer marked the change high risk/,
+    /GPT reviewer marked the change high risk/
   );
   assert.match(report.escalation_reasons.join(' '), /sensitive area detected/);
   assert.equal(report.merged_findings.length, 1);
@@ -182,17 +182,17 @@ test('createHybridGptTelemetryContext keeps hybrid GPT observations separate fro
   const checkpointBucket = createProviderObservationBucketKey({
     ...createProviderTelemetryContext({
       callsite: 'checkpoint-review',
-      checkpoint: 'implementation',
+      checkpoint: 'implementation'
     }),
     model: 'gpt-5-mini',
     operation: 'review',
-    provider: 'copilot',
+    provider: 'copilot'
   });
   const hybridBucket = createProviderObservationBucketKey({
     ...createHybridGptTelemetryContext(),
     model: 'gpt-5-mini',
     operation: 'review',
-    provider: 'copilot',
+    provider: 'copilot'
   });
 
   assert.notEqual(checkpointBucket, hybridBucket);
@@ -221,9 +221,9 @@ function reviewReport(findings: LocalReviewFinding[]): LocalReviewReport {
           status: 'modified',
           old_path: null,
           language: 'typescript',
-          patch: '@@\n+const value = 1;\n',
-        },
-      ],
+          patch: '@@\n+const value = 1;\n'
+        }
+      ]
     },
     profiles: [{ name: 'typescript', description: 'TypeScript' }],
     findings,
@@ -231,7 +231,7 @@ function reviewReport(findings: LocalReviewFinding[]): LocalReviewReport {
     summary: 'Reviewed 1 file(s).',
     model_used: 'qwen3:8b',
     runtime_provider: 'ollama',
-    advisory_only: true,
+    advisory_only: true
   };
 }
 
@@ -247,6 +247,6 @@ function hybridGptReview(overrides: Partial<HybridGptReview>): HybridGptReview {
     findings: [],
     summary: 'Low-risk change.',
     error: null,
-    ...overrides,
+    ...overrides
   };
 }

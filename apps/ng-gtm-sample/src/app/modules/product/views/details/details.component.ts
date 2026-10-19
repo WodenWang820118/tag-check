@@ -1,11 +1,25 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, computed, effect, inject } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { AutoCompleteModule } from 'primeng/autocomplete';
-import { ButtonModule } from 'primeng/button';
-import { MessageModule } from 'primeng/message';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideArrowLeft,
+  lucideCircleAlert,
+  lucideMapPin,
+  lucideShoppingCart
+} from '@ng-icons/lucide';
+import { HlmAlertImports } from '@spartan-ng/helm/alert';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmLabel } from '@spartan-ng/helm/label';
+import { HlmNativeSelectImports } from '@spartan-ng/helm/native-select';
 import { DestinationService } from '../../../../shared/services/destination/destination.service';
 import { OrderService } from '../../../../shared/services/order/order.service';
 import { Destination } from '../../../../shared/models/destination.model';
@@ -18,11 +32,22 @@ import { getPublicDestinationBySlug } from '../../../../shared/services/destinat
   imports: [
     ReactiveFormsModule,
     FormsModule,
-    AutoCompleteModule,
-    ButtonModule,
-    MessageModule,
+    HlmAlertImports,
+    HlmButton,
+    HlmLabel,
+    HlmNativeSelectImports,
+    NgIcon,
     CurrencyPipe
   ],
+  providers: [
+    provideIcons({
+      lucideArrowLeft,
+      lucideCircleAlert,
+      lucideMapPin,
+      lucideShoppingCart
+    })
+  ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './details.component.html'
 })
 export class DetailsComponent {
@@ -39,12 +64,12 @@ export class DetailsComponent {
 
     return getPublicDestinationBySlug(slug) ?? null;
   });
-  readonly numberOfPersonsControl = new FormControl(1);
+  /** A native select reports its value as a string. */
+  readonly numberOfPersonsControl = new FormControl<number | string>(1);
   readonly personOptions = Array.from({ length: 6 }, (_, index) => ({
     label: `${index + 1} ${index + 1 === 1 ? 'person' : 'persons'}`,
     value: index + 1
   }));
-  filteredPersons: { label: string; value: number }[] = [];
 
   constructor(
     private readonly orderService: OrderService,
@@ -68,17 +93,10 @@ export class DetailsComponent {
   }
 
   addToCart(destination: Destination): void {
-    const numOfPersons = this.numberOfPersonsControl.value;
-    if (numOfPersons) {
+    const numOfPersons = Number(this.numberOfPersonsControl.value);
+    if (numOfPersons > 0) {
       this.orderService.addToCart(destination, numOfPersons);
     }
-  }
-
-  filterPersons(event: { query: string }): void {
-    const query = event.query?.toLowerCase() || '';
-    this.filteredPersons = this.personOptions.filter((option) =>
-      option.label.toLowerCase().startsWith(query)
-    );
   }
 
   getImageSrc(image: string | undefined) {
