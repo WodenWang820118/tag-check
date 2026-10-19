@@ -546,7 +546,7 @@ dependencies = [
 
 [[package]]
 name = "desktop-tauri"
-version = "2.1.1"
+version = "2.2.0"
 dependencies = [
  "log",
  "serde",
