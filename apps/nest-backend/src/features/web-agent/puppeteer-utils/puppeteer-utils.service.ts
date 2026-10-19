@@ -7,6 +7,8 @@ import { ConfigsService } from '../../../core/configs/configs.service';
 import { RecordingRepositoryService } from '../.././../core/repository/recording/recording-repository.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 
+const CLOSE_TIMEOUT_MS = 10_000;
+
 @Injectable()
 export class PuppeteerUtilsService {
   private readonly logger = new Logger(PuppeteerUtilsService.name);
@@ -46,8 +48,10 @@ export class PuppeteerUtilsService {
 
     const browser: Browser = await stats.puppeteer.launch({
       headless: headlessFlag,
-      // enable devtools when measurementId present (useful for debugging)
-      devtools: !!measurementId,
+      // Open DevTools for headful GA4 runs so the user can watch the network.
+      // Headless runs skip it: nobody sees it, and a tab with DevTools
+      // attached never finishes page.close().
+      devtools: !headlessFlag && !!measurementId,
       acceptInsecureCerts: true,
       args: mergedArgs,
       executablePath: stats.executablePath,
@@ -83,16 +87,46 @@ export class PuppeteerUtilsService {
     await this.stopRecorder(recorder);
 
     if (page) {
-      await page
-        .close()
-        .catch((err) => this.logger.error(`Error closing page: ${err}`));
+      await this.settleWithin(page.close(), 'closing page');
     }
 
     if (browser) {
-      await browser
-        .close()
-        .catch((err) => this.logger.error(`Error closing browser: ${err}`));
+      const closed = await this.settleWithin(
+        browser.close(),
+        'closing browser'
+      );
+      if (!closed) {
+        browser.process()?.kill('SIGKILL');
+      }
     }
+  }
+
+  /**
+   * Waits for a close call, but never longer than CLOSE_TIMEOUT_MS: a stalled
+   * close would otherwise hold the HTTP request open indefinitely.
+   * Resolves false when the call timed out.
+   */
+  private async settleWithin(
+    operation: Promise<unknown>,
+    action: string
+  ): Promise<boolean> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timedOut = new Promise<false>((resolve) => {
+      timer = setTimeout(() => resolve(false), CLOSE_TIMEOUT_MS);
+    });
+    const settled = operation.then(
+      () => true as const,
+      (err) => {
+        this.logger.error(`Error ${action}: ${err}`);
+        return true as const;
+      }
+    );
+    const result = await Promise.race([settled, timedOut]);
+    clearTimeout(timer);
+    if (!result) {
+      this.logger.warn(`Gave up ${action} after ${CLOSE_TIMEOUT_MS}ms`);
+    }
+    return result;
   }
 
   async startRecorder(
