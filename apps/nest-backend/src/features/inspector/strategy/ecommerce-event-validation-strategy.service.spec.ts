@@ -42,4 +42,20 @@ describe('EcommerceEventValidationStrategy', () => {
     expect(spy).toHaveBeenCalledWith(spec, dataLayer[2]);
     expect(result.passed).toBe(true);
   });
+
+  it('requires a reset for every validation instead of remembering an earlier one', () => {
+    const { strategy } = build();
+    strategy.validateDataLayer(
+      [{ ecommerce: null }, { event: 'purchase' }] as never,
+      { event: 'purchase' } as never
+    );
+    const result = strategy.validateDataLayer(
+      [{ event: 'purchase' }] as never,
+      { event: 'purchase' } as never
+    );
+    expect(result.passed).toBe(false);
+    expect(result.message).toContain(
+      'https://developers.google.com/analytics/devguides/collection/ga4/ecommerce'
+    );
+  });
 });

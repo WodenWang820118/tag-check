@@ -125,6 +125,9 @@ export class SpecRepositoryService {
 
     newSpec.eventName = spec.event ?? '';
     newSpec.dataLayerSpec = spec.dataLayerSpec;
+    if (spec.rawGtmTag) {
+      newSpec.rawGtmTag = spec.rawGtmTag;
+    }
     const entity = await this.repository.update(
       { testEvent: testEvent },
       newSpec

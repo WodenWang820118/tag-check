@@ -81,7 +81,7 @@ describe('ValidationStrategy', () => {
           items: [
             {
               item_id: '$item_id',
-              item_name: '^(?:switzerland|california)$',
+              item_name: '/^(?:Switzerland|California)$/',
               item_category: 'Europe',
               quantity: 1,
               price: 200
@@ -167,8 +167,8 @@ describe('ValidationStrategy', () => {
         );
 
         expect(result.passed).toBe(false);
-        expect(result.message).toBe(
-          `ecommerce must be reset before firing ${spec.event}.`
+        expect(result.message).toContain(
+          `ecommerce must be reset with { ecommerce: null } before firing ${spec.event}`
         );
       });
     });
