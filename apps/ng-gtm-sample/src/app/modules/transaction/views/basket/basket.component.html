@@ -1,10 +1,10 @@
 @let items = basketItems$();
 @if (!items?.length) {
   <div class="sample-panel mx-auto max-w-3xl p-8">
-    <p-message
-      severity="info"
-      text="There are no items in your basket."
-    ></p-message>
+    <div hlmAlert class="border-blue-200 bg-blue-50 text-blue-900">
+      <ng-icon name="lucideInfo" />
+      <p hlmAlertDescription>There are no items in your basket.</p>
+    </div>
   </div>
 } @else {
   @let width = windowSizeService.width$();
@@ -14,7 +14,7 @@
     >
       <div>
         <div class="sample-eyebrow text-slate-400">
-          <i class="pi pi-shopping-cart text-sm"></i>
+          <ng-icon name="lucideShoppingCart" class="text-sm" />
           Basket
         </div>
         <h1 class="mt-3 text-3xl font-black tracking-tight text-slate-950">
@@ -27,97 +27,111 @@
       </div>
 
       <button
-        pButton
+        hlmBtn
         type="button"
-        label="Checkout"
-        icon="pi pi-arrow-right"
-        iconPos="right"
+        data-testid="begin-checkout"
         (click)="beginCheckout(); navigateToBeginCheckout()"
-      ></button>
+      >
+        Checkout
+        <ng-icon name="lucideArrowRight" />
+      </button>
     </div>
 
     @if (width > 640) {
       <div class="sample-panel overflow-hidden p-3">
-        <p-table [value]="items || []" [responsiveLayout]="'scroll'">
-          <ng-template pTemplate="header">
-            <tr>
-              <th scope="col">Destination</th>
-              <th scope="col">Travelers</th>
-              <th scope="col">Total Price</th>
-              <th scope="col">Actions</th>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-item>
-            <tr>
-              <td>
-                <div class="flex items-center gap-4 py-2">
-                  <img
-                    [src]="item.image"
-                    [alt]="item.title"
-                    class="h-14 w-14 rounded-2xl object-cover"
-                  />
-                  <div>
-                    <div class="font-semibold text-slate-900">
-                      {{ item.title }}
+        <div hlmTableContainer>
+          <table hlmTable>
+            <thead hlmTHead>
+              <tr hlmTr>
+                <th hlmTh scope="col">Destination</th>
+                <th hlmTh scope="col">Travelers</th>
+                <th hlmTh scope="col">Total Price</th>
+                <th hlmTh scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody hlmTBody>
+              @for (item of items; track item.id) {
+                <tr hlmTr [attr.data-testid]="'cart-item-' + item.id">
+                  <td hlmTd>
+                    <div class="flex items-center gap-4 py-2">
+                      <img
+                        [src]="item.image"
+                        [alt]="item.title"
+                        class="h-14 w-14 rounded-2xl object-cover"
+                      />
+                      <div>
+                        <div class="font-semibold text-slate-900">
+                          {{ item.title }}
+                        </div>
+                        <div class="text-sm text-slate-500">
+                          Ref. {{ item.id }}
+                        </div>
+                      </div>
                     </div>
-                    <div class="text-sm text-slate-500">Ref. {{ item.id }}</div>
+                  </td>
+                  <td hlmTd>{{ item.quantity }}</td>
+                  <td hlmTd>{{ item.value | currency }}</td>
+                  <td hlmTd>
+                    <div class="flex flex-wrap gap-2">
+                      <button
+                        hlmBtn
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        [attr.aria-label]="'Edit ' + item.title"
+                        [attr.data-testid]="'cart-edit-' + item.id"
+                        (click)="updateCart(item.id)"
+                      >
+                        <ng-icon name="lucidePencil" />
+                      </button>
+                      <button
+                        hlmBtn
+                        variant="ghost"
+                        size="icon"
+                        type="button"
+                        class="text-red-600 hover:bg-red-50 hover:text-red-700"
+                        [attr.aria-label]="'Remove ' + item.title"
+                        [attr.data-testid]="'cart-remove-' + item.id"
+                        (click)="removeFromCart(item)"
+                      >
+                        <ng-icon name="lucideTrash2" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot hlmTFoot>
+              <tr hlmTr>
+                <td hlmTd colspan="4">
+                  <div class="flex items-center justify-between px-2 py-3">
+                    <span class="text-sm font-medium text-slate-500">
+                      {{ items.length }} item(s) ready
+                    </span>
+                    <span class="text-lg font-bold text-slate-900">
+                      Total: {{ cartTotal() | currency }}
+                    </span>
                   </div>
-                </div>
-              </td>
-              <td>{{ item.quantity }}</td>
-              <td>{{ item.value | currency }}</td>
-              <td>
-                <div class="flex flex-wrap gap-2">
-                  <button
-                    pButton
-                    type="button"
-                    icon="pi pi-pencil"
-                    severity="secondary"
-                    [text]="true"
-                    (click)="updateCart(item.id)"
-                  ></button>
-                  <button
-                    pButton
-                    type="button"
-                    icon="pi pi-trash"
-                    severity="danger"
-                    [text]="true"
-                    (click)="removeFromCart(item)"
-                  ></button>
-                </div>
-              </td>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="footer">
-            <tr>
-              <td colspan="4">
-                <div class="flex items-center justify-between px-2 py-3">
-                  <span class="text-sm font-medium text-slate-500">
-                    {{ items.length }} item(s) ready
-                  </span>
-                  <span class="text-lg font-bold text-slate-900">
-                    Total: {{ cartTotal() | currency }}
-                  </span>
-                </div>
-              </td>
-            </tr>
-          </ng-template>
-        </p-table>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
     } @else {
       <div class="grid gap-4">
         @for (item of items; track item.id) {
-          <p-card
-            styleClass="rounded-[1.5rem] border border-slate-200 shadow-sm overflow-hidden"
+          <section
+            hlmCard
+            class="gap-4 overflow-hidden rounded-[1.5rem] pt-0 text-base shadow-sm"
+            [attr.data-testid]="'cart-item-' + item.id"
           >
-            <ng-template pTemplate="header">
-              <img
-                [src]="item.image"
-                [alt]="item.title"
-                class="h-52 w-full object-cover"
-              />
-            </ng-template>
-            <div class="space-y-2">
+            <img
+              [src]="item.image"
+              [alt]="item.title"
+              class="h-52 w-full object-cover"
+            />
+            <div class="space-y-2 px-6">
               <h3 class="text-xl font-semibold text-slate-900">
                 {{ item.title }}
               </h3>
@@ -129,26 +143,29 @@
               </p>
               <div class="flex flex-wrap gap-2 pt-2">
                 <button
-                  pButton
+                  hlmBtn
+                  variant="outline"
                   type="button"
-                  label="Edit"
-                  icon="pi pi-pencil"
-                  severity="secondary"
-                  [outlined]="true"
+                  [attr.data-testid]="'cart-edit-' + item.id"
                   (click)="updateCart(item.id)"
-                ></button>
+                >
+                  <ng-icon name="lucidePencil" />
+                  Edit
+                </button>
                 <button
-                  pButton
+                  hlmBtn
+                  variant="outline"
                   type="button"
-                  label="Delete"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  [outlined]="true"
+                  class="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  [attr.data-testid]="'cart-remove-' + item.id"
                   (click)="removeFromCart(item)"
-                ></button>
+                >
+                  <ng-icon name="lucideTrash2" />
+                  Delete
+                </button>
               </div>
             </div>
-          </p-card>
+          </section>
         }
       </div>
 
@@ -159,13 +176,14 @@
           Total: {{ cartTotal() | currency }}
         </span>
         <button
-          pButton
+          hlmBtn
           type="button"
-          label="Proceed"
-          icon="pi pi-arrow-right"
-          iconPos="right"
+          data-testid="begin-checkout"
           (click)="beginCheckout(); navigateToBeginCheckout()"
-        ></button>
+        >
+          Proceed
+          <ng-icon name="lucideArrowRight" />
+        </button>
       </div>
     }
   </section>

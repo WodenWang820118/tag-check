@@ -56,16 +56,16 @@ test('the home carousel pushes view_promotion as a recommended ecommerce event',
   }
 });
 
-// Clicks by accessible name: the example project's recorded CSS selectors
-// (`main div > button`) predate the Tailwind/PrimeNG redesign and now hit the
-// "All Destinations" button instead.
+// Uses the data-testid hooks the example project's recordings click. Picking the
+// slide with its dot first stops autoplay, so the explore button stays put.
 test('adding a destination to the cart pushes the item the example project expects', async ({
   page
 }) => {
   await page.goto('/home');
-  await page.locator('div.p-carousel-item-end img').first().click();
+  await page.getByTestId('promotion-dot-city001').click();
+  await page.getByTestId('promotion-explore-city001').click();
   await expectRecommendedEcommercePush(page, 'view_item');
-  await page.getByRole('button', { name: 'Add to Cart' }).click();
+  await page.getByTestId('add-to-cart').click();
 
   const addToCart = await expectRecommendedEcommercePush(page, 'add_to_cart');
   expect(addToCart['ecommerce']).toMatchObject({

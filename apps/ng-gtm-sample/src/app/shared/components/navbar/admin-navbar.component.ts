@@ -3,13 +3,35 @@ import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
 import { OrderService } from '../../services/order/order.service';
-import { ButtonModule } from 'primeng/button';
-import { ToolbarModule } from 'primeng/toolbar';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideChartColumn,
+  lucideCompass,
+  lucideHouse,
+  lucideLogOut,
+  lucideMap,
+  lucidePlus,
+  lucideShoppingCart,
+  lucideUser
+} from '@ng-icons/lucide';
+import { HlmButton } from '@spartan-ng/helm/button';
 
 @Component({
   selector: 'app-admin-navbar',
   standalone: true,
-  imports: [RouterModule, ToolbarModule, ButtonModule],
+  imports: [RouterModule, HlmButton, NgIcon],
+  providers: [
+    provideIcons({
+      lucideChartColumn,
+      lucideCompass,
+      lucideHouse,
+      lucideLogOut,
+      lucideMap,
+      lucidePlus,
+      lucideShoppingCart,
+      lucideUser
+    })
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './admin-navbar.component.html'
 })

@@ -1,7 +1,35 @@
-@layer theme, base, primeng, components, utilities;
+@layer theme, base, components, utilities;
 @import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/preflight.css' layer(base);
 @import 'tailwindcss/utilities.css' layer(utilities);
-@import 'primeicons/primeicons.css';
+@import '@spartan-ng/brain/hlm-tailwind-preset.css';
+
+@source '../../../libs/ui-helm';
+
+/* spartan/ui tokens (slate base). Primary stays emerald, the storefront's call-to-action colour. */
+:root {
+  color-scheme: light;
+  --font-sans: var(--sample-font-family);
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.129 0.042 264.695);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+  --primary: oklch(0.696 0.17 162.48);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.554 0.046 257.417);
+  --accent: oklch(0.968 0.007 247.896);
+  --accent-foreground: oklch(0.208 0.042 265.755);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.929 0.013 255.508);
+  --input: oklch(0.929 0.013 255.508);
+  --ring: oklch(0.696 0.17 162.48);
+}
 
 :root {
   --sample-font-family: 'Segoe UI', 'Noto Sans', 'Helvetica Neue', sans-serif;
@@ -24,6 +52,7 @@
   *::before,
   *::after {
     box-sizing: border-box;
+    @apply border-border outline-ring/50;
   }
 
   html {

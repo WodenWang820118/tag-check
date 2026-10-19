@@ -1,0 +1,10 @@
+{
+  "name": "ui-helm",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/ui-helm/src",
+  "prefix": "hlm",
+  "tags": ["scope:ng-gtm-sample", "type:ui"],
+  "projectType": "library",
+  "// targets": "to see all targets run: nx show project ui-helm --web",
+  "targets": {}
+}

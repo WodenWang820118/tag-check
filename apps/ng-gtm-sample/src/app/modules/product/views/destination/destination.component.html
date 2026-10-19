@@ -4,21 +4,23 @@
   >
     <div class="flex flex-wrap items-center gap-3">
       <button
-        pButton
+        hlmBtn
+        variant="outline"
         type="button"
-        label="All Destinations"
-        severity="secondary"
-        [outlined]="true"
+        data-testid="filter-all"
         (click)="navigateToSearchResults('all')"
-      ></button>
+      >
+        All Destinations
+      </button>
       <button
-        pButton
+        hlmBtn
+        variant="outline"
         type="button"
-        label="Island Escapes"
-        severity="secondary"
-        [outlined]="true"
+        data-testid="filter-islands"
         (click)="navigateToSearchResults('islands')"
-      ></button>
+      >
+        Island Escapes
+      </button>
     </div>
 
     <form
@@ -28,31 +30,38 @@
       (ngSubmit)="onSubmit()"
     >
       <input
-        pInputText
+        hlmInput
         id="searchTerm"
         formControlName="searchTerm"
         type="search"
-        class="w-full"
+        class="w-full bg-white"
         placeholder="Search destinations..."
+        aria-label="Search destinations"
+        data-testid="search-input"
       />
       <button
-        pButton
+        hlmBtn
         type="submit"
-        label="Search"
-        icon="pi pi-search"
+        data-testid="search-submit"
         [disabled]="!searchForm.get('searchTerm')?.value"
-      ></button>
+      >
+        <ng-icon name="lucideSearch" />
+        Search
+      </button>
     </form>
   </section>
 
   @if (destinations$().length > 0) {
     <section id="content-chooser" class="grid gap-6 xl:grid-cols-3">
       @for (destination of destinations$(); track destination.id) {
-        <article class="sample-panel overflow-hidden p-5">
+        <article
+          class="sample-panel overflow-hidden p-5"
+          [attr.data-testid]="'destination-' + destination.id"
+        >
           <div class="flex h-full flex-col gap-5">
             <div class="space-y-2">
               <div class="sample-eyebrow text-slate-400">
-                <i class="pi pi-map-marker text-sm"></i>
+                <ng-icon name="lucideMapPin" class="text-sm" />
                 Destination
               </div>
               <div>
@@ -143,22 +152,25 @@
               </span>
               <div class="flex flex-wrap gap-2">
                 <button
-                  pButton
+                  hlmBtn
                   type="button"
-                  label="Details"
-                  icon="pi pi-arrow-right"
+                  [attr.data-testid]="'destination-details-' + destination.id"
                   (click)="goToDetails(destination); selectItem(destination)"
-                ></button>
+                >
+                  <ng-icon name="lucideArrowRight" />
+                  Details
+                </button>
                 <button
-                  pButton
+                  hlmBtn
+                  variant="outline"
                   type="button"
-                  label="Video"
-                  icon="pi pi-play"
-                  severity="secondary"
-                  [outlined]="true"
+                  [attr.data-testid]="'destination-video-' + destination.id"
                   [disabled]="!destination.video"
                   (click)="showModal(destination.video)"
-                ></button>
+                >
+                  <ng-icon name="lucidePlay" />
+                  Video
+                </button>
               </div>
             </div>
           </div>
@@ -168,53 +180,58 @@
 
     <div class="flex justify-center gap-3">
       <button
-        pButton
+        hlmBtn
+        variant="outline"
         type="button"
-        label="Previous"
-        icon="pi pi-arrow-left"
-        severity="secondary"
-        [outlined]="true"
+        data-testid="destinations-previous"
         [disabled]="isPreviousDisabled()"
         (click)="getPreviousDestinations()"
-      ></button>
+      >
+        <ng-icon name="lucideArrowLeft" />
+        Previous
+      </button>
       <button
-        pButton
+        hlmBtn
+        variant="outline"
         type="button"
-        label="Next"
-        icon="pi pi-arrow-right"
-        iconPos="right"
-        severity="secondary"
-        [outlined]="true"
+        data-testid="destinations-next"
         [disabled]="isNextDisabled()"
         (click)="getNextDestinations()"
-      ></button>
+      >
+        Next
+        <ng-icon name="lucideArrowRight" />
+      </button>
     </div>
   } @else {
     <div class="sample-panel mx-auto max-w-3xl p-8">
-      <p-message
-        severity="info"
-        text="No destinations match your search yet."
-      ></p-message>
+      <div hlmAlert class="border-blue-200 bg-blue-50 text-blue-900">
+        <ng-icon name="lucideInfo" />
+        <p hlmAlertDescription>No destinations match your search yet.</p>
+      </div>
     </div>
   }
 
-  <p-dialog
-    header="Destination Video"
-    [(visible)]="videoDialogVisible"
-    [modal]="true"
-    [style]="{ width: 'min(42rem, calc(100vw - 1.5rem))' }"
-    [baseZIndex]="10000"
-    (onHide)="closeModal()"
+  <hlm-dialog
+    [state]="videoDialogVisible ? 'open' : 'closed'"
+    (closed)="closeModal()"
   >
-    <youtube-player
-      #player
-      [id]="'yt-player-' + videoId$()"
-      class="w-full"
-      [videoId]="videoId$()"
-      [playerVars]="playerVars"
-      (stateChange)="onStateChange($event)"
-      disablePlaceholder="true"
-      placeholderButtonLabel="destination intro video"
-    ></youtube-player>
-  </p-dialog>
+    <hlm-dialog-content
+      *hlmDialogPortal="let ctx"
+      class="w-[min(42rem,calc(100vw-1.5rem))] sm:max-w-none"
+    >
+      <hlm-dialog-header>
+        <h3 hlmDialogTitle>Destination Video</h3>
+      </hlm-dialog-header>
+      <youtube-player
+        #player
+        [id]="'yt-player-' + videoId$()"
+        class="w-full"
+        [videoId]="videoId$()"
+        [playerVars]="playerVars"
+        (stateChange)="onStateChange($event)"
+        disablePlaceholder="true"
+        placeholderButtonLabel="destination intro video"
+      ></youtube-player>
+    </hlm-dialog-content>
+  </hlm-dialog>
 </div>

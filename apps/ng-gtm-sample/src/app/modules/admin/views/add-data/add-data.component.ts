@@ -1,9 +1,21 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
-import { MessageModule } from 'primeng/message';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideCircleAlert,
+  lucideCircleCheck,
+  lucideDatabase,
+  lucideInfo,
+  lucideSave
+} from '@ng-icons/lucide';
+import { HlmAlertImports } from '@spartan-ng/helm/alert';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmCard } from '@spartan-ng/helm/card';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmLabel } from '@spartan-ng/helm/label';
+import { HlmNativeSelectImports } from '@spartan-ng/helm/native-select';
+import { HlmSpinner } from '@spartan-ng/helm/spinner';
+import { HlmTextarea } from '@spartan-ng/helm/textarea';
 import { DestinationImageSlot } from '../../../../shared/models/create-destination-draft.model';
 import { AddDataFacadeService } from './add-data-facade.service';
 
@@ -22,12 +34,26 @@ interface MediaFieldConfig {
   selector: 'app-add-data',
   imports: [
     ReactiveFormsModule,
-    InputTextModule,
-    ButtonModule,
-    CardModule,
-    MessageModule
+    HlmAlertImports,
+    HlmButton,
+    HlmCard,
+    HlmInput,
+    HlmLabel,
+    HlmNativeSelectImports,
+    HlmSpinner,
+    HlmTextarea,
+    NgIcon
   ],
-  providers: [AddDataFacadeService],
+  providers: [
+    AddDataFacadeService,
+    provideIcons({
+      lucideCircleAlert,
+      lucideCircleCheck,
+      lucideDatabase,
+      lucideInfo,
+      lucideSave
+    })
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './add-data.component.html'
 })

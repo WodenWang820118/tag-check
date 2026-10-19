@@ -2,7 +2,7 @@
 
 ## Home Flow
 
-- Open `/home` and confirm the Tailwind/PrimeNG shell renders without layout collapse.
+- Open `/home` and confirm the Tailwind/Spartan NG shell renders without layout collapse.
 - Confirm the featured carousel advances and the CTA routes into the destination catalog.
 - Open cookie settings and verify the modal toggles and save controls still respond.
 - If GTM preview or a `dataLayer` inspector is available, confirm page-view level events still appear after the home shell loads.

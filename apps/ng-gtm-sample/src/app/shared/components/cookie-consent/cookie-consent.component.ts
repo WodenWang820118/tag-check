@@ -9,9 +9,11 @@ import {
 import { ConsentService } from '../../services/consent/consent.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { DialogModule } from 'primeng/dialog';
-import { ButtonModule } from 'primeng/button';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideCheck, lucideSettings } from '@ng-icons/lucide';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmDialogImports } from '@spartan-ng/helm/dialog';
+import { HlmSwitch } from '@spartan-ng/helm/switch';
 
 @Component({
   selector: 'app-cookie-consent',
@@ -19,10 +21,12 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
   imports: [
     CommonModule,
     FormsModule,
-    DialogModule,
-    ToggleSwitchModule,
-    ButtonModule
+    HlmButton,
+    HlmDialogImports,
+    HlmSwitch,
+    NgIcon
   ],
+  providers: [provideIcons({ lucideCheck, lucideSettings })],
   templateUrl: './cookie-consent.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

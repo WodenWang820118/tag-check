@@ -1,12 +1,22 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MapComponent } from '../../components/map/map.component';
 import { CardComponent } from '../../components/card/card.component';
-import { ButtonModule } from 'primeng/button';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import {
+  lucideChartPie,
+  lucideMapPin,
+  lucidePlus,
+  lucideZap
+} from '@ng-icons/lucide';
+import { HlmButton } from '@spartan-ng/helm/button';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [MapComponent, CardComponent, ButtonModule],
+  imports: [MapComponent, CardComponent, HlmButton, NgIcon],
+  providers: [
+    provideIcons({ lucideChartPie, lucideMapPin, lucidePlus, lucideZap })
+  ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard.component.html'
 })
@@ -42,13 +52,13 @@ export class DashboardComponent {
     {
       number: '235',
       text: 'TOTAL IDEAS',
-      icon: 'pi pi-bolt',
+      icon: 'lucideZap',
       accent: 'bg-emerald-100 text-emerald-700'
     },
     {
       number: '26',
       text: 'TOTAL LOCATIONS',
-      icon: 'pi pi-map-marker',
+      icon: 'lucideMapPin',
       accent: 'bg-blue-100 text-blue-700'
     }
   ];
