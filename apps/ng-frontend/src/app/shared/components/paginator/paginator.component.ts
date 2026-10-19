@@ -5,7 +5,8 @@ import {
   computed,
   viewChild,
   effect,
-  ViewEncapsulation
+  ViewEncapsulation,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {
@@ -50,6 +51,7 @@ import { MatIconModule } from '@angular/material/icon';
       }
     `
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None
 })
 export class PaginatorComponent {

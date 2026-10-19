@@ -199,9 +199,6 @@
         "buildTarget": "ng-frontend:build"
       }
     },
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    },
     "test": {
       "executor": "@angular/build:unit-test",
       "options": {

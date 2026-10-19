@@ -1,5 +1,5 @@
 import { JsonPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'lib-article',
@@ -51,6 +51,7 @@ import { Component } from '@angular/core';
       }
     `
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [JsonPipe]
 })
 export class ArticleComponent {

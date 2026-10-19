@@ -4,7 +4,8 @@ import {
   input,
   output,
   signal,
-  effect
+  effect,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { MatListModule } from '@angular/material/list';
@@ -39,6 +40,7 @@ import { MatSidenav } from '@angular/material/sidenav';
   ],
   templateUrl: './side-nav-list.component.html',
   styleUrls: ['./side-nav-list.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None
 })
 export class SideNavListComponent {

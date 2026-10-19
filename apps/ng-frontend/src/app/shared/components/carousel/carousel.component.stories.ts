@@ -7,7 +7,7 @@ import {
 import { CarouselComponent } from './carousel.component';
 
 import { AsyncPipe } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { APP_ROUTES } from '../../../app.routes';
 
@@ -21,7 +21,7 @@ const meta: Meta<CarouselComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(APP_ROUTES)]
     })
   ]
 };

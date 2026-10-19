@@ -11,6 +11,6 @@ const services = [FilePathService, PathUtilsService, FolderPathService];
 @Module({
   imports: [...modules],
   providers: [...services],
-  exports: [...services],
+  exports: [...services]
 })
 export class FilePathModule {}

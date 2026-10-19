@@ -14,16 +14,22 @@
             >
           </div>
           <div formArrayName="settings">
-            @for (item of localStorageFormArrayValue; track item.value; let idx
-            = $index;) {
-            <div class="browser-form__sub-form" [formGroupName]="idx">
-              <mat-form-field class="browser-form__field" appearance="outline">
-                <input matInput formControlName="value" placeholder="value" />
-              </mat-form-field>
-              <button mat-icon-button (click)="removeBrowserSetting(idx)">
-                <mat-icon>remove_circle_outline</mat-icon>
-              </button>
-            </div>
+            @for (
+              item of localStorageFormArrayValue;
+              track item.value;
+              let idx = $index
+            ) {
+              <div class="browser-form__sub-form" [formGroupName]="idx">
+                <mat-form-field
+                  class="browser-form__field"
+                  appearance="outline"
+                >
+                  <input matInput formControlName="value" placeholder="value" />
+                </mat-form-field>
+                <button mat-icon-button (click)="removeBrowserSetting(idx)">
+                  <mat-icon>remove_circle_outline</mat-icon>
+                </button>
+              </div>
             }
           </div>
           <mat-card-actions align="start">

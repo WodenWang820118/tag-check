@@ -2,7 +2,8 @@
   "extends": "./tsconfig.project.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": ["@angular/localize"]
+    "types": ["@angular/localize"],
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*.ts"],
   "exclude": [
@@ -21,5 +22,13 @@
     "src/**/*.test.jsx",
     "src/**/*.spec.jsx",
     "src/test-setup.ts"
-  ]
+  ],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

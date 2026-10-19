@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { ToolbarComponent } from './toolbar.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -38,7 +38,7 @@ const meta: Meta<ToolbarComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(APP_ROUTES)]
     })
   ]
 };

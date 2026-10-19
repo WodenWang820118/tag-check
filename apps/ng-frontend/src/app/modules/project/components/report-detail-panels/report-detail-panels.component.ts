@@ -1,6 +1,21 @@
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { Component, computed, DestroyRef, inject, input, signal } from '@angular/core';
-import { catchError, distinctUntilChanged, finalize, of, switchMap, take } from 'rxjs';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  signal,
+  ChangeDetectionStrategy
+} from '@angular/core';
+import {
+  catchError,
+  distinctUntilChanged,
+  finalize,
+  of,
+  switchMap,
+  take
+} from 'rxjs';
 import {
   DataLayerSpec,
   ItemDef,
@@ -34,7 +49,9 @@ function parseJson<T>(content: string): T | null {
 function isValidSpecContent(
   spec: StrictDataLayerEvent | null
 ): spec is StrictDataLayerEvent {
-  return !!spec && typeof spec.event === 'string' && spec.event.trim().length > 0;
+  return (
+    !!spec && typeof spec.event === 'string' && spec.event.trim().length > 0
+  );
 }
 
 function normalizeItemDefContent(
@@ -65,11 +82,9 @@ function normalizeItemDefContent(
 @Component({
   selector: 'app-report-detail-panels',
   standalone: true,
-  imports: [
-    ReportDetailPanelsViewComponent,
-    EditorComponent
-  ],
+  imports: [ReportDetailPanelsViewComponent, EditorComponent],
   providers: [ReportDetailPanelsFacadeService],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (context()) {
       <app-report-detail-panels-view
@@ -149,7 +164,9 @@ export class ReportDetailPanelsComponent {
   editItemId = signal('');
   editTemplateName = signal('');
 
-  itemDefLookupId = computed(() => this.specContent()?.dataLayerSpec.event ?? '');
+  itemDefLookupId = computed(
+    () => this.specContent()?.dataLayerSpec.event ?? ''
+  );
   rawRequest = computed(() => this.context()?.reportDetails?.rawRequest ?? '');
   dataLayerContent = computed(() =>
     stringifyJson(this.context()?.reportDetails?.dataLayer)
@@ -208,10 +225,12 @@ export class ReportDetailPanelsComponent {
           }
 
           this.itemDefLoading.set(true);
-          return this.reportDetailPanelsFacadeService.getItemDefById(itemId).pipe(
-            catchError(() => of(null)),
-            finalize(() => this.itemDefLoading.set(false))
-          );
+          return this.reportDetailPanelsFacadeService
+            .getItemDefById(itemId)
+            .pipe(
+              catchError(() => of(null)),
+              finalize(() => this.itemDefLoading.set(false))
+            );
         }),
         takeUntilDestroyed(this.destroyRef)
       )
@@ -253,9 +272,13 @@ export class ReportDetailPanelsComponent {
 
   toggleItemDefEdit() {
     if (!this.itemDefEditMode()) {
-      this.editItemId.set(this.itemDefContent()?.itemId ?? this.itemDefLookupId());
+      this.editItemId.set(
+        this.itemDefContent()?.itemId ?? this.itemDefLookupId()
+      );
       this.editTemplateName.set(this.itemDefContent()?.templateName ?? '');
-      this.itemDefDraftText.set(stringifyJson(this.itemDefContent()?.fullItemDef));
+      this.itemDefDraftText.set(
+        stringifyJson(this.itemDefContent()?.fullItemDef)
+      );
       this.itemDefSyntaxError.set(false);
     }
 
@@ -263,9 +286,13 @@ export class ReportDetailPanelsComponent {
   }
 
   cancelItemDefEdit() {
-    this.editItemId.set(this.itemDefContent()?.itemId ?? this.itemDefLookupId());
+    this.editItemId.set(
+      this.itemDefContent()?.itemId ?? this.itemDefLookupId()
+    );
     this.editTemplateName.set(this.itemDefContent()?.templateName ?? '');
-    this.itemDefDraftText.set(stringifyJson(this.itemDefContent()?.fullItemDef));
+    this.itemDefDraftText.set(
+      stringifyJson(this.itemDefContent()?.fullItemDef)
+    );
     this.itemDefSyntaxError.set(false);
     this.itemDefEditMode.set(false);
   }

@@ -1,4 +1,9 @@
-import { Component, Inject, inject } from '@angular/core';
+import {
+  Component,
+  Inject,
+  inject,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_SNACK_BAR_DATA,
@@ -31,6 +36,7 @@ import {
     }
   `,
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatButtonModule,
     MatSnackBarLabel,

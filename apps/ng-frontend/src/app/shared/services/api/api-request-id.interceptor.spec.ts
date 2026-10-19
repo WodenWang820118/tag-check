@@ -1,7 +1,8 @@
 import {
   HttpClient,
   provideHttpClient,
-  withInterceptors
+  withInterceptors,
+  withXhr
 } from '@angular/common/http';
 import {
   HttpTestingController,
@@ -22,7 +23,10 @@ describe('apiRequestIdInterceptor', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(withInterceptors([apiRequestIdInterceptor])),
+        provideHttpClient(
+          withXhr(),
+          withInterceptors([apiRequestIdInterceptor])
+        ),
         provideHttpClientTesting()
       ]
     });

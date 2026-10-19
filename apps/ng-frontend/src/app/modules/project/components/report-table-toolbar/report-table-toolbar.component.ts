@@ -1,5 +1,5 @@
 import { UploadSpecService } from './../../../../shared/services/upload-spec/upload-spec.service';
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { firstValueFrom } from 'rxjs';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -31,6 +31,7 @@ import { ReportTableDataSourceModelService } from '../../services/report-table-d
     MatButtonToggleModule
   ],
   templateUrl: './report-table-toolbar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./report-table-toolbar.component.scss']
 })
 export class ReportTableToolbarComponent {

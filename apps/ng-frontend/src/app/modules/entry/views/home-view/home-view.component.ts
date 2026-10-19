@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ProjectListComponent } from '../../components/project-list/project-list.component';
 
 @Component({
   selector: 'app-home-view',
   standalone: true,
   imports: [ProjectListComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div>
       <div class="mt-8">

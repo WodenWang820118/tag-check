@@ -8,7 +8,8 @@ import {
   inject,
   OnDestroy,
   viewChild,
-  ViewEncapsulation
+  ViewEncapsulation,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { EventBusService, XlsxProcessFacade } from '@data-access';
@@ -48,6 +49,7 @@ import { MatTableModule } from '@angular/material/table';
   ],
   templateUrl: `./xlsx-sidenav.component.html`,
   styleUrls: ['./xlsx-sidenav.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None
 })
 export class XlsxSidenavComponent implements AfterViewInit, OnDestroy {

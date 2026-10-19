@@ -8,7 +8,7 @@ import {
   buildWindowsProcessBridgePayload,
   createLocalReviewerDependencies,
   createLocalReviewerEnv,
-  resolveLocalReviewerRepoRoot,
+  resolveLocalReviewerRepoRoot
 } from './environment.ts';
 
 test('resolveLocalReviewerRepoRoot finds the sibling workspace', () => {
@@ -19,7 +19,7 @@ test('resolveLocalReviewerRepoRoot finds the sibling workspace', () => {
   try {
     mkdirSync(currentRepo, { recursive: true });
     mkdirSync(resolve(siblingRepo, 'packages', 'local-reviewer', 'bin'), {
-      recursive: true,
+      recursive: true
     });
     writeFileSync(resolve(currentRepo, 'package.json'), '{}', 'utf8');
     writeFileSync(resolve(siblingRepo, 'package.json'), '{}', 'utf8');
@@ -29,10 +29,10 @@ test('resolveLocalReviewerRepoRoot finds the sibling workspace', () => {
         'packages',
         'local-reviewer',
         'bin',
-        'local-reviewer.js',
+        'local-reviewer.js'
       ),
       '',
-      'utf8',
+      'utf8'
     );
 
     assert.equal(resolveLocalReviewerRepoRoot(currentRepo), siblingRepo);
@@ -49,7 +49,7 @@ test('resolveLocalReviewerRepoRoot respects LOCAL_REVIEWER_CLI_PATH overrides', 
   try {
     mkdirSync(currentRepo, { recursive: true });
     mkdirSync(resolve(siblingRepo, 'packages', 'local-reviewer', 'bin'), {
-      recursive: true,
+      recursive: true
     });
     writeFileSync(resolve(currentRepo, 'package.json'), '{}', 'utf8');
     writeFileSync(resolve(siblingRepo, 'package.json'), '{}', 'utf8');
@@ -59,17 +59,17 @@ test('resolveLocalReviewerRepoRoot respects LOCAL_REVIEWER_CLI_PATH overrides', 
         'packages',
         'local-reviewer',
         'bin',
-        'local-reviewer.js',
+        'local-reviewer.js'
       ),
       '',
-      'utf8',
+      'utf8'
     );
 
     assert.equal(
       resolveLocalReviewerRepoRoot(currentRepo, {
-        LOCAL_REVIEWER_CLI_PATH: siblingRepo,
+        LOCAL_REVIEWER_CLI_PATH: siblingRepo
       }),
-      siblingRepo,
+      siblingRepo
     );
   } finally {
     rmSync(workspace, { force: true, recursive: true });
@@ -79,11 +79,11 @@ test('resolveLocalReviewerRepoRoot respects LOCAL_REVIEWER_CLI_PATH overrides', 
 test('createLocalReviewerEnv injects the Ollama defaults', () => {
   const env = createLocalReviewerEnv(
     {
-      PATH: process.env.PATH,
+      PATH: process.env.PATH
     },
     {
-      LOCAL_REVIEWER_OLLAMA_MODEL: 'qwen3:8b',
-    },
+      LOCAL_REVIEWER_OLLAMA_MODEL: 'qwen3:8b'
+    }
   );
 
   assert.equal(env.LOCAL_REVIEWER_RUNTIME, 'ollama');
@@ -96,7 +96,7 @@ test('buildWindowsProcessBridgePayload preserves command metadata without shell 
   const payload = buildWindowsProcessBridgePayload({
     command: 'pnpm.cmd',
     args: ['review:implementation', '--', '--focus', 'general & risky'],
-    cwd: 'C:/repo',
+    cwd: 'C:/repo'
   });
 
   assert.equal(payload.command, 'pnpm.cmd');
@@ -104,7 +104,7 @@ test('buildWindowsProcessBridgePayload preserves command metadata without shell 
     'review:implementation',
     '--',
     '--focus',
-    'general & risky',
+    'general & risky'
   ]);
   assert.equal(payload.cwd, 'C:/repo');
 });
@@ -119,11 +119,11 @@ test(
       args: ['--version'],
       cwd: process.cwd(),
       env: { PATH: process.env.PATH },
-      timeoutMs: 30000,
+      timeoutMs: 30000
     });
 
     assert.equal(result.error, undefined);
     assert.equal(result.status, 0);
     assert.equal(result.stderr.trim(), '');
-  },
+  }
 );

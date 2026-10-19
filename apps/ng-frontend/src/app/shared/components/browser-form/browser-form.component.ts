@@ -3,7 +3,8 @@ import {
   DestroyRef,
   OnInit,
   signal,
-  ViewEncapsulation
+  ViewEncapsulation,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -39,6 +40,7 @@ import { BrowserSetting, ProjectSetting } from '@utils';
   ],
   templateUrl: `./browser-form.component.html`,
   styleUrls: ['./browser-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None
 })
 export class BrowserFormComponent implements OnInit {

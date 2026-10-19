@@ -6,7 +6,7 @@ describe('FolderService', () => {
   let service: FolderService;
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [FolderService],
+      providers: [FolderService]
     })
       .useMocker((token) => {
         if (token === FolderService) {

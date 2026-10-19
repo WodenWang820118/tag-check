@@ -33,7 +33,11 @@ export class ReportDetailPanelsFacadeService {
     eventId: string,
     recording: Recording
   ): Observable<Recording> {
-    return this.recordingService.updateRecording(projectSlug, eventId, recording);
+    return this.recordingService.updateRecording(
+      projectSlug,
+      eventId,
+      recording
+    );
   }
 
   getItemDefById(itemId: string): Observable<ItemDef> {

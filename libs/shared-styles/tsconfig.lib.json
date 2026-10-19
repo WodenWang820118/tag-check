@@ -5,7 +5,8 @@
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
-    "types": []
+    "types": [],
+    "ignoreDeprecations": "6.0"
   },
   "exclude": [
     "src/**/*.spec.ts",

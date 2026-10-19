@@ -1,4 +1,9 @@
-import { Component, input, output } from '@angular/core';
+import {
+  Component,
+  input,
+  output,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { EditableJsonPanelState } from '../report-detail.contracts';
 import { EditableJsonPanelComponent } from './editable-json-panel.component';
@@ -40,8 +45,8 @@ import { EditableJsonPanelComponent } from './editable-json-panel.component';
           </mat-expansion-panel-header>
           <mat-panel-description>
             <div class="raw-request-container">
-              <pre class="raw-request" aria-label="Raw Request">
-{{ rawRequest() }}
+              <pre class="raw-request" aria-label="Raw Request"
+                >{{ rawRequest() }}
               </pre>
             </div>
           </mat-panel-description>
@@ -70,6 +75,7 @@ import { EditableJsonPanelComponent } from './editable-json-panel.component';
       </mat-accordion>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./report-detail-panels-view.component.scss']
 })
 export class ReportDetailPanelsViewComponent {

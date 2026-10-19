@@ -7,7 +7,7 @@ describe('FileService', () => {
   let service: FileService;
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [FileService],
+      providers: [FileService]
     })
       .useMocker((token) => {
         if (typeof token === 'function') {

@@ -3,7 +3,8 @@ import {
   OnDestroy,
   viewChild,
   signal,
-  computed
+  computed,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {
   MatButtonToggleChange,
@@ -34,6 +35,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatButtonToggleModule
   ],
   templateUrl: './file-table-toolbar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./file-table-toolbar.component.scss']
 })
 export class FileTableToolbarComponent implements OnDestroy {

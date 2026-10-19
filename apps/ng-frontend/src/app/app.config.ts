@@ -11,7 +11,11 @@ import {
   withPreloading
 } from '@angular/router';
 import { APP_ROUTES } from './app.routes';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptors,
+  withXhr
+} from '@angular/common/http';
 import { provideMarkdown, SANITIZE } from 'ngx-markdown';
 import * as Sentry from '@sentry/angular';
 import { apiRequestIdInterceptor } from './shared/services/api/api-request-id.interceptor';
@@ -19,7 +23,7 @@ import { apiRequestIdInterceptor } from './shared/services/api/api-request-id.in
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(APP_ROUTES, withPreloading(PreloadAllModules)),
-    provideHttpClient(withInterceptors([apiRequestIdInterceptor])),
+    provideHttpClient(withXhr(), withInterceptors([apiRequestIdInterceptor])),
     provideMarkdown({
       sanitize: {
         provide: SANITIZE,

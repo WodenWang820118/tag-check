@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 
 @Component({
@@ -10,6 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
       {{ label }}
     </button>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       button {
@@ -18,8 +19,8 @@ import { MatButtonModule } from '@angular/material/button';
         color: black;
         margin-right: 1rem;
       }
-    `,
-  ],
+    `
+  ]
 })
 export class PaginatorButtonComponent {
   @Input() label = '';

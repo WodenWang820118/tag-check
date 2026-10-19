@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { OverlayComponent } from './overlay.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { PROJECT_ROUTES } from '../../routes';
 import { OverlayModule } from '@angular/cdk/overlay';
@@ -21,7 +21,7 @@ const meta: Meta<OverlayComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

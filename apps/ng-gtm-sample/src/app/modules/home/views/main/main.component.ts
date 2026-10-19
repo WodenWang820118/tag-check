@@ -1,4 +1,11 @@
-import { Component, computed, OnInit, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  OnInit,
+  signal,
+  viewChild,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { CarouselComponent } from '../../components/carousel/carousel.component';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
 import { CookieConsentComponent } from '../../../../shared/components/cookie-consent/cookie-consent.component';
@@ -14,6 +21,7 @@ import { CardModule } from 'primeng/card';
     ButtonModule,
     CardModule
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="space-y-8">
       <section

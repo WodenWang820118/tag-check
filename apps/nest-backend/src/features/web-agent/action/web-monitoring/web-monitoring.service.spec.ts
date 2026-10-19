@@ -8,7 +8,7 @@ describe('WebMonitoringService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [WebMonitoringService],
+      providers: [WebMonitoringService]
     })
       .useMocker((token) => {
         if (token === RequestService) {

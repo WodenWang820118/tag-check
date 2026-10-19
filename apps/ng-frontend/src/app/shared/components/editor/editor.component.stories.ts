@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { EditorComponent } from './editor.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { EditorService } from '@data-access';
 import { APP_ROUTES } from '../../../app.routes';
@@ -21,7 +21,7 @@ const meta: Meta<EditorComponent> = {
       providers: [EditorService]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(APP_ROUTES)]
     })
   ]
 };

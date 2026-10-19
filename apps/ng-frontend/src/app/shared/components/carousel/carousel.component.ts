@@ -4,7 +4,8 @@ import {
   inject,
   input,
   OnDestroy,
-  signal
+  signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { CarouselItem, CarouselItemEnum } from '@utils';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
@@ -16,6 +17,7 @@ import { MediaPreviewDialogComponent } from '../media-preview-dialog/media-previ
   standalone: true,
   imports: [MatDialogModule],
   templateUrl: './carousel.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./carousel.component.scss']
 })
 export class CarouselComponent implements OnDestroy {

@@ -1,4 +1,9 @@
-import { Component, signal, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  signal,
+  ViewEncapsulation,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { timer } from 'rxjs';
 import { IReportDetails, Project, ProjectSetting } from '@utils';
@@ -50,6 +55,7 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
     </div>
   `,
   styleUrls: ['./project-view.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None
 })
 export class ProjectViewComponent {

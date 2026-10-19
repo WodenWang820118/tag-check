@@ -8,7 +8,7 @@ describe('WebAgentService', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [WebAgentService],
+      providers: [WebAgentService]
     })
       .useMocker((token) => {
         if (typeof token === 'function') {

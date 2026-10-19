@@ -1,4 +1,10 @@
-import { Component, computed, inject, input } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { ReportDetailPanelsComponent } from '../report-detail-panels/report-detail-panels.component';
 import {
@@ -18,8 +24,7 @@ function buildReportTabViewModel(
   const reportDetails = context.reportDetails;
   const hasHistory =
     context.fileReports.flatMap((report) => report.testEventDetails).length > 0;
-  const recordingAvailable =
-    !!context.videoBlob && context.videoBlob.size > 0;
+  const recordingAvailable = !!context.videoBlob && context.videoBlob.size > 0;
 
   return {
     title: context.spec.rawGtmTag?.tag?.name || 'Report',
@@ -29,7 +34,9 @@ function buildReportTabViewModel(
     message: reportDetails?.message || '',
     showHistory: hasHistory,
     showShareMenu: hasHistory,
-    canExportSpreadsheet: Boolean(context.projectSlug && reportDetails?.eventId),
+    canExportSpreadsheet: Boolean(
+      context.projectSlug && reportDetails?.eventId
+    ),
     canExportRecording: recordingAvailable,
     canExportEvent: Boolean(
       context.projectSlug && reportDetails?.eventId && recordingAvailable
@@ -63,6 +70,7 @@ function buildReportTabViewModel(
       </app-report-tab-view>
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./report-tab.component.scss']
 })
 export class ReportTabComponent {

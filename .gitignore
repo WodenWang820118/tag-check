@@ -77,3 +77,6 @@ proofshot-artifacts/
 *tmp-facade-test
 *tmp-project-io-tests
 .main.mjs
+
+.claude/worktrees
+.claude/settings.local.json

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -6,6 +6,7 @@ import { InputTextModule } from 'primeng/inputtext';
 @Component({
   selector: 'app-footer',
   imports: [ToolbarModule, ButtonModule, InputTextModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <p-toolbar class="sample-shell border-none bg-transparent px-0 py-4">
       <ng-template #start>

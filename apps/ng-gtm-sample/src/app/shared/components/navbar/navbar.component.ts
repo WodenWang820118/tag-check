@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { OrderService } from '../../services/order/order.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
@@ -9,6 +9,7 @@ import { ButtonModule } from 'primeng/button';
   selector: 'app-navbar',
   standalone: true,
   imports: [RouterModule, ToolbarModule, ButtonModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './navbar.component.html'
 })
 export class NavbarComponent {

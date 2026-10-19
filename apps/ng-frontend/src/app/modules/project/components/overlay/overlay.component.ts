@@ -1,4 +1,9 @@
-import { Component, Input, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  Input,
+  ViewEncapsulation,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { CdkOverlayOrigin, OverlayModule } from '@angular/cdk/overlay';
 
 @Component({
@@ -16,6 +21,7 @@ import { CdkOverlayOrigin, OverlayModule } from '@angular/cdk/overlay';
     </ng-template>
   `,
   styles: ``,
+  changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None
 })
 export class OverlayComponent {

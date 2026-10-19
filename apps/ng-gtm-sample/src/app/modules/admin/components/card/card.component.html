@@ -1,9 +1,6 @@
 <section class="sample-panel overflow-hidden" [ngClass]="cardClass">
   @if (!hidHeader) {
-    <div
-      class="border-b border-slate-200/80 px-6 py-4"
-      [ngClass]="headerClass"
-    >
+    <div class="border-b border-slate-200/80 px-6 py-4" [ngClass]="headerClass">
       <div class="flex items-center justify-between gap-3">
         <h3 class="text-lg font-semibold text-slate-950">{{ cardTitle }}</h3>
         <ng-content select=".app-card-header"></ng-content>

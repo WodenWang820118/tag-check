@@ -1,5 +1,5 @@
 import { JsonPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MermaidDiagramComponent } from '../mermaid-diagram/mermaid-diagram.component';
 
 @Component({
@@ -7,6 +7,7 @@ import { MermaidDiagramComponent } from '../mermaid-diagram/mermaid-diagram.comp
   standalone: true,
   imports: [JsonPipe, MermaidDiagramComponent],
   templateUrl: './about.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./about.component.scss']
 })
 export class AboutComponent {

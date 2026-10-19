@@ -1,4 +1,10 @@
-import { Component, Inject, LOCALE_ID, input } from '@angular/core';
+import {
+  Component,
+  Inject,
+  LOCALE_ID,
+  input,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
@@ -44,6 +50,7 @@ export interface ToolbarInputs {
       <div style="margin-left: 1rem"></div>
     </mat-toolbar>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .spacer {

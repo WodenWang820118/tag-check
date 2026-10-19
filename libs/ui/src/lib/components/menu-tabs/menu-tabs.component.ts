@@ -1,4 +1,10 @@
-import { Component, Inject, LOCALE_ID, input } from '@angular/core';
+import {
+  Component,
+  Inject,
+  LOCALE_ID,
+  input,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -125,6 +131,7 @@ import { type SharedNavigationLink } from '../navigation-link';
       </a>
     </mat-menu>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       :host {

@@ -1,4 +1,4 @@
-import { Component, effect } from '@angular/core';
+import { Component, effect, ChangeDetectionStrategy } from '@angular/core';
 import { AuthService } from '../../../../shared/services/auth/auth.service';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
 import { ButtonModule } from 'primeng/button';
@@ -8,6 +8,7 @@ import { DividerModule } from 'primeng/divider';
 @Component({
   selector: 'app-login',
   imports: [ButtonModule, CardModule, DividerModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="grid min-h-[calc(100vh-9rem)] place-items-center py-10">
       <p-card

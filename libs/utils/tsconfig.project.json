@@ -9,6 +9,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "types": ["node"],
-    "importHelpers": true
+    "importHelpers": true,
+    "ignoreDeprecations": "6.0"
   }
 }

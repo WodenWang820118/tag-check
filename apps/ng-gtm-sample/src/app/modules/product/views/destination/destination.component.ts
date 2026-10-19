@@ -5,7 +5,8 @@ import {
   effect,
   OnInit,
   signal,
-  viewChild
+  viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -45,6 +46,7 @@ import {
     InputTextModule,
     MessageModule
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './destination.component.html'
 })
 export class DestinationComponent implements OnInit {

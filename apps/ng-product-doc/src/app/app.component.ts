@@ -1,4 +1,10 @@
-import { Component, LOCALE_ID, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  LOCALE_ID,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {
   FooterComponent,
@@ -22,6 +28,7 @@ import { SeoService } from './seo/seo.service';
     </div>
     <lib-footer></lib-footer>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .app-content {

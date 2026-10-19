@@ -1,4 +1,9 @@
-import { Component, computed, input } from '@angular/core';
+import {
+  Component,
+  computed,
+  input,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
@@ -30,6 +35,7 @@ export interface EventParameter {
     MatDividerModule,
     MatButtonModule
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './tag-manage-tab.component.html'
   // No styleUrls needed anymore
 })

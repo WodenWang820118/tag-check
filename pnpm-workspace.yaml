@@ -1,6 +1,9 @@
 packages:
   - apps/**
   - libs/**
+  # Tauri copies the built backend (with its package.json) into target/;
+  # never treat that build output as a workspace package.
+  - '!apps/desktop-tauri/src-tauri/target/**'
 
 allowBuilds:
   '@firebase/util': true

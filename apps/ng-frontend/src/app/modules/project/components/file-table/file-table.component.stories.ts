@@ -7,7 +7,7 @@ import {
 import { FileTableComponent } from './file-table.component';
 
 import { DatePipe, NgClass } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
@@ -36,7 +36,7 @@ const meta: Meta<FileTableComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

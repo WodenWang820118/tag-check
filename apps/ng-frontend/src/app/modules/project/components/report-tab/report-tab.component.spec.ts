@@ -1,4 +1,9 @@
-import { Component, input, output } from '@angular/core';
+import {
+  Component,
+  input,
+  output,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -17,6 +22,7 @@ import { ReportTabViewComponent } from './report-tab-view.component';
 @Component({
   selector: 'app-report-tab-view',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: '<ng-content></ng-content>'
 })
 class MockReportTabViewComponent {
@@ -31,6 +37,7 @@ class MockReportTabViewComponent {
 @Component({
   selector: 'app-report-detail-panels',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: ''
 })
 class MockReportDetailPanelsComponent {
@@ -122,7 +129,10 @@ describe('ReportTabComponent', () => {
           providers: [ReportTabFacade]
         },
         add: {
-          imports: [MockReportTabViewComponent, MockReportDetailPanelsComponent],
+          imports: [
+            MockReportTabViewComponent,
+            MockReportDetailPanelsComponent
+          ],
           providers: [
             {
               provide: ReportTabFacade,

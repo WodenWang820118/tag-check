@@ -7,6 +7,6 @@ import { ActionUtilsModule } from '../../action-utils/action-utils.module';
 @Module({
   imports: [ActionUtilsModule],
   providers: [ChangeStrategyService, EvaluateChangeService, PageChangeService],
-  exports: [ChangeStrategyService, EvaluateChangeService, PageChangeService],
+  exports: [ChangeStrategyService, EvaluateChangeService, PageChangeService]
 })
 export class ChangeStrategyModule {}

@@ -2,9 +2,18 @@
   "extends": "./tsconfig.project.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": ["@angular/localize"]
+    "types": ["@angular/localize"],
+    "ignoreDeprecations": "6.0"
   },
   "files": ["src/main.ts", "src/main.server.ts"],
   "include": ["src/**/*.d.ts"],
-  "exclude": ["jest.config.ts", "src/**/*.test.ts", "src/**/*.spec.ts"]
+  "exclude": ["jest.config.ts", "src/**/*.test.ts", "src/**/*.spec.ts"],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

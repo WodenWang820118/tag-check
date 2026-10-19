@@ -108,7 +108,9 @@ describe('AddDataComponent', () => {
     component.addDestination();
 
     expect(component.uploadState()).toBe('error');
-    expect(component.uploadMessage()).toContain('attach all four destination images');
+    expect(component.uploadMessage()).toContain(
+      'attach all four destination images'
+    );
     expect(uploadService.upload).not.toHaveBeenCalled();
   });
 
@@ -141,7 +143,9 @@ describe('AddDataComponent', () => {
       files
     });
     expect(component.uploadState()).toBe('success');
-    expect(component.uploadMessage()).toContain('Destination created successfully');
+    expect(component.uploadMessage()).toContain(
+      'Destination created successfully'
+    );
     expect(component.destinationForm.getRawValue().country).toBeNull();
     expect(component.destinationForm.getRawValue().price).toBeNull();
     expect(component.selectedFiles()).toEqual({

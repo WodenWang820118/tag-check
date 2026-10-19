@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth/auth.service';
 import { NavigationService } from '../../services/navigation/navigation.service';
@@ -10,6 +10,7 @@ import { ToolbarModule } from 'primeng/toolbar';
   selector: 'app-admin-navbar',
   standalone: true,
   imports: [RouterModule, ToolbarModule, ButtonModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './admin-navbar.component.html'
 })
 export class AdminNavbarComponent {

@@ -1,4 +1,9 @@
-import { Component, LOCALE_ID, inject } from '@angular/core';
+import {
+  Component,
+  LOCALE_ID,
+  inject,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import {
   LandingPageComponent as SharedLandingPageComponent,
   buildLocalizedPath
@@ -7,6 +12,7 @@ import {
 @Component({
   standalone: true,
   imports: [SharedLandingPageComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <lib-landing-page [primaryLink]="primaryLink"></lib-landing-page>
   `

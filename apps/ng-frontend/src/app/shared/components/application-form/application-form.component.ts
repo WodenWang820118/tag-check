@@ -1,4 +1,10 @@
-import { Component, DestroyRef, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { catchError, EMPTY, switchMap, tap } from 'rxjs';
@@ -34,6 +40,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatBadgeModule
   ],
   templateUrl: './application-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./application-form.component.scss']
 })
 export class ApplicationFormComponent implements OnInit {

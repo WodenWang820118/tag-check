@@ -24,9 +24,7 @@
 
   <form [formGroup]="destinationForm" (ngSubmit)="addDestination()">
     <div class="grid gap-6 xl:grid-cols-[1.2fr_0.9fr]">
-      <p-card
-        styleClass="rounded-[1.75rem] border border-slate-200 shadow-sm"
-      >
+      <p-card styleClass="rounded-[1.75rem] border border-slate-200 shadow-sm">
         <ng-template pTemplate="header">
           <div class="border-b border-slate-200 px-6 py-5">
             <div class="text-xl font-semibold text-slate-950">
@@ -85,10 +83,7 @@
           </div>
 
           <div class="space-y-2 md:col-span-2">
-            <label
-              for="smallTitle"
-              class="text-sm font-medium text-slate-600"
-            >
+            <label for="smallTitle" class="text-sm font-medium text-slate-600">
               Small title
             </label>
             <input
@@ -98,9 +93,7 @@
               class="w-full"
             />
             @if (hasError('smallTitle')) {
-              <div class="text-sm text-red-600">
-                Small title is required.
-              </div>
+              <div class="text-sm text-red-600">Small title is required.</div>
             }
           </div>
 
@@ -186,10 +179,7 @@
           </div>
 
           <div class="space-y-2 md:col-span-2">
-            <label
-              for="description"
-              class="text-sm font-medium text-slate-600"
-            >
+            <label for="description" class="text-sm font-medium text-slate-600">
               Description
             </label>
             <textarea
@@ -271,7 +261,9 @@
           </ng-template>
 
           <div class="space-y-4 px-3 py-3">
-            <div class="sample-inset-surface p-4 text-sm leading-6 text-slate-600">
+            <div
+              class="sample-inset-surface p-4 text-sm leading-6 text-slate-600"
+            >
               Submitting this form uploads the four destination images to
               Firebase Storage, stores the document in Firestore, and refreshes
               the IndexedDB-backed catalog used by the admin map and storefront

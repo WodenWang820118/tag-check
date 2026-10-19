@@ -1,4 +1,9 @@
-import { Component, input, output } from '@angular/core';
+import {
+  Component,
+  input,
+  output,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import {
   MatExpansionModule,
   MatExpansionPanel
@@ -91,6 +96,7 @@ import { EditableJsonPanelState } from '../report-detail.contracts';
       }
     </mat-expansion-panel>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./editable-json-panel.component.scss']
 })
 export class EditableJsonPanelComponent {

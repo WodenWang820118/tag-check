@@ -21,13 +21,13 @@ export class AddShippingInfoEventTracker implements AnalyticsEventTracker {
           item_name: item.title,
           item_category: item.title,
           quantity: Number(item.quantity),
-          price: item.value,
-        })),
-      },
+          price: item.value
+        }))
+      }
     };
 
     return {
-      eventData: event,
+      eventData: event
     };
   }
 }

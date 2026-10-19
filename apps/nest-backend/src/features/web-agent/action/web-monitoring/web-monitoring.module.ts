@@ -7,6 +7,6 @@ const modules = [RequestModule, DataLayerModule];
 @Module({
   imports: [...modules],
   providers: [WebMonitoringService],
-  exports: [WebMonitoringService, ...modules],
+  exports: [WebMonitoringService, ...modules]
 })
 export class WebMonitoringModule {}

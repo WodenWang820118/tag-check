@@ -14,11 +14,11 @@ export const standardParameterMap: { [key: string]: string } = {
   lp: 'index',
   va: 'variant',
   li: 'item_list_id',
-  ln: 'item_list_name',
+  ln: 'item_list_name'
 };
 
 export const standardPageParameterMap: { [key: string]: string } = {
   dp: 'page_path',
   dt: 'page_title',
-  dl: 'page_location',
+  dl: 'page_location'
 };

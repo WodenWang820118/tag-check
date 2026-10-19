@@ -1,4 +1,10 @@
-import { Component, Inject, effect, signal } from '@angular/core';
+import {
+  Component,
+  Inject,
+  effect,
+  signal,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
@@ -45,6 +51,7 @@ import {
       </mat-dialog-actions>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .error-dialog {

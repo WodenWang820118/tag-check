@@ -4,13 +4,13 @@ import test from 'node:test';
 import {
   resolveWindowsPowerShellPath,
   resolveWindowsScriptPath,
-  runLocalCliCommand,
+  runLocalCliCommand
 } from './local-cli.ts';
 
 test('runLocalCliCommand captures stdout, stderr, and status', () => {
   const result = runLocalCliCommand({
     command: process.execPath,
-    args: ['-e', 'process.stdout.write("out"); process.stderr.write("err");'],
+    args: ['-e', 'process.stdout.write("out"); process.stderr.write("err");']
   });
 
   assert.equal(result.status, 0);
@@ -22,7 +22,7 @@ test('runLocalCliCommand captures stdout, stderr, and status', () => {
 test('runLocalCliCommand returns non-zero command results without throwing', () => {
   const result = runLocalCliCommand({
     command: process.execPath,
-    args: ['-e', 'process.exit(7);'],
+    args: ['-e', 'process.exit(7);']
   });
 
   assert.equal(result.status, 7);
@@ -32,7 +32,7 @@ test('runLocalCliCommand returns non-zero command results without throwing', () 
 test('runLocalCliCommand returns spawn errors for missing commands', () => {
   const result = runLocalCliCommand({
     command: 'definitely-missing-local-cli-command-for-spec',
-    args: [],
+    args: []
   });
 
   assert.equal(result.status, null);

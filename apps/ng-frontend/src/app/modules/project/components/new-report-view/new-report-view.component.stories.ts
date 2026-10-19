@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { NewReportViewComponent } from './new-report-view.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { provideRouter } from '@angular/router';
 import { PROJECT_ROUTES } from '../../routes';
@@ -41,7 +41,7 @@ const meta: Meta<NewReportViewComponent> = {
       ]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

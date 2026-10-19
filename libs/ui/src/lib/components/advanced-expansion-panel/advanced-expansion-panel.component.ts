@@ -8,7 +8,8 @@ import {
   ViewEncapsulation,
   effect,
   Signal,
-  inject
+  inject,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {
   FormGroup,
@@ -53,6 +54,7 @@ interface AdvancedFormValues {
   ],
   templateUrl: './advanced-expansion-panel.component.html',
   styleUrls: ['./advanced-expansion-panel.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None
 })
 export class AdvancedExpansionPanelComponent implements OnInit {
