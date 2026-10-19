@@ -4,7 +4,7 @@
   "sourceRoot": "libs/ui/src",
   "prefix": "lib",
   "projectType": "library",
-  "tags": [],
+  "tags": ["scope:frontend", "type:feature"],
   "targets": {
     "test": {
       "executor": "@analogjs/vitest-angular:test"

@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/desktop-tauri",
-  "tags": [],
+  "tags": ["scope:desktop", "type:app"],
   "targets": {
     "prepare-runtime": {
       "executor": "nx:run-commands",

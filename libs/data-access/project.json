@@ -4,6 +4,7 @@
   "sourceRoot": "libs/data-access/src",
   "prefix": "lib",
   "projectType": "library",
+  "tags": ["scope:frontend", "type:data-access"],
   "targets": {
     "test": {
       "executor": "@analogjs/vitest-angular:test"

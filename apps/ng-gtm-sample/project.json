@@ -4,7 +4,7 @@
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "apps/ng-gtm-sample/src",
-  "tags": [],
+  "tags": ["scope:frontend", "type:app"],
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:application",
