@@ -1,21 +1,32 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { InputTextModule } from 'primeng/inputtext';
-import { ButtonModule } from 'primeng/button';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideCheck, lucideWallet } from '@ng-icons/lucide';
+import { HlmButton } from '@spartan-ng/helm/button';
+import { HlmInput } from '@spartan-ng/helm/input';
+import { HlmLabel } from '@spartan-ng/helm/label';
 import { CheckoutFormManagerService } from '../../../../shared/services/checkout-form-manager/checkout-form-manager.service';
 import { NavigationService } from '../../../../shared/services/navigation/navigation.service';
 
 @Component({
   selector: 'app-payment-form',
   standalone: true,
-  imports: [ReactiveFormsModule, FormsModule, InputTextModule, ButtonModule],
+  imports: [
+    ReactiveFormsModule,
+    FormsModule,
+    HlmButton,
+    HlmInput,
+    HlmLabel,
+    NgIcon
+  ],
+  providers: [provideIcons({ lucideCheck, lucideWallet })],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (checkoutFormManager.isShippingFormSubmitted$()) {
       <div class="sample-panel p-6">
         <div class="mb-5 space-y-2">
           <div class="sample-eyebrow text-slate-400">
-            <i class="pi pi-wallet text-sm"></i>
+            <ng-icon name="lucideWallet" class="text-sm" />
             Step 2
           </div>
           <h2 class="text-2xl font-bold tracking-tight text-slate-950">
@@ -30,51 +41,65 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
         <form [formGroup]="paymentForm" class="space-y-4">
           <div class="grid gap-4 md:grid-cols-2">
             <div class="space-y-2 md:col-span-2">
-              <label for="cardNum" class="text-sm font-medium text-slate-600">
+              <label
+                hlmLabel
+                for="cardNum"
+                class="text-sm font-medium text-slate-600"
+              >
                 Card Number
               </label>
               <input
-                pInputText
+                hlmInput
                 formControlName="cardNum"
                 id="cardNum"
-                class="w-full"
+                class="w-full bg-white"
+                data-testid="payment-cardNum"
               />
             </div>
             <div class="space-y-2">
               <label
+                hlmLabel
                 for="expiration"
                 class="text-sm font-medium text-slate-600"
               >
                 Expiration
               </label>
               <input
-                pInputText
+                hlmInput
                 formControlName="expiration"
                 id="expiration"
-                class="w-full"
+                class="w-full bg-white"
+                data-testid="payment-expiration"
               />
             </div>
             <div class="space-y-2">
-              <label for="security" class="text-sm font-medium text-slate-600">
+              <label
+                hlmLabel
+                for="security"
+                class="text-sm font-medium text-slate-600"
+              >
                 Security Code
               </label>
               <input
-                pInputText
+                hlmInput
                 formControlName="security"
                 id="security"
-                class="w-full"
+                class="w-full bg-white"
+                data-testid="payment-security"
               />
             </div>
           </div>
 
           <div class="flex justify-end pt-2">
             <button
-              pButton
+              hlmBtn
               type="button"
-              label="Place Order"
-              icon="pi pi-check"
+              data-testid="place-order"
               (click)="placeOrder()"
-            ></button>
+            >
+              <ng-icon name="lucideCheck" />
+              Place Order
+            </button>
           </div>
         </form>
       </div>

@@ -88,7 +88,7 @@
     },
     "@nx/angular:application": {
       "e2eTestRunner": "playwright",
-      "linter": "eslint",
+      "linter": "none",
       "style": "scss",
       "unitTestRunner": "jest"
     },
@@ -96,7 +96,7 @@
       "style": "scss"
     },
     "@nx/angular:library": {
-      "linter": "eslint",
+      "linter": "none",
       "unitTestRunner": "jest"
     }
   },

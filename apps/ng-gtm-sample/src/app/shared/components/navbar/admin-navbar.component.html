@@ -1,113 +1,128 @@
-<p-toolbar class="sample-shell border-none bg-transparent px-0 py-5">
-  <ng-template pTemplate="start">
-    <div class="flex flex-wrap items-center gap-3">
-      <a
-        class="flex items-center gap-3 rounded-full border border-white/80 bg-white/90 px-4 py-2 shadow-sm transition-transform hover:-translate-y-0.5"
-        routerLink="/"
-        href="/"
+<nav
+  class="sample-shell flex flex-wrap items-center justify-between gap-3 py-5"
+>
+  <div class="flex flex-wrap items-center gap-3">
+    <a
+      class="flex items-center gap-3 rounded-full border border-white/80 bg-white/90 px-4 py-2 shadow-sm transition-transform hover:-translate-y-0.5"
+      routerLink="/"
+      href="/"
+    >
+      <span
+        class="grid h-10 w-10 place-items-center rounded-full bg-blue-600 text-white"
       >
+        <ng-icon name="lucideCompass" class="text-lg" />
+      </span>
+      <span class="leading-tight">
         <span
-          class="grid h-10 w-10 place-items-center rounded-full bg-blue-600 text-white"
+          class="block text-xs font-semibold tracking-[0.28em] text-blue-600 uppercase"
         >
-          <i class="pi pi-compass text-lg"></i>
+          GTM Demo
         </span>
-        <span class="leading-tight">
-          <span
-            class="block text-xs font-semibold uppercase tracking-[0.28em] text-blue-600"
-          >
-            GTM Demo
-          </span>
-          <span class="block text-lg font-black tracking-tight text-slate-900">
-            Travel Site
-          </span>
+        <span class="block text-lg font-black tracking-tight text-slate-900">
+          Travel Site
         </span>
-      </a>
+      </span>
+    </a>
 
-      <div class="hidden h-8 w-px bg-slate-200 lg:block"></div>
+    <div class="hidden h-8 w-px bg-slate-200 lg:block"></div>
 
-      <div class="flex flex-wrap items-center gap-2">
-        <button
-          pButton
-          type="button"
-          icon="pi pi-home"
-          label="Home"
-          severity="secondary"
-          text="true"
-          (click)="navigateToHome()"
-        ></button>
-        <button
-          pButton
-          type="button"
-          icon="pi pi-map"
-          label="Destinations"
-          severity="secondary"
-          text="true"
-          (click)="navigateToDestinations()"
-        ></button>
-      </div>
-    </div>
-  </ng-template>
-
-  <ng-template pTemplate="end">
-    <div class="flex flex-wrap items-center justify-end gap-2">
-      @if (!user()) {
-        <button
-          pButton
-          type="button"
-          icon="pi pi-user"
-          label="Login"
-          severity="contrast"
-          [rounded]="true"
-          (click)="navigateToLogin()"
-        ></button>
-      } @else {
-        <button
-          pButton
-          type="button"
-          label="Admin"
-          icon="pi pi-chart-bar"
-          severity="secondary"
-          text="true"
-          (click)="navigateToAdmin()"
-        ></button>
-        <button
-          pButton
-          type="button"
-          label="Add Data"
-          icon="pi pi-plus"
-          severity="secondary"
-          text="true"
-          (click)="navigateToAddData()"
-        ></button>
-        <button
-          pButton
-          type="button"
-          label="Logout"
-          icon="pi pi-sign-out"
-          severity="secondary"
-          text="true"
-          (click)="logout()"
-        ></button>
-      }
-
+    <div class="flex flex-wrap items-center gap-2">
       <button
-        pButton
+        hlmBtn
+        variant="ghost"
+        size="lg"
         type="button"
-        icon="pi pi-shopping-cart"
-        label="Cart"
-        severity="contrast"
-        [rounded]="true"
-        class="relative"
-        (click)="navigateToBasket()"
+        class="text-slate-600"
+        data-testid="nav-home"
+        (click)="navigateToHome()"
       >
-        @if (cartItemCount() > 0) {
-          <span
-            class="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[0.7rem] font-semibold text-white"
-          >
-            {{ cartItemCount() }}
-          </span>
-        }
+        <ng-icon name="lucideHouse" />
+        Home
+      </button>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="lg"
+        type="button"
+        class="text-slate-600"
+        data-testid="nav-destinations"
+        (click)="navigateToDestinations()"
+      >
+        <ng-icon name="lucideMap" />
+        Destinations
       </button>
     </div>
-  </ng-template>
-</p-toolbar>
+  </div>
+
+  <div class="flex flex-wrap items-center justify-end gap-2">
+    @if (!user()) {
+      <button
+        hlmBtn
+        size="lg"
+        type="button"
+        class="rounded-full bg-slate-950 px-4 text-white hover:bg-slate-800"
+        data-testid="nav-login"
+        (click)="navigateToLogin()"
+      >
+        <ng-icon name="lucideUser" />
+        Login
+      </button>
+    } @else {
+      <button
+        hlmBtn
+        variant="ghost"
+        size="lg"
+        type="button"
+        class="text-slate-600"
+        data-testid="nav-admin-dashboard"
+        (click)="navigateToAdmin()"
+      >
+        <ng-icon name="lucideChartColumn" />
+        Admin
+      </button>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="lg"
+        type="button"
+        class="text-slate-600"
+        data-testid="nav-add-data"
+        (click)="navigateToAddData()"
+      >
+        <ng-icon name="lucidePlus" />
+        Add Data
+      </button>
+      <button
+        hlmBtn
+        variant="ghost"
+        size="lg"
+        type="button"
+        class="text-slate-600"
+        data-testid="nav-logout"
+        (click)="logout()"
+      >
+        <ng-icon name="lucideLogOut" />
+        Logout
+      </button>
+    }
+
+    <button
+      hlmBtn
+      size="lg"
+      type="button"
+      class="relative rounded-full bg-slate-950 px-4 text-white hover:bg-slate-800"
+      data-testid="nav-cart"
+      (click)="navigateToBasket()"
+    >
+      <ng-icon name="lucideShoppingCart" />
+      Cart
+      @if (cartItemCount() > 0) {
+        <span
+          class="absolute -top-1.5 -right-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[0.7rem] font-semibold text-white"
+        >
+          {{ cartItemCount() }}
+        </span>
+      }
+    </button>
+  </div>
+</nav>

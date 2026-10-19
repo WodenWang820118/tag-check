@@ -91,14 +91,22 @@ describe('ClickHandler', () => {
     ).rejects.toBeInstanceOf(InternalServerErrorException);
   });
 
-  it('clicks using mouse offset when offsetX/offsetY are provided', async () => {
+  it('scrolls the element into view, then clicks at the recorded offset', async () => {
     const { handler } = build();
     const page = makePage() as unknown as {
       $: ReturnType<typeof vi.fn>;
       mouse: { click: ReturnType<typeof vi.fn> };
     };
+    const calls: string[] = [];
+    const scrollIntoView = vi.fn(async () => {
+      calls.push('scroll');
+    });
     page.$ = vi.fn().mockResolvedValue({
-      boundingBox: () => Promise.resolve({ x: 10, y: 20, width: 1, height: 1 })
+      scrollIntoView,
+      boundingBox: async () => {
+        calls.push('measure');
+        return { x: 10, y: 20, width: 1, height: 1 };
+      }
     });
     const step: Step = {
       selectors: [['#a']],
@@ -107,6 +115,7 @@ describe('ClickHandler', () => {
       offsetY: 7
     } as never;
     await handler.handle(page as never, 'p', 'e', step, false);
+    expect(calls).toEqual(['scroll', 'measure']);
     expect(page.mouse.click).toHaveBeenCalledWith(15, 27, { delay: 100 });
   });
 

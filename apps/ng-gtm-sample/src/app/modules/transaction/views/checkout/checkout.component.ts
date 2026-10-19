@@ -1,6 +1,8 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-import { TableModule } from 'primeng/table';
+import { NgIcon, provideIcons } from '@ng-icons/core';
+import { lucideCreditCard } from '@ng-icons/lucide';
+import { HlmTableImports } from '@spartan-ng/helm/table';
 import { PaymentFormComponent } from '../../components/payment-form/payment-form.component';
 import { ShippingFormComponent } from '../../components/shipping-form/shipping-form.component';
 import { OrderService } from '../../../../shared/services/order/order.service';
@@ -11,9 +13,11 @@ import { OrderService } from '../../../../shared/services/order/order.service';
   imports: [
     ShippingFormComponent,
     PaymentFormComponent,
-    TableModule,
+    HlmTableImports,
+    NgIcon,
     CurrencyPipe
   ],
+  providers: [provideIcons({ lucideCreditCard })],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './checkout.component.html'
 })

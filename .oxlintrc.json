@@ -104,6 +104,12 @@
   },
   "overrides": [
     {
+      "files": ["libs/ui-helm/**/*.ts"],
+      "rules": {
+        "@nx/enforce-module-boundaries": "off"
+      }
+    },
+    {
       "files": ["**/*.js", "**/*.jsx", "**/*.cjs", "**/*.mjs"],
       "env": {
         "browser": true,
