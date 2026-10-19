@@ -107,6 +107,9 @@ export class ClickHandler implements ActionHandler {
           `Element not found for selector ${selector}`
         );
       }
+      // Offsets are relative to the element, and a mouse click outside the
+      // viewport is lost. Scroll first, like the Chrome Recorder replay does.
+      await elementHandle.scrollIntoView();
       const box = await elementHandle.boundingBox();
       if (!box) {
         throw new InternalServerErrorException(

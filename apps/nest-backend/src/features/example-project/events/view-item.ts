@@ -30,9 +30,16 @@ const viewItemRecording: Recording = {
     {
       type: 'click',
       target: 'main',
-      selectors: [['div.p-carousel-item-end img']],
-      offsetY: 111,
-      offsetX: 191
+      selectors: [['[data-testid="promotion-dot-city001"]']],
+      offsetY: 3,
+      offsetX: 16
+    },
+    {
+      type: 'click',
+      target: 'main',
+      selectors: [['[data-testid="promotion-explore-city001"]']],
+      offsetY: 18,
+      offsetX: 69
     }
   ]
 };

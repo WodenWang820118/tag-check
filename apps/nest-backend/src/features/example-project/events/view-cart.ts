@@ -30,23 +30,30 @@ const recording: Recording = {
     {
       type: 'click',
       target: 'main',
-      selectors: [['div:nth-of-type(8) img']],
-      offsetY: 116,
-      offsetX: 199.676025390625
+      selectors: [['[data-testid="promotion-dot-city001"]']],
+      offsetY: 3,
+      offsetX: 16
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main div > button']],
-      offsetY: 13.28125,
-      offsetX: 75.1875
+      selectors: [['[data-testid="promotion-explore-city001"]']],
+      offsetY: 18,
+      offsetX: 69
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['button.relative']],
-      offsetY: 15,
-      offsetX: 31.71875
+      selectors: [['[data-testid="add-to-cart"]']],
+      offsetY: 18,
+      offsetX: 58
+    },
+    {
+      type: 'click',
+      target: 'main',
+      selectors: [['[data-testid="nav-cart"]']],
+      offsetY: 20,
+      offsetX: 41
     }
   ]
 };

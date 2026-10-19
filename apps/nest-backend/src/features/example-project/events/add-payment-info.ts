@@ -30,30 +30,51 @@ const recording: Recording = {
     {
       type: 'click',
       target: 'main',
-      selectors: [['div.p-carousel-item-end img']],
-      offsetY: 108,
-      offsetX: 166
+      selectors: [['[data-testid="promotion-dot-city001"]']],
+      offsetY: 3,
+      offsetX: 16
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main div > button']],
-      offsetY: 20.28125,
-      offsetX: 72.1875
+      selectors: [['[data-testid="promotion-explore-city001"]']],
+      offsetY: 18,
+      offsetX: 69
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main span.p-button-label']],
-      offsetY: 8.5,
-      offsetX: 18.765625
+      selectors: [['[data-testid="add-to-cart"]']],
+      offsetY: 18,
+      offsetX: 58
     },
     {
       type: 'click',
       target: 'main',
-      selectors: [['main span']],
-      offsetY: 16,
-      offsetX: 51.953125
+      selectors: [['[data-testid="nav-cart"]']],
+      offsetY: 20,
+      offsetX: 41
+    },
+    {
+      type: 'click',
+      target: 'main',
+      selectors: [['[data-testid="begin-checkout"]']],
+      offsetY: 18,
+      offsetX: 51
+    },
+    {
+      type: 'click',
+      target: 'main',
+      selectors: [['[data-testid="shipping-continue"]']],
+      offsetY: 18,
+      offsetX: 39
+    },
+    {
+      type: 'click',
+      target: 'main',
+      selectors: [['[data-testid="place-order"]']],
+      offsetY: 18,
+      offsetX: 58
     }
   ]
 };

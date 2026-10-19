@@ -30,9 +30,9 @@ const recording: Recording = {
     {
       type: 'click',
       target: 'main',
-      selectors: [['#viewDestination span']],
-      offsetY: 2,
-      offsetX: 106.078125
+      selectors: [['[data-testid="browse-destinations"]']],
+      offsetY: 18,
+      offsetX: 86
     }
   ]
 };
