@@ -11,14 +11,27 @@ describe('GtmJsonParserService', () => {
     service = new GtmJsonParserService(httpClient as unknown as HttpClient);
   });
 
-  it('throws when JSON is not a GTM configuration', () => {
+  it('throws with the reason when JSON is not a container export', () => {
     expect(() => service.parseGtmJson('{"foo":"bar"}')).toThrow(
-      'Invalid GTM configuration JSON.'
+      'The file is not a Tag Manager container export: containerVersion is missing.'
     );
   });
 
   it('throws on syntactically invalid JSON', () => {
-    expect(() => service.parseGtmJson('not json')).toThrow();
+    expect(() => service.parseGtmJson('not json')).toThrow(
+      'The file is not valid JSON.'
+    );
+  });
+
+  it('accepts an export that leaves out lists the container does not use', () => {
+    const parsed = service.parseGtmJson(
+      JSON.stringify({
+        exportFormatVersion: 2,
+        exportTime: 'now',
+        containerVersion: { tag: [] }
+      })
+    );
+    expect(parsed.containerVersion.variable).toEqual([]);
   });
 
   it('returns parsed configuration when JSON satisfies the GTM type guard', () => {

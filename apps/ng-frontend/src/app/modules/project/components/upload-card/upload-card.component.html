@@ -1,6 +1,6 @@
 <mat-card appearance="outlined" style="max-width: 650px">
   <mat-card-header>
-    <div>Import your specification here</div>
+    <div>Import a Tag Manager container export</div>
   </mat-card-header>
   <br />
   <mat-card-content>
@@ -8,35 +8,43 @@
       type="button"
       mat-stroked-button
       color="primary"
+      [disabled]="uploadingFileName() !== null"
       (click)="fileInput.click()"
     >
       <mat-icon>cloud_upload</mat-icon>
       Upload
     </button>
-    <input hidden (change)="onFileSelected($event)" #fileInput type="file" />
-    <div>
-      <br />
-    </div>
-    @if (importedSpec()) {
-      <div style="max-width: 600px">
-        <app-editor
-          [content]="importedSpec()"
-          [editorExtension]="'specJson'"
-        ></app-editor>
-      </div>
-      <div>
-        <br />
-      </div>
-      <div style="display: flex; justify-content: flex-end">
-        <button
-          type="button"
-          mat-stroked-button
-          color="primary"
-          (click)="save(this.projectSlug$())"
-        >
-          Add to workspace
-        </button>
-      </div>
+    <input
+      hidden
+      (change)="onFileSelected($event)"
+      #fileInput
+      type="file"
+      accept="application/json,.json"
+    />
+    @if (uploadingFileName(); as fileName) {
+      <p>Importing {{ fileName }}…</p>
+    }
+    @if (summary(); as summary) {
+      <p>
+        Created {{ summary.created.length }} · Updated
+        {{ summary.updated.length }} · Unchanged
+        {{ summary.unchanged.length }} · Skipped {{ summary.skipped.length }}
+      </p>
+      @if (summary.skipped.length) {
+        <details>
+          <summary>Skipped tags</summary>
+          <ul>
+            @for (tag of summary.skipped; track tag.tagName) {
+              <li>{{ tag.tagName }}: {{ tag.reason }}</li>
+            }
+          </ul>
+        </details>
+      }
+    }
+    @if (errorMessage(); as message) {
+      <p role="alert" style="color: var(--mat-sys-error, #b3261e)">
+        {{ message }}
+      </p>
     }
   </mat-card-content>
 </mat-card>
