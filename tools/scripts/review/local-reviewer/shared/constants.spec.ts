@@ -22,7 +22,11 @@ describe('local-reviewer constants', () => {
   it('exposes a localhost ollama host and a non-empty default model', () => {
     expect(DEFAULT_OLLAMA_HOST.startsWith('http://127.0.0.1')).toBe(true);
     expect(DEFAULT_OLLAMA_MODEL.length).toBeGreaterThan(0);
-    expect(DEFAULT_HYBRID_GPT_MODEL.length).toBeGreaterThan(0);
+  });
+
+  it('leaves the hybrid GPT model to the Codex CLI configuration', () => {
+    // Reports carry `model: null`; the Codex CLI runs with its own model.
+    expect(DEFAULT_HYBRID_GPT_MODEL).toBeNull();
   });
 
   it('caps hybrid GPT diff size at the documented threshold', () => {
