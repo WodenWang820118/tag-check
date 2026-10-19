@@ -2,8 +2,8 @@
 
 This directory contains the `nest-backend` Nx project.
 
-Use the repository root [AGENTS.md](../../AGENTS.md) as the canonical source
-for workflow, review gates, reviewer routing, and skill selection.
+Use the repository root [AGENTS.md](../../AGENTS.md) for workspace commands,
+boundary rules, and conventions.
 
 Local purpose: NestJS backend for project storage, automation, APIs, and
 reporting.

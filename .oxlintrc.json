@@ -27,8 +27,54 @@
         "allow": [],
         "depConstraints": [
           {
-            "sourceTag": "*",
-            "onlyDependOnLibsWithTags": ["*"]
+            "sourceTag": "scope:shared",
+            "onlyDependOnLibsWithTags": ["scope:shared"]
+          },
+          {
+            "sourceTag": "scope:frontend",
+            "onlyDependOnLibsWithTags": ["scope:frontend", "scope:shared"]
+          },
+          {
+            "sourceTag": "scope:backend",
+            "onlyDependOnLibsWithTags": ["scope:backend", "scope:shared"]
+          },
+          {
+            "sourceTag": "scope:desktop",
+            "onlyDependOnLibsWithTags": ["scope:desktop", "scope:shared"]
+          },
+          {
+            "sourceTag": "type:app",
+            "onlyDependOnLibsWithTags": [
+              "type:feature",
+              "type:ui",
+              "type:data-access",
+              "type:util"
+            ]
+          },
+          {
+            "sourceTag": "type:e2e",
+            "onlyDependOnLibsWithTags": ["type:util"]
+          },
+          {
+            "sourceTag": "type:feature",
+            "onlyDependOnLibsWithTags": [
+              "type:feature",
+              "type:ui",
+              "type:data-access",
+              "type:util"
+            ]
+          },
+          {
+            "sourceTag": "type:ui",
+            "onlyDependOnLibsWithTags": ["type:ui", "type:util"]
+          },
+          {
+            "sourceTag": "type:data-access",
+            "onlyDependOnLibsWithTags": ["type:data-access", "type:util"]
+          },
+          {
+            "sourceTag": "type:util",
+            "onlyDependOnLibsWithTags": ["type:util"]
           }
         ]
       }
@@ -103,6 +149,45 @@
     "typescript/triple-slash-reference": "error"
   },
   "overrides": [
+    {
+      "files": [
+        "apps/nest-backend/src/infrastructure/**/*.ts",
+        "apps/nest-backend/src/core/**/*.ts",
+        "apps/nest-backend/src/shared/**/*.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^(\\.\\./)+(features|controllers)/",
+                "message": "Backend layers point down: controllers -> features -> infrastructure -> core -> shared. Move the code into features/ or inject it through an interface."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "apps/nest-backend/src/core/**/*.ts",
+        "apps/nest-backend/src/shared/**/*.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^(\\.\\./)+(features|controllers|infrastructure)/",
+                "message": "Backend layers point down: controllers -> features -> infrastructure -> core -> shared."
+              }
+            ]
+          }
+        ]
+      }
+    },
     {
       "files": ["libs/ui-helm/**/*.ts"],
       "rules": {

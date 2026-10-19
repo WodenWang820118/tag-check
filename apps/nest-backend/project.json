@@ -3,7 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/nest-backend/src",
   "projectType": "application",
-  "tags": [],
+  "tags": ["scope:backend", "type:app"],
   "targets": {
     "build": {
       "executor": "@nx/rspack:rspack",

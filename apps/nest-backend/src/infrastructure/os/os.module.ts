@@ -7,7 +7,7 @@ import { PathModule } from './path/path.module';
 import { ProjectIoModule } from './project-io/project-io.module';
 import { FolderModule } from './folder/folder.module';
 import { ImageModule } from './image/image.module';
-import { TestReportFacadeModule } from '../../features/repository/test-report-facade/test-report-facade.module';
+import { RepositoryModule } from '../../core/repository/repository.module';
 
 // services
 import { ProjectService } from './project/project.service';
@@ -24,7 +24,7 @@ const modules = [
   FolderModule,
   ImageModule,
   ProjectIoModule,
-  TestReportFacadeModule
+  RepositoryModule
 ];
 
 const services = [

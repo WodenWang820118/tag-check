@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 
 // other modules
-import { GtmOperatorModule } from '../infrastructure/gtm-operator/gtm-operator.module';
+import { GtmOperatorModule } from '../features/gtm-operator/gtm-operator.module';
 import { EventInspectionModule } from '../features/event-inspection/event-inspection.module';
 import { ProjectAgentModule } from '../features/project-agent/project-agent.module';
 import { ExampleProjectRepositoryModule } from '../features/example-project/example-project-repository.module';
