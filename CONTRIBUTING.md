@@ -55,7 +55,14 @@ As the project evolves, additional considerations will include enhancing the des
 
 ## Code Style
 
-Both Angular and NestJS have their own code style guidelines with ESLint and Prettier configurations. Please ensure that your code follows these guidelines before submitting a pull request for better review and merging process.
+The workspace lints with [oxlint](https://oxc.rs/docs/guide/usage/linter.html) (`.oxlintrc.json`, run through the `@nx/oxlint` inferred `lint` targets) and formats with [oxfmt](https://oxc.rs/docs/guide/usage/formatter.html) (`.oxfmtrc.json`). Before submitting a pull request, run:
+
+```bash
+pnpm lint          # nx run-many -t lint
+pnpm format:check  # oxfmt --check (use `pnpm format` to rewrite files)
+```
+
+The pre-commit hook already runs `oxlint --fix` and `oxfmt` on staged files.
 
 ## Issue Tracker
 

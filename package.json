@@ -71,6 +71,10 @@
     "mock-reports-back": "nodemon mock/mock-server/mock-reports-backend.js",
     "mock-settings-back": "nodemon mock/mock-server/mock-settings-backend.js",
     "mock-specs-back": "nodemon mock/mock-server/mock-specs-backend.js",
+    "_____________LINT & FORMAT____________": "--------------------------------------------------------",
+    "lint": "nx run-many -t lint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "_____________TESTING SCRIPTS____________": "--------------------------------------------------------",
     "prepare": "husky",
     "proofshot:check": "node tools/scripts/proofshot/proofshot.ts check",
@@ -118,9 +122,6 @@
     "@angular-devkit/build-angular": "22.2.3",
     "@angular-devkit/core": "22.2.3",
     "@angular-devkit/schematics": "22.2.3",
-    "@angular-eslint/eslint-plugin": "22.6.0",
-    "@angular-eslint/eslint-plugin-template": "22.6.0",
-    "@angular-eslint/template-parser": "22.6.0",
     "@angular/animations": "22.2.3",
     "@angular/build": "22.2.3",
     "@angular/cdk": "22.2.3",
@@ -145,11 +146,10 @@
     "@nx/angular": "23.3.0",
     "@nx/cypress": "23.3.0",
     "@nx/devkit": "23.3.0",
-    "@nx/eslint": "23.3.0",
-    "@nx/eslint-plugin": "23.3.0",
     "@nx/js": "23.3.0",
     "@nx/nest": "23.3.0",
     "@nx/node": "23.3.0",
+    "@nx/oxlint": "23.3.0",
     "@nx/playwright": "23.3.0",
     "@nx/rspack": "23.3.0",
     "@nx/storybook": "23.3.0",
@@ -178,28 +178,19 @@
     "@types/slug": "^5.0.9",
     "@types/supertest": "^6.0.3",
     "@types/unzipper": "^0.10.11",
-    "@typescript-eslint/eslint-plugin": "8.71.2",
-    "@typescript-eslint/parser": "8.71.2",
-    "@typescript-eslint/utils": "8.71.2",
     "@vitest/coverage-v8": "4.0.18",
     "@vitest/ui": "4.0.18",
-    "angular-eslint": "22.6.0",
     "chart.js": "^4.5.1",
     "chokidar": "^5.0.0",
     "codemirror": "^6.0.2",
     "concurrently": "^9.2.1",
     "cross-env": "^10.1.0",
     "css-loader": "^7.1.5",
-    "eslint": "^9.39.2",
-    "eslint-config-prettier": "10.1.8",
-    "eslint-plugin-playwright": "^2.5.1",
-    "eslint-plugin-storybook": "10.2.6",
     "exit-hook": "^5.1.0",
     "glob": "^13.0.1",
     "husky": "^9.1.7",
     "jiti": "2.6.1",
     "jsdom": "~28.0.0",
-    "jsonc-eslint-parser": "^2.4.2",
     "lint-staged": "^16.2.7",
     "marked": "17.0.1",
     "nestjs-spelunker": "^1.3.2",
@@ -207,7 +198,8 @@
     "ngx-markdown": "^22.1.1",
     "nodemon": "^3.1.11",
     "nx": "23.3.0",
-    "prettier": "^3.8.1",
+    "oxfmt": "0.73.0",
+    "oxlint": "1.88.0",
     "prismjs": "^1.30.0",
     "reflect-metadata": "^0.2.2",
     "sass": "^1.97.3",
@@ -297,12 +289,12 @@
     "pnpm": ">=11.0.0 <12.0.0"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
+    "*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}": [
+      "oxlint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
     ],
-    "*.{css,scss,html,md,json}": [
-      "prettier --write"
+    "*.{css,scss,html,md,json,yml,yaml}": [
+      "oxfmt --no-error-on-unmatched-pattern"
     ]
   }
 }

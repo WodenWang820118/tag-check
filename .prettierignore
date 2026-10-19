@@ -1,7 +1,0 @@
-.docusaurus/
-dist
-node_modules
-.angular
-coverage
-
-.nx/self-healing

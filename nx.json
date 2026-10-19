@@ -31,14 +31,6 @@
       "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.mjs"],
       "cache": true
     },
-    "lint": {
-      "inputs": [
-        "default",
-        "{workspaceRoot}/eslint.config.mjs",
-        "{workspaceRoot}/.eslintignore"
-      ],
-      "cache": true
-    },
     "e2e": {
       "inputs": ["default", "^production"],
       "cache": true
@@ -72,8 +64,6 @@
       "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s",
-      "!{projectRoot}/eslint.config.[cm]js",
-      "!{projectRoot}/eslint.config.mjs",
       "!{projectRoot}/**/*.stories.@(js|jsx|ts|tsx|mdx)",
       "!{projectRoot}/.storybook/**/*",
       "!{projectRoot}/tsconfig.storybook.json"
@@ -84,7 +74,7 @@
     "@nx/react": {
       "application": {
         "style": "none",
-        "linter": "eslint",
+        "linter": "none",
         "bundler": "vite",
         "babel": true
       },
@@ -93,7 +83,7 @@
       },
       "library": {
         "style": "none",
-        "linter": "eslint"
+        "linter": "none"
       }
     },
     "@nx/angular:application": {
@@ -151,6 +141,12 @@
         "previewTargetName": "preview",
         "buildDepsTargetName": "build-deps",
         "watchDepsTargetName": "watch-deps"
+      }
+    },
+    {
+      "plugin": "@nx/oxlint",
+      "options": {
+        "targetName": "lint"
       }
     }
   ]

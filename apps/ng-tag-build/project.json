@@ -118,10 +118,6 @@
       },
       "defaultConfiguration": "development"
     },
-    "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"]
-    },
     "test": {
       "executor": "@analogjs/vitest-angular:test",
       "outputs": ["{workspaceRoot}/coverage/apps/ng-tag-build"],

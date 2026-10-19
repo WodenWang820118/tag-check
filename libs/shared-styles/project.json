@@ -11,9 +11,6 @@
       "options": {
         "passWithNoTests": true
       }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
     }
   }
 }
