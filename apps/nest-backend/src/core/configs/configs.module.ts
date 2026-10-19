@@ -4,6 +4,6 @@ import { ConfigsService } from './configs.service';
 @Module({
   imports: [],
   providers: [ConfigsService],
-  exports: [ConfigsService],
+  exports: [ConfigsService]
 })
 export class ConfigsModule {}

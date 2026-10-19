@@ -26,12 +26,12 @@ import { BrowserAction } from '../action-utils';
         return {
           [BrowserAction.CLICK]: clickHandler,
           [BrowserAction.CHANGE]: changeHandler,
-          [BrowserAction.HOVER]: hoverHandler,
+          [BrowserAction.HOVER]: hoverHandler
         };
       },
-      inject: [ClickHandler, ChangeHandler, HoverHandler],
-    },
+      inject: [ClickHandler, ChangeHandler, HoverHandler]
+    }
   ],
-  exports: [StepExecutorService, StepExecutorUtilsService, HandlerModule],
+  exports: [StepExecutorService, StepExecutorUtilsService, HandlerModule]
 })
 export class StepExecutorModule {}

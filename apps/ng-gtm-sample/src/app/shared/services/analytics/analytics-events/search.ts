@@ -7,7 +7,7 @@ export class SearchEventTracker implements AnalyticsEventTracker {
 
   getProcessedData(rawEventData: any) {
     return {
-      eventData: { search_term: rawEventData },
+      eventData: { search_term: rawEventData }
     };
   }
 }

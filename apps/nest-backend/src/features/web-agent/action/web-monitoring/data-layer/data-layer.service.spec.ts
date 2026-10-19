@@ -8,7 +8,7 @@ describe('DataLayerService', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [DataLayerService],
+      providers: [DataLayerService]
     })
       .useMocker((token) => {
         if (typeof token === 'function') {

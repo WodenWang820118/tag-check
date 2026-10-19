@@ -17,14 +17,14 @@ export class SelectItemEventTracker implements AnalyticsEventTracker {
             item_name: rawEventData.title,
             item_category: rawEventData.title,
             price: rawEventData.price,
-            quantity: 1,
-          },
-        ],
-      },
+            quantity: 1
+          }
+        ]
+      }
     };
 
     return {
-      eventData: event,
+      eventData: event
     };
   }
 }

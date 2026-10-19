@@ -11,7 +11,7 @@ import {
   WINDOWS_PROCESS_BRIDGE_ENV,
   WINDOWS_PROCESS_BRIDGE_SCRIPT,
   type LocalReviewerDependencies,
-  type WindowsProcessBridgePayload,
+  type WindowsProcessBridgePayload
 } from '../shared/shared.ts';
 
 export function createLocalReviewerDependencies(): LocalReviewerDependencies {
@@ -25,18 +25,18 @@ export function createLocalReviewerDependencies(): LocalReviewerDependencies {
         if (!powershellPath) {
           return {
             error: new Error(
-              'Windows PowerShell is required to launch .cmd commands safely.',
+              'Windows PowerShell is required to launch .cmd commands safely.'
             ),
             status: null,
             stderr: '',
-            stdout: '',
+            stdout: ''
           };
         }
 
         const bridgePayload = buildWindowsProcessBridgePayload({
           args: input.args,
           command: input.command,
-          cwd: input.cwd,
+          cwd: input.cwd
         });
         const payloadDir = mkdtempSync(join(tmpdir(), 'local-reviewer-win-'));
         const payloadPath = resolve(payloadDir, 'process.json');
@@ -50,19 +50,19 @@ export function createLocalReviewerDependencies(): LocalReviewerDependencies {
                 '-NoProfile',
                 '-NonInteractive',
                 '-EncodedCommand',
-                encodePowerShellCommand(WINDOWS_PROCESS_BRIDGE_SCRIPT),
+                encodePowerShellCommand(WINDOWS_PROCESS_BRIDGE_SCRIPT)
               ],
               {
                 cwd: input.cwd,
                 encoding: 'utf8',
                 env: {
                   ...(sanitizedEnv ?? {}),
-                  [WINDOWS_PROCESS_BRIDGE_ENV]: payloadPath,
+                  [WINDOWS_PROCESS_BRIDGE_ENV]: payloadPath
                 },
                 input: input.input,
                 stdio: ['pipe', 'pipe', 'pipe'],
-                timeout: input.timeoutMs,
-              },
+                timeout: input.timeoutMs
+              }
             );
           } finally {
             rmSync(payloadDir, { force: true, recursive: true });
@@ -73,7 +73,7 @@ export function createLocalReviewerDependencies(): LocalReviewerDependencies {
           error: result.error,
           status: result.status,
           stderr: result.stderr ?? '',
-          stdout: result.stdout ?? '',
+          stdout: result.stdout ?? ''
         };
       }
 
@@ -83,26 +83,25 @@ export function createLocalReviewerDependencies(): LocalReviewerDependencies {
         env: sanitizedEnv,
         input: input.input,
         stdio: ['pipe', 'pipe', 'pipe'],
-        timeout: input.timeoutMs,
+        timeout: input.timeoutMs
       });
 
       return {
         error: result.error,
         status: result.status,
         stderr: result.stderr ?? '',
-        stdout: result.stdout ?? '',
+        stdout: result.stdout ?? ''
       };
-    },
+    }
   };
 }
 
 export function resolveLocalReviewerRepoRoot(
   repoRoot: string,
-  env: NodeJS.ProcessEnv = process.env,
+  env: NodeJS.ProcessEnv = process.env
 ): string {
   const candidate = resolve(
-    env.LOCAL_REVIEWER_CLI_PATH ??
-      resolve(repoRoot, '..', 'local-reviewer-cli'),
+    env.LOCAL_REVIEWER_CLI_PATH ?? resolve(repoRoot, '..', 'local-reviewer-cli')
   );
   const packageJsonPath = resolve(candidate, 'package.json');
   const cliEntryPath = resolve(
@@ -110,11 +109,11 @@ export function resolveLocalReviewerRepoRoot(
     'packages',
     'local-reviewer',
     'bin',
-    'local-reviewer.js',
+    'local-reviewer.js'
   );
   if (!existsSync(packageJsonPath) || !existsSync(cliEntryPath)) {
     throw new Error(
-      `Unable to find a usable local-reviewer-cli workspace at ${candidate}.`,
+      `Unable to find a usable local-reviewer-cli workspace at ${candidate}.`
     );
   }
 
@@ -123,7 +122,7 @@ export function resolveLocalReviewerRepoRoot(
 
 export function createLocalReviewerEnv(
   baseEnv: NodeJS.ProcessEnv = process.env,
-  overrides: Partial<NodeJS.ProcessEnv> = {},
+  overrides: Partial<NodeJS.ProcessEnv> = {}
 ): NodeJS.ProcessEnv {
   const model =
     overrides.LOCAL_REVIEWER_OLLAMA_MODEL ??
@@ -159,7 +158,7 @@ export function createLocalReviewerEnv(
     LOCAL_REVIEWER_OLLAMA_TIMEOUT_MS:
       overrides.LOCAL_REVIEWER_OLLAMA_TIMEOUT_MS ??
       baseEnv.LOCAL_REVIEWER_OLLAMA_TIMEOUT_MS ??
-      DEFAULT_OLLAMA_TIMEOUT_MS,
+      DEFAULT_OLLAMA_TIMEOUT_MS
   };
 }
 
@@ -171,7 +170,7 @@ export function buildWindowsProcessBridgePayload(input: {
   return {
     args: [...input.args],
     command: input.command,
-    cwd: input.cwd ?? process.cwd(),
+    cwd: input.cwd ?? process.cwd()
   };
 }
 
@@ -180,14 +179,14 @@ export function getPnpmCommand(): string {
 }
 
 export function sanitizeEnv(
-  env: NodeJS.ProcessEnv | undefined,
+  env: NodeJS.ProcessEnv | undefined
 ): NodeJS.ProcessEnv | undefined {
   if (!env) {
     return undefined;
   }
 
   const sanitizedEntries = Object.entries(env).filter(
-    (entry): entry is [string, string] => typeof entry[1] === 'string',
+    (entry): entry is [string, string] => typeof entry[1] === 'string'
   );
   return Object.fromEntries(sanitizedEntries);
 }
@@ -199,7 +198,7 @@ export function resolveWindowsPowerShellPath(): string | null {
 
   const candidates = [
     'C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe',
-    'C:\\Program Files\\PowerShell\\7\\pwsh.exe',
+    'C:\\Program Files\\PowerShell\\7\\pwsh.exe'
   ];
 
   return candidates.find((candidate) => existsSync(candidate)) ?? null;

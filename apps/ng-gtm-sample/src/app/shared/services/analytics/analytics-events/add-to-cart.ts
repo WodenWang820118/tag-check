@@ -22,13 +22,13 @@ export class AddToCartEventTracker implements AnalyticsEventTracker {
           item_list_name: 'destinations', // required for ga4_ecom_attributor
           item_category: item.title,
           quantity: Number(item.quantity),
-          price: item.value,
-        })),
-      },
+          price: item.value
+        }))
+      }
     };
 
     return {
-      eventData: event,
+      eventData: event
     };
   }
 }

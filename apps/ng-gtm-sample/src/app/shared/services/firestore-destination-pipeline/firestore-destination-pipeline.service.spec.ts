@@ -139,7 +139,9 @@ describe('FirestoreDestinationPipelineService', () => {
 
     expect(result).toEqual([cachedDestination]);
     expect(getDocs).not.toHaveBeenCalled();
-    expect(indexeddbDestinationService.replaceDestinations).not.toHaveBeenCalled();
+    expect(
+      indexeddbDestinationService.replaceDestinations
+    ).not.toHaveBeenCalled();
   });
 
   it('fetches all destinations from Firestore and refreshes the cache when the cache is empty', async () => {
@@ -157,9 +159,9 @@ describe('FirestoreDestinationPipelineService', () => {
 
     expect(getDocs).toHaveBeenCalledTimes(1);
     expect(firebaseStorageService.getImage).toHaveBeenCalledWith('image-1.jpg');
-    expect(indexeddbDestinationService.replaceDestinations).toHaveBeenCalledWith(
-      result
-    );
+    expect(
+      indexeddbDestinationService.replaceDestinations
+    ).toHaveBeenCalledWith(result);
     expect(result[0].image1).toBe('resolved:image-1.jpg');
     expect(result[0].image2).toBe('resolved:image-2.jpg');
     expect(result[0].image3).toBe('resolved:image-3.jpg');
@@ -175,7 +177,9 @@ describe('FirestoreDestinationPipelineService', () => {
     const result = await firstValueFrom(service.getAllDestinationsData());
 
     expect(result).toEqual([]);
-    expect(indexeddbDestinationService.replaceDestinations).toHaveBeenCalledWith([]);
+    expect(
+      indexeddbDestinationService.replaceDestinations
+    ).toHaveBeenCalledWith([]);
     expect(firebaseStorageService.getImage).not.toHaveBeenCalled();
   });
 
@@ -211,7 +215,9 @@ describe('FirestoreDestinationPipelineService', () => {
     const service = TestBed.inject(FirestoreDestinationPipelineService);
 
     const nextResult = await firstValueFrom(service.getNextDestinationsData(2));
-    const previousResult = await firstValueFrom(service.getPreviousDestinationsData());
+    const previousResult = await firstValueFrom(
+      service.getPreviousDestinationsData()
+    );
 
     expect(nextResult).toEqual([]);
     expect(previousResult).toEqual([]);
@@ -257,9 +263,13 @@ describe('FirestoreDestinationPipelineService', () => {
       .mockResolvedValueOnce(createSnapshot(searchResults));
 
     const service = TestBed.inject(FirestoreDestinationPipelineService);
-    const firstResult = await firstValueFrom(service.getFirstDestinationsData(2));
+    const firstResult = await firstValueFrom(
+      service.getFirstDestinationsData(2)
+    );
     const nextResult = await firstValueFrom(service.getNextDestinationsData(2));
-    const previousResult = await firstValueFrom(service.getPreviousDestinationsData());
+    const previousResult = await firstValueFrom(
+      service.getPreviousDestinationsData()
+    );
     const searchResult = await firstValueFrom(
       service.getSearchResultsData('Ja', 2)
     );
@@ -310,7 +320,9 @@ describe('FirestoreDestinationPipelineService', () => {
     const firstSearchResult = await firstValueFrom(
       service.getSearchResultsData('Ja', 2)
     );
-    const nextSearchResult = await firstValueFrom(service.getNextDestinationsData(2));
+    const nextSearchResult = await firstValueFrom(
+      service.getNextDestinationsData(2)
+    );
 
     expect(firstSearchResult.map((destination) => destination.id)).toEqual([
       'destination-5',

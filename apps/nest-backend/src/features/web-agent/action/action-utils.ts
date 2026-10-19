@@ -6,7 +6,7 @@ export enum BrowserAction {
   HOVER = 'hover',
   KEYDOWN = 'keyDown',
   KEYUP = 'keyUp',
-  WAITFORELEMENT = 'waitForElement',
+  WAITFORELEMENT = 'waitForElement'
 }
 
 export enum SelectorSymbol {
@@ -15,7 +15,7 @@ export enum SelectorSymbol {
   XPATH = 'xpath',
   PIERCE = 'pierce',
   TEXT = 'text',
-  ARIA = 'aria',
+  ARIA = 'aria'
 }
 
 export enum SelectorType {
@@ -24,5 +24,5 @@ export enum SelectorType {
   XPATH = 'xpath',
   PIERCE = 'pierce',
   TEXT = 'text',
-  ARIA = 'aria',
+  ARIA = 'aria'
 }

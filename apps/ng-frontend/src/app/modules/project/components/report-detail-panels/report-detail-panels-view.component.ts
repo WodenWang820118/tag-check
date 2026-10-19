@@ -47,8 +47,7 @@ import { EditableJsonPanelComponent } from './editable-json-panel.component';
             <div class="raw-request-container">
               <pre class="raw-request" aria-label="Raw Request"
                 >{{ rawRequest() }}
-              </pre
-              >
+              </pre>
             </div>
           </mat-panel-description>
         </mat-expansion-panel>

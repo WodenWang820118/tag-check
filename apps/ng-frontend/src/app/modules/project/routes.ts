@@ -67,9 +67,9 @@ export const PROJECT_ROUTES: Routes = [
       {
         path: 'settings/project-info',
         loadComponent: () =>
-          import(
-            '../../shared/components/project-info-form/project-info-form.component'
-          ).then((m) => m.ProjectInfoFormComponent),
+          import('../../shared/components/project-info-form/project-info-form.component').then(
+            (m) => m.ProjectInfoFormComponent
+          ),
         resolve: {
           projectInfo: getProjectFormSettingsResolver
         }
@@ -77,9 +77,9 @@ export const PROJECT_ROUTES: Routes = [
       {
         path: 'settings/pre-loading-values',
         loadComponent: () =>
-          import(
-            '../../shared/components/application-form/application-form.component'
-          ).then((m) => m.ApplicationFormComponent),
+          import('../../shared/components/application-form/application-form.component').then(
+            (m) => m.ApplicationFormComponent
+          ),
         resolve: {
           projectInfo: getProjectFormSettingsResolver
         }
@@ -87,9 +87,9 @@ export const PROJECT_ROUTES: Routes = [
       {
         path: 'settings/authentication',
         loadComponent: () =>
-          import(
-            '../../shared/components/authentication-form/authentication-form.component'
-          ).then((m) => m.AuthenticationFormComponent),
+          import('../../shared/components/authentication-form/authentication-form.component').then(
+            (m) => m.AuthenticationFormComponent
+          ),
         resolve: {
           projectInfo: getProjectFormSettingsResolver
         }
@@ -107,9 +107,9 @@ export const PROJECT_ROUTES: Routes = [
       {
         path: 'settings/advanced-browser-settings',
         loadComponent: () =>
-          import(
-            '../../shared/components/browser-form/browser-form.component'
-          ).then((m) => m.BrowserFormComponent),
+          import('../../shared/components/browser-form/browser-form.component').then(
+            (m) => m.BrowserFormComponent
+          ),
         resolve: {
           projectInfo: getProjectFormSettingsResolver
         }
@@ -117,9 +117,9 @@ export const PROJECT_ROUTES: Routes = [
       {
         path: 'settings/project-io',
         loadComponent: () =>
-          import(
-            '../../shared/components/project-io-form/project-io-form.component'
-          ).then((m) => m.ProjectIoFormComponent)
+          import('../../shared/components/project-io-form/project-io-form.component').then(
+            (m) => m.ProjectIoFormComponent
+          )
       },
       {
         path: ':eventId',

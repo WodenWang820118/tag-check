@@ -7,6 +7,6 @@ import { ActionUtilsModule } from '../../action-utils/action-utils.module';
 @Module({
   imports: [ActionUtilsModule],
   providers: [HoverStrategyService, PageHoverService, EvaluateHoverService],
-  exports: [HoverStrategyService, PageHoverService, EvaluateHoverService],
+  exports: [HoverStrategyService, PageHoverService, EvaluateHoverService]
 })
 export class HoverStrategyModule {}

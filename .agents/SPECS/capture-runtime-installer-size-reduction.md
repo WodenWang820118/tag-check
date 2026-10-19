@@ -119,7 +119,13 @@ Every ZIP contains `files-manifest.json`. Its canonical JSON shape is:
 ```json
 {
   "manifestVersion": "1",
-  "files": [{ "path": "capture-engine-ocr.exe", "bytes": 1, "sha256": "<64 lowercase hex>" }]
+  "files": [
+    {
+      "path": "capture-engine-ocr.exe",
+      "bytes": 1,
+      "sha256": "<64 lowercase hex>"
+    }
+  ]
 }
 ```
 

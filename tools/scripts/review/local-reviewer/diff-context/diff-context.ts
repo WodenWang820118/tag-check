@@ -3,7 +3,7 @@ import {
   normalizeHybridPath,
   type CommandResult,
   type EvaluationSample,
-  type LocalReviewerDependencies,
+  type LocalReviewerDependencies
 } from '../shared/shared.ts';
 
 export function collectDiffText(input: {
@@ -21,13 +21,13 @@ export function collectDiffText(input: {
         '--unified=3',
         input.baseRef ?? '',
         input.headRef ?? '',
-        '--no-ext-diff',
+        '--no-ext-diff'
       ];
 
   const result = runGitCommand(
     input.repoRoot,
     args.filter(Boolean),
-    input.dependencies,
+    input.dependencies
   );
   return result.stdout.trim();
 }
@@ -45,7 +45,7 @@ export function collectChangedFiles(input: {
   const result = runGitCommand(
     input.repoRoot,
     args.filter(Boolean),
-    input.dependencies,
+    input.dependencies
   );
 
   return result.stdout
@@ -71,20 +71,20 @@ export function buildCheckpointReviewContext(input: {
     ...input.changedFiles.map((file) => `- ${normalizeHybridPath(file)}`),
     '',
     'Diff to review:',
-    input.diffText.trim(),
+    input.diffText.trim()
   ].join('\n');
 }
 
 export function runGitCommand(
   repoRoot: string,
   args: string[],
-  dependencies: LocalReviewerDependencies,
+  dependencies: LocalReviewerDependencies
 ): CommandResult {
   const result = dependencies.runProcess({
     command: 'git',
     args,
     cwd: repoRoot,
-    timeoutMs: LOCAL_REVIEWER_COMMAND_TIMEOUT_MS,
+    timeoutMs: LOCAL_REVIEWER_COMMAND_TIMEOUT_MS
   });
 
   if (result.error || result.status !== 0) {
@@ -92,7 +92,7 @@ export function runGitCommand(
       result.stderr.trim() ||
         result.stdout.trim() ||
         result.error?.message ||
-        `Git command failed: git ${args.join(' ')}`,
+        `Git command failed: git ${args.join(' ')}`
     );
   }
 

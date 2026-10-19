@@ -16,14 +16,14 @@ export class SelectPromotionEventTracker implements AnalyticsEventTracker {
         items: [
           {
             item_id: eventData.id,
-            item_name: eventData.title,
-          },
-        ],
-      },
+            item_name: eventData.title
+          }
+        ]
+      }
     };
 
     return {
-      eventData: event,
+      eventData: event
     };
   }
 }

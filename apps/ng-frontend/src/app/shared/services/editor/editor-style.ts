@@ -2,7 +2,7 @@ export const editorStyles = {
   '.cm-scroller': {
     height: '35vh',
     'min-width': '40vw',
-    width: '100%',
+    width: '100%'
   },
   '.cm-content': {
     textAlign: 'justify',
@@ -15,6 +15,6 @@ export const editorStyles = {
     flexGrow: 1,
     flexShrink: 0,
     display: 'block',
-    whiteSpace: 'pre',
-  },
+    whiteSpace: 'pre'
+  }
 };

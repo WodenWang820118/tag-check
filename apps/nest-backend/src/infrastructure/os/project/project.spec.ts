@@ -12,12 +12,12 @@ describe('ProjectService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProjectService],
+      providers: [ProjectService]
     })
       .useMocker((token) => {
         if (token === FileService) {
           return {
-            readJsonFile: vi.fn().mockResolvedValue({ test: 'test' }),
+            readJsonFile: vi.fn().mockResolvedValue({ test: 'test' })
           };
         }
 
@@ -34,22 +34,22 @@ describe('ProjectService', () => {
                 isCharacterDevice: () => false,
                 isSymbolicLink: () => false,
                 isFIFO: () => false,
-                isSocket: () => false,
-              } as Dirent,
-            ]),
+                isSocket: () => false
+              } as Dirent
+            ])
           };
         }
 
         if (token === FolderPathService) {
           return {
-            getRootProjectFolderPath: vi.fn().mockResolvedValue('root'),
+            getRootProjectFolderPath: vi.fn().mockResolvedValue('root')
           };
         }
 
         if (token === FilePathService) {
           return {
             getProjectSettingFilePath: vi.fn().mockResolvedValue('settings'),
-            getProjectMetaDataFilePath: vi.fn().mockResolvedValue('metadata'),
+            getProjectMetaDataFilePath: vi.fn().mockResolvedValue('metadata')
           };
         }
 

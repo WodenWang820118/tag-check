@@ -141,12 +141,16 @@ describe('ReportDetailPanelsComponent', () => {
     component.specSyntaxError.set(false);
     component.saveSpec();
 
-    expect(facade.updateSpec).toHaveBeenCalledWith('storybook-project', 'evt-purchase', {
-      event: 'signup',
-      dataLayerSpec: {
-        event: 'signup'
+    expect(facade.updateSpec).toHaveBeenCalledWith(
+      'storybook-project',
+      'evt-purchase',
+      {
+        event: 'signup',
+        dataLayerSpec: {
+          event: 'signup'
+        }
       }
-    });
+    );
     expect(component.specContent()?.dataLayerSpec.event).toBe('signup');
     expect(component.specEditMode()).toBe(false);
   });
@@ -241,7 +245,9 @@ describe('ReportDetailPanelsComponent', () => {
       value: 'selected'
     } as unknown as HTMLInputElement;
 
-    facade.readFile.mockResolvedValue('{"title":"Uploaded recording","steps":[]}');
+    facade.readFile.mockResolvedValue(
+      '{"title":"Uploaded recording","steps":[]}'
+    );
 
     await component.onRecordingFileSelected({
       target
@@ -285,7 +291,9 @@ describe('ReportDetailPanelsComponent', () => {
     fixture.detectChanges();
 
     component.toggleRecordingEdit();
-    component.onRecordingDraftChange('{"title":"Updated recording","steps":[]}');
+    component.onRecordingDraftChange(
+      '{"title":"Updated recording","steps":[]}'
+    );
     component.recordingSyntaxError.set(false);
     component.saveRecording();
 

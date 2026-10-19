@@ -70,10 +70,10 @@ export class TopologicalSorterService {
       Array.isArray(anyRel?.joinColumns) && anyRel.joinColumns.length > 0;
     return Boolean(
       anyRel?.isManyToOne ||
-        anyRel?.isOneToOneOwner ||
-        anyRel?.relationType === 'many-to-one' ||
-        (anyRel?.relationType === 'one-to-one' &&
-          (anyRel?.isOwning || hasJoinColumns))
+      anyRel?.isOneToOneOwner ||
+      anyRel?.relationType === 'many-to-one' ||
+      (anyRel?.relationType === 'one-to-one' &&
+        (anyRel?.isOwning || hasJoinColumns))
     );
   }
 

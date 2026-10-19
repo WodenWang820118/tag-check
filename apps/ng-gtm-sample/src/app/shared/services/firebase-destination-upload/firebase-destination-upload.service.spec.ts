@@ -63,11 +63,12 @@ describe('FirebaseDestinationUploadService', () => {
     firestoreMockState.setDoc.mockReset();
     firestoreMockState.setDoc.mockResolvedValue(undefined);
     firebaseStorageService.uploadImage.mockReset();
-    firebaseStorageService.uploadImage.mockImplementation((_: File, fileName: string) =>
-      of({
-        fileName,
-        downloadUrl: `https://cdn.example.com/${fileName}`
-      })
+    firebaseStorageService.uploadImage.mockImplementation(
+      (_: File, fileName: string) =>
+        of({
+          fileName,
+          downloadUrl: `https://cdn.example.com/${fileName}`
+        })
     );
     pipelineService.refreshAllDestinationsCache.mockReset();
     pipelineService.refreshAllDestinationsCache.mockReturnValue(of([]));
@@ -136,7 +137,9 @@ describe('FirebaseDestinationUploadService', () => {
       price: 1299,
       video: 'https://youtu.be/demo'
     });
-    expect(pipelineService.refreshAllDestinationsCache).toHaveBeenCalledTimes(1);
+    expect(pipelineService.refreshAllDestinationsCache).toHaveBeenCalledTimes(
+      1
+    );
     expect(result).toEqual({
       id: 'destination-123',
       country: 'Japan',
@@ -176,7 +179,9 @@ describe('FirebaseDestinationUploadService', () => {
   it('propagates Firestore write failures without refreshing the cache', async () => {
     const service = TestBed.inject(FirebaseDestinationUploadService);
     const draft = createDraft();
-    firestoreMockState.setDoc.mockRejectedValueOnce(new Error('firestore failed'));
+    firestoreMockState.setDoc.mockRejectedValueOnce(
+      new Error('firestore failed')
+    );
 
     await expect(firstValueFrom(service.upload(draft))).rejects.toThrow(
       'firestore failed'

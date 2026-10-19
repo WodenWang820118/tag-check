@@ -7,6 +7,6 @@ import { PuppeteerUtilsService } from './puppeteer-utils/puppeteer-utils.service
 @Module({
   imports: [ActionModule, PuppeteerUtilsModule],
   providers: [WebAgentService, WebAgentUtilsService, PuppeteerUtilsService],
-  exports: [WebAgentService, ActionModule, PuppeteerUtilsModule],
+  exports: [WebAgentService, ActionModule, PuppeteerUtilsModule]
 })
 export class WebAgentModule {}

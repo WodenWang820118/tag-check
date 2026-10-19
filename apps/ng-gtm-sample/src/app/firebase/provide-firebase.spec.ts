@@ -103,9 +103,7 @@ describe('provideFirebaseClients', () => {
     firebaseSdkState.apps = [existingApp];
 
     TestBed.configureTestingModule({
-      providers: [
-        provideFirebaseClients(secondConfig)
-      ]
+      providers: [provideFirebaseClients(secondConfig)]
     });
 
     const config = TestBed.inject(FIREBASE_CLIENT_CONFIG);

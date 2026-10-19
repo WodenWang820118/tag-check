@@ -7,12 +7,12 @@ import { ActionUtilsModule } from '../../action-utils/action-utils.module';
 const operationStrategies = [
   EvaluateClickService,
   PageClickService,
-  ClickStrategyService,
+  ClickStrategyService
 ];
 
 @Module({
   imports: [ActionUtilsModule],
   providers: [...operationStrategies],
-  exports: [...operationStrategies],
+  exports: [...operationStrategies]
 })
 export class ClickStrategyModule {}
