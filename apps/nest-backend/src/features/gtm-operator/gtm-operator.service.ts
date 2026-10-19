@@ -10,7 +10,27 @@ import { EventInspectionPipelineService } from '../event-inspection-pipeline/eve
 import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import { RecordingRepositoryService } from '../../core/repository/recording/recording-repository.service';
-import { preloadApplicationLocalStorage } from '../web-agent/browser-state-preload.util';
+import {
+  preloadApplicationLocalStorage,
+  seedSiteLocalStorage
+} from '../web-agent/browser-state-preload.util';
+
+/**
+ * Preview mode pins Tag Assistant's badge (an iframe, 450x200, maximum
+ * z-index) to the bottom-right corner of the site, where it swallows clicks
+ * on whatever sits underneath, such as a checkout's submit button. The badge
+ * stays visible; clicks pass through it. Source text, because the ES5 bundle
+ * would add swc helpers to a function that the page lacks.
+ */
+export const TAG_ASSISTANT_BADGE_PASSTHROUGH = `(function () {
+  function addStyle() {
+    var style = document.createElement('style');
+    style.textContent = '.__TAG_ASSISTANT_BADGE { pointer-events: none !important; }';
+    (document.head || document.documentElement).appendChild(style);
+  }
+  if (document.documentElement) addStyle();
+  else document.addEventListener('DOMContentLoaded', addStyle);
+})();`;
 
 @Injectable()
 export class GtmOperatorService {
@@ -52,6 +72,11 @@ export class GtmOperatorService {
     try {
       const websiteUrl = this.getPreviewTargetUrl(query.gtmUrl);
       await this.applyCookies(browser, websiteUrl, eventInspectionPresetDto);
+      await seedSiteLocalStorage(
+        browser,
+        websiteUrl,
+        eventInspectionPresetDto.application
+      );
       await this.operateGtmPreviewMode(page, query.gtmUrl);
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -80,6 +105,7 @@ export class GtmOperatorService {
         eventId
       );
       await targetPage.bringToFront();
+      await targetPage.evaluateOnNewDocument(TAG_ASSISTANT_BADGE_PASSTHROUGH);
       await preloadApplicationLocalStorage(
         targetPage,
         eventInspectionPresetDto.application

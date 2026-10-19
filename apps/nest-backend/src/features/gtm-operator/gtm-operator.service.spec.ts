@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { GtmOperatorService } from './gtm-operator.service';
+import { runInNewContext } from 'node:vm';
+import {
+  GtmOperatorService,
+  TAG_ASSISTANT_BADGE_PASSTHROUGH
+} from './gtm-operator.service';
 
 describe('GtmOperatorService recorder lifecycle', () => {
   let service: GtmOperatorService;
@@ -156,17 +160,42 @@ describe('GtmOperatorService recorder lifecycle', () => {
     );
 
     expect(targetPage.evaluateOnNewDocument).toHaveBeenCalledWith(
-      expect.any(Function),
-      preset.application.localStorage
+      expect.stringContaining('"consentPreferences"')
     );
     expect(callOrder).toEqual([
       'bringToFront',
       'evaluateOnNewDocument',
+      'evaluateOnNewDocument',
       'goto'
     ]);
+    expect(targetPage.evaluateOnNewDocument).toHaveBeenCalledWith(
+      TAG_ASSISTANT_BADGE_PASSTHROUGH
+    );
     expect(targetPage.goto).toHaveBeenCalledWith(
       'https://example.test/product?gtm_debug=TAGASSISTANT'
     );
+  });
+
+  it("seeds the site's localStorage before Tag Assistant opens the site", async () => {
+    // Sites that load GTM only after stored consent never connect otherwise.
+    const callOrder: string[] = [];
+    browser = createMockBrowser(targetPage, callOrder);
+    puppeteerUtils.startBrowser.mockResolvedValue({
+      browser,
+      page: openerPage
+    });
+    vi.mocked(service.operateGtmPreviewMode).mockImplementation(async () => {
+      callOrder.push('tag assistant');
+    });
+
+    await service.inspectSingleEventViaGtm(
+      'project',
+      'event',
+      createQuery(),
+      createPreset({ localStorage: [{ key: 'consent', value: 'true' }] })
+    );
+
+    expect(callOrder).toEqual(['seed https://example.test', 'tag assistant']);
   });
 
   it('cleans up and rejects invalid GTM preview URLs before inspection continues', async () => {
@@ -188,6 +217,30 @@ describe('GtmOperatorService recorder lifecycle', () => {
       null
     );
     expect(service.operateGtmPreviewMode).not.toHaveBeenCalled();
+  });
+});
+
+describe('TAG_ASSISTANT_BADGE_PASSTHROUGH', () => {
+  it('lets clicks pass through the Tag Assistant badge', () => {
+    const appended: Array<{ textContent: string }> = [];
+    const document = {
+      documentElement: {},
+      head: {
+        appendChild: (node: { textContent: string }) => appended.push(node)
+      },
+      createElement: () => ({ textContent: '' }),
+      addEventListener: vi.fn()
+    };
+
+    // A fresh context: the page has none of the bundle's helpers.
+    runInNewContext(TAG_ASSISTANT_BADGE_PASSTHROUGH, { document });
+
+    expect(appended).toEqual([
+      {
+        textContent:
+          '.__TAG_ASSISTANT_BADGE { pointer-events: none !important; }'
+      }
+    ]);
   });
 });
 
@@ -283,8 +336,12 @@ function createPreset(options?: {
   } as any;
 }
 
-function createMockBrowser(targetPage: ReturnType<typeof createMockPage>) {
+function createMockBrowser(
+  targetPage: ReturnType<typeof createMockPage>,
+  callOrder?: string[]
+) {
   return {
+    newPage: vi.fn().mockImplementation(async () => createSeedPage(callOrder)),
     pages: vi.fn().mockResolvedValue([]),
     close: vi.fn().mockResolvedValue(undefined),
     setCookie: vi.fn().mockResolvedValue(undefined),
@@ -306,6 +363,18 @@ function createMockPage(callOrder?: string[]) {
     goto: vi.fn().mockImplementation(async () => {
       callOrder?.push('goto');
     })
+  };
+}
+
+function createSeedPage(callOrder?: string[]) {
+  return {
+    setRequestInterception: vi.fn().mockResolvedValue(undefined),
+    on: vi.fn(),
+    goto: vi.fn().mockImplementation(async (url: string) => {
+      callOrder?.push(`seed ${url}`);
+    }),
+    evaluate: vi.fn().mockResolvedValue(undefined),
+    close: vi.fn().mockResolvedValue(undefined)
   };
 }
 

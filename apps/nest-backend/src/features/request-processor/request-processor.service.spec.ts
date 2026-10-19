@@ -249,4 +249,17 @@ describe('RequestProcessorService', () => {
       });
     });
   });
+
+  it('restores page_path from the dp key of a GTM page_view hit', () => {
+    // Recorded from the ng-gtm-sample "GA4 event - page_view" tag in preview mode.
+    const url =
+      'https://www.google-analytics.com/g/collect?v=2&tid=G-8HKQR5ZBSK&_dbg=1&_s=2&dp=%2Fhome&dt=Home&dl=https%3A%2F%2Fng-gtm-sample.vercel.app%2Fhome&en=page_view&_et=11';
+
+    expect(service.recomposeGA4ECEvent(url)).toEqual({
+      event: 'page_view',
+      page_path: '/home',
+      page_title: 'Home',
+      page_location: 'https://ng-gtm-sample.vercel.app/home'
+    });
+  });
 });

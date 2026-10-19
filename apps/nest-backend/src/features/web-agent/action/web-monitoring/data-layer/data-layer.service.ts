@@ -5,6 +5,33 @@ import { FolderPathService } from '../../../../../infrastructure/os/path/folder-
 import { extractEventNameFromId } from '@utils';
 import { FileService } from '../../../../../infrastructure/os/file/file.service';
 import { FilePathService } from '../../../../../infrastructure/os/path/file-path/file-path.service';
+
+/**
+ * Copies `window.dataLayer` out of the page one push at a time. Cloning the
+ * whole array fails as soon as one push holds something a page cannot hand
+ * over: GTM preview mode pushes functions, and auto-events carry DOM nodes in
+ * `gtm.element`. Such pushes keep their other values. Source text, because
+ * the ES5 bundle would add swc helpers to a function that the page lacks.
+ */
+export const DATA_LAYER_SNAPSHOT_SCRIPT = `(function () {
+  var source = globalThis.dataLayer;
+  if (!Array.isArray(source)) return [{ event: 'no data layer' }];
+  var copy = [];
+  for (var i = 0; i < source.length; i++) {
+    try {
+      copy.push(structuredClone(source[i]));
+    } catch (cloneError) {
+      try {
+        var json = JSON.stringify(source[i], function (key, value) {
+          return value && value.nodeType ? undefined : value;
+        });
+        if (json !== undefined) copy.push(JSON.parse(json));
+      } catch (jsonError) {}
+    }
+  }
+  return copy;
+})()`;
+
 @Injectable()
 export class DataLayerService {
   private readonly logger = new Logger(DataLayerService.name);
@@ -40,13 +67,9 @@ export class DataLayerService {
         { timeout: 5000 }
       );
 
-      const dataLayer: unknown[] = await page.evaluate(() => {
-        // give a minimal typed shape to avoid `any` lint errors inside the evaluate sandbox
-        const g = globalThis as unknown as { dataLayer?: unknown[] };
-        return g.dataLayer
-          ? structuredClone(g.dataLayer)
-          : [{ event: 'no data layer' }];
-      });
+      const dataLayer = (await page.evaluate(
+        DATA_LAYER_SNAPSHOT_SCRIPT
+      )) as unknown[];
       await this.updateSelfDataLayerAlgorithm(dataLayer, projectName, eventId);
     } catch (error) {
       this.logger.error(`Failed to update self data layer: ${error}`);

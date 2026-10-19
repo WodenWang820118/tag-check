@@ -165,6 +165,46 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     expect(browser.close).toHaveBeenCalledTimes(1);
   });
 
+  it('cleanup moves on to the browser when a page never finishes closing', async () => {
+    vi.useFakeTimers();
+    try {
+      // A tab with DevTools attached never resolves page.close().
+      const page = { close: vi.fn(() => new Promise<void>(() => undefined)) };
+      const browser = {
+        close: vi.fn().mockResolvedValue(undefined),
+        process: vi.fn()
+      };
+
+      const cleanup = (service as any).cleanup(browser, page);
+      await vi.advanceTimersByTimeAsync(10_000);
+      await cleanup;
+
+      expect(browser.close).toHaveBeenCalledTimes(1);
+      expect(browser.process).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('cleanup kills the browser process when the browser never finishes closing', async () => {
+    vi.useFakeTimers();
+    try {
+      const kill = vi.fn();
+      const browser = {
+        close: vi.fn(() => new Promise<void>(() => undefined)),
+        process: vi.fn(() => ({ kill }))
+      };
+
+      const cleanup = (service as any).cleanup(browser, null);
+      await vi.advanceTimersByTimeAsync(10_000);
+      await cleanup;
+
+      expect(kill).toHaveBeenCalledWith('SIGKILL');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('filters dangerous Chromium args after merge while preserving container-safe flags', () => {
     const args = [
       '--no-sandbox',
