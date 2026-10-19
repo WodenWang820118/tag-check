@@ -150,6 +150,45 @@
   },
   "overrides": [
     {
+      "files": [
+        "apps/nest-backend/src/infrastructure/**/*.ts",
+        "apps/nest-backend/src/core/**/*.ts",
+        "apps/nest-backend/src/shared/**/*.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^(\\.\\./)+(features|controllers)/",
+                "message": "Backend layers point down: controllers -> features -> infrastructure -> core -> shared. Move the code into features/ or inject it through an interface."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "apps/nest-backend/src/core/**/*.ts",
+        "apps/nest-backend/src/shared/**/*.ts"
+      ],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "regex": "^(\\.\\./)+(features|controllers|infrastructure)/",
+                "message": "Backend layers point down: controllers -> features -> infrastructure -> core -> shared."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
       "files": ["libs/ui-helm/**/*.ts"],
       "rules": {
         "@nx/enforce-module-boundaries": "off"

@@ -6,13 +6,15 @@ import { ProjectRecordingModule } from '../project-recording/project-recording.m
 import { ProjectDataLayerSpecBuilderModule } from '../project-data-layer-spec-builder/project-data-layer-spec.builder.module';
 import { ProjectDataLayerSpecBuilderService } from '../project-data-layer-spec-builder/project-data-layer-spec.builder.service';
 import { ProjectGtmContainerModule } from '../project-gtm-container/project-gtm-container.module';
+import { TestReportFacadeModule } from '../../repository/test-report-facade/test-report-facade.module';
 @Module({
   imports: [
     RepositoryModule,
     ProjectReportModule,
     ProjectRecordingModule,
     ProjectDataLayerSpecBuilderModule,
-    ProjectGtmContainerModule
+    ProjectGtmContainerModule,
+    TestReportFacadeModule
   ],
   providers: [ProjectEventsBuilderService, ProjectDataLayerSpecBuilderService],
   exports: [

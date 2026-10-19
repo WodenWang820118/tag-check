@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { CookieData, Page, Browser, ScreenRecorder } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
-import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
-import { PuppeteerUtilsService } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
+import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
+import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import { RecordingRepositoryService } from '../../core/repository/recording/recording-repository.service';
-import { preloadApplicationLocalStorage } from '../../features/web-agent/browser-state-preload.util';
+import { preloadApplicationLocalStorage } from '../web-agent/browser-state-preload.util';
 
 @Injectable()
 export class GtmOperatorService {
