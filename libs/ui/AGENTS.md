@@ -2,8 +2,8 @@
 
 This directory contains the `ui` Nx project.
 
-Use the repository root [AGENTS.md](../../AGENTS.md) as the canonical source
-for workflow, review gates, reviewer routing, and skill selection.
+Use the repository root [AGENTS.md](../../AGENTS.md) for workspace commands,
+boundary rules, and conventions.
 
 Local purpose: Shared UI components and presentation helpers used by app
 surfaces.
