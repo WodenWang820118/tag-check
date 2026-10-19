@@ -1,130 +1,141 @@
 import { describe, expect, it, vi } from 'vitest';
+import { BadRequestException } from '@nestjs/common';
 import { GtmParserService } from './gtm-parser.service';
 
 function build() {
-  const folderPathService = {
-    getProjectConfigFolderPath: vi.fn().mockResolvedValue('/cfg')
+  const projectGtmContainerService = { save: vi.fn() };
+  const projectEventsBuilderService = {
+    buildEvents: vi.fn().mockResolvedValue({
+      created: ['GA4 - page_view'],
+      updated: [],
+      unchanged: []
+    })
   };
-  const fileService = {
-    writeJsonFile: vi.fn(),
-    readJsonFile: vi.fn()
-  };
-  const projectEventsBuilderService = { buildEvents: vi.fn() };
   const service = new GtmParserService(
-    folderPathService as never,
-    fileService as never,
+    projectGtmContainerService as never,
     projectEventsBuilderService as never
   );
-  return {
-    service,
-    folderPathService,
-    fileService,
-    projectEventsBuilderService
-  };
+  return { service, projectGtmContainerService, projectEventsBuilderService };
 }
 
 const baseIds = { accountId: 'a', containerId: 'c' };
 
-const validGtm = {
+function ga4EventTag(
+  name: string,
+  eventName?: string,
+  firingTriggerId = ['t1']
+) {
+  return {
+    name,
+    type: 'gaawe',
+    ...baseIds,
+    firingTriggerId,
+    parameter: eventName
+      ? [{ key: 'eventName', value: eventName, type: 'TEMPLATE' }]
+      : []
+  };
+}
+
+const dataLayerVariable = {
+  name: 'DLV - ecommerce.value',
+  type: 'v',
+  ...baseIds,
+  parameter: [{ key: 'name', value: 'ecommerce.value', type: 'TEMPLATE' }]
+};
+const builtInVariable = { name: 'Event', type: 'EVENT', ...baseIds };
+
+const container = {
   exportFormatVersion: 2,
   exportTime: '2025-01-01 00:00:00',
   containerVersion: {
-    variable: [],
-    builtInVariable: [],
+    variable: [dataLayerVariable],
+    builtInVariable: [builtInVariable],
     trigger: [
-      { triggerId: 't1', name: 'trigger-a', type: 'EVENT', ...baseIds }
+      { triggerId: 't1', name: 'trigger-a', type: 'CUSTOM_EVENT', ...baseIds },
+      { triggerId: 't2', name: 'trigger-b', type: 'CUSTOM_EVENT', ...baseIds }
     ],
     tag: [
+      ga4EventTag('GA4 - page_view', 'page_view'),
       {
-        name: 'tag-a',
+        name: 'Custom HTML',
         type: 'html',
         ...baseIds,
-        firingTriggerId: ['t1'],
         parameter: [{ key: 'eventName', value: 'page_view', type: 'TEMPLATE' }]
-      }
-    ]
-  }
-};
-
-const validGtmNoEvent = {
-  exportFormatVersion: 2,
-  exportTime: '2025-01-01 00:00:00',
-  containerVersion: {
-    variable: [],
-    builtInVariable: [],
-    trigger: [],
-    tag: [
-      {
-        name: 'tag-a',
-        type: 'html',
-        ...baseIds,
-        parameter: [{ key: 'other', value: 'v', type: 'TEMPLATE' }]
-      }
+      },
+      ga4EventTag('GA4 - no name'),
+      ga4EventTag('GA4 - dynamic', '{{Event}}'),
+      ga4EventTag('GA4 - invalid', 'GA4 event - purchase')
     ]
   }
 };
 
 describe('GtmParserService', () => {
-  it('writes the JSON file and builds events when given a valid GTM configuration object', async () => {
+  it('saves the container and imports only GA4 event tags with their firing triggers', async () => {
     const ctx = build();
-    ctx.fileService.readJsonFile.mockReturnValue(validGtm);
-    const result = await ctx.service.uploadGtmJson('demo', validGtm);
-    expect(ctx.fileService.writeJsonFile).toHaveBeenCalledWith(
-      expect.stringContaining('gtm-container.json'),
-      validGtm
+
+    const result = await ctx.service.uploadGtmJson('demo', container);
+
+    expect(ctx.projectGtmContainerService.save).toHaveBeenCalledWith(
+      'demo',
+      container
     );
     expect(ctx.projectEventsBuilderService.buildEvents).toHaveBeenCalledWith(
       'demo',
       [
-        expect.objectContaining({
+        {
           eventName: 'page_view',
-          testName: 'tag-a',
-          recording: { title: 'page_view', steps: [] }
-        })
+          testName: 'GA4 - page_view',
+          recording: { title: 'page_view', steps: [] },
+          spec: {
+            tag: container.containerVersion.tag[0],
+            trigger: [container.containerVersion.trigger[0]]
+          }
+        }
+      ],
+      [dataLayerVariable, builtInVariable]
+    );
+    expect(result).toEqual({
+      saved: true,
+      created: ['GA4 - page_view'],
+      updated: [],
+      unchanged: [],
+      skipped: [
+        { tagName: 'Custom HTML', reason: 'Not a GA4 event tag' },
+        { tagName: 'GA4 - no name', reason: 'No event name' },
+        {
+          tagName: 'GA4 - dynamic',
+          reason: 'The event name {{Event}} is only known at runtime'
+        },
+        {
+          tagName: 'GA4 - invalid',
+          reason:
+            'GA4 event names must start with a letter and use only letters, numbers and underscores (https://support.google.com/analytics/answer/13316687)'
+        }
       ]
+    });
+  });
+
+  it('accepts the export as text', async () => {
+    const ctx = build();
+    await ctx.service.uploadGtmJson('demo', JSON.stringify(container));
+    expect(ctx.projectGtmContainerService.save).toHaveBeenCalledWith(
+      'demo',
+      container
     );
-    expect(result).toEqual({ saved: true });
   });
 
-  it('parses a stringified JSON payload before processing', async () => {
+  it.each([
+    ['not-json{', 'The file is not valid JSON.'],
+    [
+      { not: 'gtm' },
+      'The file is not a Tag Manager container export: containerVersion is missing.'
+    ]
+  ])('rejects %j with a 400 and saves nothing', async (payload, reason) => {
     const ctx = build();
-    ctx.fileService.readJsonFile.mockReturnValue(validGtm);
-    await ctx.service.uploadGtmJson('demo', JSON.stringify(validGtm));
-    expect(ctx.fileService.writeJsonFile).toHaveBeenCalled();
-    expect(ctx.projectEventsBuilderService.buildEvents).toHaveBeenCalled();
-  });
-
-  it('skips writeJsonFile and buildEvents when the payload is not a valid GTM configuration and no fallback exists', async () => {
-    const ctx = build();
-    ctx.fileService.readJsonFile.mockReturnValue(null);
-    const result = await ctx.service.uploadGtmJson('demo', { not: 'gtm' });
-    expect(ctx.fileService.writeJsonFile).not.toHaveBeenCalled();
+    const upload = ctx.service.uploadGtmJson('demo', payload);
+    await expect(upload).rejects.toBeInstanceOf(BadRequestException);
+    await expect(upload).rejects.toThrow(reason);
+    expect(ctx.projectGtmContainerService.save).not.toHaveBeenCalled();
     expect(ctx.projectEventsBuilderService.buildEvents).not.toHaveBeenCalled();
-    expect(result).toEqual({ saved: true });
-  });
-
-  it('falls back to the saved file on disk when the payload is invalid JSON string', async () => {
-    const ctx = build();
-    ctx.fileService.readJsonFile.mockReturnValue(validGtm);
-    const result = await ctx.service.uploadGtmJson('demo', 'not-json{');
-    expect(ctx.projectEventsBuilderService.buildEvents).toHaveBeenCalled();
-    expect(result).toEqual({ saved: true });
-  });
-
-  it('does not call buildEvents when no event tags carry an eventName parameter', async () => {
-    const ctx = build();
-    ctx.fileService.readJsonFile.mockReturnValue(validGtmNoEvent);
-    await ctx.service.uploadGtmJson('demo', validGtmNoEvent);
-    expect(ctx.projectEventsBuilderService.buildEvents).not.toHaveBeenCalled();
-  });
-
-  it('rethrows folder resolution failures', async () => {
-    const ctx = build();
-    ctx.folderPathService.getProjectConfigFolderPath.mockRejectedValue(
-      new Error('no folder')
-    );
-    await expect(ctx.service.uploadGtmJson('demo', validGtm)).rejects.toThrow(
-      'no folder'
-    );
   });
 });

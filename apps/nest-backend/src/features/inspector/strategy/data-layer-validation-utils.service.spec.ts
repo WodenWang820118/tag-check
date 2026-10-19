@@ -66,4 +66,123 @@ describe('DataLayerValidationUtilsService', () => {
       'Value for key "page" does not match the expected value'
     );
   });
+
+  it('keeps validating the remaining keys after a $ wildcard', () => {
+    const spec = { event: 'login', user_id: '$any', method: 'Google' } as never;
+    const obj = { event: 'login', user_id: 'u1', method: 'Email' } as never;
+    const result = service.validateKeyValues(spec, obj);
+    expect(result.passed).toBe(false);
+    expect(result.message).toBe(
+      'Value for key "method" does not match the expected value'
+    );
+  });
+
+  it('only requires the key for a Tag Manager variable reference', () => {
+    const spec = {
+      event: 'add_to_cart',
+      ecommerce: { value: '{{DLV - ecommerce.value}}' }
+    } as never;
+    expect(
+      service.validateKeyValues(spec, {
+        event: 'add_to_cart',
+        ecommerce: { value: 30.03 }
+      } as never).passed
+    ).toBe(true);
+    expect(
+      service.validateKeyValues(spec, {
+        event: 'add_to_cart',
+        ecommerce: {}
+      } as never).message
+    ).toBe('Key "ecommerce.value" is missing in the data layer');
+  });
+
+  describe('nested ecommerce objects', () => {
+    const spec = {
+      event: 'add_to_cart',
+      ecommerce: {
+        currency: 'USD',
+        value: 799,
+        items: [
+          { item_id: 'city001', price: 799, quantity: 1 },
+          { item_id: 'city002', item_name: '/^Swi/' }
+        ]
+      }
+    } as never;
+
+    it('passes when every spec item matches an actual item in any order', () => {
+      const obj = {
+        event: 'add_to_cart',
+        ecommerce: {
+          currency: 'USD',
+          value: 799,
+          items: [
+            { item_id: 'city002', item_name: 'Switzerland' },
+            { item_id: 'city001', price: 799, quantity: 1, index: 0 }
+          ]
+        }
+      } as never;
+      expect(service.validateKeyValues(spec, obj).passed).toBe(true);
+    });
+
+    it('reports the path of a mismatching nested value', () => {
+      const obj = {
+        event: 'add_to_cart',
+        ecommerce: {
+          currency: 'TWD',
+          value: 799,
+          items: []
+        }
+      } as never;
+      expect(service.validateKeyValues(spec, obj).message).toBe(
+        'Value for key "ecommerce.currency" does not match the expected value'
+      );
+    });
+
+    it('reports the path of an item that matches no actual item', () => {
+      const obj = {
+        event: 'add_to_cart',
+        ecommerce: {
+          currency: 'USD',
+          value: 799,
+          items: [{ item_id: 'city001', price: '799', quantity: 1 }]
+        }
+      } as never;
+      expect(service.validateKeyValues(spec, obj).message).toBe(
+        'Value for key "ecommerce.items[0].price" does not match the expected value'
+      );
+    });
+
+    it('reports a missing item when the actual list is empty', () => {
+      const obj = {
+        event: 'add_to_cart',
+        ecommerce: { currency: 'USD', value: 799, items: [] }
+      } as never;
+      expect(service.validateKeyValues(spec, obj).message).toBe(
+        'Key "ecommerce.items[0]" is missing in the data layer'
+      );
+    });
+
+    it('rejects values of the wrong shape', () => {
+      expect(
+        service.validateKeyValues(spec, {
+          event: 'add_to_cart',
+          ecommerce: 'none'
+        } as never).message
+      ).toBe('Value for key "ecommerce" is not an object as expected');
+      expect(
+        service.validateKeyValues(spec, {
+          event: 'add_to_cart',
+          ecommerce: { currency: 'USD', value: 799, items: 'none' }
+        } as never).message
+      ).toBe('Value for key "ecommerce.items" is not an array as expected');
+    });
+  });
+
+  it('reports an invalid regex in the spec instead of throwing', () => {
+    const spec = { event: 'page_view', page: '/[/' } as never;
+    const obj = { event: 'page_view', page: '/home' } as never;
+    expect(service.validateKeyValues(spec, obj).message).toBe(
+      'Spec for key "page" is not a valid regex pattern'
+    );
+  });
 });

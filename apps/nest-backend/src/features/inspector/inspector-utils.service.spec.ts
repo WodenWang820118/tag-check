@@ -13,42 +13,57 @@ function build(
 }
 
 describe('InspectorUtilsService', () => {
-  describe('isNumericKeysObject()', () => {
-    it('returns false for plain objects whose keys are stringified numbers (Number.isInteger requires real numbers)', () => {
-      const service = build({});
-      expect(service.isNumericKeysObject({ 0: 'a', 1: 'b' })).toBe(false);
-    });
-
-    it('returns false when any key is not numeric', () => {
-      const service = build({});
-      expect(service.isNumericKeysObject({ 0: 'a', x: 'b' })).toBe(false);
-    });
-
-    it('returns false for non-objects and null', () => {
-      const service = build({});
-      expect(service.isNumericKeysObject(null)).toBe(false);
-      expect(service.isNumericKeysObject('x')).toBe(false);
-    });
-  });
-
   describe('determineStrategy()', () => {
-    it('returns NONEC by default', () => {
+    it.each(['add_to_cart', 'purchase', 'view_item_list', 'view_promotion'])(
+      'uses ecommerce rules for the recommended ecommerce event %s',
+      (event) => {
+        const service = build({});
+        expect(service.determineStrategy({ event } as never)).toBe(
+          ValidationStrategyType.ECOMMERCE
+        );
+      }
+    );
+
+    it('uses ecommerce rules for a custom event whose spec carries items', () => {
       const service = build({});
-      expect(service.determineStrategy()).toBe(ValidationStrategyType.NONEC);
+      expect(
+        service.determineStrategy({
+          event: 'quick_buy',
+          ecommerce: { items: [] }
+        } as never)
+      ).toBe(ValidationStrategyType.ECOMMERCE);
+    });
+
+    it('uses the non-ecommerce rules for other events', () => {
+      const service = build({});
+      expect(service.determineStrategy({ event: 'page_view' } as never)).toBe(
+        ValidationStrategyType.NONEC
+      );
+      expect(
+        service.determineStrategy({
+          event: 'login',
+          ecommerce: { method: 'Google' }
+        } as never)
+      ).toBe(ValidationStrategyType.NONEC);
     });
   });
 
   describe('isDataLayerCorrect()', () => {
-    it('delegates to the configured NONEC strategy with the dataLayer and spec', () => {
-      const validate = vi.fn().mockReturnValue({ passed: true });
+    it('delegates to the strategy that matches the spec', () => {
+      const nonEc = vi.fn().mockReturnValue({ passed: true });
+      const ecommerce = vi.fn().mockReturnValue({ passed: false });
       const service = build({
-        [ValidationStrategyType.NONEC]: { validateDataLayer: validate }
+        [ValidationStrategyType.NONEC]: { validateDataLayer: nonEc },
+        [ValidationStrategyType.ECOMMERCE]: { validateDataLayer: ecommerce }
       });
-      const dataLayer = [{ event: 'page_view' }] as never;
-      const spec = { event: 'page_view' } as never;
-      const result = service.isDataLayerCorrect(dataLayer, spec);
-      expect(validate).toHaveBeenCalledWith(dataLayer, spec);
-      expect(result).toEqual({ passed: true });
+      const dataLayer = [{ event: 'purchase' }] as never;
+      const spec = { event: 'purchase' } as never;
+
+      expect(service.isDataLayerCorrect(dataLayer, spec)).toEqual({
+        passed: false
+      });
+      expect(ecommerce).toHaveBeenCalledWith(dataLayer, spec);
+      expect(nonEc).not.toHaveBeenCalled();
     });
 
     it('wraps strategy failures into INTERNAL_SERVER_ERROR HttpException', () => {
@@ -61,6 +76,23 @@ describe('InspectorUtilsService', () => {
       expect(() =>
         service.isDataLayerCorrect([] as never, { event: 'x' } as never)
       ).toThrow();
+    });
+  });
+
+  describe('isRequestCorrect()', () => {
+    it('validates ecommerce requests without the data layer reset rule', () => {
+      const nonEc = vi.fn().mockReturnValue({ passed: true });
+      const ecommerce = vi.fn();
+      const service = build({
+        [ValidationStrategyType.NONEC]: { validateDataLayer: nonEc },
+        [ValidationStrategyType.ECOMMERCE]: { validateDataLayer: ecommerce }
+      });
+      const request = { event: 'purchase', ecommerce: {} } as never;
+      const spec = { event: 'purchase' } as never;
+
+      expect(service.isRequestCorrect(request, spec)).toEqual({ passed: true });
+      expect(nonEc).toHaveBeenCalledWith([request], spec);
+      expect(ecommerce).not.toHaveBeenCalled();
     });
   });
 });

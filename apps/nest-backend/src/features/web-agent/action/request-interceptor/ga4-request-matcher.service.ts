@@ -1,13 +1,32 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { Ga4CollectEvent, parseGa4CollectRequest } from './ga4-collect-request';
 
-interface Ga4JsonBody {
-  events?: [{ name: string }];
-  measurement_id?: string;
-}
-
+/**
+ * Picks the GA4 event a test expects out of the events in a collect request.
+ *
+ * Event names are compared exactly because GA4 event names are case sensitive
+ * (https://support.google.com/analytics/answer/13316687). An empty expected
+ * measurement ID accepts events sent to any GA4 property.
+ */
 @Injectable()
 export class Ga4RequestMatcher {
-  private readonly logger = new Logger(Ga4RequestMatcher.name);
+  findMatchingEvent(
+    events: readonly Ga4CollectEvent[],
+    eventName: string,
+    measurementId: string
+  ): Ga4CollectEvent | null {
+    const expectedEventName = eventName.trim();
+    const expectedMeasurementId = normalizeMeasurementId(measurementId);
+    return (
+      events.find(
+        (event) =>
+          event.eventName === expectedEventName &&
+          (!expectedMeasurementId ||
+            normalizeMeasurementId(event.measurementId) ===
+              expectedMeasurementId)
+      ) ?? null
+    );
+  }
 
   isMatchingGa4Request(
     url: string,
@@ -15,98 +34,16 @@ export class Ga4RequestMatcher {
     eventName: string,
     measurementId: string
   ): boolean {
-    const parsed = this.tryParseUrl(url);
-    if (!parsed) return false;
-
-    if (!this.isGa4Endpoint(parsed)) return false;
-
-    const urlParams = parsed.searchParams;
-    if (this.matchQueryParams(urlParams, eventName, measurementId)) return true;
-
-    if (
-      postData &&
-      this.matchPostBody(postData, urlParams, eventName, measurementId)
-    )
-      return true;
-
-    return false;
-  }
-
-  private tryParseUrl(url: string): URL | null {
-    try {
-      return new URL(url);
-    } catch (err) {
-      this.logger.debug(`Failed to parse request URL for GA4 matching: ${err}`);
-      return null;
-    }
-  }
-
-  private isGa4Endpoint(parsed: URL): boolean {
     return (
-      parsed.hostname.includes('google-analytics.com') &&
-      parsed.pathname.includes('/g/collect')
+      this.findMatchingEvent(
+        parseGa4CollectRequest(url, postData),
+        eventName,
+        measurementId
+      ) !== null
     );
   }
+}
 
-  private matchQueryParams(
-    params: URLSearchParams,
-    eventName: string,
-    measurementId: string
-  ): boolean {
-    const enParam = params.get('en');
-    const tidParam =
-      params.get('tid') || params.get('measurement_id') || params.get('mid');
-    return enParam === eventName && tidParam === measurementId;
-  }
-
-  private matchPostBody(
-    postData: string,
-    urlParams: URLSearchParams,
-    eventName: string,
-    measurementId: string
-  ): boolean {
-    // Try JSON first
-    const json = this.tryParseJson(postData);
-    if (json) {
-      const bodyEventName =
-        (Array.isArray(json.events) && json.events[0]?.name) || '';
-      const bodyMeasurementId =
-        json.measurement_id || urlParams.get('measurement_id') || '';
-      return bodyEventName === eventName && bodyMeasurementId === measurementId;
-    }
-
-    // Fallback to form-encoded
-    const form = this.tryParseForm(postData);
-    if (form) {
-      const bodyEn = form.get('en');
-      const bodyTid =
-        form.get('tid') || form.get('measurement_id') || form.get('mid');
-      return bodyEn === eventName && bodyTid === measurementId;
-    }
-
-    return false;
-  }
-
-  private tryParseJson(postData: string): Ga4JsonBody | null {
-    try {
-      if (!postData.trim().startsWith('{')) return null;
-      const parsed = JSON.parse(postData);
-      if (typeof parsed === 'object' && parsed !== null) {
-        return parsed;
-      }
-      return null;
-    } catch (err) {
-      this.logger.debug(`GA4 body parsing error (json): ${err}`);
-      return null;
-    }
-  }
-
-  private tryParseForm(postData: string): URLSearchParams | null {
-    try {
-      return new URLSearchParams(postData);
-    } catch (err) {
-      this.logger.debug(`GA4 body parsing error (form): ${err}`);
-      return null;
-    }
-  }
+function normalizeMeasurementId(measurementId: string): string {
+  return measurementId.trim().toUpperCase();
 }

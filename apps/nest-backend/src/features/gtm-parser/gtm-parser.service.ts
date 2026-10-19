@@ -1,131 +1,110 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { FolderPathService } from '../../infrastructure/os/path/folder-path/folder-path.service';
-import { FileService } from '../../infrastructure/os/file/file.service';
-import { join } from 'path';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
   ProjectEventsBuilderService,
   BuildEventInput
 } from '../project-agent/project-events-builder/project-events-builder.service';
+import { ProjectGtmContainerService } from '../project-agent/project-gtm-container/project-gtm-container.service';
 import {
+  GTMConfiguration,
+  GtmImportSummary,
   TagConfig,
+  TagTypeEnum,
   TriggerConfig,
+  getGa4EventNameIssues,
   getParameterValue,
-  isGTMConfiguration
+  parseGtmContainerExport
 } from '@utils';
+
+type TagImport =
+  | { input: BuildEventInput }
+  | { skipped: GtmImportSummary['skipped'][number] };
 
 @Injectable()
 export class GtmParserService {
   private readonly logger = new Logger(GtmParserService.name);
   constructor(
-    private readonly folderPathService: FolderPathService,
-    private readonly fileService: FileService,
+    private readonly projectGtmContainerService: ProjectGtmContainerService,
     private readonly projectEventsBuilderService: ProjectEventsBuilderService
   ) {}
 
-  // Note: We could enhance this to detect duplicate tag names and add serial numbers.
-  // For now, we simply save and build from the provided GTM JSON.
-  async uploadGtmJson(projectSlug: string, json: unknown) {
-    try {
-      // Normalize input to a proper object; callers may send a stringified JSON
-      let parsedPayload: unknown = json;
-      try {
-        parsedPayload = typeof json === 'string' ? JSON.parse(json) : json;
-      } catch (e) {
-        this.logger.warn(
-          'Received invalid JSON payload; will attempt to continue using saved file. Error: ' +
-            (e instanceof Error ? e.message : String(e))
-        );
-        parsedPayload = null;
-      }
-      const gtmObject = isGTMConfiguration(parsedPayload)
-        ? parsedPayload
-        : null;
-
-      const folderPath =
-        await this.folderPathService.getProjectConfigFolderPath(projectSlug);
-      this.logger.log(`GTM JSON uploaded for project: ${projectSlug}`);
-      const filePath = join(folderPath, 'gtm-container.json');
-      if (gtmObject) {
-        this.fileService.writeJsonFile(filePath, gtmObject);
-      } else {
-        this.logger.warn(
-          'Uploaded payload is not a valid GTM configuration; preserving the existing saved file.'
-        );
-      }
-
-      // Try to parse and build events immediately
-      try {
-        // Prefer the normalized object; otherwise fall back to the existing saved file.
-        const fromDisk = this.fileService.readJsonFile<unknown>(filePath);
-        const gtm =
-          gtmObject ?? (isGTMConfiguration(fromDisk) ? fromDisk : null);
-
-        if (!gtm) {
-          this.logger.warn(
-            'Uploaded JSON saved but no valid GTM configuration was available to build events.'
-          );
-          return { saved: true };
-        }
-
-        const tags = gtm.containerVersion?.tag ?? [];
-        const triggers = gtm.containerVersion?.trigger ?? [];
-
-        const inputs: BuildEventInput[] = tags
-          .map((t) => this.toBuildInput(t, triggers))
-          .filter((i): i is BuildEventInput => !!i);
-
-        this.logger.log(`Parsed ${inputs.length} events from GTM JSON`);
-
-        if (inputs.length > 0) {
-          await this.projectEventsBuilderService.buildEvents(
-            projectSlug,
-            inputs
-          );
-        } else {
-          this.logger.warn(
-            'No event tags with eventName found in uploaded GTM JSON'
-          );
-        }
-      } catch (e) {
-        this.logger.warn(
-          'Uploaded JSON saved but failed to build events: ' +
-            (e instanceof Error ? e.message : String(e))
-        );
-      }
-
-      return { saved: true };
-    } catch (error) {
-      this.logger.error(
-        `Failed to upload GTM JSON for project: ${projectSlug}`,
-        error
-      );
-      throw error;
+  /**
+   * Saves a Tag Manager container export as the project's container and turns
+   * each GA4 event tag into a test event. Re-importing the same container
+   * refreshes generated specs instead of duplicating events.
+   */
+  async uploadGtmJson(
+    projectSlug: string,
+    payload: unknown
+  ): Promise<GtmImportSummary> {
+    const { container, error } = parseGtmContainerExport(payload);
+    if (!container) {
+      throw new BadRequestException(error);
     }
-  }
+    await this.projectGtmContainerService.save(projectSlug, container);
 
-  private toBuildInput(
-    tag: TagConfig,
-    allTriggers: TriggerConfig[]
-  ): BuildEventInput | null {
-    const eventNameParam = getParameterValue(tag.parameter, 'eventName');
-
-    if (!eventNameParam) return null;
-
-    const firingTriggerIds = (tag.firingTriggerId ?? []) as string[];
-    const tagTriggers = allTriggers.filter((tr) =>
-      tr.triggerId ? firingTriggerIds.includes(tr.triggerId) : false
+    const imports = container.containerVersion.tag.map((tag) =>
+      this.toTagImport(tag, container)
+    );
+    const inputs = imports.flatMap((entry) =>
+      'input' in entry ? [entry.input] : []
+    );
+    const skipped = imports.flatMap((entry) =>
+      'skipped' in entry ? [entry.skipped] : []
+    );
+    const result = await this.projectEventsBuilderService.buildEvents(
+      projectSlug,
+      inputs,
+      [
+        ...container.containerVersion.variable,
+        ...container.containerVersion.builtInVariable
+      ]
     );
 
-    const spec = {
-      tag,
-      trigger: tagTriggers
-    };
+    this.logger.log(
+      `Imported GTM container for ${projectSlug}: ${result.created.length} created, ${result.updated.length} updated, ${result.unchanged.length} unchanged, ${skipped.length} skipped`
+    );
+    return { saved: true, ...result, skipped };
+  }
 
+  private toTagImport(tag: TagConfig, container: GTMConfiguration): TagImport {
+    if (tag.type !== TagTypeEnum.GAAWE) {
+      return { skipped: { tagName: tag.name, reason: 'Not a GA4 event tag' } };
+    }
+    const eventName = getParameterValue(tag.parameter, 'eventName')?.trim();
+    if (!eventName) {
+      return { skipped: { tagName: tag.name, reason: 'No event name' } };
+    }
+    if (eventName.includes('{{')) {
+      return {
+        skipped: {
+          tagName: tag.name,
+          reason: `The event name ${eventName} is only known at runtime`
+        }
+      };
+    }
+    const issues = getGa4EventNameIssues(eventName);
+    if (issues.length > 0) {
+      return {
+        skipped: {
+          tagName: tag.name,
+          reason: `GA4 event names ${issues.join(' and ')} (https://support.google.com/analytics/answer/13316687)`
+        }
+      };
+    }
+
+    const firingTriggerIds = new Set(tag.firingTriggerId ?? []);
+    const trigger = container.containerVersion.trigger.filter(
+      (candidate: TriggerConfig) =>
+        candidate.triggerId !== undefined &&
+        firingTriggerIds.has(candidate.triggerId)
+    );
     return {
-      eventName: eventNameParam,
-      testName: tag.name,
-      recording: { title: eventNameParam, steps: [] },
-      spec
+      input: {
+        eventName,
+        testName: tag.name,
+        recording: { title: eventName, steps: [] },
+        spec: { tag, trigger }
+      }
     };
   }
 }

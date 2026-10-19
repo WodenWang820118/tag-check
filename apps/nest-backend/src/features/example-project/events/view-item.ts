@@ -23,7 +23,7 @@ const viewItemRecording: Recording = {
         {
           type: 'navigation',
           url: 'https://ng-gtm-sample.vercel.app/home',
-          title: 'Ng GTM Integration App'
+          title: 'Travel With GTM | Demo Travel Catalog'
         }
       ]
     },

@@ -14,9 +14,12 @@ describe('ExampleEventsBuilderService', () => {
     await service.buildEvents('demo');
 
     expect(projectEventsBuilderService.buildEvents).toHaveBeenCalledOnce();
-    const [slug, inputs] =
+    const [slug, inputs, variables] =
       projectEventsBuilderService.buildEvents.mock.calls[0];
     expect(slug).toBe('demo');
+    expect(variables).toContainEqual(
+      expect.objectContaining({ name: 'DLV - ecommerce.value', type: 'v' })
+    );
     const expectedKeys = [
       'eventName',
       'testName',

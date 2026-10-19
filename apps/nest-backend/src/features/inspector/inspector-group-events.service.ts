@@ -1,12 +1,5 @@
-import {
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  Logger
-} from '@nestjs/common';
-import { STRATEGY_TYPE, ValidationStrategyType } from './utils';
-import { StrictDataLayerEvent, ValidationStrategy } from '@utils';
+import { Injectable, Logger } from '@nestjs/common';
+import { StrictDataLayerEvent } from '@utils';
 import { Page, Browser, Credentials } from 'puppeteer';
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
@@ -21,9 +14,7 @@ export class InspectorGroupEventsService {
     private readonly fileService: FileService,
     private readonly filePathService: FilePathService,
     private readonly inspectorSingleEventService: InspectorSingleEventService,
-    private readonly inspectorUtilsService: InspectorUtilsService,
-    @Inject(STRATEGY_TYPE)
-    private readonly strategy: { [key: string]: ValidationStrategy }
+    private readonly inspectorUtilsService: InspectorUtilsService
   ) {}
 
   async inspectProjectDataLayer(
@@ -107,22 +98,6 @@ export class InspectorGroupEventsService {
     dataLayer: StrictDataLayerEvent[],
     spec: StrictDataLayerEvent
   ) {
-    const strategyType = this.inspectorUtilsService.determineStrategy();
-
-    try {
-      switch (strategyType) {
-        case ValidationStrategyType.ECOMMERCE:
-        case ValidationStrategyType.NONEC:
-          return this.strategy[strategyType].validateDataLayer(dataLayer, spec);
-        default:
-          return {
-            passed: false,
-            message: "The test didn't pass",
-            dataLayerSpec: spec
-          };
-      }
-    } catch (error) {
-      throw new HttpException(`${error}`, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return this.inspectorUtilsService.isDataLayerCorrect(dataLayer, spec);
   }
 }

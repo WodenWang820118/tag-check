@@ -1,25 +1,42 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BaseItem } from '@utils';
+import {
+  BaseItem,
+  GA4_ECOMMERCE_EVENT_PARAMETERS,
+  GA4_NUMERIC_ITEM_PARAMETERS
+} from '@utils';
 import { URL, URLSearchParams } from 'url';
 import { standardPageParameterMap, standardParameterMap } from './utilities';
 
+/** Event-level parameters moved into `ecommerce` for item events that are not recommended events. */
+const DEFAULT_ECOMMERCE_PARAMETERS = ['currency', 'value'];
+const ITEM_KEY_LENGTH = 2;
+
+/**
+ * Rebuilds the data layer event behind a GA4 collect request so it can be
+ * validated against the same spec as the data layer.
+ *
+ * Parameter names and types follow Google's recommended events reference
+ * (https://developers.google.com/analytics/devguides/collection/ga4/reference/events):
+ * `ep.` parameters are strings, `epn.` parameters are numbers, and ecommerce
+ * parameters are nested under `ecommerce` as in Tag Manager's data layer
+ * (https://developers.google.com/analytics/devguides/collection/ga4/ecommerce?client_type=gtm).
+ */
 @Injectable()
 export class RequestProcessorService {
   private readonly logger = new Logger(RequestProcessorService.name);
   private readonly excludedEventParams = ['debug_mode'];
 
-  decodeUrl(url: string): string {
-    return decodeURIComponent(url);
-  }
-
-  parseUrl(decodedUrl: string): URLSearchParams {
-    // Use WHATWG URL API for parsing
-    // If the decodedUrl does not have a protocol, add a dummy one for parsing
+  /**
+   * Parses the query string of a collect URL. The URL is not decoded first:
+   * values such as `dl` and `dt` carry encoded `&`, `#` and `%` that would
+   * otherwise split or truncate the query.
+   */
+  parseUrl(url: string): URLSearchParams {
     let urlObj: URL;
     try {
-      urlObj = new URL(decodedUrl);
+      urlObj = new URL(url);
     } catch {
-      urlObj = new URL(decodedUrl, 'http://dummy');
+      urlObj = new URL(url, 'http://dummy');
     }
     return urlObj.searchParams;
   }
@@ -31,15 +48,13 @@ export class RequestProcessorService {
   addCustomEventParameters(dataLayer: any, queryString: string) {
     const queryParams = new URLSearchParams(queryString);
     for (const [key, val] of queryParams.entries()) {
-      // Process custom parameters
-      const customKey = key.split('.')[1];
-      if (
-        key.startsWith('ep.') &&
-        !this.excludedEventParams.includes(customKey)
-      ) {
-        dataLayer[customKey] = val;
+      if (key.startsWith('ep.')) {
+        const name = key.slice('ep.'.length);
+        if (!this.excludedEventParams.includes(name)) {
+          dataLayer[name] = val;
+        }
       } else if (key.startsWith('epn.')) {
-        dataLayer[customKey] = val;
+        dataLayer[key.slice('epn.'.length)] = toNumber(val);
       } else if (key === 'cu') {
         dataLayer['currency'] = val;
       } else if (key in standardPageParameterMap) {
@@ -54,7 +69,6 @@ export class RequestProcessorService {
     item: BaseItem,
     customKeys: { [index: string]: string }
   ): void {
-    // Use RegExp.exec() on the regex literal instead of string.match
     const customKeyMatch = /^k(\d+)/.exec(field);
     const customValueMatch = /^v(\d+)/.exec(field);
 
@@ -67,77 +81,99 @@ export class RequestProcessorService {
         item[customKeys[index]] = field.substring(`v${index}`.length);
       }
     } else {
-      const [otherCustomKey, otherCustomValue] = field.split('=');
-      item[otherCustomKey] = otherCustomValue;
+      // Unknown key: keep it rather than drop data gtag.js started sending.
+      item[field.slice(0, ITEM_KEY_LENGTH)] = field.slice(ITEM_KEY_LENGTH);
     }
   }
 
-  extractItems(queryParams: URLSearchParams, queryString: string): BaseItem[] {
+  /** Reads `pr1`, `pr2`, ... in the order they appear in the request. */
+  extractItems(queryParams: URLSearchParams): BaseItem[] {
     const items: BaseItem[] = [];
-    const regex = /(pr\d+)=/g;
-    // Rename loop variable from match to test
-    let test: RegExpExecArray | null;
-
-    while ((test = regex.exec(queryString)) !== null) {
-      const matchedKeyName = test[1];
-      const itemParam = queryParams.get(matchedKeyName);
-      if (itemParam) {
-        const item = this.formStandardItemObj(itemParam);
-        items.push(item);
+    for (const [key, value] of queryParams.entries()) {
+      if (/^pr\d+$/.test(key) && value) {
+        items.push(this.formStandardItemObj(value));
       }
     }
-
     return items;
   }
 
   recomposeGA4ECEvent(url: string) {
-    const decodedUrl = this.decodeUrl(url);
-    const queryParams = this.parseUrl(decodedUrl);
+    const queryParams = this.parseUrl(url);
     const event = this.extractEventName(queryParams);
-    const dataLayer: any = { event };
-
-    const queryString = queryParams.toString();
-    const updatedDataLayer = this.addCustomEventParameters(
-      dataLayer,
-      queryString
+    const dataLayer = this.addCustomEventParameters(
+      { event },
+      queryParams.toString()
     );
-    const items = this.extractItems(queryParams, queryString);
+    const items = this.extractItems(queryParams);
+    const ecommerceParameters = GA4_ECOMMERCE_EVENT_PARAMETERS[event];
 
-    if (items.length) {
-      updatedDataLayer.ecommerce = {
-        value: updatedDataLayer.value || '', // Ensure value is set, default to empty string if not present
-        currency: updatedDataLayer.currency || '', // Ensure currency is set, default to empty string if not present
-        items: items
-      };
-
-      delete updatedDataLayer.value;
-      delete updatedDataLayer.currency;
+    if (ecommerceParameters || items.length) {
+      const ecommerce: Record<string, unknown> = {};
+      for (const name of ecommerceParameters ?? DEFAULT_ECOMMERCE_PARAMETERS) {
+        if (name in dataLayer) {
+          ecommerce[name] = dataLayer[name];
+          delete dataLayer[name];
+        }
+      }
+      if (items.length) {
+        ecommerce['items'] = items;
+      }
+      if (Object.keys(ecommerce).length) {
+        dataLayer.ecommerce = ecommerce;
+      }
     }
 
     this.logger.log(
-      `recomposeGA4ECEvent-dataLayer${JSON.stringify(updatedDataLayer)}`
+      `recomposeGA4ECEvent-dataLayer${JSON.stringify(dataLayer)}`
     );
-    return updatedDataLayer;
+    return dataLayer;
   }
 
+  /**
+   * Decodes one `pr<n>` value: `~`-separated fields, each a two-letter key
+   * followed by its value. gtag.js escapes a literal `~` as `~~`.
+   */
   formStandardItemObj(product: string): BaseItem {
-    const productFields = product.split('~');
     const item: BaseItem = {};
     const customKeys: { [index: string]: string } = {};
 
-    for (const field of productFields) {
-      const paramName = Object.keys(standardParameterMap).find((key) =>
-        field.startsWith(key)
-      );
-
+    for (const field of splitItemFields(product)) {
+      const paramName = standardParameterMap[field.slice(0, ITEM_KEY_LENGTH)];
       if (!paramName) {
         this.processCustomField(field, item, customKeys);
         continue;
       }
 
-      item[standardParameterMap[paramName]] = field.split(paramName)[1];
+      const value = field.slice(ITEM_KEY_LENGTH);
+      item[paramName] = GA4_NUMERIC_ITEM_PARAMETERS.includes(paramName)
+        ? toNumber(value)
+        : value;
     }
 
     return item;
   }
+}
+
+function splitItemFields(product: string): string[] {
+  const fields: string[] = [];
+  let current = '';
+  for (let i = 0; i < product.length; i++) {
+    if (product[i] !== '~') {
+      current += product[i];
+    } else if (product[i + 1] === '~') {
+      current += '~';
+      i++;
+    } else {
+      fields.push(current);
+      current = '';
+    }
+  }
+  fields.push(current);
+  return fields.filter((field) => field.length > 0);
+}
+
+/** Keeps the raw string when gtag.js sent something that is not a number. */
+function toNumber(value: string): number | string {
+  const parsed = Number(value);
+  return value.trim() !== '' && Number.isFinite(parsed) ? parsed : value;
 }

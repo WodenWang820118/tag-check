@@ -7,6 +7,10 @@ import { ValidationResultDto } from '../../../shared/dto/validation-result.dto';
 import { Injectable, Logger } from '@nestjs/common';
 import { DataLayerValidationUtilsService } from './data-layer-validation-utils.service';
 
+/** Google's GTM ecommerce guide, which asks for `{ ecommerce: null }` before each ecommerce push. */
+const ECOMMERCE_RESET_GUIDE =
+  'https://developers.google.com/analytics/devguides/collection/ga4/ecommerce?client_type=gtm';
+
 @Injectable()
 export class EcommerceEventValidationStrategy implements ValidationStrategy {
   private readonly logger = new Logger(EcommerceEventValidationStrategy.name);
@@ -14,29 +18,23 @@ export class EcommerceEventValidationStrategy implements ValidationStrategy {
     private readonly dataLayerValidationUtilsService: DataLayerValidationUtilsService
   ) {}
 
-  ecommerceReset = false;
-
   validateDataLayer(
     dataLayer: StrictDataLayerEvent[] | BaseDataLayerEvent[],
     dataLayerSpec: StrictDataLayerEvent
   ) {
+    let ecommerceReset = false;
     for (const eventObj of dataLayer) {
-      // If ecommerce is being set to null, set the flag
-      // Check if eventObj contains { ecommerce: null }
       if (eventObj.ecommerce === null) {
-        this.ecommerceReset = true;
-        this.logger.log(this.ecommerceReset);
+        ecommerceReset = true;
       }
 
-      // If the event is found according to the spec, check the flag
       if (eventObj.event === dataLayerSpec.event) {
-        if (!this.ecommerceReset) {
-          this.logger.warn(
-            `ecommerce must be reset before firing ${dataLayerSpec.event}.`
-          );
+        if (!ecommerceReset) {
+          const message = `ecommerce must be reset with { ecommerce: null } before firing ${dataLayerSpec.event} (${ECOMMERCE_RESET_GUIDE}).`;
+          this.logger.warn(message);
           return new ValidationResultDto({
             passed: false,
-            message: `ecommerce must be reset before firing ${dataLayerSpec.event}.`,
+            message,
             dataLayerSpec
           });
         }
