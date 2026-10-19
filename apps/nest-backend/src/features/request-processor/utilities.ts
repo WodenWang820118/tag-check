@@ -33,9 +33,14 @@ export const standardParameterMap: { [key: string]: string } = {
   pn: 'promotion_name'
 };
 
-/** Page parameters gtag.js sends as request-level keys. */
+/**
+ * Page parameters gtag.js sends as request-level keys. `page_path` is not in
+ * Google's GA4 parameter docs, but GTM event tags still set it and gtag.js
+ * sends it as `dp` (recorded from a GTM preview session).
+ */
 export const standardPageParameterMap: { [key: string]: string } = {
   dl: 'page_location',
+  dp: 'page_path',
   dr: 'page_referrer',
   dt: 'page_title'
 };
