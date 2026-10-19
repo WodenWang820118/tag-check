@@ -25,6 +25,9 @@ const mockFileService = {
 const mockFolderPathService = {
   getProjectConfigFolderPath: vi.fn().mockResolvedValue('/tmp/example')
 };
+const mockExampleRecordingsRefreshService = {
+  refresh: vi.fn().mockResolvedValue([])
+};
 
 let service: ExampleProjectRepositoryService;
 
@@ -41,11 +44,41 @@ beforeEach(() => {
     mockExampleEventsBuilderService,
     mockApplicationSettingRepositoryService,
     mockFileService,
-    mockFolderPathService
+    mockFolderPathService,
+    mockExampleRecordingsRefreshService
   );
 });
 
 describe('ExampleProjectRepositoryService', () => {
+  it('refreshes shipped example recordings when the example project already exists', async () => {
+    await expect(service.buildExampleProject()).resolves.toBe(1);
+
+    expect(mockExampleRecordingsRefreshService.refresh).toHaveBeenCalledWith(
+      'example-project-slug'
+    );
+    expect(
+      mockProjectInitializationService.initProjectFileSystem
+    ).not.toHaveBeenCalled();
+  });
+
+  it('leaves other projects alone', async () => {
+    mockProjectRepositoryService.list.mockResolvedValue([
+      { id: 'proj-2', projectSlug: 'my-site' }
+    ]);
+
+    await service.buildExampleProject();
+
+    expect(mockExampleRecordingsRefreshService.refresh).not.toHaveBeenCalled();
+  });
+
+  it('still finishes the startup seed when the refresh fails', async () => {
+    mockExampleRecordingsRefreshService.refresh.mockRejectedValueOnce(
+      new Error('disk full')
+    );
+
+    await expect(service.buildExampleProject()).resolves.toBe(1);
+  });
+
   it('provides the expected default local storage settings', () => {
     const localStorage = (
       service as unknown as {
