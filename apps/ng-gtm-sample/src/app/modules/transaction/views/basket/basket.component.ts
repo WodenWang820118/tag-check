@@ -1,5 +1,10 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { DataViewModule } from 'primeng/dataview';
@@ -21,6 +26,7 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
     MessageModule,
     CurrencyPipe
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './basket.component.html'
 })
 export class BasketComponent implements OnInit {

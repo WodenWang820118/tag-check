@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { ErrorDialogComponent } from './error-dialog.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { APP_ROUTES } from '../../../app.routes';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -26,7 +26,7 @@ const meta: Meta<ErrorDialogComponent> = {
       ]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(APP_ROUTES)]
     })
   ]
 };

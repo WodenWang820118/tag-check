@@ -7,7 +7,8 @@
     "lib": ["es2022", "dom", "dom.iterable"],
     "emitDecoratorMetadata": true,
     "target": "es2021",
-    "isolatedModules": true
+    "isolatedModules": true,
+    "ignoreDeprecations": "6.0"
   },
   "exclude": [
     "jest.config.ts",
@@ -20,6 +21,6 @@
     "src/**/*.tsx",
     "src/**/*.js",
     "src/**/*.jsx",
-    "../../libs/utils/**/*"
+    "../../libs/utils/src/**/*.ts"
   ]
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { FileTableComponent } from '../../components/file-table/file-table.component';
 import { FileTableToolbarComponent } from '../../components/file-table-toolbar/file-table-toolbar.component';
 
@@ -14,6 +14,7 @@ import { FileTableToolbarComponent } from '../../components/file-table-toolbar/f
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .bucket-view {
       padding-top: 5rem;

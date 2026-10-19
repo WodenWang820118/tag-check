@@ -20,7 +20,11 @@
       "@shared-styles": ["libs/shared-styles/src/index.ts"],
       "@ui": ["libs/ui/src/index.ts"],
       "@utils": ["libs/utils/src/index.ts"]
-    }
+    },
+    "strict": false,
+    "noUncheckedSideEffectImports": false,
+    "esModuleInterop": false,
+    "ignoreDeprecations": "6.0"
   },
   "exclude": ["node_modules", "tmp"]
 }

@@ -1,4 +1,10 @@
-import { Component, computed, effect, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  signal,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { from } from 'rxjs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
@@ -26,6 +32,7 @@ import { MatIconModule } from '@angular/material/icon';
       </div>
     </mat-dialog-content>
   </div>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .file-upload-dialog__actions .mat-icon {

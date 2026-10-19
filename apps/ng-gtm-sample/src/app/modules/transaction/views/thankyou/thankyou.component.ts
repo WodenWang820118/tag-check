@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { OrderService } from '../../../../shared/services/order/order.service';
@@ -10,6 +10,7 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
   selector: 'app-thankyou',
   standalone: true,
   imports: [ButtonModule, CardModule, CurrencyPipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './thankyou.component.html'
 })
 export class ThankyouComponent {

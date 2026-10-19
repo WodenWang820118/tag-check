@@ -6,7 +6,8 @@ import {
   effect,
   inject,
   input,
-  signal
+  signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 
 let mermaidInitialized = false;
@@ -32,6 +33,7 @@ type RenderStatus = 'loading' | 'done' | 'error';
     }
     <div class="mermaid-container"></div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./mermaid-diagram.component.scss']
 })
 export class MermaidDiagramComponent {

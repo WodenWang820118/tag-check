@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MapComponent } from '../../components/map/map.component';
 import { CardComponent } from '../../components/card/card.component';
 import { ButtonModule } from 'primeng/button';
@@ -7,6 +7,7 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
 @Component({
   selector: 'app-dashboard',
   imports: [MapComponent, CardComponent, ButtonModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent {

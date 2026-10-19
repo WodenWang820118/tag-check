@@ -10,7 +10,8 @@
     "../../libs/utils/src/lib/interfaces/spec.interface.ts"
   ],
   "compilerOptions": {
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    "ignoreDeprecations": "6.0"
   },
   "exclude": [
     "jest.config.ts",

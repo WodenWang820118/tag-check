@@ -124,7 +124,7 @@
     },
     "test": {
       "executor": "@analogjs/vitest-angular:test",
-      "outputs": ["{options.reportsDirectory}"],
+      "outputs": ["{workspaceRoot}/coverage/apps/ng-tag-build"],
       "options": {
         "reportsDirectory": "../../coverage/apps/ng-tag-build"
       }

@@ -5,7 +5,8 @@ import {
   input,
   signal,
   computed,
-  ViewEncapsulation
+  ViewEncapsulation,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -28,6 +29,7 @@ import { MatButtonModule } from '@angular/material/button';
   ],
   templateUrl: './slide-import.component.html',
   styleUrls: ['./slide-import.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None
 })
 export class SlideImportComponent {

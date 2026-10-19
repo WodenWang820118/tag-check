@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { ProjectIoFormComponent } from './project-io-form.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { provideRouter } from '@angular/router';
@@ -24,7 +24,7 @@ const meta: Meta<ProjectIoFormComponent> = {
       providers: [ProjectIoService]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(APP_ROUTES)]
     })
   ]
 };

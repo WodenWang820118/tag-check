@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { ProjectItemComponent } from './project-item.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
@@ -24,7 +24,7 @@ const meta: Meta<ProjectItemComponent> = {
       providers: [MatDialog, ProjectIoService]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(ENTRY_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(ENTRY_ROUTES)]
     })
   ]
 };

@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { Project } from '@utils';
 import { MatButtonModule } from '@angular/material/button';
@@ -57,6 +57,7 @@ import { MetadataSourceService } from '../../../../shared/services/data-source/m
       </mat-card>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .mat-mdc-card {
       height: 200px;

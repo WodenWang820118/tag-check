@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -8,6 +8,7 @@ import { CheckoutFormManagerService } from '../../../../shared/services/checkout
   selector: 'app-shipping-form',
   standalone: true,
   imports: [ReactiveFormsModule, FormsModule, InputTextModule, ButtonModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="sample-panel p-6">
       <div class="mb-5 space-y-2">

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -28,6 +28,7 @@ interface MediaFieldConfig {
     MessageModule
   ],
   providers: [AddDataFacadeService],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './add-data.component.html'
 })
 export class AddDataComponent {

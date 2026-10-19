@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { AdminNavbarComponent } from '../../../../shared/components/navbar/admin-navbar.component';
 import { RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -7,6 +7,7 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
 @Component({
   selector: 'app-admin-home',
   imports: [AdminNavbarComponent, RouterOutlet, ButtonModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="sample-shell space-y-6 pb-10">
       <app-admin-navbar></app-admin-navbar>

@@ -1,4 +1,9 @@
-import { Component, DestroyRef, OnInit } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { catchError, switchMap, take, tap } from 'rxjs';
@@ -23,6 +28,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     FormsModule
   ],
   templateUrl: './project-info-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./project-info-form.component.scss']
 })
 export class ProjectInfoFormComponent implements OnInit {

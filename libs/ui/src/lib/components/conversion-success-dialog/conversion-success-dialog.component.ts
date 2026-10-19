@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -27,6 +27,7 @@ import { MatIconModule } from '@angular/material/icon';
       </div>
     </mat-dialog-content>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       /* Plain CSS equivalent of previous nested/SCSS rules */

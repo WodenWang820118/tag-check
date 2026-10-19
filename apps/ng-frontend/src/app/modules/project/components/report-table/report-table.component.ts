@@ -50,7 +50,7 @@ import { MatChipsModule } from '@angular/material/chips';
   ],
   templateUrl: './report-table.component.html',
   styleUrls: ['./report-table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Default
+  changeDetection: ChangeDetectionStrategy.Eager
 })
 export class ReportTableComponent implements OnInit {
   // #region viewChild / signals

@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 
@@ -19,6 +19,7 @@ export interface ErrorDialogData {
       </button>
     </div>
   </div>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [``]
 })
 export class ErrorDialogComponent {

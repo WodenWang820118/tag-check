@@ -1,5 +1,11 @@
 import { isPlatformBrowser } from '@angular/common';
-import { Component, PLATFORM_ID, effect, inject } from '@angular/core';
+import {
+  Component,
+  PLATFORM_ID,
+  effect,
+  inject,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SeoService } from './seo/seo.service';
 import { UrlTrackerService } from './shared/services/url-tracker/url-tracker.service';
@@ -9,6 +15,7 @@ import { ConsentService } from './shared/services/consent/consent.service';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<div class="sample-page"><router-outlet></router-outlet></div>`
 })
 export class AppComponent {

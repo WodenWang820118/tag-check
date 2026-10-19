@@ -1,4 +1,11 @@
-import { Component, computed, effect, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -10,6 +17,7 @@ import { UploadCardFacadeService } from './upload-card-facade.service';
   selector: 'app-upload-card',
   standalone: true,
   imports: [MatCardModule, MatButtonModule, MatIconModule, EditorComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './upload-card.component.html'
 })
 export class UploadCardComponent implements OnInit {

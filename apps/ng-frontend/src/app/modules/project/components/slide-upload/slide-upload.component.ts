@@ -1,4 +1,9 @@
-import { Component, signal, input } from '@angular/core';
+import {
+  Component,
+  signal,
+  input,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { NewReportViewComponent } from '../new-report-view/new-report-view.component';
@@ -21,6 +26,7 @@ import { Ga4UploadComponent } from '../ga4-upload/ga4-upload.component';
     Ga4UploadComponent
   ],
   templateUrl: './slide-upload.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./slide-upload.component.scss']
 })
 export class SlideUploadComponent {

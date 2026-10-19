@@ -1,5 +1,10 @@
 import { MatCardModule } from '@angular/material/card';
-import { Component, ViewEncapsulation, DestroyRef } from '@angular/core';
+import {
+  Component,
+  ViewEncapsulation,
+  DestroyRef,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { catchError, EMPTY, finalize, shareReplay, tap } from 'rxjs';
@@ -44,6 +49,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     </mat-card>
   `,
   styles: [``],
+  changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None
 })
 export class ProjectImportComponent {

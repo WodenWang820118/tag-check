@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { ProjectImportComponent } from './project-import.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { provideRouter } from '@angular/router';
@@ -23,7 +23,7 @@ const meta: Meta<ProjectImportComponent> = {
       providers: [ProjectIoService]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(APP_ROUTES)]
     })
   ]
 };

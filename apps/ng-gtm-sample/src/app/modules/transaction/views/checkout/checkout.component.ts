@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TableModule } from 'primeng/table';
 import { PaymentFormComponent } from '../../components/payment-form/payment-form.component';
 import { ShippingFormComponent } from '../../components/shipping-form/shipping-form.component';
@@ -14,6 +14,7 @@ import { OrderService } from '../../../../shared/services/order/order.service';
     TableModule,
     CurrencyPipe
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './checkout.component.html'
 })
 export class CheckoutComponent {

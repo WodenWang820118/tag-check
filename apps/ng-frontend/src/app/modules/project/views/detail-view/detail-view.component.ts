@@ -5,7 +5,8 @@ import {
   DestroyRef,
   inject,
   OnInit,
-  signal
+  signal,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {
   ActivatedRoute,
@@ -80,6 +81,7 @@ function serializeParamMap(params: ParamMap): string {
     TagManageTabComponent
   ],
   styleUrls: ['./detail-view.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="detail">
       <div class="detail__header">

@@ -1,5 +1,9 @@
 import { DomSanitizer } from '@angular/platform-browser';
-import { AfterViewInit, Component } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { DestinationService } from '../../../../shared/services/destination/destination.service';
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
 import { AnalyticsService } from '../../../../shared/services/analytics/analytics.service';
@@ -15,6 +19,7 @@ import { ButtonModule } from 'primeng/button';
   standalone: true,
   selector: 'app-carousel',
   imports: [CarouselModule, ButtonModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="sample-panel overflow-hidden px-4 py-5 sm:px-6">
       <p-carousel

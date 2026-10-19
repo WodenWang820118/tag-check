@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MermaidDiagramComponent } from '../mermaid-diagram/mermaid-diagram.component';
 
 @Component({
@@ -6,6 +6,7 @@ import { MermaidDiagramComponent } from '../mermaid-diagram/mermaid-diagram.comp
   standalone: true,
   imports: [MermaidDiagramComponent],
   templateUrl: './objectives.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./objectives.component.scss']
 })
 export class ObjectivesComponent {

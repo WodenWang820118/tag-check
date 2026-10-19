@@ -8,7 +8,7 @@ import {
 import { FileTableToolbarComponent } from './file-table-toolbar.component';
 
 import { expect, within } from 'storybook/test';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { provideRouter } from '@angular/router';
@@ -40,7 +40,7 @@ const meta: Meta<FileTableToolbarComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(PROJECT_ROUTES)]
     })
   ],
   args: {

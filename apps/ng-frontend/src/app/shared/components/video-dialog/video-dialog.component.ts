@@ -1,4 +1,9 @@
-import { Component, inject, OnDestroy } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnDestroy,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -14,6 +19,7 @@ export interface VideoDialogData {
   selector: 'app-video-dialog',
   standalone: true,
   imports: [MatDialogModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="w-full h-full flex flex-col">
       <header

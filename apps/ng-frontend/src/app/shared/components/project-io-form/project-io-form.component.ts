@@ -1,4 +1,8 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  ViewEncapsulation,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { catchError, EMPTY, map, mergeMap, switchMap, take, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
@@ -13,6 +17,7 @@ import { MatDialog } from '@angular/material/dialog';
   imports: [MatButtonModule, MatCardModule],
   templateUrl: './project-io-form.component.html',
   styleUrls: ['./project-io-form.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None
 })
 export class ProjectIoFormComponent {

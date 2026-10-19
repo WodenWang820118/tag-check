@@ -1,4 +1,10 @@
-import { Component, Inject, OnDestroy, inject } from '@angular/core';
+import {
+  Component,
+  Inject,
+  OnDestroy,
+  inject,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
@@ -58,6 +64,7 @@ export type MediaPreviewData = {
       </div>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
       .media-preview-dialog {

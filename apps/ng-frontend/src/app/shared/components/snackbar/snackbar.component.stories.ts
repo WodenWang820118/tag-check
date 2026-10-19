@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { SnackBarComponent } from './snackbar.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { APP_ROUTES } from '../../../app.routes';
 
@@ -20,7 +20,7 @@ const meta: Meta<SnackBarComponent> = {
       providers: []
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(APP_ROUTES)]
     })
   ]
 };

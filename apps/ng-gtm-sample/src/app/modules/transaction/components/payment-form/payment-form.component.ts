@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -9,6 +9,7 @@ import { NavigationService } from '../../../../shared/services/navigation/naviga
   selector: 'app-payment-form',
   standalone: true,
   imports: [ReactiveFormsModule, FormsModule, InputTextModule, ButtonModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (checkoutFormManager.isShippingFormSubmitted$()) {
       <div class="sample-panel p-6">

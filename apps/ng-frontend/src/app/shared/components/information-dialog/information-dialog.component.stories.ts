@@ -6,7 +6,7 @@ import {
 } from '@storybook/angular';
 import { InformationDialogComponent } from './information-dialog.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
@@ -45,7 +45,7 @@ const meta: Meta<InformationDialogComponent> = {
       ]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(APP_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(APP_ROUTES)]
     })
   ]
 };

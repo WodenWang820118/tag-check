@@ -7,7 +7,7 @@ import {
 import { ReportTableComponent } from './report-table.component';
 
 import { AsyncPipe, DatePipe, NgClass } from '@angular/common';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -120,7 +120,7 @@ const meta: Meta<ReportTableComponent> = {
       ]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

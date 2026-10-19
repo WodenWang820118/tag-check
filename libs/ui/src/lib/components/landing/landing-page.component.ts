@@ -1,4 +1,10 @@
-import { Component, Inject, LOCALE_ID, input } from '@angular/core';
+import {
+  Component,
+  Inject,
+  LOCALE_ID,
+  input,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { buildLocalizedPath } from '../../locale/locale-routing';
 import { type SharedNavigationLink } from '../navigation-link';
 
@@ -6,6 +12,7 @@ import { type SharedNavigationLink } from '../navigation-link';
   selector: 'lib-landing-page',
   standalone: true,
   templateUrl: './landing-page.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./landing-page.component.scss']
 })
 export class LandingPageComponent {

@@ -1,4 +1,11 @@
-import { Component, OnInit, computed, effect, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  computed,
+  effect,
+  signal,
+  ChangeDetectionStrategy
+} from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,6 +29,7 @@ import { take, tap } from 'rxjs';
     MatListModule,
     MatChipsModule
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './ga4-upload.component.html'
 })
 export class Ga4UploadComponent implements OnInit {

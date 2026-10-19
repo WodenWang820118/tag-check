@@ -3,7 +3,8 @@ import {
   inject,
   input,
   viewChild,
-  ViewEncapsulation
+  ViewEncapsulation,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { TagBuildMode } from '@data-access';
 import { FunctionalCardFacade } from './functional-card.facade.service';
@@ -16,6 +17,7 @@ import { MatButtonModule } from '@angular/material/button';
   imports: [MatButtonModule, AdvancedExpansionPanelComponent],
   templateUrl: './functional-card.component.html',
   styleUrls: ['./functional-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   encapsulation: ViewEncapsulation.None
 })
 export class FunctionalCardComponent {

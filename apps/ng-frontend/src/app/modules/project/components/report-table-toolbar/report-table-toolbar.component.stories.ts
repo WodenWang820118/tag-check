@@ -7,7 +7,7 @@ import {
 import { ReportTableToolbarComponent } from './report-table-toolbar.component';
 
 import { expect, within } from 'storybook/test';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -41,7 +41,7 @@ const meta: Meta<ReportTableToolbarComponent> = {
       providers: [TestRunningFacadeService]
     }),
     applicationConfig({
-      providers: [provideHttpClient(), provideRouter(PROJECT_ROUTES)]
+      providers: [provideHttpClient(withXhr()), provideRouter(PROJECT_ROUTES)]
     })
   ]
 };

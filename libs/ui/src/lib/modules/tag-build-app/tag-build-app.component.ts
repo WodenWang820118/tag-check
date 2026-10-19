@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ArticleComponent } from '../../components/article/article.component';
 import { XlsxSidenavComponent } from '../../components/xlsx-sidenav/xlsx-sidenav.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -15,6 +15,7 @@ import { TagBuildPageComponent } from '../../views/tag-build-page/tag-build-page
     TagBuildPageComponent
   ],
   templateUrl: './tag-build-app.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./tag-build-app.component.scss']
 })
 export class TagBuildAppComponent {
