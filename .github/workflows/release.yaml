@@ -381,11 +381,18 @@ jobs:
               core.warning(`Found ${drafts.length} drafts for ${releaseTag}; updating the oldest, which holds the assets.`);
             }
 
-            await github.rest.repos.updateRelease({
+            // Updating a draft without tag_name detaches it from its tag
+            // (GitHub renames it untagged-<hash>), so always send the tag.
+            const updated = await github.rest.repos.updateRelease({
               owner,
               repo,
               release_id: drafts[0].id,
+              tag_name: releaseTag,
               body: readFileSync(process.env.NOTES_PATH, 'utf8'),
               draft: true
             });
+            if (updated.data.tag_name !== releaseTag) {
+              core.setFailed(`Draft ${drafts[0].id} lost its tag: ${updated.data.tag_name}.`);
+              return;
+            }
             core.notice(`Synced the notes of draft ${releaseTag} (release ${drafts[0].id}).`);
