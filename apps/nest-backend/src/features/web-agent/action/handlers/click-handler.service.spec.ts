@@ -47,9 +47,17 @@ function build(opts?: {
   };
 }
 
+/** Rejects like Puppeteer's waitForSelector when the selector never appears. */
+const timedOut = (selector: string) =>
+  Promise.reject(
+    Object.assign(new Error(`Waiting for selector \`${selector}\` failed`), {
+      name: 'TimeoutError'
+    })
+  );
+
 function makePage() {
   return {
-    waitForSelector: vi.fn().mockResolvedValue({}),
+    waitForSelector: vi.fn().mockResolvedValue({ dispose: vi.fn() }),
     $: vi.fn(),
     mouse: { click: vi.fn() },
     browserContext: () => ({ pages: vi.fn().mockResolvedValue([{}]) }),
@@ -117,6 +125,74 @@ describe('ClickHandler', () => {
     await handler.handle(page as never, 'p', 'e', step, false);
     expect(calls).toEqual(['scroll', 'measure']);
     expect(page.mouse.click).toHaveBeenCalledWith(15, 27, { delay: 100 });
+  });
+
+  it('clicks the selector that became visible first', async () => {
+    const { handler, clickStrategyService } = build();
+    const page = makePage() as unknown as {
+      waitForSelector: ReturnType<typeof vi.fn>;
+    };
+    page.waitForSelector = vi.fn((selector: string) =>
+      selector === '#later-in-list'
+        ? Promise.resolve({ dispose: vi.fn() })
+        : timedOut(selector)
+    );
+    const step: Step = {
+      selectors: [['#missing'], ['#later-in-list']],
+      target: 'main'
+    } as never;
+
+    await handler.handle(page as never, 'p', 'e', step, false);
+
+    expect(
+      (clickStrategyService.clickElement as ReturnType<typeof vi.fn>).mock
+        .calls[0][3]
+    ).toBe('#later-in-list');
+  });
+
+  it('fails after the shared wait when no selector becomes visible', async () => {
+    const { handler, clickStrategyService } = build();
+    const page = makePage() as unknown as {
+      waitForSelector: ReturnType<typeof vi.fn>;
+    };
+    page.waitForSelector = vi.fn((selector: string) => timedOut(selector));
+    const step: Step = {
+      selectors: [['#a'], ['#b']],
+      target: 'main',
+      timeout: 50
+    } as never;
+
+    await expect(
+      handler.handle(page as never, 'p', 'e', step, false)
+    ).rejects.toThrow(/None of the selectors became visible within 50 ms/);
+    expect(clickStrategyService.clickElement).not.toHaveBeenCalled();
+  });
+
+  it('reports a broken wait as itself, not as an invisible element', async () => {
+    const { handler, clickStrategyService } = build();
+    const page = makePage() as unknown as {
+      waitForSelector: ReturnType<typeof vi.fn>;
+    };
+    const detached = new Error('Attempted to use detached Frame');
+    page.waitForSelector = vi.fn().mockRejectedValue(detached);
+    const step: Step = { selectors: [['#a']], target: 'main' } as never;
+
+    await expect(
+      handler.handle(page as never, 'p', 'e', step, false)
+    ).rejects.toBe(detached);
+    expect(clickStrategyService.clickElement).not.toHaveBeenCalled();
+  });
+
+  it('gives the click itself the 5 s action budget', async () => {
+    const { handler, clickStrategyService } = build();
+    const step: Step = { selectors: [['#a']], target: 'main' } as never;
+
+    await handler.handle(makePage(), 'p', 'e', step, false);
+
+    expect(
+      (clickStrategyService.clickElement as ReturnType<typeof vi.fn>).mock
+        .calls[0][6]
+    ).toBe(5000);
   });
 
   it('throws when readJsonFile yields no step url', async () => {
