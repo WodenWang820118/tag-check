@@ -1,89 +1,110 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { of } from 'rxjs';
-import { ImageService } from '../../../shared/services/api/image/image.service';
-import { ReportService } from '../../../shared/services/api/report/report.service';
-import { VideosService } from '../../../shared/services/api/videos/videos.service';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import {
-  imageResolver,
-  projectReportResolver,
-  reportDetailResolver,
-  videoResolver
-} from './report.resolver';
+  DataLayerSpec,
+  Recording,
+  REPORT_DETAIL_SAMPLE,
+  ReportDetailResponse
+} from '@utils';
+import { ImageService } from '../../../shared/services/api/image/image.service';
+import { RecordingService } from '../../../shared/services/api/recording/recording.service';
+import { ReportService } from '../../../shared/services/api/report/report.service';
+import { SpecService } from '../../../shared/services/api/spec/spec.service';
+import { VideosService } from '../../../shared/services/api/videos/videos.service';
+import { ReportDetailRouteContext } from '../components/report-detail.contracts';
+import { projectReportResolver, reportPageResolver } from './report.resolver';
 
 describe('project report.resolver', () => {
+  const detail = JSON.parse(
+    JSON.stringify(REPORT_DETAIL_SAMPLE)
+  ) as ReportDetailResponse;
+  const spec = { event: 'add_to_cart' } as unknown as DataLayerSpec;
+  const recording = { title: 'add_to_cart', steps: [] } as Recording;
+  const video = { blob: new Blob(['webm']) };
+  const image = { blob: new Blob(['png']) };
+
   const reportService = {
-    getReportDetails: vi.fn(),
+    getReportDetails: vi.fn(() => of(detail)),
     getProjectReports: vi.fn()
   };
-  const imageService = { getImage: vi.fn() };
-  const videoService = { getVideo: vi.fn() };
+  const specService = { getEventSpec: vi.fn(() => of(spec)) };
+  const recordingService = { getRecordingDetails: vi.fn(() => of(recording)) };
+  const videoService = { getVideo: vi.fn(() => of(video)) };
+  const imageService = { getImage: vi.fn(() => of(image)) };
 
   beforeEach(() => {
     TestBed.resetTestingModule();
-    reportService.getReportDetails = vi.fn();
-    reportService.getProjectReports = vi.fn();
-    imageService.getImage = vi.fn();
-    videoService.getVideo = vi.fn();
+    vi.clearAllMocks();
     TestBed.configureTestingModule({
       providers: [
         { provide: ReportService, useValue: reportService },
-        { provide: ImageService, useValue: imageService },
-        { provide: VideosService, useValue: videoService }
+        { provide: SpecService, useValue: specService },
+        { provide: RecordingService, useValue: recordingService },
+        { provide: VideosService, useValue: videoService },
+        { provide: ImageService, useValue: imageService }
       ]
     });
   });
 
-  function run<T>(fn: () => T) {
-    return TestBed.runInInjectionContext(fn);
+  const route = {
+    parent: { params: { projectSlug: 'demo' } },
+    params: { eventId: 'evt-1' }
+  } as unknown as ActivatedRouteSnapshot;
+
+  function resolvePage() {
+    return TestBed.runInInjectionContext(
+      () =>
+        reportPageResolver(
+          route,
+          {} as RouterStateSnapshot
+        ) as Observable<ReportDetailRouteContext>
+    );
   }
 
-  it('reportDetailResolver fetches details using parent slug + event id', () => {
-    const obs = of({} as any);
-    reportService.getReportDetails.mockReturnValue(obs);
-    const route = {
-      parent: { params: { projectSlug: 'p' } } as any,
-      params: { eventId: 'e' }
-    } as unknown as ActivatedRouteSnapshot;
-    expect(
-      run(() => reportDetailResolver(route, {} as RouterStateSnapshot))
-    ).toBe(obs);
-    expect(reportService.getReportDetails).toHaveBeenCalledWith('p', 'e');
+  it('loads the report, spec, recording and media for the route', async () => {
+    await firstValueFrom(resolvePage());
+
+    for (const call of [
+      reportService.getReportDetails,
+      specService.getEventSpec,
+      recordingService.getRecordingDetails,
+      videoService.getVideo,
+      imageService.getImage
+    ]) {
+      expect(call).toHaveBeenCalledWith('demo', 'evt-1');
+    }
   });
 
-  it('videoResolver delegates to VideosService', () => {
-    const obs = of({ blob: new Blob() });
-    videoService.getVideo.mockReturnValue(obs);
-    const route = {
-      parent: { params: { projectSlug: 'p' } } as any,
-      params: { eventId: 'e' }
-    } as unknown as ActivatedRouteSnapshot;
-    expect(run(() => videoResolver(route, {} as RouterStateSnapshot))).toBe(
-      obs
+  it('builds the report page from what it loaded', async () => {
+    const page = await firstValueFrom(resolvePage());
+
+    expect(page).toMatchObject({
+      projectSlug: 'demo',
+      eventId: 'evt-1',
+      spec,
+      recording,
+      videoBlob: video.blob,
+      imageBlob: image.blob,
+      historyLinkCommands: ['..', 'buckets']
+    });
+    expect(page.reportDetails?.eventName).toBe('add_to_cart');
+  });
+
+  it('projectReportResolver delegates to getProjectReports with the slug', () => {
+    const reports = of([]);
+    reportService.getProjectReports.mockReturnValue(reports);
+
+    const result = TestBed.runInInjectionContext(() =>
+      projectReportResolver(
+        {
+          params: { projectSlug: 'demo' }
+        } as unknown as ActivatedRouteSnapshot,
+        {} as RouterStateSnapshot
+      )
     );
-    expect(videoService.getVideo).toHaveBeenCalledWith('p', 'e');
-  });
 
-  it('imageResolver delegates to ImageService', () => {
-    const obs = of({ blob: new Blob() });
-    imageService.getImage.mockReturnValue(obs);
-    const route = {
-      parent: { params: { projectSlug: 'p' } } as any,
-      params: { eventId: 'e' }
-    } as unknown as ActivatedRouteSnapshot;
-    expect(run(() => imageResolver(route, {} as RouterStateSnapshot))).toBe(
-      obs
-    );
-    expect(imageService.getImage).toHaveBeenCalledWith('p', 'e');
-  });
-
-  it('projectReportResolver lists reports for the route slug', () => {
-    const obs = of([] as any);
-    reportService.getProjectReports.mockReturnValue(obs);
-    const route = { params: { projectSlug: 'p' } } as any;
-    expect(
-      run(() => projectReportResolver(route, {} as RouterStateSnapshot))
-    ).toBe(obs);
-    expect(reportService.getProjectReports).toHaveBeenCalledWith('p');
+    expect(result).toBe(reports);
+    expect(reportService.getProjectReports).toHaveBeenCalledWith('demo');
   });
 });

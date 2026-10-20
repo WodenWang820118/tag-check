@@ -1,12 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import {
-  EventInspectionPreset,
-  TestEvent,
-  TestEventDetail,
-  TestImage
-} from '@utils';
+import { EventInspectionPreset, ReportDetailResponse } from '@utils';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
 
 interface GtmInspectionParams {
@@ -50,13 +45,7 @@ export class GtmOperatorService {
     const queryString = queryParams.join('&');
 
     return this.http
-      .post<
-        {
-          testEvent: TestEvent;
-          testEventDetails: TestEventDetail;
-          testImage: TestImage;
-        }[]
-      >(
+      .post<ReportDetailResponse[]>(
         `${environment.dataLayerApiUrl}/gtm-operator/${projectSlug}/${eventId}?${queryString}`,
         params.eventInspectionPreset
       )

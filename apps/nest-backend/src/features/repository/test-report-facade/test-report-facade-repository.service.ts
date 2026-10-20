@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { ReportDetailResponse } from '@utils';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 import { TestImageRepositoryService } from '../../../core/repository/test-event/test-image-repository.service';
 import {
@@ -154,7 +155,10 @@ export class TestReportFacadeRepositoryService {
     }
   }
 
-  async getReportDetail(projectSlug: string, eventId: string) {
+  async getReportDetail(
+    projectSlug: string,
+    eventId: string
+  ): Promise<ReportDetailResponse> {
     const testEvent = await this.testEventRepositoryService.getBySlugAndEventId(
       projectSlug,
       eventId
@@ -173,8 +177,18 @@ export class TestReportFacadeRepositoryService {
 
     return {
       testEvent,
-      testEventDetails,
-      testImage
+      testEventDetails: testEventDetails ?? null,
+      // GET /projects/images serves the screenshot itself. Its bytes, encoded
+      // as JSON, would add megabytes to every report and run response.
+      testImage: testImage
+        ? {
+            id: testImage.id,
+            imageName: testImage.imageName,
+            imageSize: testImage.imageSize,
+            createdAt: testImage.createdAt,
+            updatedAt: testImage.updatedAt
+          }
+        : null
     };
   }
 }
