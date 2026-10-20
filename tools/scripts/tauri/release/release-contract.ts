@@ -177,22 +177,6 @@ function getCargoPackageSection(contents: string) {
   };
 }
 
-function readCargoManifestVersion() {
-  const cargoManifest = readFileSync(cargoManifestPath, 'utf8');
-  const { section } = getCargoPackageSection(cargoManifest);
-  const cargoVersionMatch = section.match(
-    /^version\s*=\s*"(?<version>[^"]+)"/m
-  );
-
-  if (!cargoVersionMatch?.groups?.version) {
-    throw new Error(
-      `Unable to read the package version from ${cargoManifestPath}.`
-    );
-  }
-
-  return parseStableVersion(cargoVersionMatch.groups.version);
-}
-
 function updateCargoManifestVersion(contents: string, version: string) {
   const { section, sectionEnd, sectionStart } =
     getCargoPackageSection(contents);

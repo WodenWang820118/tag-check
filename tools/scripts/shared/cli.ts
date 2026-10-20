@@ -28,7 +28,7 @@ export function stripFlagWithValue(
       index += 1;
       continue;
     }
-    output.push(args[index]!);
+    output.push(args[index]);
   }
   return output;
 }

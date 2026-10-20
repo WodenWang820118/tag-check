@@ -19,11 +19,12 @@ describe('toTagSpec', () => {
     const spec = {
       dataLayerSpec: { event: 'page_view', extra: 'x' },
       otherKey: 'k'
-    } as any;
-    const result = toTagSpec(spec) as any;
-    expect(result.event).toBe('page_view');
-    expect(result.dataLayerSpec).toBe(spec.dataLayerSpec);
-    expect(result.otherKey).toBe('k');
+    } as unknown as DataLayerSpec;
+    expect(toTagSpec(spec)).toMatchObject({
+      event: 'page_view',
+      dataLayerSpec: spec.dataLayerSpec,
+      otherKey: 'k'
+    });
   });
 });
 
