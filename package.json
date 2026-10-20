@@ -237,7 +237,7 @@
     "@codemirror/state": "^6.7.6",
     "@codemirror/view": "^6.43.14",
     "@fastify/multipart": "^10.1.4",
-    "@fastify/static": "^8.3.0",
+    "@fastify/static": "^10.1.6",
     "@nestjs/cache-manager": "^3.1.3",
     "@nestjs/common": "^11.2.7",
     "@nestjs/config": "^4.0.4",
