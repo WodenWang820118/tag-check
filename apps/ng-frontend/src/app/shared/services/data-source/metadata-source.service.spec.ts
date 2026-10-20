@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
+import type { Project } from '@utils';
 import { MetadataSourceService } from './metadata-source.service';
 
 describe('MetadataSourceService', () => {
@@ -15,7 +16,7 @@ describe('MetadataSourceService', () => {
   });
 
   it('emits projects pushed via setData', async () => {
-    const projects = [{ projectName: 'a', projectSlug: 'a' }] as any;
+    const projects: Project[] = [{ projectName: 'a', projectSlug: 'a' }];
     svc.setData(projects);
     expect(await firstValueFrom(svc.getData())).toBe(projects);
   });
@@ -27,7 +28,7 @@ describe('MetadataSourceService', () => {
   });
 
   it('connect() returns the same stream as getData()', async () => {
-    const projects = [{ projectName: 'b', projectSlug: 'b' }] as any;
+    const projects: Project[] = [{ projectName: 'b', projectSlug: 'b' }];
     svc.setData(projects);
     expect(await firstValueFrom(svc.connect())).toBe(projects);
   });

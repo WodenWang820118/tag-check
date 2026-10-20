@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { of } from 'rxjs';
+import type { ProjectSetting } from '@utils';
 import { SettingsService } from '../../../shared/services/api/settings/settings.service';
 import { getProjectFormSettingsResolver } from './project-form-settings.resolver';
 
@@ -30,11 +31,13 @@ describe('getProjectFormSettingsResolver', () => {
   });
 
   it('looks up settings for the parent project slug', () => {
-    const obs = of({} as any);
+    const obs = of({} as ProjectSetting);
     settingsService.getProjectSettings.mockReturnValue(obs);
 
     const result = run({
-      parent: { params: { projectSlug: 'demo' } } as any
+      parent: {
+        params: { projectSlug: 'demo' }
+      } as unknown as ActivatedRouteSnapshot
     });
 
     expect(result).toBe(obs);

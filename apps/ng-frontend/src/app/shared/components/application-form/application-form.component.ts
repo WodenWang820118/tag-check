@@ -106,12 +106,10 @@ export class ApplicationFormComponent implements OnInit {
   }
 
   get localStorageFormArrayValue() {
-    return Object.keys(this.localStorageFormArray.controls).map((key) => {
-      return {
-        key: key,
-        value: this.localStorageFormArray.controls[key as any].value
-      };
-    });
+    return this.localStorageFormArray.controls.map((control, index) => ({
+      key: String(index),
+      value: control.value
+    }));
   }
 
   get cookieFormArray() {
@@ -119,12 +117,10 @@ export class ApplicationFormComponent implements OnInit {
   }
 
   get cookieFormArrayValue() {
-    return Object.keys(this.cookieFormArray.controls).map((key) => {
-      return {
-        key: key,
-        value: this.cookieFormArray.controls[key as any].value
-      };
-    });
+    return this.cookieFormArray.controls.map((control, index) => ({
+      key: String(index),
+      value: control.value
+    }));
   }
 
   observeLocalStorageFormArray() {
