@@ -28,7 +28,8 @@
         "depConstraints": [
           {
             "sourceTag": "scope:shared",
-            "onlyDependOnLibsWithTags": ["scope:shared"]
+            "onlyDependOnLibsWithTags": ["scope:shared"],
+            "bannedExternalImports": ["@angular/*", "@nestjs/*", "typeorm"]
           },
           {
             "sourceTag": "scope:frontend",

@@ -99,7 +99,7 @@ export class CarouselComponent implements OnDestroy {
     this.dialog.open(MediaPreviewDialogComponent, {
       data: {
         type: item.type,
-        url: item.url as string,
+        url: item.url,
         blob: blob,
         alt: item.alt,
         caption: item.caption
