@@ -48,13 +48,19 @@ export type MediaPreviewData = {
       </div>
       <div class="caption" *ngIf="data.caption">{{ data.caption }}</div>
       <div class="actions">
-        <button mat-stroked-button type="button" (click)="download()">
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="media-preview-download"
+          (click)="download()"
+        >
           Download
         </button>
         <button
           mat-raised-button
           color="primary"
           type="button"
+          data-testid="media-preview-close"
           (click)="close()"
         >
           Close
