@@ -24,11 +24,13 @@ export class TestImageRepositoryService {
     return plainToInstance(TestImageResponseDto, entity);
   }
 
+  /** Returns the latest screenshot: every run adds a new image row. */
   async getBySlugAndEventId(projectSlug: string, eventId: string) {
     const entity = await this.repository.findOne({
       relations: {
         testEvent: true
       },
+      order: { id: 'DESC' },
       where: {
         testEvent: {
           eventId,

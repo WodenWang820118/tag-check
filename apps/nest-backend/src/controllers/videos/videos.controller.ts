@@ -7,7 +7,9 @@ export class VideosController {
 
   @Header('Content-Type', 'video/webm')
   @Header('Content-Disposition', `inline; filename="recording.webm"`)
-  @Header('Cache-Control', 'max-age=300')
+  // Every run overwrites the recording, so the browser must revalidate:
+  // a cached copy would keep showing the previous (or empty) recording.
+  @Header('Cache-Control', 'no-cache')
   @Header('Access-Control-Expose-Headers', 'Content-Disposition')
   @Get(':projectSlug/:eventId')
   async getVideos(
