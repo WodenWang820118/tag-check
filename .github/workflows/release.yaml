@@ -122,22 +122,6 @@ jobs:
             const tagRefPath = (tag) => `tags/${tag}`;
             const fullTagRef = (tag) => `refs/${tagRefPath(tag)}`;
 
-            const getReleaseByTag = async (tag) => {
-              try {
-                return await github.rest.repos.getReleaseByTag({
-                  owner,
-                  repo,
-                  tag
-                });
-              } catch (error) {
-                if (error.status === 404) {
-                  return null;
-                }
-
-                throw error;
-              }
-            };
-
             const getTagSha = async (tag) => {
               try {
                 const response = await github.rest.git.getRef({
@@ -166,19 +150,38 @@ jobs:
               }
             };
 
-            const releaseCandidates = [
-              { kind: 'release', tag: releaseTag, value: await getReleaseByTag(releaseTag) },
-              { kind: 'release', tag: legacyTag, value: await getReleaseByTag(legacyTag) }
-            ].filter((candidate) => candidate.value);
+            // List releases instead of looking them up by tag: that lookup
+            // skips drafts. A version counts as released once it is published
+            // under v<version>, <version> or v<version>-preview (2.2.0 was
+            // published as v2.2.0-preview). Prereleases of other versions,
+            // such as v3.0.0-alpha, do not match.
+            const releasedTags = [releaseTag, legacyTag, `${releaseTag}-preview`];
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner,
+              repo,
+              per_page: 100
+            });
+            const published = releases.find(
+              (release) => !release.draft && releasedTags.includes(release.tag_name)
+            );
 
-            if (releaseCandidates.length > 0) {
-              const existing = releaseCandidates[0];
-              const skipReason = `Release already exists for ${existing.tag}; skipping duplicate draft creation.`;
+            if (published) {
+              const skipReason = `${published.tag_name} is already published for ${releaseVersion}; bump VERSION to release again.`;
               core.setOutput('checkout_ref', checkoutRef);
               core.setOutput('should_release', 'false');
               core.setOutput('skip_reason', skipReason);
               core.notice(skipReason);
               return;
+            }
+
+            // An unpublished draft follows main: the tag moves below, the
+            // publish job replaces the draft's assets, and its last step
+            // rewrites the draft's notes.
+            const draft = releases.find(
+              (release) => release.draft && release.tag_name === releaseTag
+            );
+            if (draft) {
+              core.notice(`Draft ${releaseTag} is not published yet; rebuilding it from ${checkoutRef}.`);
             }
 
             const canonicalTagSha = await getTagSha(releaseTag);
@@ -345,3 +348,44 @@ jobs:
           fail_on_unmatched_files: true
           files: dist/publish-release/*
           tag_name: ${{ needs.prepare-release.outputs.release_tag }}
+      - name: Sync draft release notes
+        uses: actions/github-script@v7
+        env:
+          NOTES_PATH: docs/releases/${{ steps.release_context.outputs.release_version }}.md
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // action-gh-release@v2 finds releases with getReleaseByTag, which
+            // skips drafts. With a draft already open it creates a second one,
+            // keeps the oldest and uploads the assets there, but never updates
+            // that draft's notes. Write them here.
+            const { readFileSync } = require('node:fs');
+            const releaseTag = process.env.RELEASE_TAG;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner,
+              repo,
+              per_page: 100
+            });
+            const drafts = releases
+              .filter((release) => release.draft && release.tag_name === releaseTag)
+              .sort((left, right) => left.id - right.id);
+
+            if (drafts.length === 0) {
+              core.setFailed(`No draft release found for ${releaseTag}.`);
+              return;
+            }
+            if (drafts.length > 1) {
+              core.warning(`Found ${drafts.length} drafts for ${releaseTag}; updating the oldest, which holds the assets.`);
+            }
+
+            await github.rest.repos.updateRelease({
+              owner,
+              repo,
+              release_id: drafts[0].id,
+              body: readFileSync(process.env.NOTES_PATH, 'utf8'),
+              draft: true
+            });
+            core.notice(`Synced the notes of draft ${releaseTag} (release ${drafts[0].id}).`);

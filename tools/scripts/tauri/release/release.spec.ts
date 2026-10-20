@@ -1182,8 +1182,20 @@ describe('release helper', () => {
     expect(workflow).toContain(
       'node tools/scripts/tauri/release/release.ts assemble --release-tag ${{ needs.prepare-release.outputs.release_tag }} --artifacts-root dist/downloaded-release-assets --output-dir dist/publish-release'
     );
+    // getReleaseByTag skips drafts; listing releases sees them and the
+    // v<version>-preview tags releases have been published under.
+    expect(workflow).not.toContain('github.rest.repos.getReleaseByTag');
     expect(workflow).toContain(
-      'Release already exists for ${existing.tag}; skipping duplicate draft creation.'
+      'github.paginate(github.rest.repos.listReleases'
+    );
+    expect(workflow).toContain(
+      'const releasedTags = [releaseTag, legacyTag, `${releaseTag}-preview`];'
+    );
+    expect(workflow).toContain(
+      '${published.tag_name} is already published for ${releaseVersion}; bump VERSION to release again.'
+    );
+    expect(workflow).toContain(
+      'Draft ${releaseTag} is not published yet; rebuilding it from ${checkoutRef}.'
     );
     expect(workflow).toContain('const tagRefPath = (tag) => `tags/${tag}`;');
     expect(workflow).toContain(
@@ -1196,6 +1208,15 @@ describe('release helper', () => {
     expect(workflow).toContain('Validate checksum manifest');
     expect(workflow).toContain('uses: softprops/action-gh-release@v2');
     expect(workflow).toContain('draft: true');
+    // action-gh-release@v2 leaves an existing draft's notes untouched.
+    expect(workflow).toMatch(
+      /- name: Publish draft GitHub release[\s\S]+- name: Sync draft release notes/u
+    );
+    expect(workflow).toContain(
+      'NOTES_PATH: docs/releases/${{ steps.release_context.outputs.release_version }}.md'
+    );
+    expect(workflow).toContain('github.rest.repos.updateRelease');
+    expect(workflow).toContain('.sort((left, right) => left.id - right.id);');
   });
 
   it('keeps package and Nx release wiring aligned with the platform entrypoints', () => {
