@@ -12,7 +12,22 @@ export type TestImageSummary = {
   imageSize?: number;
 } & Auditable;
 
-/** Body of GET /reports/:projectSlug/:eventId. */
+/**
+ * A type as it arrives over HTTP: JSON turns dates into ISO strings. Use it
+ * for recorded responses; the backend types keep Date.
+ */
+export type Jsonified<T> = T extends Date
+  ? string
+  : T extends (infer Item)[]
+    ? Jsonified<Item>[]
+    : T extends object
+      ? { [Key in keyof T]: Jsonified<T[Key]> }
+      : T;
+
+/**
+ * Body of GET /reports/:projectSlug/:eventId, and of each item the run
+ * endpoints (POST /datalayer/...) return.
+ */
 export type ReportDetailResponse = {
   testEvent: AbstractTestEvent;
   /** The latest run's result, or null before the first run. */

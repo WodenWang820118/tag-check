@@ -1,6 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { describe, expect, it, vi } from 'vitest';
-import { REPORT_DETAIL_SAMPLE } from '@utils';
+import { REPORT_DETAIL_SAMPLE, shapeOf } from '@utils';
 import {
   AbstractTestEventResponseDto,
   TestEventDetailResponseDto,
@@ -202,24 +202,14 @@ describe('TestReportFacadeRepositoryService', () => {
     }
 
     const wire = (value: unknown) => JSON.parse(JSON.stringify(value));
-    const keysOf = (value: object) => Object.keys(value).sort();
 
-    it('sends the fields of the recorded contract sample', async () => {
+    it('sends the shape of the recorded contract sample', async () => {
       const ctx = build();
       stubRepositories(ctx);
 
       const body = wire(await ctx.service.getReportDetail('demo', 'evt'));
 
-      expect(keysOf(body)).toEqual(keysOf(REPORT_DETAIL_SAMPLE));
-      expect(keysOf(body.testEvent)).toEqual(
-        keysOf(REPORT_DETAIL_SAMPLE.testEvent)
-      );
-      expect(keysOf(body.testEventDetails)).toEqual(
-        keysOf(REPORT_DETAIL_SAMPLE.testEventDetails)
-      );
-      expect(keysOf(body.testImage)).toEqual(
-        keysOf(REPORT_DETAIL_SAMPLE.testImage)
-      );
+      expect(shapeOf(body)).toEqual(shapeOf(REPORT_DETAIL_SAMPLE));
     });
 
     it('leaves the screenshot bytes out; GET /projects/images serves them', async () => {

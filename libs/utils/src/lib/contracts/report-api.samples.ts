@@ -1,10 +1,17 @@
+import type {
+  AbstractTestEvent,
+  Jsonified,
+  ReportDetailResponse
+} from '../types/tag-check';
+
 /**
  * Responses of the reports API as they arrive over HTTP (dates are ISO
  * strings), recorded from an add_to_cart run of the example project.
  *
- * Backend specs check that the DTOs still produce exactly these fields, and
- * frontend specs feed these samples to the code that reads the responses, so a
- * change to either side fails a test until both agree.
+ * Backend specs check that the DTOs still produce exactly this shape, and
+ * frontend specs feed these samples to the code that reads the responses, so
+ * a change on either side fails a test until both agree. `satisfies` keeps
+ * the samples in line with the shared types.
  */
 
 /** One item of GET /reports/:projectSlug. */
@@ -20,7 +27,7 @@ export const REPORT_LIST_ITEM_SAMPLE = {
   hasRecording: true,
   passed: true,
   requestPassed: true
-};
+} satisfies Jsonified<AbstractTestEvent>;
 
 /** Body of GET /reports/:projectSlug/:eventId. */
 export const REPORT_DETAIL_SAMPLE = {
@@ -71,4 +78,23 @@ export const REPORT_DETAIL_SAMPLE = {
     createdAt: '2026-10-20T06:21:19.000Z',
     updatedAt: '2026-10-20T06:21:19.000Z'
   }
-};
+} satisfies Jsonified<ReportDetailResponse>;
+
+/**
+ * The structure of a JSON value: object keys (sorted) with the structure of
+ * their values, the structure of an array's first item, and the type of
+ * anything else. Contract specs compare structures, not values.
+ */
+export function shapeOf(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.length > 0 ? [shapeOf(value[0])] : [];
+  }
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, shapeOf((value as Record<string, unknown>)[key])])
+    );
+  }
+  return value === null ? 'null' : typeof value;
+}
