@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { REPORT_LIST_ITEM_SAMPLE } from '@utils';
 import { TestEventRepositoryService } from './test-event-repository.service';
 
 function build() {
@@ -26,6 +27,36 @@ describe('TestEventRepositoryService', () => {
       })
     );
     expect(result).toHaveLength(2);
+  });
+
+  it('listReports() sends the fields of the recorded contract sample', async () => {
+    const { service, repository } = build();
+    const latestDetail = { id: 7, passed: true, requestPassed: true };
+    // An entity row with the relations listReports() loads.
+    repository.find.mockResolvedValue([
+      {
+        ...REPORT_LIST_ITEM_SAMPLE,
+        project: { projectSlug: 'demo' },
+        recording: { title: 'add_to_cart', steps: [{ type: 'navigate' }] },
+        spec: { eventName: 'add_to_cart' },
+        testEventDetails: [{ id: 6, passed: false }, latestDetail],
+        latestTestEventDetailId: latestDetail.id,
+        latestTestImageId: 7
+      }
+    ]);
+
+    const [item] = JSON.parse(
+      JSON.stringify(await service.listReports('demo'))
+    );
+
+    expect(Object.keys(item).sort()).toEqual(
+      Object.keys(REPORT_LIST_ITEM_SAMPLE).sort()
+    );
+    expect(item).toMatchObject({
+      hasRecording: true,
+      passed: true,
+      requestPassed: true
+    });
   });
 
   it('listFileReports() builds a query joining all relations and filters by slug', async () => {

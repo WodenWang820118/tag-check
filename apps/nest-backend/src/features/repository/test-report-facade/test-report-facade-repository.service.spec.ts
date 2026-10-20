@@ -1,4 +1,11 @@
+import { plainToInstance } from 'class-transformer';
 import { describe, expect, it, vi } from 'vitest';
+import { REPORT_DETAIL_SAMPLE } from '@utils';
+import {
+  AbstractTestEventResponseDto,
+  TestEventDetailResponseDto,
+  TestImageResponseDto
+} from '../../../shared';
 import { TestReportFacadeRepositoryService } from './test-report-facade-repository.service';
 
 function build() {
@@ -167,22 +174,84 @@ describe('TestReportFacadeRepositoryService', () => {
   });
 
   describe('getReportDetail()', () => {
-    it('aggregates testEvent, testEventDetails and testImage by slug+eventId', async () => {
+    /** The repositories' DTOs, built from entity-shaped rows as they are at runtime. */
+    function stubRepositories(ctx: ReturnType<typeof build>) {
+      const detailEntity = {
+        ...REPORT_DETAIL_SAMPLE.testEventDetails,
+        testEvent: { id: 3 }
+      };
+      ctx.testEventRepositoryService.getBySlugAndEventId.mockResolvedValue(
+        plainToInstance(AbstractTestEventResponseDto, {
+          ...REPORT_DETAIL_SAMPLE.testEvent,
+          project: { projectSlug: 'demo' },
+          testEventDetails: [detailEntity],
+          testImage: [],
+          latestTestEventDetailId: detailEntity.id
+        })
+      );
+      ctx.testEventDetailRepositoryService.getBySlugAndEventId.mockResolvedValue(
+        plainToInstance(TestEventDetailResponseDto, detailEntity)
+      );
+      ctx.testImageRepositoryService.getBySlugAndEventId.mockResolvedValue(
+        plainToInstance(TestImageResponseDto, {
+          ...REPORT_DETAIL_SAMPLE.testImage,
+          imageData: Buffer.from('png bytes'),
+          testEvent: { id: 3 }
+        })
+      );
+    }
+
+    const wire = (value: unknown) => JSON.parse(JSON.stringify(value));
+    const keysOf = (value: object) => Object.keys(value).sort();
+
+    it('sends the fields of the recorded contract sample', async () => {
+      const ctx = build();
+      stubRepositories(ctx);
+
+      const body = wire(await ctx.service.getReportDetail('demo', 'evt'));
+
+      expect(keysOf(body)).toEqual(keysOf(REPORT_DETAIL_SAMPLE));
+      expect(keysOf(body.testEvent)).toEqual(
+        keysOf(REPORT_DETAIL_SAMPLE.testEvent)
+      );
+      expect(keysOf(body.testEventDetails)).toEqual(
+        keysOf(REPORT_DETAIL_SAMPLE.testEventDetails)
+      );
+      expect(keysOf(body.testImage)).toEqual(
+        keysOf(REPORT_DETAIL_SAMPLE.testImage)
+      );
+    });
+
+    it('leaves the screenshot bytes out; GET /projects/images serves them', async () => {
+      const ctx = build();
+      stubRepositories(ctx);
+
+      const result = await ctx.service.getReportDetail('demo', 'evt');
+
+      expect(result.testImage).not.toHaveProperty('imageData');
+      expect(result.testImage?.imageSize).toBe(
+        REPORT_DETAIL_SAMPLE.testImage.imageSize
+      );
+    });
+
+    it('sends null result and screenshot before the first run', async () => {
       const ctx = build();
       ctx.testEventRepositoryService.getBySlugAndEventId.mockResolvedValue({
         id: 1
       });
       ctx.testEventDetailRepositoryService.getBySlugAndEventId.mockResolvedValue(
-        { id: 2 }
+        null
       );
-      ctx.testImageRepositoryService.getBySlugAndEventId.mockResolvedValue({
-        id: 3
-      });
+      ctx.testImageRepositoryService.getBySlugAndEventId.mockResolvedValue(
+        null
+      );
+
       const result = await ctx.service.getReportDetail('demo', 'evt');
+
       expect(result).toEqual({
         testEvent: { id: 1 },
-        testEventDetails: { id: 2 },
-        testImage: { id: 3 }
+        testEventDetails: null,
+        testImage: null
       });
     });
   });
