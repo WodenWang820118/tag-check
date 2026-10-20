@@ -1,34 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
 import { join, dirname } from 'path';
-import { createWriteStream, promises as fs, WriteStream } from 'fs';
-import { execFile } from 'child_process';
-import { finished } from 'stream/promises';
-import { promisify } from 'util';
-import { Page, Browser, ScreenRecorder } from 'puppeteer';
+import { promises as fs } from 'fs';
+import { Page, Browser } from 'puppeteer';
 import { ConfigsService } from '../../../core/configs/configs.service';
 import { RecordingRepositoryService } from '../.././../core/repository/recording/recording-repository.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
+import { RunRecorder } from './run-recorder';
 
 const CLOSE_TIMEOUT_MS = 10_000;
-const execFileAsync = promisify(execFile);
-
-type RecordingOutput = {
-  file: string;
-  output: WriteStream;
-  ffmpegPath: string;
-};
 
 @Injectable()
 export class PuppeteerUtilsService {
   private readonly logger = new Logger(PuppeteerUtilsService.name);
   private readonly recorderAbortListeners = new WeakMap<
-    ScreenRecorder,
+    RunRecorder,
     { signal: AbortSignal; listener: () => void }
-  >();
-  private readonly recordingOutputs = new WeakMap<
-    ScreenRecorder,
-    RecordingOutput
   >();
 
   constructor(
@@ -93,11 +80,7 @@ export class PuppeteerUtilsService {
     }
   }
 
-  async cleanup(
-    browser: Browser,
-    page: Page,
-    recorder?: ScreenRecorder | null
-  ) {
+  async cleanup(browser: Browser, page: Page, recorder?: RunRecorder | null) {
     await this.stopRecorder(recorder);
 
     if (page) {
@@ -148,18 +131,17 @@ export class PuppeteerUtilsService {
     projectSlug: string,
     eventId: string,
     signal?: AbortSignal
-  ): Promise<ScreenRecorder> {
+  ): Promise<RunRecorder> {
     if (signal?.aborted) {
       throw new Error('Recording start aborted');
     }
 
-    let recorder: ScreenRecorder | null = null;
+    let recorder: RunRecorder | null = null;
     const abortListener = async () => {
       if (recorder) {
         await this.stopRecorder(recorder);
       }
     };
-    signal?.addEventListener('abort', abortListener);
 
     const folderPath =
       await this.folderPathService.getInspectionEventFolderPath(
@@ -189,41 +171,12 @@ export class PuppeteerUtilsService {
     }
 
     await page.bringToFront();
+    // Registered here so every failure below removes it again. An abort
+    // that arrives before this is caught by the aborted check after start.
+    signal?.addEventListener('abort', abortListener);
     try {
-      const ffmpegPath = require('ffmpeg-static');
-
-      // Ensure current viewport has even dimensions to avoid ffmpeg errors
-      try {
-        const vp = page.viewport?.();
-        const toEven = (n: number) => (n % 2 === 0 ? n : n + 1);
-        if (vp && (vp.width % 2 !== 0 || vp.height % 2 !== 0)) {
-          const evenWidth = toEven(vp.width);
-          const evenHeight = toEven(vp.height);
-          this.logger.debug(
-            `Normalizing viewport to even dimensions for recording: ${vp.width}x${vp.height} -> ${evenWidth}x${evenHeight}`
-          );
-          await page.setViewport({
-            width: evenWidth,
-            height: evenHeight,
-            deviceScaleFactor: 1
-          });
-        }
-      } catch (e) {
-        this.logger.debug(
-          `Failed to normalize viewport before recording (non-fatal): ${e}`
-        );
-      }
-
-      recorder = await page.screencast({ ffmpegPath });
-      // Write the file here instead of through screencast({ path }), so
-      // stopRecorder can wait for the last bytes before finalizing it.
-      const output = createWriteStream(outputFile);
-      recorder.pipe(output);
-      this.recordingOutputs.set(recorder, {
-        file: outputFile,
-        output,
-        ffmpegPath
-      });
+      const ffmpegPath: string = require('ffmpeg-static');
+      recorder = await RunRecorder.start(page, outputFile, ffmpegPath);
 
       if (signal) {
         this.recorderAbortListeners.set(recorder, {
@@ -246,7 +199,7 @@ export class PuppeteerUtilsService {
     return recorder;
   }
 
-  async stopRecorder(recorder?: ScreenRecorder | null) {
+  async stopRecorder(recorder?: RunRecorder | null) {
     if (!recorder) return;
 
     const registration = this.recorderAbortListeners.get(recorder);
@@ -255,57 +208,8 @@ export class PuppeteerUtilsService {
       this.recorderAbortListeners.delete(recorder);
     }
 
-    try {
-      await recorder.stop();
-    } catch (err) {
-      this.logger.warn(`Error stopping recorder: ${err}`);
-    }
-
-    const recording = this.recordingOutputs.get(recorder);
-    if (recording) {
-      this.recordingOutputs.delete(recorder);
-      await this.finalizeRecording(recording);
-    }
-  }
-
-  /**
-   * screencast() streams ffmpeg's output, so the WebM has no duration or
-   * cues: players cannot show its length or seek. Remuxing it without
-   * re-encoding writes both.
-   */
-  private async finalizeRecording({
-    file,
-    output,
-    ffmpegPath
-  }: RecordingOutput) {
-    const flushed = await this.settleWithin(
-      finished(output),
-      'writing the recording'
-    );
-    if (!flushed) return;
-
-    const remuxed = `${file}.remux.webm`;
-    try {
-      await this.remuxRecording(ffmpegPath, file, remuxed);
-      await fs.rename(remuxed, file);
-    } catch (err) {
-      this.logger.warn(`Kept the recording without seek data: ${err}`);
-    } finally {
-      await fs.rm(remuxed, { force: true }).catch(() => undefined);
-    }
-  }
-
-  private async remuxRecording(ffmpegPath: string, from: string, to: string) {
-    await execFileAsync(ffmpegPath, [
-      '-v',
-      'error',
-      '-y',
-      '-i',
-      from,
-      '-c',
-      'copy',
-      to
-    ]);
+    // stop() never throws; a failed recording is logged by the recorder.
+    await recorder.stop();
   }
 
   /**

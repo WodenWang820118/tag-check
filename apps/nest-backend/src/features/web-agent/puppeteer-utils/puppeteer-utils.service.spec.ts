@@ -1,34 +1,20 @@
-import { mkdtemp, readFile, readdir, rm, writeFile } from 'fs/promises';
+import { mkdtemp, readdir, rm, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { PassThrough } from 'stream';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-  type Mock
-} from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PuppeteerUtilsService } from './puppeteer-utils.service';
+import { RunRecorder } from './run-recorder';
 
-/** A screencast stream that ends when stopped, like ScreenRecorder. */
+/** Stands in for a RunRecorder: only stop() is used by the service. */
 function fakeRecorder() {
-  const stream = new PassThrough();
-  return Object.assign(stream, {
-    stop: vi.fn(async () => {
-      stream.end();
-    })
-  });
+  return { stop: vi.fn().mockResolvedValue(undefined) };
 }
+
+const page = { bringToFront: vi.fn() };
 
 describe('PuppeteerUtilsService recorder lifecycle', () => {
   let tempDir: string;
   let service: PuppeteerUtilsService;
-  let remux: Mock<
-    (ffmpegPath: string, from: string, to: string) => Promise<void>
-  >;
 
   beforeEach(async () => {
     tempDir = await mkdtemp(join(tmpdir(), 'tag-check-puppeteer-'));
@@ -39,11 +25,6 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
         getInspectionEventFolderPath: vi.fn().mockResolvedValue(tempDir)
       } as never
     );
-    // Stands in for ffmpeg: copies the recording and marks the copy.
-    remux = vi.fn(async (_ffmpeg: string, from: string, to: string) => {
-      await writeFile(to, `${await readFile(from, 'utf8')} +cues`);
-    });
-    service['remuxRecording'] = remux;
   });
 
   afterEach(async () => {
@@ -51,14 +32,10 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     vi.restoreAllMocks();
   });
 
-  it('does not start screencast when the abort signal is already aborted', async () => {
+  it('does not start recording when the abort signal is already aborted', async () => {
     const controller = new AbortController();
     controller.abort();
-    const page = {
-      bringToFront: vi.fn(),
-      viewport: vi.fn(() => ({ width: 1400, height: 900 })),
-      screencast: vi.fn()
-    };
+    const start = vi.spyOn(RunRecorder, 'start');
 
     await expect(
       service.startRecorder(
@@ -68,23 +45,42 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
         controller.signal
       )
     ).rejects.toThrow(/aborted/i);
-    expect(page.screencast).not.toHaveBeenCalled();
+    expect(start).not.toHaveBeenCalled();
   });
 
-  it('stops and rejects when abort happens while screencast is starting', async () => {
+  it('records the event folder recording.webm with the bundled ffmpeg, replacing an old file', async () => {
+    const file = join(tempDir, 'recording.webm');
+    await writeFile(file, 'previous run');
+    const recorder = fakeRecorder();
+    const start = vi
+      .spyOn(RunRecorder, 'start')
+      .mockResolvedValue(recorder as never);
+
+    const result = await service.startRecorder(
+      page as never,
+      'project',
+      'event'
+    );
+
+    expect(result).toBe(recorder);
+    expect(start).toHaveBeenCalledWith(
+      page,
+      file,
+      expect.stringMatching(/ffmpeg/i)
+    );
+    expect(await readdir(tempDir)).toEqual([]);
+  });
+
+  it('stops and rejects when abort happens while recording is starting', async () => {
     const controller = new AbortController();
     const recorder = fakeRecorder();
-    let resolveScreencast!: (value: typeof recorder) => void;
-    const page = {
-      bringToFront: vi.fn(),
-      viewport: vi.fn(() => ({ width: 1400, height: 900 })),
-      screencast: vi.fn(
-        () =>
-          new Promise<typeof recorder>((resolve) => {
-            resolveScreencast = resolve;
-          })
-      )
-    };
+    let resolveStart!: (value: typeof recorder) => void;
+    const start = vi.spyOn(RunRecorder, 'start').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveStart = resolve as never;
+        })
+    );
 
     const promise = service.startRecorder(
       page as never,
@@ -92,9 +88,9 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
       'event',
       controller.signal
     );
-    await vi.waitFor(() => expect(page.screencast).toHaveBeenCalled());
+    await vi.waitFor(() => expect(start).toHaveBeenCalled());
     controller.abort();
-    resolveScreencast(recorder);
+    resolveStart(recorder);
 
     await expect(promise).rejects.toThrow(/aborted/i);
     expect(recorder.stop).toHaveBeenCalledTimes(1);
@@ -104,11 +100,7 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     const controller = new AbortController();
     const removeListener = vi.spyOn(controller.signal, 'removeEventListener');
     const recorder = fakeRecorder();
-    const page = {
-      bringToFront: vi.fn(),
-      viewport: vi.fn(() => ({ width: 1400, height: 900 })),
-      screencast: vi.fn().mockResolvedValue(recorder)
-    };
+    vi.spyOn(RunRecorder, 'start').mockResolvedValue(recorder as never);
 
     const result = await service.startRecorder(
       page as never,
@@ -126,11 +118,7 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
   it('stops the returned recorder if the abort signal fires after startRecorder returns', async () => {
     const controller = new AbortController();
     const recorder = fakeRecorder();
-    const page = {
-      bringToFront: vi.fn(),
-      viewport: vi.fn(() => ({ width: 1400, height: 900 })),
-      screencast: vi.fn().mockResolvedValue(recorder)
-    };
+    vi.spyOn(RunRecorder, 'start').mockResolvedValue(recorder as never);
 
     await service.startRecorder(
       page as never,
@@ -141,25 +129,14 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     controller.abort();
 
     await vi.waitFor(() => expect(recorder.stop).toHaveBeenCalledTimes(1));
-    // The abort path finalizes the file too; let it finish before cleanup.
-    // vi.waitFor gives up after 1 s by default, too soon under parallel runs.
-    await vi.waitFor(
-      async () =>
-        expect(await readFile(join(tempDir, 'recording.webm'), 'utf8')).toBe(
-          ' +cues'
-        ),
-      { timeout: 10_000 }
-    );
   });
 
-  it('removes the abort listener when screencast fails before returning a recorder', async () => {
+  it('removes the abort listener when the recorder fails to start', async () => {
     const controller = new AbortController();
     const removeListener = vi.spyOn(controller.signal, 'removeEventListener');
-    const page = {
-      bringToFront: vi.fn(),
-      viewport: vi.fn(() => ({ width: 1400, height: 900 })),
-      screencast: vi.fn().mockRejectedValue(new Error('ffmpeg failed'))
-    };
+    vi.spyOn(RunRecorder, 'start').mockRejectedValue(
+      new Error('screencast failed')
+    );
 
     await expect(
       service.startRecorder(
@@ -168,62 +145,42 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
         'event',
         controller.signal
       )
-    ).rejects.toThrow('ffmpeg failed');
+    ).rejects.toThrow('screencast failed');
     expect(removeListener).toHaveBeenCalledWith('abort', expect.any(Function));
   });
 
+  it('leaves no abort listener when the recording folder cannot be prepared', async () => {
+    const controller = new AbortController();
+    const addListener = vi.spyOn(controller.signal, 'addEventListener');
+    const failing = new PuppeteerUtilsService(
+      { getBROWSER_ARGS: vi.fn(() => []) } as never,
+      { getRecordingDetails: vi.fn() } as never,
+      {
+        getInspectionEventFolderPath: vi
+          .fn()
+          .mockRejectedValue(new Error('no project folder'))
+      } as never
+    );
+
+    await expect(
+      failing.startRecorder(
+        page as never,
+        'project',
+        'event',
+        controller.signal
+      )
+    ).rejects.toThrow('no project folder');
+    expect(addListener).not.toHaveBeenCalled();
+  });
+
   it('stops only the recorder passed to stopRecorder', async () => {
-    const firstRecorder = { stop: vi.fn().mockResolvedValue(undefined) };
-    const secondRecorder = { stop: vi.fn().mockResolvedValue(undefined) };
+    const firstRecorder = fakeRecorder();
+    const secondRecorder = fakeRecorder();
 
     await service.stopRecorder(firstRecorder as never);
 
     expect(firstRecorder.stop).toHaveBeenCalledTimes(1);
     expect(secondRecorder.stop).not.toHaveBeenCalled();
-  });
-
-  it('writes the screencast to recording.webm and remuxes it in place when stopped', async () => {
-    const recorder = fakeRecorder();
-    const page = {
-      bringToFront: vi.fn(),
-      viewport: vi.fn(() => ({ width: 1400, height: 900 })),
-      screencast: vi.fn().mockResolvedValue(recorder)
-    };
-    const file = join(tempDir, 'recording.webm');
-
-    await service.startRecorder(page as never, 'project', 'event');
-    recorder.write('frames');
-    await service.stopRecorder(recorder as never);
-
-    expect(page.screencast).toHaveBeenCalledWith({
-      ffmpegPath: expect.any(String)
-    });
-    expect(remux).toHaveBeenCalledWith(
-      expect.any(String),
-      file,
-      `${file}.remux.webm`
-    );
-    expect(await readFile(file, 'utf8')).toBe('frames +cues');
-    expect(await readdir(tempDir)).toEqual(['recording.webm']);
-  });
-
-  it('keeps the streamed recording when the remux fails', async () => {
-    remux.mockRejectedValue(new Error('ffmpeg exited with code 1'));
-    const recorder = fakeRecorder();
-    const page = {
-      bringToFront: vi.fn(),
-      viewport: vi.fn(() => ({ width: 1400, height: 900 })),
-      screencast: vi.fn().mockResolvedValue(recorder)
-    };
-
-    await service.startRecorder(page as never, 'project', 'event');
-    recorder.write('frames');
-    await service.stopRecorder(recorder as never);
-
-    expect(await readFile(join(tempDir, 'recording.webm'), 'utf8')).toBe(
-      'frames'
-    );
-    expect(await readdir(tempDir)).toEqual(['recording.webm']);
   });
 
   it('treats stopRecorder without a recorder as a no-op', async () => {
