@@ -15,6 +15,42 @@ in Puppeteer, captures `dataLayer` pushes and GA4 requests, and checks them
 against specs built from a GTM container export. The project list is in
 [README.md](README.md#workspace-topology).
 
+## Glossary
+
+The UI, the API and the entities use different words for the same things.
+
+| UI               | Code                                                            | Meaning                                                                                                                                                                                                    |
+| ---------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project          | `ProjectEntity`, `projectSlug`                                  | One website under test, with its settings: website URL, pre-loading values, GTM preview URL, authentication, browser.                                                                                      |
+| Test             | test event: `TestEventEntity`, `eventId`                        | One GA4 event to check. Owns a Chrome Recorder **recording** (the journey to replay), a **spec** (`SpecEntity`, the expected `dataLayer` push) and an optional item definition (`ItemDefEntity`).          |
+| Run              | inspection: `inspectSingleEvent`, `singleEventInspectionRecipe` | One replay of a test in Puppeteer. Makes two checks: the **dataLayer check** (`passed`) and the **request check** (`requestPassed`: a GA4 `/g/collect` request for the event, sent to the measurement ID). |
+| Result           | `TestEventDetailEntity`                                         | One row per run with both check results, the raw request and the captured `dataLayer`. `TestEventEntity.latestTestEventDetailId` points at the latest.                                                     |
+| Media            | `TestImageEntity`, `recording.webm`                             | The run's screenshot (one row per run; the API serves the latest) and its screen recording (`inspection_results/<eventId>/recording.webm`, replaced by every run).                                         |
+| Report           | `IReportDetails`; `reports`, `file-reports` controllers         | A test's Reports tab, the Reports page and the spreadsheet export. `GET /reports/:projectSlug` flattens each test's latest result into `passed`, `requestPassed` and `hasRecording`.                       |
+| Status           | `getRunStatus` (`report-detail.contracts.ts`)                   | Not run / Passed / Partial / Failed. A test has run once `updatedAt > createdAt`.                                                                                                                          |
+| Accompanied mode | `gtm-operator`                                                  | Runs a test through GTM Preview (Tag Assistant) instead of opening the site directly.                                                                                                                      |
+
+## How a run flows
+
+```text
+ng-frontend   Tests page: run-test-<event>
+              TestRunningFacadeService.chooseAndRunTest
+                accompanied mode  POST /datalayer/gtm-operator/:projectSlug/:eventId
+                otherwise         POST /datalayer/:projectSlug/:eventId
+nest-backend  controllers/gtm-operator      -> features/gtm-operator (opens GTM Preview first)
+              controllers/data-layer        -> features/event-inspection (SingleEventInspectionService)
+              features/web-agent/puppeteer-utils: browser, pre-loading values, screen recorder
+              features/event-inspection-pipeline: singleEventInspectionRecipe
+                features/inspector       replays the recording (features/web-agent), validates
+                                         the dataLayer against the spec
+                web-agent/action/request-interceptor  captures GA4 requests (CDP Fetch)
+                features/request-processor            parses /g/collect payloads
+              core/repository: TestEventDetail and TestImage rows; recording.webm on disk
+              core/events-gateway: progressUpdate over WebSocket :7002 (progress chart)
+ng-frontend   the run's HTTP response updates the table row; the report page loads
+              GET /reports/:projectSlug/:eventId, /videos/..., /projects/images/...
+```
+
 ## Boundaries
 
 Every `project.json` has a `scope:*` and a `type:*` tag.
@@ -47,9 +83,39 @@ service; don't rely on another module re-exporting it.
   `data-testid` hooks on `ng-gtm-sample` and run against
   https://ng-gtm-sample.vercel.app. Keep those hooks stable or re-record.
 - Lint with oxlint and format with oxfmt. The workspace has no ESLint.
+- `data-testid` hooks are kebab-case, area first, with the GA4 event name or
+  project slug as the per-row suffix (`run-test-add_to_cart`,
+  `project-open-<slug>`).
+- Test frontend code that reads an API response with the JSON the endpoint
+  returns (dates are strings), not a hand-built object cast to the type. A
+  mapper once read a nested field the API never sent, and its specs still
+  passed.
 
 ## Pitfalls
 
 - In Git Bash on Windows, unset `NX_WORKSPACE_ROOT_PATH` when its drive-letter
   case differs from the shell's working directory. The `@analogjs` Angular test
   setup fails otherwise.
+- The nest-backend bundle targets ES5 (rspack + swc without `jsc.target`).
+  Functions passed to `page.evaluate` or `evaluateOnNewDocument` are compiled
+  with swc helpers that do not exist in the page, so pass source strings.
+  Raising the target breaks TypeORM entity initialization.
+- Angular 22 does not sanitize `img`, `source` or `video` `src`. Bind `blob:`
+  URLs as plain strings; a `SafeUrl` from `bypassSecurityTrustUrl` is rendered
+  as the text "SafeValue must use [property]=binding".
+- Desktop releases: see [docs/desktop-release.md](docs/desktop-release.md).
+  Every code merge to `main` runs the release workflow; bump `VERSION` before
+  a release merge. CI never packages the desktop app, so run
+  `pnpm run tauri:release:windows` locally after dependency or tooling
+  upgrades.
+- pnpm 11 passes a `--` separator through to scripts. Run
+  `pnpm run tauri:release describe`, not `pnpm run tauri:release -- describe`.
+- ng-tag-build's initial bundle has about 1.5 kB of headroom under its 1 MB
+  error budget, and `libs/shared-styles` counts against it. Prefer
+  `mat.*-overrides` mixins with only the tokens you change over
+  `mat.*-color` / `mat.*-theme`.
+- The pre-commit hook runs `nx affected` tests six at a time. ng-frontend,
+  ng-gtm-sample, data-access and nest-backend tests occasionally fail under
+  that load; if they pass alone, retry the commit.
+- Headful GTM runs (accompanied mode) leave their Chromium window open on
+  purpose, for inspection. Close it yourself.
