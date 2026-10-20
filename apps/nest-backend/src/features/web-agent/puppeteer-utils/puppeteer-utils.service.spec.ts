@@ -1,12 +1,24 @@
-import { mkdtemp, rm } from 'fs/promises';
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
+import { PassThrough } from 'stream';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PuppeteerUtilsService } from './puppeteer-utils.service';
+
+/** A screencast stream that ends when stopped, like ScreenRecorder. */
+function fakeRecorder() {
+  const stream = new PassThrough();
+  return Object.assign(stream, {
+    stop: vi.fn(async () => {
+      stream.end();
+    })
+  });
+}
 
 describe('PuppeteerUtilsService recorder lifecycle', () => {
   let tempDir: string;
   let service: PuppeteerUtilsService;
+  let remux: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     tempDir = await mkdtemp(join(tmpdir(), 'tag-check-puppeteer-'));
@@ -17,6 +29,11 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
         getInspectionEventFolderPath: vi.fn().mockResolvedValue(tempDir)
       } as any
     );
+    // Stands in for ffmpeg: copies the recording and marks the copy.
+    remux = vi.fn(async (_ffmpeg: string, from: string, to: string) => {
+      await writeFile(to, `${await readFile(from, 'utf8')} +cues`);
+    });
+    (service as any).remuxRecording = remux;
   });
 
   afterEach(async () => {
@@ -46,7 +63,7 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
 
   it('stops and rejects when abort happens while screencast is starting', async () => {
     const controller = new AbortController();
-    const recorder = { stop: vi.fn().mockResolvedValue(undefined) };
+    const recorder = fakeRecorder();
     let resolveScreencast!: (value: typeof recorder) => void;
     const page = {
       bringToFront: vi.fn(),
@@ -76,7 +93,7 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
   it('returns a live recorder on success and unregisters the abort listener when stopped', async () => {
     const controller = new AbortController();
     const removeListener = vi.spyOn(controller.signal, 'removeEventListener');
-    const recorder = { stop: vi.fn().mockResolvedValue(undefined) };
+    const recorder = fakeRecorder();
     const page = {
       bringToFront: vi.fn(),
       viewport: vi.fn(() => ({ width: 1400, height: 900 })),
@@ -98,7 +115,7 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
 
   it('stops the returned recorder if the abort signal fires after startRecorder returns', async () => {
     const controller = new AbortController();
-    const recorder = { stop: vi.fn().mockResolvedValue(undefined) };
+    const recorder = fakeRecorder();
     const page = {
       bringToFront: vi.fn(),
       viewport: vi.fn(() => ({ width: 1400, height: 900 })),
@@ -114,6 +131,12 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     controller.abort();
 
     await vi.waitFor(() => expect(recorder.stop).toHaveBeenCalledTimes(1));
+    // The abort path finalizes the file too; let it finish before cleanup.
+    await vi.waitFor(async () =>
+      expect(await readFile(join(tempDir, 'recording.webm'), 'utf8')).toBe(
+        ' +cues'
+      )
+    );
   });
 
   it('removes the abort listener when screencast fails before returning a recorder', async () => {
@@ -144,6 +167,50 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
 
     expect(firstRecorder.stop).toHaveBeenCalledTimes(1);
     expect(secondRecorder.stop).not.toHaveBeenCalled();
+  });
+
+  it('writes the screencast to recording.webm and remuxes it in place when stopped', async () => {
+    const recorder = fakeRecorder();
+    const page = {
+      bringToFront: vi.fn(),
+      viewport: vi.fn(() => ({ width: 1400, height: 900 })),
+      screencast: vi.fn().mockResolvedValue(recorder)
+    };
+    const file = join(tempDir, 'recording.webm');
+
+    await (service as any).startRecorder(page, 'project', 'event');
+    recorder.write('frames');
+    await (service as any).stopRecorder(recorder);
+
+    expect(page.screencast).toHaveBeenCalledWith({
+      ffmpegPath: expect.any(String)
+    });
+    expect(remux).toHaveBeenCalledWith(
+      expect.any(String),
+      file,
+      `${file}.remux.webm`
+    );
+    expect(await readFile(file, 'utf8')).toBe('frames +cues');
+    expect(await readdir(tempDir)).toEqual(['recording.webm']);
+  });
+
+  it('keeps the streamed recording when the remux fails', async () => {
+    remux.mockRejectedValue(new Error('ffmpeg exited with code 1'));
+    const recorder = fakeRecorder();
+    const page = {
+      bringToFront: vi.fn(),
+      viewport: vi.fn(() => ({ width: 1400, height: 900 })),
+      screencast: vi.fn().mockResolvedValue(recorder)
+    };
+
+    await (service as any).startRecorder(page, 'project', 'event');
+    recorder.write('frames');
+    await (service as any).stopRecorder(recorder);
+
+    expect(await readFile(join(tempDir, 'recording.webm'), 'utf8')).toBe(
+      'frames'
+    );
+    expect(await readdir(tempDir)).toEqual(['recording.webm']);
   });
 
   it('treats stopRecorder without a recorder as a no-op', async () => {

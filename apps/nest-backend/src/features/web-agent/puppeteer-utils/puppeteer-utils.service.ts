@@ -1,13 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
 import { join, dirname } from 'path';
-import { promises as fs } from 'fs';
+import { createWriteStream, promises as fs, WriteStream } from 'fs';
+import { execFile } from 'child_process';
+import { finished } from 'stream/promises';
+import { promisify } from 'util';
 import { Page, Browser, ScreenRecorder } from 'puppeteer';
 import { ConfigsService } from '../../../core/configs/configs.service';
 import { RecordingRepositoryService } from '../.././../core/repository/recording/recording-repository.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 
 const CLOSE_TIMEOUT_MS = 10_000;
+const execFileAsync = promisify(execFile);
+
+type RecordingOutput = {
+  file: string;
+  output: WriteStream;
+  ffmpegPath: string;
+};
 
 @Injectable()
 export class PuppeteerUtilsService {
@@ -15,6 +25,10 @@ export class PuppeteerUtilsService {
   private readonly recorderAbortListeners = new WeakMap<
     ScreenRecorder,
     { signal: AbortSignal; listener: () => void }
+  >();
+  private readonly recordingOutputs = new WeakMap<
+    ScreenRecorder,
+    RecordingOutput
   >();
 
   constructor(
@@ -200,9 +214,15 @@ export class PuppeteerUtilsService {
         );
       }
 
-      recorder = await page.screencast({
-        ffmpegPath: ffmpegPath,
-        path: `${recordingPath}.webm`
+      recorder = await page.screencast({ ffmpegPath });
+      // Write the file here instead of through screencast({ path }), so
+      // stopRecorder can wait for the last bytes before finalizing it.
+      const output = createWriteStream(outputFile);
+      recorder.pipe(output);
+      this.recordingOutputs.set(recorder, {
+        file: outputFile,
+        output,
+        ffmpegPath
       });
 
       if (signal) {
@@ -240,6 +260,52 @@ export class PuppeteerUtilsService {
     } catch (err) {
       this.logger.warn(`Error stopping recorder: ${err}`);
     }
+
+    const recording = this.recordingOutputs.get(recorder);
+    if (recording) {
+      this.recordingOutputs.delete(recorder);
+      await this.finalizeRecording(recording);
+    }
+  }
+
+  /**
+   * screencast() streams ffmpeg's output, so the WebM has no duration or
+   * cues: players cannot show its length or seek. Remuxing it without
+   * re-encoding writes both.
+   */
+  private async finalizeRecording({
+    file,
+    output,
+    ffmpegPath
+  }: RecordingOutput) {
+    const flushed = await this.settleWithin(
+      finished(output),
+      'writing the recording'
+    );
+    if (!flushed) return;
+
+    const remuxed = `${file}.remux.webm`;
+    try {
+      await this.remuxRecording(ffmpegPath, file, remuxed);
+      await fs.rename(remuxed, file);
+    } catch (err) {
+      this.logger.warn(`Kept the recording without seek data: ${err}`);
+    } finally {
+      await fs.rm(remuxed, { force: true }).catch(() => undefined);
+    }
+  }
+
+  private async remuxRecording(ffmpegPath: string, from: string, to: string) {
+    await execFileAsync(ffmpegPath, [
+      '-v',
+      'error',
+      '-y',
+      '-i',
+      from,
+      '-c',
+      'copy',
+      to
+    ]);
   }
 
   /**
