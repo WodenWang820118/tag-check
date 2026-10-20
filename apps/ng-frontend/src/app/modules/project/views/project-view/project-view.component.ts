@@ -1,15 +1,20 @@
 import {
   Component,
+  inject,
   signal,
   ViewEncapsulation,
   ChangeDetectionStrategy
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { BreakpointObserver } from '@angular/cdk/layout';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
-import { timer } from 'rxjs';
+import { map } from 'rxjs';
 import { IReportDetails, Project, ProjectSetting } from '@utils';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
+
+const WIDE_LAYOUT_QUERY = '(min-width: 1024px)';
 
 @Component({
   selector: 'app-project-view',
@@ -27,23 +32,24 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
         [settings]="project()"
         [snav]="snav"
         [projects]="projectInfo()"
-        (changeProject)="snav.close(); onChangeProject($event, snav)"
+        (changeProject)="onChangeProject($event, snav)"
       ></app-toolbar>
 
+      <!-- Wide screens keep the menu beside the content; narrow ones slide it over. -->
       <mat-sidenav-container
         class="project-view__sidenav-container"
-        [hasBackdrop]="true"
+        [hasBackdrop]="!isWide()"
         (backdropClick)="snav.close()"
       >
         <mat-sidenav
           #snav
-          [opened]="isProjectRoute()"
-          [mode]="'over'"
+          [opened]="isWide()"
+          [mode]="isWide() ? 'side' : 'over'"
           fixedTopGap="56"
         >
           <app-side-nav-list
             [snav]="snav"
-            (menuClick)="snav.toggle()"
+            (menuClick)="closeOverlayMenu(snav)"
           ></app-side-nav-list>
         </mat-sidenav>
         <mat-sidenav-content>
@@ -62,7 +68,15 @@ export class ProjectViewComponent {
   project = signal<ProjectSetting>({} as ProjectSetting);
   projectInfo = signal<Project[]>([]);
   reports = signal<IReportDetails[]>([]);
-  isProjectRoute = signal<boolean>(false);
+  private readonly breakpointObserver = inject(BreakpointObserver);
+  readonly isWide = toSignal(
+    this.breakpointObserver
+      .observe(WIDE_LAYOUT_QUERY)
+      .pipe(map((state) => state.matches)),
+    {
+      initialValue: this.breakpointObserver.isMatched(WIDE_LAYOUT_QUERY)
+    }
+  );
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -76,21 +90,17 @@ export class ProjectViewComponent {
       this.projectInfo.set(projectInfo);
       this.reports.set(report);
     });
-
-    // Subscribe to route parameters to check if we're in a project route
-    this.route.params.subscribe((params) => {
-      const urlParts = this.router.url.split('/');
-      this.isProjectRoute.set(
-        urlParts.length === 3 && // ['', 'projects', 'projectSlug']
-          urlParts[1] === 'projects'
-      );
-    });
   }
 
   onChangeProject(projectSlug: string, snav: MatSidenav) {
+    this.closeOverlayMenu(snav);
     this.router.navigate(['/projects', projectSlug]);
-    timer(700).subscribe(() => {
-      snav.open();
-    });
+  }
+
+  /** The side-by-side menu stays open; the overlay closes after a choice. */
+  closeOverlayMenu(snav: MatSidenav) {
+    if (!this.isWide()) {
+      snav.close();
+    }
   }
 }

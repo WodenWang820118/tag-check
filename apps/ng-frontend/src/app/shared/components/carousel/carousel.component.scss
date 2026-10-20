@@ -1,18 +1,23 @@
+// Screenshots and recordings share the browser viewport's shape, so the
+// frame keeps a similar ratio and letterboxes instead of cropping.
 .carousel {
   position: relative;
   width: 100%;
-  height: 400px;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
+  background: #111;
 }
 
 .carousel-container {
   display: flex;
+  height: 100%;
   transition: transform 0.5s ease-in-out;
 }
 
 .carousel-item {
   flex: 0 0 100%;
   display: none;
+  height: 100%;
 
   &.active {
     display: block;
@@ -20,9 +25,10 @@
 
   img,
   video {
+    display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
   .clickable {
     cursor: zoom-in;

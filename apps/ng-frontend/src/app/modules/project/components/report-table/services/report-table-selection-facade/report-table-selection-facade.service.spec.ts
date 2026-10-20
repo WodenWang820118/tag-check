@@ -59,12 +59,18 @@ describe('ReportTableSelectionFacadeService', () => {
     expect(service.checkboxLabel()).toBe('deselect all');
   });
 
-  it('checkboxLabel returns row-level deselect/select with 1-based position', () => {
-    const rows = [row(4)];
+  it('checkboxLabel names the row by its test name', () => {
+    const rows = [
+      { testName: 'GA4 event - add_to_cart', eventName: 'add_to_cart' } as Row
+    ];
     const { service, selection } = makeService(rows);
-    expect(service.checkboxLabel(rows[0])).toBe('select row 5');
+    expect(service.checkboxLabel(rows[0])).toBe(
+      'select GA4 event - add_to_cart'
+    );
     selection.set(new SelectionModel<Row>(true, [rows[0]]));
-    expect(service.checkboxLabel(rows[0])).toBe('deselect row 5');
+    expect(service.checkboxLabel(rows[0])).toBe(
+      'deselect GA4 event - add_to_cart'
+    );
   });
 
   it('isAllSelected returns false for an empty page', () => {

@@ -8,7 +8,6 @@ import {
   ChangeDetectionStrategy
 } from '@angular/core';
 import { CarouselItem, CarouselItemEnum } from '@utils';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MediaPreviewDialogComponent } from '../media-preview-dialog/media-preview-dialog.component';
 
@@ -21,17 +20,17 @@ import { MediaPreviewDialogComponent } from '../media-preview-dialog/media-previ
   styleUrls: ['./carousel.component.scss']
 })
 export class CarouselComponent implements OnDestroy {
-  private readonly sanitizer = inject(DomSanitizer);
   private readonly dialog = inject(MatDialog);
   private readonly objectUrls: string[] = [];
   imageBlob = input<Blob | undefined>(undefined);
   videoBlob = input<Blob | undefined>(undefined);
 
-  // Helper method to generate a safe URL from a Blob.
-  private getSafeUrl(blob: Blob): SafeUrl {
+  // Angular does not sanitize img/source src, so bind the blob: URL as a
+  // plain string: a SafeUrl would be set as the text "SafeValue must use...".
+  private getObjectUrl(blob: Blob): string {
     const objectUrl = URL.createObjectURL(blob);
     this.objectUrls.push(objectUrl);
-    return this.sanitizer.bypassSecurityTrustUrl(objectUrl);
+    return objectUrl;
   }
 
   imageType = CarouselItemEnum.Image;
@@ -44,18 +43,17 @@ export class CarouselComponent implements OnDestroy {
     if (imgBlob !== undefined) {
       items.push({
         type: CarouselItemEnum.Image,
-        url: this.getSafeUrl(imgBlob)
+        url: this.getObjectUrl(imgBlob)
       });
     }
 
     if (vidBlob !== undefined) {
       items.push({
         type: CarouselItemEnum.Video,
-        url: this.getSafeUrl(vidBlob)
+        url: this.getObjectUrl(vidBlob)
       });
     }
 
-    console.warn('items: ', items);
     return items;
   });
 

@@ -1,3 +1,4 @@
+import { HEADERS_METADATA } from '@nestjs/common/constants';
 import { describe, expect, it, vi } from 'vitest';
 import { VideosController } from './videos.controller';
 
@@ -15,5 +16,16 @@ describe('VideosController', () => {
       'evt-1'
     );
     expect(result).toBe('video-stream');
+  });
+
+  it('makes the browser revalidate the recording, which each run overwrites', () => {
+    const headers: { name: string; value: string }[] = Reflect.getMetadata(
+      HEADERS_METADATA,
+      VideosController.prototype.getVideos
+    );
+    expect(headers).toContainEqual({
+      name: 'Cache-Control',
+      value: 'no-cache'
+    });
   });
 });

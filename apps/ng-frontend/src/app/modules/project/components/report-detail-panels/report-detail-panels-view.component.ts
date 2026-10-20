@@ -16,6 +16,7 @@ import { EditableJsonPanelComponent } from './editable-json-panel.component';
     <div class="test-detail-panels">
       <mat-accordion class="headers-align" multi>
         <app-editable-json-panel
+          data-testid="panel-data-layer-spec"
           [state]="specPanel()"
           (toggleEdit)="specToggleEdit.emit()"
           (uploadRequested)="specUploadRequested.emit($event)"
@@ -28,6 +29,7 @@ import { EditableJsonPanelComponent } from './editable-json-panel.component';
         </app-editable-json-panel>
 
         <app-editable-json-panel
+          data-testid="panel-chrome-recording"
           [state]="recordingPanel()"
           (toggleEdit)="recordingToggleEdit.emit()"
           (uploadRequested)="recordingUploadRequested.emit($event)"
@@ -39,7 +41,7 @@ import { EditableJsonPanelComponent } from './editable-json-panel.component';
           </div>
         </app-editable-json-panel>
 
-        <mat-expansion-panel hideToggle>
+        <mat-expansion-panel hideToggle data-testid="panel-raw-request">
           <mat-expansion-panel-header>
             <mat-panel-title>Raw Request</mat-panel-title>
           </mat-expansion-panel-header>
@@ -52,7 +54,7 @@ import { EditableJsonPanelComponent } from './editable-json-panel.component';
           </mat-panel-description>
         </mat-expansion-panel>
 
-        <mat-expansion-panel hideToggle>
+        <mat-expansion-panel hideToggle data-testid="panel-data-layer">
           <mat-expansion-panel-header>
             <mat-panel-title>Data Layer</mat-panel-title>
           </mat-expansion-panel-header>
@@ -62,6 +64,7 @@ import { EditableJsonPanelComponent } from './editable-json-panel.component';
         </mat-expansion-panel>
 
         <app-editable-json-panel
+          data-testid="panel-item-definition"
           [state]="itemDefPanel()"
           (toggleEdit)="itemDefToggleEdit.emit()"
           (uploadRequested)="itemDefUploadRequested.emit($event)"

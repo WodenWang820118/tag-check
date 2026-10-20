@@ -2,7 +2,6 @@ import {
   Component,
   Inject,
   OnDestroy,
-  inject,
   ChangeDetectionStrategy
 } from '@angular/core';
 import {
@@ -13,13 +12,12 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import { CarouselItemEnum } from '@utils';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 export type MediaPreviewData = {
   type: CarouselItemEnum;
   // Prefer blob when available to manage object URL lifecycle locally.
   blob?: Blob;
-  url?: string | SafeUrl;
+  url?: string;
   alt?: string;
   caption?: string;
 };
@@ -50,13 +48,19 @@ export type MediaPreviewData = {
       </div>
       <div class="caption" *ngIf="data.caption">{{ data.caption }}</div>
       <div class="actions">
-        <button mat-stroked-button type="button" (click)="download()">
+        <button
+          mat-stroked-button
+          type="button"
+          data-testid="media-preview-download"
+          (click)="download()"
+        >
           Download
         </button>
         <button
           mat-raised-button
           color="primary"
           type="button"
+          data-testid="media-preview-close"
           (click)="close()"
         >
           Close
@@ -112,10 +116,10 @@ export type MediaPreviewData = {
 })
 export class MediaPreviewDialogComponent implements OnDestroy {
   mediaTypes = CarouselItemEnum;
-  private readonly sanitizer = inject(DomSanitizer);
   private objectUrl: string | null = null;
-  // Safe display URL used by template
-  displayUrl: string | SafeUrl | null = null;
+  // Angular does not sanitize img/source src, so bind the blob: URL as a
+  // plain string: a SafeUrl would be set as the text "SafeValue must use...".
+  displayUrl: string | null = null;
 
   constructor(
     private readonly dialogRef: MatDialogRef<MediaPreviewDialogComponent>,
@@ -123,7 +127,7 @@ export class MediaPreviewDialogComponent implements OnDestroy {
   ) {
     if (data.blob) {
       this.objectUrl = URL.createObjectURL(data.blob);
-      this.displayUrl = this.sanitizer.bypassSecurityTrustUrl(this.objectUrl);
+      this.displayUrl = this.objectUrl;
     } else if (data.url) {
       this.displayUrl = data.url;
     }
@@ -140,7 +144,7 @@ export class MediaPreviewDialogComponent implements OnDestroy {
       const dlUrl = this.objectUrl ?? URL.createObjectURL(this.data.blob);
       a.href = dlUrl;
     } else {
-      a.href = (this.data.url as string) ?? '';
+      a.href = this.data.url ?? '';
     }
     const ts = new Date().toISOString().replaceAll(/[:.]/g, '-');
     const base =

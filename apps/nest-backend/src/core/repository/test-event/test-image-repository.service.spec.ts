@@ -38,6 +38,15 @@ describe('TestImageRepositoryService', () => {
     );
   });
 
+  it('getBySlugAndEventId() returns the latest screenshot of re-run events', async () => {
+    const { service, repository } = build();
+    repository.findOne.mockResolvedValue({ id: 2 });
+    await service.getBySlugAndEventId('demo', 'evt');
+    expect(repository.findOne).toHaveBeenCalledWith(
+      expect.objectContaining({ order: { id: 'DESC' } })
+    );
+  });
+
   it('getBySlugAndEventIds() returns DTOs for all matching events', async () => {
     const { service, repository } = build();
     repository.find.mockResolvedValue([{ id: 1 }, { id: 2 }]);

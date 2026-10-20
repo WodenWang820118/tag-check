@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, tap } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 
 @Injectable({
@@ -19,9 +19,6 @@ export class ImageService {
         observe: 'response'
       })
       .pipe(
-        tap((response) => {
-          console.warn('response: ', response);
-        }),
         map((response) => {
           return {
             blob: response.body ?? new Blob()

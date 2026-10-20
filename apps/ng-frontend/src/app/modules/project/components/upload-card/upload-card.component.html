@@ -10,6 +10,7 @@
       color="primary"
       [disabled]="uploadingFileName() !== null"
       (click)="fileInput.click()"
+      data-testid="import-gtm-upload"
     >
       <mat-icon>cloud_upload</mat-icon>
       Upload
@@ -19,13 +20,14 @@
       (change)="onFileSelected($event)"
       #fileInput
       type="file"
+      data-testid="import-gtm-file"
       accept="application/json,.json"
     />
     @if (uploadingFileName(); as fileName) {
       <p>Importing {{ fileName }}…</p>
     }
     @if (summary(); as summary) {
-      <p>
+      <p data-testid="import-gtm-summary">
         Created {{ summary.created.length }} · Updated
         {{ summary.updated.length }} · Unchanged
         {{ summary.unchanged.length }} · Skipped {{ summary.skipped.length }}

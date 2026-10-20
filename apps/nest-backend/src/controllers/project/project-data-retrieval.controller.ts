@@ -26,6 +26,7 @@ export class ProjectDataRetrievalController {
 
   @Get('/images/:projectSlug/:eventId')
   @Header('Content-Type', 'image/png')
+  @Header('Cache-Control', 'no-cache')
   async readImage(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string
@@ -34,12 +35,12 @@ export class ProjectDataRetrievalController {
       projectSlug,
       eventId
     );
-    try {
-      return new StreamableFile(image.imageData);
-    } catch (error) {
-      Logger.error(error);
+    // A test that has not run yet has no screenshot: answer with an empty
+    // body, which the report shows as "No media available".
+    if (!image?.imageData) {
       return new StreamableFile(Buffer.from(''));
     }
+    return new StreamableFile(image.imageData);
   }
 
   @Get(':projectSlug')

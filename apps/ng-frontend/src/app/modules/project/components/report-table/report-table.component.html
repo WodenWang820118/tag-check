@@ -9,11 +9,16 @@
       <mat-icon class="pending-status" inline>hourglass_empty</mat-icon>
       <span>Not run</span>
     </div>
-    <div class="filters" aria-label="status filter">
+    <div
+      class="filters"
+      aria-label="status filter"
+      data-testid="status-filters"
+    >
       <button
         mat-stroked-button
         [color]="statusFilter === 'all' ? 'primary' : null"
         (click)="setStatusFilter('all')"
+        data-testid="status-filter-all"
       >
         All
       </button>
@@ -21,6 +26,7 @@
         mat-stroked-button
         [color]="statusFilter === 'notRun' ? 'primary' : null"
         (click)="setStatusFilter('notRun')"
+        data-testid="status-filter-not-run"
       >
         Not run
       </button>
@@ -28,6 +34,7 @@
         mat-stroked-button
         [color]="statusFilter === 'failed' ? 'primary' : null"
         (click)="setStatusFilter('failed')"
+        data-testid="status-filter-failed"
       >
         Failed
       </button>
@@ -35,6 +42,7 @@
         mat-stroked-button
         [color]="statusFilter === 'partial' ? 'primary' : null"
         (click)="setStatusFilter('partial')"
+        data-testid="status-filter-partial"
       >
         Partial
       </button>
@@ -42,12 +50,14 @@
         mat-stroked-button
         [color]="statusFilter === 'passed' ? 'primary' : null"
         (click)="setStatusFilter('passed')"
+        data-testid="status-filter-passed"
       >
         Passed
       </button>
     </div>
   </div>
   <table
+    data-testid="tests-table"
     mat-table
     [dataSource]="dataSource"
     [trackBy]="trackByEventId"
@@ -130,6 +140,7 @@
         <a
           style="text-decoration: none"
           [routerLink]="['./', element.eventId]"
+          [attr.data-testid]="'test-link-' + element.eventName"
           matBadge="bookmark_border"
           [matBadgeHidden]="!element.stopNavigation"
           matBadgeOverlap="false"
@@ -147,8 +158,26 @@
 
     <ng-container matColumnDef="status">
       <th mat-header-cell *matHeaderCellDef>Status</th>
-      <td mat-cell *matCellDef="let element">
+      <td
+        mat-cell
+        *matCellDef="let element"
+        [attr.data-testid]="'test-status-' + element.eventName"
+      >
         @if (
+          testRunningFacadeService.isRunningTest$() &&
+          testRunningFacadeService.eventRunningTest$() === element.eventId
+        ) {
+          <div class="status-icons" aria-label="Status: running">
+            <mat-chip-set aria-label="Status chips">
+              <mat-chip selected matTooltip="Status: Running">
+                <div class="flex items-center gap-1">
+                  <mat-icon inline>sync</mat-icon>
+                  <span class="ml-1">Running</span>
+                </div>
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        } @else if (
           element.updatedAt &&
           element.createdAt &&
           element.updatedAt > element.createdAt
@@ -274,6 +303,7 @@
             <button
               mat-icon-button
               aria-label="run test"
+              [attr.data-testid]="'run-test-' + element.eventName"
               (click)="runTest(element.eventId); $event.stopPropagation()"
             >
               <mat-icon>play_arrow</mat-icon>
@@ -303,6 +333,7 @@
       mat-row
       *matRowDef="let element; columns: columnsWithExpand"
       class="element-row"
+      [attr.data-testid]="'test-row-' + element.eventName"
     ></tr>
   </table>
   <mat-paginator

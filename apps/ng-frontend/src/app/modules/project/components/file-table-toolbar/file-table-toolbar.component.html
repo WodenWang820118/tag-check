@@ -5,6 +5,7 @@
     matTooltip="Delete"
     matTooltipPosition="above"
     aria-label="Delete"
+    data-testid="reports-delete"
     (click)="deleteSelected()"
     [disabled]="!hasSelection()"
   >
@@ -16,6 +17,7 @@
     matTooltip="Download"
     matTooltipPosition="above"
     aria-label="Download"
+    data-testid="reports-download"
     (click)="downloadSelected()"
     [disabled]="!hasSelection()"
   >
