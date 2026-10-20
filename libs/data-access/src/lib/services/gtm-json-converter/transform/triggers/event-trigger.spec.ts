@@ -5,7 +5,6 @@ import { CustomEventTriggerConfig, TriggerTypeEnum } from '@utils';
 
 describe('EventTrigger', () => {
   let service: EventTrigger;
-  let parameterUtils: ParameterUtils;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -13,7 +12,6 @@ describe('EventTrigger', () => {
     });
 
     service = TestBed.inject(EventTrigger);
-    parameterUtils = TestBed.inject(ParameterUtils);
   });
 
   it('should be created', () => {

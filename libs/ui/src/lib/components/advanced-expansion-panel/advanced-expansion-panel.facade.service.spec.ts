@@ -9,14 +9,26 @@ import { AdvancedExpansionPanelFacade } from './advanced-expansion-panel.facade.
 
 describe('AdvancedExpansionPanelFacade', () => {
   let svc: AdvancedExpansionPanelFacade;
-  let editorFacade: any;
-  let setup: any;
-  let esv: any;
+  let editorFacade: {
+    updateJsonBasedOnForm: ReturnType<typeof vi.fn>;
+    hasVideoTag: ReturnType<typeof vi.fn>;
+    hasScrollTag: ReturnType<typeof vi.fn>;
+    inputJsonContent: string;
+  };
+  let setup: {
+    setIncludeItemScopedVariables: ReturnType<typeof vi.fn>;
+    setGoogleTagName: ReturnType<typeof vi.fn>;
+    setMeasurementId: ReturnType<typeof vi.fn>;
+    setIsSendingEcommerceData: ReturnType<typeof vi.fn>;
+  };
+  let esv: { setEsvContent: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     editorFacade = {
-      updateJsonBasedOnForm: vi.fn((j: any) => JSON.stringify({ ...j, x: 1 })),
+      updateJsonBasedOnForm: vi.fn((j: Record<string, unknown>) =>
+        JSON.stringify({ ...j, x: 1 })
+      ),
       hasVideoTag: vi.fn(() => true),
       hasScrollTag: vi.fn(() => false),
       inputJsonContent: ''

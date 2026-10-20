@@ -5,25 +5,27 @@ import { EventSettingsVariable } from '@utils';
   providedIn: 'root'
 })
 export class EsvExtractService {
-  isEventSettingsVariable(obj: any): obj is EventSettingsVariable {
+  isEventSettingsVariable(obj: unknown): obj is EventSettingsVariable {
     // Check if obj is an object
     if (typeof obj !== 'object' || obj === null) {
       throw new TypeError('Input must be an object');
     }
+    const candidate = obj as Record<string, unknown>;
 
     // Check name property
-    if (typeof obj.name !== 'string') {
+    if (typeof candidate['name'] !== 'string') {
       throw new TypeError('name property must be a string');
     }
 
     // Check parameters property
-    if (!Array.isArray(obj.parameters)) {
+    const parameters = candidate['parameters'];
+    if (!Array.isArray(parameters)) {
       throw new TypeError('parameters must be an array');
     }
 
     // Validate each parameter object
-    for (let i = 0; i < obj.parameters.length; i++) {
-      const param = obj.parameters[i];
+    for (let i = 0; i < parameters.length; i++) {
+      const param: unknown = parameters[i];
       if (typeof param !== 'object' || param === null) {
         throw new TypeError(`parameters[${i}] must be an object`);
       }

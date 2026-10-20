@@ -3,7 +3,7 @@ import { isPlatformServer } from '@angular/common';
 import { ResolveFn } from '@angular/router';
 import { getLocaleConfig } from '../../../locale/locale-routing';
 import { MarkdownService } from 'ngx-markdown';
-import { firstValueFrom, from, map, Observable } from 'rxjs';
+import { firstValueFrom, from, map } from 'rxjs';
 
 const MARKDOWN_ASSET_ROOT = 'assets/markdown';
 const WORKSPACE_MARKDOWN_ROOT = [
@@ -123,12 +123,10 @@ async function loadServerMarkdown(localeSegments: string[], nodeName: string) {
   };
 }
 
-export const treeNodeResolver: ResolveFn<
-  Observable<{
-    fileName: string;
-    content: string;
-  }>
-> = (route) => {
+export const treeNodeResolver: ResolveFn<{
+  fileName: string;
+  content: string;
+}> = (route) => {
   const markdownService = inject(MarkdownService);
   const platformId = inject(PLATFORM_ID);
   const locale = getLocaleConfig(inject(LOCALE_ID)).assetSegment;

@@ -21,8 +21,7 @@ const mockActivatedRoute = {
 };
 
 const mockMarkdownService = {
-  getSource: (fileName: string) =>
-    of('# Test Content\n## Section 1\nContent here')
+  getSource: () => of('# Test Content\n## Section 1\nContent here')
 };
 
 const mockViewportScroller = {

@@ -7,11 +7,10 @@ import { ConstantVariable } from '../variables/constant-variable.service';
 import { EventSettingsVariableService } from '../variables/event-settings-variable.service';
 import { EventUtils } from '../../utils/event-utils.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import type { DataLayer, EventSettingsVariable, VariableConfig } from '@utils';
+import type { DataLayer, EventSettingsVariable } from '@utils';
 
 describe('VariableManager', () => {
   let service: VariableManager;
-  let eventUtils: EventUtils;
 
   const mockAccountId = 'acc-1';
   const mockContainerId = 'con-1';
@@ -31,7 +30,6 @@ describe('VariableManager', () => {
       ]
     });
     service = TestBed.inject(VariableManager);
-    eventUtils = TestBed.inject(EventUtils);
   });
 
   it('should be created', () => {

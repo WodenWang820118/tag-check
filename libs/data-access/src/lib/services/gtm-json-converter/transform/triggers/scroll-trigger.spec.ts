@@ -7,7 +7,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('scrollTrigger', () => {
   let service: ScrollTrigger;
-  let parameterUtils: ParameterUtils;
   let eventUtils: EventUtils;
   let mockScrollTriggerConfig: ScrollDepthTriggerConfig;
 
@@ -16,7 +15,6 @@ describe('scrollTrigger', () => {
       providers: [ScrollTrigger, ParameterUtils, EventUtils]
     });
     service = TestBed.inject(ScrollTrigger);
-    parameterUtils = TestBed.inject(ParameterUtils);
     eventUtils = TestBed.inject(EventUtils);
     mockScrollTriggerConfig = {
       accountId: 'test-account',

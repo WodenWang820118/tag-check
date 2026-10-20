@@ -1,13 +1,27 @@
 import { TestBed } from '@angular/core/testing';
 import { Dialog } from '@angular/cdk/dialog';
-import { of, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { XlsxProcessFacade } from './xlsx-facade.service';
 import { XlsxProcessService } from '../xlsx-process/xlsx-process.service';
 import { WebWorkerService } from '../web-worker/web-worker.service';
 
 describe('XlsxProcessFacade', () => {
   let svc: XlsxProcessFacade;
-  let xlsx: any;
+  let xlsx: {
+    setIsPreviewing: ReturnType<typeof vi.fn>;
+    setIsRenderingJson: ReturnType<typeof vi.fn>;
+    resetAllData: ReturnType<typeof vi.fn>;
+    loadXlsxFile: ReturnType<typeof vi.fn>;
+    getNumTotalEvents: ReturnType<typeof vi.fn>;
+    getNumParsedEvents: ReturnType<typeof vi.fn>;
+    isRenderingJson: boolean;
+    isPreviewing: boolean;
+    xlsxDisplayService: {
+      dataSource$: Observable<unknown>;
+      displayedDataSource$: ReturnType<typeof vi.fn>;
+    };
+    workbookService: { workbook$: ReturnType<typeof vi.fn> };
+  };
   let worker: { postMessage: ReturnType<typeof vi.fn> };
   let dialog: { open: ReturnType<typeof vi.fn> };
 
