@@ -114,8 +114,9 @@ service; don't rely on another module re-exporting it.
   error budget, and `libs/shared-styles` counts against it. Prefer
   `mat.*-overrides` mixins with only the tokens you change over
   `mat.*-color` / `mat.*-theme`.
-- The pre-commit hook runs `nx affected` tests six at a time. ng-frontend,
-  ng-gtm-sample, data-access and nest-backend tests occasionally fail under
-  that load; if they pass alone, retry the commit.
+- The pre-commit hook runs `nx affected` tests three at a time. At six,
+  vitest workers ran out of memory (`DataCloneError: ... out of memory`) and
+  timing-sensitive specs timed out. If a project fails only there but passes
+  alone, retry the commit.
 - Headful GTM runs (accompanied mode) leave their Chromium window open on
   purpose, for inspection. Close it yourself.
