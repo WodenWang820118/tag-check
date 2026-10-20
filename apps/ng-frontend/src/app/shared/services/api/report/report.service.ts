@@ -8,6 +8,7 @@ import {
   Spec,
   TestEvent,
   AbstractTestEvent,
+  ReportDetailResponse,
   StrictDataLayerEvent
 } from '@utils';
 import { environment } from '../../../../../environments/environment';
@@ -196,9 +197,9 @@ export class ReportService {
   getReportDetails(
     projectSlug: string,
     eventId: string
-  ): Observable<IReportDetails> {
+  ): Observable<ReportDetailResponse> {
     return this.http
-      .get<IReportDetails>(
+      .get<ReportDetailResponse>(
         `${environment.reportApiUrl}/${projectSlug}/${eventId}`,
         {
           context: new HttpContext().set(

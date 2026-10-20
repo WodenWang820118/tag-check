@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ReportMapperService } from './report-mapper.service';
-import type { AbstractTestEvent } from '@utils';
+import { REPORT_LIST_ITEM_SAMPLE, type AbstractTestEvent } from '@utils';
 
-// The body of GET /reports/:projectSlug as it arrives: dates are strings.
-function parseReports(json: string): AbstractTestEvent[] {
-  return JSON.parse(json) as AbstractTestEvent[];
+// One item of GET /reports/:projectSlug as it arrives over HTTP.
+function listItem(overrides: Record<string, unknown> = {}): AbstractTestEvent {
+  return JSON.parse(
+    JSON.stringify({ ...REPORT_LIST_ITEM_SAMPLE, ...overrides })
+  ) as AbstractTestEvent;
 }
 
 describe('ReportMapperService', () => {
@@ -25,21 +27,23 @@ describe('ReportMapperService', () => {
   // Reading only latestTestEventDetail turned every row Failed, with no
   // recording, after a GTM or GA4 import refreshed the table.
   it('reads the flattened result the reports list sends', () => {
-    const [ev] = parseReports(
-      '[{"id":3,"eventId":"0fd9ce76-5792-4191-8fba-8bb20e3013bc","testName":"GA4 event - add_to_cart","eventName":"add_to_cart","stopNavigation":false,"message":"Valid","createdAt":"2026-10-20T06:18:46.000Z","updatedAt":"2026-10-20T06:21:19.000Z","hasRecording":true,"passed":true,"requestPassed":true}]'
-    );
+    const ev = listItem();
 
     const [out] = svc.toReportDetails([ev]);
     expect(out.passed).toBe(true);
     expect(out.requestPassed).toBe(true);
     expect(out.hasRecording).toBe(true);
-    expect(out.updatedAt!.toISOString()).toBe('2026-10-20T06:21:19.000Z');
+    expect(out.updatedAt!.toISOString()).toBe(
+      REPORT_LIST_ITEM_SAMPLE.updatedAt
+    );
   });
 
   it('marks a test without a recording', () => {
-    const [ev] = parseReports(
-      '[{"id":4,"eventId":"e4","testName":"GA4 event - scroll","eventName":"scroll","stopNavigation":false,"message":"","createdAt":"2026-10-20T06:18:46.000Z","updatedAt":"2026-10-20T06:18:46.000Z","hasRecording":false,"passed":false,"requestPassed":false}]'
-    );
+    const ev = listItem({
+      hasRecording: false,
+      passed: false,
+      requestPassed: false
+    });
 
     const [out] = svc.toReportDetails([ev]);
     expect(out.hasRecording).toBe(false);

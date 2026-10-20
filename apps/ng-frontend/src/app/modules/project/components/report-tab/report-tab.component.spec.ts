@@ -80,17 +80,6 @@ function createContext(): ReportDetailRouteContext {
     } as ReportDetailRouteContext['reportDetails'],
     videoBlob: new Blob(['video'], { type: 'video/webm' }),
     imageBlob: new Blob(['image'], { type: 'image/png' }),
-    fileReports: [
-      {
-        fileName: 'report.json',
-        testEventDetails: [
-          {
-            eventId: 'evt-1'
-          }
-        ],
-        testImage: []
-      }
-    ] as unknown as ReportDetailRouteContext['fileReports'],
     historyLinkCommands: ['..', 'buckets']
   };
 }

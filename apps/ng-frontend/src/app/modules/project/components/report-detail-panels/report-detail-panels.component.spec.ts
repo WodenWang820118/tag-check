@@ -41,7 +41,6 @@ function createContext(eventName = 'purchase'): ReportDetailRouteContext {
     } as ReportDetailRouteContext['reportDetails'],
     videoBlob: undefined,
     imageBlob: undefined,
-    fileReports: [],
     historyLinkCommands: ['..', 'buckets']
   };
 }
