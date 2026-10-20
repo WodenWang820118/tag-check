@@ -5,7 +5,7 @@ import { VideoTrigger } from '../triggers/video-trigger.service';
 import { ScrollTrigger } from '../triggers/scroll-trigger.service';
 import { EventUtils } from '../../utils/event-utils.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import type { DataLayer, Trigger } from '@utils';
+import type { DataLayer } from '@utils';
 
 describe('TriggerManager', () => {
   let service: TriggerManager;

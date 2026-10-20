@@ -5,7 +5,6 @@ import { DataLayerVariableConfig, VariableTypeEnum } from '@utils';
 
 describe('DataLayerVariable', () => {
   let service: DataLayerVariable;
-  let parameterUtils: ParameterUtils;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -13,7 +12,6 @@ describe('DataLayerVariable', () => {
     });
 
     service = TestBed.inject(DataLayerVariable);
-    parameterUtils = TestBed.inject(ParameterUtils);
   });
 
   it('should be created', () => {

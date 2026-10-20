@@ -9,7 +9,7 @@ describe('treeNodeResolver', () => {
 
   function callResolver(name: string) {
     return TestBed.runInInjectionContext(() =>
-      (treeNodeResolver as any)({ params: { name } } as never, {} as never)
+      treeNodeResolver({ params: { name } } as never, {} as never)
     );
   }
 
@@ -26,7 +26,7 @@ describe('treeNodeResolver', () => {
       ]
     });
     markdown.getSource.mockReturnValueOnce(of('# hi'));
-    const out: any = await firstValueFrom(callResolver('topic'));
+    const out = await firstValueFrom(callResolver('topic'));
     expect(out).toEqual({
       fileName: 'assets/markdown/en/topic.md',
       content: '# hi'
@@ -42,7 +42,7 @@ describe('treeNodeResolver', () => {
       ]
     });
     markdown.getSource.mockReturnValueOnce(of(''));
-    const out: any = await firstValueFrom(callResolver('gone'));
+    const out = await firstValueFrom(callResolver('gone'));
     expect(out.fileName).toBe('404.md');
     expect(out.content).toContain('404');
   });
@@ -59,7 +59,7 @@ describe('treeNodeResolver', () => {
     const errSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
-    const out: any = await firstValueFrom(callResolver('x'));
+    const out = await firstValueFrom(callResolver('x'));
     expect(out.fileName).toBe('404.md');
     expect(out.content).toContain('404 Not Found');
     errSpy.mockRestore();
@@ -74,7 +74,7 @@ describe('treeNodeResolver', () => {
       ]
     });
 
-    const out: any = await firstValueFrom(callResolver('introduction'));
+    const out = await firstValueFrom(callResolver('introduction'));
     expect(markdown.getSource).not.toHaveBeenCalled();
     expect(out.fileName).toBe('assets/markdown/en/introduction.md');
     expect(out.content).toContain('# Introduction');
@@ -92,7 +92,7 @@ describe('treeNodeResolver', () => {
     const errSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
-    const out: any = await firstValueFrom(callResolver('missing-doc-page'));
+    const out = await firstValueFrom(callResolver('missing-doc-page'));
     expect(markdown.getSource).not.toHaveBeenCalled();
     expect(out.fileName).toBe('404.md');
     expect(out.content).toContain('404 Not Found');
@@ -113,7 +113,7 @@ describe('treeNodeResolver', () => {
       )
       .mockReturnValueOnce(of('# english fallback'));
 
-    const out: any = await firstValueFrom(callResolver('topic'));
+    const out = await firstValueFrom(callResolver('topic'));
 
     expect(markdown.getSource).toHaveBeenNthCalledWith(
       1,

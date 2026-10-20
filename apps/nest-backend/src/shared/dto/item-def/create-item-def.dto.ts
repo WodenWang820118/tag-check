@@ -1,9 +1,8 @@
-import type { LocalStorage } from '@utils';
 import { IsJSON } from 'class-validator';
 
 export class CreateItemDefDto {
   @IsJSON()
-  fullItemDef!: LocalStorage;
+  fullItemDef!: Record<string, unknown>;
 
   itemId!: string;
 

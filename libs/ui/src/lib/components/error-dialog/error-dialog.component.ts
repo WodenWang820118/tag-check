@@ -2,6 +2,8 @@ import { Component, Inject, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 
+export type ErrorDialogData = { message: string };
+
 @Component({
   selector: 'lib-error-dialog',
   standalone: true,
@@ -19,5 +21,5 @@ import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
   styles: [``]
 })
 export class ErrorDialogComponent {
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any) {}
+  constructor(@Inject(MAT_DIALOG_DATA) public data: ErrorDialogData) {}
 }

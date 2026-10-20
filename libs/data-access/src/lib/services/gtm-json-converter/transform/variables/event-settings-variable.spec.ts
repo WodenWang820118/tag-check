@@ -9,7 +9,6 @@ import {
 
 describe('EventSettingsVariableService', () => {
   let service: EventSettingsVariableService;
-  let parameterUtils: ParameterUtils;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -29,7 +28,6 @@ describe('EventSettingsVariableService', () => {
     });
 
     service = TestBed.inject(EventSettingsVariableService);
-    parameterUtils = TestBed.inject(ParameterUtils);
   });
 
   it('should be created', () => {

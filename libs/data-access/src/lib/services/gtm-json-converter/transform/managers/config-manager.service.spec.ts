@@ -5,7 +5,6 @@ import type { TagConfig, TriggerConfig, VariableConfig } from '@utils';
 
 describe('ConfigManager', () => {
   let service: ConfigManager;
-  let utilsService: UtilsService;
 
   const mockAccountId = '123456';
   const mockContainerId = '789012';
@@ -72,7 +71,6 @@ describe('ConfigManager', () => {
       providers: [ConfigManager, UtilsService]
     });
     service = TestBed.inject(ConfigManager);
-    utilsService = TestBed.inject(UtilsService);
   });
 
   it('should be created', () => {

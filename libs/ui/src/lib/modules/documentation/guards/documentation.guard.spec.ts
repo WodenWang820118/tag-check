@@ -3,7 +3,7 @@ import { treeNodeDeactivateGuard } from './documentation.guard';
 describe('treeNodeDeactivateGuard', () => {
   it('returns true (always allows deactivation)', () => {
     const spy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-    const result = (treeNodeDeactivateGuard as any)(
+    const result = treeNodeDeactivateGuard(
       {},
       {} as never,
       {} as never,

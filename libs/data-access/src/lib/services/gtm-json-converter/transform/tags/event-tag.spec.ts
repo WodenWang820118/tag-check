@@ -1,8 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import {
-  BrowserDynamicTestingModule,
-  platformBrowserDynamicTesting
-} from '@angular/platform-browser-dynamic/testing';
 import { EventTag } from './event-tag.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventTagConfig, Tag, TagTypeEnum, Trigger } from '@utils';

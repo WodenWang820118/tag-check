@@ -5,7 +5,6 @@ import { RegexVariableConfig, VariableTypeEnum } from '@utils';
 
 describe('RegexVariable', () => {
   let service: RegexVariable;
-  let parameterUtils: ParameterUtils;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -13,7 +12,6 @@ describe('RegexVariable', () => {
     });
 
     service = TestBed.inject(RegexVariable);
-    parameterUtils = TestBed.inject(ParameterUtils);
   });
 
   it('should be created', () => {

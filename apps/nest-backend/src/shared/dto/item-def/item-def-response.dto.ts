@@ -1,12 +1,11 @@
 import { Exclude, Expose } from 'class-transformer';
-import type { LocalStorage } from '@utils';
 import { IsJSON } from 'class-validator';
 
 @Exclude()
 export class ItemDefResponseDto {
   @Expose()
   @IsJSON()
-  fullItemDef!: LocalStorage;
+  fullItemDef!: Record<string, unknown>;
 
   @Expose()
   itemId!: string;
