@@ -119,6 +119,47 @@ describe('ClickHandler', () => {
     expect(page.mouse.click).toHaveBeenCalledWith(15, 27, { delay: 100 });
   });
 
+  it('clicks the selector that became visible first', async () => {
+    const { handler, clickStrategyService } = build();
+    const page = makePage() as unknown as {
+      waitForSelector: ReturnType<typeof vi.fn>;
+    };
+    page.waitForSelector = vi.fn((selector: string) =>
+      selector === '#later-in-list'
+        ? Promise.resolve({})
+        : Promise.reject(
+            new Error(`Waiting for selector \`${selector}\` failed`)
+          )
+    );
+    const step: Step = {
+      selectors: [['#missing'], ['#later-in-list']],
+      target: 'main'
+    } as never;
+
+    await handler.handle(page as never, 'p', 'e', step, false);
+
+    expect(
+      (clickStrategyService.clickElement as ReturnType<typeof vi.fn>).mock
+        .calls[0][3]
+    ).toBe('#later-in-list');
+  });
+
+  it('fails after the shared wait when no selector becomes visible', async () => {
+    const { handler, clickStrategyService } = build();
+    const page = makePage() as unknown as {
+      waitForSelector: ReturnType<typeof vi.fn>;
+    };
+    page.waitForSelector = vi.fn((selector: string) =>
+      Promise.reject(new Error(`Waiting for selector \`${selector}\` failed`))
+    );
+    const step: Step = { selectors: [['#a'], ['#b']], target: 'main' } as never;
+
+    await expect(
+      handler.handle(page as never, 'p', 'e', step, false)
+    ).rejects.toBeInstanceOf(InternalServerErrorException);
+    expect(clickStrategyService.clickElement).not.toHaveBeenCalled();
+  });
+
   it('throws when readJsonFile yields no step url', async () => {
     const { handler, fileService } = build();
     (fileService.readJsonFile as ReturnType<typeof vi.fn>).mockReturnValue({

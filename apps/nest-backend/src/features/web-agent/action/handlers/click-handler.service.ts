@@ -6,7 +6,13 @@ import {
   InternalServerErrorException
 } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { ActionHandler, getFirstSelector } from './utils';
+import {
+  ActionHandler,
+  getFirstSelector,
+  preferSelector,
+  STEP_SELECTOR_TIMEOUT_MS,
+  waitForAnySelector
+} from './utils';
 import { ProjectService } from '../../../../infrastructure/os/project/project.service';
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
 import { FilePathService } from '../../../../infrastructure/os/path/file-path/file-path.service';
@@ -37,15 +43,25 @@ export class ClickHandler implements ActionHandler {
     const preventNavigation = false;
     const offsetX = step.offsetX;
     const offsetY = step.offsetY;
-    for (const selector of step.selectors ?? []) {
-      const firstSelector = getFirstSelector(selector);
+    const candidates = (step.selectors ?? []).map(getFirstSelector);
+    const visible = await waitForAnySelector(page, candidates);
+    if (!visible) {
+      this.logger.warn(
+        `None of ${candidates.length} selector(s) became visible within ${STEP_SELECTOR_TIMEOUT_MS} ms: ${candidates.join(', ')}`
+      );
+      throw new InternalServerErrorException(
+        `Failed to click. None of the selectors worked for action ${step.target}`
+      );
+    }
+    for (const firstSelector of preferSelector(candidates, visible)) {
       try {
+        // The shared wait above already saw the preferred selector.
         const clicked = await this.clickElement(
           page,
           projectSlug,
           eventId,
           firstSelector,
-          { preventNavigation, timeout: 5000, offsetX, offsetY }
+          { preventNavigation, timeout: 2000, offsetX, offsetY }
         );
         if (clicked) {
           clickedSuccessfully = true;

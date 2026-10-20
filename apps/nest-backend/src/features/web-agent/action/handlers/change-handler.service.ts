@@ -5,7 +5,12 @@ import {
   InternalServerErrorException
 } from '@nestjs/common';
 import { Page } from 'puppeteer';
-import { ActionHandler, getFirstSelector } from './utils';
+import {
+  ActionHandler,
+  getFirstSelector,
+  preferSelector,
+  waitForAnySelector
+} from './utils';
 import { ChangeStrategyService } from '../strategies/change-strategies/change-strategy.service';
 import { ActionUtilsService } from './../action-utils/action-utils.service';
 import { Step } from '@utils';
@@ -29,17 +34,20 @@ export class ChangeHandler implements ActionHandler {
     isLastStep: boolean,
     timeout = 3000
   ): Promise<void> {
-    const selectors = step.selectors ?? [];
+    const candidates = (step.selectors ?? []).map(getFirstSelector);
     const value = step.value!;
+    // Give slow pages time to render the field, then start with the selector
+    // that appeared; the strategies below only wait `timeout` themselves.
+    const visible = await waitForAnySelector(page, candidates);
 
-    for (const selector of selectors) {
+    for (const selector of preferSelector(candidates, visible)) {
       try {
         if (
           await this.changeElement(
             page,
             projectName,
             eventId,
-            getFirstSelector(selector),
+            selector,
             value,
             timeout
           )
