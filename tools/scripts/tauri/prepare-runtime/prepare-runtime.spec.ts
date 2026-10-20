@@ -19,6 +19,10 @@ import {
   stopExistingDesktopSidecars
 } from './prepare-runtime.ts';
 import { runWithPuppeteerDownloadSkipped } from '../backend-runtime/backend-runtime.ts';
+import {
+  resolveNxEntrypoint,
+  workspaceRoot
+} from '../path-contract/path-contract.ts';
 
 const npmRuntimeFlags = ['--omit=dev', '--no-audit', '--no-fund'];
 const puppeteerSkipDownloadEnv = 'PUPPETEER_SKIP_DOWNLOAD';
@@ -848,7 +852,7 @@ describe('buildBackendApplication', () => {
 
     buildBackendApplication({
       nodeExecPath: 'node.exe',
-      rootDir: 'workspace-root',
+      rootDir: workspaceRoot,
       runFn(command, args, cwd) {
         calls.push({ command, args, cwd });
       }
@@ -857,11 +861,9 @@ describe('buildBackendApplication', () => {
     expect(calls).toHaveLength(1);
     expect(calls[0]).toMatchObject({
       command: 'node.exe',
-      cwd: 'workspace-root'
+      cwd: workspaceRoot
     });
-    expect(calls[0]?.args[0]).toBe(
-      join('workspace-root', 'node_modules', 'nx', 'bin', 'nx.js')
-    );
+    expect(calls[0]?.args[0]).toBe(resolveNxEntrypoint(workspaceRoot));
     expect(calls[0]?.args.slice(1)).toEqual(['build', 'nest-backend']);
   });
 });
