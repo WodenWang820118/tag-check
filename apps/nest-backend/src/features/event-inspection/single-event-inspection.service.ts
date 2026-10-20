@@ -5,10 +5,11 @@ import {
   InternalServerErrorException,
   Logger
 } from '@nestjs/common';
-import { CookieData, Credentials, ScreenRecorder } from 'puppeteer';
+import { CookieData, Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '@utils';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
 import { PuppeteerUtilsService } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
+import { RunRecorder } from '../../features/web-agent/puppeteer-utils/run-recorder';
 
 export interface InspectSingleEventOptions {
   headless: string;
@@ -62,7 +63,7 @@ export class SingleEventInspectionService {
       eventInspectionPresetDto,
       this.abortController.signal
     );
-    let recorder: ScreenRecorder | null = null;
+    let recorder: RunRecorder | null = null;
 
     // extract cookie setting logic to helper
     await this.applyCookies(browser, url, eventInspectionPresetDto);
