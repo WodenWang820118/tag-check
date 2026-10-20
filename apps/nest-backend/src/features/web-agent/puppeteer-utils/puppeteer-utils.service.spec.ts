@@ -132,10 +132,13 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
 
     await vi.waitFor(() => expect(recorder.stop).toHaveBeenCalledTimes(1));
     // The abort path finalizes the file too; let it finish before cleanup.
-    await vi.waitFor(async () =>
-      expect(await readFile(join(tempDir, 'recording.webm'), 'utf8')).toBe(
-        ' +cues'
-      )
+    // vi.waitFor gives up after 1 s by default, too soon under parallel runs.
+    await vi.waitFor(
+      async () =>
+        expect(await readFile(join(tempDir, 'recording.webm'), 'utf8')).toBe(
+          ' +cues'
+        ),
+      { timeout: 10_000 }
     );
   });
 

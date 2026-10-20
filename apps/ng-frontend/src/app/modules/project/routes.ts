@@ -4,26 +4,15 @@ import {
   projectSettingResolver
 } from './resolvers/project.resolver';
 import {
-  reportDetailResolver,
-  imageResolver,
-  videoResolver,
-  projectReportResolver
+  projectReportResolver,
+  reportPageResolver
 } from './resolvers/report.resolver';
 import {
   getFileReportResolver,
   getProjectSlugResolver
 } from './resolvers/file-report.resolver';
 import { getProjectFormSettingsResolver } from './resolvers/project-form-settings.resolver';
-import {
-  recordingDetailResolver,
-  recordingResolver
-} from './resolvers/recording.resolver';
-import {
-  reportDetailEventIdResolver,
-  reportDetailSlugResolver,
-  specResolver
-} from './resolvers/spec.resolver';
-import { gtmConfigResolver } from './resolvers/gtm-config.resolver';
+import { recordingResolver } from './resolvers/recording.resolver';
 
 export const PROJECT_ROUTES: Routes = [
   {
@@ -128,15 +117,7 @@ export const PROJECT_ROUTES: Routes = [
             (m) => m.DetailViewComponent
           ),
         resolve: {
-          reportDetails: reportDetailResolver,
-          image: imageResolver,
-          video: videoResolver,
-          spec: specResolver,
-          gtmConfig: gtmConfigResolver,
-          recording: recordingDetailResolver,
-          projectSlug: reportDetailSlugResolver,
-          eventId: reportDetailEventIdResolver,
-          fileReports: getFileReportResolver
+          page: reportPageResolver
         }
       }
     ]

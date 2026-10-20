@@ -7,7 +7,10 @@ import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DataLayerSpec } from '@utils';
-import { ReportDetailRouteContext } from '../../components/report-detail.contracts';
+import {
+  buildReportPage,
+  ReportDetailRouteContext
+} from '../../components/report-detail.contracts';
 import { ReportTabComponent } from '../../components/report-tab/report-tab.component';
 import { TagManageTabComponent } from '../../components/tag-manage-tab/tag-manage-tab.component';
 import { SnackBarComponent } from '../../../../shared/components/snackbar/snackbar.component';
@@ -48,6 +51,18 @@ function createSpec(eventName = 'purchase'): DataLayerSpec {
   };
 }
 
+function createPage(): ReportDetailRouteContext {
+  return buildReportPage({
+    projectSlug: 'storybook-project',
+    eventId: 'evt-1',
+    detail: null,
+    spec: createSpec(),
+    recording: { title: 'Purchase recording', steps: [] },
+    video: { blob: new Blob(['video'], { type: 'video/webm' }) },
+    image: { blob: new Blob(['image'], { type: 'image/png' }) }
+  });
+}
+
 describe('DetailViewComponent', () => {
   const routeSnapshot: {
     queryParams: Record<string, string>;
@@ -56,45 +71,8 @@ describe('DetailViewComponent', () => {
       tab: 'reports'
     }
   };
-  const routeData$ = new BehaviorSubject({
-    projectSlug: 'storybook-project',
-    eventId: 'evt-1',
-    spec: createSpec(),
-    recording: {
-      title: 'Purchase recording',
-      steps: []
-    },
-    reportDetails: {
-      testEvent: {
-        eventId: 'evt-1',
-        eventName: 'purchase',
-        message: 'Failed run',
-        createdAt: new Date('2026-04-21T00:00:00.000Z'),
-        updatedAt: new Date('2026-04-22T00:00:00.000Z')
-      },
-      testEventDetails: {
-        passed: false,
-        requestPassed: false,
-        destinationUrl: 'https://example.com',
-        rawRequest: 'POST /collect'
-      },
-      testImage: {}
-    },
-    video: {
-      blob: new Blob(['video'], { type: 'video/webm' })
-    },
-    image: {
-      blob: new Blob(['image'], { type: 'image/png' })
-    },
-    fileReports: [
-      {
-        testEventDetails: [
-          {
-            eventId: 'evt-1'
-          }
-        ]
-      }
-    ]
+  const routeData$ = new BehaviorSubject<{ page: ReportDetailRouteContext }>({
+    page: createPage()
   });
   const queryParamMap$ = new BehaviorSubject(
     convertToParamMap({ tab: 'reports' })
@@ -110,51 +88,7 @@ describe('DetailViewComponent', () => {
   beforeEach(async () => {
     router.navigate.mockClear();
     snackBar.openFromComponent.mockClear();
-    // A run detail is created at the run time; it must not replace the test
-    // event's timestamps, which tell whether the test has run.
-    const runDetail = {
-      passed: false,
-      requestPassed: false,
-      destinationUrl: 'https://example.com',
-      rawRequest: 'POST /collect',
-      createdAt: new Date('2026-04-22T00:00:00.000Z'),
-      updatedAt: new Date('2026-04-22T00:00:00.000Z')
-    };
-    routeData$.next({
-      projectSlug: 'storybook-project',
-      eventId: 'evt-1',
-      spec: createSpec(),
-      recording: {
-        title: 'Purchase recording',
-        steps: []
-      },
-      reportDetails: {
-        testEvent: {
-          eventId: 'evt-1',
-          eventName: 'purchase',
-          message: 'Failed run',
-          createdAt: new Date('2026-04-21T00:00:00.000Z'),
-          updatedAt: new Date('2026-04-22T00:00:00.000Z')
-        },
-        testEventDetails: runDetail,
-        testImage: {}
-      },
-      video: {
-        blob: new Blob(['video'], { type: 'video/webm' })
-      },
-      image: {
-        blob: new Blob(['image'], { type: 'image/png' })
-      },
-      fileReports: [
-        {
-          testEventDetails: [
-            {
-              eventId: 'evt-1'
-            }
-          ]
-        }
-      ]
-    });
+    routeData$.next({ page: createPage() });
     routeSnapshot.queryParams = {
       tab: 'reports'
     };
@@ -192,7 +126,7 @@ describe('DetailViewComponent', () => {
       .compileComponents();
   });
 
-  it('builds a route context and passes it into the report tab', async () => {
+  it('passes the resolved report page into the report tab', async () => {
     const fixture = TestBed.createComponent(DetailViewComponent);
 
     fixture.detectChanges();
@@ -204,28 +138,9 @@ describe('DetailViewComponent', () => {
       By.directive(MockReportTabComponent)
     ).componentInstance as MockReportTabComponent;
 
-    expect(component.routeContext()).toEqual(
-      expect.objectContaining({
-        projectSlug: 'storybook-project',
-        eventId: 'evt-1',
-        historyLinkCommands: ['..', 'buckets']
-      })
-    );
-    expect(component.routeContext()?.reportDetails).toEqual(
-      expect.objectContaining({
-        event: 'purchase',
-        eventName: 'purchase',
-        createdAt: new Date('2026-04-21T00:00:00.000Z'),
-        passed: false,
-        requestPassed: false,
-        rawRequest: 'POST /collect',
-        destinationUrl: 'https://example.com',
-        updatedAt: new Date('2026-04-22T00:00:00.000Z')
-      })
-    );
+    expect(component.routeContext()).toBe(routeData$.value.page);
+    expect(reportTab.context()).toBe(routeData$.value.page);
     expect(component.tagSpec()?.event).toBe('purchase');
-    expect(reportTab.context()?.projectSlug).toBe('storybook-project');
-    expect(reportTab.context()?.reportDetails?.eventName).toBe('purchase');
     expect(component.selectedTabIndex).toBe(1);
   });
 

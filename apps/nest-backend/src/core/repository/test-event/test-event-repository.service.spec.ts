@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { REPORT_DETAIL_SAMPLE, REPORT_LIST_ITEM_SAMPLE, shapeOf } from '@utils';
 import { TestEventRepositoryService } from './test-event-repository.service';
 
 function build() {
@@ -26,6 +27,72 @@ describe('TestEventRepositoryService', () => {
       })
     );
     expect(result).toHaveLength(2);
+  });
+
+  /**
+   * A test_event row with only the relations the query asked for, as TypeORM
+   * returns it, so the contract specs follow changes to the queries.
+   */
+  function rowFor(relations: Record<string, unknown> = {}) {
+    const related: Record<string, unknown> = {
+      project: { projectSlug: 'demo' },
+      recording: { title: 'add_to_cart', steps: [{ type: 'navigate' }] },
+      spec: { eventName: 'add_to_cart' },
+      testEventDetails: [
+        { id: 6, passed: false, requestPassed: false },
+        { id: 7, passed: true, requestPassed: true }
+      ],
+      testImage: [{ id: 7, imageName: 'screenshot.png' }]
+    };
+    const { id, eventId, testName, eventName, stopNavigation, message } =
+      REPORT_LIST_ITEM_SAMPLE;
+    return {
+      id,
+      eventId,
+      testName,
+      eventName,
+      stopNavigation,
+      message,
+      createdAt: new Date(REPORT_LIST_ITEM_SAMPLE.createdAt),
+      updatedAt: new Date(REPORT_LIST_ITEM_SAMPLE.updatedAt),
+      latestTestEventDetailId: 7,
+      latestTestImageId: 7,
+      ...Object.fromEntries(
+        Object.entries(related).filter(([name]) => relations[name])
+      )
+    };
+  }
+
+  const wire = (value: unknown) => JSON.parse(JSON.stringify(value));
+
+  it('listReports() sends the shape of the recorded contract sample', async () => {
+    const { service, repository } = build();
+    repository.find.mockImplementation(
+      async (options: { relations?: Record<string, unknown> }) => [
+        rowFor(options.relations)
+      ]
+    );
+
+    const [item] = wire(await service.listReports('demo'));
+
+    expect(shapeOf(item)).toEqual(shapeOf(REPORT_LIST_ITEM_SAMPLE));
+    expect(item).toMatchObject({
+      hasRecording: true,
+      passed: true,
+      requestPassed: true
+    });
+  });
+
+  it('getBySlugAndEventId() sends the shape of the report detail sample', async () => {
+    const { service, repository } = build();
+    repository.findOne.mockImplementation(
+      async (options: { relations?: Record<string, unknown> }) =>
+        rowFor(options.relations)
+    );
+
+    const testEvent = wire(await service.getBySlugAndEventId('demo', 'evt'));
+
+    expect(shapeOf(testEvent)).toEqual(shapeOf(REPORT_DETAIL_SAMPLE.testEvent));
   });
 
   it('listFileReports() builds a query joining all relations and filters by slug', async () => {

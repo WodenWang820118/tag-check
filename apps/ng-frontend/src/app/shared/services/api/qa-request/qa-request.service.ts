@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { GtmInspectionParams } from '../../utils/interfaces';
-import { TestEvent, TestEventDetail, TestImage } from '@utils';
+import { ReportDetailResponse } from '@utils';
 
 @Injectable({
   providedIn: 'root'
@@ -29,13 +29,7 @@ export class QaRequestService {
       queryParams.push(`captureRequest=${params.captureRequest}`);
     const queryString = queryParams.length ? '?' + queryParams.join('&') : '';
     return this.http
-      .post<
-        {
-          testEvent: TestEvent;
-          testEventDetails: TestEventDetail;
-          testImage: TestImage;
-        }[]
-      >(
+      .post<ReportDetailResponse[]>(
         `${environment.dataLayerApiUrl}/${projectSlug}/${eventId}${queryString}`,
         params.eventInspectionPreset
       )

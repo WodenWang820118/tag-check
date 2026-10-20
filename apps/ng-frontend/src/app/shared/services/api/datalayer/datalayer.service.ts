@@ -1,12 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import {
-  EventInspectionPreset,
-  TestEvent,
-  TestEventDetail,
-  TestImage
-} from '@utils';
+import { EventInspectionPreset, ReportDetailResponse } from '@utils';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
 
 export interface RunDataLayerParams {
@@ -59,13 +54,7 @@ export class DataLayerService {
     }
 
     return this.http
-      .post<
-        {
-          testEvent: TestEvent;
-          testEventDetails: TestEventDetail;
-          testImage: TestImage;
-        }[]
-      >(
+      .post<ReportDetailResponse[]>(
         `${environment.dataLayerApiUrl}/${projectSlug}/${eventId}`,
         eventInspectionPreset,
         { params: httpParams }

@@ -8,10 +8,3 @@ export const recordingResolver: ResolveFn<Recording[] | null> = (route) => {
   const projectSlug = route.params['projectSlug'];
   return recordingService.getProjectRecordings(projectSlug);
 };
-
-export const recordingDetailResolver: ResolveFn<Recording | null> = (route) => {
-  const recordingService = inject(RecordingService);
-  const projectSlug = route.parent?.params['projectSlug'];
-  const eventId = route.params['eventId'];
-  return recordingService.getRecordingDetails(projectSlug, eventId);
-};
