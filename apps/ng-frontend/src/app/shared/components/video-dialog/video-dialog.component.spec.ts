@@ -1,19 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { DomSanitizer } from '@angular/platform-browser';
 import { VideoDialogComponent } from './video-dialog.component';
 
 describe('VideoDialogComponent', () => {
   const originalCreate = (URL as any).createObjectURL;
   const originalRevoke = (URL as any).revokeObjectURL;
-  const sanitizer = {
-    bypassSecurityTrustUrl: vi.fn((u: string) => `safe:${u}`)
-  };
 
   beforeEach(() => {
     (URL as any).createObjectURL = vi.fn(() => 'blob:url');
     (URL as any).revokeObjectURL = vi.fn();
-    sanitizer.bypassSecurityTrustUrl.mockClear();
   });
 
   afterEach(() => {
@@ -27,19 +22,21 @@ describe('VideoDialogComponent', () => {
       imports: [VideoDialogComponent],
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: { blob } },
-        { provide: MatDialogRef, useValue: {} },
-        { provide: DomSanitizer, useValue: sanitizer }
+        { provide: MatDialogRef, useValue: {} }
       ]
     });
     return TestBed.createComponent(VideoDialogComponent);
   }
 
-  it('creates a sanitized object URL from the blob', () => {
+  it('plays the blob through its object URL', () => {
     const blob = new Blob(['v']);
     const fixture = configure(blob);
+    fixture.detectChanges();
     expect((URL as any).createObjectURL).toHaveBeenCalledWith(blob);
-    expect(sanitizer.bypassSecurityTrustUrl).toHaveBeenCalledWith('blob:url');
-    expect(fixture.componentInstance.safeUrl).toBe('safe:blob:url');
+    expect(fixture.componentInstance.url).toBe('blob:url');
+    const source: HTMLSourceElement =
+      fixture.nativeElement.querySelector('source');
+    expect(source.src).toBe('blob:url');
   });
 
   it('revokes the object URL on destroy', () => {

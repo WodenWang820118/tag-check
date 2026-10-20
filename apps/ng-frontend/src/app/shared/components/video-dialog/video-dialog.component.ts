@@ -9,7 +9,6 @@ import {
   MatDialogModule,
   MatDialogRef
 } from '@angular/material/dialog';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 export interface VideoDialogData {
   blob: Blob;
@@ -30,7 +29,7 @@ export interface VideoDialogData {
       </header>
       <div class="flex-1 min-h-0">
         <video class="w-full h-full" controls autoplay>
-          <source [src]="safeUrl" type="video/webm" />
+          <source [src]="url" type="video/webm" />
           <track kind="captions" srclang="en" label="English captions" />
         </video>
       </div>
@@ -40,17 +39,12 @@ export interface VideoDialogData {
 export class VideoDialogComponent implements OnDestroy {
   private readonly dialogRef = inject(MatDialogRef<VideoDialogComponent>);
   private readonly data = inject<VideoDialogData>(MAT_DIALOG_DATA);
-  private readonly sanitizer = inject(DomSanitizer);
-  private objectUrl?: string;
-
-  safeUrl: SafeUrl = this.createUrl(this.data.blob);
-
-  private createUrl(blob: Blob): SafeUrl {
-    this.objectUrl = URL.createObjectURL(blob);
-    return this.sanitizer.bypassSecurityTrustUrl(this.objectUrl);
-  }
+  // Angular does not sanitize img/source src, so bind the blob: URL as a
+  // plain string: a SafeUrl would be set as the text "SafeValue must use...".
+  private readonly objectUrl = URL.createObjectURL(this.data.blob);
+  readonly url = this.objectUrl;
 
   ngOnDestroy(): void {
-    if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
+    URL.revokeObjectURL(this.objectUrl);
   }
 }
