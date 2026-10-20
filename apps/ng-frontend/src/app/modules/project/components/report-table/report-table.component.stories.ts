@@ -31,6 +31,7 @@ const MOCK_REPORTS: IReportDetails[] = [
     eventId: 'evt-1',
     testName: 'Purchase Flow',
     eventName: 'purchase',
+    message: '',
     passed: false,
     requestPassed: false,
     rawRequest: '',
@@ -38,8 +39,6 @@ const MOCK_REPORTS: IReportDetails[] = [
     // Auditable
     createdAt: new Date(),
     updatedAt: new Date(),
-    // Display-only convenience
-    // @ts-expect-error Story-only property used by template
     hasRecording: true
   },
   {
@@ -48,13 +47,13 @@ const MOCK_REPORTS: IReportDetails[] = [
     eventId: 'evt-2',
     testName: 'Signup Flow',
     eventName: 'signup',
+    message: '',
     passed: true,
     requestPassed: true,
     rawRequest: '',
     destinationUrl: 'https://example.com',
     createdAt: new Date(),
     updatedAt: new Date(),
-    // @ts-expect-error Story-only property used by template
     hasRecording: true
   }
 ];
