@@ -2,12 +2,34 @@ import { Injectable } from '@angular/core';
 import { Environment } from '../env-detector/utils';
 import { EnvDetectorService } from '../env-detector/env-detector.service';
 
+/**
+ * Bridges the Flutter, Android and iOS host apps inject into the WebView. Each
+ * handler below only runs after `EnvDetectorService` found its bridge.
+ */
+interface NativeBridges {
+  flutter_inappwebview: {
+    callHandler(handlerName: string, ...args: unknown[]): unknown;
+  };
+  AnalyticsWebInterface: {
+    logEvent(name: string, jsonParams: string): void;
+    setUserProperty(name: string, value: unknown): void;
+    setUserId(userId: unknown): void;
+  };
+  webkit: {
+    messageHandlers: { firebase: { postMessage(message: unknown): void } };
+  };
+}
+
+function nativeBridges(): NativeBridges {
+  return globalThis as unknown as NativeBridges;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class JavascriptInterfaceService {
   constructor(private readonly envDetector: EnvDetectorService) {}
-  logEvent(name: string, params: any) {
+  logEvent(name: string, params: Record<string, unknown>) {
     switch (this.envDetector.getPlatform()) {
       case Environment.FLUTTER:
         this.flutterHandler(name, params, 'eventHandler');
@@ -42,7 +64,7 @@ export class JavascriptInterfaceService {
   setUserId(userId = '123456') {
     switch (this.envDetector.getPlatform()) {
       case Environment.FLUTTER:
-        (globalThis as any).flutter_inappwebview.callHandler('userIdHandler', {
+        nativeBridges().flutter_inappwebview.callHandler('userIdHandler', {
           user_id: userId
         });
         break;
@@ -57,9 +79,9 @@ export class JavascriptInterfaceService {
     }
   }
 
-  flutterHandler(name: string, params: any, handler: string) {
+  flutterHandler(name: string, params: unknown, handler: string) {
     try {
-      (globalThis as any).flutter_inappwebview.callHandler(handler, {
+      nativeBridges().flutter_inappwebview.callHandler(handler, {
         name: name,
         params: params
       });
@@ -69,23 +91,20 @@ export class JavascriptInterfaceService {
   }
 
   // NOTE: Android handler - verify on real device
-  androidHandler(name: string, params: any, command: string) {
+  androidHandler(name: string, params: unknown, command: string) {
     try {
       switch (command) {
         case 'logEvent':
-          (globalThis as any).AnalyticsWebInterface.logEvent(
+          nativeBridges().AnalyticsWebInterface.logEvent(
             name,
             JSON.stringify(params)
           );
           break;
         case 'setUserProperty':
-          (globalThis as any).AnalyticsWebInterface.setUserProperty(
-            name,
-            params
-          );
+          nativeBridges().AnalyticsWebInterface.setUserProperty(name, params);
           break;
         case 'setUserId':
-          (globalThis as any).AnalyticsWebInterface.setUserId(params);
+          nativeBridges().AnalyticsWebInterface.setUserId(params);
           break;
         default:
           break;
@@ -96,14 +115,14 @@ export class JavascriptInterfaceService {
   }
 
   // NOTE: iOS handler - verify on real device
-  iosHandler(name: string, params: any, command: string) {
+  iosHandler(name: string, params: unknown, command: string) {
     try {
       const message = {
         command: command,
         name: name,
         parameters: params
       };
-      (globalThis as any).webkit.messageHandlers.firebase.postMessage(message);
+      nativeBridges().webkit.messageHandlers.firebase.postMessage(message);
     } catch (error) {
       console.log(error);
     }

@@ -16,7 +16,7 @@ import {
   ReactiveFormsModule
 } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
-import { YouTubePlayerModule } from '@angular/youtube-player';
+import { YouTubePlayer, YouTubePlayerModule } from '@angular/youtube-player';
 import { ActivatedRoute } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
@@ -36,7 +36,10 @@ import { WindowSizeService } from '../../../../shared/services/window-size/windo
 import { UtilsService } from '../../../../shared/services/utils/utils.service';
 import { DestinationService } from '../../../../shared/services/destination/destination.service';
 import { SearchService } from '../../../../shared/services/search/search.service';
-import { YoutubeService } from '../../../../shared/services/youtube/youtube.service';
+import {
+  YoutubeService,
+  YoutubeStateChangeEvent
+} from '../../../../shared/services/youtube/youtube.service';
 import { AnalyticsService } from '../../../../shared/services/analytics/analytics.service';
 import {
   getPublicDestinationPage,
@@ -92,7 +95,7 @@ export class DestinationComponent implements OnInit {
     enablejsapi: 1
   };
 
-  private readonly videoPlayer = viewChild<any>('player');
+  private readonly videoPlayer = viewChild<YouTubePlayer>('player');
 
   constructor(
     private readonly destinationService: DestinationService,
@@ -223,7 +226,7 @@ export class DestinationComponent implements OnInit {
     this.showVideoPlayer.set(true);
   }
 
-  onStateChange(event: unknown) {
+  onStateChange(event: YoutubeStateChangeEvent) {
     this.youtubeService.trackVideoEvent(event);
   }
 

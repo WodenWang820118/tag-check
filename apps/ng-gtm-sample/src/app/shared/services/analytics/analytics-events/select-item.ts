@@ -1,11 +1,17 @@
-import { AnalyticsEventTracker } from '../../../models/analytics-event-tracker.model';
+import {
+  AnalyticsEventTracker,
+  ProcessedAnalyticsEvent
+} from '../../../models/analytics-event-tracker.model';
+import { Destination } from '../../../models/destination.model';
 
-export class SelectItemEventTracker implements AnalyticsEventTracker {
+export class SelectItemEventTracker implements AnalyticsEventTracker<Destination> {
   constructor(private readonly eventName: string) {
     this.eventName = eventName;
   }
 
-  getProcessedData(rawEventData: any) {
+  getProcessedData(
+    rawEventData: Destination
+  ): ProcessedAnalyticsEvent | undefined {
     if (!rawEventData) return;
     const event = {
       ecommerce: {
