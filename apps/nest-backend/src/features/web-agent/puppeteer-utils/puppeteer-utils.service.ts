@@ -142,7 +142,6 @@ export class PuppeteerUtilsService {
         await this.stopRecorder(recorder);
       }
     };
-    signal?.addEventListener('abort', abortListener);
 
     const folderPath =
       await this.folderPathService.getInspectionEventFolderPath(
@@ -172,6 +171,9 @@ export class PuppeteerUtilsService {
     }
 
     await page.bringToFront();
+    // Registered here so every failure below removes it again. An abort
+    // that arrives before this is caught by the aborted check after start.
+    signal?.addEventListener('abort', abortListener);
     try {
       const ffmpegPath: string = require('ffmpeg-static');
       recorder = await RunRecorder.start(page, outputFile, ffmpegPath);

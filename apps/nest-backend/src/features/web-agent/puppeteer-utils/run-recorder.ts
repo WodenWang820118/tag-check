@@ -5,8 +5,12 @@ import type { CDPSession, Page, Protocol } from 'puppeteer';
 /** Frames per second written to the recording. */
 export const RECORDING_FPS = 15;
 /** Longest gap one frame may fill, so a stalled page cannot flood ffmpeg. */
-const MAX_FRAME_SECONDS = 120;
-const STOP_TIMEOUT_MS = 10_000;
+const MAX_FRAME_SECONDS = 60;
+/** How long the last frame stays on screen after the page stops changing. */
+const LAST_FRAME_MAX_SECONDS = 3;
+/** ffmpeg encodes repeated frames at roughly 270 fps; this leaves headroom. */
+const STOP_TIMEOUT_MS = 30_000;
+const CDP_TIMEOUT_MS = 2_000;
 const STDERR_TAIL_CHARS = 2_000;
 
 type SpawnFfmpeg = (ffmpegPath: string, args: string[]) => ChildProcess;
@@ -36,7 +40,7 @@ export function recordingArgs(
         `pad=${width}:${height}:(ow-iw)/2:(oh-ih)/2,format=yuv420p`
     ],
     ['-c:v', 'libvpx-vp9', '-deadline', 'realtime', '-cpu-used', '8'],
-    ['-row-mt', '1', '-b:v', '0', '-crf', '34'],
+    ['-lag-in-frames', '0', '-row-mt', '1', '-b:v', '0', '-crf', '34'],
     // Writing to a file lets the muxer record the duration and cues, so
     // players can show the length and seek.
     ['-y', file]
@@ -50,6 +54,24 @@ export function frameRepeats(seconds: number): number {
 }
 
 const toEven = (n: number) => Math.max(2, Math.round(n / 2) * 2);
+
+/** Resolves true once `operation` settles, or false after `ms`. */
+async function settlesWithin(
+  operation: Promise<unknown>,
+  ms: number
+): Promise<boolean> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timedOut = new Promise<false>((resolve) => {
+    timer = setTimeout(() => resolve(false), ms);
+  });
+  const settled = operation.then(
+    () => true as const,
+    () => true as const
+  );
+  const result = await Promise.race([settled, timedOut]);
+  clearTimeout(timer);
+  return result;
+}
 
 /**
  * Records a page to a WebM file from Chrome DevTools screencast frames.
@@ -143,42 +165,44 @@ export class RunRecorder {
   }
 
   /**
-   * Stops the screencast, writes the last frame up to now and waits for
-   * ffmpeg to finish the file. Never throws; calling it again waits for the
-   * same stop.
+   * Stops the screencast, writes the last frame (up to LAST_FRAME_MAX_SECONDS)
+   * and waits for ffmpeg to finish the file. Never throws; calling it again
+   * waits for the same stop.
    */
   stop(): Promise<void> {
     this.stopping ??= this.finish();
     return this.stopping;
   }
 
+  // Every wait is bounded: a closed target or an ffmpeg that stops reading
+  // would otherwise hold the run open.
   private async finish(): Promise<void> {
-    await this.session.send('Page.stopScreencast').catch(() => undefined);
+    await settlesWithin(
+      this.session.send('Page.stopScreencast'),
+      CDP_TIMEOUT_MS
+    );
     const last = this.lastFrame;
     if (last) {
-      this.enqueue(
-        last.data,
-        Math.max(1, frameRepeats(Date.now() / 1000 - last.timestamp))
+      const shown = Math.min(
+        Date.now() / 1000 - last.timestamp,
+        LAST_FRAME_MAX_SECONDS
       );
+      this.enqueue(last.data, Math.max(1, frameRepeats(shown)));
     }
-    // Bounded: an ffmpeg that stops reading would otherwise hold the run.
-    const flushed = (async () => {
-      await this.writes;
-      this.ffmpeg.stdin?.end();
-      await this.exited;
-      return true as const;
-    })();
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const timedOut = new Promise<false>((resolve) => {
-      timer = setTimeout(() => resolve(false), STOP_TIMEOUT_MS);
-    });
-    const closed = await Promise.race([flushed, timedOut]);
-    clearTimeout(timer);
-    if (!closed) {
-      this.ffmpeg.kill('SIGKILL');
+    const finished = await settlesWithin(
+      (async () => {
+        await this.writes;
+        this.ffmpeg.stdin?.end();
+        await this.exited;
+      })(),
+      STOP_TIMEOUT_MS
+    );
+    if (!finished) {
       this.fail(`ffmpeg did not finish within ${STOP_TIMEOUT_MS}ms`);
+      this.ffmpeg.stdin?.destroy();
+      this.ffmpeg.kill('SIGKILL');
     }
-    await this.session.detach().catch(() => undefined);
+    await settlesWithin(this.session.detach(), CDP_TIMEOUT_MS);
 
     if (this.failure) {
       this.logger.warn(

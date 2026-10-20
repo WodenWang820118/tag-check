@@ -149,6 +149,30 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     expect(removeListener).toHaveBeenCalledWith('abort', expect.any(Function));
   });
 
+  it('leaves no abort listener when the recording folder cannot be prepared', async () => {
+    const controller = new AbortController();
+    const addListener = vi.spyOn(controller.signal, 'addEventListener');
+    const failing = new PuppeteerUtilsService(
+      { getBROWSER_ARGS: vi.fn(() => []) } as never,
+      { getRecordingDetails: vi.fn() } as never,
+      {
+        getInspectionEventFolderPath: vi
+          .fn()
+          .mockRejectedValue(new Error('no project folder'))
+      } as never
+    );
+
+    await expect(
+      failing.startRecorder(
+        page as never,
+        'project',
+        'event',
+        controller.signal
+      )
+    ).rejects.toThrow('no project folder');
+    expect(addListener).not.toHaveBeenCalled();
+  });
+
   it('stops only the recorder passed to stopRecorder', async () => {
     const firstRecorder = fakeRecorder();
     const secondRecorder = fakeRecorder();

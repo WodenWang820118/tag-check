@@ -182,11 +182,43 @@ describe('RunRecorder', () => {
     const recorder = await start();
 
     const stopping = recorder.stop();
-    await vi.advanceTimersByTimeAsync(10_000);
+    await vi.advanceTimersByTimeAsync(30_000);
     await stopping;
 
     expect(ffmpeg.kill).toHaveBeenCalledWith('SIGKILL');
     expect(recorder.error).toMatch(/did not finish/);
+  });
+
+  it('shows the last frame for at most three seconds after the page stops changing', async () => {
+    const { ffmpeg, session, start } = setup();
+    const recorder = await start();
+
+    session.frame('A', 100);
+    vi.spyOn(Date, 'now').mockReturnValue(400_000);
+    await recorder.stop();
+
+    expect(ffmpeg.frames).toHaveLength(3 * RECORDING_FPS);
+  });
+
+  it('stops even when the closed target never answers the screencast commands', async () => {
+    vi.useFakeTimers();
+    const { ffmpeg, session, start } = setup();
+    const recorder = await start();
+    session.send.mockImplementation(() => new Promise(() => undefined));
+    session.detach.mockImplementation(() => new Promise(() => undefined));
+
+    let stopped = false;
+    const stopping = recorder.stop().then(() => {
+      stopped = true;
+    });
+    // Two bounded CDP waits of 2 s each, with ffmpeg finishing in between.
+    for (let i = 0; i < 20 && !stopped; i++) {
+      await vi.advanceTimersByTimeAsync(500);
+    }
+    await stopping;
+
+    expect(stopped).toBe(true);
+    expect(ffmpeg.kill).not.toHaveBeenCalled();
   });
 
   it('stops ffmpeg and rejects when the screencast cannot start', async () => {
@@ -216,7 +248,7 @@ describe('frameRepeats', () => {
     expect(frameRepeats(-1)).toBe(0);
   });
 
-  it('caps a long gap at two minutes', () => {
-    expect(frameRepeats(3600)).toBe(120 * RECORDING_FPS);
+  it('caps a long gap at one minute', () => {
+    expect(frameRepeats(3600)).toBe(60 * RECORDING_FPS);
   });
 });
