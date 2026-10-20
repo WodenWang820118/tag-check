@@ -38,7 +38,7 @@ describe('XlsxTestDataSectionService', () => {
       ]
     } as never;
 
-    svc.addTestDataSection(ws, report, 1);
+    svc.addTestDataSection(ws, report);
 
     // Two data rows are written; assert by scanning row values instead of relying on
     // exact row numbers since worksheet.columns assignment shifts the header.
@@ -70,7 +70,7 @@ describe('XlsxTestDataSectionService', () => {
       }
     } as never;
 
-    svc.addTestDataSection(ws, report, 1);
+    svc.addTestDataSection(ws, report);
 
     const allValues: unknown[] = [];
     ws.eachRow((row) => {

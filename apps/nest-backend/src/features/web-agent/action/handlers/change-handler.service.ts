@@ -39,7 +39,7 @@ export class ChangeHandler implements ActionHandler {
     if (candidates.length === 0) {
       return;
     }
-    const value = step.value!;
+    const value = step.value;
     // Give slow pages time to render the field. Typing does not need it to be
     // visible (page.type fills hidden fields too), only present.
     const waitTimeout = step.timeout ?? STEP_SELECTOR_TIMEOUT_MS;
@@ -87,7 +87,8 @@ export class ChangeHandler implements ActionHandler {
     projectName: string,
     eventId: string,
     selector: string,
-    value: string,
+    // ChangeStrategyService rejects a missing value itself.
+    value: string | undefined,
     timeout?: number
   ): Promise<boolean> {
     try {

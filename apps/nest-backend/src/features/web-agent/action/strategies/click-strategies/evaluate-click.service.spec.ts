@@ -13,10 +13,10 @@ describe('EvaluateClickService', () => {
     const page = {
       evaluate: vi.fn()
     };
-    const service = new EvaluateClickService(actionUtils as any);
+    const service = new EvaluateClickService(actionUtils as never);
 
     const result = await service.operate(
-      page as any,
+      page as never,
       'project',
       'event',
       '#buy',
@@ -38,10 +38,10 @@ describe('EvaluateClickService', () => {
     const page = {
       evaluate: vi.fn()
     };
-    const service = new EvaluateClickService(actionUtils as any);
+    const service = new EvaluateClickService(actionUtils as never);
 
     const result = await service.operate(
-      page as any,
+      page as never,
       'project',
       'event',
       '#missing',

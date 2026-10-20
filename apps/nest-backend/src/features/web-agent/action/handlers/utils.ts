@@ -1,11 +1,12 @@
 import { Page } from 'puppeteer';
+import { Step } from '@utils';
 
 export interface ActionHandler {
   handle(
     page: Page,
     projectName: string,
     eventId: string,
-    step: any,
+    step: Step,
     isLastStep: boolean
   ): Promise<void>;
 }

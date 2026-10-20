@@ -32,8 +32,7 @@ export class TestEventDuplicateService {
         } as Record<string, unknown>)) as Array<Record<string, unknown>>;
         existing = fallback.map((fRaw) => {
           const f = fRaw;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const proj = f['project'] as Record<string, any> | undefined;
+          const proj = f['project'] as Record<string, unknown> | undefined;
           return {
             id: f['id'],
             eventId: f['eventId'],

@@ -50,22 +50,10 @@ export class XlsxReportService {
           const worksheet = workbook.addWorksheet(worksheetName);
 
           // Build all textual/data sections first. We'll place the image afterwards so we can anchor at bottom-right.
-          this.xlsxHeaderService.addProjectHeader(
-            worksheet,
-            projectInfo,
-            report
-          );
+          this.xlsxHeaderService.addProjectHeader(worksheet, projectInfo);
           this.xlsxTestInfoSectionService.addTestInfoSection(worksheet, report);
-          this.xlsxTestDataSectionService.addTestDataSection(
-            worksheet,
-            report,
-            worksheet.lastRow?.number || 1
-          );
-          this.xlsxSummarySectionService.addSummarySection(
-            worksheet,
-            report,
-            worksheet.lastRow?.number || 1
-          );
+          this.xlsxTestDataSectionService.addTestDataSection(worksheet, report);
+          this.xlsxSummarySectionService.addSummarySection(worksheet, report);
           this.xlsxRecordingSectionService.addRecordingSection(
             worksheet,
             report

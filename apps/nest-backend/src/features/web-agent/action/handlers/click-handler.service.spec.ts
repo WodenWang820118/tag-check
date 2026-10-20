@@ -30,7 +30,7 @@ function build(opts?: {
   } as unknown as ClickStrategyService;
   const actionUtilsService = {
     getSelectorType: vi.fn(() =>
-      'selectorType' in (opts ?? {}) ? opts!.selectorType : 'css'
+      opts && 'selectorType' in opts ? opts.selectorType : 'css'
     )
   } as unknown as ActionUtilsService;
   return {

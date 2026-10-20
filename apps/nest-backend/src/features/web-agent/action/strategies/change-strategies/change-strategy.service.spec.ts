@@ -50,7 +50,7 @@ describe('ChangeStrategyService', () => {
   });
 
   it('falls back to evaluate when page service returns false', async () => {
-    const { svc, pageChangeService, evaluateChangeService } = build({
+    const { svc, evaluateChangeService } = build({
       pageResult: false,
       evalResult: true
     });
