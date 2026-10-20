@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { of, throwError } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { ImageService } from './image.service';
 
 describe('ImageService', () => {

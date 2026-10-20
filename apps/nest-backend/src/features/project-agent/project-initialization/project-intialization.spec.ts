@@ -4,19 +4,11 @@ import { FolderService } from '../../../infrastructure/os/folder/folder.service'
 import { FilePathService } from '../../../infrastructure/os/path/file-path/file-path.service';
 import { FileService } from '../../../infrastructure/os/file/file.service';
 import { ProjectInitializationService } from './project-initialization.service';
-import { join } from 'path';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
 import { ConfigsService } from '../../../core/configs/configs.service';
 
 describe('ProjectInitializationService', () => {
   let service: ProjectInitializationService;
-  let folderPathService: FolderPathService;
-  let folderService: FolderService;
-  let configsService: ConfigsService;
-  let rootProject: string;
-  let initializedProject: string;
-  let reportSavingFolder: string;
-  let eventFolder: string;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -39,26 +31,6 @@ describe('ProjectInitializationService', () => {
     service = moduleRef.get<ProjectInitializationService>(
       ProjectInitializationService
     );
-    folderPathService = moduleRef.get<FolderPathService>(FolderPathService);
-    folderService = moduleRef.get<FolderService>(FolderService);
-    configsService = moduleRef.get<ConfigsService>(ConfigsService);
-
-    rootProject = join(
-      __dirname,
-      '..',
-      '..',
-      '..',
-      '..',
-      '..',
-      '..',
-      'tag_check_projects'
-    );
-    initializedProject = join(rootProject, 'newProject');
-    reportSavingFolder = join(
-      initializedProject,
-      configsService.getRESULT_FOLDER()
-    );
-    eventFolder = join(reportSavingFolder, 'eventId');
   });
 
   it('should be defined', () => {

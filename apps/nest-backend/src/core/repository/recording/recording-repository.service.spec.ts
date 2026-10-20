@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { RecordingRepositoryService } from './recording-repository.service';
 

@@ -144,13 +144,10 @@ export function selectAbSamples(
       continue;
     }
 
-    selected.push(remaining[index]!);
-    remaining.splice(index, 1);
+    selected.push(...remaining.splice(index, 1));
   }
 
-  while (selected.length < desiredCount && remaining.length > 0) {
-    selected.push(remaining.shift()!);
-  }
+  selected.push(...remaining.splice(0, desiredCount - selected.length));
 
   return selected;
 }
@@ -506,9 +503,9 @@ function interleaveEvaluationSamples(
   const output: EvaluationSample[] = [];
   while ([...queues.values()].some((queue) => queue.length > 0)) {
     for (const kind of EVALUATION_KIND_ORDER) {
-      const queue = queues.get(kind);
-      if (queue && queue.length > 0) {
-        output.push(queue.shift()!);
+      const next = queues.get(kind)?.shift();
+      if (next) {
+        output.push(next);
       }
     }
   }

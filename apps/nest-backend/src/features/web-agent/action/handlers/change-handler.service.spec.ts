@@ -22,7 +22,7 @@ describe('ChangeHandler', () => {
     } as unknown as ChangeStrategyService;
     const actionUtilsService = {
       getSelectorType: vi.fn(() =>
-        'selectorType' in (opts ?? {}) ? opts!.selectorType : 'css'
+        opts && 'selectorType' in opts ? opts.selectorType : 'css'
       )
     } as unknown as ActionUtilsService;
     return {

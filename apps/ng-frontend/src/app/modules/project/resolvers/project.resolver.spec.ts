@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { of } from 'rxjs';
+import type { ProjectSetting, ProjectSchema } from '@utils';
 import { ProjectService } from '../../../shared/services/api/project-info/project-info.service';
 import { SettingsService } from '../../../shared/services/api/settings/settings.service';
 import {
@@ -25,10 +26,12 @@ describe('project.resolver', () => {
   });
 
   it('projectSettingResolver fetches by route slug', () => {
-    const obs = of({} as any);
+    const obs = of({} as ProjectSetting);
     settingsService.getProjectSettings.mockReturnValue(obs);
 
-    const route = { params: { projectSlug: 'foo' } } as any;
+    const route = {
+      params: { projectSlug: 'foo' }
+    } as unknown as ActivatedRouteSnapshot;
     const result = TestBed.runInInjectionContext(() =>
       projectSettingResolver(route, {} as RouterStateSnapshot)
     );
@@ -38,7 +41,7 @@ describe('project.resolver', () => {
   });
 
   it('projectInfoResolver lists all projects', () => {
-    const obs = of([] as any);
+    const obs = of([] as ProjectSchema[]);
     projectService.getProjects.mockReturnValue(obs);
 
     const result = TestBed.runInInjectionContext(() =>

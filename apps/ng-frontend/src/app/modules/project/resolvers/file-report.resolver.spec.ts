@@ -42,11 +42,13 @@ describe('file-report.resolver', () => {
   });
 
   it('fetches file reports using the parent project slug', () => {
-    const obs = of([] as any);
+    const obs = of([]);
     fileReportService.getFileReports.mockReturnValue(obs);
 
     const result = runFileReport({
-      parent: { params: { projectSlug: 'shop' } } as any
+      parent: {
+        params: { projectSlug: 'shop' }
+      } as unknown as ActivatedRouteSnapshot
     });
 
     expect(result).toBe(obs);
@@ -58,8 +60,12 @@ describe('file-report.resolver', () => {
   });
 
   it('getProjectSlugResolver returns parent project slug', () => {
-    expect(runSlug({ parent: { params: { projectSlug: 'biz' } } as any })).toBe(
-      'biz'
-    );
+    expect(
+      runSlug({
+        parent: {
+          params: { projectSlug: 'biz' }
+        } as unknown as ActivatedRouteSnapshot
+      })
+    ).toBe('biz');
   });
 });

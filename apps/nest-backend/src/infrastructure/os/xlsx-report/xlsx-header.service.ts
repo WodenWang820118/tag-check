@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { FullTestEventResponseDto } from '../../../shared';
 import * as ExcelJS from 'exceljs';
 
 @Injectable()
@@ -11,8 +10,7 @@ export class XlsxHeaderService {
       projectSlug: string;
       projectDescription: string;
       measurementId: string;
-    },
-    report: FullTestEventResponseDto
+    }
   ): void {
     // Add project title
     const titleRow = worksheet.addRow([

@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EntityMetadata } from 'typeorm';
 import { FixtureEnvelopeV1 } from '../../interfaces/fixture-types';
 
+type RelationMetadata = EntityMetadata['relations'][number];
+
 @Injectable()
 export class TopologicalSorterService {
   private readonly logger = new Logger(TopologicalSorterService.name);
@@ -43,7 +45,7 @@ export class TopologicalSorterService {
   }
 
   private processRelation(
-    rel: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+    rel: RelationMetadata,
     childName: string,
     entityNames: string[],
     children: Map<string, Set<string>>,
@@ -62,18 +64,15 @@ export class TopologicalSorterService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private isOwningSide(rel: any): boolean {
+  private isOwningSide(rel: RelationMetadata): boolean {
     // RelationMetadata API differences: use optional chaining defensively
-    const anyRel: any = rel; // eslint-disable-line @typescript-eslint/no-explicit-any
     const hasJoinColumns =
-      Array.isArray(anyRel?.joinColumns) && anyRel.joinColumns.length > 0;
+      Array.isArray(rel?.joinColumns) && rel.joinColumns.length > 0;
     return Boolean(
-      anyRel?.isManyToOne ||
-      anyRel?.isOneToOneOwner ||
-      anyRel?.relationType === 'many-to-one' ||
-      (anyRel?.relationType === 'one-to-one' &&
-        (anyRel?.isOwning || hasJoinColumns))
+      rel?.isManyToOne ||
+      rel?.isOneToOneOwner ||
+      rel?.relationType === 'many-to-one' ||
+      (rel?.relationType === 'one-to-one' && (rel?.isOwning || hasJoinColumns))
     );
   }
 

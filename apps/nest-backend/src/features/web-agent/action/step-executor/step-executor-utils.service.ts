@@ -7,6 +7,19 @@ import { ConfigsService } from '../../../../core/configs/configs.service';
 import { Step } from '@utils';
 import { preloadApplicationLocalStorage } from '../../browser-state-preload.util';
 
+/** Replay state shared across the steps of one recording. */
+export interface StepReplayState {
+  isFirstNavigation: boolean;
+}
+
+/** Chrome Recorder navigate steps carry the URL to open. */
+function navigateUrl(step: Step): string {
+  if (step.url === undefined) {
+    throw new Error(`Step "${step.type}" has no url to navigate to`);
+  }
+  return step.url;
+}
+
 @Injectable()
 export class StepExecutorUtilsService {
   private readonly logger = new Logger(StepExecutorUtilsService.name);
@@ -43,14 +56,14 @@ export class StepExecutorUtilsService {
     }
   }
 
-  async handleSetViewport(page: Page, step: any): Promise<void> {
+  async handleSetViewport(page: Page, step: Step): Promise<void> {
     await page.setViewport({ width: step.width, height: step.height });
   }
 
   async handleNavigate(
     page: Page,
     step: Step,
-    state: any,
+    state: StepReplayState,
     isLastStep: boolean,
     application: EventInspectionPresetDto['application']
   ): Promise<void> {
@@ -71,7 +84,7 @@ export class StepExecutorUtilsService {
 
       await this.handleFirstNavigation(page, step, state, application);
     } else {
-      await page.goto(step.url!, { waitUntil: 'networkidle2' });
+      await page.goto(navigateUrl(step), { waitUntil: 'networkidle2' });
     }
     await this.handleNavigationIfNeeded(page, isLastStep, 2000);
   }
@@ -119,13 +132,14 @@ export class StepExecutorUtilsService {
   private async handleFirstNavigation(
     page: Page,
     step: Step,
-    state: any,
+    state: StepReplayState,
     application: EventInspectionPresetDto['application']
   ): Promise<void> {
     await preloadApplicationLocalStorage(page, application);
-    await page.goto(step.url!, { waitUntil: 'networkidle2' });
+    const url = navigateUrl(step);
+    await page.goto(url, { waitUntil: 'networkidle2' });
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    await page.goto(step.url!, { waitUntil: 'networkidle2' });
+    await page.goto(url, { waitUntil: 'networkidle2' });
     await this.verifyLocalStorageAndCookies(page);
     state.isFirstNavigation = false;
   }

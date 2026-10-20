@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
+import type { GTMConfiguration } from '@utils';
 import { GtmJsonParserService } from './gtm-json-parser.service';
 
 describe('GtmJsonParserService', () => {
@@ -53,7 +54,7 @@ describe('GtmJsonParserService', () => {
   it('uploads GTM JSON to the project-scoped endpoint', () => {
     const obs = of({});
     httpClient.post.mockReturnValue(obs);
-    const payload = { foo: 'bar' } as any;
+    const payload = { foo: 'bar' } as unknown as GTMConfiguration;
     expect(service.uploadGtmJson('shop', payload)).toBe(obs);
     expect(httpClient.post).toHaveBeenCalledWith(
       expect.stringContaining('/upload/shop'),

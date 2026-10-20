@@ -38,12 +38,12 @@ describe('GroupEventsInspectionService browser ownership', () => {
       ])
     };
     service = new GroupEventsInspectionService(
-      {} as any,
-      inspectorGroupEventsService as any,
+      {} as never,
+      inspectorGroupEventsService as never,
       {
         writeProjectAbstractTestResultJson: vi.fn().mockResolvedValue(undefined)
-      } as any,
-      { getBROWSER_ARGS: vi.fn(() => []) } as any
+      } as never,
+      { getBROWSER_ARGS: vi.fn(() => []) } as never
     );
   });
 

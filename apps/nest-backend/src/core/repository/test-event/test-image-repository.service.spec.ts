@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { TestImageRepositoryService } from './test-image-repository.service';
 

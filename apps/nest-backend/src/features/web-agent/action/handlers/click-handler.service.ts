@@ -36,7 +36,6 @@ export class ClickHandler implements ActionHandler {
     projectSlug: string,
     eventId: string,
     step: Step,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _isLastStep: boolean
   ): Promise<void> {
     let clickedSuccessfully = false;

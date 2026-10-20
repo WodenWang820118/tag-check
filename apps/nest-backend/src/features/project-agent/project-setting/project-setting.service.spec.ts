@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { ProjectSetting } from '@utils';
 import { ProjectSettingService } from './project-setting.service';
 
-function build(initialSettings: any = {}) {
+function build(initialSettings: Record<string, unknown> = {}) {
   const fileService = {
     readJsonFile: vi.fn(() => initialSettings),
     writeJsonFile: vi.fn()
@@ -27,10 +28,11 @@ describe('ProjectSettingService', () => {
 
   it('updateSettings() reads, applies the update fn, then writes back the merged settings', async () => {
     const ctx = build({ headless: true });
-    const result = await ctx.service.updateSettings('demo', (s: any) => ({
-      ...s,
-      foo: 'bar'
-    }));
+    // 'foo' is not a ProjectSetting key; the test checks it is written back as-is.
+    const result = await ctx.service.updateSettings(
+      'demo',
+      (s) => ({ ...s, foo: 'bar' }) as ProjectSetting
+    );
     expect(ctx.fileService.writeJsonFile).toHaveBeenCalledWith(
       '/cfg/settings.json',
       {

@@ -13,27 +13,27 @@ describe('StepExecutorService', () => {
     };
     const service = new StepExecutorService(
       {},
-      { updateSelfDataLayer: vi.fn() } as any,
-      utils as any
+      { updateSelfDataLayer: vi.fn() } as never,
+      utils as never
     );
 
     await service.executeStep(
-      page as any,
-      { type: BrowserAction.KEYDOWN, key: 'Enter' } as any,
+      page as never,
+      { type: BrowserAction.KEYDOWN, key: 'Enter' },
       'project',
       'event',
       { isFirstNavigation: false },
       false,
-      {} as any
+      {} as never
     );
     await service.executeStep(
-      page as any,
-      { type: BrowserAction.KEYUP, key: 'Enter' } as any,
+      page as never,
+      { type: BrowserAction.KEYUP, key: 'Enter' },
       'project',
       'event',
       { isFirstNavigation: false },
       true,
-      {} as any
+      {} as never
     );
 
     expect(page.keyboard.down).toHaveBeenCalledWith('Enter');
@@ -59,13 +59,13 @@ describe('StepExecutorService', () => {
     };
     const service = new StepExecutorService(
       { [BrowserAction.CLICK]: handler },
-      { updateSelfDataLayer: vi.fn().mockResolvedValue(undefined) } as any,
-      utils as any
+      { updateSelfDataLayer: vi.fn().mockResolvedValue(undefined) } as never,
+      utils as never
     );
 
     await service.handleDefaultAction(
-      page as any,
-      { type: BrowserAction.CLICK } as any,
+      page as never,
+      { type: BrowserAction.CLICK },
       'project',
       'event',
       true,
@@ -86,13 +86,13 @@ describe('StepExecutorService', () => {
     };
     const service = new StepExecutorService(
       { [BrowserAction.CLICK]: handler },
-      { updateSelfDataLayer: vi.fn().mockResolvedValue(undefined) } as any,
-      utils as any
+      { updateSelfDataLayer: vi.fn().mockResolvedValue(undefined) } as never,
+      utils as never
     );
 
     await service.handleDefaultAction(
-      page as any,
-      { type: BrowserAction.CLICK } as any,
+      page as never,
+      { type: BrowserAction.CLICK },
       'project',
       'event',
       false,

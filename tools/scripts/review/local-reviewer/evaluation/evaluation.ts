@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { basename, join, resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 
 import {
   buildCheckpointReviewContext,
@@ -27,8 +27,7 @@ import {
   type EvaluationReviewerResult,
   type EvaluationSample,
   type LocalReviewerDependencies,
-  type LocalReviewerEvaluationConfig,
-  type LocalReviewReport
+  type LocalReviewerEvaluationConfig
 } from '../shared/shared.ts';
 
 export function resolveEvaluationRepoTargets(
@@ -130,13 +129,10 @@ export function selectAbSamples(
       continue;
     }
 
-    selected.push(remaining[index]!);
-    remaining.splice(index, 1);
+    selected.push(...remaining.splice(index, 1));
   }
 
-  while (selected.length < desiredCount && remaining.length > 0) {
-    selected.push(remaining.shift()!);
-  }
+  selected.push(...remaining.splice(0, desiredCount - selected.length));
 
   return selected;
 }
@@ -612,9 +608,9 @@ function interleaveEvaluationSamples(
   const output: EvaluationSample[] = [];
   while ([...queues.values()].some((queue) => queue.length > 0)) {
     for (const kind of EVALUATION_KIND_ORDER) {
-      const queue = queues.get(kind);
-      if (queue && queue.length > 0) {
-        output.push(queue.shift()!);
+      const next = queues.get(kind)?.shift();
+      if (next) {
+        output.push(next);
       }
     }
   }
@@ -684,7 +680,7 @@ function shuffleWithSeed<T>(items: T[], seed: number): T[] {
   const random = mulberry32(seed);
   for (let index = copy.length - 1; index > 0; index -= 1) {
     const swapIndex = Math.floor(random() * (index + 1));
-    [copy[index], copy[swapIndex]] = [copy[swapIndex]!, copy[index]!];
+    [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
   }
   return copy;
 }
@@ -731,6 +727,6 @@ function median(values: number[]): number {
   const sorted = [...values].sort((left, right) => left - right);
   const middle = Math.floor(sorted.length / 2);
   return sorted.length % 2 === 0
-    ? Math.round((sorted[middle - 1]! + sorted[middle]!) / 2)
-    : sorted[middle]!;
+    ? Math.round((sorted[middle - 1] + sorted[middle]) / 2)
+    : sorted[middle];
 }

@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { SingleEventInspectionService } from './single-event-inspection.service';
+import {
+  InspectSingleEventOptions,
+  SingleEventInspectionService
+} from './single-event-inspection.service';
 
 describe('SingleEventInspectionService recorder lifecycle', () => {
   let service: SingleEventInspectionService;
@@ -16,9 +19,9 @@ describe('SingleEventInspectionService recorder lifecycle', () => {
   let recorder: { stop: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    vi.spyOn(global, 'setTimeout').mockImplementation((callback: any) => {
+    vi.spyOn(global, 'setTimeout').mockImplementation((callback) => {
       callback();
-      return 0 as any;
+      return 0 as unknown as NodeJS.Timeout;
     });
     browser = createMockBrowser();
     page = {};
@@ -34,8 +37,8 @@ describe('SingleEventInspectionService recorder lifecycle', () => {
       cleanup: vi.fn().mockResolvedValue(undefined)
     };
     service = new SingleEventInspectionService(
-      pipeline as any,
-      puppeteerUtils as any
+      pipeline as never,
+      puppeteerUtils as never
     );
   });
 
@@ -68,7 +71,7 @@ describe('SingleEventInspectionService recorder lifecycle', () => {
   });
 });
 
-function createOptions() {
+function createOptions(): InspectSingleEventOptions {
   return {
     headless: 'true',
     measurementId: 'G-TEST',
@@ -82,7 +85,7 @@ function createOptions() {
       },
       puppeteerArgs: []
     }
-  } as any;
+  };
 }
 
 function createMockBrowser() {

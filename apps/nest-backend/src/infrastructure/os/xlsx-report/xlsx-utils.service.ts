@@ -3,9 +3,10 @@ import { Injectable, Logger } from '@nestjs/common';
 @Injectable()
 export class XlsxUtilsService {
   private readonly logger = new Logger(XlsxUtilsService.name);
-  formatJsonForExcel(jsonData: any): string {
+  formatJsonForExcel(jsonData: unknown): string {
     try {
-      if (Object.keys(jsonData).length === 0) {
+      // Object.keys throws on null/undefined; the catch falls back to String().
+      if (Object.keys(jsonData as object).length === 0) {
         return '{}';
       }
       return JSON.stringify(jsonData, null, 2);

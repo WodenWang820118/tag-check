@@ -4,9 +4,16 @@ import {
   localStorageScript,
   seedSiteLocalStorage
 } from './browser-state-preload.util';
+import type { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 
-function preset(data: Array<{ key: string; value: unknown }>) {
-  return { localStorage: { data }, cookie: { data: [] } } as any;
+// Values may be non-strings on purpose: the script stringifies them.
+function preset(
+  data: Array<{ key: string; value: unknown }>
+): EventInspectionPresetDto['application'] {
+  return {
+    localStorage: { data },
+    cookie: { data: [] }
+  } as EventInspectionPresetDto['application'];
 }
 
 describe('localStorageScript', () => {
@@ -64,7 +71,7 @@ describe('seedSiteLocalStorage', () => {
     const browser = { newPage: vi.fn().mockResolvedValue(seedPage) };
 
     await seedSiteLocalStorage(
-      browser as any,
+      browser as never,
       'https://example.test/product?gtm_debug=1',
       preset([{ key: 'consent', value: 'true' }])
     );
@@ -93,7 +100,7 @@ describe('seedSiteLocalStorage', () => {
 
     await expect(
       seedSiteLocalStorage(
-        browser as any,
+        browser as never,
         'https://example.test',
         preset([{ key: 'consent', value: 'true' }])
       )
@@ -105,7 +112,7 @@ describe('seedSiteLocalStorage', () => {
     const browser = { newPage: vi.fn() };
 
     await seedSiteLocalStorage(
-      browser as any,
+      browser as never,
       'https://example.test',
       preset([])
     );

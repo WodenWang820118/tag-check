@@ -24,10 +24,10 @@ describe('InspectorGroupEventsService browser lifecycle', () => {
       inspectDataLayer: vi.fn().mockResolvedValue({ passed: true })
     };
     service = new InspectorGroupEventsService(
-      fileService as any,
-      filePathService as any,
-      inspectorSingleEventService as any,
-      { isDataLayerCorrect: vi.fn() } as any
+      fileService as never,
+      filePathService as never,
+      inspectorSingleEventService as never,
+      { isDataLayerCorrect: vi.fn() } as never
     );
   });
 
@@ -37,7 +37,7 @@ describe('InspectorGroupEventsService browser lifecycle', () => {
     const browser = createMockBrowser(context);
 
     await service.inspectProjectDataLayer(
-      browser as any,
+      browser as never,
       'project',
       'G-TEST',
       { username: '', password: '' },
@@ -59,7 +59,7 @@ describe('InspectorGroupEventsService browser lifecycle', () => {
     const browser = createMockBrowser(context);
 
     const result = await service.inspectProjectDataLayer(
-      browser as any,
+      browser as never,
       'project',
       'G-TEST',
       { username: '', password: '' },
