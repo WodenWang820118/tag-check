@@ -18,9 +18,38 @@ export type ReportDetailRouteContext = {
   historyLinkCommands: string[];
 };
 
+export type RunStatus = 'notRun' | 'passed' | 'partial' | 'failed';
+
+/**
+ * A test has run once its detail was updated after it was created. It passes
+ * when both the data layer and the request check passed, and is partial when
+ * only one did.
+ */
+export function getRunStatus(
+  report:
+    | Pick<
+        IReportDetails,
+        'createdAt' | 'updatedAt' | 'passed' | 'requestPassed'
+      >
+    | undefined
+): RunStatus {
+  const updated = report?.updatedAt ? new Date(report.updatedAt).getTime() : 0;
+  const created = report?.createdAt ? new Date(report.createdAt).getTime() : 0;
+  if (!report || updated <= created) {
+    return 'notRun';
+  }
+  const dataLayerPassed = report.passed === true;
+  const requestPassed = report.requestPassed === true;
+  if (dataLayerPassed && requestPassed) {
+    return 'passed';
+  }
+  return dataLayerPassed || requestPassed ? 'partial' : 'failed';
+}
+
 export type ReportTabViewModel = {
   title: string;
   createdAt: Date | string | undefined;
+  status: RunStatus;
   passed: boolean;
   eventName: string;
   message: string;

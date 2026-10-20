@@ -8,6 +8,7 @@ import {
 import { Router } from '@angular/router';
 import { ReportDetailPanelsComponent } from '../report-detail-panels/report-detail-panels.component';
 import {
+  getRunStatus,
   ReportDetailRouteContext,
   ReportTabViewModel
 } from '../report-detail.contracts';
@@ -29,6 +30,7 @@ function buildReportTabViewModel(
   return {
     title: context.spec.rawGtmTag?.tag?.name || 'Report',
     createdAt: reportDetails?.createdAt,
+    status: getRunStatus(reportDetails),
     passed: reportDetails?.passed ?? false,
     eventName: reportDetails?.eventName || '',
     message: reportDetails?.message || '',

@@ -13,6 +13,7 @@ function createViewModel(
   return {
     title: 'Purchase Report',
     createdAt: new Date('2026-04-23T12:34:56.000Z'),
+    status: 'failed',
     passed: false,
     eventName: 'purchase',
     message: 'The run failed because one required parameter was missing.',
@@ -71,9 +72,22 @@ type Story = StoryObj<ReportTabViewComponent>;
 
 export const FailedWithMedia: Story = {};
 
+export const NotRunYet: Story = {
+  args: {
+    viewModel: createViewModel({
+      status: 'notRun',
+      message: '',
+      showHistory: false,
+      showShareMenu: false,
+      hasMedia: false
+    })
+  }
+};
+
 export const PassedWithoutHistory: Story = {
   args: {
     viewModel: createViewModel({
+      status: 'passed',
       passed: true,
       message: 'The run completed successfully.',
       showHistory: false,
