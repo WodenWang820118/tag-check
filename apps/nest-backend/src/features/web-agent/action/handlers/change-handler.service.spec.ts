@@ -63,6 +63,18 @@ describe('ChangeHandler', () => {
   });
 
   describe('handle', () => {
+    /** A page where only the listed selectors exist. */
+    function pageWith(...present: string[]) {
+      return {
+        waitForSelector: vi.fn(async (selector: string) => {
+          if (present.includes(selector)) return { dispose: vi.fn() };
+          throw Object.assign(new Error(`Waiting for ${selector} failed`), {
+            name: 'TimeoutError'
+          });
+        })
+      };
+    }
+
     it('iterates selectors and stops on first successful change', async () => {
       const { svc, changeStrategyService } = build({ changeResult: true });
       const step: Step = {
@@ -70,12 +82,46 @@ describe('ChangeHandler', () => {
         value: 'v'
       } as unknown as Step;
 
-      await svc.handle({} as never, 'p', 'e', step, false);
+      await svc.handle(pageWith('#a', '#b') as never, 'p', 'e', step, false);
 
       expect(changeStrategyService.changeElement).toHaveBeenCalledTimes(1);
     });
 
-    it('rethrows NotFoundException raised inside the loop', async () => {
+    it('waits for the field to exist, not to be visible, and starts with it', async () => {
+      const { svc, changeStrategyService } = build({ changeResult: true });
+      const page = pageWith('#second');
+      const step: Step = {
+        selectors: [['#first'], ['#second']],
+        value: 'v'
+      } as unknown as Step;
+
+      await svc.handle(page as never, 'p', 'e', step, false);
+
+      for (const [, options] of page.waitForSelector.mock.calls) {
+        expect(options).toMatchObject({ visible: false });
+      }
+      expect(
+        (changeStrategyService.changeElement as ReturnType<typeof vi.fn>).mock
+          .calls[0][3]
+      ).toBe('#second');
+    });
+
+    it('falls back to the next selector when one fails', async () => {
+      const { svc, changeStrategyService } = build();
+      (changeStrategyService.changeElement as ReturnType<typeof vi.fn>)
+        .mockRejectedValueOnce(new Error('detached'))
+        .mockResolvedValueOnce(true);
+      const step: Step = {
+        selectors: [['#a'], ['#b']],
+        value: 'v'
+      } as unknown as Step;
+
+      await svc.handle(pageWith('#a', '#b') as never, 'p', 'e', step, false);
+
+      expect(changeStrategyService.changeElement).toHaveBeenCalledTimes(2);
+    });
+
+    it('rethrows NotFoundException when every selector fails', async () => {
       const { svc } = build({
         changeError: new NotFoundException('missing')
       });
@@ -85,8 +131,22 @@ describe('ChangeHandler', () => {
       } as unknown as Step;
 
       await expect(
-        svc.handle({} as never, 'p', 'e', step, false)
+        svc.handle(pageWith('#a') as never, 'p', 'e', step, false)
       ).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('fails with NotFoundException when no selector appears in time', async () => {
+      const { svc, changeStrategyService } = build();
+      const step: Step = {
+        selectors: [['#a'], ['#b']],
+        value: 'v',
+        timeout: 50
+      } as unknown as Step;
+
+      await expect(
+        svc.handle(pageWith() as never, 'p', 'e', step, false)
+      ).rejects.toThrow(/None of the selectors appeared within 50 ms/);
+      expect(changeStrategyService.changeElement).not.toHaveBeenCalled();
     });
   });
 });
