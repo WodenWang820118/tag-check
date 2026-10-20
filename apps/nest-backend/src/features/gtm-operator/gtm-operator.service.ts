@@ -4,10 +4,11 @@ import {
   InternalServerErrorException,
   Logger
 } from '@nestjs/common';
-import { CookieData, Page, Browser, ScreenRecorder } from 'puppeteer';
+import { CookieData, Page, Browser } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
 import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
+import { RunRecorder } from '../web-agent/puppeteer-utils/run-recorder';
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import { RecordingRepositoryService } from '../../core/repository/recording/recording-repository.service';
 import {
@@ -68,7 +69,7 @@ export class GtmOperatorService {
 
     // normalize headless flag consistently with PuppeteerUtilsService
     const headlessFlag = query.headless === 'true' || query.headless === '1';
-    let recorder: ScreenRecorder | null = null;
+    let recorder: RunRecorder | null = null;
     try {
       const websiteUrl = this.getPreviewTargetUrl(query.gtmUrl);
       await this.applyCookies(browser, websiteUrl, eventInspectionPresetDto);
