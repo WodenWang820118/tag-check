@@ -1,64 +1,77 @@
 # Desktop Release Runbook
 
-This runbook defines the official Tag Check desktop release flow for the first
-cross-platform Tauri release, `2.0.0`, and the future stable releases that
-follow the same contract.
+How Tag Check desktop releases are built and published. The workflow is
+`.github/workflows/release.yaml`.
 
 ## Version Authority
 
-Every desktop release must keep these version authorities in sync:
+The release version lives in five places, which must agree:
 
+- `VERSION`
 - `package.json`
 - `apps/desktop-tauri/src-tauri/tauri.conf.json`
 - `apps/desktop-tauri/src-tauri/Cargo.toml`
+- the `desktop-tauri` entry in `apps/desktop-tauri/src-tauri/Cargo.lock`
 
-The release helper fails when those files disagree or when the checked-out
-version does not match the requested stable release tag.
-
-## Supported Release Assets
-
-`2.0.0` ships exactly these desktop assets:
-
-- Windows x64 NSIS installer: `tag-check-desktop-v2.0.0-windows-x64-nsis.exe`
-- macOS arm64 unsigned archive: `tag-check-desktop-v2.0.0-macos-arm64-unsigned.tar.gz`
-- Linux x64 AppImage: `tag-check-desktop-v2.0.0-linux-x64-appimage.AppImage`
-
-Canonical artifact names in GitHub Actions drop the file extension:
-
-- `tag-check-desktop-v2.0.0-windows-x64-nsis`
-- `tag-check-desktop-v2.0.0-macos-arm64-unsigned`
-- `tag-check-desktop-v2.0.0-linux-x64-appimage`
-
-The macOS asset is intentionally unsigned for `2.0.0`. Operators and testers
-should expect manual trust prompts when opening it on a local machine.
+To change the version, edit `VERSION` and run `pnpm run version:sync`. It
+writes the highest stable version found in the first four files to all four,
+so it never moves a version backwards. Update `Cargo.lock` by hand. Check with
+`pnpm run version:check` and `pnpm run tauri:release describe`, which prints
+the release tag (`v<VERSION>`).
 
 ## Triggers
 
-The release workflow in `.github/workflows/release.yaml` supports two entry
-paths:
+- Every push to `main` that changes more than documentation runs the
+  workflow. `docs/**`, `*.md`, `**/README.md`, `**/AGENTS.md`,
+  `.github/**/*.md`, `apps/*/docs/**` and `LICENSE` are ignored.
+- `workflow_dispatch` runs it by hand, with an optional `checkout_ref` (branch,
+  tag or commit) to evaluate instead of `main`.
 
-- Push a stable semver tag such as `v2.0.0`.
-- Run `workflow_dispatch` with both:
-  - `release_tag`: a stable tag such as `v2.0.0`
-  - `checkout_ref`: the branch, tag, or commit that should resolve to that tag
+## Release Gate
 
-Both paths validate the requested tag format. Each build job and the publish job
-also verify that the checked-out `HEAD` exactly matches the requested release
-tag commit before bundling or publishing anything.
+`prepare-release` reads `VERSION` and decides whether to build:
+
+- If a release for this version is already **published**, under `v<VERSION>`,
+  `<VERSION>` or `v<VERSION>-preview`, the run stops: "… is already published
+  for <VERSION>; bump VERSION to release again."
+- Otherwise it creates or force-moves the tag `v<VERSION>` to the commit being
+  released and builds. Prereleases of other versions, such as `v3.0.0-alpha`
+  for 3.0.0, do not count.
+- While the release is still a **draft**, it follows `main`: every code merge
+  moves the tag, rebuilds the assets into the same draft and rewrites its
+  notes. Publish the draft to stop this.
+
+So bump `VERSION` (with `docs/releases/<VERSION>.md`) in the PR that starts a
+release, and publish the draft under the tag `v<VERSION>`.
+
+## Release Assets
+
+Each release ships three assets plus `SHA256SUMS.txt`:
+
+- Windows x64 NSIS installer: `tag-check-desktop-v<VERSION>-windows-x64-nsis.exe`
+- macOS arm64 unsigned archive:
+  `tag-check-desktop-v<VERSION>-macos-arm64-unsigned.tar.gz`
+- Linux x64 AppImage: `tag-check-desktop-v<VERSION>-linux-x64-appimage.AppImage`
+
+GitHub Actions artifact names are the same without the extension. The macOS
+archive holds an unsigned `Tag Check Desktop.app`; testers may need to allow it
+in System Settings or remove its quarantine flag.
 
 ## Workflow Shape
 
-The release workflow runs in three phases:
-
-1. `prepare-release`: resolves the stable release tag and checkout ref.
-2. `build-desktop`: runs a 3-OS matrix across:
+1. `prepare-release`: checks the release notes exist, runs the release gate
+   and resolves the tag and checkout ref.
+2. `build-desktop`: a three-OS matrix:
    - `windows-latest` for the Windows x64 NSIS installer
-   - `macos-latest` for the unsigned Apple Silicon macOS archive
+   - `macos-latest` for the unsigned Apple silicon archive
    - `ubuntu-latest` for the Linux x64 AppImage
-3. `publish-release`: downloads all three validated artifacts, assembles the
-   release payload, writes `SHA256SUMS.txt`, and creates a draft GitHub Release.
+3. `publish-release`: downloads the three validated artifacts, assembles the
+   release payload, writes `SHA256SUMS.txt`, uploads everything to the draft
+   with `softprops/action-gh-release@v2`, then writes the notes into the draft.
+   That action looks releases up with `getReleaseByTag`, which skips drafts, so
+   it never updates an existing draft's notes itself.
 
-The publish job runs only after every required matrix job succeeds.
+The publish job runs only after every matrix job succeeds.
 
 ## Validation Rules
 
@@ -78,17 +91,16 @@ The publish job validates the assembled release a second time by:
 
 ## Failure Policy
 
-If any required OS job fails, the draft release payload must not be published as
-complete. CI artifacts and logs remain available for debugging, but the publish
-job does not run.
+If any OS job fails, the publish job does not run and the draft keeps its
+previous assets. CI artifacts and logs remain available for debugging.
+
+CI never packages the desktop app outside this workflow. After dependency,
+Nx or build-tooling upgrades, run `pnpm run tauri:release:windows` locally
+(about 10 minutes) before merging to `main`.
 
 ## Release Notes
 
-Each desktop release must provide a matching notes file under `docs/releases/`.
-For example, `v2.0.0` publishes from `docs/releases/2.0.0.md`.
-
-## Size Reporting
-
-Existing Windows-focused size reporting stays informational for `2.0.0`. It
-must not block the first cross-platform Tauri release while packaging and draft
-release automation are being standardized.
+Each release needs `docs/releases/<VERSION>.md`; `prepare-release` fails
+without it. A merge that changes only documentation does not run the
+workflow, so after editing only the notes, update the draft's text by hand
+(`gh release edit v<VERSION> --notes-file docs/releases/<VERSION>.md`).
