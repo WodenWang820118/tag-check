@@ -9,11 +9,19 @@ import {
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideArrowRight,
-  lucideChartLine,
+  lucideBadgePercent,
+  lucideCalendarCheck,
+  lucideCompass,
+  lucideCreditCard,
   lucideGlobe,
+  lucideHeadset,
   lucideHouse,
+  lucideMapPin,
+  lucideShieldCheck,
   lucideSmartphone,
-  lucideTags
+  lucideSparkles,
+  lucideTags,
+  lucideUsers
 } from '@ng-icons/lucide';
 import { HlmButton } from '@spartan-ng/helm/button';
 import { HlmCard } from '@spartan-ng/helm/card';
@@ -34,11 +42,19 @@ import { ConsentService } from '../../../../shared/services/consent/consent.serv
   providers: [
     provideIcons({
       lucideArrowRight,
-      lucideChartLine,
+      lucideBadgePercent,
+      lucideCalendarCheck,
+      lucideCompass,
+      lucideCreditCard,
       lucideGlobe,
+      lucideHeadset,
       lucideHouse,
+      lucideMapPin,
+      lucideShieldCheck,
       lucideSmartphone,
-      lucideTags
+      lucideSparkles,
+      lucideTags,
+      lucideUsers
     })
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -49,17 +65,17 @@ import { ConsentService } from '../../../../shared/services/consent/consent.serv
       >
         <div class="flex flex-col justify-center gap-5">
           <span class="sample-eyebrow">
-            <ng-icon name="lucideChartLine" class="text-sm" />
-            GTM Event Showcase
+            <ng-icon name="lucideSparkles" class="text-sm" />
+            Handpicked trips for every season
           </span>
           <div class="space-y-4">
             <h1 class="sample-page-title max-w-3xl text-slate-950">
-              Travel-booking flows rebuilt on Tailwind v4 and Spartan NG.
+              Find your next unforgettable journey.
             </h1>
             <p class="sample-copy max-w-2xl text-lg">
-              Explore a polished demo storefront that keeps the original GTM
-              routes and analytics behavior intact while modernizing the
-              storefront experience.
+              Explore mountain villages, sunlit coastlines and lively cities.
+              Compare trips with the full price up front, choose your travelers,
+              and book in a few minutes.
             </p>
           </div>
 
@@ -80,53 +96,49 @@ import { ConsentService } from '../../../../shared/services/consent/consent.serv
               rel="noreferrer"
             >
               <ng-icon name="lucideSmartphone" class="text-base" />
-              Open mobile deep-link demo
+              Get the mobile app
             </a>
           </div>
         </div>
 
-        <div class="sample-inset-surface grid gap-4 p-5">
-          <div class="rounded-2xl bg-slate-950 px-5 py-4 text-white">
+        <div class="sample-inset-surface grid content-start gap-3 p-5">
+          <div
+            class="text-sm font-semibold tracking-[0.22em] text-slate-500 uppercase"
+          >
+            Why travelers book with us
+          </div>
+          @for (promise of bookingPromises; track promise.title) {
             <div
-              class="text-sm font-semibold tracking-[0.22em] text-blue-200 uppercase"
+              class="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3"
             >
-              Demo flow
-            </div>
-            <div class="mt-3 text-2xl font-semibold">
-              Home -> Destinations -> Detail -> Basket -> Checkout
-            </div>
-            <div class="mt-2 text-sm leading-6 text-slate-200">
-              Use this site to exercise list views, promotions, consent, basket,
-              and checkout events without changing the original routing model.
-            </div>
-          </div>
-
-          <div class="grid gap-3 sm:grid-cols-2">
-            <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4">
-              <div
-                class="text-sm font-semibold tracking-[0.22em] text-slate-400 uppercase"
+              <span
+                class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-50 text-lg text-emerald-700"
               >
-                Frontend stack
-              </div>
-              <div class="mt-2 text-lg font-semibold text-slate-900">
-                CSS + TailwindCSS v4 + Spartan NG
-              </div>
-            </div>
-            <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4">
-              <div
-                class="text-sm font-semibold tracking-[0.22em] text-slate-400 uppercase"
-              >
-                Data layer
-              </div>
-              <div class="mt-2 text-lg font-semibold text-slate-900">
-                GTM + Firebase sample flows
+                <ng-icon [name]="promise.icon" />
+              </span>
+              <div>
+                <div class="font-semibold text-slate-900">
+                  {{ promise.title }}
+                </div>
+                <div class="text-sm leading-6 text-slate-600">
+                  {{ promise.description }}
+                </div>
               </div>
             </div>
-          </div>
+          }
         </div>
       </section>
 
-      <section>
+      <section class="space-y-4">
+        <div class="space-y-1">
+          <span class="sample-eyebrow">
+            <ng-icon name="lucideMapPin" class="text-sm" />
+            Featured destinations
+          </span>
+          <h2 class="sample-section-title text-slate-950">
+            This season's favorites
+          </h2>
+        </div>
         <app-carousel></app-carousel>
       </section>
 
@@ -156,6 +168,38 @@ import { ConsentService } from '../../../../shared/services/consent/consent.serv
         }
       </section>
 
+      <section class="sample-panel space-y-6 px-6 py-8 lg:px-8">
+        <div class="space-y-1">
+          <span class="sample-eyebrow">
+            <ng-icon name="lucideCompass" class="text-sm" />
+            How booking works
+          </span>
+          <h2 class="sample-section-title text-slate-950">
+            From inspiration to confirmation in three steps
+          </h2>
+        </div>
+        <ol class="grid gap-4 md:grid-cols-3">
+          @for (step of bookingSteps; track step.title; let i = $index) {
+            <li class="sample-inset-surface flex gap-4 p-5">
+              <span
+                class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-slate-950 font-semibold text-white"
+              >
+                {{ i + 1 }}
+              </span>
+              <div>
+                <div
+                  class="flex items-center gap-2 font-semibold text-slate-900"
+                >
+                  <ng-icon [name]="step.icon" />
+                  {{ step.title }}
+                </div>
+                <p class="sample-copy mt-1 text-sm">{{ step.description }}</p>
+              </div>
+            </li>
+          }
+        </ol>
+      </section>
+
       <app-cookie-consent
         [showModalInput]="showCookieModal$()"
         [showCookieConsentInput]="true"
@@ -170,21 +214,64 @@ export class MainComponent implements OnInit {
       accent: 'bg-blue-100 text-blue-700',
       title: 'Luxurious Accommodations',
       description:
-        'Showcase room, package, and occupancy-related events with a layout designed for richer ecommerce storytelling.'
+        'Stay in hand-selected hotels, chalets and seaside villas, with breakfast and transfers included on most trips.'
     },
     {
       icon: 'lucideGlobe',
       accent: 'bg-emerald-100 text-emerald-700',
       title: 'Incredible Locations',
       description:
-        'Browse destination detail flows that mirror real-world discovery journeys across search, list, and detail screens.'
+        'Discover Swiss valleys, Andalusian plazas and New England harbors, each with a local guide who knows the best spots.'
     },
     {
       icon: 'lucideTags',
       accent: 'bg-amber-100 text-amber-700',
       title: 'Pricing & Promotions',
       description:
-        'Use the paired mobile app deep link to validate promotion clicks, attribution parameters, and conversion events.'
+        'See the full price per person before you book, and save more with seasonal offers and early-booking deals.'
+    }
+  ];
+
+  readonly bookingPromises = [
+    {
+      icon: 'lucideBadgePercent',
+      title: 'Transparent prices',
+      description: 'The price you see per person is the price you pay.'
+    },
+    {
+      icon: 'lucideCalendarCheck',
+      title: 'Flexible plans',
+      description: 'Change your travelers before you check out.'
+    },
+    {
+      icon: 'lucideShieldCheck',
+      title: 'Secure checkout',
+      description: 'Your payment details are encrypted from start to finish.'
+    },
+    {
+      icon: 'lucideHeadset',
+      title: 'Help when you need it',
+      description:
+        'Our travel team answers questions before and during your trip.'
+    }
+  ];
+
+  readonly bookingSteps = [
+    {
+      icon: 'lucideMapPin',
+      title: 'Choose a destination',
+      description: 'Browse featured trips or search the full catalog.'
+    },
+    {
+      icon: 'lucideUsers',
+      title: 'Add your travelers',
+      description:
+        'Pick how many people are coming and add the trip to your cart.'
+    },
+    {
+      icon: 'lucideCreditCard',
+      title: 'Check out securely',
+      description: 'Enter your details and payment, then get your confirmation.'
     }
   ];
 
