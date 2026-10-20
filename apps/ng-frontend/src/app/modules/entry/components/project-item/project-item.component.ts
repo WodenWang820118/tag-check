@@ -51,7 +51,7 @@ import { MetadataSourceService } from '../../../../shared/services/data-source/m
             View
           </button>
           <button mat-button (click)="deleteProject()" color="warn">
-            DELETE
+            Delete
           </button>
         </mat-card-actions>
       </mat-card>

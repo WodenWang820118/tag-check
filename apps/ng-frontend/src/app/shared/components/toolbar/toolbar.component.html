@@ -9,7 +9,9 @@
         <mat-icon>menu</mat-icon>
       </button>
     }
-    <span [routerLink]="['/']" style="cursor: pointer">TagCheck</span>
+    <a class="toolbar__home" [routerLink]="['/']" aria-label="TagCheck projects"
+      >TagCheck</a
+    >
 
     @defer (
       when this.snav() && this.settings() && this.projects();
@@ -76,6 +78,8 @@
               (keyup)="applyFilter($event)"
               #input
               class="filter__input"
+              placeholder="Search projects"
+              aria-label="Search projects"
             />
             <button
               matSuffix

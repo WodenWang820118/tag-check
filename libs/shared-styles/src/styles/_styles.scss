@@ -94,5 +94,11 @@ a {
 
 // Theme includes
 @include mat.all-component-themes(theme.$primary-theme);
+
+// M2 colors checked checkboxes with the accent palette, a pale brown that
+// reads as disabled. Use the primary palette like the other controls.
+.mat-mdc-checkbox {
+  @include mat.checkbox-color(theme.$primary-theme, $color-variant: primary);
+}
 @include mixin.custom-button-toggle-theme(theme.$primary-theme);
 @include mixin.custom-tree-node-theme(theme.$primary-theme);

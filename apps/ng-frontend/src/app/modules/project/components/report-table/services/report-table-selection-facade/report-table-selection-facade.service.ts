@@ -67,11 +67,12 @@ export class ReportTableSelectionFacadeService {
     if (!row) {
       return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
     }
+    // Test rows have no position; the test name tells rows apart.
     return `${
       this.reportTableDataSourceModelService.selection().isSelected(row)
         ? 'deselect'
         : 'select'
-    } row ${row.position + 1}`;
+    } ${row.testName || row.eventName}`;
   }
 
   // Whether all rows on the current page are selected

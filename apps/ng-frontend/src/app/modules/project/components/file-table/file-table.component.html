@@ -75,7 +75,7 @@
     <ng-container matColumnDef="eventName">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
       <td mat-cell *matCellDef="let element">
-        <p>{{ element.eventName }}</p>
+        <span>{{ element.eventName }}</span>
       </td>
     </ng-container>
 
@@ -165,6 +165,14 @@
       *matRowDef="let element; columns: columns"
       class="element-row"
     ></tr>
+    <tr class="mat-mdc-row" *matNoDataRow>
+      <td
+        class="mat-mdc-cell file-table__empty"
+        [attr.colspan]="columns.length"
+      >
+        No reports yet. Run a test from the Tests page to create one.
+      </td>
+    </tr>
   </table>
   <mat-paginator
     [pageSizeOptions]="[7, 10, 25, 100]"
