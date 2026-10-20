@@ -10,6 +10,7 @@ export type ProjectReport = {
 export type IReportDetails = {
   position: number;
   event: string;
+  hasRecording?: boolean;
 } & TestEvent &
   TestEventDetail &
   Auditable;

@@ -3,6 +3,11 @@ import { TestBed } from '@angular/core/testing';
 import { ReportMapperService } from './report-mapper.service';
 import type { AbstractTestEvent } from '@utils';
 
+// The body of GET /reports/:projectSlug as it arrives: dates are strings.
+function parseReports(json: string): AbstractTestEvent[] {
+  return JSON.parse(json) as AbstractTestEvent[];
+}
+
 describe('ReportMapperService', () => {
   let svc: ReportMapperService;
 
@@ -13,6 +18,32 @@ describe('ReportMapperService', () => {
 
   it('returns an empty array for an empty input', () => {
     expect(svc.toReportDetails([])).toEqual([]);
+  });
+
+  // Recorded from GET /reports/:projectSlug (AbstractTestEventResponseDto):
+  // the latest result is flattened onto the test, with no nested detail.
+  // Reading only latestTestEventDetail turned every row Failed, with no
+  // recording, after a GTM or GA4 import refreshed the table.
+  it('reads the flattened result the reports list sends', () => {
+    const [ev] = parseReports(
+      '[{"id":3,"eventId":"0fd9ce76-5792-4191-8fba-8bb20e3013bc","testName":"GA4 event - add_to_cart","eventName":"add_to_cart","stopNavigation":false,"message":"Valid","createdAt":"2026-10-20T06:18:46.000Z","updatedAt":"2026-10-20T06:21:19.000Z","hasRecording":true,"passed":true,"requestPassed":true}]'
+    );
+
+    const [out] = svc.toReportDetails([ev]);
+    expect(out.passed).toBe(true);
+    expect(out.requestPassed).toBe(true);
+    expect(out.hasRecording).toBe(true);
+    expect(out.updatedAt!.toISOString()).toBe('2026-10-20T06:21:19.000Z');
+  });
+
+  it('marks a test without a recording', () => {
+    const [ev] = parseReports(
+      '[{"id":4,"eventId":"e4","testName":"GA4 event - scroll","eventName":"scroll","stopNavigation":false,"message":"","createdAt":"2026-10-20T06:18:46.000Z","updatedAt":"2026-10-20T06:18:46.000Z","hasRecording":false,"passed":false,"requestPassed":false}]'
+    );
+
+    const [out] = svc.toReportDetails([ev]);
+    expect(out.hasRecording).toBe(false);
+    expect(out.passed).toBe(false);
   });
 
   it('maps fields and uses the event-level updatedAt when present', () => {

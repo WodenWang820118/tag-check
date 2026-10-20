@@ -37,6 +37,10 @@ export type AbstractTestEvent = {
   recording?: Recording;
   spec?: Spec;
   hasRecording?: boolean;
+  // GET /reports/:projectSlug flattens the latest result onto each test
+  // (AbstractTestEventResponseDto); it does not send latestTestEventDetail.
+  passed?: boolean;
+  requestPassed?: boolean;
 } & TestEventSchema;
 
 export type FullTestEventSchema = {

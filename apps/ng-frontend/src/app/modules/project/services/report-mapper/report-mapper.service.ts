@@ -25,9 +25,11 @@ export class ReportMapperService {
         eventId: e.eventId,
         stopNavigation: e.stopNavigation,
         message: e.message,
-        // TestEventDetail fields from latestTestEventDetail
-        passed: d?.passed ?? false,
-        requestPassed: d?.requestPassed ?? false,
+        // The reports list sends the latest result flattened onto the test;
+        // latestTestEventDetail is only a fallback for nested payloads.
+        passed: e.passed ?? d?.passed ?? false,
+        requestPassed: e.requestPassed ?? d?.requestPassed ?? false,
+        hasRecording: e.hasRecording ?? false,
         rawRequest: d?.rawRequest,
         destinationUrl: d?.destinationUrl ?? '',
         dataLayer: d?.dataLayer,
