@@ -1,13 +1,32 @@
 import { Injectable, OnDestroy } from '@angular/core';
+import { DataLayerGlobal } from '../../models/data-layer-event.model';
+
+/**
+ * The IFrame API player members this service reads
+ * (https://developers.google.com/youtube/iframe_api_reference). `videoTitle`
+ * is not in that reference; it is read as the player object exposes it.
+ */
+interface TrackedYoutubePlayer {
+  getPlayerState(): number;
+  getVideoUrl(): string;
+  getCurrentTime(): number;
+  getDuration(): number;
+  videoTitle?: string;
+}
+
+/** `stateChange` event emitted by `<youtube-player>`. */
+export interface YoutubeStateChangeEvent {
+  target: TrackedYoutubePlayer;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class YoutubeService implements OnDestroy {
-  private progressInterval: any;
+  private progressInterval?: ReturnType<typeof setInterval> | null;
   private readonly youtubeEventRecords: Map<number, boolean> = new Map();
 
-  trackVideoEvent(event: any): void {
+  trackVideoEvent(event: YoutubeStateChangeEvent): void {
     const playerState = event.target.getPlayerState();
     switch (playerState) {
       case -1:
@@ -15,7 +34,7 @@ export class YoutubeService implements OnDestroy {
         break;
       case 0:
         console.log('Video Ended');
-        (globalThis as any).dataLayer.push({
+        (globalThis as unknown as DataLayerGlobal).dataLayer.push({
           event: 'youtube_complete',
           videoTitle: event.target.videoTitle,
           videoUrl: event.target.getVideoUrl(),
@@ -34,7 +53,7 @@ export class YoutubeService implements OnDestroy {
         break;
       case 5:
         console.log('Video Cued');
-        (globalThis as any).dataLayer.push({
+        (globalThis as unknown as DataLayerGlobal).dataLayer.push({
           event: 'youtube_start',
           videoTitle: event.target.videoTitle,
           videoUrl: event.target.getVideoUrl(),
@@ -48,7 +67,7 @@ export class YoutubeService implements OnDestroy {
     }
   }
 
-  startProgressTracking(event: any): void {
+  startProgressTracking(event: YoutubeStateChangeEvent): void {
     // Clear existing interval if any
     this.stopProgressTracking();
 
@@ -65,7 +84,7 @@ export class YoutubeService implements OnDestroy {
     }
   }
 
-  trackVideoProgress(event: any): void {
+  trackVideoProgress(event: YoutubeStateChangeEvent): void {
     const videoPercent =
       event.target.getCurrentTime() / event.target.getDuration();
     this.checkAndTrackProgress(
@@ -88,12 +107,12 @@ export class YoutubeService implements OnDestroy {
   private checkAndTrackProgress(
     label: number,
     condition: boolean,
-    event: any
+    event: YoutubeStateChangeEvent
   ): void {
     if (condition && !this.youtubeEventRecords.get(label)) {
       console.log(`Video Progress ${label}`);
       this.youtubeEventRecords.set(label, true);
-      (globalThis as any).dataLayer.push({
+      (globalThis as unknown as DataLayerGlobal).dataLayer.push({
         event: 'youtube_progress',
         videoTitle: event.target.videoTitle,
         videoUrl: event.target.getVideoUrl(),

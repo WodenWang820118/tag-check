@@ -14,10 +14,10 @@ describe('EvaluateHoverService', () => {
     const page = {
       evaluate: vi.fn()
     };
-    const service = new EvaluateHoverService(actionUtils as any);
+    const service = new EvaluateHoverService(actionUtils as never);
 
     const result = await service.operate(
-      page as any,
+      page as never,
       'project',
       'event',
       '.menu',
@@ -40,10 +40,10 @@ describe('EvaluateHoverService', () => {
     const page = {
       evaluate: vi.fn()
     };
-    const service = new EvaluateHoverService(actionUtils as any);
+    const service = new EvaluateHoverService(actionUtils as never);
 
     const result = await service.operate(
-      page as any,
+      page as never,
       'project',
       'event',
       '.missing',

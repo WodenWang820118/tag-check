@@ -1,8 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Page } from 'puppeteer';
+import { KeyInput, Page } from 'puppeteer';
 import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
 import { ACTION_HANDLERS, ActionHandler } from '..//handlers/utils';
-import { StepExecutorUtilsService } from './step-executor-utils.service';
+import {
+  StepExecutorUtilsService,
+  StepReplayState
+} from './step-executor-utils.service';
 import { EventInspectionPresetDto } from '../../../../shared/dto/event-inspection-preset.dto';
 import { Step } from '@utils';
 import { BrowserAction } from '../action-utils';
@@ -22,7 +25,7 @@ export class StepExecutorService {
     step: Step,
     projectSlug: string,
     eventId: string,
-    state: any,
+    state: StepReplayState,
     isLastStep: boolean,
     application: EventInspectionPresetDto['application']
   ) {
@@ -53,13 +56,11 @@ export class StepExecutorService {
         break;
       case BrowserAction.KEYDOWN:
         this.logger.log(`${step.type} ${step.key}`);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await page.keyboard.down(step.key as any);
+        await page.keyboard.down(step.key as KeyInput);
         break;
       case BrowserAction.KEYUP:
         this.logger.log(`${step.type} ${step.key}`);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await page.keyboard.up(step.key as any);
+        await page.keyboard.up(step.key as KeyInput);
         await this.stepExecutorUtilsService.handleKeyboardAction(
           page,
           projectSlug,

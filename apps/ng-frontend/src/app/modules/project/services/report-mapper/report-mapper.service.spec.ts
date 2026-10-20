@@ -33,7 +33,7 @@ describe('ReportMapperService', () => {
     expect(out.passed).toBe(true);
     expect(out.requestPassed).toBe(true);
     expect(out.hasRecording).toBe(true);
-    expect(out.updatedAt!.toISOString()).toBe(
+    expect(out.updatedAt?.toISOString()).toBe(
       REPORT_LIST_ITEM_SAMPLE.updatedAt
     );
   });
@@ -76,8 +76,8 @@ describe('ReportMapperService', () => {
     expect(out.passed).toBe(true);
     expect(out.requestPassed).toBe(true);
     expect(out.destinationUrl).toBe('http://x');
-    expect(out.updatedAt!.toISOString()).toBe('2024-01-03T00:00:00.000Z');
-    expect(out.createdAt!.toISOString()).toBe('2024-01-02T00:00:00.000Z');
+    expect(out.updatedAt?.toISOString()).toBe('2024-01-03T00:00:00.000Z');
+    expect(out.createdAt?.toISOString()).toBe('2024-01-02T00:00:00.000Z');
   });
 
   it('falls back to detail.updatedAt when event has none', () => {
@@ -94,7 +94,7 @@ describe('ReportMapperService', () => {
       }
     } as never;
     const [out] = svc.toReportDetails([ev]);
-    expect(out.updatedAt!.toISOString()).toBe('2024-01-04T00:00:00.000Z');
+    expect(out.updatedAt?.toISOString()).toBe('2024-01-04T00:00:00.000Z');
   });
 
   it('falls back to "now" when neither event nor detail provides timestamps', () => {
@@ -107,7 +107,7 @@ describe('ReportMapperService', () => {
     } as never;
     const [out] = svc.toReportDetails([ev]);
     expect(out.updatedAt instanceof Date).toBe(true);
-    expect(out.createdAt! instanceof Date).toBe(true);
+    expect(out.createdAt instanceof Date).toBe(true);
     expect(out.passed).toBe(false);
     expect(out.requestPassed).toBe(false);
     expect(out.destinationUrl).toBe('');

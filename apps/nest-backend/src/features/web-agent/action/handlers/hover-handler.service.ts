@@ -24,8 +24,7 @@ export class HoverHandler implements ActionHandler {
     projectName: string,
     eventId: string,
     step: Step,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    isLastStep: boolean
+    _isLastStep: boolean
   ): Promise<void> {
     let hoveredSuccessfully = false;
 

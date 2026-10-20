@@ -53,7 +53,7 @@ describe('RequestInterceptorService', () => {
     const page = createMockPage(fetchSession);
 
     const handle = await service.setupInterception(
-      page as any,
+      page as never,
       'project',
       'event-a',
       'view_item',
@@ -97,7 +97,7 @@ describe('RequestInterceptorService', () => {
     const fetchSession = createMockCdpSession();
     const page = createMockPage(fetchSession);
     const handle = await service.setupInterception(
-      page as any,
+      page as never,
       'project',
       'event-a',
       'login',
@@ -122,7 +122,7 @@ describe('RequestInterceptorService', () => {
     const fetchSession = createMockCdpSession();
     const page = createMockPage(fetchSession);
     const handle = await service.setupInterception(
-      page as any,
+      page as never,
       'project',
       'event-a',
       'view_item_list',
@@ -156,14 +156,14 @@ describe('RequestInterceptorService', () => {
     const page = createMockPage(firstSession, secondSession);
 
     const firstHandle = await service.setupInterception(
-      page as any,
+      page as never,
       'project',
       'event-a',
       'view_item',
       'G-A'
     );
     const secondHandle = await service.setupInterception(
-      page as any,
+      page as never,
       'project',
       'event-b',
       'purchase',
@@ -210,7 +210,7 @@ describe('RequestInterceptorService', () => {
     const page = createMockPage(fetchSession);
 
     const handle = await service.setupInterception(
-      page as any,
+      page as never,
       'project',
       'event-a',
       'view_item',
@@ -242,7 +242,7 @@ describe('RequestInterceptorService', () => {
     const page = createMockPage(fetchSession, networkSession);
 
     const handle = await service.setupInterception(
-      page as any,
+      page as never,
       'project',
       'event-a',
       'search',
@@ -271,12 +271,12 @@ describe('RequestInterceptorService', () => {
 
   it('reports the GA4 events it saw when nothing matched', async () => {
     const warn = vi
-      .spyOn((service as any).logger, 'warn')
+      .spyOn(service['logger'], 'warn')
       .mockImplementation(() => undefined);
     const fetchSession = createMockCdpSession();
     const page = createMockPage(fetchSession);
     const handle = await service.setupInterception(
-      page as any,
+      page as never,
       'project',
       'event-a',
       'purchase',
@@ -298,12 +298,12 @@ describe('RequestInterceptorService', () => {
 
   it('warns when the expected event name breaks GA4 naming rules', async () => {
     const warn = vi
-      .spyOn((service as any).logger, 'warn')
+      .spyOn(service['logger'], 'warn')
       .mockImplementation(() => undefined);
     const page = createMockPage(createMockCdpSession());
 
     const handle = await service.setupInterception(
-      page as any,
+      page as never,
       'project',
       'event-a',
       'GA4 event - view_promotion',
@@ -332,16 +332,16 @@ function createMockPage(...sessions: MockCdpSession[]) {
 function createMockCdpSession(
   responses: Record<string, (params?: unknown) => Promise<unknown>> = {}
 ) {
-  const handlers = new Map<string, (...args: any[]) => void>();
+  const handlers = new Map<string, (payload: unknown) => void>();
   return {
     send: vi.fn((method: string, params?: unknown) =>
       responses[method] ? responses[method](params) : Promise.resolve(undefined)
     ),
     detach: vi.fn().mockResolvedValue(undefined),
-    on: vi.fn((event: string, handler: (...args: any[]) => void) => {
+    on: vi.fn((event: string, handler: (payload: unknown) => void) => {
       handlers.set(event, handler);
     }),
-    off: vi.fn((event: string, handler: (...args: any[]) => void) => {
+    off: vi.fn((event: string, handler: (payload: unknown) => void) => {
       if (handlers.get(event) === handler) {
         handlers.delete(event);
       }

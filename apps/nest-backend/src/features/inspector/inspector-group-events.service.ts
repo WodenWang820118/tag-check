@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { StrictDataLayerEvent } from '@utils';
 import { Page, Browser, Credentials } from 'puppeteer';
 import { FileService } from '../../infrastructure/os/file/file.service';
+import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { FilePathService } from '../../infrastructure/os/path/file-path/file-path.service';
 import { InspectorSingleEventService } from './inspector-single-event.service';
 import { InspectorUtilsService } from './inspector-utils.service';
@@ -31,7 +32,8 @@ export class InspectorGroupEventsService {
     const operations =
       await this.fileService.getOperationJsonByProject(projectName);
 
-    const results: any[] = [];
+    // Each entry is an inspection result, a caught `{ error }`, or a rejection reason.
+    const results: unknown[] = [];
     for (let i = 0; i < operations.length; i += concurrency) {
       const incognitoContext = await browser.createBrowserContext();
       const operationBatch = operations.slice(i, i + concurrency);
@@ -49,7 +51,8 @@ export class InspectorGroupEventsService {
               measurementId,
               credentials,
               captureRequest,
-              '' as any
+              // Group runs have no preset; '' stands in for "no application".
+              '' as unknown as EventInspectionPresetDto['application']
             );
           await this.fileService.writeCacheFile(projectName, operation, result);
           const imageSavingFolder = await this.filePathService.getImageFilePath(

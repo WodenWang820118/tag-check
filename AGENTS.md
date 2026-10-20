@@ -83,6 +83,9 @@ service; don't rely on another module re-exporting it.
   `data-testid` hooks on `ng-gtm-sample` and run against
   https://ng-gtm-sample.vercel.app. Keep those hooks stable or re-record.
 - Lint with oxlint and format with oxfmt. The workspace has no ESLint.
+- `any`, non-null assertions (`x!`) and unused variables are lint errors
+  everywhere, specs and `tools/scripts` included. Narrow or guard values
+  instead of asserting them.
 - `data-testid` hooks are kebab-case, area first, with the GA4 event name or
   project slug as the per-row suffix (`run-test-add_to_cart`,
   `project-open-<slug>`).
@@ -114,8 +117,9 @@ service; don't rely on another module re-exporting it.
   error budget, and `libs/shared-styles` counts against it. Prefer
   `mat.*-overrides` mixins with only the tokens you change over
   `mat.*-color` / `mat.*-theme`.
-- The pre-commit hook runs `nx affected` tests six at a time. ng-frontend,
-  ng-gtm-sample, data-access and nest-backend tests occasionally fail under
-  that load; if they pass alone, retry the commit.
+- The pre-commit hook runs `nx affected` tests three at a time. At six,
+  vitest workers ran out of memory (`DataCloneError: ... out of memory`) and
+  timing-sensitive specs timed out. If a project fails only there but passes
+  alone, retry the commit.
 - Headful GTM runs (accompanied mode) leave their Chromium window open on
   purpose, for inspection. Close it yourself.

@@ -31,11 +31,14 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
-  signOut
+  signOut,
+  type Auth,
+  type User,
+  type UserCredential
 } from 'firebase/auth';
 
 describe('AuthService', () => {
-  const firebaseAuth = { name: 'firebase-auth' } as any;
+  const firebaseAuth = { name: 'firebase-auth' } as Auth;
   const analyticsService = {
     trackEvent: vi.fn()
   };
@@ -70,7 +73,7 @@ describe('AuthService', () => {
 
   it('syncs the user signal from onAuthStateChanged', () => {
     const service = TestBed.inject(AuthService);
-    const user = { uid: 'user-1', displayName: 'Travel Admin' } as any;
+    const user = { uid: 'user-1', displayName: 'Travel Admin' } as User;
 
     expect(onAuthStateChanged).toHaveBeenCalledWith(
       firebaseAuth,
@@ -88,11 +91,11 @@ describe('AuthService', () => {
 
   it('returns the signed-in user and tracks the login event', async () => {
     const service = TestBed.inject(AuthService);
-    const user = { uid: 'user-2', displayName: 'Traveler' } as any;
+    const user = { uid: 'user-2', displayName: 'Traveler' } as User;
 
     vi.mocked(signInWithPopup).mockResolvedValue({
       user
-    } as any);
+    } as UserCredential);
 
     const result = await firstValueFrom(service.loginWithGoogle());
 

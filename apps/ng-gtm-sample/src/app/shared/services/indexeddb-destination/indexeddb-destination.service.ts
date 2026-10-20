@@ -18,7 +18,7 @@ export class IndexeddbDestinationService {
   private readonly dbReady$ = defer(() =>
     from(import('../../../db-destinations')).pipe(
       take(1),
-      tap((module) => {
+      tap(() => {
         console.log('IndexedDB: regular destinations initialized');
         this.dbInitialized.set(true);
       }),

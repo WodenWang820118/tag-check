@@ -7,6 +7,11 @@ import { doc, setDoc, writeBatch } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { FIREBASE_FIRESTORE } from '../../../firebase/firebase.tokens';
 
+/** Entry in `assets/countries.json`; only the fields the app reads are typed. */
+export interface CountryJsonEntry {
+  name: { common: string };
+}
+
 @Injectable()
 export class CountriesDataService {
   private readonly jsonUrl = 'assets/countries.json'; // Path to the JSON file
@@ -58,7 +63,7 @@ export class CountriesDataService {
     }
   }
 
-  private destinationToFirestoreObject(destination: Destination): any {
+  private destinationToFirestoreObject(destination: Destination): Destination {
     return {
       country: destination.country,
       city: destination.city,
@@ -92,8 +97,8 @@ export class CountriesDataService {
     });
   }
 
-  getCountries(): Observable<any> {
-    return this.http.get<any>(this.jsonUrl);
+  getCountries(): Observable<CountryJsonEntry[]> {
+    return this.http.get<CountryJsonEntry[]>(this.jsonUrl);
   }
 
   assembleAllDestinations() {

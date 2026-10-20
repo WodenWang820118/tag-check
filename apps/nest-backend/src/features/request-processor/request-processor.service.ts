@@ -45,7 +45,10 @@ export class RequestProcessorService {
     return queryParams.get('en') || '';
   }
 
-  addCustomEventParameters(dataLayer: any, queryString: string) {
+  addCustomEventParameters(
+    dataLayer: Record<string, unknown>,
+    queryString: string
+  ): Record<string, unknown> {
     const queryParams = new URLSearchParams(queryString);
     for (const [key, val] of queryParams.entries()) {
       if (key.startsWith('ep.')) {

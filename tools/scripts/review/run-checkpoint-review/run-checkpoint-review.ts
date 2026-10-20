@@ -331,9 +331,7 @@ export function inferAutoReviewRisk(input: {
     changedFiles.some((filePath) =>
       matchesPathPattern(filePath, HIGH_RISK_PATH_PATTERNS)
     ) ||
-    changedFiles.some((filePath) =>
-      isReviewControlPlanePath(filePath, input.context)
-    )
+    changedFiles.some((filePath) => isReviewControlPlanePath(filePath))
   ) {
     return 'high';
   }
@@ -781,7 +779,7 @@ function collectRepoDiffText(repoRoot: string): string {
   return outputs.join('\n').trim();
 }
 
-function isReviewControlPlanePath(filePath: string, context: string): boolean {
+function isReviewControlPlanePath(filePath: string): boolean {
   const normalizedPath = normalizeReviewPath(filePath);
   if (
     REVIEW_CONTROL_PLANE_PATH_PATTERNS.some((pattern) =>

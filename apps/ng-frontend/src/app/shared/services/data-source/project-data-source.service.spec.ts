@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
+import type { IReportDetails } from '@utils';
 import { ProjectDataSourceService } from './project-data-source.service';
 
 describe('ProjectDataSourceService', () => {
@@ -15,7 +16,7 @@ describe('ProjectDataSourceService', () => {
   });
 
   it('setData pushes a new value to the stream', async () => {
-    const reports = [{ eventName: 'e1' }] as any;
+    const reports = [{ eventName: 'e1' }] as IReportDetails[];
     svc.setData(reports);
     expect(await firstValueFrom(svc.connect())).toBe(reports);
   });

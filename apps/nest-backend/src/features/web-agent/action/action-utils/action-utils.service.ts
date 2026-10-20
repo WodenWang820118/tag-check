@@ -131,9 +131,12 @@ export class ActionUtilsService {
     return null;
   }
 
-  isElementHandle(obj: any): obj is ElementHandle<Element> {
+  isElementHandle(obj: unknown): obj is ElementHandle<Element> {
+    const candidate = obj as Partial<Record<'click' | 'focus', unknown>> | null;
     return (
-      obj && typeof obj.click === 'function' && typeof obj.focus === 'function'
+      !!candidate &&
+      typeof candidate.click === 'function' &&
+      typeof candidate.focus === 'function'
     );
   }
 

@@ -107,55 +107,58 @@ export function classes(
       }
     }
 
+    // Closures below run later, so they keep their own non-optional reference.
+    const elementManager = manager;
+
     // Assign order once at registration time
-    const sourceOrder = manager.nextOrder++;
+    const sourceOrder = elementManager.nextOrder++;
 
     function updateClasses(): void {
       // Get the new classes from the computed function
       const newClasses = toClassList(computed());
 
       // Update this source's classes, keeping the original order
-      manager!.sources.set(sourceId, {
+      elementManager.sources.set(sourceId, {
         classes: new Set(newClasses),
         order: sourceOrder
       });
 
       // Update the element
-      updateElement(manager!);
+      updateElement(elementManager);
 
       // Re-enable transitions after the first effect writes correct classes.
       // Deferred to next animation frame so the browser paints the class change
       // with transitions disabled first, then re-enables them.
-      if (manager!.transitionsSuppressed) {
-        manager!.transitionsSuppressed = false;
-        manager!.restoreRafId = requestAnimationFrame(() => {
-          manager!.restoreRafId = null;
-          restoreTransitionSuppression(manager!);
+      if (elementManager.transitionsSuppressed) {
+        elementManager.transitionsSuppressed = false;
+        elementManager.restoreRafId = requestAnimationFrame(() => {
+          elementManager.restoreRafId = null;
+          restoreTransitionSuppression(elementManager);
         });
       }
     }
 
     // Register cleanup with DestroyRef
     destroyRef.onDestroy(() => {
-      if (manager!.restoreRafId !== null) {
-        cancelAnimationFrame(manager!.restoreRafId);
-        manager!.restoreRafId = null;
+      if (elementManager.restoreRafId !== null) {
+        cancelAnimationFrame(elementManager.restoreRafId);
+        elementManager.restoreRafId = null;
       }
 
-      if (manager!.transitionsSuppressed) {
-        manager!.transitionsSuppressed = false;
-        restoreTransitionSuppression(manager!);
+      if (elementManager.transitionsSuppressed) {
+        elementManager.transitionsSuppressed = false;
+        restoreTransitionSuppression(elementManager);
       }
 
       // Remove this source from the manager
-      manager!.sources.delete(sourceId);
+      elementManager.sources.delete(sourceId);
 
       // If no more sources, clean up the manager
-      if (manager!.sources.size === 0) {
+      if (elementManager.sources.size === 0) {
         cleanupManager(element);
       } else {
         // Update element without this source's classes
-        updateElement(manager!);
+        updateElement(elementManager);
       }
     });
 
@@ -306,8 +309,11 @@ const classListCache = new Map<string, string[]>();
 
 function toClassList(className: string | ClassValue[]): string[] {
   // For simple string inputs, use cache to avoid repeated parsing
-  if (typeof className === 'string' && classListCache.has(className)) {
-    return classListCache.get(className)!;
+  if (typeof className === 'string') {
+    const cached = classListCache.get(className);
+    if (cached) {
+      return cached;
+    }
   }
 
   const result = clsx(className)

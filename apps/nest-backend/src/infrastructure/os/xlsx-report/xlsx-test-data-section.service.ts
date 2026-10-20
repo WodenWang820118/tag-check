@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
-import { FullTestEventResponseDto } from '../../../shared';
+import {
+  FullTestEventResponseDto,
+  TestEventDetailResponseDto
+} from '../../../shared';
 import { XlsxUtilsService } from './xlsx-utils.service';
 
 @Injectable()
@@ -10,8 +13,7 @@ export class XlsxTestDataSectionService {
 
   addTestDataSection(
     worksheet: ExcelJS.Worksheet,
-    report: FullTestEventResponseDto,
-    startRow: number
+    report: FullTestEventResponseDto
   ): void {
     // Add data section header
     const dataHeaderRow = worksheet.addRow(['Test Data']);
@@ -61,9 +63,13 @@ export class XlsxTestDataSectionService {
     );
 
     // Normalize testEventDetails to an array to support both single object and array payloads
-    const detailsArray: any[] = Array.isArray((report as any).testEventDetails)
-      ? ((report as any).testEventDetails as any[])
-      : [(report as any).testEventDetails];
+    // (the DTO declares a single detail, but some callers pass an array).
+    const testEventDetails:
+      | TestEventDetailResponseDto
+      | TestEventDetailResponseDto[]
+      | undefined = report.testEventDetails;
+    const detailsArray: (TestEventDetailResponseDto | undefined)[] =
+      Array.isArray(testEventDetails) ? testEventDetails : [testEventDetails];
 
     // Add one data row per detail entry
     for (const detail of detailsArray) {

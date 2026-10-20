@@ -76,7 +76,7 @@ function createSnapshot(destinations: Destination[]) {
       id: destination.id,
       data: () => ({ ...destination })
     }))
-  } as any;
+  };
 }
 
 describe('FirestoreDestinationPipelineService', () => {

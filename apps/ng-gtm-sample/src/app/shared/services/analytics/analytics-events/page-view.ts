@@ -1,11 +1,18 @@
-import { AnalyticsEventTracker } from '../../../models/analytics-event-tracker.model';
+import {
+  AnalyticsEventTracker,
+  ProcessedAnalyticsEvent
+} from '../../../models/analytics-event-tracker.model';
 
-export class PageViewEventTracker implements AnalyticsEventTracker {
+export class PageViewEventTracker implements AnalyticsEventTracker<
+  Record<string, unknown>
+> {
   constructor(private readonly eventName: string) {
     this.eventName = eventName;
   }
 
-  getProcessedData(rawEventData: any) {
+  getProcessedData(
+    rawEventData: Record<string, unknown>
+  ): ProcessedAnalyticsEvent {
     return {
       eventData: rawEventData
     };

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigsService } from '../../../../../core/configs/configs.service';
-import { Page } from 'puppeteer';
+import { HTTPRequest, Page } from 'puppeteer';
 
 @Injectable()
 export class RequestService {
@@ -16,11 +16,7 @@ export class RequestService {
       'user-agent': this.configsService.getUSER_AGENT()
     });
 
-    const requestHandler = async (request: {
-      isInterceptResolutionHandled: () => any;
-      url: () => string;
-      continue: () => any;
-    }) => {
+    const requestHandler = async (request: HTTPRequest) => {
       if (request.isInterceptResolutionHandled()) return;
       this.requests.push(request.url());
       await request.continue();

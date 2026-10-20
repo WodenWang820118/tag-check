@@ -20,7 +20,7 @@ describe('UploadSpecService', () => {
   });
 
   it('existKeys returns false when any spec is missing the event key', () => {
-    expect(svc.existKeys([{ event: 'a' }, {} as any])).toBe(false);
+    expect(svc.existKeys([{ event: 'a' }, {}])).toBe(false);
   });
 
   it('existKeys returns true for an empty list', () => {

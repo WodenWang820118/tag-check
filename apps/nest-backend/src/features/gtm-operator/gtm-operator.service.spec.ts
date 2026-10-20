@@ -4,6 +4,8 @@ import {
   GtmOperatorService,
   TAG_ASSISTANT_BADGE_PASSTHROUGH
 } from './gtm-operator.service';
+import type { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
+import type { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 
 describe('GtmOperatorService recorder lifecycle', () => {
   let service: GtmOperatorService;
@@ -21,9 +23,9 @@ describe('GtmOperatorService recorder lifecycle', () => {
   let recorder: { stop: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    vi.spyOn(global, 'setTimeout').mockImplementation((callback: any) => {
+    vi.spyOn(global, 'setTimeout').mockImplementation((callback) => {
       callback();
-      return 0 as any;
+      return 0 as unknown as NodeJS.Timeout;
     });
     targetPage = createMockPage();
     browser = createMockBrowser(targetPage);
@@ -40,9 +42,9 @@ describe('GtmOperatorService recorder lifecycle', () => {
       cleanup: vi.fn().mockResolvedValue(undefined)
     };
     service = new GtmOperatorService(
-      pipeline as any,
-      puppeteerUtils as any,
-      {} as any
+      pipeline as never,
+      puppeteerUtils as never,
+      {} as never
     );
     vi.spyOn(service, 'operateGtmPreviewMode').mockResolvedValue(undefined);
   });
@@ -246,11 +248,15 @@ describe('TAG_ASSISTANT_BADGE_PASSTHROUGH', () => {
 
 describe('GtmOperatorService.operateGtmPreviewMode', () => {
   it('waits for each required GTM preview control before clicking it', async () => {
-    const service = new GtmOperatorService({} as any, {} as any, {} as any);
+    const service = new GtmOperatorService(
+      {} as never,
+      {} as never,
+      {} as never
+    );
     const page = createPreviewPage();
 
     await service.operateGtmPreviewMode(
-      page as any,
+      page as never,
       'https://tagassistant.google.com/#url=https%3A%2F%2Fexample.test'
     );
 
@@ -277,13 +283,17 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
   });
 
   it('fails fast when a required GTM preview control is missing', async () => {
-    const service = new GtmOperatorService({} as any, {} as any, {} as any);
+    const service = new GtmOperatorService(
+      {} as never,
+      {} as never,
+      {} as never
+    );
     const page = createPreviewPage();
     page.waitForSelector.mockRejectedValueOnce(new Error('missing control'));
 
     await expect(
       service.operateGtmPreviewMode(
-        page as any,
+        page as never,
         'https://tagassistant.google.com/#url=https%3A%2F%2Fexample.test'
       )
     ).rejects.toThrow(/Failed to operate GTM preview control/);
@@ -294,7 +304,11 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
 
 describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
   it('returns the decoded website URL from the GTM preview hash', () => {
-    const service = new GtmOperatorService({} as any, {} as any, {} as any);
+    const service = new GtmOperatorService(
+      {} as never,
+      {} as never,
+      {} as never
+    );
 
     expect(
       service.extractBaseUrlFromGtmUrl(
@@ -304,7 +318,11 @@ describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
   });
 
   it('returns an empty string when the GTM preview hash has no target url', () => {
-    const service = new GtmOperatorService({} as any, {} as any, {} as any);
+    const service = new GtmOperatorService(
+      {} as never,
+      {} as never,
+      {} as never
+    );
 
     expect(
       service.extractBaseUrlFromGtmUrl(
@@ -314,26 +332,27 @@ describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
   });
 });
 
-function createQuery() {
+function createQuery(): InspectGtmQueryDto {
   return {
     headless: 'true',
     measurementId: 'G-TEST',
     gtmUrl: 'https://tagassistant.google.com/#url=https%3A%2F%2Fexample.test',
     captureRequest: 'false'
-  } as any;
+  };
 }
 
 function createPreset(options?: {
   cookie?: Array<{ key: string; value: unknown }>;
   localStorage?: Array<{ key: string; value: unknown }>;
-}) {
+}): EventInspectionPresetDto {
+  // Values may be non-strings on purpose: the preload script stringifies them.
   return {
     application: {
       localStorage: { data: options?.localStorage ?? [] },
       cookie: { data: options?.cookie ?? [] }
     },
     puppeteerArgs: []
-  } as any;
+  } as EventInspectionPresetDto;
 }
 
 function createMockBrowser(

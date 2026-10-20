@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RequestProcessorService } from './request-processor.service';
 import { describe, it, expect } from 'vitest';
+import type { BaseECommerce, BaseItem } from '@utils';
 import { parseGa4CollectRequest } from '../web-agent/action/request-interceptor/ga4-collect-request';
 import {
   GTAG_ADD_TO_CART_HIT,
@@ -221,8 +222,11 @@ describe('RequestProcessorService', () => {
         GTAG_BATCHED_HIT.url,
         GTAG_BATCHED_HIT.body
       ).find((event) => event.eventName === 'search');
+      if (!search) {
+        throw new Error('The batched hit has no search event');
+      }
 
-      expect(service.recomposeGA4ECEvent(search!.normalizedUrl)).toStrictEqual({
+      expect(service.recomposeGA4ECEvent(search.normalizedUrl)).toStrictEqual({
         event: 'search',
         ...page,
         search_term: 'a&b #c +d'
@@ -237,7 +241,7 @@ describe('RequestProcessorService', () => {
 
       const recomposed = service.recomposeGA4ECEvent(
         viewItemList.normalizedUrl
-      );
+      ) as { ecommerce: BaseECommerce & { items: BaseItem[] } };
 
       expect(recomposed.ecommerce.item_list_id).toBe('list_6');
       expect(recomposed.ecommerce.item_list_name).toBe('List 6');
