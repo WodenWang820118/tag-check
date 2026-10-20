@@ -1182,8 +1182,20 @@ describe('release helper', () => {
     expect(workflow).toContain(
       'node tools/scripts/tauri/release/release.ts assemble --release-tag ${{ needs.prepare-release.outputs.release_tag }} --artifacts-root dist/downloaded-release-assets --output-dir dist/publish-release'
     );
+    // getReleaseByTag skips drafts; listing releases sees them and the
+    // v<version>-preview tags releases have been published under.
+    expect(workflow).not.toContain('getReleaseByTag');
     expect(workflow).toContain(
-      'Release already exists for ${existing.tag}; skipping duplicate draft creation.'
+      'github.paginate(github.rest.repos.listReleases'
+    );
+    expect(workflow).toContain(
+      'const releasedTags = [releaseTag, legacyTag, `${releaseTag}-preview`];'
+    );
+    expect(workflow).toContain(
+      '${published.tag_name} is already published for ${releaseVersion}; bump VERSION to release again.'
+    );
+    expect(workflow).toContain(
+      'Draft ${releaseTag} is not published yet; rebuilding it from ${checkoutRef}.'
     );
     expect(workflow).toContain('const tagRefPath = (tag) => `tags/${tag}`;');
     expect(workflow).toContain(
