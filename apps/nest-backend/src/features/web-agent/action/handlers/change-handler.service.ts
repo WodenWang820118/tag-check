@@ -9,6 +9,7 @@ import {
   ActionHandler,
   getFirstSelector,
   preferSelector,
+  STEP_SELECTOR_TIMEOUT_MS,
   waitForAnySelector
 } from './utils';
 import { ChangeStrategyService } from '../strategies/change-strategies/change-strategy.service';
@@ -35,12 +36,26 @@ export class ChangeHandler implements ActionHandler {
     timeout = 3000
   ): Promise<void> {
     const candidates = (step.selectors ?? []).map(getFirstSelector);
+    if (candidates.length === 0) {
+      return;
+    }
     const value = step.value!;
-    // Give slow pages time to render the field, then start with the selector
-    // that appeared; the strategies below only wait `timeout` themselves.
-    const visible = await waitForAnySelector(page, candidates);
+    // Give slow pages time to render the field. Typing does not need it to be
+    // visible (page.type fills hidden fields too), only present.
+    const waitTimeout = step.timeout ?? STEP_SELECTOR_TIMEOUT_MS;
+    const present = await waitForAnySelector(page, candidates, {
+      timeout: waitTimeout,
+      visible: false
+    });
+    if (!present) {
+      throw new NotFoundException(
+        `None of the selectors appeared within ${waitTimeout} ms: ${candidates.join(', ')}`
+      );
+    }
 
-    for (const selector of preferSelector(candidates, visible)) {
+    // Start with the selector that appeared; fall back to the others.
+    let lastError: unknown;
+    for (const selector of preferSelector(candidates, present)) {
       try {
         if (
           await this.changeElement(
@@ -52,17 +67,19 @@ export class ChangeHandler implements ActionHandler {
             timeout
           )
         ) {
-          break;
+          return;
         }
       } catch (error) {
-        if (error instanceof NotFoundException) {
-          throw error;
-        }
-        if (error instanceof InternalServerErrorException) {
-          throw error;
-        }
+        lastError = error;
+        this.logger.warn(`Failed to change using selector ${selector}`);
       }
     }
+    throw (
+      lastError ??
+      new InternalServerErrorException(
+        `Failed to change any of: ${candidates.join(', ')}`
+      )
+    );
   }
 
   async changeElement(

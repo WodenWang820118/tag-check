@@ -44,24 +44,26 @@ export class ClickHandler implements ActionHandler {
     const offsetX = step.offsetX;
     const offsetY = step.offsetY;
     const candidates = (step.selectors ?? []).map(getFirstSelector);
-    const visible = await waitForAnySelector(page, candidates);
+    const timeout = step.timeout ?? STEP_SELECTOR_TIMEOUT_MS;
+    const visible = await waitForAnySelector(page, candidates, { timeout });
     if (!visible) {
       this.logger.warn(
-        `None of ${candidates.length} selector(s) became visible within ${STEP_SELECTOR_TIMEOUT_MS} ms: ${candidates.join(', ')}`
+        `None of ${candidates.length} selector(s) became visible within ${timeout} ms: ${candidates.join(', ')}`
       );
       throw new InternalServerErrorException(
-        `Failed to click. None of the selectors worked for action ${step.target}`
+        `Failed to click. None of the selectors became visible within ${timeout} ms for action ${step.target}`
       );
     }
     for (const firstSelector of preferSelector(candidates, visible)) {
       try {
-        // The shared wait above already saw the preferred selector.
+        // The shared wait above already saw the preferred selector; this
+        // timeout also bounds the click itself, so keep it at 5 s.
         const clicked = await this.clickElement(
           page,
           projectSlug,
           eventId,
           firstSelector,
-          { preventNavigation, timeout: 2000, offsetX, offsetY }
+          { preventNavigation, timeout: 5000, offsetX, offsetY }
         );
         if (clicked) {
           clickedSuccessfully = true;
