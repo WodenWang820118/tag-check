@@ -48,7 +48,7 @@ export function getRunStatus(
 
 export type ReportTabViewModel = {
   title: string;
-  createdAt: Date | string | undefined;
+  lastRunAt: Date | string | undefined;
   status: RunStatus;
   passed: boolean;
   eventName: string;

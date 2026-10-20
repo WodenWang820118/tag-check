@@ -29,7 +29,7 @@ function buildReportTabViewModel(
 
   return {
     title: context.spec.rawGtmTag?.tag?.name || 'Report',
-    createdAt: reportDetails?.createdAt,
+    lastRunAt: reportDetails?.updatedAt,
     status: getRunStatus(reportDetails),
     passed: reportDetails?.passed ?? false,
     eventName: reportDetails?.eventName || '',

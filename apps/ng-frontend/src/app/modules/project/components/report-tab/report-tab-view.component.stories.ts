@@ -12,7 +12,7 @@ function createViewModel(
 ): ReportTabViewModel {
   return {
     title: 'Purchase Report',
-    createdAt: new Date('2026-04-23T12:34:56.000Z'),
+    lastRunAt: new Date('2026-04-23T12:34:56.000Z'),
     status: 'failed',
     passed: false,
     eventName: 'purchase',

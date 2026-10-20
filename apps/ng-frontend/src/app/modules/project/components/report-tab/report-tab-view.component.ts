@@ -61,8 +61,8 @@ const STATUS_BADGES: Record<
               @if (viewModel().status === 'notRun') {
                 <span class="text-black/70">Not run yet</span>
               } @else {
-                <time class="text-black/70" aria-label="Report created at">
-                  {{ viewModel().createdAt | date: 'medium' }}
+                <time class="text-black/70" aria-label="Last run">
+                  {{ viewModel().lastRunAt | date: 'medium' }}
                 </time>
               }
             </mat-card-subtitle>
@@ -72,7 +72,10 @@ const STATUS_BADGES: Record<
             <output class="sr-only" aria-live="polite" aria-atomic="true">
               Report status: {{ statusBadge().label }}
             </output>
-            <mat-chip-set aria-label="Report status">
+            <mat-chip-set
+              aria-label="Report status"
+              data-testid="report-status"
+            >
               <mat-chip [color]="statusBadge().color" class="w-full">
                 <div class="flex items-center gap-1">
                   {{ statusBadge().label }}
@@ -186,7 +189,10 @@ const STATUS_BADGES: Record<
           <section class="space-y-4 mt-10">
             @if (viewModel().hasMedia) {
               <mat-accordion displayMode="flat">
-                <mat-expansion-panel [expanded]="!viewModel().passed">
+                <mat-expansion-panel
+                  [expanded]="!viewModel().passed"
+                  data-testid="report-media"
+                >
                   <mat-expansion-panel-header>
                     <mat-panel-title>
                       <span class="flex items-center">
