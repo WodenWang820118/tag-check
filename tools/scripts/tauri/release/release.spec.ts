@@ -1216,6 +1216,9 @@ describe('release helper', () => {
       'NOTES_PATH: docs/releases/${{ steps.release_context.outputs.release_version }}.md'
     );
     expect(workflow).toContain('github.rest.repos.updateRelease');
+    // Without tag_name GitHub detaches the draft from its tag (untagged-<hash>).
+    expect(workflow).toContain('tag_name: releaseTag,');
+    expect(workflow).toContain('lost its tag');
     expect(workflow).toContain('.sort((left, right) => left.id - right.id);');
   });
 
