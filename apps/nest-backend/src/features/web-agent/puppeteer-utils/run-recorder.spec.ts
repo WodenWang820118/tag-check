@@ -140,15 +140,39 @@ describe('RunRecorder', () => {
     expect(recorder.error).toMatch(/exited early \(code 1/);
   });
 
-  it('reports a missing ffmpeg instead of throwing', async () => {
+  it('reports a missing ffmpeg and stops without waiting for it', async () => {
+    vi.useFakeTimers();
     const { ffmpeg, start } = setup();
+    ffmpeg.exitOnEnd = false;
     const recorder = await start();
 
+    // A process that never started emits 'error' and no 'close'.
     ffmpeg.emit('error', new Error('spawn ffmpeg.exe ENOENT'));
-    ffmpeg.emit('close', -2, null);
-    await recorder.stop();
+    let stopped = false;
+    const stopping = recorder.stop().then(() => {
+      stopped = true;
+    });
+    await vi.advanceTimersByTimeAsync(0);
+    await stopping;
 
+    expect(stopped).toBe(true);
+    expect(ffmpeg.kill).not.toHaveBeenCalled();
     expect(recorder.error).toMatch(/ENOENT/);
+  });
+
+  it('releases the CDP session when ffmpeg cannot be spawned', async () => {
+    const { session } = setup();
+    const page = {
+      viewport: () => ({ width: 1400, height: 900 }),
+      createCDPSession: vi.fn(async () => session)
+    };
+
+    await expect(
+      RunRecorder.start(page as never, 'out.webm', 'ffmpeg.exe', () => {
+        throw new Error('spawn EINVAL');
+      })
+    ).rejects.toThrow('spawn EINVAL');
+    expect(session.detach).toHaveBeenCalled();
   });
 
   it('kills ffmpeg when it does not finish after stop', async () => {

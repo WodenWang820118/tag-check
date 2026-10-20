@@ -81,8 +81,12 @@ export class RunRecorder {
         }
         resolve();
       });
+      ffmpeg.on('error', (error) => {
+        this.fail(`ffmpeg failed: ${error.message}`);
+        // A process that never started may never emit 'close'.
+        if (ffmpeg.pid === undefined) resolve();
+      });
     });
-    ffmpeg.on('error', (error) => this.fail(`ffmpeg failed: ${error.message}`));
     ffmpeg.stdin?.on('error', (error) =>
       this.fail(`writing frames to ffmpeg failed: ${error.message}`)
     );
@@ -111,7 +115,13 @@ export class RunRecorder {
     const height = toEven(viewport.height);
 
     const session = await page.createCDPSession();
-    const ffmpeg = spawnProcess(ffmpegPath, recordingArgs(width, height, file));
+    let ffmpeg: ChildProcess;
+    try {
+      ffmpeg = spawnProcess(ffmpegPath, recordingArgs(width, height, file));
+    } catch (error) {
+      await session.detach().catch(() => undefined);
+      throw error;
+    }
     const recorder = new RunRecorder(session, ffmpeg, file);
     try {
       await session.send('Page.startScreencast', {
