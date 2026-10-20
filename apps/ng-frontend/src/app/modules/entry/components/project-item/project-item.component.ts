@@ -24,7 +24,7 @@ import { MetadataSourceService } from '../../../../shared/services/data-source/m
   imports: [MatCardModule, MatButtonModule, RouterLink],
   template: `
     <div class="project-item">
-      <mat-card>
+      <mat-card [attr.data-testid]="'project-card-' + project().projectSlug">
         <mat-card-header>
           <mat-card-title>{{ project().projectName }}</mat-card-title>
           <mat-card-subtitle>{{ project().projectSlug }}</mat-card-subtitle>
@@ -46,11 +46,17 @@ import { MetadataSourceService } from '../../../../shared/services/data-source/m
             mat-button
             [routerLink]="['/projects', project().projectSlug]"
             [state]="{ slug: project().projectSlug }"
+            [attr.data-testid]="'project-open-' + project().projectSlug"
             color="primary"
           >
             View
           </button>
-          <button mat-button (click)="deleteProject()" color="warn">
+          <button
+            mat-button
+            (click)="deleteProject()"
+            color="warn"
+            [attr.data-testid]="'project-delete-' + project().projectSlug"
+          >
             Delete
           </button>
         </mat-card-actions>

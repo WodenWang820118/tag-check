@@ -5,6 +5,7 @@
     matTooltip="Add new report"
     matTooltipPosition="above"
     aria-label="Add new report"
+    data-testid="tests-add"
     (click)="emitAddEvent()"
   >
     <mat-icon>add</mat-icon>
@@ -15,6 +16,7 @@
     matTooltip="Delete"
     matTooltipPosition="above"
     aria-label="Delete"
+    data-testid="tests-delete"
     [disabled]="!hasSelection()"
     (click)="deleteSelected()"
   >
@@ -27,6 +29,7 @@
     matTooltip="Mark to stop operation for this event"
     matTooltipPosition="above"
     aria-label="Stop operation"
+    data-testid="tests-stop"
     [disabled]="!isRunningTest()"
     (click)="stopOperation()"
   >
@@ -60,6 +63,7 @@
     matTooltip="Mark to prevent navigation for this event"
     matTooltipPosition="above"
     aria-label="Prevent navigation"
+    data-testid="tests-prevent-navigation"
     (click)="preventNavigationSelected()"
   >
     <mat-icon>bookmark_border</mat-icon>

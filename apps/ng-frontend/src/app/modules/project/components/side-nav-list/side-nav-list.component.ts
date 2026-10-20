@@ -60,6 +60,7 @@ export class SideNavListComponent {
       icon: string;
       title: string;
       link: string;
+      testId: string;
       subTitle?: string;
     }[]
   >([]);
@@ -67,27 +68,33 @@ export class SideNavListComponent {
   settingsMenuItems = signal([
     {
       title: 'Project Information',
-      link: ['./', 'settings', 'project-info']
+      link: ['./', 'settings', 'project-info'],
+      testId: 'nav-settings-project-info'
     },
     {
       title: 'Preloading Values',
-      link: ['./', 'settings', 'pre-loading-values']
+      link: ['./', 'settings', 'pre-loading-values'],
+      testId: 'nav-settings-preloading-values'
     },
     {
       title: 'Authentication',
-      link: ['./', 'settings', 'authentication']
+      link: ['./', 'settings', 'authentication'],
+      testId: 'nav-settings-authentication'
     },
     {
       title: 'Google Tag Manager',
-      link: ['./', 'settings', 'gtm']
+      link: ['./', 'settings', 'gtm'],
+      testId: 'nav-settings-gtm'
     },
     {
       title: 'Advanced Browser',
-      link: ['./', 'settings', 'advanced-browser-settings']
+      link: ['./', 'settings', 'advanced-browser-settings'],
+      testId: 'nav-settings-browser'
     },
     {
       title: 'Project IO',
-      link: ['./', 'settings', 'project-io']
+      link: ['./', 'settings', 'project-io'],
+      testId: 'nav-settings-project-io'
     }
   ]);
 
@@ -113,22 +120,26 @@ export class SideNavListComponent {
             icon: 'home',
             title: 'Tests',
             link: `./`,
+            testId: 'nav-tests',
             subTitle: projectSlug
           },
           {
             icon: 'build',
             title: 'TagBuild',
-            link: `tag-build`
+            link: `tag-build`,
+            testId: 'nav-tagbuild'
           },
           {
             icon: 'folder_shared',
             title: 'Reports',
-            link: `buckets`
+            link: `buckets`,
+            testId: 'nav-reports'
           },
           {
             icon: 'settings',
             title: 'Settings',
-            link: `settings`
+            link: `settings`,
+            testId: 'nav-settings'
           }
         ]);
       });

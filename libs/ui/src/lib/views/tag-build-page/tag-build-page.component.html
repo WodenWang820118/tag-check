@@ -31,12 +31,14 @@
         @if (selectedIndex === TagBuildMode.TagBuild) {
           @if (specs().length > 0) {
             <lib-editor
+              data-testid="tagbuild-input"
               [content]="specs() | json"
               [editorExtension]="inputExtension"
             >
             </lib-editor>
           } @else {
             <lib-editor
+              data-testid="tagbuild-input"
               [content]="[] | json"
               [editorExtension]="inputExtension"
             ></lib-editor>
