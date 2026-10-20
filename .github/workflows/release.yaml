@@ -4,6 +4,16 @@ on:
   push:
     branches:
       - main
+    # Same document-only rule as build.yml. A release changes VERSION, which
+    # is not listed, so release PRs still run this.
+    paths-ignore:
+      - '*.md'
+      - '**/README.md'
+      - '**/AGENTS.md'
+      - '.github/**/*.md'
+      - 'apps/*/docs/**'
+      - 'docs/**'
+      - 'LICENSE'
   workflow_dispatch:
     inputs:
       checkout_ref:

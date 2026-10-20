@@ -1,9 +1,28 @@
 name: Build
+# Changes that touch only documents skip CI. A change with any other file
+# still runs it. Markdown under apps/*/src and libs/*/src is not listed: it is
+# site content (the documentation site renders libs/utils markdown).
 on:
   push:
     branches: [main, develop]
+    paths-ignore:
+      - '*.md'
+      - '**/README.md'
+      - '**/AGENTS.md'
+      - '.github/**/*.md'
+      - 'apps/*/docs/**'
+      - 'docs/**'
+      - 'LICENSE'
   pull_request:
     types: [opened, synchronize, reopened]
+    paths-ignore:
+      - '*.md'
+      - '**/README.md'
+      - '**/AGENTS.md'
+      - '.github/**/*.md'
+      - 'apps/*/docs/**'
+      - 'docs/**'
+      - 'LICENSE'
 jobs:
   sonarcloud:
     name: SonarCloud
