@@ -244,6 +244,24 @@ and Linux AppImage release targets explicit.
 The cross-platform desktop release workflow, artifact names, and operator
 runbook live in [docs/desktop-release.md](./docs/desktop-release.md).
 
+### Vercel Sites
+
+Four Vercel projects build from the repository root:
+
+| Vercel project            | Build script           | Nx project       |
+| ------------------------- | ---------------------- | ---------------- |
+| `tag-check-ng-gtm-sample` | `build-ng-sample-site` | `ng-gtm-sample`  |
+| `tag-build`               | `build-tag-build`      | `ng-tag-build`   |
+| `tag-check-documentation` | `build-product-doc`    | `ng-product-doc` |
+| `tag-check-storybook`     | `build-storybook`      | `ng-frontend`    |
+
+Vercel deploys production from `main` only; `vercel.json` turns off its
+deployments for every other branch. A pull request into `develop` gets a
+preview of each site whose Nx project it affects, from the
+[Vercel previews workflow](./.github/workflows/vercel-previews.yaml). The
+workflow comments the preview URLs on the pull request. It needs a Vercel
+access token in the `VERCEL_TOKEN` repository secret and skips without one.
+
 ## Review Workflow
 
 This repo uses review gates for non-trivial work. The most common commands are:

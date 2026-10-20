@@ -110,6 +110,10 @@ service; don't rely on another module re-exporting it.
   upgrades.
 - pnpm 11 passes a `--` separator through to scripts. Run
   `pnpm run tauri:release describe`, not `pnpm run tauri:release -- describe`.
+- Vercel deploys only `main` (`vercel.json`). Pull request previews come from
+  `.github/workflows/vercel-previews.yaml`, which deploys the sites whose Nx
+  project is affected. Register a new Vercel site in
+  `tools/scripts/vercel/preview-targets`.
 - ng-tag-build's initial bundle has about 1.5 kB of headroom under its 1 MB
   error budget, and `libs/shared-styles` counts against it. Prefer
   `mat.*-overrides` mixins with only the tokens you change over

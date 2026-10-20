@@ -1,0 +1,133 @@
+name: Vercel previews
+# Vercel's Git integration deploys only main (vercel.json). A pull request into
+# develop gets a preview of each Vercel site whose Nx project it affects
+# (tools/scripts/vercel/preview-targets). Unaffected sites create no
+# deployment, so they use none of the daily deployment quota.
+#
+# Needs the VERCEL_TOKEN repository secret; without it the workflow skips.
+on:
+  pull_request:
+    branches: [develop]
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - '*.md'
+      - '**/README.md'
+      - '**/AGENTS.md'
+      - '.github/**/*.md'
+      - 'apps/*/docs/**'
+      - 'docs/**'
+      - 'LICENSE'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: vercel-previews-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  VERCEL_CLI: vercel@62.4.0
+  VERCEL_TEAM: wodenwang820118s-projects
+
+jobs:
+  select:
+    name: Select sites
+    runs-on: ubuntu-latest
+    outputs:
+      targets: ${{ steps.select.outputs.targets }}
+    env:
+      HAS_VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN != '' }}
+    steps:
+      - name: Skip without a Vercel token
+        if: env.HAS_VERCEL_TOKEN != 'true'
+        run: echo "::notice::VERCEL_TOKEN is not set, so no Vercel previews are deployed."
+      - uses: actions/checkout@v4
+        if: env.HAS_VERCEL_TOKEN == 'true'
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        if: env.HAS_VERCEL_TOKEN == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+      - name: Setup pnpm
+        if: env.HAS_VERCEL_TOKEN == 'true'
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.0.8 --activate
+      - name: Install dependencies
+        if: env.HAS_VERCEL_TOKEN == 'true'
+        run: pnpm install --frozen-lockfile
+      - name: Select affected sites
+        id: select
+        if: env.HAS_VERCEL_TOKEN == 'true'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          pnpm nx show projects --affected --base="origin/$BASE_REF" --head=HEAD --json > "$RUNNER_TEMP/affected.json"
+          node tools/scripts/vercel/preview-targets/preview-targets.ts "$RUNNER_TEMP/affected.json" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: Preview ${{ matrix.vercelProject }}
+    needs: select
+    if: needs.select.outputs.targets != '' && needs.select.outputs.targets != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.select.outputs.targets) }}
+    # The token goes to the Vercel CLI as an argument only, so the install and
+    # build scripts never see it in their environment.
+    env:
+      VERCEL_PROJECT: ${{ matrix.vercelProject }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.0.8 --activate
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Link the Vercel project
+        run: npx --yes "$VERCEL_CLI" link --yes --team "$VERCEL_TEAM" --project "$VERCEL_PROJECT" --token "${{ secrets.VERCEL_TOKEN }}"
+      - name: Pull preview settings
+        run: npx --yes "$VERCEL_CLI" pull --yes --environment=preview --token "${{ secrets.VERCEL_TOKEN }}"
+      - name: Build
+        run: npx --yes "$VERCEL_CLI" build --token "${{ secrets.VERCEL_TOKEN }}"
+      - name: Deploy
+        id: deploy
+        run: |
+          url=$(npx --yes "$VERCEL_CLI" deploy --prebuilt --token "${{ secrets.VERCEL_TOKEN }}")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "**$VERCEL_PROJECT** preview: $url" >> "$GITHUB_STEP_SUMMARY"
+      - name: Comment the preview URL
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.url }}
+        with:
+          script: |
+            const project = process.env.VERCEL_PROJECT;
+            const marker = `<!-- vercel-preview:${project} -->`;
+            const sha = context.payload.pull_request.head.sha.slice(0, 7);
+            const body = `${marker}\n**${project}** preview for ${sha}: ${process.env.PREVIEW_URL}`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100
+            });
+            const existing = comments.find(
+              (comment) => comment.user?.type === 'Bot' && comment.body?.startsWith(marker)
+            );
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
