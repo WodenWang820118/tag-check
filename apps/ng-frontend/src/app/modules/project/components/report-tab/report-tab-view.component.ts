@@ -203,7 +203,7 @@ const STATUS_BADGES: Record<
                   </mat-expansion-panel-header>
                   <div
                     id="media-content"
-                    class="max-h-[260px] overflow-hidden rounded-b-lg border-t border-black/10"
+                    class="overflow-hidden rounded-b-lg border-t border-black/10"
                     aria-label="Media content"
                   >
                     <app-carousel
