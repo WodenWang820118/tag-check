@@ -39,5 +39,7 @@ export class ItemDefEntity extends AuditableEntity {
     nullable: true,
     comment: 'Stores the full item definition in JSON format'
   })
-  fullItemDef!: any;
+  // object, not Record<string, unknown>: TypeORM's QueryDeepPartialEntity
+  // rejects unknown-valued records in update() for this and related entities.
+  fullItemDef!: object;
 }

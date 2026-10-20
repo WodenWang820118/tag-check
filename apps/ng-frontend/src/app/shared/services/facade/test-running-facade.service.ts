@@ -16,9 +16,7 @@ import {
   IReportDetails,
   EventInspectionPresetDto,
   ProjectSetting,
-  TestEvent,
-  TestEventDetail,
-  TestImage
+  ReportDetailResponse
 } from '@utils';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
@@ -152,11 +150,7 @@ export class TestRunningFacadeService {
 
   private updateReportDetails(
     eventId: string,
-    res: {
-      testEvent: TestEvent;
-      testEventDetails: TestEventDetail;
-      testImage: TestImage;
-    }[],
+    res: ReportDetailResponse[],
     testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
   ) {
     if (!res || res.length === 0) {

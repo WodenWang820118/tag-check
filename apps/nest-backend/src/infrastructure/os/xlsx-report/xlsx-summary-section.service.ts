@@ -6,8 +6,7 @@ import * as ExcelJS from 'exceljs';
 export class XlsxSummarySectionService {
   addSummarySection(
     worksheet: ExcelJS.Worksheet,
-    report: FullTestEventResponseDto,
-    startRow: number
+    report: FullTestEventResponseDto
   ): void {
     // Add a few empty rows after the data
     worksheet.addRow([]);

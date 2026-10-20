@@ -26,8 +26,8 @@ describe('ActionService', () => {
         )
     };
     const service = new ActionService(
-      eventsGateway as any,
-      stepExecutor as any,
+      eventsGateway as never,
+      stepExecutor as never,
       {
         getRecordingDetails: vi.fn().mockResolvedValue({
           steps: [
@@ -35,13 +35,13 @@ describe('ActionService', () => {
             { type: BrowserAction.NAVIGATE, url: 'https://example.test/next' }
           ]
         })
-      } as any
+      } as never
     );
 
-    await service.performOperation({} as any, 'project', 'event', {
+    await service.performOperation({} as never, 'project', 'event', {
       localStorage: { data: [] },
       cookie: { data: [] }
-    } as any);
+    });
 
     expect(stepExecutor.executeStep).toHaveBeenCalledTimes(2);
     expect(states[1]).toBe(states[0]);

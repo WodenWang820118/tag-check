@@ -1,4 +1,14 @@
-import { toTagSpec, getRunStatus } from './report-detail.contracts';
+import {
+  DataLayerSpec,
+  REPORT_DETAIL_SAMPLE,
+  ReportDetailResponse
+} from '@utils';
+import {
+  buildReportPage,
+  getRunStatus,
+  toReportDetails,
+  toTagSpec
+} from './report-detail.contracts';
 
 describe('toTagSpec', () => {
   it('returns undefined for an undefined spec', () => {
@@ -9,11 +19,12 @@ describe('toTagSpec', () => {
     const spec = {
       dataLayerSpec: { event: 'page_view', extra: 'x' },
       otherKey: 'k'
-    } as any;
-    const result = toTagSpec(spec) as any;
-    expect(result.event).toBe('page_view');
-    expect(result.dataLayerSpec).toBe(spec.dataLayerSpec);
-    expect(result.otherKey).toBe('k');
+    } as unknown as DataLayerSpec;
+    expect(toTagSpec(spec)).toMatchObject({
+      event: 'page_view',
+      dataLayerSpec: spec.dataLayerSpec,
+      otherKey: 'k'
+    });
   });
 });
 
@@ -33,5 +44,87 @@ describe('getRunStatus', () => {
     expect(getRunStatus(report(true, false))).toBe('partial');
     expect(getRunStatus(report(false, true))).toBe('partial');
     expect(getRunStatus(report(false, false))).toBe('failed');
+  });
+});
+
+// The body of GET /reports/:projectSlug/:eventId as it arrives over HTTP.
+function detailResponse(
+  overrides: Partial<ReportDetailResponse> = {}
+): ReportDetailResponse {
+  const wire = JSON.parse(
+    JSON.stringify(REPORT_DETAIL_SAMPLE)
+  ) as ReportDetailResponse;
+  return { ...wire, ...overrides };
+}
+
+describe('toReportDetails', () => {
+  it('flattens the recorded response into one report row', () => {
+    const report = toReportDetails(detailResponse());
+
+    expect(report).toMatchObject({
+      eventId: REPORT_DETAIL_SAMPLE.testEvent.eventId,
+      eventName: 'add_to_cart',
+      event: 'add_to_cart',
+      passed: true,
+      requestPassed: true,
+      rawRequest: REPORT_DETAIL_SAMPLE.testEventDetails.rawRequest,
+      destinationUrl: REPORT_DETAIL_SAMPLE.testEventDetails.destinationUrl,
+      dataLayer: REPORT_DETAIL_SAMPLE.testEventDetails.dataLayer
+    });
+    expect(getRunStatus(report)).toBe('passed');
+  });
+
+  it("keeps the test event's timestamps, which tell whether it has run", () => {
+    const report = toReportDetails(detailResponse());
+
+    expect(report?.createdAt).toBe(REPORT_DETAIL_SAMPLE.testEvent.createdAt);
+    expect(report?.updatedAt).toBe(REPORT_DETAIL_SAMPLE.testEvent.updatedAt);
+  });
+
+  it('reads a test that has not run yet', () => {
+    const notRun = detailResponse({
+      testEventDetails: null,
+      testImage: null
+    });
+    notRun.testEvent = {
+      ...notRun.testEvent,
+      updatedAt: notRun.testEvent.createdAt,
+      passed: false,
+      requestPassed: false
+    };
+
+    const report = toReportDetails(notRun);
+
+    expect(report).toMatchObject({ passed: false, destinationUrl: '' });
+    expect(report?.rawRequest).toBeUndefined();
+    expect(getRunStatus(report)).toBe('notRun');
+  });
+
+  it('returns undefined without a response', () => {
+    expect(toReportDetails(null)).toBeUndefined();
+  });
+});
+
+describe('buildReportPage', () => {
+  it('collects what the report page shows', () => {
+    const video = new Blob(['webm']);
+    const page = buildReportPage({
+      projectSlug: 'demo',
+      eventId: 'evt-1',
+      detail: detailResponse(),
+      spec: {} as DataLayerSpec,
+      recording: null,
+      video: { blob: video },
+      image: null
+    });
+
+    expect(page).toMatchObject({
+      projectSlug: 'demo',
+      eventId: 'evt-1',
+      videoBlob: video,
+      imageBlob: undefined,
+      historyLinkCommands: ['..', 'buckets']
+    });
+    expect(page.reportDetails?.eventName).toBe('add_to_cart');
   });
 });

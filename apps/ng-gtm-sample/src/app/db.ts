@@ -2,7 +2,10 @@ import { JavascriptInterfaceService } from './shared/services/javascript-interfa
 import { EnvDetectorService } from './shared/services/env-detector/env-detector.service';
 import Dexie, { Table, liveQuery } from 'dexie';
 import { from, take, tap } from 'rxjs';
-import { DataLayerEvent } from './shared/models/data-layer-event.model';
+import {
+  DataLayerEvent,
+  DataLayerGlobal
+} from './shared/models/data-layer-event.model';
 
 export class DataLayerDatabase extends Dexie {
   events!: Table<DataLayerEvent, string>;
@@ -37,7 +40,7 @@ export class DataLayerDatabase extends Dexie {
         events.forEach((event) => {
           if (!event.eventName || !event.eventData) return;
           console.log('Syncing ecommerce from IndexedDB', event);
-          (globalThis as any).dataLayer.push(
+          (globalThis as unknown as DataLayerGlobal).dataLayer.push(
             { ecommerce: null },
             {
               event: event.eventName,

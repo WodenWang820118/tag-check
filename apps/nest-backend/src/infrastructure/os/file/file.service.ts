@@ -78,7 +78,7 @@ export class FileService {
 
   async downloadFiles(
     projectSlug: string,
-    testResults: any[],
+    testResults: { id: number | string; createdAt: Date | string }[],
     outputFilePath: string
   ) {
     const output = createWriteStream(outputFilePath);
@@ -90,11 +90,11 @@ export class FileService {
       );
     });
 
-    archive.on('warning', (err: any) => {
+    archive.on('warning', (err: archiver.ArchiverError) => {
       this.logger.warn('Archive warning: ' + err);
     });
 
-    archive.on('error', (err: any) => {
+    archive.on('error', (err: archiver.ArchiverError) => {
       this.logger.error('Archive error: ' + err);
     });
 
@@ -130,7 +130,7 @@ export class FileService {
     return new StreamableFile(createReadStream(reportPath));
   }
 
-  writeJsonFile(filePath: string, content: any) {
+  writeJsonFile(filePath: string, content: unknown) {
     const dir = dirname(filePath);
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true });
@@ -139,7 +139,7 @@ export class FileService {
     writeFileSync(filePath, JSON.stringify(content, null, 2));
   }
 
-  async writeCacheFile(projectSlug: string, eventId: string, data: any) {
+  async writeCacheFile(projectSlug: string, eventId: string, data: unknown) {
     const cachePath = await this.filePathService.getCacheFilePath(
       projectSlug,
       eventId

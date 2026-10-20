@@ -7,6 +7,7 @@ import { FileService } from '../../../infrastructure/os/file/file.service';
 import * as fs from 'fs';
 import { join } from 'path';
 import { describe, beforeEach, it, expect, vi } from 'vitest';
+import type { OutputValidationResult } from '@utils';
 
 vi.mock('fs', () => ({
   readFileSync: vi.fn(() => '{}'),
@@ -31,6 +32,8 @@ const folder = join(
 );
 
 const filePath = join(folder, 'abstract.json');
+// The spec placeholders ('$value', '$price', ...) are strings where the
+// result type expects numbers, so the fixture is cast once as a whole.
 const abstractJsonContent = {
   eventName: 'add_payment_info',
   passed: true,
@@ -56,27 +59,26 @@ const abstractJsonContent = {
   dataLayerSpec: {
     event: 'add_payment_info',
     ecommerce: {
-      value: '$value' as any,
+      value: '$value',
       currency: '$currency',
       items: [
         {
           item_id: '$item_id',
           item_name: '$item_name',
           item_category: '$item_category',
-          price: '$price' as any,
-          quantity: '$quantity' as any
+          price: '$price',
+          quantity: '$quantity'
         }
       ]
     }
   },
   destinationUrl: 'https://www.google.com',
   completedTime: new Date('2024-08-29T02:25:48.610Z')
-};
+} as unknown as Partial<OutputValidationResult>;
 
 describe('ProjectAbstractReportService', () => {
   let service: ProjectAbstractReportService;
   let folderPathService: FolderPathService;
-  let folderService: FolderService;
   let filePathService: FilePathService;
   let fileService: FileService;
 
@@ -101,7 +103,6 @@ describe('ProjectAbstractReportService', () => {
       ProjectAbstractReportService
     );
     folderPathService = moduleRef.get<FolderPathService>(FolderPathService);
-    folderService = moduleRef.get<FolderService>(FolderService);
     filePathService = moduleRef.get<FilePathService>(FilePathService);
     fileService = moduleRef.get<FileService>(FileService);
   });
@@ -156,15 +157,15 @@ describe('ProjectAbstractReportService', () => {
       dataLayerSpec: {
         event: 'add_payment_info',
         ecommerce: {
-          value: '$value' as any,
+          value: '$value',
           currency: '$currency',
           items: [
             {
               item_id: '$item_id',
               item_name: '$item_name',
               item_category: '$item_category',
-              price: '$price' as any,
-              quantity: '$quantity' as any
+              price: '$price',
+              quantity: '$quantity'
             }
           ]
         }

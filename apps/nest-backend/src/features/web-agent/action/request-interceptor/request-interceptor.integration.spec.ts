@@ -40,6 +40,12 @@ const MAIN_PAGE = `<!doctype html><title>Fixture #1</title>
     }).then((response) => response.status);
 </script>`;
 
+/** The functions MAIN_PAGE defines on window. */
+type FixtureWindow = typeof globalThis & {
+  sendOnPageHide(transport: string, eventName: string): void;
+  sendBatch(): Promise<number>;
+};
+
 const chromeAvailable = (() => {
   try {
     return existsSync(puppeteer.executablePath());
@@ -129,7 +135,7 @@ describe.skipIf(!chromeAvailable)('RequestInterceptorService in Chrome', () => {
 
       await page.evaluate(
         (selectedTransport, name) =>
-          (globalThis as any).sendOnPageHide(selectedTransport, name),
+          (globalThis as FixtureWindow).sendOnPageHide(selectedTransport, name),
         transport,
         eventName
       );
@@ -158,7 +164,7 @@ describe.skipIf(!chromeAvailable)('RequestInterceptorService in Chrome', () => {
     const handle = await capture(page, 'login');
 
     await expect(
-      page.evaluate(() => (globalThis as any).sendBatch())
+      page.evaluate(() => (globalThis as FixtureWindow).sendBatch())
     ).resolves.toBe(204);
 
     const params = new URL(await captured(handle)).searchParams;
@@ -168,7 +174,7 @@ describe.skipIf(!chromeAvailable)('RequestInterceptorService in Chrome', () => {
 
     await handle.stop();
     await expect(
-      page.evaluate(() => (globalThis as any).sendBatch())
+      page.evaluate(() => (globalThis as FixtureWindow).sendBatch())
     ).resolves.toBe(204);
     await page.close();
   });

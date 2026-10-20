@@ -1,31 +1,35 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
-import { AbstractTestEvent, IReportDetails } from '@utils';
+import { forkJoin, map } from 'rxjs';
+import { AbstractTestEvent } from '@utils';
 import { ImageService } from '../../../shared/services/api/image/image.service';
+import { RecordingService } from '../../../shared/services/api/recording/recording.service';
 import { ReportService } from '../../../shared/services/api/report/report.service';
+import { SpecService } from '../../../shared/services/api/spec/spec.service';
 import { VideosService } from '../../../shared/services/api/videos/videos.service';
+import {
+  buildReportPage,
+  ReportDetailRouteContext
+} from '../components/report-detail.contracts';
 
-export const reportDetailResolver: ResolveFn<IReportDetails | null> = (
+/** Loads everything the report page shows, as one typed object. */
+export const reportPageResolver: ResolveFn<ReportDetailRouteContext> = (
   route
 ) => {
-  const reportService = inject(ReportService);
-  const projectSlug = route.parent?.params['projectSlug'];
-  const eventId = route.params['eventId'];
-  return reportService.getReportDetails(projectSlug, eventId);
-};
-
-export const videoResolver: ResolveFn<{ blob: Blob }> = (route) => {
-  const videoService = inject(VideosService);
-  const projectSlug = route.parent?.params['projectSlug'];
-  const eventId = route.params['eventId'];
-  return videoService.getVideo(projectSlug, eventId);
-};
-
-export const imageResolver: ResolveFn<{ blob: Blob }> = (route) => {
-  const imageService = inject(ImageService);
-  const projectSlug = route.parent?.params['projectSlug'];
-  const eventId = route.params['eventId'];
-  return imageService.getImage(projectSlug, eventId);
+  const projectSlug: string = route.parent?.params['projectSlug'] ?? '';
+  const eventId: string = route.params['eventId'];
+  return forkJoin({
+    detail: inject(ReportService).getReportDetails(projectSlug, eventId),
+    spec: inject(SpecService).getEventSpec(projectSlug, eventId),
+    recording: inject(RecordingService).getRecordingDetails(
+      projectSlug,
+      eventId
+    ),
+    video: inject(VideosService).getVideo(projectSlug, eventId),
+    image: inject(ImageService).getImage(projectSlug, eventId)
+  }).pipe(
+    map((loaded) => buildReportPage({ projectSlug, eventId, ...loaded }))
+  );
 };
 
 export const projectReportResolver: ResolveFn<AbstractTestEvent[]> = (

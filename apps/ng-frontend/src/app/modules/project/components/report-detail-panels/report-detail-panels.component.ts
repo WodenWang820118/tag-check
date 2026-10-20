@@ -54,16 +54,20 @@ function isValidSpecContent(
   );
 }
 
+function isJsonObject(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
 function normalizeItemDefContent(
   value: unknown,
   fallbackItemId: string,
   fallbackTemplateName = ''
 ): ItemDef | null {
-  if (!value || typeof value !== 'object') {
+  if (!isJsonObject(value)) {
     return null;
   }
 
-  if ('fullItemDef' in (value as Record<string, unknown>)) {
+  if ('fullItemDef' in value) {
     const itemDef = value as Partial<ItemDef>;
     return {
       itemId: itemDef.itemId ?? fallbackItemId,

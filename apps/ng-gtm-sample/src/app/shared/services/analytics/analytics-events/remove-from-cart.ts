@@ -1,12 +1,17 @@
 import { Order } from '../../../models/order.model';
-import { AnalyticsEventTracker } from '../../../models/analytics-event-tracker.model';
+import {
+  AnalyticsEventTracker,
+  ProcessedAnalyticsEvent
+} from '../../../models/analytics-event-tracker.model';
 
-export class RemoveFromCartEventTracker implements AnalyticsEventTracker {
+export class RemoveFromCartEventTracker implements AnalyticsEventTracker<
+  Order[]
+> {
   constructor(private readonly eventName: string) {
     this.eventName = eventName;
   }
 
-  getProcessedData(rawEventData: any) {
+  getProcessedData(rawEventData: Order[]): ProcessedAnalyticsEvent | undefined {
     if (!rawEventData) return;
     const event = {
       ecommerce: {

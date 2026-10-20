@@ -2,7 +2,15 @@ import { mkdtemp, readFile, readdir, rm, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { PassThrough } from 'stream';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type Mock
+} from 'vitest';
 import { PuppeteerUtilsService } from './puppeteer-utils.service';
 
 /** A screencast stream that ends when stopped, like ScreenRecorder. */
@@ -18,22 +26,24 @@ function fakeRecorder() {
 describe('PuppeteerUtilsService recorder lifecycle', () => {
   let tempDir: string;
   let service: PuppeteerUtilsService;
-  let remux: ReturnType<typeof vi.fn>;
+  let remux: Mock<
+    (ffmpegPath: string, from: string, to: string) => Promise<void>
+  >;
 
   beforeEach(async () => {
     tempDir = await mkdtemp(join(tmpdir(), 'tag-check-puppeteer-'));
     service = new PuppeteerUtilsService(
-      { getBROWSER_ARGS: vi.fn(() => []) } as any,
-      { getRecordingDetails: vi.fn() } as any,
+      { getBROWSER_ARGS: vi.fn(() => []) } as never,
+      { getRecordingDetails: vi.fn() } as never,
       {
         getInspectionEventFolderPath: vi.fn().mockResolvedValue(tempDir)
-      } as any
+      } as never
     );
     // Stands in for ffmpeg: copies the recording and marks the copy.
     remux = vi.fn(async (_ffmpeg: string, from: string, to: string) => {
       await writeFile(to, `${await readFile(from, 'utf8')} +cues`);
     });
-    (service as any).remuxRecording = remux;
+    service['remuxRecording'] = remux;
   });
 
   afterEach(async () => {
@@ -51,8 +61,8 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     };
 
     await expect(
-      (service as any).startRecorder(
-        page,
+      service.startRecorder(
+        page as never,
         'project',
         'event',
         controller.signal
@@ -76,8 +86,8 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
       )
     };
 
-    const promise = (service as any).startRecorder(
-      page,
+    const promise = service.startRecorder(
+      page as never,
       'project',
       'event',
       controller.signal
@@ -100,13 +110,13 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
       screencast: vi.fn().mockResolvedValue(recorder)
     };
 
-    const result = await (service as any).startRecorder(
-      page,
+    const result = await service.startRecorder(
+      page as never,
       'project',
       'event',
       controller.signal
     );
-    await (service as any).stopRecorder(result);
+    await service.stopRecorder(result);
 
     expect(result).toBe(recorder);
     expect(removeListener).toHaveBeenCalledWith('abort', expect.any(Function));
@@ -122,8 +132,8 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
       screencast: vi.fn().mockResolvedValue(recorder)
     };
 
-    await (service as any).startRecorder(
-      page,
+    await service.startRecorder(
+      page as never,
       'project',
       'event',
       controller.signal
@@ -132,10 +142,13 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
 
     await vi.waitFor(() => expect(recorder.stop).toHaveBeenCalledTimes(1));
     // The abort path finalizes the file too; let it finish before cleanup.
-    await vi.waitFor(async () =>
-      expect(await readFile(join(tempDir, 'recording.webm'), 'utf8')).toBe(
-        ' +cues'
-      )
+    // vi.waitFor gives up after 1 s by default, too soon under parallel runs.
+    await vi.waitFor(
+      async () =>
+        expect(await readFile(join(tempDir, 'recording.webm'), 'utf8')).toBe(
+          ' +cues'
+        ),
+      { timeout: 10_000 }
     );
   });
 
@@ -149,8 +162,8 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     };
 
     await expect(
-      (service as any).startRecorder(
-        page,
+      service.startRecorder(
+        page as never,
         'project',
         'event',
         controller.signal
@@ -163,7 +176,7 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     const firstRecorder = { stop: vi.fn().mockResolvedValue(undefined) };
     const secondRecorder = { stop: vi.fn().mockResolvedValue(undefined) };
 
-    await (service as any).stopRecorder(firstRecorder);
+    await service.stopRecorder(firstRecorder as never);
 
     expect(firstRecorder.stop).toHaveBeenCalledTimes(1);
     expect(secondRecorder.stop).not.toHaveBeenCalled();
@@ -178,9 +191,9 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     };
     const file = join(tempDir, 'recording.webm');
 
-    await (service as any).startRecorder(page, 'project', 'event');
+    await service.startRecorder(page as never, 'project', 'event');
     recorder.write('frames');
-    await (service as any).stopRecorder(recorder);
+    await service.stopRecorder(recorder as never);
 
     expect(page.screencast).toHaveBeenCalledWith({
       ffmpegPath: expect.any(String)
@@ -203,9 +216,9 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
       screencast: vi.fn().mockResolvedValue(recorder)
     };
 
-    await (service as any).startRecorder(page, 'project', 'event');
+    await service.startRecorder(page as never, 'project', 'event');
     recorder.write('frames');
-    await (service as any).stopRecorder(recorder);
+    await service.stopRecorder(recorder as never);
 
     expect(await readFile(join(tempDir, 'recording.webm'), 'utf8')).toBe(
       'frames'
@@ -214,10 +227,8 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
   });
 
   it('treats stopRecorder without a recorder as a no-op', async () => {
-    await expect((service as any).stopRecorder(null)).resolves.toBeUndefined();
-    await expect(
-      (service as any).stopRecorder(undefined)
-    ).resolves.toBeUndefined();
+    await expect(service.stopRecorder(null)).resolves.toBeUndefined();
+    await expect(service.stopRecorder(undefined)).resolves.toBeUndefined();
   });
 
   it('cleanup stops the provided recorder before closing the page and browser', async () => {
@@ -225,7 +236,7 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     const page = { close: vi.fn().mockResolvedValue(undefined) };
     const browser = { close: vi.fn().mockResolvedValue(undefined) };
 
-    await (service as any).cleanup(browser, page, recorder);
+    await service.cleanup(browser as never, page as never, recorder as never);
 
     expect(recorder.stop).toHaveBeenCalledTimes(1);
     expect(page.close).toHaveBeenCalledTimes(1);
@@ -242,7 +253,7 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
         process: vi.fn()
       };
 
-      const cleanup = (service as any).cleanup(browser, page);
+      const cleanup = service.cleanup(browser as never, page as never);
       await vi.advanceTimersByTimeAsync(10_000);
       await cleanup;
 
@@ -262,7 +273,7 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
         process: vi.fn(() => ({ kill }))
       };
 
-      const cleanup = (service as any).cleanup(browser, null);
+      const cleanup = service.cleanup(browser as never, null as never);
       await vi.advanceTimersByTimeAsync(10_000);
       await cleanup;
 
@@ -282,7 +293,7 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
       '--window-size=1400,900'
     ];
 
-    expect((service as any).filterPuppeteerArgs(args)).toEqual([
+    expect(service['filterPuppeteerArgs'](args)).toEqual([
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--window-size=1400,900'

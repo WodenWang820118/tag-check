@@ -4,6 +4,9 @@
 dist
 tmp
 /out-tsc
+# TypeScript output written next to a project, such as libs/utils/out-tsc
+out-tsc/
+*.tsbuildinfo
 out
 
 # dependencies
@@ -79,4 +82,5 @@ proofshot-artifacts/
 .main.mjs
 
 .claude/worktrees
+.vercel
 .claude/settings.local.json

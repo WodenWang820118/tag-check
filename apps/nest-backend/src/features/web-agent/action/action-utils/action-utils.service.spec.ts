@@ -8,7 +8,7 @@ describe('ActionUtilsService', () => {
     const selector = 'text/Checkout';
 
     await service.getElement(
-      page as any,
+      page as never,
       service.getSelectorType(selector) ?? '',
       selector
     );
@@ -27,7 +27,7 @@ describe('ActionUtilsService', () => {
     const page = createPage();
     const service = new ActionUtilsService();
 
-    await service.getElement(page as any, 'text', 'Checkout');
+    await service.getElement(page as never, 'text', 'Checkout');
 
     expect(page.$).toHaveBeenCalledWith('text/Checkout');
   });
@@ -38,7 +38,7 @@ describe('ActionUtilsService', () => {
     const selector = 'xpath/.//button';
 
     await service.getElement(
-      page as any,
+      page as never,
       service.getSelectorType(selector) ?? '',
       selector
     );
@@ -53,7 +53,7 @@ describe('ActionUtilsService', () => {
     const selector = './/button';
 
     await service.getElement(
-      page as any,
+      page as never,
       service.getSelectorType(selector) ?? '',
       selector
     );
@@ -66,7 +66,7 @@ describe('ActionUtilsService', () => {
     const page = createPage();
     const service = new ActionUtilsService();
 
-    await service.getElement(page as any, 'aria', 'aria/aria-label/Checkout');
+    await service.getElement(page as never, 'aria', 'aria/aria-label/Checkout');
 
     expect(page.$).toHaveBeenCalledWith('[aria-label="Checkout"]');
   });
@@ -77,7 +77,7 @@ describe('ActionUtilsService', () => {
     const selector = 'aria/Checkout';
 
     await service.getElement(
-      page as any,
+      page as never,
       service.getSelectorType(selector) ?? '',
       selector
     );
@@ -89,7 +89,7 @@ describe('ActionUtilsService', () => {
     const page = createPage();
     const service = new ActionUtilsService();
 
-    await service.getElement(page as any, 'aria', 'Checkout');
+    await service.getElement(page as never, 'aria', 'Checkout');
 
     expect(page.$).toHaveBeenCalledWith('aria/Checkout');
   });
@@ -106,7 +106,7 @@ describe('ActionUtilsService', () => {
     const selector = 'pierce/#host/.shadow-button';
 
     const result = await service.getElement(
-      page as any,
+      page as never,
       service.getSelectorType(selector) ?? '',
       selector
     );

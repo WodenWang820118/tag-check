@@ -64,9 +64,9 @@ describe('ExampleRecordingsRefreshService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     service = new ExampleRecordingsRefreshService(
-      testEventRepositoryService as any,
-      recordingRepositoryService as any,
-      projectRecordingService as any
+      testEventRepositoryService as never,
+      recordingRepositoryService as never,
+      projectRecordingService as never
     );
   });
 

@@ -36,7 +36,8 @@ export type DataLayerSpecSchema = {
 export type ItemDef = {
   templateName: string;
   itemId: string;
-  fullItemDef: any;
+  /** A GA4 item, such as { item_id, item_name, price }. */
+  fullItemDef: Record<string, unknown>;
 };
 
 export type ItemDefSchema = {

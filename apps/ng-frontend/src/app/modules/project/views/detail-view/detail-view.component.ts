@@ -1,11 +1,10 @@
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {
   Component,
   computed,
   DestroyRef,
   inject,
   OnInit,
-  signal,
   ChangeDetectionStrategy
 } from '@angular/core';
 import {
@@ -15,16 +14,7 @@ import {
   Params,
   Router
 } from '@angular/router';
-import { distinctUntilChanged, startWith } from 'rxjs';
-import {
-  DataLayerSpec,
-  FrontFileReport,
-  IReportDetails,
-  Recording,
-  TestEvent,
-  TestEventDetail,
-  TestImage
-} from '@utils';
+import { distinctUntilChanged, map, startWith } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -37,32 +27,6 @@ import {
   ReportDetailRouteContext,
   toTagSpec
 } from '../../components/report-detail.contracts';
-
-function buildFlattenedReportDetails(
-  reportDetailsObject:
-    | {
-        testEvent: TestEvent;
-        testEventDetails: TestEventDetail;
-        testImage: TestImage;
-      }
-    | undefined
-): IReportDetails | undefined {
-  if (!reportDetailsObject) {
-    return undefined;
-  }
-
-  return {
-    ...reportDetailsObject.testEvent,
-    ...reportDetailsObject.testEventDetails,
-    ...reportDetailsObject.testImage,
-    // Keep the test event's timestamps, as the tests list does: a run
-    // updates the event, while each run detail is created at the run time.
-    createdAt: reportDetailsObject.testEvent.createdAt,
-    updatedAt: reportDetailsObject.testEvent.updatedAt,
-    position: 0,
-    event: reportDetailsObject.testEvent.eventName
-  };
-}
 
 function serializeParamMap(params: ParamMap): string {
   return JSON.stringify(
@@ -120,48 +84,20 @@ function serializeParamMap(params: ParamMap): string {
 })
 export class DetailViewComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly snackBar = inject(MatSnackBar);
 
-  routeContext = signal<ReportDetailRouteContext | undefined>(undefined);
+  /** Loaded by reportPageResolver. */
+  routeContext = toSignal(
+    this.route.data.pipe(
+      map((data) => data['page'] as ReportDetailRouteContext | undefined)
+    )
+  );
   tagSpec = computed(() => toTagSpec(this.routeContext()?.spec));
   selectedTabIndex = 0;
 
-  constructor(
-    private readonly router: Router,
-    private readonly route: ActivatedRoute,
-    private readonly snackBar: MatSnackBar
-  ) {}
-
   ngOnInit(): void {
-    this.route.data
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((data) => {
-        const spec = data['spec'] as DataLayerSpec;
-        const fileReports =
-          (data['fileReports'] as FrontFileReport[] | null) ?? [];
-        const video = data['video'] as { blob: Blob | undefined };
-        const image = data['image'] as { blob: Blob | undefined };
-        const recording = (data['recording'] as Recording | null) ?? null;
-        const reportDetailsObject = data['reportDetails'] as
-          | {
-              testEvent: TestEvent;
-              testEventDetails: TestEventDetail;
-              testImage: TestImage;
-            }
-          | undefined;
-
-        this.routeContext.set({
-          projectSlug: (data['projectSlug'] as string | undefined) ?? '',
-          eventId: (data['eventId'] as string | undefined) ?? '',
-          spec,
-          recording,
-          reportDetails: buildFlattenedReportDetails(reportDetailsObject),
-          videoBlob: video?.blob,
-          imageBlob: image?.blob,
-          fileReports,
-          historyLinkCommands: ['..', 'buckets']
-        });
-      });
-
     this.route.queryParamMap
       .pipe(
         startWith(convertToParamMap(this.route.snapshot.queryParams)),

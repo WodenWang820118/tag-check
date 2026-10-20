@@ -61,7 +61,7 @@ export class XlsxRecordingSectionService {
   }
 
   // Helper method to try parsing JSON strings
-  private tryParseJson(jsonString: string): any {
+  private tryParseJson(jsonString: string): unknown {
     try {
       return JSON.parse(jsonString);
     } catch (e) {

@@ -23,14 +23,15 @@ function buildReportTabViewModel(
   }
 
   const reportDetails = context.reportDetails;
-  const hasHistory =
-    context.fileReports.flatMap((report) => report.testEventDetails).length > 0;
+  const status = getRunStatus(reportDetails);
+  // History lists this test's runs, so it exists once the test has run.
+  const hasHistory = status !== 'notRun';
   const recordingAvailable = !!context.videoBlob && context.videoBlob.size > 0;
 
   return {
     title: context.spec.rawGtmTag?.tag?.name || 'Report',
     lastRunAt: reportDetails?.updatedAt,
-    status: getRunStatus(reportDetails),
+    status,
     passed: reportDetails?.passed ?? false,
     eventName: reportDetails?.eventName || '',
     message: reportDetails?.message || '',

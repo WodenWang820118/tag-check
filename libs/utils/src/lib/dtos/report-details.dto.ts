@@ -21,7 +21,7 @@ export class ReportDetailsDto implements OutputValidationResult {
   createdAt: Date = new Date();
   id!: number;
   imageName!: string;
-  imageData!: any; // should be the image buffer data
+  imageData!: Uint8Array;
   imageSize!: number;
   updatedAt?: Date;
 

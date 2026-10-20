@@ -78,6 +78,9 @@ describe('DetailsComponent', () => {
     const destination = getPublicDestinationBySlug('san-francisco');
 
     expect(destination).not.toBeNull();
+    if (!destination) {
+      throw new Error('Expected the san-francisco destination in the catalog');
+    }
 
     await router.navigateByUrl('/product/details/san-francisco');
     fixture.detectChanges();
@@ -86,12 +89,12 @@ describe('DetailsComponent', () => {
 
     const textContent = fixture.nativeElement.textContent as string;
 
-    expect(textContent).toContain(destination!.title);
-    expect(textContent).toContain(destination!.description);
+    expect(textContent).toContain(destination.title);
+    expect(textContent).toContain(destination.description);
     expect(destinationServiceMock.changeDestination).toHaveBeenCalledWith(
       expect.objectContaining({
-        slug: destination!.slug,
-        title: destination!.title
+        slug: destination.slug,
+        title: destination.title
       }),
       { persist: false, trackViewItem: false }
     );

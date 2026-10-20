@@ -79,10 +79,7 @@ export async function mapLimit<TItem, TResult>(
       while (nextIndex < items.length) {
         const currentIndex = nextIndex;
         nextIndex += 1;
-        results[currentIndex] = await mapper(
-          items[currentIndex]!,
-          currentIndex
-        );
+        results[currentIndex] = await mapper(items[currentIndex], currentIndex);
       }
     })
   );

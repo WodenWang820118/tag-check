@@ -1,21 +1,25 @@
-import { AnalyticsEventTracker } from '../../../models/analytics-event-tracker.model';
+import {
+  AnalyticsEventTracker,
+  ProcessedAnalyticsEvent
+} from '../../../models/analytics-event-tracker.model';
+import { Order } from '../../../models/order.model';
 
-export class ViewCartEventTracker implements AnalyticsEventTracker {
+export class ViewCartEventTracker implements AnalyticsEventTracker<Order[]> {
   constructor(private readonly eventName: string) {
     this.eventName = eventName;
   }
 
-  getProcessedData(rawEventData: any) {
+  getProcessedData(rawEventData: Order[]): ProcessedAnalyticsEvent | undefined {
     if (!rawEventData.length) return;
     const event = {
       ecommerce: {
         currency: 'USD',
         value: rawEventData.reduce(
-          (accumulator: number, currentValue: any) =>
+          (accumulator: number, currentValue: Order) =>
             accumulator + currentValue.value * currentValue.quantity,
           0
         ),
-        items: rawEventData.map((item: any) => ({
+        items: rawEventData.map((item: Order) => ({
           item_id: item.id,
           item_name: item.title,
           item_category: item.category,

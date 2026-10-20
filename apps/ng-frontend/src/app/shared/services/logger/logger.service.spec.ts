@@ -2,18 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LogLevel, LoggerService } from './logger.service';
 
 describe('LoggerService', () => {
-  let debugSpy: ReturnType<typeof vi.spyOn>;
   let errorSpy: ReturnType<typeof vi.spyOn>;
   let infoSpy: ReturnType<typeof vi.spyOn>;
-  let logSpy: ReturnType<typeof vi.spyOn>;
   let service: LoggerService;
   let warnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    debugSpy = vi.spyOn(console, 'debug').mockImplementation(() => undefined);
+    vi.spyOn(console, 'debug').mockImplementation(() => undefined);
     errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     infoSpy = vi.spyOn(console, 'info').mockImplementation(() => undefined);
-    logSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    vi.spyOn(console, 'log').mockImplementation(() => undefined);
     warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
 
     service = new LoggerService();

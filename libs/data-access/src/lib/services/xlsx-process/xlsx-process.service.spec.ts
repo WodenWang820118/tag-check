@@ -8,7 +8,7 @@ import { FileService } from '../file/file.service';
 
 describe('XlsxProcessService', () => {
   let svc: XlsxProcessService;
-  let worker$: Subject<any>;
+  let worker$: Subject<unknown>;
   let webWorker: {
     postMessage: ReturnType<typeof vi.fn>;
     onMessage: ReturnType<typeof vi.fn>;
@@ -35,7 +35,7 @@ describe('XlsxProcessService', () => {
   };
 
   beforeEach(() => {
-    worker$ = new Subject<any>();
+    worker$ = new Subject<unknown>();
     webWorker = {
       postMessage: vi.fn(),
       onMessage: vi.fn(() => worker$.asObservable())

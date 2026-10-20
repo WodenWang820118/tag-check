@@ -3,7 +3,7 @@ export function shuffleWithSeed<T>(items: T[], seed: number): T[] {
   const random = mulberry32(seed);
   for (let index = copy.length - 1; index > 0; index -= 1) {
     const swapIndex = Math.floor(random() * (index + 1));
-    [copy[index], copy[swapIndex]] = [copy[swapIndex]!, copy[index]!];
+    [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
   }
   return copy;
 }
@@ -30,6 +30,6 @@ export function median(values: number[]): number {
   const sorted = [...values].sort((left, right) => left - right);
   const middle = Math.floor(sorted.length / 2);
   return sorted.length % 2 === 0
-    ? Math.round((sorted[middle - 1]! + sorted[middle]!) / 2)
-    : sorted[middle]!;
+    ? Math.round((sorted[middle - 1] + sorted[middle]) / 2)
+    : sorted[middle];
 }

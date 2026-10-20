@@ -38,7 +38,7 @@ import { MatTableModule } from '@angular/material/table';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomMatTableComponent {
-  @Input() displayedDataSource!: any[];
+  @Input() displayedDataSource!: Array<Record<string, unknown>>;
   @Input() displayedColumns!: string[];
 
   constructor(public xlsxProcessService: XlsxProcessService) {}

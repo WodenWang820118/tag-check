@@ -56,11 +56,9 @@ describe('TopologicalSorterService', () => {
     service = new TopologicalSorterService();
     // Provide a noop implementation (return void) for warn
 
-    warnSpy = vi
-      .spyOn(service['logger'] as any, 'warn')
-      .mockImplementation(() => {
-        /* noop */
-      });
+    warnSpy = vi.spyOn(service['logger'], 'warn').mockImplementation(() => {
+      /* noop */
+    });
   });
 
   function run(envEntities: string[], metas: Record<string, EntityMetadata>) {

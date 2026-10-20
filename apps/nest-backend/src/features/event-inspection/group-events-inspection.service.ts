@@ -4,6 +4,15 @@ import { InspectorGroupEventsService } from '../../features/inspector/inspector-
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
 import { ConfigsService } from '../../core/configs/configs.service';
+import type { OutputValidationResult, ValidationResult } from '@utils';
+
+/** The fields this service reads from each group inspection entry. */
+type GroupInspectionEntry = {
+  dataLayerCheckResult: OutputValidationResult;
+  requestCheckResult: ValidationResult;
+  rawRequest: string;
+  destinationUrl: string;
+};
 
 // Note: Not fully implemented yet
 @Injectable()
@@ -68,7 +77,7 @@ export class GroupEventsInspectionService {
         );
 
       // 3.2) construct the data to be written to the xlsx file
-      const data = result.map((item) => {
+      const data = (result as GroupInspectionEntry[]).map((item) => {
         return {
           dataLayerResult: item.dataLayerCheckResult,
           requestCheckResult: item.requestCheckResult,

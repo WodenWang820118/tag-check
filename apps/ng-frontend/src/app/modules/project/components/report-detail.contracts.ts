@@ -1,11 +1,12 @@
 import {
   DataLayerSpec,
-  FrontFileReport,
   IReportDetails,
   Recording,
+  ReportDetailResponse,
   TagSpec
 } from '@utils';
 
+/** Everything the report page shows, loaded by reportPageResolver. */
 export type ReportDetailRouteContext = {
   projectSlug: string;
   eventId: string;
@@ -14,9 +15,56 @@ export type ReportDetailRouteContext = {
   reportDetails: IReportDetails | undefined;
   videoBlob: Blob | undefined;
   imageBlob: Blob | undefined;
-  fileReports: FrontFileReport[];
   historyLinkCommands: string[];
 };
+
+/**
+ * Flattens GET /reports/:projectSlug/:eventId into one report row. The test
+ * event's timestamps win, as in the tests list: a run updates the event,
+ * while each result is created at its run time.
+ */
+export function toReportDetails(
+  response: ReportDetailResponse | null | undefined
+): IReportDetails | undefined {
+  if (!response?.testEvent) {
+    return undefined;
+  }
+  const { testEvent, testEventDetails } = response;
+  return {
+    ...testEvent,
+    passed: testEventDetails?.passed ?? testEvent.passed ?? false,
+    requestPassed:
+      testEventDetails?.requestPassed ?? testEvent.requestPassed ?? false,
+    rawRequest: testEventDetails?.rawRequest,
+    destinationUrl: testEventDetails?.destinationUrl ?? '',
+    dataLayer: testEventDetails?.dataLayer,
+    createdAt: testEvent.createdAt,
+    updatedAt: testEvent.updatedAt,
+    position: 0,
+    event: testEvent.eventName
+  };
+}
+
+export function buildReportPage(loaded: {
+  projectSlug: string;
+  eventId: string;
+  detail: ReportDetailResponse | null;
+  spec: DataLayerSpec;
+  recording: Recording | null;
+  video: { blob: Blob } | null;
+  image: { blob: Blob } | null;
+}): ReportDetailRouteContext {
+  return {
+    projectSlug: loaded.projectSlug,
+    eventId: loaded.eventId,
+    spec: loaded.spec,
+    recording: loaded.recording,
+    reportDetails: toReportDetails(loaded.detail),
+    videoBlob: loaded.video?.blob,
+    imageBlob: loaded.image?.blob,
+    historyLinkCommands: ['..', 'buckets']
+  };
+}
 
 export type RunStatus = 'notRun' | 'passed' | 'partial' | 'failed';
 

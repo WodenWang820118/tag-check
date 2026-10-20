@@ -1,11 +1,21 @@
-import { AnalyticsEventTracker } from '../../../models/analytics-event-tracker.model';
+import {
+  AnalyticsEventTracker,
+  ProcessedAnalyticsEvent
+} from '../../../models/analytics-event-tracker.model';
 
-export class ViewItemListEventTracker implements AnalyticsEventTracker {
+/** Payload built by `DestinationComponent.trackViewItemList`. */
+type ViewItemListEventData = {
+  ecommerce: { items: Record<string, unknown>[] };
+};
+
+export class ViewItemListEventTracker implements AnalyticsEventTracker<ViewItemListEventData> {
   constructor(private readonly eventName: string) {
     this.eventName = eventName;
   }
 
-  getProcessedData(rawEventData: any) {
+  getProcessedData(
+    rawEventData: ViewItemListEventData
+  ): ProcessedAnalyticsEvent | undefined {
     if (!rawEventData.ecommerce.items.length) return;
 
     return {

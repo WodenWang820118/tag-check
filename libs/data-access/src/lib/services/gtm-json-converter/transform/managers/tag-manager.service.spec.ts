@@ -6,7 +6,7 @@ import { ScrollTag } from '../tags/scroll-tag.service';
 import { VideoTag } from '../tags/video-tag.service';
 import { EventUtils } from '../../utils/event-utils.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import type { DataLayer, Trigger, TagConfig } from '@utils';
+import type { DataLayer, Trigger } from '@utils';
 
 describe('TagManager', () => {
   let service: TagManager;

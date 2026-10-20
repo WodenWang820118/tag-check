@@ -134,10 +134,7 @@ export class WebAgentUtilsService {
         eventId
       );
 
-      const dataLayer = (await this.getOptimizedDataLayer(
-        projectSlug,
-        eventId
-      )) as any[];
+      const dataLayer = await this.getOptimizedDataLayer(projectSlug, eventId);
       const destinationUrl = page.url();
       this.logger.log('Test completed');
 
@@ -274,17 +271,18 @@ export class WebAgentUtilsService {
    *
    * @returns The stripped data-layer event array.
    */
-  private async getOptimizedDataLayer(projectSlug: string, eventId: string) {
+  private async getOptimizedDataLayer(
+    projectSlug: string,
+    eventId: string
+  ): Promise<Record<string, unknown>[]> {
     const dataLayer = await this.dataLayerService.getMyDataLayer(
       projectSlug,
       eventId
     );
     this.logger.log('Optimized data layer:', dataLayer);
-    return (dataLayer as any[]).map(
-      (event: { [x: string]: any; 'gtm.uniqueEventId': string }) => {
-        const { 'gtm.uniqueEventId': _, ...rest } = event;
-        return rest;
-      }
-    );
+    return (dataLayer as Record<string, unknown>[]).map((event) => {
+      const { 'gtm.uniqueEventId': _, ...rest } = event;
+      return rest;
+    });
   }
 }

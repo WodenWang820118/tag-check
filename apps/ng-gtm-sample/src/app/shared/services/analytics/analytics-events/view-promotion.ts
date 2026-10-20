@@ -1,18 +1,26 @@
-import { AnalyticsEventTracker } from '../../../models/analytics-event-tracker.model';
+import {
+  AnalyticsEventTracker,
+  ProcessedAnalyticsEvent
+} from '../../../models/analytics-event-tracker.model';
+import { Destination } from '../../../models/destination.model';
 
 const promotions: string[] = [];
 
-export class ViewPromotionEventTracker implements AnalyticsEventTracker {
+export class ViewPromotionEventTracker implements AnalyticsEventTracker<Destination> {
   item_id = '';
 
   constructor(private readonly eventName: string) {}
 
-  private isPromotionTracked(newPromotion: any): boolean {
+  private isPromotionTracked(newPromotion: {
+    ecommerce: { items: { item_id: string }[] };
+  }): boolean {
     // Assuming that each promotion has a unique 'id' property
     return promotions.includes(newPromotion.ecommerce.items[0]['item_id']);
   }
 
-  getProcessedData(rawEventData: any) {
+  getProcessedData(
+    rawEventData: Destination
+  ): ProcessedAnalyticsEvent | undefined {
     if (!rawEventData) return;
 
     const event = {
