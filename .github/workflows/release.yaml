@@ -174,8 +174,9 @@ jobs:
               return;
             }
 
-            // An unpublished draft follows main: the tag moves below and the
-            // publish job replaces the draft's assets and notes.
+            // An unpublished draft follows main: the tag moves below, the
+            // publish job replaces the draft's assets, and its last step
+            // rewrites the draft's notes.
             const draft = releases.find(
               (release) => release.draft && release.tag_name === releaseTag
             );
@@ -347,3 +348,44 @@ jobs:
           fail_on_unmatched_files: true
           files: dist/publish-release/*
           tag_name: ${{ needs.prepare-release.outputs.release_tag }}
+      - name: Sync draft release notes
+        uses: actions/github-script@v7
+        env:
+          NOTES_PATH: docs/releases/${{ steps.release_context.outputs.release_version }}.md
+          RELEASE_TAG: ${{ needs.prepare-release.outputs.release_tag }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // action-gh-release@v2 finds releases with getReleaseByTag, which
+            // skips drafts. With a draft already open it creates a second one,
+            // keeps the oldest and uploads the assets there, but never updates
+            // that draft's notes. Write them here.
+            const { readFileSync } = require('node:fs');
+            const releaseTag = process.env.RELEASE_TAG;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner,
+              repo,
+              per_page: 100
+            });
+            const drafts = releases
+              .filter((release) => release.draft && release.tag_name === releaseTag)
+              .sort((left, right) => left.id - right.id);
+
+            if (drafts.length === 0) {
+              core.setFailed(`No draft release found for ${releaseTag}.`);
+              return;
+            }
+            if (drafts.length > 1) {
+              core.warning(`Found ${drafts.length} drafts for ${releaseTag}; updating the oldest, which holds the assets.`);
+            }
+
+            await github.rest.repos.updateRelease({
+              owner,
+              repo,
+              release_id: drafts[0].id,
+              body: readFileSync(process.env.NOTES_PATH, 'utf8'),
+              draft: true
+            });
+            core.notice(`Synced the notes of draft ${releaseTag} (release ${drafts[0].id}).`);
