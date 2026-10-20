@@ -36,6 +36,7 @@
         "server": "apps/ng-product-doc/src/main.server.ts",
         "outputMode": "static",
         "polyfills": ["zone.js", "@angular/localize/init"],
+        "externalDependencies": ["marked-katex-extension"],
         "tsConfig": "apps/ng-product-doc/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
