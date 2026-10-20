@@ -83,6 +83,9 @@ service; don't rely on another module re-exporting it.
   `data-testid` hooks on `ng-gtm-sample` and run against
   https://ng-gtm-sample.vercel.app. Keep those hooks stable or re-record.
 - Lint with oxlint and format with oxfmt. The workspace has no ESLint.
+- `any`, non-null assertions (`x!`) and unused variables are lint errors
+  everywhere, specs and `tools/scripts` included. Narrow or guard values
+  instead of asserting them.
 - `data-testid` hooks are kebab-case, area first, with the GA4 event name or
   project slug as the per-row suffix (`run-test-add_to_cart`,
   `project-open-<slug>`).
