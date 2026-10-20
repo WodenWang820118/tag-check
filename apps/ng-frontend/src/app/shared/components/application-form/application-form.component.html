@@ -16,6 +16,7 @@
             <input
               matInput
               formControlName="websiteUrl"
+              data-testid="preload-website-url"
               placeholder="Website URL"
             />
           </mat-form-field>
@@ -24,7 +25,7 @@
         <!-- Local Storage section -->
         <section aria-labelledby="local-storage-heading">
           <h2 id="local-storage-heading">Local Storage</h2>
-          <div formArrayName="localStorage">
+          <div formArrayName="localStorage" data-testid="preload-local-storage">
             @for (
               item of localStorageFormArrayValue;
               track item.key;
@@ -66,7 +67,7 @@
         <!-- Cookie section -->
         <section aria-labelledby="cookie-heading">
           <h2 id="cookie-heading">Cookie</h2>
-          <div formArrayName="cookie">
+          <div formArrayName="cookie" data-testid="preload-cookies">
             @for (
               item of cookieFormArrayValue;
               track item.key;

@@ -55,6 +55,10 @@ function buildFlattenedReportDetails(
     ...reportDetailsObject.testEvent,
     ...reportDetailsObject.testEventDetails,
     ...reportDetailsObject.testImage,
+    // Keep the test event's timestamps, as the tests list does: a run
+    // updates the event, while each run detail is created at the run time.
+    createdAt: reportDetailsObject.testEvent.createdAt,
+    updatedAt: reportDetailsObject.testEvent.updatedAt,
     position: 0,
     event: reportDetailsObject.testEvent.eventName
   };

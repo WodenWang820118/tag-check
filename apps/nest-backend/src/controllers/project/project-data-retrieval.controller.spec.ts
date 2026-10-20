@@ -42,6 +42,15 @@ describe('ProjectDataRetrievalController', () => {
     expect(result).toBeInstanceOf(StreamableFile);
   });
 
+  it('readImage answers with an empty file when the test has not run yet', async () => {
+    const { controller } = build({
+      getBySlugAndEventId: vi.fn().mockResolvedValue(null)
+    });
+    const result = await controller.readImage('proj-1', 'evt-1');
+    expect(result).toBeInstanceOf(StreamableFile);
+    expect(result.getStream().read()).toBeNull();
+  });
+
   it('getProject delegates to ProjectRepositoryService.getBySlug', async () => {
     const { controller, projectRepositoryService } = build();
     const result = await controller.getProject('proj-1');

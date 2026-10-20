@@ -9,7 +9,6 @@ describe('ImageService', () => {
 
   beforeEach(() => {
     http = { get: vi.fn() };
-    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     service = new ImageService(http as unknown as HttpClient);
   });
 

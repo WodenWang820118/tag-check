@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   signal,
   effect,
   viewChild,
@@ -22,19 +23,34 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   selector: 'app-progress-pie-chart',
   imports: [MatProgressSpinnerModule],
   template: `
-    @if (!spinnerVisible()) {
-      <ng-container>
-        <canvas #chart></canvas>
-      </ng-container>
-    } @else {
-      <mat-progress-spinner
-        mode="indeterminate"
-        diameter="30"
-      ></mat-progress-spinner>
-    }
+    <div class="progress">
+      @if (!spinnerVisible()) {
+        <ng-container>
+          <canvas #chart></canvas>
+        </ng-container>
+      } @else {
+        <mat-progress-spinner
+          mode="indeterminate"
+          diameter="30"
+        ></mat-progress-spinner>
+      }
+      <!-- Starting the browser takes a while before the first step arrives. -->
+      @if (waitingForSteps() && !spinnerVisible()) {
+        <mat-progress-spinner
+          class="progress__waiting"
+          mode="indeterminate"
+          diameter="30"
+          aria-label="Starting test"
+        ></mat-progress-spinner>
+      }
+    </div>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
-  styles: ['canvas { max-width: 30px; max-height: 30px; }']
+  styles: [
+    'canvas { max-width: 30px; max-height: 30px; }',
+    '.progress { position: relative; width: 30px; height: 30px; }',
+    '.progress__waiting { position: absolute; inset: 0; }'
+  ]
 })
 export class ProgressPieChartComponent {
   chartRef = viewChild.required<ElementRef<HTMLCanvasElement>>('chart');
@@ -42,6 +58,9 @@ export class ProgressPieChartComponent {
   // Track last total steps and spinner state
   private lastTotalSteps = 0;
   spinnerVisible = signal<boolean>(false);
+  readonly waitingForSteps = computed(
+    () => this.progressUpdateService.totalSteps$() === 0
+  );
 
   constructor(private readonly progressUpdateService: ProgressUpdateService) {
     // Setup effect to handle chart updates

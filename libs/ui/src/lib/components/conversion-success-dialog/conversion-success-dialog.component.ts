@@ -16,12 +16,20 @@ import { MatIconModule } from '@angular/material/icon';
     <h2 mat-dialog-title class="secondary">Conversion Successful</h2>
     <mat-dialog-content class="conversion-success__options">
       <div class="conversion-success__options__option">
-        <button mat-stroked-button (click)="onDownload()">
+        <button
+          mat-stroked-button
+          data-testid="tagbuild-download"
+          (click)="onDownload()"
+        >
           <mat-icon>cloud_download</mat-icon>Download
         </button>
       </div>
       <div class="conversion-success__options__option">
-        <button mat-stroked-button (click)="onClipBoard()">
+        <button
+          mat-stroked-button
+          data-testid="tagbuild-copy"
+          (click)="onClipBoard()"
+        >
           <mat-icon>file_copy</mat-icon>Copy to clipboard
         </button>
       </div>

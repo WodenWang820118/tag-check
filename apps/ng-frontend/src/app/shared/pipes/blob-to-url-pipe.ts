@@ -1,18 +1,16 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Pipe({
   name: 'blobToUrl',
   standalone: true
 })
 export class BlobToUrlPipe implements PipeTransform {
-  constructor(private readonly sanitizer: DomSanitizer) {}
-
-  transform(blob: Blob | null): SafeUrl | '' {
+  // Returns a plain string: Angular does not sanitize img/source src, so a
+  // SafeUrl would be set as the text "SafeValue must use...".
+  transform(blob: Blob | null): string {
     if (!blob) {
       return '';
     }
-    const objectUrl = URL.createObjectURL(blob);
-    return this.sanitizer.bypassSecurityTrustUrl(objectUrl);
+    return URL.createObjectURL(blob);
   }
 }

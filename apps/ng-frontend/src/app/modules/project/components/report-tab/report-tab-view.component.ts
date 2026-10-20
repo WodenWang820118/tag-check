@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import {
   Component,
+  computed,
   input,
   output,
   ChangeDetectionStrategy
@@ -16,7 +17,17 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel.component';
-import { ReportTabViewModel } from '../report-detail.contracts';
+import { ReportTabViewModel, RunStatus } from '../report-detail.contracts';
+
+const STATUS_BADGES: Record<
+  RunStatus,
+  { label: string; icon: string; color: 'primary' | 'warn' | undefined }
+> = {
+  notRun: { label: 'Not run', icon: 'hourglass_empty', color: undefined },
+  passed: { label: 'Passed', icon: 'check_circle', color: 'primary' },
+  partial: { label: 'Partial', icon: 'error', color: 'warn' },
+  failed: { label: 'Failed', icon: 'cancel', color: 'warn' }
+};
 
 @Component({
   selector: 'app-report-tab-view',
@@ -47,25 +58,29 @@ import { ReportTabViewModel } from '../report-detail.contracts';
             <mat-card-subtitle
               class="flex flex-wrap items-center gap-2 text-sm"
             >
-              <time class="text-black/70" aria-label="Report created at">
-                {{ viewModel().createdAt | date: 'medium' }}
-              </time>
+              @if (viewModel().status === 'notRun') {
+                <span class="text-black/70">Not run yet</span>
+              } @else {
+                <time class="text-black/70" aria-label="Last run">
+                  {{ viewModel().lastRunAt | date: 'medium' }}
+                </time>
+              }
             </mat-card-subtitle>
           </div>
 
           <div class="flex items-center gap-2 self-start">
             <output class="sr-only" aria-live="polite" aria-atomic="true">
-              {{ viewModel().passed ? 'Report passed' : 'Report failed' }}
+              Report status: {{ statusBadge().label }}
             </output>
-            <mat-chip-set aria-label="Report status">
-              <mat-chip
-                [color]="viewModel().passed ? 'primary' : 'warn'"
-                class="w-full"
-              >
+            <mat-chip-set
+              aria-label="Report status"
+              data-testid="report-status"
+            >
+              <mat-chip [color]="statusBadge().color" class="w-full">
                 <div class="flex items-center gap-1">
-                  {{ viewModel().passed ? 'Passed' : 'Failed' }}
+                  {{ statusBadge().label }}
                   <mat-icon style="transform: scale(0.85)">{{
-                    viewModel().passed ? 'check_circle' : 'cancel'
+                    statusBadge().icon
                   }}</mat-icon>
                 </div>
               </mat-chip>
@@ -174,7 +189,10 @@ import { ReportTabViewModel } from '../report-detail.contracts';
           <section class="space-y-4 mt-10">
             @if (viewModel().hasMedia) {
               <mat-accordion displayMode="flat">
-                <mat-expansion-panel [expanded]="!viewModel().passed">
+                <mat-expansion-panel
+                  [expanded]="!viewModel().passed"
+                  data-testid="report-media"
+                >
                   <mat-expansion-panel-header>
                     <mat-panel-title>
                       <span class="flex items-center">
@@ -185,7 +203,7 @@ import { ReportTabViewModel } from '../report-detail.contracts';
                   </mat-expansion-panel-header>
                   <div
                     id="media-content"
-                    class="max-h-[260px] overflow-hidden rounded-b-lg border-t border-black/10"
+                    class="overflow-hidden rounded-b-lg border-t border-black/10"
                     aria-label="Media content"
                   >
                     <app-carousel
@@ -226,6 +244,7 @@ import { ReportTabViewModel } from '../report-detail.contracts';
 })
 export class ReportTabViewComponent {
   viewModel = input.required<ReportTabViewModel>();
+  statusBadge = computed(() => STATUS_BADGES[this.viewModel().status]);
 
   copyEventName = output<void>();
   exportSpreadsheet = output<void>();

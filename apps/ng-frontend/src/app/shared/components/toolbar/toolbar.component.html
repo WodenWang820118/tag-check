@@ -9,7 +9,13 @@
         <mat-icon>menu</mat-icon>
       </button>
     }
-    <span [routerLink]="['/']" style="cursor: pointer">TagCheck</span>
+    <a
+      class="toolbar__home"
+      [routerLink]="['/']"
+      aria-label="TagCheck projects"
+      data-testid="toolbar-home"
+      >TagCheck</a
+    >
 
     @defer (
       when this.snav() && this.settings() && this.projects();
@@ -40,6 +46,7 @@
       @if (!isSearchVisible()) {
         <button
           id="top-search-button"
+          data-testid="toolbar-search"
           mat-icon-button
           aria-label="Open search"
           (click)="toggleSearch()"
@@ -52,6 +59,7 @@
           mat-icon-button
           aria-label="New project"
           [routerLink]="['/init-project']"
+          data-testid="toolbar-new-project"
           matTooltip="New Project"
           style="cursor: pointer"
         >
@@ -59,6 +67,7 @@
         </button>
         <button
           id="documentation-button"
+          data-testid="toolbar-help"
           mat-icon-button
           aria-label="Help center"
           [routerLink]="['/documentation']"
@@ -76,6 +85,9 @@
               (keyup)="applyFilter($event)"
               #input
               class="filter__input"
+              placeholder="Search projects"
+              aria-label="Search projects"
+              data-testid="toolbar-search-input"
             />
             <button
               matSuffix

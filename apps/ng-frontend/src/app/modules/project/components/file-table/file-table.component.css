@@ -9,3 +9,9 @@
 .pending-status {
   color: #9e9e9e; /* grey for not run */
 }
+
+.file-table__empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.6);
+}

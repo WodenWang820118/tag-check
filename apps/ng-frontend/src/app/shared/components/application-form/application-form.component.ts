@@ -25,6 +25,16 @@ import { SettingsService } from '../../services/api/settings/settings.service';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+/**
+ * The text a settings field shows for a stored value. Strings are shown as
+ * they are: encoding them as JSON added quotes that a save then stored, so
+ * the site read `"true"` instead of `true`. Older settings may hold objects,
+ * which are shown as JSON.
+ */
+export function toEditableValue(value: unknown): string {
+  return typeof value === 'string' ? value : JSON.stringify(value);
+}
+
 @Component({
   selector: 'app-application-form',
   standalone: true,
@@ -199,13 +209,13 @@ export class ApplicationFormComponent implements OnInit {
     const allCookies = this.getAllSettingsFromCookies();
     for (const setting of allSettings) {
       this.localStorageFormArray.push(
-        this.createSettingFormGroup(setting.key, JSON.stringify(setting.value))
+        this.createSettingFormGroup(setting.key, toEditableValue(setting.value))
       );
     }
 
     for (const setting of allCookies) {
       this.cookieFormArray.push(
-        this.createSettingFormGroup(setting.key, JSON.stringify(setting.value))
+        this.createSettingFormGroup(setting.key, toEditableValue(setting.value))
       );
     }
   }

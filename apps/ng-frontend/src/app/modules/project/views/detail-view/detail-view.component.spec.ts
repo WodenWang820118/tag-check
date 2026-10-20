@@ -110,6 +110,16 @@ describe('DetailViewComponent', () => {
   beforeEach(async () => {
     router.navigate.mockClear();
     snackBar.openFromComponent.mockClear();
+    // A run detail is created at the run time; it must not replace the test
+    // event's timestamps, which tell whether the test has run.
+    const runDetail = {
+      passed: false,
+      requestPassed: false,
+      destinationUrl: 'https://example.com',
+      rawRequest: 'POST /collect',
+      createdAt: new Date('2026-04-22T00:00:00.000Z'),
+      updatedAt: new Date('2026-04-22T00:00:00.000Z')
+    };
     routeData$.next({
       projectSlug: 'storybook-project',
       eventId: 'evt-1',
@@ -126,12 +136,7 @@ describe('DetailViewComponent', () => {
           createdAt: new Date('2026-04-21T00:00:00.000Z'),
           updatedAt: new Date('2026-04-22T00:00:00.000Z')
         },
-        testEventDetails: {
-          passed: false,
-          requestPassed: false,
-          destinationUrl: 'https://example.com',
-          rawRequest: 'POST /collect'
-        },
+        testEventDetails: runDetail,
         testImage: {}
       },
       video: {

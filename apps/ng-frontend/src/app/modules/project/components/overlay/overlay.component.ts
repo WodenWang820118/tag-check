@@ -2,7 +2,8 @@ import {
   Component,
   Input,
   ViewEncapsulation,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  output
 } from '@angular/core';
 import { CdkOverlayOrigin, OverlayModule } from '@angular/cdk/overlay';
 
@@ -16,6 +17,10 @@ import { CdkOverlayOrigin, OverlayModule } from '@angular/cdk/overlay';
       [cdkConnectedOverlayOrigin]="trigger"
       [cdkConnectedOverlayOpen]="isOpen"
       [cdkConnectedOverlayOffsetX]="50"
+      [cdkConnectedOverlayHasBackdrop]="true"
+      cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+      (backdropClick)="closed.emit()"
+      (overlayKeydown)="$event.key === 'Escape' && closed.emit()"
     >
       <ng-content></ng-content>
     </ng-template>
@@ -27,5 +32,7 @@ import { CdkOverlayOrigin, OverlayModule } from '@angular/cdk/overlay';
 export class OverlayComponent {
   @Input() trigger!: CdkOverlayOrigin;
   @Input() isOpen!: boolean;
+  /** Emitted when the user clicks outside the overlay or presses Escape. */
+  readonly closed = output<void>();
   // empty constructor removed
 }

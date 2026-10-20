@@ -16,8 +16,11 @@
     font-size: 1.3rem;
   }
 
+  // Long titles wrap in the narrow column; let the header grow with them.
   .mat-expansion-panel-header {
-    height: 48px !important;
+    height: auto !important;
+    min-height: 48px;
+    padding-block: 8px;
   }
 
   .mat-expansion-panel {

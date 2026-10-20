@@ -16,7 +16,9 @@
             class="gtm-preview-mode-form__checkbox"
             style="display: flex; align-items: center; gap: 0.25rem"
           >
-            <mat-checkbox formControlName="isAccompanyMode"
+            <mat-checkbox
+              formControlName="isAccompanyMode"
+              data-testid="gtm-accompanied-mode"
               >Activate Accompanied Mode</mat-checkbox
             >
             <button
@@ -38,7 +40,9 @@
             class="gtm-preview-mode-form__checkbox"
             style="display: flex; align-items: center; gap: 0.25rem"
           >
-            <mat-checkbox formControlName="isRequestCheck"
+            <mat-checkbox
+              formControlName="isRequestCheck"
+              data-testid="gtm-request-check"
               >Activate Request Check</mat-checkbox
             >
 
@@ -73,7 +77,11 @@
         <div class="gtm-preview-mode-form__field gtm-preview-mode-form__row">
           <mat-form-field appearance="outline" style="width: 100%">
             <mat-label>Preview Mode URL</mat-label>
-            <input matInput formControlName="gtmPreviewModeUrl" />
+            <input
+              matInput
+              formControlName="gtmPreviewModeUrl"
+              data-testid="gtm-preview-url"
+            />
             @if (previewModeForm.controls.gtmPreviewModeUrl.value) {
               <button
                 matSuffix

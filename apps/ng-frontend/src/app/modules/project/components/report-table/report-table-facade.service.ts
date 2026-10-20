@@ -9,6 +9,7 @@ import { MatSort } from '@angular/material/sort';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
 import { ReportTableSelectionFacadeService } from './services/report-table-selection-facade/report-table-selection-facade.service';
 import { ReportTableEffectsFacadeService } from './services/report-table-effects-facade/report-table-effects-facade.service';
+import { getRunStatus } from '../report-detail.contracts';
 
 @Injectable({ providedIn: 'root' })
 export class ReportTableFacadeService {
@@ -177,17 +178,7 @@ export class ReportTableFacadeService {
         `${row.testName ?? ''} ${row.eventName ?? ''}`.toLowerCase();
       const textMatch = !t || haystack.includes(t);
 
-      const u = row?.updatedAt ? new Date(row.updatedAt).getTime() : 0;
-      const c = row?.createdAt ? new Date(row.createdAt).getTime() : 0;
-      const run = u > c;
-      const dl = row?.passed === true;
-      const req = row?.requestPassed === true;
-      let statusKey: 'notRun' | 'failed' | 'partial' | 'passed';
-      if (!run) statusKey = 'notRun';
-      else if (dl && req) statusKey = 'passed';
-      else if (dl || req) statusKey = 'partial';
-      else statusKey = 'failed';
-      const statusMatch = s === 'all' || s === statusKey;
+      const statusMatch = s === 'all' || s === getRunStatus(row);
 
       return textMatch && statusMatch;
     };
