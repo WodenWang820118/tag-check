@@ -82,4 +82,5 @@ proofshot-artifacts/
 .main.mjs
 
 .claude/worktrees
+.vercel
 .claude/settings.local.json
