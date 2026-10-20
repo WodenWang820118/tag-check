@@ -148,6 +148,10 @@ export class SideNavListComponent {
     this.menuClick.emit();
   }
 
+  toggleSettings() {
+    this.isOpen.set(!this.isOpen());
+  }
+
   private updateParentTitle() {
     const currentUrl = this.router.url;
     if (currentUrl.includes('/settings')) {
