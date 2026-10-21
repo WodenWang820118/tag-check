@@ -116,7 +116,7 @@ infrastructure modules.
   a release merge. CI never packages the desktop app, so run
   `pnpm run tauri:release:windows` locally after dependency or tooling
   upgrades.
-- pnpm 11 passes a `--` separator through to scripts. Run
+- pnpm (11 and 12) passes a `--` separator through to scripts. Run
   `pnpm run tauri:release describe`, not `pnpm run tauri:release -- describe`.
 - Vercel deploys only `main` (`vercel.json`). Pull request previews come from
   `.github/workflows/vercel-previews.yaml`, which deploys the sites whose Nx
