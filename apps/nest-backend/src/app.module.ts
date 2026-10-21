@@ -7,6 +7,7 @@ import { AllExceptionsFilterModule } from './common/all-exceptions-filter/all-ex
 import { AllExceptionsFilter } from './common/all-exceptions-filter/all-exceptions-filter.service';
 import { DatabaseConfigService } from './core/database/database.service';
 import { DatabaseConfigModule } from './core/database/database.module';
+import { createMigratedDataSource } from './core/database/database-migrations';
 import { LoggerModule, LoggerErrorInterceptor } from 'nestjs-pino';
 import { ConfigsModule } from './core/configs/configs.module';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -76,7 +77,9 @@ function sanitizeHttpPath(rawUrl: string | undefined): string | undefined {
       imports: [DatabaseConfigModule],
       useFactory: (databaseConfigService: DatabaseConfigService) =>
         databaseConfigService.getTypeOrmConfig(),
-      inject: [DatabaseConfigService]
+      inject: [DatabaseConfigService],
+      // Migrate before any module queries the database.
+      dataSourceFactory: createMigratedDataSource
     }),
 
     // Feature modules
