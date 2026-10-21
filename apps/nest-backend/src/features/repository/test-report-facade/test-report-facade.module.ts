@@ -1,20 +1,11 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigsModule } from '../../../core/configs/configs.module';
-import { TestImageEntity } from '../../../shared/entity/test-image.entity';
-import { RepositoryModule } from '../../../core/repository/repository.module';
+import { OsModule } from '../../../infrastructure/os/os.module';
 import { TestReportFacadeRepositoryService } from './test-report-facade-repository.service';
+
 @Module({
-  imports: [
-    RepositoryModule,
-    TypeOrmModule.forFeature([TestImageEntity]),
-    ConfigsModule
-  ],
+  // Data access through OsModule, the features' data-access layer.
+  imports: [OsModule],
   providers: [TestReportFacadeRepositoryService],
-  exports: [
-    TypeOrmModule.forFeature([TestImageEntity]),
-    RepositoryModule,
-    TestReportFacadeRepositoryService
-  ]
+  exports: [TestReportFacadeRepositoryService]
 })
 export class TestReportFacadeModule {}

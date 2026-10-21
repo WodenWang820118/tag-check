@@ -1,13 +1,11 @@
-import { RepositoryModule } from '../../../core/repository/repository.module';
-import { ProjectFacadeRepositoryService } from './project-facade-repository.service';
 import { Module } from '@nestjs/common';
-
-const modules = [RepositoryModule];
-const services = [ProjectFacadeRepositoryService];
+import { OsModule } from '../../../infrastructure/os/os.module';
+import { ProjectFacadeRepositoryService } from './project-facade-repository.service';
 
 @Module({
-  imports: [...modules],
-  providers: [...services],
-  exports: [...modules, ...services]
+  // Data access through OsModule, the features' data-access layer.
+  imports: [OsModule],
+  providers: [ProjectFacadeRepositoryService],
+  exports: [ProjectFacadeRepositoryService]
 })
 export class ProjectFacadeRepositoryModule {}

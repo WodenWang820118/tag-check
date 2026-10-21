@@ -1,20 +1,14 @@
 import { Module } from '@nestjs/common';
 import { OsModule } from '../../../infrastructure/os/os.module';
 import { ProjectSpecService } from './project-spec.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { SpecEntity, ProjectEntity } from '../../../shared';
 import { SpecService } from './spec.service';
-import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
 
-const modules = [
-  OsModule,
-  TypeOrmModule.forFeature([ProjectEntity, SpecEntity])
-];
-const services = [ProjectSpecService, SpecService, SpecRepositoryService];
+const services = [ProjectSpecService, SpecService];
 
 @Module({
-  imports: [...modules],
+  // Data access through OsModule, the features' data-access layer.
+  imports: [OsModule],
   providers: [...services],
-  exports: [...services, ...modules]
+  exports: [...services, OsModule]
 })
 export class ProjectSpecModule {}
