@@ -22,7 +22,8 @@ export default defineConfig(() => ({
     reporters: ['default'],
     coverage: {
       reportsDirectory: '../../coverage/apps/ng-gtm-sample',
-      provider: 'v8' as const
+      provider: 'v8' as const,
+      reporter: ['lcov', 'html']
     }
   }
 }));

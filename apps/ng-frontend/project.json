@@ -205,7 +205,8 @@
       "options": {
         "buildTarget": "ng-frontend:build:development",
         "tsConfig": "apps/ng-frontend/tsconfig.spec.json",
-        "runner": "vitest"
+        "runner": "vitest",
+        "coverageReporters": ["lcov", "html"]
       }
     },
     "serve-static": {

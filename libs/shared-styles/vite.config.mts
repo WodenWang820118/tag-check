@@ -23,7 +23,8 @@ export default defineConfig({
     reporters: ['default'],
     coverage: {
       reportsDirectory: '../../coverage/libs/shared-styles',
-      provider: 'v8'
+      provider: 'v8',
+      reporter: ['lcov']
     }
   }
 });

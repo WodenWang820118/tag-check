@@ -34,6 +34,13 @@ const services = [
   ImageService,
   ProjectIoService
 ];
+/**
+ * The data-access layer for features. It brings the infrastructure services
+ * (paths, files, folders, images, spreadsheets, project import and export)
+ * and re-exports RepositoryModule, so a feature module imports OsModule alone
+ * rather than RepositoryModule or individual repository and infrastructure
+ * modules.
+ */
 @Module({
   imports: [...modules],
   providers: [...services],
