@@ -10,18 +10,28 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTableModule } from '@angular/material/table';
 import { MatDividerModule } from '@angular/material/divider';
 import {
-  Parameter,
   TagSpec,
   TriggerConfig,
-  getParameterListItems,
-  getParameterMapValue,
-  getParameterValue
+  VariableConfig,
+  VariableReferenceValue,
+  getGa4EventParameterRows,
+  getParameterValue,
+  resolveVariableReference
 } from '@utils';
 import { MatButtonModule } from '@angular/material/button';
 
 export interface EventParameter {
   parameter: string;
   value: string;
+  /** What the value's variable stands for, when the container says. */
+  resolved: string | null;
+}
+
+function describeReference(value: VariableReferenceValue | null) {
+  if (!value) return null;
+  return value.kind === 'constant'
+    ? `Constant: ${value.value}`
+    : `Data layer: ${value.path}`;
 }
 
 @Component({
@@ -42,24 +52,29 @@ export interface EventParameter {
 export class TagManageTabComponent {
   // Inputs
   tagSpec = input<TagSpec | undefined>(undefined);
+  /** The container's variables, to resolve the tag's {{references}}. */
+  variables = input<readonly VariableConfig[]>([]);
 
   // Display columns
   displayedColumns: string[] = ['parameter', 'value'];
 
   // Computed helpers
-  private readonly tagConfig$ = computed(() => {
-    console.log('tag info: ', this.tagSpec()?.rawGtmTag?.tag);
-    return this.tagSpec()?.rawGtmTag?.tag;
-  });
+  private readonly tagConfig$ = computed(() => this.tagSpec()?.rawGtmTag?.tag);
 
-  // Measurement ID: show standard template used by GoogleTag generator
-  measurementId$ = computed(() => {
-    return (
+  /** The tag's Measurement ID field, often a {{Constant}} reference. */
+  measurementIdReference$ = computed(
+    () =>
       getParameterValue(
         this.tagConfig$()?.parameter,
         'measurementIdOverride'
       ) ?? ''
-    );
+  );
+
+  /** The Measurement ID itself when the field references a Constant. */
+  measurementId$ = computed(() => {
+    const reference = this.measurementIdReference$();
+    const resolved = resolveVariableReference(reference, this.variables());
+    return resolved?.kind === 'constant' ? resolved.value : reference;
   });
 
   // Google Tag reference name from the Event tag parameters (TAG_REFERENCE measurementId)
@@ -109,19 +124,19 @@ export class TagManageTabComponent {
   });
   triggerType$ = computed(() => 'Custom Event');
 
-  // Event parameters table data from LIST(eventParameters)
+  /**
+   * The parameters the tag sends: its own table, then the table of the Event
+   * Settings variable it references once the container's variables load.
+   */
   eventParameters$ = computed<EventParameter[]>(() => {
-    const params: Parameter[] = this.tagConfig$()?.parameter ?? [];
-    const listParam = params.find(
-      (p) => p.key === 'eventSettingsTable' && p.type === 'LIST'
-    );
-    return getParameterListItems(listParam)
-      .map((item) => {
-        const paramName = getParameterMapValue(item, 'parameter');
-        const paramValue = getParameterMapValue(item, 'parameterValue');
-        if (!paramName || !paramValue) return undefined;
-        return { parameter: paramName, value: paramValue } as EventParameter;
-      })
-      .filter((v): v is EventParameter => !!v);
+    const tag = this.tagConfig$();
+    if (!tag?.parameter) return [];
+    const variables = this.variables();
+    return getGa4EventParameterRows(tag, variables).map((row) => ({
+      ...row,
+      resolved: describeReference(
+        resolveVariableReference(row.value, variables)
+      )
+    }));
   });
 }

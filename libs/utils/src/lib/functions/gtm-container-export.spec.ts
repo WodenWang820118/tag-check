@@ -3,7 +3,8 @@ import type { TagConfig, VariableConfig } from '../types/tag-build';
 import {
   getDataLayerVariablePath,
   getGa4EventParameterRows,
-  parseGtmContainerExport
+  parseGtmContainerExport,
+  resolveVariableReference
 } from './gtm-container-export';
 
 const dataLayerVariable = (
@@ -106,6 +107,48 @@ describe('getDataLayerVariablePath', () => {
     'prefix {{DLV - ecommerce.value}}'
   ])('returns null for %s', (reference) => {
     expect(getDataLayerVariablePath(reference, variables)).toBeNull();
+  });
+});
+
+describe('resolveVariableReference', () => {
+  const constant: VariableConfig = {
+    accountId: '1',
+    containerId: '2',
+    name: 'CONST - Measurement ID',
+    type: 'c',
+    parameter: [{ type: 'TEMPLATE', key: 'value', value: 'G-8HKQR5ZBSK' }]
+  };
+  const customJs: VariableConfig = {
+    accountId: '1',
+    containerId: '2',
+    name: '[custom] GA4 Items array',
+    type: 'jsm',
+    parameter: [{ type: 'TEMPLATE', key: 'javascript', value: 'function(){}' }]
+  };
+  const variables = [
+    constant,
+    customJs,
+    dataLayerVariable('DLV - ecommerce.value', 'ecommerce.value')
+  ];
+
+  it('resolves a Constant to its value', () => {
+    expect(
+      resolveVariableReference('{{CONST - Measurement ID}}', variables)
+    ).toEqual({ kind: 'constant', value: 'G-8HKQR5ZBSK' });
+  });
+
+  it('resolves a Data Layer Variable to the key it reads', () => {
+    expect(
+      resolveVariableReference('{{DLV - ecommerce.value}}', variables)
+    ).toEqual({ kind: 'dataLayer', path: 'ecommerce.value' });
+  });
+
+  it('leaves run-time variables, unknown names and plain text unresolved', () => {
+    expect(
+      resolveVariableReference('{{[custom] GA4 Items array}}', variables)
+    ).toBeNull();
+    expect(resolveVariableReference('{{Missing}}', variables)).toBeNull();
+    expect(resolveVariableReference('G-8HKQR5ZBSK', variables)).toBeNull();
   });
 });
 

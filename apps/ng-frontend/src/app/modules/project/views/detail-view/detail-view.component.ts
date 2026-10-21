@@ -14,7 +14,8 @@ import {
   Params,
   Router
 } from '@angular/router';
-import { distinctUntilChanged, map, startWith } from 'rxjs';
+import { distinctUntilChanged, map, of, startWith, switchMap } from 'rxjs';
+import { VariableConfig } from '@utils';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -23,6 +24,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ReportTabComponent } from '../../components/report-tab/report-tab.component';
 import { TagManageTabComponent } from '../../components/tag-manage-tab/tag-manage-tab.component';
 import { SnackBarComponent } from '../../../../shared/components/snackbar/snackbar.component';
+import { ProjectService } from '../../../../shared/services/api/project-info/project-info.service';
 import {
   ReportDetailRouteContext,
   toTagSpec
@@ -71,7 +73,10 @@ function serializeParamMap(params: ParamMap): string {
           [selectedIndex]="selectedTabIndex"
         >
           <mat-tab label="Tag Snapshot">
-            <app-tag-manage-tab [tagSpec]="tagSpec()"></app-tag-manage-tab>
+            <app-tag-manage-tab
+              [tagSpec]="tagSpec()"
+              [variables]="variables()"
+            ></app-tag-manage-tab>
           </mat-tab>
           <mat-tab label="Latest result">
             <app-report-tab [context]="routeContext()"></app-report-tab>
@@ -87,6 +92,7 @@ export class DetailViewComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly projectService = inject(ProjectService);
 
   /** Loaded by reportPageResolver. */
   routeContext = toSignal(
@@ -95,6 +101,26 @@ export class DetailViewComponent implements OnInit {
     )
   );
   tagSpec = computed(() => toTagSpec(this.routeContext()?.spec));
+  /**
+   * The project's container variables, which resolve the tag's references.
+   * They load after the page shows; until then the tab shows the references.
+   */
+  variables = toSignal(
+    this.route.data.pipe(
+      map(
+        (data) =>
+          (data['page'] as ReportDetailRouteContext | undefined)?.projectSlug
+      ),
+      distinctUntilChanged(),
+      switchMap((projectSlug) =>
+        projectSlug
+          ? this.projectService.getProjectGtmConfig(projectSlug)
+          : of(null)
+      ),
+      map((container) => container?.containerVersion?.variable ?? [])
+    ),
+    { initialValue: [] as VariableConfig[] }
+  );
   selectedTabIndex = 0;
 
   ngOnInit(): void {

@@ -16,8 +16,14 @@
               <code
                 class="block w-full font-mono !text-[14px] text-gray-800 bg-gray-100 rounded px-3 py-1 break-words"
                 aria-label="Measurement ID"
+                data-testid="tag-measurement-id"
                 >{{ measurementId$() }}</code
               >
+              @if (measurementId$() !== measurementIdReference$()) {
+                <div class="mt-1 text-sm text-gray-600">
+                  From {{ measurementIdReference$() }}
+                </div>
+              }
             </div>
           </div>
         </div>
@@ -73,6 +79,16 @@
                   class="block w-full font-mono !text-[14px] text-gray-800 bg-gray-100 rounded px-3 py-1 break-words"
                   >{{ element.value }}</code
                 >
+                @if (element.resolved) {
+                  <div
+                    class="mt-1 px-3 text-sm text-gray-600"
+                    [attr.data-testid]="
+                      'tag-parameter-source-' + element.parameter
+                    "
+                  >
+                    {{ element.resolved }}
+                  </div>
+                }
               </td>
             </ng-container>
 
