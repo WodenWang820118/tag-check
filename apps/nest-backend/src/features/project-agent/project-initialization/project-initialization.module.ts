@@ -6,6 +6,7 @@ import { OsModule } from '../../../infrastructure/os/os.module';
 import { ProjectFacadeRepositoryService } from '../../repository/project-facade/project-facade-repository.service';
 
 @Module({
+  // Data access through OsModule, the features' data-access layer.
   imports: [OsModule],
   providers: [
     ProjectInitializationService,

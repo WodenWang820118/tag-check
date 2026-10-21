@@ -17,6 +17,11 @@ const modules = [
   ItemDefRepositoryModule
 ];
 
+/**
+ * Gathers every repository module. Features reach it through OsModule, which
+ * re-exports it; infrastructure modules that read configuration or images
+ * import it directly.
+ */
 @Module({
   imports: modules,
   exports: modules

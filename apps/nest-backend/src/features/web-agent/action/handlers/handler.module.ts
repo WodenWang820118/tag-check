@@ -18,6 +18,7 @@ const strategyModules = [
 ];
 
 @Module({
+  // Data access through OsModule, the features' data-access layer.
   imports: [OsModule, ActionUtilsModule, ...strategyModules],
   providers: [...handlers, ClickStrategyService],
   exports: [...handlers, ...strategyModules, OsModule]
