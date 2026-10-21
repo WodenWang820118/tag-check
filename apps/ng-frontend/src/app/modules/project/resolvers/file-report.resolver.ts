@@ -1,11 +1,11 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
-import { TestEventSchema } from '@utils';
+import { Jsonified, RunSummary } from '@utils';
 import { FileReportService } from '../../../shared/services/api/file-report/file-report.service';
 
-export const getFileReportResolver: ResolveFn<TestEventSchema[] | null> = (
-  route
-) => {
+export const getFileReportResolver: ResolveFn<
+  Jsonified<RunSummary>[] | null
+> = (route) => {
   const fileReportService = inject(FileReportService);
 
   if (!route.parent) {
