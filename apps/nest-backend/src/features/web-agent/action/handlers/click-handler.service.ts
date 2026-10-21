@@ -37,11 +37,11 @@ export class ClickHandler implements ActionHandler {
     projectSlug: string,
     eventId: string,
     step: Step,
-    isLastStep: boolean
+    isLastClick: boolean
   ): Promise<void> {
     let clickedSuccessfully = false;
     const preventNavigation =
-      isLastStep &&
+      isLastClick &&
       (
         await this.testEventRepositoryService.getEntityBySlugAndEventId(
           projectSlug,

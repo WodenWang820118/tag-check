@@ -83,6 +83,7 @@ export class ReportTableEffectsFacadeService {
     effect(() => {
       if (!this.projectDataSourceService.getPreventNavigationSignal()) return;
       untracked(() => {
+        const saveProjectSlug = this.getProjectSlug();
         const testEvents = this.reportTableDataSourceModelService
           .selection()
           .selected.map((item) => ({
@@ -94,7 +95,7 @@ export class ReportTableEffectsFacadeService {
           return;
         }
         this.reportService
-          .updateTestEvents(this.getProjectSlug(), testEvents)
+          .updateTestEvents(saveProjectSlug, testEvents)
           .pipe(
             take(1),
             finalize(() =>
@@ -103,6 +104,11 @@ export class ReportTableEffectsFacadeService {
           )
           .subscribe({
             next: () => {
+              // The user switched project while saving: these rows are another project's.
+              if (this.getProjectSlug() !== saveProjectSlug) {
+                this.projectDataSourceService.setPreventNavigationSignal(false);
+                return;
+              }
               const settings = new Map(
                 testEvents.map((item) => [item.eventId, item.stopNavigation])
               );
@@ -117,6 +123,10 @@ export class ReportTableEffectsFacadeService {
               });
             },
             error: () => {
+              if (this.getProjectSlug() !== saveProjectSlug) {
+                this.projectDataSourceService.setPreventNavigationSignal(false);
+                return;
+              }
               this.snackBar.open(
                 'Could not save navigation bookmarks. Please try again.',
                 'Dismiss',

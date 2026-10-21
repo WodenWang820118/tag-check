@@ -32,7 +32,7 @@ export class ChangeHandler implements ActionHandler {
     projectName: string,
     eventId: string,
     step: Step,
-    isLastStep: boolean,
+    _isLastClick?: boolean,
     timeout = 3000
   ): Promise<void> {
     const candidates = (step.selectors ?? []).map(getFirstSelector);

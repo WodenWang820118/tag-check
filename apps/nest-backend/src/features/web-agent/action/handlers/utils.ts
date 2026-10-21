@@ -7,7 +7,7 @@ export interface ActionHandler {
     projectName: string,
     eventId: string,
     step: Step,
-    isLastStep: boolean
+    isLastClick: boolean
   ): Promise<void>;
 }
 

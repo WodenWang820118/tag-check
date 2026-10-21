@@ -149,39 +149,44 @@ export class TestEventRepositoryService {
 
     const updatedEntities: TestEventEntity[] = [];
 
-    for (const event of events) {
-      const updatedEvent = data.find((e) => e.eventId === event.eventId);
-      if (updatedEvent) {
-        // Create update object with only the fields that can be updated
-        const updateData: Partial<TestEventEntity> = {
-          message: updatedEvent.message
-        };
+    await this.repository.manager.transaction(async (manager) => {
+      // One transaction: a failed save leaves every row unchanged.
+      const repo = manager.getRepository(TestEventEntity);
 
-        // Omitted settings preserve their value; false removes the bookmark.
-        if (updatedEvent.stopNavigation !== undefined) {
-          updateData.stopNavigation = updatedEvent.stopNavigation;
+      for (const event of events) {
+        const updatedEvent = data.find((e) => e.eventId === event.eventId);
+        if (updatedEvent) {
+          // Create update object with only the fields that can be updated
+          const updateData: Partial<TestEventEntity> = {
+            message: updatedEvent.message
+          };
+
+          // Omitted settings preserve their value; false removes the bookmark.
+          if (updatedEvent.stopNavigation !== undefined) {
+            updateData.stopNavigation = updatedEvent.stopNavigation;
+          }
+
+          // If latest records are provided in the DTO, update their references
+          if (updatedEvent.latestTestEventDetailId) {
+            updateData.latestTestEventDetailId =
+              updatedEvent.latestTestEventDetailId;
+          }
+
+          if (updatedEvent.latestTestImageId) {
+            updateData.latestTestImageId = updatedEvent.latestTestImageId;
+          }
+
+          // Use save instead of update to properly handle relations
+          // Upsert
+          const updatedEntity = await repo.save({
+            ...event,
+            ...updateData
+          });
+
+          updatedEntities.push(updatedEntity);
         }
-
-        // If latest records are provided in the DTO, update their references
-        if (updatedEvent.latestTestEventDetailId) {
-          updateData.latestTestEventDetailId =
-            updatedEvent.latestTestEventDetailId;
-        }
-
-        if (updatedEvent.latestTestImageId) {
-          updateData.latestTestImageId = updatedEvent.latestTestImageId;
-        }
-
-        // Use save instead of update to properly handle relations
-        // Upsert
-        const updatedEntity = await this.repository.save({
-          ...event,
-          ...updateData
-        });
-
-        updatedEntities.push(updatedEntity);
       }
-    }
+    });
 
     // Fetch final state with all necessary relations
     const finalEntities = await this.repository.find({

@@ -24,7 +24,7 @@ export class HoverHandler implements ActionHandler {
     projectName: string,
     eventId: string,
     step: Step,
-    _isLastStep: boolean
+    _isLastClick: boolean
   ): Promise<void> {
     let hoveredSuccessfully = false;
 

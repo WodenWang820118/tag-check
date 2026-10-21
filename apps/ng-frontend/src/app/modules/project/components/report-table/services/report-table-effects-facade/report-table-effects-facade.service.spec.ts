@@ -15,8 +15,10 @@ describe('navigation bookmarks', () => {
   const openSnackBar = vi.fn();
   let state: ProjectDataSourceService;
   let model: ReportTableDataSourceModelService;
+  let currentProjectSlug = 'demo';
 
   beforeEach(() => {
+    currentProjectSlug = 'demo';
     response = new Subject();
     updateTestEvents.mockReset().mockReturnValue(response);
     openSnackBar.mockClear();
@@ -46,7 +48,7 @@ describe('navigation bookmarks', () => {
     TestBed.runInInjectionContext(() =>
       TestBed.inject(ReportTableEffectsFacadeService).initialize({
         getStatus: () => 'all',
-        getProjectSlug: () => 'demo'
+        getProjectSlug: () => currentProjectSlug
       })
     );
     TestBed.tick();
@@ -103,6 +105,45 @@ describe('navigation bookmarks', () => {
     state.setPreventNavigationSignal(true);
     TestBed.tick();
     expect(updateTestEvents).not.toHaveBeenCalled();
+    expect(state.getPreventNavigationSignal()).toBe(false);
+  });
+
+  it('ignores response that arrives after a project switch and clears pending state', () => {
+    const ds = model.dataSource();
+    const [first] = ds.data;
+    model.selection().select(first);
+    state.setPreventNavigationSignal(true);
+    TestBed.tick();
+    expect(updateTestEvents).toHaveBeenCalledWith('demo', [
+      expect.objectContaining({ eventId: 'a', stopNavigation: true })
+    ]);
+    expect(state.getPreventNavigationSignal()).toBe(true);
+
+    // User switches project before the response arrives
+    currentProjectSlug = 'other';
+    // The new project table is populated with JSON shaped like the real API response
+    const newProjectRows = new ReportMapperService().toReportDetails(
+      JSON.parse(
+        JSON.stringify([
+          { ...REPORT_LIST_ITEM_SAMPLE, eventId: 'a', stopNavigation: false }
+        ])
+      )
+    );
+    model.dataSource().data = newProjectRows;
+
+    // Response arrives from the old project
+    response.next(
+      JSON.parse(
+        JSON.stringify([
+          { ...REPORT_LIST_ITEM_SAMPLE, eventId: 'a', stopNavigation: true }
+        ])
+      )
+    );
+    TestBed.tick();
+
+    // The other project row remains unchanged
+    expect(newProjectRows[0].stopNavigation).toBe(false);
+    // The pending state is cleared
     expect(state.getPreventNavigationSignal()).toBe(false);
   });
 });

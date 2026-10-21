@@ -10,7 +10,16 @@ function build() {
     update: vi.fn(),
     delete: vi.fn(),
     remove: vi.fn(),
-    createQueryBuilder: vi.fn()
+    createQueryBuilder: vi.fn(),
+    manager: {
+      transaction: vi.fn(async (cb: (m: unknown) => Promise<unknown>) =>
+        cb({
+          save: repository.save,
+          find: repository.find,
+          getRepository: () => repository
+        })
+      )
+    }
   };
   const service = new TestEventRepositoryService(repository as never);
   return { service, repository };
