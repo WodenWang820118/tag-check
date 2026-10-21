@@ -13,6 +13,13 @@ import { plainToInstance } from 'class-transformer';
 import type { RunSummary } from '@utils';
 import { screenshotsOfRuns } from './run-screenshots';
 
+/** A test's latest run, screenshot and message after its latest run went. */
+type RepointedTest = {
+  latestTestEventDetailId: number | null;
+  latestTestImageId: number | null;
+  message: string;
+};
+
 /** What deleteRuns removed. */
 export type DeletedRuns = {
   deletedRunIds: number[];
@@ -152,60 +159,84 @@ export class TestEventDetailRepositoryService {
         where: { id: In(runIds), testEvent: { project: { projectSlug } } }
       });
       const deleted = new Set(runs.map((run) => run.id));
-      const tests = new Map(
-        runs.map((run) => [run.testEvent.id, run.testEvent])
-      );
-      const screenshotIds: number[] = [];
-      const latestRunDeletedEventIds: string[] = [];
-
-      for (const test of tests.values()) {
-        const testRuns = await manager.find(TestEventDetailEntity, {
+      const tests = [
+        ...new Map(
+          runs.map((run) => [run.testEvent.id, run.testEvent])
+        ).values()
+      ];
+      if (tests.length === 0) {
+        return { deletedRunIds: [], latestRunDeletedEventIds: [] };
+      }
+      const testIds = tests.map((test) => test.id);
+      // Every run and screenshot of those tests, oldest first. Screenshots
+      // are read without their bytes.
+      const [allRuns, allScreenshots] = await Promise.all([
+        manager.find(TestEventDetailEntity, {
           select: {
             id: true,
             createdAt: true,
             message: true,
-            testImage: { id: true }
+            testImage: { id: true },
+            testEvent: { id: true }
           },
-          relations: { testImage: true },
-          where: { testEvent: { id: test.id } },
+          relations: { testImage: true, testEvent: true },
+          where: { testEvent: { id: In(testIds) } },
           order: { createdAt: 'ASC', id: 'ASC' }
-        });
-        // Metadata only: the screenshots' bytes stay on disk.
-        const screenshots = await manager.find(TestImageEntity, {
-          select: { id: true, createdAt: true },
-          where: { testEvent: { id: test.id } },
+        }),
+        manager.find(TestImageEntity, {
+          select: { id: true, createdAt: true, testEvent: { id: true } },
+          relations: { testEvent: true },
+          where: { testEvent: { id: In(testIds) } },
           order: { id: 'ASC' }
-        });
-        const removed = screenshotsOfRuns(testRuns, screenshots, deleted);
+        })
+      ]);
+
+      const screenshotIds: number[] = [];
+      const repointed: { test: TestEventEntity; values: RepointedTest }[] = [];
+      for (const test of tests) {
+        const testRuns = allRuns.filter((run) => run.testEvent.id === test.id);
+        const screenshots = allScreenshots.filter(
+          (screenshot) => screenshot.testEvent.id === test.id
+        );
+        const removed = new Set(
+          screenshotsOfRuns(testRuns, screenshots, deleted)
+        );
         screenshotIds.push(...removed);
 
-        if (
-          test.latestTestEventDetailId != null &&
-          deleted.has(test.latestTestEventDetailId)
-        ) {
-          // Point the test away from the deleted rows before deleting them.
-          const latestRun = testRuns
-            .filter((run) => !deleted.has(run.id))
-            .at(-1);
-          const latestScreenshot = screenshots
-            .filter((screenshot) => !removed.includes(screenshot.id))
-            .at(-1);
-          await manager.update(TestEventEntity, test.id, {
-            latestTestEventDetailId: latestRun?.id ?? null,
-            latestTestImageId: latestScreenshot?.id ?? null,
-            message: latestRun?.message ?? ''
+        const latestRunId = test.latestTestEventDetailId;
+        if (latestRunId != null && deleted.has(latestRunId)) {
+          const remainingRuns = testRuns.filter((run) => !deleted.has(run.id));
+          const remainingScreenshots = screenshots.filter(
+            (screenshot) => !removed.has(screenshot.id)
+          );
+          const latestRun = remainingRuns.at(-1);
+          repointed.push({
+            test,
+            values: {
+              latestTestEventDetailId: latestRun?.id ?? null,
+              latestTestImageId: remainingScreenshots.at(-1)?.id ?? null,
+              message: latestRun?.message ?? ''
+            }
           });
-          latestRunDeletedEventIds.push(test.eventId);
         }
       }
 
+      // Point the tests away from the deleted rows before deleting them.
+      await Promise.all(
+        repointed.map(({ test, values }) =>
+          manager.update(TestEventEntity, test.id, values)
+        )
+      );
       if (deleted.size > 0) {
         await manager.delete(TestEventDetailEntity, [...deleted]);
       }
       if (screenshotIds.length > 0) {
         await manager.delete(TestImageEntity, screenshotIds);
       }
-      return { deletedRunIds: [...deleted], latestRunDeletedEventIds };
+      return {
+        deletedRunIds: [...deleted],
+        latestRunDeletedEventIds: repointed.map(({ test }) => test.eventId)
+      };
     });
   }
 

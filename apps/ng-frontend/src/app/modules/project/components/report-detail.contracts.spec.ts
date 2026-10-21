@@ -57,6 +57,7 @@ describe('getRunStatus', () => {
     expect(getRunStatus({ ...item, lastRunAt: null })).toBe('notRun');
     expect(getLastRunAt(item)).toBe(REPORT_LIST_ITEM_SAMPLE.lastRunAt);
     expect(getLastRunAt({ ...item, lastRunAt: null })).toBeUndefined();
+    expect(getLastRunAt(undefined)).toBeUndefined();
   });
 });
 

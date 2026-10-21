@@ -73,6 +73,18 @@ describe('FileTableDataSourceFacadeService', () => {
     expect(facade.selection.selected).toEqual([]);
   });
 
+  it('sends nothing to delete when no run is selected', () => {
+    facade.initializeData(null as never, null as never, {
+      fileReports: [newer],
+      projectSlug: 'shop'
+    });
+
+    facade['handleReportDeletion']();
+
+    expect(fileReportService.deleteRuns).not.toHaveBeenCalled();
+    expect(facade.dataSource.data).toEqual([newer]);
+  });
+
   it('downloads each selected test once, however many of its runs are selected', () => {
     facade['handleReportDownload']('shop', [newer, older]);
 
