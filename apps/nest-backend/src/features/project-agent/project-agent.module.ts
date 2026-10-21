@@ -16,21 +16,7 @@ import { ProjectFacadeRepositoryModule } from '../repository/project-facade/proj
 import { ProjectDataLayerSpecBuilderModule } from './project-data-layer-spec-builder/project-data-layer-spec.builder.module';
 import { ProjectGtmContainerModule } from './project-gtm-container/project-gtm-container.module';
 import { TestReportFacadeModule } from '../repository/test-report-facade/test-report-facade.module';
-
-// services
-import { ProjectAbstractReportService } from './project-abstract-report/project-abstract-report.service';
-import { ProjectInitializationService } from './project-initialization/project-initialization.service';
-import { ProjectIoFacadeService } from './project-io-facade/project-io-facade.service';
-import { ProjectMetadataService } from './project-metadata/project-metadata.service';
-import { ProjectRecordingService } from './project-recording/project-recording.service';
-import { ProjectReportService } from './project-report/project-report.service';
-import { ProjectSettingService } from './project-setting/project-setting.service';
-import { ProjectSpecService } from './project-spec/project-spec.service';
-import { ProjectImageService } from './project-image/project-image.service';
-import { ProjectFileReportService } from './project-file-report/project-file-report.service';
-import { ProjectVideoService } from './project-video/project-video.service';
-import { ProjectEventsBuilderService } from './project-events-builder/project-events-builder.service';
-import { ProjectDataLayerSpecBuilderService } from './project-data-layer-spec-builder/project-data-layer-spec.builder.service';
+import { ProjectEventsBuilderModule } from './project-events-builder/project-events-builder.module';
 
 const modules = [
   ProjectFacadeRepositoryModule,
@@ -47,28 +33,13 @@ const modules = [
   ProjectVideoModule,
   ProjectDataLayerSpecBuilderModule,
   ProjectGtmContainerModule,
+  ProjectEventsBuilderModule,
   TestReportFacadeModule
 ];
 
-const services = [
-  ProjectAbstractReportService,
-  ProjectInitializationService,
-  ProjectIoFacadeService,
-  ProjectMetadataService,
-  ProjectRecordingService,
-  ProjectReportService,
-  ProjectSettingService,
-  ProjectSpecService,
-  ProjectImageService,
-  ProjectFileReportService,
-  ProjectVideoService,
-  ProjectEventsBuilderService,
-  ProjectDataLayerSpecBuilderService
-];
-
+/** The project features together; each service comes from its own module. */
 @Module({
   imports: [...modules],
-  providers: [...services],
-  exports: [...modules, ...services]
+  exports: [...modules]
 })
 export class ProjectAgentModule {}
