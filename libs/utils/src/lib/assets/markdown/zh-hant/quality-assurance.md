@@ -1,58 +1,79 @@
 # 品質保證
 
-品質保證的核心，是確認系統是否符合驗收條件。本文會一步步說明如何在平台上完成 QA 流程。
+當網站與 GTM 送出的內容符合規格的描述時，測試就會通過。本頁說明如何撰寫規格、兩項檢查如何比對規格，以及如何在發布代碼前先審查它。
 
-## 建立報告
+## 撰寫規格
 
-在稽核測試案例之前，先建立可供參照的 report。由於同一个事件可能在多個位置被觸發，系统會為每一份報告建立 event ID。當存在多個 `add_to_cart` 測試案例時，一份共用的 JSON 規格即可浵蓋所有案例。例如：
+規格就是你預期的 `dataLayer` 推送，以 JSON 撰寫。其中 `event` 指定 GA4 事件名稱，其他每個鍵都是推送必須包含的參數。規格沒有列出的鍵會被忽略，因此規格只需要包含你在意的參數。
+
+值遵循以下規則：
+
+| 規格值                                     | 通過條件                                         |
+| ------------------------------------------ | ------------------------------------------------ |
+| `"$name"`，例如 `"$item_id"`               | 鍵存在，不論其值為何                             |
+| `"{{Variable Name}}"`，即 Tag Manager 變數 | 鍵存在，不論其值為何                             |
+| `"/pattern/"`                              | 值是符合兩個斜線之間正規表示式的字串             |
+| 其他任何字串、數字或布林值                 | 值完全相等，包括型別                             |
+| 物件，例如 `ecommerce`                     | 物件中的每個鍵都依相同規則通過                   |
+| 陣列，例如 `items`                         | 每個元素都至少符合實際陣列中的一個元素，順序不拘 |
+
+例如：
 
 ```json
 {
   "event": "add_to_cart",
   "ecommerce": {
+    "currency": "USD",
+    "value": "$value",
     "items": [
       {
         "item_id": "$item_id",
-        "item_name": "^(?:switzerland|california)$",
-        "item_category": "Europe",
-        "quantity": 1,
-        "price": 200
+        "item_name": "/^(?:Switzerland|California)$/",
+        "quantity": 1
       }
-    ],
-    "currency": "USD",
-    "value": 200
+    ]
   }
 }
 ```
 
-你之後仍可視需要編輯規格。事件名稱在系統中是唯一的，因此不能再新增另一份 `add_to_cart` 規格；其他測試案例會透過事件名稱共用這份規格，例如：
+數字 `1` 不符合字串 `"1"`。網站推送數字時，請在規格中寫成數字。
+
+從 GTM 容器匯入的測試，一開始的規格是依代碼建立的：每個讀取資料層變數的參數都會成為一個鍵，其值為該變數的參照，例如 `"value": "{{DLV - ecommerce.value}}"`，因此該鍵必須存在。在你想要更嚴格檢查的地方，請將參照替換為值或模式。若要編輯規格，請開啟測試，前往 **Latest result**，並使用 **Data Layer Spec** 面板的編輯按鈕。
+
+## 電子商務事件
+
+對於 Google 建議的電子商務事件，以及任何含有 `ecommerce.items` 的規格，資料層檢查還會要求事件之前先有一次 `{ ecommerce: null }` 推送；Google 建議以此清除先前的電子商務資料（[使用 Tag Manager 評估電子商務](https://developers.google.com/analytics/devguides/collection/ga4/ecommerce?client_type=gtm)）。請求檢查會略過這條規則，因為這次重設不會離開瀏覽器。
+
+測試也可以有一份 **Item Definition**：一個 GA4 商品，例如：
 
 ```json
 {
-  "event": "add_to_cart"
+  "item_id": "city001",
+  "item_name": "Switzerland",
+  "item_category": "Switzerland",
+  "quantity": 1,
+  "price": 799
 }
 ```
 
-## 規格審查
+如此一來，對於電子商務事件，執行會預期 `ecommerce.items` 的元素就是這個商品，取代規格中的商品。請在測試 **Latest result** 的 **Item Definition** 面板中編輯它。
 
-同一個事件的量測規格應保持一致。當量測規劃一致時，Google Analytics 報表會更容易閱讀，也較不容易出現令人困惑的 `(not set)`。由於規格是全域共用的，修改規格可能影響其他測試案例。
+## 請求檢查
 
-## Chrome 錄製流程
+開啟 **Activate Request Check** 後，TagCheck 會攔截測試事件傳送到專案評估 ID 的 GA4 請求。它會從請求中讀取事件名稱、事件參數與商品，將它們重組成形狀類似 `dataLayer` 推送的物件，然後套用同一份規格。Google 並未提供請求格式的說明文件；TagCheck 依照 gtag.js 實際送出的格式來讀取。
 
-Chrome Recorder 會記錄 CSS/ID selector、XPath 與其他定位資訊，用來描述每一步操作。常見動作包含點擊、滑過、輸入與選取。下載 Recorder 產生的 JSON 後，上傳到系統即可在稽核流程中使用。目前 TagCheck 主要以 CSS/ID selector 執行自動化。
+重組後的物件會保留請求所帶的型別：數值事件參數（`epn.`）與數值商品欄位（例如 `price` 和 `quantity`）會成為數字；其他事件參數（`ep.`）則維持字串。如果代碼把數字當成文字參數送出，規格值 `200` 會通過資料層檢查，但請求檢查會因為 `"200"` 而失敗。請修正代碼，或在型別無關緊要的地方使用 `"$value"` 或模式。
 
-## Google Tag Manager
+## 審查代碼
 
-Google Tag Manager 是一套代碼管理系統，讓團隊能在不直接修改網站程式碼的情況下，聚焦在追蹤設計本身。TagCheck 的目標，就是減少重複的手動測試，並協助 QA 更穩定地對照商業需求驗證標記實作。
+測試的 **Tag Snapshot** 分頁會顯示該測試所來自的 GA4 事件代碼：
 
-## Data layer
+- **Measurement ID**：代碼傳送的目標 ID。當代碼參照常數變數（例如 `{{CONST - Measurement ID}}`）時，此分頁會顯示該常數的值，並在其下方顯示參照。
+- **Event Name** 與 **Event Parameters**：代碼傳送的參數，包括來自其事件設定變數的參數。讀取資料層變數的值，會顯示它所讀取的資料層鍵，例如 `Data layer: ecommerce.value`。
+- **Triggering**：代碼的觸發條件。
 
-Data layer 是串接使用者互動與資料收集流程的 JavaScript 物件。例如，當使用者點擊按鈕時，data layer 會收到定義好的資料並觸發對應的 GTM 標記。因此，檢查 data layer 是確認實作品質的核心能力之一。
+將它與規格比較，即可看出代碼是否讀取了網站推送的鍵。
 
-## Request 攔截
+## Accompanied Mode
 
-多數情況下，只檢查 data layer 已經足夠。不過有些情況在 GTM Preview 看起來正確，實際送到 Google Analytics 的值卻已被轉換，例如陣列被轉成字串。為了降低這類誤判，TagCheck 可以額外稽核外送 request。系統會依據專案中的 measurement ID 攔截 request，重建成類似 data layer 的物件，再以同一套驗證邏輯檢查它是否符合規格。
-
-## GTM accompanied mode
-
-GTM accompanied mode 讓你在自動化執行時，同步觀察 GTM Preview 中的標記觸發狀況，也適合用來檢查尚未發佈的 workspace。你需要提供 GTM container 的 shareable link 與落地頁網址，系統才會開啟預覽並執行稽核。
+Accompanied Mode 會透過 GTM Preview 執行測試，因此受測代碼是你所預覽之工作區中的代碼，即使尚未發布也一樣。若要使用此模式，請在 **Google Tag Manager** 設定中輸入 **Preview Mode URL**，並開啟 **Activate Accompanied Mode**。執行時會在網站旁開啟 Tag Assistant，執行結束後瀏覽器視窗會保持開啟以供檢查；完成後請將它關閉。

@@ -1,70 +1,50 @@
 # 使用场景
 
-Google Analytics 报表中的异常，往往就是标签问题的线索。例如 page view 突然明显下降，或某些事件出现 `(not set)` 参数，这些情况都可能来自 Google Tag Manager 中不正确的标签实现。通过审计，用户可以找出触发不准确的标签并进行修复。
+追踪问题往往最先在 Google Analytics 中显现：页面浏览量下降，或者某个事件的参数显示为 `(not set)`。这些问题通常源于改动了 `dataLayer` 的网站变更，或者破坏了某个标签的 GTM 变更。TagCheck 通过在网站本身上检查每个规划好的事件来发现这些问题。
 
-TagCheck 特别适合以下场景：
+TagCheck 适用于：
 
-- 拥有大量标签的大型网站
-- 在 GTM 中有复杂自定义标签逻辑的网站
-- 网站与 GTM 标签变动频繁的团队
+- 标签众多，或 GTM 配置高度定制的网站；
+- 经常发布网站或更改 GTM 的团队；
+- 电子商务网站，其事件携带的商品和数值必须始终准确。
 
-## 搭配 GTM 的自动化
+## 每次发布后检查所有事件
 
-当系统提供 GTM shareable link 时，审计可以在 accompanied mode 下执行。审计进行时，另一个浏览器实例会打开 GTM Preview，让你同步观察标签的实时触发情况。
+导入您的 GTM 容器，为每个 GA4 事件标签创建一个测试，为每个测试添加录制，然后在每次发布后运行全部测试。测试表格会显示哪些事件不再通过，Reports 页面则保留每一次运行以供比较。
 
-## 验证标签是否触发
+## 发布前检查工作区
 
-这个场景下，用户希望找出完全没有触发的标签。标签依赖 data layer 内容，失败可能来自 trigger 设置问题，或标签本身实现不正确。
+伴随模式通过 GTM 预览运行测试，因此被测的标签是您未发布工作区中的标签。在 TagCheck 检查数据层和请求的同时，您可以在 Tag Assistant 中观察标签触发。
 
-## 验证参数
+## 检查参数，而不仅仅是事件
 
-根据量测规范，审计也可以检查标签是否带着正确参数触发。例如：
+规格声明了事件所需的参数及其值或模式。例如，以下规格要求一个 `add_to_cart` 推送，其唯一的商品为 Switzerland 或 California，且价格和数量与所列一致：
 
 ```json
 {
   "event": "add_to_cart",
   "ecommerce": {
+    "currency": "USD",
+    "value": 200,
     "items": [
       {
         "item_id": "$item_id",
-        "item_name": "^(?:switzerland|california)$",
+        "item_name": "/^(?:Switzerland|California)$/",
         "item_category": "Europe",
         "quantity": 1,
         "price": 200
       }
-    ],
-    "currency": "USD",
-    "value": 200
+    ]
   }
 }
 ```
 
-- `item_id` 只要求字段存在，不会比对实际值。`$item_id` 是一种 placeholder，方便在量测规划中引用这个值，也可以和其他参数例如 `$index` 一起使用
-- `item_name` 必须符合 `switzerland` 或 `california` 的正则表达式
-- `item_category` 必须精确等于 `Europe`
-- `quantity` 必须是整数 `1`
+- `"$item_id"` 只要求 `item_id` 存在，不论其值为何。
+- `"/^(?:Switzerland|California)$/"` 要求 `item_name` 与两个斜杠之间的正则表达式匹配。
+- `"Europe"`、`1` 和 `200` 必须完全匹配，包括类型：数字 `200` 与字符串 `"200"` 不匹配。
 
-## 找出假阳性的 request
+**质量保证**列出了所有规则。
 
-在 GTM container 中，标签有时可能看起来已经正确实现，但实际发送到 Google Analytics 的数据并不符合预期。例如某个自定义事件带了数组类型参数，而 Google Analytics 并不支持这种形式。TagCheck 会拦截 request，并把信息重组为类似 data layer 的格式，再根据规范检查参数。例如：
+## 发现发往 GA4 途中发生变化的数据
 
-```typescript
-{
-  event: 'remove_from_wishlist',
-  ecommerce: {
-    items: [
-      {
-        item_id: '$item_id',
-        item_name: '^(?:switzerland|california)$',
-        item_category: 'Europe',
-        quantity: 1,
-        price: 200
-      }
-    ],
-    currency: 'USD',
-    value: 200
-  }
-}
-```
-
-`remove_from_wishlist` 的 `items` 数组虽然会出现在 GTM Preview 中，但因为它不是 GA4 的推荐事件之一，Google Analytics 并不会真正收集这组 `items`。此时审计会将标签判定为失败，并说明原因。
+GTM 预览显示的是标签接收到的内容，而不是 GA4 接收到的内容。标签可能会丢弃某个参数，将事件发送到另一个测量 ID，或者将数组转换为字符串。在这些情况下，数据层检查仍会通过。请求检查会将 GA4 请求本身与规格进行比较，因此测试会以 Partial 结束，而不会掩盖这一差异，并且结果会保留原始请求以供审查。

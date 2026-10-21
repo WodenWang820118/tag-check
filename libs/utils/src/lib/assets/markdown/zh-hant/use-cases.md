@@ -1,70 +1,50 @@
-# 使用情境
+# 使用案例
 
-Google Analytics 報表中的異常，往往就是標記問題的線索。例如 page view 突然明顯下降，或某些事件出現 `(not set)` 參數，這些情況都可能來自 Google Tag Manager 內不正確的標記實作。透過稽核，使用者可以找出觸發不準確的標記並加以修正。
+追蹤問題往往最先出現在 Google Analytics 中：網頁瀏覽量下降，或某個事件的參數顯示為 `(not set)`。這些問題通常來自改動了 `dataLayer` 的網站變更，或是弄壞了代碼的 GTM 變更。TagCheck 會直接在網站上檢查每個規劃好的事件，藉此找出這些問題。
 
-TagCheck 特別適合以下情境：
+TagCheck 適用於：
 
-- 具有大量標記的大型網站
-- 在 GTM 中有複雜自訂標記邏輯的網站
-- 網站與 GTM 標記變動頻繁的團隊
+- 代碼眾多，或 GTM 設定經過大量客製化的網站；
+- 經常發布網站或變更 GTM 的團隊；
+- 電子商務網站，其事件所帶的商品與數值必須保持精確。
 
-## 搭配 GTM 的自動化
+## 每次發布後檢查所有事件
 
-當系統提供 GTM shareable link 時，稽核可以在 accompanied mode 下執行。稽核進行時，另一個瀏覽器實例會開啟 GTM Preview，讓你能同步觀察標記的即時觸發狀況。
+匯入你的 GTM 容器，為每個 GA4 事件代碼建立一個測試，為每個測試加入錄製，並在每次發布後全部執行。測試表格會顯示哪些事件不再通過，Reports 頁面則會保留每次執行以供比較。
 
-## 驗證標記是否觸發
+## 發布前先檢查工作區
 
-這個情境下，使用者想找出完全沒有觸發的標記。標記依賴 data layer 內容，失敗可能來自 trigger 設定問題，或標記本身實作不正確。
+Accompanied Mode 會透過 GTM Preview 執行測試，因此受測的代碼是你尚未發布之工作區中的代碼。你可以在 Tag Assistant 中觀察代碼觸發，同時由 TagCheck 檢查資料層與請求。
 
-## 驗證參數
+## 檢查參數，而不只是事件
 
-根據量測規格，稽核也可以檢查標記是否帶著正確參數觸發。例如：
+規格會說明事件需要哪些參數，以及這些參數的值或模式。例如，以下規格要求一次 `add_to_cart` 推送，其中唯一的商品是 Switzerland 或 California，且價格與數量需與所列相符：
 
 ```json
 {
   "event": "add_to_cart",
   "ecommerce": {
+    "currency": "USD",
+    "value": 200,
     "items": [
       {
         "item_id": "$item_id",
-        "item_name": "^(?:switzerland|california)$",
+        "item_name": "/^(?:Switzerland|California)$/",
         "item_category": "Europe",
         "quantity": 1,
         "price": 200
       }
-    ],
-    "currency": "USD",
-    "value": 200
+    ]
   }
 }
 ```
 
-- `item_id` 只要求欄位存在，不會比對實際值。`$item_id` 是一種 placeholder，方便在量測規劃中引用這個值，也可以和其他參數例如 `$index` 一起使用
-- `item_name` 必須符合 `switzerland` 或 `california` 的正規表示式
-- `item_category` 必須精確等於 `Europe`
-- `quantity` 必須是整數 `1`
+- `"$item_id"` 只要求 `item_id` 存在，不論其值為何。
+- `"/^(?:Switzerland|California)$/"` 要求 `item_name` 符合兩個斜線之間的正規表示式。
+- `"Europe"`、`1` 與 `200` 必須完全相符，包括型別：數字 `200` 不符合字串 `"200"`。
 
-## 找出假陽性的 request
+**品質保證**列出了所有規則。
 
-在 GTM container 中，標記有時可能看起來已正確實作，但實際送往 Google Analytics 的資料並不符合預期。例如某個自訂事件帶了陣列型別參數，而 Google Analytics 並不支援這種形式。TagCheck 會攔截 request，並把資訊重組成類似 data layer 的格式，再根據規格檢查參數。例如：
+## 抓出在傳往 GA4 途中改變的資料
 
-```typescript
-{
-  event: 'remove_from_wishlist',
-  ecommerce: {
-    items: [
-      {
-        item_id: '$item_id',
-        item_name: '^(?:switzerland|california)$',
-        item_category: 'Europe',
-        quantity: 1,
-        price: 200
-      }
-    ],
-    currency: 'USD',
-    value: 200
-  }
-}
-```
-
-`remove_from_wishlist` 的 `items` 陣列雖然會出現在 GTM Preview 中，但因為它不是 GA4 的建議事件之一，Google Analytics 不會真正收集這組 `items`。此時稽核會將標記判定為失敗，並說明原因。
+GTM Preview 顯示的是代碼收到的內容，而不是 GA4 收到的內容。代碼可能遺漏某個參數、將事件傳送到其他評估 ID，或把陣列轉成字串。在這些情況下，資料層檢查仍會通過。請求檢查會將 GA4 請求本身與規格比對，因此測試會以 Partial 結束，而不會掩蓋其中的落差；結果也會保留原始請求供你檢視。
