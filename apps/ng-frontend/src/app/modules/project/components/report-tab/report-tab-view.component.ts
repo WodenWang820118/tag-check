@@ -161,16 +161,17 @@ import { ReportTabViewModel, STATUS_BADGES } from '../report-detail.contracts';
 
             <ng-content select="[report-detail-content]"></ng-content>
 
-            <mat-form-field class="w-full mt-5" appearance="fill">
-              <mat-label>Message</mat-label>
-              <textarea
-                matInput
-                [rows]="3"
-                [readonly]="true"
-                [value]="viewModel().message"
-                aria-label="Test message"
-              ></textarea>
-            </mat-form-field>
+            <section class="mt-5" aria-labelledby="result-message-label">
+              <div id="result-message-label" class="text-sm text-black/60">
+                Message
+              </div>
+              <p
+                class="mt-1 whitespace-pre-wrap text-xl"
+                data-testid="result-message"
+              >
+                {{ viewModel().message || '—' }}
+              </p>
+            </section>
           </section>
 
           <section class="space-y-4 mt-10">
