@@ -1,50 +1,40 @@
-# 設定
+# 設定の詳細
 
-## プロジェクト情報
+各プロジェクトには独自の設定があり、プロジェクトのメニューの **Settings** から開けます。変更を保持するには、各ページで **Save** を選択します。
 
-プロジェクト情報セクションでは、プロジェクト名、説明、measurement ID、関連する Google Sheet などの詳細を確認および編集できます。
+## Project Information
 
-- Project Name: プロジェクト名
-- Description: プロジェクトの簡単な説明
-- Measurement ID: プロジェクトに関連付けられた Google Analytics measurement ID
-- Google Sheet Link: プロジェクトに関連付けられた Google Sheet へのリンク
+- **Project Name**: Projects ページに表示される名前です。
+- **Measurement ID**: サイトの送信先となる GA4 の測定 ID です。リクエストチェックは、この ID に送信された GA4 リクエストを探します。
+- **Project Description**: 任意のメモです。
 
-## 認証
+## Pre-loading Values
 
-テスト実行前にログインが必要な場合は、ここで HTTP authentication に使うユーザー名とパスワードの組み合わせを設定します。
+各実行の前に TagCheck が設定する値です。これにより、サイトはテストに必要な状態で開始されます。
+
+- **Website URL**: テスト対象のサイトです。TagCheck は、下記の Cookie をこのサイトのドメインに設定します。
+- **Local Storage**: キーと値のペアです（サイトがローカルストレージに保持する同意状態など）。TagCheck は、実行で開く各ページのスクリプトより前にこれらを書き込みます。
+- **Cookie**: 名前と値のペアです（同意 Cookie など）。
+
+同意がないと、多くのサイトはアナリティクスタグをブロックし、両方のチェックが失敗します。
+
+## Authentication
+
+HTTP 認証で保護されたサイト用の **Username** と **Password** です。サイトから要求されたときに TagCheck が送信します。
 
 ## Google Tag Manager
 
-このセクションには GTM 関連の設定が含まれます。
+- **Activate Accompanied Mode**: 各テストを GTM Preview 経由で実行し、プレビュー中のワークスペースのタグをテスト対象にします。Preview Mode URL が必要です。
+- **Activate Request Check**: データレイヤーに加えて GA4 リクエストもチェックします。測定 ID が必要です。
+- **GTM URL**: Tag Manager 上のコンテナのワークスペースのアドレスです。参照用に保存されます。
+- **Preview Mode URL**: プレビューセッションの Tag Assistant のアドレスです。Tag Manager で **Preview** を開始し、Tag Assistant に表示されるアドレスをコピーします。このアドレスには、コンテナ ID とサイトが含まれます（例: `https://tagassistant.google.com/#/?id=GTM-XXXXXXX&url=https%3A%2F%2Fexample.com`）。
 
-- Request Interception
+## Browser Settings
 
-  この機能は GTM container から送信される request を傍受し、data layer に近い構造へ再整形します。raw request も詳細画面で確認できます。
+- **Hide the browser?**: ウィンドウを表示せずに Chrome を実行します。Accompanied Mode では常にウィンドウが表示されます。
+- **Add browser setting**: 実行時に使う Chrome のコマンドライン引数を追加します（例: `--window-size=1280,800`）。
 
-- GTM Accompanied Mode
+## Export or Delete
 
-  このモードでは監査と同時に GTM Preview を実行し、タグが期待どおり発火しているかを確認できます。未公開ワークスペースの監査にも便利です。
-
-- GTM URL and Shareable Link
-
-  GTM URL は確認対象の workspace を指し、shareable link は同じ GTM container 設定を他の人と共有するためのプレビューリンクです。
-
-## Browser arguments
-
-このセクションは 2 つの要素で構成されます。
-
-- Browser arguments
-
-  Puppeteer に渡す高度なブラウザ引数で、アプリケーションの動作を制御できます。
-
-- Hide Browser
-
-  テストをバックグラウンドで実行する際にブラウザウィンドウを非表示にできます。ただし GTM Accompanied Mode を有効にすると、ブラウザは表示されたままになります。
-
-## プリロードデータ
-
-プリロードデータは、テスト開始前にアプリケーションへ読み込まれるデータです。特に local storage や cookies が対象になります。よくある用途は、同意 cookie を事前に読み込み、自動化開始前に analytics の収集を許可状態にしておくことです。
-
-## Project IO
-
-この機能では、プロジェクトのインポートとエクスポートを行えます。プロジェクトデータは zip 形式でやり取りされます。
+- **Export**: プロジェクトを、テスト、スペック、記録、結果とともに ZIP ファイルとしてダウンロードします。別のコンピューターでは、New Project ページの **Already got the project?** からインポートします。
+- **Delete**: プロジェクトとその中のすべてを削除します。この操作は元に戻せません。

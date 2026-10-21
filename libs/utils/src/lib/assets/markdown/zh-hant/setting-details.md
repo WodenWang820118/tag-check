@@ -1,50 +1,40 @@
-# 設定
+# 設定詳情
 
-## 專案資訊
+每個專案都有自己的設定，位於專案選單中的 **Settings**。在頁面上點選 **Save** 即可保留該頁的變更。
 
-專案資訊區塊可讓你檢視並編輯專案細節，例如專案名稱、描述、measurement ID 與連結的 Google Sheet。
+## Project Information
 
-- Project Name：專案名稱
-- Description：專案描述
-- Measurement ID：與專案關聯的 Google Analytics measurement ID
-- Google Sheet Link：與專案關聯的 Google Sheet 連結
+- **Project Name**：顯示在 Projects 頁面上的名稱。
+- **Measurement ID**：網站傳送資料的目標 GA4 評估 ID。請求檢查會尋找傳送到此 ID 的 GA4 請求。
+- **Project Description**：選填的備註。
 
-## 驗證
+## Pre-loading Values
 
-當系統在執行測試前需要先登入時，可以在這裡設定 HTTP authentication 所需的帳號與密碼組合。
+TagCheck 在每次執行前設定的值，讓網站以測試所需的狀態開始：
+
+- **Website URL**：受測網站。TagCheck 會在其網域上設定下方的 cookie。
+- **Local Storage**：鍵與值的配對，例如網站保存在本機儲存空間中的同意聲明狀態。在執行所開啟的每個網頁中，TagCheck 會先於網頁的指令碼寫入這些配對。
+- **Cookie**：名稱與值的配對，例如同意聲明 cookie。
+
+若未取得同意，許多網站會封鎖分析代碼，兩項檢查都會失敗。
+
+## Authentication
+
+供位於 HTTP 驗證之後的網站使用的 **Username** 與 **Password**。TagCheck 會在網站要求時傳送它們。
 
 ## Google Tag Manager
 
-這個區塊包含多項 GTM 相關設定。
+- **Activate Accompanied Mode**：透過 GTM Preview 執行每個測試，讓受測代碼成為所預覽之工作區中的代碼。需要 Preview Mode URL。
+- **Activate Request Check**：除了資料層之外也檢查 GA4 請求。需要評估 ID。
+- **GTM URL**：容器工作區在 Tag Manager 中的網址，保存供參考。
+- **Preview Mode URL**：你的預覽工作階段的 Tag Assistant 網址。在 Tag Manager 中啟動 **Preview**，並複製 Tag Assistant 顯示的網址；其中包含容器 ID 與網站，例如 `https://tagassistant.google.com/#/?id=GTM-XXXXXXX&url=https%3A%2F%2Fexample.com`。
 
-- Request Interception
+## Browser Settings
 
-  這項功能會攔截 GTM container 發出的 request，將其重組為類似 data layer 的資料結構，並在詳細頁中保留 raw request 供檢查。
+- **Hide the browser?**：以無視窗模式執行 Chrome。Accompanied Mode 一律會顯示視窗。
+- **Add browser setting**：為執行新增一個 Chrome 命令列參數，例如 `--window-size=1280,800`。
 
-- GTM Accompanied Mode
+## Export or Delete
 
-  這個模式會在稽核過程中同步開啟 GTM Preview，讓你確認標記是否有如預期觸發，也適用於稽核未發佈的工作區。
-
-- GTM URL and Shareable Link
-
-  GTM URL 指向要檢查的 workspace；shareable link 則是可分享給他人、用來預覽相同 GTM container 設定的連結。
-
-## Browser arguments
-
-此區塊包含兩部分：
-
-- Browser arguments
-
-  可傳給 Puppeteer 的進階瀏覽器參數，用來控制瀏覽器行為。
-
-- Hide Browser
-
-  可在背景執行測試時隱藏瀏覽器視窗。不過若啟用 GTM Accompanied Mode，瀏覽器仍會保持可見。
-
-## 預載資料
-
-預載資料會在測試開始前先載入到應用程式中，特別是 local storage 與 cookies。常見用途是預先載入 consent cookie，讓 analytics 收集在自動化開始前就處於允許狀態。
-
-## Project IO
-
-這項功能可讓你匯入與匯出專案。專案資料會以 ZIP 檔格式傳輸。
+- **Export**：將專案連同其測試、規格、錄製與結果下載為 ZIP 檔案。在另一台電腦上，可透過 New Project 頁面的 **Already got the project?** 匯入。
+- **Delete**：刪除專案及其中的所有內容。此操作無法復原。

@@ -1,11 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { MatTableDataSource } from '@angular/material/table';
 import { FileTableDataSourceModelService } from './file-table-data-source-model.service';
-import type { IReportDetails, TestImage } from '@utils';
+import { Jsonified, RUN_SUMMARY_SAMPLE, RunSummary } from '@utils';
 
-/** Table rows identified by event id; the selection logic reads nothing else. */
-const rows = (...eventIds: string[]) =>
-  eventIds.map((eventId) => ({ eventId }) as IReportDetails & TestImage);
+/** Runs as GET /file-reports returns them, one per event id. */
+const rows = (...eventIds: string[]): Jsonified<RunSummary>[] =>
+  eventIds.map((eventId, index) => ({
+    ...RUN_SUMMARY_SAMPLE,
+    runId: index + 1,
+    eventId
+  }));
 
 describe('FileTableDataSourceModelService', () => {
   let svc: FileTableDataSourceModelService;

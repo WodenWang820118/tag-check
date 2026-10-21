@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { InternalServerErrorException } from '@nestjs/common';
 import { ClickHandler } from './click-handler.service';
-import { ProjectService } from '../../../../infrastructure/os/project/project.service';
+import { TestEventRepositoryService } from '../../../../core/repository/test-event/test-event-repository.service';
 import { FileService } from '../../../../infrastructure/os/file/file.service';
 import { FilePathService } from '../../../../infrastructure/os/path/file-path/file-path.service';
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
@@ -9,11 +9,16 @@ import { ActionUtilsService } from '../action-utils/action-utils.service';
 import type { Step } from '@utils';
 
 function build(opts?: {
+  stopNavigation?: boolean;
   clickResult?: boolean;
   clickThrows?: Error;
   selectorType?: string | undefined;
 }) {
-  const projectService = {} as ProjectService;
+  const testEventRepositoryService = {
+    getEntityBySlugAndEventId: vi.fn(async () => ({
+      stopNavigation: opts?.stopNavigation
+    }))
+  } as unknown as TestEventRepositoryService;
   const fileService = {
     readJsonFile: vi.fn(() => ({
       steps: [{ url: 'https://start' }, { url: 'https://example.com/page' }]
@@ -35,13 +40,14 @@ function build(opts?: {
   } as unknown as ActionUtilsService;
   return {
     handler: new ClickHandler(
-      projectService,
+      testEventRepositoryService,
       fileService,
       filePathService,
       clickStrategyService,
       actionUtilsService
     ),
     fileService,
+    testEventRepositoryService,
     clickStrategyService,
     actionUtilsService
   };
@@ -59,10 +65,11 @@ function makePage() {
   return {
     waitForSelector: vi.fn().mockResolvedValue({ dispose: vi.fn() }),
     $: vi.fn(),
+    evaluate: vi.fn().mockResolvedValue(undefined),
     mouse: { click: vi.fn() },
     browserContext: () => ({ pages: vi.fn().mockResolvedValue([{}]) }),
     url: () => 'https://other.test/'
-  } as never;
+  };
 }
 
 describe('ClickHandler', () => {
@@ -70,7 +77,7 @@ describe('ClickHandler', () => {
     const { handler, clickStrategyService } = build();
     const step: Step = { selectors: [['#a']], target: 'main' } as never;
     await expect(
-      handler.handle(makePage(), 'p', 'e', step, false)
+      handler.handle(makePage() as never, 'p', 'e', step, false)
     ).resolves.toBeUndefined();
     expect(clickStrategyService.clickElement).toHaveBeenCalled();
   });
@@ -79,7 +86,7 @@ describe('ClickHandler', () => {
     const { handler } = build({ clickResult: false });
     const step: Step = { selectors: [['#a']], target: 'main' } as never;
     await expect(
-      handler.handle(makePage(), 'p', 'e', step, false)
+      handler.handle(makePage() as never, 'p', 'e', step, false)
     ).rejects.toBeInstanceOf(InternalServerErrorException);
   });
 
@@ -87,7 +94,7 @@ describe('ClickHandler', () => {
     const { handler } = build({ clickThrows: new Error('boom') });
     const step: Step = { selectors: [['#a']], target: 'main' } as never;
     await expect(
-      handler.handle(makePage(), 'p', 'e', step, false)
+      handler.handle(makePage() as never, 'p', 'e', step, false)
     ).rejects.toBeInstanceOf(InternalServerErrorException);
   });
 
@@ -95,7 +102,7 @@ describe('ClickHandler', () => {
     const { handler } = build({ selectorType: undefined });
     const step: Step = { selectors: [['#a']], target: 'main' } as never;
     await expect(
-      handler.handle(makePage(), 'p', 'e', step, false)
+      handler.handle(makePage() as never, 'p', 'e', step, false)
     ).rejects.toBeInstanceOf(InternalServerErrorException);
   });
 
@@ -111,6 +118,7 @@ describe('ClickHandler', () => {
     });
     page.$ = vi.fn().mockResolvedValue({
       scrollIntoView,
+      dispose: vi.fn().mockResolvedValue(undefined),
       boundingBox: async () => {
         calls.push('measure');
         return { x: 10, y: 20, width: 1, height: 1 };
@@ -187,7 +195,7 @@ describe('ClickHandler', () => {
     const { handler, clickStrategyService } = build();
     const step: Step = { selectors: [['#a']], target: 'main' } as never;
 
-    await handler.handle(makePage(), 'p', 'e', step, false);
+    await handler.handle(makePage() as never, 'p', 'e', step, false);
 
     expect(
       (clickStrategyService.clickElement as ReturnType<typeof vi.fn>).mock
@@ -202,7 +210,65 @@ describe('ClickHandler', () => {
     });
     const step: Step = { selectors: [['#a']], target: 'main' } as never;
     await expect(
-      handler.handle(makePage(), 'p', 'e', step, false)
+      handler.handle(makePage() as never, 'p', 'e', step, false)
     ).rejects.toBeInstanceOf(InternalServerErrorException);
+  });
+
+  it.each([true, false, undefined])(
+    'uses the stored final-click bookmark (%s)',
+    async (stopNavigation) => {
+      const { handler, testEventRepositoryService } = build({ stopNavigation });
+      const evaluate = vi.fn().mockResolvedValue(undefined);
+      const page = { ...makePage(), evaluate };
+      await handler.handle(
+        page as never,
+        'project',
+        'event',
+        { type: 'click', selectors: [['#a']] },
+        true
+      );
+      expect(
+        testEventRepositoryService.getEntityBySlugAndEventId
+      ).toHaveBeenCalledWith('project', 'event');
+      expect(evaluate).toHaveBeenCalledTimes(stopNavigation === true ? 2 : 0);
+      for (const [source] of evaluate.mock.calls)
+        expect(typeof source).toBe('string');
+    }
+  );
+
+  it('does not block earlier journey clicks for a bookmarked test', async () => {
+    const { handler, testEventRepositoryService } = build({
+      stopNavigation: true
+    });
+    await handler.handle(
+      makePage(),
+      'p',
+      'e',
+      { type: 'click', selectors: [['#a']] },
+      false
+    );
+    expect(
+      testEventRepositoryService.getEntityBySlugAndEventId
+    ).not.toHaveBeenCalled();
+  });
+
+  it('cleans the guard when the final click fails', async () => {
+    const { handler } = build({
+      stopNavigation: true,
+      clickThrows: new Error('click failed')
+    });
+    const evaluate = vi.fn().mockResolvedValue(undefined);
+    const page = { ...makePage(), evaluate };
+    await expect(
+      handler.handle(
+        page as never,
+        'p',
+        'e',
+        { type: 'click', selectors: [['#a']] },
+        true
+      )
+    ).rejects.toThrow('Failed to click');
+    expect(evaluate).toHaveBeenCalledTimes(2);
+    expect(evaluate.mock.calls[1][0]).toContain('typeof window[key]');
   });
 });

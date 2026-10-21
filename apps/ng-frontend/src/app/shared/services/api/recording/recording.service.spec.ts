@@ -57,21 +57,6 @@ describe('RecordingService', () => {
     expect(service.isLoading$()).toBe(false);
   });
 
-  it('getProjectRecordings returns the response and falls back to null on error', async () => {
-    httpClient.get.mockReturnValueOnce(of([{ id: 1 }] as never));
-    expect(await firstValueFrom(service.getProjectRecordings('slug'))).toEqual([
-      { id: 1 }
-    ]);
-    expect(httpClient.get).toHaveBeenCalledWith(
-      `${environment.recordingApiUrl}/slug`
-    );
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    httpClient.get.mockReturnValueOnce(throwError(() => new Error('x')));
-    expect(
-      await firstValueFrom(service.getProjectRecordings('slug'))
-    ).toBeNull();
-  });
-
   it('getProjectRecordingNames falls back to [] on error', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     httpClient.get.mockReturnValueOnce(throwError(() => new Error('x')));

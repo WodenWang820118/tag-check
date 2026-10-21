@@ -1,171 +1,45 @@
-# 快速开始
+# 开始使用
 
-TagCheck 可以帮助你统一量测规范，并将这些规范用于 GTM 相关网站或正式站点的标签验证。
+本指南将带您从新建项目一直走到获得第一个结果。TagCheck 自带的示例项目针对 https://ng-gtm-sample.vercel.app 上的演示商店运行，其中每一步都已完成，可供参考。
 
-## 什么是 Google Tag Manager
+## 1. 创建项目
 
-Google Tag Manager 是一套用来管理和部署营销标签的工具。你可以在不修改网站或 App 源代码的情况下，新增或更新追踪代码、像素与其他标签，并把数据发送到 Google Analytics、Facebook Pixel 等第三方服务。
+在 **Projects** 页面上，选择 **New Project**（+），然后填写：
 
-## 什么是 TagCheck
+- **Project Name**：TagCheck 会据此生成项目 slug。
+- **Measurement ID**：网站发送数据的目标 GA4 测量 ID，例如 `G-8HKQR5ZBSK`。请求检查需要用到它。
+- **Project Description**：可选。
 
-TagCheck 是一套帮助你管理 Google Tag Manager（GTM）标签审计项目的工具。你可以创建项目、加入标签，并执行审计来确认标签是否在正确场景下被使用，或是否根本没有被触发。之后你可以根据结果调整标签配置。
+如需继续使用从 TagCheck 导出的项目，请在同一页面上使用 **Already got the project?** 并上传其 ZIP 文件。
 
-## 创建项目与第一个测试用例
+## 2. 准备网站
 
-每个项目都会有唯一的 project slug 作为识别，也可以填写后续在 Google Tag Manager 中会用到的项目信息。开始自动化之前，有两个必要条件：规范与录制流程。
+打开项目并进入 **Settings**：
 
-## 规范
+- **Pre-loading Values**：输入 **Website URL**，以及运行前网站所需的本地存储项和 Cookie。典型的例子是用户同意值，使网站允许其分析标签触发。
+- **Google Tag Manager**：开启 **Activate Request Check**，以便在检查数据层的同时检查 GA4 请求。
+- **Authentication**：如果网站受 HTTP 身份验证保护，请输入用户名和密码。
 
-规范使用 JSON 格式定义，例如：
+## 3. 添加测试
 
-```json
-{
-  "event": "page_view",
-  "page_location": "$page_location",
-  "page_referrer": "$page_referrer"
-}
-```
+在 **Tests** 页面上，选择 **Add tests**（+）。共有三种方式：
 
-TagCheck 会根据几种场景检查字段值：
+- **Import GTM JSON**（推荐）：在 Tag Manager 中，前往 **Admin** > **Export container**，然后上传导出的文件。TagCheck 会为每个 GA4 事件标签创建一个测试。每个规格都会列出该标签从数据层变量中读取的参数，这些键必须存在于推送中。TagCheck 无法转换为测试的标签会列在 **Skipped tags** 下。
+- **Import GA4 events**：上传或粘贴您计划推送的事件（单个 JSON 对象或数组），然后选择 **Create tests**。
+- **Create a test manually**：在编辑器中编写规格并粘贴录制，然后选择 **Submit**。
 
-- 以 `$` 开头的字符串：只验证该字段是否存在
-- 静态值：字符串或数字。请注意，GA4 除了像 `items` 这类推荐事件字段外，不接受数组对象
-- 正则表达式：例如 `^(?:switzerland|california)$`
+## 4. 录制用户旅程
 
-## GTM 标签配置
+每个测试都会重放一个 Chrome Recorder 录制，该录制以推送其事件的操作结束。
 
-创建好的标签可以配合 `TagBuild`，把规范转换为 GTM 可导入的 JSON。转换后，你可以直接粘贴到 GTM，或下载为 JSON 文件。
+1. 在 Chrome 中打开 DevTools 和 **Recorder** 面板，在您的网站上录制用户旅程：例如，打开一个商品页面并选择 **Add to cart**。
+2. 将录制导出为 JSON 文件。
+3. 打开测试并进入 **Latest result**。在 **Chrome Recording** 面板中，选择编辑按钮，通过 **Upload** 上传该文件或粘贴其内容，然后选择 **Save**。
 
-## 录制流程
+TagCheck 可以重放 `setViewport`、`navigate`、`click`、`hover`、`change`、`keyDown`、`keyUp` 和 `waitForElement` 步骤，支持 CSS、ID、ARIA、文本、XPath 和 pierce 选择器。稳定的选择器（例如 `data-testid` 属性）可以让录制在设计变更后依然有效。
 
-录制流程是来自 Chrome Recorder 的 JSON 文件。目前 TagCheck 支持 CSS 和 ID selector，例如：
+## 5. 运行测试
 
-```json
-{
-  "title": "add_to_cart",
-  "steps": [
-    {
-      "type": "setViewport",
-      "width": 1737,
-      "height": 1100,
-      "deviceScaleFactor": 1,
-      "isMobile": false,
-      "hasTouch": false,
-      "isLandscape": false
-    },
-    {
-      "type": "navigate",
-      "url": "https://ng-gtm-sample.vercel.app/home"
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [["div.active img"]],
-      "offsetY": 44.42852783203125,
-      "offsetX": 344.60711669921875
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [["app-details button"]],
-      "offsetY": 22.705322265625,
-      "offsetX": 67.1070556640625
-    }
-  ]
-}
-```
+选择测试所在行末尾的播放按钮。进度图会随录制的步骤推进。如需停止运行，请选择工具栏中的 **Stop the running test**。
 
-请将文件下载为 JSON，并上传到 TagCheck，或者直接把文本粘贴到编辑器中。
-
-## 执行测试
-
-表格右上角有一个播放按钮。点击后，系统会根据录制流程与标签配置执行测试。测试执行时会同步显示进度，而进度步数取决于录制文件中的操作数量。例如：
-
-```json
-{
-  "title": "add_to_cart",
-  "steps": [
-    {
-      "type": "setViewport",
-      "width": 1737,
-      "height": 1100,
-      "deviceScaleFactor": 1,
-      "isMobile": false,
-      "hasTouch": false,
-      "isLandscape": false
-    },
-    {
-      "type": "navigate",
-      "url": "https://ng-gtm-sample.vercel.app/home"
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [["div.active img"]],
-      "offsetY": 44.42852783203125,
-      "offsetX": 344.60711669921875
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [["app-details button"]],
-      "offsetY": 22.705322265625,
-      "offsetX": 67.1070556640625
-    }
-  ]
-}
-```
-
-## 测试结果
-
-测试完成后，结果会立即更新，主要分成 data layer 与 request 两部分。
-
-## Data layer
-
-Data layer 是浏览器 `window` 对象下的一个数据对象。Google Tag Manager 会利用并监听 data layer，把数据发送到 Google Analytics 4。你可以通过 `window.dataLayer` 验证网站是否在指定步骤中推送了约定好的数据。
-
-## Request
-
-当启用 `Check Request` 并填入 measurement ID 后，TagCheck 会根据 measurement ID 与 event name 拦截请求，拆解 URL 参数，并重组成类似 data layer 的对象。例如：
-
-'https://www.google-analytics.com/g/collect?v=2&tid=G-8HKQR5ZBSK<br />&gtm=45je4410v9171567282z89168785492za200&\_p=1712224628461&gcs=G111&gcd=13r3r3r3q7&npa=1&dma=0&cid=485839296.1712224634<br />&ul=en-us&sr=2195x1235&uaa=x86&uab=64&uafvl=Chromium%3B121.0.6167.85%7CNot%2520A(Brand%3B99.0.0.0&uamb=0&uam=<br />&uap=Windows&uapv=15.0.0&uaw=0&pscdl=noapi&\_s=5&dr=&dl=&cu=USD&sid=1712224634&sct=1&seg=1&dt=Ng%20GTM%20Integration%20App<br />&en=add_to_cart&pr1=idcity001~ nmSwitzerland ~ lndestinations ~ caSwitzerland ~ qt1 ~ pr799&epn.value=799<br />&ep.promotion_id=city001&ep.promotion_name=Switzerland&ep.creative_name=travel_slide&ep.creative_slot=featured_attributor&\_et=8682&tfd=30981'
-
-会转换成：
-
-```json
-{
-  "event": "add_to_cart",
-  "creative_name": "travel_slide",
-  "creative_slot": "featured_attributor",
-  "promotion_id": "city001",
-  "promotion_name": "Switzerland",
-  "ecommerce": {
-    "value": "799",
-    "currency": "USD",
-    "items": [
-      {
-        "item_id": "city001",
-        "item_name": "Switzerland",
-        "item_category": "Switzerland",
-        "price": "799",
-        "quantity": "1"
-      }
-    ]
-  }
-}
-```
-
-一个典型例子是 `add_to_wishlist`，它属于 GA4 推荐事件，因此 `items` 会被正确收集；但像 `remove_from_wishlist` 并不是推荐事件，虽然 GTM Preview 仍会显示 `items`，实际发送到 Google Analytics 4 时却不一定会保留。通过 request 检查可以进一步确认真实发送的数据。
-
-## 报告
-
-每次测试执行后，系统都会自动生成报告，内容包括：
-
-- Data layer specification：创建测试用例时定义的规范
-- Actual data layer：浏览器 `window` 对象中的实际 data layer
-- Request data layer：由网络请求重组出的 data layer
-- Raw request：如果有拦截到，可用于验证数据是否真的发送到 GA4
-- Destination URL：事件触发所在页面的网址
-- Screenshot：事件触发时的画面截图
-
-所有报告都可以从侧边栏的 Reports 菜单下载。
+运行结束后，该行会显示新的状态。打开测试即可查看结果：各项检查、捕获的 `dataLayer`、GA4 请求、截图和录屏。**报告管理**会逐一解释每个部分。

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
-import { FrontFileReport, TestEventSchema } from '@utils';
+import { DeleteRunsResponse, Jsonified, RunSummary } from '@utils';
 import { catchHttpError, rethrowHttpError } from '../http-error.utils';
 
 @Injectable({
@@ -12,7 +12,7 @@ export class FileReportService {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * Retrieves all file reports for a project.
+   * Lists every run of the project's tests, newest first.
    *
    * Returns `null` on HTTP failure so callers can treat a missing list as an
    * empty state.
@@ -21,25 +21,25 @@ export class FileReportService {
    */
   getFileReports(projectSlug: string) {
     return this.http
-      .get<TestEventSchema[]>(`${environment.fileReportApiUrl}/${projectSlug}`)
+      .get<Jsonified<RunSummary>[]>(
+        `${environment.fileReportApiUrl}/${projectSlug}`
+      )
       .pipe(catchHttpError(null));
   }
 
   /**
-   * Deletes file reports identified by their event IDs.
+   * Deletes runs and the screenshots they saved; the tests stay.
    *
    * @param projectSlug - URL-friendly project identifier.
-   * @param eventIds    - Array of event IDs to delete.
+   * @param runIds      - The runs to delete.
    */
-  deleteFileReport(projectSlug: string, eventIds: string[]) {
+  deleteRuns(projectSlug: string, runIds: number[]) {
     return this.http
-      .delete<FrontFileReport>(
+      .delete<DeleteRunsResponse>(
         `${environment.fileReportApiUrl}/${projectSlug}`,
-        {
-          params: { eventIds: eventIds }
-        }
+        { params: { runIds: runIds.join(',') } }
       )
-      .pipe(rethrowHttpError('Error deleting file report'));
+      .pipe(rethrowHttpError('Error deleting runs'));
   }
 
   downloadFileReports(projectSlug: string, eventIds: string[]) {

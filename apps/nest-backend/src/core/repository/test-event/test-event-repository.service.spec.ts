@@ -10,7 +10,16 @@ function build() {
     update: vi.fn(),
     delete: vi.fn(),
     remove: vi.fn(),
-    createQueryBuilder: vi.fn()
+    createQueryBuilder: vi.fn(),
+    manager: {
+      transaction: vi.fn(async (cb: (m: unknown) => Promise<unknown>) =>
+        cb({
+          save: repository.save,
+          find: repository.find,
+          getRepository: () => repository
+        })
+      )
+    }
   };
   const service = new TestEventRepositoryService(repository as never);
   return { service, repository };
@@ -42,7 +51,21 @@ describe('TestEventRepositoryService', () => {
         { id: 6, passed: false, requestPassed: false },
         { id: 7, passed: true, requestPassed: true }
       ],
-      testImage: [{ id: 7, imageName: 'screenshot.png' }]
+      latestTestEventDetail: {
+        id: 7,
+        passed: true,
+        requestPassed: true,
+        createdAt: new Date(REPORT_LIST_ITEM_SAMPLE.lastRunAt)
+      },
+      testImage: [
+        { id: 6, imageName: 'screenshot.png', imageData: Buffer.from('6') },
+        { id: 7, imageName: 'screenshot.png', imageData: Buffer.from('7') }
+      ],
+      latestTestImage: {
+        id: 7,
+        imageName: 'screenshot.png',
+        imageData: Buffer.from('7')
+      }
     };
     const { id, eventId, testName, eventName, stopNavigation, message } =
       REPORT_LIST_ITEM_SAMPLE;
@@ -83,6 +106,21 @@ describe('TestEventRepositoryService', () => {
     });
   });
 
+  it('listReports() sends a null lastRunAt for a test with no run', async () => {
+    const { service, repository } = build();
+    repository.find.mockResolvedValue([
+      { ...rowFor({ recording: true }), latestTestEventDetail: null }
+    ]);
+
+    const [item] = wire(await service.listReports('demo'));
+
+    expect(item).toMatchObject({
+      lastRunAt: null,
+      passed: false,
+      requestPassed: false
+    });
+  });
+
   it('getBySlugAndEventId() sends the shape of the report detail sample', async () => {
     const { service, repository } = build();
     repository.findOne.mockImplementation(
@@ -95,20 +133,25 @@ describe('TestEventRepositoryService', () => {
     expect(shapeOf(testEvent)).toEqual(shapeOf(REPORT_DETAIL_SAMPLE.testEvent));
   });
 
-  it('listFileReports() builds a query joining all relations and filters by slug', async () => {
+  it('listWithRecordings() loads only the recordings of the project tests', async () => {
     const { service, repository } = build();
-    const qb: Record<string, unknown> = {};
-    qb.leftJoinAndSelect = vi.fn().mockReturnValue(qb);
-    qb.where = vi.fn().mockReturnValue(qb);
-    qb.getMany = vi.fn().mockResolvedValue([{ id: 1 }]);
-    repository.createQueryBuilder.mockReturnValue(qb);
-    const result = await service.listFileReports('demo');
-    expect(qb.where).toHaveBeenCalledWith(
-      'project.projectSlug = :projectSlug',
-      {
-        projectSlug: 'demo'
-      }
-    );
+    repository.find.mockResolvedValue([{ id: 1 }]);
+    const result = await service.listWithRecordings('demo');
+    expect(repository.find).toHaveBeenCalledWith({
+      relations: { recording: true },
+      where: { project: { projectSlug: 'demo' } }
+    });
+    expect(result).toEqual([{ id: 1 }]);
+  });
+
+  it('listWithSpecs() loads only the specs of the project tests', async () => {
+    const { service, repository } = build();
+    repository.find.mockResolvedValue([{ id: 1 }]);
+    const result = await service.listWithSpecs('demo');
+    expect(repository.find).toHaveBeenCalledWith({
+      relations: { spec: true },
+      where: { project: { projectSlug: 'demo' } }
+    });
     expect(result).toEqual([{ id: 1 }]);
   });
 
@@ -125,6 +168,15 @@ describe('TestEventRepositoryService', () => {
     repository.findOne.mockResolvedValue({ id: 1 });
     const result = await service.getEntityBySlugAndEventId('demo', 'evt');
     expect(result).toEqual({ id: 1 });
+  });
+
+  it('getEntityBySlugAndEventId() loads no past runs or screenshots', async () => {
+    const { service, repository } = build();
+    repository.findOne.mockResolvedValue({ id: 1 });
+    await service.getEntityBySlugAndEventId('demo', 'evt');
+    expect(repository.findOne).toHaveBeenCalledWith({
+      where: { project: { projectSlug: 'demo' }, eventId: 'evt' }
+    });
   });
 
   it('getEntityBySlugAndEventId() throws NOT_FOUND when missing', async () => {
@@ -146,6 +198,24 @@ describe('TestEventRepositoryService', () => {
       'e3'
     ]);
     expect(result).toHaveLength(3);
+  });
+
+  it('getBySlugAndEventIds() exports every run but only the latest screenshot', async () => {
+    const { service, repository } = build();
+    repository.find.mockImplementation(
+      async (options: { relations?: Record<string, unknown> }) => [
+        rowFor(options.relations)
+      ]
+    );
+
+    const [report] = await service.getBySlugAndEventIds('demo', ['evt']);
+
+    expect(repository.find.mock.calls[0][0].relations).not.toHaveProperty(
+      'testImage'
+    );
+    expect(report.testEventDetails).toHaveLength(2);
+    expect(report.latestTestEventDetail).toMatchObject({ id: 7, passed: true });
+    expect(report.latestTestImage?.imageData).toEqual(Buffer.from('7'));
   });
 
   it('create() persists a new test event with the provided fields', async () => {
@@ -260,4 +330,23 @@ describe('TestEventRepositoryService', () => {
     await service.deleteByProjectSlugAndEventIds('demo', ['a', 'b']);
     expect(repository.remove).toHaveBeenCalledWith([{ id: 1 }, { id: 2 }]);
   });
+
+  it.each([true, false, undefined])(
+    'updateTestEvents() persists explicit bookmark values and preserves omitted values (%s)',
+    async (stopNavigation) => {
+      const { service, repository } = build();
+      const existing = { id: 1, eventId: 'a', stopNavigation: true };
+      repository.find.mockResolvedValue([existing]);
+      repository.save.mockImplementation(async (entity) => entity);
+      await service.updateTestEvents('demo', [
+        { eventId: 'a', stopNavigation }
+      ]);
+      expect(repository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 1,
+          stopNavigation: stopNavigation ?? true
+        })
+      );
+    }
+  );
 });

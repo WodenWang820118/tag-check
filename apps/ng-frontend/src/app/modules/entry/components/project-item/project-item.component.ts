@@ -2,6 +2,8 @@ import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { Project } from '@utils';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { InformationDialogComponent } from '../../../../shared/components/information-dialog/information-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -21,7 +23,13 @@ import { MetadataSourceService } from '../../../../shared/services/data-source/m
 @Component({
   selector: 'app-project-item',
   standalone: true,
-  imports: [MatCardModule, MatButtonModule, RouterLink],
+  imports: [
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    RouterLink
+  ],
   template: `
     <div class="project-item">
       <mat-card [attr.data-testid]="'project-card-' + project().projectSlug">
@@ -29,35 +37,28 @@ import { MetadataSourceService } from '../../../../shared/services/data-source/m
           <mat-card-title>{{ project().projectName }}</mat-card-title>
           <mat-card-subtitle>{{ project().projectSlug }}</mat-card-subtitle>
         </mat-card-header>
-        <mat-card-content>
-          @if (project().projectDescription) {
-            <p>{{ project().projectDescription }}</p>
-            <br />
-            <br />
-          } @else {
-            <br />
-            <br />
-            <br />
-            <br />
-          }
+        <mat-card-content class="project-item__description">
+          <p>{{ project().projectDescription || 'No description' }}</p>
         </mat-card-content>
-        <mat-card-actions>
+        <mat-card-actions class="project-item__actions">
           <button
-            mat-button
+            mat-flat-button
             [routerLink]="['/projects', project().projectSlug]"
             [state]="{ slug: project().projectSlug }"
             [attr.data-testid]="'project-open-' + project().projectSlug"
             color="primary"
           >
-            View
+            Open
           </button>
           <button
-            mat-button
+            mat-icon-button
+            type="button"
+            aria-label="Delete project"
+            matTooltip="Delete project"
             (click)="deleteProject()"
-            color="warn"
             [attr.data-testid]="'project-delete-' + project().projectSlug"
           >
-            Delete
+            <mat-icon>delete_outline</mat-icon>
           </button>
         </mat-card-actions>
       </mat-card>
@@ -68,6 +69,19 @@ import { MetadataSourceService } from '../../../../shared/services/data-source/m
     .mat-mdc-card {
       height: 200px;
       min-width: 300px;
+      display: flex;
+      flex-direction: column;
+    }
+    .project-item__description {
+      flex: 1;
+    }
+    .project-item__description p {
+      margin: 8px 0 0;
+      color: rgba(0, 0, 0, 0.7);
+    }
+    .project-item__actions {
+      justify-content: space-between;
+      padding: 8px 16px 16px;
     }
   `
 })

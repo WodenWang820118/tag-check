@@ -1,0 +1,23 @@
+.project-io__section {
+  padding: 8px 0 16px;
+}
+
+.project-io__heading {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.project-io__section p {
+  margin: 0 0 12px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+// Deleting cannot be undone, so it sits apart from export.
+.project-io__danger {
+  margin-top: 8px;
+  padding: 16px;
+  border: 1px solid #f5c2c0;
+  border-radius: 8px;
+  background: #fff8f7;
+}

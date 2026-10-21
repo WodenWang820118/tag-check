@@ -41,10 +41,11 @@ export type AbstractTestEvent = {
   // (AbstractTestEventResponseDto); it does not send latestTestEventDetail.
   passed?: boolean;
   requestPassed?: boolean;
+  /** When the latest run ran; null when the test has no run. */
+  lastRunAt?: Date | null;
 } & TestEventSchema;
 
 export type FullTestEventSchema = {
   testEventDetails: TestEventDetailSchema;
-  testImage: TestImageSchema[];
   project: ProjectSchema;
 } & TestEventSchema;

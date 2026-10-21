@@ -120,13 +120,13 @@ flowchart LR
 This repository pins its toolchain in `package.json`:
 
 - `Node.js 24.x`
-- `pnpm 11.0.8` via Corepack
+- `pnpm 12.14.0` via Corepack (the `packageManager` field)
 
 Recommended setup:
 
 ```bash
 corepack enable
-corepack prepare pnpm@11.0.8 --activate
+corepack install
 pnpm install
 ```
 

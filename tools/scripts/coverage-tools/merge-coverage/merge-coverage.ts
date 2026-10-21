@@ -1,5 +1,5 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, isAbsolute, relative, resolve } from 'node:path';
 
 import { glob } from 'glob';
 
@@ -53,13 +53,55 @@ export async function findLcovFiles(
     .sort((left, right) => left.localeCompare(right));
 }
 
+/**
+ * The project roots an LCOV file's paths may be relative to: its directory
+ * under coverage/ (coverage/libs/utils → libs/utils), and for an e2e project
+ * the project it tests (apps/nest-backend-e2e → apps/nest-backend).
+ */
+function projectRootsFor(lcovFile: string): string[] {
+  const root = normalizeCoveragePath(relative('coverage', dirname(lcovFile)));
+  const tested = root.replace(/-e2e$/u, '');
+  return tested === root ? [root] : [root, tested];
+}
+
+/**
+ * Rewrites an LCOV file's source paths to be relative to the workspace root.
+ * Vitest writes them relative to the project it ran in (src/lib/a.ts), which
+ * SonarCloud cannot place: several libraries have a src/lib folder. A path
+ * that already exists from the workspace root is kept.
+ */
+export function rebaseLcovPaths(
+  content: string,
+  lcovFile: string,
+  cwd = process.cwd()
+): string {
+  const roots = projectRootsFor(lcovFile);
+  return content.replace(/^SF:(.+)$/gmu, (_line, rawPath: string) => {
+    const path = rawPath.trim().replaceAll('\\', '/');
+    const fromWorkspace = isAbsolute(path)
+      ? normalizeCoveragePath(relative(cwd, path))
+      : path;
+    if (existsSync(resolve(cwd, fromWorkspace))) {
+      return `SF:${fromWorkspace}`;
+    }
+    const root = roots.find((candidate) =>
+      existsSync(resolve(cwd, candidate, fromWorkspace))
+    );
+    return `SF:${root ? `${root}/${fromWorkspace}` : fromWorkspace}`;
+  });
+}
+
 export function mergeLcovContents(
   files: string[],
   cwd = process.cwd()
 ): string {
   const sections = files
     .map((file) =>
-      readFileSync(resolve(cwd, file), 'utf8').replace(/[\r\n]+$/u, '')
+      rebaseLcovPaths(
+        readFileSync(resolve(cwd, file), 'utf8').replace(/[\r\n]+$/u, ''),
+        file,
+        cwd
+      )
     )
     .filter((content) => content.length > 0);
 

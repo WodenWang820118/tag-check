@@ -1,58 +1,79 @@
 # 质量保证
 
-质量保证的核心，是确认系统是否符合验收条件。本文会一步步说明如何在平台上完成 QA 流程。
+当网站和 GTM 发送的内容与测试规格的描述一致时，测试即通过。本页介绍如何编写规格、两项检查如何与规格进行比较，以及如何在发布标签之前审查标签。
 
-## 创建报告
+## 编写规格
 
-在审计测试用例之前，先创建可供参考的 report。由于同一个事件可能在多个位置被触发，系统会为每一份报告分配 event ID。当存在多个 `add_to_cart` 测试用例时，一份共享的 JSON 规范可置入所有用例。例如：
+规格是您期望的 `dataLayer` 推送，以 JSON 编写。其中 `event` 指定 GA4 事件名称，其他每个键都是推送必须包含的参数。规格中未列出的键会被忽略，因此规格只需包含您关心的参数。
+
+值遵循以下规则：
+
+| 规格值                                     | 通过条件                                           |
+| ------------------------------------------ | -------------------------------------------------- |
+| `"$name"`，例如 `"$item_id"`               | 该键存在，不论其值为何                             |
+| `"{{Variable Name}}"`，即 Tag Manager 变量 | 该键存在，不论其值为何                             |
+| `"/pattern/"`                              | 该值是与两个斜杠之间的正则表达式匹配的字符串       |
+| 任何其他字符串、数字或布尔值               | 该值完全相等，包括类型                             |
+| 对象，例如 `ecommerce`                     | 其每个键都按相同规则通过                           |
+| 数组，例如 `items`                         | 每个条目都至少与实际数组中的一个条目匹配，顺序不限 |
+
+例如：
 
 ```json
 {
   "event": "add_to_cart",
   "ecommerce": {
+    "currency": "USD",
+    "value": "$value",
     "items": [
       {
         "item_id": "$item_id",
-        "item_name": "^(?:switzerland|california)$",
-        "item_category": "Europe",
-        "quantity": 1,
-        "price": 200
+        "item_name": "/^(?:Switzerland|California)$/",
+        "quantity": 1
       }
-    ],
-    "currency": "USD",
-    "value": 200
+    ]
   }
 }
 ```
 
-之后仍可按需要编辑规范。事件名称在系统中是唯一的，因此不能再新增另一份 `add_to_cart` 规范；其他测试用例会通过事件名称共用这份规范，例如：
+数字 `1` 与字符串 `"1"` 不匹配。当网站推送的是数字时，请将其写为数字。
+
+从 GTM 容器导入的测试，其初始规格根据标签生成：每个读取数据层变量的参数都会成为一个键，其值为变量引用，例如 `"value": "{{DLV - ecommerce.value}}"`，因此该键必须存在。如需更严格的检查，请将引用替换为值或模式。要编辑规格，请打开测试，进入 **Latest result**，然后使用 **Data Layer Spec** 面板的编辑按钮。
+
+## 电子商务事件
+
+对于 Google 推荐的电子商务事件，以及任何包含 `ecommerce.items` 的规格，数据层检查还要求在该事件之前先推送 `{ ecommerce: null }`，这是 Google 为清除之前的电子商务数据而推荐的做法（[使用 Tag Manager 衡量电子商务](https://developers.google.com/analytics/devguides/collection/ga4/ecommerce?client_type=gtm)）。请求检查会跳过这条规则，因为这次重置从不离开浏览器。
+
+测试还可以有一个 **Item Definition**：一个 GA4 商品，例如：
 
 ```json
 {
-  "event": "add_to_cart"
+  "item_id": "city001",
+  "item_name": "Switzerland",
+  "item_category": "Switzerland",
+  "quantity": 1,
+  "price": 799
 }
 ```
 
-## 规范审查
+对于电子商务事件，运行随后会期望 `ecommerce.items` 中的条目为该商品，以取代规格中的商品。请在测试 **Latest result** 中的 **Item Definition** 面板里编辑它。
 
-同一个事件的量测规范应保持一致。当量测规划一致时，Google Analytics 报表会更容易阅读，也较不容易出现令人困惑的 `(not set)`。由于规范是全局共享的，修改规范可能影响其他测试用例。
+## 请求检查
 
-## Chrome 录制流程
+开启 **Activate Request Check** 后，TagCheck 会拦截发送到项目测量 ID 的、该测试事件的 GA4 请求。它从请求中读取事件名称、事件参数和商品，将它们重建为一个结构与 `dataLayer` 推送相同的对象，然后应用同一规格。Google 并未公开该请求格式的文档；TagCheck 按照 gtag.js 实际发送的方式读取它。
 
-Chrome Recorder 会记录 CSS/ID selector、XPath 与其他定位信息，用来描述每一步操作。常见动作包括点击、悬停、输入与选择。下载 Recorder 生成的 JSON 后，上传到系统即可在审计流程中使用。目前 TagCheck 主要以 CSS/ID selector 执行自动化。
+重建后的对象保留请求所携带的类型：数值型事件参数（`epn.`）和数值型商品字段（例如 `price` 和 `quantity`）会成为数字；其他事件参数（`ep.`）保持为字符串。如果标签将数字作为文本参数发送，规格值 `200` 会通过数据层检查，但在请求检查中会因 `"200"` 而失败。请修复标签，或者在类型无关紧要的地方使用 `"$value"` 或模式。
 
-## Google Tag Manager
+## 审查标签
 
-Google Tag Manager 是一套代码管理系统，让团队能在不直接修改网站代码的情况下，专注于追踪设计本身。TagCheck 的目标，就是减少重复的手动测试，并协助 QA 更稳定地对照业务需求验证标签实现。
+测试的 **Tag Snapshot** 选项卡显示该测试所来源的 GA4 事件标签：
 
-## Data layer
+- **Measurement ID**：标签发送数据的目标 ID。当标签引用常量变量（例如 `{{CONST - Measurement ID}}`）时，该选项卡会显示常量的值，并在其下方显示该引用。
+- **Event Name** 和 **Event Parameters**：标签发送的参数，包括来自其事件设置变量的参数。读取数据层变量的值会显示其读取的数据层键，例如 `Data layer: ecommerce.value`。
+- **Triggering**：标签的触发器。
 
-Data layer 是连接用户交互与数据收集流程的 JavaScript 对象。例如，当用户点击按钮时，data layer 会收到定义好的数据并触发对应的 GTM 标签。因此，检查 data layer 是确认实现质量的核心能力之一。
+将其与规格进行比较，即可判断标签读取的是否为网站推送的键。
 
-## Request 拦截
+## 伴随模式
 
-多数情况下，只检查 data layer 已经足够。不过有些情况在 GTM Preview 看起来正确，实际发送到 Google Analytics 的值却已经被转换，例如数组被转成字符串。为了降低这类误判，TagCheck 可以额外审计外发 request。系统会根据项目中的 measurement ID 拦截 request，重建为类似 data layer 的对象，再用同一套验证逻辑检查它是否符合规范。
-
-## GTM accompanied mode
-
-GTM accompanied mode 让你在自动化执行时，同步观察 GTM Preview 中的标签触发情况，也适合用来检查尚未发布的 workspace。你需要提供 GTM container 的 shareable link 与落地页 URL，系统才会打开预览并执行审计。
+伴随模式通过 GTM 预览运行测试，因此被测的标签是您正在预览的工作区中的标签，即使尚未发布也是如此。如需使用，请在 **Google Tag Manager** 设置中输入 **Preview Mode URL**，并开启 **Activate Accompanied Mode**。运行会在网站旁边打开 Tag Assistant，并且浏览器窗口在运行结束后会保持打开状态以供检查；用完后请将其关闭。

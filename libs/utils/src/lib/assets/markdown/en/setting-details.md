@@ -1,50 +1,40 @@
-# Settings
+# Setting details
 
-## Project information
+Each project has its own settings, under **Settings** in the project's menu. Select **Save** on a page to keep its changes.
 
-The project information section lets you review and edit project details such as the project name, description, measurement ID, and linked Google Sheet.
+## Project Information
 
-- Project Name: the name of the project.
-- Description: a short description of the project.
-- Measurement ID: the Google Analytics measurement ID associated with the project.
-- Google Sheet Link: the Google Sheet linked to the project.
+- **Project Name**: the name shown on the Projects page.
+- **Measurement ID**: the GA4 measurement ID the site sends to. The request check looks for GA4 requests sent to it.
+- **Project Description**: optional notes.
+
+## Pre-loading Values
+
+Values TagCheck sets before each run, so the site starts in the state the test needs:
+
+- **Website URL**: the site under test. TagCheck sets the cookies below on its domain.
+- **Local Storage**: key and value pairs, such as a consent state the site keeps in local storage. TagCheck writes them before the scripts of each page the run opens.
+- **Cookie**: name and value pairs, such as a consent cookie.
+
+Without consent, many sites block analytics tags, and both checks fail.
 
 ## Authentication
 
-Authentication is a username and password combination used for HTTP authentication when sign-in is required before running tests.
+A **Username** and **Password** for sites behind HTTP authentication. TagCheck sends them when the site asks.
 
 ## Google Tag Manager
 
-This section contains several GTM-related settings.
+- **Activate Accompanied Mode**: runs each test through GTM Preview, so the tags under test are those of the previewed workspace. It needs the Preview Mode URL.
+- **Activate Request Check**: checks the GA4 request as well as the data layer. It needs the measurement ID.
+- **GTM URL**: the address of the container's workspace in Tag Manager, kept for reference.
+- **Preview Mode URL**: the Tag Assistant address for your preview session. Start **Preview** in Tag Manager and copy the address Tag Assistant shows; it includes the container ID and the site, such as `https://tagassistant.google.com/#/?id=GTM-XXXXXXX&url=https%3A%2F%2Fexample.com`.
 
-- Request Interception
+## Browser Settings
 
-  This feature intercepts requests made by the GTM container, reformats them into a data-layer-like structure, and keeps the raw request available on the detail page.
+- **Hide the browser?**: runs Chrome without a window. Accompanied Mode always shows the window.
+- **Add browser setting**: adds a Chrome command-line argument for runs, such as `--window-size=1280,800`.
 
-- GTM Accompanied Mode
+## Export or Delete
 
-  This mode runs GTM Preview alongside the audit so you can confirm whether tags fire as expected. It is also useful when auditing an unpublished workspace.
-
-- GTM URL and Shareable Link
-
-  The GTM URL points to the workspace to inspect, while the shareable link is the preview link you can share with others for the same GTM container setup.
-
-## Browser arguments
-
-This section includes two parts:
-
-- Browser arguments
-
-  Advanced Puppeteer arguments that control browser behavior.
-
-- Hide Browser
-
-  Lets you hide the browser window while tests are running in the background. The browser stays visible when GTM Accompanied Mode is enabled.
-
-## Pre-load data
-
-Pre-load data is applied to the application before tests run, covering local storage and cookies. A common use case is loading consent cookies so analytics collection is enabled before automation starts.
-
-## Project IO
-
-This feature lets you import and export projects. Projects are transferred as ZIP files.
+- **Export**: downloads the project, with its tests, specs, recordings and results, as a ZIP file. Import it on another computer with **Already got the project?** on the New Project page.
+- **Delete**: deletes the project and everything in it. This cannot be undone.

@@ -170,16 +170,17 @@ export class TestReportFacadeRepositoryService {
         eventId
       );
 
-    const testImage = await this.testImageRepositoryService.getBySlugAndEventId(
-      projectSlug,
-      eventId
-    );
+    // GET /projects/images serves the screenshot itself. Its bytes, encoded
+    // as JSON, would add megabytes to every report and run response.
+    const testImage =
+      await this.testImageRepositoryService.getSummaryBySlugAndEventId(
+        projectSlug,
+        eventId
+      );
 
     return {
       testEvent,
       testEventDetails: testEventDetails ?? null,
-      // GET /projects/images serves the screenshot itself. Its bytes, encoded
-      // as JSON, would add megabytes to every report and run response.
       testImage: testImage
         ? {
             id: testImage.id,

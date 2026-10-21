@@ -1,7 +1,8 @@
 import type {
   AbstractTestEvent,
   Jsonified,
-  ReportDetailResponse
+  ReportDetailResponse,
+  RunSummary
 } from '../types/tag-check';
 
 /**
@@ -26,7 +27,8 @@ export const REPORT_LIST_ITEM_SAMPLE = {
   updatedAt: '2026-10-20T06:21:19.000Z',
   hasRecording: true,
   passed: true,
-  requestPassed: true
+  requestPassed: true,
+  lastRunAt: '2026-10-20T06:21:19.000Z'
 } satisfies Jsonified<AbstractTestEvent>;
 
 /** Body of GET /reports/:projectSlug/:eventId. */
@@ -41,12 +43,14 @@ export const REPORT_DETAIL_SAMPLE = {
     createdAt: '2026-10-20T06:18:46.000Z',
     updatedAt: '2026-10-20T06:21:19.000Z',
     passed: true,
-    requestPassed: true
+    requestPassed: true,
+    lastRunAt: '2026-10-20T06:21:19.000Z'
   },
   testEventDetails: {
     id: 7,
     requestPassed: true,
     passed: true,
+    message: 'Valid',
     rawRequest:
       'https://www.google-analytics.com/g/collect?v=2&tid=G-8HKQR5ZBSK&en=add_to_cart&pr1=idcity001~nmSwitzerland~qt1~pr799&epn.value=799&cu=USD',
     destinationUrl:
@@ -80,6 +84,17 @@ export const REPORT_DETAIL_SAMPLE = {
   }
 } satisfies Jsonified<ReportDetailResponse>;
 
+/** One item of GET /file-reports/:projectSlug. */
+export const RUN_SUMMARY_SAMPLE = {
+  runId: 7,
+  eventId: '0fd9ce76-5792-4191-8fba-8bb20e3013bc',
+  eventName: 'add_to_cart',
+  testName: 'GA4 event - add_to_cart',
+  passed: true,
+  requestPassed: true,
+  runAt: '2026-10-20T06:21:19.000Z'
+} satisfies Jsonified<RunSummary>;
+
 /**
  * The structure of a JSON value: object keys (sorted) with the structure of
  * their values, the structure of an array's first item, and the type of
@@ -92,7 +107,7 @@ export function shapeOf(value: unknown): unknown {
   if (value !== null && typeof value === 'object') {
     return Object.fromEntries(
       Object.keys(value)
-        .sort()
+        .sort((left, right) => left.localeCompare(right))
         .map((key) => [key, shapeOf((value as Record<string, unknown>)[key])])
     );
   }

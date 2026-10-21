@@ -4,9 +4,9 @@ import { By } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DataLayerSpec } from '@utils';
+import { DataLayerSpec, VariableConfig } from '@utils';
 import {
   buildReportPage,
   ReportDetailRouteContext
@@ -14,6 +14,7 @@ import {
 import { ReportTabComponent } from '../../components/report-tab/report-tab.component';
 import { TagManageTabComponent } from '../../components/tag-manage-tab/tag-manage-tab.component';
 import { SnackBarComponent } from '../../../../shared/components/snackbar/snackbar.component';
+import { ProjectService } from '../../../../shared/services/api/project-info/project-info.service';
 import { DetailViewComponent } from './detail-view.component';
 
 @Component({
@@ -34,7 +35,16 @@ class MockReportTabComponent {
 })
 class MockTagManageTabComponent {
   tagSpec = input<unknown>(undefined);
+  variables = input<readonly VariableConfig[]>([]);
 }
+
+const MEASUREMENT_ID_CONSTANT: VariableConfig = {
+  accountId: '1',
+  containerId: '2',
+  name: 'CONST - Measurement ID',
+  type: 'c',
+  parameter: [{ type: 'TEMPLATE', key: 'value', value: 'G-8HKQR5ZBSK' }]
+};
 
 function createSpec(eventName = 'purchase'): DataLayerSpec {
   return {
@@ -84,6 +94,11 @@ describe('DetailViewComponent', () => {
   const snackBar = {
     openFromComponent: vi.fn()
   };
+  const projectService = {
+    getProjectGtmConfig: vi.fn(() =>
+      of({ containerVersion: { variable: [MEASUREMENT_ID_CONSTANT] } })
+    )
+  };
 
   beforeEach(async () => {
     router.navigate.mockClear();
@@ -109,7 +124,8 @@ describe('DetailViewComponent', () => {
         {
           provide: Router,
           useValue: router
-        }
+        },
+        { provide: ProjectService, useValue: projectService }
       ]
     })
       .overrideProvider(MatSnackBar, {
@@ -142,6 +158,23 @@ describe('DetailViewComponent', () => {
     expect(reportTab.context()).toBe(routeData$.value.page);
     expect(component.tagSpec()?.event).toBe('purchase');
     expect(component.selectedTabIndex).toBe(1);
+  });
+
+  it("passes the project's container variables into the tag tab", () => {
+    // Without ?tab=reports the page opens on the Tag Snapshot tab.
+    routeSnapshot.queryParams = {};
+    queryParamMap$.next(convertToParamMap({}));
+    const fixture = TestBed.createComponent(DetailViewComponent);
+
+    fixture.detectChanges();
+
+    const tagTab = fixture.debugElement.query(
+      By.directive(MockTagManageTabComponent)
+    ).componentInstance as MockTagManageTabComponent;
+    expect(projectService.getProjectGtmConfig).toHaveBeenCalledWith(
+      'storybook-project'
+    );
+    expect(tagTab.variables()).toEqual([MEASUREMENT_ID_CONSTANT]);
   });
 
   it('shows the missing recording snackbar and strips the query param from the url', async () => {

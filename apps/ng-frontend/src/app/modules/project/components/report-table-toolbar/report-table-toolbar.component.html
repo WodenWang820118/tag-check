@@ -2,9 +2,9 @@
   <button
     mat-icon-button
     class="icon"
-    matTooltip="Add new report"
+    matTooltip="Add tests"
     matTooltipPosition="above"
-    aria-label="Add new report"
+    aria-label="Add tests"
     data-testid="tests-add"
     (click)="emitAddEvent()"
   >
@@ -26,9 +26,9 @@
   <button
     mat-icon-button
     class="icon"
-    matTooltip="Mark to stop operation for this event"
+    matTooltip="Stop the running test"
     matTooltipPosition="above"
-    aria-label="Stop operation"
+    aria-label="Stop the running test"
     data-testid="tests-stop"
     [disabled]="!isRunningTest()"
     (click)="stopOperation()"
@@ -60,10 +60,11 @@
   <button
     mat-icon-button
     class="icon"
-    matTooltip="Mark to prevent navigation for this event"
+    matTooltip="Bookmark: on the last click, block the browser's default link and form navigation (single-page app routing still runs)"
     matTooltipPosition="above"
-    aria-label="Prevent navigation"
+    aria-label="Bookmark: block default navigation on the last click"
     data-testid="tests-prevent-navigation"
+    [disabled]="!hasSelection() || isRunningTest() || isSavingNavigation()"
     (click)="preventNavigationSelected()"
   >
     <mat-icon>bookmark_border</mat-icon>

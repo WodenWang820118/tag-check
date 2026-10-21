@@ -18,7 +18,12 @@ export default defineConfig(({ mode }) => {
       include: ['**/*.spec.ts'],
       // Allow CI/pre-commit to pass when this package has no tests yet
       passWithNoTests: true,
-      reporters: ['default']
+      reporters: ['default'],
+      coverage: {
+        reportsDirectory: '../../coverage/libs/ui',
+        provider: 'v8' as const,
+        reporter: ['lcov']
+      }
     },
     define: {
       'import.meta.vitest': mode !== 'production'

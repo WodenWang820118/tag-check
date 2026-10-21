@@ -25,6 +25,28 @@ export type Jsonified<T> = T extends Date
       : T;
 
 /**
+ * One item of GET /file-reports/:projectSlug: a single run of a test and its
+ * two check results. The Reports page lists them, newest first.
+ */
+export type RunSummary = {
+  /** The run's result id (TestEventDetail). */
+  runId: number;
+  eventId: string;
+  eventName: string;
+  testName: string;
+  passed: boolean;
+  requestPassed: boolean;
+  /** When the run's result was saved. */
+  runAt: Date;
+};
+
+/** Body of DELETE /file-reports/:projectSlug?runIds=1,2. */
+export type DeleteRunsResponse = {
+  /** The runs that were deleted; ids of other projects' runs are ignored. */
+  deletedRunIds: number[];
+};
+
+/**
  * Body of GET /reports/:projectSlug/:eventId, and of each item the run
  * endpoints (POST /datalayer/...) return.
  */

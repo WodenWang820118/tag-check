@@ -1,8 +1,10 @@
 import {
   DataLayerSpec,
+  getCheckStatus,
   IReportDetails,
   Recording,
   ReportDetailResponse,
+  RunStatus,
   TagSpec
 } from '@utils';
 
@@ -66,33 +68,71 @@ export function buildReportPage(loaded: {
   };
 }
 
-export type RunStatus = 'notRun' | 'passed' | 'partial' | 'failed';
+/**
+ * Whether a test has a run. The API sends lastRunAt, null once every run is
+ * deleted; without it, a test has run once it was updated after it was
+ * created.
+ */
+export function hasRun(
+  report:
+    | Pick<IReportDetails, 'createdAt' | 'updatedAt' | 'lastRunAt'>
+    | undefined
+): boolean {
+  if (!report) {
+    return false;
+  }
+  if (report.lastRunAt !== undefined) {
+    return report.lastRunAt !== null;
+  }
+  const updated = report.updatedAt ? new Date(report.updatedAt).getTime() : 0;
+  const created = report.createdAt ? new Date(report.createdAt).getTime() : 0;
+  return updated > created;
+}
+
+/** When the test's latest run ran, or undefined when it has no run. */
+export function getLastRunAt(
+  report:
+    | Pick<IReportDetails, 'createdAt' | 'updatedAt' | 'lastRunAt'>
+    | undefined
+): Date | string | undefined {
+  if (!report || !hasRun(report)) {
+    return undefined;
+  }
+  return report.lastRunAt ?? report.updatedAt;
+}
 
 /**
- * A test has run once its detail was updated after it was created. It passes
- * when both the data layer and the request check passed, and is partial when
- * only one did.
+ * A test that has run passes when both the data layer and the request check
+ * passed, and is partial when only one did.
  */
 export function getRunStatus(
   report:
     | Pick<
         IReportDetails,
-        'createdAt' | 'updatedAt' | 'passed' | 'requestPassed'
+        'createdAt' | 'updatedAt' | 'lastRunAt' | 'passed' | 'requestPassed'
       >
     | undefined
 ): RunStatus {
-  const updated = report?.updatedAt ? new Date(report.updatedAt).getTime() : 0;
-  const created = report?.createdAt ? new Date(report.createdAt).getTime() : 0;
-  if (!report || updated <= created) {
+  if (!report || !hasRun(report)) {
     return 'notRun';
   }
-  const dataLayerPassed = report.passed === true;
-  const requestPassed = report.requestPassed === true;
-  if (dataLayerPassed && requestPassed) {
-    return 'passed';
-  }
-  return dataLayerPassed || requestPassed ? 'partial' : 'failed';
+  return getCheckStatus(report.passed, report.requestPassed);
 }
+
+/** A status chip's label, icon and Material color. */
+export type StatusBadge = {
+  label: string;
+  icon: string;
+  color: 'primary' | 'warn' | undefined;
+};
+
+export const STATUS_BADGES: Record<RunStatus | 'running', StatusBadge> = {
+  notRun: { label: 'Not run', icon: 'hourglass_empty', color: undefined },
+  passed: { label: 'Passed', icon: 'check_circle', color: 'primary' },
+  partial: { label: 'Partial', icon: 'error', color: 'warn' },
+  failed: { label: 'Failed', icon: 'cancel', color: 'warn' },
+  running: { label: 'Running', icon: 'sync', color: undefined }
+};
 
 export type ReportTabViewModel = {
   title: string;

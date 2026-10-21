@@ -102,6 +102,36 @@ describe('StepExecutorService', () => {
     expect(handler.handle).toHaveBeenCalledTimes(1);
     expect(utils.handleNavigationIfNeeded).not.toHaveBeenCalled();
   });
+
+  it('forwards isLastClick to the action handler', async () => {
+    const page = createPage();
+    const handler = { handle: vi.fn().mockResolvedValue(undefined) };
+    const service = new StepExecutorService(
+      { [BrowserAction.CLICK]: handler },
+      { updateSelfDataLayer: vi.fn().mockResolvedValue(undefined) } as never,
+      {
+        handleNavigationIfNeeded: vi.fn().mockResolvedValue(undefined)
+      } as never
+    );
+
+    await service.handleDefaultAction(
+      page as never,
+      { type: BrowserAction.CLICK },
+      'project',
+      'event',
+      false,
+      0,
+      true
+    );
+
+    expect(handler.handle).toHaveBeenCalledWith(
+      page,
+      'project',
+      'event',
+      { type: BrowserAction.CLICK },
+      true
+    );
+  });
 });
 
 function createPage() {

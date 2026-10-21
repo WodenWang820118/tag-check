@@ -19,17 +19,12 @@ export class TestEventRepositoryService {
     private readonly repository: Repository<TestEventEntity>
   ) {}
 
+  /** The project's tests with their latest results, for the tests table. */
   async listReports(
     projectSlug: string
   ): Promise<AbstractTestEventResponseDto[]> {
     const entities = await this.repository.find({
-      relations: {
-        testEventDetails: true,
-        testImage: false,
-        project: true,
-        recording: true,
-        spec: true
-      },
+      relations: { latestTestEventDetail: true, recording: true },
       where: { project: { projectSlug } }
     });
     return plainToInstance(AbstractTestEventResponseDto, entities, {
@@ -37,18 +32,20 @@ export class TestEventRepositoryService {
     });
   }
 
-  async listFileReports(projectSlug: string) {
-    const query = this.repository
-      .createQueryBuilder('test_event')
-      .leftJoinAndSelect('test_event.project', 'project')
-      .leftJoinAndSelect('test_event.testEventDetails', 'test_event_detail')
-      .leftJoinAndSelect('test_event.recording', 'recording')
-      .leftJoinAndSelect('test_event.spec', 'spec')
-      .leftJoinAndSelect('test_event.testImage', 'test_image');
+  /** The project's tests with their recordings, without run results. */
+  async listWithRecordings(projectSlug: string) {
+    return await this.repository.find({
+      relations: { recording: true },
+      where: { project: { projectSlug } }
+    });
+  }
 
-    return await query
-      .where('project.projectSlug = :projectSlug', { projectSlug })
-      .getMany();
+  /** The project's tests with their specs, without run results. */
+  async listWithSpecs(projectSlug: string) {
+    return await this.repository.find({
+      relations: { spec: true },
+      where: { project: { projectSlug } }
+    });
   }
 
   async getEntityByEventId(eventId: string) {
@@ -59,14 +56,9 @@ export class TestEventRepositoryService {
     return entity;
   }
 
+  /** The test's own columns: a run needs its id, not its past results. */
   async getEntityBySlugAndEventId(projectSlug: string, eventId: string) {
     const entity = await this.repository.findOne({
-      relations: {
-        testEventDetails: true,
-        testImage: true,
-        latestTestImage: true,
-        project: true
-      },
       where: { project: { projectSlug }, eventId }
     });
 
@@ -76,24 +68,26 @@ export class TestEventRepositoryService {
     return entity;
   }
 
+  /** The test with its latest result, without past runs or screenshots. */
   async getBySlugAndEventId(projectSlug: string, eventId: string) {
     const entity = await this.repository.findOne({
-      relations: {
-        testEventDetails: true,
-        testImage: true,
-        project: true
-      },
+      relations: { latestTestEventDetail: true },
       where: { project: { projectSlug }, eventId }
     });
 
     return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
+  /**
+   * The tests for the spreadsheet export: every run's result, but only the
+   * latest screenshot.
+   */
   async getBySlugAndEventIds(projectSlug: string, eventIds: string[]) {
     const entities = await this.repository.find({
       relations: {
         testEventDetails: true,
-        testImage: true,
+        latestTestEventDetail: true,
+        latestTestImage: true,
         project: true,
         spec: true,
         recording: true
@@ -155,34 +149,44 @@ export class TestEventRepositoryService {
 
     const updatedEntities: TestEventEntity[] = [];
 
-    for (const event of events) {
-      const updatedEvent = data.find((e) => e.eventId === event.eventId);
-      if (updatedEvent) {
-        // Create update object with only the fields that can be updated
-        const updateData: Partial<TestEventEntity> = {
-          message: updatedEvent.message
-        };
+    await this.repository.manager.transaction(async (manager) => {
+      // One transaction: a failed save leaves every row unchanged.
+      const repo = manager.getRepository(TestEventEntity);
 
-        // If latest records are provided in the DTO, update their references
-        if (updatedEvent.latestTestEventDetailId) {
-          updateData.latestTestEventDetailId =
-            updatedEvent.latestTestEventDetailId;
+      for (const event of events) {
+        const updatedEvent = data.find((e) => e.eventId === event.eventId);
+        if (updatedEvent) {
+          // Create update object with only the fields that can be updated
+          const updateData: Partial<TestEventEntity> = {
+            message: updatedEvent.message
+          };
+
+          // Omitted settings preserve their value; false removes the bookmark.
+          if (updatedEvent.stopNavigation !== undefined) {
+            updateData.stopNavigation = updatedEvent.stopNavigation;
+          }
+
+          // If latest records are provided in the DTO, update their references
+          if (updatedEvent.latestTestEventDetailId) {
+            updateData.latestTestEventDetailId =
+              updatedEvent.latestTestEventDetailId;
+          }
+
+          if (updatedEvent.latestTestImageId) {
+            updateData.latestTestImageId = updatedEvent.latestTestImageId;
+          }
+
+          // Use save instead of update to properly handle relations
+          // Upsert
+          const updatedEntity = await repo.save({
+            ...event,
+            ...updateData
+          });
+
+          updatedEntities.push(updatedEntity);
         }
-
-        if (updatedEvent.latestTestImageId) {
-          updateData.latestTestImageId = updatedEvent.latestTestImageId;
-        }
-
-        // Use save instead of update to properly handle relations
-        // Upsert
-        const updatedEntity = await this.repository.save({
-          ...event,
-          ...updateData
-        });
-
-        updatedEntities.push(updatedEntity);
       }
-    }
+    });
 
     // Fetch final state with all necessary relations
     const finalEntities = await this.repository.find({

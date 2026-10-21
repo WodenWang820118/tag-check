@@ -145,6 +145,25 @@ describe('AllExceptionsFilter', () => {
     expect(JSON.stringify(doc)).not.toContain('raw report payload');
   });
 
+  it('leaves out the fields a report has no value for, which Firestore rejects', async () => {
+    const { host } = buildHost({ url: '/projects', method: 'GET', id: 'r1' });
+
+    await filter.catch('not an Error', host);
+    await Promise.resolve();
+
+    const doc = addDocMock.mock.calls[0][1] as Record<string, unknown>;
+    expect(Object.values(doc)).not.toContain(undefined);
+    expect(doc).not.toHaveProperty('operation');
+    expect(doc).not.toHaveProperty('projectSlug');
+    expect(doc).not.toHaveProperty('stack');
+    expect(doc).toMatchObject({
+      requestId: 'r1',
+      path: '/projects',
+      exceptionType: 'string',
+      exceptionMessage: 'not an Error'
+    });
+  });
+
   it('prefers the client request id header and tolerates missing URLs', async () => {
     const { host, send } = buildHost({
       url: undefined as unknown as string,

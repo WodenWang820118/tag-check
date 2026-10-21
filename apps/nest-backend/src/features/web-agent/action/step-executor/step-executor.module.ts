@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { StepExecutorUtilsService } from './step-executor-utils.service';
 import { StepExecutorService } from './step-executor.service';
 import { DataLayerModule } from '../web-monitoring/data-layer/data-layer.module';
-import { DataLayerService } from '../web-monitoring/data-layer/data-layer.service';
 import { HandlerModule } from '../handlers/handler.module';
 import { ChangeHandler } from '../handlers/change-handler.service';
 import { ClickHandler } from '../handlers/click-handler.service';
@@ -15,7 +14,6 @@ import { BrowserAction } from '../action-utils';
   providers: [
     StepExecutorService,
     StepExecutorUtilsService,
-    DataLayerService,
     {
       provide: ACTION_HANDLERS,
       useFactory: (

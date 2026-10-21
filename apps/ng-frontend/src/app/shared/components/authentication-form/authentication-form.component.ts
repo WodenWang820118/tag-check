@@ -3,7 +3,8 @@ import {
   DestroyRef,
   OnInit,
   ViewEncapsulation,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  signal
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,6 +36,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   encapsulation: ViewEncapsulation.None
 })
 export class AuthenticationFormComponent implements OnInit {
+  /** The password is hidden until the user asks to see it. */
+  readonly showPassword = signal(false);
   authenticationForm = this.fb.nonNullable.group({
     username: [''],
     password: ['']

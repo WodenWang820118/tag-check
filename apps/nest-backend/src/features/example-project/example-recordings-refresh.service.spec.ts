@@ -52,7 +52,7 @@ describe('isShippedLegacyRecording', () => {
 });
 
 describe('ExampleRecordingsRefreshService', () => {
-  const testEventRepositoryService = { listFileReports: vi.fn() };
+  const testEventRepositoryService = { listWithRecordings: vi.fn() };
   const recordingRepositoryService = {
     update: vi.fn().mockResolvedValue(undefined)
   };
@@ -71,7 +71,7 @@ describe('ExampleRecordingsRefreshService', () => {
   });
 
   it('replaces shipped recordings in the database and the recording file only', async () => {
-    testEventRepositoryService.listFileReports.mockResolvedValue([
+    testEventRepositoryService.listWithRecordings.mockResolvedValue([
       {
         eventId: 'shipped',
         eventName: 'add_to_cart',

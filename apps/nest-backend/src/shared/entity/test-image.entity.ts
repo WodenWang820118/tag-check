@@ -1,5 +1,11 @@
 import type { TestImageSchema } from '@utils';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn
+} from 'typeorm';
 import { AuditableEntity } from './common';
 import { TestEventEntity } from './test-event.entity';
 
@@ -30,6 +36,9 @@ export class TestImageEntity
   })
   imageSize?: number;
 
+  // Screenshots are looked up by test. Without an index SQLite scans the whole
+  // table, reading past every stored screenshot.
+  @Index()
   @ManyToOne(() => TestEventEntity, (testEvent) => testEvent.testImage, {
     onDelete: 'CASCADE'
   })

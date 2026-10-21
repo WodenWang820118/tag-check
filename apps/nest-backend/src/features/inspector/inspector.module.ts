@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { InspectorGroupEventsService } from './inspector-group-events.service';
 import { WebAgentModule } from '../web-agent/web-agent.module';
 import { RequestProcessorModule } from '../request-processor/request-processor.module';
-import { RequestProcessorService } from '../request-processor/request-processor.service';
 import { InspectorSingleEventService } from './inspector-single-event.service';
 import { ProjectAgentModule } from '../project-agent/project-agent.module';
 import { DataLayerValidationStrategyModule } from './strategy/data-layer-validation-strategy.module';
@@ -29,11 +28,8 @@ const strategyService = {
 const services = [
   InspectorGroupEventsService,
   InspectorSingleEventService,
-  RequestProcessorService,
   strategyService,
-  InspectorUtilsService,
-  EcommerceEventValidationStrategy,
-  NonEcEventsValidationStrategy
+  InspectorUtilsService
 ];
 @Module({
   imports: [
@@ -44,6 +40,11 @@ const services = [
     TestReportFacadeModule
   ],
   providers: [...services],
-  exports: [...services, ProjectAgentModule]
+  exports: [
+    ...services,
+    ProjectAgentModule,
+    RequestProcessorModule,
+    DataLayerValidationStrategyModule
+  ]
 })
 export class InspectorModule {}

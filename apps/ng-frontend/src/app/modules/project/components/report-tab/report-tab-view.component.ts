@@ -17,17 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel.component';
-import { ReportTabViewModel, RunStatus } from '../report-detail.contracts';
-
-const STATUS_BADGES: Record<
-  RunStatus,
-  { label: string; icon: string; color: 'primary' | 'warn' | undefined }
-> = {
-  notRun: { label: 'Not run', icon: 'hourglass_empty', color: undefined },
-  passed: { label: 'Passed', icon: 'check_circle', color: 'primary' },
-  partial: { label: 'Partial', icon: 'error', color: 'warn' },
-  failed: { label: 'Failed', icon: 'cancel', color: 'warn' }
-};
+import { ReportTabViewModel, STATUS_BADGES } from '../report-detail.contracts';
 
 @Component({
   selector: 'app-report-tab-view',
@@ -70,12 +60,9 @@ const STATUS_BADGES: Record<
 
           <div class="flex items-center gap-2 self-start">
             <output class="sr-only" aria-live="polite" aria-atomic="true">
-              Report status: {{ statusBadge().label }}
+              Result: {{ statusBadge().label }}
             </output>
-            <mat-chip-set
-              aria-label="Report status"
-              data-testid="report-status"
-            >
+            <mat-chip-set aria-label="Result" data-testid="report-status">
               <mat-chip [color]="statusBadge().color" class="w-full">
                 <div class="flex items-center gap-1">
                   {{ statusBadge().label }}
@@ -174,16 +161,17 @@ const STATUS_BADGES: Record<
 
             <ng-content select="[report-detail-content]"></ng-content>
 
-            <mat-form-field class="w-full mt-5" appearance="fill">
-              <mat-label>Message</mat-label>
-              <textarea
-                matInput
-                [rows]="3"
-                [readonly]="true"
-                [value]="viewModel().message"
-                aria-label="Report message"
-              ></textarea>
-            </mat-form-field>
+            <section class="mt-5" aria-labelledby="result-message-label">
+              <div id="result-message-label" class="text-sm text-black/60">
+                Message
+              </div>
+              <p
+                class="mt-1 whitespace-pre-wrap text-xl"
+                data-testid="result-message"
+              >
+                {{ viewModel().message || '—' }}
+              </p>
+            </section>
           </section>
 
           <section class="space-y-4 mt-10">
@@ -222,16 +210,13 @@ const STATUS_BADGES: Record<
                   <div class="min-w-0">
                     <div class="text-2xl">No media available</div>
                     <p class="text-xl text-black/70 m-0 mt-1">
-                      Screenshots and the test recording will appear here when
-                      captured.
+                      @if (viewModel().status === 'notRun') {
+                        Run the test to capture a screenshot and a recording of
+                        the run.
+                      } @else {
+                        This run saved no screenshot or recording.
+                      }
                     </p>
-                    <ul class="list-disc pl-5 text-xl text-black/70 mt-2">
-                      <li>Media capture may be disabled for this run.</li>
-                      <li>
-                        Some runs may not produce screenshots if nothing changed
-                        visually.
-                      </li>
-                    </ul>
                   </div>
                 </div>
               </mat-card>

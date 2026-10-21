@@ -19,16 +19,16 @@ against specs built from a GTM container export. The project list is in
 
 The UI, the API and the entities use different words for the same things.
 
-| UI               | Code                                                            | Meaning                                                                                                                                                                                                    |
-| ---------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Project          | `ProjectEntity`, `projectSlug`                                  | One website under test, with its settings: website URL, pre-loading values, GTM preview URL, authentication, browser.                                                                                      |
-| Test             | test event: `TestEventEntity`, `eventId`                        | One GA4 event to check. Owns a Chrome Recorder **recording** (the journey to replay), a **spec** (`SpecEntity`, the expected `dataLayer` push) and an optional item definition (`ItemDefEntity`).          |
-| Run              | inspection: `inspectSingleEvent`, `singleEventInspectionRecipe` | One replay of a test in Puppeteer. Makes two checks: the **dataLayer check** (`passed`) and the **request check** (`requestPassed`: a GA4 `/g/collect` request for the event, sent to the measurement ID). |
-| Result           | `TestEventDetailEntity`                                         | One row per run with both check results, the raw request and the captured `dataLayer`. `TestEventEntity.latestTestEventDetailId` points at the latest.                                                     |
-| Media            | `TestImageEntity`, `recording.webm`                             | The run's screenshot (one row per run; the API serves the latest) and its screen recording (`inspection_results/<eventId>/recording.webm`, replaced by every run).                                         |
-| Report           | `IReportDetails`; `reports`, `file-reports` controllers         | A test's Reports tab, the Reports page and the spreadsheet export. `GET /reports/:projectSlug` flattens each test's latest result into `passed`, `requestPassed` and `hasRecording`.                       |
-| Status           | `getRunStatus` (`report-detail.contracts.ts`)                   | Not run / Passed / Partial / Failed. A test has run once `updatedAt > createdAt`.                                                                                                                          |
-| Accompanied mode | `gtm-operator`                                                  | Runs a test through GTM Preview (Tag Assistant) instead of opening the site directly.                                                                                                                      |
+| UI               | Code                                                            | Meaning                                                                                                                                                                                                                                                                          |
+| ---------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Project          | `ProjectEntity`, `projectSlug`                                  | One website under test, with its settings: website URL, pre-loading values, GTM preview URL, authentication, browser.                                                                                                                                                            |
+| Test             | test event: `TestEventEntity`, `eventId`                        | One GA4 event to check. Owns a Chrome Recorder **recording** (the journey to replay), a **spec** (`SpecEntity`, the expected `dataLayer` push) and an optional item definition (`ItemDefEntity`).                                                                                |
+| Run              | inspection: `inspectSingleEvent`, `singleEventInspectionRecipe` | One replay of a test in Puppeteer. Makes two checks: the **dataLayer check** (`passed`) and the **request check** (`requestPassed`: a GA4 `/g/collect` request for the event, sent to the measurement ID).                                                                       |
+| Result           | `TestEventDetailEntity`                                         | One row per run with both check results, the raw request, the captured `dataLayer`, the message and the run's screenshot (`testImage`; null for older runs). `TestEventEntity.latestTestEventDetailId` points at the latest.                                                     |
+| Media            | `TestImageEntity`, `recording.webm`                             | The run's screenshot (one row per run; the API serves the latest) and its screen recording (`inspection_results/<eventId>/recording.webm`, replaced by every run).                                                                                                               |
+| Report           | `IReportDetails`; `reports`, `file-reports` controllers         | A test's Reports tab, the Reports page (one row per run; deleting rows deletes runs and their screenshots, not tests) and the spreadsheet export. `GET /reports/:projectSlug` flattens each test's latest result into `passed`, `requestPassed`, `hasRecording` and `lastRunAt`. |
+| Status           | `getRunStatus` (`report-detail.contracts.ts`)                   | Not run / Passed / Partial / Failed. A test has run when `lastRunAt` is set (null once every run is deleted).                                                                                                                                                                    |
+| Accompanied mode | `gtm-operator`                                                  | Runs a test through GTM Preview (Tag Assistant) instead of opening the site directly.                                                                                                                                                                                            |
 
 ## How a run flows
 
@@ -68,8 +68,17 @@ Inside `apps/nest-backend/src`, imports point down:
 `controllers -> features -> infrastructure -> core -> shared`. A
 `no-restricted-imports` override stops `infrastructure`, `core` and `shared`
 from importing upward. Code that drives features, such as the Puppeteer
-inspection run, belongs in `features/`. Import the module that provides a
-service; don't rely on another module re-exporting it.
+inspection run, belongs in `features/`.
+
+`OsModule` (`infrastructure/os/os.module.ts`) is the single module features
+import for data access: it brings the infrastructure services and re-exports
+`RepositoryModule`, which gathers every repository module. A feature module
+imports `OsModule` rather than `RepositoryModule` or individual repository or
+infrastructure modules.
+
+Every module lists only its own services in `providers` and imports the
+module that provides any other: a second provider creates a second instance.
+`ProjectAgentModule` gathers the project modules and provides nothing itself.
 
 ## Conventions
 
@@ -99,6 +108,14 @@ service; don't rely on another module re-exporting it.
 - In Git Bash on Windows, unset `NX_WORKSPACE_ROOT_PATH` when its drive-letter
   case differs from the shell's working directory. The `@analogjs` Angular test
   setup fails otherwise.
+- The SQLite schema comes from migrations
+  (`apps/nest-backend/src/core/database/migrations`), not `synchronize`.
+  Change an entity together with a new migration listed in
+  `DATABASE_MIGRATIONS`; `database-migrations.spec.ts` fails while they
+  disagree, and its `pendingSchemaChanges` gives the SQL to start from. A
+  database created before migrations is synchronized once on its first start
+  and every migration is recorded as applied, so a migration's data changes
+  never run on it.
 - The nest-backend bundle targets ES5 (rspack + swc without `jsc.target`).
   Functions passed to `page.evaluate` or `evaluateOnNewDocument` are compiled
   with swc helpers that do not exist in the page, so pass source strings.
@@ -111,7 +128,7 @@ service; don't rely on another module re-exporting it.
   a release merge. CI never packages the desktop app, so run
   `pnpm run tauri:release:windows` locally after dependency or tooling
   upgrades.
-- pnpm 11 passes a `--` separator through to scripts. Run
+- pnpm (11 and 12) passes a `--` separator through to scripts. Run
   `pnpm run tauri:release describe`, not `pnpm run tauri:release -- describe`.
 - Vercel deploys only `main` (`vercel.json`). Pull request previews come from
   `.github/workflows/vercel-previews.yaml`, which deploys the sites whose Nx

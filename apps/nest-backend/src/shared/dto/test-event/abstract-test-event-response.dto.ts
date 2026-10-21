@@ -1,6 +1,5 @@
 import { Exclude, Expose, Transform } from 'class-transformer';
 import type { AbstractTestEvent, Recording, Spec } from '@utils';
-import { TestEventDetailEntity } from '../../entity';
 
 @Exclude()
 export class AbstractTestEventResponseDto implements AbstractTestEvent {
@@ -46,27 +45,17 @@ export class AbstractTestEventResponseDto implements AbstractTestEvent {
   })
   hasRecording!: boolean;
 
+  // The latest run's checks: load the latestTestEventDetail relation.
   @Expose()
-  @Transform(({ obj }) => {
-    const eventDetails = Array.isArray(obj.testEventDetails)
-      ? (obj.testEventDetails as TestEventDetailEntity[])
-      : [];
-    const latestedEventDetail = eventDetails.find(
-      (item) => item.id === obj.latestTestEventDetailId
-    );
-    return latestedEventDetail?.passed ?? false;
-  })
+  @Transform(({ obj }) => obj.latestTestEventDetail?.passed ?? false)
   passed!: boolean;
 
   @Expose()
-  @Transform(({ obj }) => {
-    const eventDetails = Array.isArray(obj.testEventDetails)
-      ? (obj.testEventDetails as TestEventDetailEntity[])
-      : [];
-    const latestedEventDetail = eventDetails.find(
-      (item) => item.id === obj.latestTestEventDetailId
-    );
-    return latestedEventDetail?.requestPassed ?? false;
-  })
+  @Transform(({ obj }) => obj.latestTestEventDetail?.requestPassed ?? false)
   requestPassed!: boolean;
+
+  /** When the latest run ran; null when the test has no run. */
+  @Expose()
+  @Transform(({ obj }) => obj.latestTestEventDetail?.createdAt ?? null)
+  lastRunAt!: Date | null;
 }

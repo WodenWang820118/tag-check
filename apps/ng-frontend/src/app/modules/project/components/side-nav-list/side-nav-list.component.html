@@ -5,8 +5,7 @@
         <mat-list-item
           tabindex="-1"
           [routerLink]="item.link"
-          [routerLinkActive]="['secondary']"
-          [routerLinkActiveOptions]="routerLinkActiveOptions()"
+          [class.secondary]="section() === item.section"
           (click)="onMenuClick()"
           [attr.data-testid]="item.testId"
         >
@@ -20,7 +19,7 @@
     }
     <mat-list-item
       tabindex="-1"
-      [ngClass]="{ secondary: selectedParent() === 'Settings' }"
+      [class.secondary]="section() === 'settings'"
       (click)="toggleSettings()"
       data-testid="nav-settings"
     >
@@ -54,7 +53,7 @@
             [attr.data-testid]="item.testId"
             [routerLink]="item.link"
             [routerLinkActive]="['secondary']"
-            (click)="isOpen.set(false); onSubItemClick('Settings')"
+            (click)="onSubItemClick()"
           >
             <div matListItemTitle>{{ item.title }}</div>
           </mat-list-item>

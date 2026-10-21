@@ -1,7 +1,8 @@
 import { TestEventEntity } from './../../../shared/entity/test-event.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository } from 'typeorm';
+import type { TestImageSummary } from '@utils';
 import {
   CreateTestImageDto,
   TestImageEntity,
@@ -27,9 +28,6 @@ export class TestImageRepositoryService {
   /** Returns the latest screenshot: every run adds a new image row. */
   async getBySlugAndEventId(projectSlug: string, eventId: string) {
     const entity = await this.repository.findOne({
-      relations: {
-        testEvent: true
-      },
       order: { id: 'DESC' },
       where: {
         testEvent: {
@@ -43,23 +41,22 @@ export class TestImageRepositoryService {
     return plainToInstance(TestImageResponseDto, entity);
   }
 
-  async getBySlugAndEventIds(projectSlug: string, eventIds: string[]) {
-    const entities = await this.repository.find({
-      relations: {
-        testEvent: true
+  /** The latest screenshot's name, size and dates, without its bytes. */
+  async getSummaryBySlugAndEventId(
+    projectSlug: string,
+    eventId: string
+  ): Promise<TestImageSummary | null> {
+    return await this.repository.findOne({
+      select: {
+        id: true,
+        imageName: true,
+        imageSize: true,
+        createdAt: true,
+        updatedAt: true
       },
-      where: {
-        testEvent: {
-          eventId: In(eventIds),
-          project: {
-            projectSlug
-          }
-        }
-      }
+      order: { id: 'DESC' },
+      where: { testEvent: { eventId, project: { projectSlug } } }
     });
-    return entities.map((entity) =>
-      plainToInstance(TestImageResponseDto, entity)
-    );
   }
 
   async create(projectSlug: string, eventId: string, data: CreateTestImageDto) {

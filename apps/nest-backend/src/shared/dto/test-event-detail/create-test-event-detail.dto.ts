@@ -31,4 +31,9 @@ export class CreateTestEventDetailDto implements TestEventDetail {
 
   @IsString()
   destinationUrl!: string;
+
+  /** The run's validation message, such as "Valid". */
+  @IsOptional()
+  @IsString()
+  message?: string;
 }

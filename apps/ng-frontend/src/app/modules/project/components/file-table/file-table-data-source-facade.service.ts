@@ -3,13 +3,7 @@ import { FileTableDataSourceService } from '../../../../shared/services/data-sou
 import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
 import { take } from 'rxjs';
 import { MatTableDataSource } from '@angular/material/table';
-import {
-  FrontFileReport,
-  IReportDetails,
-  TestEvent,
-  TestEventDetailSchema,
-  TestImage
-} from '@utils';
+import { Jsonified, RunSummary } from '@utils';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { InformationDialogComponent } from '../../../../shared/components/information-dialog/information-dialog.component';
@@ -46,8 +40,9 @@ export class FileTableDataSourceFacadeService {
       if (deletedSignal) {
         const dialogRef = this.dialog.open(InformationDialogComponent, {
           data: {
-            title: 'Delete Reports',
-            contents: 'Are you sure you want to delete the selected reports?',
+            title: 'Delete runs',
+            contents:
+              'Delete the selected runs and their screenshots? The tests stay, and a test whose latest run is deleted shows its previous run.',
             action: 'Delete',
             actionColor: 'warn',
             consent: false
@@ -87,112 +82,55 @@ export class FileTableDataSourceFacadeService {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  initializeData(paginator: MatPaginator, sort: MatSort, data: any) {
-    const fileReports = data['fileReports'] as FrontFileReport[];
-    const projectSlug = data['projectSlug'] as string;
-
-    console.log('File Reports: ', fileReports);
-
-    // cross-join the test events with the test event details and test images
-    const reports = fileReports.flatMap((report) => {
-      return report.testEventDetails.map((detail, detailIndex) =>
-        this.mapTestEventDetails(
-          detail,
-          detailIndex,
-          report,
-          report.testImage[detailIndex]
-        )
-      );
-    });
-
-    console.log('reports: ', reports);
-
-    if (reports.length && paginator && sort) {
-      // Sort the data
-      const injectReports = reports.toSorted((a, b) =>
-        a.eventName.localeCompare(b.eventName)
-      );
-      // Create data source and assign
-      const dataSource = new MatTableDataSource(injectReports);
-      dataSource.paginator = paginator;
-      dataSource.sort = sort;
-      this.fileTableDataSourceModelService.dataSource.set(dataSource);
-      this.projectSlug.set(projectSlug);
-    }
-  }
-
-  private mapTestEventDetails(
-    details: TestEventDetailSchema,
-    position: number,
-    event: TestEvent,
-    image: TestImage
-  ): IReportDetails & TestImage {
-    console.log(
-      'Mapping TestEventDetail:',
-      details,
-      'with event:',
-      event,
-      'and image:',
-      image
+  /**
+   * Shows the runs the route resolved: one row per run, newest first, as
+   * GET /file-reports/:projectSlug returns them.
+   */
+  initializeData(
+    paginator: MatPaginator,
+    sort: MatSort,
+    data: { fileReports?: Jsonified<RunSummary>[] | null; projectSlug?: string }
+  ) {
+    const dataSource = new MatTableDataSource(data.fileReports ?? []);
+    dataSource.paginator = paginator;
+    dataSource.sort = sort;
+    this.fileTableDataSourceModelService.dataSource.set(dataSource);
+    this.fileTableDataSourceModelService.selection.set(
+      new SelectionModel<Jsonified<RunSummary>>(true, [])
     );
-    return {
-      // Test event details
-      passed: details.passed,
-      requestPassed: details.requestPassed,
-      dataLayer: details.dataLayer,
-      rawRequest: details.rawRequest,
-      destinationUrl: details.destinationUrl,
-
-      // Test event
-      position,
-      event: event.eventName,
-      eventId: event.eventId,
-      eventName: event.eventName,
-      testName: event.testName,
-      createdAt: event.createdAt,
-      updatedAt: event.updatedAt,
-      stopNavigation: event.stopNavigation,
-      message: event.message,
-
-      // Test image
-      imageName: image?.imageName || '',
-      imageSize: image?.imageSize || 0,
-      imageData: image?.imageData || ''
-    };
+    this.projectSlug.set(data.projectSlug ?? '');
   }
 
+  /** Deletes the selected runs, then drops the rows the server deleted. */
   private handleReportDeletion() {
-    const remainingReports = this.fileTableDataSourceModelService
-      .dataSource()
-      .data.filter(
-        (item) =>
-          !this.fileTableDataSourceModelService
-            .selection()
-            .selected.includes(item)
-      );
-    this.fileTableDataSourceModelService.dataSource().data = remainingReports;
-    this.fileTableDataSourceService.setData(remainingReports);
+    const selection = this.fileTableDataSourceModelService.selection();
+    const runIds = selection.selected.map((run) => run.runId);
+    if (runIds.length === 0) {
+      return;
+    }
     this.fileReportService
-      .deleteFileReport(
-        this.projectSlug(),
-        this.fileTableDataSourceModelService
-          .selection()
-          .selected.map((item) => item.eventId)
-      )
+      .deleteRuns(this.projectSlug(), runIds)
       .pipe(take(1))
-      .subscribe();
+      .subscribe(({ deletedRunIds }) => {
+        const deleted = new Set(deletedRunIds);
+        const dataSource = this.fileTableDataSourceModelService.dataSource();
+        const remaining = dataSource.data.filter(
+          (run) => !deleted.has(run.runId)
+        );
+        dataSource.data = remaining;
+        this.fileTableDataSourceService.setData(remaining);
+        selection.clear();
+      });
   }
 
   private handleReportDownload(
     projectSlug: string,
-    selected: (IReportDetails & TestImage)[]
+    selected: Jsonified<RunSummary>[]
   ) {
+    // The spreadsheet covers whole tests, so each test is listed once.
+    const eventIds = [...new Set(selected.map((item) => item.eventId))];
     this.fileReportService
-      .downloadFileReports(
-        projectSlug,
-        selected.map((item) => item.eventId)
-      )
+      .downloadFileReports(projectSlug, eventIds)
       .pipe(take(1))
       .subscribe();
   }
@@ -205,7 +143,7 @@ export class FileTableDataSourceFacadeService {
     // Derive the working set: prefer filteredData if present, else all data
     // Note: MatTableDataSource exposes filteredData publicly
     const working =
-      (ds as unknown as { filteredData?: (IReportDetails & TestImage)[] })
+      (ds as unknown as { filteredData?: Jsonified<RunSummary>[] })
         .filteredData ?? ds.data;
     // Apply sorting consistent with the table if available
     const sorted = ds.sort ? ds.sortData(working, ds.sort) : working;
@@ -220,7 +158,7 @@ export class FileTableDataSourceFacadeService {
     const allPageSelected = pageRows.every((r) => sel.isSelected(r));
 
     // Build next selection set immutably
-    let nextSelected: (IReportDetails & TestImage)[];
+    let nextSelected: Jsonified<RunSummary>[];
     if (allPageSelected) {
       // Deselect only the current page rows
       const pageSet = new Set(pageRows);
@@ -234,41 +172,41 @@ export class FileTableDataSourceFacadeService {
       nextSelected = Array.from(set);
     }
 
-    const newModel = new SelectionModel<IReportDetails & TestImage>(
+    const newModel = new SelectionModel<Jsonified<RunSummary>>(
       true,
       nextSelected
     );
     this.fileTableDataSourceModelService.selection.set(newModel);
   }
 
-  toggleRow(row: IReportDetails & TestImage) {
+  toggleRow(row: Jsonified<RunSummary>) {
     const prevModel = this.fileTableDataSourceModelService.selection();
     const prevSelected = prevModel.selected;
     const isSelected = prevModel.isSelected(row);
     const newSelected = isSelected
       ? prevSelected.filter((r) => r !== row)
       : [...prevSelected, row];
-    const newModel = new SelectionModel<IReportDetails & TestImage>(
+    const newModel = new SelectionModel<Jsonified<RunSummary>>(
       true,
       newSelected
     );
     this.fileTableDataSourceModelService.selection.set(newModel);
   }
 
-  checkboxLabel(row?: IReportDetails & TestImage): string {
+  checkboxLabel(row?: Jsonified<RunSummary>): string {
     if (!row) {
       return `${this.isAllSelected ? 'deselect' : 'select'} all`;
     }
-    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} the ${row.eventName} run of ${row.runAt}`;
   }
 
   /** Return the current data source directly */
-  get dataSource(): MatTableDataSource<IReportDetails & TestImage> {
+  get dataSource(): MatTableDataSource<Jsonified<RunSummary>> {
     return this.fileTableDataSourceModelService.computedDataSource();
   }
 
   /** Return the current selection model directly */
-  get selection(): SelectionModel<IReportDetails & TestImage> {
+  get selection(): SelectionModel<Jsonified<RunSummary>> {
     return this.fileTableDataSourceModelService.computedSelection();
   }
 
@@ -278,7 +216,7 @@ export class FileTableDataSourceFacadeService {
     const sel = this.fileTableDataSourceModelService.selection();
 
     const working =
-      (ds as unknown as { filteredData?: (IReportDetails & TestImage)[] })
+      (ds as unknown as { filteredData?: Jsonified<RunSummary>[] })
         .filteredData ?? ds.data;
     const sorted = ds.sort ? ds.sortData(working, ds.sort) : working;
     const pageIndex = ds.paginator?.pageIndex ?? 0;

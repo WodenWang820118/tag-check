@@ -1,11 +1,10 @@
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { Exclude, Expose, Type } from 'class-transformer';
 import type { FullTestEventSchema } from '@utils';
 import { TestEventDetailResponseDto } from '../test-event-detail';
 import { TestImageResponseDto } from '../test-image';
 import { ProjectResponseDto } from '../project';
 import { SpecResponseDto } from '../spec';
 import { RecordingResponseDto } from '../recording';
-import { TestImageEntity } from '../../entity';
 
 @Exclude()
 export class FullTestEventResponseDto implements FullTestEventSchema {
@@ -38,10 +37,6 @@ export class FullTestEventResponseDto implements FullTestEventSchema {
   testEventDetails!: TestEventDetailResponseDto;
 
   @Expose()
-  @Type(() => TestImageResponseDto)
-  testImage!: TestImageResponseDto[];
-
-  @Expose()
   @Type(() => ProjectResponseDto)
   project!: ProjectResponseDto;
 
@@ -53,16 +48,13 @@ export class FullTestEventResponseDto implements FullTestEventSchema {
   @Type(() => RecordingResponseDto)
   recording!: RecordingResponseDto;
 
+  /** The latest run's result; testEventDetails holds every run. */
+  @Expose()
+  @Type(() => TestEventDetailResponseDto)
+  latestTestEventDetail?: TestEventDetailResponseDto;
+
+  /** The latest run's screenshot. Earlier screenshots are not loaded. */
   @Expose()
   @Type(() => TestImageResponseDto)
-  @Transform(({ obj }) => {
-    const testImages = Array.isArray(obj.testImage)
-      ? (obj.testImage as TestImageEntity[])
-      : [];
-    const latestImage = testImages.find(
-      (img) => img.id === obj.latestTestImageId
-    );
-    return latestImage ?? new TestImageResponseDto();
-  })
-  latestTestImage!: TestImageResponseDto;
+  latestTestImage?: TestImageResponseDto;
 }

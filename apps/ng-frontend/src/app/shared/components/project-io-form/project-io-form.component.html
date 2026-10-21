@@ -1,16 +1,39 @@
 <div class="settings">
   <mat-card appearance="outlined">
     <mat-card-header>
-      <mat-card-title>Project I/O</mat-card-title>
-      <mat-card-subtitle>Export or delete the project</mat-card-subtitle>
+      <mat-card-title>Export or delete project</mat-card-title>
     </mat-card-header>
-    <mat-card-actions align="start" style="gap: 1rem">
-      <button mat-raised-button (click)="exportProject()">
-        Export Project
-      </button>
-      <button mat-raised-button color="warn" (click)="deleteProject()">
-        Delete Project
-      </button>
-    </mat-card-actions>
+    <mat-card-content>
+      <section class="project-io__section">
+        <h2 class="project-io__heading">Export</h2>
+        <p>
+          Download the project as a file you can import into Tag Check again.
+        </p>
+        <button
+          mat-raised-button
+          data-testid="project-export"
+          (click)="exportProject()"
+        >
+          Export project
+        </button>
+      </section>
+      <section
+        class="project-io__section project-io__danger"
+        aria-labelledby="delete-project-heading"
+      >
+        <h2 id="delete-project-heading" class="project-io__heading">Delete</h2>
+        <p>
+          Removes the project with its tests and results. This cannot be undone.
+        </p>
+        <button
+          mat-flat-button
+          color="warn"
+          data-testid="project-delete"
+          (click)="deleteProject()"
+        >
+          Delete project
+        </button>
+      </section>
+    </mat-card-content>
   </mat-card>
 </div>

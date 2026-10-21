@@ -15,6 +15,19 @@ interface DiagnosticRequestContext {
   projectSlug?: string;
 }
 
+/**
+ * Firestore rejects a document with an undefined field, so a report of a
+ * request without a diagnostic context or of an exception without a stack
+ * would be lost. Leaves those fields out.
+ */
+function withoutUndefinedFields(
+  fields: Record<string, unknown>
+): Record<string, unknown> {
+  return Object.fromEntries(
+    Object.entries(fields).filter(([, value]) => value !== undefined)
+  );
+}
+
 const REQUEST_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -113,21 +126,24 @@ export class AllExceptionsFilter implements ExceptionFilter {
       );
       const diagnosticContext = (request as RequestWithDiagnostics)
         .diagnosticContext;
-      await addDoc(errorsCollection, {
-        timestamp: new Date(),
-        requestId,
-        method: request.method,
-        path: this.sanitizePath(request.url),
-        statusCode: status,
-        operation: diagnosticContext?.operation,
-        projectSlug: diagnosticContext?.projectSlug,
-        exceptionType:
-          exception instanceof Error
-            ? exception.constructor.name
-            : typeof exception,
-        exceptionMessage: this.getExceptionMessage(exception),
-        stack: exception instanceof Error ? exception.stack : undefined
-      });
+      await addDoc(
+        errorsCollection,
+        withoutUndefinedFields({
+          timestamp: new Date(),
+          requestId,
+          method: request.method,
+          path: this.sanitizePath(request.url),
+          statusCode: status,
+          operation: diagnosticContext?.operation,
+          projectSlug: diagnosticContext?.projectSlug,
+          exceptionType:
+            exception instanceof Error
+              ? exception.constructor.name
+              : typeof exception,
+          exceptionMessage: this.getExceptionMessage(exception),
+          stack: exception instanceof Error ? exception.stack : undefined
+        })
+      );
     } catch (error) {
       Logger.error(
         'Failed to log error to Firebase:',

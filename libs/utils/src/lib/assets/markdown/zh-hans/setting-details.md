@@ -1,50 +1,40 @@
-# 设置
+# 设置详情
 
-## 项目信息
+每个项目都有自己的设置，位于项目菜单的 **Settings** 下。在某个页面上选择 **Save**，即可保存该页面的更改。
 
-项目信息区域可让你查看并编辑项目细节，例如项目名称、描述、measurement ID 与关联的 Google Sheet。
+## Project Information
 
-- Project Name：项目名称
-- Description：项目描述
-- Measurement ID：与项目关联的 Google Analytics measurement ID
-- Google Sheet Link：与项目关联的 Google Sheet 链接
+- **Project Name**：显示在 Projects 页面上的名称。
+- **Measurement ID**：网站发送数据的目标 GA4 测量 ID。请求检查会查找发送到该 ID 的 GA4 请求。
+- **Project Description**：可选的备注。
 
-## 验证
+## Pre-loading Values
 
-当系统在执行测试前需要先登录时，可以在这里设置 HTTP authentication 所需的用户名与密码组合。
+TagCheck 在每次运行前设置的值，使网站以测试所需的状态启动：
+
+- **Website URL**：被测网站。TagCheck 会在该网站的域名上设置下方的 Cookie。
+- **Local Storage**：键值对，例如网站保存在本地存储中的用户同意状态。TagCheck 会在运行打开的每个页面的脚本执行之前写入这些键值对。
+- **Cookie**：名称和值对，例如用户同意 Cookie。
+
+如果没有用户同意，许多网站会阻止分析标签，两项检查都会失败。
+
+## Authentication
+
+用于受 HTTP 身份验证保护的网站的 **Username** 和 **Password**。TagCheck 会在网站要求时发送它们。
 
 ## Google Tag Manager
 
-这个区域包含多项 GTM 相关设置。
+- **Activate Accompanied Mode**：通过 GTM 预览运行每个测试，因此被测的标签是所预览工作区中的标签。它需要 Preview Mode URL。
+- **Activate Request Check**：在检查数据层的同时检查 GA4 请求。它需要测量 ID。
+- **GTM URL**：该容器的工作区在 Tag Manager 中的地址，仅供参考。
+- **Preview Mode URL**：您的预览会话的 Tag Assistant 地址。在 Tag Manager 中启动 **Preview**，然后复制 Tag Assistant 显示的地址；该地址包含容器 ID 和网站，例如 `https://tagassistant.google.com/#/?id=GTM-XXXXXXX&url=https%3A%2F%2Fexample.com`。
 
-- Request Interception
+## Browser Settings
 
-  这项功能会拦截 GTM container 发出的 request，将其重组为类似 data layer 的数据结构，并在详情页中保留 raw request 供检查。
+- **Hide the browser?**：在不显示窗口的情况下运行 Chrome。伴随模式始终会显示窗口。
+- **Add browser setting**：为运行添加一个 Chrome 命令行参数，例如 `--window-size=1280,800`。
 
-- GTM Accompanied Mode
+## Export or Delete
 
-  这个模式会在审计过程中同步打开 GTM Preview，让你确认标签是否按预期触发，也适用于审计未发布的工作区。
-
-- GTM URL and Shareable Link
-
-  GTM URL 指向要检查的 workspace；shareable link 则是可分享给他人、用于预览相同 GTM container 配置的链接。
-
-## Browser arguments
-
-此区域包含两部分：
-
-- Browser arguments
-
-  可传给 Puppeteer 的高级浏览器参数，用来控制浏览器行为。
-
-- Hide Browser
-
-  可在后台执行测试时隐藏浏览器窗口。不过若启用 GTM Accompanied Mode，浏览器仍会保持可见。
-
-## 预载数据
-
-预载数据会在测试开始前先加载到应用中，尤其是 local storage 与 cookies。常见用途是预先加载 consent cookie，让 analytics 收集在自动化开始前就处于允许状态。
-
-## Project IO
-
-这项功能可让你导入与导出项目。项目数据会以 ZIP 文件格式传输。
+- **Export**：将项目及其测试、规格、录制和结果下载为 ZIP 文件。在另一台计算机上，可通过 New Project 页面上的 **Already got the project?** 导入它。
+- **Delete**：删除该项目及其中的所有内容。此操作无法撤销。

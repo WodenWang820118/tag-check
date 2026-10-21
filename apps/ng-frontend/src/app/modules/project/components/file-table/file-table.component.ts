@@ -12,7 +12,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { DatePipe, NgClass, CommonModule } from '@angular/common';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
-import { IReportDetails, TestImage } from '@utils';
+import { getCheckStatus, Jsonified, RunSummary } from '@utils';
 import { MatInputModule } from '@angular/material/input';
 import { FileTableDataSourceFacadeService } from './file-table-data-source-facade.service';
 import { ActivatedRoute } from '@angular/router';
@@ -20,6 +20,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TableSortService } from '../../../../shared/services/utils/table-sort.service';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
 
 @Component({
   selector: 'app-file-table',
@@ -35,6 +36,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatSortModule,
     MatChipsModule,
     MatTooltipModule,
+    RunStatusChipComponent,
     CommonModule
   ],
   templateUrl: './file-table.component.html',
@@ -59,7 +61,6 @@ export class FileTableComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .pipe(
         tap((data) => {
-          console.log('Route data for file table:', data);
           if (paginator && sort)
             this.facade.initializeData(paginator, sort, data);
         })
@@ -77,13 +78,9 @@ export class FileTableComponent implements OnInit {
         {
           name: 'status',
           type: 'number',
-          accessor: (row: IReportDetails & TestImage) => {
-            const u = row?.updatedAt ? new Date(row.updatedAt).getTime() : 0;
-            const c = row?.createdAt ? new Date(row.createdAt).getTime() : 0;
-            const run = u > c;
+          accessor: (row: Jsonified<RunSummary>) => {
             const dl = row?.passed === true;
             const req = row?.requestPassed === true;
-            if (!run) return 0; // Not run
             if (dl && req) return 3; // Passed
             if (dl || req) return 2; // Partial
             return 1; // Failed
@@ -92,14 +89,15 @@ export class FileTableComponent implements OnInit {
         {
           name: 'completedTime',
           type: 'date',
-          accessor: (row: IReportDetails & TestImage) => {
-            const u = row?.updatedAt ? new Date(row.updatedAt).getTime() : 0;
-            const c = row?.createdAt ? new Date(row.createdAt).getTime() : 0;
-            return u > c ? row?.updatedAt : 0;
-          }
+          accessor: (row: Jsonified<RunSummary>) => row.runAt
         }
       ]
     );
+  }
+
+  /** Every listed run finished, so its status follows from its two checks. */
+  runStatus(run: Jsonified<RunSummary>) {
+    return getCheckStatus(run.passed, run.requestPassed);
   }
 
   // The following getters make it easier to use signals in the template:
@@ -124,11 +122,11 @@ export class FileTableComponent implements OnInit {
   }
 
   /** Toggle selection of a single row via facade */
-  toggleSelection(row: IReportDetails & TestImage) {
+  toggleSelection(row: Jsonified<RunSummary>) {
     this.facade.toggleRow(row);
   }
 
-  checkboxLabel(row?: IReportDetails & TestImage) {
+  checkboxLabel(row?: Jsonified<RunSummary>) {
     return this.facade.checkboxLabel(row);
   }
 }

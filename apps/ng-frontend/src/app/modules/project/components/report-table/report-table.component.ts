@@ -13,13 +13,14 @@ import { MatTable, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { tap, take } from 'rxjs';
-import { IReportDetails } from '@utils';
+import { IReportDetails, RunStatus } from '@utils';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatBadgeModule } from '@angular/material/badge';
+import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-chart.component';
@@ -27,6 +28,8 @@ import { ReportTableFacadeService } from './report-table-facade.service';
 import { TableSortService } from '../../../../shared/services/utils/table-sort.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
+import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
+import { getLastRunAt, getRunStatus, hasRun } from '../report-detail.contracts';
 // #endregion
 
 @Component({
@@ -46,6 +49,7 @@ import { MatChipsModule } from '@angular/material/chips';
     ProgressPieChartComponent,
     MatTooltipModule,
     MatChipsModule,
+    RunStatusChipComponent,
     CommonModule
   ],
   templateUrl: './report-table.component.html',
@@ -53,6 +57,16 @@ import { MatChipsModule } from '@angular/material/chips';
   changeDetection: ChangeDetectionStrategy.Eager
 })
 export class ReportTableComponent implements OnInit {
+  /** The single status a row shows: Passed, Partial, Failed or Not run. */
+  runStatus(report: IReportDetails): RunStatus {
+    return getRunStatus(report);
+  }
+
+  /** When the row's latest run ran; undefined before the first run. */
+  lastRunAt(report: IReportDetails) {
+    return getLastRunAt(report);
+  }
+
   // #region viewChild / signals
   private readonly paginator = viewChild<MatPaginator>(MatPaginator);
   private readonly sort = viewChild<MatSort>(MatSort);
@@ -71,7 +85,8 @@ export class ReportTableComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly facade: ReportTableFacadeService,
     private readonly tableSortService: TableSortService,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly projectDataSourceService: ProjectDataSourceService
   ) {
     // #region constructor effects
     effect(() => {
@@ -158,9 +173,7 @@ export class ReportTableComponent implements OnInit {
           name: 'status',
           type: 'number',
           accessor: (row: IReportDetails) => {
-            const u = row?.updatedAt ? new Date(row.updatedAt).getTime() : 0;
-            const c = row?.createdAt ? new Date(row.createdAt).getTime() : 0;
-            const run = u > c;
+            const run = hasRun(row);
             const dl = row?.passed === true;
             const req = row?.requestPassed === true;
             // Order: Passed (3) > Partial (2) > Failed (1) > Not run (0)
@@ -173,11 +186,7 @@ export class ReportTableComponent implements OnInit {
         {
           name: 'completedTime',
           type: 'date',
-          accessor: (row: IReportDetails) => {
-            const u = row?.updatedAt ? new Date(row.updatedAt).getTime() : 0;
-            const c = row?.createdAt ? new Date(row.createdAt).getTime() : 0;
-            return u > c ? row?.updatedAt : 0;
-          }
+          accessor: (row: IReportDetails) => getLastRunAt(row) ?? 0
         }
       ]
     );
@@ -209,7 +218,12 @@ export class ReportTableComponent implements OnInit {
   }
 
   // Expose methods directly:
+  isSavingNavigation() {
+    return this.projectDataSourceService.getPreventNavigationSignal();
+  }
+
   runTest(eventId: string) {
+    if (this.isSavingNavigation()) return;
     this.facade
       .runTest(eventId)
       .pipe(take(1))
