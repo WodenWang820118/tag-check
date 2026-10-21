@@ -15,10 +15,15 @@ const older = RUN_SUMMARY_SAMPLE;
 
 describe('FileTableDataSourceFacadeService', () => {
   let facade: FileTableDataSourceFacadeService;
-  const fileReportService = { downloadFileReports: vi.fn(() => of(null)) };
+  const fileReportService = {
+    downloadFileReports: vi.fn(() => of(null)),
+    // As DELETE /file-reports/:projectSlug answers: only the runs it deleted.
+    deleteRuns: vi.fn(() => of({ deletedRunIds: [newer.runId] }))
+  };
 
   beforeEach(() => {
     fileReportService.downloadFileReports.mockClear();
+    fileReportService.deleteRuns.mockClear();
     TestBed.configureTestingModule({
       providers: [
         { provide: FileReportService, useValue: fileReportService },
@@ -48,6 +53,23 @@ describe('FileTableDataSourceFacadeService', () => {
     });
 
     expect(facade.dataSource.data).toEqual([]);
+    expect(facade.selection.selected).toEqual([]);
+  });
+
+  it('deletes the selected runs and drops the rows the server deleted', () => {
+    facade.initializeData(null as never, null as never, {
+      fileReports: [newer, older],
+      projectSlug: 'shop'
+    });
+    facade.selection.select(newer, older);
+
+    facade['handleReportDeletion']();
+
+    expect(fileReportService.deleteRuns).toHaveBeenCalledWith('shop', [
+      newer.runId,
+      older.runId
+    ]);
+    expect(facade.dataSource.data).toEqual([older]);
     expect(facade.selection.selected).toEqual([]);
   });
 

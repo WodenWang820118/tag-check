@@ -1,4 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { DeleteRunsResponse } from '@utils';
+import { rm } from 'fs/promises';
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { join } from 'path';
@@ -33,22 +35,29 @@ export class ProjectFileReportService {
     });
   }
 
-  async getReportFolderFiles(projectSlug: string) {
-    return await this.testEventRepositoryService.listReports(projectSlug);
-  }
-
-  async deleteReportFile(projectSlug: string, eventId: string) {
-    return this.testEventRepositoryService.deleteByProjectSlugAndEventId(
-      projectSlug,
-      eventId
-    );
-  }
-
-  async deleteSelectedFiles(projectSlug: string, eventIds: string[]) {
-    return this.testEventRepositoryService.deleteByProjectSlugAndEventIds(
-      projectSlug,
-      eventIds
-    );
+  /**
+   * Deletes the project's runs with these ids and the screenshots they saved;
+   * the tests stay. Every run replaces the test's screen recording, so a test
+   * whose latest run is deleted loses its recording too.
+   */
+  async deleteRuns(
+    projectSlug: string,
+    runIds: number[]
+  ): Promise<DeleteRunsResponse> {
+    const { deletedRunIds, latestRunDeletedEventIds } =
+      await this.testEventDetailRepositoryService.deleteRuns(
+        projectSlug,
+        runIds
+      );
+    for (const eventId of latestRunDeletedEventIds) {
+      const folder = await this.folderPathService.getInspectionEventFolderPath(
+        projectSlug,
+        eventId
+      );
+      await rm(join(folder, 'recording.webm'), { force: true });
+    }
+    this.logger.log(`Deleted ${deletedRunIds.length} run(s) of ${projectSlug}`);
+    return { deletedRunIds };
   }
 
   async downloadReportFiles(projectSlug: string, eventIds: string[]) {

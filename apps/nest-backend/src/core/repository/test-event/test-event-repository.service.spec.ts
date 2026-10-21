@@ -42,7 +42,12 @@ describe('TestEventRepositoryService', () => {
         { id: 6, passed: false, requestPassed: false },
         { id: 7, passed: true, requestPassed: true }
       ],
-      latestTestEventDetail: { id: 7, passed: true, requestPassed: true },
+      latestTestEventDetail: {
+        id: 7,
+        passed: true,
+        requestPassed: true,
+        createdAt: new Date(REPORT_LIST_ITEM_SAMPLE.lastRunAt)
+      },
       testImage: [
         { id: 6, imageName: 'screenshot.png', imageData: Buffer.from('6') },
         { id: 7, imageName: 'screenshot.png', imageData: Buffer.from('7') }
@@ -89,6 +94,21 @@ describe('TestEventRepositoryService', () => {
       hasRecording: true,
       passed: true,
       requestPassed: true
+    });
+  });
+
+  it('listReports() sends a null lastRunAt for a test with no run', async () => {
+    const { service, repository } = build();
+    repository.find.mockResolvedValue([
+      { ...rowFor({ recording: true }), latestTestEventDetail: null }
+    ]);
+
+    const [item] = wire(await service.listReports('demo'));
+
+    expect(item).toMatchObject({
+      lastRunAt: null,
+      passed: false,
+      requestPassed: false
     });
   });
 

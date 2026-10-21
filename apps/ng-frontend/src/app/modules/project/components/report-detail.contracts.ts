@@ -69,21 +69,51 @@ export function buildReportPage(loaded: {
 }
 
 /**
- * A test has run once its detail was updated after it was created. It passes
- * when both the data layer and the request check passed, and is partial when
- * only one did.
+ * Whether a test has a run. The API sends lastRunAt, null once every run is
+ * deleted; without it, a test has run once it was updated after it was
+ * created.
+ */
+export function hasRun(
+  report:
+    | Pick<IReportDetails, 'createdAt' | 'updatedAt' | 'lastRunAt'>
+    | undefined
+): boolean {
+  if (!report) {
+    return false;
+  }
+  if (report.lastRunAt !== undefined) {
+    return report.lastRunAt !== null;
+  }
+  const updated = report.updatedAt ? new Date(report.updatedAt).getTime() : 0;
+  const created = report.createdAt ? new Date(report.createdAt).getTime() : 0;
+  return updated > created;
+}
+
+/** When the test's latest run ran, or undefined when it has no run. */
+export function getLastRunAt(
+  report:
+    | Pick<IReportDetails, 'createdAt' | 'updatedAt' | 'lastRunAt'>
+    | undefined
+): Date | string | undefined {
+  if (!report || !hasRun(report)) {
+    return undefined;
+  }
+  return report.lastRunAt ?? report.updatedAt;
+}
+
+/**
+ * A test that has run passes when both the data layer and the request check
+ * passed, and is partial when only one did.
  */
 export function getRunStatus(
   report:
     | Pick<
         IReportDetails,
-        'createdAt' | 'updatedAt' | 'passed' | 'requestPassed'
+        'createdAt' | 'updatedAt' | 'lastRunAt' | 'passed' | 'requestPassed'
       >
     | undefined
 ): RunStatus {
-  const updated = report?.updatedAt ? new Date(report.updatedAt).getTime() : 0;
-  const created = report?.createdAt ? new Date(report.createdAt).getTime() : 0;
-  if (!report || updated <= created) {
+  if (!report || !hasRun(report)) {
     return 'notRun';
   }
   return getCheckStatus(report.passed, report.requestPassed);

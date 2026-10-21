@@ -27,7 +27,8 @@ export const REPORT_LIST_ITEM_SAMPLE = {
   updatedAt: '2026-10-20T06:21:19.000Z',
   hasRecording: true,
   passed: true,
-  requestPassed: true
+  requestPassed: true,
+  lastRunAt: '2026-10-20T06:21:19.000Z'
 } satisfies Jsonified<AbstractTestEvent>;
 
 /** Body of GET /reports/:projectSlug/:eventId. */
@@ -42,12 +43,14 @@ export const REPORT_DETAIL_SAMPLE = {
     createdAt: '2026-10-20T06:18:46.000Z',
     updatedAt: '2026-10-20T06:21:19.000Z',
     passed: true,
-    requestPassed: true
+    requestPassed: true,
+    lastRunAt: '2026-10-20T06:21:19.000Z'
   },
   testEventDetails: {
     id: 7,
     requestPassed: true,
     passed: true,
+    message: 'Valid',
     rawRequest:
       'https://www.google-analytics.com/g/collect?v=2&tid=G-8HKQR5ZBSK&en=add_to_cart&pr1=idcity001~nmSwitzerland~qt1~pr799&epn.value=799&cu=USD',
     destinationUrl:

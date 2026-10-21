@@ -40,8 +40,9 @@ export class FileTableDataSourceFacadeService {
       if (deletedSignal) {
         const dialogRef = this.dialog.open(InformationDialogComponent, {
           data: {
-            title: 'Delete Reports',
-            contents: 'Are you sure you want to delete the selected reports?',
+            title: 'Delete runs',
+            contents:
+              'Delete the selected runs and their screenshots? The tests stay, and a test whose latest run is deleted shows its previous run.',
             action: 'Delete',
             actionColor: 'warn',
             consent: false
@@ -100,26 +101,26 @@ export class FileTableDataSourceFacadeService {
     this.projectSlug.set(data.projectSlug ?? '');
   }
 
+  /** Deletes the selected runs, then drops the rows the server deleted. */
   private handleReportDeletion() {
-    const remainingReports = this.fileTableDataSourceModelService
-      .dataSource()
-      .data.filter(
-        (item) =>
-          !this.fileTableDataSourceModelService
-            .selection()
-            .selected.includes(item)
-      );
-    this.fileTableDataSourceModelService.dataSource().data = remainingReports;
-    this.fileTableDataSourceService.setData(remainingReports);
+    const selection = this.fileTableDataSourceModelService.selection();
+    const runIds = selection.selected.map((run) => run.runId);
+    if (runIds.length === 0) {
+      return;
+    }
     this.fileReportService
-      .deleteFileReport(
-        this.projectSlug(),
-        this.fileTableDataSourceModelService
-          .selection()
-          .selected.map((item) => item.eventId)
-      )
+      .deleteRuns(this.projectSlug(), runIds)
       .pipe(take(1))
-      .subscribe();
+      .subscribe(({ deletedRunIds }) => {
+        const deleted = new Set(deletedRunIds);
+        const dataSource = this.fileTableDataSourceModelService.dataSource();
+        const remaining = dataSource.data.filter(
+          (run) => !deleted.has(run.runId)
+        );
+        dataSource.data = remaining;
+        this.fileTableDataSourceService.setData(remaining);
+        selection.clear();
+      });
   }
 
   private handleReportDownload(

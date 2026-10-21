@@ -40,6 +40,12 @@ export type RunSummary = {
   runAt: Date;
 };
 
+/** Body of DELETE /file-reports/:projectSlug?runIds=1,2. */
+export type DeleteRunsResponse = {
+  /** The runs that were deleted; ids of other projects' runs are ignored. */
+  deletedRunIds: number[];
+};
+
 /**
  * Body of GET /reports/:projectSlug/:eventId, and of each item the run
  * endpoints (POST /datalayer/...) return.

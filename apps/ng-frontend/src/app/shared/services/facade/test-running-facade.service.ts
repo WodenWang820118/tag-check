@@ -186,7 +186,8 @@ export class TestRunningFacadeService {
             passed: result.testEventDetails?.passed ?? false,
             requestPassed: result.testEventDetails?.requestPassed ?? false,
             message: result.testEvent?.message ?? [],
-            updatedAt
+            updatedAt,
+            lastRunAt: result.testEvent?.lastRunAt ?? updatedAt
           }
         : event
     );

@@ -32,19 +32,21 @@ describe('FileReportService', () => {
     expect(await firstValueFrom(service.getFileReports('slug'))).toBeNull();
   });
 
-  it('deleteFileReport sends event ids in HttpParams and rethrows on error', async () => {
-    httpClient.delete.mockReturnValueOnce(of({ ok: true } as never));
-    await firstValueFrom(service.deleteFileReport('slug', ['a', 'b']));
+  it('deleteRuns sends the run ids as one list and rethrows on error', async () => {
+    httpClient.delete.mockReturnValueOnce(of({ deletedRunIds: [7, 9] }));
+    expect(await firstValueFrom(service.deleteRuns('slug', [7, 9]))).toEqual({
+      deletedRunIds: [7, 9]
+    });
     expect(httpClient.delete).toHaveBeenCalledWith(
       `${environment.fileReportApiUrl}/slug`,
-      { params: { eventIds: ['a', 'b'] } }
+      { params: { runIds: '7,9' } }
     );
 
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     httpClient.delete.mockReturnValueOnce(throwError(() => new Error('x')));
     await expect(
-      firstValueFrom(service.deleteFileReport('slug', ['a']))
-    ).rejects.toThrow('Error deleting file report');
+      firstValueFrom(service.deleteRuns('slug', [7]))
+    ).rejects.toThrow('Error deleting runs');
   });
 
   it('downloadFileReports returns null when the response body is empty', async () => {

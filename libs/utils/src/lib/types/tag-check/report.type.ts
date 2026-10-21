@@ -11,6 +11,8 @@ export type IReportDetails = {
   position: number;
   event: string;
   hasRecording?: boolean;
+  /** When the latest run ran; null when the test has no run. */
+  lastRunAt?: Date | string | null;
 } & TestEvent &
   TestEventDetail &
   Auditable;
@@ -25,5 +27,7 @@ export type TestEventDetail = {
 
 export type TestEventDetailSchema = {
   id: number;
+  /** The run's validation message; null for runs saved before runs kept it. */
+  message?: string | null;
 } & TestEventDetail &
   Auditable;
