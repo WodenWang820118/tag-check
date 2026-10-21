@@ -1,14 +1,13 @@
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 import { ControllerModule } from './controllers/controller.module';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilterModule } from './common/all-exceptions-filter/all-exceptions.filter.module';
 import { AllExceptionsFilter } from './common/all-exceptions-filter/all-exceptions-filter.service';
 import { DatabaseConfigService } from './core/database/database.service';
 import { DatabaseConfigModule } from './core/database/database.module';
-import { migrateDatabase } from './core/database/database-migrations';
+import { createMigratedDataSource } from './core/database/database-migrations';
 import { LoggerModule, LoggerErrorInterceptor } from 'nestjs-pino';
 import { ConfigsModule } from './core/configs/configs.module';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -80,14 +79,7 @@ function sanitizeHttpPath(rawUrl: string | undefined): string | undefined {
         databaseConfigService.getTypeOrmConfig(),
       inject: [DatabaseConfigService],
       // Migrate before any module queries the database.
-      dataSourceFactory: async (options) => {
-        if (!options) {
-          throw new Error('TypeORM options are missing');
-        }
-        const dataSource = await new DataSource(options).initialize();
-        await migrateDatabase(dataSource);
-        return dataSource;
-      }
+      dataSourceFactory: createMigratedDataSource
     }),
 
     // Feature modules

@@ -1,4 +1,4 @@
-import { DataSource } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 import { InitialSchema1792540800000 } from './migrations/1792540800000-initial-schema';
 
 /** Every migration, oldest first. Add a migration for each schema change. */
@@ -31,4 +31,19 @@ export async function migrateDatabase(dataSource: DataSource): Promise<void> {
     await dataSource.runMigrations({ fake: true });
   }
   await dataSource.runMigrations({ transaction: 'each' });
+}
+
+/**
+ * Opens the database and migrates it, for TypeOrmModule's
+ * dataSourceFactory: no module queries the database before it is migrated.
+ */
+export async function createMigratedDataSource(
+  options?: DataSourceOptions
+): Promise<DataSource> {
+  if (!options) {
+    throw new Error('TypeORM options are missing');
+  }
+  const dataSource = await new DataSource(options).initialize();
+  await migrateDatabase(dataSource);
+  return dataSource;
 }

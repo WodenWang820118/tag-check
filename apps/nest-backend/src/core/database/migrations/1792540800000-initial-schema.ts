@@ -56,16 +56,33 @@ export class InitialSchema1792540800000 implements MigrationInterface {
   }
 
   async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE "test_image"`);
+    // test_event and its latest run and screenshot reference each other, and
+    // SQLite cannot drop a table whose foreign key names a dropped table.
+    // Rebuild test_event without those two keys, then drop children first.
+    await queryRunner.query(
+      `CREATE TABLE "temporary_test_event" ("createdAt" datetime NOT NULL DEFAULT (datetime('now')), "updatedAt" datetime NOT NULL DEFAULT (datetime('now')), "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "event_id" varchar NOT NULL, "test_name" varchar NOT NULL, "event_name" varchar NOT NULL, "stop_navigation" boolean, "message" text, "latest_test_event_detail_id" integer, "latest_test_image_id" integer, "project_id" integer, CONSTRAINT "FK_90e5e2a6c8a8c1adbae7ab7cc4e" FOREIGN KEY ("project_id") REFERENCES "project" ("id") ON DELETE CASCADE ON UPDATE NO ACTION)`
+    );
+    await queryRunner.query(
+      `INSERT INTO "temporary_test_event" SELECT * FROM "test_event"`
+    );
     await queryRunner.query(`DROP TABLE "test_event"`);
-    await queryRunner.query(`DROP TABLE "item_def"`);
-    await queryRunner.query(`DROP TABLE "recording"`);
-    await queryRunner.query(`DROP TABLE "spec"`);
-    await queryRunner.query(`DROP TABLE "test_event_detail"`);
-    await queryRunner.query(`DROP TABLE "project"`);
-    await queryRunner.query(`DROP TABLE "application_setting"`);
-    await queryRunner.query(`DROP TABLE "browser_setting"`);
-    await queryRunner.query(`DROP TABLE "authentication_setting"`);
-    await queryRunner.query(`DROP TABLE "sys_configuration"`);
+    await queryRunner.query(
+      `ALTER TABLE "temporary_test_event" RENAME TO "test_event"`
+    );
+    for (const table of [
+      'item_def',
+      'recording',
+      'spec',
+      'test_event_detail',
+      'test_image',
+      'test_event',
+      'application_setting',
+      'browser_setting',
+      'authentication_setting',
+      'project',
+      'sys_configuration'
+    ]) {
+      await queryRunner.query(`DROP TABLE "${table}"`);
+    }
   }
 }
