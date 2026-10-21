@@ -4,6 +4,7 @@ import { FilePathService } from '../../../infrastructure/os/path/file-path/file-
 import { OsModule } from '../../../infrastructure/os/os.module';
 
 @Module({
+  // Data access through OsModule, the features' data-access layer.
   imports: [OsModule],
   providers: [ProjectAbstractReportService, FilePathService],
   exports: [ProjectAbstractReportService, OsModule]

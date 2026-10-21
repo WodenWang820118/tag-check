@@ -4,6 +4,7 @@ import { ProjectFileReportService } from './project-file-report.service';
 import { FileService } from '../../../infrastructure/os/file/file.service';
 
 @Module({
+  // Data access through OsModule, the features' data-access layer.
   imports: [OsModule],
   providers: [FileService, ProjectFileReportService],
   exports: [ProjectFileReportService]
