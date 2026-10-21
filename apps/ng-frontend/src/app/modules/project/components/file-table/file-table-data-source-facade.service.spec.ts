@@ -58,4 +58,40 @@ describe('FileTableDataSourceFacadeService', () => {
       RUN_SUMMARY_SAMPLE.eventId
     ]);
   });
+
+  it('selects every run on the page, and a second toggle clears them', () => {
+    facade.initializeData(null as never, null as never, {
+      fileReports: [newer, older],
+      projectSlug: 'shop'
+    });
+
+    facade.toggleAllRows();
+    expect(facade.selection.selected).toEqual([newer, older]);
+    expect(facade.isAllSelected).toBe(true);
+    expect(facade.checkboxLabel()).toBe('deselect all');
+
+    facade.toggleAllRows();
+    expect(facade.selection.selected).toEqual([]);
+    expect(facade.isAllSelected).toBe(false);
+    expect(facade.checkboxLabel()).toBe('select all');
+  });
+
+  it('toggles a single run and labels its checkbox by event and time', () => {
+    facade.initializeData(null as never, null as never, {
+      fileReports: [newer, older],
+      projectSlug: 'shop'
+    });
+
+    expect(facade.checkboxLabel(older)).toBe(
+      `select the add_to_cart run of ${older.runAt}`
+    );
+    facade.toggleRow(older);
+    expect(facade.selection.selected).toEqual([older]);
+    expect(facade.checkboxLabel(older)).toBe(
+      `deselect the add_to_cart run of ${older.runAt}`
+    );
+
+    facade.toggleRow(older);
+    expect(facade.selection.selected).toEqual([]);
+  });
 });
