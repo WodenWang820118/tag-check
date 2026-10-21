@@ -74,8 +74,11 @@ inspection run, belongs in `features/`.
 import for data access: it brings the infrastructure services and re-exports
 `RepositoryModule`, which gathers every repository module. A feature module
 imports `OsModule` rather than `RepositoryModule` or individual repository or
-infrastructure modules, and does not list their services in its own
-`providers`: a second provider creates a second instance.
+infrastructure modules.
+
+Every module lists only its own services in `providers` and imports the
+module that provides any other: a second provider creates a second instance.
+`ProjectAgentModule` gathers the project modules and provides nothing itself.
 
 ## Conventions
 
