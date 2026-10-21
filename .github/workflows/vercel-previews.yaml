@@ -97,6 +97,18 @@ jobs:
         run: npx --yes "$VERCEL_CLI" link --yes --team "$VERCEL_TEAM" --project "$VERCEL_PROJECT" --token "${{ secrets.VERCEL_TOKEN }}"
       - name: Pull preview settings
         run: npx --yes "$VERCEL_CLI" pull --yes --environment=preview --token "${{ secrets.VERCEL_TOKEN }}"
+      # Dependencies are already installed. A project's own install command
+      # can clash with the runner: the Storybook project's
+      # `npm install -g pnpm` fails because corepack already provides pnpm.
+      - name: Use the workspace install
+        run: |
+          node -e "
+            const fs = require('node:fs');
+            const file = '.vercel/project.json';
+            const project = JSON.parse(fs.readFileSync(file, 'utf8'));
+            project.settings = { ...project.settings, installCommand: 'pnpm install --frozen-lockfile' };
+            fs.writeFileSync(file, JSON.stringify(project));
+          "
       - name: Build
         run: npx --yes "$VERCEL_CLI" build --token "${{ secrets.VERCEL_TOKEN }}"
       - name: Deploy
