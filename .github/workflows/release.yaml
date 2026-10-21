@@ -49,7 +49,7 @@ jobs:
       - name: Setup pnpm
         run: |
           corepack enable
-          corepack prepare pnpm@11.0.8 --activate
+          corepack install
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Describe release context
@@ -271,7 +271,7 @@ jobs:
       - name: Setup pnpm
         run: |
           corepack enable
-          corepack prepare pnpm@11.0.8 --activate
+          corepack install
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Describe release context
@@ -308,7 +308,7 @@ jobs:
       - name: Setup pnpm
         run: |
           corepack enable
-          corepack prepare pnpm@11.0.8 --activate
+          corepack install
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Describe release context
