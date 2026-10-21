@@ -2,9 +2,9 @@
   <button
     mat-icon-button
     class="icon"
-    matTooltip="Add new report"
+    matTooltip="Add tests"
     matTooltipPosition="above"
-    aria-label="Add new report"
+    aria-label="Add tests"
     data-testid="tests-add"
     (click)="emitAddEvent()"
   >
@@ -26,9 +26,9 @@
   <button
     mat-icon-button
     class="icon"
-    matTooltip="Mark to stop operation for this event"
+    matTooltip="Stop the running test"
     matTooltipPosition="above"
-    aria-label="Stop operation"
+    aria-label="Stop the running test"
     data-testid="tests-stop"
     [disabled]="!isRunningTest()"
     (click)="stopOperation()"
