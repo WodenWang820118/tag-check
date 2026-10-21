@@ -17,7 +17,25 @@
         </mat-form-field>
         <mat-form-field class="authentication-form__field" appearance="outline">
           <mat-label>Password</mat-label>
-          <input matInput formControlName="password" />
+          <input
+            matInput
+            formControlName="password"
+            autocomplete="off"
+            [type]="showPassword() ? 'text' : 'password'"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            [attr.aria-label]="
+              showPassword() ? 'Hide password' : 'Show password'
+            "
+            (click)="showPassword.set(!showPassword())"
+          >
+            <mat-icon>{{
+              showPassword() ? 'visibility_off' : 'visibility'
+            }}</mat-icon>
+          </button>
         </mat-form-field>
         <mat-card-actions align="end" style="gap: 1rem">
           <button mat-raised-button color="primary">Save</button>

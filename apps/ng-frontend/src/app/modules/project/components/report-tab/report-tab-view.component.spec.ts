@@ -21,13 +21,33 @@ const notRun: ReportTabViewModel = {
   imageBlob: undefined
 };
 
-function renderText(viewModel: ReportTabViewModel): string {
+function render(viewModel: ReportTabViewModel): HTMLElement {
   TestBed.configureTestingModule({ providers: [provideNoopAnimations()] });
   const fixture = TestBed.createComponent(ReportTabViewComponent);
   fixture.componentRef.setInput('viewModel', viewModel);
   fixture.detectChanges();
-  return fixture.nativeElement.textContent as string;
+  return fixture.nativeElement as HTMLElement;
 }
+
+function renderText(viewModel: ReportTabViewModel): string {
+  return render(viewModel).textContent ?? '';
+}
+
+function messageOf(viewModel: ReportTabViewModel): string | undefined {
+  return render(viewModel)
+    .querySelector('[data-testid="result-message"]')
+    ?.textContent?.trim();
+}
+
+describe('ReportTabViewComponent message', () => {
+  it('shows the test message as text', () => {
+    expect(messageOf(notRun)).toBe('This is a standard test');
+  });
+
+  it('shows a dash when the test has no message', () => {
+    expect(messageOf({ ...notRun, message: '' })).toBe('—');
+  });
+});
 
 describe('ReportTabViewComponent media card', () => {
   it('asks to run a test that has not run', () => {

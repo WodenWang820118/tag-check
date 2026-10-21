@@ -13,13 +13,11 @@
           <div class="text-lg text-gray-600 w-full md:w-full">
             Measurement ID
             <div class="mt-2">
-              <mat-chip
-                class="!w-full !bg-indigo-50 !text-indigo-700 font-mono !text-lg !rounded-sm !py-1 !break-words whitespace-normal"
-                selectable="false"
+              <code
+                class="block w-full font-mono !text-[14px] text-gray-800 bg-gray-100 rounded px-3 py-1 break-words"
                 aria-label="Measurement ID"
+                >{{ measurementId$() }}</code
               >
-                {{ measurementId$() }}
-              </mat-chip>
             </div>
           </div>
         </div>
@@ -28,13 +26,11 @@
           <div class="text-lg text-gray-600 w-full md:w-full">
             Event Name
             <div class="mt-2">
-              <mat-chip
-                class="!w-full !bg-indigo-50 !text-indigo-700 font-mono !text-lg !rounded-sm !py-1 !break-words whitespace-normal"
-                selectable="false"
+              <code
+                class="block w-full font-mono !text-[14px] text-gray-800 bg-gray-100 rounded px-3 py-1 break-words"
                 aria-label="Event Name"
+                >{{ eventName$() }}</code
               >
-                {{ eventName$() }}
-              </mat-chip>
             </div>
           </div>
         </div>
@@ -57,10 +53,9 @@
                 Event Parameter
               </th>
               <td mat-cell *matCellDef="let element" class="!border-b-0">
-                <mat-chip
-                  class="!w-full !bg-indigo-50 !text-indigo-700 font-mono !text-lg !rounded-sm !py-1 !break-words whitespace-normal"
-                  selectable="false"
-                  >{{ element.parameter }}</mat-chip
+                <code
+                  class="block w-full font-mono !text-[14px] text-gray-800 bg-gray-100 rounded px-3 py-1 break-words"
+                  >{{ element.parameter }}</code
                 >
               </td>
             </ng-container>
@@ -74,10 +69,9 @@
                 Value
               </th>
               <td mat-cell *matCellDef="let element" class="!border-b-0">
-                <mat-chip
-                  class="!w-full !bg-indigo-50 !text-indigo-700 font-mono !text-lg !rounded-sm !py-1 !break-words whitespace-normal"
-                  selectable="false"
-                  >{{ element.value }}</mat-chip
+                <code
+                  class="block w-full font-mono !text-[14px] text-gray-800 bg-gray-100 rounded px-3 py-1 break-words"
+                  >{{ element.value }}</code
                 >
               </td>
             </ng-container>

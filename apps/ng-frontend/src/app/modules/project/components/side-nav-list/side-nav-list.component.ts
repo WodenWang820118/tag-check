@@ -5,14 +5,16 @@ import {
   output,
   signal,
   effect,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  computed,
+  inject
 } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map } from 'rxjs';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import {
   ActivatedRoute,
-  IsActiveMatchOptions,
   NavigationEnd,
   Router,
   RouterLink,
@@ -23,6 +25,27 @@ import { OverlayModule } from '@angular/cdk/overlay';
 import { OverlayComponent } from '../overlay/overlay.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenav } from '@angular/material/sidenav';
+
+export type NavSection = 'tests' | 'tagbuild' | 'reports' | 'settings';
+
+/**
+ * The menu item a project URL belongs to. A test's own page
+ * (/projects/:slug/:eventId) belongs to Tests.
+ */
+export function navSectionOf(url: string): NavSection {
+  const path = url.split(/[?#]/u)[0];
+  const rest = /^\/projects\/[^/]+\/?(.*)$/u.exec(path)?.[1] ?? '';
+  switch (rest.split('/')[0]) {
+    case 'tag-build':
+      return 'tagbuild';
+    case 'buckets':
+      return 'reports';
+    case 'settings':
+      return 'settings';
+    default:
+      return 'tests';
+  }
+}
 
 @Component({
   selector: 'app-side-nav-list',
@@ -35,8 +58,7 @@ import { MatSidenav } from '@angular/material/sidenav';
     OverlayModule,
     OverlayComponent,
     MatButtonModule,
-    RouterLinkActive,
-    NgClass
+    RouterLinkActive
   ],
   templateUrl: './side-nav-list.component.html',
   styleUrls: ['./side-nav-list.component.scss'],
@@ -44,16 +66,20 @@ import { MatSidenav } from '@angular/material/sidenav';
   encapsulation: ViewEncapsulation.None
 })
 export class SideNavListComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   snav = input.required<MatSidenav>();
   menuClick = output<void>();
-  routerLinkActiveOptions = signal<IsActiveMatchOptions>({
-    paths: 'exact',
-    queryParams: 'ignored',
-    matrixParams: 'ignored',
-    fragment: 'ignored'
-  });
+  private readonly url = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects)
+    ),
+    { initialValue: this.router.url }
+  );
+  /** The highlighted menu item, from the current URL. */
+  readonly section = computed(() => navSectionOf(this.url()));
 
-  selectedParent = signal<string | null>(null);
   isOpen = signal(false);
   items = signal<
     {
@@ -62,6 +88,7 @@ export class SideNavListComponent {
       link: string;
       testId: string;
       subTitle?: string;
+      section: NavSection;
     }[]
   >([]);
 
@@ -72,7 +99,7 @@ export class SideNavListComponent {
       testId: 'nav-settings-project-info'
     },
     {
-      title: 'Preloading Values',
+      title: 'Pre-loading Values',
       link: ['./', 'settings', 'pre-loading-values'],
       testId: 'nav-settings-preloading-values'
     },
@@ -87,30 +114,18 @@ export class SideNavListComponent {
       testId: 'nav-settings-gtm'
     },
     {
-      title: 'Advanced Browser',
+      title: 'Browser Settings',
       link: ['./', 'settings', 'advanced-browser-settings'],
       testId: 'nav-settings-browser'
     },
     {
-      title: 'Project IO',
+      title: 'Export or Delete',
       link: ['./', 'settings', 'project-io'],
       testId: 'nav-settings-project-io'
     }
   ]);
 
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly router: Router
-  ) {
-    // Convert router subscription to effect
-    effect(() => {
-      this.router.events.subscribe((event) => {
-        if (event instanceof NavigationEnd) {
-          this.updateParentTitle();
-        }
-      });
-    });
-
+  constructor() {
     // Convert route params subscription to effect
     effect(() => {
       this.route.params.subscribe((params) => {
@@ -121,25 +136,29 @@ export class SideNavListComponent {
             title: 'Tests',
             link: `./`,
             testId: 'nav-tests',
+            section: 'tests',
             subTitle: projectSlug
           },
           {
             icon: 'build',
             title: 'TagBuild',
             link: `tag-build`,
-            testId: 'nav-tagbuild'
+            testId: 'nav-tagbuild',
+            section: 'tagbuild'
           },
           {
             icon: 'folder_shared',
             title: 'Reports',
             link: `buckets`,
-            testId: 'nav-reports'
+            testId: 'nav-reports',
+            section: 'reports'
           },
           {
             icon: 'settings',
             title: 'Settings',
             link: `settings`,
-            testId: 'nav-settings'
+            testId: 'nav-settings',
+            section: 'settings'
           }
         ]);
       });
@@ -163,19 +182,7 @@ export class SideNavListComponent {
     this.isOpen.set(!this.isOpen());
   }
 
-  private updateParentTitle() {
-    const currentUrl = this.router.url;
-    if (currentUrl.includes('/settings')) {
-      this.selectedParent.set('Settings');
-    } else if (currentUrl.includes('/other-parent')) {
-      this.selectedParent.set('OtherParent');
-    } else {
-      this.selectedParent.set(null);
-    }
-  }
-
-  onSubItemClick(parentTitle: string) {
-    this.selectedParent.set(parentTitle);
+  onSubItemClick() {
     this.isOpen.set(false);
     this.onMenuClick();
   }
