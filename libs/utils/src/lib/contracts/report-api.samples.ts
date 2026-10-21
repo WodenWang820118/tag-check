@@ -1,7 +1,8 @@
 import type {
   AbstractTestEvent,
   Jsonified,
-  ReportDetailResponse
+  ReportDetailResponse,
+  RunSummary
 } from '../types/tag-check';
 
 /**
@@ -79,6 +80,17 @@ export const REPORT_DETAIL_SAMPLE = {
     updatedAt: '2026-10-20T06:21:19.000Z'
   }
 } satisfies Jsonified<ReportDetailResponse>;
+
+/** One item of GET /file-reports/:projectSlug. */
+export const RUN_SUMMARY_SAMPLE = {
+  runId: 7,
+  eventId: '0fd9ce76-5792-4191-8fba-8bb20e3013bc',
+  eventName: 'add_to_cart',
+  testName: 'GA4 event - add_to_cart',
+  passed: true,
+  requestPassed: true,
+  runAt: '2026-10-20T06:21:19.000Z'
+} satisfies Jsonified<RunSummary>;
 
 /**
  * The structure of a JSON value: object keys (sorted) with the structure of

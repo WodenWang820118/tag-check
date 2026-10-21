@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
+import { RUN_SUMMARY_SAMPLE, shapeOf } from '@utils';
 import { TestEventDetailRepositoryService } from './test-event-detail-repository.service';
 
 function build() {
@@ -18,6 +19,51 @@ function build() {
 }
 
 describe('TestEventDetailRepositoryService', () => {
+  it('listRunSummaries() selects only the listed columns, newest first', async () => {
+    const { service, repository } = build();
+    repository.find.mockResolvedValue([]);
+
+    await service.listRunSummaries('demo');
+
+    expect(repository.find).toHaveBeenCalledWith({
+      select: {
+        id: true,
+        passed: true,
+        requestPassed: true,
+        createdAt: true,
+        testEvent: { id: true, eventId: true, eventName: true, testName: true }
+      },
+      relations: { testEvent: true },
+      where: { testEvent: { project: { projectSlug: 'demo' } } },
+      order: { createdAt: 'DESC', id: 'DESC' }
+    });
+  });
+
+  it('listRunSummaries() returns the RunSummary contract over JSON', async () => {
+    const { service, repository } = build();
+    repository.find.mockResolvedValue([
+      {
+        id: RUN_SUMMARY_SAMPLE.runId,
+        passed: RUN_SUMMARY_SAMPLE.passed,
+        requestPassed: RUN_SUMMARY_SAMPLE.requestPassed,
+        createdAt: new Date(RUN_SUMMARY_SAMPLE.runAt),
+        testEvent: {
+          id: 3,
+          eventId: RUN_SUMMARY_SAMPLE.eventId,
+          eventName: RUN_SUMMARY_SAMPLE.eventName,
+          testName: RUN_SUMMARY_SAMPLE.testName
+        }
+      }
+    ]);
+
+    const [run] = JSON.parse(
+      JSON.stringify(await service.listRunSummaries('demo'))
+    );
+
+    expect(run).toEqual(RUN_SUMMARY_SAMPLE);
+    expect(shapeOf(run)).toEqual(shapeOf(RUN_SUMMARY_SAMPLE));
+  });
+
   it('getBySlugAndEventId() filters by slug, eventId and orders by createdAt DESC', async () => {
     const { service, repository } = build();
     repository.findOne.mockResolvedValue({ id: 1 });

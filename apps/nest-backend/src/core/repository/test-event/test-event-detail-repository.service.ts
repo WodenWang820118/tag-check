@@ -9,6 +9,7 @@ import {
   UpdateTestEventDetailDto
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
+import type { RunSummary } from '@utils';
 
 @Injectable()
 export class TestEventDetailRepositoryService {
@@ -18,6 +19,34 @@ export class TestEventDetailRepositoryService {
     @InjectRepository(TestEventEntity)
     private readonly testEventRepository: Repository<TestEventEntity>
   ) {}
+
+  /**
+   * Every run of the project's tests, newest first, with only the columns the
+   * Reports page shows: no raw request, data layer or screenshot.
+   */
+  async listRunSummaries(projectSlug: string): Promise<RunSummary[]> {
+    const runs = await this.repository.find({
+      select: {
+        id: true,
+        passed: true,
+        requestPassed: true,
+        createdAt: true,
+        testEvent: { id: true, eventId: true, eventName: true, testName: true }
+      },
+      relations: { testEvent: true },
+      where: { testEvent: { project: { projectSlug } } },
+      order: { createdAt: 'DESC', id: 'DESC' }
+    });
+    return runs.map((run) => ({
+      runId: run.id,
+      eventId: run.testEvent.eventId,
+      eventName: run.testEvent.eventName,
+      testName: run.testEvent.testName,
+      passed: run.passed,
+      requestPassed: run.requestPassed,
+      runAt: run.createdAt
+    }));
+  }
 
   async getBySlugAndEventId(projectSlug: string, eventId: string) {
     const entity = await this.repository.findOne({
