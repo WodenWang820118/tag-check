@@ -73,7 +73,7 @@ function serializeParamMap(params: ParamMap): string {
           <mat-tab label="Tag Snapshot">
             <app-tag-manage-tab [tagSpec]="tagSpec()"></app-tag-manage-tab>
           </mat-tab>
-          <mat-tab label="Reports">
+          <mat-tab label="Latest result">
             <app-report-tab [context]="routeContext()"></app-report-tab>
           </mat-tab>
         </mat-tab-group>

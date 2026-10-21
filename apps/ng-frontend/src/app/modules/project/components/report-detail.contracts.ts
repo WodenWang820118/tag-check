@@ -86,13 +86,34 @@ export function getRunStatus(
   if (!report || updated <= created) {
     return 'notRun';
   }
-  const dataLayerPassed = report.passed === true;
-  const requestPassed = report.requestPassed === true;
-  if (dataLayerPassed && requestPassed) {
+  return getCheckStatus(report.passed, report.requestPassed);
+}
+
+/** The status of a run from its two checks: both, one or neither passed. */
+export function getCheckStatus(
+  passed: boolean | undefined,
+  requestPassed: boolean | undefined
+): Exclude<RunStatus, 'notRun'> {
+  if (passed === true && requestPassed === true) {
     return 'passed';
   }
-  return dataLayerPassed || requestPassed ? 'partial' : 'failed';
+  return passed === true || requestPassed === true ? 'partial' : 'failed';
 }
+
+/** A status chip's label, icon and Material color. */
+export type StatusBadge = {
+  label: string;
+  icon: string;
+  color: 'primary' | 'warn' | undefined;
+};
+
+export const STATUS_BADGES: Record<RunStatus | 'running', StatusBadge> = {
+  notRun: { label: 'Not run', icon: 'hourglass_empty', color: undefined },
+  passed: { label: 'Passed', icon: 'check_circle', color: 'primary' },
+  partial: { label: 'Partial', icon: 'error', color: 'warn' },
+  failed: { label: 'Failed', icon: 'cancel', color: 'warn' },
+  running: { label: 'Running', icon: 'sync', color: undefined }
+};
 
 export type ReportTabViewModel = {
   title: string;

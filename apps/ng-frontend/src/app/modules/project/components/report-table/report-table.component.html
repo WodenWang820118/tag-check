@@ -4,6 +4,8 @@
     <div class="legend" aria-label="status legend">
       <mat-icon class="true-status" inline>check_circle</mat-icon>
       <span>Passed</span>
+      <mat-icon class="partial-status" inline>error</mat-icon>
+      <span>Partial</span>
       <mat-icon class="false-status" inline>cancel</mat-icon>
       <span>Failed</span>
       <mat-icon class="pending-status" inline>hourglass_empty</mat-icon>
@@ -68,53 +70,6 @@
       #reportTable
       class="w-full"
     >
-      <!-- Reusable tri-state status icon (Passed / Failed / Not run) -->
-      <ng-template
-        #triStateIcon
-        let-value="value"
-        let-updatedAt="updatedAt"
-        let-createdAt="createdAt"
-        let-label="label"
-        let-tooltipDisabled="tooltipDisabled"
-      >
-        <mat-icon
-          [ngClass]="{
-            'true-status':
-              value === true && updatedAt && createdAt && updatedAt > createdAt,
-            'false-status':
-              value === false &&
-              updatedAt &&
-              createdAt &&
-              updatedAt > createdAt,
-            'pending-status': !(updatedAt && createdAt && updatedAt > createdAt)
-          }"
-          [matTooltip]="
-            (label || 'Status') +
-            ': ' +
-            (updatedAt && createdAt && updatedAt > createdAt
-              ? value
-                ? 'Passed'
-                : 'Failed'
-              : 'Not run yet')
-          "
-          [matTooltipDisabled]="!!tooltipDisabled"
-          [attr.aria-label]="
-            (label || 'status') +
-            ' ' +
-            (updatedAt && createdAt && updatedAt > createdAt
-              ? value
-                ? 'passed'
-                : 'failed'
-              : 'not run yet')
-          "
-        >
-          @if (updatedAt > createdAt) {
-            {{ value ? 'check_circle' : 'cancel' }}
-          } @else {
-            hourglass_empty
-          }
-        </mat-icon>
-      </ng-template>
       <ng-container matColumnDef="select">
         <th mat-header-cell *matHeaderCellDef>
           <mat-checkbox
@@ -171,98 +126,13 @@
             testRunningFacadeService.isRunningTest$() &&
             testRunningFacadeService.eventRunningTest$() === element.eventId
           ) {
-            <div class="status-icons" aria-label="Status: running">
-              <mat-chip-set aria-label="Status chips">
-                <mat-chip selected matTooltip="Status: Running">
-                  <div class="flex items-center gap-1">
-                    <mat-icon inline>sync</mat-icon>
-                    <span class="ml-1">Running</span>
-                  </div>
-                </mat-chip>
-              </mat-chip-set>
-            </div>
-          } @else if (
-            element.updatedAt &&
-            element.createdAt &&
-            element.updatedAt > element.createdAt
-          ) {
-            <div
-              class="status-icons"
-              aria-label="Status: data layer and request"
-            >
-              <mat-chip-set aria-label="Status chips">
-                <mat-chip
-                  [color]="element.passed === true ? 'primary' : 'warn'"
-                  [matTooltip]="
-                    element.passed === true
-                      ? 'Data layer: Passed'
-                      : 'Data layer: Failed'
-                  "
-                  selected
-                >
-                  <div class="flex items-center gap-1">
-                    <ng-container
-                      [ngTemplateOutlet]="triStateIcon"
-                      [ngTemplateOutletContext]="{
-                        value: element.passed === true,
-                        updatedAt: element.updatedAt,
-                        createdAt: element.createdAt,
-                        label: 'Data layer',
-                        tooltipDisabled: true
-                      }"
-                    ></ng-container>
-                    <span class="ml-1">Data layer</span>
-                  </div>
-                </mat-chip>
-                <mat-chip
-                  [color]="element.requestPassed === true ? 'primary' : 'warn'"
-                  [matTooltip]="
-                    element.requestPassed === true
-                      ? 'Request: Passed'
-                      : 'Request: Failed'
-                  "
-                  selected
-                >
-                  <div class="flex items-center gap-1">
-                    <ng-container
-                      [ngTemplateOutlet]="triStateIcon"
-                      [ngTemplateOutletContext]="{
-                        value: element.requestPassed === true,
-                        updatedAt: element.updatedAt,
-                        createdAt: element.createdAt,
-                        label: 'Request',
-                        tooltipDisabled: true
-                      }"
-                    ></ng-container>
-                    <span class="ml-1">Request</span>
-                  </div>
-                </mat-chip>
-              </mat-chip-set>
-            </div>
+            <app-run-status-chip status="running"></app-run-status-chip>
           } @else {
-            <div class="status-icons" aria-label="Status: not run yet">
-              <mat-chip-set aria-label="Status chips">
-                <mat-chip
-                  [color]="'accent'"
-                  [matTooltip]="'Status: Not run yet'"
-                  selected
-                >
-                  <div class="flex items-center gap-1">
-                    <ng-container
-                      [ngTemplateOutlet]="triStateIcon"
-                      [ngTemplateOutletContext]="{
-                        value: null,
-                        updatedAt: element.updatedAt,
-                        createdAt: element.createdAt,
-                        label: 'Status',
-                        tooltipDisabled: true
-                      }"
-                    ></ng-container>
-                    <span class="ml-1">Not run</span>
-                  </div>
-                </mat-chip>
-              </mat-chip-set>
-            </div>
+            <app-run-status-chip
+              [status]="runStatus(element)"
+              [passed]="element.passed"
+              [requestPassed]="element.requestPassed"
+            ></app-run-status-chip>
           }
         </td>
       </ng-container>
