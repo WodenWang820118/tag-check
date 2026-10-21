@@ -27,7 +27,8 @@ export class StepExecutorService {
     eventId: string,
     state: StepReplayState,
     isLastStep: boolean,
-    application: EventInspectionPresetDto['application']
+    application: EventInspectionPresetDto['application'],
+    isLastClick = false
   ) {
     const randomDelay = 3000 + Math.floor(Math.random() * 2000);
 
@@ -77,7 +78,8 @@ export class StepExecutorService {
             projectSlug,
             eventId,
             isLastStep,
-            randomDelay
+            randomDelay,
+            isLastClick
           );
         } else {
           this.logger.warn(`Unknown action type: ${step.type}`);
@@ -92,7 +94,8 @@ export class StepExecutorService {
     projectName: string,
     eventId: string,
     isLastStep: boolean,
-    delay: number
+    delay: number,
+    isLastClick = false
   ) {
     await new Promise((resolve) => setTimeout(resolve, delay));
     if (
@@ -111,7 +114,7 @@ export class StepExecutorService {
         projectName,
         eventId,
         step,
-        isLastStep
+        isLastClick
       );
       await navigationPromise;
       await this.dataLayerService.updateSelfDataLayer(

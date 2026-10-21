@@ -33,11 +33,19 @@ export class ActionService {
     const state = {
       isFirstNavigation: true
     };
+    let lastClickIndex = -1;
+    for (let i = steps.length - 1; i >= 0; i--) {
+      if (steps[i].type === 'click') {
+        lastClickIndex = i;
+        break;
+      }
+    }
 
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i];
 
       if (i === steps.length - 1) isLastStep = true;
+      const isLastClick = i === lastClickIndex;
 
       this.logger.log(`Performing step ${i + 1} of ${lastStep}`);
       this.eventsGatewayService.sendProgressUpdate(lastStep, i + 1); // Send progress update
@@ -49,7 +57,8 @@ export class ActionService {
         eventId,
         state,
         isLastStep,
-        application
+        application,
+        isLastClick
       );
     }
     this.logger.log('Operation performed successfully');

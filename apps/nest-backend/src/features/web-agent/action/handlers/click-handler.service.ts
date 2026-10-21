@@ -13,7 +13,8 @@ import {
   STEP_SELECTOR_TIMEOUT_MS,
   waitForAnySelector
 } from './utils';
-import { ProjectService } from '../../../../infrastructure/os/project/project.service';
+import { TestEventRepositoryService } from '../../../../core/repository/test-event/test-event-repository.service';
+import { randomUUID } from 'node:crypto';
 import { ClickStrategyService } from '../strategies/click-strategies/click-strategy.service';
 import { FilePathService } from '../../../../infrastructure/os/path/file-path/file-path.service';
 import { FileService } from '../../../../infrastructure/os/file/file.service';
@@ -24,7 +25,7 @@ import { ActionUtilsService } from '../action-utils/action-utils.service';
 export class ClickHandler implements ActionHandler {
   private readonly logger = new Logger(ClickHandler.name);
   constructor(
-    private readonly projectService: ProjectService,
+    private readonly testEventRepositoryService: TestEventRepositoryService,
     private readonly fileService: FileService,
     private readonly filePathService: FilePathService,
     private readonly clickStrategyService: ClickStrategyService,
@@ -36,10 +37,17 @@ export class ClickHandler implements ActionHandler {
     projectSlug: string,
     eventId: string,
     step: Step,
-    _isLastStep: boolean
+    isLastClick: boolean
   ): Promise<void> {
     let clickedSuccessfully = false;
-    const preventNavigation = false;
+    const preventNavigation =
+      isLastClick &&
+      (
+        await this.testEventRepositoryService.getEntityBySlugAndEventId(
+          projectSlug,
+          eventId
+        )
+      ).stopNavigation === true;
     const offsetX = step.offsetX;
     const offsetY = step.offsetY;
     const candidates = (step.selectors ?? []).map(getFirstSelector);
@@ -117,39 +125,37 @@ export class ClickHandler implements ActionHandler {
     // Wait for the selector to be visible
     await page.waitForSelector(selector, { timeout, visible: true });
 
-    if (offsetX !== undefined && offsetY !== undefined) {
-      const elementHandle = await page.$(selector);
-      if (!elementHandle) {
-        throw new InternalServerErrorException(
-          `Element not found for selector ${selector}`
-        );
-      }
-      // Offsets are relative to the element, and a mouse click outside the
-      // viewport is lost. Scroll first, like the Chrome Recorder replay does.
-      await elementHandle.scrollIntoView();
-      const box = await elementHandle.boundingBox();
-      if (!box) {
-        throw new InternalServerErrorException(
-          `Could not determine bounding box for selector ${selector}`
-        );
-      }
-      if (preventNavigation) {
-        await this.preventNavigationOnElement(page, selector);
-      }
-      // Perform mouse click at specified offset
-      await page.mouse.click(box.x + offsetX, box.y + offsetY, { delay: 100 });
-      return true;
-    }
-
-    // Determine the click method based on conditions
-    const pages = await page.browserContext().pages();
-    const useNormalClick = pages.length === 1 || !page.url().includes(domain);
-
-    if (preventNavigation) {
-      await this.preventNavigationOnElement(page, selector);
-    }
+    const cleanupKey = preventNavigation
+      ? await this.preventNavigationForClick(page)
+      : undefined;
 
     try {
+      if (offsetX !== undefined && offsetY !== undefined) {
+        const elementHandle = await page.$(selector);
+        if (!elementHandle) {
+          throw new InternalServerErrorException(
+            `Element not found for selector ${selector}`
+          );
+        }
+        try {
+          await elementHandle.scrollIntoView();
+          const box = await elementHandle.boundingBox();
+          if (!box) {
+            throw new InternalServerErrorException(
+              `Could not determine bounding box for selector ${selector}`
+            );
+          }
+          await page.mouse.click(box.x + offsetX, box.y + offsetY, {
+            delay: 100
+          });
+          return true;
+        } finally {
+          await elementHandle.dispose();
+        }
+      }
+
+      const pages = await page.browserContext().pages();
+      const useNormalClick = pages.length === 1 || !page.url().includes(domain);
       const selectorType = this.actionUtilsService.getSelectorType(selector);
       if (!selectorType) {
         throw new HttpException(
@@ -157,7 +163,7 @@ export class ClickHandler implements ActionHandler {
           HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
-      const result = await this.clickStrategyService.clickElement(
+      return await this.clickStrategyService.clickElement(
         page,
         projectName,
         eventId,
@@ -166,45 +172,38 @@ export class ClickHandler implements ActionHandler {
         useNormalClick,
         timeout
       );
-      return result;
-    } catch (error) {
-      this.logger.error(error);
-      throw error; // Re-throw the error to be caught in the calling method
+    } finally {
+      if (cleanupKey) {
+        // A scripted redirect can replace the document and its listeners.
+        // Cleanup must never hide the original click error.
+        await page
+          .evaluate(`(() => {
+          const key = ${JSON.stringify(cleanupKey)};
+          if (typeof window[key] === "function") window[key]();
+        })()`)
+          .catch((error: unknown) => {
+            this.logger.warn(
+              `Could not clean up navigation guard: ${String(error)}`
+            );
+          });
+      }
     }
   }
 
-  eventTargetToNode(eventTarget: EventTarget): Node {
-    return eventTarget as Node; // Convert EventTarget to Node
-  }
-
-  private async preventNavigationOnElement(
-    page: Page,
-    selector: string
-  ): Promise<void> {
-    this.logger.log(`Preventing navigation on selector: ${selector}`);
-
-    await page.evaluate((sel) => {
-      const isDescendant = (parent: Node, child: Node | null): boolean => {
-        let node = child;
-        while (node !== null) {
-          if (node === parent) {
-            return true;
-          }
-          node = node.parentNode;
-        }
-        return false;
+  private async preventNavigationForClick(page: Page): Promise<string> {
+    const cleanupKey = `__tagCheckNavigation_${randomUUID()}`;
+    // The next click may use CSS, text, aria or XPath selectors.
+    // Do not stop propagation: site/GTM listeners must still see the click.
+    // A source string avoids missing SWC helpers in the ES5 backend bundle.
+    await page.evaluate(`(() => {
+      const key = ${JSON.stringify(cleanupKey)};
+      const preventDefault = (event) => event.preventDefault();
+      document.addEventListener("click", preventDefault, { capture: true, once: true });
+      window[key] = () => {
+        document.removeEventListener("click", preventDefault, true);
+        delete window[key];
       };
-
-      const elements = document.querySelectorAll<HTMLElement>(sel);
-      for (const elem of elements) {
-        elem.addEventListener('click', (e) => {
-          const target = e.target as Node;
-          // Check if the target is the element itself or a descendant of the element
-          if (target === elem || isDescendant(elem, target)) {
-            e.preventDefault();
-          }
-        });
-      }
-    }, selector);
+    })()`);
+    return cleanupKey;
   }
 }
