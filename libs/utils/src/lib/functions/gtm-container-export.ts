@@ -82,6 +82,34 @@ export function getDataLayerVariablePath(
   return version === '1' ? [name] : name.split('.');
 }
 
+/** What a `{{Variable Name}}` reference stands for, as far as the container says. */
+export type VariableReferenceValue =
+  | { kind: 'constant'; value: string }
+  | { kind: 'dataLayer'; path: string };
+
+/**
+ * Resolves a `{{Variable Name}}` reference to a Constant's value or to the
+ * data layer key a Data Layer Variable reads. Other variables, such as
+ * custom JavaScript or lookup tables, only have a value at run time: null.
+ */
+export function resolveVariableReference(
+  reference: string,
+  variables: readonly VariableConfig[]
+): VariableReferenceValue | null {
+  const path = getDataLayerVariablePath(reference, variables);
+  if (path) {
+    return { kind: 'dataLayer', path: path.join('.') };
+  }
+  const variableName = VARIABLE_REFERENCE.exec(reference.trim())?.[1];
+  const constant = variables.find(
+    (candidate) =>
+      candidate.name === variableName &&
+      candidate.type === VariableTypeEnum.CONSTANT
+  );
+  const value = getParameterValue(constant?.parameter, 'value');
+  return value ? { kind: 'constant', value } : null;
+}
+
 /**
  * The parameter rows a GA4 event tag sends: its own event parameter table
  * followed by the table of the Event Settings variable it references, if any.
