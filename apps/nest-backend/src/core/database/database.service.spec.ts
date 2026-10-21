@@ -25,8 +25,8 @@ describe('DatabaseConfigService', () => {
     expect(cfg).toMatchObject({
       type: 'sqlite',
       database: '/db.sqlite',
-      autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
+      migrationsRun: false,
       logging: false,
       retryAttempts: 10,
       retryDelay: 3000

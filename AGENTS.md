@@ -105,6 +105,14 @@ infrastructure modules, and does not list their services in its own
 - In Git Bash on Windows, unset `NX_WORKSPACE_ROOT_PATH` when its drive-letter
   case differs from the shell's working directory. The `@analogjs` Angular test
   setup fails otherwise.
+- The SQLite schema comes from migrations
+  (`apps/nest-backend/src/core/database/migrations`), not `synchronize`.
+  Change an entity together with a new migration listed in
+  `DATABASE_MIGRATIONS`; `database-migrations.spec.ts` fails while they
+  disagree, and its `pendingSchemaChanges` gives the SQL to start from. A
+  database created before migrations is synchronized once on its first start
+  and every migration is recorded as applied, so a migration's data changes
+  never run on it.
 - The nest-backend bundle targets ES5 (rspack + swc without `jsc.target`).
   Functions passed to `page.evaluate` or `evaluateOnNewDocument` are compiled
   with swc helpers that do not exist in the page, so pass source strings.
