@@ -13,7 +13,7 @@ import { MatTable, MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { tap, take } from 'rxjs';
-import { IReportDetails } from '@utils';
+import { IReportDetails, RunStatus } from '@utils';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
@@ -28,7 +28,7 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
-import { getRunStatus, RunStatus } from '../report-detail.contracts';
+import { getRunStatus } from '../report-detail.contracts';
 // #endregion
 
 @Component({

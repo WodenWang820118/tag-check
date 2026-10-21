@@ -1,8 +1,10 @@
 import {
   DataLayerSpec,
+  getCheckStatus,
   IReportDetails,
   Recording,
   ReportDetailResponse,
+  RunStatus,
   TagSpec
 } from '@utils';
 
@@ -66,8 +68,6 @@ export function buildReportPage(loaded: {
   };
 }
 
-export type RunStatus = 'notRun' | 'passed' | 'partial' | 'failed';
-
 /**
  * A test has run once its detail was updated after it was created. It passes
  * when both the data layer and the request check passed, and is partial when
@@ -87,17 +87,6 @@ export function getRunStatus(
     return 'notRun';
   }
   return getCheckStatus(report.passed, report.requestPassed);
-}
-
-/** The status of a run from its two checks: both, one or neither passed. */
-export function getCheckStatus(
-  passed: boolean | undefined,
-  requestPassed: boolean | undefined
-): Exclude<RunStatus, 'notRun'> {
-  if (passed === true && requestPassed === true) {
-    return 'passed';
-  }
-  return passed === true || requestPassed === true ? 'partial' : 'failed';
 }
 
 /** A status chip's label, icon and Material color. */

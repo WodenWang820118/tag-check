@@ -47,11 +47,20 @@ describe('TestImageRepositoryService', () => {
     );
   });
 
-  it('getBySlugAndEventIds() returns DTOs for all matching events', async () => {
+  it('getSummaryBySlugAndEventId() selects the latest screenshot without its bytes', async () => {
     const { service, repository } = build();
-    repository.find.mockResolvedValue([{ id: 1 }, { id: 2 }]);
-    const result = await service.getBySlugAndEventIds('demo', ['e1', 'e2']);
-    expect(result).toHaveLength(2);
+    const summary = { id: 2, imageName: 'screenshot.png', imageSize: 4 };
+    repository.findOne.mockResolvedValue(summary);
+
+    const result = await service.getSummaryBySlugAndEventId('demo', 'evt');
+
+    const options = repository.findOne.mock.calls[0][0];
+    expect(options.select).not.toHaveProperty('imageData');
+    expect(options).toMatchObject({
+      order: { id: 'DESC' },
+      where: { testEvent: { eventId: 'evt', project: { projectSlug: 'demo' } } }
+    });
+    expect(result).toBe(summary);
   });
 
   it('create() persists an image with derived size when not provided', async () => {

@@ -19,17 +19,12 @@ export class TestEventRepositoryService {
     private readonly repository: Repository<TestEventEntity>
   ) {}
 
+  /** The project's tests with their latest results, for the tests table. */
   async listReports(
     projectSlug: string
   ): Promise<AbstractTestEventResponseDto[]> {
     const entities = await this.repository.find({
-      relations: {
-        testEventDetails: true,
-        testImage: false,
-        project: true,
-        recording: true,
-        spec: true
-      },
+      relations: { latestTestEventDetail: true, recording: true },
       where: { project: { projectSlug } }
     });
     return plainToInstance(AbstractTestEventResponseDto, entities, {
@@ -61,14 +56,9 @@ export class TestEventRepositoryService {
     return entity;
   }
 
+  /** The test's own columns: a run needs its id, not its past results. */
   async getEntityBySlugAndEventId(projectSlug: string, eventId: string) {
     const entity = await this.repository.findOne({
-      relations: {
-        testEventDetails: true,
-        testImage: true,
-        latestTestImage: true,
-        project: true
-      },
       where: { project: { projectSlug }, eventId }
     });
 
@@ -78,24 +68,26 @@ export class TestEventRepositoryService {
     return entity;
   }
 
+  /** The test with its latest result, without past runs or screenshots. */
   async getBySlugAndEventId(projectSlug: string, eventId: string) {
     const entity = await this.repository.findOne({
-      relations: {
-        testEventDetails: true,
-        testImage: true,
-        project: true
-      },
+      relations: { latestTestEventDetail: true },
       where: { project: { projectSlug }, eventId }
     });
 
     return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
+  /**
+   * The tests for the spreadsheet export: every run's result, but only the
+   * latest screenshot.
+   */
   async getBySlugAndEventIds(projectSlug: string, eventIds: string[]) {
     const entities = await this.repository.find({
       relations: {
         testEventDetails: true,
-        testImage: true,
+        latestTestEventDetail: true,
+        latestTestImage: true,
         project: true,
         spec: true,
         recording: true

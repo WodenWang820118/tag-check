@@ -7,7 +7,8 @@ import {
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RunStatus, STATUS_BADGES } from '../report-detail.contracts';
+import { RunStatus } from '@utils';
+import { STATUS_BADGES } from '../report-detail.contracts';
 
 const checkLabel = (passed: boolean | undefined) =>
   passed === true ? 'Passed' : 'Failed';

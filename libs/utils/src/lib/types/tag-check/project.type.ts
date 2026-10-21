@@ -45,6 +45,5 @@ export type AbstractTestEvent = {
 
 export type FullTestEventSchema = {
   testEventDetails: TestEventDetailSchema;
-  testImage: TestImageSchema[];
   project: ProjectSchema;
 } & TestEventSchema;
