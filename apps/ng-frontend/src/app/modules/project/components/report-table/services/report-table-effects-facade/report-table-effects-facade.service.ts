@@ -1,6 +1,7 @@
-import { Injectable, effect, inject } from '@angular/core';
+import { Injectable, effect, inject, untracked } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { take } from 'rxjs';
+import { finalize, take } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { IReportDetails } from '@utils';
 import { ProjectDataSourceService } from '../../../../../../shared/services/data-source/project-data-source.service';
 import { ReportService } from '../../../../../../shared/services/api/report/report.service';
@@ -23,6 +24,7 @@ export class ReportTableEffectsFacadeService {
 
   private readonly projectDataSourceService = inject(ProjectDataSourceService);
   private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
   private readonly reportService = inject(ReportService);
   private readonly reportTableDataSourceModelService = inject(
     ReportTableDataSourceModelService
@@ -77,47 +79,52 @@ export class ReportTableEffectsFacadeService {
       }
     });
 
-    // Effect 2: Update Settings effect (prevent navigation / stopNavigation toggle)
+    // Effect 2: Save bookmarks before changing the visible state.
     effect(() => {
-      const preventSignal =
-        this.projectDataSourceService.getPreventNavigationSignal();
-      if (preventSignal) {
+      if (!this.projectDataSourceService.getPreventNavigationSignal()) return;
+      untracked(() => {
         const testEvents = this.reportTableDataSourceModelService
           .selection()
-          .selected.map((item: IReportDetails) => {
-            // Handle the toggle logic properly
-            const newStopNavigation = item.stopNavigation !== true;
-
-            return {
-              ...item,
-              stopNavigation: newStopNavigation
-            };
-          });
-
-        // Update the data source with the same logic
-        const currentDsA = this.reportTableDataSourceModelService.dataSource();
-        const nextDataA = currentDsA.data.map((item: IReportDetails) => {
-          if (
-            this.reportTableDataSourceModelService
-              .selection()
-              .selected.includes(item)
-          ) {
-            item.stopNavigation = item.stopNavigation !== true;
-          }
-          return item;
-        });
-        const newDsA = new MatTableDataSource<IReportDetails>([...nextDataA]);
-        newDsA.paginator = currentDsA.paginator;
-        newDsA.sort = currentDsA.sort;
-        this.reportTableDataSourceModelService.dataSource.set(newDsA);
-
+          .selected.map((item) => ({
+            ...item,
+            stopNavigation: item.stopNavigation !== true
+          }));
+        if (testEvents.length === 0) {
+          this.projectDataSourceService.setPreventNavigationSignal(false);
+          return;
+        }
         this.reportService
           .updateTestEvents(this.getProjectSlug(), testEvents)
-          .pipe(take(1))
-          .subscribe();
-
-        this.projectDataSourceService.setPreventNavigationSignal(false);
-      }
+          .pipe(
+            take(1),
+            finalize(() =>
+              this.projectDataSourceService.setPreventNavigationSignal(false)
+            )
+          )
+          .subscribe({
+            next: () => {
+              const settings = new Map(
+                testEvents.map((item) => [item.eventId, item.stopNavigation])
+              );
+              const ds = this.reportTableDataSourceModelService.dataSource();
+              // Keep selected row identities, filters, sorting and pagination.
+              ds.data = ds.data.map((item) => {
+                const stopNavigation = settings.get(item.eventId);
+                if (stopNavigation !== undefined) {
+                  item.stopNavigation = stopNavigation;
+                }
+                return item;
+              });
+            },
+            error: () => {
+              this.snackBar.open(
+                'Could not save navigation bookmarks. Please try again.',
+                'Dismiss',
+                { duration: 5000 }
+              );
+            }
+          });
+      });
     });
 
     // Effect 3: Delete Confirmation effect

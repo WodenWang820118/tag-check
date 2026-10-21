@@ -60,10 +60,11 @@
   <button
     mat-icon-button
     class="icon"
-    matTooltip="Mark to prevent navigation for this event"
+    matTooltip="Toggle prevention of default link/form navigation on the final replay click"
     matTooltipPosition="above"
     aria-label="Prevent navigation"
     data-testid="tests-prevent-navigation"
+    [disabled]="!hasSelection() || isRunningTest() || isSavingNavigation()"
     (click)="preventNavigationSelected()"
   >
     <mat-icon>bookmark_border</mat-icon>

@@ -321,4 +321,23 @@ describe('TestEventRepositoryService', () => {
     await service.deleteByProjectSlugAndEventIds('demo', ['a', 'b']);
     expect(repository.remove).toHaveBeenCalledWith([{ id: 1 }, { id: 2 }]);
   });
+
+  it.each([true, false, undefined])(
+    'updateTestEvents() persists explicit bookmark values and preserves omitted values (%s)',
+    async (stopNavigation) => {
+      const { service, repository } = build();
+      const existing = { id: 1, eventId: 'a', stopNavigation: true };
+      repository.find.mockResolvedValue([existing]);
+      repository.save.mockImplementation(async (entity) => entity);
+      await service.updateTestEvents('demo', [
+        { eventId: 'a', stopNavigation }
+      ]);
+      expect(repository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 1,
+          stopNavigation: stopNavigation ?? true
+        })
+      );
+    }
+  );
 });

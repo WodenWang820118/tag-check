@@ -157,6 +157,11 @@ export class TestEventRepositoryService {
           message: updatedEvent.message
         };
 
+        // Omitted settings preserve their value; false removes the bookmark.
+        if (updatedEvent.stopNavigation !== undefined) {
+          updateData.stopNavigation = updatedEvent.stopNavigation;
+        }
+
         // If latest records are provided in the DTO, update their references
         if (updatedEvent.latestTestEventDetailId) {
           updateData.latestTestEventDetailId =

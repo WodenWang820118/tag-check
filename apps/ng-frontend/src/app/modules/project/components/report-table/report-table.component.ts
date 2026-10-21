@@ -20,6 +20,7 @@ import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatBadgeModule } from '@angular/material/badge';
+import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { ProgressPieChartComponent } from '../progress-pie-chart/progress-pie-chart.component';
@@ -84,7 +85,8 @@ export class ReportTableComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly facade: ReportTableFacadeService,
     private readonly tableSortService: TableSortService,
-    private readonly snackBar: MatSnackBar
+    private readonly snackBar: MatSnackBar,
+    private readonly projectDataSourceService: ProjectDataSourceService
   ) {
     // #region constructor effects
     effect(() => {
@@ -216,7 +218,12 @@ export class ReportTableComponent implements OnInit {
   }
 
   // Expose methods directly:
+  isSavingNavigation() {
+    return this.projectDataSourceService.getPreventNavigationSignal();
+  }
+
   runTest(eventId: string) {
+    if (this.isSavingNavigation()) return;
     this.facade
       .runTest(eventId)
       .pipe(take(1))

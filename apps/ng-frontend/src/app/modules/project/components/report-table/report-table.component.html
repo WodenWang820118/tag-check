@@ -101,6 +101,7 @@
             [routerLink]="['./', element.eventId]"
             [attr.data-testid]="'test-link-' + element.eventName"
             matBadge="bookmark_border"
+            matBadgeDescription="Default navigation is prevented on the final replay click"
             [matBadgeHidden]="!element.stopNavigation"
             matBadgeOverlap="false"
           >
@@ -181,6 +182,7 @@
                 mat-icon-button
                 aria-label="run test"
                 [attr.data-testid]="'run-test-' + element.eventName"
+                [disabled]="isSavingNavigation()"
                 (click)="runTest(element.eventId); $event.stopPropagation()"
               >
                 <mat-icon>play_arrow</mat-icon>

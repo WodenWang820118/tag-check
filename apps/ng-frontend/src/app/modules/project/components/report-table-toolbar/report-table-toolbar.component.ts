@@ -54,7 +54,17 @@ export class ReportTableToolbarComponent {
     this.dataSourceService.setDeletedSignal(true);
   }
 
+  isSavingNavigation() {
+    return this.dataSourceService.getPreventNavigationSignal();
+  }
+
   preventNavigationSelected() {
+    if (
+      !this.hasSelection() ||
+      this.isRunningTest() ||
+      this.isSavingNavigation()
+    )
+      return;
     this.dataSourceService.setPreventNavigationSignal(true);
   }
 
