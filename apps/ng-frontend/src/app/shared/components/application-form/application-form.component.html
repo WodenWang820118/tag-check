@@ -13,11 +13,12 @@
         <section aria-labelledby="website-url-heading">
           <h2 id="website-url-heading">Website URL</h2>
           <mat-form-field class="application-form__field" appearance="outline">
+            <mat-label>Website URL</mat-label>
             <input
               matInput
               formControlName="websiteUrl"
               data-testid="preload-website-url"
-              placeholder="Website URL"
+              placeholder="https://www.example.com"
             />
           </mat-form-field>
         </section>
@@ -36,16 +37,20 @@
                   class="application-form__field"
                   appearance="outline"
                 >
+                  <mat-label>Key</mat-label>
                   <input matInput formControlName="key" />
                 </mat-form-field>
                 <mat-form-field
                   class="application-form__field"
                   appearance="outline"
                 >
+                  <mat-label>Value</mat-label>
                   <input matInput formControlName="value" />
                 </mat-form-field>
                 <button
                   mat-icon-button
+                  type="button"
+                  [attr.aria-label]="'Remove local storage item ' + (idx + 1)"
                   (click)="removeLocalStorageSetting(idx)"
                 >
                   <mat-icon>remove_circle_outline</mat-icon>
@@ -56,6 +61,7 @@
           <mat-card-actions align="start">
             <button
               mat-raised-button
+              type="button"
               color="action"
               (click)="addLocalStorageSetting()"
             >
@@ -78,25 +84,22 @@
                   class="application-form__field"
                   appearance="outline"
                 >
-                  <mat-label>cookie Key</mat-label>
-                  <input
-                    matInput
-                    formControlName="key"
-                    placeholder="cookie key"
-                  />
+                  <mat-label>Key</mat-label>
+                  <input matInput formControlName="key" />
                 </mat-form-field>
                 <mat-form-field
                   class="application-form__field"
                   appearance="outline"
                 >
-                  <mat-label>cookie Value</mat-label>
-                  <input
-                    matInput
-                    formControlName="value"
-                    placeholder="cookie value"
-                  />
+                  <mat-label>Value</mat-label>
+                  <input matInput formControlName="value" />
                 </mat-form-field>
-                <button mat-icon-button (click)="removeCookieSetting(idx)">
+                <button
+                  mat-icon-button
+                  type="button"
+                  [attr.aria-label]="'Remove cookie ' + (idx + 1)"
+                  (click)="removeCookieSetting(idx)"
+                >
                   <mat-icon>remove_circle_outline</mat-icon>
                 </button>
               </div>
@@ -105,6 +108,7 @@
           <mat-card-actions align="start">
             <button
               mat-raised-button
+              type="button"
               color="action"
               (click)="addCookieSetting()"
             >

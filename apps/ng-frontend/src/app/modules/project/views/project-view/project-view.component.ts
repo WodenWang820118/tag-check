@@ -14,7 +14,9 @@ import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
 
-const WIDE_LAYOUT_QUERY = '(min-width: 1024px)';
+// Below this width the 246px menu leaves the tests table too narrow for its
+// run buttons, so the menu slides over the content instead.
+const WIDE_LAYOUT_QUERY = '(min-width: 1280px)';
 
 @Component({
   selector: 'app-project-view',

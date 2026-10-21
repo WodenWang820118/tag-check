@@ -11,6 +11,12 @@
     margin-bottom: 8px;
     padding: 0 2.7rem;
   }
+
+  // Narrow windows scroll the table sideways instead of clipping the run
+  // buttons in the last column.
+  &__scroll {
+    overflow-x: auto;
+  }
 }
 
 table {

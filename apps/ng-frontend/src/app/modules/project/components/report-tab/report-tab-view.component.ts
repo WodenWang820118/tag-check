@@ -222,16 +222,13 @@ const STATUS_BADGES: Record<
                   <div class="min-w-0">
                     <div class="text-2xl">No media available</div>
                     <p class="text-xl text-black/70 m-0 mt-1">
-                      Screenshots and the test recording will appear here when
-                      captured.
+                      @if (viewModel().status === 'notRun') {
+                        Run the test to capture a screenshot and a recording of
+                        the run.
+                      } @else {
+                        This run saved no screenshot or recording.
+                      }
                     </p>
-                    <ul class="list-disc pl-5 text-xl text-black/70 mt-2">
-                      <li>Media capture may be disabled for this run.</li>
-                      <li>
-                        Some runs may not produce screenshots if nothing changed
-                        visually.
-                      </li>
-                    </ul>
                   </div>
                 </div>
               </mat-card>

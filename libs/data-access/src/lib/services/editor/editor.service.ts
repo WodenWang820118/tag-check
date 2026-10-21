@@ -17,9 +17,10 @@ export class EditorService {
     outputJson: jsonLightEditorExtensions
   };
 
+  // Shown as the editor placeholder until the editor has content.
   private readonly contents = {
     inputJson: signal('[]'),
-    outputJson: signal(`Placeholder content for JSON editor`)
+    outputJson: signal('Convert the input to see the GTM container here.')
   };
 
   contents$ = {

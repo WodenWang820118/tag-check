@@ -7,6 +7,7 @@ import {
 export const APP_ROUTES: Route[] = [
   {
     path: 'documentation',
+    title: 'Documentation',
     loadChildren: () => import('@ui').then((m) => m.DOCS_ROUTES)
   },
   {

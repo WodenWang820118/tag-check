@@ -65,7 +65,7 @@ import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
       }
 
       .report-view {
-        margin: 5rem 12rem;
+        margin: clamp(1.5rem, 5vw, 5rem) clamp(1rem, 8vw, 12rem);
       }
 
       .preview-mode-input {

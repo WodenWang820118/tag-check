@@ -46,11 +46,15 @@ import { EditableJsonPanelComponent } from './editable-json-panel.component';
             <mat-panel-title>Raw Request</mat-panel-title>
           </mat-expansion-panel-header>
           <mat-panel-description>
-            <div class="raw-request-container">
-              <pre class="raw-request" aria-label="Raw Request"
-                >{{ rawRequest() }}
-              </pre>
-            </div>
+            @if (rawRequest()) {
+              <div class="raw-request-container">
+                <pre class="raw-request" aria-label="Raw Request"
+                  >{{ rawRequest() }}
+                </pre>
+              </div>
+            } @else {
+              <p>No GA4 request captured yet. Run the test to capture it.</p>
+            }
           </mat-panel-description>
         </mat-expansion-panel>
 
@@ -59,7 +63,11 @@ import { EditableJsonPanelComponent } from './editable-json-panel.component';
             <mat-panel-title>Data Layer</mat-panel-title>
           </mat-expansion-panel-header>
           <mat-panel-description>
-            <pre class="json">{{ dataLayerContent() }}</pre>
+            @if (dataLayerContent()) {
+              <pre class="json">{{ dataLayerContent() }}</pre>
+            } @else {
+              <p>No data layer captured yet. Run the test to capture it.</p>
+            }
           </mat-panel-description>
         </mat-expansion-panel>
 

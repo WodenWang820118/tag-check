@@ -32,6 +32,7 @@ export const PROJECT_ROUTES: Routes = [
     children: [
       {
         path: '',
+        title: 'Tests',
         loadComponent: () =>
           import('./views/report-big-table/report-big-table.component').then(
             (m) => m.ReportBigTableComponent
@@ -39,11 +40,13 @@ export const PROJECT_ROUTES: Routes = [
       },
       {
         path: 'tag-build',
+        title: 'TagBuild',
         loadChildren: () =>
           import('../tag-build/routes').then((m) => m.TAG_BUILD_ROUTES)
       },
       {
         path: 'buckets',
+        title: 'Reports',
         loadComponent: () =>
           import('./views/buckets-view/buckets-view.component').then(
             (m) => m.BucketsViewComponent
@@ -55,6 +58,7 @@ export const PROJECT_ROUTES: Routes = [
       },
       {
         path: 'settings/project-info',
+        title: 'Project information',
         loadComponent: () =>
           import('../../shared/components/project-info-form/project-info-form.component').then(
             (m) => m.ProjectInfoFormComponent
@@ -65,6 +69,7 @@ export const PROJECT_ROUTES: Routes = [
       },
       {
         path: 'settings/pre-loading-values',
+        title: 'Pre-loading values',
         loadComponent: () =>
           import('../../shared/components/application-form/application-form.component').then(
             (m) => m.ApplicationFormComponent
@@ -75,6 +80,7 @@ export const PROJECT_ROUTES: Routes = [
       },
       {
         path: 'settings/authentication',
+        title: 'Authentication',
         loadComponent: () =>
           import('../../shared/components/authentication-form/authentication-form.component').then(
             (m) => m.AuthenticationFormComponent
@@ -85,6 +91,7 @@ export const PROJECT_ROUTES: Routes = [
       },
       {
         path: 'settings/gtm',
+        title: 'Google Tag Manager',
         loadComponent: () =>
           import('../../shared/components/gtm-form/gtm-form.component').then(
             (m) => m.GtmFormComponent
@@ -95,6 +102,7 @@ export const PROJECT_ROUTES: Routes = [
       },
       {
         path: 'settings/advanced-browser-settings',
+        title: 'Browser settings',
         loadComponent: () =>
           import('../../shared/components/browser-form/browser-form.component').then(
             (m) => m.BrowserFormComponent
@@ -105,6 +113,7 @@ export const PROJECT_ROUTES: Routes = [
       },
       {
         path: 'settings/project-io',
+        title: 'Export or delete project',
         loadComponent: () =>
           import('../../shared/components/project-io-form/project-io-form.component').then(
             (m) => m.ProjectIoFormComponent
@@ -112,6 +121,7 @@ export const PROJECT_ROUTES: Routes = [
       },
       {
         path: ':eventId',
+        title: 'Test details',
         loadComponent: () =>
           import('./views/detail-view/detail-view.component').then(
             (m) => m.DetailViewComponent
