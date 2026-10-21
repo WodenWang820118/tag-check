@@ -4,7 +4,13 @@ import type {
   TestEventDetailSchema
 } from '@utils';
 import { AuditableEntity } from './common';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  ManyToOne,
+  PrimaryGeneratedColumn
+} from 'typeorm';
 import { TestEventEntity } from './test-event.entity';
 
 @Entity('test_event_detail')
@@ -15,6 +21,8 @@ export class TestEventDetailEntity
   @PrimaryGeneratedColumn()
   id!: number;
 
+  // Runs are looked up by test; without an index SQLite scans the whole table.
+  @Index()
   @ManyToOne(() => TestEventEntity, (testEvent) => testEvent.testEventDetails, {
     onDelete: 'CASCADE'
   })

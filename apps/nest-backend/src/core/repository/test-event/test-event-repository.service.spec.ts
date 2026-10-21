@@ -42,7 +42,16 @@ describe('TestEventRepositoryService', () => {
         { id: 6, passed: false, requestPassed: false },
         { id: 7, passed: true, requestPassed: true }
       ],
-      testImage: [{ id: 7, imageName: 'screenshot.png' }]
+      latestTestEventDetail: { id: 7, passed: true, requestPassed: true },
+      testImage: [
+        { id: 6, imageName: 'screenshot.png', imageData: Buffer.from('6') },
+        { id: 7, imageName: 'screenshot.png', imageData: Buffer.from('7') }
+      ],
+      latestTestImage: {
+        id: 7,
+        imageName: 'screenshot.png',
+        imageData: Buffer.from('7')
+      }
     };
     const { id, eventId, testName, eventName, stopNavigation, message } =
       REPORT_LIST_ITEM_SAMPLE;
@@ -132,6 +141,15 @@ describe('TestEventRepositoryService', () => {
     expect(result).toEqual({ id: 1 });
   });
 
+  it('getEntityBySlugAndEventId() loads no past runs or screenshots', async () => {
+    const { service, repository } = build();
+    repository.findOne.mockResolvedValue({ id: 1 });
+    await service.getEntityBySlugAndEventId('demo', 'evt');
+    expect(repository.findOne).toHaveBeenCalledWith({
+      where: { project: { projectSlug: 'demo' }, eventId: 'evt' }
+    });
+  });
+
   it('getEntityBySlugAndEventId() throws NOT_FOUND when missing', async () => {
     const { service, repository } = build();
     repository.findOne.mockResolvedValue(null);
@@ -151,6 +169,24 @@ describe('TestEventRepositoryService', () => {
       'e3'
     ]);
     expect(result).toHaveLength(3);
+  });
+
+  it('getBySlugAndEventIds() exports every run but only the latest screenshot', async () => {
+    const { service, repository } = build();
+    repository.find.mockImplementation(
+      async (options: { relations?: Record<string, unknown> }) => [
+        rowFor(options.relations)
+      ]
+    );
+
+    const [report] = await service.getBySlugAndEventIds('demo', ['evt']);
+
+    expect(repository.find.mock.calls[0][0].relations).not.toHaveProperty(
+      'testImage'
+    );
+    expect(report.testEventDetails).toHaveLength(2);
+    expect(report.latestTestEventDetail).toMatchObject({ id: 7, passed: true });
+    expect(report.latestTestImage?.imageData).toEqual(Buffer.from('7'));
   });
 
   it('create() persists a new test event with the provided fields', async () => {

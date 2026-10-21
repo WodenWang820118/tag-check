@@ -3,8 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { REPORT_DETAIL_SAMPLE, shapeOf } from '@utils';
 import {
   AbstractTestEventResponseDto,
-  TestEventDetailResponseDto,
-  TestImageResponseDto
+  TestEventDetailResponseDto
 } from '../../../shared';
 import { TestReportFacadeRepositoryService } from './test-report-facade-repository.service';
 
@@ -20,7 +19,10 @@ function build() {
     getBySlugAndEventId: vi.fn()
   };
   const specRepositoryService = { create: vi.fn() };
-  const testImageRepositoryService = { getBySlugAndEventId: vi.fn() };
+  const testImageRepositoryService = {
+    getBySlugAndEventId: vi.fn(),
+    getSummaryBySlugAndEventId: vi.fn()
+  };
   const recordingRepositoryService = { create: vi.fn() };
   const itemDefRepositoryService = { create: vi.fn() };
   const service = new TestReportFacadeRepositoryService(
@@ -183,21 +185,15 @@ describe('TestReportFacadeRepositoryService', () => {
       ctx.testEventRepositoryService.getBySlugAndEventId.mockResolvedValue(
         plainToInstance(AbstractTestEventResponseDto, {
           ...REPORT_DETAIL_SAMPLE.testEvent,
-          project: { projectSlug: 'demo' },
-          testEventDetails: [detailEntity],
-          testImage: [],
-          latestTestEventDetailId: detailEntity.id
+          latestTestEventDetailId: detailEntity.id,
+          latestTestEventDetail: detailEntity
         })
       );
       ctx.testEventDetailRepositoryService.getBySlugAndEventId.mockResolvedValue(
         plainToInstance(TestEventDetailResponseDto, detailEntity)
       );
-      ctx.testImageRepositoryService.getBySlugAndEventId.mockResolvedValue(
-        plainToInstance(TestImageResponseDto, {
-          ...REPORT_DETAIL_SAMPLE.testImage,
-          imageData: Buffer.from('png bytes'),
-          testEvent: { id: 3 }
-        })
+      ctx.testImageRepositoryService.getSummaryBySlugAndEventId.mockResolvedValue(
+        REPORT_DETAIL_SAMPLE.testImage
       );
     }
 
@@ -212,13 +208,18 @@ describe('TestReportFacadeRepositoryService', () => {
       expect(shapeOf(body)).toEqual(shapeOf(REPORT_DETAIL_SAMPLE));
     });
 
-    it('leaves the screenshot bytes out; GET /projects/images serves them', async () => {
+    it('reads the screenshot metadata, not its bytes; GET /projects/images serves them', async () => {
       const ctx = build();
       stubRepositories(ctx);
 
       const result = await ctx.service.getReportDetail('demo', 'evt');
 
-      expect(result.testImage).not.toHaveProperty('imageData');
+      expect(
+        ctx.testImageRepositoryService.getSummaryBySlugAndEventId
+      ).toHaveBeenCalledWith('demo', 'evt');
+      expect(
+        ctx.testImageRepositoryService.getBySlugAndEventId
+      ).not.toHaveBeenCalled();
       expect(result.testImage?.imageSize).toBe(
         REPORT_DETAIL_SAMPLE.testImage.imageSize
       );
@@ -232,7 +233,7 @@ describe('TestReportFacadeRepositoryService', () => {
       ctx.testEventDetailRepositoryService.getBySlugAndEventId.mockResolvedValue(
         null
       );
-      ctx.testImageRepositoryService.getBySlugAndEventId.mockResolvedValue(
+      ctx.testImageRepositoryService.getSummaryBySlugAndEventId.mockResolvedValue(
         null
       );
 

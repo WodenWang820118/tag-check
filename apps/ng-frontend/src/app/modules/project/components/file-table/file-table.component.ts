@@ -12,7 +12,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { DatePipe, NgClass, CommonModule } from '@angular/common';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
-import { Jsonified, RunSummary } from '@utils';
+import { getCheckStatus, Jsonified, RunSummary } from '@utils';
 import { MatInputModule } from '@angular/material/input';
 import { FileTableDataSourceFacadeService } from './file-table-data-source-facade.service';
 import { ActivatedRoute } from '@angular/router';
@@ -21,7 +21,6 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
-import { getCheckStatus } from '../report-detail.contracts';
 
 @Component({
   selector: 'app-file-table',
