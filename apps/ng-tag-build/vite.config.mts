@@ -13,7 +13,12 @@ export default defineConfig(({ mode }) => {
       environment: 'jsdom',
       setupFiles: ['src/test-setup.ts'],
       include: ['**/*.spec.ts'],
-      reporters: ['default']
+      reporters: ['default'],
+      coverage: {
+        reportsDirectory: '../../coverage/apps/ng-tag-build',
+        provider: 'v8' as const,
+        reporter: ['lcov']
+      }
     },
     define: {
       'import.meta.vitest': mode !== 'production'
