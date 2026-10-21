@@ -12,7 +12,6 @@ import {
   getProjectSlugResolver
 } from './resolvers/file-report.resolver';
 import { getProjectFormSettingsResolver } from './resolvers/project-form-settings.resolver';
-import { recordingResolver } from './resolvers/recording.resolver';
 
 export const PROJECT_ROUTES: Routes = [
   {
@@ -26,7 +25,6 @@ export const PROJECT_ROUTES: Routes = [
       projectSetting: projectSettingResolver,
       projectInfo: projectInfoResolver,
       projectReport: projectReportResolver,
-      recordings: recordingResolver,
       projectSlug: getProjectSlugResolver
     },
     children: [

@@ -59,20 +59,6 @@ export class RecordingService {
   }
 
   /**
-   * Fetches all recordings belonging to a project.
-   *
-   * Returns `null` on HTTP failure so callers can treat a missing recording
-   * list as an empty state rather than an unrecoverable error.
-   *
-   * @param projectSlug - URL-friendly project identifier.
-   */
-  getProjectRecordings(projectSlug: string) {
-    return this.http
-      .get<Recording[]>(`${environment.recordingApiUrl}/${projectSlug}`)
-      .pipe(catchHttpError(null));
-  }
-
-  /**
    * Fetches only the names (identifiers) for a project's recordings.
    *
    * Returns `[]` on HTTP failure so UI list bindings stay functional.
