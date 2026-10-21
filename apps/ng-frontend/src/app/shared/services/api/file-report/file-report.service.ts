@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
-import { FrontFileReport, TestEventSchema } from '@utils';
+import { FrontFileReport, Jsonified, RunSummary } from '@utils';
 import { catchHttpError, rethrowHttpError } from '../http-error.utils';
 
 @Injectable({
@@ -12,7 +12,7 @@ export class FileReportService {
   constructor(private readonly http: HttpClient) {}
 
   /**
-   * Retrieves all file reports for a project.
+   * Lists every run of the project's tests, newest first.
    *
    * Returns `null` on HTTP failure so callers can treat a missing list as an
    * empty state.
@@ -21,7 +21,9 @@ export class FileReportService {
    */
   getFileReports(projectSlug: string) {
     return this.http
-      .get<TestEventSchema[]>(`${environment.fileReportApiUrl}/${projectSlug}`)
+      .get<Jsonified<RunSummary>[]>(
+        `${environment.fileReportApiUrl}/${projectSlug}`
+      )
       .pipe(catchHttpError(null));
   }
 

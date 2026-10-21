@@ -4,6 +4,7 @@ import { FolderPathService } from '../../../infrastructure/os/path/folder-path/f
 import { join } from 'path';
 import { XlsxReportService } from '../../../infrastructure/os/xlsx-report/xlsx-report.service';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
+import { TestEventDetailRepositoryService } from '../../../core/repository/test-event/test-event-detail-repository.service';
 
 @Injectable()
 export class ProjectFileReportService {
@@ -12,8 +13,13 @@ export class ProjectFileReportService {
     private readonly folderService: FolderService,
     private readonly folderPathService: FolderPathService,
     private readonly xlsxReportService: XlsxReportService,
-    private readonly testEventRepositoryService: TestEventRepositoryService
+    private readonly testEventRepositoryService: TestEventRepositoryService,
+    private readonly testEventDetailRepositoryService: TestEventDetailRepositoryService
   ) {}
+
+  async listRuns(projectSlug: string) {
+    return this.testEventDetailRepositoryService.listRunSummaries(projectSlug);
+  }
 
   async getReportFolders(projectSlug: string) {
     const folderPath =

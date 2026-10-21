@@ -9,13 +9,11 @@ import {
   Query
 } from '@nestjs/common';
 import { ProjectFileReportService } from '../../features/project-agent/project-file-report/project-file-report.service';
-import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 
 @Controller('file-reports')
 export class FileReportsController {
   constructor(
-    private readonly projectFileReportService: ProjectFileReportService,
-    private readonly testEventFileRepositoryService: TestEventRepositoryService
+    private readonly projectFileReportService: ProjectFileReportService
   ) {}
 
   @Delete(':projectSlug/:eventId')
@@ -29,9 +27,10 @@ export class FileReportsController {
     );
   }
 
+  /** Every run of the project's tests, newest first (RunSummary[]). */
   @Get(':projectSlug')
-  async getReportFiles(@Param('projectSlug') projectSlug: string) {
-    return this.testEventFileRepositoryService.listFileReports(projectSlug);
+  async listRuns(@Param('projectSlug') projectSlug: string) {
+    return this.projectFileReportService.listRuns(projectSlug);
   }
 
   @Post('/download/:projectSlug')

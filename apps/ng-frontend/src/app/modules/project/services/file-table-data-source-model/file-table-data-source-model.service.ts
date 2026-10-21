@@ -1,12 +1,12 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { Injectable, signal, computed } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { IReportDetails, TestImage } from '@utils';
+import { Jsonified, RunSummary } from '@utils';
 @Injectable({
   providedIn: 'root'
 })
 export class FileTableDataSourceModelService {
-  readonly dataSource = signal<MatTableDataSource<IReportDetails & TestImage>>(
+  readonly dataSource = signal<MatTableDataSource<Jsonified<RunSummary>>>(
     new MatTableDataSource()
   );
 
@@ -15,7 +15,7 @@ export class FileTableDataSourceModelService {
   });
 
   readonly selection = signal(
-    new SelectionModel<IReportDetails & TestImage>(true, [])
+    new SelectionModel<Jsonified<RunSummary>>(true, [])
   );
 
   readonly computedSelection = computed(() => {

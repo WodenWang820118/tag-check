@@ -66,7 +66,7 @@ export class ExampleRecordingsRefreshService {
       ])
     );
     const testEvents =
-      await this.testEventRepositoryService.listFileReports(projectSlug);
+      await this.testEventRepositoryService.listWithRecordings(projectSlug);
     const refreshed: string[] = [];
 
     for (const testEvent of testEvents) {

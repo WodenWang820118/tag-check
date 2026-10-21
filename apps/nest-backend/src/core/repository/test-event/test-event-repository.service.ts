@@ -37,18 +37,20 @@ export class TestEventRepositoryService {
     });
   }
 
-  async listFileReports(projectSlug: string) {
-    const query = this.repository
-      .createQueryBuilder('test_event')
-      .leftJoinAndSelect('test_event.project', 'project')
-      .leftJoinAndSelect('test_event.testEventDetails', 'test_event_detail')
-      .leftJoinAndSelect('test_event.recording', 'recording')
-      .leftJoinAndSelect('test_event.spec', 'spec')
-      .leftJoinAndSelect('test_event.testImage', 'test_image');
+  /** The project's tests with their recordings, without run results. */
+  async listWithRecordings(projectSlug: string) {
+    return await this.repository.find({
+      relations: { recording: true },
+      where: { project: { projectSlug } }
+    });
+  }
 
-    return await query
-      .where('project.projectSlug = :projectSlug', { projectSlug })
-      .getMany();
+  /** The project's tests with their specs, without run results. */
+  async listWithSpecs(projectSlug: string) {
+    return await this.repository.find({
+      relations: { spec: true },
+      where: { project: { projectSlug } }
+    });
   }
 
   async getEntityByEventId(eventId: string) {

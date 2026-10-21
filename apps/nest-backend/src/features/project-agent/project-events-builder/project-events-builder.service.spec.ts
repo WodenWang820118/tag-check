@@ -11,7 +11,7 @@ function build(existingEvents: unknown[] = []) {
     upgradeLegacyDataLayerSpec: vi.fn().mockReturnValue(null)
   };
   const testEventRepositoryService = {
-    listFileReports: vi.fn().mockResolvedValue(existingEvents)
+    listWithSpecs: vi.fn().mockResolvedValue(existingEvents)
   };
   const specRepositoryService = { update: vi.fn() };
   const projectGtmContainerService = { read: vi.fn().mockResolvedValue(null) };
@@ -54,9 +54,7 @@ describe('ProjectEventsBuilderService', () => {
     expect(
       ctx.projectReportService.createEventReportFolder
     ).not.toHaveBeenCalled();
-    expect(
-      ctx.testEventRepositoryService.listFileReports
-    ).not.toHaveBeenCalled();
+    expect(ctx.testEventRepositoryService.listWithSpecs).not.toHaveBeenCalled();
   });
 
   it('buildEvents() creates report folder, adds recording, and creates full report for each input', async () => {

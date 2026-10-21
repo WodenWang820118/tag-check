@@ -68,8 +68,13 @@ Inside `apps/nest-backend/src`, imports point down:
 `controllers -> features -> infrastructure -> core -> shared`. A
 `no-restricted-imports` override stops `infrastructure`, `core` and `shared`
 from importing upward. Code that drives features, such as the Puppeteer
-inspection run, belongs in `features/`. Import the module that provides a
-service; don't rely on another module re-exporting it.
+inspection run, belongs in `features/`.
+
+`OsModule` (`infrastructure/os/os.module.ts`) is the single module features
+import for data access: it brings the infrastructure services and re-exports
+`RepositoryModule`, which gathers every repository module. A feature module
+imports `OsModule` rather than `RepositoryModule` or individual repository or
+infrastructure modules.
 
 ## Conventions
 

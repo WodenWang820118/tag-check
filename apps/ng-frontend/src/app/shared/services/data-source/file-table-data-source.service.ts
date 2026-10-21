@@ -1,5 +1,5 @@
 import { DataSource } from '@angular/cdk/collections';
-import { IReportDetails, TestImage } from '@utils';
+import { Jsonified, RunSummary } from '@utils';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Injectable, signal } from '@angular/core';
 
@@ -7,11 +7,11 @@ import { Injectable, signal } from '@angular/core';
   providedIn: 'root'
 })
 export class FileTableDataSourceService extends DataSource<
-  IReportDetails & TestImage
+  Jsonified<RunSummary>
 > {
-  private readonly _dataStream = new BehaviorSubject<
-    (IReportDetails & TestImage)[]
-  >([]);
+  private readonly _dataStream = new BehaviorSubject<Jsonified<RunSummary>[]>(
+    []
+  );
   private readonly _filterSignal = signal<string>('');
   private readonly _deletedSignal = signal<boolean>(false);
   private readonly _downloadSignal = signal<boolean>(false);
@@ -20,7 +20,7 @@ export class FileTableDataSourceService extends DataSource<
     super();
   }
 
-  connect(): Observable<(IReportDetails & TestImage)[]> {
+  connect(): Observable<Jsonified<RunSummary>[]> {
     return this._dataStream;
   }
 
@@ -28,11 +28,11 @@ export class FileTableDataSourceService extends DataSource<
     this._dataStream.complete();
   }
 
-  setData(data: (IReportDetails & TestImage)[]) {
+  setData(data: Jsonified<RunSummary>[]) {
     this._dataStream.next(data);
   }
 
-  getData(): Observable<(IReportDetails & TestImage)[]> {
+  getData(): Observable<Jsonified<RunSummary>[]> {
     return this._dataStream;
   }
 
