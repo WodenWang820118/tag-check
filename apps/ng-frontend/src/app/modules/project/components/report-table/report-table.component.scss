@@ -33,11 +33,15 @@ table {
 }
 
 .true-status {
-  color: green;
+  color: #2e7d32;
 }
 
 .false-status {
-  color: red;
+  color: #c62828;
+}
+
+.partial-status {
+  color: #ef6c00;
 }
 
 // Neutral/pending status color for items that haven't run yet

@@ -27,6 +27,8 @@ import { ReportTableFacadeService } from './report-table-facade.service';
 import { TableSortService } from '../../../../shared/services/utils/table-sort.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
+import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
+import { getRunStatus, RunStatus } from '../report-detail.contracts';
 // #endregion
 
 @Component({
@@ -46,6 +48,7 @@ import { MatChipsModule } from '@angular/material/chips';
     ProgressPieChartComponent,
     MatTooltipModule,
     MatChipsModule,
+    RunStatusChipComponent,
     CommonModule
   ],
   templateUrl: './report-table.component.html',
@@ -53,6 +56,11 @@ import { MatChipsModule } from '@angular/material/chips';
   changeDetection: ChangeDetectionStrategy.Eager
 })
 export class ReportTableComponent implements OnInit {
+  /** The single status a row shows: Passed, Partial, Failed or Not run. */
+  runStatus(report: IReportDetails): RunStatus {
+    return getRunStatus(report);
+  }
+
   // #region viewChild / signals
   private readonly paginator = viewChild<MatPaginator>(MatPaginator);
   private readonly sort = viewChild<MatSort>(MatSort);

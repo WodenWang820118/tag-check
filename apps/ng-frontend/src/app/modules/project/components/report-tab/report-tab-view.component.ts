@@ -17,17 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel.component';
-import { ReportTabViewModel, RunStatus } from '../report-detail.contracts';
-
-const STATUS_BADGES: Record<
-  RunStatus,
-  { label: string; icon: string; color: 'primary' | 'warn' | undefined }
-> = {
-  notRun: { label: 'Not run', icon: 'hourglass_empty', color: undefined },
-  passed: { label: 'Passed', icon: 'check_circle', color: 'primary' },
-  partial: { label: 'Partial', icon: 'error', color: 'warn' },
-  failed: { label: 'Failed', icon: 'cancel', color: 'warn' }
-};
+import { ReportTabViewModel, STATUS_BADGES } from '../report-detail.contracts';
 
 @Component({
   selector: 'app-report-tab-view',
@@ -70,12 +60,9 @@ const STATUS_BADGES: Record<
 
           <div class="flex items-center gap-2 self-start">
             <output class="sr-only" aria-live="polite" aria-atomic="true">
-              Report status: {{ statusBadge().label }}
+              Result: {{ statusBadge().label }}
             </output>
-            <mat-chip-set
-              aria-label="Report status"
-              data-testid="report-status"
-            >
+            <mat-chip-set aria-label="Result" data-testid="report-status">
               <mat-chip [color]="statusBadge().color" class="w-full">
                 <div class="flex items-center gap-1">
                   {{ statusBadge().label }}
@@ -181,7 +168,7 @@ const STATUS_BADGES: Record<
                 [rows]="3"
                 [readonly]="true"
                 [value]="viewModel().message"
-                aria-label="Report message"
+                aria-label="Test message"
               ></textarea>
             </mat-form-field>
           </section>

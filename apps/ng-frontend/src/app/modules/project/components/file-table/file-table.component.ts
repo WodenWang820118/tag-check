@@ -20,6 +20,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TableSortService } from '../../../../shared/services/utils/table-sort.service';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
+import { getCheckStatus } from '../report-detail.contracts';
 
 @Component({
   selector: 'app-file-table',
@@ -35,6 +37,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatSortModule,
     MatChipsModule,
     MatTooltipModule,
+    RunStatusChipComponent,
     CommonModule
   ],
   templateUrl: './file-table.component.html',
@@ -91,6 +94,11 @@ export class FileTableComponent implements OnInit {
         }
       ]
     );
+  }
+
+  /** Every listed run finished, so its status follows from its two checks. */
+  runStatus(run: Jsonified<RunSummary>) {
+    return getCheckStatus(run.passed, run.requestPassed);
   }
 
   // The following getters make it easier to use signals in the template:

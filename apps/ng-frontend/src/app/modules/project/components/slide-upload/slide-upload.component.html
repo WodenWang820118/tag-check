@@ -11,7 +11,7 @@
     >
       <mat-icon>close</mat-icon>
     </button>
-    <div class="text-3xl">Add report to project</div>
+    <div class="text-3xl">Add tests to the project</div>
   </div>
 </div>
 
@@ -19,8 +19,8 @@
 <div class="p-4 md:p-6">
   <!-- Intro -->
   <div class="mb-4 text-2xl text-gray-600">
-    Start by importing a GTM JSON file (recommended). You can also create a
-    report manually with the editor.
+    Start by importing a GTM JSON file (recommended). You can also create a test
+    manually with the editor.
   </div>
 
   <!-- Tabs: Import (default) | Create manually -->
@@ -36,7 +36,7 @@
         <app-ga4-upload></app-ga4-upload>
       </div>
     </mat-tab>
-    <mat-tab label="Create report manually">
+    <mat-tab label="Create a test manually">
       <div class="mt-4 rounded-md border border-gray-200 p-3 md:p-4 bg-white">
         <app-new-report-view [sidenav]="sidenav()"></app-new-report-view>
       </div>
