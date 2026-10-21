@@ -1,4 +1,7 @@
+// A recording or a captured data layer runs to hundreds of lines: scroll it
+// inside the panel instead of pushing the rest of the result down.
 .json {
+  max-height: 480px;
   overflow: auto;
 }
 
