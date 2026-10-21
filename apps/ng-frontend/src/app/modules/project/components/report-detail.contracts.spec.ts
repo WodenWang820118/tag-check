@@ -1,10 +1,12 @@
 import {
   DataLayerSpec,
   REPORT_DETAIL_SAMPLE,
+  REPORT_LIST_ITEM_SAMPLE,
   ReportDetailResponse
 } from '@utils';
 import {
   buildReportPage,
+  getLastRunAt,
   getRunStatus,
   toReportDetails,
   toTagSpec
@@ -44,6 +46,18 @@ describe('getRunStatus', () => {
     expect(getRunStatus(report(true, false))).toBe('partial');
     expect(getRunStatus(report(false, true))).toBe('partial');
     expect(getRunStatus(report(false, false))).toBe('failed');
+  });
+
+  it('follows lastRunAt from GET /reports when the API sends it', () => {
+    // An item of GET /reports/:projectSlug as it arrives over HTTP.
+    const item = JSON.parse(JSON.stringify(REPORT_LIST_ITEM_SAMPLE));
+
+    expect(getRunStatus(item)).toBe('passed');
+    // Every run was deleted: the test was updated, but has no run.
+    expect(getRunStatus({ ...item, lastRunAt: null })).toBe('notRun');
+    expect(getLastRunAt(item)).toBe(REPORT_LIST_ITEM_SAMPLE.lastRunAt);
+    expect(getLastRunAt({ ...item, lastRunAt: null })).toBeUndefined();
+    expect(getLastRunAt(undefined)).toBeUndefined();
   });
 });
 
@@ -90,7 +104,8 @@ describe('toReportDetails', () => {
       ...notRun.testEvent,
       updatedAt: notRun.testEvent.createdAt,
       passed: false,
-      requestPassed: false
+      requestPassed: false,
+      lastRunAt: null
     };
 
     const report = toReportDetails(notRun);

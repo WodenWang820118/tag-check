@@ -138,10 +138,10 @@
       </ng-container>
 
       <ng-container matColumnDef="completedTime">
-        <th mat-header-cell mat-sort-header *matHeaderCellDef>Last QA Time</th>
+        <th mat-header-cell mat-sort-header *matHeaderCellDef>Last run</th>
         <td mat-cell *matCellDef="let element">
-          @if (element.updatedAt > element.createdAt) {
-            {{ element.updatedAt | date: 'medium' }}
+          @if (lastRunAt(element); as ranAt) {
+            {{ ranAt | date: 'medium' }}
           } @else {
             <span class="muted" matTooltip="Not run yet">—</span>
           }

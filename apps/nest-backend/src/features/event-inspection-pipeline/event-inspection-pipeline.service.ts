@@ -81,19 +81,18 @@ export class EventInspectionPipelineService {
         'Updated detail:',
         JSON.stringify(updatedDetail, null, 2)
       );
-      const testEventDetailDto =
-        await this.testEventDetailRepositoryService.create(
-          testEvent,
-          updatedDetail
-        );
-
-      testEventDetailDto.message = dataLayerResult.message || '';
-
+      // The screenshot first, so the result links to it.
       const testImageDto = await this.buildTestImage(
         page,
         projectSlug,
         eventId
       );
+      const testEventDetailDto =
+        await this.testEventDetailRepositoryService.create(
+          testEvent,
+          updatedDetail,
+          testImageDto
+        );
       await this.updateLatestTestEvent(
         testEvent,
         testEventDetailDto,
@@ -104,16 +103,17 @@ export class EventInspectionPipelineService {
       this.logger.error('Error during event inspection', error);
       // Build detail DTO for a failed event.
       const updatedDetail = this.buildFallbackTestEventDetail();
-      const testEventDetailDto =
-        await this.testEventDetailRepositoryService.create(
-          testEvent,
-          updatedDetail
-        );
       const testImageDto = await this.buildTestImage(
         page,
         projectSlug,
         eventId
       );
+      const testEventDetailDto =
+        await this.testEventDetailRepositoryService.create(
+          testEvent,
+          updatedDetail,
+          testImageDto
+        );
       await this.updateLatestTestEvent(
         testEvent,
         testEventDetailDto,
@@ -146,7 +146,8 @@ export class EventInspectionPipelineService {
       requestPassed: result.requestCheckResult.passed || false,
       rawRequest: result.rawRequest,
       destinationUrl: result.destinationUrl,
-      dataLayer: result.dataLayerResult.dataLayer
+      dataLayer: result.dataLayerResult.dataLayer,
+      message: result.dataLayerResult.message || ''
     };
   }
 
@@ -159,7 +160,8 @@ export class EventInspectionPipelineService {
       requestPassed: false,
       rawRequest: '',
       destinationUrl: '',
-      dataLayer: []
+      dataLayer: [],
+      message: 'The run stopped with an error before its checks finished.'
     };
   }
 

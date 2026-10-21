@@ -28,7 +28,7 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
-import { getRunStatus } from '../report-detail.contracts';
+import { getLastRunAt, getRunStatus, hasRun } from '../report-detail.contracts';
 // #endregion
 
 @Component({
@@ -59,6 +59,11 @@ export class ReportTableComponent implements OnInit {
   /** The single status a row shows: Passed, Partial, Failed or Not run. */
   runStatus(report: IReportDetails): RunStatus {
     return getRunStatus(report);
+  }
+
+  /** When the row's latest run ran; undefined before the first run. */
+  lastRunAt(report: IReportDetails) {
+    return getLastRunAt(report);
   }
 
   // #region viewChild / signals
@@ -166,9 +171,7 @@ export class ReportTableComponent implements OnInit {
           name: 'status',
           type: 'number',
           accessor: (row: IReportDetails) => {
-            const u = row?.updatedAt ? new Date(row.updatedAt).getTime() : 0;
-            const c = row?.createdAt ? new Date(row.createdAt).getTime() : 0;
-            const run = u > c;
+            const run = hasRun(row);
             const dl = row?.passed === true;
             const req = row?.requestPassed === true;
             // Order: Passed (3) > Partial (2) > Failed (1) > Not run (0)
@@ -181,11 +184,7 @@ export class ReportTableComponent implements OnInit {
         {
           name: 'completedTime',
           type: 'date',
-          accessor: (row: IReportDetails) => {
-            const u = row?.updatedAt ? new Date(row.updatedAt).getTime() : 0;
-            const c = row?.createdAt ? new Date(row.createdAt).getTime() : 0;
-            return u > c ? row?.updatedAt : 0;
-          }
+          accessor: (row: IReportDetails) => getLastRunAt(row) ?? 0
         }
       ]
     );

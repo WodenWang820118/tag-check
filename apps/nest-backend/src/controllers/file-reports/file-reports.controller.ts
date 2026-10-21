@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,6 +9,7 @@ import {
   Post,
   Query
 } from '@nestjs/common';
+import type { DeleteRunsResponse } from '@utils';
 import { ProjectFileReportService } from '../../features/project-agent/project-file-report/project-file-report.service';
 
 @Controller('file-reports')
@@ -16,15 +18,22 @@ export class FileReportsController {
     private readonly projectFileReportService: ProjectFileReportService
   ) {}
 
-  @Delete(':projectSlug/:eventId')
-  async deleteReportFile(
+  /**
+   * Deletes runs and their screenshots; the tests stay.
+   * `runIds` is a comma-separated list, such as `?runIds=7,9`.
+   */
+  @Delete(':projectSlug')
+  async deleteRuns(
     @Param('projectSlug') projectSlug: string,
-    @Query('filePath') filePath: string
-  ) {
-    return this.projectFileReportService.deleteReportFile(
-      projectSlug,
-      filePath
-    );
+    @Query('runIds') runIds: string | undefined
+  ): Promise<DeleteRunsResponse> {
+    const ids = (runIds ?? '').split(',').map((id) => Number(id.trim()));
+    if (!ids.every((id) => Number.isSafeInteger(id) && id > 0)) {
+      throw new BadRequestException(
+        'runIds must be a comma-separated list of run ids'
+      );
+    }
+    return await this.projectFileReportService.deleteRuns(projectSlug, ids);
   }
 
   /** Every run of the project's tests, newest first (RunSummary[]). */

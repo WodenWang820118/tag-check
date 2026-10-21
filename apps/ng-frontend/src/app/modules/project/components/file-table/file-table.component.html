@@ -49,7 +49,7 @@
     </ng-container>
 
     <ng-container matColumnDef="completedTime">
-      <th mat-header-cell mat-sort-header *matHeaderCellDef>Last QA Time</th>
+      <th mat-header-cell mat-sort-header *matHeaderCellDef>Run at</th>
       <td mat-cell *matCellDef="let element">
         {{ element.runAt | date: 'medium' }}
       </td>
