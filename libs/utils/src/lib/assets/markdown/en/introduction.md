@@ -1,38 +1,30 @@
 # Introduction
 
-Here you can find information about the application and how to use it.
+TagCheck checks that a Google Tag Manager (GTM) setup sends the data you planned. It replays a user journey in Chrome, captures every `dataLayer` push and the GA4 request for the event, and compares both with a spec: the event and the parameters you expect.
 
-## Getting Started
+## How TagCheck is organized
 
-This section will guide you through the basic steps to get started with the application. You will learn how the application helps you manage your Google Tag Manager (GTM) tag audit projects.
+- **Project**: one website under test, with its settings: the values to load before each run (such as consent cookies), sign-in details, the GTM preview link and browser options.
+- **Test**: one GA4 event to check. A test has a **spec**, the `dataLayer` push it expects, and a **recording**, the Chrome Recorder journey that makes the event happen.
+- **Run**: one replay of a test's recording. Each run makes two checks:
+  - the **data layer check**: the event pushed to `dataLayer` matches the spec;
+  - the **request check**: a GA4 request for the event was sent to the project's measurement ID, and its parameters match the spec.
+- **Result**: what a run found: both checks, the captured `dataLayer`, the raw request, a screenshot and a screen recording.
+- **Status**: each test shows the status of its latest run: **Passed** when both checks passed, **Partial** when one did, **Failed** when neither did, and **Not run** before the first run.
 
-## Projects
+## What happens during a run
 
-This section will guide you through the basic steps to create and manage projects in the application. You will learn how to create a new project, add tags to it, and run an audit on the tags. It will also guide you through other project management features like editing and deleting projects.
+1. TagCheck opens Chrome with Puppeteer, loads the project's pre-loading values and replays the test's recording.
+2. It records every `dataLayer` push and intercepts the GA4 requests the page sends.
+3. It compares the event and the request with the spec, saves the result with a screenshot and a screen recording, and updates the test's status.
 
-## Settings
+In Accompanied Mode, the run opens the site through GTM Preview (Tag Assistant), so you can also watch the tags fire in an unpublished workspace.
 
-This section will guide you through the basic steps to configure the application settings as needed. It includes:
+## In this documentation
 
-- Project Information
-- Authentication
-- Pre-load Data
-- Browser Arguments
-- Google Tag Manager and request interception settings
-- Project IO
-
-## How TagCheck works
-
-This is a brief overview of how the application works.
-
-## Puppeteer
-
-Puppeteer is a Node.js library that provides a high-level API to control headless Chrome or Chromium over the DevTools Protocol. It allows the application to run the audit using browser automation. It also allows the application to control multiple browser instances to fulfill the quality assurance requirements.
-
-## Chrome Recorder
-
-The Chrome Recorder is a tool that records user interactions with the browser and generates Puppeteer scripts. For flexibility, the application uses the JSON format from the recorder and Puppeteer to run the audit.
-
-## Audit Pipeline
-
-When you run an audit, TagCheck creates a new browser instance and replays the recorded interactions. TagCheck then checks if the tags are firing correctly and provides a report on the audit results. The report includes details on the tags that are not firing correctly and the reasons why they failed.
+- **Objective**: what the two checks catch.
+- **Use cases**: when TagCheck helps.
+- **Getting started**: create a project, add tests and run them.
+- **Quality assurance**: write specs and read the checks.
+- **Report management**: results, the Reports page and spreadsheets.
+- **Setting details**: every project setting.

@@ -1,171 +1,45 @@
-# はじめに
+# クイックスタート
 
-TagCheck は、計測仕様を統一し、その仕様を GTM 関連サイトや本番サイトのタグ検証に再利用できるようにします。
+このガイドでは、新しいプロジェクトの作成から最初の結果までを説明します。TagCheck に付属するサンプルプロジェクトは https://ng-gtm-sample.vercel.app のデモストアに対して実行され、すべての手順が完了した状態を確認できます。
 
-## Google Tag Manager とは
+## 1. プロジェクトを作成する
 
-Google Tag Manager は、Web サイトやモバイルアプリのソースコードを直接変更せずに、マーケティングタグやトラッキングピクセルを管理・配信するためのツールです。Google Analytics や Facebook Pixel などの外部サービスに送るデータ収集タグを、開発者の作業なしで追加・更新できます。
+**Projects** ページで **New Project**（+）を選択し、次の項目を入力します。
 
-## TagCheck とは
+- **Project Name**: TagCheck はこの名前からプロジェクトのスラッグを生成します。
+- **Measurement ID**: サイトの送信先となる GA4 の測定 ID です（例: `G-8HKQR5ZBSK`）。リクエストチェックに必要です。
+- **Project Description**: 任意です。
 
-TagCheck は、Google Tag Manager（GTM）のタグ監査プロジェクトを管理するためのツールです。プロジェクトを作成し、タグを追加し、タグが正しい文脈で使われているか、あるいはそもそも発火しているかを監査できます。結果を確認したうえで、必要に応じてタグ設定を見直せます。
+TagCheck からエクスポートしたプロジェクトの作業を続けるには、同じページの **Already got the project?** を使って、その ZIP ファイルをアップロードします。
 
-## プロジェクトと最初のテストケースを作成する
+## 2. サイトを準備する
 
-各プロジェクトには一意の project slug があり、Google Tag Manager と連携するための情報もあわせて入力できます。自動化を実行する前に必要なのは、仕様と録画データの 2 つです。
+プロジェクトを開き、**Settings** に移動します。
 
-## 仕様
+- **Pre-loading Values**: **Website URL** と、実行前にサイトが必要とするローカルストレージの項目および Cookie を入力します。典型的な例は同意の値で、これによりサイトがアナリティクスタグの発火を許可するようになります。
+- **Google Tag Manager**: **Activate Request Check** をオンにすると、データレイヤーに加えて GA4 リクエストもチェックします。
+- **Authentication**: サイトが HTTP 認証で保護されている場合は、ユーザー名とパスワードを入力します。
 
-仕様は JSON 形式で定義します。例:
+## 3. テストを追加する
 
-```json
-{
-  "event": "page_view",
-  "page_location": "$page_location",
-  "page_referrer": "$page_referrer"
-}
-```
+**Tests** ページで **Add tests**（+）を選択します。方法は 3 つあります。
 
-TagCheck は主に次のパターンで値を検証します。
+- **Import GTM JSON**（推奨）: Tag Manager で **Admin** > **Export container** に移動し、そのファイルをアップロードします。TagCheck は GA4 イベントタグごとに 1 つのテストを作成します。各スペックには、タグがデータレイヤー変数から読み取るパラメータが記載され、それらのキーはプッシュに存在する必要があります。TagCheck がテストに変換できないタグは **Skipped tags** に表示されます。
+- **Import GA4 events**: プッシュする予定のイベントを、1 つの JSON オブジェクトまたは配列としてアップロードするか貼り付け、**Create tests** を選択します。
+- **Create a test manually**: エディターにスペックを書き、記録を貼り付けてから、**Submit** を選択します。
 
-- `$` で始まる文字列: キーが存在するかだけを確認
-- 固定値: 文字列または数値。`items` のような推奨イベントを除き、GA4 は配列オブジェクトを受け取りません
-- 正規表現: 例 `^(?:switzerland|california)$`
+## 4. ジャーニーを記録する
 
-## GTM タグ設定
+各テストは、そのイベントをプッシュする操作で終わる Chrome Recorder の記録を再生します。
 
-作成したタグは `TagBuild` を使って GTM 互換の JSON に変換できます。変換後は、そのまま GTM に貼り付けるか、JSON ファイルとしてダウンロードできます。
+1. Chrome で DevTools と **Recorder** パネルを開き、サイト上でジャーニーを記録します。たとえば、商品ページを開いて **Add to cart** を選択します。
+2. 記録を JSON ファイルとしてエクスポートします。
+3. テストを開いて **Latest result** に移動します。**Chrome Recording** パネルで編集ボタンを選択し、ファイルを **Upload** するか内容を貼り付けて、**Save** を選択します。
 
-## 録画データ
+TagCheck は、`setViewport`、`navigate`、`click`、`hover`、`change`、`keyDown`、`keyUp`、`waitForElement` の各ステップを、CSS、ID、ARIA、テキスト、XPath、pierce の各セレクターで再生します。`data-testid` 属性のような安定したセレクターを使うと、デザインが変わっても記録が動作し続けます。
 
-録画データは Chrome Recorder から出力される JSON ファイルです。現時点で TagCheck は CSS セレクターと ID セレクターをサポートしています。例:
+## 5. テストを実行する
 
-```json
-{
-  "title": "add_to_cart",
-  "steps": [
-    {
-      "type": "setViewport",
-      "width": 1737,
-      "height": 1100,
-      "deviceScaleFactor": 1,
-      "isMobile": false,
-      "hasTouch": false,
-      "isLandscape": false
-    },
-    {
-      "type": "navigate",
-      "url": "https://ng-gtm-sample.vercel.app/home"
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [["div.active img"]],
-      "offsetY": 44.42852783203125,
-      "offsetX": 344.60711669921875
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [["app-details button"]],
-      "offsetY": 22.705322265625,
-      "offsetX": 67.1070556640625
-    }
-  ]
-}
-```
+テストの行の末尾にある再生ボタンを選択します。進行状況チャートが記録のステップの進み具合を表示します。実行を停止するには、ツールバーの **Stop the running test** を選択します。
 
-この JSON ファイルをダウンロードして TagCheck にアップロードするか、内容をそのままエディターに貼り付けてください。
-
-## テストを実行する
-
-テーブル右上の再生ボタンをクリックすると、録画データとタグ設定に基づいてテストが実行されます。進行状況はリアルタイムに表示され、ステップ数は録画内の操作数に応じて決まります。例:
-
-```json
-{
-  "title": "add_to_cart",
-  "steps": [
-    {
-      "type": "setViewport",
-      "width": 1737,
-      "height": 1100,
-      "deviceScaleFactor": 1,
-      "isMobile": false,
-      "hasTouch": false,
-      "isLandscape": false
-    },
-    {
-      "type": "navigate",
-      "url": "https://ng-gtm-sample.vercel.app/home"
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [["div.active img"]],
-      "offsetY": 44.42852783203125,
-      "offsetX": 344.60711669921875
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [["app-details button"]],
-      "offsetY": 22.705322265625,
-      "offsetX": 67.1070556640625
-    }
-  ]
-}
-```
-
-## テスト結果
-
-テスト完了後、結果はすぐに更新され、主に data layer と request の 2 つに分かれます。
-
-## Data layer
-
-Data layer はブラウザの `window` オブジェクト配下にあるデータ構造です。Google Tag Manager はこれを監視して Google Analytics 4 へデータを送信します。`window.dataLayer` を確認することで、対象サイトが想定どおりのデータを所定のステップで push しているかを検証できます。
-
-## Request
-
-`Check Request` を有効にし、measurement ID を設定すると、TagCheck は measurement ID と event name に基づいて request を傍受します。その後、URL パラメータを分解し、data layer に近い形式へ再構成します。例:
-
-'https://www.google-analytics.com/g/collect?v=2&tid=G-8HKQR5ZBSK<br />&gtm=45je4410v9171567282z89168785492za200&\_p=1712224628461&gcs=G111&gcd=13r3r3r3q7&npa=1&dma=0&cid=485839296.1712224634<br />&ul=en-us&sr=2195x1235&uaa=x86&uab=64&uafvl=Chromium%3B121.0.6167.85%7CNot%2520A(Brand%3B99.0.0.0&uamb=0&uam=<br />&uap=Windows&uapv=15.0.0&uaw=0&pscdl=noapi&\_s=5&dr=&dl=&cu=USD&sid=1712224634&sct=1&seg=1&dt=Ng%20GTM%20Integration%20App<br />&en=add_to_cart&pr1=idcity001~ nmSwitzerland ~ lndestinations ~ caSwitzerland ~ qt1 ~ pr799&epn.value=799<br />&ep.promotion_id=city001&ep.promotion_name=Switzerland&ep.creative_name=travel_slide&ep.creative_slot=featured_attributor&\_et=8682&tfd=30981'
-
-これは次のように変換されます。
-
-```json
-{
-  "event": "add_to_cart",
-  "creative_name": "travel_slide",
-  "creative_slot": "featured_attributor",
-  "promotion_id": "city001",
-  "promotion_name": "Switzerland",
-  "ecommerce": {
-    "value": "799",
-    "currency": "USD",
-    "items": [
-      {
-        "item_id": "city001",
-        "item_name": "Switzerland",
-        "item_category": "Switzerland",
-        "price": "799",
-        "quantity": "1"
-      }
-    ]
-  }
-}
-```
-
-代表的な例は `add_to_wishlist` です。これは GA4 の推奨イベントなので `items` が正しく収集されます。一方、`remove_from_wishlist` のような非推奨イベントでは、GTM Preview には `items` が表示されても、Google Analytics 4 にはそのまま送られないことがあります。request の検査により、実際に送信されたデータをさらに確認できます。
-
-## レポート
-
-各テスト実行後、システムは自動的にレポートを生成します。内容には次が含まれます。
-
-- Data layer specification: テストケース作成時に定義した仕様
-- Actual data layer: ブラウザ `window` 配下の実際の data layer
-- Request data layer: ネットワークリクエストから再構成した data layer
-- Raw request: 取得できた場合、GA4 へ本当に送信されたかを検証するために利用可能
-- Destination URL: イベントが発火したページ URL
-- Screenshot: イベント発火時の画面キャプチャ
-
-すべてのレポートはサイドバーの Reports メニューからダウンロードできます。
+実行が終わると、行に新しいステータスが表示されます。テストを開くと結果を確認できます。結果には、チェック結果、取得した `dataLayer`、GA4 リクエスト、スクリーンショット、画面録画が含まれます。各項目については **レポート管理** で説明しています。

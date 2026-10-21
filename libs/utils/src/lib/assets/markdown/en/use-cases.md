@@ -1,70 +1,50 @@
-# Use Cases
+# Use cases
 
-Usually, anomalies can be found in a Google Analytics report. For example, the number of page views is significantly lower than usual, or a specific event has the `(not set)` event parameters. These anomalies could be caused by incorrect tag implementation within Google Tag Manager. By running an audit on the tags, you can identify the tags that are firing inaccurately and fix them.
+Tracking problems often show up first in Google Analytics: page views drop, or an event's parameters read `(not set)`. They usually come from a site change that altered the `dataLayer`, or from a GTM change that broke a tag. TagCheck finds them by checking every planned event on the site itself.
 
-TagCheck is suitable for:
+TagCheck suits:
 
-- Large websites with many tags
-- Websites with complex tag customizations on GTM
-- Frequent changes on websites and GTM tags
+- sites with many tags, or with heavily customized GTM setups;
+- teams that release the site or change GTM often;
+- ecommerce sites, where events carry items and values that must stay exact.
 
-## Automation with GTM
+## Check every event after a release
 
-When enabled with the GTM shareable link, the audit will run in GTM Accompanied Mode. When the audit is running, the GTM preview mode will be opened in another browser instance. GTM Preview mode allows you to see the tags firing in real time.
+Import your GTM container to create one test per GA4 event tag, add a recording to each, and run them all after each release. The tests table shows which events stopped passing, and the Reports page keeps every run for comparison.
 
-## Validate tag firing
+## Check a workspace before publishing
 
-In this use case, you want to identify the tags that are not firing at all. The tags depend on the data layer, and failures can be due to trigger issues or incorrect tag implementation.
+Accompanied Mode runs a test through GTM Preview, so the tags under test are those of your unpublished workspace. Watch the tags fire in Tag Assistant while TagCheck checks the data layer and the request.
 
-## Verify parameters
+## Check the parameters, not only the event
 
-According to the specification, the audit can examine whether the tags are firing with the correct parameters. For example,
+A spec states the parameters an event needs, with their values or patterns. For example, this spec requires an `add_to_cart` push whose single item is Switzerland or California, at the listed price and quantity:
 
 ```json
 {
   "event": "add_to_cart",
   "ecommerce": {
+    "currency": "USD",
+    "value": 200,
     "items": [
       {
         "item_id": "$item_id",
-        "item_name": "^(?:switzerland|california)$",
+        "item_name": "/^(?:Switzerland|California)$/",
         "item_category": "Europe",
         "quantity": 1,
         "price": 200
       }
-    ],
-    "currency": "USD",
-    "value": 200
+    ]
   }
 }
 ```
 
-- The `item_id` should exist and the audit won't check the value. The `$item_id` is a placeholder for the actual value and it could be convenient for you to reference it when planning the tags. For example, you can use `$item_id` as another custom event parameter for another tag. Moreover, you may combine `$item_id` and other parameters such as `$index` for further measurement indication. This is more relevant to the measurement planning artifact.
-- The `item_name` should be either `switzerland` or `california` with a regex pattern
-- The `item_category` should be an exact word `Europe`
-- The `quantity` should be exactly `1` and it should be an integer
+- `"$item_id"` only requires `item_id` to exist, whatever its value.
+- `"/^(?:Switzerland|California)$/"` requires `item_name` to match the regular expression between the slashes.
+- `"Europe"`, `1` and `200` must match exactly, type included: the number `200` does not match the string `"200"`.
 
-## Identify false positive request
+**Quality assurance** lists every rule.
 
-In the GTM (Google Tag Manager) container, tags can be implemented incorrectly. For example, a tag may fire a custom event whose parameters include an array—a format not supported by Google Analytics. The audit intercepts the request and reformats the information into a data-layer-like structure, then checks whether the tag is firing with the correct parameters. For example,
+## Catch data that changes on the way to GA4
 
-```typescript
-{
-  event: 'remove_from_wishlist',
-  ecommerce: {
-    items: [
-      {
-        item_id: '$item_id',
-        item_name: '^(?:switzerland|california)$',
-        item_category: 'Europe',
-        quantity: 1,
-        price: 200
-      }
-    ],
-    currency: 'USD',
-    value: 200
-  }
-}
-```
-
-The `remove_from_wishlist` event's item array won't be collected by Google Analytics since it's not listed as one of the recommended events, although the information appears in GTM Preview. The audit will mark the tag as failed and provide details on why it failed.
+GTM Preview shows what the tags received, not what GA4 receives. A tag can drop a parameter, send the event to another measurement ID, or turn an array into a string. The data layer check still passes in those cases. The request check compares the GA4 request itself with the spec, so the test ends as Partial instead of hiding the gap, and the result keeps the raw request for review.

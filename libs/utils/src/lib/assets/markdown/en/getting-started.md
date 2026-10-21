@@ -1,171 +1,45 @@
 # Getting started
 
-TagCheck helps you define a unified specification and apply it to both GTM and production site tag validations.
+This guide takes you from a new project to your first result. The example project that comes with TagCheck runs against the demo store at https://ng-gtm-sample.vercel.app and shows every step already done.
 
-## What is Google Tag Manager
+## 1. Create a project
 
-Google Tag Manager is a tool for managing and deploying marketing tags (snippets of code or tracking pixels) on your website (or mobile app) without having to modify the code. It allows you to add and update tags without having to involve a developer. Tags are used to collect data from your website and send it to third-party services like Google Analytics, Facebook Pixel, etc.
+On the **Projects** page, select **New Project** (+) and fill in:
 
-## What is TagCheck
+- **Project Name**: TagCheck derives the project slug from it.
+- **Measurement ID**: the GA4 measurement ID the site sends to, such as `G-8HKQR5ZBSK`. The request check needs it.
+- **Project Description**: optional.
 
-TagCheck is a tool that helps you manage your Google Tag Manager (GTM) tag audit projects. You can create a project, add tags to it, and run an audit on the tags. The audit will check if the tags are used in the correct context and if they are used at all. You can then review the audit results and make changes to the tags if necessary.
+To continue a project exported from TagCheck, use **Already got the project?** on the same page and upload its ZIP file.
 
-## Create a project and the first test case
+## 2. Prepare the site
 
-Each project is identified by a unique project slug. Fill in the form to configure the project for use with Google Tag Manager. Before running automation, there are two essential requirements: spec and recording.
+Open the project and go to **Settings**:
 
-## Spec
+- **Pre-loading Values**: enter the **Website URL**, and the local storage items and cookies the site needs before a run. A typical example is a consent value, so that the site allows its analytics tags to fire.
+- **Google Tag Manager**: turn on **Activate Request Check** to check GA4 requests as well as the data layer.
+- **Authentication**: enter a username and password if the site is behind HTTP authentication.
 
-The spec is where the specification is defined in JSON format. For example,
+## 3. Add tests
 
-```json
-{
-  "event": "page_view",
-  "page_location": "$page_location",
-  "page_referrer": "$page_referrer"
-}
-```
+On the **Tests** page, select **Add tests** (+). There are three ways:
 
-TagCheck can check key values based on several scenarios:
+- **Import GTM JSON** (recommended): in Tag Manager, go to **Admin** > **Export container** and upload the file. TagCheck creates one test per GA4 event tag. Each spec lists the parameters the tag reads from Data Layer Variables, and those keys must exist in the push. Tags TagCheck cannot turn into tests are listed under **Skipped tags**.
+- **Import GA4 events**: upload or paste the events you plan to push, as one JSON object or an array, and select **Create tests**.
+- **Create a test manually**: write the spec and paste a recording in the editors, then select **Submit**.
 
-- Dollar-headed string: only verify whether the key exists
-- Static value: string or number. Please note GA4 doesn't accept array objects other than in the recommended events that use the `items` parameter, such as `add_to_cart`
-- Regular expression: customized via a regex pattern such as `^(?:switzerland|california)$`
+## 4. Record the journey
 
-## GTM tag configuration
+Each test replays a Chrome Recorder recording that ends with the action that pushes its event.
 
-The created tag can be configured with `TagBuild`, which converts your specs to GTM-compatible JSON format. After conversion, you can either paste the JSON into GTM or download it as a JSON file.
+1. In Chrome, open DevTools and the **Recorder** panel, and record the journey on your site: for example, open a product page and select **Add to cart**.
+2. Export the recording as a JSON file.
+3. Open the test and go to **Latest result**. In the **Chrome Recording** panel, select the edit button, **Upload** the file or paste its content, and select **Save**.
 
-## Recording
+TagCheck replays the steps `setViewport`, `navigate`, `click`, `hover`, `change`, `keyDown`, `keyUp` and `waitForElement`, with CSS, ID, ARIA, text, XPath and pierce selectors. Stable selectors, such as `data-testid` attributes, keep recordings working after design changes.
 
-The recording is a JSON-formatted file from Chrome Recorder. Currently, TagCheck supports CSS and ID selectors. For example,
+## 5. Run a test
 
-```json
-{
-  "title": "add_to_cart",
-  "steps": [
-    {
-      "type": "setViewport",
-      "width": 1737,
-      "height": 1100,
-      "deviceScaleFactor": 1,
-      "isMobile": false,
-      "hasTouch": false,
-      "isLandscape": false
-    },
-    {
-      "type": "navigate",
-      "url": "https://ng-gtm-sample.vercel.app/home"
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [["div.active img"]],
-      "offsetY": 44.42852783203125,
-      "offsetX": 344.60711669921875
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [["app-details button"]],
-      "offsetY": 22.705322265625,
-      "offsetX": 67.1070556640625
-    }
-  ]
-}
-```
+Select the play button at the end of the test's row. A progress chart follows the recording's steps. To stop a run, select **Stop the running test** in the toolbar.
 
-Please download it as a JSON file and upload it to TagCheck or paste the content into the text editor.
-
-## Running a test
-
-A play button is located in the top right corner of the table. Clicking it will run the test based on your recording and tag configuration. The progress will be synced and displayed while the test is running. Progress depends on the number of actions required. For instance:
-
-```json
-{
-  "title": "add_to_cart",
-  "steps": [
-    {
-      "type": "setViewport",
-      "width": 1737,
-      "height": 1100,
-      "deviceScaleFactor": 1,
-      "isMobile": false,
-      "hasTouch": false,
-      "isLandscape": false
-    },
-    {
-      "type": "navigate",
-      "url": "https://ng-gtm-sample.vercel.app/home"
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [["div.active img"]],
-      "offsetY": 44.42852783203125,
-      "offsetX": 344.60711669921875
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [["app-details button"]],
-      "offsetY": 22.705322265625,
-      "offsetX": 67.1070556640625
-    }
-  ]
-}
-```
-
-## Test result
-
-After test completion, the results will be displayed in two sections: Data Layer and Request.
-
-## Data layer
-
-The data layer is an object under the browser's window object. Google Tag Manager utilizes and monitors the data layer to send data to Google Analytics 4. In the browser console, you can use `window.dataLayer` to verify whether the target site pushes the agreed data in the data layer with the defined steps.
-
-## Request
-
-With `Check Request` enabled and measurement ID filled, TagCheck will intercept the request based on the measurement ID and event name. Further, TagCheck decomposes the request URL and recomposes relevant information into the data layer object. For example,
-
-'https://www.google-analytics.com/g/collect?v=2&tid=G-8HKQR5ZBSK<br />&gtm=45je4410v9171567282z89168785492za200&\_p=1712224628461&gcs=G111&gcd=13r3r3r3q7&npa=1&dma=0&cid=485839296.1712224634<br />&ul=en-us&sr=2195x1235&uaa=x86&uab=64&uafvl=Chromium%3B121.0.6167.85%7CNot%2520A(Brand%3B99.0.0.0&uamb=0&uam=<br />&uap=Windows&uapv=15.0.0&uaw=0&pscdl=noapi&\_s=5&dr=&dl=&cu=USD&sid=1712224634&sct=1&seg=1&dt=Ng%20GTM%20Integration%20App<br />&en=add_to_cart&pr1=idcity001~ nmSwitzerland ~ lndestinations ~ caSwitzerland ~ qt1 ~ pr799&epn.value=799<br />&ep.promotion_id=city001&ep.promotion_name=Switzerland&ep.creative_name=travel_slide&ep.creative_slot=featured_attributor&\_et=8682&tfd=30981'
-
-Will be converted to:
-
-```json
-{
-  "event": "add_to_cart",
-  "creative_name": "travel_slide",
-  "creative_slot": "featured_attributor",
-  "promotion_id": "city001",
-  "promotion_name": "Switzerland",
-  "ecommerce": {
-    "value": "799",
-    "currency": "USD",
-    "items": [
-      {
-        "item_id": "city001",
-        "item_name": "Switzerland",
-        "item_category": "Switzerland",
-        "price": "799",
-        "quantity": "1"
-      }
-    ]
-  }
-}
-```
-
-The classic example would be `add_to_wishlist`, which is one of the recommended GA4 events. However, there is no `remove_from_wishlist` equivalent—so although `items` appears in the GTM preview, it doesn't get sent to Google Analytics 4. Checking requests confirms what data is actually transmitted.
-
-## Report
-
-Reports are automatically generated after running each test. The report includes:
-
-- Data layer specification: the defined specification given when creating the test case
-- Actual data layer: the data layer under the browser's window object
-- Request data layer: the recomposed data layer from the network request
-- Raw request: if captured, it can be used to verify whether the data is sent to GA4
-- Destination URL: the link where the event is being triggered
-- Screenshot: the image where the event is being triggered
-
-All reports are available to download via the Reports sidebar menu.
+When the run ends, the row shows the new status. Open the test to see the result: the checks, the captured `dataLayer`, the GA4 request, a screenshot and a screen recording. **Report management** explains each part.

@@ -1,58 +1,79 @@
 # Quality assurance
 
-Quality assurance is the process of confirming whether the acceptance criteria are met. This document guides you through the platform's QA flow step by step.
+A test passes when the site and GTM send what its spec describes. This page explains how to write specs, how the two checks compare them, and how to review a tag before you publish it.
 
-## Report creation
+## Writing a spec
 
-Before auditing a test case, add a report entry for reference. Since the same event can be triggered in multiple places, the system creates an event ID for each report. When there are multiple `add_to_cart` test cases, one shared JSON specification covers all of them. For example:
+A spec is the `dataLayer` push you expect, written as JSON. Its `event` names the GA4 event, and every other key is a parameter the push must contain. Keys the spec does not list are ignored, so a spec only needs the parameters you care about.
+
+Values follow these rules:
+
+| Spec value                                    | Passes when                                                               |
+| --------------------------------------------- | ------------------------------------------------------------------------- |
+| `"$name"`, such as `"$item_id"`               | the key exists, whatever its value                                        |
+| `"{{Variable Name}}"`, a Tag Manager variable | the key exists, whatever its value                                        |
+| `"/pattern/"`                                 | the value is a string matching the regular expression between the slashes |
+| any other string, number or boolean           | the value is exactly equal, type included                                 |
+| an object, such as `ecommerce`                | each of its keys passes, by the same rules                                |
+| an array, such as `items`                     | each entry matches at least one entry of the actual array, in any order   |
+
+For example:
 
 ```json
 {
   "event": "add_to_cart",
   "ecommerce": {
+    "currency": "USD",
+    "value": "$value",
     "items": [
       {
         "item_id": "$item_id",
-        "item_name": "^(?:switzerland|california)$",
-        "item_category": "Europe",
-        "quantity": 1,
-        "price": 200
+        "item_name": "/^(?:Switzerland|California)$/",
+        "quantity": 1
       }
-    ],
-    "currency": "USD",
-    "value": 200
+    ]
   }
 }
 ```
 
-You can edit the spec afterward as needed. The event name is unique, so the system will not let you add another `add_to_cart` spec. Instead, other test cases reference the shared spec by event name, for example:
+The number `1` does not match the string `"1"`. Write numbers as numbers when the site pushes numbers.
+
+Tests imported from a GTM container start with a spec built from the tag: each parameter that reads a Data Layer Variable becomes a key holding the variable reference, such as `"value": "{{DLV - ecommerce.value}}"`, so the key must exist. Replace references with values or patterns where you want stricter checks. To edit a spec, open the test, go to **Latest result**, and use the edit button of the **Data Layer Spec** panel.
+
+## Ecommerce events
+
+For Google's recommended ecommerce events, and for any spec with `ecommerce.items`, the data layer check also requires a `{ ecommerce: null }` push before the event, as Google recommends to clear the previous ecommerce data ([Measure ecommerce with Tag Manager](https://developers.google.com/analytics/devguides/collection/ga4/ecommerce?client_type=gtm)). The request check skips this rule, since the reset never leaves the browser.
+
+A test can also have an **Item Definition**: one GA4 item, such as:
 
 ```json
 {
-  "event": "add_to_cart"
+  "item_id": "city001",
+  "item_name": "Switzerland",
+  "item_category": "Switzerland",
+  "quantity": 1,
+  "price": 799
 }
 ```
 
-## Specification review
+For an ecommerce event, a run then expects this item as the entry of `ecommerce.items`, in place of the items in the spec. Edit it in the **Item Definition** panel of the test's **Latest result**.
 
-Measurement specifications should stay consistent for the same event. Consistent specs make Google Analytics reports easier to understand and help avoid confusing `(not set)` values. Because specs are shared globally, editing one may affect other test cases.
+## The request check
 
-## Chrome recording
+With **Activate Request Check** on, TagCheck intercepts the GA4 request for the test's event sent to the project's measurement ID. It reads the event name, event parameters and items from the request and rebuilds them into an object shaped like a `dataLayer` push, then applies the same spec. Google does not document the request format; TagCheck reads it as gtag.js sends it.
 
-Chrome Recorder captures CSS or ID selectors, XPath expressions, and other information needed to replay the flow. Common actions include clicking, hovering, typing, and selecting. After downloading the JSON recording from the browser, upload it to the system and TagCheck will use it during the audit. Currently, TagCheck runs the flow with CSS and ID selectors.
+The rebuilt object keeps the types the request carries: numeric event parameters (`epn.`) and numeric item fields, such as `price` and `quantity`, become numbers; other event parameters (`ep.`) stay strings. If a tag sends a number as a text parameter, a spec value of `200` passes the data layer check but fails the request check on `"200"`. Fix the tag, or use `"$value"` or a pattern where the type does not matter.
 
-## Google Tag Manager
+## Reviewing a tag
 
-Google Tag Manager is a tag management system that helps teams focus on tracking without directly editing the website codebase. TagCheck aims to reduce repetitive manual testing and support higher-quality QA against business requirements.
+The **Tag Snapshot** tab of a test shows the GA4 event tag the test came from:
 
-## Data layer
+- **Measurement ID**: the ID the tag sends to. When the tag references a Constant variable, such as `{{CONST - Measurement ID}}`, the tab shows the Constant's value and the reference under it.
+- **Event Name** and **Event Parameters**: the parameters the tag sends, including those from its Event Settings variable. A value that reads a Data Layer Variable shows the data layer key it reads, such as `Data layer: ecommerce.value`.
+- **Triggering**: the tag's trigger.
 
-The data layer is a JavaScript object that bridges user interactions and the data collection pipeline. For example, when you click a button, the data layer receives the defined data and triggers the corresponding GTM tag. Inspecting the data layer is therefore one of the core ways to verify implementation quality.
+Compare it with the spec to see whether the tag reads the keys the site pushes.
 
-## Request interception
+## Accompanied Mode
 
-In most cases, checking the data layer is enough. There are still situations where an implementation appears correct in GTM Preview, but Google Analytics receives a transformed value instead. One example is array data being turned into strings. To reduce false positives, TagCheck can also audit outgoing requests. TagCheck intercepts requests using the measurement ID configured in the project, rebuilds them into a data-layer-like object, and reuses the same validation logic against the spec.
-
-## GTM accompanied mode
-
-GTM Accompanied Mode lets you inspect tag firing alongside GTM Preview while automation is running. It is also useful when you want to audit an unpublished workspace. Provide the GTM container's shareable link and landing page URL so TagCheck can open the preview session and run the audit.
+Accompanied Mode runs a test through GTM Preview, so the tags under test are those of the workspace you preview, even unpublished. To use it, enter the **Preview Mode URL** in the **Google Tag Manager** settings and turn on **Activate Accompanied Mode**. The run opens Tag Assistant next to the site, and the browser window stays open afterwards for inspection; close it when you are done.
