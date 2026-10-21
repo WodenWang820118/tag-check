@@ -64,7 +64,7 @@ export class ProjectEventsBuilderService {
       return result;
     }
     const existingEvents =
-      await this.testEventRepositoryService.listFileReports(projectSlug);
+      await this.testEventRepositoryService.listWithSpecs(projectSlug);
 
     for (const input of inputs) {
       const dataLayerSpec = this.dataLayerSpecBuilderService.buildDataLayerSpec(

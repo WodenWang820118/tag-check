@@ -95,20 +95,25 @@ describe('TestEventRepositoryService', () => {
     expect(shapeOf(testEvent)).toEqual(shapeOf(REPORT_DETAIL_SAMPLE.testEvent));
   });
 
-  it('listFileReports() builds a query joining all relations and filters by slug', async () => {
+  it('listWithRecordings() loads only the recordings of the project tests', async () => {
     const { service, repository } = build();
-    const qb: Record<string, unknown> = {};
-    qb.leftJoinAndSelect = vi.fn().mockReturnValue(qb);
-    qb.where = vi.fn().mockReturnValue(qb);
-    qb.getMany = vi.fn().mockResolvedValue([{ id: 1 }]);
-    repository.createQueryBuilder.mockReturnValue(qb);
-    const result = await service.listFileReports('demo');
-    expect(qb.where).toHaveBeenCalledWith(
-      'project.projectSlug = :projectSlug',
-      {
-        projectSlug: 'demo'
-      }
-    );
+    repository.find.mockResolvedValue([{ id: 1 }]);
+    const result = await service.listWithRecordings('demo');
+    expect(repository.find).toHaveBeenCalledWith({
+      relations: { recording: true },
+      where: { project: { projectSlug: 'demo' } }
+    });
+    expect(result).toEqual([{ id: 1 }]);
+  });
+
+  it('listWithSpecs() loads only the specs of the project tests', async () => {
+    const { service, repository } = build();
+    repository.find.mockResolvedValue([{ id: 1 }]);
+    const result = await service.listWithSpecs('demo');
+    expect(repository.find).toHaveBeenCalledWith({
+      relations: { spec: true },
+      where: { project: { projectSlug: 'demo' } }
+    });
     expect(result).toEqual([{ id: 1 }]);
   });
 
