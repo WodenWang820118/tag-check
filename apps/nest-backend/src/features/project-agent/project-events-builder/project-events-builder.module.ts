@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ProjectEventsBuilderService } from './project-events-builder.service';
-import { RepositoryModule } from '../../../core/repository/repository.module';
+import { OsModule } from '../../../infrastructure/os/os.module';
 import { ProjectReportModule } from '../project-report/project-report.module';
 import { ProjectRecordingModule } from '../project-recording/project-recording.module';
 import { ProjectDataLayerSpecBuilderModule } from '../project-data-layer-spec-builder/project-data-layer-spec.builder.module';
@@ -8,8 +8,9 @@ import { ProjectDataLayerSpecBuilderService } from '../project-data-layer-spec-b
 import { ProjectGtmContainerModule } from '../project-gtm-container/project-gtm-container.module';
 import { TestReportFacadeModule } from '../../repository/test-report-facade/test-report-facade.module';
 @Module({
+  // Data access through OsModule, the features' data-access layer.
   imports: [
-    RepositoryModule,
+    OsModule,
     ProjectReportModule,
     ProjectRecordingModule,
     ProjectDataLayerSpecBuilderModule,
