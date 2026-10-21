@@ -104,7 +104,7 @@ export function shapeOf(value: unknown): unknown {
   if (value !== null && typeof value === 'object') {
     return Object.fromEntries(
       Object.keys(value)
-        .sort()
+        .sort((left, right) => left.localeCompare(right))
         .map((key) => [key, shapeOf((value as Record<string, unknown>)[key])])
     );
   }
