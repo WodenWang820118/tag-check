@@ -93,7 +93,7 @@ describe('ScrollTag', () => {
 
       vi.spyOn(parameterUtils, 'createBuiltInListParameter').mockReturnValue({
         type: 'LIST',
-        key: 'eventParameters',
+        key: 'eventSettingsTable',
         list: [
           {
             type: 'MAP',
@@ -148,7 +148,7 @@ describe('ScrollTag', () => {
             { type: 'TEMPLATE', key: 'eventName', value: 'scroll' },
             {
               type: 'LIST',
-              key: 'eventParameters',
+              key: 'eventSettingsTable',
               list: [
                 {
                   type: 'MAP',
@@ -200,7 +200,7 @@ describe('ScrollTag', () => {
         '{{Scroll Depth Threshold}}'
       );
       expect(parameterUtils.createBuiltInListParameter).toHaveBeenCalledWith(
-        'eventParameters',
+        'eventSettingsTable',
         expect.any(Array)
       );
       expect(parameterUtils.createTagReferenceParameter).toHaveBeenCalledWith(

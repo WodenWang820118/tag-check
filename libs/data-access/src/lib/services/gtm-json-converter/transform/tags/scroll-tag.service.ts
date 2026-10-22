@@ -42,7 +42,7 @@ export class ScrollTag {
             'eventName',
             ScrollTag.EVENT_NAME
           ),
-          this.parameterUtils.createBuiltInListParameter('eventParameters', [
+          this.parameterUtils.createBuiltInListParameter('eventSettingsTable', [
             this.parameterUtils.createMapParameter(
               ScrollTag.SCROLL_DEPTH_KEY,
               ScrollTag.SCROLL_DEPTH_VAR

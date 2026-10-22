@@ -113,13 +113,20 @@ export function resolveVariableReference(
 /**
  * The parameter rows a GA4 event tag sends: its own event parameter table
  * followed by the table of the Event Settings variable it references, if any.
+ *
+ * GTM exports the table as `eventSettingsTable`. Containers built by earlier
+ * versions of tag-build named the same rows `eventParameters`, so both keys are
+ * read.
  */
 export function getGa4EventParameterRows(
   tag: TagConfig,
   variables: readonly VariableConfig[]
 ): { parameter: string; value: string }[] {
   const tables = [
-    tag.parameter.find((entry) => entry.key === 'eventSettingsTable')
+    tag.parameter.find(
+      (entry) =>
+        entry.key === 'eventSettingsTable' || entry.key === 'eventParameters'
+    )
   ];
   const settingsReference = getParameterValue(
     tag.parameter,

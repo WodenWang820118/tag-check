@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TagTypeEnum } from '@utils';
+import { getGa4EventParameterRows, TagTypeEnum } from '@utils';
 
 import { EventTag } from './event-tag.service';
 
@@ -54,7 +54,7 @@ describe('EventTag', () => {
     expect(config.firingTriggerId).toEqual(['20', '21', '10']);
   });
 
-  it('emits sendEcommerceData, eventName, eventParameters, measurementId in order', () => {
+  it('emits sendEcommerceData, eventName, eventSettingsTable, measurementId in order', () => {
     const config = service.createTag(
       'GA4 Tag',
       'a',
@@ -67,7 +67,7 @@ describe('EventTag', () => {
     expect(keys).toEqual([
       'sendEcommerceData',
       'eventName',
-      'eventParameters',
+      'eventSettingsTable',
       'measurementId'
     ]);
     expect(config.parameter?.[3]).toEqual({
@@ -94,5 +94,16 @@ describe('EventTag', () => {
     expect(eventParameters?.list).toHaveLength(1);
     // remaining row wraps the surviving "currency" param as MAP/TEMPLATE
     expect(eventParameters?.list?.[0].map?.[0].value).toBe('currency');
+  });
+
+  it('writes parameters where GTM exports and TagCheck imports read them', () => {
+    const config = service.createTag('GA4', 'a', 'c', tag, triggers, 'false');
+
+    expect(
+      getGa4EventParameterRows(
+        { ...config, parameter: config.parameter ?? [] },
+        []
+      ).map(({ parameter }) => parameter)
+    ).toEqual(['currency', 'items']);
   });
 });

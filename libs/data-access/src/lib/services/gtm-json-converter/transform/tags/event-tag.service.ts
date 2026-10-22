@@ -59,7 +59,7 @@ export class EventTag {
       ),
       this.parameterUtils.createTemplateParameter('eventName', tag.name),
       this.parameterUtils.createListParameter(
-        'eventParameters',
+        'eventSettingsTable',
         this.processEcommerceData(tag, isSendEcommerceData)
       ),
       this.parameterUtils.createTagReferenceParameter(

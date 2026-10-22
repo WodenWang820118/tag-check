@@ -51,7 +51,7 @@ describe('EventTag', () => {
 
     vi.spyOn(parameterUtils, 'createListParameter').mockReturnValue({
       type: 'LIST',
-      key: 'eventParameters',
+      key: 'eventSettingsTable',
       list: []
     });
 
@@ -81,7 +81,7 @@ describe('EventTag', () => {
       parameter: [
         { type: 'BOOLEAN', key: 'sendEcommerceData', value: 'false' },
         { type: 'TEMPLATE', key: 'eventName', value: 'TestTag' },
-        { type: 'LIST', key: 'eventParameters', list: [] },
+        { type: 'LIST', key: 'eventSettingsTable', list: [] },
         { type: 'TAG_REFERENCE', key: 'measurementId', value: 'GoogleTag' }
       ],
       firingTriggerId: ['1'],
@@ -104,7 +104,7 @@ describe('EventTag', () => {
       'TestTag'
     );
     expect(parameterUtils.createListParameter).toHaveBeenCalledWith(
-      'eventParameters',
+      'eventSettingsTable',
       tag.parameters
     );
     expect(parameterUtils.createTagReferenceParameter).toHaveBeenCalledWith(
