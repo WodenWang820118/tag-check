@@ -12,6 +12,34 @@ export interface EventCompletedPayload {
   message?: unknown;
 }
 
+/** Parses an SSE `data` field; returns undefined when it is not JSON. */
+function parseData(event: Event): unknown {
+  if (!(event instanceof MessageEvent) || typeof event.data !== 'string') {
+    return undefined;
+  }
+  try {
+    return JSON.parse(event.data);
+  } catch {
+    return undefined;
+  }
+}
+
+function isProgressUpdate(value: unknown): value is ProgressUpdatePayload {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'totalSteps' in value &&
+    'currentStep' in value &&
+    typeof value.totalSteps === 'number' &&
+    typeof value.currentStep === 'number'
+  );
+}
+
+/**
+ * Receives run progress from GET /events. The stream is open only while a
+ * test runs, so it does not hold one of the browser's connections to the API
+ * between runs.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -30,8 +58,7 @@ export class ProgressEventsService implements OnDestroy {
 
   constructor() {
     effect(() => {
-      const isRunning = this.testRunningFacade.isRunningTest$();
-      if (isRunning) {
+      if (this.testRunningFacade.isRunningTest$()) {
         this.openStream();
       } else {
         this.closeStream();
@@ -43,73 +70,32 @@ export class ProgressEventsService implements OnDestroy {
     if (this.eventSource) {
       return;
     }
-
-    if (typeof EventSource === 'undefined') {
-      return;
-    }
-
     const source = new EventSource(environment.progressEventsUrl);
     this.eventSource = source;
 
-    source.addEventListener(
-      'progressUpdate',
-      (event: globalThis.MessageEvent<string>) => {
-        try {
-          const raw: unknown =
-            typeof event.data === 'string'
-              ? JSON.parse(event.data)
-              : event.data;
-          if (
-            typeof raw === 'object' &&
-            raw !== null &&
-            'totalSteps' in raw &&
-            'currentStep' in raw
-          ) {
-            const payload = raw as ProgressUpdatePayload;
-            this.progressUpdateSubject.next({
-              totalSteps: Number(payload.totalSteps),
-              currentStep: Number(payload.currentStep)
-            });
-          }
-        } catch {
-          // ignore parse errors
-        }
+    source.addEventListener('progressUpdate', (event) => {
+      const data = parseData(event);
+      if (isProgressUpdate(data)) {
+        this.progressUpdateSubject.next({
+          totalSteps: data.totalSteps,
+          currentStep: data.currentStep
+        });
       }
-    );
+    });
 
-    source.addEventListener(
-      'eventCompleted',
-      (event: globalThis.MessageEvent<string>) => {
-        try {
-          const raw: unknown =
-            typeof event.data === 'string'
-              ? JSON.parse(event.data)
-              : event.data;
-          if (typeof raw === 'object' && raw !== null) {
-            this.eventCompletedSubject.next(raw as EventCompletedPayload);
-          } else {
-            this.eventCompletedSubject.next({});
-          }
-        } catch {
-          this.eventCompletedSubject.next({});
-        }
-      }
-    );
-
-    source.onerror = () => {
-      // EventSource automatically manages retry logic
-    };
+    source.addEventListener('eventCompleted', (event) => {
+      const data = parseData(event);
+      this.eventCompletedSubject.next(
+        typeof data === 'object' && data !== null && 'message' in data
+          ? { message: data.message }
+          : {}
+      );
+    });
   }
 
   closeStream(): void {
-    if (this.eventSource) {
-      this.eventSource.close();
-      this.eventSource = null;
-    }
-  }
-
-  getEventSource(): EventSource | null {
-    return this.eventSource;
+    this.eventSource?.close();
+    this.eventSource = null;
   }
 
   ngOnDestroy(): void {

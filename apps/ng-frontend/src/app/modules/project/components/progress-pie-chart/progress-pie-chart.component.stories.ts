@@ -17,8 +17,7 @@ const mockProgressEventsService = {
   progressUpdate$: of({ totalSteps: 10, currentStep: 4 }),
   eventCompleted$: of({ message: '' }),
   openStream: () => undefined,
-  closeStream: () => undefined,
-  getEventSource: () => null
+  closeStream: () => undefined
 };
 
 const meta: Meta<ProgressPieChartComponent> = {
