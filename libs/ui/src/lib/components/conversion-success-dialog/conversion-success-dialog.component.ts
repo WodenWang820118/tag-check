@@ -6,6 +6,17 @@ import {
 } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { GTMConfiguration } from '@utils';
+
+/**
+ * Events pushed to the tag-build site's dataLayer when a container is exported.
+ * GA4 has no recommended event for this, and its automatic `file_download`
+ * covers links to files only, so these are custom events named under GA4's
+ * naming rules.
+ * @see https://support.google.com/analytics/answer/13316687
+ * @see https://support.google.com/analytics/answer/9216061
+ */
+export type ContainerExportEvent = 'container_download' | 'container_copy';
 
 @Component({
   selector: 'lib-conversion-success-dialog',
@@ -51,7 +62,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class ConversionSuccessDialogComponent {
   constructor(
-    @Inject(MAT_DIALOG_DATA) public configuration: unknown,
+    @Inject(MAT_DIALOG_DATA) public configuration: GTMConfiguration,
     private readonly dialog: MatDialog
   ) {}
 
@@ -67,6 +78,7 @@ export class ConversionSuccessDialogComponent {
     a.click(); // this will start download
     // Clean up after the download to avoid memory leaks
     URL.revokeObjectURL(url);
+    this.trackExport('container_download');
     this.dialog.closeAll();
   }
 
@@ -74,12 +86,29 @@ export class ConversionSuccessDialogComponent {
     const json = JSON.stringify(this.configuration, null, 2);
     navigator.clipboard.writeText(json).then(
       () => {
-        console.log('Async: Copying to clipboard was successful!');
+        this.trackExport('container_copy');
         this.dialog.closeAll();
       },
       (err) => {
         console.error('Async: Could not copy text: ', err);
       }
     );
+  }
+
+  /**
+   * Counts exports on the public tag-build site, which loads GTM. The app
+   * embedded in TagCheck has no dataLayer, so nothing is pushed there.
+   */
+  private trackExport(event: ContainerExportEvent): void {
+    const { dataLayer } = globalThis as {
+      dataLayer?: Array<Record<string, unknown>>;
+    };
+    const { tag, trigger, variable } = this.configuration.containerVersion;
+    dataLayer?.push({
+      event,
+      tag_count: tag.length,
+      trigger_count: trigger.length,
+      variable_count: variable.length
+    });
   }
 }
