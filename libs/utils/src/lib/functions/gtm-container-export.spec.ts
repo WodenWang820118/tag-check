@@ -194,4 +194,25 @@ describe('getGa4EventParameterRows', () => {
       { parameter: 'currency', value: '{{DLV - ecommerce.currency}}' }
     ]);
   });
+
+  it('reads the eventParameters table of containers built by older tag-build', () => {
+    const tag = {
+      name: 'GA4 event - add_to_cart',
+      type: 'gaawe',
+      accountId: '1',
+      containerId: '2',
+      parameter: [
+        { type: 'TEMPLATE', key: 'eventName', value: 'add_to_cart' },
+        {
+          type: 'LIST',
+          key: 'eventParameters',
+          list: [settingsRow('currency', '{{DLV - ecommerce.currency}}')]
+        }
+      ]
+    } as unknown as TagConfig;
+
+    expect(getGa4EventParameterRows(tag, [])).toEqual([
+      { parameter: 'currency', value: '{{DLV - ecommerce.currency}}' }
+    ]);
+  });
 });
