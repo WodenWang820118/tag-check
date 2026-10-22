@@ -46,7 +46,7 @@ nest-backend  controllers/gtm-operator      -> features/gtm-operator (opens GTM 
                 web-agent/action/request-interceptor  captures GA4 requests (CDP Fetch)
                 features/request-processor            parses /g/collect payloads
               core/repository: TestEventDetail and TestImage rows; recording.webm on disk
-              core/events-gateway: progressUpdate over WebSocket :7002 (progress chart)
+              core/events-gateway: progressUpdate over SSE (GET /events, opened during a run)
 ng-frontend   the run's HTTP response updates the table row; the report page loads
               GET /reports/:projectSlug/:eventId, /videos/..., /projects/images/...
 ```

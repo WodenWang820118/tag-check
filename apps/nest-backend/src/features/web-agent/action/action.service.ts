@@ -2,14 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { StepExecutorService } from './step-executor/step-executor.service';
 import { EventInspectionPresetDto } from '../../../shared/dto/event-inspection-preset.dto';
-import { EventsGatewayService } from '../../../core/events-gateway/events-gateway.service';
+import { ProgressEventsService } from '../../../core/events-gateway/progress-events.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
 
 @Injectable()
 export class ActionService {
   private readonly logger = new Logger(ActionService.name);
   constructor(
-    private readonly eventsGatewayService: EventsGatewayService,
+    private readonly progressEventsService: ProgressEventsService,
     private readonly stepExecutorService: StepExecutorService,
     private readonly recordingRepositoryService: RecordingRepositoryService
   ) {}
@@ -48,7 +48,7 @@ export class ActionService {
       const isLastClick = i === lastClickIndex;
 
       this.logger.log(`Performing step ${i + 1} of ${lastStep}`);
-      this.eventsGatewayService.sendProgressUpdate(lastStep, i + 1); // Send progress update
+      this.progressEventsService.sendProgressUpdate(lastStep, i + 1); // Send progress update
 
       await this.stepExecutorService.executeStep(
         page,
@@ -62,6 +62,6 @@ export class ActionService {
       );
     }
     this.logger.log('Operation performed successfully');
-    this.eventsGatewayService.sendEventCompleted(eventId);
+    this.progressEventsService.sendEventCompleted(eventId);
   }
 }
