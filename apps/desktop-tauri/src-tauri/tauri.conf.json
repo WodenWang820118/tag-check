@@ -1,7 +1,7 @@
 {
   "$schema": "../../../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Tag Check Desktop",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "identifier": "com.wodenwang.tagcheck.desktop",
   "build": {
     "frontendDist": "../../../dist/apps/ng-frontend/browser",
