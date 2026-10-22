@@ -8,17 +8,31 @@ import { ProgressPieChartComponent } from './progress-pie-chart.component';
 
 import { provideHttpClient, withXhr } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 import { PROJECT_ROUTES } from '../../routes';
+import { ProgressEventsService } from '../../../../shared/services/progress-events/progress-events.service';
 import { ProgressUpdateService } from '../../../../shared/services/progress-update/progress-update.service';
+
+const mockProgressEventsService = {
+  progressUpdate$: of({ totalSteps: 10, currentStep: 4 }),
+  eventCompleted$: of({ message: '' }),
+  openStream: () => undefined,
+  closeStream: () => undefined
+};
 
 const meta: Meta<ProgressPieChartComponent> = {
   component: ProgressPieChartComponent,
   title: 'Modules/Project/Components/ProgressPieChartComponent',
   decorators: [
     moduleMetadata({
-      //👇 Imports both components to allow component composition with Storybook
       imports: [],
-      providers: [ProgressUpdateService]
+      providers: [
+        ProgressUpdateService,
+        {
+          provide: ProgressEventsService,
+          useValue: mockProgressEventsService
+        }
+      ]
     }),
     applicationConfig({
       providers: [provideHttpClient(withXhr()), provideRouter(PROJECT_ROUTES)]
