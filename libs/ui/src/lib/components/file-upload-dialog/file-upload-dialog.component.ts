@@ -6,29 +6,46 @@ import {
   ChangeDetectionStrategy
 } from '@angular/core';
 import { from } from 'rxjs';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogContent } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { EventBusService, EditorFacadeService } from '@data-access';
+import {
+  isMeasurementPlanHeader,
+  measurementPlanToDataLayerSpecs,
+  parseMeasurementPlanRows
+} from '@utils';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'lib-file-upload-dialog',
   standalone: true,
-  imports: [MatDialogModule, MatButtonModule, MatIconModule],
+  imports: [MatDialogContent, MatButtonModule, MatIconModule],
   template: `<div class="file-upload-dialog">
     <mat-dialog-content class="file-upload-dialog__actions">
       <div class="file-upload-dialog__actions__action">
         <button type="button" mat-button (click)="fileInput.click()">
           <mat-icon>cloud_upload</mat-icon>
-          Upload JSON File
+          Upload File
         </button>
         <input
           hidden
           (change)="onFileSelected($event)"
           #fileInput
           type="file"
+          accept=".json,.xlsx,.csv"
         />
+      </div>
+      <div class="file-upload-dialog__actions__action">
+        <button
+          type="button"
+          mat-button
+          (click)="downloadPlanTemplate()"
+          data-testid="tagbuild-plan-template-download"
+        >
+          <mat-icon>download</mat-icon>
+          Download plan template
+        </button>
       </div>
     </mat-dialog-content>
   </div>`,
@@ -67,7 +84,6 @@ export class FileUploadDialogComponent {
     effect(() => {
       const fileContent = this.fileContent$();
       if (fileContent !== null) {
-        // Ensure the fileContent is a valid object (parsed JSON)
         if (typeof fileContent === 'object' && fileContent !== null) {
           this.editorFacadeService.inputJsonContent = fileContent;
           this.dialog.closeAll();
@@ -87,33 +103,83 @@ export class FileUploadDialogComponent {
     this.eventBusService.emit('toggleDrawer', file);
   }
 
-  onFileSelected(event: Event): void {
+  async downloadPlanTemplate(): Promise<void> {
+    const { downloadMeasurementPlanTemplate } =
+      await import('./measurement-plan-spreadsheet');
+    downloadMeasurementPlanTemplate();
+  }
+
+  async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement | null;
     const file: File | undefined = input?.files?.[0];
 
     if (file) {
-      const fileExtension = file.name.split('.').pop();
-      const fileType = file.type;
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
 
-      if (fileExtension === 'json' && fileType === 'application/json') {
+      if (fileExtension === 'json') {
         this.selectedFile = file;
         this.handleJsonFile(file);
-      } else if (
-        fileExtension === 'xlsx' &&
-        fileType ===
-          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      ) {
+      } else if (fileExtension === 'xlsx') {
         this.selectedFile = file;
         this.handFileToSidenavForm(file);
+      } else if (fileExtension === 'csv') {
+        this.selectedFile = file;
+        await this.handleMeasurementPlanFile(file);
       } else {
         this.selectedFile = null;
         this.dialog.open(ErrorDialogComponent, {
           data: {
-            message: 'Please upload a valid JSON file.'
+            message: 'Please upload a valid JSON, XLSX, or CSV file.'
           }
         });
       }
     }
+  }
+
+  async handleMeasurementPlanFile(file: File): Promise<void> {
+    try {
+      const { readMeasurementPlanFile } =
+        await import('./measurement-plan-spreadsheet');
+      if (!this.importPlanTable(await readMeasurementPlanFile(file))) {
+        this.dialog.open(ErrorDialogComponent, {
+          data: {
+            message:
+              'A CSV file must be a measurement plan: download the plan template for its columns.'
+          }
+        });
+      }
+    } catch (err) {
+      this.dialog.open(ErrorDialogComponent, {
+        data: {
+          message: `Failed to read spreadsheet file: ${String(err)}`
+        }
+      });
+    }
+  }
+
+  /**
+   * Imports a measurement plan from a parsed sheet table.
+   * If the first row is the plan header, parses it, opens an error dialog on issues,
+   * or sets the converted dataLayer specs on the input JSON editor.
+   * Returns true if the table was handled as a measurement plan, false otherwise.
+   */
+  importPlanTable(table: string[][]): boolean {
+    if (table.length === 0 || !isMeasurementPlanHeader(table[0])) {
+      return false;
+    }
+    const { rows, issues } = parseMeasurementPlanRows(table);
+    if (issues.length > 0) {
+      this.dialog.open(ErrorDialogComponent, {
+        data: {
+          message: issues.join('\n')
+        }
+      });
+      return true;
+    }
+    const specs = measurementPlanToDataLayerSpecs(rows);
+    this.editorFacadeService.inputJsonContent = specs;
+    this.dialog.closeAll();
+    return true;
   }
 
   handleJsonFile(file: File): void {
@@ -121,12 +187,12 @@ export class FileUploadDialogComponent {
   }
 
   readJsonFileContent(file: File): void {
-    // Use the modern File.text() which returns a Promise<string>, convert to Observable
     from(file.text()).subscribe({
       next: (fileContentString: string) => {
         try {
-          // update the file content
-          this.fileContent.set(JSON.parse(fileContentString));
+          this.fileContent.set(
+            JSON.parse(fileContentString) as Record<string, unknown>
+          );
         } catch (error) {
           console.error('Error parsing JSON file:', error);
           this.dialog.open(ErrorDialogComponent, {

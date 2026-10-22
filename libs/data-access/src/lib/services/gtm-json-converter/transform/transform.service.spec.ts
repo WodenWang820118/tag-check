@@ -20,7 +20,13 @@ import { ScrollVariable } from './variables/scroll-variable.service';
 import { VideoVariable } from './variables/video-variable.service';
 import { ConstantVariable } from './variables/constant-variable.service';
 import { EventSettingsVariableService } from './variables/event-settings-variable.service';
-import type { GTMContainerConfig, StrictDataLayerEvent } from '@utils';
+import {
+  getGa4EventParameterRows,
+  measurementPlanToDataLayerSpecs,
+  type GTMContainerConfig,
+  type MeasurementPlanRow,
+  type StrictDataLayerEvent
+} from '@utils';
 
 describe('TransformService', () => {
   let service: TransformService;
@@ -331,6 +337,106 @@ describe('TransformService', () => {
       expect(triggerNames).not.toEqual(
         expect.arrayContaining(['event scroll', 'event youtube video'])
       );
+    });
+
+    describe('measurement plan round-trip', () => {
+      const planRows: MeasurementPlanRow[] = [
+        {
+          eventName: 'add_to_cart',
+          eventParameters: ['currency', 'value'],
+          itemParameters: ['item_id', 'item_name', 'price']
+        },
+        {
+          eventName: 'sign_up',
+          eventParameters: ['method'],
+          itemParameters: []
+        }
+      ];
+
+      it('round-trips plan rows to specs and verifies getGa4EventParameterRows with sendEcommerceData="false"', () => {
+        const specs = measurementPlanToDataLayerSpecs(planRows);
+        const options = buildOptions({
+          gtmConfigGenerator: {
+            ...mockGtmConfig,
+            specs
+          },
+          isSendingEcommerceData: 'false'
+        });
+
+        const result = service.convert(options);
+        const tags = result.containerVersion.tag;
+        const variables = result.containerVersion.variable;
+
+        const addToCartTag = tags.find(
+          (t) => t.name === 'GA4 event - add_to_cart'
+        );
+        const signUpTag = tags.find((t) => t.name === 'GA4 event - sign_up');
+
+        expect(addToCartTag).toBeDefined();
+        expect(signUpTag).toBeDefined();
+
+        if (addToCartTag) {
+          const addToCartRows = getGa4EventParameterRows(
+            addToCartTag,
+            variables
+          );
+          const params = addToCartRows.map((r) => r.parameter);
+          expect(params).toContain('currency');
+          expect(params).toContain('value');
+          expect(addToCartRows).toEqual(
+            expect.arrayContaining([
+              { parameter: 'currency', value: '{{DLV - ecommerce.currency}}' },
+              { parameter: 'value', value: '{{DLV - ecommerce.value}}' }
+            ])
+          );
+        }
+
+        if (signUpTag) {
+          const signUpRows = getGa4EventParameterRows(signUpTag, variables);
+          expect(signUpRows).toEqual([
+            { parameter: 'method', value: '{{DLV - method}}' }
+          ]);
+        }
+      });
+
+      it('round-trips plan rows with sendEcommerceData="true" where ecommerce parameters are omitted', () => {
+        const specs = measurementPlanToDataLayerSpecs(planRows);
+        const options = buildOptions({
+          gtmConfigGenerator: {
+            ...mockGtmConfig,
+            specs
+          },
+          isSendingEcommerceData: 'true'
+        });
+
+        const result = service.convert(options);
+        const tags = result.containerVersion.tag;
+        const variables = result.containerVersion.variable;
+
+        const addToCartTag = tags.find(
+          (t) => t.name === 'GA4 event - add_to_cart'
+        );
+        const signUpTag = tags.find((t) => t.name === 'GA4 event - sign_up');
+
+        expect(addToCartTag).toBeDefined();
+        expect(signUpTag).toBeDefined();
+
+        if (addToCartTag) {
+          // When sendEcommerceData is true, parameters whose values mention ecommerce are omitted
+          const addToCartRows = getGa4EventParameterRows(
+            addToCartTag,
+            variables
+          );
+          expect(addToCartRows).toEqual([]);
+        }
+
+        if (signUpTag) {
+          const signUpRows = getGa4EventParameterRows(signUpTag, variables);
+          expect(signUpRows).toEqual([
+            { parameter: 'method', value: '{{DLV - method}}' }
+          ]);
+        }
+      });
     });
   });
 });
