@@ -33,7 +33,7 @@ export class TagManager {
       measurementId,
       isSendingEcommerceData
     );
-    return this.assignTagIds(configs) as TagConfig[];
+    return this.assignTagIds(configs);
   }
 
   private preprocessParameters(paths: string[]): Parameter[] {

@@ -1,8 +1,14 @@
 import '@angular/localize/init';
-import { RenderMode } from '@angular/ssr';
+import { RenderMode, type ServerRoute } from '@angular/ssr';
 import { DOCUMENTATION_ROUTE_SLUGS } from '@ui';
 import { describe, expect, it } from 'vitest';
 import { serverRoutes } from './app.routes.server';
+
+function hasPrerenderParams(route: ServerRoute): route is ServerRoute & {
+  getPrerenderParams: () => Promise<Record<string, string>[]>;
+} {
+  return 'getPrerenderParams' in route;
+}
 
 describe('serverRoutes', () => {
   it('marks docs and public pages as prerenderable inside each localized build root', () => {
@@ -41,8 +47,13 @@ describe('serverRoutes', () => {
 
     expect(documentationRoutes).toHaveLength(1);
     for (const documentationRoute of documentationRoutes) {
+      expect(hasPrerenderParams(documentationRoute)).toBe(true);
+      if (!hasPrerenderParams(documentationRoute)) {
+        return;
+      }
+
       expect(documentationRoute.getPrerenderParams).toBeTypeOf('function');
-      await expect(documentationRoute.getPrerenderParams?.()).resolves.toEqual(
+      await expect(documentationRoute.getPrerenderParams()).resolves.toEqual(
         DOCUMENTATION_ROUTE_SLUGS.map((name) => ({ name }))
       );
     }

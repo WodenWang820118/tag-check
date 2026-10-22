@@ -59,6 +59,9 @@ jobs:
       - name: Test and coverage
         run: pnpm run test:cov
         shell: bash
+      - name: Type-check specs
+        run: pnpm nx run-many -t typecheck-spec
+        shell: bash
       - name: Backend e2e tests with coverage
         run: pnpm run test-back:e2e:cov
         shell: bash

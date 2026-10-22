@@ -35,6 +35,20 @@
       "inputs": ["default", "^production"],
       "cache": true
     },
+    "typecheck-spec": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "default",
+        "^production",
+        {
+          "externalDependencies": ["typescript"]
+        }
+      ],
+      "options": {
+        "command": "tsc --noEmit -p {projectRoot}/tsconfig.spec.json"
+      }
+    },
     "@angular-devkit/build-angular:application": {
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"],

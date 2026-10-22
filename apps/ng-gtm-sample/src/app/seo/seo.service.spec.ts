@@ -130,8 +130,10 @@ describe('SeoService', () => {
   }
 
   function getCanonicalHref(): string | null {
-    return document
-      .querySelector<HTMLLinkElement>('link[rel="canonical"]')
-      ?.getAttribute('href');
+    return (
+      document
+        .querySelector<HTMLLinkElement>('link[rel="canonical"]')
+        ?.getAttribute('href') ?? null
+    );
   }
 });

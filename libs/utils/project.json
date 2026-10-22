@@ -4,5 +4,7 @@
   "sourceRoot": "libs/utils/src",
   "projectType": "library",
   "tags": ["scope:shared", "type:util"],
-  "targets": {}
+  "targets": {
+    "typecheck-spec": {}
+  }
 }

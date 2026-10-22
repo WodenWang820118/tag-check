@@ -50,7 +50,7 @@ describe('ConstantVariable', () => {
       expect(result).toEqual(expected);
     });
 
-    it('should create a measurement ID constant variable with default G-0 when no ID provided', () => {
+    it('should create a measurement ID constant variable with default G-0 when measurementId is empty', () => {
       // Arrange
       const accountId = 'test-account';
       const containerId = 'test-container';
@@ -59,13 +59,13 @@ describe('ConstantVariable', () => {
       const result = service.createMeasurementIdConstantVariable(
         accountId,
         containerId,
-        null
+        ''
       );
 
       // Assert
-      expect(result.parameter[0]).toEqual(
+      expect(result.parameter).toEqual([
         parameterUtils.createTemplateParameter('value', 'G-0')
-      );
+      ]);
       expect(result.name).toBe('CONST - Measurement ID');
       expect(result.type).toBe('c');
     });
