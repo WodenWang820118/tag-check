@@ -6,6 +6,7 @@
   "sourceRoot": "apps/ng-frontend/src",
   "tags": ["scope:frontend", "type:app"],
   "targets": {
+    "typecheck-spec": {},
     "build": {
       "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],

@@ -6,6 +6,7 @@
   "sourceRoot": "apps/ng-gtm-sample/src",
   "tags": ["scope:frontend", "type:app"],
   "targets": {
+    "typecheck-spec": {},
     "build": {
       "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],

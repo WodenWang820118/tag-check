@@ -43,8 +43,10 @@ function configureConsentService(platformId = 'browser') {
 }
 
 function dataLayer() {
-  return (globalThis as { dataLayer: Array<Record<string, unknown>> })
-    .dataLayer;
+  const host = globalThis as unknown as {
+    dataLayer: Array<Record<string, unknown>>;
+  };
+  return host.dataLayer;
 }
 
 function expectLatestConsentUpdate(expected: Record<string, string>) {

@@ -13,6 +13,8 @@ export type TagConfig = {
   type: string;
   accountId: string;
   containerId: string;
+  // GTM writes this on every exported tag. It is absent on tags that have not been given an id yet.
+  tagId?: string;
   parameter: Parameter[];
   fingerprint?: string;
   // Present on most tags, but not strictly required (e.g., some config tags)

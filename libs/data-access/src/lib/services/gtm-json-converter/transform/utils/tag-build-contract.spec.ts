@@ -19,6 +19,7 @@ import {
   isVariableConfig,
   validateGTMImportReadiness,
   TagTypeEnum,
+  type Parameter,
   type TriggerConfig
 } from '@utils';
 
@@ -415,7 +416,7 @@ describe('tag-build contract helpers', () => {
   });
 
   it('returns safe fallback values for nullable list and map lookups', () => {
-    const listParameter = {
+    const listParameter: Parameter = {
       type: 'LIST',
       key: 'eventSettingsTable',
       list: [
@@ -435,7 +436,7 @@ describe('tag-build contract helpers', () => {
           ]
         }
       ]
-    } as const;
+    };
 
     const list = getParameterListItems(listParameter);
 
@@ -449,7 +450,6 @@ describe('tag-build contract helpers', () => {
       getParameterMapValue(
         {
           type: 'TEMPLATE',
-          key: 'parameter',
           value: 'currency'
         },
         'parameterValue'

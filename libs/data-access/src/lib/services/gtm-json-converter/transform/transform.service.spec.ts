@@ -263,7 +263,7 @@ describe('TransformService', () => {
           ...mockGtmConfig,
           specs: []
         }
-      } as ConvertOptions);
+      });
 
       const result = service.convert(options);
 
