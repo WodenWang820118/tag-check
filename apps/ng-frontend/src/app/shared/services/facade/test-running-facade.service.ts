@@ -9,8 +9,7 @@ import {
   forkJoin,
   Observable,
   of,
-  map,
-  throwError
+  map
 } from 'rxjs';
 import {
   IReportDetails,
@@ -25,6 +24,14 @@ import { QaRequestService } from '../api/qa-request/qa-request.service';
 import { SettingsService } from '../api/settings/settings.service';
 import { GtmInspectionParams } from '../utils/interfaces';
 import { ReportTableDataSourceModelService } from '../../../modules/project/services/report-table-data-source-model/report-table-data-source-model.service';
+
+export type RunTestOptions = {
+  /**
+   * Open the website directly even when the project uses accompanied mode,
+   * so that a batch of runs does not leave a GTM Preview window per test.
+   */
+  direct?: boolean;
+};
 
 @Injectable({ providedIn: 'root' })
 export class TestRunningFacadeService {
@@ -49,13 +56,39 @@ export class TestRunningFacadeService {
     projectSlug: string,
     testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
   ) {
+    return this.run(eventId, projectSlug, {}).pipe(
+      map((res) => this.updateReportDetails(eventId, res, testDataSource))
+    );
+  }
+
+  /**
+   * Runs a test, updates its row in the tests table that is shown when the
+   * run ends, and emits the run's report (undefined when the API returned
+   * none).
+   */
+  runTestForReport(
+    eventId: string,
+    projectSlug: string,
+    options: RunTestOptions = {}
+  ): Observable<ReportDetailResponse | undefined> {
+    return this.run(eventId, projectSlug, options).pipe(
+      map((res) => {
+        this.updateReportDetails(
+          eventId,
+          res,
+          this.reportTableDataSourceModelService.dataSource()
+        );
+        return res?.[0];
+      })
+    );
+  }
+
+  private run(eventId: string, projectSlug: string, options: RunTestOptions) {
     return this.settingsService.getProjectSettings(projectSlug).pipe(
       take(1),
       switchMap((project) =>
-        this.chooseAndRunTest(eventId, projectSlug, project)
+        this.chooseAndRunTest(eventId, projectSlug, project, options)
       ),
-      map((res) => this.updateReportDetails(eventId, res, testDataSource)),
-      catchError((error) => throwError(() => error)),
       finalize(() => {
         this.isRunningTest.set(false);
         this.eventRunningTest.set('');
@@ -66,7 +99,8 @@ export class TestRunningFacadeService {
   chooseAndRunTest(
     eventId: string,
     projectSlug: string,
-    project: ProjectSetting
+    project: ProjectSetting,
+    options: RunTestOptions = {}
   ) {
     const headless = project.browserSettings.headless;
     const inspectEventDto = new EventInspectionPresetDto(project);
@@ -84,7 +118,7 @@ export class TestRunningFacadeService {
       captureRequest: project.applicationSettings.gtm.isRequestCheck
     };
 
-    if (project.applicationSettings.gtm.isAccompanyMode) {
+    if (project.applicationSettings.gtm.isAccompanyMode && !options.direct) {
       const measurementId = project.applicationSettings.gtm.isRequestCheck
         ? project.measurementId
         : undefined;

@@ -16,6 +16,9 @@ import {
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
 
+import { ReportTableFacadeService } from '../report-table/report-table-facade.service';
+import { BatchRunService } from '../../services/batch-run/batch-run.service';
+
 @Component({
   selector: 'app-report-table-toolbar',
   standalone: true,
@@ -42,7 +45,9 @@ export class ReportTableToolbarComponent {
     private readonly dataSourceService: ProjectDataSourceService,
     private readonly testRunningFacade: TestRunningFacadeService,
     private readonly uploadSpecService: UploadSpecService,
-    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService
+    private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService,
+    private readonly reportTableFacadeService: ReportTableFacadeService,
+    private readonly batchRunService: BatchRunService
   ) {}
 
   applyFilter(event: Event) {
@@ -85,6 +90,27 @@ export class ReportTableToolbarComponent {
 
   hasSelection() {
     return this.reportTableDataSourceModelService.selection().hasValue();
+  }
+
+  canRunSelected() {
+    return (
+      this.hasSelection() &&
+      !this.isRunningTest() &&
+      !this.batchRunService.isRunning()
+    );
+  }
+
+  /** Runs the selected tests in the order the table shows them. */
+  runSelected() {
+    const projectSlug = this.reportTableFacadeService.projectSlug$();
+    const selection = this.reportTableDataSourceModelService.selection();
+    const tests = this.reportTableDataSourceModelService
+      .dataSource()
+      .filteredData.filter((row) => selection.isSelected(row))
+      .map(({ eventId, eventName }) => ({ eventId, eventName }));
+    if (projectSlug && tests.length > 0 && this.canRunSelected()) {
+      void this.batchRunService.start(projectSlug, tests);
+    }
   }
 
   isRunningTest() {

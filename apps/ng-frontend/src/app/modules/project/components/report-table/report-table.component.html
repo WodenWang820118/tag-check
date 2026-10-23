@@ -182,7 +182,7 @@
                 mat-icon-button
                 aria-label="run test"
                 [attr.data-testid]="'run-test-' + element.eventName"
-                [disabled]="isSavingNavigation()"
+                [disabled]="isSavingNavigation() || batchRunService.isRunning()"
                 (click)="runTest(element.eventId); $event.stopPropagation()"
               >
                 <mat-icon>play_arrow</mat-icon>

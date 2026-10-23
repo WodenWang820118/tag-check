@@ -13,6 +13,18 @@
   <button
     mat-icon-button
     class="icon"
+    matTooltip="Run the selected tests one after another"
+    matTooltipPosition="above"
+    aria-label="Run the selected tests"
+    data-testid="tests-run-selected"
+    [disabled]="!canRunSelected()"
+    (click)="runSelected()"
+  >
+    <mat-icon>playlist_play</mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    class="icon"
     matTooltip="Delete"
     matTooltipPosition="above"
     aria-label="Delete"
