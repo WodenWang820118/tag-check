@@ -36,9 +36,7 @@ jobs:
         with:
           node-version: '24.x'
       - name: Setup pnpm
-        run: |
-          corepack enable
-          corepack install
+        uses: ./.github/actions/setup-pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Format check
