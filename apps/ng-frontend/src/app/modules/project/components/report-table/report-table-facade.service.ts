@@ -35,6 +35,7 @@ export class ReportTableFacadeService {
 
   readonly expandedElement = signal<Report | null>(null);
   private readonly projectSlug = signal<string>('');
+  readonly projectSlug$ = this.projectSlug.asReadonly();
   private readonly hasRecordingMap: Map<string, boolean> = new Map();
   private paginatorPageSubscription: Subscription | null = null;
   // Status filter: all | notRun | failed | partial | passed

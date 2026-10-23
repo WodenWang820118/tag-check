@@ -9,8 +9,38 @@ import { TestRunningFacadeService } from '../../../../shared/services/facade/tes
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
 import { ReportTableToolbarComponent } from './report-table-toolbar.component';
+import { SelectionModel } from '@angular/cdk/collections';
+import { MatTableDataSource } from '@angular/material/table';
+import type { IReportDetails } from '@utils';
+import { ReportTableFacadeService } from '../report-table/report-table-facade.service';
+import { BatchRunService } from '../../services/batch-run/batch-run.service';
+
+/** Rows as GET /reports/:projectSlug returns them (dates are strings). */
+const rows: IReportDetails[] = JSON.parse(
+  JSON.stringify(
+    ['add_to_cart', 'view_item', 'purchase'].map((eventName, index) => ({
+      id: index + 1,
+      eventId: `id-${eventName}`,
+      testName: eventName,
+      eventName,
+      passed: false,
+      requestPassed: false,
+      hasRecording: true,
+      lastRunAt: null,
+      createdAt: '2026-10-01T00:00:00.000Z',
+      updatedAt: '2026-10-01T00:00:00.000Z'
+    }))
+  )
+) as IReportDetails[];
 
 describe('ReportTableToolbarComponent', () => {
+  const batchRun = { isRunning: vi.fn(() => false), start: vi.fn() };
+  // Selected out of table order on purpose.
+  const selection = new SelectionModel<IReportDetails>(true, [
+    rows[2],
+    rows[0]
+  ]);
+
   async function renderToolbar(): Promise<
     ComponentFixture<ReportTableToolbarComponent>
   > {
@@ -44,11 +74,15 @@ describe('ReportTableToolbarComponent', () => {
         {
           provide: ReportTableDataSourceModelService,
           useValue: {
-            selection: vi.fn().mockReturnValue({
-              hasValue: vi.fn().mockReturnValue(true)
-            })
+            selection: vi.fn(() => selection),
+            dataSource: vi.fn(() => new MatTableDataSource(rows))
           }
-        }
+        },
+        {
+          provide: ReportTableFacadeService,
+          useValue: { projectSlug$: vi.fn(() => 'example-project-slug') }
+        },
+        { provide: BatchRunService, useValue: batchRun }
       ]
     });
     const fixture = TestBed.createComponent(ReportTableToolbarComponent);
@@ -74,5 +108,20 @@ describe('ReportTableToolbarComponent', () => {
     expect(tooltip.message).toBe(
       "Bookmark: on the last click, block the browser's default link and form navigation (single-page app routing still runs)"
     );
+  });
+
+  it('runs the selected tests as a batch in table order', async () => {
+    const fixture = await renderToolbar();
+    const button = fixture.debugElement.query(
+      By.css('[data-testid="tests-run-selected"]')
+    ).nativeElement as HTMLButtonElement;
+
+    expect(button.disabled).toBe(false);
+    button.click();
+
+    expect(batchRun.start).toHaveBeenCalledWith('example-project-slug', [
+      { eventId: 'id-add_to_cart', eventName: 'add_to_cart' },
+      { eventId: 'id-purchase', eventName: 'purchase' }
+    ]);
   });
 });

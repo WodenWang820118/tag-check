@@ -12,12 +12,14 @@ import { SlideUploadComponent } from '../../components/slide-upload/slide-upload
 import { SlideImportComponent } from '../../components/slide-import/slide-import.component';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { BatchRunPanelComponent } from '../../components/batch-run-panel/batch-run-panel.component';
 @Component({
   selector: 'app-report-big-table',
   standalone: true,
   imports: [
     ReportTableComponent,
     ReportTableToolbarComponent,
+    BatchRunPanelComponent,
     SlideUploadComponent,
     SlideImportComponent,
     MatSidenavModule
@@ -51,6 +53,7 @@ import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
       <mat-sidenav-content>
         <div class="report-view mat-elevation-z4">
           <app-report-table-toolbar></app-report-table-toolbar>
+          <app-batch-run-panel></app-batch-run-panel>
           <app-report-table></app-report-table>
         </div>
       </mat-sidenav-content>

@@ -32,6 +32,8 @@ import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.compo
 import { getLastRunAt, getRunStatus, hasRun } from '../report-detail.contracts';
 // #endregion
 
+import { BatchRunService } from '../../services/batch-run/batch-run.service';
+
 @Component({
   selector: 'app-report-table',
   standalone: true,
@@ -82,6 +84,7 @@ export class ReportTableComponent implements OnInit {
 
   constructor(
     public testRunningFacadeService: TestRunningFacadeService,
+    public batchRunService: BatchRunService,
     private readonly route: ActivatedRoute,
     private readonly facade: ReportTableFacadeService,
     private readonly tableSortService: TableSortService,
