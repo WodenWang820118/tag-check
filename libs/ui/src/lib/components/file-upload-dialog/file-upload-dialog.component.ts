@@ -8,7 +8,7 @@ import {
 import { from } from 'rxjs';
 import { MatDialog, MatDialogContent } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
-import { EventBusService, EditorFacadeService } from '@data-access';
+import { EditorFacadeService } from '@data-access';
 import {
   extractDataLayerPushes,
   isMeasurementPlanHeader,
@@ -80,7 +80,6 @@ export class FileUploadDialogComponent {
 
   constructor(
     public dialog: MatDialog,
-    private readonly eventBusService: EventBusService,
     private readonly editorFacadeService: EditorFacadeService
   ) {
     effect(() => {
@@ -98,11 +97,6 @@ export class FileUploadDialogComponent {
         }
       }
     });
-  }
-
-  handFileToSidenavForm(file: File) {
-    this.dialog.closeAll();
-    this.eventBusService.emit('toggleDrawer', file);
   }
 
   async downloadPlanTemplate(): Promise<void> {

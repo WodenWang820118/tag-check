@@ -134,8 +134,10 @@ module that provides any other: a second provider creates a second instance.
   `.github/workflows/vercel-previews.yaml`, which deploys the sites whose Nx
   project is affected. Register a new Vercel site in
   `tools/scripts/vercel/preview-targets`.
-- ng-tag-build's initial bundle has about 1.5 kB of headroom under its 1 MB
-  error budget, and `libs/shared-styles` counts against it. Prefer
+- ng-tag-build's initial bundle has about 12 kB of headroom under its 1 MB
+  error budget, and `libs/shared-styles` counts against it. A dynamic import
+  of a CommonJS package (such as exceljs) still adds the bundler's interop
+  helpers to the initial bundle. Prefer
   `mat.*-overrides` mixins with only the tokens you change over
   `mat.*-color` / `mat.*-theme`.
 - The pre-commit hook runs `nx affected` tests three at a time. At six,

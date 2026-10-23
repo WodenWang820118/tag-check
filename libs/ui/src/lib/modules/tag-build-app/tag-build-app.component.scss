@@ -1,15 +1,7 @@
-@use 'libs/shared-styles/src/variables.scss' as *;
-
 .main-page {
   display: flex;
   flex-direction: column;
   gap: 2rem;
   margin: 0 auto;
   max-width: 112rem;
-
-  &__sidenav {
-    border: 1px solid $border-color;
-    border-radius: 6px;
-    min-height: 16rem;
-  }
 }
