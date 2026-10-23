@@ -53,4 +53,53 @@ describe('measurement-plan-spreadsheet', () => {
       ['login', 'method', '']
     ]);
   });
+
+  it('supports RFC 4180 quoted cells containing line breaks as Excel writes them', () => {
+    const csv =
+      'dataLayer Specs\r\n' +
+      '"window.dataLayer.push({\r\n  event: \'view_item\'\r\n});"\r\n';
+
+    expect(parseCsvToTable(csv)).toEqual([
+      ['dataLayer Specs'],
+      ["window.dataLayer.push({\r\n  event: 'view_item'\r\n});"]
+    ]);
+  });
+
+  it('handles doubled quotes within multi-line cells', () => {
+    const csv =
+      'dataLayer Specs\r\n' +
+      '"window.dataLayer.push({\r\n  ""event"": ""view_item""\r\n});"\r\n';
+
+    expect(parseCsvToTable(csv)).toEqual([
+      ['dataLayer Specs'],
+      ['window.dataLayer.push({\r\n  "event": "view_item"\r\n});']
+    ]);
+  });
+
+  it('supports semicolon delimiter with multi-line quoted cells and doubled quotes', () => {
+    const csv =
+      'dataLayer Specs;Notes\r\n' +
+      '"window.dataLayer.push({\r\n  event: \'add_to_cart\'\r\n});";"A ""quoted"" note"\r\n';
+
+    expect(parseCsvToTable(csv)).toEqual([
+      ['dataLayer Specs', 'Notes'],
+      [
+        "window.dataLayer.push({\r\n  event: 'add_to_cart'\r\n});",
+        'A "quoted" note'
+      ]
+    ]);
+  });
+
+  it('skips blank lines and whitespace-only lines between multi-line records', () => {
+    const csv =
+      'dataLayer Specs\r\n\r\n' +
+      '"window.dataLayer.push({\r\n  event: \'login\'\r\n});"\r\n   \r\n' +
+      '"window.dataLayer.push({\r\n  event: \'sign_up\'\r\n});"\r\n\r\n';
+
+    expect(parseCsvToTable(csv)).toEqual([
+      ['dataLayer Specs'],
+      ["window.dataLayer.push({\r\n  event: 'login'\r\n});"],
+      ["window.dataLayer.push({\r\n  event: 'sign_up'\r\n});"]
+    ]);
+  });
 });

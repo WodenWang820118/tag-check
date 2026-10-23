@@ -37,39 +37,91 @@ export function downloadMeasurementPlanTemplate(): void {
   URL.revokeObjectURL(url);
 }
 
+function detectDelimiter(text: string): string {
+  let inQuotes = false;
+  let start = 0;
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (char === '"') {
+      if (inQuotes && text[i + 1] === '"') {
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (!inQuotes && (char === '\r' || char === '\n')) {
+      const line = text.slice(start, i);
+      if (line.trim() !== '') {
+        return line.includes(';') && !line.includes(',') ? ';' : ',';
+      }
+      if (char === '\r' && text[i + 1] === '\n') {
+        i++;
+      }
+      start = i + 1;
+    }
+  }
+  const remaining = text.slice(start);
+  return remaining.includes(';') && !remaining.includes(',') ? ';' : ',';
+}
+
 /**
- * Splits CSV text into rows of cells. Quoted cells may hold delimiters and
- * doubled quotes. Excel saves with `;` in locales that use a decimal comma, so
- * a header line with `;` and no `,` switches the delimiter.
+ * Splits CSV text into rows of cells according to RFC 4180.
+ * Supports quoted cells containing line breaks and doubled quotes.
+ * Excel saves with `;` in locales that use a decimal comma, so a header line
+ * with `;` and no `,` switches the delimiter. Blank lines are skipped.
  */
 export function parseCsvToTable(text: string): string[][] {
-  const lines = text.replace(/^﻿/, '').split(/\r?\n/);
-  const header = lines[0] ?? '';
-  const delimiter = header.includes(';') && !header.includes(',') ? ';' : ',';
+  const cleanText = text.replace(/^\uFEFF/, '');
+  const delimiter = detectDelimiter(cleanText);
 
-  return lines
-    .filter((line) => line.trim() !== '')
-    .map((line) => {
-      const cells: string[] = [];
-      let current = '';
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        if (char === '"' && inQuotes && line[i + 1] === '"') {
-          current += '"';
-          i++;
-        } else if (char === '"') {
-          inQuotes = !inQuotes;
-        } else if (char === delimiter && !inQuotes) {
-          cells.push(current);
-          current = '';
-        } else {
-          current += char;
-        }
+  const rows: string[][] = [];
+  let cells: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  let rowHasContent = false;
+
+  for (let i = 0; i < cleanText.length; i++) {
+    const char = cleanText[i];
+
+    if (char === '"') {
+      rowHasContent = true;
+      if (inQuotes && cleanText[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
       }
+    } else if (inQuotes) {
+      rowHasContent = true;
+      current += char;
+    } else if (char === delimiter) {
+      rowHasContent = true;
       cells.push(current);
-      return cells;
-    });
+      current = '';
+    } else if (char === '\r' || char === '\n') {
+      if (char === '\r' && cleanText[i + 1] === '\n') {
+        i++;
+      }
+      if (rowHasContent) {
+        cells.push(current);
+        rows.push(cells);
+      }
+      cells = [];
+      current = '';
+      rowHasContent = false;
+    } else {
+      if (char.trim() !== '') {
+        rowHasContent = true;
+      }
+      current += char;
+    }
+  }
+
+  if (rowHasContent || cells.length > 0) {
+    cells.push(current);
+    rows.push(cells);
+  }
+
+  return rows;
 }
 
 export async function readMeasurementPlanFile(file: File): Promise<string[][]> {

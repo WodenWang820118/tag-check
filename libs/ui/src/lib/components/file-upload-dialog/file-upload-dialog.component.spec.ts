@@ -113,7 +113,67 @@ describe('FileUploadDialogComponent', () => {
     });
   });
 
-  describe('choosing a file', () => {
+  describe('importLegacySpecsTable', () => {
+    it('imports specs from dataLayer Specs column, skipping resets', () => {
+      const table: string[][] = [
+        ['ID', 'dataLayer Specs', 'Comments'],
+        [
+          '1',
+          "window.dataLayer.push({ ecommerce: null });\nwindow.dataLayer.push({ event: 'view_item', ecommerce: { items: [{ item_name: 'Hat' }] } });",
+          'tested'
+        ],
+        [
+          '2',
+          "dataLayer.push({ event: 'purchase', ecommerce: { currency: 'USD', value: '49.99' } });",
+          'verified'
+        ]
+      ];
+
+      const handled = component.importLegacySpecsTable(table);
+      expect(handled).toBe(true);
+      expect(dialog.closeAll).toHaveBeenCalled();
+      expect(editorFacade.inputJsonContent).toEqual([
+        {
+          event: 'view_item',
+          ecommerce: { items: [{ item_name: 'Hat' }] }
+        },
+        {
+          event: 'purchase',
+          ecommerce: { currency: 'USD', value: '49.99' }
+        }
+      ]);
+    });
+
+    it('shows issues with spreadsheet row numbers in error dialog and imports nothing', () => {
+      const table: string[][] = [
+        ['dataLayer Specs'],
+        ["window.dataLayer.push({ event: 'valid_event' });"],
+        ['window.dataLayer.push({ event: broken payload {{{%% });']
+      ];
+
+      const handled = component.importLegacySpecsTable(table);
+      expect(handled).toBe(true);
+      expect(dialog.open).toHaveBeenCalledWith(ErrorDialogComponent, {
+        data: {
+          message: expect.stringContaining('Row 3:')
+        }
+      });
+      expect(editorFacade.inputJsonContent).toBeNull();
+    });
+
+    it('returns false when table does not have a dataLayer Specs column', () => {
+      const table: string[][] = [
+        ['some_column', 'other_column'],
+        ['value1', 'value2']
+      ];
+
+      const handled = component.importLegacySpecsTable(table);
+      expect(handled).toBe(false);
+      expect(editorFacade.inputJsonContent).toBeNull();
+    });
+  });
+
+  describe('choosing a file (dialog routing)', () => {
     const select = (file: File) =>
       component.onFileSelected({
         target: { files: [file] }
@@ -133,7 +193,42 @@ describe('FileUploadDialogComponent', () => {
       expect(dialog.closeAll).toHaveBeenCalled();
     });
 
-    it('rejects a CSV file that is not a measurement plan', async () => {
+    it('imports a legacy CSV with "dataLayer Specs" column into the input JSON editor', async () => {
+      const csv =
+        'dataLayer Specs\r\n' +
+        "\"window.dataLayer.push({ event: 'view_item', ecommerce: { items: [{ item_name: 'Shirt' }] } });\"\r\n";
+
+      await select(new File([csv], 'legacy.csv'));
+
+      expect(editorFacade.inputJsonContent).toEqual([
+        {
+          event: 'view_item',
+          ecommerce: { items: [{ item_name: 'Shirt' }] }
+        }
+      ]);
+      expect(dialog.closeAll).toHaveBeenCalled();
+    });
+
+    it('opens error dialog with spreadsheet row numbers when legacy CSV has issues and imports nothing', async () => {
+      const csv =
+        'dataLayer Specs\r\n' +
+        '"window.dataLayer.push({ event: \'valid_event\' });"\r\n' +
+        '"window.dataLayer.push({ event: broken payload %%% });"\r\n';
+
+      await select(new File([csv], 'broken-legacy.csv'));
+
+      expect(editorFacade.inputJsonContent).toBeNull();
+      expect(dialog.open).toHaveBeenCalledWith(
+        ErrorDialogComponent,
+        expect.objectContaining({
+          data: expect.objectContaining({
+            message: expect.stringContaining('Row 3:')
+          })
+        })
+      );
+    });
+
+    it('rejects a CSV file that is neither a measurement plan nor a legacy sheet, naming both formats', async () => {
       await select(new File(['name,value\na,1\n'], 'other.csv'));
 
       expect(editorFacade.inputJsonContent).toBeNull();
@@ -141,18 +236,74 @@ describe('FileUploadDialogComponent', () => {
         ErrorDialogComponent,
         expect.objectContaining({
           data: expect.objectContaining({
-            message: expect.stringContaining('measurement plan')
+            message: expect.stringMatching(/measurement plan.*dataLayer Specs/s)
           })
         })
       );
     });
 
-    it('hands an .xlsx file to the spreadsheet drawer as before', async () => {
+    it('rejects an .xlsx file with instructions to save as CSV (UTF-8)', async () => {
       const file = new File(['xlsx bytes'], 'specs.xlsx');
 
       await select(file);
 
-      expect(eventBus.emit).toHaveBeenCalledWith('toggleDrawer', file);
+      expect(dialog.open).toHaveBeenCalledWith(ErrorDialogComponent, {
+        data: {
+          message:
+            'Save the spreadsheet as CSV (UTF-8) and upload the .csv file.'
+        }
+      });
+      expect(eventBus.emit).not.toHaveBeenCalled();
+    });
+
+    it('rejects an .xls file with instructions to save as CSV (UTF-8)', async () => {
+      const file = new File(['xls bytes'], 'specs.xls');
+
+      await select(file);
+
+      expect(dialog.open).toHaveBeenCalledWith(ErrorDialogComponent, {
+        data: {
+          message:
+            'Save the spreadsheet as CSV (UTF-8) and upload the .csv file.'
+        }
+      });
+      expect(eventBus.emit).not.toHaveBeenCalled();
+    });
+
+    it('rejects a "dataLayer Specs" column without any event push', async () => {
+      await select(
+        new File(
+          ['dataLayer Specs\n"dataLayer.push({ ecommerce: null });"\n'],
+          'specs.csv'
+        )
+      );
+
+      expect(editorFacade.inputJsonContent).toBeNull();
+      expect(dialog.open).toHaveBeenCalledWith(
+        ErrorDialogComponent,
+        expect.objectContaining({
+          data: expect.objectContaining({
+            message: expect.stringContaining(
+              'no dataLayer.push call with an event'
+            )
+          })
+        })
+      );
+    });
+
+    it('imports a JSON file into the input JSON editor', async () => {
+      const jsonContent = JSON.stringify([{ event: 'page_view' }]);
+      const file = new File([jsonContent], 'specs.json', {
+        type: 'application/json'
+      });
+
+      await select(file);
+      // The file is read asynchronously and an effect writes it to the editor.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      TestBed.tick();
+
+      expect(editorFacade.inputJsonContent).toEqual([{ event: 'page_view' }]);
+      expect(dialog.closeAll).toHaveBeenCalled();
     });
   });
 });
