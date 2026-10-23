@@ -48,9 +48,7 @@ jobs:
           node-version: '24.x'
           check-latest: true
       - name: Setup pnpm
-        run: |
-          corepack enable
-          corepack install
+        uses: ./.github/actions/setup-pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Describe release context
@@ -273,9 +271,7 @@ jobs:
           command -v mksquashfs
           command -v patchelf
       - name: Setup pnpm
-        run: |
-          corepack enable
-          corepack install
+        uses: ./.github/actions/setup-pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Describe release context
@@ -311,9 +307,7 @@ jobs:
           node-version: '24.x'
           check-latest: true
       - name: Setup pnpm
-        run: |
-          corepack enable
-          corepack install
+        uses: ./.github/actions/setup-pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Describe release context

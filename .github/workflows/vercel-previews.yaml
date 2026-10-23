@@ -53,9 +53,7 @@ jobs:
           node-version: '24.x'
       - name: Setup pnpm
         if: env.HAS_VERCEL_TOKEN == 'true'
-        run: |
-          corepack enable
-          corepack install
+        uses: ./.github/actions/setup-pnpm
       - name: Install dependencies
         if: env.HAS_VERCEL_TOKEN == 'true'
         run: pnpm install --frozen-lockfile
@@ -88,9 +86,7 @@ jobs:
         with:
           node-version: '24.x'
       - name: Setup pnpm
-        run: |
-          corepack enable
-          corepack install
+        uses: ./.github/actions/setup-pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Link the Vercel project
