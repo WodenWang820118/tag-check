@@ -10,9 +10,11 @@ import { MatDialog, MatDialogContent } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { EventBusService, EditorFacadeService } from '@data-access';
 import {
+  extractDataLayerPushes,
   isMeasurementPlanHeader,
   measurementPlanToDataLayerSpecs,
-  parseMeasurementPlanRows
+  parseMeasurementPlanRows,
+  StrictDataLayerEvent
 } from '@utils';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -33,7 +35,7 @@ import { MatIconModule } from '@angular/material/icon';
           (change)="onFileSelected($event)"
           #fileInput
           type="file"
-          accept=".json,.xlsx,.csv"
+          accept=".json,.csv"
         />
       </div>
       <div class="file-upload-dialog__actions__action">
@@ -119,17 +121,22 @@ export class FileUploadDialogComponent {
       if (fileExtension === 'json') {
         this.selectedFile = file;
         this.handleJsonFile(file);
-      } else if (fileExtension === 'xlsx') {
-        this.selectedFile = file;
-        this.handFileToSidenavForm(file);
       } else if (fileExtension === 'csv') {
         this.selectedFile = file;
         await this.handleMeasurementPlanFile(file);
+      } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+        this.selectedFile = null;
+        this.dialog.open(ErrorDialogComponent, {
+          data: {
+            message:
+              'Save the spreadsheet as CSV (UTF-8) and upload the .csv file.'
+          }
+        });
       } else {
         this.selectedFile = null;
         this.dialog.open(ErrorDialogComponent, {
           data: {
-            message: 'Please upload a valid JSON, XLSX, or CSV file.'
+            message: 'Please upload a valid JSON or CSV file.'
           }
         });
       }
@@ -140,14 +147,19 @@ export class FileUploadDialogComponent {
     try {
       const { readMeasurementPlanFile } =
         await import('./measurement-plan-spreadsheet');
-      if (!this.importPlanTable(await readMeasurementPlanFile(file))) {
-        this.dialog.open(ErrorDialogComponent, {
-          data: {
-            message:
-              'A CSV file must be a measurement plan: download the plan template for its columns.'
-          }
-        });
+      const table = await readMeasurementPlanFile(file);
+      if (this.importPlanTable(table)) {
+        return;
       }
+      if (this.importLegacySpecsTable(table)) {
+        return;
+      }
+      this.dialog.open(ErrorDialogComponent, {
+        data: {
+          message:
+            'A CSV file must be a measurement plan (event_name, event_parameters, item_parameters) or include a "dataLayer Specs" column.'
+        }
+      });
     } catch (err) {
       this.dialog.open(ErrorDialogComponent, {
         data: {
@@ -178,6 +190,60 @@ export class FileUploadDialogComponent {
     }
     const specs = measurementPlanToDataLayerSpecs(rows);
     this.editorFacadeService.inputJsonContent = specs;
+    this.dialog.closeAll();
+    return true;
+  }
+
+  /**
+   * Imports dataLayer specs from a parsed sheet table containing a "dataLayer Specs" column.
+   * If any issues are found, opens the error dialog with spreadsheet row numbers and imports nothing.
+   * Otherwise, sets the extracted dataLayer specs on the input JSON editor and closes the dialog.
+   * Returns true if the table was handled as a legacy specs table, false otherwise.
+   */
+  importLegacySpecsTable(table: string[][]): boolean {
+    if (table.length === 0) {
+      return false;
+    }
+    const headerRow = table[0];
+    const dataLayerSpecsColIndex = headerRow.findIndex(
+      (cell) => cell.trim().toLowerCase() === 'datalayer specs'
+    );
+    if (dataLayerSpecsColIndex === -1) {
+      return false;
+    }
+
+    const allSpecs: StrictDataLayerEvent[] = [];
+    const allIssues: string[] = [];
+
+    for (let rowIndex = 1; rowIndex < table.length; rowIndex++) {
+      const row = table[rowIndex];
+      const cellValue = row[dataLayerSpecsColIndex];
+      if (!cellValue || cellValue.trim() === '') {
+        continue;
+      }
+      const rowNumber = rowIndex + 1;
+      const { specs, issues } = extractDataLayerPushes(cellValue);
+      for (const issue of issues) {
+        allIssues.push(`Row ${rowNumber}: ${issue}`);
+      }
+      allSpecs.push(...specs);
+    }
+    if (allIssues.length === 0 && allSpecs.length === 0) {
+      allIssues.push(
+        'The "dataLayer Specs" column has no dataLayer.push call with an event.'
+      );
+    }
+
+    if (allIssues.length > 0) {
+      this.dialog.open(ErrorDialogComponent, {
+        data: {
+          message: allIssues.join('\n')
+        }
+      });
+      return true;
+    }
+
+    this.editorFacadeService.inputJsonContent = allSpecs;
     this.dialog.closeAll();
     return true;
   }
