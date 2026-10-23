@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FileUploadDialogComponent } from './file-upload-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
-import { EditorFacadeService, EventBusService } from '@data-access';
+import { EditorFacadeService } from '@data-access';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 
 describe('FileUploadDialogComponent', () => {
@@ -11,19 +11,16 @@ describe('FileUploadDialogComponent', () => {
     open: ReturnType<typeof vi.fn>;
     closeAll: ReturnType<typeof vi.fn>;
   };
-  let eventBus: { emit: ReturnType<typeof vi.fn> };
   let editorFacade: { inputJsonContent: unknown };
 
   beforeEach(async () => {
     dialog = { open: vi.fn(), closeAll: vi.fn() };
-    eventBus = { emit: vi.fn() };
     editorFacade = { inputJsonContent: null };
 
     await TestBed.configureTestingModule({
       imports: [FileUploadDialogComponent],
       providers: [
         { provide: MatDialog, useValue: dialog },
-        { provide: EventBusService, useValue: eventBus },
         { provide: EditorFacadeService, useValue: editorFacade }
       ]
     }).compileComponents();
@@ -253,7 +250,6 @@ describe('FileUploadDialogComponent', () => {
             'Save the spreadsheet as CSV (UTF-8) and upload the .csv file.'
         }
       });
-      expect(eventBus.emit).not.toHaveBeenCalled();
     });
 
     it('rejects an .xls file with instructions to save as CSV (UTF-8)', async () => {
@@ -267,7 +263,6 @@ describe('FileUploadDialogComponent', () => {
             'Save the spreadsheet as CSV (UTF-8) and upload the .csv file.'
         }
       });
-      expect(eventBus.emit).not.toHaveBeenCalled();
     });
 
     it('rejects a "dataLayer Specs" column without any event push', async () => {

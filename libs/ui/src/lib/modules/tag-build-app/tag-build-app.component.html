@@ -1,13 +1,6 @@
 <div class="main-page">
   <lib-tag-build-page [specs]="exampleInputJson"></lib-tag-build-page>
   @defer (on viewport) {
-    <mat-sidenav-container class="main-page__sidenav">
-      <lib-xlsx-sidenav-form></lib-xlsx-sidenav-form>
-    </mat-sidenav-container>
-  } @placeholder {
-    <div></div>
-  }
-  @defer (on viewport) {
     <div class="main-page__article">
       <lib-article />
     </div>
