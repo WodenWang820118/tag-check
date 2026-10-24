@@ -11,7 +11,7 @@ function build() {
   const projectRepositoryService = { getEntityBySlug: vi.fn() };
   const testEventRepositoryService = {
     create: vi.fn(),
-    getEntityByEventId: vi.fn(),
+    getEntityBySlugAndEventId: vi.fn(),
     getBySlugAndEventId: vi.fn()
   };
   const testEventDetailRepositoryService = {
@@ -52,9 +52,11 @@ describe('TestReportFacadeRepositoryService', () => {
       const ctx = build();
       ctx.projectRepositoryService.getEntityBySlug.mockResolvedValue({ id: 1 });
       ctx.testEventRepositoryService.create.mockResolvedValue({});
-      ctx.testEventRepositoryService.getEntityByEventId.mockResolvedValue({
-        id: 7
-      });
+      ctx.testEventRepositoryService.getEntityBySlugAndEventId.mockResolvedValue(
+        {
+          id: 7
+        }
+      );
       ctx.recordingRepositoryService.create.mockResolvedValue({});
       ctx.specRepositoryService.create.mockResolvedValue({});
       ctx.itemDefRepositoryService.create.mockResolvedValue({});
@@ -83,6 +85,10 @@ describe('TestReportFacadeRepositoryService', () => {
         { id: 7 },
         { fullItemDef: 'd', itemId: 'iid', templateName: 'tpl' }
       );
+      // Another project may hold a test with the same eventId.
+      expect(
+        ctx.testEventRepositoryService.getEntityBySlugAndEventId
+      ).toHaveBeenCalledWith('demo', 'evt');
       expect(result).toEqual({ id: 7 });
     });
 

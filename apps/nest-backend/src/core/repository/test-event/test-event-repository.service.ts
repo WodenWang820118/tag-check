@@ -48,14 +48,6 @@ export class TestEventRepositoryService {
     });
   }
 
-  async getEntityByEventId(eventId: string) {
-    const entity = await this.repository.findOne({ where: { eventId } });
-    if (!entity) {
-      throw new HttpException('Test event not found', HttpStatus.NOT_FOUND);
-    }
-    return entity;
-  }
-
   /** The test's own columns: a run needs its id, not its past results. */
   async getEntityBySlugAndEventId(projectSlug: string, eventId: string) {
     const entity = await this.repository.findOne({

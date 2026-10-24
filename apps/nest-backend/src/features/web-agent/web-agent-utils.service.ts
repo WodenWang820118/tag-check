@@ -100,7 +100,10 @@ export class WebAgentUtilsService {
 
     if (credentials) await this.authenticate(page, credentials);
     const testEventEntity =
-      await this.testEventRepositoryService.getEntityByEventId(eventId);
+      await this.testEventRepositoryService.getEntityBySlugAndEventId(
+        projectSlug,
+        eventId
+      );
     // 2) capture the request if needed
     if (captureRequest) {
       requestInterception = await this.setupRequestInterception(

@@ -51,8 +51,13 @@ export class TestReportFacadeRepositoryService {
         updatedAt: new Date()
       });
 
+      // eventId is unique only within a project; the example project and
+      // an imported copy of it share every eventId.
       const testEvent =
-        await this.testEventRepositoryService.getEntityByEventId(eventId);
+        await this.testEventRepositoryService.getEntityBySlugAndEventId(
+          projectSlug,
+          eventId
+        );
 
       // Create recording
       await this.recordingRepositoryService.create(testEvent, {
