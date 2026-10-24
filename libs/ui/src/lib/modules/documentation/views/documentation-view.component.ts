@@ -2,6 +2,9 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { SideBarComponent } from '../components/sidebar/sidebar.component';
 import { RouterOutlet } from '@angular/router';
 
+/**
+ * The documentation layout: the sidebar beside the routed page.
+ */
 @Component({
   selector: 'app-documentation-view',
   standalone: true,

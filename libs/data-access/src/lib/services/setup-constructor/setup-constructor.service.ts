@@ -1,5 +1,9 @@
 import { computed, Injectable, signal } from '@angular/core';
 
+/**
+ * Holds tag-build's setup options: the Google tag name, the measurement ID,
+ * item-scoped variables and whether event tags send ecommerce data.
+ */
 @Injectable({
   providedIn: 'root'
 })

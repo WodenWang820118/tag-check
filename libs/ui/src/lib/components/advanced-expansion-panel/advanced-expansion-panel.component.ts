@@ -37,6 +37,10 @@ interface AdvancedFormValues {
   includeItemScopedVariables: boolean;
 }
 
+/**
+ * tag-build's advanced options: built-in scroll and video events, the
+ * Google tag setup, ecommerce data and Event Settings variables.
+ */
 @Component({
   selector: 'lib-advanced-expansion-panel',
   standalone: true,

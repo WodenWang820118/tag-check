@@ -25,6 +25,9 @@ export function buildMeasurementPlanTemplateCsv(): string {
     .join('\r\n');
 }
 
+/**
+ * Downloads the template as a UTF-8 CSV file.
+ */
 export function downloadMeasurementPlanTemplate(): void {
   const blob = new Blob([buildMeasurementPlanTemplateCsv()], {
     type: 'text/csv;charset=utf-8'
@@ -124,6 +127,9 @@ export function parseCsvToTable(text: string): string[][] {
   return rows;
 }
 
+/**
+ * Reads an uploaded CSV file into rows of cells; see {@link parseCsvToTable}.
+ */
 export async function readMeasurementPlanFile(file: File): Promise<string[][]> {
   return parseCsvToTable(await file.text());
 }

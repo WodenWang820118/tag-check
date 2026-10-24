@@ -1,6 +1,9 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MermaidDiagramComponent } from '../mermaid-diagram/mermaid-diagram.component';
 
+/**
+ * The public sites' Objectives page.
+ */
 @Component({
   selector: 'lib-objectives',
   standalone: true,

@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { VariableTypeEnum, VideoVariableConfig } from '@utils';
 
+/**
+ * The built-in video variables the video tags read.
+ */
 @Injectable({
   providedIn: 'root'
 })

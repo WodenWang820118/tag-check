@@ -12,6 +12,10 @@ import {
 import { EditorView, basicSetup } from 'codemirror';
 import { json } from '@codemirror/lang-json';
 
+/**
+ * A CodeMirror editor that shows `content` with the given language
+ * extension.
+ */
 @Component({
   selector: 'lib-general-editor',
   standalone: true,

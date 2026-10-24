@@ -2,6 +2,10 @@ import { DataLayerVariableConfig, VariableTypeEnum } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 
+/**
+ * Builds a version 2 Data Layer Variable named `DLV - <path>` for each data
+ * layer path; version 2 reads dots as nested keys.
+ */
 @Injectable({
   providedIn: 'root'
 })

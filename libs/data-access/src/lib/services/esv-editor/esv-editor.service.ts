@@ -1,5 +1,9 @@
 import { computed, Injectable, signal } from '@angular/core';
 
+/**
+ * Holds the Event Settings variable JSON typed in tag-build's advanced
+ * options.
+ */
 @Injectable({
   providedIn: 'root'
 })

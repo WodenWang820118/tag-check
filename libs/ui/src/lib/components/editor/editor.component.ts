@@ -9,6 +9,9 @@ import {
 import { EditorService } from '@data-access';
 import { EditorTypeEnum } from '@utils';
 
+/**
+ * Mounts one of tag-build's CodeMirror editors, chosen by `editorExtension`.
+ */
 @Component({
   selector: 'lib-editor',
   standalone: true,

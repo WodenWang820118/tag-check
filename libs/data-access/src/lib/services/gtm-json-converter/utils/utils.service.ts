@@ -1,10 +1,18 @@
 import { Injectable } from '@angular/core';
 import { NestedObject } from '@utils';
 
+/**
+ * Helpers shared by the converter.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class UtilsService {
+  /**
+   * The account and container IDs in a Tag Manager URL
+   * (`.../accounts/<id>/containers/<id>...`), or empty strings when the URL
+   * has none.
+   */
   extractAccountAndContainerId(url: string) {
     const regex = /accounts\/(\d+)\/containers\/(\d+)/;
     const result = regex.exec(url);
@@ -20,6 +28,9 @@ export class UtilsService {
     };
   }
 
+  /**
+   * The current local time in the export format, such as `2023-08-03 02:16:33`.
+   */
   outputTime() {
     // output the time in GTM export format: 2023-08-03 02:16:33
     const d = new Date();

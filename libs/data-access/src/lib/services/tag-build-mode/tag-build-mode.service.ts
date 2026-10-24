@@ -10,6 +10,9 @@ export enum TagBuildMode {
   TagExtract = 1
 }
 
+/**
+ * Holds which tag-build tab is active: Tag Build or Tag Extract.
+ */
 @Injectable({ providedIn: 'root' })
 export class TagBuildModeService {
   private readonly _mode: WritableSignal<TagBuildMode> = signal(

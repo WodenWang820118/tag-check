@@ -19,6 +19,11 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
+/**
+ * tag-build's upload dialog: reads specs from a JSON file, or from a CSV
+ * measurement plan or "dataLayer Specs" sheet, into the input editor, and
+ * downloads the measurement plan template.
+ */
 @Component({
   selector: 'lib-file-upload-dialog',
   standalone: true,

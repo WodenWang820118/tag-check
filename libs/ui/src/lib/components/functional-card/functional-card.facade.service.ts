@@ -22,6 +22,11 @@ import {
 } from '@utils';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
 
+/**
+ * Runs tag-build's conversion: reads the specs and options, converts them
+ * into a container, checks it with {@link validateGTMImportReadiness} and
+ * shows the result or the reasons it needs review.
+ */
 @Injectable({ providedIn: 'root' })
 export class FunctionalCardFacade {
   private readonly dataLayer: Array<Record<string, unknown>>;
