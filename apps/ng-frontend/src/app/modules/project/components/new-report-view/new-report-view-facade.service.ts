@@ -142,7 +142,6 @@ export class NewReportViewFacadeService {
     const recordingEditor = this.editorService.editor$.recordingJsonEditor();
     const specContent = specEditor.state.doc.toString();
     const recordingContent = recordingEditor.state.doc.toString();
-    const testName = specContent ? JSON.parse(specContent).event : '';
     // cleaned legacy combineLatest-based editor content sync
     const eventId = uuidv4();
 
@@ -165,6 +164,9 @@ export class NewReportViewFacadeService {
         }
       }
 
+      // Read after validation: parsing invalid JSON earlier threw before the
+      // "Spec must be valid JSON." dialog could open.
+      const testName = (specParsed as { event?: string }).event ?? '';
       const eventName = (specParsed as { event?: string }).event ?? 'unknown';
       const reportDetails: IReportDetails = new ReportDetailsDto({
         eventId: eventId,
