@@ -73,7 +73,7 @@ describe('ApplicationSettingRepositoryService', () => {
     repository.findOne.mockResolvedValue(null);
     await expect(
       service.update({ id: 1, projectSlug: 'demo' } as never, {} as never)
-    ).rejects.toMatchObject({ status: HttpStatus.INTERNAL_SERVER_ERROR });
+    ).rejects.toMatchObject({ status: HttpStatus.NOT_FOUND });
   });
 
   it('update() rethrows save failures as INTERNAL_SERVER_ERROR', async () => {

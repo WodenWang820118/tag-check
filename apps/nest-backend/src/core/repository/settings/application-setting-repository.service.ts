@@ -68,6 +68,8 @@ export class ApplicationSettingRepositoryService {
         HttpStatus.NOT_FOUND
       );
     } catch (error) {
+      // Keep the 404 thrown above; only unexpected failures become a 500.
+      if (error instanceof HttpException) throw error;
       Logger.error(`Failed to update Application settings: ${error}`);
       throw new HttpException(
         'Failed to update Application settings',
