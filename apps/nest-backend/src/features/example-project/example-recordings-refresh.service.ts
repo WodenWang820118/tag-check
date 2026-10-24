@@ -80,6 +80,8 @@ export class ExampleRecordingsRefreshService {
         continue;
       }
 
+      // Sequential on purpose: these are writes, the row first and then
+      // the file, one test at a time.
       await this.recordingRepositoryService.update(
         projectSlug,
         testEvent.eventId,

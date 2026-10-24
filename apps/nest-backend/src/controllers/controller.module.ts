@@ -38,6 +38,7 @@ const services = [
   ConfigurationControllerService
 ];
 
+/** Every HTTP controller, with the feature modules they call. */
 @Module({
   imports: [
     ProjectAgentModule,

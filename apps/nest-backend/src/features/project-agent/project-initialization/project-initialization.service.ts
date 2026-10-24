@@ -5,6 +5,7 @@ import { ProjectFacadeRepositoryService } from '../../repository/project-facade/
 import { CreateProjectDto } from '../../../shared';
 import { existsSync, mkdirSync } from 'fs';
 
+/** Creates a project's folders and its database rows. */
 @Injectable()
 export class ProjectInitializationService {
   constructor(

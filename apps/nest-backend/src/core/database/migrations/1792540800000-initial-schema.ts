@@ -27,6 +27,7 @@ export class InitialSchema1792540800000 implements MigrationInterface {
   name = 'InitialSchema1792540800000';
 
   async up(queryRunner: QueryRunner): Promise<void> {
+    // Sequential on purpose: one connection, and an index needs its table.
     for (const statement of INITIAL_SCHEMA) {
       await queryRunner.query(statement);
     }
@@ -59,6 +60,7 @@ export class InitialSchema1792540800000 implements MigrationInterface {
       'project',
       'sys_configuration'
     ]) {
+      // Sequential on purpose: a child table goes before its parent.
       await queryRunner.query(`DROP TABLE "${table}"`);
     }
   }

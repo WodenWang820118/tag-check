@@ -11,6 +11,7 @@ import {
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
+/** Reads and writes tests (`TestEventEntity`). */
 @Injectable()
 export class TestEventRepositoryService {
   constructor(
@@ -175,8 +176,8 @@ export class TestEventRepositoryService {
             updateData.latestTestImageId = updatedEvent.latestTestImageId;
           }
 
-          // Use save instead of update to properly handle relations
-          // Upsert
+          // Sequential on purpose: the saves share the transaction's
+          // connection. save, not update, keeps the loaded relations.
           const updatedEntity = await repo.save({
             ...event,
             ...updateData

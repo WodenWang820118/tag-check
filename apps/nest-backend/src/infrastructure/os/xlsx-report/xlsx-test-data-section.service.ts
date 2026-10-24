@@ -6,6 +6,7 @@ import {
 } from '../../../shared';
 import { XlsxUtilsService } from './xlsx-utils.service';
 
+/** Writes a sheet's test data: the spec and one row per run. */
 @Injectable()
 export class XlsxTestDataSectionService {
   private readonly logger = new Logger(XlsxTestDataSectionService.name);

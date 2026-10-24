@@ -30,6 +30,10 @@ type ReportDiagnosticRequest = FastifyRequest & {
 const REQUEST_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+/**
+ * A project's tests with their latest results: list, add, update and delete
+ * tests, and read one test's report.
+ */
 @Controller('reports')
 export class ReportController {
   private readonly logger = new Logger(ReportController.name);

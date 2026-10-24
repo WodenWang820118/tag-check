@@ -13,6 +13,10 @@ import { existsSync, mkdirSync } from 'fs';
 import { FilePathService } from '../../../infrastructure/os/path/file-path/file-path.service';
 import { FileService } from '../../../infrastructure/os/file/file.service';
 
+/**
+ * Writes and deletes a test's result folder
+ * (`inspection_results/<eventId>`) and its abstract report JSON.
+ */
 @Injectable()
 export class ProjectAbstractReportService {
   private readonly logger = new Logger(ProjectAbstractReportService.name);

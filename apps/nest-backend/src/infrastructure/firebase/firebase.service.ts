@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+/**
+ * The Firebase app the backend reports unhandled errors to (Firestore). The
+ * web API key is public by design.
+ */
 @Injectable()
 export class FirebaseService {
   private readonly firebaseConfig = {

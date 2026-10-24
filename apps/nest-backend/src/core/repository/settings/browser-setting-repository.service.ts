@@ -10,6 +10,7 @@ import {
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
+/** Reads and writes a project's browser settings (headless, extra arguments). */
 @Injectable()
 export class BrowserSettingRepositoryService {
   constructor(

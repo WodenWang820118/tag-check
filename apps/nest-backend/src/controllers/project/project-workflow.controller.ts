@@ -5,6 +5,7 @@ import { CreateProjectDto } from '../../shared';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 import { ExampleProjectRepositoryService } from '../../features/example-project/example-project-repository.service';
 
+/** Creates and lists projects. */
 @Controller('projects')
 export class ProjectWorkFlowController {
   constructor(

@@ -7,6 +7,7 @@ export interface ExtraFileDescriptor {
   name?: string;
 }
 
+/** Zips a project folder, plus extra files at the zip's root. */
 @Injectable()
 export class ProjectCompressor {
   private readonly logger = new Logger(ProjectCompressor.name);

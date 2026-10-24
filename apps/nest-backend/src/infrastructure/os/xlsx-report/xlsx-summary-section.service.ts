@@ -11,6 +11,7 @@ const RESULT_CELLS: Record<RunStatus, { text: string; argb: string }> = {
   notRun: { text: 'NOT RUN', argb: '00808080' }
 };
 
+/** Writes a sheet's summary of the test's latest result. */
 @Injectable()
 export class XlsxSummarySectionService {
   addSummarySection(

@@ -7,6 +7,10 @@ import { FileService } from '../../../infrastructure/os/file/file.service';
 /** File name of a project's imported Tag Manager container, in its config folder. */
 export const GTM_CONTAINER_FILE_NAME = 'gtm-container.json';
 
+/**
+ * Saves and reads the GTM container a project imported, in its config
+ * folder.
+ */
 @Injectable()
 export class ProjectGtmContainerService {
   private readonly logger = new Logger(ProjectGtmContainerService.name);

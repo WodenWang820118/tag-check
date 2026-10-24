@@ -9,6 +9,7 @@ import {
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
+/** Reads and writes tests' Chrome Recorder recordings (`RecordingEntity`). */
 @Injectable()
 export class RecordingRepositoryService {
   constructor(

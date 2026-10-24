@@ -2,6 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import { ExampleProjectRepositoryService } from '../../features/example-project/example-project-repository.service';
 import type { ExampleProjectStartupReadiness } from '../../features/example-project/example-project-repository.service';
 
+/** Reports whether the example project's startup seed has finished. */
 @Controller('startup')
 export class StartupReadinessController {
   constructor(

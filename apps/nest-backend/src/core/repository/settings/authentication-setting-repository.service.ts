@@ -10,6 +10,7 @@ import {
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
+/** Reads and writes a project's site credentials. */
 @Injectable()
 export class AuthenticationSettingRepositoryService {
   constructor(

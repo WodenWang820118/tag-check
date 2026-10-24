@@ -6,6 +6,7 @@ import { Readable } from 'stream';
 
 import { RECORDING_FILES, RecordingFile } from '../../../shared';
 
+/** Streams a test's latest screen recording, or an empty file when it has none. */
 @Injectable()
 export class ProjectVideoService {
   constructor(private readonly folderPathService: FolderPathService) {}

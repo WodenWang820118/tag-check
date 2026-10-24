@@ -2,6 +2,11 @@ import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { join } from 'path';
 import { cwd } from 'process';
 
+/**
+ * Fixed names (folders, files, configuration keys), Chromium's arguments, and
+ * the database and projects paths for the current NODE_ENV. The desktop app
+ * sets DATABASE_PATH and ROOT_PROJECT_PATH.
+ */
 @Injectable()
 export class ConfigsService {
   private readonly USER_AGENT =

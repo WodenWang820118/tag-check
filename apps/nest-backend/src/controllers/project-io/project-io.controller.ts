@@ -20,6 +20,10 @@ import { SysConfigurationRepositoryService } from '../../core/repository/sys-con
 import { ProjectIoFacadeService } from '../../features/project-agent/project-io-facade/project-io-facade.service';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 
+/**
+ * Exports a project as a zip, imports one, and deletes a project with its
+ * folder.
+ */
 @Controller('projects')
 export class ProjectIoController {
   private readonly logger = new Logger(ProjectIoController.name);

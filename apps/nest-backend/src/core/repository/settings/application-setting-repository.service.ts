@@ -10,6 +10,10 @@ import {
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
+/**
+ * Reads and writes a project's application settings: website URL,
+ * pre-loading values (local storage and cookies) and GTM preview options.
+ */
 @Injectable()
 export class ApplicationSettingRepositoryService {
   private readonly logger = new Logger(

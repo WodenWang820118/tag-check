@@ -14,6 +14,10 @@ import { GtmOperatorService } from '../../features/gtm-operator/gtm-operator.ser
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 
+/**
+ * Runs a test in accompanied mode, through GTM Preview (Tag Assistant), and
+ * stops such a run.
+ */
 @Controller('datalayer')
 export class GtmOperatorController {
   private readonly logger = new Logger(GtmOperatorController.name);

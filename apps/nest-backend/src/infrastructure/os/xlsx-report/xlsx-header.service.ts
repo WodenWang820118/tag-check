@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 
+/** Writes a sheet's project title, description and measurement ID rows. */
 @Injectable()
 export class XlsxHeaderService {
   addProjectHeader(
