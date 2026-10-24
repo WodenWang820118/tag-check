@@ -147,6 +147,31 @@ describe('BatchRunService', () => {
     ]);
   });
 
+  it("shows the API's reason when a run service wraps the failed response", async () => {
+    runTestForReport.mockReturnValueOnce(
+      throwError(
+        () =>
+          new Error('GTM inspection failed', {
+            cause: new HttpErrorResponse({
+              status: 500,
+              error: { statusCode: 500, message: 'No recording found' }
+            })
+          })
+      )
+    );
+    runTestForReport.mockReturnValueOnce(
+      throwError(() => new Error('GTM inspection failed'))
+    );
+    const service = createService();
+
+    await service.start('example-project-slug', tests.slice(0, 2));
+
+    expect(service.batch()?.items.map((item) => item.message)).toEqual([
+      'No recording found',
+      'GTM inspection failed'
+    ]);
+  });
+
   it('stops the running test and skips the rest when cancelled', async () => {
     const firstRun = new Subject<ReportDetailResponse>();
     runTestForReport.mockReturnValueOnce(firstRun);

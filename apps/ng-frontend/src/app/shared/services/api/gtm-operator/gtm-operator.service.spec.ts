@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom, of, Subject, throwError } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { GtmOperatorService } from './gtm-operator.service';
@@ -75,6 +75,23 @@ describe('GtmOperatorService', () => {
         } as never)
       )
     ).rejects.toThrow('GTM inspection failed');
+  });
+
+  it('runInspectionViaGtm keeps the failed response as the cause', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const response = new HttpErrorResponse({
+      status: 500,
+      error: { statusCode: 500, message: 'No recording found' }
+    });
+    httpClient.post.mockReturnValueOnce(throwError(() => response));
+    await expect(
+      firstValueFrom(
+        service.runInspectionViaGtm('s', 'e', { gtmUrl: 'x' } as never)
+      )
+    ).rejects.toMatchObject({
+      message: 'GTM inspection failed',
+      cause: response
+    });
   });
 
   it('runInspectionViaGtm returns [] when the run fails after a stop', async () => {

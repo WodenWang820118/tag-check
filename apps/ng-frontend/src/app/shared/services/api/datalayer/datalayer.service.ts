@@ -80,8 +80,9 @@ export class DataLayerService {
           }
           return throwError(
             () =>
-              'Error running data layer inspection: ' +
-              JSON.stringify(error, null, 2)
+              new Error('Error running data layer inspection', {
+                cause: error
+              })
           );
         })
       );

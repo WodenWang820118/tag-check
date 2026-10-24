@@ -61,7 +61,9 @@ export class GtmOperatorService {
           if (this.isStopOperation$()) {
             return of([]);
           }
-          return throwError(() => new Error('GTM inspection failed'));
+          return throwError(
+            () => new Error('GTM inspection failed', { cause: error })
+          );
         })
       );
   }

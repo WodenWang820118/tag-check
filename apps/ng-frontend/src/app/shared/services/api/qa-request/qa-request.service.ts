@@ -51,7 +51,9 @@ export class QaRequestService {
           if (this.isStopOperation$()) {
             return of([]);
           }
-          return throwError(() => new Error('Data layer inspection failed'));
+          return throwError(
+            () => new Error('Data layer inspection failed', { cause: error })
+          );
         })
       );
   }

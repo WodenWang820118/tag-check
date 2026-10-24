@@ -214,9 +214,18 @@ function statusOf(
   return { status: getCheckStatus(details.passed, details.requestPassed) };
 }
 
+/**
+ * Why a run failed. The run services wrap the failed request in an Error
+ * whose cause is the HttpErrorResponse; the API's own message, when it sent
+ * one, says more than the wrapper's.
+ */
 function errorMessage(error: unknown): string {
-  if (error instanceof HttpErrorResponse) {
-    const body: unknown = error.error;
+  const response =
+    error instanceof Error && error.cause instanceof HttpErrorResponse
+      ? error.cause
+      : error;
+  if (response instanceof HttpErrorResponse) {
+    const body: unknown = response.error;
     if (
       typeof body === 'object' &&
       body !== null &&
@@ -225,9 +234,10 @@ function errorMessage(error: unknown): string {
     ) {
       return body.message;
     }
-    return error.message;
   }
-  return error instanceof Error ? error.message : String(error);
+  return error instanceof Error || error instanceof HttpErrorResponse
+    ? error.message
+    : String(error);
 }
 
 const ITEM_STATUSES: readonly BatchItemStatus[] = [

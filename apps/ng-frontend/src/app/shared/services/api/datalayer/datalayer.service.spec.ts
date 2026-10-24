@@ -47,7 +47,7 @@ describe('DataLayerService', () => {
           websiteUrl: 'https://x.test'
         })
       )
-    ).rejects.toMatch(/Error running data layer inspection/);
+    ).rejects.toThrow('Error running data layer inspection');
   });
 
   it('runDataLayerInspection swallows the error of a stopped run and resets the stop flag', async () => {
@@ -80,7 +80,7 @@ describe('DataLayerService', () => {
           websiteUrl: 'https://x.test'
         })
       )
-    ).rejects.toMatch(/Error running data layer inspection/);
+    ).rejects.toThrow('Error running data layer inspection');
   });
 
   it('stopOperation flips the signal only on status 200 and rethrows errors', async () => {
