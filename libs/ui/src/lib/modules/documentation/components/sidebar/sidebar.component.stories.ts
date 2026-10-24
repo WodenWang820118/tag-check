@@ -7,11 +7,9 @@ import {
 import { SideBarComponent } from './sidebar.component';
 
 import { provideHttpClient } from '@angular/common/http';
-import { importProvidersFrom } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { provideRouter } from '@angular/router';
-import { TreeNodeService } from '../../services/tree-node/tree-node.service';
-import { MarkdownModule } from 'ngx-markdown';
+import { provideMarkdown } from 'ngx-markdown';
 import { DOCS_ROUTES } from '../../routes';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTreeModule } from '@angular/material/tree';
@@ -22,14 +20,13 @@ const meta: Meta<SideBarComponent> = {
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
-      imports: [MatTreeModule, MatIconModule, MatButtonModule],
-      providers: [TreeNodeService]
+      imports: [MatTreeModule, MatIconModule, MatButtonModule]
     }),
     applicationConfig({
       providers: [
         provideHttpClient(),
         provideRouter(DOCS_ROUTES),
-        importProvidersFrom(MarkdownModule.forRoot())
+        provideMarkdown()
       ]
     })
   ]

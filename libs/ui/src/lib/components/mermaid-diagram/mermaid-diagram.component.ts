@@ -14,6 +14,9 @@ let mermaidInitialized = false;
 
 type RenderStatus = 'loading' | 'done' | 'error';
 
+/**
+ * Renders a Mermaid diagram definition in the browser.
+ */
 @Component({
   selector: 'lib-mermaid-diagram',
   standalone: true,

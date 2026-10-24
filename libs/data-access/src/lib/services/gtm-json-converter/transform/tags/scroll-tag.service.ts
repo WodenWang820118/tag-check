@@ -2,14 +2,20 @@ import { EventTagConfig, TagTypeEnum, Trigger, DataLayer } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { CONSENT_STATUS_NOT_NEEDED } from '../utils/constant';
+import {
+  CONSENT_STATUS_NOT_NEEDED,
+  SCROLL_TRIGGER_NAME
+} from '../utils/constant';
 
+/**
+ * Builds the GA4 scroll event tag, fired by the Scroll Depth trigger with
+ * the threshold reached as a parameter.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class ScrollTag {
-  // Constants for easier maintenance
-  private static readonly TRIGGER_NAME = 'scroll';
+  private static readonly TRIGGER_NAME = SCROLL_TRIGGER_NAME;
   private static readonly TAG_NAME = 'GA4 event - scroll';
   private static readonly EVENT_NAME = 'scroll';
   private static readonly FINGERPRINT = '1690184079241';
@@ -67,11 +73,12 @@ export class ScrollTag {
   }
 
   /**
-   * Creates scroll tag(s) if scroll events are present in dataLayers
-   * @param configurationName GTM configuration tag reference
+   * Creates the scroll tag when a data layer event is `scroll`, or an empty
+   * array otherwise or when the `event scroll` trigger is missing.
+   * @param configurationName name of the Google tag the event tag refers to
    * @param accountId GTM account ID
    * @param containerId GTM container ID
-   * @param triggers Available triggers to match
+   * @param triggers trigger names and IDs to find the Scroll Depth trigger in
    * @param dataLayers DataLayer events to inspect
    */
   public createScrollTag(
@@ -81,17 +88,14 @@ export class ScrollTag {
     triggers: Trigger[],
     dataLayers: DataLayer[] = []
   ): EventTagConfig[] {
-    // Only proceed if scroll event is included
     if (!this.eventUtils.isIncludeScroll(dataLayers)) {
       return [];
     }
-    // Find the scroll trigger
     const trigger = triggers.find((t) => t.name === ScrollTag.TRIGGER_NAME);
     if (!trigger?.triggerId) {
       console.error(`Missing trigger (${ScrollTag.TRIGGER_NAME}) or triggerId`);
       return [];
     }
-    // Build and return the tag configuration
     return this.buildScrollTag(
       configurationName,
       accountId,

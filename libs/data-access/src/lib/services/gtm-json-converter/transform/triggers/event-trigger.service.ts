@@ -2,6 +2,10 @@ import { CustomEventTriggerConfig, TriggerTypeEnum } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 
+/**
+ * Builds the Custom Event trigger `event equals <event>` for a data layer
+ * event.
+ */
 @Injectable({
   providedIn: 'root'
 })

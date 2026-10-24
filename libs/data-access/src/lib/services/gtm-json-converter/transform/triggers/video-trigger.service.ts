@@ -2,6 +2,10 @@ import { TriggerTypeEnum, YouTubeVideoTriggerConfig, DataLayer } from '@utils';
 import { Injectable } from '@angular/core';
 import { EventUtils } from '../../utils/event-utils.service';
 
+/**
+ * Builds the YouTube Video trigger (`event youtube video`) for start,
+ * progress and complete.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -67,6 +71,10 @@ export class VideoTrigger {
     };
   }
 
+  /**
+   * The YouTube Video trigger when a data layer event is a video event,
+   * otherwise an empty array.
+   */
   createVideoTrigger(
     accountId: string,
     containerId: string,

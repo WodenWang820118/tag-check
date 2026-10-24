@@ -34,10 +34,6 @@ export type CustomEventFilter = {
   parameter: Parameter[];
 };
 
-export type DataRow = {
-  [key: string]: string;
-};
-
 export type DataLayer = {
   event: string;
   paths: string[];

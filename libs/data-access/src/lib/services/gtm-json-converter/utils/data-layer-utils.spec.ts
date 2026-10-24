@@ -47,4 +47,33 @@ describe('DataLayerManager', () => {
       }
     ]);
   });
+
+  it('should leave out the keys of every item, not only the first', () => {
+    const dataLayers = service.getDataLayers([
+      {
+        event: 'purchase',
+        ecommerce: {
+          value: 10,
+          items: [{ item_id: '$item_id' }, { item_id: '$item_id' }]
+        }
+      }
+    ]);
+
+    expect(dataLayers).toEqual([
+      { event: 'purchase', paths: ['ecommerce.value', 'ecommerce.items'] }
+    ]);
+  });
+
+  it('should merge specs that repeat an event into one entry', () => {
+    const dataLayers = service.getDataLayers([
+      { event: 'login', method: '$method' },
+      { event: 'sign_up', method: '$method' },
+      { event: 'login', user_type: '$user_type' }
+    ]);
+
+    expect(dataLayers).toEqual([
+      { event: 'login', paths: ['method', 'user_type'] },
+      { event: 'sign_up', paths: ['method'] }
+    ]);
+  });
 });

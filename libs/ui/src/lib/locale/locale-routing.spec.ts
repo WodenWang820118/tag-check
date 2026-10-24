@@ -5,7 +5,6 @@ import {
   getLocaleConfig,
   getLocaleFromPathname,
   isIndexableLogicalRoute,
-  getLogicalPath,
   stripLocalePrefix
 } from './locale-routing';
 
@@ -41,6 +40,12 @@ describe('locale routing helpers', () => {
     expect(stripLocalePrefix('/app')).toBe('/app');
   });
 
+  it('keeps the root when a path is only slashes', () => {
+    expect(stripLocalePrefix('//')).toBe('/');
+    expect(stripLocalePrefix('/about///')).toBe('/about');
+    expect(buildLocalizedPath('//', 'ja')).toBe('/ja/');
+  });
+
   it('reads locale and logical path from a localized URL', () => {
     expect(getLocaleFromPathname('/ja/documentation/introduction').code).toBe(
       'ja'
@@ -48,7 +53,7 @@ describe('locale routing helpers', () => {
     expect(getLocaleFromPathname('/documentation/introduction').code).toBe(
       'en-US'
     );
-    expect(getLogicalPath('/en/about')).toBe('/about');
+    expect(stripLocalePrefix('/en/about')).toBe('/about');
   });
 
   it.each(
@@ -59,7 +64,7 @@ describe('locale routing helpers', () => {
       expect(getLocaleFromPathname(`/${urlSegment}/about`).code).toBe(
         localeCode
       );
-      expect(getLogicalPath(`/${urlSegment}/documentation/objective`)).toBe(
+      expect(stripLocalePrefix(`/${urlSegment}/documentation/objective`)).toBe(
         '/documentation/objective'
       );
     }

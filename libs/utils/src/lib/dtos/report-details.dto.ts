@@ -4,6 +4,11 @@ import {
   StrictDataLayerEvent
 } from '../types/tag-check';
 
+/**
+ * The outcome of one run: both check results, the captured data layer, the
+ * raw GA4 request and the screenshot. Fields left out of the constructor
+ * argument keep the defaults of a run that has not passed.
+ */
 export class ReportDetailsDto implements OutputValidationResult {
   position = 0;
   eventId!: string;

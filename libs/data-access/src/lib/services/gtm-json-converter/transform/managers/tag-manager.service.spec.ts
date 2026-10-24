@@ -123,7 +123,7 @@ describe('TagManager', () => {
 
     it('should include scroll tag when data layers contain a scroll event', () => {
       const dataLayers: DataLayer[] = [{ event: 'scroll', paths: [] }];
-      const triggers: Trigger[] = [{ name: 'scroll', triggerId: '99' }];
+      const triggers: Trigger[] = [{ name: 'event scroll', triggerId: '99' }];
 
       const result = service.getTags(
         mockAccountId,

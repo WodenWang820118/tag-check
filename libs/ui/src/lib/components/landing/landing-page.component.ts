@@ -8,6 +8,9 @@ import {
 import { buildLocalizedPath } from '../../locale/locale-routing';
 import { type SharedNavigationLink } from '../navigation-link';
 
+/**
+ * The public sites' landing page.
+ */
 @Component({
   selector: 'lib-landing-page',
   standalone: true,

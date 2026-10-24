@@ -6,6 +6,11 @@ import {
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 
+/**
+ * Builds Event Settings variables (`ESV - <name>`) from the JSON typed in
+ * the advanced options. Each parameter object contributes its first key
+ * and value as one row.
+ */
 @Injectable({
   providedIn: 'root'
 })

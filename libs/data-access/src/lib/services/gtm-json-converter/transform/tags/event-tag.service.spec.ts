@@ -14,7 +14,7 @@ const tag = {
   triggers: [{ name: 'click' }, { name: 'page_view' }],
   parameters: [
     { type: 'TEMPLATE', key: 'currency', value: 'USD' },
-    { type: 'TEMPLATE', key: 'items', value: 'ecommerce_items' }
+    { type: 'TEMPLATE', key: 'items', value: 'ecommerce.items' }
   ]
 } as never;
 
@@ -88,7 +88,7 @@ describe('EventTag', () => {
     expect(eventParameters?.list).toHaveLength(2);
   });
 
-  it('drops parameters whose value mentions ecommerce when sendEcommerceData is "true"', () => {
+  it('drops parameters read from the ecommerce object when sendEcommerceData is "true"', () => {
     const config = service.createTag('GA4', 'a', 'c', tag, triggers, 'true');
     const eventParameters = config.parameter?.[2];
     expect(eventParameters?.list).toHaveLength(1);

@@ -9,6 +9,11 @@ import { DataLayerUtils } from '../utils/data-layer-utils.service';
 import { EventSettingsVariable, GTMContainerConfig } from '@utils';
 import { VariableManager } from './managers/variable-manager.service';
 
+/**
+ * tag-build's converter: turns dataLayer specs into a Tag Manager container
+ * export with a Google tag, one GA4 event tag and Custom Event trigger per
+ * event, and the variables they read.
+ */
 @Injectable({
   providedIn: 'root'
 })

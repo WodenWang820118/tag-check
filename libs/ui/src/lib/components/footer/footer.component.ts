@@ -1,5 +1,8 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
+/**
+ * The public sites' footer.
+ */
 @Component({
   selector: 'lib-footer',
   standalone: true,

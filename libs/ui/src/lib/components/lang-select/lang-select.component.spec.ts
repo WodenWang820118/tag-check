@@ -27,6 +27,37 @@ describe('LangSelectComponent', () => {
     expect(document.location.href).toBe('/ja/about?tab=seo#diagram');
   });
 
+  it('still navigates when the browser blocks localStorage', () => {
+    const descriptor = Object.getOwnPropertyDescriptor(
+      globalThis,
+      'localStorage'
+    );
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      get() {
+        throw new DOMException('Access is denied', 'SecurityError');
+      }
+    });
+    try {
+      const document = createDocument('/en/about');
+      const component = new LangSelectComponent(
+        'en-US',
+        document,
+        browserPlatformId
+      );
+
+      component.changeLocale('ja');
+
+      expect(document.location.href).toBe('/ja/about');
+    } finally {
+      if (descriptor) {
+        Object.defineProperty(globalThis, 'localStorage', descriptor);
+      } else {
+        Reflect.deleteProperty(globalThis, 'localStorage');
+      }
+    }
+  });
+
   it('does not navigate while rendering outside the browser', () => {
     const document = createDocument('/zh-hans/objectives');
     const component = new LangSelectComponent(

@@ -7,6 +7,11 @@ import { EventUtils } from '../../utils/event-utils.service';
 import { ConstantVariable } from '../variables/constant-variable.service';
 import { EventSettingsVariableService } from '../variables/event-settings-variable.service';
 
+/**
+ * Builds the container's variables: one Data Layer Variable per spec path,
+ * the measurement ID constant and the Event Settings variables, plus the
+ * built-in video and scroll variables when the specs ask for them.
+ */
 @Injectable({
   providedIn: 'root'
 })

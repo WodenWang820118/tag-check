@@ -8,6 +8,10 @@ import {
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
 
+/**
+ * Builds the Scroll Depth trigger (`event scroll`) that fires at vertical
+ * scroll thresholds after the window loads.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -56,6 +60,10 @@ export class ScrollTrigger {
     };
   }
 
+  /**
+   * The Scroll Depth trigger when a data layer event is `scroll`, otherwise
+   * an empty array.
+   */
   createScrollTrigger(
     accountId: string,
     containerId: string,

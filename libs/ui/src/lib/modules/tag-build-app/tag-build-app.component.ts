@@ -3,6 +3,9 @@ import { ArticleComponent } from '../../components/article/article.component';
 import type { StrictDataLayerEvent } from '@utils';
 import { TagBuildPageComponent } from '../../views/tag-build-page/tag-build-page.component';
 
+/**
+ * The tag-build application route.
+ */
 @Component({
   selector: 'lib-tag-build-app',
   standalone: true,

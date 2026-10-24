@@ -1,70 +1,75 @@
 import type { StrictDataLayerEvent } from '../types/tag-check';
 import { isStrictDataLayerEvent } from './tag-build-contract';
 
+/** A JSON number literal, which an unquoted value may already be. */
+const JSON_NUMBER = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/;
+
 /**
- * Repairs lightly malformed JSON text commonly found in legacy GTM specs and spreadsheets:
- * - strips multi-line (/*...*\/) comments
- * - strips single-line (//...) comments after JSON values
+ * Repairs lightly malformed JSON text commonly found in legacy GTM specs and
+ * spreadsheets, where specs are written as JavaScript object literals:
+ * - strips `//` and `/* *\/` comments outside string literals
  * - converts single-quoted keys and string values to double-quoted
  * - wraps unquoted property names with double quotes
- * - wraps unquoted string values with double quotes (except true, false, null)
- * - removes trailing commas before } and ]
+ * - wraps unquoted values with double quotes, except numbers, `true`,
+ *   `false` and `null`
+ * - removes trailing commas before `}` and `]`
+ *
+ * The result is not guaranteed to be valid JSON: callers still parse it and
+ * report the error. Unquoted values that contain spaces are not repaired.
  */
 export function fixJsonString(inputString: string): string {
-  try {
-    let fixedString = inputString;
+  let fixedString = stripComments(inputString);
 
-    // Remove multi-line comments first (/**/)
-    fixedString = fixedString.replaceAll(/\/\*[\s\S]*?\*\//gm, '');
+  // Convert single-quoted JSON keys and string values without
+  // rewriting apostrophes inside already double-quoted content.
+  fixedString = fixedString.replaceAll(/([{,]\s*)'([^']+)'(\s*:)/g, '$1"$2"$3');
+  fixedString = fixedString.replaceAll(
+    /(:\s*)'([^']*)'(?=\s*[,}\]])/g,
+    '$1"$2"'
+  );
 
-    // Remove single-line comments that appear after JSON values
-    const lines = fixedString.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-      const commentIndex = lines[i].indexOf('//');
-      if (commentIndex >= 0) {
-        const precedingChars = lines[i].substring(0, commentIndex);
-        if (/[:,]\s*$/.test(precedingChars)) {
-          // Comment appears after a JSON value, remove only the comment
-          lines[i] = lines[i].substring(0, commentIndex);
-        }
+  // Wrap unquoted property names with double quotes
+  fixedString = fixedString.replaceAll(
+    /([{,]\s*)([a-zA-Z_]\w*)(\s*:)/g,
+    '$1"$2"$3'
+  );
+
+  // Wrap unquoted values with double quotes; literals JSON already accepts
+  // keep their type, so `value: 19.99` stays a number.
+  fixedString = fixedString.replaceAll(
+    /(:\s*)([^"{}[\],\s]+)(?=\s*[,\]}])/g,
+    (match, prefix: string, value: string) =>
+      ['true', 'false', 'null'].includes(value) || JSON_NUMBER.test(value)
+        ? match
+        : `${prefix}"${value}"`
+  );
+
+  // Remove any trailing commas
+  return fixedString.replaceAll(/,\s*([\]}])/g, '$1');
+}
+
+/**
+ * Removes `//` and `/* *\/` comments, leaving string literals untouched so a
+ * URL such as `'https://example.com'` keeps its `//`. A line comment's
+ * newline is kept.
+ */
+function stripComments(text: string): string {
+  let result = '';
+  let i = 0;
+  while (i < text.length) {
+    const end = skipLiteralOrComment(text, i);
+    if (end === i) {
+      result += text[i];
+      i++;
+    } else {
+      // A comment starts with `/`; anything else skipped is a string literal.
+      if (text[i] !== '/') {
+        result += text.slice(i, end);
       }
+      i = end;
     }
-
-    fixedString = lines.join('\n');
-
-    // Convert single-quoted JSON keys and string values without
-    // rewriting apostrophes inside already double-quoted content.
-    fixedString = fixedString.replaceAll(
-      /([{,]\s*)'([^']+)'(\s*:)/g,
-      '$1"$2"$3'
-    );
-    fixedString = fixedString.replaceAll(
-      /(:\s*)'([^']*)'(?=\s*[,}\]])/g,
-      '$1"$2"'
-    );
-
-    // Wrap unquoted property names with double quotes
-    fixedString = fixedString.replaceAll(
-      /([{,]\s*)([a-zA-Z_]\w*)(\s*:)/g,
-      '$1"$2"$3'
-    );
-
-    // Fix unquoted values (except true, false, and null) by wrapping them with quotes
-    fixedString = fixedString.replaceAll(
-      /(:\s*)([^"{}[\],\s]+)(?=\s*[,\]}])/g,
-      (match, p1, p2) => {
-        if (['true', 'false', 'null'].includes(p2)) return match;
-        return `${p1}"${p2}"`;
-      }
-    );
-
-    // Remove any trailing commas
-    fixedString = fixedString.replaceAll(/,\s*([\]}])/g, '$1');
-
-    return fixedString;
-  } catch (error) {
-    throw new Error('Failed to fix JSON parsing issues: ' + error);
   }
+  return result;
 }
 
 const PUSH_CALL = /(?:window\s*\.\s*)?dataLayer\s*\.\s*push\s*\(/y;

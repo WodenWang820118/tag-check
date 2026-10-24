@@ -16,6 +16,10 @@ import {
 } from '../../locale/locale-routing';
 import { type SharedNavigationLink } from '../navigation-link';
 
+/**
+ * The public sites' navigation links, marking the one for the current
+ * route as active.
+ */
 @Component({
   selector: 'lib-menu-tabs',
   standalone: true,
