@@ -9,7 +9,7 @@ describe('treeNodeResolver', () => {
 
   function callResolver(name: string) {
     return TestBed.runInInjectionContext(() =>
-      treeNodeResolver({ params: { name } } as never, {} as never)
+      treeNodeResolver({ params: { name } } as never)
     );
   }
 
@@ -26,9 +26,9 @@ describe('treeNodeResolver', () => {
       ]
     });
     markdown.getSource.mockReturnValueOnce(of('# hi'));
-    const out = await firstValueFrom(callResolver('topic'));
+    const out = await firstValueFrom(callResolver('use-cases'));
     expect(out).toEqual({
-      fileName: 'assets/markdown/en/topic.md',
+      fileName: 'assets/markdown/en/use-cases.md',
       content: '# hi'
     });
   });
@@ -42,7 +42,7 @@ describe('treeNodeResolver', () => {
       ]
     });
     markdown.getSource.mockReturnValueOnce(of(''));
-    const out = await firstValueFrom(callResolver('gone'));
+    const out = await firstValueFrom(callResolver('objective'));
     expect(out.fileName).toBe('404.md');
     expect(out.content).toContain('404');
   });
@@ -59,7 +59,7 @@ describe('treeNodeResolver', () => {
     const errSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
-    const out = await firstValueFrom(callResolver('x'));
+    const out = await firstValueFrom(callResolver('objective'));
     expect(out.fileName).toBe('404.md');
     expect(out.content).toContain('404 Not Found');
     errSpy.mockRestore();
@@ -80,6 +80,24 @@ describe('treeNodeResolver', () => {
     expect(out.content).toContain('# Introduction');
   });
 
+  it.each([
+    'missing-doc-page',
+    '../../../../../../../README',
+    '..%2F..%2Fsecret'
+  ])('returns the 404 page for %s without reading a file', async (name) => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: MarkdownService, useValue: markdown },
+        { provide: PLATFORM_ID, useValue: 'server' },
+        { provide: LOCALE_ID, useValue: 'en-US' }
+      ]
+    });
+
+    const out = await firstValueFrom(callResolver(name));
+    expect(markdown.getSource).not.toHaveBeenCalled();
+    expect(out.fileName).toBe('404.md');
+  });
+
   it('falls back to the inline 404 message when server file read errors', async () => {
     TestBed.configureTestingModule({
       providers: [
@@ -92,7 +110,9 @@ describe('treeNodeResolver', () => {
     const errSpy = vi
       .spyOn(console, 'error')
       .mockImplementation(() => undefined);
-    const out = await firstValueFrom(callResolver('missing-doc-page'));
+    const cwd = vi.spyOn(process, 'cwd').mockReturnValue('/no/such/workspace');
+    const out = await firstValueFrom(callResolver('introduction'));
+    cwd.mockRestore();
     expect(markdown.getSource).not.toHaveBeenCalled();
     expect(out.fileName).toBe('404.md');
     expect(out.content).toContain('404 Not Found');
@@ -113,18 +133,18 @@ describe('treeNodeResolver', () => {
       )
       .mockReturnValueOnce(of('# english fallback'));
 
-    const out = await firstValueFrom(callResolver('topic'));
+    const out = await firstValueFrom(callResolver('use-cases'));
 
     expect(markdown.getSource).toHaveBeenNthCalledWith(
       1,
-      'assets/markdown/zh-hant/topic.md'
+      'assets/markdown/zh-hant/use-cases.md'
     );
     expect(markdown.getSource).toHaveBeenNthCalledWith(
       2,
-      'assets/markdown/en/topic.md'
+      'assets/markdown/en/use-cases.md'
     );
     expect(out).toEqual({
-      fileName: 'assets/markdown/en/topic.md',
+      fileName: 'assets/markdown/en/use-cases.md',
       content: '# english fallback'
     });
   });
