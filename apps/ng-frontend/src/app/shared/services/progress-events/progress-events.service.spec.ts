@@ -93,6 +93,31 @@ describe('ProgressEventsService', () => {
     expect(stream.url).toBe(environment.progressEventsUrl);
   });
 
+  it('starts each run with no steps, even when the last run never completed', () => {
+    const service = TestBed.inject(ProgressEventsService);
+    const emitted: ProgressUpdatePayload[] = [];
+    const sub = service.progressUpdate$.subscribe((v) => emitted.push(v));
+    isRunningTest.set(true);
+    TestBed.tick();
+    // The run fails at its third step: the backend sends no eventCompleted.
+    FakeEventSource.instances[0]?.emit(
+      'progressUpdate',
+      '{"totalSteps":6,"currentStep":3}'
+    );
+    isRunningTest.set(false);
+    TestBed.tick();
+
+    isRunningTest.set(true);
+    TestBed.tick();
+    sub.unsubscribe();
+
+    expect(emitted).toEqual([
+      { totalSteps: 0, currentStep: 0 },
+      { totalSteps: 6, currentStep: 3 },
+      { totalSteps: 0, currentStep: 0 }
+    ]);
+  });
+
   it('emits progressUpdate payloads and skips malformed ones', () => {
     const { service, stream } = startRun();
     const emitted: ProgressUpdatePayload[] = [];

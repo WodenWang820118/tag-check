@@ -70,6 +70,10 @@ export class ProgressEventsService implements OnDestroy {
     if (this.eventSource) {
       return;
     }
+    // A new run has no steps yet. The backend sends eventCompleted, which
+    // resets the progress, only after the last step, so a run that failed
+    // or was stopped left its steps behind for the next run to show.
+    this.progressUpdateSubject.next({ totalSteps: 0, currentStep: 0 });
     const source = new EventSource(environment.progressEventsUrl);
     this.eventSource = source;
 
