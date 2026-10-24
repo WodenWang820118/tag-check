@@ -142,6 +142,17 @@ describe('extractDataLayerPushes', () => {
     expect(result.specs).toEqual([{ event: 'actual_event' }]);
   });
 
+  it('keeps // inside single-quoted URL values', () => {
+    const text =
+      "dataLayer.push({ event: 'page_view', page_location: 'https://example.com/shop' });";
+    const result = extractDataLayerPushes(text);
+
+    expect(result.issues).toEqual([]);
+    expect(result.specs).toEqual([
+      { event: 'page_view', page_location: 'https://example.com/shop' }
+    ]);
+  });
+
   it('supports pushes with array of event objects', () => {
     const text = "dataLayer.push([{ event: 'first' }, { event: 'second' }]);";
     const result = extractDataLayerPushes(text);
@@ -174,6 +185,29 @@ describe('fixJsonString', () => {
         currency: 'EUR',
         items: [{ item_name: 'Book' }]
       }
+    });
+  });
+
+  it('strips comments on their own line but not inside strings', () => {
+    const input = `[
+      // the home page
+      { event: 'page_view', note: 'a /* kept */ b', url: 'https://x.test' }
+    ]`;
+
+    expect(JSON.parse(fixJsonString(input))).toEqual([
+      { event: 'page_view', note: 'a /* kept */ b', url: 'https://x.test' }
+    ]);
+  });
+
+  it('keeps unquoted numbers as numbers and quotes other bare words', () => {
+    const input =
+      '{ event: purchase, value: 799.99, quantity: 3, tax: -1.5e2 }';
+
+    expect(JSON.parse(fixJsonString(input))).toEqual({
+      event: 'purchase',
+      value: 799.99,
+      quantity: 3,
+      tax: -150
     });
   });
 });
