@@ -20,16 +20,16 @@ export class XlsxTestDataSectionService {
     dataHeaderRow.font = { bold: true, size: 14 };
     worksheet.mergeCells(`A${dataHeaderRow.number}:G${dataHeaderRow.number}`);
 
+    // Widths only: a column `header` is written into row 1, which would
+    // overwrite the sheet's project title. The header row is added below.
     worksheet.columns = [
-      { header: 'DataLayer Spec', key: 'dataLayerSpec', width: 40 },
-      { header: 'DataLayer', key: 'dataLayer', width: 40 },
-      { header: 'Passed', key: 'passed', width: 10 },
-      { header: 'Request Passed', key: 'requestPassed', width: 10 },
-      { header: 'Raw Request', key: 'rawRequest', width: 40 },
-      { header: 'Destination URL', key: 'destinationUrl', width: 40 }
+      { key: 'dataLayerSpec', width: 40 },
+      { key: 'dataLayer', width: 40 },
+      { key: 'passed', width: 10 },
+      { key: 'requestPassed', width: 10 },
+      { key: 'rawRequest', width: 40 },
+      { key: 'destinationUrl', width: 40 }
     ];
-
-    // worksheet.getRow(dataHeaderRow.number + 1)
 
     // Add column headers for test data
     worksheet.addRow([
