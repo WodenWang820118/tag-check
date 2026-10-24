@@ -110,23 +110,36 @@ export class StepExecutorUtilsService {
         this.logger.error(`Failed to find selector: ${selector}`);
       }
     }
-    // NOTE(stage2): Move page lifecycle ownership to the orchestration layer.
-    await page.close();
+    // The page stays open: the pipeline still takes the failed run's
+    // screenshot, and the caller decides whether the browser closes.
     throw new NotFoundException(
       'Failed to find any of the specified selectors'
     );
   }
 
+  /**
+   * Logs the consent preferences and cookies the page sees after the first
+   * navigation. Diagnostic only: a value it cannot read is logged, and the
+   * run goes on.
+   */
   private async verifyLocalStorageAndCookies(page: Page): Promise<void> {
-    const finalCheck = await page.evaluate(() => {
-      const localStorageData =
-        localStorage.getItem('consentPreferences') || '{}';
-      const cookiesData = document.cookie;
-      const parsedLocalStorage = JSON.parse(localStorageData);
-      return { parsedLocalStorage, cookiesData };
-    });
+    try {
+      // Helper-free on purpose: swc compiles this function to ES5 for the
+      // page, which has none of the bundle's helpers (see AGENTS.md).
+      const finalCheck = await page.evaluate(() => {
+        const localStorageData =
+          localStorage.getItem('consentPreferences') || '{}';
+        const cookiesData = document.cookie;
+        const parsedLocalStorage = JSON.parse(localStorageData);
+        return { parsedLocalStorage, cookiesData };
+      });
 
-    this.logger.log(`Final check: ${JSON.stringify(finalCheck, null, 2)}`);
+      this.logger.log(`Final check: ${JSON.stringify(finalCheck, null, 2)}`);
+    } catch (error) {
+      this.logger.warn(
+        `Could not read the consent preferences and cookies: ${error}`
+      );
+    }
   }
 
   private async handleFirstNavigation(
