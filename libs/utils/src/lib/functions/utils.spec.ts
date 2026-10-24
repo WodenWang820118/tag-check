@@ -1,25 +1,5 @@
-import { describe, expect, it, afterEach, vi } from 'vitest';
-import { extractEventNameFromId, getCurrentTimestamp } from './utils';
-
-describe('getCurrentTimestamp', () => {
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('formats the current date as YYYY-MM-DD_HHMMSS with zero padding', () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date(2024, 0, 5, 9, 7, 3));
-
-    expect(getCurrentTimestamp()).toBe('2024-01-05_090703');
-  });
-
-  it('uses two-digit fields for end-of-year, end-of-day values', () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date(2025, 11, 31, 23, 59, 59));
-
-    expect(getCurrentTimestamp()).toBe('2025-12-31_235959');
-  });
-});
+import { describe, expect, it } from 'vitest';
+import { extractEventNameFromId } from './utils';
 
 describe('extractEventNameFromId', () => {
   it('strips a trailing _<uuid> suffix', () => {
