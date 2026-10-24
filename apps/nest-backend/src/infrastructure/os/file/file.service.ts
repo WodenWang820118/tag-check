@@ -1,10 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
+import { FilePathService } from '../path/file-path/file-path.service';
 
 /** Reads and writes the JSON files of the projects folder. */
 @Injectable()
 export class FileService {
+  constructor(private readonly filePathService: FilePathService) {}
+
   /**
    * @returns The file's JSON content, cast to `T` without validation.
    * @throws NotFoundException when the file does not exist; a SyntaxError
@@ -24,5 +27,13 @@ export class FileService {
       mkdirSync(dir, { recursive: true });
     }
     writeFileSync(filePath, JSON.stringify(content, null, 2));
+  }
+
+  /** Writes a run's raw result to the test's result cache file. */
+  async writeCacheFile(projectSlug: string, eventId: string, data: unknown) {
+    this.writeJsonFile(
+      await this.filePathService.getCacheFilePath(projectSlug, eventId),
+      data
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import {
@@ -10,14 +10,19 @@ import {
 } from 'fs';
 import { NotFoundException } from '@nestjs/common';
 import { FileService } from './file.service';
+import { FilePathService } from '../path/file-path/file-path.service';
 
 describe('FileService', () => {
   let dir: string;
   let svc: FileService;
+  let filePathService: FilePathService;
 
   beforeEach(() => {
     dir = mkdtempSync(join(tmpdir(), 'file-svc-'));
-    svc = new FileService();
+    filePathService = {
+      getCacheFilePath: vi.fn(async (_p, e) => join(dir, `${e}-cache.json`))
+    } as unknown as FilePathService;
+    svc = new FileService(filePathService);
   });
 
   afterEach(() => {
@@ -41,5 +46,11 @@ describe('FileService', () => {
     svc.writeJsonFile(fp, { v: 7 });
     expect(existsSync(fp)).toBe(true);
     expect(JSON.parse(readFileSync(fp, 'utf8'))).toEqual({ v: 7 });
+  });
+
+  it('writeCacheFile resolves the cache path and writes the data', async () => {
+    await svc.writeCacheFile('p', 'e', { ok: true });
+    expect(filePathService.getCacheFilePath).toHaveBeenCalledWith('p', 'e');
+    expect(existsSync(join(dir, 'e-cache.json'))).toBe(true);
   });
 });

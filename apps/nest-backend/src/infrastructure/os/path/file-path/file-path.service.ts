@@ -48,6 +48,16 @@ export class FilePathService {
     );
   }
 
+  async getCacheFilePath(projectSlug: string, eventId: string) {
+    return join(
+      await this.folderPathService.getInspectionEventFolderPath(
+        projectSlug,
+        eventId
+      ),
+      `${extractEventNameFromId(eventId)} - result cache.json`
+    );
+  }
+
   async getMyDataLayerFilePath(projectSlug: string, eventId: string) {
     return join(
       await this.folderPathService.getInspectionEventFolderPath(
