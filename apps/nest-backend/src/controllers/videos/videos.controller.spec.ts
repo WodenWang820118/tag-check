@@ -13,9 +13,25 @@ describe('VideosController', () => {
 
     expect(projectVideoService.getVideos).toHaveBeenCalledWith(
       'proj-1',
-      'evt-1'
+      'evt-1',
+      'recording.webm'
     );
     expect(result).toBe('video-stream');
+  });
+
+  it('serves the Tag Assistant recording for view=tag-assistant', async () => {
+    const projectVideoService = {
+      getVideos: vi.fn().mockResolvedValue('video-stream')
+    };
+    const controller = new VideosController(projectVideoService as never);
+
+    await controller.getVideos('proj-1', 'evt-1', 'tag-assistant');
+
+    expect(projectVideoService.getVideos).toHaveBeenCalledWith(
+      'proj-1',
+      'evt-1',
+      'recording-tag-assistant.webm'
+    );
   });
 
   it('makes the browser revalidate the recording, which each run overwrites', () => {

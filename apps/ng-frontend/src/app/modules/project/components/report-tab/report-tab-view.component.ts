@@ -197,6 +197,9 @@ import { ReportTabViewModel, STATUS_BADGES } from '../report-detail.contracts';
                     <app-carousel
                       [imageBlob]="viewModel().imageBlob"
                       [videoBlob]="viewModel().videoBlob"
+                      [tagAssistantVideoBlob]="
+                        viewModel().tagAssistantVideoBlob
+                      "
                     ></app-carousel>
                   </div>
                 </mat-expansion-panel>

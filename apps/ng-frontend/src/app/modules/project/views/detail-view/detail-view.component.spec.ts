@@ -69,6 +69,7 @@ function createPage(): ReportDetailRouteContext {
     spec: createSpec(),
     recording: { title: 'Purchase recording', steps: [] },
     video: { blob: new Blob(['video'], { type: 'video/webm' }) },
+    tagAssistantVideo: null,
     image: { blob: new Blob(['image'], { type: 'image/png' }) }
   });
 }

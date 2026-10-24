@@ -10,6 +10,8 @@ import { RunRecorder } from './run-recorder';
 
 const CLOSE_TIMEOUT_MS = 10_000;
 
+import { RECORDING_FILES, RecordingFile } from '../../../shared';
+
 @Injectable()
 export class PuppeteerUtilsService {
   private readonly logger = new Logger(PuppeteerUtilsService.name);
@@ -126,12 +128,19 @@ export class PuppeteerUtilsService {
     return result;
   }
 
+  /**
+   * Records `page` to one of the test's recording files (the site recording
+   * by default). Starting the site recording removes the previous run's
+   * Tag Assistant recording, so a direct run never shows a stale one.
+   */
   async startRecorder(
     page: Page,
     projectSlug: string,
     eventId: string,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    options: { file?: RecordingFile; bringToFront?: boolean } = {}
   ): Promise<RunRecorder> {
+    const file = options.file ?? RECORDING_FILES.site;
     if (signal?.aborted) {
       throw new Error('Recording start aborted');
     }
@@ -149,8 +158,7 @@ export class PuppeteerUtilsService {
         eventId
       );
 
-    const recordingPath = join(folderPath, 'recording');
-    const outputFile = `${recordingPath}.webm`;
+    const outputFile = join(folderPath, file);
 
     // Ensure destination directory exists and previous output is cleared
     try {
@@ -163,6 +171,11 @@ export class PuppeteerUtilsService {
     }
     try {
       await fs.rm(outputFile, { force: true });
+      if (file === RECORDING_FILES.site) {
+        await fs.rm(join(folderPath, RECORDING_FILES.tagAssistant), {
+          force: true
+        });
+      }
     } catch (e) {
       // Non-fatal; proceed if file didn't exist
       this.logger.debug(
@@ -170,7 +183,9 @@ export class PuppeteerUtilsService {
       );
     }
 
-    await page.bringToFront();
+    if (options.bringToFront !== false) {
+      await page.bringToFront();
+    }
     // Registered here so every failure below removes it again. An abort
     // that arrives before this is caught by the aborted check after start.
     signal?.addEventListener('abort', abortListener);

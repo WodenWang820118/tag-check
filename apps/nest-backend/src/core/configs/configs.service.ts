@@ -21,7 +21,12 @@ export class ConfigsService {
     '--disable-setuid-sandbox',
     '--disable-dev-shm-usage',
     '--disable-accelerated-2d-canvas',
-    '--disable-gpu'
+    '--disable-gpu',
+    // Keep windows painting when another window covers them, so recordings
+    // (the site and, in accompanied mode, Tag Assistant) do not freeze.
+    '--disable-backgrounding-occluded-windows',
+    '--disable-renderer-backgrounding',
+    '--disable-background-timer-throttling'
   ];
 
   private readonly DEFAULT_PROJECT_PATH = 'tag_check_projects';

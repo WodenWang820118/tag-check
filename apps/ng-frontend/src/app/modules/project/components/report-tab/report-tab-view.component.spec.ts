@@ -18,6 +18,7 @@ const notRun: ReportTabViewModel = {
   canExportEvent: false,
   hasMedia: false,
   videoBlob: undefined,
+  tagAssistantVideoBlob: undefined,
   imageBlob: undefined
 };
 

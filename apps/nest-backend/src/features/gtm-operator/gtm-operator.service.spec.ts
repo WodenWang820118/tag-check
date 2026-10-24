@@ -22,6 +22,7 @@ describe('GtmOperatorService recorder lifecycle', () => {
   let openerPage: Record<string, unknown>;
   let targetPage: ReturnType<typeof createMockPage>;
   let recorder: { stop: ReturnType<typeof vi.fn> };
+  let tagAssistantRecorder: { stop: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     vi.spyOn(global, 'setTimeout').mockImplementation((callback) => {
@@ -32,13 +33,17 @@ describe('GtmOperatorService recorder lifecycle', () => {
     browser = createMockBrowser(targetPage);
     openerPage = {};
     recorder = { stop: vi.fn().mockResolvedValue(undefined) };
+    tagAssistantRecorder = { stop: vi.fn().mockResolvedValue(undefined) };
     pipeline = {
       singleEventInspectionRecipe: vi.fn().mockResolvedValue([{ passed: true }])
     };
     puppeteerUtils = {
       startBrowser: vi.fn().mockResolvedValue({ browser, page: openerPage }),
       applyRecordedViewport: vi.fn().mockResolvedValue(undefined),
-      startRecorder: vi.fn().mockResolvedValue(recorder),
+      startRecorder: vi
+        .fn()
+        .mockResolvedValueOnce(recorder)
+        .mockResolvedValueOnce(tagAssistantRecorder),
       stopRecorder: vi.fn().mockResolvedValue(undefined),
       cleanup: vi.fn().mockResolvedValue(undefined)
     };
@@ -70,6 +75,44 @@ describe('GtmOperatorService recorder lifecycle', () => {
     expect(browser.close).toHaveBeenCalledTimes(1);
   });
 
+  it('records the Tag Assistant tab next to the site, without bringing it to the front', async () => {
+    await service.inspectSingleEventViaGtm(
+      'project',
+      'event',
+      createQuery(),
+      createPreset()
+    );
+
+    expect(puppeteerUtils.startRecorder).toHaveBeenNthCalledWith(
+      2,
+      openerPage,
+      'project',
+      'event',
+      expect.any(AbortSignal),
+      { file: 'recording-tag-assistant.webm', bringToFront: false }
+    );
+    expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(
+      tagAssistantRecorder
+    );
+  });
+
+  it('runs without the Tag Assistant recording when it cannot start', async () => {
+    puppeteerUtils.startRecorder = vi
+      .fn()
+      .mockResolvedValueOnce(recorder)
+      .mockRejectedValueOnce(new Error('screencast unavailable'));
+
+    await expect(
+      service.inspectSingleEventViaGtm(
+        'project',
+        'event',
+        createQuery(),
+        createPreset()
+      )
+    ).resolves.toEqual([{ passed: true }]);
+    expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
+  });
+
   it('passes the recorder handle to cleanup on failure', async () => {
     pipeline.singleEventInspectionRecipe.mockRejectedValue(new Error('failed'));
 
@@ -82,7 +125,9 @@ describe('GtmOperatorService recorder lifecycle', () => {
       )
     ).rejects.toThrow('Failed to perform GTM validation');
 
-    expect(puppeteerUtils.stopRecorder).not.toHaveBeenCalled();
+    expect(puppeteerUtils.stopRecorder).toHaveBeenCalledExactlyOnceWith(
+      tagAssistantRecorder
+    );
     expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(
       browser,
       openerPage,

@@ -4,16 +4,22 @@ import { join } from 'path';
 import { createReadStream, existsSync } from 'fs';
 import { Readable } from 'stream';
 
+import { RECORDING_FILES, RecordingFile } from '../../../shared';
+
 @Injectable()
 export class ProjectVideoService {
   constructor(private readonly folderPathService: FolderPathService) {}
 
-  async getVideos(projectSlug: string, eventId: string) {
+  async getVideos(
+    projectSlug: string,
+    eventId: string,
+    file: RecordingFile = RECORDING_FILES.site
+  ) {
     const folder = await this.folderPathService.getInspectionEventFolderPath(
       projectSlug,
       eventId
     );
-    const videoPath = join(folder, 'recording.webm');
+    const videoPath = join(folder, file);
 
     Logger.debug(`Video path: ${videoPath}`, ProjectVideoService.name);
 

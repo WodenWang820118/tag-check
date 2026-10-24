@@ -37,6 +37,49 @@ describe('CarouselComponent', () => {
     );
   });
 
+  it('adds the Tag Assistant recording after the site recording, both labelled', () => {
+    const tagAssistant = new Blob(['ta-webm']);
+    const fixture = TestBed.createComponent(CarouselComponent);
+    fixture.componentRef.setInput('imageBlob', new Blob(['png']));
+    fixture.componentRef.setInput('videoBlob', new Blob(['webm']));
+    fixture.componentRef.setInput('tagAssistantVideoBlob', tagAssistant);
+    fixture.detectChanges();
+    // The component provides its own MatDialog through MatDialogModule.
+    const open = vi
+      .spyOn(fixture.debugElement.injector.get(MatDialog), 'open')
+      .mockReturnValue({} as never);
+
+    const element: HTMLElement = fixture.nativeElement;
+    const captions = Array.from(
+      element.querySelectorAll('.carousel-caption'),
+      (caption) => caption.textContent?.trim()
+    );
+    expect(captions).toEqual(['Website', 'Tag Assistant']);
+    element
+      .querySelector<HTMLElement>('[data-testid="media-open-tag-assistant"]')
+      ?.click();
+    expect(open).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        data: expect.objectContaining({
+          blob: tagAssistant,
+          url: 'blob:media-3'
+        })
+      })
+    );
+  });
+
+  it('leaves out an empty Tag Assistant recording and the site label', () => {
+    const fixture = TestBed.createComponent(CarouselComponent);
+    fixture.componentRef.setInput('videoBlob', new Blob(['webm']));
+    fixture.componentRef.setInput('tagAssistantVideoBlob', new Blob([]));
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(element.querySelectorAll('video')).toHaveLength(1);
+    expect(element.querySelector('.carousel-caption')).toBeNull();
+  });
+
   it('revokes the blob URLs on destroy', () => {
     const fixture = TestBed.createComponent(CarouselComponent);
     fixture.componentRef.setInput('imageBlob', new Blob(['png']));
