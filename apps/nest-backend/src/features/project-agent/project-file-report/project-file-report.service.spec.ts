@@ -61,6 +61,10 @@ describe('ProjectFileReportService', () => {
     for (const eventId of ['latest-deleted', 'older-deleted']) {
       mkdirSync(join(root, eventId));
       writeFileSync(join(root, eventId, 'recording.webm'), 'webm');
+      writeFileSync(
+        join(root, eventId, 'recording-tag-assistant.webm'),
+        'webm'
+      );
     }
     ctx.testEventDetailRepositoryService.deleteRuns.mockResolvedValue({
       deletedRunIds: [7, 3],
@@ -76,6 +80,12 @@ describe('ProjectFileReportService', () => {
     expect(existsSync(join(root, 'latest-deleted', 'recording.webm'))).toBe(
       false
     );
+    expect(
+      existsSync(join(root, 'latest-deleted', 'recording-tag-assistant.webm'))
+    ).toBe(false);
+    expect(
+      existsSync(join(root, 'older-deleted', 'recording-tag-assistant.webm'))
+    ).toBe(true);
     expect(existsSync(join(root, 'older-deleted', 'recording.webm'))).toBe(
       true
     );

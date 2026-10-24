@@ -7,6 +7,7 @@ import { join } from 'path';
 import { XlsxReportService } from '../../../infrastructure/os/xlsx-report/xlsx-report.service';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 import { TestEventDetailRepositoryService } from '../../../core/repository/test-event/test-event-detail-repository.service';
+import { RECORDING_FILES } from '../../../shared';
 
 @Injectable()
 export class ProjectFileReportService {
@@ -37,8 +38,9 @@ export class ProjectFileReportService {
 
   /**
    * Deletes the project's runs with these ids and the screenshots they saved;
-   * the tests stay. Every run replaces the test's screen recording, so a test
-   * whose latest run is deleted loses its recording too.
+   * the tests stay. Every run replaces the test's screen recordings (the
+   * site's and, in accompanied mode, Tag Assistant's), so a test whose latest
+   * run is deleted loses both.
    */
   async deleteRuns(
     projectSlug: string,
@@ -56,7 +58,11 @@ export class ProjectFileReportService {
             projectSlug,
             eventId
           );
-        await rm(join(folder, 'recording.webm'), { force: true });
+        await Promise.all(
+          Object.values(RECORDING_FILES).map((file) =>
+            rm(join(folder, file), { force: true })
+          )
+        );
       })
     );
     this.logger.log(`Deleted ${deletedRunIds.length} run(s) of ${projectSlug}`);
