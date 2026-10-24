@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { IReportDetails, REPORT_LIST_ITEM_SAMPLE } from '@utils';
 import { StatusFilter } from '../../report-filter';
 import { ProjectDataSourceService } from '../../../../../../shared/services/data-source/project-data-source.service';
@@ -147,6 +147,46 @@ describe('navigation bookmarks', () => {
     expect(newProjectRows[0].stopNavigation).toBe(false);
     // The pending state is cleared
     expect(state.getPreventNavigationSignal()).toBe(false);
+  });
+});
+
+describe('deleting tests', () => {
+  it('removes the selected tests and clears the selection', () => {
+    const deleteBatchReports = vi.fn(() => of({ affected: 1 }));
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ReportService, useValue: { deleteBatchReports } },
+        {
+          provide: MatDialog,
+          useValue: { open: () => ({ afterClosed: () => of(true) }) }
+        },
+        { provide: MatSnackBar, useValue: { open: vi.fn() } }
+      ]
+    });
+    const state = TestBed.inject(ProjectDataSourceService);
+    const model = TestBed.inject(ReportTableDataSourceModelService);
+    model.dataSource().data = JSON.parse(
+      JSON.stringify([
+        { ...REPORT_LIST_ITEM_SAMPLE, eventId: 'a', eventName: 'a' },
+        { ...REPORT_LIST_ITEM_SAMPLE, eventId: 'b', eventName: 'b' }
+      ])
+    );
+    TestBed.runInInjectionContext(() =>
+      TestBed.inject(ReportTableEffectsFacadeService).initialize({
+        getStatus: () => 'all',
+        getProjectSlug: () => 'demo'
+      })
+    );
+    const [first] = model.dataSource().data;
+    model.selection().select(first);
+
+    state.setDeletedSignal(true);
+    TestBed.tick();
+
+    expect(deleteBatchReports).toHaveBeenCalledWith('demo', ['a']);
+    expect(model.dataSource().data.map((row) => row.eventId)).toEqual(['b']);
+    expect(model.selection().hasValue()).toBe(false);
+    expect(state.getDeletedSignal()).toBe(false);
   });
 });
 

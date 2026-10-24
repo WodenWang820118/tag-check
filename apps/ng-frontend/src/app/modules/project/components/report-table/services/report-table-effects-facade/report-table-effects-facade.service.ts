@@ -1,3 +1,4 @@
+import { SelectionModel } from '@angular/cdk/collections';
 import { Injectable, effect, inject, untracked } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
@@ -125,27 +126,25 @@ export class ReportTableEffectsFacadeService {
 
         dialogRef.afterClosed().subscribe((result) => {
           if (result) {
-            const currentDsB =
-              this.reportTableDataSourceModelService.dataSource();
-            const remainingReports = currentDsB.data.filter(
-              (item: IReportDetails) =>
-                !this.reportTableDataSourceModelService
-                  .selection()
-                  .selected.includes(item)
+            const model = this.reportTableDataSourceModelService;
+            const selected = model.selection().selected;
+            const current = model.dataSource();
+            // The rows go at once; the filter effect re-applies the filter
+            // to the new data source.
+            const remaining = new MatTableDataSource<IReportDetails>(
+              current.data.filter((item) => !selected.includes(item))
             );
-            const newDsB = new MatTableDataSource<IReportDetails>([
-              ...remainingReports
-            ]);
-            newDsB.paginator = currentDsB.paginator;
-            newDsB.sort = currentDsB.sort;
-            this.reportTableDataSourceModelService.dataSource.set(newDsB);
+            remaining.paginator = current.paginator;
+            remaining.sort = current.sort;
+            model.dataSource.set(remaining);
+            // The deleted rows must not stay selected, or the toolbar would
+            // still offer to delete, run or bookmark them.
+            model.selection.set(new SelectionModel<IReportDetails>(true, []));
 
             this.reportService
               .deleteBatchReports(
                 this.getProjectSlug(),
-                this.reportTableDataSourceModelService
-                  .selection()
-                  .selected.map((item: IReportDetails) => item.eventId)
+                selected.map((item) => item.eventId)
               )
               .pipe(take(1))
               .subscribe();
