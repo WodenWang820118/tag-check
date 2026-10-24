@@ -50,7 +50,6 @@ describe('GtmOperatorService recorder lifecycle', () => {
     service = new GtmOperatorService(
       pipeline as never,
       puppeteerUtils as never,
-      {} as never,
       new RunQueueService()
     );
     vi.spyOn(service, 'operateGtmPreviewMode').mockResolvedValue(undefined);
@@ -318,7 +317,6 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      {} as never,
       new RunQueueService()
     );
     const page = createPreviewPage();
@@ -354,7 +352,6 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      {} as never,
       new RunQueueService()
     );
     const page = createPreviewPage();
@@ -376,7 +373,6 @@ describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      {} as never,
       new RunQueueService()
     );
 
@@ -389,7 +385,6 @@ describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
 
   it('returns an empty string when the GTM preview hash has no target url', () => {
     const service = new GtmOperatorService(
-      {} as never,
       {} as never,
       {} as never,
       new RunQueueService()
