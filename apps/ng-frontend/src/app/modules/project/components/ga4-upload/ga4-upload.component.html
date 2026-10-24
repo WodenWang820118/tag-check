@@ -29,8 +29,8 @@
         <textarea
           matInput
           rows="10"
-          [value]="textValue$()"
-          (keyup)="textValue.set($any($event.target).value)"
+          [value]="text()"
+          (keyup)="onTextChange($any($event.target).value)"
           placeholder='[{ "event": "add_payment_info", "ecommerce": { ... } }]'
         ></textarea>
       </mat-form-field>

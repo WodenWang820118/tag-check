@@ -1,8 +1,6 @@
 import {
   Component,
   OnInit,
-  computed,
-  effect,
   signal,
   ChangeDetectionStrategy
 } from '@angular/core';
@@ -38,18 +36,15 @@ export class Ga4UploadComponent implements OnInit {
   parseError = this.facade.parseError$;
   isSaving = this.facade.isSaving$;
 
-  // local textarea binding
-  textValue = signal<string>('');
-  textValue$ = computed(() => this.textValue());
+  /** The JSON in the text box, typed, pasted or read from a file. */
+  text = this.facade.rawJson.asReadonly();
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly facade: Ga4UploadFacadeService
   ) {
-    effect(() => {
-      const v = this.textValue$();
-      this.facade.setRawJson(v);
-    });
+    // The facade outlives the tab, so each opening starts empty.
+    this.facade.setRawJson('');
   }
 
   ngOnInit(): void {
@@ -61,6 +56,10 @@ export class Ga4UploadComponent implements OnInit {
 
   onFileSelected(event: Event) {
     this.facade.onFileSelected(event);
+  }
+
+  onTextChange(text: string) {
+    this.facade.setRawJson(text);
   }
 
   setSample() {
@@ -97,7 +96,7 @@ export class Ga4UploadComponent implements OnInit {
     }
   }
 ]`;
-    this.textValue.set(sample);
+    this.facade.setRawJson(sample);
   }
 
   save() {
