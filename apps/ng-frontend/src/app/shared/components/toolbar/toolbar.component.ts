@@ -2,13 +2,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { Project, ProjectSetting } from '@utils';
 import {
   Component,
-  effect,
   input,
   model,
   output,
   signal,
   ChangeDetectionStrategy
 } from '@angular/core';
+import { filter, map } from 'rxjs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,6 +26,10 @@ import { MatInputModule } from '@angular/material/input';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+/**
+ * The app bar. On the home page it offers the project search, new project
+ * and help; on a project page, the menu toggle and the project switcher.
+ */
 @Component({
   selector: 'app-toolbar',
   standalone: true,
@@ -45,7 +49,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   styleUrl: './toolbar.component.scss'
 })
 export class ToolbarComponent {
-  // Convert inputs to signal inputs
   snav = input<MatSidenav | undefined>();
   settings = input.required<ProjectSetting | undefined>();
   projects = input.required<Project[] | undefined>();
@@ -57,24 +60,24 @@ export class ToolbarComponent {
   selectedProject = model<string>(this.params().projectSlug);
   changeProject = output<string>();
 
-  // Convert state to signals
   isSearchVisible = signal(false);
-  isHomeView = signal(false);
+  /**
+   * Whether the home page shows. Each project page creates a toolbar, so
+   * the subscription must end with it; toSignal ends it on destroy.
+   */
+  readonly isHomeView = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.url === '/')
+    ),
+    { initialValue: false }
+  );
 
   constructor(
     private readonly metadataSourceService: MetadataSourceService,
     private readonly router: Router,
     private readonly route: ActivatedRoute
-  ) {
-    // Handle navigation with effect
-    effect(() => {
-      this.router.events.subscribe((event) => {
-        if (event instanceof NavigationEnd) {
-          this.isHomeView.set(event.url === '/');
-        }
-      });
-    });
-  }
+  ) {}
 
   onChangeProject(projectSlug: string) {
     this.selectedProject.set(projectSlug);
@@ -85,8 +88,10 @@ export class ToolbarComponent {
     this.isSearchVisible.update((value) => !value);
   }
 
+  /** Closes the project search and shows every project again. */
   closeSearch() {
     this.isSearchVisible.set(false);
+    this.metadataSourceService.setFilterSignal('');
   }
 
   applyFilter(event: Event) {

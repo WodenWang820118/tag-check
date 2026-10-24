@@ -39,7 +39,6 @@ export class ProjectListComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.facade.setPaginator(this.paginator());
-    this.facade.initializeData();
   }
 
   handlePageEvent(e: PageEvent): void {
