@@ -35,6 +35,8 @@ export const TAG_ASSISTANT_BADGE_PASSTHROUGH = `(function () {
 
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
 
+import { RECORDING_FILES } from '../../shared';
+
 @Injectable()
 export class GtmOperatorService {
   private readonly logger = new Logger(GtmOperatorService.name);
@@ -85,6 +87,7 @@ export class GtmOperatorService {
     // normalize headless flag consistently with PuppeteerUtilsService
     const headlessFlag = query.headless === 'true' || query.headless === '1';
     let recorder: RunRecorder | null = null;
+    let tagAssistantRecorder: RunRecorder | null = null;
     try {
       const websiteUrl = this.getPreviewTargetUrl(query.gtmUrl);
       await this.applyCookies(browser, websiteUrl, eventInspectionPresetDto);
@@ -134,6 +137,12 @@ export class GtmOperatorService {
         eventId,
         this.abortController.signal
       );
+      tagAssistantRecorder = await this.startTagAssistantRecorder(
+        page,
+        projectSlug,
+        eventId,
+        this.abortController.signal
+      );
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const data =
@@ -148,6 +157,7 @@ export class GtmOperatorService {
         );
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await this.puppeteerUtilsService.stopRecorder(recorder);
+      await this.puppeteerUtilsService.stopRecorder(tagAssistantRecorder);
 
       if (headlessFlag) {
         const pages = await browser.pages();
@@ -161,6 +171,13 @@ export class GtmOperatorService {
       return data;
     } catch (error) {
       this.logger.error(error);
+      if (tagAssistantRecorder) {
+        await this.puppeteerUtilsService
+          .stopRecorder(tagAssistantRecorder)
+          .catch((err) =>
+            this.logger.error(`Error stopping Tag Assistant recorder: ${err}`)
+          );
+      }
 
       if (headlessFlag) {
         await this.puppeteerUtilsService.cleanup(browser, page, recorder);
@@ -178,6 +195,31 @@ export class GtmOperatorService {
       throw new InternalServerErrorException(
         'Failed to perform GTM validation'
       );
+    }
+  }
+
+  /**
+   * Records the Tag Assistant tab, which lists the tags that fire while the
+   * site's journey replays. The run does not depend on it: a recorder that
+   * fails to start is logged and the run goes on with the site recording.
+   */
+  private async startTagAssistantRecorder(
+    page: Page,
+    projectSlug: string,
+    eventId: string,
+    signal: AbortSignal
+  ): Promise<RunRecorder | null> {
+    try {
+      return await this.puppeteerUtilsService.startRecorder(
+        page,
+        projectSlug,
+        eventId,
+        signal,
+        { file: RECORDING_FILES.tagAssistant, bringToFront: false }
+      );
+    } catch (error) {
+      this.logger.warn(`Tag Assistant was not recorded: ${error}`);
+      return null;
     }
   }
 

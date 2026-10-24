@@ -23,6 +23,15 @@ describe('VideosService', () => {
     );
   });
 
+  it('asks for the Tag Assistant recording with view=tag-assistant', async () => {
+    http.get.mockReturnValue(of({ body: new Blob(['v']) }));
+    await firstValueFrom(service.getVideo('p', 'e', 'tag-assistant'));
+    expect(http.get).toHaveBeenCalledWith(
+      expect.stringContaining('/p/e'),
+      expect.objectContaining({ params: { view: 'tag-assistant' } })
+    );
+  });
+
   it('falls back to an empty Blob when response body is missing', async () => {
     http.get.mockReturnValue(of({ body: null }));
     const result = await firstValueFrom(service.getVideo('p', 'e'));

@@ -11,6 +11,9 @@ import { CarouselItem, CarouselItemEnum } from '@utils';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MediaPreviewDialogComponent } from '../media-preview-dialog/media-preview-dialog.component';
 
+/** A carousel item with the blob it shows, for previews and downloads. */
+type MediaItem = CarouselItem & { blob: Blob; testId: string };
+
 @Component({
   selector: 'app-carousel',
   standalone: true,
@@ -24,6 +27,8 @@ export class CarouselComponent implements OnDestroy {
   private readonly objectUrls: string[] = [];
   imageBlob = input<Blob | undefined>(undefined);
   videoBlob = input<Blob | undefined>(undefined);
+  /** The Tag Assistant tab recorded by an accompanied-mode run. */
+  tagAssistantVideoBlob = input<Blob | undefined>(undefined);
 
   // Angular does not sanitize img/source src, so bind the blob: URL as a
   // plain string: a SafeUrl would be set as the text "SafeValue must use...".
@@ -37,20 +42,37 @@ export class CarouselComponent implements OnDestroy {
   videoType = CarouselItemEnum.Video;
 
   readonly items = computed(() => {
-    const items: CarouselItem[] = [];
+    const items: MediaItem[] = [];
     const imgBlob = this.imageBlob();
     const vidBlob = this.videoBlob();
+    const tagAssistantBlob = this.tagAssistantVideoBlob();
+    const hasTagAssistant = !!tagAssistantBlob && tagAssistantBlob.size > 0;
     if (imgBlob !== undefined) {
       items.push({
         type: CarouselItemEnum.Image,
-        url: this.getObjectUrl(imgBlob)
+        url: this.getObjectUrl(imgBlob),
+        blob: imgBlob,
+        testId: 'media-open-screenshot'
       });
     }
 
     if (vidBlob !== undefined) {
       items.push({
         type: CarouselItemEnum.Video,
-        url: this.getObjectUrl(vidBlob)
+        url: this.getObjectUrl(vidBlob),
+        blob: vidBlob,
+        testId: 'media-open-recording',
+        caption: hasTagAssistant ? 'Website' : undefined
+      });
+    }
+
+    if (hasTagAssistant) {
+      items.push({
+        type: CarouselItemEnum.Video,
+        url: this.getObjectUrl(tagAssistantBlob),
+        blob: tagAssistantBlob,
+        testId: 'media-open-tag-assistant',
+        caption: 'Tag Assistant'
       });
     }
 
@@ -91,16 +113,11 @@ export class CarouselComponent implements OnDestroy {
     if (!items?.length) return;
     const item = items[index];
     if (!item) return;
-    // Determine the blob to pass for better download support
-    const blob =
-      item.type === CarouselItemEnum.Image
-        ? this.imageBlob()
-        : this.videoBlob();
     this.dialog.open(MediaPreviewDialogComponent, {
       data: {
         type: item.type,
         url: item.url,
-        blob: blob,
+        blob: item.blob,
         alt: item.alt,
         caption: item.caption
       },

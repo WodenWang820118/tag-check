@@ -24,6 +24,7 @@ function createViewModel(
     canExportEvent: true,
     hasMedia: true,
     videoBlob: new Blob(['video'], { type: 'video/webm' }),
+    tagAssistantVideoBlob: undefined,
     imageBlob: new Blob(['image'], { type: 'image/png' }),
     ...overrides
   };
@@ -104,6 +105,7 @@ export const ActionsDisabled: Story = {
       canExportEvent: false,
       hasMedia: false,
       videoBlob: undefined,
+      tagAssistantVideoBlob: undefined,
       imageBlob: undefined
     })
   }

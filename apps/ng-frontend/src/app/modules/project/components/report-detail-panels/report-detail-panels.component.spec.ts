@@ -40,6 +40,7 @@ function createContext(eventName = 'purchase'): ReportDetailRouteContext {
       updatedAt: new Date('2026-04-23T12:34:56.000Z')
     } as ReportDetailRouteContext['reportDetails'],
     videoBlob: undefined,
+    tagAssistantVideoBlob: undefined,
     imageBlob: undefined,
     historyLinkCommands: ['..', 'buckets']
   };

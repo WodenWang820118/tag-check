@@ -79,6 +79,7 @@ function createContext(): ReportDetailRouteContext {
       message: 'The run failed.'
     } as ReportDetailRouteContext['reportDetails'],
     videoBlob: new Blob(['video'], { type: 'video/webm' }),
+    tagAssistantVideoBlob: undefined,
     imageBlob: new Blob(['image'], { type: 'image/png' }),
     historyLinkCommands: ['..', 'buckets']
   };

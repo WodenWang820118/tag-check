@@ -47,6 +47,7 @@ function buildReportTabViewModel(
     hasMedia:
       (context.imageBlob?.size || 0) > 0 && (context.videoBlob?.size || 0) > 0,
     videoBlob: context.videoBlob,
+    tagAssistantVideoBlob: context.tagAssistantVideoBlob,
     imageBlob: context.imageBlob
   };
 }

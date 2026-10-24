@@ -130,6 +130,7 @@ describe('buildReportPage', () => {
       spec: {} as DataLayerSpec,
       recording: null,
       video: { blob: video },
+      tagAssistantVideo: null,
       image: null
     });
 
@@ -137,6 +138,7 @@ describe('buildReportPage', () => {
       projectSlug: 'demo',
       eventId: 'evt-1',
       videoBlob: video,
+      tagAssistantVideoBlob: undefined,
       imageBlob: undefined,
       historyLinkCommands: ['..', 'buckets']
     });
