@@ -2,26 +2,21 @@ import {
   Controller,
   Get,
   Header,
-  HttpException,
-  HttpStatus,
-  Logger,
+  NotFoundException,
   Param,
-  StreamableFile,
-  UseInterceptors
+  StreamableFile
 } from '@nestjs/common';
 import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
-import { FileService } from '../../infrastructure/os/file/file.service';
-import { GTMConfiguration } from '@utils';
-import { join } from 'path';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { ProjectGtmContainerService } from '../../features/project-agent/project-gtm-container/project-gtm-container.service';
 
+/** Serves a project, its tests' latest screenshots and its GTM container. */
 @Controller('projects')
 export class ProjectDataRetrievalController {
   constructor(
     private readonly testImageRepositoryService: TestImageRepositoryService,
     private readonly projectRepositoryService: ProjectRepositoryService,
-    private readonly fileService: FileService
+    private readonly projectGtmContainerService: ProjectGtmContainerService
   ) {}
 
   @Get('/images/:projectSlug/:eventId')
@@ -48,27 +43,21 @@ export class ProjectDataRetrievalController {
     return this.projectRepositoryService.getBySlug(projectSlug);
   }
 
-  @UseInterceptors(CacheInterceptor)
+  /**
+   * The GTM container the project imported, which the report page uses to
+   * resolve tag variables. It is read from the project's config folder on
+   * every request: a cached copy would outlive the next container import.
+   *
+   * @throws NotFoundException when the project has no readable container.
+   */
   @Get(':projectSlug/gtm-config')
   async getGtmConfig(@Param('projectSlug') projectSlug: string) {
-    const gtmConfigPath =
-      await this.projectRepositoryService.getGtmConfigBySlug(projectSlug);
-    if (!gtmConfigPath) {
-      throw new HttpException(
-        'GTM config path not found',
-        HttpStatus.NOT_FOUND
+    const container = await this.projectGtmContainerService.read(projectSlug);
+    if (!container) {
+      throw new NotFoundException(
+        `No GTM container imported for project '${projectSlug}'`
       );
     }
-    try {
-      return this.fileService.readJsonFile<GTMConfiguration>(
-        join(gtmConfigPath, 'gtm-container.json')
-      );
-    } catch (error) {
-      Logger.error(error);
-      throw new HttpException(
-        'Failed to retrieve GTM config',
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
+    return container;
   }
 }

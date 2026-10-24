@@ -10,7 +10,6 @@ import { DatabaseConfigModule } from './core/database/database.module';
 import { createMigratedDataSource } from './core/database/database-migrations';
 import { LoggerModule, LoggerErrorInterceptor } from 'nestjs-pino';
 import { ConfigsModule } from './core/configs/configs.module';
-import { CacheModule } from '@nestjs/cache-manager';
 import { EntitiesModule } from './infrastructure/database/entities.module';
 import { HealthModule } from './common/health/health.module';
 import { randomUUID } from 'node:crypto';
@@ -62,9 +61,6 @@ function sanitizeHttpPath(rawUrl: string | undefined): string | undefined {
     // // Load ConfigModule first as other modules depend on it
     ConfigModule.forRoot({
       isGlobal: true // Make configuration globally available
-    }),
-    CacheModule.register({
-      isGlobal: true
     }),
 
     // Core modules

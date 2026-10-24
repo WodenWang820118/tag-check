@@ -99,14 +99,4 @@ describe('ProjectRepositoryService', () => {
     await service.deleteBySlug('demo');
     expect(repository.delete).toHaveBeenCalledWith({ projectSlug: 'demo' });
   });
-
-  it('getGtmConfigBySlug() returns the gtmConfigurationPath of the resolved project', async () => {
-    const { service, repository } = build();
-    repository.findOne.mockResolvedValue({
-      id: 1,
-      gtmConfigurationPath: '/cfg.json'
-    });
-    const result = await service.getGtmConfigBySlug('demo');
-    expect(result).toBe('/cfg.json');
-  });
 });

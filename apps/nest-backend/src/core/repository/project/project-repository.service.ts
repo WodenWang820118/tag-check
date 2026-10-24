@@ -83,9 +83,4 @@ export class ProjectRepositoryService {
     const entity = await this.repository.delete({ projectSlug: slug });
     return plainToInstance(ProjectResponseDto, entity);
   }
-
-  async getGtmConfigBySlug(slug: string) {
-    const entity = await this.getEntityBySlug(slug);
-    return entity.gtmConfigurationPath;
-  }
 }
