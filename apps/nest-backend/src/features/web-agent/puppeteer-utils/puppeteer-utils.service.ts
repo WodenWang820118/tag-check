@@ -2,16 +2,36 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventInspectionPresetDto } from '@utils';
 import { join, dirname } from 'path';
 import { promises as fs } from 'fs';
-import { Page, Browser } from 'puppeteer';
+import { Page, Browser, LaunchOptions } from 'puppeteer';
 import { ConfigsService } from '../../../core/configs/configs.service';
 import { RecordingRepositoryService } from '../.././../core/repository/recording/recording-repository.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
+import { RECORDING_FILES, RecordingFile } from '../../../shared';
 import { RunRecorder } from './run-recorder';
 
 const CLOSE_TIMEOUT_MS = 10_000;
 
-import { RECORDING_FILES, RecordingFile } from '../../../shared';
+/**
+ * Reads the `headless` query flag, which arrives as a string. Only "true" and
+ * "1" mean headless; anything else, including a missing value, is headful.
+ */
+export function isHeadless(headless: string | undefined): boolean {
+  return headless === 'true' || headless === '1';
+}
 
+/** The Chromium build that puppeteer-chromium-resolver found or downloaded. */
+interface ResolvedChromium {
+  puppeteer: { launch(options: LaunchOptions): Promise<Browser> };
+  executablePath: string;
+}
+
+/**
+ * Launches and closes the Chromium a run drives, and records its pages.
+ *
+ * The caller owns the browser that startBrowser returns: it calls cleanup on
+ * every path, except a headful run that is left open on purpose so the user
+ * can inspect it.
+ */
 @Injectable()
 export class PuppeteerUtilsService {
   private readonly logger = new Logger(PuppeteerUtilsService.name);
@@ -26,18 +46,19 @@ export class PuppeteerUtilsService {
     private readonly folderPathService: FolderPathService
   ) {}
 
+  /**
+   * Launches Chromium and returns it with its first page. Aborting `signal`
+   * later closes the browser. A signal aborted while Chromium starts closes
+   * the browser and rejects.
+   */
   async startBrowser(
     headless: string,
     measurementId: string,
     eventInspectionPresetDto: EventInspectionPresetDto,
     signal: AbortSignal
   ) {
-    const PCR = require('puppeteer-chromium-resolver');
-
-    const options = {};
-    const stats = await PCR(options);
-    // normalize headless flag: callers may pass string 'true'/'false'
-    const headlessFlag = headless === 'true' || headless === '1';
+    const stats = await this.resolveChromium();
+    const headlessFlag = isHeadless(headless);
 
     // Merge default browser args with any provided by the preset (last wins per flag)
     const defaultArgs = this.configsService.getBROWSER_ARGS?.() ?? [];
@@ -62,26 +83,40 @@ export class PuppeteerUtilsService {
       signal: signal
     });
 
-    const pages = await browser.pages();
-    const page = pages[0];
-    try {
-      // Set up an abort listener
-      signal.addEventListener('abort', async () => {
-        this.logger.log('Received the abort signal');
-        await this.cleanup(browser, page);
-      });
-
-      return {
-        browser: browser,
-        page: page
-      };
-    } catch (error) {
-      this.logger.error(`Error starting browser: ${error}`);
+    const [page] = await browser.pages();
+    // A signal fires 'abort' only once. An abort that arrived while Chromium
+    // was starting would never reach the listener below, and the run would
+    // go on in a browser nobody closes.
+    if (signal.aborted) {
       await this.cleanup(browser, page);
-      throw error;
+      throw new Error('Browser start aborted');
     }
+    signal.addEventListener(
+      'abort',
+      () => {
+        this.logger.log('Received the abort signal');
+        void this.cleanup(browser, page);
+      },
+      { once: true }
+    );
+
+    return { browser, page };
   }
 
+  /**
+   * Finds the Chromium build to launch. The resolver is required lazily: it
+   * is CommonJS without types and is only needed once a run starts.
+   */
+  protected async resolveChromium(): Promise<ResolvedChromium> {
+    const PCR = require('puppeteer-chromium-resolver');
+    return await PCR({});
+  }
+
+  /**
+   * Stops `recorder`, then closes `page` and `browser`. Never throws: each
+   * close is bounded by CLOSE_TIMEOUT_MS, and a browser that does not close
+   * in time has its process killed.
+   */
   async cleanup(browser: Browser, page: Page, recorder?: RunRecorder | null) {
     await this.stopRecorder(recorder);
 
