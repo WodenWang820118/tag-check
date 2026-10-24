@@ -20,6 +20,8 @@ export interface InspectSingleEventOptions {
   eventInspectionPresetDto: EventInspectionPresetDto;
 }
 
+import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
+
 @Injectable()
 export class SingleEventInspectionService {
   private readonly logger = new Logger(SingleEventInspectionService.name);
@@ -28,14 +30,24 @@ export class SingleEventInspectionService {
 
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
-    private readonly puppeteerUtilsService: PuppeteerUtilsService
+    private readonly puppeteerUtilsService: PuppeteerUtilsService,
+    private readonly runQueue: RunQueueService
   ) {}
 
   initializeAbortController() {
     this.abortController = new AbortController();
   }
 
-  async inspectSingleEvent(
+  /** Runs the test once every run requested before it has finished. */
+  inspectSingleEvent(
+    projectSlug: string,
+    eventId: string,
+    options: InspectSingleEventOptions
+  ) {
+    return this.runQueue.run(() => this.inspect(projectSlug, eventId, options));
+  }
+
+  private async inspect(
     projectSlug: string,
     eventId: string,
     options: InspectSingleEventOptions
