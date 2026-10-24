@@ -1,7 +1,10 @@
 import { EventTagConfig, Parameter, Tag, TagTypeEnum, Trigger } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { CONSENT_STATUS_NOT_NEEDED } from '../utils/constant';
+import {
+  CONSENT_STATUS_NOT_NEEDED,
+  MEASUREMENT_ID_VARIABLE_NAME
+} from '../utils/constant';
 
 /**
  * Builds a GA4 Event tag (`gaawe`) for one custom data layer event. Each
@@ -34,6 +37,9 @@ export class EventTag {
   }
 
   /**
+   * @param googleTagName not used: the tag sets its measurement ID itself,
+   * as Tag Manager exports GA4 event tags since the Google tag replaced the
+   * GA4 Configuration tag.
    * @param triggers the trigger names and IDs the tag's firing triggers are
    * looked up in.
    * @param isSendEcommerceData the tag's "Send Ecommerce data" setting.
@@ -51,7 +57,7 @@ export class EventTag {
       type: TagTypeEnum.GAAWE,
       accountId,
       containerId,
-      parameter: this.buildParameter(googleTagName, tag, isSendEcommerceData),
+      parameter: this.buildParameter(tag, isSendEcommerceData),
       firingTriggerId: this.buildTriggerIds(tag, triggers),
       tagFiringOption: 'ONCE_PER_EVENT',
       monitoringMetadata: {
@@ -63,11 +69,7 @@ export class EventTag {
     };
   }
 
-  private buildParameter(
-    googleTagName: string,
-    tag: Tag,
-    isSendEcommerceData: 'true' | 'false'
-  ) {
+  private buildParameter(tag: Tag, isSendEcommerceData: 'true' | 'false') {
     return [
       this.parameterUtils.createBooleanParameter(
         'sendEcommerceData',
@@ -80,9 +82,12 @@ export class EventTag {
         'eventSettingsTable',
         this.processEcommerceData(tag, isSendEcommerceData)
       ),
-      this.parameterUtils.createTagReferenceParameter(
-        'measurementId',
-        googleTagName
+      // Tag Manager exports the event tag's Measurement ID field as
+      // `measurementIdOverride`. A `measurementId` tag reference points at a
+      // GA4 Configuration tag, which the Google tag replaced.
+      this.parameterUtils.createTemplateParameter(
+        'measurementIdOverride',
+        `{{${MEASUREMENT_ID_VARIABLE_NAME}}}`
       )
     ];
   }
