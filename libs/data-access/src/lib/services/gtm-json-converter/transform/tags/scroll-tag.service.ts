@@ -4,6 +4,7 @@ import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
 import {
   CONSENT_STATUS_NOT_NEEDED,
+  MEASUREMENT_ID_VARIABLE_NAME,
   SCROLL_TRIGGER_NAME
 } from '../utils/constant';
 
@@ -28,7 +29,6 @@ export class ScrollTag {
   ) {}
   // Build the scroll tag configuration
   private buildScrollTag(
-    configurationName: string,
     accountId: string,
     containerId: string,
     triggerId: string
@@ -54,9 +54,10 @@ export class ScrollTag {
               ScrollTag.SCROLL_DEPTH_VAR
             )
           ]),
-          this.parameterUtils.createTagReferenceParameter(
-            'measurementId',
-            configurationName
+          // The event tag's Measurement ID field, as Tag Manager exports it.
+          this.parameterUtils.createTemplateParameter(
+            'measurementIdOverride',
+            `{{${MEASUREMENT_ID_VARIABLE_NAME}}}`
           )
         ],
         fingerprint: ScrollTag.FINGERPRINT,
@@ -75,7 +76,8 @@ export class ScrollTag {
   /**
    * Creates the scroll tag when a data layer event is `scroll`, or an empty
    * array otherwise or when the `event scroll` trigger is missing.
-   * @param configurationName name of the Google tag the event tag refers to
+   * @param configurationName name of the Google tag; not used, because the
+   * event tag sets its measurement ID directly
    * @param accountId GTM account ID
    * @param containerId GTM container ID
    * @param triggers trigger names and IDs to find the Scroll Depth trigger in
@@ -96,11 +98,6 @@ export class ScrollTag {
       console.error(`Missing trigger (${ScrollTag.TRIGGER_NAME}) or triggerId`);
       return [];
     }
-    return this.buildScrollTag(
-      configurationName,
-      accountId,
-      containerId,
-      trigger.triggerId
-    );
+    return this.buildScrollTag(accountId, containerId, trigger.triggerId);
   }
 }

@@ -54,7 +54,12 @@ export class GoogleTag {
         'tagId',
         GoogleTag.MEASUREMENT_ID_TEMPLATE
       ),
-      this.parameterUtils.createBooleanParameter('sendPageView', 'false'),
+      // The Google tag keeps its settings in a configuration table; the
+      // `sendPageView` checkbox belonged to the GA4 Configuration tag it
+      // replaced. Page views stay off: tag-build only sends the plan's events.
+      this.parameterUtils.createBuiltInListParameter('configSettingsTable', [
+        this.parameterUtils.createMapParameter('send_page_view', 'false')
+      ]),
       this.parameterUtils.createBooleanParameter(
         'enableSendToServerContainer',
         'false'
