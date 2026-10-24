@@ -186,4 +186,15 @@ describe('TestEventDetailRepositoryService.deleteRuns (SQLite)', () => {
     expect(deleted.deletedRunIds).toEqual([]);
     expect(await remainingRuns()).toEqual([foreign.runId]);
   });
+
+  it('getBySlugAndEventId() returns the newer of two runs saved in the same second', async () => {
+    const demo = await project('demo');
+    const cart = await test(demo, 'add_to_cart');
+    await run(cart, '10:00', { message: 'older' });
+    const newer = await run(cart, '10:00', { message: 'newer' });
+
+    const latest = await service.getBySlugAndEventId('demo', 'add_to_cart');
+
+    expect(latest.id).toBe(newer.runId);
+  });
 });

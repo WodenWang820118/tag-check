@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { RUN_SUMMARY_SAMPLE, shapeOf } from '@utils';
 import { TestEventDetailRepositoryService } from './test-event-detail-repository.service';
@@ -7,15 +7,10 @@ function build() {
   const repository = {
     findOne: vi.fn(),
     find: vi.fn(),
-    save: vi.fn(),
-    update: vi.fn()
+    save: vi.fn()
   };
-  const testEventRepository = { findOne: vi.fn() };
-  const service = new TestEventDetailRepositoryService(
-    repository as never,
-    testEventRepository as never
-  );
-  return { service, repository, testEventRepository };
+  const service = new TestEventDetailRepositoryService(repository as never);
+  return { service, repository };
 }
 
 describe('TestEventDetailRepositoryService', () => {
@@ -73,16 +68,9 @@ describe('TestEventDetailRepositoryService', () => {
         where: {
           testEvent: { project: { projectSlug: 'demo' }, eventId: 'evt' }
         },
-        order: { createdAt: 'DESC' }
+        order: { createdAt: 'DESC', id: 'DESC' }
       })
     );
-  });
-
-  it('getBySlugAndEventIds() returns DTOs for matching events', async () => {
-    const { service, repository } = build();
-    repository.find.mockResolvedValue([{ id: 1 }, { id: 2 }]);
-    const result = await service.getBySlugAndEventIds('demo', ['e1', 'e2']);
-    expect(result).toHaveLength(2);
   });
 
   it('create() persists a detail bound to the test event', async () => {
@@ -120,28 +108,5 @@ describe('TestEventDetailRepositoryService', () => {
         } as never
       )
     ).rejects.toMatchObject({ status: HttpStatus.BAD_REQUEST });
-  });
-
-  it('update() resolves the test event then updates by relation, applying defaults', async () => {
-    const { service, repository, testEventRepository } = build();
-    const testEvent = { id: 1, eventId: 'evt' };
-    testEventRepository.findOne.mockResolvedValue(testEvent);
-    repository.update.mockResolvedValue({ affected: 1 });
-    await service.update('demo', 'evt', {} as never);
-    const [criteria, payload] = repository.update.mock.calls[0];
-    expect(criteria).toEqual({ testEvent });
-    expect(payload.passed).toBe(false);
-    expect(payload.requestPassed).toBe(false);
-    expect(payload.rawRequest).toBe('');
-    expect(payload.destinationUrl).toBe('');
-    expect(payload.dataLayer).toEqual([]);
-  });
-
-  it('update() rethrows when the test event is missing as a wrapped HttpException', async () => {
-    const { service, testEventRepository } = build();
-    testEventRepository.findOne.mockResolvedValue(null);
-    await expect(
-      service.update('demo', 'evt', {} as never)
-    ).rejects.toBeInstanceOf(HttpException);
   });
 });
