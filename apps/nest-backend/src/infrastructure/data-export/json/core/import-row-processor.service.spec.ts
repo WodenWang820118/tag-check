@@ -29,10 +29,7 @@ describe('ImportRowProcessorService', () => {
     dup = {
       handleDuplicate: vi.fn(() => false)
     } as unknown as TestEventDuplicateService;
-    const map = new Map<unknown, unknown>();
-    registry = {
-      ensure: vi.fn(() => map)
-    } as unknown as IdMapRegistryService;
+    registry = new IdMapRegistryService();
     assigner = {
       assignIfApplicable: vi.fn()
     } as unknown as ProjectIdAssignerService;
@@ -116,6 +113,52 @@ describe('ImportRowProcessorService', () => {
       ctx: makeCtx()
     });
     expect(result).toBe(false);
+  });
+
+  describe('a run whose primary key collides', () => {
+    const runMeta = {
+      name: 'TestEventDetailEntity',
+      relations: [
+        {
+          isManyToOne: true,
+          propertyName: 'testEvent',
+          inverseEntityMetadata: { name: 'TestEventEntity' }
+        }
+      ]
+    } as unknown as EntityMetadata;
+
+    function preProcessRun(svc: ImportRowProcessorService) {
+      return svc.preProcessRow({
+        raw: { id: 2, testEvent: 7 },
+        materialized: { id: 2, testEvent: 7 },
+        meta: runMeta,
+        name: 'TestEventDetailEntity',
+        pkInfo: { primaryIsSingle: true, primaryKeyProp: 'id' },
+        existingIds: new Set([2]),
+        existingCompositeEventMap: null,
+        ctx: {
+          ...makeCtx(),
+          stats: { TestEventDetailEntity: { inserted: 0, skipped: 0 } }
+        }
+      });
+    }
+
+    it('is inserted when its test was created by this import', async () => {
+      registry.set('TestEventEntity', 7, 30);
+      registry.markCreated('TestEventEntity', 30);
+      const svc = new ImportRowProcessorService(dup, registry, assigner);
+
+      expect(await preProcessRun(svc)).toBe(false);
+      expect(registry.get('TestEventDetailEntity', 2)).toBeUndefined();
+    });
+
+    it('is skipped as already present when its test existed before', async () => {
+      registry.set('TestEventEntity', 7, 7);
+      const svc = new ImportRowProcessorService(dup, registry, assigner);
+
+      expect(await preProcessRun(svc)).toBe(true);
+      expect(registry.get('TestEventDetailEntity', 2)).toBe(2);
+    });
   });
 
   it('returns false when no PK is set', async () => {

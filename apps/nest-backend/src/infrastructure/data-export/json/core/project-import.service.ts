@@ -198,6 +198,7 @@ export class ProjectImportService {
         ? raw[pkInfo.primaryKeyProp]
         : undefined;
       if (oldPk != null) this.idMapRegistry.set(meta.name, oldPk, newPk);
+      this.idMapRegistry.markCreated(meta.name, newPk);
 
       this.registerSlug(meta.name, uniqueSlug, newPk);
       const exportRef = this.getExportRef(raw, materialized);

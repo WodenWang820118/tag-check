@@ -35,6 +35,29 @@ describe('RowMaterializerService', () => {
     expect(out['name']).toBe('2024-01-02T03:04:05.678Z');
   });
 
+  it('drops the inverse side of relations, which only lists exported child ids', () => {
+    const projectMeta = {
+      columns: [],
+      relations: [
+        {
+          isManyToOne: false,
+          isOneToOneOwner: false,
+          propertyName: 'testEvents'
+        },
+        {
+          isManyToOne: false,
+          isOneToOneOwner: false,
+          propertyName: 'browserSettings'
+        }
+      ]
+    } as never;
+    const out = service.materialize(
+      { id: 1, projectSlug: 'p', testEvents: [2, 3], browserSettings: 4 },
+      projectMeta
+    );
+    expect(out).toEqual({ id: 1, projectSlug: 'p' });
+  });
+
   it('passes other values through untouched', () => {
     const row = { count: 5, ok: true, tag: 'plain' };
     const out = service.materialize(row, dateMeta);

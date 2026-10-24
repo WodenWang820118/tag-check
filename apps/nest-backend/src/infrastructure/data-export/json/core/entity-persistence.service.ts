@@ -130,6 +130,7 @@ export class EntityPersistenceService {
     const oldPk = raw[primaryKeyProp];
     if (newPk != null) {
       if (oldPk != null) this.idMapRegistry.ensure(meta.name).set(oldPk, newPk);
+      this.idMapRegistry.markCreated(meta.name, newPk);
       existingIds?.add(newPk);
     }
   }

@@ -29,6 +29,11 @@ export class RelationMapperService {
     return this.maps[entityName];
   }
 
+  /** Forgets every alternate key, before the next import starts. */
+  clear(): void {
+    for (const k of Object.keys(this.maps)) delete this.maps[k];
+  }
+
   // --- Relation mapping ---
   mapRelations(
     materialized: Record<string, unknown>,
