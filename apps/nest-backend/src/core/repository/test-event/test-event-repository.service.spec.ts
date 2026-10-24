@@ -155,14 +155,6 @@ describe('TestEventRepositoryService', () => {
     expect(result).toEqual([{ id: 1 }]);
   });
 
-  it('getEntityByEventId() throws NOT_FOUND when no entity exists', async () => {
-    const { service, repository } = build();
-    repository.findOne.mockResolvedValue(null);
-    await expect(service.getEntityByEventId('evt')).rejects.toMatchObject({
-      status: 404
-    });
-  });
-
   it('getEntityBySlugAndEventId() returns the entity when found', async () => {
     const { service, repository } = build();
     repository.findOne.mockResolvedValue({ id: 1 });

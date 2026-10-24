@@ -92,7 +92,9 @@ function createServiceHarness(
     action?: Partial<ActionService>;
     dataLayer?: Partial<DataLayerService>;
     interceptor?: Partial<RequestInterceptorService>;
-    testEventRepository?: { getEntityByEventId?: ReturnType<typeof vi.fn> };
+    testEventRepository?: {
+      getEntityBySlugAndEventId?: ReturnType<typeof vi.fn>;
+    };
     page?: ReturnType<typeof createPage>;
   } = {}
 ) {
@@ -118,7 +120,9 @@ function createServiceHarness(
   } as unknown as RequestInterceptorService;
 
   const testEventRepository = {
-    getEntityByEventId: vi.fn().mockResolvedValue({ eventName: 'purchase' }),
+    getEntityBySlugAndEventId: vi
+      .fn()
+      .mockResolvedValue({ eventName: 'purchase' }),
     ...overrides.testEventRepository
   };
   const page = overrides.page ?? createPage();
@@ -173,6 +177,20 @@ describe('WebAgentUtilsService.performTest data layer', () => {
 
     expect(result.dataLayer).toEqual(expected);
     expect(dataLayer.getMyDataLayer).toHaveBeenCalledWith(
+      'project',
+      'event-id'
+    );
+  });
+});
+
+describe('WebAgentUtilsService.performTest test lookup', () => {
+  it("reads the test from the run's project", async () => {
+    const { testEventRepository, performTest } = createServiceHarness();
+
+    await performTest({ captureRequest: false });
+
+    // Another project may hold a test with the same eventId.
+    expect(testEventRepository.getEntityBySlugAndEventId).toHaveBeenCalledWith(
       'project',
       'event-id'
     );
