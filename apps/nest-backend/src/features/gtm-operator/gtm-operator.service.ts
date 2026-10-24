@@ -33,6 +33,8 @@ export const TAG_ASSISTANT_BADGE_PASSTHROUGH = `(function () {
   else document.addEventListener('DOMContentLoaded', addStyle);
 })();`;
 
+import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
+
 @Injectable()
 export class GtmOperatorService {
   private readonly logger = new Logger(GtmOperatorService.name);
@@ -41,14 +43,27 @@ export class GtmOperatorService {
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
     private readonly puppeteerUtilsService: PuppeteerUtilsService,
-    private readonly recordingRepositoryService: RecordingRepositoryService
+    private readonly recordingRepositoryService: RecordingRepositoryService,
+    private readonly runQueue: RunQueueService
   ) {}
 
   initializeAbortController() {
     this.abortController = new AbortController();
   }
 
-  async inspectSingleEventViaGtm(
+  /** Runs the test once every run requested before it has finished. */
+  inspectSingleEventViaGtm(
+    projectSlug: string,
+    eventId: string,
+    query: InspectGtmQueryDto,
+    eventInspectionPresetDto: EventInspectionPresetDto
+  ) {
+    return this.runQueue.run(() =>
+      this.inspectViaGtm(projectSlug, eventId, query, eventInspectionPresetDto)
+    );
+  }
+
+  private async inspectViaGtm(
     projectSlug: string,
     eventId: string,
     query: InspectGtmQueryDto,

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
 import { runInNewContext } from 'node:vm';
 import {
   GtmOperatorService,
@@ -44,7 +45,8 @@ describe('GtmOperatorService recorder lifecycle', () => {
     service = new GtmOperatorService(
       pipeline as never,
       puppeteerUtils as never,
-      {} as never
+      {} as never,
+      new RunQueueService()
     );
     vi.spyOn(service, 'operateGtmPreviewMode').mockResolvedValue(undefined);
   });
@@ -251,7 +253,8 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      {} as never
+      {} as never,
+      new RunQueueService()
     );
     const page = createPreviewPage();
 
@@ -286,7 +289,8 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      {} as never
+      {} as never,
+      new RunQueueService()
     );
     const page = createPreviewPage();
     page.waitForSelector.mockRejectedValueOnce(new Error('missing control'));
@@ -307,7 +311,8 @@ describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      {} as never
+      {} as never,
+      new RunQueueService()
     );
 
     expect(
@@ -321,7 +326,8 @@ describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      {} as never
+      {} as never,
+      new RunQueueService()
     );
 
     expect(

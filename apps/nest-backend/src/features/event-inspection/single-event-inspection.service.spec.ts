@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
 import {
   InspectSingleEventOptions,
   SingleEventInspectionService
@@ -38,7 +39,8 @@ describe('SingleEventInspectionService recorder lifecycle', () => {
     };
     service = new SingleEventInspectionService(
       pipeline as never,
-      puppeteerUtils as never
+      puppeteerUtils as never,
+      new RunQueueService()
     );
   });
 
@@ -53,6 +55,27 @@ describe('SingleEventInspectionService recorder lifecycle', () => {
     );
     expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
     expect(browser.close).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts a second run only after the first one has finished', async () => {
+    let finishFirst: (value: unknown) => void = () => undefined;
+    pipeline.singleEventInspectionRecipe.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishFirst = resolve;
+      })
+    );
+
+    const first = service.inspectSingleEvent('project', 'a', createOptions());
+    const second = service.inspectSingleEvent('project', 'b', createOptions());
+    await vi.waitFor(() =>
+      expect(pipeline.singleEventInspectionRecipe).toHaveBeenCalledOnce()
+    );
+    expect(puppeteerUtils.startBrowser).toHaveBeenCalledOnce();
+
+    finishFirst([{ passed: true }]);
+    await Promise.all([first, second]);
+    expect(puppeteerUtils.startBrowser).toHaveBeenCalledTimes(2);
+    expect(browser.close).toHaveBeenCalledTimes(2);
   });
 
   it('passes the recorder handle to cleanup on failure', async () => {
