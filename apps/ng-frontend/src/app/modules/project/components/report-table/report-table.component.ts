@@ -1,14 +1,17 @@
 import { CommonModule } from '@angular/common';
 import {
   Component,
-  OnInit,
+  effect,
+  inject,
+  untracked,
   viewChild,
   ChangeDetectionStrategy
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { tap, take } from 'rxjs';
+import { take } from 'rxjs';
 import {
   getCheckStatus,
   IReportDetails,
@@ -78,42 +81,32 @@ const SNACKBAR_CLASSES: Record<Exclude<RunStatus, 'notRun'>, string> = {
   styleUrls: ['./report-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager
 })
-export class ReportTableComponent implements OnInit {
+export class ReportTableComponent {
   private readonly paginator = viewChild<MatPaginator>(MatPaginator);
   private readonly sort = viewChild<MatSort>(MatSort);
+  private readonly routeData = toSignal(inject(ActivatedRoute).data);
 
   constructor(
     public testRunningFacadeService: TestRunningFacadeService,
     public batchRunService: BatchRunService,
-    private readonly route: ActivatedRoute,
     private readonly facade: ReportTableFacadeService,
     private readonly tableSortService: TableSortService,
     private readonly snackBar: MatSnackBar,
     private readonly projectDataSourceService: ProjectDataSourceService
-  ) {}
-
-  ngOnInit() {
-    this.route.data
-      .pipe(
-        take(1),
-        tap((data) => {
-          const paginator = this.paginator();
-          const sort = this.sort();
-          if (paginator && sort) {
-            this.facade.initializeData(paginator, sort, data);
-          } else {
-            // The view queries resolve after ngOnInit; wait for them once.
-            queueMicrotask(() => {
-              const p = this.paginator();
-              const s = this.sort();
-              if (p && s) {
-                this.facade.initializeData(p, s, data);
-              }
-            });
-          }
-        })
-      )
-      .subscribe();
+  ) {
+    // Rebuild the table on every resolve, not only the first: switching
+    // project in the toolbar reuses this component and only resolves the
+    // new project's tests. The view queries resolve after the first render,
+    // so the effect also waits for the paginator and the sort.
+    effect(() => {
+      const data = this.routeData();
+      const paginator = this.paginator();
+      const sort = this.sort();
+      if (data && paginator && sort) {
+        // initializeData reads the filter signals; they must not re-run this.
+        untracked(() => this.facade.initializeData(paginator, sort, data));
+      }
+    });
   }
 
   /** The single status a row shows: Passed, Partial, Failed or Not run. */

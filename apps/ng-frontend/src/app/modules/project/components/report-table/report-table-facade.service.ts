@@ -1,3 +1,4 @@
+import { SelectionModel } from '@angular/cdk/collections';
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Subscription } from 'rxjs';
@@ -52,51 +53,53 @@ export class ReportTableFacadeService {
   }
 
   //#region Initialization
+  /**
+   * Builds the tests table from the route's data: `projectReport` is
+   * GET /reports/:projectSlug, as JSON (dates are strings), and
+   * `projectSlug` the project. Called again when the project changes; the
+   * previous project's selection and page are dropped.
+   */
   initializeData(
     paginator: MatPaginator,
     sort: MatSort,
     data: Record<string, unknown>
   ) {
-    console.log('Initializing report table with data:', data);
     const reports = (data['projectReport'] || []) as IReportDetails[];
     const toDate = (
       d: Date | string | number | undefined | null
     ): Date | undefined => (d == null ? undefined : new Date(d));
-    const normalize = (r: IReportDetails): IReportDetails => ({
-      ...r,
-      passed: r.passed === true,
-      requestPassed: r.requestPassed === true,
-      createdAt: toDate(r.createdAt) ?? new Date(0),
-      updatedAt: toDate(r.updatedAt)
-    });
-    const normalizedReports = reports.map(normalize);
+    const rows = reports
+      .map((r): IReportDetails => ({
+        ...r,
+        passed: r.passed === true,
+        requestPassed: r.requestPassed === true,
+        createdAt: toDate(r.createdAt) ?? new Date(0),
+        updatedAt: toDate(r.updatedAt)
+      }))
+      .sort((a, b) => a.eventName.localeCompare(b.eventName));
+    const dataSource = new MatTableDataSource(rows);
 
-    if (paginator && sort) {
-      // Sort the data
-      const injectReports = [...normalizedReports].sort((a, b) =>
-        a.eventName.localeCompare(b.eventName)
-      );
-      // Create data source and assign
-      const dataSource = new MatTableDataSource([...injectReports]);
+    const slug = data['projectSlug'] as string | undefined;
+    // A reused paginator still shows the previous project's page.
+    paginator.pageIndex = 0;
+    this.restorePaginatorStateForProject(paginator, slug);
 
-      const slug = data['projectSlug'] as string | undefined;
-      // Try to restore saved page size and page index for this project from localStorage
-      this.restorePaginatorStateForProject(paginator, slug);
+    dataSource.paginator = paginator;
+    dataSource.sort = sort;
+    dataSource.filterPredicate = reportFilterPredicate;
+    dataSource.filter = toReportFilter(
+      this.projectDataSourceService.getFilterSignal(),
+      this.statusFilter()
+    );
+    this.reportTableDataSourceModelService.dataSource.set(dataSource);
+    // Selected rows are row objects of the previous table: drop them, or
+    // the toolbar would act on tests the table no longer shows.
+    this.reportTableDataSourceModelService.selection.set(
+      new SelectionModel<IReportDetails>(true, [])
+    );
+    this.projectSlug.set(slug ?? '');
 
-      dataSource.paginator = paginator;
-      dataSource.sort = sort;
-      // Initialize filter predicate and filter value using current signals
-      dataSource.filterPredicate = reportFilterPredicate;
-      dataSource.filter = toReportFilter(
-        this.projectDataSourceService.getFilterSignal(),
-        this.statusFilter()
-      );
-      this.reportTableDataSourceModelService.dataSource.set(dataSource);
-      this.projectSlug.set(data['projectSlug'] as string);
-
-      // Subscribe to paginator page events to persist pageSize changes per project
-      this.subscribeToPersistPaginatorState(paginator, slug);
-    }
+    this.subscribeToPersistPaginatorState(paginator, slug);
   }
   //#endregion
 
