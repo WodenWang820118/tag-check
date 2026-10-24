@@ -63,13 +63,16 @@ export class BatchRunService {
   );
   readonly canResume = computed(
     () =>
-      !this.running() &&
+      !this.isBusy() &&
       (this.state()?.items.some((item) => item.status === 'pending') ?? false)
   );
 
-  /** Starts a new batch; ignored while another batch is running. */
+  /**
+   * Starts a new batch; ignored while a batch or a single test runs, since
+   * the backend drives one browser run at a time.
+   */
   async start(projectSlug: string, tests: BatchTest[]): Promise<void> {
-    if (this.running() || tests.length === 0) {
+    if (this.isBusy() || tests.length === 0) {
       return;
     }
     this.save({
@@ -106,6 +109,10 @@ export class BatchRunService {
     if (!this.running()) {
       this.save(null);
     }
+  }
+
+  private isBusy(): boolean {
+    return this.running() || this.testRunningFacade.isRunningTest$();
   }
 
   private async runPending(): Promise<void> {
@@ -148,8 +155,11 @@ export class BatchRunService {
           closeBrowser: true
         })
       );
+      // The run services turn the failure of a stopped run into an empty
+      // result, so a cancelled test usually ends here rather than in catch.
+      const cancelled = this.cancelRequested && !report?.testEventDetails;
       this.setItem(item.eventId, {
-        ...statusOf(report),
+        ...(cancelled ? { status: 'cancelled' } : statusOf(report)),
         finishedAt: new Date().toISOString()
       });
     } catch (error) {
