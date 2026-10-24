@@ -3,7 +3,6 @@ import { SettingsController } from './settings.controller';
 
 describe('SettingsController', () => {
   function build() {
-    const projectSettingService = {};
     const projectRepositoryService = {
       getSettingBySlug: vi.fn().mockResolvedValue({ slug: 'proj-1' })
     };
@@ -14,7 +13,6 @@ describe('SettingsController', () => {
       updateBrowserSettings: vi.fn().mockResolvedValue('b-updated')
     };
     const controller = new SettingsController(
-      projectSettingService as never,
       projectRepositoryService as never,
       projectFacadeRepositoryService as never
     );

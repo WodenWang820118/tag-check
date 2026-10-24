@@ -1,4 +1,4 @@
-import { Injectable, Logger, Optional } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { EntityMetadata } from 'typeorm';
 import { TestEventDuplicateService } from './test-event-duplicate.service';
 import { IdMapRegistryService } from './id-map-registry.service';
@@ -14,7 +14,6 @@ import { ExistingIdCollisionService } from './existing-id-collision.service';
  */
 @Injectable()
 export class ImportRowProcessorService {
-  private readonly logger = new Logger(ImportRowProcessorService.name);
   private readonly existingIdCollision: ExistingIdCollisionService;
 
   constructor(

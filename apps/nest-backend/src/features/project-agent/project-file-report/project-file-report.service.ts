@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { DeleteRunsResponse } from '@utils';
 import { rm } from 'node:fs/promises';
-import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { join } from 'path';
 import { XlsxReportService } from '../../../infrastructure/os/xlsx-report/xlsx-report.service';
@@ -9,31 +8,23 @@ import { TestEventRepositoryService } from '../../../core/repository/test-event/
 import { TestEventDetailRepositoryService } from '../../../core/repository/test-event/test-event-detail-repository.service';
 import { RECORDING_FILES } from '../../../shared';
 
+/**
+ * The Reports page's data: the project's runs, deleting runs, and the
+ * spreadsheet export of chosen tests.
+ */
 @Injectable()
 export class ProjectFileReportService {
   private readonly logger = new Logger(ProjectFileReportService.name);
   constructor(
-    private readonly folderService: FolderService,
     private readonly folderPathService: FolderPathService,
     private readonly xlsxReportService: XlsxReportService,
     private readonly testEventRepositoryService: TestEventRepositoryService,
     private readonly testEventDetailRepositoryService: TestEventDetailRepositoryService
   ) {}
 
+  /** Every run of the project's tests, newest first. */
   async listRuns(projectSlug: string) {
     return this.testEventDetailRepositoryService.listRunSummaries(projectSlug);
-  }
-
-  async getReportFolders(projectSlug: string) {
-    const folderPath =
-      await this.folderPathService.getReportSavingFolderPath(projectSlug);
-    const data = this.folderService.readFolder(folderPath);
-    return data.map((dirent) => {
-      return {
-        name: dirent.name,
-        path: join(dirent.parentPath, dirent.name)
-      };
-    });
   }
 
   /**
@@ -69,6 +60,11 @@ export class ProjectFileReportService {
     return { deletedRunIds };
   }
 
+  /**
+   * The spreadsheet of the chosen tests.
+   *
+   * @throws Error when none of the event IDs is a test of the project.
+   */
   async downloadReportFiles(projectSlug: string, eventIds: string[]) {
     const reports = await this.testEventRepositoryService.getBySlugAndEventIds(
       projectSlug,

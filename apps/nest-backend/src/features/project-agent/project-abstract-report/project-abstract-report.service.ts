@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { IReportDetails, OutputValidationResult } from '@utils';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
-import { existsSync, mkdirSync, statSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import { FilePathService } from '../../../infrastructure/os/path/file-path/file-path.service';
 import { FileService } from '../../../infrastructure/os/file/file.service';
 
@@ -86,34 +86,6 @@ export class ProjectAbstractReportService {
         'Failed to delete report',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
-    }
-  }
-
-  async getSingleAbstractTestResultJson(projectSlug: string, eventId: string) {
-    try {
-      const filePath = await this.filePathService.getInspectionResultFilePath(
-        projectSlug,
-        eventId
-      );
-
-      if (!existsSync(filePath)) {
-        throw new NotFoundException(`Report not found: ${filePath}`);
-      }
-
-      const completedTime = statSync(filePath).mtime;
-
-      return {
-        // eventName: eventId,
-        ...this.fileService.readJsonFile<IReportDetails>(filePath),
-        completedTime
-      };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      this.logger.error(error);
-      throw new HttpException('Failed to read report', HttpStatus.BAD_REQUEST);
     }
   }
 }

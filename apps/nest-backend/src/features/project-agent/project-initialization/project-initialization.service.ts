@@ -37,13 +37,4 @@ export class ProjectInitializationService {
       await this.folderPathService.getProjectConfigFolderPath(projectSlug)
     );
   }
-
-  async initInspectionEventSavingFolder(projectName: string, eventId: string) {
-    const eventFolder =
-      await this.folderPathService.getInspectionEventFolderPath(
-        projectName,
-        eventId
-      );
-    this.folderService.createFolder(eventFolder);
-  }
 }

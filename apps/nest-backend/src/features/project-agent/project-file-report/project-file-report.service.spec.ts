@@ -8,7 +8,6 @@ let root = '';
 
 function build() {
   root = mkdtempSync(join(tmpdir(), 'file-report-'));
-  const folderService = { readFolder: vi.fn() };
   const folderPathService = {
     getReportSavingFolderPath: vi.fn().mockResolvedValue('/rep'),
     getInspectionEventFolderPath: vi.fn(
@@ -23,7 +22,6 @@ function build() {
     deleteRuns: vi.fn()
   };
   const service = new ProjectFileReportService(
-    folderService as never,
     folderPathService as never,
     xlsxReportService as never,
     testEventRepositoryService as never,
@@ -31,7 +29,6 @@ function build() {
   );
   return {
     service,
-    folderService,
     xlsxReportService,
     testEventRepositoryService,
     testEventDetailRepositoryService
@@ -43,19 +40,6 @@ afterEach(() => {
 });
 
 describe('ProjectFileReportService', () => {
-  it('getReportFolders() maps each dirent to {name, path}', async () => {
-    const ctx = build();
-    ctx.folderService.readFolder.mockReturnValue([
-      { name: 'a', parentPath: '/rep' },
-      { name: 'b', parentPath: '/rep' }
-    ]);
-    const result = await ctx.service.getReportFolders('demo');
-    expect(result).toEqual([
-      { name: 'a', path: expect.stringContaining('a') },
-      { name: 'b', path: expect.stringContaining('b') }
-    ]);
-  });
-
   it('deleteRuns() deletes the runs and the recording of a test whose latest run went', async () => {
     const ctx = build();
     for (const eventId of ['latest-deleted', 'older-deleted']) {

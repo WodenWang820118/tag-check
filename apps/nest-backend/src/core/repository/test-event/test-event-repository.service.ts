@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import {
@@ -13,7 +13,6 @@ import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class TestEventRepositoryService {
-  private readonly logger = new Logger(TestEventRepositoryService.name);
   constructor(
     @InjectRepository(TestEventEntity)
     private readonly repository: Repository<TestEventEntity>

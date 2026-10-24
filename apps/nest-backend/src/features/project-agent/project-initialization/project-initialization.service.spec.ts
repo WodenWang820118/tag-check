@@ -53,12 +53,4 @@ describe('ProjectInitializationService', () => {
     // root exists -> no mkdir; project folder exists -> no createFolder for sub-paths
     expect(ctx.folderService.createFolder).not.toHaveBeenCalled();
   });
-
-  it('initInspectionEventSavingFolder() creates the per-event folder', async () => {
-    const ctx = build();
-    await ctx.service.initInspectionEventSavingFolder('demo', 'evt');
-    expect(ctx.folderService.createFolder).toHaveBeenCalledWith(
-      '/root/demo/evt'
-    );
-  });
 });

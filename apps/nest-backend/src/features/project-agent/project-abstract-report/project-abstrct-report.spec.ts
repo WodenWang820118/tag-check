@@ -174,23 +174,4 @@ describe('ProjectAbstractReportService', () => {
       completedTime: new Date('2024-08-29T02:25:48.610Z')
     });
   });
-
-  it('should get single abstract test result json', async () => {
-    const readJsonFile = vi.spyOn(fileService, 'readJsonFile');
-    const abstractPath = vi
-      .spyOn(filePathService, 'getInspectionResultFilePath')
-      .mockResolvedValue(filePath);
-    const existsSync = vi.spyOn(fs, 'existsSync').mockReturnValue(true);
-
-    const result = await service.getSingleAbstractTestResultJson(
-      projectSlug,
-      eventId
-    );
-    expect(abstractPath).toHaveBeenCalledWith(projectSlug, eventId);
-    expect(existsSync).toHaveBeenCalledWith(filePath);
-    expect(readJsonFile).toHaveBeenCalledWith(filePath);
-    expect(result).toBeDefined();
-
-    // rmSync(filePath);
-  });
 });
