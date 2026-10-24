@@ -28,8 +28,10 @@ export class VideoTag {
   private static readonly EVENT_TAG_NAME = 'GA4 event - Video';
   private static readonly HTML_TAG_NAME = 'cHTML - Youtube iframe API script';
   private static readonly EVENT_NAME_TEMPLATE = 'video_{{Video Status}}';
+  // The script element must be closed: Tag Manager validates Custom HTML,
+  // and an open element would swallow anything added after it.
   private static readonly HTML_SCRIPT_SRC =
-    '<script src="https://www.youtube.com/iframe_api">\n';
+    '<script src="https://www.youtube.com/iframe_api"></script>\n';
   private static readonly EVENT_FINGERPRINT = '1690374452646';
   private static readonly HTML_FINGERPRINT = '1689848944995';
 
