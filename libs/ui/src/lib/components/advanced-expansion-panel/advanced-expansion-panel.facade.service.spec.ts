@@ -99,6 +99,13 @@ describe('AdvancedExpansionPanelFacade', () => {
       });
     });
 
+    it('passes the parsed specs, not the editor, to the presence checks', () => {
+      const specs = [{ event: 'scroll' }, { event: 'video_start' }];
+      svc.getPatchValuesFromEditor(makeEditor(JSON.stringify(specs)));
+      expect(editorFacade.hasVideoTag).toHaveBeenCalledWith(specs);
+      expect(editorFacade.hasScrollTag).toHaveBeenCalledWith(specs);
+    });
+
     it('queries the editor facade for tag presence', () => {
       expect(svc.getPatchValuesFromEditor({} as never)).toEqual({
         includeVideoTag: true,

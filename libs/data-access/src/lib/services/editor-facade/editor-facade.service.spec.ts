@@ -92,4 +92,16 @@ describe('EditorFacadeService', () => {
     const events = result.map((entry: { event: string }) => entry.event);
     expect(new Set(events).size).toBe(events.length);
   });
+
+  it('updateJsonBasedOnForm leaves a single event object unchanged', () => {
+    const json = { event: 'page_view' };
+    const form = {
+      includeVideoTag: true,
+      includeScrollTag: false,
+      includeItemScopedVariables: false
+    };
+    expect(facade.updateJsonBasedOnForm(json, form)).toEqual({
+      event: 'page_view'
+    });
+  });
 });
