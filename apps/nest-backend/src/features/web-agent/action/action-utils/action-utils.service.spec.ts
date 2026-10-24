@@ -23,6 +23,21 @@ describe('ActionUtilsService', () => {
     expect(service.getSelectorType('Checkout')).toBe('css');
   });
 
+  it('treats CSS selectors that start like a query handler name as CSS', async () => {
+    const page = createPage();
+    const service = new ActionUtilsService();
+    const selector = 'textarea.comment';
+
+    expect(service.getSelectorType(selector)).toBe('css');
+    await service.getElement(
+      page as never,
+      service.getSelectorType(selector) ?? '',
+      selector
+    );
+
+    expect(page.$).toHaveBeenCalledWith('textarea.comment');
+  });
+
   it('adds the Puppeteer text query handler prefix when text type is explicit', async () => {
     const page = createPage();
     const service = new ActionUtilsService();
