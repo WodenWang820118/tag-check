@@ -1,6 +1,11 @@
 import { Injectable } from '@angular/core';
 import { AbstractTestEvent, IReportDetails } from '@utils';
 
+/**
+ * Maps GET /reports/:projectSlug to tests table rows. The endpoint
+ * flattens each test's latest result onto it (passed, requestPassed,
+ * hasRecording, lastRunAt).
+ */
 @Injectable({ providedIn: 'root' })
 export class ReportMapperService {
   toReportDetails(items: AbstractTestEvent[]): IReportDetails[] {
@@ -30,6 +35,8 @@ export class ReportMapperService {
         passed: e.passed ?? d?.passed ?? false,
         requestPassed: e.requestPassed ?? d?.requestPassed ?? false,
         hasRecording: e.hasRecording ?? false,
+        // Null once every run is deleted; the row's status needs it.
+        lastRunAt: e.lastRunAt,
         rawRequest: d?.rawRequest,
         destinationUrl: d?.destinationUrl ?? '',
         dataLayer: d?.dataLayer,

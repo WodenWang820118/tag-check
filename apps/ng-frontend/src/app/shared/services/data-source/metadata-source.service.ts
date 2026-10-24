@@ -3,6 +3,7 @@ import { Project } from '@utils';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Injectable, signal } from '@angular/core';
 
+/** The home page's project list and the toolbar's search text. */
 @Injectable({
   providedIn: 'root'
 })

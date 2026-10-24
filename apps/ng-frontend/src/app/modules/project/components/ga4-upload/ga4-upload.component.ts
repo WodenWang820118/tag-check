@@ -1,8 +1,6 @@
 import {
   Component,
   OnInit,
-  computed,
-  effect,
   signal,
   ChangeDetectionStrategy
 } from '@angular/core';
@@ -15,8 +13,9 @@ import { MatListModule } from '@angular/material/list';
 import { MatChipsModule } from '@angular/material/chips';
 import { ActivatedRoute } from '@angular/router';
 import { Ga4UploadFacadeService } from './ga4-upload-facade.service';
-import { take, tap } from 'rxjs';
+import { take } from 'rxjs';
 
+/** The "Import GA4 events" tab; Ga4UploadFacadeService parses and saves. */
 @Component({
   selector: 'app-ga4-upload',
   standalone: true,
@@ -38,18 +37,15 @@ export class Ga4UploadComponent implements OnInit {
   parseError = this.facade.parseError$;
   isSaving = this.facade.isSaving$;
 
-  // local textarea binding
-  textValue = signal<string>('');
-  textValue$ = computed(() => this.textValue());
+  /** The JSON in the text box, typed, pasted or read from a file. */
+  text = this.facade.rawJson.asReadonly();
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly facade: Ga4UploadFacadeService
   ) {
-    effect(() => {
-      const v = this.textValue$();
-      this.facade.setRawJson(v);
-    });
+    // The facade outlives the tab, so each opening starts empty.
+    this.facade.setRawJson('');
   }
 
   ngOnInit(): void {
@@ -61,6 +57,10 @@ export class Ga4UploadComponent implements OnInit {
 
   onFileSelected(event: Event) {
     this.facade.onFileSelected(event);
+  }
+
+  onTextChange(text: string) {
+    this.facade.setRawJson(text);
   }
 
   setSample() {
@@ -97,23 +97,13 @@ export class Ga4UploadComponent implements OnInit {
     }
   }
 ]`;
-    this.textValue.set(sample);
+    this.facade.setRawJson(sample);
   }
 
   save() {
     const slug = this.projectSlug();
     if (!slug) return;
-    this.facade
-      .save(slug)
-      .pipe(
-        take(1),
-        tap(() => {
-          // Handle successful save
-          // TODO: refresh the view
-
-          console.log('GA4 events saved successfully');
-        })
-      )
-      .subscribe();
+    // The facade reloads the tests table once the tests are created.
+    this.facade.save(slug).pipe(take(1)).subscribe();
   }
 }

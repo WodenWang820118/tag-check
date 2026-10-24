@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { catchError, EMPTY, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, switchMap, take, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
@@ -35,6 +35,10 @@ export function toEditableValue(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value);
 }
 
+/**
+ * Settings > Pre-loading values: the localStorage items and cookies set
+ * on the site before each run.
+ */
 @Component({
   selector: 'app-application-form',
   standalone: true,
@@ -77,7 +81,6 @@ export class ApplicationFormComponent implements OnInit {
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         tap((data) => {
-          console.log('data in application: ', data);
           const settings = data['projectInfo'].applicationSettings;
           if (settings) {
             this.localStorageSettings.set(
@@ -132,10 +135,6 @@ export class ApplicationFormComponent implements OnInit {
             (setting: LocalStorageData) => !setting.key || !setting.value
           )
         );
-      }),
-      catchError((error) => {
-        console.error('Error: ', error);
-        return error;
       })
     );
   }
@@ -147,10 +146,6 @@ export class ApplicationFormComponent implements OnInit {
         this.isEmptyCookie.set(
           value.some((setting: CookieData) => !setting.key || !setting.value)
         );
-      }),
-      catchError((error) => {
-        console.error('Error: ', error);
-        return error;
       })
     );
   }
@@ -158,7 +153,7 @@ export class ApplicationFormComponent implements OnInit {
   onFormSubmit() {
     this.route.parent?.params
       .pipe(
-        takeUntilDestroyed(this.destroyRef),
+        take(1),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           if (projectSlug) {
@@ -184,9 +179,10 @@ export class ApplicationFormComponent implements OnInit {
           }
           return EMPTY;
         }),
-        catchError((error) => {
+        // SettingsService has shown the failure in a snackbar.
+        catchError((error: unknown) => {
           console.error('Error: ', error);
-          return error;
+          return EMPTY;
         })
       )
       .subscribe();

@@ -11,6 +11,11 @@ import { MatSort } from '@angular/material/sort';
 import { FileTableDataSourceModelService } from '../../services/file-table-data-source-model/file-table-data-source-model.service';
 import { SelectionModel } from '@angular/cdk/collections';
 
+/**
+ * The Reports page's runs: one row per run, newest first. The toolbar
+ * asks for a delete or a download through FileTableDataSourceService's
+ * signals; this service confirms it in a dialog and calls the API.
+ */
 @Injectable({
   providedIn: 'root'
 })

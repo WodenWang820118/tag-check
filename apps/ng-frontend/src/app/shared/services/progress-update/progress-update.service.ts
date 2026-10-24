@@ -2,6 +2,7 @@ import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProgressEventsService } from '../progress-events/progress-events.service';
 
+/** The running test's steps as signals, fed by ProgressEventsService. */
 @Injectable({
   providedIn: 'root'
 })

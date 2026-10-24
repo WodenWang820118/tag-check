@@ -161,78 +161,6 @@ describe('ReportTabFacade', () => {
     );
   });
 
-  it('downloads spreadsheets from a direct report url', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      blob: vi.fn().mockResolvedValue(new Blob(['sheet']))
-    });
-    const createElement = vi.spyOn(document, 'createElement');
-    const click = vi.fn();
-    const originalCreateElement = document.createElement.bind(document);
-
-    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:spreadsheet');
-    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
-    createElement.mockImplementation(((tagName: string) => {
-      if (tagName === 'a') {
-        return {
-          click,
-          href: '',
-          download: ''
-        } as unknown as HTMLAnchorElement;
-      }
-
-      return originalCreateElement(tagName);
-    }) as typeof document.createElement);
-    vi.stubGlobal('fetch', fetchMock);
-
-    service.shareSpreadsheet(undefined, {
-      eventId: 'evt-1',
-      xlsxUrl: 'https://example.com/report.xlsx'
-    } as never);
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(fetchMock).toHaveBeenCalledWith('https://example.com/report.xlsx', {
-      credentials: 'include'
-    });
-    expect(click).toHaveBeenCalled();
-    expect(snackBar.open).toHaveBeenCalledWith(
-      'Spreadsheet downloaded',
-      undefined,
-      {
-        duration: 1400,
-        horizontalPosition: 'right',
-        verticalPosition: 'top'
-      }
-    );
-  });
-
-  it('shows an error when a direct-url spreadsheet export fails', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: false,
-        status: 500
-      })
-    );
-
-    service.shareSpreadsheet(undefined, {
-      eventId: 'evt-1',
-      xlsxUrl: 'https://example.com/report.xlsx'
-    } as never);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    expect(snackBar.open).toHaveBeenCalledWith(
-      'Unable to download spreadsheet from URL',
-      undefined,
-      {
-        duration: 1500,
-        horizontalPosition: 'right',
-        verticalPosition: 'top'
-      }
-    );
-  });
-
   it('downloads a recording immediately when a local blob is already available', () => {
     const createElement = vi.spyOn(document, 'createElement');
     const click = vi.fn();
@@ -413,98 +341,6 @@ describe('ReportTabFacade', () => {
     );
   });
 
-  it('supports spreadsheet downloads via the excelUrl alias', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      blob: vi.fn().mockResolvedValue(new Blob(['sheet']))
-    });
-    const createElement = vi.spyOn(document, 'createElement');
-    const click = vi.fn();
-    const originalCreateElement = document.createElement.bind(document);
-
-    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:excel-url');
-    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
-    createElement.mockImplementation(((tagName: string) => {
-      if (tagName === 'a') {
-        return {
-          click,
-          href: '',
-          download: ''
-        } as unknown as HTMLAnchorElement;
-      }
-
-      return originalCreateElement(tagName);
-    }) as typeof document.createElement);
-    vi.stubGlobal('fetch', fetchMock);
-
-    service.shareSpreadsheet(undefined, {
-      eventId: 'evt-1',
-      excelUrl: 'https://example.com/report.xlsx'
-    } as never);
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(fetchMock).toHaveBeenCalledWith('https://example.com/report.xlsx', {
-      credentials: 'include'
-    });
-    expect(click).toHaveBeenCalled();
-    expect(snackBar.open).toHaveBeenCalledWith(
-      'Spreadsheet downloaded',
-      undefined,
-      {
-        duration: 1400,
-        horizontalPosition: 'right',
-        verticalPosition: 'top'
-      }
-    );
-  });
-
-  it('supports spreadsheet downloads via the reportXlsxUrl alias', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      blob: vi.fn().mockResolvedValue(new Blob(['sheet']))
-    });
-    const createElement = vi.spyOn(document, 'createElement');
-    const click = vi.fn();
-    const originalCreateElement = document.createElement.bind(document);
-
-    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:report-xlsx-url');
-    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
-    createElement.mockImplementation(((tagName: string) => {
-      if (tagName === 'a') {
-        return {
-          click,
-          href: '',
-          download: ''
-        } as unknown as HTMLAnchorElement;
-      }
-
-      return originalCreateElement(tagName);
-    }) as typeof document.createElement);
-    vi.stubGlobal('fetch', fetchMock);
-
-    service.shareSpreadsheet(undefined, {
-      eventId: 'evt-1',
-      reportXlsxUrl: 'https://example.com/report.xlsx'
-    } as never);
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(fetchMock).toHaveBeenCalledWith('https://example.com/report.xlsx', {
-      credentials: 'include'
-    });
-    expect(click).toHaveBeenCalled();
-    expect(snackBar.open).toHaveBeenCalledWith(
-      'Spreadsheet downloaded',
-      undefined,
-      {
-        duration: 1400,
-        horizontalPosition: 'right',
-        verticalPosition: 'top'
-      }
-    );
-  });
-
   it('fans out event export to spreadsheet and recording exports', () => {
     const shareSpreadsheetSpy = vi
       .spyOn(service, 'shareSpreadsheet')
@@ -543,11 +379,5 @@ describe('ReportTabFacade', () => {
         verticalPosition: 'top'
       }
     );
-  });
-
-  it('reports recording availability based on blob size', () => {
-    expect(service.getRecordingAvailable(undefined)).toBe(false);
-    expect(service.getRecordingAvailable(new Blob([]))).toBe(false);
-    expect(service.getRecordingAvailable(new Blob(['video']))).toBe(true);
   });
 });

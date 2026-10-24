@@ -1,3 +1,4 @@
+import { signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, Subject, throwError } from 'rxjs';
@@ -61,6 +62,7 @@ describe('BatchRunService', () => {
     >
   >;
   let stopOperation: ReturnType<typeof vi.fn<() => Observable<unknown>>>;
+  let isRunningTest: WritableSignal<boolean>;
 
   function createService(): BatchRunService {
     TestBed.resetTestingModule();
@@ -68,7 +70,11 @@ describe('BatchRunService', () => {
       providers: [
         {
           provide: TestRunningFacadeService,
-          useValue: { runTestForReport, stopOperation }
+          useValue: {
+            runTestForReport,
+            stopOperation,
+            isRunningTest$: isRunningTest.asReadonly()
+          }
         }
       ]
     });
@@ -79,6 +85,7 @@ describe('BatchRunService', () => {
     localStorage.clear();
     runTestForReport = vi.fn();
     stopOperation = vi.fn(() => of(null));
+    isRunningTest = signal(false);
   });
 
   afterEach(() => localStorage.clear());
@@ -147,6 +154,31 @@ describe('BatchRunService', () => {
     ]);
   });
 
+  it("shows the API's reason when a run service wraps the failed response", async () => {
+    runTestForReport.mockReturnValueOnce(
+      throwError(
+        () =>
+          new Error('GTM inspection failed', {
+            cause: new HttpErrorResponse({
+              status: 500,
+              error: { statusCode: 500, message: 'No recording found' }
+            })
+          })
+      )
+    );
+    runTestForReport.mockReturnValueOnce(
+      throwError(() => new Error('GTM inspection failed'))
+    );
+    const service = createService();
+
+    await service.start('example-project-slug', tests.slice(0, 2));
+
+    expect(service.batch()?.items.map((item) => item.message)).toEqual([
+      'No recording found',
+      'GTM inspection failed'
+    ]);
+  });
+
   it('stops the running test and skips the rest when cancelled', async () => {
     const firstRun = new Subject<ReportDetailResponse>();
     runTestForReport.mockReturnValueOnce(firstRun);
@@ -165,6 +197,50 @@ describe('BatchRunService', () => {
       'cancelled',
       'cancelled'
     ]);
+  });
+
+  it('marks the stopped test cancelled when its run returns no result', async () => {
+    // A run service answers a run the user stopped with an empty result.
+    const firstRun = new Subject<ReportDetailResponse | undefined>();
+    runTestForReport.mockReturnValueOnce(firstRun);
+    const service = createService();
+
+    const running = service.start('example-project-slug', tests);
+    await service.cancel();
+    firstRun.next(undefined);
+    firstRun.complete();
+    await running;
+
+    expect(service.batch()?.items).toEqual([
+      expect.objectContaining({ status: 'cancelled', message: undefined }),
+      expect.objectContaining({ status: 'cancelled' }),
+      expect.objectContaining({ status: 'cancelled' })
+    ]);
+  });
+
+  it('does not start or resume a batch while a single test runs', async () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        projectSlug: 'example-project-slug',
+        startedAt: '2026-10-23T12:00:00.000Z',
+        items: [
+          { eventId: 'id-view_item', eventName: 'view_item', status: 'pending' }
+        ]
+      })
+    );
+    isRunningTest.set(true);
+    const service = createService();
+
+    expect(service.canResume()).toBe(false);
+    await service.resume();
+    await service.start('example-project-slug', tests);
+
+    expect(runTestForReport).not.toHaveBeenCalled();
+    expect(service.batch()?.items).toHaveLength(1);
+
+    isRunningTest.set(false);
+    expect(service.canResume()).toBe(true);
   });
 
   it('ignores a second start while a batch is running', async () => {

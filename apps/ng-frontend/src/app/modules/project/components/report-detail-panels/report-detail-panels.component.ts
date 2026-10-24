@@ -83,6 +83,12 @@ function normalizeItemDefContent(
   };
 }
 
+/**
+ * The JSON panels of a test's Latest result tab: the spec, the recording
+ * and the item definition, each editable, and the dataLayer and GA4
+ * request the run captured. Edits start from the route context and are
+ * reset when it changes.
+ */
 @Component({
   selector: 'app-report-detail-panels',
   standalone: true,

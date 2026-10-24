@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, Subject, throwError } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { QaRequestService } from './qa-request.service';
 
@@ -47,19 +47,36 @@ describe('QaRequestService', () => {
     );
   });
 
-  it('runDataLayerWithRequestCheck swallows errors when a stop has been requested', async () => {
+  it('runDataLayerWithRequestCheck swallows the error of a run that was stopped', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const run = new Subject<never>();
+    httpClient.post
+      .mockReturnValueOnce(run)
+      .mockReturnValueOnce(of({ status: 200, message: 'ok' }));
+    const result = firstValueFrom(
+      service.runDataLayerWithRequestCheck('s', 'e', {
+        eventInspectionPreset: {} as never
+      } as never)
+    );
+    await firstValueFrom(service.stopOperation());
+    expect(service.isStopOperation$()).toBe(true);
+    run.error(new Error('boom'));
+    expect(await result).toEqual([]);
+  });
+
+  it('runDataLayerWithRequestCheck reports the failure of a run started after a stop', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     httpClient.post
       .mockReturnValueOnce(of({ status: 200, message: 'ok' }))
       .mockReturnValueOnce(throwError(() => new Error('boom')));
     await firstValueFrom(service.stopOperation());
-    expect(service.isStopOperation$()).toBe(true);
-    const result = await firstValueFrom(
-      service.runDataLayerWithRequestCheck('s', 'e', {
-        eventInspectionPreset: {} as never
-      } as never)
-    );
-    expect(result).toEqual([]);
+    await expect(
+      firstValueFrom(
+        service.runDataLayerWithRequestCheck('s', 'e', {
+          eventInspectionPreset: {} as never
+        } as never)
+      )
+    ).rejects.toThrow('Data layer inspection failed');
   });
 
   it('runDataLayerWithRequestCheck rethrows when no stop has been requested', async () => {

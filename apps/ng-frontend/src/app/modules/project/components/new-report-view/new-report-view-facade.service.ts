@@ -13,11 +13,14 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Location } from '@angular/common';
 import { v4 as uuidv4 } from 'uuid';
-import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 import { LoggerService } from '../../../../shared/services/logger/logger.service'; // Create this service
 
+/**
+ * The "Create a test manually" tab: validates the spec and recording
+ * editors and creates the test from them.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -31,7 +34,6 @@ export class NewReportViewFacadeService {
   private readonly fb = inject(FormBuilder);
   private readonly location = inject(Location);
   private readonly dialog = inject(MatDialog);
-  private readonly recordingService = inject(RecordingService);
   private readonly projectDataSourceService = inject(ProjectDataSourceService);
   private readonly uploadSpecService = inject(UploadSpecService);
 
@@ -115,18 +117,20 @@ export class NewReportViewFacadeService {
     this.location.back();
   }
 
+  /**
+   * Shows the chosen Chrome recording in the recording editor; the test is
+   * created from the editor's text, which uploadReport validates.
+   */
   onFileSelected(event: Event) {
     const target = event.target as HTMLInputElement;
     const file: File | null = target.files?.[0] || null;
     if (file) {
-      this.recordingService.readRecordingJsonFileContent(file);
-      const recordingContent = this.recordingService.recordingContent$();
-      if (recordingContent) {
-        this.editorService.setContent(
-          'recordingJson',
-          JSON.stringify(recordingContent)
+      file
+        .text()
+        .then((text) => this.editorService.setContent('recordingJson', text))
+        .catch((error: unknown) =>
+          this.logger.error(`Failed to read the recording file: ${error}`)
         );
-      }
     }
   }
 

@@ -12,6 +12,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { UploadCardFacadeService } from './upload-card-facade.service';
 
+/** The "Import GTM JSON" tab; UploadCardFacadeService does the import. */
 @Component({
   selector: 'app-upload-card',
   standalone: true,

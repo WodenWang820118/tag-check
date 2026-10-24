@@ -17,6 +17,11 @@ interface ThemeDecl {
 
 export type EditorThemeStyles = Record<string, ThemeDecl>;
 
+/**
+ * The CodeMirror editors for specs, recordings and item definitions, and
+ * whether their JSON is valid. There is one editor per kind for the whole
+ * app: the editor shown last of a kind is the one its methods act on.
+ */
 @Injectable({
   providedIn: 'root'
 })
