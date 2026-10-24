@@ -56,7 +56,7 @@ export class SpecController {
     return await this.projectSpecService.addSpec(projectSlug, spec);
   }
 
-  @Put(':projectSlug/:eventid')
+  @Put(':projectSlug/:eventId')
   async updateSpec(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,
