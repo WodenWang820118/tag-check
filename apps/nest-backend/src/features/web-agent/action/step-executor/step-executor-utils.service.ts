@@ -20,6 +20,7 @@ function navigateUrl(step: Step): string {
   return step.url;
 }
 
+/** The step handlers that StepExecutorService runs itself. */
 @Injectable()
 export class StepExecutorUtilsService {
   private readonly logger = new Logger(StepExecutorUtilsService.name);
@@ -27,6 +28,11 @@ export class StepExecutorUtilsService {
     private readonly dataLayerService: DataLayerService,
     private readonly configsService: ConfigsService
   ) {}
+
+  /**
+   * After a key-up: on the last step, waits up to `delay` for the navigation
+   * the key may have started; then snapshots the dataLayer.
+   */
   async handleKeyboardAction(
     page: Page,
     projectName: string,
@@ -38,6 +44,10 @@ export class StepExecutorUtilsService {
     await this.dataLayerService.updateSelfDataLayer(page, projectName, eventId);
   }
 
+  /**
+   * On the last step only: waits up to `delay` for a navigation, then 2 s
+   * more for the new page's tags. Never throws; most steps do not navigate.
+   */
   async handleNavigationIfNeeded(
     page: Page,
     isLastStep: boolean,
@@ -60,6 +70,11 @@ export class StepExecutorUtilsService {
     await page.setViewport({ width: step.width, height: step.height });
   }
 
+  /**
+   * Opens the step's URL. The replay's first navigation also sets the
+   * configured user agent and the preset's localStorage, and loads the page
+   * twice (see handleFirstNavigation).
+   */
   async handleNavigate(
     page: Page,
     step: Step,
@@ -73,7 +88,9 @@ export class StepExecutorUtilsService {
       // set the User-Agent HTTP header for outgoing requests
       await page.setExtraHTTPHeaders({ 'user-agent': ua });
 
-      // ensure scripts see the same userAgent value by overriding navigator.userAgent on new documents
+      // ensure scripts see the same userAgent value by overriding navigator.userAgent on new documents.
+      // Helper-free on purpose: swc compiles this function to ES5 for the
+      // page, which has none of the bundle's helpers (see AGENTS.md).
       await page.evaluateOnNewDocument((userAgentValue) => {
         Object.defineProperty(navigator, 'userAgent', {
           get() {
@@ -89,6 +106,11 @@ export class StepExecutorUtilsService {
     await this.handleNavigationIfNeeded(page, isLastStep, 2000);
   }
 
+  /**
+   * Resolves once one of the step's selectors appears, or the page
+   * navigates, each selector waited for up to `timeout` in turn. Throws
+   * NotFoundException when none does.
+   */
   async handleWaitForElement(page: Page, step: Step, timeout: number) {
     for (const selector of step.selectors ?? []) {
       try {
@@ -142,6 +164,11 @@ export class StepExecutorUtilsService {
     }
   }
 
+  /**
+   * Registers the preset's localStorage, then loads the page twice, so the
+   * replay starts as a returning visit: with the storage and cookies that
+   * the first load and the preset wrote.
+   */
   private async handleFirstNavigation(
     page: Page,
     step: Step,

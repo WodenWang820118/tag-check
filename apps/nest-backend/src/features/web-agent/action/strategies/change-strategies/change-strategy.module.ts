@@ -4,6 +4,7 @@ import { EvaluateChangeService } from './evaluate-change.service';
 import { PageChangeService } from './page-change.service';
 import { ActionUtilsModule } from '../../action-utils/action-utils.module';
 
+/** Provides the ways of typing into or selecting an element. */
 @Module({
   imports: [ActionUtilsModule],
   providers: [ChangeStrategyService, EvaluateChangeService, PageChangeService],

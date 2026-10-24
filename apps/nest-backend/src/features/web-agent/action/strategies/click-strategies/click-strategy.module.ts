@@ -10,6 +10,7 @@ const operationStrategies = [
   ClickStrategyService
 ];
 
+/** Provides the ways of clicking an element. */
 @Module({
   imports: [ActionUtilsModule],
   providers: [...operationStrategies],

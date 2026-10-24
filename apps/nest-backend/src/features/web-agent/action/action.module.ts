@@ -10,6 +10,7 @@ const modules = [DataLayerModule, EventsGatewayModule, StepExecutorModule];
 
 const services = [ActionService, RequestInterceptorService, Ga4RequestMatcher];
 
+/** Provides the recording replay and GA4 request capture. */
 @Module({
   imports: [...modules],
   providers: [...services],

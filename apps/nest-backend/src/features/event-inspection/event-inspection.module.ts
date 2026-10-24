@@ -3,6 +3,7 @@ import { EventInspectionPipelineModule } from '../../features/event-inspection-p
 import { SingleEventInspectionService } from './single-event-inspection.service';
 import { PuppeteerUtilsModule } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.module';
 
+/** Provides direct runs of a test. */
 @Module({
   imports: [EventInspectionPipelineModule, PuppeteerUtilsModule],
   providers: [SingleEventInspectionService],

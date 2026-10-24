@@ -29,6 +29,7 @@ const services = [
   strategyService,
   InspectorUtilsService
 ];
+/** Provides the inspector and the dataLayer validation strategies it picks from. */
 @Module({
   imports: [
     WebAgentModule,

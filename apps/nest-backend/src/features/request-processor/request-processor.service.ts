@@ -45,10 +45,16 @@ export class RequestProcessorService {
     return urlObj.searchParams;
   }
 
+  /** The event name (`en`), or an empty string. */
   extractEventName(queryParams: URLSearchParams): string {
     return queryParams.get('en') || '';
   }
 
+  /**
+   * Copies the event parameters of `queryString` onto `dataLayer` and returns
+   * it: `ep.` as strings, `epn.` as numbers, `cu` as `currency` and the page
+   * parameters under their GA4 names. `debug_mode` is left out.
+   */
   addCustomEventParameters(
     dataLayer: Record<string, unknown>,
     queryString: string
@@ -71,6 +77,10 @@ export class RequestProcessorService {
     return dataLayer;
   }
 
+  /**
+   * Reads one item field that is not a standard key: `k<n>` names a custom
+   * parameter, `v<n>` gives its value. Writes the result onto `item`.
+   */
   processCustomField(
     field: string,
     item: BaseItem,
@@ -104,6 +114,11 @@ export class RequestProcessorService {
     return items;
   }
 
+  /**
+   * Rebuilds the dataLayer push behind a collect URL: the event name, its
+   * parameters and, for ecommerce events or events with items, an
+   * `ecommerce` object. Never throws.
+   */
   recomposeGA4ECEvent(url: string) {
     const queryParams = this.parseUrl(url);
     const event = this.extractEventName(queryParams);
@@ -161,6 +176,7 @@ export class RequestProcessorService {
   }
 }
 
+/** Splits a `pr<n>` value on `~`, reading `~~` as a literal `~`. */
 function splitItemFields(product: string): string[] {
   const fields: string[] = [];
   let current = '';

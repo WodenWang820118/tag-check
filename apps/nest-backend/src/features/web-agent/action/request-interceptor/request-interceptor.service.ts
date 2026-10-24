@@ -10,6 +10,11 @@ import {
 } from './ga4-collect-request';
 import { ReplaySubject } from 'rxjs';
 
+/**
+ * One run's GA4 request capture. `rawRequest$` replays the matched request
+ * to late subscribers and completes on stop(). The caller must call stop(),
+ * which releases the CDP session and is safe to call twice.
+ */
 export interface RequestInterceptionHandle {
   rawRequest$: ReplaySubject<string>;
   stop(): Promise<void>;
@@ -24,6 +29,10 @@ interface RequestTap {
 /** Large enough for gtag.js batches, which carry one event per body line. */
 const MAX_POST_DATA_BYTES = 1024 * 1024;
 
+/**
+ * Captures the GA4 collect request a test expects while its recording
+ * replays, and snapshots the dataLayer at the moment it is sent.
+ */
 @Injectable()
 export class RequestInterceptorService {
   private readonly logger = new Logger(RequestInterceptorService.name);
@@ -207,12 +216,18 @@ export class RequestInterceptorService {
     };
   }
 
+  /**
+   * Merges the page's dataLayer as it is when the matched request is sent,
+   * before a navigation can replace it. Never throws.
+   */
   private async snapshotDataLayer(
     page: Page,
     projectSlug: string,
     eventId: string
   ): Promise<void> {
     try {
+      // Helper-free on purpose: swc compiles this function to ES5 for the
+      // page, which has none of the bundle's helpers (see AGENTS.md).
       const latestDataLayer = await page.evaluate(
         () => (globalThis as unknown as { dataLayer?: unknown[] }).dataLayer
       );
@@ -236,6 +251,10 @@ export class RequestInterceptorService {
   }
 }
 
+/**
+ * The request body as text. CDP sends it as `postData`, or only as base64
+ * `postDataEntries` when the body is large or binary.
+ */
 function readPostData(request: {
   postData?: string;
   postDataEntries?: Protocol.Network.PostDataEntry[];
@@ -250,6 +269,7 @@ function readPostData(request: {
     .join('');
 }
 
+/** The warning logged when the run ends without a matching request. */
 function describeMissedCapture(
   eventName: string,
   measurementId: string,

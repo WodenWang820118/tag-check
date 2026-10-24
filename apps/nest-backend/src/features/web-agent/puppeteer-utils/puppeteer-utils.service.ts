@@ -249,6 +249,10 @@ export class PuppeteerUtilsService {
     return recorder;
   }
 
+  /**
+   * Stops `recorder` and unregisters its abort listener. Does nothing for
+   * null; never throws.
+   */
   async stopRecorder(recorder?: RunRecorder | null) {
     if (!recorder) return;
 
@@ -368,6 +372,11 @@ export class PuppeteerUtilsService {
     return result;
   }
 
+  /**
+   * Drops Chromium flags a preset must not set: remote debugging, profile
+   * paths, disabled web security, extensions and proxies. A dropped flag's
+   * separate value argument is dropped with it.
+   */
   private filterPuppeteerArgs(args: string[]): string[] {
     const dangerousFlags = new Set([
       '--remote-debugging-port',
