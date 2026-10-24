@@ -2,8 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   BaseItem,
   GA4_ECOMMERCE_EVENT_PARAMETERS,
-  StrictDataLayerEvent,
-  ValidationResult
+  StrictDataLayerEvent
 } from '@utils';
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { WebAgentService } from '../web-agent/web-agent.service';
@@ -124,7 +123,7 @@ export class InspectorSingleEventService {
       dataLayerResult,
       destinationUrl,
       rawRequest: '',
-      requestCheckResult: '' as unknown as ValidationResult
+      requestCheckResult: null
     };
   }
 
