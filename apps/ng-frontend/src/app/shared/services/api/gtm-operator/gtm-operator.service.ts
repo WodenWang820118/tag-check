@@ -1,18 +1,9 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { EventInspectionPreset, ReportDetailResponse } from '@utils';
+import { ReportDetailResponse } from '@utils';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
-
-interface GtmInspectionParams {
-  gtmUrl: string;
-  headless?: boolean;
-  eventInspectionPreset?: EventInspectionPreset;
-  measurementId?: string;
-  username?: string;
-  password?: string;
-  captureRequest?: boolean;
-}
+import { GtmInspectionParams } from '../../utils/interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -41,6 +32,7 @@ export class GtmOperatorService {
       queryParams.push(`password=${encodeURIComponent(params.password)}`);
     if (params.captureRequest)
       queryParams.push(`captureRequest=${params.captureRequest}`);
+    if (params.closeBrowser) queryParams.push('closeBrowser=true');
 
     const queryString = queryParams.join('&');
 

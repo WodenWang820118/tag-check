@@ -35,8 +35,9 @@ export type BatchTest = Pick<BatchItem, 'eventId' | 'eventName'>;
 const STORAGE_KEY = 'tag-check.batch-run';
 
 /**
- * Runs a list of tests one after another, the same way as the play button
- * but always opening the website directly (no GTM Preview window per test).
+ * Runs a list of tests one after another, the same way as the play button,
+ * in accompanied mode when the project uses it. Each test's browser is closed
+ * when its run ends, so a batch does not leave a GTM Preview window per test.
  * Each test's result is saved as a normal run. The batch is kept in
  * localStorage so that tests still pending after a reload or a restart can
  * be resumed.
@@ -144,7 +145,7 @@ export class BatchRunService {
     try {
       const report = await firstValueFrom(
         this.testRunningFacade.runTestForReport(item.eventId, projectSlug, {
-          direct: true
+          closeBrowser: true
         })
       );
       this.setItem(item.eventId, {
