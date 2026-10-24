@@ -2,7 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { ClickOperation } from './utils';
 import { ActionUtilsService } from '../../action-utils/action-utils.service';
+import { withTimeout } from '../with-timeout';
 
+/**
+ * Clicks with element.click() inside the page: a DOM click that reaches
+ * elements covered by others or outside the viewport.
+ */
 @Injectable()
 export class EvaluateClickService implements ClickOperation {
   private readonly logger = new Logger(EvaluateClickService.name);
@@ -29,17 +34,15 @@ export class EvaluateClickService implements ClickOperation {
       }
 
       try {
-        await Promise.race([
+        // Helper-free on purpose: swc compiles this function to ES5 for the
+        // page, which has none of the bundle's helpers (see AGENTS.md).
+        await withTimeout(
           element.evaluate((el) => {
             (el as HTMLElement).click();
           }),
-          new Promise((_, reject) =>
-            setTimeout(
-              () => reject(new Error('Timeout exceeded Evaluation Clicking')),
-              timeout
-            )
-          )
-        ]);
+          timeout,
+          'Timeout exceeded Evaluation Clicking'
+        );
       } finally {
         await element.dispose().catch((error) => {
           this.logger.warn(

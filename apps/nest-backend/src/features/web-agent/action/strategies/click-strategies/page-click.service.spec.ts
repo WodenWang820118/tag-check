@@ -17,6 +17,20 @@ describe('PageClickService', () => {
     expect(page.click).toHaveBeenCalledWith('sel', { delay: 100 });
   });
 
+  it('leaves no timeout timer behind after a click', async () => {
+    vi.useFakeTimers();
+    try {
+      const service = new PageClickService();
+      const page = { click: vi.fn().mockResolvedValue(undefined) };
+
+      await service.operate(page as never, 'p', 'evt', 'sel', 'css', 5000);
+
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('returns false when page.click() rejects', async () => {
     const service = new PageClickService();
     const page = { click: vi.fn().mockRejectedValue(new Error('boom')) };
