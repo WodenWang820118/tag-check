@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getStorage } from 'firebase/storage';
 import { getFirestore } from 'firebase/firestore';
 @Injectable()
 export class FirebaseService {
@@ -17,14 +15,6 @@ export class FirebaseService {
 
   private readonly ERROR_COLLECTION = 'errors';
   private readonly app = initializeApp(this.firebaseConfig);
-
-  getAuth() {
-    return getAuth(this.app);
-  }
-
-  getStorage() {
-    return getStorage(this.app);
-  }
 
   getFirestore() {
     return getFirestore(this.app);

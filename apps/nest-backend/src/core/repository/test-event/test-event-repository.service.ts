@@ -211,14 +211,6 @@ export class TestEventRepositoryService {
     return plainToInstance(AbstractTestEventResponseDto, updatedEntity);
   }
 
-  async deleteByProjectSlugAndEventId(projectSlug: string, eventId: string) {
-    const entity = await this.repository.delete({
-      project: { projectSlug },
-      eventId
-    });
-    return plainToInstance(AbstractTestEventResponseDto, entity);
-  }
-
   async deleteByProjectSlugAndEventIds(
     projectSlug: string,
     eventIds: string[]

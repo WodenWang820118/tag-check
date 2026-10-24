@@ -134,19 +134,4 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
 
     return configuration.value;
   }
-
-  async getCurrentProjectPath() {
-    const configuration = await this.configurationRepository.findOne({
-      where: { name: this.configsService.getCONFIG_CURRENT_PROJECT_PATH() }
-    });
-
-    if (!configuration) {
-      throw new HttpException(
-        'Current project path configuration not found',
-        HttpStatus.NOT_FOUND
-      );
-    }
-
-    return configuration;
-  }
 }
