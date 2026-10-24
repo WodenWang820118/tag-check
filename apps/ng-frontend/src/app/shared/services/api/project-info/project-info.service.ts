@@ -147,36 +147,10 @@ export class ProjectService {
     return readiness.ready && readiness.projectCount > 0;
   }
 
-  getProject(projectSlug: string) {
-    return this.http
-      .get<ProjectSchema>(`${environment.projectApiUrl}/${projectSlug}`)
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of(null);
-        })
-      );
-  }
-
   initProject(project: Project) {
     return this.http
       .post<ProjectSchema>(
         `${environment.projectApiUrl}/init-project/${project.projectSlug}`,
-        project
-      )
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of(null);
-        })
-      );
-  }
-
-  updateProject(project: Project) {
-    console.log('Updating project: ', project);
-    return this.http
-      .put<ProjectSchema>(
-        `${environment.projectApiUrl}/${project.projectSlug}`,
         project
       )
       .pipe(

@@ -1,90 +1,21 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, of, throwError, from, tap, finalize } from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 import { ItemDef } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
+/** Reads and saves the optional item definition (ItemDef) of a test. */
 @Injectable({
   providedIn: 'root'
 })
 export class ItemDefService {
-  tempItemDefContent = signal<ItemDef | null>(null);
-  tempItemDefContent$ = computed(() => this.tempItemDefContent());
-  itemDefContent = signal<ItemDef | null>(null);
-  itemDefContent$ = computed(() => this.itemDefContent());
-  isLoading = signal(false);
-  isLoading$ = computed(() => this.isLoading());
-
   constructor(private readonly http: HttpClient) {}
-
-  setTempItemDef(itemDef: ItemDef | null) {
-    this.tempItemDefContent.set(itemDef);
-  }
-
-  setItemDef(itemDef: ItemDef | null) {
-    this.itemDefContent.set(itemDef);
-  }
-
-  setLoading(isLoading: boolean) {
-    this.isLoading.set(isLoading);
-  }
-
-  readItemDefJsonFileContent(file: File): void {
-    this.setLoading(true);
-
-    from(file.text())
-      .pipe(
-        tap((text) => {
-          const fileContentString = String(text ?? '');
-          try {
-            const parsed = JSON.parse(fileContentString);
-            // Accept either full DTO shape or just the fullItemDef object
-            const value: ItemDef = parsed?.fullItemDef
-              ? (parsed as ItemDef)
-              : ({
-                  templateName: '',
-                  itemId: '',
-                  fullItemDef: parsed
-                } as ItemDef);
-            this.tempItemDefContent.set(value);
-          } catch (error) {
-            console.error('Error parsing file content', error);
-            this.tempItemDefContent.set(null);
-          }
-        }),
-        catchError((err) => {
-          console.error('Error reading file content', err);
-          this.tempItemDefContent.set(null);
-          return of(null);
-        }),
-        finalize(() => {
-          setTimeout(() => {
-            this.setLoading(false);
-          }, 1000);
-        })
-      )
-      .subscribe();
-  }
 
   getItemDefById(itemId: string) {
     if (!itemId) return throwError(() => new Error('itemId is required'));
     return this.http
       .get<ItemDef>(
         `${environment.specApiUrl}/${encodeURIComponent(itemId)}/item-def`
-      )
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return throwError(() => new Error('Failed to get item definition'));
-        })
-      );
-  }
-
-  getItemDefByTemplateName(templateName: string) {
-    if (!templateName) return of(null);
-    return this.http
-      .get<ItemDef>(
-        `${environment.specApiUrl}/${encodeURIComponent(templateName)}/item-def`
       )
       .pipe(
         catchError((error) => {

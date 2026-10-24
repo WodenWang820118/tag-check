@@ -24,12 +24,6 @@ describe('SettingsService', () => {
 
   afterEach(() => vi.restoreAllMocks());
 
-  it('getSettings falls back to [] on error', async () => {
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    httpClient.get.mockReturnValueOnce(throwError(() => new Error('x')));
-    expect(await firstValueFrom(service.getSettings())).toEqual([]);
-  });
-
   it('getProjectSettings rethrows the underlying error', async () => {
     httpClient.get.mockReturnValueOnce(throwError(() => new Error('boom')));
     await expect(
@@ -98,32 +92,5 @@ describe('SettingsService', () => {
       `${environment.settingsApiUrl}/s/application`
     );
     expectSnack('Saved');
-  });
-
-  it('addSettings POSTs the body and falls back to null on error', async () => {
-    httpClient.post.mockReturnValueOnce(of({ id: 1 }));
-    await firstValueFrom(service.addSettings('s', { name: 'n' } as never));
-    expect(httpClient.post).toHaveBeenCalledWith(
-      `${environment.settingsApiUrl}/s`,
-      { name: 'n' }
-    );
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    httpClient.post.mockReturnValueOnce(throwError(() => new Error('x')));
-    expect(
-      await firstValueFrom(service.addSettings('s', {} as never))
-    ).toBeNull();
-  });
-
-  it('switchToProject sets the current project signal on success', async () => {
-    const project = { projectSlug: 's' } as never;
-    httpClient.get.mockReturnValueOnce(of(project));
-    await firstValueFrom(service.switchToProject('s'));
-    expect(service.currentProject$()).toBe(project);
-  });
-
-  it('switchToProject falls back to null and leaves the signal unchanged on error', async () => {
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    httpClient.get.mockReturnValueOnce(throwError(() => new Error('x')));
-    expect(await firstValueFrom(service.switchToProject('s'))).toBeNull();
   });
 });

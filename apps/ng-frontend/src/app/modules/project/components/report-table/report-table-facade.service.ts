@@ -38,10 +38,8 @@ export class ReportTableFacadeService {
     'actions'
   ]);
 
-  readonly expandedElement = signal<Report | null>(null);
   private readonly projectSlug = signal<string>('');
   readonly projectSlug$ = this.projectSlug.asReadonly();
-  private readonly hasRecordingMap: Map<string, boolean> = new Map();
   private paginatorPageSubscription: Subscription | null = null;
   readonly statusFilter = signal<StatusFilter>('all');
 
@@ -177,11 +175,6 @@ export class ReportTableFacadeService {
     );
   }
 
-  /** Returns true when a recording is associated with the given event. */
-  hasRecording(eventId: string): boolean {
-    return this.hasRecordingMap.get(eventId) || false;
-  }
-
   // Selection actions delegated to sub-facade
   toggleAllRows(): void {
     this.selectionFacade.toggleAllRows();
@@ -197,10 +190,6 @@ export class ReportTableFacadeService {
 
   get dataSource() {
     return this.reportTableDataSourceModelService.computedDataSource;
-  }
-
-  get selectionSignal() {
-    return this.reportTableDataSourceModelService.selection;
   }
 
   get selection() {
