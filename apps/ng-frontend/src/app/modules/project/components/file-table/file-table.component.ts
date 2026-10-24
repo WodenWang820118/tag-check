@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { tap } from 'rxjs';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { DatePipe, NgClass, CommonModule } from '@angular/common';
+import { DatePipe, CommonModule } from '@angular/common';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
 import { getCheckStatus, Jsonified, RunSummary } from '@utils';
 import { MatInputModule } from '@angular/material/input';
@@ -36,7 +36,6 @@ import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.compo
     MatCheckboxModule,
     DatePipe,
     MatInputModule,
-    NgClass,
     MatSortModule,
     MatChipsModule,
     MatTooltipModule,
