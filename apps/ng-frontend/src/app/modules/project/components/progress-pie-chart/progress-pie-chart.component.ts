@@ -1,8 +1,10 @@
 import {
   Component,
   computed,
+  DestroyRef,
   signal,
   effect,
+  inject,
   viewChild,
   ElementRef,
   ChangeDetectionStrategy
@@ -53,7 +55,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   ]
 })
 export class ProgressPieChartComponent {
-  chartRef = viewChild.required<ElementRef<HTMLCanvasElement>>('chart');
+  // Not required: the effect can run before the canvas renders, or while the
+  // spinner replaces it. Reading the query makes the effect run again once
+  // the canvas is there.
+  chartRef = viewChild<ElementRef<HTMLCanvasElement>>('chart');
   chart = signal<Chart | null>(null);
   // Track last total steps and spinner state
   private lastTotalSteps = 0;
@@ -63,7 +68,10 @@ export class ProgressPieChartComponent {
   );
 
   constructor(private readonly progressUpdateService: ProgressUpdateService) {
-    // Setup effect to handle chart updates
+    // Chart.js keeps every chart in its registry, with a resize listener,
+    // until destroy(); the row removes this component when its run ends.
+    inject(DestroyRef).onDestroy(() => this.destroyChart());
+
     effect(() => {
       // track totalSteps for chart recreation and update
       const total = this.progressUpdateService.totalSteps$();
