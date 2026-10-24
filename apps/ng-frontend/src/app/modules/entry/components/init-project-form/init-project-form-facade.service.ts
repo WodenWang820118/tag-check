@@ -137,13 +137,18 @@ export class InitProjectFormFacadeService {
           .initProject(this.projectForm.getRawValue())
           .pipe(
             tap((data) => {
-              if (data) {
-                void this.router
-                  .navigate(['/', 'projects', data.projectSlug])
-                  .then(() => {
-                    this.projectForm.reset();
-                  });
+              // ProjectService logs a failed request and answers null.
+              if (!data) {
+                void this.showErrorDialog(
+                  'Could not create the project. Please try again.'
+                );
+                return;
               }
+              void this.router
+                .navigate(['/', 'projects', data.projectSlug])
+                .then(() => {
+                  this.projectForm.reset();
+                });
             })
           );
       }),
