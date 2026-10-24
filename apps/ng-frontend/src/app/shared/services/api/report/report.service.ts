@@ -115,7 +115,6 @@ export class ReportService {
    */
   deleteBatchReports(projectSlug: string, eventIds: string[]) {
     if (!projectSlug || !eventIds) throw new Error('Invalid arguments');
-    console.log('Deleting reports:', eventIds);
     return this.http
       .delete<TestEventSchema>(`${environment.reportApiUrl}/${projectSlug}`, {
         body: eventIds

@@ -74,7 +74,6 @@ export class GtmFormComponent implements OnInit {
           const settings: ProjectSetting = data[
             'projectInfo'
           ] as ProjectSetting;
-          console.log('settings', settings);
           if (settings) {
             this.previewModeForm.patchValue(settings.applicationSettings.gtm);
             if (settings.measurementId) {
@@ -126,7 +125,6 @@ export class GtmFormComponent implements OnInit {
         take(1),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
-          console.log(this.previewModeForm.value);
           const settings: Partial<ApplicationSetting> = {
             gtm: {
               gtmPreviewModeUrl:

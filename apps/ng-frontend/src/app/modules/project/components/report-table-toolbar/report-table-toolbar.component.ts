@@ -74,7 +74,6 @@ export class ReportTableToolbarComponent {
   }
 
   onToggleChange(event: MatButtonToggleChange) {
-    console.log(event.value);
     if (event.value === 'search') {
       this.isSearchVisible.update((prev) => !prev);
     }

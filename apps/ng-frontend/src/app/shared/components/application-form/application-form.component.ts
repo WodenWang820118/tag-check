@@ -77,7 +77,6 @@ export class ApplicationFormComponent implements OnInit {
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         tap((data) => {
-          console.log('data in application: ', data);
           const settings = data['projectInfo'].applicationSettings;
           if (settings) {
             this.localStorageSettings.set(

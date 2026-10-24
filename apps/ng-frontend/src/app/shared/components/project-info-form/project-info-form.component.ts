@@ -65,8 +65,6 @@ export class ProjectInfoFormComponent implements OnInit {
         take(1),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
-          console.log(this.projectInfoForm.value);
-          console.log(projectSlug);
 
           const settings: Partial<Project> = {
             projectName: this.projectInfoForm.value.projectName || '',

@@ -13,7 +13,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatChipsModule } from '@angular/material/chips';
 import { ActivatedRoute } from '@angular/router';
 import { Ga4UploadFacadeService } from './ga4-upload-facade.service';
-import { take, tap } from 'rxjs';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-ga4-upload',
@@ -102,17 +102,7 @@ export class Ga4UploadComponent implements OnInit {
   save() {
     const slug = this.projectSlug();
     if (!slug) return;
-    this.facade
-      .save(slug)
-      .pipe(
-        take(1),
-        tap(() => {
-          // Handle successful save
-          // TODO: refresh the view
-
-          console.log('GA4 events saved successfully');
-        })
-      )
-      .subscribe();
+    // The facade reloads the tests table once the tests are created.
+    this.facade.save(slug).pipe(take(1)).subscribe();
   }
 }

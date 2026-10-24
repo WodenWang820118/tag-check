@@ -76,7 +76,6 @@ export class GtmOperatorService {
       }>(`${environment.dataLayerApiUrl}/stop-gtm-operation`, {})
       .pipe(
         map((message) => {
-          console.log('Operation stopped:', message);
           if (message.status === 200) {
             this.isStopOperation.set(true);
           }

@@ -42,7 +42,6 @@ export class ProjectIoService {
     }
     const formData = new FormData();
     formData.append('file', file); // 'file' is the field name you'll access on the server
-    console.log('formData', formData.get('file'));
     return this.http
       .post(`${environment.projectApiUrl}/import`, formData, {
         reportProgress: true,

@@ -58,9 +58,7 @@ export class FileTableToolbarComponent implements OnDestroy {
   ) {}
 
   applyFilter(event: Event) {
-    console.log('event', event);
     const filterValue = (event.target as HTMLInputElement).value;
-    console.log('filter value in applyFilter', filterValue);
     this.fileTableDataSourceService.setFilterSignal(filterValue);
   }
 

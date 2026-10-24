@@ -117,7 +117,6 @@ export class NewReportViewComponent {
     private readonly editorService: EditorService
   ) {
     this.route.data.subscribe((data) => {
-      console.log('data: ', data);
       const projectSlug = data['projectSlug'];
       if (projectSlug) {
         this.projectSlug.set(projectSlug);
