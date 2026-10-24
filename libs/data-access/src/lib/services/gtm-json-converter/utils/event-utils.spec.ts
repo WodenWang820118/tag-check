@@ -30,6 +30,11 @@ describe('EventUtils', () => {
     it('should return false for a non-built-in event', () => {
       expect(service.isBuiltInEvent('custom_event')).toBe(false);
     });
+
+    it('should return false for custom events that only contain a built-in name', () => {
+      expect(service.isBuiltInEvent('infinite_scroll')).toBe(false);
+      expect(service.isBuiltInEvent('video_start_click')).toBe(false);
+    });
   });
 
   describe('isIncludeVideo', () => {

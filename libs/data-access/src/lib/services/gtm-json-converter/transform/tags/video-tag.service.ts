@@ -11,14 +11,20 @@ import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import {
   CONSENT_STATUS_NOT_NEEDED,
-  BUILT_IN_VIDEO_EVENTS
+  MEASUREMENT_ID_VARIABLE_NAME,
+  VIDEO_TRIGGER_NAME
 } from '../utils/constant';
 
+/**
+ * Builds the YouTube video tags: a GA4 event tag that sends
+ * `video_<status>` (video_start, video_progress, video_complete) with the
+ * built-in video variables, and a Custom HTML tag that loads the YouTube
+ * iframe API. Both fire on the YouTube Video trigger.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class VideoTag {
-  // Constants for maintenance
   private static readonly EVENT_TAG_NAME = 'GA4 event - Video';
   private static readonly HTML_TAG_NAME = 'cHTML - Youtube iframe API script';
   private static readonly EVENT_NAME_TEMPLATE = 'video_{{Video Status}}';
@@ -31,9 +37,8 @@ export class VideoTag {
     private readonly parameterUtils: ParameterUtils,
     private readonly eventUtils: EventUtils
   ) {}
-  // Build the GA4 video event tag
+
   private buildEventTag(
-    configurationName: string,
     accountId: string,
     containerId: string,
     triggerId: string
@@ -76,9 +81,11 @@ export class VideoTag {
           this.parameterUtils.createMapParameter('video_url', '{{Video URL}}'),
           this.parameterUtils.createMapParameter('visible', '{{Video Visible}}')
         ]),
+        // The container defines the measurement ID as a Constant variable;
+        // there is no variable named "Measurement ID" to refer to.
         this.parameterUtils.createTemplateParameter(
           'measurementIdOverride',
-          '{{Measurement ID}}'
+          `{{${MEASUREMENT_ID_VARIABLE_NAME}}}`
         )
       ],
       fingerprint: VideoTag.EVENT_FINGERPRINT,
@@ -89,9 +96,7 @@ export class VideoTag {
     };
   }
 
-  // Build the HTML script tag for YouTube API
   private buildHtmlTag(
-    configurationName: string,
     accountId: string,
     containerId: string,
     triggerId: string
@@ -120,11 +125,14 @@ export class VideoTag {
   }
 
   /**
-   * Creates video event and HTML script tags if video events are present
-   * @param configurationName GTM configuration reference
+   * Creates the video event and HTML script tags when a data layer event is
+   * a video event. Returns an empty array otherwise, or when the
+   * `event youtube video` trigger is missing.
+   * @param configurationName name of the Google tag; not used, because the
+   * event tag sets its measurement ID directly
    * @param accountId GTM account ID
    * @param containerId GTM container ID
-   * @param triggers Available triggers to match
+   * @param triggers trigger names and IDs to find the YouTube Video trigger in
    * @param dataLayers DataLayer events to inspect
    */
   public createVideoTag(
@@ -134,33 +142,17 @@ export class VideoTag {
     triggers: Trigger[],
     dataLayers: DataLayer[] = []
   ): TagConfig[] {
-    try {
-      if (!this.eventUtils.isIncludeVideo(dataLayers)) {
-        return [];
-      }
-      // Match the trigger by data layer event name (e.g. 'video_start')
-      const trigger = triggers.find((t) =>
-        BUILT_IN_VIDEO_EVENTS.includes(t.name)
-      );
-      if (!trigger?.triggerId) {
-        throw new Error("Couldn't find matching trigger for video tag");
-      }
-      const eventTag = this.buildEventTag(
-        configurationName,
-        accountId,
-        containerId,
-        trigger.triggerId
-      );
-      const htmlTag = this.buildHtmlTag(
-        configurationName,
-        accountId,
-        containerId,
-        trigger.triggerId
-      );
-      return [eventTag, htmlTag];
-    } catch (error) {
-      console.error('Error while creating video tag:', error);
+    if (!this.eventUtils.isIncludeVideo(dataLayers)) {
       return [];
     }
+    const trigger = triggers.find((t) => t.name === VIDEO_TRIGGER_NAME);
+    if (!trigger?.triggerId) {
+      console.error(`Missing trigger (${VIDEO_TRIGGER_NAME}) or triggerId`);
+      return [];
+    }
+    return [
+      this.buildEventTag(accountId, containerId, trigger.triggerId),
+      this.buildHtmlTag(accountId, containerId, trigger.triggerId)
+    ];
   }
 }

@@ -74,7 +74,7 @@ describe('ScrollTag', () => {
       const containerId = 'container456';
       const triggers: Trigger[] = [
         {
-          name: 'scroll',
+          name: 'event scroll',
           triggerId: 'trigger789'
         }
       ];
