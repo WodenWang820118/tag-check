@@ -48,14 +48,14 @@ export class SlideUploadComponent {
   open() {
     const s = this.sidenav();
     if (!s) return;
-    s.open();
+    void s.open();
   }
 
   closeIfOpen() {
     const s = this.sidenav();
     if (!s) return;
     if (s.opened) {
-      s.close();
+      void s.close();
       this.uploadSpecService.resetStart();
     }
   }

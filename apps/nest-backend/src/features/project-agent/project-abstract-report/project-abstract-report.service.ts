@@ -59,32 +59,6 @@ export class ProjectAbstractReportService {
     }
   }
 
-  async writeProjectAbstractTestResultJson(
-    projectName: string,
-    data: OutputValidationResult[]
-  ) {
-    const resultFolderPath =
-      await this.folderPathService.getReportSavingFolderPath(projectName);
-
-    const eventFolderNames = this.folderService
-      .readFolderFiles(resultFolderPath)
-      .filter((dirent) => dirent.isDirectory())
-      .map((dirent) => dirent.name);
-
-    for (const name of eventFolderNames) {
-      for (const dataPiece of data) {
-        if (name === dataPiece.dataLayerSpec.event) {
-          const abstractFilePath =
-            await this.filePathService.getInspectionResultFilePath(
-              projectName,
-              name
-            );
-          this.fileService.writeJsonFile(abstractFilePath, dataPiece);
-        }
-      }
-    }
-  }
-
   async deleteSingleAbstractTestResultFolder(
     projectSlug: string,
     eventId: string

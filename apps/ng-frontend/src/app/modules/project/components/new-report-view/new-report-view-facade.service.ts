@@ -142,7 +142,6 @@ export class NewReportViewFacadeService {
     const recordingEditor = this.editorService.editor$.recordingJsonEditor();
     const specContent = specEditor.state.doc.toString();
     const recordingContent = recordingEditor.state.doc.toString();
-    const testName = specContent ? JSON.parse(specContent).event : '';
     // cleaned legacy combineLatest-based editor content sync
     const eventId = uuidv4();
 
@@ -153,18 +152,21 @@ export class NewReportViewFacadeService {
       try {
         specParsed = JSON.parse(specContent) as StrictDataLayerEvent;
       } catch {
-        this.showErrorDialog('Spec must be valid JSON.');
+        void this.showErrorDialog('Spec must be valid JSON.');
         return EMPTY;
       }
       if (recordingContent && recordingContent.trim() !== '') {
         try {
           recordingParsed = JSON.parse(recordingContent) as Recording;
         } catch {
-          this.showErrorDialog('Recording must be valid JSON.');
+          void this.showErrorDialog('Recording must be valid JSON.');
           return EMPTY;
         }
       }
 
+      // Read after validation: parsing invalid JSON earlier threw before the
+      // "Spec must be valid JSON." dialog could open.
+      const testName = (specParsed as { event?: string }).event ?? '';
       const eventName = (specParsed as { event?: string }).event ?? 'unknown';
       const reportDetails: IReportDetails = new ReportDetailsDto({
         eventId: eventId,
@@ -190,7 +192,9 @@ export class NewReportViewFacadeService {
             .pipe(
               catchError((error) => {
                 this.logger.error('Error adding report:', error);
-                this.showErrorDialog('Failed to add report. Please try again.');
+                void this.showErrorDialog(
+                  'Failed to add report. Please try again.'
+                );
                 return throwError(() => error);
               })
             )
@@ -198,7 +202,7 @@ export class NewReportViewFacadeService {
       );
     }
 
-    this.showErrorDialog('Spec content is required and cannot be empty.');
+    void this.showErrorDialog('Spec content is required and cannot be empty.');
     return EMPTY;
     // cleaned legacy combineLatest-based addReport flow
   }

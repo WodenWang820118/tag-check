@@ -96,13 +96,13 @@ export class ProjectViewComponent {
 
   onChangeProject(projectSlug: string, snav: MatSidenav) {
     this.closeOverlayMenu(snav);
-    this.router.navigate(['/projects', projectSlug]);
+    void this.router.navigate(['/projects', projectSlug]);
   }
 
   /** The side-by-side menu stays open; the overlay closes after a choice. */
   closeOverlayMenu(snav: MatSidenav) {
     if (!this.isWide()) {
-      snav.close();
+      void snav.close();
     }
   }
 }

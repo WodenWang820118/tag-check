@@ -91,22 +91,6 @@ describe('ProjectAbstractReportService', () => {
     });
   });
 
-  describe('writeProjectAbstractTestResultJson()', () => {
-    it('writes one file per matching event/dataLayerSpec.event pair', async () => {
-      const ctx = build();
-      ctx.folderService.readFolderFiles.mockReturnValue([
-        { name: 'page_view', isDirectory: () => true },
-        { name: 'add_to_cart', isDirectory: () => true },
-        { name: 'ignore-file.txt', isDirectory: () => false }
-      ]);
-      await ctx.service.writeProjectAbstractTestResultJson('demo', [
-        { dataLayerSpec: { event: 'page_view' } } as never,
-        { dataLayerSpec: { event: 'unmatched' } } as never
-      ]);
-      expect(ctx.fileService.writeJsonFile).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('deleteSingleAbstractTestResultFolder()', () => {
     it('throws NotFound when the folder does not exist', async () => {
       vi.mocked(existsSync).mockImplementation(() => false);

@@ -91,15 +91,15 @@ export class ReportBigTableComponent implements OnDestroy {
         this.uploadSpecService.isOpenImportSidenav();
       const sn = this.sheet();
       if (this.isClosing()) {
-        sn.close();
+        void sn.close();
         document.body.style.overflow = 'auto';
         return;
       }
       if (showUpload || showImport) {
-        sn.open();
+        void sn.open();
         document.body.style.overflow = 'hidden';
       } else {
-        sn.close();
+        void sn.close();
         document.body.style.overflow = 'auto';
       }
     });
@@ -107,7 +107,7 @@ export class ReportBigTableComponent implements OnDestroy {
 
   onBackdrop() {
     this.isClosing.set(true);
-    this.sheet()?.close();
+    void this.sheet()?.close();
   }
 
   onClosed() {
