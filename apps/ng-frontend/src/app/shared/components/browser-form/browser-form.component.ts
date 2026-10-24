@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { catchError, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, switchMap, take, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {
@@ -126,7 +126,7 @@ export class BrowserFormComponent implements OnInit {
 
     this.route.parent?.params
       .pipe(
-        takeUntilDestroyed(this.destroyRef),
+        take(1),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
           const browserSettings: Partial<BrowserSetting> = {
@@ -138,9 +138,10 @@ export class BrowserFormComponent implements OnInit {
             browserSettings
           );
         }),
-        catchError((error) => {
+        // SettingsService has shown the failure in a snackbar.
+        catchError((error: unknown) => {
           console.error('Error: ', error);
-          return error;
+          return EMPTY;
         })
       )
       .subscribe();

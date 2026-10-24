@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
@@ -60,6 +60,15 @@ describe('SettingsService', () => {
   it('updateProjectSetting opens an Error snackbar on empty response', async () => {
     httpClient.put.mockReturnValueOnce(of({}));
     await firstValueFrom(service.updateProjectSetting('s', {} as never));
+    expectSnack('Error');
+  });
+
+  it('a failed save shows the Error snackbar and still fails', async () => {
+    const failure = new HttpErrorResponse({ status: 500 });
+    httpClient.put.mockReturnValueOnce(throwError(() => failure));
+    await expect(
+      firstValueFrom(service.updateBrowserSetting('s', {} as never))
+    ).rejects.toBe(failure);
     expectSnack('Error');
   });
 
