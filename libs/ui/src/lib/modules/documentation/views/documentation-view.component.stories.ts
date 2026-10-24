@@ -7,10 +7,8 @@ import {
 import { HelpCenterViewComponent } from './documentation-view.component';
 
 import { provideHttpClient } from '@angular/common/http';
-import { importProvidersFrom } from '@angular/core';
 import { provideRouter, RouterOutlet } from '@angular/router';
-import { MarkdownModule } from 'ngx-markdown';
-import { TreeNodeService } from '../services/tree-node/tree-node.service';
+import { provideMarkdown } from 'ngx-markdown';
 import { DOCS_ROUTES } from '../routes';
 import { AsyncPipe } from '@angular/common';
 import { SideBarComponent } from '../components/sidebar/sidebar.component';
@@ -21,14 +19,13 @@ const meta: Meta<HelpCenterViewComponent> = {
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
-      imports: [AsyncPipe, SideBarComponent, RouterOutlet],
-      providers: [TreeNodeService]
+      imports: [AsyncPipe, SideBarComponent, RouterOutlet]
     }),
     applicationConfig({
       providers: [
         provideHttpClient(),
         provideRouter(DOCS_ROUTES),
-        importProvidersFrom(MarkdownModule.forRoot())
+        provideMarkdown()
       ]
     })
   ]
