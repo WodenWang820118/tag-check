@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, Subject, throwError } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { GtmOperatorService } from './gtm-operator.service';
 
@@ -77,18 +77,34 @@ describe('GtmOperatorService', () => {
     ).rejects.toThrow('GTM inspection failed');
   });
 
-  it('runInspectionViaGtm returns [] after stopOperation succeeded', async () => {
+  it('runInspectionViaGtm returns [] when the run fails after a stop', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const run = new Subject<never>();
+    httpClient.post
+      .mockReturnValueOnce(run)
+      .mockReturnValueOnce(of({ status: 200, message: 'ok' }));
+    const result = firstValueFrom(
+      service.runInspectionViaGtm('s', 'e', { gtmUrl: 'x' } as never)
+    );
+    await firstValueFrom(service.stopOperation());
+    expect(service.isStopOperation$()).toBe(true);
+    run.error(new Error('boom'));
+    expect(await result).toEqual([]);
+  });
+
+  it('runInspectionViaGtm reports the failure of a run started after a stop', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     vi.spyOn(console, 'log').mockImplementation(() => undefined);
     httpClient.post
       .mockReturnValueOnce(of({ status: 200, message: 'ok' }))
       .mockReturnValueOnce(throwError(() => new Error('boom')));
     await firstValueFrom(service.stopOperation());
-    expect(service.isStopOperation$()).toBe(true);
-    const result = await firstValueFrom(
-      service.runInspectionViaGtm('s', 'e', { gtmUrl: 'x' } as never)
-    );
-    expect(result).toEqual([]);
+    await expect(
+      firstValueFrom(
+        service.runInspectionViaGtm('s', 'e', { gtmUrl: 'x' } as never)
+      )
+    ).rejects.toThrow('GTM inspection failed');
   });
 
   it('stopOperation only flips on status 200 and rethrows errors', async () => {
