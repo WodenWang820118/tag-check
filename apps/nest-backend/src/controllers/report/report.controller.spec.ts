@@ -26,14 +26,19 @@ describe('ReportController', () => {
         .mockResolvedValue('deleted-batch'),
       updateTestEvents: vi.fn().mockResolvedValue('updated')
     };
+    const projectRecordingService = {
+      addRecording: vi.fn().mockResolvedValue(undefined)
+    };
     const controller = new ReportController(
       projectReportService as never,
       projectAbstractReportService as never,
       testReportFacadeRepositoryService as never,
-      testEventRepositoryService as never
+      testEventRepositoryService as never,
+      projectRecordingService as never
     );
     return {
       controller,
+      projectRecordingService,
       projectReportService,
       projectAbstractReportService,
       testReportFacadeRepositoryService,
@@ -142,14 +147,24 @@ describe('ReportController', () => {
     ).toHaveBeenCalledWith('proj-1', 'evt-1', report);
   });
 
-  it('addReport creates the report folder and then a full report record', async () => {
+  it('addReport creates the report folder, the full report record and the recording file', async () => {
     const {
       controller,
       projectReportService,
-      testReportFacadeRepositoryService
+      testReportFacadeRepositoryService,
+      projectRecordingService
     } = build();
-    const reportData = { foo: 'bar' } as never;
+    const steps = [{ type: 'navigate', url: 'https://shop.example' }];
+    const reportData = {
+      reportDetails: { eventName: 'add_to_cart' },
+      recording: { title: 'ignored', steps }
+    } as never;
     const result = await controller.addReport('proj-1', 'evt-1', reportData);
+    expect(projectRecordingService.addRecording).toHaveBeenCalledWith(
+      'proj-1',
+      'evt-1',
+      { title: 'add_to_cart', steps }
+    );
     expect(projectReportService.createEventReportFolder).toHaveBeenCalledWith(
       'proj-1',
       'evt-1'

@@ -16,6 +16,7 @@ import { ProjectReportService } from '../../features/project-agent/project-repor
 import { ProjectAbstractReportService } from '../../features/project-agent/project-abstract-report/project-abstract-report.service';
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
+import { ProjectRecordingService } from '../../features/project-agent/project-recording/project-recording.service';
 import { CreateFullTestEventDto, UpdateTestEventDto } from '../../shared';
 
 type ReportDiagnosticRequest = FastifyRequest & {
@@ -36,7 +37,8 @@ export class ReportController {
     private readonly projectReportService: ProjectReportService,
     private readonly projectAbstractReportService: ProjectAbstractReportService,
     private readonly testReportFacadeRepositoryService: TestReportFacadeRepositoryService,
-    private readonly testEventRepositoryService: TestEventRepositoryService
+    private readonly testEventRepositoryService: TestEventRepositoryService,
+    private readonly projectRecordingService: ProjectRecordingService
   ) {}
 
   @Get(':projectSlug')
@@ -113,11 +115,19 @@ export class ReportController {
       eventId
     );
 
-    return this.testReportFacadeRepositoryService.createFullReport(
-      projectSlug,
-      eventId,
-      reportData
-    );
+    const created =
+      await this.testReportFacadeRepositoryService.createFullReport(
+        projectSlug,
+        eventId,
+        reportData
+      );
+    // A run reads the site's domain from the recording file in the project
+    // folder; without it, the test's click steps fail.
+    await this.projectRecordingService.addRecording(projectSlug, eventId, {
+      title: reportData.reportDetails.eventName,
+      steps: reportData.recording?.steps ?? []
+    });
+    return created;
   }
 
   @Delete(':projectSlug/:eventId')

@@ -1,16 +1,14 @@
-import { Body, Controller, Get, Logger, Param, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
 import type { Recording } from '@utils';
 import { ProjectRecordingService } from '../../features/project-agent/project-recording/project-recording.service';
-import { ProjectFacadeRepositoryService } from '../../features/repository/project-facade/project-facade-repository.service';
 import { RecordingRepositoryService } from '../../core/repository/recording/recording-repository.service';
 
+/** Reads and updates tests' Chrome Recorder recordings. */
 @Controller('recordings')
 export class RecordingController {
-  private readonly logger = new Logger(RecordingController.name);
   constructor(
     private readonly projectRecordingService: ProjectRecordingService,
-    private readonly projectFacadeRepositoryService: ProjectFacadeRepositoryService,
     private readonly recordingRepositoryService: RecordingRepositoryService
   ) {}
 
@@ -65,9 +63,17 @@ export class RecordingController {
     @Param('eventId') eventId: string,
     @Body() recording: Recording
   ) {
-    return await this.recordingRepositoryService.update(projectSlug, eventId, {
+    const updated = await this.recordingRepositoryService.update(
+      projectSlug,
+      eventId,
+      { title: recording.title, steps: recording.steps }
+    );
+    // Keep the recording file in the project folder in step: a run reads
+    // the site's domain from it, and an exported zip carries it.
+    await this.projectRecordingService.updateRecording(projectSlug, eventId, {
       title: recording.title,
       steps: recording.steps
     });
+    return updated;
   }
 }
