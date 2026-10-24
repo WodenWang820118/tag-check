@@ -9,7 +9,11 @@ import {
 } from './single-per-parent-upsert.service';
 
 /**
- * Handles generic entity persistence (non-Project special cases) and alternate key registration.
+ * Persists one non-project row: merges it into the parent's existing row
+ * for the one-per-parent entities (settings, recording, spec, item
+ * definition), else inserts it with a new primary key. Records the new key
+ * in the ID map and the row's alternate keys. A row that fails to save is
+ * logged and counted as skipped; the import goes on.
  */
 @Injectable()
 export class EntityPersistenceService {
@@ -20,6 +24,7 @@ export class EntityPersistenceService {
     private readonly singlePerParentUpsert: SinglePerParentUpsertService
   ) {}
 
+  /** Records a test's eventId as an alternate key of its new primary key. */
   registerAlternateKeys(
     meta: EntityMetadata,
     entityInstance: Record<string, unknown>,

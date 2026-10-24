@@ -1,5 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+/**
+ * Decides what to do with a row whose exported primary key already exists
+ * in its table: one-per-parent entities go on to be merged into their
+ * parent's row; any other row is taken to be that existing row and skipped.
+ */
 @Injectable()
 export class ExistingIdCollisionService {
   private readonly logger = new Logger(ExistingIdCollisionService.name);

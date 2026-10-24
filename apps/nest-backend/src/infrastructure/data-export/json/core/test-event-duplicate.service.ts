@@ -11,6 +11,10 @@ export class TestEventDuplicateService {
   private readonly logger = new Logger(TestEventDuplicateService.name);
   constructor(private readonly idMapRegistry: IdMapRegistryService) {}
 
+  /**
+   * The existing tests as `<projectId>::<eventId>` -> primary key, or null
+   * for other entities and when the read fails.
+   */
   async prefetchExistingComposite(
     meta: EntityMetadata,
     repo: Repository<ObjectLiteral>
@@ -59,7 +63,12 @@ export class TestEventDuplicateService {
   }
 
   /**
-   * Returns true if row should be skipped, and wires idMap if we can map old -> existing pk.
+   * Maps the exported primary key of a test that already exists in its
+   * project to the existing test, so its children attach to it.
+   *
+   * @returns `true` only when the row asks to be skipped with
+   * `skipIfDuplicate`. The import ignores it: inserting the duplicate fails
+   * on the unique (project, eventId) index and is counted as skipped.
    */
   handleDuplicate(
     meta: EntityMetadata,

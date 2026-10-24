@@ -12,6 +12,11 @@ export interface UpsertContext {
   raw: Record<string, unknown>;
 }
 
+/**
+ * Merges an imported row into the existing row of the same parent for the
+ * entities a parent has at most one of: a project's settings, and a test's
+ * recording, spec and item definition.
+ */
 @Injectable()
 export class SinglePerParentUpsertService {
   private readonly logger = new Logger(SinglePerParentUpsertService.name);
@@ -20,6 +25,7 @@ export class SinglePerParentUpsertService {
     private readonly idMapRegistry: IdMapRegistryService
   ) {}
 
+  /** The relation to the parent, or undefined for other entities. */
   getRelationProp(entityName: string): string | undefined {
     const singlePerParent: Record<string, string> = {
       ApplicationSettingEntity: 'project',
@@ -32,6 +38,11 @@ export class SinglePerParentUpsertService {
     return singlePerParent[entityName];
   }
 
+  /**
+   * @returns `true` when the row was merged into an existing one (and
+   * counted as inserted); `false` when the caller should insert it, also
+   * when the lookup fails.
+   */
   async tryUpsert(
     meta: EntityMetadata,
     repo: Repository<ObjectLiteral>,

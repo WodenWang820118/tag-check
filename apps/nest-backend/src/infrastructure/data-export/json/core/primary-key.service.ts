@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityMetadata } from 'typeorm';
 
-/**
- * PrimaryKeyService
- *  - Isolates logic for determining primary key shape for an entity.
- */
+/** Whether an entity has a single-column primary key, and its property. */
 @Injectable()
 export class PrimaryKeyService {
   getPrimaryKeyInfo(meta: EntityMetadata): {
