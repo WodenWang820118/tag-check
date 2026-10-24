@@ -163,13 +163,14 @@ export class ReportTableFacadeService {
   //#endregion
 
   //#region Actions
-  /** Triggers a test run for the given event in the current project. */
+  /**
+   * Runs a test of the current project and emits its report, or undefined
+   * when the run returned none. The test's row is updated when the run ends.
+   */
   runTest(eventId: string) {
-    const projectSlug = this.projectSlug();
-    return this.testRunningFacadeService.runTest(
+    return this.testRunningFacadeService.runTestForReport(
       eventId,
-      projectSlug,
-      this.reportTableDataSourceModelService.dataSource()
+      this.projectSlug()
     );
   }
 
