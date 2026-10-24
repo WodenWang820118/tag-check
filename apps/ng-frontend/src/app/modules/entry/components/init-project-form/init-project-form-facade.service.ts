@@ -121,7 +121,7 @@ export class InitProjectFormFacadeService {
 
   submitProject() {
     if (this.projectForm.invalid) {
-      this.showErrorDialog('Please fill in the required fields.');
+      void this.showErrorDialog('Please fill in the required fields.');
       return EMPTY;
     }
 
@@ -129,7 +129,7 @@ export class InitProjectFormFacadeService {
       take(1),
       switchMap((rootProjectPath) => {
         if (!rootProjectPath || this.isEmptyObject(rootProjectPath)) {
-          this.showErrorDialog('Please configure the root path first.');
+          void this.showErrorDialog('Please configure the root path first.');
           return EMPTY;
         }
 
@@ -138,7 +138,7 @@ export class InitProjectFormFacadeService {
           .pipe(
             tap((data) => {
               if (data) {
-                this.router
+                void this.router
                   .navigate(['/', 'projects', data.projectSlug])
                   .then(() => {
                     this.projectForm.reset();

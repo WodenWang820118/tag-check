@@ -102,7 +102,7 @@ bootstrapApplication(AppComponent, appConfig)
     await notifyAppReady();
 
     // Load integrations after bootstrap completes
-    loadSentryIntegrations();
+    void loadSentryIntegrations();
   })
   .catch((err) => console.error('Error bootstrapping application:', err));
 

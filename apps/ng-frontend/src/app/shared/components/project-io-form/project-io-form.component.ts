@@ -75,7 +75,7 @@ export class ProjectIoFormComponent {
           return EMPTY;
         }),
         tap(() => {
-          this.router.navigate(['/']);
+          void this.router.navigate(['/']);
         }),
         catchError((err) => {
           console.error(err);

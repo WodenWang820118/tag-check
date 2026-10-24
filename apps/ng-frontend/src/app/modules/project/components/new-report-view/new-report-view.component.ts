@@ -150,9 +150,9 @@ export class NewReportViewComponent {
       .subscribe(() => {
         // force reload the page
         this.router.navigated = false;
-        this.router.navigate([this.router.url]).then(() => {
+        void this.router.navigate([this.router.url]).then(() => {
           if (this.route.snapshot.data['reports']) {
-            this.sidenav().close();
+            void this.sidenav().close();
           }
         });
       });

@@ -137,7 +137,7 @@ export class DetailViewComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['../'], { relativeTo: this.route });
+    void this.router.navigate(['../'], { relativeTo: this.route });
   }
 
   private handleQueryParams(params: ParamMap) {
@@ -156,7 +156,7 @@ export class DetailViewComponent implements OnInit {
 
       const queryParams: Params = { ...this.route.snapshot.queryParams };
       delete queryParams['snackbar'];
-      this.router.navigate([], {
+      void this.router.navigate([], {
         relativeTo: this.route,
         queryParams,
         replaceUrl: true

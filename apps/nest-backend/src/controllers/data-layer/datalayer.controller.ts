@@ -2,7 +2,6 @@ import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import {
   Body,
   Controller,
-  Get,
   HttpException,
   HttpStatus,
   Logger,
@@ -72,35 +71,6 @@ export class DataLayerController {
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
-  }
-
-  @ApiOperation({
-    summary: 'Inspects a project dataLayer',
-    description: `This endpoint inspects an entire project and returns dataLayer object,
-    and the comparison result written to an xlsx file. Please see the 
-    inspectSingleEvent endpoint for more parameters details.`
-  })
-  @Get(':projectSlug')
-  async inspectProject(
-    @Param('projectSlug') projectSlug: string,
-    @Query('headless') headless: string,
-    @Query('measurementId') measurementId: string,
-    @Query('username') username: string,
-    @Query('password') password: string,
-    @Query('captureRequest') captureRequest: string,
-    @Query('concurrency') concurrency = 2
-  ) {
-    return await this.eventInspectionControllerService.inspectProject(
-      projectSlug,
-      headless,
-      measurementId,
-      {
-        username,
-        password
-      },
-      captureRequest,
-      Number(concurrency)
-    );
   }
 
   @ApiOperation({

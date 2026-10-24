@@ -111,7 +111,7 @@ export class GtmFormComponent implements OnInit {
 
   goToProjectInfo() {
     // Navigate to the project info settings route
-    this.router.navigate(['../project-info'], {
+    void this.router.navigate(['../project-info'], {
       relativeTo: this.route
     });
   }

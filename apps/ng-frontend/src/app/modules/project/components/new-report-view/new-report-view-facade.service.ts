@@ -153,14 +153,14 @@ export class NewReportViewFacadeService {
       try {
         specParsed = JSON.parse(specContent) as StrictDataLayerEvent;
       } catch {
-        this.showErrorDialog('Spec must be valid JSON.');
+        void this.showErrorDialog('Spec must be valid JSON.');
         return EMPTY;
       }
       if (recordingContent && recordingContent.trim() !== '') {
         try {
           recordingParsed = JSON.parse(recordingContent) as Recording;
         } catch {
-          this.showErrorDialog('Recording must be valid JSON.');
+          void this.showErrorDialog('Recording must be valid JSON.');
           return EMPTY;
         }
       }
@@ -190,7 +190,9 @@ export class NewReportViewFacadeService {
             .pipe(
               catchError((error) => {
                 this.logger.error('Error adding report:', error);
-                this.showErrorDialog('Failed to add report. Please try again.');
+                void this.showErrorDialog(
+                  'Failed to add report. Please try again.'
+                );
                 return throwError(() => error);
               })
             )
@@ -198,7 +200,7 @@ export class NewReportViewFacadeService {
       );
     }
 
-    this.showErrorDialog('Spec content is required and cannot be empty.');
+    void this.showErrorDialog('Spec content is required and cannot be empty.');
     return EMPTY;
     // cleaned legacy combineLatest-based addReport flow
   }

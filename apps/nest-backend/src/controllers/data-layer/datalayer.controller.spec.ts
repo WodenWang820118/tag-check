@@ -6,7 +6,6 @@ describe('DataLayerController', () => {
   function build(overrides: Record<string, unknown> = {}) {
     const eventInspectionControllerService = {
       inspectSingleEvent: vi.fn().mockResolvedValue(undefined),
-      inspectProject: vi.fn().mockResolvedValue('project-result'),
       stopOperation: vi.fn().mockResolvedValue(undefined),
       ...overrides
     };
@@ -78,30 +77,6 @@ describe('DataLayerController', () => {
         status: HttpStatus.INTERNAL_SERVER_ERROR
       });
     });
-  });
-
-  it('inspectProject forwards normalized concurrency to the inspection service', async () => {
-    const { controller, eventInspectionControllerService } = build();
-    const result = await controller.inspectProject(
-      'proj-1',
-      'true',
-      'G-1',
-      'user',
-      'pass',
-      'true',
-      '4' as unknown as number
-    );
-    expect(
-      eventInspectionControllerService.inspectProject
-    ).toHaveBeenCalledWith(
-      'proj-1',
-      'true',
-      'G-1',
-      { username: 'user', password: 'pass' },
-      'true',
-      4
-    );
-    expect(result).toBe('project-result');
   });
 
   it('stopOperation returns a 200 success envelope on the happy path', async () => {
