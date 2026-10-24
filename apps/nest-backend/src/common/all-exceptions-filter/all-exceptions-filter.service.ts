@@ -36,11 +36,17 @@ type RequestWithDiagnostics = FastifyRequest & {
   diagnosticContext?: DiagnosticRequestContext;
 };
 
+/**
+ * Answers every unhandled exception with a JSON body: an HttpException keeps
+ * its status and response, anything else becomes a 500 "Internal Server
+ * Error" without its message. Each error is also reported to Firestore in
+ * the background, so reporting never delays or fails the response.
+ */
 @Catch()
 @Injectable()
 export class AllExceptionsFilter implements ExceptionFilter {
   constructor(private readonly firebaseService: FirebaseService) {}
-  async catch(exception: unknown, host: ArgumentsHost) {
+  catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<FastifyReply>();
     const request = ctx.getRequest<RequestWithDiagnostics>();
