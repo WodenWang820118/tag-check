@@ -176,11 +176,19 @@ export class RequestInterceptorService {
     };
 
     session.on('Network.requestWillBeSent', onRequestWillBeSent);
-    await session.send('Network.enable', {
-      maxPostDataSize: MAX_POST_DATA_BYTES
-    });
-    await session.send('Network.setCacheDisabled', { cacheDisabled: true });
-    await session.send('Network.setBypassServiceWorker', { bypass: true });
+    try {
+      // In order: the other two Network commands need the domain enabled.
+      await session.send('Network.enable', {
+        maxPostDataSize: MAX_POST_DATA_BYTES
+      });
+      await session.send('Network.setCacheDisabled', { cacheDisabled: true });
+      await session.send('Network.setBypassServiceWorker', { bypass: true });
+    } catch (error) {
+      // The caller gets no handle to stop, so the session is released here.
+      session.off('Network.requestWillBeSent', onRequestWillBeSent);
+      await session.detach().catch(() => undefined);
+      throw error;
+    }
 
     return {
       stop: async () => {

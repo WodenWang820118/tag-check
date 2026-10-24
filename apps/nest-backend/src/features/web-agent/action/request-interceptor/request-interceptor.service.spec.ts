@@ -245,6 +245,32 @@ describe('RequestInterceptorService', () => {
     expect(networkSession.detach).toHaveBeenCalledTimes(1);
   });
 
+  it('detaches the Network session when the fallback cannot be enabled', async () => {
+    const fetchSession = createMockCdpSession({
+      'Fetch.enable': () => Promise.reject(new Error('not supported'))
+    });
+    const networkSession = createMockCdpSession({
+      'Network.enable': () => Promise.reject(new Error('Target closed'))
+    });
+    const page = createMockPage(fetchSession, networkSession);
+
+    await expect(
+      service.setupInterception(
+        page as never,
+        'project',
+        'event-a',
+        'search',
+        'G-TAGCHECK01'
+      )
+    ).rejects.toThrow('Target closed');
+
+    expect(networkSession.detach).toHaveBeenCalledTimes(1);
+    expect(networkSession.off).toHaveBeenCalledWith(
+      'Network.requestWillBeSent',
+      expect.any(Function)
+    );
+  });
+
   it('reports the GA4 events it saw when nothing matched', async () => {
     const warn = vi
       .spyOn(service['logger'], 'warn')
