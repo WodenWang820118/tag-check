@@ -160,12 +160,27 @@ describe('ExampleProjectRepositoryService', () => {
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([visibleProject]);
 
-    await service.onApplicationBootstrap();
+    service.onApplicationBootstrap();
 
     // Lifecycle hook itself does not await; readiness is still in-flight or just-finished.
     // We verify the seed promise is in progress / completed by awaiting via scheduleStartupSeed.
     const projectCount = await service.scheduleStartupSeed();
     expect(projectCount).toBe(1);
     expect(service.getStartupSeedReadiness().ready).toBe(true);
+  });
+
+  it('onApplicationBootstrap leaves no unhandled rejection when the seed fails', async () => {
+    mockProjectRepositoryService.list.mockRejectedValue(new Error('db down'));
+    const unhandled = vi.fn();
+    process.on('unhandledRejection', unhandled);
+    try {
+      service.onApplicationBootstrap();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(unhandled).not.toHaveBeenCalled();
+      expect(service.getStartupSeedReadiness().error).toBe('db down');
+    } finally {
+      process.off('unhandledRejection', unhandled);
+    }
   });
 });

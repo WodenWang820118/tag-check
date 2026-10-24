@@ -18,6 +18,12 @@ export interface ExampleProjectStartupReadiness {
   error: string | null;
 }
 
+/**
+ * Creates the example project (against https://ng-gtm-sample.vercel.app) on
+ * the first start, when there is no project yet, and refreshes its shipped
+ * recordings on later starts. Seeding runs in the background; callers that
+ * need it finished await ensureSeededOnce().
+ */
 @Injectable()
 export class ExampleProjectRepositoryService implements OnApplicationBootstrap {
   private readonly logger = new Logger(ExampleProjectRepositoryService.name);
@@ -64,12 +70,14 @@ export class ExampleProjectRepositoryService implements OnApplicationBootstrap {
     private readonly exampleRecordingsRefreshService: ExampleRecordingsRefreshService
   ) {}
 
-  async onApplicationBootstrap(): Promise<void> {
+  onApplicationBootstrap(): void {
     // Fire-and-forget: do NOT await. Seeding is decorative (creates the
     // example project on first launch) and must not block app.listen() or
     // request handling. Readiness is observable via getStartupSeedReadiness()
     // and the StartupReadinessController.
-    void this.scheduleStartupSeed();
+    // The catch matters: a seed failure is logged and recorded in the
+    // readiness, and an unhandled rejection would stop the Node process.
+    this.scheduleStartupSeed().catch(() => undefined);
   }
 
   /**
@@ -151,6 +159,12 @@ export class ExampleProjectRepositoryService implements OnApplicationBootstrap {
     }
   }
 
+  /**
+   * Seeds the example project when no project exists.
+   *
+   * @returns The number of projects visible afterwards.
+   * @throws When seeding fails or the project is still not visible.
+   */
   async buildExampleProject(): Promise<number> {
     this.logger.debug('Checking example project startup seed state');
     try {
