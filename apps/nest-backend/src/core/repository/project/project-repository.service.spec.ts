@@ -71,11 +71,26 @@ describe('ProjectRepositoryService', () => {
     expect(result).toMatchObject({ id: 9 });
   });
 
-  it('update() forwards the data to the repository update', async () => {
+  it('update() forwards the data and returns the updated project', async () => {
     const { service, repository } = build();
-    repository.update.mockResolvedValue({ affected: 1 });
-    await service.update(1, { projectName: 'new' } as never);
+    repository.update.mockResolvedValue({ affected: 1, raw: [] });
+    repository.findOne.mockResolvedValue({
+      id: 1,
+      projectSlug: 'demo',
+      projectName: 'new'
+    });
+    const result = await service.update(1, { projectName: 'new' } as never);
     expect(repository.update).toHaveBeenCalledWith(1, { projectName: 'new' });
+    expect(result).toMatchObject({ projectSlug: 'demo', projectName: 'new' });
+  });
+
+  it('update() throws NOT_FOUND when the project does not exist', async () => {
+    const { service, repository } = build();
+    repository.update.mockResolvedValue({ affected: 0, raw: [] });
+    repository.findOne.mockResolvedValue(null);
+    await expect(
+      service.update(1, { projectName: 'new' } as never)
+    ).rejects.toMatchObject({ status: 404 });
   });
 
   it('deleteBySlug() removes by slug', async () => {

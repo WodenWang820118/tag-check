@@ -9,6 +9,7 @@ import {
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
+/** Reads and writes projects (`ProjectEntity`). */
 @Injectable()
 export class ProjectRepositoryService {
   constructor(
@@ -16,6 +17,7 @@ export class ProjectRepositoryService {
     private readonly repository: Repository<ProjectEntity>
   ) {}
 
+  /** The project with this id, or an empty DTO when there is none. */
   async get(id: number) {
     const entity = await this.repository.findOne({ where: { id } });
     return plainToInstance(ProjectResponseDto, entity);
@@ -31,6 +33,7 @@ export class ProjectRepositoryService {
     return plainToInstance(ProjectResponseDto, entity);
   }
 
+  /** @throws HttpException 404 when no project has this slug. */
   async getEntityBySlug(slug: string) {
     const entity = await this.repository.findOne({
       where: { projectSlug: slug }
@@ -41,6 +44,7 @@ export class ProjectRepositoryService {
     return entity;
   }
 
+  /** The project with its authentication, browser and application settings. */
   async getSettingBySlug(slug: string) {
     const entity = await this.repository.findOne({
       relations: {
@@ -59,8 +63,19 @@ export class ProjectRepositoryService {
     return plainToInstance(ProjectResponseDto, entity);
   }
 
+  /**
+   * Updates the project's own columns.
+   *
+   * @returns The updated project. The settings page reads an empty body as
+   * a failed save.
+   * @throws HttpException 404 when no project has this id.
+   */
   async update(id: number, data: UpdateProjectDto) {
-    const entity = await this.repository.update(id, data);
+    await this.repository.update(id, data);
+    const entity = await this.repository.findOne({ where: { id } });
+    if (!entity) {
+      throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
+    }
     return plainToInstance(ProjectResponseDto, entity);
   }
 
