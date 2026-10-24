@@ -11,6 +11,10 @@ import { DataLayerValidationUtilsService } from './data-layer-validation-utils.s
 const ECOMMERCE_RESET_GUIDE =
   'https://developers.google.com/analytics/devguides/collection/ga4/ecommerce?client_type=gtm';
 
+/**
+ * Validates an ecommerce event like NonEcEventsValidationStrategy, and also
+ * fails it when no `{ ecommerce: null }` push came before it.
+ */
 @Injectable()
 export class EcommerceEventValidationStrategy implements ValidationStrategy {
   private readonly logger = new Logger(EcommerceEventValidationStrategy.name);

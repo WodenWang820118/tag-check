@@ -54,7 +54,7 @@ describe('SingleEventInspectionService recorder lifecycle', () => {
       expect.any(AbortSignal)
     );
     expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
-    expect(browser.close).toHaveBeenCalledTimes(1);
+    expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(browser, page, null);
   });
 
   it('starts a second run only after the first one has finished', async () => {
@@ -75,7 +75,7 @@ describe('SingleEventInspectionService recorder lifecycle', () => {
     finishFirst([{ passed: true }]);
     await Promise.all([first, second]);
     expect(puppeteerUtils.startBrowser).toHaveBeenCalledTimes(2);
-    expect(browser.close).toHaveBeenCalledTimes(2);
+    expect(puppeteerUtils.cleanup).toHaveBeenCalledTimes(2);
   });
 
   it('passes the recorder handle to cleanup on failure', async () => {
@@ -91,6 +91,45 @@ describe('SingleEventInspectionService recorder lifecycle', () => {
       page,
       recorder
     );
+  });
+
+  it('closes the browser when the recorder cannot start', async () => {
+    puppeteerUtils.startRecorder.mockRejectedValue(new Error('no ffmpeg'));
+
+    await expect(
+      service.inspectSingleEvent('project', 'event', createOptions())
+    ).rejects.toThrow(/no ffmpeg/);
+
+    expect(pipeline.singleEventInspectionRecipe).not.toHaveBeenCalled();
+    expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(browser, page, null);
+  });
+
+  it('closes the browser when the cookies cannot be set', async () => {
+    const options = createOptions();
+    options.url = 'not a url';
+    options.eventInspectionPresetDto.application.cookie.data = [
+      { key: 'consent', value: 'true' }
+    ];
+
+    await expect(
+      service.inspectSingleEvent('project', 'event', options)
+    ).rejects.toThrow(/invalid url/i);
+
+    expect(puppeteerUtils.startRecorder).not.toHaveBeenCalled();
+    expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(browser, page, null);
+  });
+
+  it('leaves a headful browser open when the recorder cannot start', async () => {
+    puppeteerUtils.startRecorder.mockRejectedValue(new Error('no ffmpeg'));
+    const options = createOptions();
+    options.headless = 'false';
+
+    await expect(
+      service.inspectSingleEvent('project', 'event', options)
+    ).rejects.toThrow(/no ffmpeg/);
+
+    expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(null);
+    expect(puppeteerUtils.cleanup).not.toHaveBeenCalled();
   });
 });
 

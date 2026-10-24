@@ -11,6 +11,10 @@ import { HoverStrategyService } from '../strategies/hover-strategies/hover-strat
 import { ActionUtilsService } from '../action-utils/action-utils.service';
 import { Step } from '@utils';
 
+/**
+ * Replays a hover step with the first of its selectors that works, each
+ * waited for in turn.
+ */
 @Injectable()
 export class HoverHandler implements ActionHandler {
   private readonly logger = new Logger(HoverHandler.name);

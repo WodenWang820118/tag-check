@@ -19,6 +19,7 @@ type TagImport =
   | { input: BuildEventInput }
   | { skipped: GtmImportSummary['skipped'][number] };
 
+/** Turns a GTM container export into a project's tests. */
 @Injectable()
 export class GtmParserService {
   private readonly logger = new Logger(GtmParserService.name);
@@ -66,6 +67,10 @@ export class GtmParserService {
     return { saved: true, ...result, skipped };
   }
 
+  /**
+   * A GA4 event tag with a literal, valid event name becomes a test input
+   * with its firing triggers; any other tag is skipped with the reason.
+   */
   private toTagImport(tag: TagConfig, container: GTMConfiguration): TagImport {
     if (tag.type !== TagTypeEnum.GAAWE) {
       return { skipped: { tagName: tag.name, reason: 'Not a GA4 event tag' } };

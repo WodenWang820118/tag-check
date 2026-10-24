@@ -1,6 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
+import { withTimeout } from '../with-timeout';
 
+/**
+ * Hovers with page.hover(). Resolves true once the mouse is over the
+ * element, false when it failed or timed out; it does not throw.
+ */
 @Injectable()
 export class PageHoverService {
   private readonly logger = new Logger(PageHoverService.name);
@@ -13,12 +18,7 @@ export class PageHoverService {
     timeout = 5000
   ): Promise<boolean> {
     try {
-      await Promise.race([
-        page.hover(selector),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Timeout exceeded')), timeout)
-        )
-      ]);
+      await withTimeout(page.hover(selector), timeout, 'Timeout exceeded');
       return true;
     } catch (error) {
       this.logger.error(

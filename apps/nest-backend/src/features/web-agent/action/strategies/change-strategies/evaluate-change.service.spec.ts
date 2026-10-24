@@ -36,13 +36,15 @@ describe('EvaluateChangeService', () => {
     const element = {
       evaluate: vi.fn().mockResolvedValue('select'),
       select: vi.fn().mockResolvedValue(undefined),
-      type: vi.fn()
+      type: vi.fn(),
+      dispose: vi.fn().mockResolvedValue(undefined)
     };
     ctx.actionUtilsService.getElement.mockResolvedValue(element);
     expect(
       await ctx.service.operate({} as never, 'p', 'e', 'sel', 'css', 'v', 50)
     ).toBe(true);
     expect(element.select).toHaveBeenCalledWith('v');
+    expect(element.dispose).toHaveBeenCalledTimes(1);
   });
 
   it('calls .type() on an INPUT element', async () => {
@@ -50,13 +52,15 @@ describe('EvaluateChangeService', () => {
     const element = {
       evaluate: vi.fn().mockResolvedValue('input'),
       type: vi.fn().mockResolvedValue(undefined),
-      select: vi.fn()
+      select: vi.fn(),
+      dispose: vi.fn().mockResolvedValue(undefined)
     };
     ctx.actionUtilsService.getElement.mockResolvedValue(element);
     expect(
       await ctx.service.operate({} as never, 'p', 'e', 'sel', 'css', 'v', 50)
     ).toBe(true);
     expect(element.type).toHaveBeenCalledWith('v');
+    expect(element.dispose).toHaveBeenCalledTimes(1);
   });
 
   it('returns false for unsupported element types', async () => {
@@ -64,7 +68,8 @@ describe('EvaluateChangeService', () => {
     const element = {
       evaluate: vi.fn().mockResolvedValue('div'),
       type: vi.fn(),
-      select: vi.fn()
+      select: vi.fn(),
+      dispose: vi.fn().mockResolvedValue(undefined)
     };
     ctx.actionUtilsService.getElement.mockResolvedValue(element);
     expect(

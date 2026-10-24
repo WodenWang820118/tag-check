@@ -8,16 +8,13 @@ import {
   Ga4CollectEvent,
   parseGa4CollectRequest
 } from './ga4-collect-request';
-import {
-  BehaviorSubject,
-  catchError,
-  first,
-  of,
-  ReplaySubject,
-  timeout,
-  TimeoutError
-} from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 
+/**
+ * One run's GA4 request capture. `rawRequest$` replays the matched request
+ * to late subscribers and completes on stop(). The caller must call stop(),
+ * which releases the CDP session and is safe to call twice.
+ */
 export interface RequestInterceptionHandle {
   rawRequest$: ReplaySubject<string>;
   stop(): Promise<void>;
@@ -32,10 +29,13 @@ interface RequestTap {
 /** Large enough for gtag.js batches, which carry one event per body line. */
 const MAX_POST_DATA_BYTES = 1024 * 1024;
 
+/**
+ * Captures the GA4 collect request a test expects while its recording
+ * replays, and snapshots the dataLayer at the moment it is sent.
+ */
 @Injectable()
 export class RequestInterceptorService {
   private readonly logger = new Logger(RequestInterceptorService.name);
-  private readonly rawRequest = new BehaviorSubject<string>('');
 
   constructor(
     private readonly dataLayerService: DataLayerService,
@@ -185,11 +185,19 @@ export class RequestInterceptorService {
     };
 
     session.on('Network.requestWillBeSent', onRequestWillBeSent);
-    await session.send('Network.enable', {
-      maxPostDataSize: MAX_POST_DATA_BYTES
-    });
-    await session.send('Network.setCacheDisabled', { cacheDisabled: true });
-    await session.send('Network.setBypassServiceWorker', { bypass: true });
+    try {
+      // In order: the other two Network commands need the domain enabled.
+      await session.send('Network.enable', {
+        maxPostDataSize: MAX_POST_DATA_BYTES
+      });
+      await session.send('Network.setCacheDisabled', { cacheDisabled: true });
+      await session.send('Network.setBypassServiceWorker', { bypass: true });
+    } catch (error) {
+      // The caller gets no handle to stop, so the session is released here.
+      session.off('Network.requestWillBeSent', onRequestWillBeSent);
+      await session.detach().catch(() => undefined);
+      throw error;
+    }
 
     return {
       stop: async () => {
@@ -208,12 +216,18 @@ export class RequestInterceptorService {
     };
   }
 
+  /**
+   * Merges the page's dataLayer as it is when the matched request is sent,
+   * before a navigation can replace it. Never throws.
+   */
   private async snapshotDataLayer(
     page: Page,
     projectSlug: string,
     eventId: string
   ): Promise<void> {
     try {
+      // Helper-free on purpose: swc compiles this function to ES5 for the
+      // page, which has none of the bundle's helpers (see AGENTS.md).
       const latestDataLayer = await page.evaluate(
         () => (globalThis as unknown as { dataLayer?: unknown[] }).dataLayer
       );
@@ -235,42 +249,12 @@ export class RequestInterceptorService {
       );
     }
   }
-
-  setRawRequest(request: string) {
-    this.rawRequest.next(request);
-  }
-
-  /**
-   * Returns an observable of the raw GA4 request URL captured by the interceptor.
-   * By default it waits (up to 15s) for a non-empty value (useful in production flows).
-   * Tests can pass a shorter timeout and/or disable the non-empty wait so they do not
-   * block for the full default timeout when asserting timeout behaviour or after a clear.
-   *
-   * @deprecated Use the handle returned by setupInterception instead.
-   */
-  getRawRequest(options?: { timeoutMs?: number; waitForNonEmpty?: boolean }) {
-    const { timeoutMs = 15000, waitForNonEmpty = true } = options || {};
-    return this.rawRequest.pipe(
-      timeout(timeoutMs),
-      // Only gate on non-empty if requested (mirrors previous semantics by default)
-      waitForNonEmpty ? first((request) => !!request) : first(),
-      catchError((error) => {
-        if (error instanceof TimeoutError) {
-          this.logger.warn('Timeout occurred while waiting for raw request');
-          return of('');
-        }
-        this.logger.error(`Error getting raw request: ${error}`);
-        return of('');
-      })
-    );
-  }
-
-  /** @deprecated Use the handle returned by setupInterception instead. */
-  clearRawRequest() {
-    this.rawRequest.next('');
-  }
 }
 
+/**
+ * The request body as text. CDP sends it as `postData`, or only as base64
+ * `postDataEntries` when the body is large or binary.
+ */
 function readPostData(request: {
   postData?: string;
   postDataEntries?: Protocol.Network.PostDataEntry[];
@@ -285,6 +269,7 @@ function readPostData(request: {
     .join('');
 }
 
+/** The warning logged when the run ends without a matching request. */
 function describeMissedCapture(
   eventName: string,
   measurementId: string,

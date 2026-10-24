@@ -247,6 +247,8 @@ export class RunRecorder {
         return;
       }
       if (!stdin.write(data)) {
+        // Sequential on purpose: frames must reach ffmpeg in order, and
+        // waiting for 'drain' keeps a slow encoder from buffering them all.
         await new Promise<void>((resolve) => {
           const done = () => {
             stdin.off('drain', done);

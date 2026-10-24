@@ -13,13 +13,7 @@ describe('ActionService', () => {
       executeStep: vi
         .fn()
         .mockImplementation(
-          async (
-            _page,
-            _step,
-            _projectSlug,
-            _eventId,
-            state: { isFirstNavigation: boolean }
-          ) => {
+          async ({ state }: { state: { isFirstNavigation: boolean } }) => {
             states.push(state);
             state.isFirstNavigation = false;
           }
@@ -64,16 +58,15 @@ describe('ActionService', () => {
         executeStep: vi
           .fn()
           .mockImplementation(
-            async (
-              _page,
-              step: { type: string },
-              _projectSlug,
-              _eventId,
-              _state,
-              isLastStep: boolean,
-              _application,
-              isLastClick: boolean
-            ) => {
+            async ({
+              step,
+              isLastStep,
+              isLastClick
+            }: {
+              step: { type: string };
+              isLastStep: boolean;
+              isLastClick: boolean;
+            }) => {
               executed.push({ type: step.type, isLastStep, isLastClick });
             }
           )

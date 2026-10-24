@@ -8,6 +8,7 @@ const services = [
   NonEcEventsValidationStrategy,
   DataLayerValidationUtilsService
 ];
+/** Provides the ecommerce and non-ecommerce validation strategies. */
 @Module({
   imports: [],
   providers: [...services],

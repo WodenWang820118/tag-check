@@ -3,6 +3,10 @@ import { StrictDataLayerEvent, BaseDataLayerEvent } from '@utils';
 import { ValidationResultDto } from '../../../shared/dto/validation-result.dto';
 import { DataLayerValidationUtilsService } from './data-layer-validation-utils.service';
 
+/**
+ * Validates the first push whose `event` equals the spec's event against the
+ * spec. Fails with "Event not found" when there is none.
+ */
 @Injectable()
 export class NonEcEventsValidationStrategy {
   private readonly logger = new Logger(this.constructor.name);

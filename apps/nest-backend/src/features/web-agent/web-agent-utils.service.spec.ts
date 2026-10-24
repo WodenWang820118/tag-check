@@ -114,8 +114,6 @@ function createServiceHarness(
       rawRequest$: of(''),
       stop: defaultStop
     }),
-    getRawRequest: vi.fn(),
-    clearRawRequest: vi.fn(),
     ...overrides.interceptor
   } as unknown as RequestInterceptorService;
 
@@ -182,7 +180,7 @@ describe('WebAgentUtilsService.performTest data layer', () => {
 });
 
 describe('WebAgentUtilsService.performTest request capture', () => {
-  it('uses the per-interception handle instead of the legacy rawRequest subject', async () => {
+  it('returns the request captured through the interception handle', async () => {
     const rawRequest =
       'https://www.google-analytics.com/g/collect?v=2&en=purchase&tid=G-TEST';
     const stop = vi.fn().mockResolvedValue(undefined);
@@ -198,8 +196,6 @@ describe('WebAgentUtilsService.performTest request capture', () => {
     const result = await performTest();
 
     expect(interceptor.setupInterception).toHaveBeenCalledTimes(1);
-    expect(interceptor.getRawRequest).not.toHaveBeenCalled();
-    expect(interceptor.clearRawRequest).not.toHaveBeenCalled();
     expect(stop).toHaveBeenCalledTimes(1);
     expect(result.eventRequest).toBe(rawRequest);
   });
@@ -250,38 +246,30 @@ describe('WebAgentUtilsService.performTest request capture', () => {
 
   it('returns an empty request when the interception handle completes without a request', async () => {
     const stop = vi.fn().mockResolvedValue(undefined);
-    const { interceptor, performTest } = createServiceHarness({
+    const { performTest } = createServiceHarness({
       interceptor: {
         setupInterception: vi.fn().mockResolvedValue({
           rawRequest$: EMPTY,
           stop
-        }),
-        getRawRequest: vi.fn(() => of('legacy-stale-request')),
-        clearRawRequest: vi.fn()
+        })
       }
     });
 
     const result = await performTest({ requestCaptureTimeoutMs: 10 });
 
     expect(result.eventRequest).toBe('');
-    expect(interceptor.getRawRequest).not.toHaveBeenCalled();
-    expect(interceptor.clearRawRequest).not.toHaveBeenCalled();
     expect(stop).toHaveBeenCalledTimes(1);
   });
 
-  it('requires an interception handle instead of falling back to legacy raw request state', async () => {
-    const { interceptor, performTest } = createServiceHarness({
+  it('rejects when interception set-up returns no handle', async () => {
+    const { performTest } = createServiceHarness({
       interceptor: {
-        setupInterception: vi.fn().mockResolvedValue(null),
-        getRawRequest: vi.fn(() => of('legacy-stale-request')),
-        clearRawRequest: vi.fn()
+        setupInterception: vi.fn().mockResolvedValue(null)
       }
     });
 
     await expect(performTest({ requestCaptureTimeoutMs: 10 })).rejects.toThrow(
       /Request interception handle is required/
     );
-    expect(interceptor.getRawRequest).not.toHaveBeenCalled();
-    expect(interceptor.clearRawRequest).not.toHaveBeenCalled();
   });
 });

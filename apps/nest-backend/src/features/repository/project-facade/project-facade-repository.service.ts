@@ -18,6 +18,10 @@ import {
   ProjectSetting
 } from '@utils';
 
+/**
+ * Creates a project with its default settings and updates its settings and
+ * specs, across their repositories.
+ */
 @Injectable()
 export class ProjectFacadeRepositoryService {
   private readonly logger = new Logger(ProjectFacadeRepositoryService.name);
@@ -29,6 +33,11 @@ export class ProjectFacadeRepositoryService {
     private readonly specRepositoryService: SpecRepositoryService
   ) {}
 
+  /**
+   * Creates the project and its application, authentication and browser
+   * settings with empty defaults (headless browser, no GTM preview). Returns
+   * the created project.
+   */
   async createProject(project: CreateProjectDto) {
     const projectDto = await this.projectRepositoryService.create(project);
     const projectEntity = await this.projectRepositoryService.getEntityBySlug(

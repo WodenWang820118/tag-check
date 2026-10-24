@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { ClickOperation } from './utils';
+import { withTimeout } from '../with-timeout';
 
+/** Clicks with page.click(): a real mouse click at the element's position. */
 @Injectable()
 export class PageClickService implements ClickOperation {
   private readonly logger = new Logger(PageClickService.name);
@@ -14,15 +16,11 @@ export class PageClickService implements ClickOperation {
     timeout = 5000
   ): Promise<boolean> {
     try {
-      await Promise.race([
+      await withTimeout(
         page.click(selector, { delay: 100 }),
-        new Promise((_, reject) =>
-          setTimeout(
-            () => reject(new Error('Timeout exceeded Page Clicking')),
-            timeout
-          )
-        )
-      ]);
+        timeout,
+        'Timeout exceeded Page Clicking'
+      );
       return true;
     } catch (error) {
       this.logger.error(

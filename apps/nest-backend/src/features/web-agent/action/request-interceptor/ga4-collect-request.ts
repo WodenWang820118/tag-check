@@ -22,7 +22,7 @@
 /** Matches the GA4 collection path on any host, for CDP `Fetch` patterns. */
 export const GA4_COLLECT_URL_PATTERN = '*/g/collect*';
 
-const GA4_COLLECT_PATH = /\/g\/collect$/;
+const GA4_COLLECT_PATH = '/g/collect';
 const GA4_PROTOCOL_VERSION = '2';
 
 export interface Ga4CollectEvent {
@@ -42,6 +42,11 @@ export interface Ga4CollectEvent {
   normalizedUrl: string;
 }
 
+/**
+ * Splits one collect request into its events, in the order sent. Returns an
+ * empty array for a URL that is not a GA4 (`v=2`) collect endpoint. Never
+ * throws.
+ */
 export function parseGa4CollectRequest(
   url: string,
   body = ''
@@ -78,7 +83,7 @@ export function parseGa4CollectRequest(
 
 function isGa4CollectEndpoint(url: URL): boolean {
   return (
-    GA4_COLLECT_PATH.test(url.pathname) &&
+    url.pathname.endsWith(GA4_COLLECT_PATH) &&
     url.searchParams.get('v') === GA4_PROTOCOL_VERSION
   );
 }

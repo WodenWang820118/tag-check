@@ -32,6 +32,11 @@ export const DATA_LAYER_SNAPSHOT_SCRIPT = `(function () {
   return copy;
 })()`;
 
+/**
+ * Keeps the dataLayer a run captured in `<eventName> - myDataLayer.json` in
+ * the event's report folder. Snapshots taken during the replay are merged
+ * into the file, so a push survives the page navigating away.
+ */
 @Injectable()
 export class DataLayerService {
   private readonly logger = new Logger(DataLayerService.name);
@@ -41,6 +46,7 @@ export class DataLayerService {
     private readonly filePathService: FilePathService
   ) {}
 
+  /** Starts the run's captured dataLayer empty. */
   async initSelfDataLayer(projectName: string, eventId: string) {
     const resultFolder =
       await this.folderPathService.getReportSavingFolderPath(projectName);
@@ -53,8 +59,15 @@ export class DataLayerService {
     this.fileService.writeJsonFile(filePath, []);
   }
 
+  /**
+   * Waits up to 5 s for the page to have a non-empty dataLayer, then merges
+   * a snapshot of it into the file. Never throws: a page without a dataLayer
+   * is logged and skipped.
+   */
   async updateSelfDataLayer(page: Page, projectName: string, eventId: string) {
     try {
+      // Helper-free on purpose: swc compiles this function to ES5 for the
+      // page, which has none of the bundle's helpers (see AGENTS.md).
       await page.waitForFunction(
         () => {
           const g = globalThis as unknown as { dataLayer?: unknown[] };
@@ -76,6 +89,11 @@ export class DataLayerService {
     }
   }
 
+  /**
+   * Merges `dataLayer` into the file: a push replaces the stored push with
+   * the same `event` value (pushes without one count as the same), and any
+   * other push is appended.
+   */
   async updateSelfDataLayerAlgorithm(
     dataLayer: unknown[],
     projectName: string,
@@ -121,6 +139,7 @@ export class DataLayerService {
     this.fileService.writeJsonFile(myDataLayerFile, myDataLayer);
   }
 
+  /** Returns the run's captured dataLayer, or [] when there is none. */
   async getMyDataLayer(projectSlug: string, eventId: string) {
     const myDataLayerFile = await this.filePathService.getMyDataLayerFilePath(
       projectSlug,

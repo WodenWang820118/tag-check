@@ -16,6 +16,7 @@ const strategyModules = [
   HoverStrategyModule
 ];
 
+/** Provides the click, change and hover step handlers. */
 @Module({
   // Data access through OsModule, the features' data-access layer.
   imports: [OsModule, ActionUtilsModule, ...strategyModules],
