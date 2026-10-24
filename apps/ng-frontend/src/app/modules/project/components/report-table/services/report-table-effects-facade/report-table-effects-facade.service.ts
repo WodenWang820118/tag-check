@@ -20,6 +20,11 @@ export interface ReportTableEffectsInitOptions {
   getProjectSlug: () => string;
 }
 
+/**
+ * The tests table's effects. The toolbar asks for a bookmark save or a
+ * delete through ProjectDataSourceService's signals; these effects carry
+ * them out, and keep the filters applied to the current data source.
+ */
 @Injectable({ providedIn: 'root' })
 export class ReportTableEffectsFacadeService {
   private initialized = false;
@@ -35,8 +40,14 @@ export class ReportTableEffectsFacadeService {
   );
 
   //#region Initialize & effects
+  /**
+   * Starts the effects, reading the status filter and the project from
+   * ReportTableFacadeService, which owns them (passed as callbacks because
+   * that facade injects this one). Must run in an injection context; only
+   * the first call counts, as both services live as long as the app.
+   */
   initialize(opts: ReportTableEffectsInitOptions) {
-    if (this.initialized) return; // idempotent
+    if (this.initialized) return;
     this.initialized = true;
     this.getStatus = opts.getStatus;
     this.getProjectSlug = opts.getProjectSlug;

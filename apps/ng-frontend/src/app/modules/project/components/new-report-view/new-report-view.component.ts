@@ -20,6 +20,10 @@ import {
   EditorThemeStyles
 } from '../../../../shared/services/editor/editor.service';
 
+/**
+ * The "Create a test manually" tab: a spec editor and a recording
+ * editor; a Chrome recording can also be uploaded.
+ */
 @Component({
   selector: 'app-new-report-view',
   standalone: true,

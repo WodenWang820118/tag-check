@@ -25,6 +25,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApplicationSetting, ProjectSetting } from '@utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+/**
+ * Settings > Google Tag Manager: the GTM Preview URL, accompanied mode,
+ * which needs that URL, and the request check, which needs a
+ * measurement ID.
+ */
 @Component({
   selector: 'app-gtm-form',
   standalone: true,

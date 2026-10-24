@@ -13,6 +13,10 @@ export type UploadState =
   | { status: 'done'; summary: GtmImportSummary }
   | { status: 'error'; message: string };
 
+/**
+ * The "Import GTM JSON" tab: uploads a container export, which creates
+ * or updates the project's tests, then reloads the tests table.
+ */
 @Injectable({
   providedIn: 'root'
 })

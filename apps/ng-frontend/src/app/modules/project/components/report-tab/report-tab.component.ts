@@ -52,6 +52,7 @@ function buildReportTabViewModel(
   };
 }
 
+/** A test's Latest result tab, built from the report page's route context. */
 @Component({
   selector: 'app-report-tab',
   standalone: true,

@@ -16,6 +16,11 @@ import {
   toReportFilter
 } from './report-filter';
 
+/**
+ * The tests table's state and actions: builds the rows from the route's
+ * data, keeps the status filter and, per project, the page size, and
+ * runs a test.
+ */
 @Injectable({ providedIn: 'root' })
 export class ReportTableFacadeService {
   private readonly projectDataSourceService = inject(ProjectDataSourceService);

@@ -17,6 +17,10 @@ import { ProjectDataSourceService } from '../../../../shared/services/data-sourc
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 import { LoggerService } from '../../../../shared/services/logger/logger.service'; // Create this service
 
+/**
+ * The "Create a test manually" tab: validates the spec and recording
+ * editors and creates the test from them.
+ */
 @Injectable({
   providedIn: 'root'
 })

@@ -35,6 +35,10 @@ export function toEditableValue(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value);
 }
 
+/**
+ * Settings > Pre-loading values: the localStorage items and cookies set
+ * on the site before each run.
+ */
 @Component({
   selector: 'app-application-form',
   standalone: true,

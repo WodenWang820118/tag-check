@@ -4,6 +4,7 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, EMPTY, throwError } from 'rxjs';
 import { catchHttpError } from '../http-error.utils';
 
+/** Exports, imports and deletes whole projects. */
 @Injectable({
   providedIn: 'root'
 })

@@ -5,6 +5,11 @@ import { IReportDetails } from '@utils';
 import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
 import { VideosService } from '../../../../shared/services/api/videos/videos.service';
 
+/**
+ * Actions of a test's Latest result tab: copy the event name, and export
+ * the spreadsheet, the recording or both. Each says how it went in a
+ * snackbar.
+ */
 @Injectable()
 export class ReportTabFacade {
   private readonly snackBar = inject(MatSnackBar);

@@ -15,6 +15,10 @@ import { environment } from '../../../../../environments/environment';
 import { catchHttpError, rethrowHttpError } from '../http-error.utils';
 import { API_OPERATION_CONTEXT } from '../api-request-id.interceptor';
 
+/**
+ * The tests API (test events): list, create, update and delete tests, and
+ * load a test's latest result.
+ */
 @Injectable({
   providedIn: 'root'
 })

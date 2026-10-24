@@ -14,6 +14,7 @@ import {
 } from '../information-dialog/information-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 
+/** Settings > Export or delete: exports the project to a file or deletes it. */
 @Component({
   selector: 'app-project-io-form',
   standalone: true,

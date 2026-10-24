@@ -18,6 +18,10 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
 // run buttons, so the menu slides over the content instead.
 const WIDE_LAYOUT_QUERY = '(min-width: 1280px)';
 
+/**
+ * A project's frame: the toolbar with the project switcher, the side
+ * menu and the routed page.
+ */
 @Component({
   selector: 'app-project-view',
   standalone: true,

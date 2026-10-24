@@ -15,6 +15,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Ga4UploadFacadeService } from './ga4-upload-facade.service';
 import { take } from 'rxjs';
 
+/** The "Import GA4 events" tab; Ga4UploadFacadeService parses and saves. */
 @Component({
   selector: 'app-ga4-upload',
   standalone: true,

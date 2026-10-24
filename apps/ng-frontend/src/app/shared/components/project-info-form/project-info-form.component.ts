@@ -16,6 +16,10 @@ import { ActivatedRoute } from '@angular/router';
 import { Project, ProjectSetting } from '@utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+/**
+ * Settings > Project information: the project's name, description and
+ * measurement ID.
+ */
 @Component({
   selector: 'app-project-info-form',
   imports: [

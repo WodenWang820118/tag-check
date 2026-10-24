@@ -22,6 +22,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import slug from 'slug';
 
+/**
+ * The new project form: suggests a slug from the project name, creates
+ * the project once a root project path is configured, then opens it.
+ */
 @Injectable({
   providedIn: 'root'
 })

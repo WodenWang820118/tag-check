@@ -19,6 +19,10 @@ import { ReportTableDataSourceModelService } from '../../services/report-table-d
 import { ReportTableFacadeService } from '../report-table/report-table-facade.service';
 import { BatchRunService } from '../../services/batch-run/batch-run.service';
 
+/**
+ * The tests table's toolbar: add tests, run the selected ones as a
+ * batch, delete, stop the running test, search and bookmark.
+ */
 @Component({
   selector: 'app-report-table-toolbar',
   standalone: true,

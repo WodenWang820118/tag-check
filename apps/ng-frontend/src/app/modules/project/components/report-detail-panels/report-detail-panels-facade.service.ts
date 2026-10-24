@@ -8,6 +8,10 @@ import {
 import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { ItemDefService } from '../../../../shared/services/api/item-def/item-def.service';
 
+/**
+ * The report panels' access to the spec, recording and item definition
+ * APIs, provided per panel group.
+ */
 @Injectable()
 export class ReportDetailPanelsFacadeService {
   constructor(

@@ -21,6 +21,11 @@ import {
 import { ProgressUpdateService } from '../../../../shared/services/progress-update/progress-update.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+/**
+ * The running test's progress: a pie with one slice per recording step.
+ * A spinner shows while the browser starts, and from the last step until
+ * the run's result arrives and the row removes this component.
+ */
 @Component({
   selector: 'app-progress-pie-chart',
   imports: [MatProgressSpinnerModule],

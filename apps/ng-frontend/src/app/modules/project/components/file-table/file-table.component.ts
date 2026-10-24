@@ -22,6 +22,10 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
 
+/**
+ * The Reports page's table: one row per run with its status, sortable
+ * and paged, selected rows being what the toolbar acts on.
+ */
 @Component({
   selector: 'app-file-table',
   standalone: true,

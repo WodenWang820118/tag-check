@@ -1,5 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 
+/**
+ * Which side sheet of the Tests page is open, "Add tests" or the import
+ * sheet, shared by the toolbar, the sheets and their tabs.
+ */
 @Injectable({
   providedIn: 'root'
 })

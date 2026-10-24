@@ -25,6 +25,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BrowserSetting, ProjectSetting } from '@utils';
 
+/** Settings > Browser settings: headless mode and the browser arguments. */
 @Component({
   selector: 'app-browser-form',
   standalone: true,

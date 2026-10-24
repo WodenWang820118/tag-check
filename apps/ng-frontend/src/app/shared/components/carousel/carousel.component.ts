@@ -14,6 +14,10 @@ import { MediaPreviewDialogComponent } from '../media-preview-dialog/media-previ
 /** A carousel item with the blob it shows, for previews and downloads. */
 type MediaItem = CarouselItem & { blob: Blob; testId: string };
 
+/**
+ * The run's screenshot and recordings, one at a time; a click opens a
+ * preview. The object URLs it makes are revoked when it is destroyed.
+ */
 @Component({
   selector: 'app-carousel',
   standalone: true,

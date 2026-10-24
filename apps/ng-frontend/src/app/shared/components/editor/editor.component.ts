@@ -16,6 +16,7 @@ import {
   EditorThemeStyles
 } from '../../services/editor/editor.service';
 
+/** A CodeMirror JSON editor, one of EditorService's editors. */
 @Component({
   selector: 'app-editor',
   standalone: true,

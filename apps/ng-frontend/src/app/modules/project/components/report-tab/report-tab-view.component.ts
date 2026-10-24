@@ -19,6 +19,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel.component';
 import { ReportTabViewModel, STATUS_BADGES } from '../report-detail.contracts';
 
+/**
+ * The Latest result tab as shown: status, last run, export menu, panels
+ * and media. It only displays the view model and emits the actions.
+ */
 @Component({
   selector: 'app-report-tab-view',
   standalone: true,

@@ -23,6 +23,11 @@ const STARTUP_SEED_READINESS_RETRY_DELAY_MS = 1000;
 const STARTUP_PROJECT_LIST_MAX_ATTEMPTS = 10;
 const STARTUP_PROJECT_LIST_RETRY_DELAY_MS = 300;
 
+/**
+ * The projects API. On startup the project list waits until the backend
+ * has seeded the example project, so the home page does not show an
+ * empty list first.
+ */
 @Injectable({
   providedIn: 'root'
 })

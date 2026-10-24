@@ -23,6 +23,7 @@ import {
 import { ProjectIoService } from '../../../../shared/services/api/project-io/project-io.service';
 import { MetadataSourceService } from '../../../../shared/services/data-source/metadata-source.service';
 
+/** A project's card on the home page, to open or delete the project. */
 @Component({
   selector: 'app-project-item',
   standalone: true,
