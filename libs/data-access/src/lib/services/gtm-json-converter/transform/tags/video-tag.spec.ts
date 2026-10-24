@@ -244,7 +244,8 @@ describe('VideoTag', () => {
           {
             type: 'TEMPLATE',
             key: 'html',
-            value: '<script src="https://www.youtube.com/iframe_api">\n'
+            value:
+              '<script src="https://www.youtube.com/iframe_api"></script>\n'
           },
           { type: 'BOOLEAN', key: 'supportDocumentWrite', value: 'false' }
         ],
