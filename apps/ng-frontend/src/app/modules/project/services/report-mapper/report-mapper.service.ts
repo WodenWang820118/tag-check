@@ -30,6 +30,8 @@ export class ReportMapperService {
         passed: e.passed ?? d?.passed ?? false,
         requestPassed: e.requestPassed ?? d?.requestPassed ?? false,
         hasRecording: e.hasRecording ?? false,
+        // Null once every run is deleted; the row's status needs it.
+        lastRunAt: e.lastRunAt,
         rawRequest: d?.rawRequest,
         destinationUrl: d?.destinationUrl ?? '',
         dataLayer: d?.dataLayer,
