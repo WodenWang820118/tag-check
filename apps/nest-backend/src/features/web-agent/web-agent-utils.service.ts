@@ -216,10 +216,6 @@ export class WebAgentUtilsService {
     requestInterception: RequestInterceptionHandle,
     timeoutMs = 15000
   ): Promise<string> {
-    if (!requestInterception) {
-      throw new Error('Request interception handle is required');
-    }
-
     const eventRequest = await firstValueFrom(
       requestInterception.rawRequest$.pipe(
         timeout(timeoutMs),

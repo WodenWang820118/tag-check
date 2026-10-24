@@ -8,15 +8,7 @@ import {
   Ga4CollectEvent,
   parseGa4CollectRequest
 } from './ga4-collect-request';
-import {
-  BehaviorSubject,
-  catchError,
-  first,
-  of,
-  ReplaySubject,
-  timeout,
-  TimeoutError
-} from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 
 export interface RequestInterceptionHandle {
   rawRequest$: ReplaySubject<string>;
@@ -35,7 +27,6 @@ const MAX_POST_DATA_BYTES = 1024 * 1024;
 @Injectable()
 export class RequestInterceptorService {
   private readonly logger = new Logger(RequestInterceptorService.name);
-  private readonly rawRequest = new BehaviorSubject<string>('');
 
   constructor(
     private readonly dataLayerService: DataLayerService,
@@ -234,40 +225,6 @@ export class RequestInterceptorService {
         `"${eventName}" can never match a GA4 request: event names ${issues.join(' and ')} (https://support.google.com/analytics/answer/13316687)`
       );
     }
-  }
-
-  setRawRequest(request: string) {
-    this.rawRequest.next(request);
-  }
-
-  /**
-   * Returns an observable of the raw GA4 request URL captured by the interceptor.
-   * By default it waits (up to 15s) for a non-empty value (useful in production flows).
-   * Tests can pass a shorter timeout and/or disable the non-empty wait so they do not
-   * block for the full default timeout when asserting timeout behaviour or after a clear.
-   *
-   * @deprecated Use the handle returned by setupInterception instead.
-   */
-  getRawRequest(options?: { timeoutMs?: number; waitForNonEmpty?: boolean }) {
-    const { timeoutMs = 15000, waitForNonEmpty = true } = options || {};
-    return this.rawRequest.pipe(
-      timeout(timeoutMs),
-      // Only gate on non-empty if requested (mirrors previous semantics by default)
-      waitForNonEmpty ? first((request) => !!request) : first(),
-      catchError((error) => {
-        if (error instanceof TimeoutError) {
-          this.logger.warn('Timeout occurred while waiting for raw request');
-          return of('');
-        }
-        this.logger.error(`Error getting raw request: ${error}`);
-        return of('');
-      })
-    );
-  }
-
-  /** @deprecated Use the handle returned by setupInterception instead. */
-  clearRawRequest() {
-    this.rawRequest.next('');
   }
 }
 

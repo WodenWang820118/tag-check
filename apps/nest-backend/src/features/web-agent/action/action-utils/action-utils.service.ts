@@ -27,10 +27,6 @@ export class ActionUtilsService {
     }
   }
 
-  async sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
   async getElement(
     page: Page,
     selectorType: string,
@@ -129,24 +125,5 @@ export class ActionUtilsService {
     }
     await jsHandle.dispose();
     return null;
-  }
-
-  isElementHandle(obj: unknown): obj is ElementHandle<Element> {
-    const candidate = obj as Partial<Record<'click' | 'focus', unknown>> | null;
-    return (
-      !!candidate &&
-      typeof candidate.click === 'function' &&
-      typeof candidate.focus === 'function'
-    );
-  }
-
-  queryShadowDom(selector: string, shadowHostSelector: string) {
-    const shadowHost = document.querySelector(shadowHostSelector);
-    if (!shadowHost) return null;
-
-    const shadowRoot = shadowHost.shadowRoot;
-    if (!shadowRoot) return null;
-
-    return shadowRoot.querySelector(selector);
   }
 }

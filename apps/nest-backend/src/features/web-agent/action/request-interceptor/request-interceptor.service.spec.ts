@@ -24,30 +24,6 @@ describe('RequestInterceptorService', () => {
     );
   });
 
-  it('getRawRequest should time out and return empty string when no request is set', async () => {
-    const raw$ = service.getRawRequest({ timeoutMs: 50 });
-    // firstValueFrom will resolve to '' after timeout inside the operator
-    const val = await firstValueFrom(raw$);
-    expect(val).toBe('');
-  });
-
-  it('setRawRequest and getRawRequest should return the value when set', async () => {
-    const valToSet =
-      'https://www.google-analytics.com/g/collect?v=2&en=test&tid=G-123';
-    // subscribe to the raw request and ensure we get the new value
-    const p = firstValueFrom(service.getRawRequest({ timeoutMs: 500 }));
-    service.setRawRequest(valToSet);
-    const val = await p;
-    expect(val).toBe(valToSet);
-
-    // clear it and ensure subsequent get returns '' (via timeout)
-    service.clearRawRequest();
-    const afterClear = await firstValueFrom(
-      service.getRawRequest({ timeoutMs: 50 })
-    );
-    expect(afterClear).toBe('');
-  });
-
   it('captures through the page Fetch domain and releases every paused request', async () => {
     const fetchSession = createMockCdpSession();
     const page = createMockPage(fetchSession);

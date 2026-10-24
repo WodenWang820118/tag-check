@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Ga4CollectEvent, parseGa4CollectRequest } from './ga4-collect-request';
+import { Ga4CollectEvent } from './ga4-collect-request';
 
 /**
  * Picks the GA4 event a test expects out of the events in a collect request.
@@ -10,6 +10,11 @@ import { Ga4CollectEvent, parseGa4CollectRequest } from './ga4-collect-request';
  */
 @Injectable()
 export class Ga4RequestMatcher {
+  /**
+   * Returns the first event named `eventName` and sent to `measurementId`,
+   * or null. Surrounding whitespace in the expected values is ignored, and
+   * measurement IDs are compared without regard to case.
+   */
   findMatchingEvent(
     events: readonly Ga4CollectEvent[],
     eventName: string,
@@ -25,21 +30,6 @@ export class Ga4RequestMatcher {
             normalizeMeasurementId(event.measurementId) ===
               expectedMeasurementId)
       ) ?? null
-    );
-  }
-
-  isMatchingGa4Request(
-    url: string,
-    postData: string,
-    eventName: string,
-    measurementId: string
-  ): boolean {
-    return (
-      this.findMatchingEvent(
-        parseGa4CollectRequest(url, postData),
-        eventName,
-        measurementId
-      ) !== null
     );
   }
 }
