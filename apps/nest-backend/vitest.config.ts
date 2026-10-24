@@ -1,6 +1,6 @@
 import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 const verboseTestLogs = process.env['TEST_LOGS'] === '1';
 const isCi = process.env['CI'] === 'true';
@@ -34,7 +34,7 @@ export default defineConfig({
     target: 'es2020'
   },
   plugins: [
-    nxViteTsPaths(),
+    tsconfigPaths(),
     swc.vite({
       module: { type: 'es6' }
     })

@@ -1,10 +1,10 @@
 import { defineConfig } from 'vitest/config';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
-  root: __dirname,
+  root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/apps/ng-gtm-sample-seo',
-  plugins: [nxViteTsPaths()],
+  plugins: [tsconfigPaths()],
   test: {
     name: 'ng-gtm-sample-seo',
     watch: false,
