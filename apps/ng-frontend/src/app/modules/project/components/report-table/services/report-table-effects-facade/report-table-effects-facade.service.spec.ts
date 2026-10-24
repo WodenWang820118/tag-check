@@ -1,8 +1,10 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
-import { REPORT_LIST_ITEM_SAMPLE } from '@utils';
+import { IReportDetails, REPORT_LIST_ITEM_SAMPLE } from '@utils';
+import { StatusFilter } from '../../report-filter';
 import { ProjectDataSourceService } from '../../../../../../shared/services/data-source/project-data-source.service';
 import { ReportService } from '../../../../../../shared/services/api/report/report.service';
 import { ReportTableDataSourceModelService } from '../../../../services/report-table-data-source-model/report-table-data-source-model.service';
@@ -145,5 +147,57 @@ describe('navigation bookmarks', () => {
     expect(newProjectRows[0].stopNavigation).toBe(false);
     // The pending state is cleared
     expect(state.getPreventNavigationSignal()).toBe(false);
+  });
+});
+
+describe('status filter', () => {
+  it('filters on the status the row shows, including tests whose runs were deleted', () => {
+    const status = signal<StatusFilter>('all');
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ReportService, useValue: {} },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: MatSnackBar, useValue: { open: vi.fn() } }
+      ]
+    });
+    const model = TestBed.inject(ReportTableDataSourceModelService);
+    // GET /reports/:projectSlug: a test whose every run was deleted still has
+    // updatedAt after createdAt, but lastRunAt is null.
+    const rows: IReportDetails[] = JSON.parse(
+      JSON.stringify([
+        { ...REPORT_LIST_ITEM_SAMPLE, eventId: 'ran', eventName: 'ran' },
+        {
+          ...REPORT_LIST_ITEM_SAMPLE,
+          eventId: 'deleted-runs',
+          eventName: 'deleted_runs',
+          passed: false,
+          requestPassed: false,
+          lastRunAt: null
+        }
+      ])
+    );
+    model.dataSource().data = rows;
+    TestBed.runInInjectionContext(() =>
+      TestBed.inject(ReportTableEffectsFacadeService).initialize({
+        getStatus: () => status(),
+        getProjectSlug: () => 'demo'
+      })
+    );
+
+    status.set('notRun');
+    TestBed.tick();
+    expect(model.dataSource().filteredData.map((row) => row.eventId)).toEqual([
+      'deleted-runs'
+    ]);
+
+    status.set('failed');
+    TestBed.tick();
+    expect(model.dataSource().filteredData).toEqual([]);
+
+    status.set('passed');
+    TestBed.tick();
+    expect(model.dataSource().filteredData.map((row) => row.eventId)).toEqual([
+      'ran'
+    ]);
   });
 });

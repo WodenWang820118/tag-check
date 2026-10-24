@@ -9,7 +9,11 @@ import { MatSort } from '@angular/material/sort';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
 import { ReportTableSelectionFacadeService } from './services/report-table-selection-facade/report-table-selection-facade.service';
 import { ReportTableEffectsFacadeService } from './services/report-table-effects-facade/report-table-effects-facade.service';
-import { getRunStatus } from '../report-detail.contracts';
+import {
+  reportFilterPredicate,
+  StatusFilter,
+  toReportFilter
+} from './report-filter';
 
 @Injectable({ providedIn: 'root' })
 export class ReportTableFacadeService {
@@ -38,10 +42,7 @@ export class ReportTableFacadeService {
   readonly projectSlug$ = this.projectSlug.asReadonly();
   private readonly hasRecordingMap: Map<string, boolean> = new Map();
   private paginatorPageSubscription: Subscription | null = null;
-  // Status filter: all | notRun | failed | partial | passed
-  readonly statusFilter = signal<
-    'all' | 'notRun' | 'failed' | 'partial' | 'passed'
-  >('all');
+  readonly statusFilter = signal<StatusFilter>('all');
 
   constructor() {
     this.effectsFacade.initialize({
@@ -85,11 +86,11 @@ export class ReportTableFacadeService {
       dataSource.paginator = paginator;
       dataSource.sort = sort;
       // Initialize filter predicate and filter value using current signals
-      dataSource.filterPredicate = this.createFilterPredicate();
-      dataSource.filter = JSON.stringify({
-        text: this.projectDataSourceService.getFilterSignal(),
-        status: this.statusFilter()
-      });
+      dataSource.filterPredicate = reportFilterPredicate;
+      dataSource.filter = toReportFilter(
+        this.projectDataSourceService.getFilterSignal(),
+        this.statusFilter()
+      );
       this.reportTableDataSourceModelService.dataSource.set(dataSource);
       this.projectSlug.set(data['projectSlug'] as string);
 
@@ -161,31 +162,6 @@ export class ReportTableFacadeService {
   }
   //#endregion
 
-  //#region Filtering
-  private createFilterPredicate() {
-    return (row: IReportDetails, filterStr: string) => {
-      let parsed: { text?: string; status?: string } = {};
-      try {
-        parsed = JSON.parse(filterStr || '{}');
-      } catch {
-        parsed = { text: filterStr || '' };
-      }
-      const t = (parsed.text || '').toLowerCase();
-      const s = (parsed.status || 'all') as ReturnType<
-        typeof this.statusFilter
-      >;
-
-      const haystack =
-        `${row.testName ?? ''} ${row.eventName ?? ''}`.toLowerCase();
-      const textMatch = !t || haystack.includes(t);
-
-      const statusMatch = s === 'all' || s === getRunStatus(row);
-
-      return textMatch && statusMatch;
-    };
-  }
-  //#endregion
-
   //#region Actions
   /** Triggers a test run for the given event in the current project. */
   runTest(eventId: string) {
@@ -229,7 +205,7 @@ export class ReportTableFacadeService {
 
   // Status filter API for component
   /** Applies the given status filter to narrow the visible report rows. */
-  setStatusFilter(status: 'all' | 'notRun' | 'failed' | 'partial' | 'passed') {
+  setStatusFilter(status: StatusFilter) {
     this.statusFilter.set(status);
   }
 

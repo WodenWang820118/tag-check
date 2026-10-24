@@ -8,19 +8,22 @@ import { ReportService } from '../../../../../../shared/services/api/report/repo
 import { InformationDialogComponent } from '../../../../../../shared/components/information-dialog/information-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ReportTableDataSourceModelService } from '../../../../services/report-table-data-source-model/report-table-data-source-model.service';
-
-type Status = 'all' | 'notRun' | 'failed' | 'partial' | 'passed';
+import {
+  reportFilterPredicate,
+  StatusFilter,
+  toReportFilter
+} from '../../report-filter';
 
 export interface ReportTableEffectsInitOptions {
-  getStatus: () => Status;
+  getStatus: () => StatusFilter;
   getProjectSlug: () => string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class ReportTableEffectsFacadeService {
   private initialized = false;
-  private getStatus!: () => Status;
-  private getProjectSlug!: () => string;
+  private getStatus: () => StatusFilter = () => 'all';
+  private getProjectSlug: () => string = () => '';
 
   private readonly projectDataSourceService = inject(ProjectDataSourceService);
   private readonly dialog = inject(MatDialog);
@@ -37,46 +40,15 @@ export class ReportTableEffectsFacadeService {
     this.getStatus = opts.getStatus;
     this.getProjectSlug = opts.getProjectSlug;
 
-    // Effect 1: Combine text filter and status filter into one dataSource.filter string
+    // Effect 1: apply the text and status filter to the current data source.
+    // A run or a delete replaces the data source, so the predicate is set
+    // again on each one.
     effect(() => {
       const text = this.projectDataSourceService.getFilterSignal();
       const status = this.getStatus();
       const ds = this.reportTableDataSourceModelService.dataSource();
-      if (ds) {
-        // Ensure custom filter predicate is set once
-        ds.filterPredicate = (data: unknown, filterStr: string) => {
-          let parsed: { text?: string; status?: string } = {};
-          try {
-            parsed = JSON.parse(filterStr || '{}');
-          } catch {
-            // Fallback: treat entire string as text filter
-            parsed = { text: filterStr || '' };
-          }
-          const t = (parsed.text || '').toLowerCase();
-          const s = (parsed.status || 'all') as Status;
-
-          // Text match against key fields
-          const haystack =
-            `${(data as IReportDetails).testName ?? ''} ${(data as IReportDetails).eventName ?? ''}`.toLowerCase();
-          const textMatch = !t || haystack.includes(t);
-
-          // Status match
-          const rd = data as IReportDetails;
-          const run = (rd?.updatedAt ?? 0) > (rd?.createdAt ?? 0);
-          const dl = !!rd?.passed;
-          const req = !!rd?.requestPassed;
-          let statusKey: 'notRun' | 'failed' | 'partial' | 'passed';
-          if (!run) statusKey = 'notRun';
-          else if (dl && req) statusKey = 'passed';
-          else if (dl || req) statusKey = 'partial';
-          else statusKey = 'failed';
-
-          const statusMatch = s === 'all' || s === statusKey;
-          return textMatch && statusMatch;
-        };
-
-        ds.filter = JSON.stringify({ text, status });
-      }
+      ds.filterPredicate = reportFilterPredicate;
+      ds.filter = toReportFilter(text, status);
     });
 
     // Effect 2: Save bookmarks before changing the visible state.

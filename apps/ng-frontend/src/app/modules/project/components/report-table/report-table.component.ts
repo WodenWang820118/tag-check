@@ -33,6 +33,7 @@ import { getLastRunAt, getRunStatus, hasRun } from '../report-detail.contracts';
 // #endregion
 
 import { BatchRunService } from '../../services/batch-run/batch-run.service';
+import { StatusFilter } from './report-filter';
 
 @Component({
   selector: 'app-report-table',
@@ -247,7 +248,7 @@ export class ReportTableComponent implements OnInit {
   }
 
   // Status filter wrappers for the template
-  setStatusFilter(status: 'all' | 'notRun' | 'failed' | 'partial' | 'passed') {
+  setStatusFilter(status: StatusFilter) {
     this.facade.setStatusFilter(status);
   }
 
