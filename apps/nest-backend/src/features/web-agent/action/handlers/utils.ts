@@ -1,6 +1,10 @@
 import { Page } from 'puppeteer';
 import { Step } from '@utils';
 
+/**
+ * Replays one click, change or hover step. Resolves once the action was
+ * performed with one of the step's selectors; throws when none worked.
+ */
 export interface ActionHandler {
   handle(
     page: Page,
@@ -11,8 +15,13 @@ export interface ActionHandler {
   ): Promise<void>;
 }
 
+/** Injection token of the step type to ActionHandler map. */
 export const ACTION_HANDLERS = 'ACTION_HANDLERS';
 
+/**
+ * Chrome Recorder stores each selector as a group: a chain for nested
+ * frames or shadow roots. Only the group's first selector is replayed.
+ */
 export function getFirstSelector(selectorGroup: string | string[]): string {
   return Array.isArray(selectorGroup) ? selectorGroup[0] : selectorGroup;
 }

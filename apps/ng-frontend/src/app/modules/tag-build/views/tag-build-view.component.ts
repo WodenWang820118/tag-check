@@ -12,6 +12,10 @@ import { ActivatedRoute } from '@angular/router';
 import { StrictDataLayerEvent } from '@utils';
 import { SpecService } from '../../../shared/services/api/spec/spec.service';
 
+/**
+ * The TagBuild page: loads the project's specs into @ui's
+ * TagBuildPageComponent, imported lazily.
+ */
 @Component({
   selector: 'app-tag-build-view',
   standalone: true,

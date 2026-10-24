@@ -1,8 +1,13 @@
+/** Angular locale IDs the sites are built for. */
 export type SupportedLocaleCode = 'en-US' | 'zh-Hant' | 'zh-Hans' | 'ja';
 export type LocaleUrlSegment = 'en' | 'zh-hant' | 'zh-hans' | 'ja';
 export type LocaleAssetSegment = 'en' | 'zh-hant' | 'zh-hans' | 'ja';
 export type LocaleHreflang = 'en' | 'zh-Hant' | 'zh-Hans' | 'ja';
 
+/**
+ * One built locale: its Angular locale ID, its URL prefix, the folder of its
+ * markdown assets and its hreflang value.
+ */
 export interface SupportedLocale {
   readonly code: SupportedLocaleCode;
   readonly urlSegment: LocaleUrlSegment;
@@ -42,10 +47,16 @@ export const SUPPORTED_LOCALES = [
   }
 ] as const satisfies readonly SupportedLocale[];
 
+/** English, used when a locale or URL prefix is not supported. */
 export const DEFAULT_LOCALE = SUPPORTED_LOCALES[0];
+/** Routes that search engines may index, without their locale prefix. */
 export const INDEXABLE_LOGICAL_ROUTES = ['/', '/about', '/objectives'] as const;
-export const APP_LOGICAL_ROUTE = '/app' as const;
 
+/**
+ * The supported locale for an Angular locale ID, URL prefix or hreflang,
+ * matched case-insensitively with `_` read as `-`; a regional variant such as
+ * `ja-JP` matches its language. Falls back to {@link DEFAULT_LOCALE}.
+ */
 export function getLocaleConfig(
   locale: string | null | undefined
 ): SupportedLocale {
@@ -57,6 +68,10 @@ export function getLocaleConfig(
   );
 }
 
+/**
+ * The logical route of a pathname: without query, fragment, trailing slashes
+ * and a leading supported locale prefix. `/ja/` becomes `/`.
+ */
 export function stripLocalePrefix(pathname: string): string {
   const normalizedPath = normalizePath(pathname);
   const segments = normalizedPath.split('/').filter(Boolean);
@@ -73,6 +88,10 @@ export function stripLocalePrefix(pathname: string): string {
     : `/${remainingSegments.join('/')}`;
 }
 
+/**
+ * The pathname of a logical route in a locale. Every locale, English
+ * included, gets its prefix; the root keeps a trailing slash (`/en/`).
+ */
 export function buildLocalizedPath(
   logicalPath: string,
   locale: string | SupportedLocale
@@ -86,10 +105,7 @@ export function buildLocalizedPath(
     : `/${localeConfig.urlSegment}${normalizedPath}`;
 }
 
-export function getLogicalPath(pathname: string): string {
-  return stripLocalePrefix(pathname);
-}
-
+/** The locale a pathname's prefix names, or {@link DEFAULT_LOCALE}. */
 export function getLocaleFromPathname(pathname: string): SupportedLocale {
   const normalizedPath = normalizePath(pathname);
   const firstSegment = normalizedPath
@@ -100,6 +116,10 @@ export function getLocaleFromPathname(pathname: string): SupportedLocale {
   return findLocaleByUrlSegment(firstSegment) ?? DEFAULT_LOCALE;
 }
 
+/**
+ * Whether search engines may index the page: the landing, about and
+ * objectives pages and each documentation page, in any locale.
+ */
 export function isIndexableLogicalRoute(pathname: string): boolean {
   const logicalPath = stripLocalePrefix(pathname);
   if (INDEXABLE_LOGICAL_ROUTES.some((route) => route === logicalPath)) {
@@ -110,7 +130,7 @@ export function isIndexableLogicalRoute(pathname: string): boolean {
 }
 
 function normalizeLocale(locale: string | null | undefined): string {
-  return (locale ?? DEFAULT_LOCALE.code).replace(/_/g, '-').toLowerCase();
+  return (locale ?? DEFAULT_LOCALE.code).replaceAll('_', '-').toLowerCase();
 }
 
 function isLocaleMatch(
@@ -141,10 +161,16 @@ function findLocaleByUrlSegment(
   );
 }
 
+/**
+ * Drops the query and fragment, adds a leading slash and removes trailing
+ * ones, keeping `/` for the root (`'//'` included).
+ */
 function normalizePath(pathname: string): string {
   const pathOnly = pathname.split(/[?#]/)[0] || '/';
   const withLeadingSlash = pathOnly.startsWith('/') ? pathOnly : `/${pathOnly}`;
-  return withLeadingSlash.length > 1
-    ? withLeadingSlash.replace(/\/+$/, '')
-    : withLeadingSlash;
+  let end = withLeadingSlash.length;
+  while (end > 1 && withLeadingSlash[end - 1] === '/') {
+    end--;
+  }
+  return withLeadingSlash.slice(0, end);
 }

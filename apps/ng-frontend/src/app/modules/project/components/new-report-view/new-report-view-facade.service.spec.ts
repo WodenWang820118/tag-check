@@ -16,6 +16,40 @@ const editor = (text: string) => () => ({
   state: { doc: { toString: () => text } }
 });
 
+describe('NewReportViewFacadeService.onFileSelected', () => {
+  it('shows the uploaded recording in the recording editor', async () => {
+    const setContent = vi.fn();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: LoggerService, useValue: { error: vi.fn(), info: vi.fn() } },
+        { provide: ReportService, useValue: {} },
+        { provide: EditorService, useValue: { setContent } },
+        { provide: Location, useValue: {} },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: RecordingService, useValue: {} },
+        { provide: ProjectDataSourceService, useValue: {} },
+        { provide: UploadSpecService, useValue: {} }
+      ]
+    });
+    const service = TestBed.inject(NewReportViewFacadeService);
+    // A Chrome Recorder export.
+    const recording = JSON.stringify({
+      title: 'add_to_cart',
+      steps: [{ type: 'navigate', url: 'https://ng-gtm-sample.vercel.app/' }]
+    });
+    const input = document.createElement('input');
+    Object.defineProperty(input, 'files', {
+      value: [new File([recording], 'add_to_cart.json')]
+    });
+    input.addEventListener('change', (event) => service.onFileSelected(event));
+
+    input.dispatchEvent(new Event('change'));
+    await vi.waitFor(() => expect(setContent).toHaveBeenCalled());
+
+    expect(setContent).toHaveBeenCalledWith('recordingJson', recording);
+  });
+});
+
 describe('NewReportViewFacadeService.uploadReport', () => {
   let addReport: ReturnType<typeof vi.fn>;
   let setData: ReturnType<typeof vi.fn>;

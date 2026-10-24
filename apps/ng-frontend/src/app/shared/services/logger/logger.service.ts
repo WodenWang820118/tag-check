@@ -16,6 +16,10 @@ export interface LoggerConfig {
   contextMaxLength: number;
 }
 
+/**
+ * Console logging with levels, timestamps and context labels. Production
+ * builds log errors only.
+ */
 @Injectable({
   providedIn: 'root'
 })

@@ -1,23 +1,35 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { GtmInspectionParams } from '../../utils/interfaces';
 import { ReportDetailResponse } from '@utils';
 
+/**
+ * Runs a test on the site directly with the request check: the backend also
+ * captures the GA4 request the event sends to the measurement ID.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class QaRequestService {
+  /** Set when the user stopped the run, whose request then fails. */
   private readonly isStopOperation = signal(false);
-  isStopOperation$ = computed(() => this.isStopOperation());
+  readonly isStopOperation$ = this.isStopOperation.asReadonly();
   constructor(private readonly http: HttpClient) {}
 
+  /**
+   * Runs the test and emits the API's result. A run the user stopped emits
+   * `[]` instead of failing; any other failure errors with an Error whose
+   * `cause` is the HttpErrorResponse.
+   */
   runDataLayerWithRequestCheck(
     projectSlug: string,
     eventId: string,
     params: GtmInspectionParams
   ) {
+    // A stop applies only to the run it interrupted; see GtmOperatorService.
+    this.isStopOperation.set(false);
     const queryParams = [];
     if (params.measurementId)
       queryParams.push(`measurementId=${params.measurementId}`);
@@ -39,7 +51,9 @@ export class QaRequestService {
           if (this.isStopOperation$()) {
             return of([]);
           }
-          return throwError(() => new Error('Data layer inspection failed'));
+          return throwError(
+            () => new Error('Data layer inspection failed', { cause: error })
+          );
         })
       );
   }

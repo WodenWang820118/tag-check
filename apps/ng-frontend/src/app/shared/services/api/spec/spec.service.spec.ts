@@ -20,51 +20,6 @@ describe('SpecService', () => {
     vi.useRealTimers();
   });
 
-  it('round-trips temp/spec/loading signals', () => {
-    const spec = { name: 'x' } as never;
-    service.setTempSpec(spec);
-    service.setSpec(spec);
-    service.setLoading(true);
-    expect(service.tempSpecContent$()).toBe(spec);
-    expect(service.specContent$()).toBe(spec);
-    expect(service.isLoading$()).toBe(true);
-  });
-
-  it('readSpecJsonFileContent parses JSON and clears loading after the timeout', async () => {
-    vi.useFakeTimers();
-    const file = { text: () => Promise.resolve('{"event":"a"}') } as File;
-    service.readSpecJsonFileContent(file);
-    expect(service.isLoading$()).toBe(true);
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(service.tempSpecContent$()).toEqual({ event: 'a' });
-    vi.advanceTimersByTime(1000);
-    expect(service.isLoading$()).toBe(false);
-  });
-
-  it('readSpecJsonFileContent sets temp to null on parse error', async () => {
-    vi.useFakeTimers();
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const file = { text: () => Promise.resolve('not json') } as File;
-    service.tempSpecContent.set({ event: 'old' } as never);
-    service.readSpecJsonFileContent(file);
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(service.tempSpecContent$()).toBeNull();
-    vi.advanceTimersByTime(1000);
-  });
-
-  it('getSpecs hits the spec API and rethrows wrapped errors', async () => {
-    httpClient.get.mockReturnValueOnce(of([{ id: 1 }] as never));
-    await firstValueFrom(service.getSpecs());
-    expect(httpClient.get).toHaveBeenCalledWith(environment.specApiUrl);
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    httpClient.get.mockReturnValueOnce(throwError(() => new Error('x')));
-    await expect(firstValueFrom(service.getSpecs())).rejects.toThrow(
-      'Failed to get specs'
-    );
-  });
-
   it('getProjectSpec rethrows wrapped errors', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     httpClient.get.mockReturnValueOnce(throwError(() => new Error('x')));

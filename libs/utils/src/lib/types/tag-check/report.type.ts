@@ -2,11 +2,6 @@ import { Auditable } from './auditable.type';
 import { BaseDataLayerEvent, StrictDataLayerEvent } from './data-layer.type';
 import { TestEvent } from './project.type';
 
-export type ProjectReport = {
-  projectSlug: string;
-  reports: IReportDetails[];
-};
-
 export type IReportDetails = {
   position: number;
   event: string;

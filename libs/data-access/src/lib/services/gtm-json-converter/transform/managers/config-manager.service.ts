@@ -18,6 +18,10 @@ export interface GTMFinalConfigurationOptions {
   gtmId: string;
 }
 
+/**
+ * Wraps the generated variables, triggers and tags in the container export
+ * envelope Tag Manager imports (export format version 2).
+ */
 @Injectable({
   providedIn: 'root'
 })

@@ -18,6 +18,10 @@ export class RunQueueService {
     return this.pending;
   }
 
+  /**
+   * Starts `task` once every earlier task has settled, and settles as it
+   * does. A task that rejects does not stop the ones queued after it.
+   */
   run<T>(task: () => Promise<T>): Promise<T> {
     this.pending++;
     const result = this.tail.then(task).finally(() => {

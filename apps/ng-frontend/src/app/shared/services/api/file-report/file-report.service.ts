@@ -5,6 +5,10 @@ import { environment } from '../../../../../environments/environment';
 import { DeleteRunsResponse, Jsonified, RunSummary } from '@utils';
 import { catchHttpError, rethrowHttpError } from '../http-error.utils';
 
+/**
+ * The Reports page's API: the project's runs, deleting runs, and the
+ * spreadsheet export of whole tests.
+ */
 @Injectable({
   providedIn: 'root'
 })

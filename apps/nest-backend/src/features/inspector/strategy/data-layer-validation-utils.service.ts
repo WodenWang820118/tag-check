@@ -6,7 +6,12 @@ import {
 } from '@utils';
 import { ValidationResultDto } from '../../../shared/dto/validation-result.dto';
 
-/** A Tag Manager variable such as `{{DLV - ecommerce.value}}`, only known at runtime. */
+/**
+ * A Tag Manager variable such as `{{DLV - ecommerce.value}}`, only known at
+ * runtime. With a single quantifier the pattern cannot backtrack
+ * exponentially; a failed match is at worst quadratic in the length of the
+ * value, and it only ever runs on the short strings of a spec.
+ */
 const GTM_VARIABLE_REFERENCE = /\{\{[^}]+\}\}/;
 
 type Indexable = Record<string, unknown>;

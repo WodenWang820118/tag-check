@@ -11,20 +11,24 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MarkdownModule } from 'ngx-markdown';
-import { TreeNodeService } from '../../services/tree-node/tree-node.service';
+import { MarkdownComponent } from 'ngx-markdown';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { DOCUMENT, NgClass, isPlatformBrowser } from '@angular/common';
+import { buildHeadingIds } from './heading-ids';
 
+/**
+ * Renders the markdown the documentation resolver loaded for the route, with
+ * an "On This Page" list of its h1 and h2 headings.
+ */
 @Component({
   selector: 'app-contents',
   standalone: true,
   imports: [
-    MarkdownModule,
+    MarkdownComponent,
     MatButtonModule,
     MatIconModule,
     MatCardModule,
@@ -38,28 +42,17 @@ import { DOCUMENT, NgClass, isPlatformBrowser } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MainContentComponent implements OnInit {
-  public treeNodeService = inject(TreeNodeService);
   public route = inject(ActivatedRoute);
   private readonly destroyedRef = inject(DestroyRef);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
 
-  private readonly fileNameSignal = signal<string>('');
   private readonly contentSignal = signal<string>('');
   private readonly tocSignal = signal<{ id: string; text: string }[]>([]);
 
-  readonly fileName = computed(() => this.fileNameSignal());
   readonly content = computed(() => this.contentSignal());
   readonly toc = computed(() => this.tocSignal());
 
-  readonly treeData = this.treeNodeService.treeData;
-  readonly childrenAccessor = this.treeNodeService.childrenAccessor;
-
-  readonly currentNodeId = computed(() => this.treeNodeService.currentNodeId());
-  readonly hasPrevious = computed(
-    () => !!this.treeNodeService.getPreviousNode()
-  );
-  readonly hasNext = computed(() => !!this.treeNodeService.getNextNode());
   activeSection: string | null = null;
 
   ngOnInit() {
@@ -67,7 +60,6 @@ export class MainContentComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyedRef))
       .subscribe((data) => {
         const fullData = data['data'];
-        this.fileNameSignal.set((fullData['fileName'] as string) ?? '');
         this.contentSignal.set((fullData['content'] as string) ?? '');
         this.tocSignal.set([]);
       });
@@ -89,23 +81,19 @@ export class MainContentComponent implements OnInit {
     this.scrollToSection('markdown');
   }
 
+  /** Gives the rendered headings ids and lists them in document order. */
   onMarkdownReady() {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-    this.tocSignal.set([]);
-    const h1Elements = this.document.querySelectorAll('#markdown h1');
-    const h2Elements = this.document.querySelectorAll('#markdown h2');
-    const headElements = Array.from(h1Elements).concat(Array.from(h2Elements));
-
-    const newToc = headElements.map((element) => {
-      const text = element.textContent || '';
-      const id = text.toLowerCase().replaceAll(/[^\w]+/g, '-');
-      element.id = id;
-
-      return { id, text };
+    const headings = Array.from(
+      this.document.querySelectorAll('#markdown h1, #markdown h2')
+    );
+    const texts = headings.map((element) => element.textContent ?? '');
+    const ids = buildHeadingIds(texts);
+    headings.forEach((element, index) => {
+      element.id = ids[index];
     });
-
-    this.tocSignal.set(newToc);
+    this.tocSignal.set(texts.map((text, index) => ({ id: ids[index], text })));
   }
 }

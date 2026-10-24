@@ -1,7 +1,6 @@
 import { EditorComponent } from '../../components/editor/editor.component';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FunctionalCardComponent } from '../../components/functional-card/functional-card.component';
-import { ErrorDialogComponent } from '../../components/error-dialog/error-dialog.component';
 import { UploadActionComponent } from '../../components/upload-action/upload-action.component';
 import { FileUploadDialogComponent } from '../../components/file-upload-dialog/file-upload-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,6 +9,10 @@ import { JsonPipe } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TagBuildModeService, TagBuildMode } from '@data-access';
 
+/**
+ * tag-build's main view: the Tag Build and Tag Extract tabs with the input
+ * and output JSON editors, the convert card and the spec upload.
+ */
 @Component({
   selector: 'lib-tag-build-page',
   standalone: true,
@@ -51,14 +54,5 @@ export class TagBuildPageComponent {
 
   openFileUploadDialog() {
     this.dialog.open(FileUploadDialogComponent);
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  openDialog(data: any) {
-    this.dialog.open(ErrorDialogComponent, {
-      data: {
-        message: data.message
-      }
-    });
   }
 }

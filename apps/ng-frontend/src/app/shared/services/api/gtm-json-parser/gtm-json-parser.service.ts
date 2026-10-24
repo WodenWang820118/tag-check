@@ -7,6 +7,7 @@ import {
 } from '@utils';
 import { environment } from '../../../../../environments/environment';
 
+/** Checks a GTM container export and uploads it, which creates tests. */
 @Injectable({
   providedIn: 'root'
 })

@@ -11,6 +11,10 @@ import { FunctionalCardFacade } from './functional-card.facade.service';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
 import { MatButtonModule } from '@angular/material/button';
 
+/**
+ * The card with tag-build's Convert button and the import readiness of
+ * the last conversion.
+ */
 @Component({
   selector: 'lib-functional-card',
   standalone: true,

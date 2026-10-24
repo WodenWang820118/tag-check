@@ -1,21 +1,19 @@
 <div class="side-nav-list">
   <mat-nav-list>
-    @for (item of items(); track item.icon) {
-      @if (item.title !== 'Settings') {
-        <mat-list-item
-          tabindex="-1"
-          [routerLink]="item.link"
-          [class.secondary]="section() === item.section"
-          (click)="onMenuClick()"
-          [attr.data-testid]="item.testId"
-        >
-          <div class="mat-list-item-content">
-            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-            <span>{{ item.title }}</span>
-            <div class="spacer"></div>
-          </div>
-        </mat-list-item>
-      }
+    @for (item of items; track item.testId) {
+      <mat-list-item
+        tabindex="-1"
+        [routerLink]="item.link"
+        [class.secondary]="section() === item.section"
+        (click)="onMenuClick()"
+        [attr.data-testid]="item.testId"
+      >
+        <div class="mat-list-item-content">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span>{{ item.title }}</span>
+          <div class="spacer"></div>
+        </div>
+      </mat-list-item>
     }
     <mat-list-item
       tabindex="-1"
@@ -47,7 +45,7 @@
       (closed)="isOpen.set(false)"
     >
       <mat-nav-list class="mat-elevation-z8" style="background-color: white">
-        @for (item of settingsMenuItems(); track item.title) {
+        @for (item of settingsMenuItems; track item.testId) {
           <mat-list-item
             class="sub-list-item"
             [attr.data-testid]="item.testId"

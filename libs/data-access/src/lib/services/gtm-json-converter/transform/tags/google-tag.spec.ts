@@ -6,7 +6,6 @@ import { describe, it, expect } from 'vitest';
 
 describe('Google Tag', () => {
   let googleTag: GoogleTag;
-  let parameterUtils: ParameterUtils;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -14,7 +13,6 @@ describe('Google Tag', () => {
     });
 
     googleTag = TestBed.inject(GoogleTag);
-    parameterUtils = TestBed.inject(ParameterUtils);
   });
 
   it('should create a valid GA4 configuration', () => {
@@ -23,24 +21,6 @@ describe('Google Tag', () => {
     const measurementId = 'G-12345678';
     const accountId = 'account123';
     const containerId = 'container456';
-
-    vi.spyOn(parameterUtils, 'createBooleanParameter')
-      .mockReturnValueOnce({
-        type: 'BOOLEAN',
-        key: 'sendPageView',
-        value: 'false'
-      })
-      .mockReturnValueOnce({
-        type: 'BOOLEAN',
-        key: 'enableSendToServerContainer',
-        value: 'false'
-      });
-
-    vi.spyOn(parameterUtils, 'createTemplateParameter').mockReturnValue({
-      type: 'TEMPLATE',
-      key: 'measurementId',
-      value: 'G-12345678'
-    });
 
     // Act
     const result = googleTag.createGA4Configuration(
@@ -57,8 +37,24 @@ describe('Google Tag', () => {
       accountId: 'account123',
       containerId: 'container456',
       parameter: [
-        { type: 'TEMPLATE', key: 'measurementId', value: 'G-12345678' },
-        { type: 'BOOLEAN', key: 'sendPageView', value: 'false' },
+        {
+          type: 'TEMPLATE',
+          key: 'tagId',
+          value: '{{CONST - Measurement ID}}'
+        },
+        {
+          type: 'LIST',
+          key: 'configSettingsTable',
+          list: [
+            {
+              type: 'MAP',
+              map: [
+                { type: 'TEMPLATE', key: 'parameter', value: 'send_page_view' },
+                { type: 'TEMPLATE', key: 'parameterValue', value: 'false' }
+              ]
+            }
+          ]
+        },
         { type: 'BOOLEAN', key: 'enableSendToServerContainer', value: 'false' }
       ],
       firingTriggerId: ['2147479553'],
@@ -71,20 +67,5 @@ describe('Google Tag', () => {
       }
     };
     expect(result).toEqual(expectedTag);
-
-    expect(parameterUtils.createBooleanParameter).toHaveBeenCalledTimes(2);
-    expect(parameterUtils.createTemplateParameter).toHaveBeenCalledTimes(1);
-    expect(parameterUtils.createBooleanParameter).toHaveBeenCalledWith(
-      'sendPageView',
-      'false'
-    );
-    expect(parameterUtils.createBooleanParameter).toHaveBeenCalledWith(
-      'enableSendToServerContainer',
-      'false'
-    );
-    expect(parameterUtils.createTemplateParameter).toHaveBeenCalledWith(
-      'tagId',
-      '{{CONST - Measurement ID}}'
-    );
   });
 });

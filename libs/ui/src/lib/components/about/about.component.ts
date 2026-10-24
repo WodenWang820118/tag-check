@@ -2,6 +2,9 @@ import { JsonPipe } from '@angular/common';
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MermaidDiagramComponent } from '../mermaid-diagram/mermaid-diagram.component';
 
+/**
+ * The public sites' About page.
+ */
 @Component({
   selector: 'lib-about',
   standalone: true,

@@ -13,6 +13,10 @@ import { SlideImportComponent } from '../../components/slide-import/slide-import
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { BatchRunPanelComponent } from '../../components/batch-run-panel/batch-run-panel.component';
+/**
+ * The Tests page: toolbar, batch run panel, tests table and the side
+ * sheet for adding tests, which UploadSpecService opens and closes.
+ */
 @Component({
   selector: 'app-report-big-table',
   standalone: true,

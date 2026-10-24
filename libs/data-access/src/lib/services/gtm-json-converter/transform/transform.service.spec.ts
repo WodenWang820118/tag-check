@@ -319,6 +319,114 @@ describe('TransformService', () => {
       expect(tagNames).toEqual(expect.arrayContaining(['GA4 event - Video']));
     });
 
+    it('fires the scroll tag on the Scroll Depth trigger, with no custom scroll event tag', () => {
+      const result = service.convert(
+        buildOptions({
+          gtmConfigGenerator: {
+            ...mockGtmConfig,
+            specs: [{ event: 'page_view' }, { event: 'scroll' }]
+          }
+        })
+      );
+      const { tag, trigger } = result.containerVersion;
+
+      const scrollTags = tag.filter((t) => t.name === 'GA4 event - scroll');
+      expect(scrollTags).toHaveLength(1);
+      const firing = trigger.filter((t) =>
+        scrollTags[0].firingTriggerId?.includes(t.triggerId ?? '')
+      );
+      expect(firing.map((t) => t.type)).toEqual(['SCROLL_DEPTH']);
+      expect(trigger.map((t) => t.name)).not.toContain('event equals scroll');
+    });
+
+    it('fires the video tags on the YouTube Video trigger with a defined measurement ID', () => {
+      const result = service.convert(
+        buildOptions({
+          gtmConfigGenerator: {
+            ...mockGtmConfig,
+            specs: [{ event: 'video_start' }, { event: 'video_complete' }]
+          }
+        })
+      );
+      const { tag, trigger, variable } = result.containerVersion;
+
+      const videoTag = tag.find((t) => t.name === 'GA4 event - Video');
+      const firing = trigger.filter((t) =>
+        videoTag?.firingTriggerId?.includes(t.triggerId ?? '')
+      );
+      expect(firing.map((t) => t.type)).toEqual(['YOU_TUBE_VIDEO']);
+      expect(tag.map((t) => t.name)).not.toContain('GA4 event - video_start');
+
+      const measurementId = videoTag?.parameter.find(
+        (p) => p.key === 'measurementIdOverride'
+      )?.value;
+      expect(variable.map((v) => `{{${v.name}}}`)).toContain(measurementId);
+    });
+
+    it('creates one trigger and one tag for an event that several specs push', () => {
+      const result = service.convert(
+        buildOptions({
+          gtmConfigGenerator: {
+            ...mockGtmConfig,
+            specs: [
+              { event: 'login', method: '$method' },
+              { event: 'login', user_type: '$user_type' }
+            ]
+          }
+        })
+      );
+      const { tag, trigger } = result.containerVersion;
+
+      expect(trigger.map((t) => t.name)).toEqual(['event equals login']);
+      const loginTags = tag.filter((t) => t.name === 'GA4 event - login');
+      expect(loginTags).toHaveLength(1);
+      expect(
+        getGa4EventParameterRows(loginTags[0], []).map((row) => row.parameter)
+      ).toEqual(['method', 'user_type']);
+    });
+
+    it('gives every tag and trigger a unique name', () => {
+      const result = service.convert(
+        buildOptions({
+          gtmConfigGenerator: {
+            ...mockGtmConfig,
+            specs: [
+              { event: 'page_view' },
+              { event: 'scroll' },
+              { event: 'video_start' },
+              { event: 'page_view' }
+            ]
+          }
+        })
+      );
+      const tagNames = result.containerVersion.tag.map((t) => t.name);
+      const triggerNames = result.containerVersion.trigger.map((t) => t.name);
+
+      expect(new Set(tagNames).size).toBe(tagNames.length);
+      expect(new Set(triggerNames).size).toBe(triggerNames.length);
+    });
+
+    it('keeps top-level parameters whose name contains "ecommerce"', () => {
+      const result = service.convert(
+        buildOptions({
+          gtmConfigGenerator: {
+            ...mockGtmConfig,
+            specs: [{ event: 'page_view', ecommerce_platform: '$platform' }]
+          }
+        })
+      );
+      const pageView = result.containerVersion.tag.find(
+        (t) => t.name === 'GA4 event - page_view'
+      );
+
+      expect(pageView ? getGa4EventParameterRows(pageView, []) : []).toEqual([
+        {
+          parameter: 'ecommerce_platform',
+          value: '{{DLV - ecommerce_platform}}'
+        }
+      ]);
+    });
+
     it('should NOT include scroll/video triggers when specs lack those events', () => {
       const specs: StrictDataLayerEvent[] = [
         { event: 'page_view', page_location: '/home' }

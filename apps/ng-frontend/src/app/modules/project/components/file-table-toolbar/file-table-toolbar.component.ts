@@ -20,6 +20,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+/**
+ * The Reports page's toolbar: delete or download the selected runs, and
+ * filter the table.
+ */
 @Component({
   selector: 'app-file-table-toolbar',
   standalone: true,
@@ -58,9 +62,7 @@ export class FileTableToolbarComponent implements OnDestroy {
   ) {}
 
   applyFilter(event: Event) {
-    console.log('event', event);
     const filterValue = (event.target as HTMLInputElement).value;
-    console.log('filter value in applyFilter', filterValue);
     this.fileTableDataSourceService.setFilterSignal(filterValue);
   }
 

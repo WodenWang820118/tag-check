@@ -74,7 +74,7 @@ describe('ScrollTag', () => {
       const containerId = 'container456';
       const triggers: Trigger[] = [
         {
-          name: 'scroll',
+          name: 'event scroll',
           triggerId: 'trigger789'
         }
       ];
@@ -118,14 +118,6 @@ describe('ScrollTag', () => {
           map: [{ type: 'TEMPLATE', key, value }]
         })
       );
-      vi.spyOn(
-        parameterUtils,
-        'createTagReferenceParameter'
-      ).mockImplementation((key, value) => ({
-        type: 'TAG_REFERENCE',
-        key,
-        value
-      }));
 
       // Act
       const result = scrollTag.createScrollTag(
@@ -168,9 +160,9 @@ describe('ScrollTag', () => {
               ]
             },
             {
-              type: 'TAG_REFERENCE',
-              key: 'measurementId',
-              value: configurationName
+              type: 'TEMPLATE',
+              key: 'measurementIdOverride',
+              value: '{{CONST - Measurement ID}}'
             }
           ],
           fingerprint: '1690184079241',
@@ -202,10 +194,6 @@ describe('ScrollTag', () => {
       expect(parameterUtils.createBuiltInListParameter).toHaveBeenCalledWith(
         'eventSettingsTable',
         expect.any(Array)
-      );
-      expect(parameterUtils.createTagReferenceParameter).toHaveBeenCalledWith(
-        'measurementId',
-        configurationName
       );
     });
   });

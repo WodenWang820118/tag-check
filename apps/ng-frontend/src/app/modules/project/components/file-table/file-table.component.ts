@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { tap } from 'rxjs';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { DatePipe, NgClass, CommonModule } from '@angular/common';
+import { DatePipe, CommonModule } from '@angular/common';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
 import { getCheckStatus, Jsonified, RunSummary } from '@utils';
 import { MatInputModule } from '@angular/material/input';
@@ -22,6 +22,10 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
 
+/**
+ * The Reports page's table: one row per run with its status, sortable
+ * and paged, selected rows being what the toolbar acts on.
+ */
 @Component({
   selector: 'app-file-table',
   standalone: true,
@@ -32,7 +36,6 @@ import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.compo
     MatCheckboxModule,
     DatePipe,
     MatInputModule,
-    NgClass,
     MatSortModule,
     MatChipsModule,
     MatTooltipModule,

@@ -13,6 +13,7 @@ import { ProjectIoService } from '../../services/api/project-io/project-io.servi
 import { HttpEventType } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+/** Imports a project from an exported file, showing the upload progress. */
 @Component({
   selector: 'app-project-import',
   standalone: true,

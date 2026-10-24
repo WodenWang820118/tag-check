@@ -22,6 +22,9 @@ export interface ToolbarInputs {
   objectivesDisabled?: boolean;
 }
 
+/**
+ * The public sites' toolbar: title, navigation and language picker.
+ */
 @Component({
   selector: 'lib-toolbar',
   standalone: true,

@@ -38,6 +38,11 @@ function serializeParamMap(params: ParamMap): string {
   );
 }
 
+/**
+ * A test's page: the Tag Snapshot and Latest result tabs, loaded by
+ * reportPageResolver. `?tab=reports` opens Latest result, and
+ * `?snackbar=missingRecording` says why the test cannot run yet.
+ */
 @Component({
   selector: 'app-detail-view',
   standalone: true,

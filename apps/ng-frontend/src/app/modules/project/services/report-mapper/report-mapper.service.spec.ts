@@ -2,6 +2,10 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { ReportMapperService } from './report-mapper.service';
 import { REPORT_LIST_ITEM_SAMPLE, type AbstractTestEvent } from '@utils';
+import {
+  getLastRunAt,
+  getRunStatus
+} from '../../components/report-detail.contracts';
 
 // One item of GET /reports/:projectSlug as it arrives over HTTP.
 function listItem(overrides: Record<string, unknown> = {}): AbstractTestEvent {
@@ -48,6 +52,18 @@ describe('ReportMapperService', () => {
     const [out] = svc.toReportDetails([ev]);
     expect(out.hasRecording).toBe(false);
     expect(out.passed).toBe(false);
+  });
+
+  it('keeps lastRunAt, so a test whose runs were deleted shows Not run', () => {
+    const [ran, deleted] = svc.toReportDetails([
+      listItem(),
+      listItem({ passed: false, requestPassed: false, lastRunAt: null })
+    ]);
+
+    expect(getRunStatus(ran)).toBe('passed');
+    expect(getLastRunAt(ran)).toBe(REPORT_LIST_ITEM_SAMPLE.lastRunAt);
+    // updatedAt is after createdAt, but the test has no run left.
+    expect(getRunStatus(deleted)).toBe('notRun');
   });
 
   it('maps fields and uses the event-level updatedAt when present', () => {

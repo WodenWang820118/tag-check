@@ -3,6 +3,11 @@ import { Jsonified, RunSummary } from '@utils';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Injectable, signal } from '@angular/core';
 
+/**
+ * Requests from the Reports page's toolbar to its table: the filter text,
+ * and delete or download flags that FileTableDataSourceFacadeService
+ * handles and resets.
+ */
 @Injectable({
   providedIn: 'root'
 })

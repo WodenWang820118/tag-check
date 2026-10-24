@@ -4,9 +4,7 @@ import { InspectorSingleEventService } from '../../features/inspector/inspector-
 import {
   CreateTestEventDetailDto,
   EventInspectionPresetDto,
-  TestEventDetailResponseDto,
   TestEventEntity,
-  TestImageResponseDto,
   UpdateTestEventDto
 } from '../../shared';
 import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
@@ -14,6 +12,11 @@ import { TestEventDetailRepositoryService } from '../../core/repository/test-eve
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 import { ValidationResult } from '@utils';
 
+/**
+ * Runs the checks on a page the caller has prepared and saves the run's
+ * result: one TestEventDetail row with the run's screenshot, which then
+ * becomes the test's latest result.
+ */
 @Injectable()
 export class EventInspectionPipelineService {
   private readonly logger = new Logger(EventInspectionPipelineService.name);
@@ -25,6 +28,15 @@ export class EventInspectionPipelineService {
     private readonly testImageRepositoryService: TestImageRepositoryService
   ) {}
 
+  /**
+   * Replays the test on `page`, checks the dataLayer (and the GA4 request
+   * when `captureRequest` is set) and saves the result.
+   *
+   * When the replay or a check throws, the run is saved as failed and the
+   * method resolves with undefined: the caller reads the result from the
+   * saved report. It rejects only when the result cannot be saved; for a
+   * failed run it then rejects with the run's own error.
+   */
   async singleEventInspectionRecipe(
     page: Page,
     projectSlug: string,
@@ -35,17 +47,17 @@ export class EventInspectionPipelineService {
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
     this.logger.log('Inspecting single event');
-    // Retrieve the test event once since it is needed in both paths.
-    const testEvent = await this.getTestEvent(projectSlug, eventId);
+    const testEvent =
+      await this.testEventRepositoryService.getEntityBySlugAndEventId(
+        projectSlug,
+        eventId
+      );
 
+    let inspection: Awaited<
+      ReturnType<InspectorSingleEventService['inspectDataLayer']>
+    >;
     try {
-      // Call the inspector service to get the inspection result.
-      const {
-        dataLayerResult,
-        destinationUrl,
-        rawRequest,
-        requestCheckResult
-      } = await this.inspectorSingleEventService.inspectDataLayer(
+      inspection = await this.inspectorSingleEventService.inspectDataLayer(
         page,
         projectSlug,
         eventId,
@@ -54,134 +66,74 @@ export class EventInspectionPipelineService {
         captureRequest,
         eventInspectionPresetDto.application
       );
-      this.logger.debug(
-        'data layer result:',
-        JSON.stringify(dataLayerResult, null, 2)
-      );
-      // Map service response to the output data format.
-      const data = [
-        {
-          dataLayerResult,
-          rawRequest,
-          requestCheckResult,
-          destinationUrl
-        }
-      ];
-      this.logger.debug('Data to be saved:', JSON.stringify(data, null, 2));
+    } catch (error) {
+      this.logger.error('Error during event inspection', error);
+      try {
+        await this.saveResult(
+          page,
+          projectSlug,
+          eventId,
+          testEvent,
+          this.buildFallbackTestEventDetail()
+        );
+      } catch (saveError) {
+        // The run's own error says more than the failure to save it.
+        this.logger.error(`Failed to save the failed run: ${saveError}`);
+        throw error;
+      }
+      return undefined;
+    }
 
-      // Build detail DTO for a passed event.
-      const updatedDetail = this.buildTestEventDetail({
+    // Saved outside the try above: a failure to save a finished run must
+    // not save it a second time as failed.
+    const { dataLayerResult, destinationUrl, rawRequest, requestCheckResult } =
+      inspection;
+    this.logger.debug(
+      'data layer result:',
+      JSON.stringify(dataLayerResult, null, 2)
+    );
+    const data = [
+      {
         dataLayerResult,
         rawRequest,
         requestCheckResult,
         destinationUrl
-      });
+      }
+    ];
+    this.logger.debug('Data to be saved:', JSON.stringify(data, null, 2));
 
-      this.logger.debug(
-        'Updated detail:',
-        JSON.stringify(updatedDetail, null, 2)
-      );
-      // The screenshot first, so the result links to it.
-      const testImageDto = await this.buildTestImage(
-        page,
-        projectSlug,
-        eventId
-      );
-      const testEventDetailDto =
-        await this.testEventDetailRepositoryService.create(
-          testEvent,
-          updatedDetail,
-          testImageDto
-        );
-      await this.updateLatestTestEvent(
-        testEvent,
-        testEventDetailDto,
-        testImageDto
-      );
-      return data;
-    } catch (error) {
-      this.logger.error('Error during event inspection', error);
-      // Build detail DTO for a failed event.
-      const updatedDetail = this.buildFallbackTestEventDetail();
-      const testImageDto = await this.buildTestImage(
-        page,
-        projectSlug,
-        eventId
-      );
-      const testEventDetailDto =
-        await this.testEventDetailRepositoryService.create(
-          testEvent,
-          updatedDetail,
-          testImageDto
-        );
-      await this.updateLatestTestEvent(
-        testEvent,
-        testEventDetailDto,
-        testImageDto
-      );
-    }
-  }
-
-  /**
-   * Retrieves the test event based on projectSlug and eventId.
-   */
-  private async getTestEvent(projectSlug: string, eventId: string) {
-    return await this.testEventRepositoryService.getEntityBySlugAndEventId(
-      projectSlug,
-      eventId
+    const updatedDetail = this.buildTestEventDetail(inspection);
+    this.logger.debug(
+      'Updated detail:',
+      JSON.stringify(updatedDetail, null, 2)
     );
+    await this.saveResult(page, projectSlug, eventId, testEvent, updatedDetail);
+    return data;
   }
 
   /**
-   * Builds a DTO for saving the event detail on successful inspection.
+   * Saves the run's screenshot, then its result linked to it, and points the
+   * test at both as its latest.
    */
-  private buildTestEventDetail(result: {
-    dataLayerResult: ValidationResult;
-    destinationUrl: string;
-    rawRequest: string;
-    requestCheckResult: ValidationResult;
-  }): CreateTestEventDetailDto {
-    return {
-      passed: result.dataLayerResult.passed || false,
-      requestPassed: result.requestCheckResult.passed || false,
-      rawRequest: result.rawRequest,
-      destinationUrl: result.destinationUrl,
-      dataLayer: result.dataLayerResult.dataLayer,
-      message: result.dataLayerResult.message || ''
-    };
-  }
-
-  /**
-   * Builds a fallback DTO when an error occurs during inspection.
-   */
-  private buildFallbackTestEventDetail(): CreateTestEventDetailDto {
-    return {
-      passed: false,
-      requestPassed: false,
-      rawRequest: '',
-      destinationUrl: '',
-      dataLayer: [],
-      message: 'The run stopped with an error before its checks finished.'
-    };
-  }
-
-  private async buildTestImage(
+  private async saveResult(
     page: Page,
     projectSlug: string,
-    eventId: string
-  ) {
-    const screenshot = await page.screenshot({ fullPage: true });
-    return await this.testImageRepositoryService.create(projectSlug, eventId, {
-      imageName: `screenshot.png`,
-      imageData: screenshot
-    });
-  }
-
-  private async updateLatestTestEvent(
+    eventId: string,
     testEvent: TestEventEntity,
-    testEventDetail: TestEventDetailResponseDto,
-    testImage: TestImageResponseDto
-  ) {
+    detail: CreateTestEventDetailDto
+  ): Promise<void> {
+    const screenshot = await page.screenshot({ fullPage: true });
+    const testImage = await this.testImageRepositoryService.create(
+      projectSlug,
+      eventId,
+      { imageName: `screenshot.png`, imageData: screenshot }
+    );
+    const testEventDetail = await this.testEventDetailRepositoryService.create(
+      testEvent,
+      detail,
+      testImage
+    );
+
     const updatedInfo: UpdateTestEventDto = {
       latestTestEventDetailId: testEventDetail.id,
       latestTestImageId: testImage.id,
@@ -193,5 +145,34 @@ export class EventInspectionPipelineService {
     );
     this.logger.debug('Updated info:', JSON.stringify(updatedInfo, null, 2));
     this.logger.debug('Updated event:', JSON.stringify(updatedEvent, null, 2));
+  }
+
+  /** The result row of a run whose checks finished. */
+  private buildTestEventDetail(result: {
+    dataLayerResult: ValidationResult;
+    destinationUrl: string;
+    rawRequest: string;
+    requestCheckResult: ValidationResult | null;
+  }): CreateTestEventDetailDto {
+    return {
+      passed: result.dataLayerResult.passed || false,
+      requestPassed: result.requestCheckResult?.passed || false,
+      rawRequest: result.rawRequest,
+      destinationUrl: result.destinationUrl,
+      dataLayer: result.dataLayerResult.dataLayer,
+      message: result.dataLayerResult.message || ''
+    };
+  }
+
+  /** The result row of a run that stopped before its checks finished. */
+  private buildFallbackTestEventDetail(): CreateTestEventDetailDto {
+    return {
+      passed: false,
+      requestPassed: false,
+      rawRequest: '',
+      destinationUrl: '',
+      dataLayer: [],
+      message: 'The run stopped with an error before its checks finished.'
+    };
   }
 }

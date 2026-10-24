@@ -8,6 +8,11 @@ import { jsonParseLinter } from '@codemirror/lang-json';
 import { EditorTypeEnum } from '@utils';
 import { Extension } from '@codemirror/state';
 
+/**
+ * Owns tag-build's two CodeMirror editors (input specs and output
+ * container) and mirrors their text in signals. Content set before an
+ * editor is mounted is kept in the signal and shown once it is.
+ */
 @Injectable({
   providedIn: 'root'
 })

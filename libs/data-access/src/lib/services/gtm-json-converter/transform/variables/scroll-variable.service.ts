@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ScrollVariableConfig, VariableTypeEnum } from '@utils';
 
+/**
+ * The built-in Scroll Depth Threshold variable the scroll tag reads.
+ */
 @Injectable({
   providedIn: 'root'
 })

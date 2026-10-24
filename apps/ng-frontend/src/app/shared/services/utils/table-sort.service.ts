@@ -9,6 +9,10 @@ export interface SortableColumn<T> {
   accessor?: (item: T) => SortableValue;
 }
 
+/**
+ * Sorts table rows by a column, with accessors for computed columns such
+ * as status.
+ */
 @Injectable({
   providedIn: 'root'
 })

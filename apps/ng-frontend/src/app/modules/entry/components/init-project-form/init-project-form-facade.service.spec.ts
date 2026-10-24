@@ -109,6 +109,29 @@ describe('InitProjectFormFacadeService', () => {
     });
   });
 
+  it('says so when the project could not be created', async () => {
+    configurationService.getConfiguration.mockReturnValue(
+      of({
+        name: 'rootProjectPath',
+        value: 'C:/tmp/tag-check-projects'
+      })
+    );
+    // ProjectService answers a failed request with null.
+    projectService.initProject.mockReturnValue(of(null));
+    service.projectForm.controls.projectName.setValue('Test Project');
+    service.projectForm.controls.measurementId.setValue('G-TEST123');
+
+    await firstValueFrom(service.submitProject(), { defaultValue: null });
+    await Promise.resolve();
+
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(dialog.open).toHaveBeenCalledWith(MockErrorDialogComponent, {
+      data: {
+        message: 'Could not create the project. Please try again.'
+      }
+    });
+  });
+
   it('submits a valid project and navigates to the project workspace', async () => {
     configurationService.getConfiguration.mockReturnValue(
       of({

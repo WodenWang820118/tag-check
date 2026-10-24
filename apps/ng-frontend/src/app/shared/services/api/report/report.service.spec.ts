@@ -59,15 +59,6 @@ describe('ReportService', () => {
     ).rejects.toThrow('Failed to update test event');
   });
 
-  it('updateReport PUTs the single report body', async () => {
-    httpClient.put.mockReturnValueOnce(of({} as never));
-    await firstValueFrom(service.updateReport('s', { eventId: 'a' } as never));
-    expect(httpClient.put).toHaveBeenCalledWith(
-      `${environment.reportApiUrl}/s`,
-      { eventId: 'a' }
-    );
-  });
-
   it('addReport POSTs reportDetails/recording/spec to /:slug/:eventId', async () => {
     httpClient.post.mockReturnValueOnce(of({} as never));
     await firstValueFrom(
@@ -107,62 +98,6 @@ describe('ReportService', () => {
       spec: { spec: 'foo' },
       dataLayerSpec: { event: 'a' }
     });
-  });
-
-  it('downloadFile creates a temporary anchor, clicks it and revokes the URL', () => {
-    const blob = new Blob(['xlsx']);
-    httpClient.get.mockReturnValueOnce(of(blob));
-    const click = vi.fn();
-    const anchor = {
-      click,
-      href: '',
-      download: ''
-    } as unknown as HTMLAnchorElement;
-    vi.spyOn(document, 'createElement').mockReturnValue(anchor);
-    const createSpy = vi
-      .spyOn(URL, 'createObjectURL')
-      .mockReturnValue('blob:fake');
-    const revokeSpy = vi
-      .spyOn(URL, 'revokeObjectURL')
-      .mockImplementation(() => undefined);
-    service.downloadFile('s', 'evt');
-    expect(httpClient.get).toHaveBeenCalledWith(
-      `${environment.reportApiUrl}/xlsx/s/evt`,
-      { responseType: 'blob' }
-    );
-    expect(anchor.download).toBe('s_evt.xlsx');
-    expect(createSpy).toHaveBeenCalledWith(blob);
-    expect(click).toHaveBeenCalled();
-    expect(revokeSpy).toHaveBeenCalledWith('blob:fake');
-  });
-
-  it('downloadFile swallows errors and skips anchor creation', () => {
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    httpClient.get.mockReturnValueOnce(throwError(() => new Error('x')));
-    const createElement = vi.spyOn(document, 'createElement');
-    service.downloadFile('s', 'evt');
-    expect(createElement).not.toHaveBeenCalled();
-  });
-
-  it('deleteReports issues a DELETE per report and joins the responses', async () => {
-    httpClient.delete
-      .mockReturnValueOnce(of({ id: 1 } as never))
-      .mockReturnValueOnce(of({ id: 2 } as never));
-    const result = await firstValueFrom(
-      service.deleteReports('s', [
-        { eventId: 'a' } as never,
-        { eventId: 'b' } as never
-      ])
-    );
-    expect(result).toEqual([{ id: 1 }, { id: 2 }]);
-    expect(httpClient.delete).toHaveBeenNthCalledWith(
-      1,
-      `${environment.reportApiUrl}/s/a`
-    );
-    expect(httpClient.delete).toHaveBeenNthCalledWith(
-      2,
-      `${environment.reportApiUrl}/s/b`
-    );
   });
 
   it('deleteBatchReports throws when projectSlug or eventIds are missing', () => {

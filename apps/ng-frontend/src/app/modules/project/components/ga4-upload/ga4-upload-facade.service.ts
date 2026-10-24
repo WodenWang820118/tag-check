@@ -21,6 +21,11 @@ import {
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
 import { ReportMapperService } from '../../services/report-mapper/report-mapper.service';
 
+/**
+ * The "Import GA4 events" tab: parses GA4 event JSON, typed or uploaded,
+ * and creates one test per event with a placeholder spec and an empty
+ * recording, then reloads the tests table.
+ */
 @Injectable({ providedIn: 'root' })
 export class Ga4UploadFacadeService {
   rawJson = signal<string>('');
@@ -86,6 +91,11 @@ export class Ga4UploadFacadeService {
 
   private tryParse() {
     this.parseError.set(null);
+    // Nothing typed yet is not an error.
+    if (!this.rawJson().trim()) {
+      this.events.set([]);
+      return;
+    }
     try {
       const json = JSON.parse(this.rawJson());
       const normalized = this.normalizeToEvents(json);

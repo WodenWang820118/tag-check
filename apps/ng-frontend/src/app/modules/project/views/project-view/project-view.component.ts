@@ -9,7 +9,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
 import { map } from 'rxjs';
-import { IReportDetails, Project, ProjectSetting } from '@utils';
+import { Project, ProjectSetting } from '@utils';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { SideNavListComponent } from '../../components/side-nav-list/side-nav-list.component';
@@ -18,6 +18,10 @@ import { SideNavListComponent } from '../../components/side-nav-list/side-nav-li
 // run buttons, so the menu slides over the content instead.
 const WIDE_LAYOUT_QUERY = '(min-width: 1280px)';
 
+/**
+ * A project's frame: the toolbar with the project switcher, the side
+ * menu and the routed page.
+ */
 @Component({
   selector: 'app-project-view',
   standalone: true,
@@ -69,7 +73,6 @@ const WIDE_LAYOUT_QUERY = '(min-width: 1280px)';
 export class ProjectViewComponent {
   project = signal<ProjectSetting>({} as ProjectSetting);
   projectInfo = signal<Project[]>([]);
-  reports = signal<IReportDetails[]>([]);
   private readonly breakpointObserver = inject(BreakpointObserver);
   readonly isWide = toSignal(
     this.breakpointObserver
@@ -87,10 +90,8 @@ export class ProjectViewComponent {
     this.route.data.subscribe((data) => {
       const projectSettings = data['projectSetting'];
       const projectInfo = data['projectInfo'];
-      const report = data['reports'];
       this.project.set(projectSettings);
       this.projectInfo.set(projectInfo);
-      this.reports.set(report);
     });
   }
 

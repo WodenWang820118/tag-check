@@ -3,6 +3,11 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { IReportDetails } from '@utils';
 import { ReportTableDataSourceModelService } from '../../../../services/report-table-data-source-model/report-table-data-source-model.service';
 
+/**
+ * Selection in the tests table. Select all acts on the rows of the
+ * current page, as filtered and sorted. Each change sets a new
+ * SelectionModel, so the signal notifies.
+ */
 @Injectable({ providedIn: 'root' })
 export class ReportTableSelectionFacadeService {
   constructor(

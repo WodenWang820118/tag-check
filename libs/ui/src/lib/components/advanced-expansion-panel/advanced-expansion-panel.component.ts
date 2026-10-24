@@ -21,10 +21,9 @@ import {
 import { catchError, EMPTY, filter, map } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
-import { EditorFacadeService, SetupConstructorService } from '@data-access';
+import { EditorFacadeService } from '@data-access';
 import { AdvancedExpansionPanelFacade } from './advanced-expansion-panel.facade.service';
 import { MatAccordion, MatExpansionModule } from '@angular/material/expansion';
-import { EditorView } from 'codemirror';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -38,6 +37,10 @@ interface AdvancedFormValues {
   includeItemScopedVariables: boolean;
 }
 
+/**
+ * tag-build's advanced options: built-in scroll and video events, the
+ * Google tag setup, ecommerce data and Event Settings variables.
+ */
 @Component({
   selector: 'lib-advanced-expansion-panel',
   standalone: true,
@@ -62,7 +65,6 @@ export class AdvancedExpansionPanelComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly editorFacadeService = inject(EditorFacadeService);
   private readonly facade = inject(AdvancedExpansionPanelFacade);
-  private readonly setupConstructorService = inject(SetupConstructorService);
   private readonly destroyRef = inject(DestroyRef);
 
   form: FormGroup = this.fb.group({
@@ -125,21 +127,6 @@ export class AdvancedExpansionPanelComponent implements OnInit {
 
   ngOnInit() {
     this.initializeFormSubscriptions(); // inspect the specification JSON and update the form
-    // Testing code below to test the custimized GTM Event Settings Variable
-    // const esvValue = JSON.stringify(
-    //   [
-    //     {
-    //       name: 'Google Tag G-8HKQR5ZBSK Event Settings',
-    //       parameters: [
-    //         {
-    //           page_referrer: '{{page_referrer for G-8HKQR5ZBSK Tags | String}}'
-    //         }
-    //       ]
-    //     }
-    //   ],
-    //   null,
-    //   2
-    // );
     this.setupForm.controls.googleTagName.setValue('GA4 Configuration Tag');
     this.setupForm.controls.useExistingMeasurementId.setValue('');
   }
@@ -162,29 +149,6 @@ export class AdvancedExpansionPanelComponent implements OnInit {
         // Delegate the heavy lifting to the facade which returns the updated JSON or null on error
         this.facade.updateJsonBasedOnForm(editor, form as AdvancedFormValues);
       });
-  }
-
-  private handleEditorAndFormChanges(
-    editor: EditorView,
-    form: AdvancedFormValues
-  ): void {
-    if (!editor.state.doc.toString()) return;
-
-    try {
-      const jsonString = editor.state.doc.toString();
-      const json = JSON.parse(jsonString);
-      const updatedJson = this.editorFacadeService.updateJsonBasedOnForm(
-        json,
-        form
-      );
-
-      this.editorFacadeService.inputJsonContent = updatedJson;
-      this.setupConstructorService.setIncludeItemScopedVariables(
-        form.includeItemScopedVariables
-      );
-    } catch (error) {
-      this.handleError('JSON parsing error', error);
-    }
   }
 
   onPanelOpened(): void {

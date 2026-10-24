@@ -18,6 +18,10 @@ import { GTMConfiguration } from '@utils';
  */
 export type ContainerExportEvent = 'container_download' | 'container_copy';
 
+/**
+ * Shown after a conversion that passed the import checks: downloads the
+ * container JSON or copies it to the clipboard.
+ */
 @Component({
   selector: 'lib-conversion-success-dialog',
   standalone: true,

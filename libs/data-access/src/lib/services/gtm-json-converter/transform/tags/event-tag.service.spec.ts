@@ -14,7 +14,7 @@ const tag = {
   triggers: [{ name: 'click' }, { name: 'page_view' }],
   parameters: [
     { type: 'TEMPLATE', key: 'currency', value: 'USD' },
-    { type: 'TEMPLATE', key: 'items', value: 'ecommerce_items' }
+    { type: 'TEMPLATE', key: 'items', value: 'ecommerce.items' }
   ]
 } as never;
 
@@ -54,7 +54,7 @@ describe('EventTag', () => {
     expect(config.firingTriggerId).toEqual(['20', '21', '10']);
   });
 
-  it('emits sendEcommerceData, eventName, eventSettingsTable, measurementId in order', () => {
+  it('emits sendEcommerceData, eventName, eventSettingsTable, measurementIdOverride in order', () => {
     const config = service.createTag(
       'GA4 Tag',
       'a',
@@ -68,12 +68,14 @@ describe('EventTag', () => {
       'sendEcommerceData',
       'eventName',
       'eventSettingsTable',
-      'measurementId'
+      'measurementIdOverride'
     ]);
+    // As Tag Manager exports it since the Google tag replaced the GA4
+    // Configuration tag: the event tag reads the measurement ID itself.
     expect(config.parameter?.[3]).toEqual({
-      type: 'TAG_REFERENCE',
-      key: 'measurementId',
-      value: 'GA4 Tag'
+      type: 'TEMPLATE',
+      key: 'measurementIdOverride',
+      value: '{{CONST - Measurement ID}}'
     });
     expect(config.parameter?.[1]).toEqual({
       type: 'TEMPLATE',
@@ -88,7 +90,7 @@ describe('EventTag', () => {
     expect(eventParameters?.list).toHaveLength(2);
   });
 
-  it('drops parameters whose value mentions ecommerce when sendEcommerceData is "true"', () => {
+  it('drops parameters read from the ecommerce object when sendEcommerceData is "true"', () => {
     const config = service.createTag('GA4', 'a', 'c', tag, triggers, 'true');
     const eventParameters = config.parameter?.[2];
     expect(eventParameters?.list).toHaveLength(1);

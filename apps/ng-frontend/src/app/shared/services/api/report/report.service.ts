@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpContext } from '@angular/common/http';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   IReportDetails,
   TestEventSchema,
@@ -15,6 +15,10 @@ import { environment } from '../../../../../environments/environment';
 import { catchHttpError, rethrowHttpError } from '../http-error.utils';
 import { API_OPERATION_CONTEXT } from '../api-request-id.interceptor';
 
+/**
+ * The tests API (test events): list, create, update and delete tests, and
+ * load a test's latest result.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -43,21 +47,6 @@ export class ReportService {
     return this.http
       .put<TestEvent[]>(`${environment.reportApiUrl}/${projectSlug}`, reports)
       .pipe(rethrowHttpError('Failed to update test event'));
-  }
-
-  /**
-   * Updates a single abstract report.
-   *
-   * @param projectSlug - URL-friendly project identifier.
-   * @param report      - Updated report payload.
-   */
-  updateReport(projectSlug: string, report: AbstractTestEvent) {
-    return this.http
-      .put<AbstractTestEvent>(
-        `${environment.reportApiUrl}/${projectSlug}`,
-        report
-      )
-      .pipe(rethrowHttpError('Failed to update report'));
   }
 
   /**
@@ -120,53 +109,6 @@ export class ReportService {
   }
 
   /**
-   * Downloads the XLSX report for a single event and triggers a browser
-   * file-save dialog. Failures are swallowed since the operation is
-   * fire-and-forget with no observable consumer.
-   *
-   * @param projectSlug - URL-friendly project identifier.
-   * @param eventName   - Name of the event whose report to download.
-   */
-  downloadFile(projectSlug: string, eventName: string) {
-    this.http
-      .get(`${environment.reportApiUrl}/xlsx/${projectSlug}/${eventName}`, {
-        responseType: 'blob'
-      })
-      .pipe(catchHttpError(null))
-      .subscribe((blob) => {
-        if (blob) {
-          // Create a new Blob object using the response data of the file
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = `${projectSlug}_${eventName}.xlsx`; // A default filename if none is specified by headers
-          a.click();
-
-          URL.revokeObjectURL(a.href);
-        }
-      });
-  }
-
-  /**
-   * Deletes individual reports one at a time and waits for all deletions.
-   *
-   * Per-item failures return `null` so a single failing delete does not
-   * abort the remaining ones.
-   *
-   * @param projectSlug - URL-friendly project identifier.
-   * @param reports     - Array of report details whose events to delete.
-   */
-  deleteReports(projectSlug: string, reports: IReportDetails[]) {
-    const tasks = reports.map((report) =>
-      this.http
-        .delete<TestEventSchema>(
-          `${environment.reportApiUrl}/${projectSlug}/${report.eventId}`
-        )
-        .pipe(catchHttpError(null))
-    );
-    return forkJoin(tasks); // Waits for all DELETE operations to complete.
-  }
-
-  /**
    * Deletes multiple reports in a single batched request.
    *
    * Returns `null` on HTTP failure rather than throwing so callers can treat
@@ -177,7 +119,6 @@ export class ReportService {
    */
   deleteBatchReports(projectSlug: string, eventIds: string[]) {
     if (!projectSlug || !eventIds) throw new Error('Invalid arguments');
-    console.log('Deleting reports:', eventIds);
     return this.http
       .delete<TestEventSchema>(`${environment.reportApiUrl}/${projectSlug}`, {
         body: eventIds

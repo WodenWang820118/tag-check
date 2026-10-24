@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { rethrowHttpError } from '../http-error.utils';
 
+/** Loads the screen recordings of a test's latest run. */
 @Injectable({
   providedIn: 'root'
 })

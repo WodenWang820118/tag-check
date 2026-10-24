@@ -20,51 +20,6 @@ describe('RecordingService', () => {
     vi.useRealTimers();
   });
 
-  it('round-trips temp/recording/loading signals', () => {
-    const recording = { name: 'r' } as never;
-    service.setTempRecording(recording);
-    service.setRecording(recording);
-    service.setLoading(true);
-    expect(service.tempRecordingContent$()).toBe(recording);
-    expect(service.recordingContent$()).toBe(recording);
-    expect(service.isLoading$()).toBe(true);
-  });
-
-  it('readRecordingJsonFileContent parses JSON content into the temp signal and clears loading', async () => {
-    vi.useFakeTimers();
-    const file = {
-      text: () => Promise.resolve('{"name":"foo"}')
-    } as File;
-    service.readRecordingJsonFileContent(file);
-    expect(service.isLoading$()).toBe(true);
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(service.tempRecordingContent$()).toEqual({ name: 'foo' });
-    vi.advanceTimersByTime(1000);
-    expect(service.isLoading$()).toBe(false);
-  });
-
-  it('readRecordingJsonFileContent sets temp to null when JSON.parse throws', async () => {
-    vi.useFakeTimers();
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const file = { text: () => Promise.resolve('not json') } as File;
-    service.tempRecordingContent.set({ name: 'old' } as never);
-    service.readRecordingJsonFileContent(file);
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(service.tempRecordingContent$()).toBeNull();
-    vi.advanceTimersByTime(1000);
-    expect(service.isLoading$()).toBe(false);
-  });
-
-  it('getProjectRecordingNames falls back to [] on error', async () => {
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    httpClient.get.mockReturnValueOnce(throwError(() => new Error('x')));
-    expect(await firstValueFrom(service.getProjectRecordingNames('s'))).toEqual(
-      []
-    );
-  });
-
   it('getRecordingDetails short-circuits when projectSlug or eventId is missing', async () => {
     expect(
       await firstValueFrom(service.getRecordingDetails('', 'evt'))

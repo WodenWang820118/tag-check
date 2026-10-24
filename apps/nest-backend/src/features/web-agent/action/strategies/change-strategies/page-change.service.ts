@@ -1,7 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { ChangeOperation } from './utils';
+import { withTimeout } from '../with-timeout';
 
+/**
+ * Changes an element through the page: page.select() for a select element,
+ * page.type() otherwise. Works with CSS selectors only; for other selector
+ * types the tag check fails and the strategy falls back to an element handle.
+ */
 @Injectable()
 export class PageChangeService implements ChangeOperation {
   private readonly logger = new Logger(PageChangeService.name);
@@ -15,35 +21,32 @@ export class PageChangeService implements ChangeOperation {
     timeout = 5000
   ): Promise<boolean> {
     try {
-      // TODO: verifiy this
-      // Check if the element is a select element
       if (!value) {
         this.logger.error('Value is required to change the element');
         return false;
       }
 
+      // Helper-free on purpose: swc compiles this function to ES5 for the
+      // page, which has none of the bundle's helpers (see AGENTS.md).
       const isSelect = await page.evaluate((selector) => {
         const element = document.querySelector(selector);
         return element?.tagName.toLowerCase() === 'select';
       }, selector);
 
       if (isSelect) {
-        // If it's a select element, use page.select() to change its value
         this.logger.log('Selecting the select element');
-        await Promise.race([
+        await withTimeout(
           page.select(selector, value),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout exceeded')), timeout)
-          )
-        ]);
+          timeout,
+          'Timeout exceeded'
+        );
       } else {
         this.logger.log('Typing the input element');
-        await Promise.race([
+        await withTimeout(
           page.type(selector, value),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout exceeded')), timeout)
-          )
-        ]);
+          timeout,
+          'Timeout exceeded'
+        );
       }
 
       return true;

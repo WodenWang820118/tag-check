@@ -257,3 +257,77 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     ]);
   });
 });
+
+describe('PuppeteerUtilsService.startBrowser', () => {
+  const preset = {
+    application: { localStorage: { data: [] }, cookie: { data: [] } },
+    puppeteerArgs: []
+  };
+
+  /** A service whose Chromium launch returns `browser`. */
+  function serviceLaunching(browser: unknown) {
+    const service = new PuppeteerUtilsService(
+      { getBROWSER_ARGS: vi.fn(() => []) } as never,
+      {} as never,
+      {} as never
+    );
+    vi.spyOn(
+      service as unknown as { resolveChromium: () => Promise<unknown> },
+      'resolveChromium'
+    ).mockResolvedValue({
+      puppeteer: { launch: vi.fn().mockResolvedValue(browser) },
+      executablePath: 'chrome'
+    });
+    return service;
+  }
+
+  function createBrowser(onPages: () => void = () => undefined) {
+    const page = { close: vi.fn().mockResolvedValue(undefined) };
+    return {
+      page,
+      pages: vi.fn(async () => {
+        onPages();
+        return [page];
+      }),
+      close: vi.fn().mockResolvedValue(undefined),
+      process: vi.fn(() => null)
+    };
+  }
+
+  it('returns the browser with its first page', async () => {
+    const browser = createBrowser();
+    const service = serviceLaunching(browser);
+
+    const started = await service.startBrowser(
+      'true',
+      '',
+      preset,
+      new AbortController().signal
+    );
+
+    expect(started).toEqual({ browser, page: browser.page });
+    expect(browser.close).not.toHaveBeenCalled();
+  });
+
+  it('closes the browser and rejects when the run is aborted while Chromium starts', async () => {
+    const controller = new AbortController();
+    const browser = createBrowser(() => controller.abort());
+    const service = serviceLaunching(browser);
+
+    await expect(
+      service.startBrowser('true', '', preset, controller.signal)
+    ).rejects.toThrow(/aborted/i);
+    expect(browser.close).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes the browser once when the run is aborted after it started', async () => {
+    const controller = new AbortController();
+    const browser = createBrowser();
+    const service = serviceLaunching(browser);
+
+    await service.startBrowser('true', '', preset, controller.signal);
+    controller.abort();
+
+    await vi.waitFor(() => expect(browser.close).toHaveBeenCalledTimes(1));
+  });
+});

@@ -22,6 +22,11 @@ import {
 } from '@utils';
 import { AdvancedExpansionPanelComponent } from '../advanced-expansion-panel/advanced-expansion-panel.component';
 
+/**
+ * Runs tag-build's conversion: reads the specs and options, converts them
+ * into a container, checks it with {@link validateGTMImportReadiness} and
+ * shows the result or the reasons it needs review.
+ */
 @Injectable({ providedIn: 'root' })
 export class FunctionalCardFacade {
   private readonly dataLayer: Array<Record<string, unknown>>;
@@ -90,38 +95,15 @@ export class FunctionalCardFacade {
     return this.tagBuildModeService.mode;
   }
 
+  /**
+   * Converts the input editor's specs into a GTM container in Tag Build
+   * mode. Tag Extract mode has no conversion yet, so it does nothing.
+   */
   convertCode(accordionContainer?: () => AdvancedExpansionPanelComponent) {
-    const mode = this.tagBuildModeService.mode;
-    console.log('Converting code in mode:', TagBuildMode[mode]);
-    if (mode === TagBuildMode.TagExtract) {
-      // this.convertTagExtract();
-    } else {
+    if (this.tagBuildModeService.mode === TagBuildMode.TagBuild) {
       this.convertTagBuild(accordionContainer);
     }
   }
-
-  // private convertTagExtract() {
-  //   console.log('Converting code in mode: TagExtract');
-  //   const inputJsonEditor = this.editorFacadeService.editorView;
-  //   const inputText = inputJsonEditor.inputJson().state.doc.toString();
-  //   try {
-  //     if (inputText === '') {
-  //       this.openDialog({ message: 'Please provide a valid JSON input.' });
-  //       return;
-  //     }
-
-  //     const specs = this.gtmJsonParserService.parse(inputText);
-  //     this.editorFacadeService.outputJsonContent = specs;
-  //     //  this.editorFacadeService.
-  //   } catch (error) {
-  //     const data = {
-  //       message:
-  //         String(error) || 'An error occurred while processing the input JSON.'
-  //     };
-  //     this.openDialog(data);
-  //     console.error(error);
-  //   }
-  // }
 
   private convertTagBuild(
     accordionContainer?: () => AdvancedExpansionPanelComponent

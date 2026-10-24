@@ -1,7 +1,10 @@
 import { Routes } from '@angular/router';
 import { treeNodeResolver } from './resolvers/documentation.resolver';
-import { treeNodeDeactivateGuard } from './guards/documentation.guard';
 
+/**
+ * Documentation routes: the sidebar shell, with each page at `:name` and
+ * the index redirecting to the introduction.
+ */
 export const DOCS_ROUTES: Routes = [
   {
     path: '',
@@ -25,8 +28,7 @@ export const DOCS_ROUTES: Routes = [
           ),
         resolve: {
           data: treeNodeResolver
-        },
-        canDeactivate: [treeNodeDeactivateGuard]
+        }
       }
     ]
   }
