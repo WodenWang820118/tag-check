@@ -5,7 +5,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
-import { InformationDialogComponent } from '../../../../shared/components/information-dialog/information-dialog.component';
+import {
+  InformationDialogComponent,
+  InformationDialogData
+} from '../../../../shared/components/information-dialog/information-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import {
   take,
@@ -94,10 +97,13 @@ export class ProjectItemComponent {
   ) {}
 
   deleteProject() {
-    const dialogRef = this.dialog.open(InformationDialogComponent, {
+    const dialogRef = this.dialog.open<
+      InformationDialogComponent,
+      InformationDialogData
+    >(InformationDialogComponent, {
       data: {
         title: 'Delete project',
-        message: 'Are you sure you want to delete this project?',
+        contents: 'Are you sure you want to delete this project?',
         action: 'Delete'
       }
     });
