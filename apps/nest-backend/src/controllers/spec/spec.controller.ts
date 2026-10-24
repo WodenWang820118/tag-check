@@ -5,6 +5,7 @@ import { SpecRepositoryService } from '../../core/repository/spec/spec-repositor
 import { ItemDefRepositoryService } from '../../core/repository/item-def/item-def-repository.service';
 import { CreateSpecDto, UpdateItemDefDto, UpdateSpecDto } from '../../shared';
 
+/** Reads and edits tests' specs and item definitions. */
 @Controller('specs')
 export class SpecController {
   constructor(
@@ -56,7 +57,7 @@ export class SpecController {
     return await this.projectSpecService.addSpec(projectSlug, spec);
   }
 
-  @Put(':projectSlug/:eventid')
+  @Put(':projectSlug/:eventId')
   async updateSpec(
     @Param('projectSlug') projectSlug: string,
     @Param('eventId') eventId: string,

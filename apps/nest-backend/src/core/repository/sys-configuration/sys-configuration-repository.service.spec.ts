@@ -149,24 +149,4 @@ describe('SysConfigurationRepositoryService', () => {
       status: 404
     });
   });
-
-  it('getCurrentProjectPath() returns the configuration entity', async () => {
-    const { service, repository } = build();
-    (repository.findOne as ReturnType<typeof vi.fn>).mockResolvedValue({
-      id: 1,
-      value: '/cur'
-    });
-    expect(await service.getCurrentProjectPath()).toEqual({
-      id: 1,
-      value: '/cur'
-    });
-  });
-
-  it('getCurrentProjectPath() throws NOT_FOUND when missing', async () => {
-    const { service, repository } = build();
-    (repository.findOne as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-    await expect(service.getCurrentProjectPath()).rejects.toMatchObject({
-      status: 404
-    });
-  });
 });

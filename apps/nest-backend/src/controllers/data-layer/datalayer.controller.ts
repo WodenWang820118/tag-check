@@ -14,6 +14,10 @@ import { EventInspectionControllerService } from './event-inspection-controller.
 import { TestReportFacadeRepositoryService } from '../../features/repository/test-report-facade/test-report-facade-repository.service';
 import { InspectEventQueryDto } from './dto/inspect-event-query.dto';
 
+/**
+ * Runs a test directly against the site (not through GTM Preview) and stops a
+ * running test.
+ */
 @Controller('datalayer')
 export class DataLayerController {
   private readonly logger = new Logger(DataLayerController.name);

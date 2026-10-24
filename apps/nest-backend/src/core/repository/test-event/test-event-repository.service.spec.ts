@@ -294,16 +294,6 @@ describe('TestEventRepositoryService', () => {
     expect(repository.update).toHaveBeenCalledWith(1, { message: 'm' });
   });
 
-  it('deleteByProjectSlugAndEventId() deletes by composite criteria', async () => {
-    const { service, repository } = build();
-    repository.delete.mockResolvedValue({ affected: 1 });
-    await service.deleteByProjectSlugAndEventId('demo', 'evt');
-    expect(repository.delete).toHaveBeenCalledWith({
-      project: { projectSlug: 'demo' },
-      eventId: 'evt'
-    });
-  });
-
   it('deleteByProjectSlugAndEventIds() rejects empty event id arrays', async () => {
     const { service } = build();
     await expect(

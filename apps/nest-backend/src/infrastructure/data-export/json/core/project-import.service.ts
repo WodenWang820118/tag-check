@@ -7,8 +7,10 @@ import { RelationMapperService } from './relation-mapper.service';
 import { ImportStats } from '../../interfaces/import-types';
 
 /**
- * Handles importing of ProjectEntity rows, slug uniqueness and registration
- * of alternate keys (slug + exportRef).
+ * Imports project rows. A project whose slug already exists is updated in
+ * place (the import merges into it); otherwise a project is created. Either
+ * way the exported primary key maps to the project's key here, and its slug
+ * and `__exportRef` become alternate keys for the rows that follow.
  */
 @Injectable()
 export class ProjectImportService {
@@ -32,6 +34,8 @@ export class ProjectImportService {
     idMaps: Record<string, Map<unknown, unknown>>
   ): Promise<unknown> {
     let newProjectId: unknown = undefined;
+    // Sequential on purpose: the lookups and saves share the import's
+    // transaction, and a later row may reuse an earlier row's slug.
     for (const raw of rows as Array<Record<string, unknown>>) {
       const materialized = this.materializer.materialize(raw, meta) as Record<
         string,
@@ -198,6 +202,7 @@ export class ProjectImportService {
         ? raw[pkInfo.primaryKeyProp]
         : undefined;
       if (oldPk != null) this.idMapRegistry.set(meta.name, oldPk, newPk);
+      this.idMapRegistry.markCreated(meta.name, newPk);
 
       this.registerSlug(meta.name, uniqueSlug, newPk);
       const exportRef = this.getExportRef(raw, materialized);

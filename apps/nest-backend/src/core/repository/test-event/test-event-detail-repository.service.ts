@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import {
@@ -6,8 +6,7 @@ import {
   TestEventDetailEntity,
   TestEventDetailResponseDto,
   TestEventEntity,
-  TestImageEntity,
-  UpdateTestEventDetailDto
+  TestImageEntity
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 import type { RunSummary } from '@utils';
@@ -27,13 +26,12 @@ export type DeletedRuns = {
   latestRunDeletedEventIds: string[];
 };
 
+/** Reads, saves and deletes runs (`TestEventDetailEntity`). */
 @Injectable()
 export class TestEventDetailRepositoryService {
   constructor(
     @InjectRepository(TestEventDetailEntity)
-    private readonly repository: Repository<TestEventDetailEntity>,
-    @InjectRepository(TestEventEntity)
-    private readonly testEventRepository: Repository<TestEventEntity>
+    private readonly repository: Repository<TestEventDetailEntity>
   ) {}
 
   /**
@@ -64,6 +62,10 @@ export class TestEventDetailRepositoryService {
     }));
   }
 
+  /**
+   * The test's latest run, or an empty DTO when it has none. Runs saved in
+   * the same second share `createdAt`, so the higher id breaks the tie.
+   */
   async getBySlugAndEventId(projectSlug: string, eventId: string) {
     const entity = await this.repository.findOne({
       relations: {
@@ -77,35 +79,16 @@ export class TestEventDetailRepositoryService {
           eventId
         }
       },
-      order: {
-        createdAt: 'DESC'
-      }
+      order: { createdAt: 'DESC', id: 'DESC' }
     });
     return plainToInstance(TestEventDetailResponseDto, entity);
-  }
-
-  async getBySlugAndEventIds(projectSlug: string, eventIds: string[]) {
-    const entities = await this.repository.find({
-      relations: {
-        testEvent: true
-      },
-      where: {
-        testEvent: {
-          project: {
-            projectSlug
-          },
-          eventId: In(eventIds)
-        }
-      }
-    });
-    return entities.map((entity) =>
-      plainToInstance(TestEventDetailResponseDto, entity)
-    );
   }
 
   /**
    * Saves a run's result, with its message and, when the run saved one, its
    * screenshot.
+   *
+   * @throws HttpException 400 with the database error when saving fails.
    */
   async create(
     testEventEntity: TestEventEntity,
@@ -238,43 +221,5 @@ export class TestEventDetailRepositoryService {
         latestRunDeletedEventIds: repointed.map(({ test }) => test.eventId)
       };
     });
-  }
-
-  async update(
-    projectSlug: string,
-    eventId: string,
-    data: UpdateTestEventDetailDto
-  ) {
-    try {
-      const testEvent = await this.testEventRepository.findOne({
-        relations: { project: true },
-        where: {
-          eventId: eventId,
-          project: { projectSlug: projectSlug }
-        }
-      });
-      if (!testEvent)
-        throw new HttpException('TestEvent not found', HttpStatus.NOT_FOUND);
-
-      const newDetail = new TestEventDetailEntity();
-      newDetail.passed = data.passed ?? false;
-      newDetail.requestPassed = data.requestPassed ?? false;
-      newDetail.rawRequest = data.rawRequest ?? '';
-      newDetail.destinationUrl = data.destinationUrl ?? '';
-      newDetail.dataLayer = data.dataLayer ?? [];
-
-      const entity = await this.repository.update(
-        { testEvent: testEvent },
-        newDetail
-      );
-
-      return plainToInstance(TestEventDetailResponseDto, entity);
-    } catch (error) {
-      Logger.error(error);
-      throw new HttpException(
-        'Error updating test event detail',
-        HttpStatus.BAD_REQUEST
-      );
-    }
   }
 }

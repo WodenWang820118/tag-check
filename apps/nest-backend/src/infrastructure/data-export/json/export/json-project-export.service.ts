@@ -2,23 +2,23 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityMetadata } from 'typeorm';
 import { ProjectExportProvider } from '../../interfaces/project-export-provider.interface';
+import { FixtureEnvelopeV1, FixtureRow } from '../../interfaces/fixture-types';
 
-type FixtureRow = Record<string, unknown>;
-
-interface FixtureEnvelopeV1 {
-  version: 1;
-  exportedAt: string; // ISO
-  schemaHash: string; // placeholder until migrations introduced
-  projectSlug: string;
-  entities: Record<string, FixtureRow[]>; // EntityName -> rows
-}
-
+/**
+ * Exports one project's database rows as a JSON fixture envelope: the
+ * project row, then every entity whose rows belong to it (directly, or
+ * through a parent that has a project). Relations are written as the
+ * related rows' IDs, which the import remaps.
+ */
 @Injectable()
 export class JsonProjectExportService implements ProjectExportProvider {
   private readonly logger = new Logger(JsonProjectExportService.name);
 
   constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
+  /**
+   * @throws Error when no project has this slug.
+   */
   async exportProject(projectSlug: string): Promise<FixtureEnvelopeV1> {
     this.logger.log(`Exporting project (JSON) slug=${projectSlug}`);
 
@@ -48,30 +48,36 @@ export class JsonProjectExportService implements ProjectExportProvider {
       return a.name.localeCompare(b.name);
     });
 
-    const result: Record<string, FixtureRow[]> = {};
-    for (const meta of metas) {
-      try {
-        const rows = await this.fetchRowsForProject(meta, projectId);
-        if (rows && rows.length > 0) {
-          result[meta.name] = rows.map((r) =>
-            this.serializeRow(r, meta, canonicalProjectSlug)
+    // The reads are independent; the envelope keeps the order of `metas`.
+    const rowsByMeta = await Promise.all(
+      metas.map(async (meta) => {
+        try {
+          return await this.fetchRowsForProject(meta, projectId);
+        } catch (e) {
+          this.logger.debug(
+            `Skipping entity ${meta.name}: ${(e as Error).message}`
           );
+          return undefined;
         }
-      } catch (e) {
-        this.logger.debug(
-          `Skipping entity ${meta.name}: ${(e as Error).message}`
+      })
+    );
+    const result: Record<string, FixtureRow[]> = {};
+    metas.forEach((meta, index) => {
+      const rows = rowsByMeta[index];
+      if (rows && rows.length > 0) {
+        result[meta.name] = rows.map((r) =>
+          this.serializeRow(r, meta, canonicalProjectSlug)
         );
       }
-    }
+    });
 
-    const envelope: FixtureEnvelopeV1 = {
+    return {
       version: 1,
       exportedAt: new Date().toISOString(),
       schemaHash: 'dev-schema-hash',
       projectSlug,
       entities: result
     };
-    return envelope;
   }
 
   private getProjectEntityMeta(): EntityMetadata {

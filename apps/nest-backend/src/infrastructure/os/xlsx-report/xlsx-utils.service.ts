@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+/** Formats values for spreadsheet cells. */
 @Injectable()
 export class XlsxUtilsService {
   private readonly logger = new Logger(XlsxUtilsService.name);

@@ -10,6 +10,10 @@ import {
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
+/**
+ * Reads and writes a project's application settings: website URL,
+ * pre-loading values (local storage and cookies) and GTM preview options.
+ */
 @Injectable()
 export class ApplicationSettingRepositoryService {
   private readonly logger = new Logger(
@@ -68,6 +72,8 @@ export class ApplicationSettingRepositoryService {
         HttpStatus.NOT_FOUND
       );
     } catch (error) {
+      // Keep the 404 thrown above; only unexpected failures become a 500.
+      if (error instanceof HttpException) throw error;
       Logger.error(`Failed to update Application settings: ${error}`);
       throw new HttpException(
         'Failed to update Application settings',

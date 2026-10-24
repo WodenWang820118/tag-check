@@ -3,6 +3,10 @@ import { SingleEventInspectionService } from '../../features/event-inspection/si
 import { CookieData, EventInspectionPresetDto, LocalStorageData } from '@utils';
 import { InspectEventQueryDto } from './dto/inspect-event-query.dto';
 
+/**
+ * Turns a run request's query string and body into the options of a
+ * single-event inspection, and aborts the running one.
+ */
 @Injectable()
 export class EventInspectionControllerService {
   private readonly logger = new Logger(EventInspectionControllerService.name);

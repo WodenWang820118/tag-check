@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DATABASE_ENTITIES } from './database-entities';
 import {
   createMigratedDataSource,
@@ -78,6 +78,32 @@ describe('createMigratedDataSource', () => {
     await expect(createMigratedDataSource()).rejects.toThrow(
       'TypeORM options are missing'
     );
+  });
+
+  it('closes the database when a migration fails', async () => {
+    class FailingMigration1792540800001 {
+      name = 'FailingMigration1792540800001';
+      async up(): Promise<void> {
+        throw new Error('migration failed');
+      }
+      async down(): Promise<void> {
+        // Nothing to undo.
+      }
+    }
+    const destroy = vi.spyOn(DataSource.prototype, 'destroy');
+    try {
+      await expect(
+        createMigratedDataSource({
+          type: 'sqlite',
+          database: ':memory:',
+          entities: DATABASE_ENTITIES,
+          migrations: [...DATABASE_MIGRATIONS, FailingMigration1792540800001]
+        })
+      ).rejects.toThrow('migration failed');
+      expect(destroy).toHaveBeenCalledOnce();
+    } finally {
+      destroy.mockRestore();
+    }
   });
 });
 

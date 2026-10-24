@@ -3,6 +3,7 @@ import { ProjectImportProvider } from '../../interfaces/project-import-provider.
 import { ImportOrchestrator } from './import-orchestrator.service';
 import { FixtureEnvelopeV1 } from '../../interfaces/fixture-types';
 
+/** Validates a parsed `<slug>.fixture.json` and imports its rows. */
 @Injectable()
 export class JsonProjectImportService implements ProjectImportProvider {
   private readonly logger = new Logger(JsonProjectImportService.name);
@@ -14,6 +15,10 @@ export class JsonProjectImportService implements ProjectImportProvider {
     await this.orchestrator.import(env);
   }
 
+  /**
+   * @throws Error when the payload is not a version 1 envelope with
+   * entities.
+   */
   validate(payload: unknown): FixtureEnvelopeV1 {
     if (!payload || typeof payload !== 'object') {
       throw new Error('Invalid payload');

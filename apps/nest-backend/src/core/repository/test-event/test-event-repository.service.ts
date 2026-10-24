@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import {
@@ -11,9 +11,9 @@ import {
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
+/** Reads and writes tests (`TestEventEntity`). */
 @Injectable()
 export class TestEventRepositoryService {
-  private readonly logger = new Logger(TestEventRepositoryService.name);
   constructor(
     @InjectRepository(TestEventEntity)
     private readonly repository: Repository<TestEventEntity>
@@ -176,8 +176,8 @@ export class TestEventRepositoryService {
             updateData.latestTestImageId = updatedEvent.latestTestImageId;
           }
 
-          // Use save instead of update to properly handle relations
-          // Upsert
+          // Sequential on purpose: the saves share the transaction's
+          // connection. save, not update, keeps the loaded relations.
           const updatedEntity = await repo.save({
             ...event,
             ...updateData
@@ -210,14 +210,6 @@ export class TestEventRepositoryService {
       ...data
     });
     return plainToInstance(AbstractTestEventResponseDto, updatedEntity);
-  }
-
-  async deleteByProjectSlugAndEventId(projectSlug: string, eventId: string) {
-    const entity = await this.repository.delete({
-      project: { projectSlug },
-      eventId
-    });
-    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
   async deleteByProjectSlugAndEventIds(

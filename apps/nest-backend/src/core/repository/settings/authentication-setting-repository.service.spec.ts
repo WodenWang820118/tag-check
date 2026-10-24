@@ -60,12 +60,12 @@ describe('AuthenticationSettingRepositoryService', () => {
     );
   });
 
-  it('update() throws when the setting does not exist', async () => {
+  it('update() throws NOT_FOUND when the setting does not exist', async () => {
     const { service, repository } = build();
     repository.findOne.mockResolvedValue(null);
     await expect(
       service.update({ id: 4, projectSlug: 'demo' } as never, {} as never)
-    ).rejects.toMatchObject({ status: HttpStatus.INTERNAL_SERVER_ERROR });
+    ).rejects.toMatchObject({ status: HttpStatus.NOT_FOUND });
   });
 
   it('update() wraps save failures into an HttpException', async () => {

@@ -15,6 +15,10 @@ import { ConfigsService } from '../../configs/configs.service';
 import { Repository } from 'typeorm';
 import { existsSync } from 'fs';
 
+/**
+ * Reads and writes system configuration entries, such as the root projects
+ * path, which it creates or repairs when the module starts.
+ */
 @Injectable()
 export class SysConfigurationRepositoryService implements OnModuleInit {
   private readonly logger = new Logger(SysConfigurationRepositoryService.name);
@@ -133,20 +137,5 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
     }
 
     return configuration.value;
-  }
-
-  async getCurrentProjectPath() {
-    const configuration = await this.configurationRepository.findOne({
-      where: { name: this.configsService.getCONFIG_CURRENT_PROJECT_PATH() }
-    });
-
-    if (!configuration) {
-      throw new HttpException(
-        'Current project path configuration not found',
-        HttpStatus.NOT_FOUND
-      );
-    }
-
-    return configuration;
   }
 }

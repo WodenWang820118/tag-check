@@ -4,6 +4,7 @@ import { TopologicalSorterService } from './topological-sorter.service';
 import { PointerRepairService } from './pointer-repair.service';
 import { IdMapRegistryService } from './id-map-registry.service';
 import { EntityImportService } from './entity-import.service';
+import { RelationMapperService } from './relation-mapper.service';
 import type { DataSource } from 'typeorm';
 import type { FixtureEnvelopeV1 } from '../../interfaces/fixture-types';
 
@@ -42,6 +43,9 @@ describe('ImportTransactionService', () => {
         return 'new-id';
       })
     } as unknown as EntityImportService;
+    const relationMapper = {
+      clear: vi.fn()
+    } as unknown as RelationMapperService;
 
     return {
       svc: new ImportTransactionService(
@@ -49,11 +53,14 @@ describe('ImportTransactionService', () => {
         sorter,
         pointerRepair,
         idMapRegistry,
-        entityImporter
+        entityImporter,
+        relationMapper
       ),
       qr,
       pointerRepair,
-      entityImporter
+      entityImporter,
+      idMapRegistry,
+      relationMapper
     };
   }
 
@@ -70,6 +77,34 @@ describe('ImportTransactionService', () => {
     expect(qr.commitTransaction).toHaveBeenCalled();
     expect(qr.release).toHaveBeenCalled();
     expect(out.stats).toBeDefined();
+  });
+
+  it("starts from empty id and alternate-key maps, so an earlier import's keys cannot resolve this one's references", async () => {
+    const { svc, idMapRegistry, relationMapper } = build();
+    await svc.runWithinTransaction(env);
+    expect(idMapRegistry.clear).toHaveBeenCalled();
+    expect(relationMapper.clear).toHaveBeenCalled();
+  });
+
+  it('repairs the pointers recorded while the rows were imported', async () => {
+    const { svc, pointerRepair, entityImporter } = build();
+    vi.mocked(entityImporter.importEntitiesFor).mockImplementationOnce(
+      async (_name, _rows, _meta, _repo, ctx) => {
+        ctx.deferredPointers?.push({
+          entityName: 'TestEventEntity',
+          exportedRowId: 1,
+          relationProp: 'latestTestEventDetail',
+          targetEntityName: 'TestEventDetailEntity',
+          exportedTargetId: 2
+        });
+        return 'new-id';
+      }
+    );
+    await svc.runWithinTransaction(env);
+    expect(pointerRepair.repairPointers).toHaveBeenCalledWith(
+      expect.anything(),
+      [expect.objectContaining({ exportedTargetId: 2 })]
+    );
   });
 
   it('rolls back the transaction on error and rethrows', async () => {

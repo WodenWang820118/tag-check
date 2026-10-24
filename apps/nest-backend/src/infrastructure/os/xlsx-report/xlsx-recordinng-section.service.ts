@@ -3,6 +3,7 @@ import { FullTestEventResponseDto } from '../../../shared';
 import * as ExcelJS from 'exceljs';
 import { XlsxUtilsService } from './xlsx-utils.service';
 
+/** Writes a sheet's recording section: the test's recorded steps. */
 @Injectable()
 export class XlsxRecordingSectionService {
   private readonly logger = new Logger(XlsxRecordingSectionService.name);

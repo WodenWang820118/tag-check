@@ -16,6 +16,11 @@ import { XlsxTestDataSectionService } from './xlsx-test-data-section.service';
 import { XlsxSummarySectionService } from './xlsx-summary-section.service';
 import { XlsxRecordingSectionService } from './xlsx-recordinng-section.service';
 
+/**
+ * Builds the spreadsheet export: one sheet per test with the project header,
+ * the test's info, every run's data, a summary, the recording steps and the
+ * latest screenshot.
+ */
 @Injectable()
 export class XlsxReportService {
   private readonly logger = new Logger(XlsxReportService.name);
@@ -29,9 +34,15 @@ export class XlsxReportService {
     private readonly nameService: XlsxNameService,
     private readonly imageService: XlsxImageService
   ) {}
+  /**
+   * @param reports - At least one test; the file is named after the first
+   * one's project.
+   * @throws HttpException 500 when building the workbook fails.
+   */
   async writeXlsxFile(reports: FullTestEventResponseDto[]) {
     try {
       const workbook = new ExcelJS.Workbook();
+      const sheetNames = new Set<string>();
 
       // Group reports by project for better organization
       const projectGroups = this.groupingService.groupReportsByProject(reports);
@@ -43,10 +54,11 @@ export class XlsxReportService {
         );
 
         for (const report of projectReports) {
-          // Create sheet name using test name and event name (<= 31 chars)
-          const rawWorksheetName = `${report.testName} - ${report.eventName || 'No Event'}`;
-          const worksheetName =
-            this.nameService.sanitiseWorksheetName(rawWorksheetName);
+          // Sheet names are cut to 31 characters, so two tests can share one.
+          const worksheetName = this.nameService.uniqueWorksheetName(
+            `${report.testName} - ${report.eventName || 'No Event'}`,
+            sheetNames
+          );
           const worksheet = workbook.addWorksheet(worksheetName);
 
           // Build all textual/data sections first. We'll place the image afterwards so we can anchor at bottom-right.
@@ -76,14 +88,11 @@ export class XlsxReportService {
       });
     } catch (error) {
       this.handleError(error, 'writeXlsxFile');
-      throw new HttpException(
-        'An error occurred while processing the Excel file',
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
     }
   }
 
-  private handleError(error: unknown, methodName: string) {
+  /** Logs the error and rethrows it as an HttpException. */
+  private handleError(error: unknown, methodName: string): never {
     this.logger.error(
       `Error in ${XlsxReportService.name}.${methodName}: ${
         error instanceof Error ? error.message : JSON.stringify(error, null, 2)

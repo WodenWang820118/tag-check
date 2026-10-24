@@ -12,23 +12,22 @@ describe('ProjectDataRetrievalController', () => {
     };
     const projectRepositoryService = {
       getBySlug: vi.fn().mockResolvedValue({ slug: 'proj-1' }),
-      getGtmConfigBySlug: vi.fn().mockResolvedValue('/config'),
       ...overrides
     };
-    const fileService = {
-      readJsonFile: vi.fn().mockResolvedValue({ container: 'x' }),
+    const projectGtmContainerService = {
+      read: vi.fn().mockResolvedValue({ containerVersion: {} }),
       ...overrides
     };
     const controller = new ProjectDataRetrievalController(
       testImageRepositoryService as never,
       projectRepositoryService as never,
-      fileService as never
+      projectGtmContainerService as never
     );
     return {
       controller,
       testImageRepositoryService,
       projectRepositoryService,
-      fileService
+      projectGtmContainerService
     };
   }
 
@@ -58,36 +57,36 @@ describe('ProjectDataRetrievalController', () => {
     expect(result).toEqual({ slug: 'proj-1' });
   });
 
-  it('getGtmConfig reads the gtm-container.json file from the resolved config path', async () => {
-    const { controller, fileService, projectRepositoryService } = build();
+  it("getGtmConfig returns the container saved in the project's config folder", async () => {
+    const { controller, projectGtmContainerService } = build();
     const result = await controller.getGtmConfig('proj-1');
-    expect(projectRepositoryService.getGtmConfigBySlug).toHaveBeenCalledWith(
-      'proj-1'
-    );
-    expect(fileService.readJsonFile).toHaveBeenCalledOnce();
-    const callArg = fileService.readJsonFile.mock.calls[0][0] as string;
-    expect(callArg.replace(/\\/g, '/')).toMatch(/\/gtm-container\.json$/);
-    expect(result).toEqual({ container: 'x' });
+    expect(projectGtmContainerService.read).toHaveBeenCalledWith('proj-1');
+    expect(result).toEqual({ containerVersion: {} });
   });
 
-  it('getGtmConfig throws 404 HttpException when no config path exists', async () => {
+  it('getGtmConfig throws 404 when the project has no readable container', async () => {
     const { controller } = build({
-      getGtmConfigBySlug: vi.fn().mockResolvedValue(null)
+      read: vi.fn().mockResolvedValue(null)
     });
     await expect(controller.getGtmConfig('proj-1')).rejects.toMatchObject({
       status: HttpStatus.NOT_FOUND
     });
   });
 
-  it('getGtmConfig propagates file read errors thrown by FileService', async () => {
-    // The controller currently does not await fileService.readJsonFile inside
-    // its try/catch, so async rejections are surfaced to the caller as-is
-    // rather than being wrapped in a 500 HttpException.
-    const { controller } = build({
-      readJsonFile: vi.fn().mockRejectedValue(new Error('disk fail'))
+  it('getGtmConfig does not cache: a newly imported container is served', async () => {
+    const read = vi
+      .fn()
+      .mockResolvedValueOnce({ containerVersion: { tag: ['old'] } })
+      .mockResolvedValueOnce({ containerVersion: { tag: ['new'] } });
+    const { controller } = build({ read });
+    await controller.getGtmConfig('proj-1');
+    expect(await controller.getGtmConfig('proj-1')).toEqual({
+      containerVersion: { tag: ['new'] }
     });
-    await expect(controller.getGtmConfig('proj-1')).rejects.toThrow(
-      'disk fail'
-    );
+    expect(
+      Reflect.getMetadataKeys(
+        ProjectDataRetrievalController.prototype.getGtmConfig
+      )
+    ).not.toContain('__interceptors__');
   });
 });

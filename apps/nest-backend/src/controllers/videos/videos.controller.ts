@@ -3,6 +3,7 @@ import { ProjectVideoService } from '../../features/project-agent/project-video/
 
 import { RECORDING_FILES } from '../../shared';
 
+/** Serves a test's latest screen recordings. */
 @Controller('videos')
 export class VideosController {
   constructor(private readonly projectVideoService: ProjectVideoService) {}

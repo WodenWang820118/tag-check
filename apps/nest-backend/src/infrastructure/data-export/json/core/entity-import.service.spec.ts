@@ -6,13 +6,7 @@ import { ProjectImportService } from './project-import.service';
 import { TestEventDuplicateService } from './test-event-duplicate.service';
 import { EntityPersistenceService } from './entity-persistence.service';
 import { ImportRowProcessorService } from './import-row-processor.service';
-import {
-  DataSource,
-  EntityManager,
-  EntityMetadata,
-  ObjectLiteral,
-  Repository
-} from 'typeorm';
+import { EntityMetadata, ObjectLiteral, Repository } from 'typeorm';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // Minimal helper to craft metadata
@@ -98,7 +92,7 @@ describe('EntityImportService (unit)', () => {
       )
     } as unknown as EntityPersistenceService;
     rowProcessor = {
-      preProcessRow: vi.fn(async () => false)
+      preProcessRow: vi.fn(() => false)
     } as unknown as ImportRowProcessorService;
 
     service = new EntityImportService(
@@ -121,7 +115,6 @@ describe('EntityImportService (unit)', () => {
   it('prefetchExistingIdsIfNeeded returns null when composite PK', async () => {
     const set = await service.prefetchExistingIdsIfNeeded(
       repo,
-      'X',
       false,
       undefined
     );
@@ -129,12 +122,7 @@ describe('EntityImportService (unit)', () => {
   });
 
   it('prefetchExistingIdsIfNeeded returns Set for single PK', async () => {
-    const result = await service.prefetchExistingIdsIfNeeded(
-      repo,
-      'X',
-      true,
-      'id'
-    );
+    const result = await service.prefetchExistingIdsIfNeeded(repo, true, 'id');
     expect(result).toBeInstanceOf(Set);
     expect(result?.has(1)).toBe(true);
   });
@@ -201,10 +189,10 @@ describe('EntityImportService (unit)', () => {
         mockImplementationOnce: (
           implementation: (
             params: Parameters<ImportRowProcessorService['preProcessRow']>[0]
-          ) => Promise<boolean>
+          ) => boolean
         ) => void;
       }
-    ).mockImplementationOnce(async ({ ctx, name }) => {
+    ).mockImplementationOnce(({ ctx, name }) => {
       ctx.stats[name].skipped++;
       return true;
     });
@@ -218,23 +206,5 @@ describe('EntityImportService (unit)', () => {
     await service.importEntitiesFor('ChildEntity', [{ id: 222 }], m, repo, ctx);
     expect(persistence.persistEntityAndRegister).not.toHaveBeenCalled();
     expect(stats.ChildEntity).toEqual({ inserted: 0, skipped: 1 });
-  });
-
-  it('runInTransaction executes non-transactionally when datasource absent', async () => {
-    const result = await service.runInTransaction(undefined, async () => 42);
-    expect(result).toBe(42);
-  });
-
-  it('runInTransaction uses provided datasource transaction', async () => {
-    const txFn = vi.fn(async (fn: (m: EntityManager) => Promise<unknown>) =>
-      fn({} as EntityManager)
-    );
-    const ds = { transaction: txFn } as unknown as DataSource;
-    const result = await service.runInTransaction(ds, async (m) => {
-      expect(m).toBeDefined();
-      return 77;
-    });
-    expect(result).toBe(77);
-    expect(txFn).toHaveBeenCalled();
   });
 });

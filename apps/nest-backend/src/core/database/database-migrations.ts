@@ -36,6 +36,10 @@ export async function migrateDatabase(dataSource: DataSource): Promise<void> {
 /**
  * Opens the database and migrates it, for TypeOrmModule's
  * dataSourceFactory: no module queries the database before it is migrated.
+ *
+ * @throws When the options are missing or a migration fails. The connection
+ * is closed first: TypeOrmModule retries the factory, and every attempt
+ * would otherwise leave the SQLite file open (and locked, on Windows).
  */
 export async function createMigratedDataSource(
   options?: DataSourceOptions
@@ -44,6 +48,11 @@ export async function createMigratedDataSource(
     throw new Error('TypeORM options are missing');
   }
   const dataSource = await new DataSource(options).initialize();
-  await migrateDatabase(dataSource);
+  try {
+    await migrateDatabase(dataSource);
+  } catch (error) {
+    await dataSource.destroy();
+    throw error;
+  }
   return dataSource;
 }

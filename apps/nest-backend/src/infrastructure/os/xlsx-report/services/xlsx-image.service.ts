@@ -7,6 +7,10 @@ interface ResolvedImage {
   extension: 'png' | 'jpeg';
 }
 
+/**
+ * Embeds a test's latest screenshot in its sheet, right of the summary and
+ * recording sections.
+ */
 @Injectable()
 export class XlsxImageService {
   private readonly logger = new Logger(XlsxImageService.name);
@@ -61,13 +65,9 @@ export class XlsxImageService {
         worksheet,
         baseRowForColumnCalc
       );
-      let imageStartCol = lastUsedInAnchorRow >= 1 ? lastUsedInAnchorRow : 4; // 1-based to 0-based later by ExcelJS
-
-      // Safety: if the calculated start column would overlap existing populated cells (defensive),
-      // nudge it one column to the right.
-      if (lastUsedInAnchorRow >= 1 && imageStartCol === lastUsedInAnchorRow) {
-        imageStartCol = lastUsedInAnchorRow; // lastUsedInAnchorRow is 1-based; ExcelJS image anchor col accepts zero-based; we handle below.
-      }
+      // The last used column is 1-based and an image anchor's column is
+      // 0-based, so the same number places the image just right of it.
+      const imageStartCol = lastUsedInAnchorRow >= 1 ? lastUsedInAnchorRow : 4;
       const { targetWidth, targetHeight, rowsNeeded } = this.computeImageLayout(
         resolved.buffer,
         resolved.extension
@@ -252,18 +252,5 @@ export class XlsxImageService {
       i++;
     }
     return undefined;
-  }
-  private findMaxColumnInRange(
-    worksheet: ExcelJS.Worksheet,
-    startRow: number,
-    endRow: number
-  ): number {
-    let maxCol = 0;
-    for (let r = startRow; r <= endRow; r++) {
-      const row = worksheet.getRow(r);
-      const lastCol = row.cellCount;
-      if (lastCol > maxCol) maxCol = lastCol;
-    }
-    return maxCol;
   }
 }

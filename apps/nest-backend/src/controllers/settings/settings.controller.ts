@@ -1,6 +1,5 @@
 import { Controller, Get, Param, Put, Body, Logger } from '@nestjs/common';
 import { ApiOperation, ApiParam } from '@nestjs/swagger';
-import { ProjectSettingService } from '../../features/project-agent/project-setting/project-setting.service';
 import {
   ApplicationSetting,
   AuthenticationSetting,
@@ -10,11 +9,14 @@ import {
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 import { ProjectFacadeRepositoryService } from '../../features/repository/project-facade/project-facade-repository.service';
 
+/**
+ * Reads a project with its settings and updates the project's own columns
+ * and its application, authentication and browser settings.
+ */
 @Controller('settings')
 export class SettingsController {
   private readonly logger = new Logger(SettingsController.name);
   constructor(
-    private readonly projectSettingService: ProjectSettingService,
     private readonly projectRepositoryService: ProjectRepositoryService,
     private readonly projectFacadeRepositoryService: ProjectFacadeRepositoryService
   ) {}

@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, NotFoundException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { ConfigurationController } from './configuration.controller';
 
@@ -49,6 +49,16 @@ describe('ConfigurationController', () => {
       getConfiguration: vi.fn().mockRejectedValue(notFound)
     });
     await expect(controller.getConfiguration('missing')).rejects.toBe(notFound);
+  });
+
+  it('getConfiguration keeps the 404 of a missing configuration', async () => {
+    const notFound = new HttpException('missing', HttpStatus.NOT_FOUND);
+    const { controller } = build({
+      getConfiguration: vi.fn().mockRejectedValue(notFound)
+    });
+    await expect(controller.getConfiguration('missing')).rejects.toMatchObject({
+      status: HttpStatus.NOT_FOUND
+    });
   });
 
   it('getConfiguration wraps unexpected errors in InternalServerErrorException', async () => {

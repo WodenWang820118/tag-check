@@ -61,12 +61,12 @@ describe('BrowserSettingRepositoryService', () => {
     );
   });
 
-  it('update() throws when no setting exists', async () => {
+  it('update() throws NOT_FOUND when no setting exists', async () => {
     const { service, repository } = build();
     repository.findOne.mockResolvedValue(null);
     await expect(
       service.update({ id: 1 } as never, {} as never)
-    ).rejects.toMatchObject({ status: HttpStatus.INTERNAL_SERVER_ERROR });
+    ).rejects.toMatchObject({ status: HttpStatus.NOT_FOUND });
   });
 
   it('update() wraps save failures into an HttpException', async () => {

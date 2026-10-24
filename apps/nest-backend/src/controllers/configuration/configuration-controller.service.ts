@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { SysConfigurationRepositoryService } from '../../core/repository/sys-configuration/sys-configuration-repository.service';
 
+/** The configuration endpoints' reads and writes of system configuration entries. */
 @Injectable()
 export class ConfigurationControllerService {
   private readonly logger = new Logger(ConfigurationControllerService.name);

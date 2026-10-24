@@ -118,29 +118,4 @@ describe('ProjectAbstractReportService', () => {
       ).rejects.toBeInstanceOf(HttpException);
     });
   });
-
-  describe('getSingleAbstractTestResultJson()', () => {
-    it('throws NotFound when the file is missing', async () => {
-      vi.mocked(existsSync).mockImplementation(() => false);
-      const ctx = build();
-      await expect(
-        ctx.service.getSingleAbstractTestResultJson('demo', 'evt')
-      ).rejects.toBeInstanceOf(NotFoundException);
-    });
-
-    it('returns the report contents augmented with the completedTime mtime', async () => {
-      vi.mocked(existsSync).mockImplementation(() => true);
-      const ctx = build();
-      ctx.fileService.readJsonFile.mockReturnValue({
-        passed: true,
-        message: 'ok'
-      });
-      const result = await ctx.service.getSingleAbstractTestResultJson(
-        'demo',
-        'evt'
-      );
-      expect(result).toMatchObject({ passed: true, message: 'ok' });
-      expect(result.completedTime).toBeInstanceOf(Date);
-    });
-  });
 });

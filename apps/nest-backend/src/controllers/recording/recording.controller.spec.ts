@@ -3,8 +3,9 @@ import { RecordingController } from './recording.controller';
 
 describe('RecordingController', () => {
   function build() {
-    const projectRecordingService = {};
-    const projectFacadeRepositoryService = {};
+    const projectRecordingService = {
+      updateRecording: vi.fn().mockResolvedValue(undefined)
+    };
     const recordingRepositoryService = {
       listByProject: vi.fn().mockResolvedValue([{ id: 'r-1' }]),
       getRecordingDetails: vi.fn().mockResolvedValue({ id: 'r-1' }),
@@ -12,10 +13,9 @@ describe('RecordingController', () => {
     };
     const controller = new RecordingController(
       projectRecordingService as never,
-      projectFacadeRepositoryService as never,
       recordingRepositoryService as never
     );
-    return { controller, recordingRepositoryService };
+    return { controller, recordingRepositoryService, projectRecordingService };
   }
 
   it('getRecordings delegates to RecordingRepositoryService.listByProject', async () => {
@@ -49,6 +49,20 @@ describe('RecordingController', () => {
       'proj-1',
       'evt-1',
       { title: 'My Recording', steps: [{ type: 'click' }] }
+    );
+  });
+
+  it('updateRecording also rewrites the recording file a run reads', async () => {
+    const { controller, projectRecordingService } = build();
+    const steps = [{ type: 'navigate', url: 'https://new.example' }];
+    await controller.updateRecording('proj-1', 'evt-1', {
+      title: 'checkout',
+      steps
+    } as never);
+    expect(projectRecordingService.updateRecording).toHaveBeenCalledWith(
+      'proj-1',
+      'evt-1',
+      { title: 'checkout', steps }
     );
   });
 });

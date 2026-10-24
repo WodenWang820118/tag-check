@@ -79,4 +79,18 @@ describe('XlsxTestDataSectionService', () => {
     expect(allValues).toContain('rr');
     expect(allValues).toContain('du');
   });
+
+  it("keeps the sheet's title in row 1", () => {
+    const svc = build();
+    const ws = new ExcelJS.Workbook().addWorksheet('s');
+    ws.addRow(['Project: Demo (demo)']);
+    ws.mergeCells('A1:G1');
+
+    svc.addTestDataSection(ws, {
+      spec: { dataLayerSpec: { event: 'click' } },
+      testEventDetails: []
+    } as never);
+
+    expect(ws.getCell('A1').value).toBe('Project: Demo (demo)');
+  });
 });

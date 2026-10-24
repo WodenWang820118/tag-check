@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { FileService } from './file.service';
 import { PathModule } from '../path/path.module';
-import { FolderModule } from '../folder/folder.module';
+
 @Module({
-  imports: [PathModule, FolderModule],
+  imports: [PathModule],
   providers: [FileService],
-  exports: [FileService, PathModule, FolderModule]
+  exports: [FileService]
 })
 export class FileModule {}

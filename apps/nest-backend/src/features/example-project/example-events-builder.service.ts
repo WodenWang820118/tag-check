@@ -7,6 +7,10 @@ import {
   BuildEventInput
 } from '../project-agent/project-events-builder/project-events-builder.service';
 
+/**
+ * Creates the example project's tests from its shipped recordings and GTM
+ * container.
+ */
 @Injectable()
 export class ExampleEventsBuilderService {
   private readonly logger = new Logger(ExampleEventsBuilderService.name);

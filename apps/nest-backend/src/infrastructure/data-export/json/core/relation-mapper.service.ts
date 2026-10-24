@@ -1,14 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EntityMetadata } from 'typeorm';
 
+/**
+ * Rewrites a row's foreign keys from exported IDs to IDs in this database.
+ * A key is resolved through the ID maps (exported primary key -> new key)
+ * or through alternate keys this service records during the import: a
+ * project's slug, a test's eventId and any row's `__exportRef`. A key it
+ * cannot resolve is kept as exported.
+ */
 @Injectable()
 export class RelationMapperService {
-  private readonly logger = new Logger(RelationMapperService.name);
-
-  // internal alternate-key maps: entityName -> Map(altKey -> pk)
+  // entityName -> Map(alternate key -> primary key in this database)
   private readonly maps: Record<string, Map<unknown, unknown>> = {};
 
-  // --- IdIndexer-like methods (kept public to preserve existing usage) ---
   ensure(entityName: string) {
     if (!this.maps[entityName]) this.maps[entityName] = new Map();
     return this.maps[entityName];
@@ -21,15 +25,21 @@ export class RelationMapperService {
 
   lookup(entityName: string, altKey: unknown): unknown {
     const m = this.maps[entityName];
-    if (!m) return undefined as unknown;
+    if (!m) return undefined;
     return m.get(altKey);
   }
 
-  getMap(entityName: string): Map<unknown, unknown> | undefined {
-    return this.maps[entityName];
+  /** Forgets every alternate key, before the next import starts. */
+  clear(): void {
+    for (const k of Object.keys(this.maps)) delete this.maps[k];
   }
 
-  // --- Relation mapping ---
+  /**
+   * Rewrites in place the foreign keys of `materialized`: the owning side of
+   * each relation in `meta`, then `<entity>Id`, `<entity>ExportRef` and
+   * embedded `{ __exportRef }` properties. A project relation with no key
+   * falls back to `projectId`.
+   */
   mapRelations(
     materialized: Record<string, unknown>,
     meta: EntityMetadata,
@@ -87,7 +97,7 @@ export class RelationMapperService {
       }
       if (typeof val === 'string' || typeof val === 'number') return val;
     }
-    return undefined as unknown;
+    return undefined;
   }
 
   private maybeTestEventFk(
@@ -95,7 +105,7 @@ export class RelationMapperService {
     relation: { inverseEntityMetadata?: { name?: string } }
   ): unknown {
     if (relation.inverseEntityMetadata?.name !== 'TestEventEntity')
-      return undefined as unknown;
+      return undefined;
     const candidates = ['eventId', 'event_id', 'testEvent'] as const;
     for (const cand of candidates) {
       if (!Object.hasOwn(materialized, cand)) continue;
@@ -105,7 +115,7 @@ export class RelationMapperService {
       if (typeof v === 'object' && 'eventId' in (v as Record<string, unknown>))
         return (v as Record<string, unknown>)['eventId'];
     }
-    return undefined as unknown;
+    return undefined;
   }
 
   private applyResolvedFk(
@@ -198,7 +208,7 @@ export class RelationMapperService {
         : undefined;
       if (newId != null) return newId;
     }
-    return undefined as unknown;
+    return undefined;
   }
 
   // --- Extracted helpers to reduce cognitive complexity ---

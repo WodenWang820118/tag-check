@@ -29,6 +29,29 @@ describe('ProjectUnzipper', () => {
     }
   });
 
+  it.each(['', '.', '..'])(
+    'rejects the slug %j instead of replacing the projects folder',
+    async (badSlug) => {
+      const root = mkdtempSync(join(tmpdir(), 'unzipper-'));
+      try {
+        const projectFolder = join(root, 'src-proj');
+        mkdirSync(projectFolder, { recursive: true });
+        writeFileSync(join(projectFolder, 'a.txt'), 'a');
+        const zip = join(root, 'archive.zip');
+        const dest = join(root, 'extracted');
+        mkdirSync(join(dest, 'other-project'), { recursive: true });
+        await new ProjectCompressor().compress(projectFolder, zip, 'x', []);
+
+        await expect(
+          new ProjectUnzipper().unzip(badSlug, zip, dest)
+        ).rejects.toThrow('Invalid project slug');
+        expect(existsSync(join(dest, 'other-project'))).toBe(true);
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    }
+  );
+
   it('falls back to the provided slug when no fixture is present and avoids overwriting', async () => {
     const root = mkdtempSync(join(tmpdir(), 'unzipper-'));
     try {

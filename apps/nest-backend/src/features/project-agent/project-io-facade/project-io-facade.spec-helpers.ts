@@ -37,9 +37,16 @@ export class FolderServiceMock {
 export class JsonProjectImportServiceMock {
   imported: unknown = null;
   importCalls: unknown[] = [];
+  /** When set, importProject rejects with it. */
+  failWith: Error | null = null;
+
+  validate(payload: unknown) {
+    return payload;
+  }
 
   async importProject(payload: unknown) {
     this.importCalls.push(payload);
+    if (this.failWith) throw this.failWith;
     this.imported = payload;
   }
 }

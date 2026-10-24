@@ -2,12 +2,14 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
   InternalServerErrorException,
-  NotFoundException,
   Param,
   Post
 } from '@nestjs/common';
 import { ConfigurationControllerService } from './configuration-controller.service';
+
+/** Reads and creates the backend's system configuration entries. */
 @Controller('configurations')
 export class ConfigurationController {
   constructor(private readonly service: ConfigurationControllerService) {}
@@ -22,16 +24,21 @@ export class ConfigurationController {
     return await this.service.getConfigurations();
   }
 
+  /**
+   * The value of one configuration entry, as `{ value }`.
+   *
+   * @throws 404 when no entry has this name; 500 for any other failure.
+   */
   @Get(':name')
   async getConfiguration(@Param('name') name: string) {
     try {
-      const result = await this.service.getConfiguration(name);
-      return result;
+      return await this.service.getConfiguration(name);
     } catch (error) {
-      if (error instanceof NotFoundException) {
+      // The repository reports a missing entry as an HttpException 404,
+      // not a NotFoundException: keep its status.
+      if (error instanceof HttpException) {
         throw error;
       }
-      // Handle other types of errors
       throw new InternalServerErrorException(
         'An error occurred while fetching the configuration'
       );

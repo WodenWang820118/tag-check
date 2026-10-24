@@ -1,34 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
-import { extname } from 'path';
+import { existsSync, mkdirSync, rmSync } from 'fs';
 
+/** Creates and deletes folders under the projects folder. */
 @Injectable()
 export class FolderService {
-  readFolderFiles(folderPath: string) {
-    if (!existsSync(folderPath)) {
-      throw new NotFoundException('Folder not found');
-    }
-    return readdirSync(folderPath, {
-      withFileTypes: true
-    });
-  }
-
-  readFolderFileNames(folderPath: string) {
-    if (!existsSync(folderPath)) {
-      throw new NotFoundException('Folder not found');
-    }
-    return readdirSync(folderPath);
-  }
-
-  readFolder(folderPath: string) {
-    if (!existsSync(folderPath)) {
-      throw new NotFoundException('Folder not found');
-    }
-    return readdirSync(folderPath, {
-      withFileTypes: true
-    }).filter((dirent) => dirent.isDirectory());
-  }
-
   createFolder(folderPath: string) {
     // create folder only if it doesn't exist, use recursive to avoid errors if parent folders are missing
     if (!existsSync(folderPath)) {
@@ -36,19 +11,11 @@ export class FolderService {
     }
   }
 
-  getJsonFilesFromDir(dirPath: string) {
-    if (!existsSync(dirPath)) {
-      throw new NotFoundException('Folder not found');
-    }
-
-    const files = readdirSync(dirPath);
-    if (!files.length) {
-      throw new NotFoundException('No files found');
-    }
-
-    return files.filter((file) => extname(file) === '.json');
-  }
-
+  /**
+   * Deletes the folder and everything in it.
+   *
+   * @throws NotFoundException when the folder does not exist.
+   */
   deleteFolder(folderPath: string) {
     if (!existsSync(folderPath)) {
       throw new NotFoundException('Folder not found');

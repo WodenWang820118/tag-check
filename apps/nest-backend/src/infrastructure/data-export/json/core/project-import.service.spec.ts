@@ -15,7 +15,8 @@ function deps() {
   const map = new Map<unknown, unknown>();
   const registry = {
     ensure: vi.fn(() => map),
-    set: vi.fn((_n, k, v) => map.set(k, v))
+    set: vi.fn((_n, k, v) => map.set(k, v)),
+    markCreated: vi.fn()
   } as unknown as IdMapRegistryService;
   const relationMapper = {
     register: vi.fn()

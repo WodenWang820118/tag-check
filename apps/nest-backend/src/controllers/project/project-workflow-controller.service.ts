@@ -5,6 +5,10 @@ import { mkdirSync } from 'fs';
 import { ConfigsService } from '../../core/configs/configs.service';
 import { CreateProjectDto } from '../../shared';
 
+/**
+ * Creates a project's folders and rows, and records the root and current
+ * project in the system configuration.
+ */
 @Injectable()
 export class ProjectWorkFlowControllerService {
   private readonly logger = new Logger(ProjectWorkFlowControllerService.name);

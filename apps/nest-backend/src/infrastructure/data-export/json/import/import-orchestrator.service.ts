@@ -3,6 +3,7 @@ import { FixtureEnvelopeV1 } from '../../interfaces/fixture-types';
 import { ImportTransactionService } from '../core/import-transaction.service';
 import { ImportStats } from '../../interfaces/import-types';
 
+/** Runs a fixture import in one transaction and logs its row counts. */
 @Injectable()
 export class ImportOrchestrator {
   private readonly logger = new Logger(ImportOrchestrator.name);

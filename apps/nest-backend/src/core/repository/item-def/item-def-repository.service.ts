@@ -10,6 +10,7 @@ import {
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
+/** Reads and writes tests' ecommerce item definitions (`ItemDefEntity`). */
 @Injectable()
 export class ItemDefRepositoryService {
   constructor(
