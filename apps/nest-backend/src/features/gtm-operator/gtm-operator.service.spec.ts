@@ -72,7 +72,11 @@ describe('GtmOperatorService recorder lifecycle', () => {
     );
     expect(recorder.stop).not.toHaveBeenCalled();
     expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
-    expect(browser.close).toHaveBeenCalledTimes(1);
+    expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(
+      browser,
+      openerPage,
+      null
+    );
   });
 
   it('records the Tag Assistant tab next to the site, without bringing it to the front', async () => {
@@ -132,6 +136,22 @@ describe('GtmOperatorService recorder lifecycle', () => {
       browser,
       openerPage,
       recorder
+    );
+  });
+
+  it('closes a headful run when the caller asks, as a batch does', async () => {
+    await service.inspectSingleEventViaGtm(
+      'project',
+      'event',
+      { ...createQuery(), headless: 'false', closeBrowser: 'true' },
+      createPreset()
+    );
+
+    expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
+    expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(
+      browser,
+      openerPage,
+      null
     );
   });
 

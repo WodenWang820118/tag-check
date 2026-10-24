@@ -83,7 +83,7 @@ describe('BatchRunService', () => {
 
   afterEach(() => localStorage.clear());
 
-  it('runs the tests one after another, directly, and records each outcome', async () => {
+  it('runs the tests one after another, closing each browser, and records each outcome', async () => {
     const order: string[] = [];
     runTestForReport.mockImplementation((eventId) => {
       order.push(eventId);
@@ -102,7 +102,7 @@ describe('BatchRunService', () => {
     expect(runTestForReport).toHaveBeenCalledWith(
       'id-add_to_cart',
       'example-project-slug',
-      { direct: true }
+      { closeBrowser: true }
     );
     expect(service.batch()?.items.map((item) => item.status)).toEqual([
       'passed',

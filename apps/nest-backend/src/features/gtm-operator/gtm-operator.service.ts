@@ -86,6 +86,9 @@ export class GtmOperatorService {
 
     // normalize headless flag consistently with PuppeteerUtilsService
     const headlessFlag = query.headless === 'true' || query.headless === '1';
+    // A headful run is left open for inspection unless the caller (a batch)
+    // asks to close it.
+    const closeBrowser = headlessFlag || query.closeBrowser === 'true';
     let recorder: RunRecorder | null = null;
     let tagAssistantRecorder: RunRecorder | null = null;
     try {
@@ -159,10 +162,10 @@ export class GtmOperatorService {
       await this.puppeteerUtilsService.stopRecorder(recorder);
       await this.puppeteerUtilsService.stopRecorder(tagAssistantRecorder);
 
-      if (headlessFlag) {
-        const pages = await browser.pages();
-        await Promise.all(pages.map((page) => page.close()));
-        await browser.close();
+      if (closeBrowser) {
+        // Bounded close: Tag Assistant can hold a headful browser open, and
+        // an unbounded close left the request (and a batch) waiting forever.
+        await this.puppeteerUtilsService.cleanup(browser, page, null);
       } else {
         this.logger.log(
           'Headful mode detected (GTM): leaving browser open for user interaction. Close it manually when done.'
@@ -179,7 +182,7 @@ export class GtmOperatorService {
           );
       }
 
-      if (headlessFlag) {
+      if (closeBrowser) {
         await this.puppeteerUtilsService.cleanup(browser, page, recorder);
       } else {
         await this.puppeteerUtilsService

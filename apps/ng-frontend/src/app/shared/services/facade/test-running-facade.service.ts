@@ -27,10 +27,11 @@ import { ReportTableDataSourceModelService } from '../../../modules/project/serv
 
 export type RunTestOptions = {
   /**
-   * Open the website directly even when the project uses accompanied mode,
-   * so that a batch of runs does not leave a GTM Preview window per test.
+   * Close the run's browser when it ends. An accompanied-mode run otherwise
+   * leaves its GTM Preview window open for inspection; a batch closes each
+   * one so that windows do not pile up.
    */
-  direct?: boolean;
+  closeBrowser?: boolean;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -118,12 +119,13 @@ export class TestRunningFacadeService {
       captureRequest: project.applicationSettings.gtm.isRequestCheck
     };
 
-    if (project.applicationSettings.gtm.isAccompanyMode && !options.direct) {
+    if (project.applicationSettings.gtm.isAccompanyMode) {
       const measurementId = project.applicationSettings.gtm.isRequestCheck
         ? project.measurementId
         : undefined;
 
       gtmInspectionParams.measurementId = measurementId;
+      gtmInspectionParams.closeBrowser = options.closeBrowser;
       return this.gtmOperatorService.runInspectionViaGtm(
         projectSlug,
         eventId,

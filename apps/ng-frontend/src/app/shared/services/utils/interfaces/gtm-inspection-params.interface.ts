@@ -8,4 +8,6 @@ export interface GtmInspectionParams {
   username?: string;
   password?: string;
   captureRequest?: boolean;
+  /** Close the run's browser when it ends instead of leaving it open. */
+  closeBrowser?: boolean;
 }

@@ -38,6 +38,18 @@ describe('GtmOperatorService', () => {
     expect(body).toEqual({ name: 'preset' });
   });
 
+  it('runInspectionViaGtm asks the backend to close the browser for a batch', async () => {
+    httpClient.post.mockReturnValueOnce(of([]));
+    await firstValueFrom(
+      service.runInspectionViaGtm('slug', 'evt', {
+        gtmUrl: 'https://x.test',
+        closeBrowser: true
+      })
+    );
+    const [url] = httpClient.post.mock.calls[0];
+    expect(url).toContain('&closeBrowser=true');
+  });
+
   it('runInspectionViaGtm omits optional params when not set', async () => {
     httpClient.post.mockReturnValueOnce(of([]));
     await firstValueFrom(
