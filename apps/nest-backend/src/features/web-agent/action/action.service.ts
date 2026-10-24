@@ -5,6 +5,11 @@ import { EventInspectionPresetDto } from '../../../shared/dto/event-inspection-p
 import { ProgressEventsService } from '../../../core/events-gateway/progress-events.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
 
+/**
+ * Replays a test's Chrome Recorder recording on a page, step by step, and
+ * reports progress over SSE. A test without a recording replays nothing.
+ * Rejects with the error of the first step that fails.
+ */
 @Injectable()
 export class ActionService {
   private readonly logger = new Logger(ActionService.name);
@@ -28,38 +33,28 @@ export class ActionService {
 
     if (!operation || !steps) return;
 
-    let isLastStep = false;
-    const lastStep = steps.length;
+    const totalSteps = steps.length;
     const state = {
       isFirstNavigation: true
     };
-    let lastClickIndex = -1;
-    for (let i = steps.length - 1; i >= 0; i--) {
-      if (steps[i].type === 'click') {
-        lastClickIndex = i;
-        break;
-      }
-    }
+    const lastClickIndex = steps.map((step) => step.type).lastIndexOf('click');
 
-    for (let i = 0; i < steps.length; i++) {
-      const step = steps[i];
+    for (const [i, step] of steps.entries()) {
+      this.logger.log(`Performing step ${i + 1} of ${totalSteps}`);
+      this.progressEventsService.sendProgressUpdate(totalSteps, i + 1);
 
-      if (i === steps.length - 1) isLastStep = true;
-      const isLastClick = i === lastClickIndex;
-
-      this.logger.log(`Performing step ${i + 1} of ${lastStep}`);
-      this.progressEventsService.sendProgressUpdate(lastStep, i + 1); // Send progress update
-
-      await this.stepExecutorService.executeStep(
+      // Sequential on purpose: each step acts on the page the previous
+      // steps left behind.
+      await this.stepExecutorService.executeStep({
         page,
         step,
         projectSlug,
         eventId,
         state,
-        isLastStep,
+        isLastStep: i === totalSteps - 1,
         application,
-        isLastClick
-      );
+        isLastClick: i === lastClickIndex
+      });
     }
     this.logger.log('Operation performed successfully');
     this.progressEventsService.sendEventCompleted(eventId);

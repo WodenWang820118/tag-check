@@ -10,6 +10,8 @@ import { standardPageParameterMap, standardParameterMap } from './utilities';
 /** Event-level parameters moved into `ecommerce` for item events that are not recommended events. */
 const DEFAULT_ECOMMERCE_PARAMETERS = ['currency', 'value'];
 const ITEM_KEY_LENGTH = 2;
+/** A placeholder origin for parsing relative URLs; nothing is fetched from it. */
+const RELATIVE_URL_BASE = 'http://localhost';
 
 /**
  * Rebuilds the data layer event behind a GA4 collect request so it can be
@@ -36,7 +38,9 @@ export class RequestProcessorService {
     try {
       urlObj = new URL(url);
     } catch {
-      urlObj = new URL(url, 'http://dummy');
+      // A relative URL ("/g/collect?..." or "?v=2&...") needs a base to
+      // parse. Only the query is read, so the base is never requested.
+      urlObj = new URL(url, RELATIVE_URL_BASE);
     }
     return urlObj.searchParams;
   }

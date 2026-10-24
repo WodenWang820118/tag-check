@@ -17,24 +17,24 @@ describe('StepExecutorService', () => {
       utils as never
     );
 
-    await service.executeStep(
-      page as never,
-      { type: BrowserAction.KEYDOWN, key: 'Enter' },
-      'project',
-      'event',
-      { isFirstNavigation: false },
-      false,
-      {} as never
-    );
-    await service.executeStep(
-      page as never,
-      { type: BrowserAction.KEYUP, key: 'Enter' },
-      'project',
-      'event',
-      { isFirstNavigation: false },
-      true,
-      {} as never
-    );
+    await service.executeStep({
+      page: page as never,
+      step: { type: BrowserAction.KEYDOWN, key: 'Enter' },
+      projectSlug: 'project',
+      eventId: 'event',
+      state: { isFirstNavigation: false },
+      isLastStep: false,
+      application: {} as never
+    });
+    await service.executeStep({
+      page: page as never,
+      step: { type: BrowserAction.KEYUP, key: 'Enter' },
+      projectSlug: 'project',
+      eventId: 'event',
+      state: { isFirstNavigation: false },
+      isLastStep: true,
+      application: {} as never
+    });
 
     expect(page.keyboard.down).toHaveBeenCalledWith('Enter');
     expect(page.keyboard.up).toHaveBeenCalledWith('Enter');
