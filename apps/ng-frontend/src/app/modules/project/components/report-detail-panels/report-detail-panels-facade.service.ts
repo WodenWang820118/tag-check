@@ -44,11 +44,15 @@ export class ReportDetailPanelsFacadeService {
     );
   }
 
-  getItemDefById(itemId: string): Observable<ItemDef> {
-    return this.itemDefService.getItemDefById(itemId);
+  getItemDef(projectSlug: string, eventId: string): Observable<ItemDef | null> {
+    return this.itemDefService.getItemDef(projectSlug, eventId);
   }
 
-  updateItemDef(itemId: string, itemDef: Partial<ItemDef>) {
-    return this.itemDefService.updateItemDef(itemId, itemDef);
+  updateItemDef(
+    projectSlug: string,
+    eventId: string,
+    itemDef: Partial<ItemDef>
+  ): Observable<ItemDef> {
+    return this.itemDefService.updateItemDef(projectSlug, eventId, itemDef);
   }
 }

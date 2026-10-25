@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -38,16 +38,6 @@ export class ItemDefRepositoryService {
     return entity ? plainToInstance(ItemDefResponseDto, entity) : null;
   }
 
-  async getItemDefById(itemId: string) {
-    const entity = await this.repository.findOne({ where: { itemId } });
-    return plainToInstance(ItemDefResponseDto, entity);
-  }
-
-  async getItemDefByTemplateName(templateName: string) {
-    const entity = await this.repository.findOne({ where: { templateName } });
-    return plainToInstance(ItemDefResponseDto, entity);
-  }
-
   async list() {
     const entities = await this.repository.find();
     return plainToInstance(ItemDefResponseDto, entities);
@@ -69,10 +59,42 @@ export class ItemDefRepositoryService {
     return plainToInstance(ItemDefResponseDto, updatedEntity);
   }
 
-  async updateItemDefById(itemId: string, data: UpdateItemDefDto) {
-    await this.repository.update({ itemId }, data);
-    const updatedEntity = await this.repository.findOne({ where: { itemId } });
-    return plainToInstance(ItemDefResponseDto, updatedEntity);
+  /**
+   * Saves the item definition of one test: updates the test's own row, or
+   * creates it when the test has none. Definitions of other tests, in this
+   * project or another, are left alone even when they share the `itemId`.
+   * A new definition takes the test's event name as its `itemId` and its
+   * `itemId` as its template name unless `data` gives them.
+   *
+   * @throws HttpException 404 when the project has no test with this eventId.
+   */
+  async saveItemDefByProjectSlugAndEventId(
+    projectSlug: string,
+    eventId: string,
+    data: UpdateItemDefDto
+  ) {
+    return await this.repository.manager.transaction(async (manager) => {
+      const testEvent = await manager.findOne(TestEventEntity, {
+        where: { eventId, project: { projectSlug } }
+      });
+      if (!testEvent) {
+        throw new HttpException('Test not found', HttpStatus.NOT_FOUND);
+      }
+
+      const itemDef =
+        (await manager.findOne(ItemDefEntity, {
+          where: { testEvent: { id: testEvent.id } }
+        })) ?? manager.create(ItemDefEntity, { testEvent });
+      itemDef.itemId = data.itemId ?? itemDef.itemId ?? testEvent.eventName;
+      itemDef.templateName =
+        data.templateName ?? itemDef.templateName ?? itemDef.itemId;
+      if (data.fullItemDef !== undefined) {
+        itemDef.fullItemDef = data.fullItemDef;
+      }
+
+      const saved = await manager.save(ItemDefEntity, itemDef);
+      return plainToInstance(ItemDefResponseDto, saved);
+    });
   }
 
   async delete(id: number) {
