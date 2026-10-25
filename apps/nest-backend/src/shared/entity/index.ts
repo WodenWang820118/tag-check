@@ -10,3 +10,6 @@ export * from './authentication-setting.entity';
 export * from './application-setting.entity';
 export * from './test-event-detail.entity';
 export * from './common';
+export * from './schedule.entity';
+export * from './batch-run.entity';
+export * from './batch-run-item.entity';
