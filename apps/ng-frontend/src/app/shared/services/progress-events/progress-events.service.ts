@@ -1,5 +1,10 @@
-import { effect, inject, Injectable, OnDestroy } from '@angular/core';
+import { effect, inject, Injectable, OnDestroy, signal } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
+import type {
+  BatchRunItemStatus,
+  BatchRunStatus,
+  BatchUpdatePayload
+} from '@utils';
 import { environment } from '../../../../environments/environment';
 import { TestRunningFacadeService } from '../facade/test-running-facade.service';
 
@@ -11,6 +16,23 @@ export interface ProgressUpdatePayload {
 export interface EventCompletedPayload {
   message?: unknown;
 }
+
+const BATCH_STATUSES: readonly BatchRunStatus[] = [
+  'pending',
+  'running',
+  'completed',
+  'cancelled'
+];
+
+const ITEM_STATUSES: readonly BatchRunItemStatus[] = [
+  'pending',
+  'running',
+  'passed',
+  'partial',
+  'failed',
+  'error',
+  'cancelled'
+];
 
 /** Parses an SSE `data` field; returns undefined when it is not JSON. */
 function parseData(event: Event): unknown {
@@ -35,10 +57,40 @@ function isProgressUpdate(value: unknown): value is ProgressUpdatePayload {
   );
 }
 
+function isBatchUpdateItem(value: unknown): boolean {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'eventId' in value &&
+    typeof value.eventId === 'string' &&
+    'status' in value &&
+    ITEM_STATUSES.some((status) => status === value.status) &&
+    'message' in value &&
+    (value.message === null || typeof value.message === 'string')
+  );
+}
+
+function isBatchUpdate(value: unknown): value is BatchUpdatePayload {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'batchId' in value &&
+    typeof value.batchId === 'number' &&
+    'projectSlug' in value &&
+    typeof value.projectSlug === 'string' &&
+    'status' in value &&
+    BATCH_STATUSES.some((status) => status === value.status) &&
+    'items' in value &&
+    Array.isArray(value.items) &&
+    value.items.every(isBatchUpdateItem)
+  );
+}
+
 /**
- * Receives run progress from GET /events. The stream is open only while a
- * test runs, so it does not hold one of the browser's connections to the API
- * between runs.
+ * Receives run progress and batch updates from GET /events. The stream is
+ * open only while a test runs or something holds it (the batch run, while
+ * the Tests page shows a project), so it does not hold one of the browser's
+ * connections to the API otherwise.
  */
 @Injectable({
   providedIn: 'root'
@@ -48,17 +100,32 @@ export class ProgressEventsService implements OnDestroy {
 
   private readonly progressUpdateSubject = new Subject<ProgressUpdatePayload>();
   private readonly eventCompletedSubject = new Subject<EventCompletedPayload>();
+  private readonly batchUpdateSubject = new Subject<BatchUpdatePayload>();
+  private readonly holds = signal(0);
+  private wasRunningTest = false;
 
   readonly progressUpdate$: Observable<ProgressUpdatePayload> =
     this.progressUpdateSubject.asObservable();
   readonly eventCompleted$: Observable<EventCompletedPayload> =
     this.eventCompletedSubject.asObservable();
+  /** `batchUpdate` events: a batch was created, started, changed or ended. */
+  readonly batchUpdate$: Observable<BatchUpdatePayload> =
+    this.batchUpdateSubject.asObservable();
 
   private eventSource: EventSource | null = null;
 
   constructor() {
     effect(() => {
-      if (this.testRunningFacade.isRunningTest$()) {
+      const running = this.testRunningFacade.isRunningTest$();
+      if (running && !this.wasRunningTest) {
+        // A new run has no steps yet. The backend sends eventCompleted,
+        // which resets the progress, only after the last step, so a run
+        // that failed or was stopped left its steps behind for the next
+        // run to show.
+        this.progressUpdateSubject.next({ totalSteps: 0, currentStep: 0 });
+      }
+      this.wasRunningTest = running;
+      if (running || this.holds() > 0) {
         this.openStream();
       } else {
         this.closeStream();
@@ -66,14 +133,25 @@ export class ProgressEventsService implements OnDestroy {
     });
   }
 
+  /**
+   * Keeps the stream open until the returned function is called, for a
+   * listener of events that arrive between runs, such as `batchUpdate`.
+   */
+  hold(): () => void {
+    this.holds.update((count) => count + 1);
+    let released = false;
+    return () => {
+      if (!released) {
+        released = true;
+        this.holds.update((count) => Math.max(0, count - 1));
+      }
+    };
+  }
+
   openStream(): void {
     if (this.eventSource) {
       return;
     }
-    // A new run has no steps yet. The backend sends eventCompleted, which
-    // resets the progress, only after the last step, so a run that failed
-    // or was stopped left its steps behind for the next run to show.
-    this.progressUpdateSubject.next({ totalSteps: 0, currentStep: 0 });
     const source = new EventSource(environment.progressEventsUrl);
     this.eventSource = source;
 
@@ -94,6 +172,13 @@ export class ProgressEventsService implements OnDestroy {
           ? { message: data.message }
           : {}
       );
+    });
+
+    source.addEventListener('batchUpdate', (event) => {
+      const data = parseData(event);
+      if (isBatchUpdate(data)) {
+        this.batchUpdateSubject.next(data);
+      }
     });
   }
 
