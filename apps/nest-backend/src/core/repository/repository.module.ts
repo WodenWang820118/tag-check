@@ -6,8 +6,12 @@ import { ProjectRepositoryModule } from './project/project-repository.module';
 import { RecordingRepositoryModule } from './recording/recording-repository.module';
 import { SpecRepositoryModule } from './spec/spec-repository.module';
 import { ItemDefRepositoryModule } from './item-def/item-def-repository.module';
+import { BatchRunRepositoryModule } from './batch-run/batch-run-repository.module';
+import { ScheduleRepositoryModule } from './schedule/schedule-repository.module';
 
 const modules = [
+  BatchRunRepositoryModule,
+  ScheduleRepositoryModule,
   ProjectRepositoryModule,
   RecordingRepositoryModule,
   SettingRepositoryModule,
