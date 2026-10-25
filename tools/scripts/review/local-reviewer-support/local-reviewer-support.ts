@@ -19,7 +19,7 @@ export {
   createHybridGptTelemetryContext,
   planHybridLocalReview,
   runHybridGptReview
-} from '../local-reviewer/hybrid-routing/hybrid-routing.ts';
+} from '../local-reviewer/hybrid-review/hybrid-review.ts';
 export {
   buildHybridPrefilterContext,
   buildPrefilterContext,

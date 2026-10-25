@@ -363,10 +363,7 @@ test('buildHybridReviewReport escalates when either GPT or local review blocks a
   assert.equal(report.merged_findings[0]?.source, 'gpt');
   assert.match(report.summary, /Low-risk change|Hybrid review completed/i);
   assert.equal(report.decision_basis, 'gpt+local');
-  assert.match(
-    buildHybridPrefilterContext({ report }),
-    /gpt_provider=copilot-gpt-5-mini/
-  );
+  assert.match(buildHybridPrefilterContext({ report }), /gpt_provider=codex/);
 });
 
 test('createHybridGptTelemetryContext keeps hybrid GPT observations separate from checkpoint review buckets', () => {
@@ -602,7 +599,7 @@ function reviewReport(findings: LocalReviewFinding[]): LocalReviewReport {
 
 function hybridGptReview(overrides: Partial<HybridGptReview>): HybridGptReview {
   return {
-    provider: 'copilot-gpt-5-mini',
+    provider: 'codex',
     model: 'gpt-5-mini',
     status: 'completed',
     overall_risk: 'low',
