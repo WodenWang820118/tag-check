@@ -6,29 +6,6 @@
   "tags": ["scope:backend", "type:app"],
   "targets": {
     "typecheck-spec": {},
-    "build": {
-      "executor": "@nx/rspack:rspack",
-      "outputs": ["{options.outputPath}"],
-      "defaultConfiguration": "production",
-      "options": {
-        "target": "node",
-        "compiler": "swc",
-        "outputPath": "dist/apps/nest-backend",
-        "main": "apps/nest-backend/src/main.ts",
-        "tsConfig": "apps/nest-backend/tsconfig.app.json",
-        "generatePackageJson": true,
-        "runtimeDependencies": ["sqlite3"],
-        "rspackConfig": "apps/nest-backend/rspack.config.cjs",
-        "outputHashing": "none",
-        "outputFileName": "main.js",
-        "externalDependencies": "all",
-        "typeCheckOptions": false
-      },
-      "configurations": {
-        "development": {},
-        "production": {}
-      }
-    },
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
@@ -40,7 +17,7 @@
           "buildTarget": "nest-backend:build:development"
         },
         "production": {
-          "buildTarget": "nest-backend:build:production"
+          "buildTarget": "nest-backend:build"
         }
       }
     },
