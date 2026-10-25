@@ -5,10 +5,8 @@ import { BrowserAction } from './action-utils';
 describe('ActionService', () => {
   it('keeps first-navigation state across operation steps', async () => {
     const states: Array<{ isFirstNavigation: boolean }> = [];
-    const eventsGateway = {
-      sendProgressUpdate: vi.fn(),
-      sendEventCompleted: vi.fn()
-    };
+    const eventsGateway = { sendEventCompleted: vi.fn() };
+    const runStatus = { step: vi.fn() };
     const stepExecutor = {
       executeStep: vi
         .fn()
@@ -29,7 +27,8 @@ describe('ActionService', () => {
             { type: BrowserAction.NAVIGATE, url: 'https://example.test/next' }
           ]
         })
-      } as never
+      } as never,
+      runStatus as never
     );
 
     await service.performOperation({} as never, 'project', 'event', {
@@ -40,8 +39,8 @@ describe('ActionService', () => {
     expect(stepExecutor.executeStep).toHaveBeenCalledTimes(2);
     expect(states[1]).toBe(states[0]);
     expect(states[1]?.isFirstNavigation).toBe(false);
-    expect(eventsGateway.sendProgressUpdate).toHaveBeenNthCalledWith(1, 2, 1);
-    expect(eventsGateway.sendProgressUpdate).toHaveBeenNthCalledWith(2, 2, 2);
+    expect(runStatus.step).toHaveBeenNthCalledWith(1, 'event', 2, 1);
+    expect(runStatus.step).toHaveBeenNthCalledWith(2, 'event', 2, 2);
     expect(eventsGateway.sendEventCompleted).toHaveBeenCalledWith('event');
   });
 
@@ -72,11 +71,12 @@ describe('ActionService', () => {
           )
       };
       const service = new ActionService(
-        { sendProgressUpdate: vi.fn(), sendEventCompleted: vi.fn() } as never,
+        { sendEventCompleted: vi.fn() } as never,
         stepExecutor as never,
         {
           getRecordingDetails: vi.fn().mockResolvedValue({ steps })
-        } as never
+        } as never,
+        { step: vi.fn() } as never
       );
       await service.performOperation({} as never, 'project', 'event', {
         localStorage: { data: [] },

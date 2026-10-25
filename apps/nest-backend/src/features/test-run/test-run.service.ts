@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { RunStatusBatch } from '@utils';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
 import { SingleEventInspectionService } from '../event-inspection/single-event-inspection.service';
 import { GtmOperatorService } from '../gtm-operator/gtm-operator.service';
@@ -24,11 +25,12 @@ export class TestRunService {
    * read when the run is requested, so a change applies to the next run.
    * Rejects as the run does (see GtmOperatorService and
    * SingleEventInspectionService), or with 404 for an unknown project.
+   * `choice.batch` places the run in its batch for the run status.
    */
   async run(
     projectSlug: string,
     eventId: string,
-    choice: { headless: boolean }
+    choice: { headless: boolean; batch?: RunStatusBatch }
   ): Promise<void> {
     const project =
       await this.projectRepositoryService.getRunSettingsEntityBySlug(
@@ -47,14 +49,16 @@ export class TestRunService {
         projectSlug,
         eventId,
         plan.query,
-        plan.preset
+        plan.preset,
+        choice.batch
       );
       return;
     }
     await this.singleEventInspectionService.inspectSingleEvent(
       projectSlug,
       eventId,
-      plan.options
+      plan.options,
+      choice.batch
     );
   }
 

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { InternalServerErrorException } from '@nestjs/common';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
+import { passThroughTracker } from '../event-inspection-pipeline/run-tracker.spec-helpers';
 import { runInNewContext } from 'node:vm';
 import {
   GtmOperatorService,
@@ -51,7 +52,8 @@ describe('GtmOperatorService recorder lifecycle', () => {
     service = new GtmOperatorService(
       pipeline as never,
       puppeteerUtils as never,
-      new RunQueueService()
+      new RunQueueService(),
+      passThroughTracker()
     );
     vi.spyOn(service, 'operateGtmPreviewMode').mockResolvedValue(undefined);
   });
@@ -378,7 +380,8 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      new RunQueueService()
+      new RunQueueService(),
+      passThroughTracker()
     );
     const page = createPreviewPage();
 
@@ -413,7 +416,8 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      new RunQueueService()
+      new RunQueueService(),
+      passThroughTracker()
     );
     const page = createPreviewPage();
     page.waitForSelector.mockRejectedValueOnce(new Error('missing control'));
@@ -434,7 +438,8 @@ describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      new RunQueueService()
+      new RunQueueService(),
+      passThroughTracker()
     );
 
     expect(
@@ -448,7 +453,8 @@ describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      new RunQueueService()
+      new RunQueueService(),
+      passThroughTracker()
     );
 
     expect(

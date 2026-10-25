@@ -8,6 +8,7 @@ import { Page } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
+import { RunTrackerService } from '../event-inspection-pipeline/run-tracker.service';
 import {
   isHeadless,
   PuppeteerUtilsService
@@ -15,6 +16,7 @@ import {
 import { RunRecorder } from '../web-agent/puppeteer-utils/run-recorder';
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import { RECORDING_FILES, toClientErrorMessage } from '../../shared';
+import type { RunStatusBatch } from '@utils';
 import {
   applyPresetCookies,
   preloadApplicationLocalStorage,
@@ -53,28 +55,33 @@ export class GtmOperatorService {
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
     private readonly puppeteerUtilsService: PuppeteerUtilsService,
-    private readonly runQueue: RunQueueService
+    private readonly runQueue: RunQueueService,
+    private readonly runTracker: RunTrackerService
   ) {}
 
   /**
    * Runs the test once every run requested before it has finished. Resolves
    * with the pipeline's result. Rejects with BadRequestException for a GTM
    * preview URL without a target site, and InternalServerErrorException for
-   * any other failure, with the failure's reason in its message.
+   * any other failure, with the failure's reason in its message. `batch`
+   * places the run in its batch for the run status.
    */
   inspectSingleEventViaGtm(
     projectSlug: string,
     eventId: string,
     query: InspectGtmQueryDto,
-    eventInspectionPresetDto: EventInspectionPresetDto
+    eventInspectionPresetDto: EventInspectionPresetDto,
+    batch?: RunStatusBatch
   ) {
     return this.runQueue.run((signal) =>
-      this.inspectViaGtm(
-        projectSlug,
-        eventId,
-        query,
-        eventInspectionPresetDto,
-        signal
+      this.runTracker.track({ projectSlug, eventId, batch }, signal, () =>
+        this.inspectViaGtm(
+          projectSlug,
+          eventId,
+          query,
+          eventInspectionPresetDto,
+          signal
+        )
       )
     );
   }

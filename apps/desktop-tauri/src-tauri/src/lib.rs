@@ -1,6 +1,7 @@
 mod app;
 mod backend;
 mod diagnostics;
+mod run_status;
 mod tray;
 mod window;
 

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
+import { passThroughTracker } from '../event-inspection-pipeline/run-tracker.spec-helpers';
 import {
   InspectSingleEventOptions,
   SingleEventInspectionService
@@ -40,7 +41,8 @@ describe('SingleEventInspectionService recorder lifecycle', () => {
     service = new SingleEventInspectionService(
       pipeline as never,
       puppeteerUtils as never,
-      new RunQueueService()
+      new RunQueueService(),
+      passThroughTracker()
     );
   });
 

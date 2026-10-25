@@ -15,6 +15,7 @@ use tauri_plugin_shell::{
 use super::{health::wait_for_backend, paths::resolve_backend_paths, DEFAULT_PORT};
 use crate::{
     diagnostics::write_diagnostic_log,
+    run_status::{handle_status_message, parse_status_line, STATUS_STDOUT_ENV},
     window::{show_main_window, MAIN_WINDOW_LABEL},
 };
 
@@ -86,6 +87,9 @@ pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::er
                 .to_string_lossy()
                 .into_owned(),
         ),
+        // Asks the backend for its run status as TAGCHECK_STATUS lines on
+        // stdout, which the tray and notifications show.
+        (STATUS_STDOUT_ENV.to_string(), "1".to_string()),
     ];
     write_diagnostic_log(
         &app_handle,
@@ -123,6 +127,21 @@ pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::er
         while let Some(event) = rx.recv().await {
             match event {
                 CommandEvent::Stdout(line) => {
+                    // Status lines go to the tray, not the diagnostic log.
+                    match parse_status_line(&String::from_utf8_lossy(&line)) {
+                        Some(Ok(message)) => {
+                            handle_status_message(&diagnostics_handle, message);
+                            continue;
+                        }
+                        Some(Err(error)) => {
+                            write_diagnostic_log(
+                                &diagnostics_handle,
+                                &format!("backend status line ignored: {error}"),
+                            );
+                            continue;
+                        }
+                        None => {}
+                    }
                     write_diagnostic_log(
                         &diagnostics_handle,
                         &format!("backend stdout: {}", String::from_utf8_lossy(&line).trim()),

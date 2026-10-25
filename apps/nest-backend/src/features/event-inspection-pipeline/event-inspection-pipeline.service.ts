@@ -13,6 +13,19 @@ import { TestEventRepositoryService } from '../../core/repository/test-event/tes
 import { ValidationResult } from '@utils';
 
 /**
+ * What `singleEventInspectionRecipe` resolves with: the run's checks, or
+ * undefined when the run failed and was saved as failed.
+ */
+export type SingleEventInspectionResult =
+  | {
+      dataLayerResult: ValidationResult;
+      rawRequest: string;
+      requestCheckResult: ValidationResult | null;
+      destinationUrl: string;
+    }[]
+  | undefined;
+
+/**
  * Runs the checks on a page the caller has prepared and saves the run's
  * result: one TestEventDetail row with the run's screenshot, which then
  * becomes the test's latest result.
@@ -45,7 +58,7 @@ export class EventInspectionPipelineService {
     credentials: Credentials,
     captureRequest: string,
     eventInspectionPresetDto: EventInspectionPresetDto
-  ) {
+  ): Promise<SingleEventInspectionResult> {
     this.logger.log('Inspecting single event');
     const testEvent =
       await this.testEventRepositoryService.getEntityBySlugAndEventId(
