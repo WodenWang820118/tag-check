@@ -14,3 +14,6 @@ export * from './auditable.type';
 export * from './report.type';
 export * from './report-api.type';
 export * from './gtm-import.type';
+export * from './batch-run.type';
+export * from './schedule.type';
+export * from './run-status-event.type';

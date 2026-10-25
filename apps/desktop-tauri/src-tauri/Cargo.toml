@@ -1,6 +1,6 @@
 [package]
 name = "desktop-tauri"
-version = "3.2.0"
+version = "3.3.0"
 description = "Tag Check Desktop"
 authors = ["Guan Xin Wang"]
 license = ""
@@ -21,9 +21,10 @@ tauri-build = { version = "2.7.3", features = [] }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
-tauri = { version = "2.12.4", features = [] }
+tauri = { version = "2.12.4", features = ["tray-icon"] }
 tauri-plugin-log = "2.10"
 tauri-plugin-shell = "2.5"
+tauri-plugin-notification = "2.7"
 
 [profile.release]
 opt-level = "z"

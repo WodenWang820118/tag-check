@@ -3,7 +3,7 @@ import {
   analyzeHybridHeuristics,
   createHybridGptBypassReview,
   planHybridLocalReview
-} from './hybrid-routing.ts';
+} from './hybrid-review.ts';
 import type { HybridGptReview, HybridHeuristics } from '../shared/shared.ts';
 
 function makeHeuristics(
@@ -23,7 +23,7 @@ function makeGptReview(
   partial: Partial<HybridGptReview> = {}
 ): HybridGptReview {
   return {
-    provider: 'copilot-gpt-5-mini',
+    provider: 'codex',
     model: 'gpt-5-mini',
     status: 'completed',
     overall_risk: 'low',

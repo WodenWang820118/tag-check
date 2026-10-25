@@ -6,6 +6,7 @@ import {
   tryRunSyncCommand
 } from '../../shared/process.ts';
 
+export type PathExistsFunction = (targetPath: string) => boolean;
 export type RemovePathFunction = (targetPath: string) => void;
 export type RunFunction = (
   command: string,

@@ -16,7 +16,6 @@ import {
   ProjectSetting,
   ReportDetailResponse
 } from '@utils';
-import { MatTableDataSource } from '@angular/material/table';
 import { QaRequestService } from '../api/qa-request/qa-request.service';
 import { SettingsService } from '../api/settings/settings.service';
 import { GtmInspectionParams } from '../utils/interfaces';
@@ -24,18 +23,20 @@ import { ReportTableDataSourceModelService } from '../../../modules/project/serv
 
 export type RunTestOptions = {
   /**
-   * Close the run's browser when it ends. An accompanied-mode run otherwise
-   * leaves its GTM Preview window open for inspection; a batch closes each
-   * one so that windows do not pile up.
+   * Run without a visible browser window. The project's browser setting
+   * applies when it is left out. A headless accompanied-mode run closes its
+   * browser when it ends; a headful one leaves its GTM Preview window open
+   * for inspection.
    */
-  closeBrowser?: boolean;
+  headless?: boolean;
 };
 
 /**
- * Runs one test the way the project's settings ask for: through GTM Preview
- * in accompanied mode, otherwise on the site directly, with or without the
- * request check. It tracks which test is running, for the play buttons and
- * the progress stream, and writes each result into the tests table.
+ * Runs one test, from its play button, the way the project's settings ask
+ * for: through GTM Preview in accompanied mode, otherwise on the site
+ * directly, with or without the request check. It tracks which test is
+ * running, for the play buttons and the progress stream, and writes each
+ * result into the tests table. Batches run in the backend (BatchRunService).
  */
 @Injectable({ providedIn: 'root' })
 export class TestRunningFacadeService {
@@ -69,7 +70,10 @@ export class TestRunningFacadeService {
       map((res) => {
         const report = res?.[0];
         if (report) {
-          this.updateReportDetails(eventId, report);
+          this.reportTableDataSourceModelService.applyRunResult(
+            eventId,
+            report
+          );
         }
         return report;
       })
@@ -97,7 +101,7 @@ export class TestRunningFacadeService {
     project: ProjectSetting,
     options: RunTestOptions
   ) {
-    const headless = project.browserSettings.headless;
+    const headless = options.headless ?? project.browserSettings.headless;
     const inspectEventDto = new EventInspectionPresetDto(project);
     this.isRunningTest.set(true);
     this.eventRunningTest.set(eventId);
@@ -117,7 +121,6 @@ export class TestRunningFacadeService {
         .isRequestCheck
         ? project.measurementId
         : undefined;
-      gtmInspectionParams.closeBrowser = options.closeBrowser;
       return this.gtmOperatorService.runInspectionViaGtm(
         projectSlug,
         eventId,
@@ -173,40 +176,5 @@ export class TestRunningFacadeService {
         this.eventRunningTest.set('');
       })
     );
-  }
-
-  /**
-   * Writes a run's result into the test's row. The table is read when the
-   * run ends, not when it starts: while a run lasts, the user may leave the
-   * tests page and come back, which builds a new data source bound to a new
-   * paginator and sort.
-   */
-  private updateReportDetails(eventId: string, result: ReportDetailResponse) {
-    const current = this.reportTableDataSourceModelService.dataSource();
-    // The API sends dates as strings; a missing one means the run just ended.
-    const updatedAt = result.testEvent?.updatedAt
-      ? new Date(result.testEvent.updatedAt)
-      : new Date();
-
-    const nextData = current.data.map((event) =>
-      event.eventId === eventId
-        ? {
-            ...event,
-            passed: result.testEventDetails?.passed ?? false,
-            requestPassed: result.testEventDetails?.requestPassed ?? false,
-            message: result.testEvent?.message ?? event.message,
-            updatedAt,
-            lastRunAt: result.testEvent?.lastRunAt ?? updatedAt
-          }
-        : event
-    );
-
-    // A new data source instance makes the signal, and the table, update.
-    const next = new MatTableDataSource(nextData);
-    next.paginator = current.paginator;
-    next.sort = current.sort;
-    next.filterPredicate = current.filterPredicate;
-    next.filter = current.filter;
-    this.reportTableDataSourceModelService.dataSource.set(next);
   }
 }

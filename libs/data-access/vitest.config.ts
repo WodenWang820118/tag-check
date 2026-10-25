@@ -1,10 +1,12 @@
 import angular from '@analogjs/vite-plugin-angular';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
 // Mirror the Angular-friendly settings from vite.config.mts so TestBed is initialized.
 export default defineConfig({
-  plugins: [angular(), tsconfigPaths()],
+  resolve: {
+    tsconfigPaths: true
+  },
+  plugins: [angular()],
   test: {
     globals: true,
     environment: 'jsdom',

@@ -1,6 +1,9 @@
 mod app;
 mod backend;
 mod diagnostics;
+mod run_status;
+mod tray;
+mod window;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {

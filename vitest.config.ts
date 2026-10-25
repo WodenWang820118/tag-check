@@ -1,12 +1,15 @@
-import { globSync, readFileSync } from 'node:fs';
 import { defineConfig } from 'vitest/config';
 
-const TOOLS_SPECS = 'tools/scripts/**/*.spec.ts';
+import {
+  findNodeTestSpecs,
+  TOOLS_SPECS_GLOB
+} from './tools/scripts/testing/node-test-specs/node-test-specs.ts';
 
-/** Specs written for Node's built-in runner run with `node --test`, not Vitest. */
-const nodeTestSpecs = globSync(TOOLS_SPECS)
-  .filter((file) => /from ['"]node:test['"]/.test(readFileSync(file, 'utf8')))
-  .map((file) => file.replaceAll('\\', '/'));
+/**
+ * Specs written for Node's built-in runner run with `node --test`
+ * (`pnpm run test:tools:node`), not Vitest.
+ */
+const nodeTestSpecs = findNodeTestSpecs();
 
 export default defineConfig({
   test: {
@@ -19,7 +22,7 @@ export default defineConfig({
         test: {
           name: 'tools',
           environment: 'node',
-          include: [TOOLS_SPECS],
+          include: [TOOLS_SPECS_GLOB],
           exclude: ['**/node_modules/**', ...nodeTestSpecs]
         }
       }

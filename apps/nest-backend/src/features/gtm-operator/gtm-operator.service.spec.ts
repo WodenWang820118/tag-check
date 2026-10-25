@@ -1,11 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { InternalServerErrorException } from '@nestjs/common';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
+import { passThroughTracker } from '../event-inspection-pipeline/run-tracker.spec-helpers';
 import { runInNewContext } from 'node:vm';
 import {
   GtmOperatorService,
   TAG_ASSISTANT_BADGE_PASSTHROUGH
 } from './gtm-operator.service';
+import {
+  CHECK_INCLUDE_DEBUG_PARAM,
+  GtmPreviewConnectionError,
+  READ_TAG_ASSISTANT_VIEW
+} from './tag-assistant-connection';
 import type { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import type { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 
@@ -51,7 +57,8 @@ describe('GtmOperatorService recorder lifecycle', () => {
     service = new GtmOperatorService(
       pipeline as never,
       puppeteerUtils as never,
-      new RunQueueService()
+      new RunQueueService(),
+      passThroughTracker()
     );
     vi.spyOn(service, 'operateGtmPreviewMode').mockResolvedValue(undefined);
   });
@@ -76,6 +83,27 @@ describe('GtmOperatorService recorder lifecycle', () => {
       browser,
       openerPage,
       null
+    );
+  });
+
+  it("replays on the site's page, not on the site's service worker", async () => {
+    await expect(
+      service.inspectSingleEventViaGtm(
+        'project',
+        'event',
+        createQuery(),
+        createPreset()
+      )
+    ).resolves.toEqual([{ passed: true }]);
+
+    expect(pipeline.singleEventInspectionRecipe).toHaveBeenCalledWith(
+      targetPage,
+      'project',
+      'event',
+      'G-TEST',
+      { username: '', password: '' },
+      'false',
+      expect.anything()
     );
   });
 
@@ -197,6 +225,40 @@ describe('GtmOperatorService recorder lifecycle', () => {
       message:
         'Failed to perform GTM validation: Waiting for selector `#buy` failed'
     });
+  });
+
+  it('rejects with a readable message when GTM Preview does not connect, and logs the detail', async () => {
+    vi.mocked(service.operateGtmPreviewMode).mockRejectedValue(
+      new GtmPreviewConnectionError(
+        'Could not connect to GTM Preview (Tag Assistant did not show the Continue button)',
+        'Failed to operate GTM preview control ".btn.btn--filled.wd-continue-debugging-button": TimeoutError'
+      )
+    );
+    const logError = vi
+      .spyOn(Logger.prototype, 'error')
+      .mockImplementation(() => undefined);
+
+    const error: unknown = await service
+      .inspectSingleEventViaGtm(
+        'project',
+        'event',
+        createQuery(),
+        createPreset()
+      )
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(InternalServerErrorException);
+    expect(error).toMatchObject({
+      message:
+        'Could not connect to GTM Preview (Tag Assistant did not show the Continue button)'
+    });
+    expect(String(logError.mock.calls[0]?.[0])).toContain('TimeoutError');
+    expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(
+      browser,
+      openerPage,
+      null
+    );
+    logError.mockRestore();
   });
 
   it('closes a headful run when the caller asks, as a batch does', async () => {
@@ -374,11 +436,12 @@ describe('TAG_ASSISTANT_BADGE_PASSTHROUGH', () => {
 });
 
 describe('GtmOperatorService.operateGtmPreviewMode', () => {
-  it('waits for each required GTM preview control before clicking it', async () => {
+  it('opens Tag Assistant, connects it to the site and continues past the "Connected!" dialog', async () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      new RunQueueService()
+      new RunQueueService(),
+      passThroughTracker()
     );
     const page = createPreviewPage();
 
@@ -391,29 +454,20 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
       'https://tagassistant.google.com/#url=https%3A%2F%2Fexample.test',
       { waitUntil: 'networkidle2' }
     );
-    expect(page.waitForSelector).toHaveBeenCalledWith('#include-debug-param', {
-      visible: true
-    });
-    expect(page.waitForSelector).toHaveBeenCalledWith('#domain-start-button', {
-      visible: true
-    });
-    expect(page.waitForSelector).toHaveBeenCalledWith(
-      '.btn.btn--filled.wd-continue-debugging-button',
-      { visible: true }
-    );
-    expect(page.click).toHaveBeenNthCalledWith(1, '#include-debug-param');
-    expect(page.click).toHaveBeenNthCalledWith(2, '#domain-start-button');
+    expect(page.evaluate).toHaveBeenCalledWith(CHECK_INCLUDE_DEBUG_PARAM);
+    expect(page.click).toHaveBeenNthCalledWith(1, '#domain-start-button');
     expect(page.click).toHaveBeenNthCalledWith(
-      3,
+      2,
       '.btn.btn--filled.wd-continue-debugging-button'
     );
   });
 
-  it('fails fast when a required GTM preview control is missing', async () => {
+  it('fails fast when the connect dialog is missing', async () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      new RunQueueService()
+      new RunQueueService(),
+      passThroughTracker()
     );
     const page = createPreviewPage();
     page.waitForSelector.mockRejectedValueOnce(new Error('missing control'));
@@ -423,7 +477,7 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
         page as never,
         'https://tagassistant.google.com/#url=https%3A%2F%2Fexample.test'
       )
-    ).rejects.toThrow(/Failed to operate GTM preview control/);
+    ).rejects.toBeInstanceOf(GtmPreviewConnectionError);
 
     expect(page.click).not.toHaveBeenCalled();
   });
@@ -434,7 +488,8 @@ describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      new RunQueueService()
+      new RunQueueService(),
+      passThroughTracker()
     );
 
     expect(
@@ -448,7 +503,8 @@ describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      new RunQueueService()
+      new RunQueueService(),
+      passThroughTracker()
     );
 
     expect(
@@ -491,10 +547,41 @@ function createMockBrowser(
     pages: vi.fn().mockResolvedValue([]),
     close: vi.fn().mockResolvedValue(undefined),
     setCookie: vi.fn().mockResolvedValue(undefined),
-    waitForTarget: vi.fn().mockResolvedValue({
-      url: vi.fn(() => 'https://example.test/product?gtm_debug=TAGASSISTANT'),
-      asPage: vi.fn().mockResolvedValue(targetPage)
-    })
+    // Resolves with the first target that matches, as Puppeteer does: the
+    // site's service worker comes before its page.
+    waitForTarget: vi
+      .fn()
+      .mockImplementation(
+        async (predicate: (target: MockTarget) => boolean) => {
+          const match = [siteWorkerTarget(), sitePageTarget(targetPage)].find(
+            predicate
+          );
+          if (!match) throw new Error('Waiting for target failed');
+          return match;
+        }
+      )
+  };
+}
+
+interface MockTarget {
+  type(): string;
+  url(): string;
+  asPage(): Promise<unknown>;
+}
+
+function sitePageTarget(page: unknown): MockTarget {
+  return {
+    type: () => 'page',
+    url: () => 'https://example.test/product?gtm_debug=TAGASSISTANT',
+    asPage: vi.fn().mockResolvedValue(page)
+  };
+}
+
+function siteWorkerTarget(): MockTarget {
+  return {
+    type: () => 'service_worker',
+    url: () => 'https://example.test/ngsw-worker.js',
+    asPage: vi.fn().mockRejectedValue(new Error('Target must exist'))
   };
 }
 
@@ -524,10 +611,21 @@ function createSeedPage(callOrder?: string[]) {
   };
 }
 
+/** Tag Assistant showing its "Connected!" dialog as soon as it is read. */
 function createPreviewPage() {
   return {
     goto: vi.fn().mockResolvedValue(undefined),
     waitForSelector: vi.fn().mockResolvedValue({}),
-    click: vi.fn().mockResolvedValue(undefined)
+    click: vi.fn().mockResolvedValue(undefined),
+    evaluate: vi.fn().mockImplementation(async (script: string) =>
+      script === READ_TAG_ASSISTANT_VIEW
+        ? JSON.stringify({
+            continueVisible: true,
+            connected: true,
+            retryVisible: false,
+            message: 'Connected!'
+          })
+        : true
+    )
   };
 }

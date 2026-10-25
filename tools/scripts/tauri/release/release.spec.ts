@@ -1163,6 +1163,7 @@ describe('release helper', () => {
     expect(workflow).toContain('run: pnpm run ${{ matrix.release_script }}');
     expect(workflow).toContain('build-essential');
     expect(workflow).toContain('desktop-file-utils');
+    expect(workflow).toContain('libayatana-appindicator3-dev');
     expect(workflow).toContain(
       'libfuse2t64 || sudo apt-get install -y libfuse2'
     );

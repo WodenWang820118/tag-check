@@ -9,6 +9,7 @@ import {
   workspaceRoot
 } from '../path-contract/path-contract.ts';
 import {
+  type PathExistsFunction,
   rmIfExists,
   run,
   type RemovePathFunction,
@@ -54,7 +55,7 @@ export type WriteTextFileFunction = (
 export interface PrepareBackendRuntimeDependencies {
   arch?: string;
   backendDir?: string;
-  existsSyncFn?: typeof existsSync;
+  existsSyncFn?: PathExistsFunction;
   hashFileFn?: HashFileFunction;
   nodeVersion?: string;
   platform?: NodeJS.Platform;
@@ -137,13 +138,14 @@ export function buildBackendRuntimeInstallStamp(
   backendDir: string,
   dependencies: {
     arch?: string;
-    existsSyncFn?: typeof existsSync;
+    existsSyncFn?: PathExistsFunction;
     hashFileFn?: HashFileFunction;
     nodeVersion?: string;
     platform?: NodeJS.Platform;
   } = {}
 ): BackendRuntimeInstallStamp {
-  const existsSyncFn = dependencies.existsSyncFn ?? existsSync;
+  const existsSyncFn: PathExistsFunction =
+    dependencies.existsSyncFn ?? existsSync;
   const hashFileFn = dependencies.hashFileFn ?? hashFile;
   const packageJsonPath = join(backendDir, 'package.json');
   const packageLockPath = join(backendDir, 'package-lock.json');
@@ -249,7 +251,8 @@ export function prepareBackendRuntime(
 ) {
   const backendDir = dependencies.backendDir ?? backendDistDir;
   const arch = dependencies.arch ?? process.arch;
-  const existsSyncFn = dependencies.existsSyncFn ?? existsSync;
+  const existsSyncFn: PathExistsFunction =
+    dependencies.existsSyncFn ?? existsSync;
   const hashFileFn = dependencies.hashFileFn ?? hashFile;
   const nodeVersion = dependencies.nodeVersion ?? process.version;
   const platform = dependencies.platform ?? process.platform;

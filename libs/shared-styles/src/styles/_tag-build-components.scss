@@ -1,0 +1,23 @@
+@use '@angular/material' as mat;
+
+// The themes of the Material components ng-tag-build renders, in the order
+// `mat.all-component-themes` emits them. ng-tag-build's global styles count
+// against its 1 MB initial bundle, so they leave out the other components.
+// Add a component here when ng-tag-build starts rendering it: without its
+// theme it falls back to Material's M3 default tokens.
+@mixin component-themes($theme) {
+  @include mat.core-theme($theme);
+  @include mat.tooltip-theme($theme);
+  @include mat.form-field-theme($theme);
+  @include mat.input-theme($theme);
+  @include mat.select-theme($theme);
+  @include mat.dialog-theme($theme);
+  @include mat.menu-theme($theme);
+  @include mat.tabs-theme($theme);
+  @include mat.checkbox-theme($theme);
+  @include mat.button-theme($theme);
+  @include mat.icon-button-theme($theme);
+  @include mat.expansion-theme($theme);
+  @include mat.icon-theme($theme);
+  @include mat.toolbar-theme($theme);
+}

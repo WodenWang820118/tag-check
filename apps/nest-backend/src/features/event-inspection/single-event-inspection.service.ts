@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials } from 'puppeteer';
-import { EventInspectionPresetDto } from '@utils';
+import type { EventInspectionPresetDto, RunStatusBatch } from '@utils';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
 import {
   isHeadless,
@@ -9,6 +9,7 @@ import {
 import { RunRecorder } from '../../features/web-agent/puppeteer-utils/run-recorder';
 import { applyPresetCookies } from '../web-agent/browser-state-preload.util';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
+import { RunTrackerService } from '../event-inspection-pipeline/run-tracker.service';
 import { toClientErrorMessage } from '../../shared/client-error-message';
 
 /** What a direct run needs besides the test it runs. */
@@ -38,21 +39,25 @@ export class SingleEventInspectionService {
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
     private readonly puppeteerUtilsService: PuppeteerUtilsService,
-    private readonly runQueue: RunQueueService
+    private readonly runQueue: RunQueueService,
+    private readonly runTracker: RunTrackerService
   ) {}
 
   /**
    * Runs the test once every run requested before it has finished. Resolves
    * with the pipeline's result; rejects with an HttpException (500) when the
-   * run fails.
+   * run fails. `batch` places the run in its batch for the run status.
    */
   inspectSingleEvent(
     projectSlug: string,
     eventId: string,
-    options: InspectSingleEventOptions
+    options: InspectSingleEventOptions,
+    batch?: RunStatusBatch
   ) {
     return this.runQueue.run((signal) =>
-      this.inspect(projectSlug, eventId, options, signal)
+      this.runTracker.track({ projectSlug, eventId, batch }, signal, () =>
+        this.inspect(projectSlug, eventId, options, signal)
+      )
     );
   }
 

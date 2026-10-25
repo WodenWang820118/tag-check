@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { computed, signal, WritableSignal } from '@angular/core';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { BatchUpdatePayload } from '@utils';
 import { environment } from '../../../../environments/environment';
 import { TestRunningFacadeService } from '../facade/test-running-facade.service';
 import {
@@ -152,6 +153,54 @@ describe('ProgressEventsService', () => {
     TestBed.tick();
 
     expect(stream.closed).toBe(true);
+  });
+
+  it('keeps the stream open between runs while it is held', () => {
+    const service = TestBed.inject(ProgressEventsService);
+    const release = service.hold();
+    TestBed.tick();
+    const stream = FakeEventSource.instances[0];
+    expect(stream?.closed).toBe(false);
+
+    isRunningTest.set(true);
+    TestBed.tick();
+    isRunningTest.set(false);
+    TestBed.tick();
+    expect(FakeEventSource.instances).toHaveLength(1);
+    expect(stream?.closed).toBe(false);
+
+    release();
+    release();
+    TestBed.tick();
+    expect(stream?.closed).toBe(true);
+  });
+
+  it('emits batchUpdate payloads and skips malformed ones', () => {
+    const service = TestBed.inject(ProgressEventsService);
+    service.hold();
+    TestBed.tick();
+    const stream = FakeEventSource.instances[0];
+    const emitted: BatchUpdatePayload[] = [];
+    const sub = service.batchUpdate$.subscribe((v) => emitted.push(v));
+    const update = {
+      batchId: 3,
+      projectSlug: 'demo',
+      status: 'running',
+      items: [
+        { eventId: 'a', status: 'passed', message: null },
+        { eventId: 'b', status: 'running', message: null }
+      ]
+    };
+
+    stream?.emit('batchUpdate', JSON.stringify(update));
+    stream?.emit('batchUpdate', '{"batchId":"3"}');
+    stream?.emit(
+      'batchUpdate',
+      JSON.stringify({ ...update, items: [{ eventId: 'a', status: 'done' }] })
+    );
+    sub.unsubscribe();
+
+    expect(emitted).toEqual([update]);
   });
 
   it('closes the stream when the service is destroyed', () => {

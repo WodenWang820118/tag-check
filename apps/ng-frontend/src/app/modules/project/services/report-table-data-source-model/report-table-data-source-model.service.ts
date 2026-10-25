@@ -1,7 +1,7 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { Injectable, signal, computed } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { IReportDetails } from '@utils';
+import { IReportDetails, ReportDetailResponse } from '@utils';
 
 /**
  * The tests table's rows and selection, shared by the table, its toolbar,
@@ -21,4 +21,40 @@ export class ReportTableDataSourceModelService {
   readonly computedDataSource = computed(() => this.dataSource());
   readonly selection = signal(new SelectionModel<IReportDetails>(true, []));
   readonly computedSelection = computed(() => this.selection());
+
+  /**
+   * Writes a run's result into the test's row: `result` is the run
+   * endpoint's or GET /reports/:projectSlug/:eventId's JSON. The table is
+   * read when the run ends, not when it starts: while a run lasts, the user
+   * may leave the tests page and come back, which builds a new data source
+   * bound to a new paginator and sort.
+   */
+  applyRunResult(eventId: string, result: ReportDetailResponse): void {
+    const current = this.dataSource();
+    // The API sends dates as strings; a missing one means the run just ended.
+    const updatedAt = result.testEvent?.updatedAt
+      ? new Date(result.testEvent.updatedAt)
+      : new Date();
+
+    const nextData = current.data.map((event) =>
+      event.eventId === eventId
+        ? {
+            ...event,
+            passed: result.testEventDetails?.passed ?? false,
+            requestPassed: result.testEventDetails?.requestPassed ?? false,
+            message: result.testEvent?.message ?? event.message,
+            updatedAt,
+            lastRunAt: result.testEvent?.lastRunAt ?? updatedAt
+          }
+        : event
+    );
+
+    // A new data source instance makes the signal, and the table, update.
+    const next = new MatTableDataSource(nextData);
+    next.paginator = current.paginator;
+    next.sort = current.sort;
+    next.filterPredicate = current.filterPredicate;
+    next.filter = current.filter;
+    this.dataSource.set(next);
+  }
 }

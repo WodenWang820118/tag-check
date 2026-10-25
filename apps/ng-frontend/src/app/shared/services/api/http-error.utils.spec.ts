@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom, throwError } from 'rxjs';
 import {
+  apiErrorMessage,
   getHttpDiagnosticMetadata,
   rethrowHttpError,
   setHttpDiagnosticMetadata
@@ -63,5 +64,45 @@ describe('http-error utils diagnostics', () => {
       url: '/reports/p',
       path: '/reports/p'
     });
+  });
+});
+
+describe('apiErrorMessage', () => {
+  it("reads the reason the backend's error filter wraps", () => {
+    const error = new HttpErrorResponse({
+      status: 400,
+      error: {
+        statusCode: 400,
+        message: {
+          message: 'time must be HH:MM, from 00:00 to 23:59',
+          error: 'Bad Request',
+          statusCode: 400
+        },
+        path: '/schedules/demo'
+      }
+    });
+
+    expect(apiErrorMessage(error, 'Could not save')).toBe(
+      'time must be HH:MM, from 00:00 to 23:59'
+    );
+  });
+
+  it('reads a plain message, also from an Error caused by the response', () => {
+    const response = new HttpErrorResponse({
+      status: 500,
+      error: { statusCode: 500, message: 'No recording found' }
+    });
+
+    expect(apiErrorMessage(response, 'Failed')).toBe('No recording found');
+    expect(
+      apiErrorMessage(new Error('Run failed', { cause: response }), 'Failed')
+    ).toBe('No recording found');
+  });
+
+  it('falls back when the API gave no reason', () => {
+    expect(
+      apiErrorMessage(new HttpErrorResponse({ status: 0 }), 'Offline')
+    ).toBe('Offline');
+    expect(apiErrorMessage(new Error('boom'), 'Failed')).toBe('Failed');
   });
 });

@@ -1,0 +1,10 @@
+@use './styles/global';
+@use './styles/theme' as theme;
+@use './styles/tag-build-components' as components;
+
+// ng-tag-build's counterpart of `index.scss`: the same global rules, with
+// the themes of the components ng-tag-build renders instead of
+// `mat.all-component-themes`.
+@include global.base-styles();
+@include components.component-themes(theme.$primary-theme);
+@include global.theme-overrides();

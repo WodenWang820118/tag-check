@@ -1,7 +1,7 @@
 {
   "name": "tag-check",
   "sideEffects": false,
-  "version": "3.2.0",
+  "version": "3.3.0",
   "type": "module",
   "author": "Guan Xin Wang",
   "description": "A tool to verify Google Tag Manager implementations on websites",
@@ -98,6 +98,9 @@
     "test-front:e2e": "pnpm nx run ng-frontend:e2e",
     "test:pre-commit": "nx affected --target=test --base=HEAD --parallel=3",
     "test:release-tools": "vitest run tools/scripts/tauri/release/release.spec.ts",
+    "test:tools": "vitest run --project tools",
+    "test:tools:node": "node tools/scripts/testing/node-test-specs/node-test-specs.ts",
+    "typecheck:tools": "tsc --noEmit -p tools/scripts/tsconfig.json",
     "test:cov": "nx run-many --target=test --parallel=6 --coverage --verbose --exclude=**/nest-backend,**/e2e && pnpm run test-back:cov && pnpm run coverage:merge",
     "test:data-access": "nx test data-access --experimental-vm-modules",
     "test:e2e": "pnpm run test-back:e2e",
@@ -192,7 +195,6 @@
     "unplugin-swc": "^1.6.0",
     "vite": "8.3.4",
     "vite-plugin-dts": "4.5.4",
-    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "4.1.12",
     "zone.js": "0.16.3"
   },

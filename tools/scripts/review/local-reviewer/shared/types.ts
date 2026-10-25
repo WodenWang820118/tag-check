@@ -1,4 +1,6 @@
-export type { CommandResult } from '../../../shared/process.ts';
+import type { CommandResult } from '../../../shared/process.ts';
+
+export type { CommandResult };
 
 export type LocalReviewSeverity =
   | 'critical'

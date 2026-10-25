@@ -58,6 +58,27 @@ export class ProjectRepositoryService {
     return plainToInstance(ProjectResponseDto, entity);
   }
 
+  /**
+   * The project with every setting a run needs, the authentication password
+   * included (it is left out of every other read).
+   *
+   * @throws HttpException 404 when no project has this slug.
+   */
+  async getRunSettingsEntityBySlug(slug: string): Promise<ProjectEntity> {
+    const entity = await this.repository
+      .createQueryBuilder('project')
+      .leftJoinAndSelect('project.authenticationSettings', 'authentication')
+      .addSelect('authentication.password')
+      .leftJoinAndSelect('project.browserSettings', 'browser')
+      .leftJoinAndSelect('project.applicationSettings', 'application')
+      .where('project.projectSlug = :slug', { slug })
+      .getOne();
+    if (!entity) {
+      throw new HttpException('Project not found', HttpStatus.NOT_FOUND);
+    }
+    return entity;
+  }
+
   async create(data: CreateProjectDto): Promise<ProjectResponseDto> {
     const entity = await this.repository.save(data);
     return plainToInstance(ProjectResponseDto, entity);

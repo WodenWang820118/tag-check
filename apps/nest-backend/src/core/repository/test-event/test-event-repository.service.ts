@@ -60,6 +60,20 @@ export class TestEventRepositoryService {
     return entity;
   }
 
+  /**
+   * The project's tests with these eventIds, own columns only, in no
+   * particular order; eventIds the project does not have are left out.
+   */
+  async listEntitiesBySlugAndEventIds(
+    projectSlug: string,
+    eventIds: string[]
+  ): Promise<TestEventEntity[]> {
+    if (eventIds.length === 0) return [];
+    return await this.repository.find({
+      where: { project: { projectSlug }, eventId: In(eventIds) }
+    });
+  }
+
   /** The test with its latest result, without past runs or screenshots. */
   async getBySlugAndEventId(projectSlug: string, eventId: string) {
     const entity = await this.repository.findOne({

@@ -127,3 +127,36 @@ export function rethrowHttpError<T>(
       })
     );
 }
+
+/** Reads a non-empty string `message` field of a JSON object. */
+function readMessage(value: unknown): string | undefined {
+  if (typeof value !== 'object' || value === null || !('message' in value)) {
+    return undefined;
+  }
+  const { message } = value;
+  return typeof message === 'string' && message !== '' ? message : undefined;
+}
+
+/**
+ * The reason the API gave for a failed request, for the user, or `fallback`
+ * when it gave none. The backend's error filter wraps an HttpException, so a
+ * 400 body is `{ statusCode, message: { message: '<reason>', ... }, ... }`;
+ * other bodies carry the reason as a string `message`. An Error whose
+ * `cause` is the HttpErrorResponse, as the run services throw, is read the
+ * same way.
+ */
+export function apiErrorMessage(error: unknown, fallback: string): string {
+  const response =
+    error instanceof Error && error.cause instanceof HttpErrorResponse
+      ? error.cause
+      : error;
+  if (!(response instanceof HttpErrorResponse)) {
+    return fallback;
+  }
+  const body: unknown = response.error;
+  const wrapped =
+    typeof body === 'object' && body !== null && 'message' in body
+      ? readMessage(body.message)
+      : undefined;
+  return wrapped ?? readMessage(body) ?? fallback;
+}

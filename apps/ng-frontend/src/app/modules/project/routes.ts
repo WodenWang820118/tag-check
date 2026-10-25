@@ -55,6 +55,14 @@ export const PROJECT_ROUTES: Routes = [
         }
       },
       {
+        path: 'schedules',
+        title: 'Schedules',
+        loadComponent: () =>
+          import('./views/schedules-view/schedules-view.component').then(
+            (m) => m.SchedulesViewComponent
+          )
+      },
+      {
         path: 'settings/project-info',
         title: 'Project information',
         loadComponent: () =>

@@ -9,6 +9,7 @@ import { GtmParserModule } from '../features/gtm-parser/gtm-parser.module';
 import { ProjectDataExportModule } from '../infrastructure/data-export/project-data-export.module';
 import { TestReportFacadeModule } from '../features/repository/test-report-facade/test-report-facade.module';
 import { EventsGatewayModule } from '../core/events-gateway/events-gateway.module';
+import { BatchQueueModule } from '../features/batch-queue/batch-queue.module';
 
 // controllers
 import { ProjectWorkFlowController } from './project/project-workflow.controller';
@@ -26,6 +27,8 @@ import { VideosController } from './videos/videos.controller';
 import { GtmParserController } from './gtm-parser/gtm-parser.controller';
 import { StartupReadinessController } from './startup/startup-readiness.controller';
 import { EventsController } from './events/events.controller';
+import { BatchRunsController } from './batch-runs/batch-runs.controller';
+import { SchedulesController } from './schedules/schedules.controller';
 
 // services
 import { EventInspectionControllerService } from './data-layer/event-inspection-controller.service';
@@ -48,7 +51,8 @@ const services = [
     GtmParserModule,
     TestReportFacadeModule,
     ProjectDataExportModule,
-    EventsGatewayModule
+    EventsGatewayModule,
+    BatchQueueModule
   ],
   controllers: [
     ProjectWorkFlowController,
@@ -65,7 +69,9 @@ const services = [
     VideosController,
     GtmParserController,
     StartupReadinessController,
-    EventsController
+    EventsController,
+    BatchRunsController,
+    SchedulesController
   ],
   providers: [...services]
 })

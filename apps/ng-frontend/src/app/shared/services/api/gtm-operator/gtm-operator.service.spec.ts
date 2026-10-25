@@ -14,7 +14,7 @@ describe('GtmOperatorService', () => {
 
   afterEach(() => vi.restoreAllMocks());
 
-  it('runInspectionViaGtm always sends headless=false and url-encodes credentials', async () => {
+  it('runInspectionViaGtm sends the headless choice and url-encodes credentials', async () => {
     httpClient.post.mockReturnValueOnce(of([]));
     await firstValueFrom(
       service.runInspectionViaGtm('slug', 'evt', {
@@ -31,23 +31,23 @@ describe('GtmOperatorService', () => {
     expect(url).toBe(
       `${environment.dataLayerApiUrl}/gtm-operator/slug/evt?gtmUrl=${encodeURIComponent(
         'https://gtm.example/?id=GTM-1'
-      )}&headless=false&measurementId=G-1&username=${encodeURIComponent(
+      )}&headless=true&measurementId=G-1&username=${encodeURIComponent(
         'u@x.com'
       )}&password=${encodeURIComponent('p+s')}&captureRequest=true`
     );
     expect(body).toEqual({ name: 'preset' });
   });
 
-  it('runInspectionViaGtm asks the backend to close the browser for a batch', async () => {
+  it('runInspectionViaGtm sends headless=false for a headful run', async () => {
     httpClient.post.mockReturnValueOnce(of([]));
     await firstValueFrom(
       service.runInspectionViaGtm('slug', 'evt', {
         gtmUrl: 'https://x.test',
-        closeBrowser: true
+        headless: false
       })
     );
     const [url] = httpClient.post.mock.calls[0];
-    expect(url).toContain('&closeBrowser=true');
+    expect(url).toContain('&headless=false');
   });
 
   it('runInspectionViaGtm omits optional params when not set', async () => {

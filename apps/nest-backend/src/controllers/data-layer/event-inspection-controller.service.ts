@@ -1,7 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { SingleEventInspectionService } from '../../features/event-inspection/single-event-inspection.service';
-import { CookieData, EventInspectionPresetDto, LocalStorageData } from '@utils';
+import { EventInspectionPresetDto } from '@utils';
 import { InspectEventQueryDto } from './dto/inspect-event-query.dto';
+import { buildDirectRunOptions } from '../../features/test-run/run-options';
+import { isQueryFlagOn } from '../../shared/query-flag';
 
 /**
  * Turns a run request's query string and body into the options of a
@@ -23,23 +25,15 @@ export class EventInspectionControllerService {
     return await this.singleEventInspectionService.inspectSingleEvent(
       projectName,
       eventId,
-      {
-        headless: query.headless || 'false',
-        measurementId: query.measurementId || '',
-        credentials: {
-          username: query.username || '',
-          password: query.password || ''
-        },
-        captureRequest: query.captureRequest || 'false',
+      buildDirectRunOptions({
+        headless: isQueryFlagOn(query.headless),
+        measurementId: query.measurementId,
+        username: query.username,
+        password: query.password,
+        captureRequest: isQueryFlagOn(query.captureRequest),
         url: query.url,
-        eventInspectionPresetDto: eventInspectionPresetDto || {
-          application: {
-            localStorage: { data: [] as LocalStorageData[] },
-            cookie: { data: [] as CookieData[] }
-          },
-          puppeteerArgs: []
-        }
-      }
+        preset: eventInspectionPresetDto
+      })
     );
   }
 

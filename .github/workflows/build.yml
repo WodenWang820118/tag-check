@@ -51,14 +51,20 @@ jobs:
       - name: Backend integration tests
         run: pnpm run test-back:integration
         shell: bash
-      - name: Release tooling tests
-        run: pnpm run test:release-tools
+      - name: Tools tests (Vitest)
+        run: pnpm run test:tools
+        shell: bash
+      - name: Tools tests (node:test)
+        run: pnpm run test:tools:node
         shell: bash
       - name: Test and coverage
         run: pnpm run test:cov
         shell: bash
       - name: Type-check specs
         run: pnpm nx run-many -t typecheck-spec
+        shell: bash
+      - name: Type-check tools
+        run: pnpm run typecheck:tools
         shell: bash
       - name: Backend e2e tests with coverage
         run: pnpm run test-back:e2e:cov

@@ -7,6 +7,8 @@ use tauri::{Listener, Manager, WebviewUrl};
 use crate::{
     backend::{start_backend, stop_backend, BackendProcess, BACKEND_HEALTH_BUDGET},
     diagnostics::write_diagnostic_log,
+    tray::create_tray,
+    window::{on_window_event, SPLASH_WINDOW_LABEL},
 };
 const SPLASH_TIMEOUT_MARGIN_SECS: u64 = 30;
 
@@ -40,7 +42,7 @@ fn try_close_splash_window(
         app_handle,
         &format!("splash: both startup signals received, closing splash ({reason})"),
     );
-    if let Some(splash) = app_handle.get_webview_window("splash") {
+    if let Some(splash) = app_handle.get_webview_window(SPLASH_WINDOW_LABEL) {
         let _: Result<(), _> = splash.close();
     }
 }
@@ -49,7 +51,7 @@ fn try_close_splash_window(
 fn create_splash_window(app_handle: &tauri::AppHandle) {
     match tauri::WebviewWindowBuilder::new(
         app_handle,
-        "splash",
+        SPLASH_WINDOW_LABEL,
         WebviewUrl::App("splash.html".into()),
     )
     .title("Tag Check")
@@ -72,7 +74,11 @@ fn create_splash_window(app_handle: &tauri::AppHandle) {
 pub(crate) fn run() {
     let mut builder = tauri::Builder::default()
         .manage(BackendProcess::default())
-        .plugin(tauri_plugin_shell::init());
+        .plugin(tauri_plugin_shell::init())
+        // Notifications are sent from Rust only (run_status), so no
+        // capability grants the webview the plugin's commands.
+        .plugin(tauri_plugin_notification::init())
+        .on_window_event(on_window_event);
 
     if cfg!(debug_assertions) {
         builder = builder.plugin(
@@ -91,6 +97,12 @@ pub(crate) fn run() {
             //    while the backend reaches startup data readiness.
             write_diagnostic_log(app_handle, "setup: creating splash window");
             create_splash_window(app_handle);
+
+            // The tray keeps the app reachable while the main window is
+            // hidden; closing the main window hides it instead of quitting.
+            if let Err(error) = create_tray(app_handle) {
+                write_diagnostic_log(app_handle, &format!("tray: failed to create icon: {error}"));
+            }
 
             // 2. Listen for both startup signals. The splash only closes after
             //    the backend startup seed is complete and the main frontend has
@@ -145,7 +157,7 @@ pub(crate) fn run() {
                 {
                     return;
                 }
-                if let Some(splash) = timeout_handle.get_webview_window("splash") {
+                if let Some(splash) = timeout_handle.get_webview_window(SPLASH_WINDOW_LABEL) {
                     let _: Result<(), _> = splash.close();
                     write_diagnostic_log(
                         &timeout_handle,
@@ -167,12 +179,26 @@ pub(crate) fn run() {
         .build(tauri::generate_context!())
         .expect("error while building the Tauri application");
 
+    // Quit (tray), `AppHandle::exit`, closing the last window, and an OS
+    // shutdown or log-off (tao turns `WM_ENDSESSION` into `RunEvent::Exit`)
+    // all pass through here, so the sidecar is always stopped.
     app.run(|app_handle, event| {
         if matches!(
             event,
             tauri::RunEvent::Exit | tauri::RunEvent::ExitRequested { .. }
         ) {
             stop_backend(app_handle);
+        }
+
+        // macOS: clicking the Dock icon while the main window is hidden in
+        // the menu bar brings it back.
+        #[cfg(target_os = "macos")]
+        if let tauri::RunEvent::Reopen {
+            has_visible_windows: false,
+            ..
+        } = event
+        {
+            let _ = crate::window::show_main_window(app_handle);
         }
     });
 }
