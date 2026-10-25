@@ -419,6 +419,55 @@ describe('TransformService', () => {
       ).toEqual([]);
     });
 
+    it('sends the keys of a nested object, not the object, and keeps ecommerce and items', () => {
+      const login: unknown = {
+        event: 'login',
+        user: { id: '$id', type: '$type', address: { city: '$city' } }
+      };
+      if (!isStrictDataLayerEvent(login)) {
+        throw new Error('expected a dataLayer spec');
+      }
+      const purchase: StrictDataLayerEvent = {
+        event: 'purchase',
+        ecommerce: {
+          currency: '$currency',
+          value: 10,
+          items: [{ item_id: '$item_id' }]
+        }
+      };
+      const result = service.convert(
+        buildOptions({
+          gtmConfigGenerator: { ...mockGtmConfig, specs: [login, purchase] }
+        })
+      );
+      const { tag, variable } = result.containerVersion;
+      const rowsOf = (eventName: string) => {
+        const eventTag = tag.find((t) => t.name === `GA4 event - ${eventName}`);
+        return eventTag ? getGa4EventParameterRows(eventTag, variable) : [];
+      };
+
+      expect(rowsOf('login')).toEqual([
+        { parameter: 'user_id', value: '{{DLV - user.id}}' },
+        { parameter: 'user_type', value: '{{DLV - user.type}}' },
+        { parameter: 'user_address_city', value: '{{DLV - user.address.city}}' }
+      ]);
+      expect(rowsOf('purchase')).toEqual([
+        { parameter: 'currency', value: '{{DLV - ecommerce.currency}}' },
+        { parameter: 'value', value: '{{DLV - ecommerce.value}}' },
+        { parameter: 'items', value: '{{DLV - ecommerce.items}}' }
+      ]);
+      expect(
+        variable.map((v) => v.name).filter((name) => name.startsWith('DLV - '))
+      ).toEqual([
+        'DLV - user.id',
+        'DLV - user.type',
+        'DLV - user.address.city',
+        'DLV - ecommerce.currency',
+        'DLV - ecommerce.value',
+        'DLV - ecommerce.items'
+      ]);
+    });
+
     it('gives every tag and trigger a unique name', () => {
       const result = service.convert(
         buildOptions({
