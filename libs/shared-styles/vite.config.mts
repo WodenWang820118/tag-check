@@ -1,17 +1,15 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vitest/config';
 import angular from '@analogjs/vite-plugin-angular';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 
 export default defineConfig({
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/libs/shared-styles',
-  plugins: [angular(), tsconfigPaths(), nxCopyAssetsPlugin(['*.md'])],
-  // Uncomment this if you are using workers.
-  // worker: {
-  //  plugins: [ tsconfigPaths() ],
-  // },
+  resolve: {
+    tsconfigPaths: true
+  },
+  plugins: [angular(), nxCopyAssetsPlugin(['*.md'])],
   test: {
     watch: false,
     globals: true,

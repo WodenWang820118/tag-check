@@ -1,17 +1,15 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
 import angular from '@analogjs/vite-plugin-angular';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 
 export default defineConfig(() => ({
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/apps/ng-gtm-sample',
-  plugins: [angular(), tsconfigPaths(), nxCopyAssetsPlugin(['*.md'])],
-  // Uncomment this if you are using workers.
-  // worker: {
-  //  plugins: [ tsconfigPaths() ],
-  // },
+  resolve: {
+    tsconfigPaths: true
+  },
+  plugins: [angular(), nxCopyAssetsPlugin(['*.md'])],
   test: {
     name: 'ng-gtm-sample',
     watch: false,

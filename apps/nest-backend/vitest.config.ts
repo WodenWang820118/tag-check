@@ -1,6 +1,5 @@
 import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 const verboseTestLogs = process.env['TEST_LOGS'] === '1';
 const isCi = process.env['CI'] === 'true';
@@ -30,11 +29,13 @@ export default defineConfig({
       reporter: ['lcov']
     }
   },
+  resolve: {
+    tsconfigPaths: true
+  },
   esbuild: {
     target: 'es2020'
   },
   plugins: [
-    tsconfigPaths(),
     swc.vite({
       module: { type: 'es6' }
     })
