@@ -1,5 +1,6 @@
 import { Injectable, MessageEvent } from '@nestjs/common';
 import { Observable, Subject } from 'rxjs';
+import type { BatchUpdatePayload } from '@utils';
 
 /** The data of a `progressUpdate` event: the step a replay has reached. */
 export interface ProgressUpdatePayload {
@@ -40,6 +41,18 @@ export class ProgressEventsService {
     this.eventsSubject.next({
       type: 'eventCompleted',
       data: { message },
+      retry: 1000
+    });
+  }
+
+  /**
+   * Reports a batch's state after it changed: created, started, an item
+   * started or ended, cancelled or ended.
+   */
+  sendBatchUpdate(payload: BatchUpdatePayload): void {
+    this.eventsSubject.next({
+      type: 'batchUpdate',
+      data: payload,
       retry: 1000
     });
   }
