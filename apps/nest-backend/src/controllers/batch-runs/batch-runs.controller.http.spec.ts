@@ -374,5 +374,56 @@ describe('BatchRunsController and SchedulesController (HTTP, SQLite)', () => {
         items: [{ eventId: 'view_item', status: 'pending', message: null }]
       });
     });
+
+    it('streams a batchFinished event when the batch ends', async () => {
+      fakeRun.behaviors.set('add_to_cart', 'failed');
+      await app.listen(0, '127.0.0.1');
+      const address = app.getHttpServer().address();
+      const port =
+        typeof address === 'object' && address !== null ? address.port : 0;
+      const abort = new AbortController();
+      const stream = await fetch(`http://127.0.0.1:${port}/events`, {
+        signal: abort.signal
+      });
+      const reader = stream.body?.getReader();
+      if (!reader) throw new Error('No event stream');
+
+      const created = await post('/batch-runs/shop', {
+        eventIds: ['view_item', 'add_to_cart'],
+        headless: true
+      });
+      // Complete events only: each ends with a blank line.
+      const finishedBlock = (text: string) =>
+        text
+          .split('\n\n')
+          .slice(0, -1)
+          .find((chunk) => chunk.includes('event: batchFinished'));
+      let text = '';
+      const decoder = new TextDecoder();
+      while (!finishedBlock(text)) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        text += decoder.decode(value);
+      }
+      abort.abort();
+
+      const block = finishedBlock(text);
+      const data = block
+        ?.split('\n')
+        .find((line) => line.startsWith('data: '))
+        ?.slice('data: '.length);
+      expect(JSON.parse(data ?? 'null')).toEqual({
+        batchId: created.json().id,
+        projectSlug: 'shop',
+        source: 'manual',
+        status: 'completed',
+        total: 2,
+        passed: 1,
+        partial: 0,
+        failed: 1,
+        error: 0,
+        cancelled: 0
+      });
+    });
   });
 });

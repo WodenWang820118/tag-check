@@ -67,6 +67,29 @@ describe('BatchQueueService (SQLite)', () => {
     }
   });
 
+  it('tells each run its place in the batch', async () => {
+    await bed.batchQueue.enqueue('shop', ['c', 'a'], {
+      source: 'schedule',
+      headless: true
+    });
+    await bed.batchQueue.whenIdle();
+
+    expect(bed.fakeRun.batches).toEqual([
+      {
+        batchId: expect.any(Number),
+        position: 1,
+        total: 2,
+        source: 'schedule'
+      },
+      {
+        batchId: expect.any(Number),
+        position: 2,
+        total: 2,
+        source: 'schedule'
+      }
+    ]);
+  });
+
   it('runs batches first in, first out', async () => {
     const first = await bed.batchQueue.enqueue('shop', ['b', 'a'], {
       source: 'manual',
@@ -135,6 +158,32 @@ describe('BatchQueueService (SQLite)', () => {
       ]
     ]);
     expect(done.items[2]?.testEventDetailId).toBeNull();
+    expect(bed.finished).toEqual([
+      {
+        batchId: batch.id,
+        projectSlug: 'shop',
+        source: 'manual',
+        status: 'completed',
+        total: 3,
+        passed: 0,
+        partial: 1,
+        failed: 1,
+        error: 1,
+        cancelled: 0
+      },
+      {
+        batchId: other.id,
+        projectSlug: 'other',
+        source: 'manual',
+        status: 'completed',
+        total: 1,
+        passed: 0,
+        partial: 0,
+        failed: 0,
+        error: 1,
+        cancelled: 0
+      }
+    ]);
     const otherDone = await bed.batchQueue.get('other', other.id);
     expect(otherDone.items[0]).toMatchObject({
       status: 'error',
@@ -248,6 +297,22 @@ describe('BatchQueueService (SQLite)', () => {
     await expect(bed.batchQueue.get('shop', next.id)).resolves.toMatchObject({
       status: 'completed'
     });
+    // One batchFinished per batch: the cancel's, then the next batch's.
+    expect(bed.finished).toEqual([
+      expect.objectContaining({
+        batchId: batch.id,
+        status: 'cancelled',
+        total: 3,
+        passed: 1,
+        cancelled: 2
+      }),
+      expect.objectContaining({
+        batchId: next.id,
+        status: 'completed',
+        total: 1,
+        passed: 1
+      })
+    ]);
     expect(bed.fakeRun.calls.map((call) => call.eventId)).toEqual([
       'a',
       'b',

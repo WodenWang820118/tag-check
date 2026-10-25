@@ -11,10 +11,12 @@ import { ProjectRepositoryService } from '../../core/repository/project/project-
 import { TestEventDetailRepositoryService } from '../../core/repository/test-event/test-event-detail-repository.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 import { ProgressEventsService } from '../../core/events-gateway/progress-events.service';
-import type { BatchRunItemEntity } from '../../shared';
+import { RunStatusService } from '../../core/events-gateway/run-status.service';
+import type { BatchRunEntity, BatchRunItemEntity } from '../../shared';
 import { TestRunService } from '../test-run/test-run.service';
 import {
   type ItemOutcome,
+  toBatchFinishedPayload,
   toBatchRunResponse,
   toBatchUpdatePayload,
   toItemOutcome
@@ -46,7 +48,8 @@ export interface EnqueueOptions {
  * Batches run in the order they were created (FIFO), one test at a time.
  * Each test runs through TestRunService, which waits in the RunQueueService
  * shared with single runs, so a single run and a batch never overlap.
- * Every change is saved and sent as a `batchUpdate` event (GET /events).
+ * Every change is saved and sent as a `batchUpdate` event (GET /events);
+ * the end of a batch is also reported to RunStatusService (`batchFinished`).
  *
  * When the backend starts, items left running by a backend that stopped
  * mid-run are requeued, and unfinished batches resume.
@@ -70,7 +73,8 @@ export class BatchQueueService
     private readonly testEvents: TestEventRepositoryService,
     private readonly testEventDetails: TestEventDetailRepositoryService,
     private readonly testRunService: TestRunService,
-    private readonly progressEvents: ProgressEventsService
+    private readonly progressEvents: ProgressEventsService,
+    private readonly runStatus: RunStatusService
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
@@ -205,6 +209,7 @@ export class BatchQueueService
     }
     const updated = await this.batchRuns.getById(batchId);
     this.progressEvents.sendBatchUpdate(toBatchUpdatePayload(updated));
+    this.runStatus.finishBatch(toBatchFinishedPayload(updated));
     return toBatchRunResponse(updated);
   }
 
@@ -272,11 +277,7 @@ export class BatchQueueService
       await this.emit(batchId);
       let outcome: ItemOutcome;
       try {
-        outcome = await this.runItem(
-          batch.project.projectSlug,
-          item,
-          batch.headless
-        );
+        outcome = await this.runItem(batch, item);
       } finally {
         this.running = null;
       }
@@ -296,22 +297,31 @@ export class BatchQueueService
     });
     if (completed) {
       this.logger.log(`Batch ${batchId} completed`);
-      await this.emit(batchId);
+      const ended = await this.emit(batchId);
+      if (ended) {
+        this.runStatus.finishBatch(toBatchFinishedPayload(ended));
+      }
     }
   }
 
   /** Runs the item's test and reads the result it saved. */
   private async runItem(
-    projectSlug: string,
-    item: BatchRunItemEntity,
-    headless: boolean
+    batch: BatchRunEntity,
+    item: BatchRunItemEntity
   ): Promise<ItemOutcome> {
+    const projectSlug = batch.project.projectSlug;
     const testEventId = item.testEvent.id;
     const before = await this.testEventDetails.getLatestRunResult(testEventId);
     let failure: { error: unknown } | undefined;
     try {
       await this.testRunService.run(projectSlug, item.testEvent.eventId, {
-        headless
+        headless: batch.headless,
+        batch: {
+          batchId: batch.id,
+          position: item.position + 1,
+          total: batch.items.length,
+          source: batch.source
+        }
       });
     } catch (error) {
       this.logger.warn(
@@ -324,15 +334,20 @@ export class BatchQueueService
     return toItemOutcome(saved, failure);
   }
 
-  /** Sends the batch's current state; a failure to read it is only logged. */
-  private async emit(batchId: number): Promise<void> {
+  /**
+   * Sends the batch's current state and returns the batch; a failure to
+   * read it is only logged, and returns null.
+   */
+  private async emit(batchId: number): Promise<BatchRunEntity | null> {
     try {
       const batch = await this.batchRuns.getById(batchId);
       this.progressEvents.sendBatchUpdate(toBatchUpdatePayload(batch));
+      return batch;
     } catch (error) {
       this.logger.warn(
         `Could not send the update of batch ${batchId}: ${error}`
       );
+      return null;
     }
   }
 }

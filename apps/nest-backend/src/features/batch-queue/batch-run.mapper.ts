@@ -1,5 +1,6 @@
 import {
   getCheckStatus,
+  type BatchFinishedPayload,
   type BatchRunItemStatus,
   type BatchRunResponse,
   type BatchUpdatePayload,
@@ -103,6 +104,38 @@ export function toBatchUpdatePayload(
       status: item.status,
       message: item.message
     }))
+  };
+}
+
+/**
+ * The `batchFinished` event of a batch that ended, loaded with its project
+ * and items: how many of its tests ended with each status. A cancelled
+ * batch's open items are all cancelled; anything else left open counts as
+ * cancelled too, so the counts add up to the total.
+ */
+export function toBatchFinishedPayload(
+  batch: BatchRunEntity
+): BatchFinishedPayload {
+  const counts = { passed: 0, partial: 0, failed: 0, error: 0, cancelled: 0 };
+  for (const item of batch.items) {
+    switch (item.status) {
+      case 'passed':
+      case 'partial':
+      case 'failed':
+      case 'error':
+        counts[item.status]++;
+        break;
+      default:
+        counts.cancelled++;
+    }
+  }
+  return {
+    batchId: batch.id,
+    projectSlug: batch.project.projectSlug,
+    source: batch.source,
+    status: batch.status === 'cancelled' ? 'cancelled' : 'completed',
+    total: batch.items.length,
+    ...counts
   };
 }
 

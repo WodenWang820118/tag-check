@@ -56,7 +56,8 @@ describe('TestRunService', () => {
         captureRequest: 'true',
         closeBrowser: 'true'
       }),
-      expect.objectContaining({ puppeteerArgs: [] })
+      expect.objectContaining({ puppeteerArgs: [] }),
+      undefined
     );
   });
 
@@ -75,7 +76,31 @@ describe('TestRunService', () => {
         headless: 'false',
         captureRequest: 'false',
         url: 'https://shop.example/'
-      })
+      }),
+      undefined
+    );
+  });
+
+  it("passes a batch run's place in its batch to the run", async () => {
+    const { service, gtm, direct } = setUp(
+      project({ isAccompanyMode: true, isRequestCheck: false })
+    );
+    const batch = {
+      batchId: 3,
+      position: 2,
+      total: 4,
+      source: 'schedule' as const
+    };
+
+    await service.run('shop', 'evt', { headless: true, batch });
+
+    expect(direct.inspectSingleEvent).not.toHaveBeenCalled();
+    expect(gtm.inspectSingleEventViaGtm).toHaveBeenCalledWith(
+      'shop',
+      'evt',
+      expect.anything(),
+      expect.anything(),
+      batch
     );
   });
 

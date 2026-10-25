@@ -3,11 +3,13 @@ import { Page } from 'puppeteer';
 import { StepExecutorService } from './step-executor/step-executor.service';
 import { EventInspectionPresetDto } from '../../../shared/dto/event-inspection-preset.dto';
 import { ProgressEventsService } from '../../../core/events-gateway/progress-events.service';
+import { RunStatusService } from '../../../core/events-gateway/run-status.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
 
 /**
  * Replays a test's Chrome Recorder recording on a page, step by step, and
- * reports progress over SSE. A test without a recording replays nothing.
+ * reports each step to RunStatusService, which sends it over SSE and to the
+ * desktop tray. A test without a recording replays nothing.
  * Rejects with the error of the first step that fails.
  */
 @Injectable()
@@ -16,7 +18,8 @@ export class ActionService {
   constructor(
     private readonly progressEventsService: ProgressEventsService,
     private readonly stepExecutorService: StepExecutorService,
-    private readonly recordingRepositoryService: RecordingRepositoryService
+    private readonly recordingRepositoryService: RecordingRepositoryService,
+    private readonly runStatusService: RunStatusService
   ) {}
 
   async performOperation(
@@ -41,7 +44,7 @@ export class ActionService {
 
     for (const [i, step] of steps.entries()) {
       this.logger.log(`Performing step ${i + 1} of ${totalSteps}`);
-      this.progressEventsService.sendProgressUpdate(totalSteps, i + 1);
+      this.runStatusService.step(eventId, totalSteps, i + 1);
 
       // Sequential on purpose: each step acts on the page the previous
       // steps left behind.

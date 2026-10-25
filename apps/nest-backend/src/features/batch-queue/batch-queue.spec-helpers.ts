@@ -2,7 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MessageEvent } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import type { BatchUpdatePayload } from '@utils';
+import type {
+  BatchFinishedPayload,
+  BatchUpdatePayload,
+  RunStatusBatch
+} from '@utils';
 import { DATABASE_ENTITIES } from '../../core/database/database-entities';
 import { BatchRunRepositoryService } from '../../core/repository/batch-run/batch-run-repository.service';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
@@ -10,6 +14,8 @@ import { ScheduleRepositoryService } from '../../core/repository/schedule/schedu
 import { TestEventDetailRepositoryService } from '../../core/repository/test-event/test-event-detail-repository.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 import { ProgressEventsService } from '../../core/events-gateway/progress-events.service';
+import { RunStatusService } from '../../core/events-gateway/run-status.service';
+import { STATUS_LINE_WRITER } from '../../core/events-gateway/status-line';
 import {
   ApplicationSettingEntity,
   AuthenticationSettingEntity,
@@ -44,6 +50,8 @@ export class FakeTestRun {
     eventId: string;
     headless: boolean;
   }[] = [];
+  /** The place in its batch of every run, in the order they ran. */
+  readonly batches: (RunStatusBatch | undefined)[] = [];
   readonly behaviors = new Map<string, FakeRunBehavior>();
   stopCount = 0;
   private readonly hanging = new Set<(error: Error) => void>();
@@ -65,9 +73,10 @@ export class FakeTestRun {
   async run(
     projectSlug: string,
     eventId: string,
-    choice: { headless: boolean }
+    choice: { headless: boolean; batch?: RunStatusBatch }
   ): Promise<void> {
     this.calls.push({ projectSlug, eventId, headless: choice.headless });
+    this.batches.push(choice.batch);
     for (const listener of this.startedListeners) listener(eventId);
     const behavior = this.behaviors.get(eventId) ?? 'passed';
     if (behavior === 'hang') {
@@ -125,6 +134,8 @@ export interface BatchQueueTestbed {
   batchRuns: BatchRunRepositoryService;
   /** Every `batchUpdate` event sent. */
   updates: BatchUpdatePayload[];
+  /** Every `batchFinished` event sent. */
+  finished: BatchFinishedPayload[];
 }
 
 /** The providers of the batch queue, for a testing module. */
@@ -136,6 +147,9 @@ export function batchQueueProviders(fakeRun: FakeTestRun) {
     TestEventRepositoryService,
     TestEventDetailRepositoryService,
     ProgressEventsService,
+    RunStatusService,
+    // Tests never write status lines, whatever the environment says.
+    { provide: STATUS_LINE_WRITER, useValue: null },
     BatchQueueService,
     ScheduleService,
     { provide: TestRunService, useValue: fakeRun }
@@ -170,11 +184,15 @@ export async function createBatchQueueTestbed(): Promise<BatchQueueTestbed> {
   const dataSource = moduleRef.get(DataSource);
   fakeRun.dataSource = dataSource;
   const updates: BatchUpdatePayload[] = [];
+  const finished: BatchFinishedPayload[] = [];
   moduleRef
     .get(ProgressEventsService)
     .events$.subscribe((event: MessageEvent) => {
       if (event.type === 'batchUpdate') {
         updates.push(event.data as BatchUpdatePayload);
+      }
+      if (event.type === 'batchFinished') {
+        finished.push(event.data as BatchFinishedPayload);
       }
     });
   return {
@@ -184,7 +202,8 @@ export async function createBatchQueueTestbed(): Promise<BatchQueueTestbed> {
     batchQueue: moduleRef.get(BatchQueueService),
     scheduleService: moduleRef.get(ScheduleService),
     batchRuns: moduleRef.get(BatchRunRepositoryService),
-    updates
+    updates,
+    finished
   };
 }
 
