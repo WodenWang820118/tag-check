@@ -59,27 +59,6 @@ describe('ReportService', () => {
     ).rejects.toThrow('Failed to update test event');
   });
 
-  it('addReport POSTs reportDetails/recording/spec to /:slug/:eventId', async () => {
-    httpClient.post.mockReturnValueOnce(of({} as never));
-    await firstValueFrom(
-      service.addReport(
-        's',
-        'evt',
-        { eventId: 'a' } as never,
-        { name: 'r' } as never,
-        { event: 'a' } as never
-      )
-    );
-    expect(httpClient.post).toHaveBeenCalledWith(
-      `${environment.reportApiUrl}/s/evt`,
-      {
-        reportDetails: { eventId: 'a' },
-        recording: { name: 'r' },
-        spec: { event: 'a' }
-      }
-    );
-  });
-
   it('addFullReport POSTs reportDetails/recording/spec/dataLayerSpec', async () => {
     httpClient.post.mockReturnValueOnce(of({} as never));
     await firstValueFrom(
@@ -117,6 +96,14 @@ describe('ReportService', () => {
       `${environment.reportApiUrl}/s`,
       { body: ['a', 'b'] }
     );
+  });
+
+  it('deleteBatchReports rethrows a failure so the caller can report it', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    httpClient.delete.mockReturnValueOnce(throwError(() => new Error('x')));
+    await expect(
+      firstValueFrom(service.deleteBatchReports('s', ['a']))
+    ).rejects.toThrow('Failed to delete tests');
   });
 
   it('getReportDetails rethrows a friendly error', async () => {

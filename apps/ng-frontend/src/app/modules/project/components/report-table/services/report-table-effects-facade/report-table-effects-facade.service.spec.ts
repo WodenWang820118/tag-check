@@ -188,6 +188,60 @@ describe('deleting tests', () => {
     expect(model.selection().hasValue()).toBe(false);
     expect(state.getDeletedSignal()).toBe(false);
   });
+
+  it('puts the tests back in order and says so when the delete fails', () => {
+    const response = new Subject<unknown>();
+    const deleteBatchReports = vi.fn(() => response);
+    const openSnackBar = vi.fn();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ReportService, useValue: { deleteBatchReports } },
+        {
+          provide: MatDialog,
+          useValue: { open: () => ({ afterClosed: () => of(true) }) }
+        },
+        { provide: MatSnackBar, useValue: { open: openSnackBar } }
+      ]
+    });
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const state = TestBed.inject(ProjectDataSourceService);
+    const model = TestBed.inject(ReportTableDataSourceModelService);
+    model.dataSource().data = new ReportMapperService().toReportDetails(
+      JSON.parse(
+        JSON.stringify([
+          { ...REPORT_LIST_ITEM_SAMPLE, eventId: 'a', eventName: 'a' },
+          { ...REPORT_LIST_ITEM_SAMPLE, eventId: 'b', eventName: 'b' },
+          { ...REPORT_LIST_ITEM_SAMPLE, eventId: 'c', eventName: 'c' }
+        ])
+      )
+    );
+    TestBed.runInInjectionContext(() =>
+      TestBed.inject(ReportTableEffectsFacadeService).initialize({
+        getStatus: () => 'all',
+        getProjectSlug: () => 'demo'
+      })
+    );
+    const [first, , third] = model.dataSource().data;
+    model.selection().select(first, third);
+
+    state.setDeletedSignal(true);
+    TestBed.tick();
+    expect(model.dataSource().data.map((row) => row.eventId)).toEqual(['b']);
+
+    response.error(new Error('Failed to delete tests'));
+    TestBed.tick();
+
+    expect(model.dataSource().data.map((row) => row.eventId)).toEqual([
+      'a',
+      'b',
+      'c'
+    ]);
+    expect(openSnackBar).toHaveBeenCalledWith(
+      expect.stringContaining('Could not delete the selected tests'),
+      'Dismiss',
+      { duration: 5000 }
+    );
+  });
 });
 
 describe('status filter', () => {

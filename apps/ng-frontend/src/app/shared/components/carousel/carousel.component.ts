@@ -3,8 +3,8 @@ import {
   computed,
   inject,
   input,
+  linkedSignal,
   OnDestroy,
-  signal,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { CarouselItem, CarouselItemEnum } from '@utils';
@@ -16,7 +16,8 @@ type MediaItem = CarouselItem & { blob: Blob; testId: string };
 
 /**
  * The run's screenshot and recordings, one at a time; a click opens a
- * preview. The object URLs it makes are revoked when it is destroyed.
+ * preview. Each blob gets one object URL, revoked once the blob leaves the
+ * inputs or the carousel is destroyed.
  */
 @Component({
   selector: 'app-carousel',
@@ -28,25 +29,17 @@ type MediaItem = CarouselItem & { blob: Blob; testId: string };
 })
 export class CarouselComponent implements OnDestroy {
   private readonly dialog = inject(MatDialog);
-  private readonly objectUrls: string[] = [];
+  private objectUrls = new Map<Blob, string>();
   imageBlob = input<Blob | undefined>(undefined);
   videoBlob = input<Blob | undefined>(undefined);
   /** The Tag Assistant tab recorded by an accompanied-mode run. */
   tagAssistantVideoBlob = input<Blob | undefined>(undefined);
 
-  // Angular does not sanitize img/source src, so bind the blob: URL as a
-  // plain string: a SafeUrl would be set as the text "SafeValue must use...".
-  private getObjectUrl(blob: Blob): string {
-    const objectUrl = URL.createObjectURL(blob);
-    this.objectUrls.push(objectUrl);
-    return objectUrl;
-  }
-
   imageType = CarouselItemEnum.Image;
   videoType = CarouselItemEnum.Video;
 
   readonly items = computed(() => {
-    const items: MediaItem[] = [];
+    const items: Omit<MediaItem, 'url'>[] = [];
     const imgBlob = this.imageBlob();
     const vidBlob = this.videoBlob();
     const tagAssistantBlob = this.tagAssistantVideoBlob();
@@ -54,7 +47,6 @@ export class CarouselComponent implements OnDestroy {
     if (imgBlob !== undefined) {
       items.push({
         type: CarouselItemEnum.Image,
-        url: this.getObjectUrl(imgBlob),
         blob: imgBlob,
         testId: 'media-open-screenshot'
       });
@@ -63,7 +55,6 @@ export class CarouselComponent implements OnDestroy {
     if (vidBlob !== undefined) {
       items.push({
         type: CarouselItemEnum.Video,
-        url: this.getObjectUrl(vidBlob),
         blob: vidBlob,
         testId: 'media-open-recording',
         caption: hasTagAssistant ? 'Website' : undefined
@@ -73,18 +64,42 @@ export class CarouselComponent implements OnDestroy {
     if (hasTagAssistant) {
       items.push({
         type: CarouselItemEnum.Video,
-        url: this.getObjectUrl(tagAssistantBlob),
         blob: tagAssistantBlob,
         testId: 'media-open-tag-assistant',
         caption: 'Tag Assistant'
       });
     }
 
-    return items;
+    const urls = this.updateObjectUrls(items.map((item) => item.blob));
+    return items.map((item): MediaItem => ({
+      ...item,
+      url: urls.get(item.blob) ?? ''
+    }));
   });
 
-  // Convert currentIndex to signal
-  currentIndex = signal(0);
+  /** The shown item; back to the first one whenever the items change. */
+  readonly currentIndex = linkedSignal({
+    source: this.items,
+    computation: () => 0
+  });
+
+  /**
+   * Keeps the URLs of blobs still shown, makes URLs for new ones and
+   * revokes the rest. Angular does not sanitize img/source src, so the
+   * template binds these blob: URLs as plain strings: a SafeUrl would be
+   * set as the text "SafeValue must use...".
+   */
+  private updateObjectUrls(blobs: Blob[]): Map<Blob, string> {
+    const next = new Map<Blob, string>();
+    for (const blob of blobs) {
+      next.set(blob, this.objectUrls.get(blob) ?? URL.createObjectURL(blob));
+    }
+    for (const [blob, url] of this.objectUrls) {
+      if (!next.has(blob)) URL.revokeObjectURL(url);
+    }
+    this.objectUrls = next;
+    return next;
+  }
 
   next(): void {
     const items = this.items();
@@ -107,9 +122,10 @@ export class CarouselComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    for (const url of this.objectUrls) {
+    for (const url of this.objectUrls.values()) {
       URL.revokeObjectURL(url);
     }
+    this.objectUrls.clear();
   }
 
   openPreview(index: number) {

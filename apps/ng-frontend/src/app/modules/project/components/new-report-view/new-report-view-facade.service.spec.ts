@@ -51,14 +51,14 @@ describe('NewReportViewFacadeService.onFileSelected', () => {
 });
 
 describe('NewReportViewFacadeService.uploadReport', () => {
-  let addReport: ReturnType<typeof vi.fn>;
+  let addFullReport: ReturnType<typeof vi.fn>;
   let setData: ReturnType<typeof vi.fn>;
 
   function create(spec: string, recording: string) {
     TestBed.configureTestingModule({
       providers: [
         { provide: LoggerService, useValue: { error: vi.fn() } },
-        { provide: ReportService, useValue: { addReport } },
+        { provide: ReportService, useValue: { addFullReport } },
         {
           provide: EditorService,
           useValue: {
@@ -86,7 +86,7 @@ describe('NewReportViewFacadeService.uploadReport', () => {
   }
 
   beforeEach(() => {
-    addReport = vi.fn(() => of({}));
+    addFullReport = vi.fn(() => of({}));
     setData = vi.fn();
   });
 
@@ -108,7 +108,7 @@ describe('NewReportViewFacadeService.uploadReport', () => {
       firstValueFrom(service.uploadReport('demo').pipe(toArray()))
     ).resolves.toEqual([]);
     expect(showErrorDialog).toHaveBeenCalledWith('Spec must be valid JSON.');
-    expect(addReport).not.toHaveBeenCalled();
+    expect(addFullReport).not.toHaveBeenCalled();
   });
 
   it('reports a recording that is not valid JSON', async () => {
@@ -123,7 +123,7 @@ describe('NewReportViewFacadeService.uploadReport', () => {
     );
   });
 
-  it('adds the test with the parsed spec and recording', async () => {
+  it('adds the test with the edited spec as its dataLayer spec', async () => {
     const { service, showErrorDialog } = create(
       '{"event":"add_to_cart","ecommerce":{"currency":"USD"}}',
       '{"title":"add_to_cart","steps":[]}'
@@ -131,7 +131,7 @@ describe('NewReportViewFacadeService.uploadReport', () => {
 
     await firstValueFrom(service.uploadReport('demo'));
 
-    expect(addReport).toHaveBeenCalledWith(
+    expect(addFullReport).toHaveBeenCalledWith(
       'demo',
       expect.any(String),
       expect.objectContaining({
@@ -139,6 +139,9 @@ describe('NewReportViewFacadeService.uploadReport', () => {
         eventName: 'add_to_cart'
       }),
       { title: 'add_to_cart', steps: [] },
+      expect.objectContaining({
+        tag: expect.objectContaining({ name: 'GA4 event - add_to_cart' })
+      }),
       { event: 'add_to_cart', ecommerce: { currency: 'USD' } }
     );
     expect(setData).toHaveBeenCalledOnce();
@@ -146,7 +149,7 @@ describe('NewReportViewFacadeService.uploadReport', () => {
   });
 
   it('reports a failed save and passes the error on', async () => {
-    addReport = vi.fn(() => throwError(() => new Error('500')));
+    addFullReport = vi.fn(() => throwError(() => new Error('500')));
     const { service, showErrorDialog } = create('{"event":"add_to_cart"}', '');
 
     await expect(firstValueFrom(service.uploadReport('demo'))).rejects.toThrow(

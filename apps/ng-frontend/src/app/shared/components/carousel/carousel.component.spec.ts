@@ -88,4 +88,55 @@ describe('CarouselComponent', () => {
 
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:media-1');
   });
+
+  it('revokes the URL of a replaced blob and keeps the others', () => {
+    const fixture = TestBed.createComponent(CarouselComponent);
+    fixture.componentRef.setInput('imageBlob', new Blob(['png']));
+    fixture.componentRef.setInput('videoBlob', new Blob(['webm']));
+    fixture.detectChanges();
+
+    // A new run's screenshot arrives; the recording is the same blob.
+    fixture.componentRef.setInput('imageBlob', new Blob(['png-2']));
+    fixture.detectChanges();
+
+    const element: HTMLElement = fixture.nativeElement;
+    expect(URL.revokeObjectURL).toHaveBeenCalledTimes(1);
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:media-1');
+    expect(element.querySelector('img')?.getAttribute('src')).toBe(
+      'blob:media-3'
+    );
+    expect(element.querySelector('video source')?.getAttribute('src')).toBe(
+      'blob:media-2'
+    );
+
+    fixture.destroy();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:media-2');
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:media-3');
+    expect(URL.revokeObjectURL).toHaveBeenCalledTimes(3);
+  });
+
+  it('shows the first item again when the items change', () => {
+    const fixture = TestBed.createComponent(CarouselComponent);
+    fixture.componentRef.setInput('imageBlob', new Blob(['png']));
+    fixture.componentRef.setInput('videoBlob', new Blob(['webm']));
+    fixture.componentRef.setInput(
+      'tagAssistantVideoBlob',
+      new Blob(['ta-webm'])
+    );
+    fixture.detectChanges();
+    const element: HTMLElement = fixture.nativeElement;
+    element
+      .querySelector<HTMLElement>('[data-testid="media-previous"]')
+      ?.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.currentIndex()).toBe(2);
+
+    // A run without accompanied mode has no Tag Assistant recording.
+    fixture.componentRef.setInput('tagAssistantVideoBlob', undefined);
+    fixture.detectChanges();
+
+    const items = element.querySelectorAll('.carousel-item');
+    expect(items).toHaveLength(2);
+    expect(items[0].classList).toContain('active');
+  });
 });
