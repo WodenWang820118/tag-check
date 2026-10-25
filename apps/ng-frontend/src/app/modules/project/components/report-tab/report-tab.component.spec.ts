@@ -7,7 +7,8 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { Router } from '@angular/router';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DataLayerSpec } from '@utils';
 import {
@@ -95,6 +96,7 @@ describe('ReportTabComponent', () => {
   const router = {
     navigate: vi.fn().mockResolvedValue(true)
   };
+  const route = {};
 
   beforeEach(async () => {
     facade.copyEventName.mockClear();
@@ -110,7 +112,8 @@ describe('ReportTabComponent', () => {
         {
           provide: Router,
           useValue: router
-        }
+        },
+        { provide: ActivatedRoute, useValue: route }
       ]
     })
       .overrideComponent(ReportTabComponent, {
@@ -169,9 +172,67 @@ describe('ReportTabComponent', () => {
       context.videoBlob
     );
     expect(router.navigate).toHaveBeenCalledWith(['..', 'buckets'], {
+      relativeTo: route,
       queryParams: {
         event: 'purchase'
       }
     });
+  });
+});
+
+@Component({
+  selector: 'app-test-page',
+  standalone: true,
+  imports: [ReportTabComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: '<app-report-tab [context]="context"></app-report-tab>'
+})
+class TestPageComponent {
+  context = createContext();
+}
+
+@Component({ standalone: true, template: '' })
+class ReportsPageComponent {}
+
+describe('ReportTabComponent history link', () => {
+  it("opens the project's Reports page for the test's event", async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideNoopAnimations(),
+        // The app's routes: a test at projects/:projectSlug/:eventId, the
+        // Reports page at projects/:projectSlug/buckets.
+        provideRouter([
+          {
+            path: 'projects/:projectSlug',
+            children: [
+              { path: 'buckets', component: ReportsPageComponent },
+              { path: ':eventId', component: TestPageComponent }
+            ]
+          }
+        ])
+      ]
+    }).overrideComponent(ReportTabComponent, {
+      remove: {
+        imports: [ReportTabViewComponent, ReportDetailPanelsComponent],
+        providers: [ReportTabFacade]
+      },
+      add: {
+        imports: [MockReportTabViewComponent, MockReportDetailPanelsComponent],
+        providers: [{ provide: ReportTabFacade, useValue: {} }]
+      }
+    });
+    const harness = await RouterTestingHarness.create(
+      '/projects/storybook-project/evt-1'
+    );
+    const tab = harness.fixture.debugElement.query(
+      By.directive(ReportTabComponent)
+    ).componentInstance as ReportTabComponent;
+
+    tab.openHistory();
+    await harness.fixture.whenStable();
+
+    expect(TestBed.inject(Router).url).toBe(
+      '/projects/storybook-project/buckets?event=purchase'
+    );
   });
 });
