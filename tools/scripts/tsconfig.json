@@ -6,6 +6,8 @@
     "types": ["node", "vitest/globals"],
     "ignoreDeprecations": "6.0"
   },
-  // Spec files are intentionally included so colocated script tests get Vitest globals.
-  "include": ["**/*.ts"]
+  // Spec files are intentionally included so colocated script tests get Vitest
+  // globals and are type-checked; tsconfig.tools.json excludes them otherwise.
+  "include": ["**/*.ts"],
+  "exclude": []
 }

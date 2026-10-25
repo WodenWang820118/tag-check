@@ -1104,7 +1104,7 @@ describe('prepareNodeSidecar', () => {
           Buffer.from('node-buffer'),
           'node-old.exe',
           { name: 'node-dirent' }
-        ] as unknown as ReturnType<typeof import('node:fs').readdirSync>;
+        ];
       },
       removePathFn(targetPath) {
         removedPaths.push(targetPath);
@@ -1531,7 +1531,7 @@ describe('getRustTargetTriple', () => {
           error: undefined,
           status: 0,
           stdout: 'x86_64-pc-windows-msvc\n'
-        } as ReturnType<typeof import('node:child_process').spawnSync>;
+        };
       }
     });
 
@@ -1565,7 +1565,7 @@ describe('getRustTargetTriple', () => {
           error: undefined,
           status: 0,
           stdout: 'x86_64-pc-windows-msvc\n'
-        } as ReturnType<typeof import('node:child_process').spawnSync>;
+        };
       }
     });
 
@@ -1601,14 +1601,14 @@ describe('getRustTargetTriple', () => {
             status: null,
             stdout: '',
             stderr: 'missing'
-          } as ReturnType<typeof import('node:child_process').spawnSync>;
+          };
         }
 
         return {
           error: undefined,
           status: 0,
           stdout: 'release: 1.0.0\nhost: aarch64-apple-darwin\n'
-        } as ReturnType<typeof import('node:child_process').spawnSync>;
+        };
       }
     });
 
@@ -1640,14 +1640,14 @@ describe('getRustTargetTriple', () => {
             status: 1,
             stdout: '',
             stderr: ''
-          } as ReturnType<typeof import('node:child_process').spawnSync>;
+          };
         }
 
         return {
           error: undefined,
           status: 0,
           stdout: 'release: 1.0.0\nhost: aarch64-apple-darwin\n'
-        } as ReturnType<typeof import('node:child_process').spawnSync>;
+        };
       }
     });
 
@@ -1679,14 +1679,14 @@ describe('getRustTargetTriple', () => {
               status: null,
               stdout: '',
               stderr: 'missing'
-            } as ReturnType<typeof import('node:child_process').spawnSync>;
+            };
           }
 
           return {
             error: undefined,
             status: 0,
             stdout: 'release: 1.0.0\n'
-          } as ReturnType<typeof import('node:child_process').spawnSync>;
+          };
         }
       })
     ).toThrow('Unable to parse the Rust target triple');
@@ -1719,7 +1719,7 @@ describe('getRustTargetTriple', () => {
               status: null,
               stdout: '',
               stderr: 'missing'
-            } as ReturnType<typeof import('node:child_process').spawnSync>;
+            };
           }
 
           return {
@@ -1727,7 +1727,7 @@ describe('getRustTargetTriple', () => {
             status: 1,
             stdout: '',
             stderr: 'rustc not found'
-          } as ReturnType<typeof import('node:child_process').spawnSync>;
+          };
         }
       })
     ).toThrow('rustc not found');
@@ -1747,7 +1747,7 @@ describe('getRustTargetTriple', () => {
               status: null,
               stdout: '',
               stderr: 'missing'
-            } as ReturnType<typeof import('node:child_process').spawnSync>;
+            };
           }
 
           return {
@@ -1755,7 +1755,7 @@ describe('getRustTargetTriple', () => {
             status: 1,
             stdout: '',
             stderr: ''
-          } as ReturnType<typeof import('node:child_process').spawnSync>;
+          };
         }
       })
     ).toThrow('Failed to determine the Rust target triple');
@@ -1773,14 +1773,14 @@ describe('getRustTargetTriple', () => {
             error: undefined,
             status: 0,
             stdout: ''
-          } as ReturnType<typeof import('node:child_process').spawnSync>;
+          };
         }
 
         return {
           error: undefined,
           status: 0,
           stdout: 'release: 1.0.0\nhost: x86_64-unknown-linux-gnu\n'
-        } as ReturnType<typeof import('node:child_process').spawnSync>;
+        };
       }
     });
 
