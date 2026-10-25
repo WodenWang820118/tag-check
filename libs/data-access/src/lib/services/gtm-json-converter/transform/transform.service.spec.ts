@@ -22,6 +22,7 @@ import { ConstantVariable } from './variables/constant-variable.service';
 import { EventSettingsVariableService } from './variables/event-settings-variable.service';
 import {
   getGa4EventParameterRows,
+  isStrictDataLayerEvent,
   measurementPlanToDataLayerSpecs,
   resolveVariableReference,
   validateGTMImportReadiness,
@@ -388,12 +389,15 @@ describe('TransformService', () => {
     });
 
     it('sends a nested spec key under a GA4-valid name that reads its dotted path', () => {
+      // Specs are parsed from the JSON the user types, which may nest any
+      // object, while StrictDataLayerEvent only types `ecommerce` objects.
+      const spec: unknown = { event: 'login', user: { id: '$user_id' } };
+      if (!isStrictDataLayerEvent(spec)) {
+        throw new Error('expected a dataLayer spec');
+      }
       const result = service.convert(
         buildOptions({
-          gtmConfigGenerator: {
-            ...mockGtmConfig,
-            specs: [{ event: 'login', user: { id: '$user_id' } }]
-          }
+          gtmConfigGenerator: { ...mockGtmConfig, specs: [spec] }
         })
       );
       const { tag, variable } = result.containerVersion;
