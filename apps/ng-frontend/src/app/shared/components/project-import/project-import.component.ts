@@ -7,10 +7,11 @@ import {
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { catchError, EMPTY, finalize, shareReplay, tap } from 'rxjs';
+import { finalize } from 'rxjs';
 import { Router } from '@angular/router';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
 import { HttpEventType } from '@angular/common/http';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 /** Imports a project from an exported file, showing the upload progress. */
@@ -60,49 +61,53 @@ export class ProjectImportComponent {
   constructor(
     private readonly projectIoService: ProjectIoService,
     private readonly router: Router,
-    private readonly destroyRef: DestroyRef
+    private readonly destroyRef: DestroyRef,
+    private readonly snackBar: MatSnackBar
   ) {}
 
+  /**
+   * Uploads the chosen export and opens the projects list once the import
+   * response arrives. Upload progress reaches 100% before the server has
+   * imported anything, so it never triggers the navigation.
+   */
   importProject(event: Event) {
     const target = event.target as HTMLInputElement;
     const file: File | null = target.files?.[0] || null;
     if (!file) return;
+    // Let the same file be chosen again after a failed import.
+    target.value = '';
 
     this.uploading = true;
     this.uploadProgress = 0;
 
-    const progress$ = this.projectIoService
+    this.projectIoService
       .importProject(file)
-      .pipe(shareReplay(1));
-
-    progress$
       .pipe(
         takeUntilDestroyed(this.destroyRef),
-        tap((event) => {
-          if (event.type === HttpEventType.UploadProgress) {
-            const progress = Math.round(
-              (100 * event.loaded) / (event.total || 1)
-            );
-            this.uploadProgress = progress;
-          }
-          if (event.type === HttpEventType.Response) {
-            this.uploadProgress = 100;
-          }
-        }),
-        tap(async () => {
-          if (this.uploadProgress === 100) {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            await this.router.navigate(['./']);
-          }
-        }),
-        catchError((err) => {
-          console.error(err);
-          return EMPTY;
-        }),
         finalize(() => {
           this.uploading = false;
         })
       )
-      .subscribe();
+      .subscribe({
+        next: (httpEvent) => {
+          if (httpEvent.type === HttpEventType.UploadProgress) {
+            this.uploadProgress = Math.round(
+              (100 * httpEvent.loaded) / (httpEvent.total || 1)
+            );
+          }
+          if (httpEvent.type === HttpEventType.Response) {
+            this.uploadProgress = 100;
+            void this.router.navigate(['./']);
+          }
+        },
+        // ProjectIoService has logged the error.
+        error: () => {
+          this.snackBar.open(
+            'Could not import the project. Choose a project export (.zip) and try again.',
+            'Dismiss',
+            { duration: 5000 }
+          );
+        }
+      });
   }
 }
