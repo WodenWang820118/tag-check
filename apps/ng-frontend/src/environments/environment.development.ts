@@ -13,5 +13,7 @@ export const environment = {
   fileReportApiUrl: 'http://localhost:7070/file-reports',
   videoApiUrl: 'http://localhost:7070/videos',
   gtmParserApiUrl: 'http://localhost:7070/gtm-parser',
-  progressEventsUrl: 'http://localhost:7070/events'
+  progressEventsUrl: 'http://localhost:7070/events',
+  batchRunsApiUrl: 'http://localhost:7070/batch-runs',
+  schedulesApiUrl: 'http://localhost:7070/schedules'
 };
