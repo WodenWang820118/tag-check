@@ -75,6 +75,9 @@ pub(crate) fn run() {
     let mut builder = tauri::Builder::default()
         .manage(BackendProcess::default())
         .plugin(tauri_plugin_shell::init())
+        // Notifications are sent from Rust only (run_status), so no
+        // capability grants the webview the plugin's commands.
+        .plugin(tauri_plugin_notification::init())
         .on_window_event(on_window_event);
 
     if cfg!(debug_assertions) {

@@ -36,8 +36,8 @@ pub(crate) fn on_window_event(window: &Window, event: &WindowEvent) {
     api.prevent_close();
     let app_handle = window.app_handle();
     match window.hide() {
-        // No notification plugin is bundled, so the first hide shows no
-        // notice; the tray icon's tooltip says Tag Check keeps running.
+        // The first hide shows no notice; the tray icon's tooltip says Tag
+        // Check keeps running, or which test runs.
         Ok(()) => write_diagnostic_log(app_handle, "window: main window hidden to tray"),
         Err(error) => write_diagnostic_log(
             app_handle,

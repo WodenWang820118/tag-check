@@ -24,6 +24,7 @@ log = "0.4"
 tauri = { version = "2.12.4", features = ["tray-icon"] }
 tauri-plugin-log = "2.10"
 tauri-plugin-shell = "2.5"
+tauri-plugin-notification = "2.7"
 
 [profile.release]
 opt-level = "z"

@@ -1,16 +1,19 @@
+use std::sync::Mutex;
+
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
-    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+    tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent},
     AppHandle, Manager,
 };
 
 use crate::{
     diagnostics::write_diagnostic_log,
+    run_status::{menu_label, IDLE_TEXT},
     window::{show_main_window, SPLASH_WINDOW_LABEL},
 };
 
 const TRAY_ID: &str = "tag-check-tray";
-const TRAY_TOOLTIP: &str = "Tag Check keeps running in the tray";
+pub(crate) const MENU_STATUS_ID: &str = "tray-status";
 pub(crate) const MENU_OPEN_ID: &str = "tray-open";
 pub(crate) const MENU_QUIT_ID: &str = "tray-quit";
 
@@ -40,9 +43,51 @@ fn tray_click_action(button: MouseButton, button_state: MouseButtonState) -> Opt
     }
 }
 
-/// Creates the tray icon with the app icon, an "Open Tag Check" item and a
-/// "Quit" item.
+/// The tray parts that show the run status: the icon's tooltip and the
+/// menu's first, disabled item (Linux trays show no tooltip).
+pub(crate) struct TrayStatus {
+    tray: TrayIcon,
+    status_item: MenuItem<tauri::Wry>,
+    /// The text shown, so an unchanged status is not set again.
+    shown: Mutex<String>,
+}
+
+/// Shows `text` (already within the tooltip limit) as the tray tooltip and
+/// the menu's status item. Does nothing before the tray exists.
+pub(crate) fn show_tray_status(app_handle: &AppHandle, text: &str) {
+    let Some(status) = app_handle.try_state::<TrayStatus>() else {
+        return;
+    };
+    {
+        let Ok(mut shown) = status.shown.lock() else {
+            return;
+        };
+        if *shown == text {
+            return;
+        }
+        text.clone_into(&mut shown);
+    }
+    if let Err(error) = status.tray.set_tooltip(Some(text)) {
+        write_diagnostic_log(app_handle, &format!("tray: failed to set tooltip: {error}"));
+    }
+    if let Err(error) = status.status_item.set_text(menu_label(text)) {
+        write_diagnostic_log(
+            app_handle,
+            &format!("tray: failed to set status item: {error}"),
+        );
+    }
+}
+
+/// Creates the tray icon with the app icon, a disabled run status item, an
+/// "Open Tag Check" item and a "Quit" item.
 pub(crate) fn create_tray(app_handle: &AppHandle) -> tauri::Result<()> {
+    let status_item = MenuItem::with_id(
+        app_handle,
+        MENU_STATUS_ID,
+        menu_label(IDLE_TEXT),
+        false,
+        None::<&str>,
+    )?;
     let open_item = MenuItem::with_id(
         app_handle,
         MENU_OPEN_ID,
@@ -52,10 +97,20 @@ pub(crate) fn create_tray(app_handle: &AppHandle) -> tauri::Result<()> {
     )?;
     let separator = PredefinedMenuItem::separator(app_handle)?;
     let quit_item = MenuItem::with_id(app_handle, MENU_QUIT_ID, "Quit", true, None::<&str>)?;
-    let menu = Menu::with_items(app_handle, &[&open_item, &separator, &quit_item])?;
+    let status_separator = PredefinedMenuItem::separator(app_handle)?;
+    let menu = Menu::with_items(
+        app_handle,
+        &[
+            &status_item,
+            &status_separator,
+            &open_item,
+            &separator,
+            &quit_item,
+        ],
+    )?;
 
     let mut builder = TrayIconBuilder::with_id(TRAY_ID)
-        .tooltip(TRAY_TOOLTIP)
+        .tooltip(IDLE_TEXT)
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app_handle, event| {
@@ -78,7 +133,12 @@ pub(crate) fn create_tray(app_handle: &AppHandle) -> tauri::Result<()> {
     if let Some(icon) = app_handle.default_window_icon() {
         builder = builder.icon(icon.clone());
     }
-    builder.build(app_handle)?;
+    let tray = builder.build(app_handle)?;
+    app_handle.manage(TrayStatus {
+        tray,
+        status_item,
+        shown: Mutex::new(IDLE_TEXT.to_string()),
+    });
     write_diagnostic_log(app_handle, "tray: icon created");
     Ok(())
 }
@@ -126,6 +186,7 @@ mod tests {
     #[test]
     fn ignores_unknown_menu_ids() {
         assert_eq!(tray_menu_action("quit"), None);
+        assert_eq!(tray_menu_action(MENU_STATUS_ID), None);
         assert_eq!(tray_menu_action(""), None);
     }
 
