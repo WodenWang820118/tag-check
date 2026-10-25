@@ -1,10 +1,13 @@
 import {
   ApplicationSettingEntity,
   AuthenticationSettingEntity,
+  BatchRunEntity,
+  BatchRunItemEntity,
   BrowserSettingEntity,
   ItemDefEntity,
   ProjectEntity,
   RecordingEntity,
+  ScheduleEntity,
   SpecEntity,
   SysConfigurationEntity,
   TestEventDetailEntity,
@@ -24,5 +27,8 @@ export const DATABASE_ENTITIES = [
   AuthenticationSettingEntity,
   BrowserSettingEntity,
   ApplicationSettingEntity,
-  SysConfigurationEntity
+  SysConfigurationEntity,
+  ScheduleEntity,
+  BatchRunEntity,
+  BatchRunItemEntity
 ];

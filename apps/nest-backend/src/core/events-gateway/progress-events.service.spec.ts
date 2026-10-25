@@ -26,6 +26,42 @@ describe('ProgressEventsService', () => {
     ]);
   });
 
+  it('emits a batchUpdate event with the batch and its items', () => {
+    const service = new ProgressEventsService();
+    const emitted: MessageEvent[] = [];
+
+    const subscription = service.events$.subscribe((event) => {
+      emitted.push(event);
+    });
+
+    service.sendBatchUpdate({
+      batchId: 4,
+      projectSlug: 'shop',
+      status: 'running',
+      items: [
+        { eventId: 'evt-1', status: 'passed', message: null },
+        { eventId: 'evt-2', status: 'running', message: null }
+      ]
+    });
+    subscription.unsubscribe();
+
+    expect(emitted).toEqual([
+      {
+        type: 'batchUpdate',
+        data: {
+          batchId: 4,
+          projectSlug: 'shop',
+          status: 'running',
+          items: [
+            { eventId: 'evt-1', status: 'passed', message: null },
+            { eventId: 'evt-2', status: 'running', message: null }
+          ]
+        },
+        retry: 1000
+      }
+    ]);
+  });
+
   it('emits an eventCompleted event with message payload and retry 1000', () => {
     const service = new ProgressEventsService();
     const emitted: MessageEvent[] = [];

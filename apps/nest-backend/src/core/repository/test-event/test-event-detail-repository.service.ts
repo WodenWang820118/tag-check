@@ -63,6 +63,31 @@ export class TestEventDetailRepositoryService {
   }
 
   /**
+   * The check results of the test's newest saved run (highest id), or null
+   * before its first run.
+   */
+  async getLatestRunResult(testEventId: number): Promise<{
+    id: number;
+    passed: boolean;
+    requestPassed: boolean;
+    message: string | null;
+  } | null> {
+    const run = await this.repository.findOne({
+      select: { id: true, passed: true, requestPassed: true, message: true },
+      where: { testEvent: { id: testEventId } },
+      order: { id: 'DESC' }
+    });
+    return run
+      ? {
+          id: run.id,
+          passed: run.passed,
+          requestPassed: run.requestPassed,
+          message: run.message ?? null
+        }
+      : null;
+  }
+
+  /**
    * The test's latest run, or an empty DTO when it has none. Runs saved in
    * the same second share `createdAt`, so the higher id breaks the tie.
    */

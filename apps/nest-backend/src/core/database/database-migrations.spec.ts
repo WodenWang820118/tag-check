@@ -159,11 +159,56 @@ describe('migrateDatabase', () => {
     ]);
   });
 
-  it('undoes the initial schema', async () => {
+  it('upgrades a database at the initial schema and keeps its rows', async () => {
+    const database = await openDatabase();
+    await database.runMigrations({ transaction: 'each' });
+    await database.undoLastMigration();
+    expect(await appliedMigrations(database)).toEqual([
+      'InitialSchema1792540800000'
+    ]);
+    await database.query(
+      `INSERT INTO "project" ("id", "project_slug", "project_name") VALUES (1, 'shop', 'Shop')`
+    );
+
+    await migrateDatabase(database);
+
+    expect(await pendingSchemaChanges(database)).toEqual([]);
+    expect(await appliedMigrations(database)).toEqual(
+      DATABASE_MIGRATIONS.map((migration) => migration.name)
+    );
+    expect(
+      await database.query('SELECT "project_slug" FROM "project"')
+    ).toEqual([{ project_slug: 'shop' }]);
+  });
+
+  it('undoes the batch runs and schedules, leaving the initial schema', async () => {
     const database = await openDatabase();
     await migrateDatabase(database);
 
     await database.undoLastMigration();
+
+    expect(await appliedMigrations(database)).toEqual([
+      'InitialSchema1792540800000'
+    ]);
+    expect(
+      await database.query(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('batch_run', 'batch_run_item', 'schedule')"
+      )
+    ).toEqual([]);
+    expect(
+      await database.query(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'test_event'"
+      )
+    ).toEqual([{ name: 'test_event' }]);
+  });
+
+  it('undoes every migration', async () => {
+    const database = await openDatabase();
+    await migrateDatabase(database);
+
+    for (let undone = 0; undone < DATABASE_MIGRATIONS.length; undone++) {
+      await database.undoLastMigration();
+    }
 
     expect(await appliedMigrations(database)).toEqual([]);
     expect(
