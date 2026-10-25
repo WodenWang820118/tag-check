@@ -5,7 +5,8 @@ import {
   IReportDetails,
   ReportDetailsDto,
   Recording,
-  StrictDataLayerEvent
+  StrictDataLayerEvent,
+  createPlaceholderSpec
 } from '@utils';
 import { tap, take, switchMap, throwError, catchError, EMPTY } from 'rxjs';
 import { EditorService } from '../../../../shared/services/editor/editor.service';
@@ -185,12 +186,16 @@ export class NewReportViewFacadeService {
           this.uploadSpecService.completeUpload();
         }),
         switchMap(() =>
+          // The edited spec is the dataLayer push a run checks, which POST
+          // /reports stores as dataLayerSpec. A manual test has no GTM tag,
+          // so a placeholder fills `spec` (rawGtmTag), as a GA4 upload does.
           this.reportService
-            .addReport(
+            .addFullReport(
               projectSlug,
               eventId,
               reportDetails,
               recordingParsed,
+              createPlaceholderSpec(`GA4 event - ${eventName}`),
               specParsed
             )
             .pipe(
@@ -208,7 +213,6 @@ export class NewReportViewFacadeService {
 
     void this.showErrorDialog('Spec content is required and cannot be empty.');
     return EMPTY;
-    // cleaned legacy combineLatest-based addReport flow
   }
 
   completeUpload() {

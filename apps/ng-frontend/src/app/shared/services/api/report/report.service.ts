@@ -50,34 +50,6 @@ export class ReportService {
   }
 
   /**
-   * Creates a new test report for a single event.
-   *
-   * @param projectSlug   - URL-friendly project identifier.
-   * @param eventId       - Test event identifier.
-   * @param reportDetails - Report metadata payload.
-   * @param recording     - Associated recording.
-   * @param spec          - Strict data-layer event spec used for validation.
-   */
-  addReport(
-    projectSlug: string,
-    eventId: string,
-    reportDetails: IReportDetails,
-    recording: Recording,
-    spec: StrictDataLayerEvent
-  ) {
-    return this.http
-      .post<TestEvent>(
-        `${environment.reportApiUrl}/${projectSlug}/${eventId}`,
-        {
-          reportDetails,
-          recording,
-          spec
-        }
-      )
-      .pipe(rethrowHttpError('Failed to add report'));
-  }
-
-  /**
    * Creates a full test report combining recording, spec, and data-layer spec.
    *
    * @param projectSlug   - URL-friendly project identifier.
