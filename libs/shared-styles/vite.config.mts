@@ -1,7 +1,6 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vitest/config';
 import angular from '@analogjs/vite-plugin-angular';
-import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 
 export default defineConfig({
   root: import.meta.dirname,
@@ -9,7 +8,7 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true
   },
-  plugins: [angular(), nxCopyAssetsPlugin(['*.md'])],
+  plugins: [angular()],
   test: {
     watch: false,
     globals: true,
