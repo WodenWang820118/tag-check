@@ -78,6 +78,33 @@ describe('SingleEventInspectionService recorder lifecycle', () => {
     expect(puppeteerUtils.cleanup).toHaveBeenCalledTimes(2);
   });
 
+  it('abort stops the running run and drops the run queued behind it', async () => {
+    let signal: AbortSignal | undefined;
+    puppeteerUtils.startBrowser.mockImplementationOnce(
+      (_headless, _measurementId, _preset, runSignal: AbortSignal) => {
+        signal = runSignal;
+        return new Promise((_resolve, reject) =>
+          runSignal.addEventListener('abort', () =>
+            reject(new Error('Browser start aborted'))
+          )
+        );
+      }
+    );
+
+    const first = service.inspectSingleEvent('project', 'a', createOptions());
+    const second = service.inspectSingleEvent('project', 'b', createOptions());
+    await vi.waitFor(() => expect(signal).toBeDefined());
+
+    service.abort();
+
+    await expect(first).rejects.toThrow('Browser start aborted');
+    await expect(second).rejects.toThrow(
+      'The run was stopped before it started'
+    );
+    expect(puppeteerUtils.startBrowser).toHaveBeenCalledOnce();
+    expect(pipeline.singleEventInspectionRecipe).not.toHaveBeenCalled();
+  });
+
   it('passes the recorder handle to cleanup on failure', async () => {
     pipeline.singleEventInspectionRecipe.mockRejectedValue(new Error('failed'));
 

@@ -33,8 +33,6 @@ export interface InspectSingleEventOptions {
 @Injectable()
 export class SingleEventInspectionService {
   private readonly logger = new Logger(SingleEventInspectionService.name);
-  // NOTE(stage2): Replace singleton abort routing with per-operation session IDs.
-  abortController: AbortController | null = null;
 
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
@@ -52,17 +50,17 @@ export class SingleEventInspectionService {
     eventId: string,
     options: InspectSingleEventOptions
   ) {
-    return this.runQueue.run(() => this.inspect(projectSlug, eventId, options));
+    return this.runQueue.run((signal) =>
+      this.inspect(projectSlug, eventId, options, signal)
+    );
   }
 
   private async inspect(
     projectSlug: string,
     eventId: string,
-    options: InspectSingleEventOptions
+    options: InspectSingleEventOptions,
+    signal: AbortSignal
   ) {
-    const controller = new AbortController();
-    this.abortController = controller;
-
     const {
       headless,
       measurementId,
@@ -76,7 +74,7 @@ export class SingleEventInspectionService {
       headless,
       measurementId,
       eventInspectionPresetDto,
-      controller.signal
+      signal
     );
     let recorder: RunRecorder | null = null;
 
@@ -97,7 +95,7 @@ export class SingleEventInspectionService {
         page,
         projectSlug,
         eventId,
-        controller.signal
+        signal
       );
       // Gives the recording a moment of the page before the replay starts.
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -143,8 +141,11 @@ export class SingleEventInspectionService {
     }
   }
 
-  /** Aborts the run in progress, which closes its browser. */
+  /**
+   * Aborts the run in progress, which closes its browser, and drops the runs
+   * queued behind it.
+   */
   abort() {
-    this.abortController?.abort();
+    this.runQueue.stop();
   }
 }

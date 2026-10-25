@@ -116,6 +116,42 @@ describe('GtmOperatorService recorder lifecycle', () => {
     expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
   });
 
+  it('stopOperation stops the running run and drops the run queued behind it', async () => {
+    let signal: AbortSignal | undefined;
+    puppeteerUtils.startBrowser.mockImplementationOnce(
+      (_headless, _measurementId, _preset, runSignal: AbortSignal) => {
+        signal = runSignal;
+        return new Promise((_resolve, reject) =>
+          runSignal.addEventListener('abort', () =>
+            reject(new Error('Browser start aborted'))
+          )
+        );
+      }
+    );
+
+    const first = service.inspectSingleEventViaGtm(
+      'project',
+      'a',
+      createQuery(),
+      createPreset()
+    );
+    const second = service.inspectSingleEventViaGtm(
+      'project',
+      'b',
+      createQuery(),
+      createPreset()
+    );
+    await vi.waitFor(() => expect(signal).toBeDefined());
+
+    service.stopOperation();
+
+    await expect(first).rejects.toThrow('Browser start aborted');
+    await expect(second).rejects.toThrow(
+      'The run was stopped before it started'
+    );
+    expect(puppeteerUtils.startBrowser).toHaveBeenCalledOnce();
+  });
+
   it('passes the recorder handle to cleanup on failure', async () => {
     pipeline.singleEventInspectionRecipe.mockRejectedValue(new Error('failed'));
 

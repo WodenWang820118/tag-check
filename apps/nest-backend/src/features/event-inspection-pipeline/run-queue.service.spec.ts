@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RunQueueService } from './run-queue.service';
+import { RunQueueService, RunStoppedError } from './run-queue.service';
 
 function deferred() {
   let resolve: () => void = () => undefined;
@@ -51,5 +51,44 @@ describe('RunQueueService', () => {
 
     await expect(a).rejects.toThrow('Operation aborted');
     await expect(b).resolves.toBe('b');
+  });
+
+  it('stop aborts the running run and drops the queued ones', async () => {
+    const queue = new RunQueueService();
+    const started: string[] = [];
+    let runningSignal: AbortSignal | undefined;
+
+    const a = queue.run(
+      (signal) =>
+        new Promise<string>((_resolve, reject) => {
+          started.push('a');
+          runningSignal = signal;
+          signal.addEventListener('abort', () =>
+            reject(new Error('Operation aborted'))
+          );
+        })
+    );
+    const b = queue.run(async () => {
+      started.push('b');
+      return 'b';
+    });
+    await tick();
+
+    queue.stop();
+
+    await expect(a).rejects.toThrow('Operation aborted');
+    await expect(b).rejects.toBeInstanceOf(RunStoppedError);
+    expect(runningSignal?.aborted).toBe(true);
+    expect(started).toEqual(['a']);
+    expect(queue.size).toBe(0);
+  });
+
+  it('runs a run requested after a stop', async () => {
+    const queue = new RunQueueService();
+    queue.stop();
+
+    await expect(queue.run(async (signal) => signal.aborted)).resolves.toBe(
+      false
+    );
   });
 });

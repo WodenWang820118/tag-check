@@ -50,8 +50,6 @@ export const TAG_ASSISTANT_BADGE_PASSTHROUGH = `(function () {
 @Injectable()
 export class GtmOperatorService {
   private readonly logger = new Logger(GtmOperatorService.name);
-  // NOTE(stage2): Replace singleton abort routing with per-operation session IDs.
-  abortController: AbortController | null = null;
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
     private readonly puppeteerUtilsService: PuppeteerUtilsService,
@@ -70,8 +68,14 @@ export class GtmOperatorService {
     query: InspectGtmQueryDto,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
-    return this.runQueue.run(() =>
-      this.inspectViaGtm(projectSlug, eventId, query, eventInspectionPresetDto)
+    return this.runQueue.run((signal) =>
+      this.inspectViaGtm(
+        projectSlug,
+        eventId,
+        query,
+        eventInspectionPresetDto,
+        signal
+      )
     );
   }
 
@@ -79,15 +83,14 @@ export class GtmOperatorService {
     projectSlug: string,
     eventId: string,
     query: InspectGtmQueryDto,
-    eventInspectionPresetDto: EventInspectionPresetDto
+    eventInspectionPresetDto: EventInspectionPresetDto,
+    signal: AbortSignal
   ) {
-    const controller = new AbortController();
-    this.abortController = controller;
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
       query.headless || 'false',
       query.measurementId,
       eventInspectionPresetDto,
-      controller.signal
+      signal
     );
 
     // A headful run is left open for inspection unless the caller (a batch)
@@ -152,13 +155,13 @@ export class GtmOperatorService {
         targetPage,
         projectSlug,
         eventId,
-        controller.signal
+        signal
       );
       tagAssistantRecorder = await this.startTagAssistantRecorder(
         page,
         projectSlug,
         eventId,
-        controller.signal
+        signal
       );
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -307,8 +310,11 @@ export class GtmOperatorService {
     }
   }
 
-  /** Aborts the run in progress, which closes its browser. */
+  /**
+   * Aborts the run in progress, which closes its browser, and drops the runs
+   * queued behind it.
+   */
   stopOperation() {
-    this.abortController?.abort();
+    this.runQueue.stop();
   }
 }
