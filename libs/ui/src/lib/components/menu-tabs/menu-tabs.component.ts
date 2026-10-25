@@ -2,12 +2,18 @@ import {
   Component,
   Inject,
   LOCALE_ID,
+  afterRenderEffect,
   input,
+  viewChild,
   ChangeDetectionStrategy
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
+// Standalone directives, not MatMenuModule: only standalone dependencies of
+// a @defer block are loaded lazily.
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+// Type-only, so the menu directives stay deferrable.
+import type { MatMenuTrigger as MenuTriggerRef } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Router } from '@angular/router';
 import {
@@ -23,118 +29,15 @@ import { type SharedNavigationLink } from '../navigation-link';
 @Component({
   selector: 'lib-menu-tabs',
   standalone: true,
-  imports: [MatTabsModule, MatIconModule, MatButtonModule, MatMenuModule],
-  template: `
-    <!-- Inline tab nav: visible on large viewports (laptop/desktop). -->
-    <nav
-      mat-tab-nav-bar
-      [tabPanel]="tabPanel"
-      class="hidden! lg:flex!"
-      aria-label="Primary navigation"
-    >
-      <a
-        mat-tab-link
-        [href]="primaryLink().href"
-        [active]="isLinkActive(primaryLink())"
-        class="nav-link-container"
-      >
-        <mat-icon class="nav-icon">{{ primaryLink().icon }}</mat-icon>
-        <span class="nav-text">{{ primaryLink().label }}</span>
-      </a>
-
-      @if (docsLink(); as link) {
-        <a
-          mat-tab-link
-          [href]="link.href"
-          [active]="isLinkActive(link)"
-          class="nav-link-container"
-        >
-          <mat-icon class="nav-icon">{{ link.icon }}</mat-icon>
-          <span class="nav-text">{{ link.label }}</span>
-        </a>
-      }
-
-      @if (!aboutDisabled()) {
-        <a
-          mat-tab-link
-          [href]="aboutPath"
-          [active]="isActive('/about')"
-          class="nav-link-container"
-        >
-          <mat-icon class="nav-icon">info</mat-icon>
-          <span i18n="@@nav.about" class="nav-text">About</span>
-        </a>
-      }
-
-      @if (!objectivesDisabled()) {
-        <a
-          mat-tab-link
-          [href]="objectivesPath"
-          [active]="isActive('/objectives')"
-          class="nav-link-container"
-        >
-          <mat-icon class="nav-icon">location_on</mat-icon>
-          <span i18n="@@nav.objectives" class="nav-text">Objectives</span>
-        </a>
-      }
-
-      <a
-        mat-tab-link
-        [href]="githubUrl"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="nav-link-container"
-      >
-        <mat-icon class="nav-icon">code</mat-icon>
-        <span i18n="@@nav.github" class="nav-text">GitHub</span>
-      </a>
-    </nav>
-    <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
-
-    <!-- Hamburger menu: visible below the laptop breakpoint. -->
-    <button
-      type="button"
-      mat-icon-button
-      class="lg:hidden! nav-hamburger"
-      [matMenuTriggerFor]="mobileMenu"
-      aria-label="Open navigation menu"
-    >
-      <mat-icon>menu</mat-icon>
-    </button>
-    <mat-menu #mobileMenu="matMenu">
-      <a mat-menu-item [href]="primaryLink().href">
-        <mat-icon>{{ primaryLink().icon }}</mat-icon>
-        <span>{{ primaryLink().label }}</span>
-      </a>
-      @if (docsLink(); as link) {
-        <a mat-menu-item [href]="link.href">
-          <mat-icon>{{ link.icon }}</mat-icon>
-          <span>{{ link.label }}</span>
-        </a>
-      }
-      @if (!aboutDisabled()) {
-        <a mat-menu-item [href]="aboutPath">
-          <mat-icon>info</mat-icon>
-          <span i18n="@@nav.about">About</span>
-        </a>
-      }
-      @if (!objectivesDisabled()) {
-        <a mat-menu-item [href]="objectivesPath">
-          <mat-icon>location_on</mat-icon>
-          <span i18n="@@nav.objectives">Objectives</span>
-        </a>
-      }
-      <a
-        mat-menu-item
-        [href]="githubUrl"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <mat-icon>code</mat-icon>
-        <span i18n="@@nav.github">GitHub</span>
-      </a>
-    </mat-menu>
-  `,
+  imports: [
+    MatTabsModule,
+    MatIconModule,
+    MatButtonModule,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger
+  ],
+  templateUrl: './menu-tabs.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [
     `
@@ -171,6 +74,10 @@ export class MenuTabsComponent {
   readonly docsLink = input<SharedNavigationLink>();
   aboutDisabled = input<boolean>(false);
   objectivesDisabled = input<boolean>(false);
+  /** Set when the placeholder button is clicked before the menu loaded. */
+  openMobileMenuOnLoad = false;
+  private readonly mobileMenuTrigger =
+    viewChild<MenuTriggerRef>('mobileMenuTrigger');
 
   constructor(
     @Inject(LOCALE_ID) locale: string,
@@ -178,6 +85,14 @@ export class MenuTabsComponent {
   ) {
     this.aboutPath = buildLocalizedPath('/about', locale);
     this.objectivesPath = buildLocalizedPath('/objectives', locale);
+
+    afterRenderEffect(() => {
+      const trigger = this.mobileMenuTrigger();
+      if (trigger && this.openMobileMenuOnLoad) {
+        this.openMobileMenuOnLoad = false;
+        trigger.openMenu();
+      }
+    });
   }
 
   isLinkActive(link: SharedNavigationLink): boolean {
