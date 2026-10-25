@@ -1,6 +1,6 @@
 [package]
 name = "desktop-tauri"
-version = "3.2.0"
+version = "3.3.0"
 description = "Tag Check Desktop"
 authors = ["Guan Xin Wang"]
 license = ""
