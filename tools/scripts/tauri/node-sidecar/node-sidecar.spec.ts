@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   getNodeSidecarStampPath,
-  getRustTargetTriple
+  getRustTargetTriple,
+  type TextSpawnResult
 } from './node-sidecar.ts';
 
 function spawnResult(input: {
@@ -9,16 +10,13 @@ function spawnResult(input: {
   stdout?: string;
   stderr?: string;
   error?: Error;
-}) {
+}): TextSpawnResult {
   return {
     status: input.status ?? 0,
     stdout: input.stdout ?? '',
     stderr: input.stderr ?? '',
-    error: input.error,
-    pid: 0,
-    output: [],
-    signal: null
-  } as unknown as ReturnType<typeof import('node:child_process').spawnSync>;
+    error: input.error
+  };
 }
 
 describe('getNodeSidecarStampPath', () => {
@@ -34,9 +32,9 @@ describe('getRustTargetTriple', () => {
     const spawnSyncFn = vi.fn(() =>
       spawnResult({ status: 0, stdout: '  x86_64-pc-windows-msvc\n' })
     );
-    expect(
-      getRustTargetTriple({ rootDir: '/r', spawnSyncFn: spawnSyncFn as never })
-    ).toBe('x86_64-pc-windows-msvc');
+    expect(getRustTargetTriple({ rootDir: '/r', spawnSyncFn })).toBe(
+      'x86_64-pc-windows-msvc'
+    );
     expect(spawnSyncFn).toHaveBeenCalledTimes(1);
   });
 
@@ -53,9 +51,9 @@ describe('getRustTargetTriple', () => {
       });
     });
 
-    expect(
-      getRustTargetTriple({ rootDir: '/r', spawnSyncFn: spawnSyncFn as never })
-    ).toBe('aarch64-apple-darwin');
+    expect(getRustTargetTriple({ rootDir: '/r', spawnSyncFn })).toBe(
+      'aarch64-apple-darwin'
+    );
     expect(spawnSyncFn).toHaveBeenCalledTimes(2);
   });
 
@@ -63,9 +61,9 @@ describe('getRustTargetTriple', () => {
     const spawnSyncFn = vi.fn(() =>
       spawnResult({ status: 1, stderr: 'rustc not installed' })
     );
-    expect(() =>
-      getRustTargetTriple({ rootDir: '/r', spawnSyncFn: spawnSyncFn as never })
-    ).toThrow('rustc not installed');
+    expect(() => getRustTargetTriple({ rootDir: '/r', spawnSyncFn })).toThrow(
+      'rustc not installed'
+    );
   });
 
   it('throws when the fallback output cannot be parsed', () => {
@@ -78,9 +76,9 @@ describe('getRustTargetTriple', () => {
       return spawnResult({ status: 0, stdout: 'no host line here' });
     });
 
-    expect(() =>
-      getRustTargetTriple({ rootDir: '/r', spawnSyncFn: spawnSyncFn as never })
-    ).toThrow(/parse the Rust target triple/);
+    expect(() => getRustTargetTriple({ rootDir: '/r', spawnSyncFn })).toThrow(
+      /parse the Rust target triple/
+    );
   });
 
   it('treats a runtime error from the preferred command as a failure and falls back', () => {
@@ -99,8 +97,8 @@ describe('getRustTargetTriple', () => {
       });
     });
 
-    expect(
-      getRustTargetTriple({ rootDir: '/r', spawnSyncFn: spawnSyncFn as never })
-    ).toBe('x86_64-unknown-linux-gnu');
+    expect(getRustTargetTriple({ rootDir: '/r', spawnSyncFn })).toBe(
+      'x86_64-unknown-linux-gnu'
+    );
   });
 });

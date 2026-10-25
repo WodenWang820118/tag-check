@@ -1,0 +1,128 @@
+<!-- Inline tab nav: visible on large viewports (laptop/desktop). -->
+<nav
+  mat-tab-nav-bar
+  [tabPanel]="tabPanel"
+  class="hidden! lg:flex!"
+  aria-label="Primary navigation"
+>
+  <a
+    mat-tab-link
+    [href]="primaryLink().href"
+    [active]="isLinkActive(primaryLink())"
+    class="nav-link-container"
+  >
+    <mat-icon class="nav-icon">{{ primaryLink().icon }}</mat-icon>
+    <span class="nav-text">{{ primaryLink().label }}</span>
+  </a>
+
+  @if (docsLink(); as link) {
+    <a
+      mat-tab-link
+      [href]="link.href"
+      [active]="isLinkActive(link)"
+      class="nav-link-container"
+    >
+      <mat-icon class="nav-icon">{{ link.icon }}</mat-icon>
+      <span class="nav-text">{{ link.label }}</span>
+    </a>
+  }
+
+  @if (!aboutDisabled()) {
+    <a
+      mat-tab-link
+      [href]="aboutPath"
+      [active]="isActive('/about')"
+      class="nav-link-container"
+    >
+      <mat-icon class="nav-icon">info</mat-icon>
+      <span i18n="@@nav.about" class="nav-text">About</span>
+    </a>
+  }
+
+  @if (!objectivesDisabled()) {
+    <a
+      mat-tab-link
+      [href]="objectivesPath"
+      [active]="isActive('/objectives')"
+      class="nav-link-container"
+    >
+      <mat-icon class="nav-icon">location_on</mat-icon>
+      <span i18n="@@nav.objectives" class="nav-text">Objectives</span>
+    </a>
+  }
+
+  <a
+    mat-tab-link
+    [href]="githubUrl"
+    target="_blank"
+    rel="noopener noreferrer"
+    class="nav-link-container"
+  >
+    <mat-icon class="nav-icon">code</mat-icon>
+    <span i18n="@@nav.github" class="nav-text">GitHub</span>
+  </a>
+</nav>
+<mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
+
+<!--
+  Hamburger menu: visible below the laptop breakpoint. The menu loads
+  after the first render, keeping it out of the initial bundle; the
+  placeholder is the same button and opens the menu once it has loaded.
+-->
+@defer (on idle; on interaction) {
+  <button
+    type="button"
+    mat-icon-button
+    class="lg:hidden! nav-hamburger"
+    [matMenuTriggerFor]="mobileMenu"
+    #mobileMenuTrigger="matMenuTrigger"
+    aria-label="Open navigation menu"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+  <mat-menu #mobileMenu="matMenu">
+    <a mat-menu-item [href]="primaryLink().href">
+      <mat-icon>{{ primaryLink().icon }}</mat-icon>
+      <span>{{ primaryLink().label }}</span>
+    </a>
+    @if (docsLink(); as link) {
+      <a mat-menu-item [href]="link.href">
+        <mat-icon>{{ link.icon }}</mat-icon>
+        <span>{{ link.label }}</span>
+      </a>
+    }
+    @if (!aboutDisabled()) {
+      <a mat-menu-item [href]="aboutPath">
+        <mat-icon>info</mat-icon>
+        <span i18n="@@nav.about">About</span>
+      </a>
+    }
+    @if (!objectivesDisabled()) {
+      <a mat-menu-item [href]="objectivesPath">
+        <mat-icon>location_on</mat-icon>
+        <span i18n="@@nav.objectives">Objectives</span>
+      </a>
+    }
+    <a
+      mat-menu-item
+      [href]="githubUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <mat-icon>code</mat-icon>
+      <span i18n="@@nav.github">GitHub</span>
+    </a>
+  </mat-menu>
+} @placeholder {
+  <button
+    type="button"
+    mat-icon-button
+    class="lg:hidden! nav-hamburger"
+    aria-label="Open navigation menu"
+    aria-haspopup="menu"
+    aria-expanded="false"
+    (click)="openMobileMenuOnLoad = true"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+}
