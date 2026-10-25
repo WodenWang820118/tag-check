@@ -7,7 +7,10 @@ import {
   parseMeasurementPlanRows,
   type MeasurementPlanRow
 } from './measurement-plan';
-import { GA4_EVENT_NAME_MAX_LENGTH } from './ga4-reference';
+import {
+  GA4_ECOMMERCE_EVENT_PARAMETERS,
+  GA4_EVENT_NAME_MAX_LENGTH
+} from './ga4-reference';
 
 describe('measurement-plan', () => {
   describe('isMeasurementPlanHeader', () => {
@@ -456,6 +459,28 @@ describe('measurement-plan', () => {
       );
       expect(login?.eventParameters).toEqual(['method']);
       expect(login?.itemParameters).toEqual([]);
+    });
+
+    // Each event's parameters as listed in Google's recommended events
+    // reference (checked 2026-10-25):
+    // https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtm
+    it('lists the documented parameters of every non-ecommerce event', () => {
+      const rows = getGa4MeasurementPlanTemplateRows().filter(
+        (row) => !(row.eventName in GA4_ECOMMERCE_EVENT_PARAMETERS)
+      );
+      expect(
+        Object.fromEntries(
+          rows.map((row) => [row.eventName, row.eventParameters])
+        )
+      ).toEqual({
+        login: ['method'],
+        sign_up: ['method'],
+        search: ['search_term'],
+        share: ['method', 'content_type', 'item_id'],
+        select_content: ['content_type', 'content_id'],
+        generate_lead: ['currency', 'value', 'lead_source']
+      });
+      expect(rows.every((row) => row.itemParameters.length === 0)).toBe(true);
     });
   });
 });

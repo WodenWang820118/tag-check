@@ -58,7 +58,7 @@ const COMMON_ITEM_PARAMETERS: readonly string[] = [
  * - search (search_term)
  * - share (method, content_type, item_id)
  * - select_content (content_type, content_id)
- * - generate_lead (currency, value)
+ * - generate_lead (currency, value, lead_source)
  *
  * @see https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtm
  * @see https://developers.google.com/analytics/devguides/collection/ga4/ecommerce?client_type=gtm
@@ -99,7 +99,7 @@ export function getGa4MeasurementPlanTemplateRows(): MeasurementPlanRow[] {
     },
     {
       eventName: 'generate_lead',
-      eventParameters: ['currency', 'value'],
+      eventParameters: ['currency', 'value', 'lead_source'],
       itemParameters: []
     }
   ];
