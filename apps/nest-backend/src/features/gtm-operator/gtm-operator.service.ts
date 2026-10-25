@@ -134,10 +134,14 @@ export class GtmOperatorService {
         }
       }
 
-      // The site's tab is the one Tag Assistant opened on the site's origin.
+      // The site's tab is the page Tag Assistant opened on the site's
+      // origin. Not any target there: the site's service worker
+      // (ngsw-worker.js on ng-gtm-sample) is one too, and outlives a window
+      // closed by a retried connection.
       const siteOrigin = new URL(websiteUrl).origin;
-      const target = await browser.waitForTarget((candidate) =>
-        candidate.url().includes(siteOrigin)
+      const target = await browser.waitForTarget(
+        (candidate) =>
+          candidate.type() === 'page' && candidate.url().includes(siteOrigin)
       );
 
       const targetUrl = target.url();

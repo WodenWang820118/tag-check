@@ -86,6 +86,27 @@ describe('GtmOperatorService recorder lifecycle', () => {
     );
   });
 
+  it("replays on the site's page, not on the site's service worker", async () => {
+    await expect(
+      service.inspectSingleEventViaGtm(
+        'project',
+        'event',
+        createQuery(),
+        createPreset()
+      )
+    ).resolves.toEqual([{ passed: true }]);
+
+    expect(pipeline.singleEventInspectionRecipe).toHaveBeenCalledWith(
+      targetPage,
+      'project',
+      'event',
+      'G-TEST',
+      { username: '', password: '' },
+      'false',
+      expect.anything()
+    );
+  });
+
   it('records the Tag Assistant tab next to the site, without bringing it to the front', async () => {
     await service.inspectSingleEventViaGtm(
       'project',
@@ -526,10 +547,41 @@ function createMockBrowser(
     pages: vi.fn().mockResolvedValue([]),
     close: vi.fn().mockResolvedValue(undefined),
     setCookie: vi.fn().mockResolvedValue(undefined),
-    waitForTarget: vi.fn().mockResolvedValue({
-      url: vi.fn(() => 'https://example.test/product?gtm_debug=TAGASSISTANT'),
-      asPage: vi.fn().mockResolvedValue(targetPage)
-    })
+    // Resolves with the first target that matches, as Puppeteer does: the
+    // site's service worker comes before its page.
+    waitForTarget: vi
+      .fn()
+      .mockImplementation(
+        async (predicate: (target: MockTarget) => boolean) => {
+          const match = [siteWorkerTarget(), sitePageTarget(targetPage)].find(
+            predicate
+          );
+          if (!match) throw new Error('Waiting for target failed');
+          return match;
+        }
+      )
+  };
+}
+
+interface MockTarget {
+  type(): string;
+  url(): string;
+  asPage(): Promise<unknown>;
+}
+
+function sitePageTarget(page: unknown): MockTarget {
+  return {
+    type: () => 'page',
+    url: () => 'https://example.test/product?gtm_debug=TAGASSISTANT',
+    asPage: vi.fn().mockResolvedValue(page)
+  };
+}
+
+function siteWorkerTarget(): MockTarget {
+  return {
+    type: () => 'service_worker',
+    url: () => 'https://example.test/ngsw-worker.js',
+    asPage: vi.fn().mockRejectedValue(new Error('Target must exist'))
   };
 }
 
