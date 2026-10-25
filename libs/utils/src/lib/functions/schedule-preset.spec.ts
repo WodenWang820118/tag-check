@@ -34,15 +34,15 @@ function wallClock(date: Date) {
 
 // New York changes clocks on 2026-03-08 (02:00 -> 03:00) and on 2026-11-01
 // (02:00 -> 01:00). Node reads TZ again whenever it is assigned.
-const originalTimeZone = process.env.TZ;
+const originalTimeZone = process.env['TZ'];
 beforeAll(() => {
-  process.env.TZ = 'America/New_York';
+  process.env['TZ'] = 'America/New_York';
 });
 afterAll(() => {
   if (originalTimeZone === undefined) {
-    delete process.env.TZ;
+    delete process.env['TZ'];
   } else {
-    process.env.TZ = originalTimeZone;
+    process.env['TZ'] = originalTimeZone;
   }
 });
 
