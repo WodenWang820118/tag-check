@@ -119,6 +119,14 @@ describe('ReportService', () => {
     );
   });
 
+  it('deleteBatchReports rethrows a failure so the caller can report it', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    httpClient.delete.mockReturnValueOnce(throwError(() => new Error('x')));
+    await expect(
+      firstValueFrom(service.deleteBatchReports('s', ['a']))
+    ).rejects.toThrow('Failed to delete tests');
+  });
+
   it('getReportDetails rethrows a friendly error', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     httpClient.get.mockReturnValueOnce(throwError(() => new Error('x')));

@@ -152,13 +152,27 @@ export class ReportTableEffectsFacadeService {
             // still offer to delete, run or bookmark them.
             model.selection.set(new SelectionModel<IReportDetails>(true, []));
 
+            const deleteProjectSlug = this.getProjectSlug();
             this.reportService
               .deleteBatchReports(
-                this.getProjectSlug(),
+                deleteProjectSlug,
                 selected.map((item) => item.eventId)
               )
               .pipe(take(1))
-              .subscribe();
+              .subscribe({
+                error: () => {
+                  // Another project's table is showing: its rows came from
+                  // the server and never held these tests.
+                  if (this.getProjectSlug() === deleteProjectSlug) {
+                    this.restoreRows(current.data, selected);
+                  }
+                  this.snackBar.open(
+                    'Could not delete the selected tests. Please try again.',
+                    'Dismiss',
+                    { duration: 5000 }
+                  );
+                }
+              });
           }
           this.projectDataSourceService.setDeletedSignal(false);
         });
@@ -166,4 +180,28 @@ export class ReportTableEffectsFacadeService {
     });
   }
   //#endregion
+
+  /**
+   * Puts rows whose delete failed back in the table, in their old order.
+   * Rows that stayed keep their latest version, as a run that ended during
+   * the delete replaced them.
+   */
+  private restoreRows(before: IReportDetails[], deleted: IReportDetails[]) {
+    const model = this.reportTableDataSourceModelService;
+    const latest = model.dataSource();
+    const latestById = new Map(latest.data.map((row) => [row.eventId, row]));
+    const deletedIds = new Set(deleted.map((row) => row.eventId));
+    const beforeIds = new Set(before.map((row) => row.eventId));
+    const rows = before.flatMap((row) => {
+      if (deletedIds.has(row.eventId)) return [row];
+      const kept = latestById.get(row.eventId);
+      return kept ? [kept] : [];
+    });
+    rows.push(...latest.data.filter((row) => !beforeIds.has(row.eventId)));
+
+    const restored = new MatTableDataSource<IReportDetails>(rows);
+    restored.paginator = latest.paginator;
+    restored.sort = latest.sort;
+    model.dataSource.set(restored);
+  }
 }

@@ -12,7 +12,7 @@ import {
   StrictDataLayerEvent
 } from '@utils';
 import { environment } from '../../../../../environments/environment';
-import { catchHttpError, rethrowHttpError } from '../http-error.utils';
+import { rethrowHttpError } from '../http-error.utils';
 import { API_OPERATION_CONTEXT } from '../api-request-id.interceptor';
 
 /**
@@ -111,8 +111,8 @@ export class ReportService {
   /**
    * Deletes multiple reports in a single batched request.
    *
-   * Returns `null` on HTTP failure rather than throwing so callers can treat
-   * the result as an optional confirmation.
+   * Failures are rethrown, so the caller can put the rows back and say the
+   * delete failed.
    *
    * @param projectSlug - URL-friendly project identifier.
    * @param eventIds    - Array of event IDs to delete.
@@ -123,7 +123,7 @@ export class ReportService {
       .delete<TestEventSchema>(`${environment.reportApiUrl}/${projectSlug}`, {
         body: eventIds
       })
-      .pipe(catchHttpError(null));
+      .pipe(rethrowHttpError('Failed to delete tests'));
   }
 
   /**
