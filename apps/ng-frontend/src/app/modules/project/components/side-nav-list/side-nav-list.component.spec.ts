@@ -18,6 +18,7 @@ describe('navSectionOf', () => {
   it('highlights the section a page belongs to', () => {
     expect(navSectionOf('/projects/shop/tag-build')).toBe('tagbuild');
     expect(navSectionOf('/projects/shop/buckets')).toBe('reports');
+    expect(navSectionOf('/projects/shop/schedules')).toBe('schedules');
     expect(navSectionOf('/projects/shop/settings/gtm')).toBe('settings');
     expect(navSectionOf('/projects/shop/settings/project-io#top')).toBe(
       'settings'
