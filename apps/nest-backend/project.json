@@ -5,6 +5,7 @@
   "projectType": "application",
   "tags": ["scope:backend", "type:app"],
   "targets": {
+    "typecheck-spec": {},
     "build": {
       "executor": "@nx/rspack:rspack",
       "outputs": ["{options.outputPath}"],
