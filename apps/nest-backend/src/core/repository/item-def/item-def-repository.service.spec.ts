@@ -31,6 +31,22 @@ describe('ItemDefRepositoryService', () => {
     });
   });
 
+  it("getItemDefByProjectSlugAndEventId() looks up the test's own definition", async () => {
+    const { service, repository } = build();
+    repository.findOne.mockResolvedValue(null);
+    await expect(
+      service.getItemDefByProjectSlugAndEventId('shop', 'add_to_cart_1')
+    ).resolves.toBeNull();
+    expect(repository.findOne).toHaveBeenCalledWith({
+      where: {
+        testEvent: {
+          eventId: 'add_to_cart_1',
+          project: { projectSlug: 'shop' }
+        }
+      }
+    });
+  });
+
   it('getItemDefByTemplateName() looks up by templateName', async () => {
     const { service, repository } = build();
     repository.findOne.mockResolvedValue({ id: 1, templateName: 't' });

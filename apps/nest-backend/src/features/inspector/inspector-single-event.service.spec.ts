@@ -52,7 +52,9 @@ describe('InspectorSingleEventService', () => {
       getSpecByProjectSlugAndEventId: vi.fn().mockResolvedValue(spec)
     } as unknown as SpecRepositoryService;
     const itemDefRepositoryService = {
-      getItemDefById: vi.fn().mockResolvedValue(opts?.itemDef ?? null)
+      getItemDefByProjectSlugAndEventId: vi
+        .fn()
+        .mockResolvedValue(opts?.itemDef ?? null)
     } as unknown as ItemDefRepositoryService;
     const projectEventsBuilderService = {
       refreshGeneratedSpec: vi.fn(
@@ -221,9 +223,9 @@ describe('InspectorSingleEventService', () => {
     expect(
       specRepositoryService.getSpecByProjectSlugAndEventId
     ).toHaveBeenCalledWith('p', 'evt');
-    expect(itemDefRepositoryService.getItemDefById).toHaveBeenCalledWith(
-      'view_item'
-    );
+    expect(
+      itemDefRepositoryService.getItemDefByProjectSlugAndEventId
+    ).toHaveBeenCalledWith('p', 'evt');
   });
 
   it('validates against the refreshed spec of an unedited legacy import', async () => {

@@ -61,9 +61,13 @@ export class InspectorSingleEventService {
         projectSpec
       )) ?? projectSpec.dataLayerSpec;
 
-    const itemDef = await this.itemDefRepositoryService.getItemDefById(
-      projectSpec.eventName
-    );
+    // The test's own definition: looked up by event name, the definition of
+    // another project's test of the same event would replace the items.
+    const itemDef =
+      await this.itemDefRepositoryService.getItemDefByProjectSlugAndEventId(
+        projectSlug,
+        eventId
+      );
     expectItem(
       projectSpec.dataLayerSpec,
       itemDef?.fullItemDef as BaseItem | undefined
