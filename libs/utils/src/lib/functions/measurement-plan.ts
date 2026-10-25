@@ -10,7 +10,8 @@
 
 import {
   GA4_ECOMMERCE_EVENT_PARAMETERS,
-  getGa4EventNameIssues
+  getGa4EventNameIssues,
+  getGa4ParameterNameIssues
 } from './ga4-reference';
 import type { BaseECommerce, StrictDataLayerEvent } from '../types/tag-check';
 
@@ -125,18 +126,6 @@ function splitAndDeduplicateParameters(
 
 function isRowBlank(row: string[]): boolean {
   return row.length === 0 || row.every((cell) => !cell || cell.trim() === '');
-}
-
-/**
- * Validates a parameter name against GA4 naming rules and length limit.
- * Parameter names follow the same rules as event names:
- * up to 40 characters, must start with a letter, and contain only letters, numbers, and underscores.
- *
- * @see https://support.google.com/analytics/answer/9267744
- * @see https://support.google.com/analytics/answer/13316687
- */
-function getGa4ParameterNameIssues(paramName: string): string[] {
-  return getGa4EventNameIssues(paramName);
 }
 
 /**

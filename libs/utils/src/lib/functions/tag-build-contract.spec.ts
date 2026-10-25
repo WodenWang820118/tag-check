@@ -505,6 +505,73 @@ describe('validateGTMImportReadiness', () => {
     );
     expect(result.warnings).toContain('The export has no container tag IDs.');
   });
+
+  function makeParameterTable(names: string[]) {
+    return {
+      type: 'LIST',
+      key: 'eventSettingsTable',
+      list: names.map((name) => ({
+        type: 'MAP',
+        map: [
+          { type: 'TEMPLATE', key: 'parameter', value: name },
+          {
+            type: 'TEMPLATE',
+            key: 'parameterValue',
+            value: `{{DLV - ${name}}}`
+          }
+        ]
+      }))
+    };
+  }
+
+  it('warns about GA4 event parameter names that break the naming rules', () => {
+    const result = validateGTMImportReadiness(
+      makeGTMExport({
+        containerVersion: makeContainerVersion({
+          tag: [
+            makeTag({
+              name: 'GA4 event - login',
+              parameter: [
+                makeParameterTable(['method', 'user.id', 'google_x', 'method'])
+              ]
+            })
+          ],
+          variable: [
+            makeVariable({
+              name: 'ESV - shared',
+              type: 'gtes',
+              parameter: [makeParameterTable(['page-type'])]
+            })
+          ]
+        })
+      })
+    );
+
+    expect(result.canImport).toBe(true);
+    expect(result.warnings).toEqual([
+      'Tag "GA4 event - login": event parameter "user.id" must start with a letter and use only letters, numbers and underscores.',
+      'Tag "GA4 event - login": event parameter "google_x" must not begin with the reserved prefix "google_".',
+      'Tag "GA4 event - login": event parameter "method" is set twice.',
+      'Variable "ESV - shared": event parameter "page-type" must start with a letter and use only letters, numbers and underscores.'
+    ]);
+  });
+
+  it('does not check the parameter tables of other tag types', () => {
+    const result = validateGTMImportReadiness(
+      makeGTMExport({
+        containerVersion: makeContainerVersion({
+          tag: [
+            makeTag({
+              type: 'html',
+              parameter: [makeParameterTable(['user.id'])]
+            })
+          ]
+        })
+      })
+    );
+
+    expect(result.warnings).toEqual([]);
+  });
 });
 
 describe('createPlaceholderTagConfig', () => {

@@ -1,8 +1,36 @@
 import { describe, expect, it } from 'vitest';
 import {
   GA4_ECOMMERCE_EVENT_PARAMETERS,
-  getGa4EventNameIssues
+  getGa4EventNameIssues,
+  getGa4ParameterNameIssues
 } from './ga4-reference';
+
+describe('getGa4ParameterNameIssues', () => {
+  it.each(['user_id', 'percent_scrolled', 'item_category2'])(
+    'accepts %s',
+    (parameterName) => {
+      expect(getGa4ParameterNameIssues(parameterName)).toEqual([]);
+    }
+  );
+
+  it.each(['user.id', 'gtag.config', '_private', 'page-type'])(
+    'rejects %j',
+    (parameterName) => {
+      expect(getGa4ParameterNameIssues(parameterName)).toContain(
+        'must start with a letter and use only letters, numbers and underscores'
+      );
+    }
+  );
+
+  it.each(['firebase_', 'ga_', 'google_'])(
+    'rejects names that begin with %s',
+    (prefix) => {
+      expect(getGa4ParameterNameIssues(`${prefix}source`)).toEqual([
+        `must not begin with the reserved prefix "${prefix}"`
+      ]);
+    }
+  );
+});
 
 describe('getGa4EventNameIssues', () => {
   it.each(['page_view', 'add_to_cart', 'Purchase2', '購買_完成'])(

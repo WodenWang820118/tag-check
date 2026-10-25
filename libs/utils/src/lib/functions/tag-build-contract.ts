@@ -1,4 +1,5 @@
-import { TagTypeEnum } from '../enums/tag-build';
+import { TagTypeEnum, VariableTypeEnum } from '../enums/tag-build';
+import { getGa4ParameterNameIssues } from './ga4-reference';
 import type {
   GTMConfiguration,
   Parameter,
@@ -353,6 +354,7 @@ export interface GTMImportReadiness {
  * Checks a generated container before the user imports it into Tag Manager:
  * export format 2, the version and container metadata, consistent paths, a
  * `GTM-` public ID and the same account and container IDs on every item.
+ * Event parameter names that break GA4's naming rules are warnings.
  */
 export function validateGTMImportReadiness(value: unknown): GTMImportReadiness {
   const issues: string[] = [];
@@ -406,6 +408,8 @@ export function validateGTMImportReadiness(value: unknown): GTMImportReadiness {
     version,
     issues
   );
+
+  validateGa4ParameterNames(version, warnings);
 
   if (version.tag.length === 0) {
     warnings.push('The export has no tags.');
@@ -510,6 +514,49 @@ function validateVersionItems(
       issues.push(`${label}[${index}].containerId must match the container.`);
     }
   });
+}
+
+/**
+ * Warns about event parameter names GA4 does not accept, in the parameter
+ * table of each GA4 event tag and Event Settings variable, and about a name
+ * that appears twice in one table. Tag Manager imports such a container, but
+ * the parameter does not reach GA4 under that name.
+ */
+function validateGa4ParameterNames(
+  version: GTMConfiguration['containerVersion'],
+  warnings: string[]
+): void {
+  const tables = [
+    ...version.tag
+      .filter((tag) => tag.type === TagTypeEnum.GAAWE)
+      .map((tag) => ({ label: `Tag "${tag.name}"`, item: tag })),
+    ...version.variable
+      .filter((variable) => variable.type === VariableTypeEnum.EVENT_SETTINGS)
+      .map((variable) => ({
+        label: `Variable "${variable.name}"`,
+        item: variable
+      }))
+  ];
+
+  for (const { label, item } of tables) {
+    const table = item.parameter?.find(
+      (entry) => entry.key === 'eventSettingsTable'
+    );
+    const seen = new Set<string>();
+    for (const row of getParameterListItems(table)) {
+      const name = getParameterMapValue(row, 'parameter');
+      if (name === undefined) {
+        continue;
+      }
+      for (const issue of getGa4ParameterNameIssues(name)) {
+        warnings.push(`${label}: event parameter "${name}" ${issue}.`);
+      }
+      if (seen.has(name)) {
+        warnings.push(`${label}: event parameter "${name}" is set twice.`);
+      }
+      seen.add(name);
+    }
+  }
 }
 
 function isNonEmptyString(value: unknown): value is string {
