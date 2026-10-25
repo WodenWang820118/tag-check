@@ -14,6 +14,7 @@ import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-pres
 import { SpecRepositoryService } from '../../core/repository/spec/spec-repository.service';
 import { ItemDefRepositoryService } from '../../core/repository/item-def/item-def-repository.service';
 import { ValidationResultDto } from '../../shared/dto/validation-result.dto';
+import { isQueryFlagOn } from '../../shared/query-flag';
 import { ProjectEventsBuilderService } from '../project-agent/project-events-builder/project-events-builder.service';
 /**
  * Runs a test's checks: refreshes its spec, replays it, and validates the
@@ -83,7 +84,7 @@ export class InspectorSingleEventService {
       'Expected Spec (from DTO): '
     );
 
-    if (dto.captureRequest === 'false' || !dto.captureRequest) {
+    if (!isQueryFlagOn(dto.captureRequest)) {
       return await this.handleNoCaptureRequest(page, projectSlug, eventId, dto);
     }
 

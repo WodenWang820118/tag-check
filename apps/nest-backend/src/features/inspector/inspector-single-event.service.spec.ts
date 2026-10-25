@@ -121,6 +121,41 @@ describe('InspectorSingleEventService', () => {
     expect(result.rawRequest).toBe('raw=1');
   });
 
+  it.each(['0', 'yes', ''])(
+    'takes the no-capture path for %j, which the web agent reads as off',
+    async (captureRequest) => {
+      const { svc, webAgentService } = build();
+      const result = await svc.inspectDataLayer(
+        {} as never,
+        'p',
+        'evt',
+        'M-1',
+        { username: 'u', password: 'p' },
+        captureRequest,
+        undefined as never
+      );
+      expect(webAgentService.executeAndGetDataLayer).toHaveBeenCalled();
+      expect(
+        webAgentService.executeAndGetDataLayerAndRequest
+      ).not.toHaveBeenCalled();
+      expect(result.requestCheckResult).toBeNull();
+    }
+  );
+
+  it('takes the capture path when captureRequest is "1"', async () => {
+    const { svc, webAgentService } = build();
+    await svc.inspectDataLayer(
+      {} as never,
+      'p',
+      'evt',
+      'M-1',
+      { username: 'u', password: 'p' },
+      '1',
+      undefined as never
+    );
+    expect(webAgentService.executeAndGetDataLayerAndRequest).toHaveBeenCalled();
+  });
+
   it('checks the recomposed request with the request rules', async () => {
     const { svc, requestProcessorService, inspectorUtilsService } = build();
     const result = await svc.inspectDataLayer(
