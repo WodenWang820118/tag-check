@@ -120,6 +120,16 @@ describe('SingleEventInspectionService recorder lifecycle', () => {
     );
   });
 
+  it('rejects with the first line of the failure, without file paths', async () => {
+    pipeline.singleEventInspectionRecipe.mockRejectedValue(
+      new Error('spawn C:\\tools\\ffmpeg.exe ENOENT\n    at main.js:1:1')
+    );
+
+    await expect(
+      service.inspectSingleEvent('project', 'event', createOptions())
+    ).rejects.toMatchObject({ status: 500, message: 'spawn <path> ENOENT' });
+  });
+
   it('closes the browser when the recorder cannot start', async () => {
     puppeteerUtils.startRecorder.mockRejectedValue(new Error('no ffmpeg'));
 

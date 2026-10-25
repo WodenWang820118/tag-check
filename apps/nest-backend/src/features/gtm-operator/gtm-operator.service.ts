@@ -14,7 +14,7 @@ import {
 } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
 import { RunRecorder } from '../web-agent/puppeteer-utils/run-recorder';
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
-import { RECORDING_FILES } from '../../shared';
+import { RECORDING_FILES, toClientErrorMessage } from '../../shared';
 import {
   applyPresetCookies,
   preloadApplicationLocalStorage,
@@ -60,7 +60,7 @@ export class GtmOperatorService {
    * Runs the test once every run requested before it has finished. Resolves
    * with the pipeline's result. Rejects with BadRequestException for a GTM
    * preview URL without a target site, and InternalServerErrorException for
-   * any other failure.
+   * any other failure, with the failure's reason in its message.
    */
   inspectSingleEventViaGtm(
     projectSlug: string,
@@ -214,8 +214,13 @@ export class GtmOperatorService {
       if (error instanceof BadRequestException) {
         throw error;
       }
+      // The batch shows this message, so it says why the run failed, without
+      // a stack trace or a file path.
+      const reason = toClientErrorMessage(error);
       throw new InternalServerErrorException(
-        'Failed to perform GTM validation'
+        reason
+          ? `Failed to perform GTM validation: ${reason}`
+          : 'Failed to perform GTM validation'
       );
     }
   }

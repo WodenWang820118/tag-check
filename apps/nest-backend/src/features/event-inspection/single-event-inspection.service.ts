@@ -9,6 +9,7 @@ import {
 import { RunRecorder } from '../../features/web-agent/puppeteer-utils/run-recorder';
 import { applyPresetCookies } from '../web-agent/browser-state-preload.util';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
+import { toClientErrorMessage } from '../../shared/client-error-message';
 
 /** What a direct run needs besides the test it runs. */
 export interface InspectSingleEventOptions {
@@ -134,8 +135,10 @@ export class SingleEventInspectionService {
         );
       }
 
+      // The batch shows this message: the reason, without a stack trace or
+      // a file path.
       throw new HttpException(
-        error instanceof Error ? error.message : String(error),
+        toClientErrorMessage(error) || 'Failed to run the test',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
