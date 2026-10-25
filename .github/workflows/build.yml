@@ -51,8 +51,11 @@ jobs:
       - name: Backend integration tests
         run: pnpm run test-back:integration
         shell: bash
-      - name: Release tooling tests
-        run: pnpm run test:release-tools
+      - name: Tools tests (Vitest)
+        run: pnpm run test:tools
+        shell: bash
+      - name: Tools tests (node:test)
+        run: pnpm run test:tools:node
         shell: bash
       - name: Test and coverage
         run: pnpm run test:cov
