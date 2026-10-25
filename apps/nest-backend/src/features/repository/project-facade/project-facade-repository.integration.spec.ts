@@ -11,7 +11,8 @@ import {
   TestEventDetailEntity,
   TestEventEntity,
   ItemDefEntity,
-  TestImageEntity
+  TestImageEntity,
+  CreateProjectDto
 } from '../../../shared';
 import { ProjectRepositoryService } from '../../../core/repository/project/project-repository.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
@@ -77,11 +78,12 @@ describe('ProjectFacadeRepositoryService', () => {
 
   it('should create a project with all related entities', async () => {
     const projectSlug = 'test-project';
-    const settings = {
+    const settings: CreateProjectDto = {
       projectSlug: 'test-project',
       projectName: 'Test Project',
       projectDescription: 'Test Description',
-      measurementId: 'TEST-123'
+      measurementId: 'TEST-123',
+      gtmConfigurationPath: 'test-project/config'
     };
 
     await service.createProject(settings);

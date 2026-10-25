@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DataSource, EntitySubscriberInterface } from 'typeorm';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   ApplicationSettingEntity,
   AuthenticationSettingEntity,
@@ -90,33 +90,18 @@ describe('TestEventRepositoryService.updateTestEvents transaction (SQLite)', () 
       message: 'original 2'
     });
 
-    const testEventRepo = dataSource.getRepository(TestEventEntity);
-    const origTransaction = testEventRepo.manager.transaction.bind(
-      testEventRepo.manager
-    );
-
-    vi.spyOn(testEventRepo.manager, 'transaction').mockImplementation(
-      async (runInTransaction) => {
-        return await origTransaction(async (entityManager) => {
-          const repo = entityManager.getRepository(TestEventEntity);
-          const origSave = repo.save.bind(repo);
-          let saveCount = 0;
-          vi.spyOn(repo, 'save').mockImplementation(
-            async (entity: unknown, options?: unknown) => {
-              saveCount++;
-              if (saveCount === 2) {
-                throw new Error('Simulated failure during second save');
-              }
-              if (options !== undefined) {
-                return await origSave(entity as never, options as never);
-              }
-              return await origSave(entity as never);
-            }
-          );
-          return await runInTransaction(entityManager);
-        });
+    // Fail the second row's UPDATE inside the service's transaction.
+    let updates = 0;
+    const failSecondUpdate: EntitySubscriberInterface<TestEventEntity> = {
+      listenTo: () => TestEventEntity,
+      beforeUpdate: async () => {
+        updates++;
+        if (updates === 2) {
+          throw new Error('Simulated failure during second save');
+        }
       }
-    );
+    };
+    dataSource.subscribers.push(failSecondUpdate);
 
     await expect(
       service.updateTestEvents('demo', [

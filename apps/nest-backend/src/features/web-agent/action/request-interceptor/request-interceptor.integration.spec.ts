@@ -129,6 +129,7 @@ describe.skipIf(!chromeAvailable)('RequestInterceptorService in Chrome', () => {
     ['fetch', '#other-origin', 'pagehide_cross_origin']
   ])(
     'captures a %s request sent on pagehide when %s is clicked',
+    { timeout: CAPTURE_TIMEOUT_MS + 10_000 },
     async ([transport, link, eventName], { skip }) => {
       const page = await openPage();
       const handle = await capture(page, eventName);
@@ -153,8 +154,7 @@ describe.skipIf(!chromeAvailable)('RequestInterceptorService in Chrome', () => {
         await handle.stop();
         await page.close();
       }
-    },
-    CAPTURE_TIMEOUT_MS + 10_000
+    }
   );
 
   it('captures from a batched body alongside page.authenticate and releases requests after stop', async () => {

@@ -13,6 +13,7 @@ import { FolderPathService } from '../../../infrastructure/os/path/folder-path/f
 import { FolderService } from '../../../infrastructure/os/folder/folder.service';
 import { JsonProjectExportService } from '../../../infrastructure/data-export/json/export/json-project-export.service';
 import { JsonProjectImportService } from '../../../infrastructure/data-export/json/import/json-project-import.service';
+import type { FixtureEnvelopeV1 } from '../../../infrastructure/data-export/interfaces/fixture-types';
 import { ProjectIoFacadeService } from './project-io-facade.service';
 
 export type ProjectIoServiceStub = Pick<
@@ -52,7 +53,7 @@ export class JsonProjectImportServiceMock {
 }
 
 export class JsonProjectExportServiceMock {
-  async exportProject(slug: string) {
+  async exportProject(slug: string): Promise<FixtureEnvelopeV1> {
     return {
       version: 1,
       exportedAt: new Date().toISOString(),

@@ -12,15 +12,15 @@ import { EntityPersistenceService } from '../entity-persistence.service';
 import { SinglePerParentUpsertService } from '../single-per-parent-upsert.service';
 import { Repository, EntityMetadata } from 'typeorm';
 
-interface ProjectRow {
+type ProjectRow = {
   id: number;
   projectSlug: string;
-}
-interface ChildRow {
+};
+type ChildRow = {
   id: number;
   projectId: number;
   value: string;
-}
+};
 
 interface PrimaryColumnLike {
   propertyName: string;

@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Logger } from '@nestjs/common';
+import type { FastifyReply } from 'fastify';
 import { ReportController } from './report.controller';
+
+/** The report endpoints set only the `x-request-id` header on the reply. */
+function replyMock() {
+  const header = vi.fn();
+  const reply: Pick<FastifyReply, 'header'> = { header };
+  return { header, response: reply as FastifyReply };
+}
 
 describe('ReportController', () => {
   afterEach(() => {
@@ -55,7 +63,7 @@ describe('ReportController', () => {
       id: 'req-1',
       headers: { 'x-request-id': '11111111-1111-4111-8111-111111111111' }
     } as never;
-    const response = { header: vi.fn() } as never;
+    const { header, response } = replyMock();
     const result = await controller.getProjectEventReports(
       'proj-1',
       request,
@@ -79,7 +87,7 @@ describe('ReportController', () => {
         count: 1
       })
     );
-    expect(response.header).toHaveBeenCalledWith(
+    expect(header).toHaveBeenCalledWith(
       'x-request-id',
       '11111111-1111-4111-8111-111111111111'
     );
@@ -94,7 +102,7 @@ describe('ReportController', () => {
       id: 'req-safe',
       headers: { 'x-request-id': 'oversized-or-malformed-request-id' }
     } as never;
-    const response = { header: vi.fn() } as never;
+    const { header, response } = replyMock();
 
     await controller.getProjectEventReports('proj-1', request, response);
 
@@ -106,7 +114,7 @@ describe('ReportController', () => {
         count: 1
       })
     );
-    expect(response.header).toHaveBeenCalledWith('x-request-id', 'req-safe');
+    expect(header).toHaveBeenCalledWith('x-request-id', 'req-safe');
   });
 
   it('getProjectEventReports preserves repository failures after attaching diagnostic context', async () => {

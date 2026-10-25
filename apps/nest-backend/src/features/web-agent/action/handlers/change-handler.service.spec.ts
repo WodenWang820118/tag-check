@@ -7,6 +7,7 @@ import { ChangeHandler } from './change-handler.service';
 import { ChangeStrategyService } from '../strategies/change-strategies/change-strategy.service';
 import { ActionUtilsService } from '../action-utils/action-utils.service';
 import type { Step } from '@utils';
+import type { WaitForSelectorOptions } from 'puppeteer';
 
 describe('ChangeHandler', () => {
   function build(opts?: {
@@ -66,12 +67,14 @@ describe('ChangeHandler', () => {
     /** A page where only the listed selectors exist. */
     function pageWith(...present: string[]) {
       return {
-        waitForSelector: vi.fn(async (selector: string) => {
-          if (present.includes(selector)) return { dispose: vi.fn() };
-          throw Object.assign(new Error(`Waiting for ${selector} failed`), {
-            name: 'TimeoutError'
-          });
-        })
+        waitForSelector: vi.fn(
+          async (selector: string, _options?: WaitForSelectorOptions) => {
+            if (present.includes(selector)) return { dispose: vi.fn() };
+            throw Object.assign(new Error(`Waiting for ${selector} failed`), {
+              name: 'TimeoutError'
+            });
+          }
+        )
       };
     }
 
@@ -101,14 +104,13 @@ describe('ChangeHandler', () => {
         expect(options).toMatchObject({ visible: false });
       }
       expect(
-        (changeStrategyService.changeElement as ReturnType<typeof vi.fn>).mock
-          .calls[0][3]
+        vi.mocked(changeStrategyService.changeElement).mock.calls[0][3]
       ).toBe('#second');
     });
 
     it('falls back to the next selector when one fails', async () => {
       const { svc, changeStrategyService } = build();
-      (changeStrategyService.changeElement as ReturnType<typeof vi.fn>)
+      vi.mocked(changeStrategyService.changeElement)
         .mockRejectedValueOnce(new Error('detached'))
         .mockResolvedValueOnce(true);
       const step: Step = {

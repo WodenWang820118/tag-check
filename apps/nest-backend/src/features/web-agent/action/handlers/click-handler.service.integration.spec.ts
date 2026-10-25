@@ -173,11 +173,11 @@ describe.skipIf(!chromeAvailable)(
     );
 
     it.each([
-      [false, true, 'disabled bookmark'],
-      [true, false, 'intermediate journey click']
-    ] as const)(
-      'allows navigation for %s/%s (%s)',
-      async (stopNavigation, last) => {
+      { stopNavigation: false, last: true, label: 'disabled bookmark' },
+      { stopNavigation: true, last: false, label: 'intermediate journey click' }
+    ])(
+      'allows navigation for $stopNavigation/$last ($label)',
+      async ({ stopNavigation, last }) => {
         await events.updateTestEvents('demo', [
           { eventId: 'event', stopNavigation }
         ]);

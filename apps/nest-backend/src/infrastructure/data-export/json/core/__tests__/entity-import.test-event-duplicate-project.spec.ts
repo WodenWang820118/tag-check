@@ -15,16 +15,16 @@ import { EntityMetadata, Repository } from 'typeorm';
 interface PrimaryColumnLike {
   propertyName: string;
 }
-interface ProjectRow {
+type ProjectRow = {
   id: number;
   projectSlug: string;
-}
-interface TestEventRow {
+};
+type TestEventRow = {
   id: number;
   eventId: string;
   projectId?: number;
   projectSlug?: string;
-}
+};
 
 class MemRepo<T extends { [k: string]: unknown } = { [k: string]: unknown }> {
   rows: T[] = [];
@@ -65,11 +65,8 @@ class PassMaterializer extends RowMaterializerService {
 }
 class SlugService extends ProjectSlugService {
   private readonly used = new Set<string>();
-  async ensureUnique(
-    repo: { rows?: Array<Record<string, unknown>> },
-    slug: string
-  ) {
-    if (Array.isArray(repo?.rows)) {
+  async ensureUnique(repo: unknown, slug: string) {
+    if (repo instanceof MemRepo) {
       for (const r of repo.rows) {
         const existing = r['projectSlug'];
         if (typeof existing === 'string') this.used.add(existing);

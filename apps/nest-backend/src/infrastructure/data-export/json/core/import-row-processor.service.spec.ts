@@ -14,7 +14,7 @@ function makeCtx() {
   return {
     exportedProjectId: 'proj-old',
     newProjectId: 'proj-new',
-    stats: { Foo: { skipped: 0, inserted: 0, total: 0 } as never },
+    stats: { Foo: { skipped: 0, inserted: 0 } },
     idMaps: {} as Record<string, Map<unknown, unknown>>
   };
 }

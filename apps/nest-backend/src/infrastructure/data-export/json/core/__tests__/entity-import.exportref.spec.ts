@@ -15,18 +15,18 @@ import { EntityMetadata, Repository } from 'typeorm';
 interface PrimaryColumnLike {
   propertyName: string;
 }
-interface ProjectRow {
+type ProjectRow = {
   id: number;
   projectSlug: string;
   __exportRef?: string;
-}
-interface ChildRow {
+};
+type ChildRow = {
   id: number;
   value: string;
   projectExportRef?: string;
   project?: { __exportRef?: string; id?: number };
   projectId?: number;
-}
+};
 
 // Narrow fake repo not pretending full TypeORM signatures
 class SimpleRepo<
