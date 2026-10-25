@@ -5,7 +5,7 @@ import { Injectable, signal } from '@angular/core';
 
 /**
  * Requests from the Reports page's toolbar to its table: the filter text,
- * and delete or download flags that FileTableDataSourceFacadeService
+ * the event filter, and delete or download flags that FileTableDataSourceFacadeService
  * handles and resets.
  */
 @Injectable({
@@ -18,6 +18,7 @@ export class FileTableDataSourceService extends DataSource<
     []
   );
   private readonly _filterSignal = signal<string>('');
+  private readonly _eventFilterSignal = signal<string>('');
   private readonly _deletedSignal = signal<boolean>(false);
   private readonly _downloadSignal = signal<boolean>(false);
 
@@ -47,6 +48,15 @@ export class FileTableDataSourceService extends DataSource<
 
   getFilterSignal() {
     return this._filterSignal();
+  }
+
+  /** The event whose runs are listed (`?event=`); empty for every run. */
+  setEventFilterSignal(eventName: string) {
+    this._eventFilterSignal.set(eventName);
+  }
+
+  getEventFilterSignal() {
+    return this._eventFilterSignal();
   }
 
   setDeletedSignal(deleted: boolean) {

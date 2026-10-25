@@ -21,6 +21,7 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
+import { FileTableDataSourceService } from '../../../../shared/services/data-source/file-table-data-source.service';
 
 /**
  * The Reports page's table: one row per run with its status, sortable
@@ -54,7 +55,8 @@ export class FileTableComponent implements OnInit {
     private readonly facade: FileTableDataSourceFacadeService,
     private readonly route: ActivatedRoute,
     private readonly destroyRef: DestroyRef,
-    private readonly tableSortService: TableSortService
+    private readonly tableSortService: TableSortService,
+    private readonly fileTableDataSourceService: FileTableDataSourceService
   ) {}
 
   ngOnInit() {
@@ -69,6 +71,15 @@ export class FileTableComponent implements OnInit {
         })
       )
       .subscribe();
+    // History opens this page with ?event=<event name> to list that
+    // test's runs.
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) =>
+        this.fileTableDataSourceService.setEventFilterSignal(
+          params.get('event') ?? ''
+        )
+      );
   }
 
   sortData(sort: Sort) {

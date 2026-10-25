@@ -24,6 +24,24 @@
     <mat-icon>download</mat-icon>
   </button>
 
+  @if (eventFilter(); as eventName) {
+    <mat-chip-set aria-label="Event filter">
+      <mat-chip
+        data-testid="reports-event-filter"
+        (removed)="clearEventFilter()"
+      >
+        Runs of {{ eventName }}
+        <button
+          matChipRemove
+          aria-label="Show every run"
+          data-testid="reports-event-filter-clear"
+        >
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip>
+    </mat-chip-set>
+  }
+
   <div class="spacer"></div>
   @if (!isSearchVisible()) {
     <mat-button-toggle-group
