@@ -133,6 +133,26 @@ describe('App (e2e)', () => {
     });
   });
 
+  // The app's database is not the in-memory one above, so these only show
+  // that the routes are registered; the SQLite specs in src cover saving.
+  describe('Item definitions', () => {
+    it("should get a test's item definition by project and eventId", async () => {
+      const response = await request(app.getHttpServer()).get(
+        '/specs/e2e_no_such_project/add_to_cart_e2e/item-def'
+      );
+      expect(response.status).toBe(200);
+      expect(response.text).toBe('null');
+    });
+
+    it('should not create an item definition for a missing test', async () => {
+      const response = await request(app.getHttpServer())
+        .put('/specs/e2e_no_such_project/add_to_cart_e2e/item-def')
+        .send({ fullItemDef: { item_name: 'Scarf' } });
+      expect(response.status).toBe(404);
+      expect(response.body).toMatchObject({ message: 'Test not found' });
+    });
+  });
+
   describe('File Reports', () => {
     it('should get all file reports according to the projectSlug', async () => {
       const response = await request(app.getHttpServer()).get(
