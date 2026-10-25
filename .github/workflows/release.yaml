@@ -247,6 +247,9 @@ jobs:
         with:
           node-version: '24.x'
           check-latest: true
+      # The tray icon (tauri feature tray-icon) loads libayatana-appindicator3
+      # at run time and the AppImage bundler packs it; Tauri 2 lists it in its
+      # Linux prerequisites.
       - name: Install Linux system dependencies
         if: runner.os == 'Linux'
         run: |
@@ -256,7 +259,7 @@ jobs:
             curl \
             desktop-file-utils \
             file \
-            libappindicator3-dev \
+            libayatana-appindicator3-dev \
             librsvg2-bin \
             librsvg2-dev \
             libssl-dev \
