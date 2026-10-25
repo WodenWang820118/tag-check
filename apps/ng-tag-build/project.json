@@ -52,9 +52,9 @@
           }
         ],
         "styles": [
-          "@angular/material/prebuilt-themes/indigo-pink.css",
+          "libs/shared-styles/src/tag-build-indigo-pink.scss",
           "apps/ng-tag-build/src/tailwind.css",
-          "libs/shared-styles/src/index.scss",
+          "libs/shared-styles/src/tag-build.scss",
           "libs/shared-styles/src/variables.scss"
         ],
         "scripts": []
