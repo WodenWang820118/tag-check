@@ -22,8 +22,8 @@ export class ConfigurationControllerService {
     return { value };
   }
 
-  createConfiguration(name: string, value: string) {
-    return this.configurationService.create({
+  async createConfiguration(name: string, value: string) {
+    return await this.configurationService.create({
       name: name,
       value: value
     });

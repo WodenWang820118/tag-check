@@ -14,7 +14,7 @@ import {
 } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
 import { RunRecorder } from '../web-agent/puppeteer-utils/run-recorder';
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
-import { RECORDING_FILES } from '../../shared';
+import { RECORDING_FILES, toClientErrorMessage } from '../../shared';
 import {
   applyPresetCookies,
   preloadApplicationLocalStorage,
@@ -50,8 +50,6 @@ export const TAG_ASSISTANT_BADGE_PASSTHROUGH = `(function () {
 @Injectable()
 export class GtmOperatorService {
   private readonly logger = new Logger(GtmOperatorService.name);
-  // NOTE(stage2): Replace singleton abort routing with per-operation session IDs.
-  abortController: AbortController | null = null;
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
     private readonly puppeteerUtilsService: PuppeteerUtilsService,
@@ -62,7 +60,7 @@ export class GtmOperatorService {
    * Runs the test once every run requested before it has finished. Resolves
    * with the pipeline's result. Rejects with BadRequestException for a GTM
    * preview URL without a target site, and InternalServerErrorException for
-   * any other failure.
+   * any other failure, with the failure's reason in its message.
    */
   inspectSingleEventViaGtm(
     projectSlug: string,
@@ -70,8 +68,14 @@ export class GtmOperatorService {
     query: InspectGtmQueryDto,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
-    return this.runQueue.run(() =>
-      this.inspectViaGtm(projectSlug, eventId, query, eventInspectionPresetDto)
+    return this.runQueue.run((signal) =>
+      this.inspectViaGtm(
+        projectSlug,
+        eventId,
+        query,
+        eventInspectionPresetDto,
+        signal
+      )
     );
   }
 
@@ -79,15 +83,14 @@ export class GtmOperatorService {
     projectSlug: string,
     eventId: string,
     query: InspectGtmQueryDto,
-    eventInspectionPresetDto: EventInspectionPresetDto
+    eventInspectionPresetDto: EventInspectionPresetDto,
+    signal: AbortSignal
   ) {
-    const controller = new AbortController();
-    this.abortController = controller;
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
       query.headless || 'false',
       query.measurementId,
       eventInspectionPresetDto,
-      controller.signal
+      signal
     );
 
     // A headful run is left open for inspection unless the caller (a batch)
@@ -152,13 +155,13 @@ export class GtmOperatorService {
         targetPage,
         projectSlug,
         eventId,
-        controller.signal
+        signal
       );
       tagAssistantRecorder = await this.startTagAssistantRecorder(
         page,
         projectSlug,
         eventId,
-        controller.signal
+        signal
       );
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -211,8 +214,13 @@ export class GtmOperatorService {
       if (error instanceof BadRequestException) {
         throw error;
       }
+      // The batch shows this message, so it says why the run failed, without
+      // a stack trace or a file path.
+      const reason = toClientErrorMessage(error);
       throw new InternalServerErrorException(
-        'Failed to perform GTM validation'
+        reason
+          ? `Failed to perform GTM validation: ${reason}`
+          : 'Failed to perform GTM validation'
       );
     }
   }
@@ -307,8 +315,11 @@ export class GtmOperatorService {
     }
   }
 
-  /** Aborts the run in progress, which closes its browser. */
+  /**
+   * Aborts the run in progress, which closes its browser, and drops the runs
+   * queued behind it.
+   */
   stopOperation() {
-    this.abortController?.abort();
+    this.runQueue.stop();
   }
 }

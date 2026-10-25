@@ -91,8 +91,13 @@ export class DataLayerService {
 
   /**
    * Merges `dataLayer` into the file: a push replaces the stored push with
-   * the same `event` value (pushes without one count as the same), and any
-   * other push is appended.
+   * the same `event` value, a push without an `event` replaces an identical
+   * stored push, and any other push is appended.
+   *
+   * Pushes without an `event` are told apart by their content. Counted as
+   * one push, the next page's gtag pushes (`gtag('consent', 'default', ...)`
+   * pushes an `arguments` object) overwrote an earlier `{ ecommerce: null }`,
+   * and the ecommerce event before it failed the reset check.
    */
   async updateSelfDataLayerAlgorithm(
     dataLayer: unknown[],
@@ -114,20 +119,9 @@ export class DataLayerService {
       this.fileService.readJsonFile<unknown[]>(myDataLayerFile) || [];
 
     for (const dataLayerObject of dataLayer) {
-      const existingIndex = myDataLayer.findIndex((myDataLayerObject) => {
-        // loosely compare by event property if present
-        try {
-          const left = (
-            myDataLayerObject as Record<string, unknown> | undefined
-          )?.['event'];
-          const right = (
-            dataLayerObject as Record<string, unknown> | undefined
-          )?.['event'];
-          return left === right;
-        } catch {
-          return false;
-        }
-      });
+      const existingIndex = myDataLayer.findIndex((myDataLayerObject) =>
+        isSamePush(myDataLayerObject, dataLayerObject)
+      );
 
       if (existingIndex === -1) {
         myDataLayer.push(dataLayerObject);
@@ -149,5 +143,29 @@ export class DataLayerService {
     const myDataLayer =
       this.fileService.readJsonFile<unknown[]>(myDataLayerFile) || [];
     return myDataLayer;
+  }
+}
+
+function eventOf(push: unknown): unknown {
+  return typeof push === 'object' && push !== null
+    ? (push as Record<string, unknown>)['event']
+    : undefined;
+}
+
+/**
+ * Whether `stored` and `pushed` are the same push for the merge: the same
+ * `event` value, or, for pushes without one, the same content.
+ */
+function isSamePush(stored: unknown, pushed: unknown): boolean {
+  const storedEvent = eventOf(stored);
+  const pushedEvent = eventOf(pushed);
+  if (storedEvent !== undefined || pushedEvent !== undefined) {
+    return storedEvent === pushedEvent;
+  }
+  try {
+    return JSON.stringify(stored) === JSON.stringify(pushed);
+  } catch {
+    // A push JSON cannot hold (a cycle, a BigInt) is kept apart.
+    return false;
   }
 }

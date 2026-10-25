@@ -8,6 +8,7 @@ import { RecordingRepositoryService } from '../.././../core/repository/recording
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
 import { RECORDING_FILES, RecordingFile } from '../../../shared';
 import { RunRecorder } from './run-recorder';
+import { isQueryFlagOn } from '../../../shared/query-flag';
 
 const CLOSE_TIMEOUT_MS = 10_000;
 
@@ -16,7 +17,7 @@ const CLOSE_TIMEOUT_MS = 10_000;
  * "1" mean headless; anything else, including a missing value, is headful.
  */
 export function isHeadless(headless: string | undefined): boolean {
-  return headless === 'true' || headless === '1';
+  return isQueryFlagOn(headless);
 }
 
 /** The Chromium build that puppeteer-chromium-resolver found or downloaded. */

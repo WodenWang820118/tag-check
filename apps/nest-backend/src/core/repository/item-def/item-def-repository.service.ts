@@ -23,6 +23,21 @@ export class ItemDefRepositoryService {
     return plainToInstance(ItemDefResponseDto, entity);
   }
 
+  /**
+   * Returns the item definition of one test, or null when it has none. A
+   * definition belongs to one test; its `itemId` (the event name, for the
+   * example project) is shared by every project's test of that event.
+   */
+  async getItemDefByProjectSlugAndEventId(
+    projectSlug: string,
+    eventId: string
+  ) {
+    const entity = await this.repository.findOne({
+      where: { testEvent: { eventId, project: { projectSlug } } }
+    });
+    return entity ? plainToInstance(ItemDefResponseDto, entity) : null;
+  }
+
   async getItemDefById(itemId: string) {
     const entity = await this.repository.findOne({ where: { itemId } });
     return plainToInstance(ItemDefResponseDto, entity);

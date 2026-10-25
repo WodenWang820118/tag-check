@@ -7,8 +7,7 @@ describe('ProjectWorkFlowController', () => {
       list: vi.fn().mockResolvedValue([{ slug: 'a' }])
     };
     const projectWorkFlowControllerService = {
-      initProject: vi.fn().mockResolvedValue('initialized'),
-      setProject: vi.fn().mockResolvedValue(undefined)
+      initProject: vi.fn().mockResolvedValue('initialized')
     };
     const exampleProjectRepositoryService = {
       ensureSeededOnce: vi.fn().mockResolvedValue(undefined)
@@ -37,12 +36,9 @@ describe('ProjectWorkFlowController', () => {
     expect(result).toBe('initialized');
   });
 
-  it('setProject delegates to ProjectWorkFlowControllerService.setProject', async () => {
-    const { controller, projectWorkFlowControllerService } = build();
-    await controller.setProject('My Project');
-    expect(projectWorkFlowControllerService.setProject).toHaveBeenCalledWith(
-      'My Project'
-    );
+  it('setProject answers without storing anything', () => {
+    const { controller } = build();
+    expect(controller.setProject()).toBeUndefined();
   });
 
   it('getProjects waits for example seeding before listing projects', async () => {
