@@ -22,7 +22,10 @@ import {
   preloadApplicationLocalStorage,
   seedSiteLocalStorage
 } from '../web-agent/browser-state-preload.util';
-import { connectTagAssistant } from './tag-assistant-connection';
+import {
+  connectTagAssistant,
+  GtmPreviewConnectionError
+} from './tag-assistant-connection';
 
 /**
  * Preview mode pins Tag Assistant's badge (an iframe, 450x200, maximum
@@ -221,6 +224,11 @@ export class GtmOperatorService {
       }
       if (error instanceof BadRequestException) {
         throw error;
+      }
+      // Tag Assistant did not connect: the user sees why in plain words; the
+      // technical detail is in the log above.
+      if (error instanceof GtmPreviewConnectionError) {
+        throw new InternalServerErrorException(error.clientMessage);
       }
       // The batch shows this message, so it says why the run failed, without
       // a stack trace or a file path.

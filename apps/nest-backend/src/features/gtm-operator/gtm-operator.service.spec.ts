@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { InternalServerErrorException } from '@nestjs/common';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
 import { passThroughTracker } from '../event-inspection-pipeline/run-tracker.spec-helpers';
 import { runInNewContext } from 'node:vm';
@@ -204,6 +204,40 @@ describe('GtmOperatorService recorder lifecycle', () => {
       message:
         'Failed to perform GTM validation: Waiting for selector `#buy` failed'
     });
+  });
+
+  it('rejects with a readable message when GTM Preview does not connect, and logs the detail', async () => {
+    vi.mocked(service.operateGtmPreviewMode).mockRejectedValue(
+      new GtmPreviewConnectionError(
+        'Could not connect to GTM Preview (Tag Assistant did not show the Continue button)',
+        'Failed to operate GTM preview control ".btn.btn--filled.wd-continue-debugging-button": TimeoutError'
+      )
+    );
+    const logError = vi
+      .spyOn(Logger.prototype, 'error')
+      .mockImplementation(() => undefined);
+
+    const error: unknown = await service
+      .inspectSingleEventViaGtm(
+        'project',
+        'event',
+        createQuery(),
+        createPreset()
+      )
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(InternalServerErrorException);
+    expect(error).toMatchObject({
+      message:
+        'Could not connect to GTM Preview (Tag Assistant did not show the Continue button)'
+    });
+    expect(String(logError.mock.calls[0]?.[0])).toContain('TimeoutError');
+    expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(
+      browser,
+      openerPage,
+      null
+    );
+    logError.mockRestore();
   });
 
   it('closes a headful run when the caller asks, as a batch does', async () => {
