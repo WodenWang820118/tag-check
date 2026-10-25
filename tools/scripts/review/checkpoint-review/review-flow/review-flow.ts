@@ -46,9 +46,7 @@ export function createReviewExecution(input: {
       (input.provider === 'copilot'
         ? DEFAULT_COPILOT_CLAUDE_MODEL
         : undefined) ??
-      (input.provider === 'gemini'
-        ? getDefaultGeminiModel(input.checkpoint)
-        : undefined)
+      (input.provider === 'gemini' ? getDefaultGeminiModel() : undefined)
   };
 }
 
@@ -136,7 +134,7 @@ export function getReviewExecutionPlan(input: {
         checkpoint: input.checkpoint,
         provider: 'gemini',
         focus: input.focus,
-        model: getDefaultGeminiModel(input.checkpoint)
+        model: getDefaultGeminiModel()
       }),
       createReviewExecution({
         checkpoint: input.checkpoint,
@@ -162,7 +160,7 @@ export function getReviewExecutionPlan(input: {
         checkpoint: input.checkpoint,
         provider: 'gemini',
         focus: input.focus,
-        model: getDefaultGeminiModel(input.checkpoint)
+        model: getDefaultGeminiModel()
       }),
       createReviewExecution({
         checkpoint: input.checkpoint,
@@ -196,7 +194,7 @@ export function getReviewExecutionPlan(input: {
         checkpoint: input.checkpoint,
         provider: 'gemini',
         focus: input.focus,
-        model: getDefaultGeminiModel(input.checkpoint)
+        model: getDefaultGeminiModel()
       }),
       createReviewExecution({
         checkpoint: input.checkpoint,
@@ -223,7 +221,7 @@ export function getReviewExecutionPlan(input: {
       checkpoint: input.checkpoint,
       provider: 'gemini',
       focus: input.focus,
-      model: getDefaultGeminiModel(input.checkpoint)
+      model: getDefaultGeminiModel()
     }),
     createReviewExecution({
       checkpoint: input.checkpoint,
@@ -348,8 +346,6 @@ async function runReviewExecution(
 
   if (execution.provider === 'copilot') {
     return runCopilotReview({
-      checkpoint: execution.checkpoint,
-      focus: execution.focus,
       model: execution.model,
       prompt,
       repoRoot: process.cwd(),
@@ -359,9 +355,7 @@ async function runReviewExecution(
 
   if (execution.provider === 'gemini') {
     return runGeminiReview({
-      checkpoint: execution.checkpoint,
-      focus: execution.focus,
-      model: execution.model ?? getDefaultGeminiModel(execution.checkpoint),
+      model: execution.model ?? getDefaultGeminiModel(),
       prompt,
       repoRoot: process.cwd(),
       telemetryContext: createCheckpointReviewTelemetryContext(execution)
@@ -388,7 +382,7 @@ async function probeReviewProviderHealth(execution: ReviewExecution) {
 
   if (execution.provider === 'gemini') {
     return probeGeminiCliHealth({
-      model: execution.model ?? getDefaultGeminiModel(execution.checkpoint),
+      model: execution.model ?? getDefaultGeminiModel(),
       repoRoot: process.cwd(),
       telemetryContext: createCheckpointReviewTelemetryContext(execution)
     });

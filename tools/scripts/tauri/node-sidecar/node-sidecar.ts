@@ -12,24 +12,39 @@ import { basename, join } from 'node:path';
 
 import { binariesDir, workspaceRoot } from '../path-contract/path-contract.ts';
 import {
+  type PathExistsFunction,
   rmIfExists,
   type RemovePathFunction
 } from '../process-utils/process-utils.ts';
 
+/** The fields of a `spawnSync` result with `encoding: 'utf8'` that are read. */
+export interface TextSpawnResult {
+  error?: Error;
+  status: number | null;
+  stderr?: string;
+  stdout?: string;
+}
+
+export type SpawnTextFunction = (
+  command: string,
+  args: string[],
+  options: { cwd: string; encoding: 'utf8' }
+) => TextSpawnResult;
+
 export interface RustTargetTripleDependencies {
   cwd?: string;
   rootDir?: string;
-  spawnSyncFn?: typeof spawnSync;
+  spawnSyncFn?: SpawnTextFunction;
 }
 
 export interface PrepareNodeSidecarDependencies {
   binariesDirectory?: string;
-  copyFileSyncFn?: typeof copyFileSync;
-  existsSyncFn?: typeof existsSync;
-  mkdirSyncFn?: typeof mkdirSync;
+  copyFileSyncFn?: CopyFileFunction;
+  existsSyncFn?: PathExistsFunction;
+  mkdirSyncFn?: MakeDirectoryFunction;
   nodeExecPath?: string;
   platform?: NodeJS.Platform;
-  readdirSyncFn?: typeof readdirSync;
+  readdirSyncFn?: ReadDirectoryFunction;
   readFileSyncFn?: ReadTextFileFunction;
   removePathFn?: RemovePathFunction;
   statSyncFn?: StatFileFunction;
@@ -46,6 +61,13 @@ interface NodeSidecarStamp {
   version: 1;
 }
 
+type CopyFileFunction = (sourcePath: string, targetPath: string) => void;
+type MakeDirectoryFunction = (
+  targetPath: string,
+  options: { recursive: true }
+) => unknown;
+/** Entries are checked at run time; only string names are pruned. */
+type ReadDirectoryFunction = (targetPath: string) => readonly unknown[];
 type ReadTextFileFunction = (
   targetPath: string,
   encoding: BufferEncoding
@@ -65,7 +87,7 @@ export function getRustTargetTriple(
 ) {
   const rootDir = dependencies.rootDir ?? workspaceRoot;
   const cwd = dependencies.cwd ?? rootDir;
-  const spawnSyncFn = dependencies.spawnSyncFn ?? spawnSync;
+  const spawnSyncFn: SpawnTextFunction = dependencies.spawnSyncFn ?? spawnSync;
   const preferred = spawnSyncFn('rustc', ['--print', 'host-tuple'], {
     cwd,
     encoding: 'utf8'
@@ -183,12 +205,16 @@ export function prepareNodeSidecar(
   dependencies: PrepareNodeSidecarDependencies = {}
 ) {
   const binariesDirectory = dependencies.binariesDirectory ?? binariesDir;
-  const copyFileSyncFn = dependencies.copyFileSyncFn ?? copyFileSync;
-  const existsSyncFn = dependencies.existsSyncFn ?? existsSync;
-  const mkdirSyncFn = dependencies.mkdirSyncFn ?? mkdirSync;
+  const copyFileSyncFn: CopyFileFunction =
+    dependencies.copyFileSyncFn ?? copyFileSync;
+  const existsSyncFn: PathExistsFunction =
+    dependencies.existsSyncFn ?? existsSync;
+  const mkdirSyncFn: MakeDirectoryFunction =
+    dependencies.mkdirSyncFn ?? mkdirSync;
   const nodeExecPath = dependencies.nodeExecPath ?? process.execPath;
   const platform = dependencies.platform ?? process.platform;
-  const readdirSyncFn = dependencies.readdirSyncFn ?? readdirSync;
+  const readdirSyncFn: ReadDirectoryFunction =
+    dependencies.readdirSyncFn ?? readdirSync;
   const readFileSyncFn =
     dependencies.readFileSyncFn ??
     ((targetPath, encoding) => readFileSync(targetPath, encoding));
