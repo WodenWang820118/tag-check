@@ -7,6 +7,11 @@ import {
   GtmOperatorService,
   TAG_ASSISTANT_BADGE_PASSTHROUGH
 } from './gtm-operator.service';
+import {
+  CHECK_INCLUDE_DEBUG_PARAM,
+  GtmPreviewConnectionError,
+  READ_TAG_ASSISTANT_VIEW
+} from './tag-assistant-connection';
 import type { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import type { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 
@@ -376,7 +381,7 @@ describe('TAG_ASSISTANT_BADGE_PASSTHROUGH', () => {
 });
 
 describe('GtmOperatorService.operateGtmPreviewMode', () => {
-  it('waits for each required GTM preview control before clicking it', async () => {
+  it('opens Tag Assistant, connects it to the site and continues past the "Connected!" dialog', async () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
@@ -394,25 +399,15 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
       'https://tagassistant.google.com/#url=https%3A%2F%2Fexample.test',
       { waitUntil: 'networkidle2' }
     );
-    expect(page.waitForSelector).toHaveBeenCalledWith('#include-debug-param', {
-      visible: true
-    });
-    expect(page.waitForSelector).toHaveBeenCalledWith('#domain-start-button', {
-      visible: true
-    });
-    expect(page.waitForSelector).toHaveBeenCalledWith(
-      '.btn.btn--filled.wd-continue-debugging-button',
-      { visible: true }
-    );
-    expect(page.click).toHaveBeenNthCalledWith(1, '#include-debug-param');
-    expect(page.click).toHaveBeenNthCalledWith(2, '#domain-start-button');
+    expect(page.evaluate).toHaveBeenCalledWith(CHECK_INCLUDE_DEBUG_PARAM);
+    expect(page.click).toHaveBeenNthCalledWith(1, '#domain-start-button');
     expect(page.click).toHaveBeenNthCalledWith(
-      3,
+      2,
       '.btn.btn--filled.wd-continue-debugging-button'
     );
   });
 
-  it('fails fast when a required GTM preview control is missing', async () => {
+  it('fails fast when the connect dialog is missing', async () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
@@ -427,7 +422,7 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
         page as never,
         'https://tagassistant.google.com/#url=https%3A%2F%2Fexample.test'
       )
-    ).rejects.toThrow(/Failed to operate GTM preview control/);
+    ).rejects.toBeInstanceOf(GtmPreviewConnectionError);
 
     expect(page.click).not.toHaveBeenCalled();
   });
@@ -530,10 +525,21 @@ function createSeedPage(callOrder?: string[]) {
   };
 }
 
+/** Tag Assistant showing its "Connected!" dialog as soon as it is read. */
 function createPreviewPage() {
   return {
     goto: vi.fn().mockResolvedValue(undefined),
     waitForSelector: vi.fn().mockResolvedValue({}),
-    click: vi.fn().mockResolvedValue(undefined)
+    click: vi.fn().mockResolvedValue(undefined),
+    evaluate: vi.fn().mockImplementation(async (script: string) =>
+      script === READ_TAG_ASSISTANT_VIEW
+        ? JSON.stringify({
+            continueVisible: true,
+            connected: true,
+            retryVisible: false,
+            message: 'Connected!'
+          })
+        : true
+    )
   };
 }
