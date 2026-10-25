@@ -10,7 +10,8 @@
 
 import {
   GA4_ECOMMERCE_EVENT_PARAMETERS,
-  getGa4EventNameIssues
+  getGa4EventNameIssues,
+  getGa4ParameterNameIssues
 } from './ga4-reference';
 import type { BaseECommerce, StrictDataLayerEvent } from '../types/tag-check';
 
@@ -58,7 +59,7 @@ const COMMON_ITEM_PARAMETERS: readonly string[] = [
  * - search (search_term)
  * - share (method, content_type, item_id)
  * - select_content (content_type, content_id)
- * - generate_lead (currency, value)
+ * - generate_lead (currency, value, lead_source)
  *
  * @see https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtm
  * @see https://developers.google.com/analytics/devguides/collection/ga4/ecommerce?client_type=gtm
@@ -99,7 +100,7 @@ export function getGa4MeasurementPlanTemplateRows(): MeasurementPlanRow[] {
     },
     {
       eventName: 'generate_lead',
-      eventParameters: ['currency', 'value'],
+      eventParameters: ['currency', 'value', 'lead_source'],
       itemParameters: []
     }
   ];
@@ -125,18 +126,6 @@ function splitAndDeduplicateParameters(
 
 function isRowBlank(row: string[]): boolean {
   return row.length === 0 || row.every((cell) => !cell || cell.trim() === '');
-}
-
-/**
- * Validates a parameter name against GA4 naming rules and length limit.
- * Parameter names follow the same rules as event names:
- * up to 40 characters, must start with a letter, and contain only letters, numbers, and underscores.
- *
- * @see https://support.google.com/analytics/answer/9267744
- * @see https://support.google.com/analytics/answer/13316687
- */
-function getGa4ParameterNameIssues(paramName: string): string[] {
-  return getGa4EventNameIssues(paramName);
 }
 
 /**

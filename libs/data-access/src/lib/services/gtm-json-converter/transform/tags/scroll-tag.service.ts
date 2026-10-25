@@ -20,7 +20,13 @@ export class ScrollTag {
   private static readonly TAG_NAME = 'GA4 event - scroll';
   private static readonly EVENT_NAME = 'scroll';
   private static readonly FINGERPRINT = '1690184079241';
-  private static readonly SCROLL_DEPTH_KEY = 'scroll_depth_threshold';
+  /**
+   * GA4's "Percent scrolled" dimension is "Populated by the event parameter
+   * `percent_scrolled`", which enhanced measurement's scroll event sends.
+   * @see https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema
+   * @see https://support.google.com/analytics/answer/9216061
+   */
+  private static readonly SCROLL_DEPTH_KEY = 'percent_scrolled';
   private static readonly SCROLL_DEPTH_VAR = '{{Scroll Depth Threshold}}';
 
   constructor(

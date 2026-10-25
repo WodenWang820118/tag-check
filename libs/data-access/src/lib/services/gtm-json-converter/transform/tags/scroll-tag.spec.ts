@@ -101,7 +101,7 @@ describe('ScrollTag', () => {
               {
                 type: 'TEMPLATE',
                 key: 'parameter',
-                value: 'scroll_percentage'
+                value: 'percent_scrolled'
               },
               {
                 type: 'TEMPLATE',
@@ -148,7 +148,7 @@ describe('ScrollTag', () => {
                     {
                       type: 'TEMPLATE',
                       key: 'parameter',
-                      value: 'scroll_percentage'
+                      value: 'percent_scrolled'
                     },
                     {
                       type: 'TEMPLATE',
@@ -188,13 +188,42 @@ describe('ScrollTag', () => {
         'scroll'
       );
       expect(parameterUtils.createMapParameter).toHaveBeenCalledWith(
-        'scroll_depth_threshold',
+        'percent_scrolled',
         '{{Scroll Depth Threshold}}'
       );
       expect(parameterUtils.createBuiltInListParameter).toHaveBeenCalledWith(
         'eventSettingsTable',
         expect.any(Array)
       );
+    });
+
+    it('sends the threshold as GA4 percent_scrolled', () => {
+      vi.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(true);
+
+      const [tag] = scrollTag.createScrollTag(
+        'TestConfig',
+        'account123',
+        'container456',
+        [{ name: 'event scroll', triggerId: 'trigger789' }],
+        []
+      );
+
+      const table = tag?.parameter.find(
+        (parameter) => parameter.key === 'eventSettingsTable'
+      );
+      expect(table?.list).toEqual([
+        {
+          type: 'MAP',
+          map: [
+            { type: 'TEMPLATE', key: 'parameter', value: 'percent_scrolled' },
+            {
+              type: 'TEMPLATE',
+              key: 'parameterValue',
+              value: '{{Scroll Depth Threshold}}'
+            }
+          ]
+        }
+      ]);
     });
   });
 });

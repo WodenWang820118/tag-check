@@ -22,7 +22,10 @@ import { ConstantVariable } from './variables/constant-variable.service';
 import { EventSettingsVariableService } from './variables/event-settings-variable.service';
 import {
   getGa4EventParameterRows,
+  isStrictDataLayerEvent,
   measurementPlanToDataLayerSpecs,
+  resolveVariableReference,
+  validateGTMImportReadiness,
   type GTMContainerConfig,
   type MeasurementPlanRow,
   type StrictDataLayerEvent
@@ -383,6 +386,37 @@ describe('TransformService', () => {
       expect(
         getGa4EventParameterRows(loginTags[0], []).map((row) => row.parameter)
       ).toEqual(['method', 'user_type']);
+    });
+
+    it('sends a nested spec key under a GA4-valid name that reads its dotted path', () => {
+      // Specs are parsed from the JSON the user types, which may nest any
+      // object, while StrictDataLayerEvent only types `ecommerce` objects.
+      const spec: unknown = { event: 'login', user: { id: '$user_id' } };
+      if (!isStrictDataLayerEvent(spec)) {
+        throw new Error('expected a dataLayer spec');
+      }
+      const result = service.convert(
+        buildOptions({
+          gtmConfigGenerator: { ...mockGtmConfig, specs: [spec] }
+        })
+      );
+      const { tag, variable } = result.containerVersion;
+      const loginTag = tag.find((t) => t.name === 'GA4 event - login');
+      const rows = loginTag ? getGa4EventParameterRows(loginTag, variable) : [];
+
+      expect(rows).toContainEqual({
+        parameter: 'user_id',
+        value: '{{DLV - user.id}}'
+      });
+      expect(resolveVariableReference('{{DLV - user.id}}', variable)).toEqual({
+        kind: 'dataLayer',
+        path: 'user.id'
+      });
+      expect(
+        validateGTMImportReadiness(result).warnings.filter((warning) =>
+          warning.includes('event parameter')
+        )
+      ).toEqual([]);
     });
 
     it('gives every tag and trigger a unique name', () => {
