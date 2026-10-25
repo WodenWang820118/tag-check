@@ -355,7 +355,13 @@ function parseMaxFilesValue(raw: string | undefined): number {
   return value;
 }
 
-const STRING_FLAG_TO_KEY: Record<string, keyof ParsedReviewGateArgs> = {
+type StringArgKey = {
+  [Key in keyof ParsedReviewGateArgs]: string extends ParsedReviewGateArgs[Key]
+    ? Key
+    : never;
+}[keyof ParsedReviewGateArgs];
+
+const STRING_FLAG_TO_KEY: Readonly<Record<string, StringArgKey>> = {
   '--reviewer': 'reviewer',
   '--focus': 'focus',
   '--summary': 'summary',
@@ -392,10 +398,10 @@ export function parseArgs(argv: string[]): ParsedReviewGateArgs {
       continue;
     }
 
-    if (current && current in STRING_FLAG_TO_KEY) {
+    if (current && Object.hasOwn(STRING_FLAG_TO_KEY, current)) {
       const next = argv[index + 1];
       if (next !== undefined) {
-        (parsed as Record<string, unknown>)[STRING_FLAG_TO_KEY[current]] = next;
+        parsed[STRING_FLAG_TO_KEY[current]] = next;
       }
       index += 1;
     }
@@ -522,7 +528,7 @@ export function evaluateHookPermission(input: {
   }
 
   const evaluation = evaluateApproval(input.state, input.repoContext);
-  if (!evaluation.valid) {
+  if (evaluation.valid === false) {
     return {
       allow: false,
       reason: evaluation.reason

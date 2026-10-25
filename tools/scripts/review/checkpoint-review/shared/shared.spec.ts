@@ -6,16 +6,8 @@ import {
 } from './shared.ts';
 
 describe('getDefaultGeminiModel', () => {
-  it('returns the flash-preview model for implementation reviews', () => {
-    expect(getDefaultGeminiModel('implementation')).toBe(
-      'gemini-3.5-flash-high'
-    );
-  });
-
-  it('returns the gemini-3.5-flash-high model for plan, test, and pre-merge reviews', () => {
-    expect(getDefaultGeminiModel('plan')).toBe('gemini-3.5-flash-high');
-    expect(getDefaultGeminiModel('test')).toBe('gemini-3.5-flash-high');
-    expect(getDefaultGeminiModel('pre-merge')).toBe('gemini-3.5-flash-high');
+  it('returns the gemini-3.5-flash-high model for every checkpoint', () => {
+    expect(getDefaultGeminiModel()).toBe('gemini-3.5-flash-high');
   });
 });
 

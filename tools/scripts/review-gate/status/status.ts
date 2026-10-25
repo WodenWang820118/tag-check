@@ -15,7 +15,7 @@ export function main(): void {
   console.log(`HEAD: ${repoContext.head ?? 'unknown'}`);
   console.log(`Worktree: ${repoContext.dirty ? 'dirty' : 'clean'}`);
 
-  if (!evaluation.valid) {
+  if (evaluation.valid === false) {
     console.log('Gate: BLOCKED');
     console.log(`Reason: ${evaluation.reason}`);
     if (repoContext.dirty) {

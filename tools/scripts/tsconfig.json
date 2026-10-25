@@ -1,6 +1,8 @@
 {
   "extends": "../tsconfig.tools.json",
   "compilerOptions": {
+    // Scripts import plain TypeScript from libs (for example the locale list).
+    "rootDir": "../..",
     "types": ["node", "vitest/globals"],
     "ignoreDeprecations": "6.0"
   },
