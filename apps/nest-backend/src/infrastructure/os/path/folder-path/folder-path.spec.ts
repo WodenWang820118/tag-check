@@ -29,7 +29,7 @@ describe('FolderPathService', () => {
               async (
                 projectSlug: string,
                 folderName: string,
-                fileName?: string
+                fileName: string
               ) => {
                 if (fileName === 'spec.json') {
                   return await Promise.resolve(

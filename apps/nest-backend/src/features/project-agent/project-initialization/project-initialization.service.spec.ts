@@ -45,7 +45,7 @@ describe('ProjectInitializationService', () => {
   });
 
   it('initProjectFileSystem() short-circuits folder creation when the project folder already exists', async () => {
-    vi.mocked(existsSync).mockImplementation((p: never) => p === '/root/demo');
+    vi.mocked(existsSync).mockImplementation((p) => p === '/root/demo');
     const ctx = build();
     await ctx.service.initProjectFileSystem('demo', {
       projectSlug: 'demo'

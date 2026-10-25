@@ -4,6 +4,12 @@ import { RowMaterializerService } from './row-materializer.service';
 import { ProjectSlugService } from './project-slug.service';
 import { IdMapRegistryService } from './id-map-registry.service';
 import { RelationMapperService } from './relation-mapper.service';
+import type { ImportStats } from '../../interfaces/import-types';
+import {
+  asRepository,
+  entityMeta,
+  importRepositoryMock
+} from './import-repository.spec-helpers';
 
 function deps() {
   const materializer = {
@@ -24,13 +30,13 @@ function deps() {
   return { materializer, slugService, registry, relationMapper, map };
 }
 
-const meta = { name: 'ProjectEntity' } as never;
+const meta = entityMeta('ProjectEntity');
 const pkInfo = { primaryIsSingle: true, primaryKeyProp: 'id' };
 
 describe('ProjectImportService', () => {
-  let stats: { skipped: number; inserted: number; total: number };
+  let stats: ImportStats;
   beforeEach(() => {
-    stats = { skipped: 0, inserted: 0, total: 0 };
+    stats = { skipped: 0, inserted: 0 };
   });
 
   it('skips rows that have no projectSlug', async () => {
@@ -41,13 +47,13 @@ describe('ProjectImportService', () => {
       d.registry,
       d.relationMapper
     );
-    const repo = { findOne: vi.fn(), create: vi.fn(), save: vi.fn() } as never;
+    const repo = importRepositoryMock();
     const out = await svc.importProjectRows(
       [{ id: 'a' }],
       meta,
-      repo,
+      asRepository(repo),
       pkInfo,
-      stats as never,
+      stats,
       {}
     );
     expect(out).toBeUndefined();
@@ -63,17 +69,15 @@ describe('ProjectImportService', () => {
       d.relationMapper
     );
     const existing = { id: 'EXISTING', projectSlug: 's', name: 'old' };
-    const repo = {
-      findOne: vi.fn().mockResolvedValue(existing),
-      save: vi.fn().mockResolvedValue(existing),
-      create: vi.fn()
-    } as never;
+    const repo = importRepositoryMock();
+    repo.findOne.mockResolvedValue(existing);
+    repo.save.mockResolvedValue(existing);
     const out = await svc.importProjectRows(
       [{ id: 'OLD', projectSlug: 's', name: 'new', __exportRef: 'ref-1' }],
       meta,
-      repo,
+      asRepository(repo),
       pkInfo,
-      stats as never,
+      stats,
       {}
     );
     expect(out).toBe('EXISTING');
@@ -100,24 +104,22 @@ describe('ProjectImportService', () => {
       d.relationMapper
     );
     const created = { id: 'NEW', projectSlug: 's-1' };
-    const repo = {
-      findOne: vi.fn().mockResolvedValue(null),
-      create: vi.fn(() => created),
-      save: vi.fn().mockResolvedValue(created)
-    } as never;
-    (d.slugService.ensureUnique as ReturnType<typeof vi.fn>).mockResolvedValue(
-      's-1'
-    );
+    const repo = importRepositoryMock();
+    repo.findOne.mockResolvedValue(null);
+    repo.create.mockReturnValue(created);
+    repo.save.mockResolvedValue(created);
+    const repository = asRepository(repo);
+    vi.mocked(d.slugService.ensureUnique).mockResolvedValue('s-1');
     const out = await svc.importProjectRows(
       [{ id: 'OLD', projectSlug: 's' }],
       meta,
-      repo,
+      repository,
       pkInfo,
-      stats as never,
+      stats,
       {}
     );
     expect(out).toBe('NEW');
-    expect(d.slugService.ensureUnique).toHaveBeenCalledWith(repo, 's');
+    expect(d.slugService.ensureUnique).toHaveBeenCalledWith(repository, 's');
     expect(repo.create).toHaveBeenCalled();
     expect(d.relationMapper.register).toHaveBeenCalledWith(
       'ProjectEntity',

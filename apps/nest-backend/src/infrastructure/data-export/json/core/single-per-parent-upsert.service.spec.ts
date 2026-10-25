@@ -5,6 +5,11 @@ import {
 } from './single-per-parent-upsert.service';
 import { RelationMapperService } from './relation-mapper.service';
 import { IdMapRegistryService } from './id-map-registry.service';
+import {
+  asRepository,
+  entityMeta,
+  importRepositoryMock
+} from './import-repository.spec-helpers';
 
 function deps() {
   const map = new Map<unknown, unknown>();
@@ -15,6 +20,17 @@ function deps() {
     register: vi.fn()
   } as unknown as RelationMapperService;
   return { registry, relationMapper, map };
+}
+
+function upsertContext(overrides: Partial<UpsertContext> = {}): UpsertContext {
+  return {
+    primaryIsSingle: true,
+    primaryKeyProp: 'id',
+    existingIds: null,
+    stats: { skipped: 0, inserted: 0 },
+    raw: {},
+    ...overrides
+  };
 }
 
 describe('SinglePerParentUpsertService', () => {
@@ -28,18 +44,12 @@ describe('SinglePerParentUpsertService', () => {
   it('returns false when the entity is not single-per-parent eligible', async () => {
     const { registry, relationMapper } = deps();
     const svc = new SinglePerParentUpsertService(relationMapper, registry);
-    const repo = { findOne: vi.fn(), save: vi.fn() } as never;
+    const repo = importRepositoryMock();
     const ok = await svc.tryUpsert(
-      { name: 'Other' } as never,
-      repo,
+      entityMeta('Other'),
+      asRepository(repo),
       { foo: 1 },
-      {
-        primaryIsSingle: true,
-        primaryKeyProp: 'id',
-        existingIds: null,
-        stats: { skipped: 0, inserted: 0, total: 0 } as never,
-        raw: {}
-      } as UpsertContext
+      upsertContext()
     );
     expect(ok).toBe(false);
   });
@@ -47,14 +57,13 @@ describe('SinglePerParentUpsertService', () => {
   it('returns false when no relation id is present', async () => {
     const { registry, relationMapper } = deps();
     const svc = new SinglePerParentUpsertService(relationMapper, registry);
-    const repo = { findOne: vi.fn(), save: vi.fn() } as never;
-    const ok = await svc.tryUpsert({ name: 'SpecEntity' } as never, repo, {}, {
-      primaryIsSingle: true,
-      primaryKeyProp: 'id',
-      existingIds: null,
-      stats: { skipped: 0, inserted: 0, total: 0 } as never,
-      raw: {}
-    } as UpsertContext);
+    const repo = importRepositoryMock();
+    const ok = await svc.tryUpsert(
+      entityMeta('SpecEntity'),
+      asRepository(repo),
+      {},
+      upsertContext()
+    );
     expect(ok).toBe(false);
     expect(repo.findOne).not.toHaveBeenCalled();
   });
@@ -63,20 +72,16 @@ describe('SinglePerParentUpsertService', () => {
     const { registry, relationMapper, map } = deps();
     const svc = new SinglePerParentUpsertService(relationMapper, registry);
     const existing = { id: 'EXISTING', testEvent: { id: 'p' } };
-    const repo = {
-      findOne: vi.fn().mockResolvedValue(existing),
-      save: vi.fn().mockResolvedValue(existing)
-    } as never;
-    const ctx: UpsertContext = {
-      primaryIsSingle: true,
-      primaryKeyProp: 'id',
+    const repo = importRepositoryMock();
+    repo.findOne.mockResolvedValue(existing);
+    repo.save.mockResolvedValue(existing);
+    const ctx = upsertContext({
       existingIds: new Set(),
-      stats: { skipped: 0, inserted: 0, total: 0 } as never,
       raw: { id: 'OLD', __exportRef: 'ref-1' }
-    };
+    });
     const ok = await svc.tryUpsert(
-      { name: 'SpecEntity' } as never,
-      repo,
+      entityMeta('SpecEntity'),
+      asRepository(repo),
       { id: 'OLD', testEvent: { id: 'p' }, name: 'updated' },
       ctx
     );
@@ -93,20 +98,13 @@ describe('SinglePerParentUpsertService', () => {
   it('returns false when no existing row matches', async () => {
     const { registry, relationMapper } = deps();
     const svc = new SinglePerParentUpsertService(relationMapper, registry);
-    const repo = {
-      findOne: vi.fn().mockResolvedValue(null),
-      save: vi.fn()
-    } as never;
+    const repo = importRepositoryMock();
+    repo.findOne.mockResolvedValue(null);
     const ok = await svc.tryUpsert(
-      { name: 'SpecEntity' } as never,
-      repo,
+      entityMeta('SpecEntity'),
+      asRepository(repo),
       { testEvent: { id: 'p' } },
-      {
-        primaryIsSingle: false,
-        existingIds: null,
-        stats: { skipped: 0, inserted: 0, total: 0 } as never,
-        raw: {}
-      } as UpsertContext
+      upsertContext({ primaryIsSingle: false, primaryKeyProp: undefined })
     );
     expect(ok).toBe(false);
   });
@@ -114,21 +112,13 @@ describe('SinglePerParentUpsertService', () => {
   it('returns false when findOne throws', async () => {
     const { registry, relationMapper } = deps();
     const svc = new SinglePerParentUpsertService(relationMapper, registry);
-    const repo = {
-      findOne: vi.fn().mockRejectedValue(new Error('db')),
-      save: vi.fn()
-    } as never;
+    const repo = importRepositoryMock();
+    repo.findOne.mockRejectedValue(new Error('db'));
     const ok = await svc.tryUpsert(
-      { name: 'SpecEntity' } as never,
-      repo,
+      entityMeta('SpecEntity'),
+      asRepository(repo),
       { testEvent: { id: 'p' } },
-      {
-        primaryIsSingle: true,
-        primaryKeyProp: 'id',
-        existingIds: null,
-        stats: { skipped: 0, inserted: 0, total: 0 } as never,
-        raw: {}
-      } as UpsertContext
+      upsertContext()
     );
     expect(ok).toBe(false);
   });

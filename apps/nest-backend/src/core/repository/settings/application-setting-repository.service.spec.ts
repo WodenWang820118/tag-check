@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { ApplicationSettingRepositoryService } from './application-setting-repository.service';
+import type { UpdateApplicationSettingDto } from '../../../shared';
 
 function build() {
   const repository = {
@@ -51,9 +52,9 @@ describe('ApplicationSettingRepositoryService', () => {
     const project = { id: 5, projectSlug: 'demo' } as never;
     repository.findOne.mockResolvedValue({ id: 7, localStorage: { data: [] } });
     repository.save.mockImplementation(async (entity) => entity);
-    const data = {
+    const data: UpdateApplicationSettingDto = {
       localStorage: { data: [{ key: 'k', value: 'v' }] }
-    } as never;
+    };
     const result = await service.update(project, data);
     expect(repository.findOne).toHaveBeenCalledWith({
       where: { project: { id: 5 } }

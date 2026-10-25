@@ -241,7 +241,7 @@ describe('ClickHandler', () => {
       stopNavigation: true
     });
     await handler.handle(
-      makePage(),
+      makePage() as never,
       'p',
       'e',
       { type: 'click', selectors: [['#a']] },
