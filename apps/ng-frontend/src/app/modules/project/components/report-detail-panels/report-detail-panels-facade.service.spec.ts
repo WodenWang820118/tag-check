@@ -5,7 +5,7 @@ describe('ReportDetailPanelsFacadeService', () => {
   let specService: { updateSpec: ReturnType<typeof vi.fn> };
   let recordingService: { updateRecording: ReturnType<typeof vi.fn> };
   let itemDefService: {
-    getItemDefById: ReturnType<typeof vi.fn>;
+    getItemDef: ReturnType<typeof vi.fn>;
     updateItemDef: ReturnType<typeof vi.fn>;
   };
   let service: ReportDetailPanelsFacadeService;
@@ -13,7 +13,7 @@ describe('ReportDetailPanelsFacadeService', () => {
   beforeEach(() => {
     specService = { updateSpec: vi.fn() };
     recordingService = { updateRecording: vi.fn() };
-    itemDefService = { getItemDefById: vi.fn(), updateItemDef: vi.fn() };
+    itemDefService = { getItemDef: vi.fn(), updateItemDef: vi.fn() };
     service = new ReportDetailPanelsFacadeService(
       specService as never,
       recordingService as never,
@@ -50,21 +50,21 @@ describe('ReportDetailPanelsFacadeService', () => {
     );
   });
 
-  it('getItemDefById forwards the id to ItemDefService.getItemDefById', () => {
-    const result = of({} as never);
-    itemDefService.getItemDefById.mockReturnValue(result);
-    expect(service.getItemDefById('item-1')).toBe(result);
-    expect(itemDefService.getItemDefById).toHaveBeenCalledWith('item-1');
+  it('getItemDef forwards the project and eventId to ItemDefService.getItemDef', () => {
+    const result = of(null);
+    itemDefService.getItemDef.mockReturnValue(result);
+    expect(service.getItemDef('slug', 'evt')).toBe(result);
+    expect(itemDefService.getItemDef).toHaveBeenCalledWith('slug', 'evt');
   });
 
   it('updateItemDef forwards arguments to ItemDefService.updateItemDef', () => {
-    const result = of({});
+    const result = of({} as never);
     itemDefService.updateItemDef.mockReturnValue(result);
-    expect(service.updateItemDef('item-1', { name: 'x' } as never)).toBe(
+    expect(service.updateItemDef('slug', 'evt', { templateName: 'x' })).toBe(
       result
     );
-    expect(itemDefService.updateItemDef).toHaveBeenCalledWith('item-1', {
-      name: 'x'
+    expect(itemDefService.updateItemDef).toHaveBeenCalledWith('slug', 'evt', {
+      templateName: 'x'
     });
   });
 });
