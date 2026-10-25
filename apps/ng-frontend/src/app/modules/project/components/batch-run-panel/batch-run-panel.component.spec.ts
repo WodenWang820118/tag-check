@@ -1,7 +1,10 @@
 import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { of } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
+import type { BatchRunStatus } from '@utils';
 import {
   BatchItem,
   BatchRun,
@@ -10,19 +13,54 @@ import {
 import { BatchRunPanelComponent } from './batch-run-panel.component';
 
 function item(
+  position: number,
   eventName: string,
   status: BatchItem['status'],
-  message?: string
+  message: string | null = null
 ): BatchItem {
-  return { eventId: `id-${eventName}`, eventName, status, message };
+  return {
+    id: position + 1,
+    eventId: `id-${eventName}`,
+    testName: eventName,
+    eventName,
+    position,
+    status,
+    message,
+    startedAt: null,
+    finishedAt: null,
+    testEventDetailId: null
+  };
 }
 
-function render(batch: BatchRun | null, running: boolean) {
+/** A batch as GET /batch-runs/:projectSlug returns it (dates are strings). */
+function batchJson(
+  status: BatchRunStatus,
+  items: BatchItem[],
+  source: BatchRun['source'] = 'manual'
+): BatchRun {
+  return JSON.parse(
+    JSON.stringify({
+      id: 3,
+      projectSlug: 'example-project-slug',
+      source,
+      scheduleId: source === 'schedule' ? 1 : null,
+      headless: true,
+      status,
+      createdAt: '2026-10-25T09:00:00.000Z',
+      startedAt: '2026-10-25T09:00:01.000Z',
+      finishedAt: null,
+      items
+    })
+  ) as BatchRun;
+}
+
+function render(batch: BatchRun | null) {
   const state = signal(batch);
-  const isRunning = signal(running);
+  const isActive = () =>
+    state()?.status === 'pending' || state()?.status === 'running';
   const service = {
     batch: state.asReadonly(),
-    isRunning: isRunning.asReadonly(),
+    isRunning: computed(isActive),
     currentItem: computed(() =>
       state()?.items.find((entry) => entry.status === 'running')
     ),
@@ -32,20 +70,32 @@ function render(batch: BatchRun | null, running: boolean) {
           (entry) => entry.status !== 'pending' && entry.status !== 'running'
         ).length ?? 0
     ),
-    canResume: computed(
-      () =>
-        !isRunning() &&
-        (state()?.items.some((entry) => entry.status === 'pending') ?? false)
+    remainingCount: computed(() =>
+      state()?.status === 'cancelled'
+        ? (state()?.items.filter((entry) => entry.status === 'cancelled')
+            .length ?? 0)
+        : 0
     ),
+    canResume: computed(() => state()?.status === 'cancelled'),
+    watch: vi.fn(),
+    unwatch: vi.fn(),
     cancel: vi.fn(),
-    resume: vi.fn(),
+    resume: vi.fn(() => Promise.resolve('Unknown tests: id-purchase')),
     clear: vi.fn()
   };
   TestBed.configureTestingModule({
     imports: [BatchRunPanelComponent],
     providers: [
       provideNoopAnimations(),
-      { provide: BatchRunService, useValue: service }
+      { provide: BatchRunService, useValue: service },
+      {
+        provide: ActivatedRoute,
+        useValue: {
+          paramMap: of(
+            convertToParamMap({ projectSlug: 'example-project-slug' })
+          )
+        }
+      }
     ]
   });
   const fixture = TestBed.createComponent(BatchRunPanelComponent);
@@ -53,30 +103,31 @@ function render(batch: BatchRun | null, running: boolean) {
   const element = fixture.nativeElement as HTMLElement;
   const query = (testId: string) =>
     element.querySelector<HTMLElement>(`[data-testid="${testId}"]`);
-  return { service, query, element };
+  return { service, query, element, fixture };
 }
 
 describe('BatchRunPanelComponent', () => {
-  it('renders nothing without a batch', () => {
-    const { query } = render(null, false);
+  it("renders nothing without a batch and follows the page's project", () => {
+    const { query, service, fixture } = render(null);
+
     expect(query('batch-run-panel')).toBeNull();
+    expect(service.watch).toHaveBeenCalledWith('example-project-slug');
+
+    fixture.destroy();
+    expect(service.unwatch).toHaveBeenCalledOnce();
   });
 
   it('shows the progress, the outcomes so far and the running test', () => {
     const { query, element, service } = render(
-      {
-        projectSlug: 'example-project-slug',
-        startedAt: '2026-10-23T12:00:00.000Z',
-        items: [
-          item('add_to_cart', 'passed'),
-          item('view_item', 'error', 'No recording found'),
-          item('purchase', 'running')
-        ]
-      },
-      true
+      batchJson('running', [
+        item(0, 'add_to_cart', 'passed'),
+        item(1, 'view_item', 'error', 'No recording found'),
+        item(2, 'purchase', 'running')
+      ])
     );
 
     expect(query('batch-run-progress')?.textContent?.trim()).toBe('2 / 3');
+    expect(element.textContent).toContain('Batch run');
     expect(element.textContent).toContain('Passed 1');
     expect(element.textContent).toContain('Error 1');
     expect(element.textContent).toContain('Running purchase');
@@ -90,22 +141,31 @@ describe('BatchRunPanelComponent', () => {
     expect(service.cancel).toHaveBeenCalledOnce();
   });
 
-  it('offers to resume a stopped batch and to clear it', () => {
-    const { query, service } = render(
-      {
-        projectSlug: 'example-project-slug',
-        startedAt: '2026-10-23T12:00:00.000Z',
-        items: [item('add_to_cart', 'passed'), item('purchase', 'pending')]
-      },
-      false
+  it('offers to run the rest of a cancelled batch again, and to clear it', async () => {
+    const { query, service, fixture, element } = render(
+      batchJson(
+        'cancelled',
+        [
+          item(0, 'add_to_cart', 'passed'),
+          item(1, 'purchase', 'cancelled', 'Cancelled')
+        ],
+        'schedule'
+      )
     );
 
+    expect(element.textContent).toContain('Scheduled batch run');
     expect(query('batch-run-cancel')).toBeNull();
     expect(query('batch-run-resume')?.textContent).toContain('1 left');
 
     query('batch-run-resume')?.click();
-    query('batch-run-clear')?.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
     expect(service.resume).toHaveBeenCalledOnce();
+    expect(query('batch-run-error')?.textContent).toContain(
+      'Unknown tests: id-purchase'
+    );
+
+    query('batch-run-clear')?.click();
     expect(service.clear).toHaveBeenCalledOnce();
   });
 });

@@ -36,8 +36,10 @@ export class GtmOperatorService {
     const encodedGtmUrl = encodeURIComponent(params.gtmUrl);
     const queryParams = [`gtmUrl=${encodedGtmUrl}`];
 
-    // GTM operator should be always headful
-    if (params.headless !== undefined) queryParams.push(`headless=${false}`);
+    // Tag Assistant connects in headless Chromium too; a headless run
+    // closes its browser when it ends, a headful one stays open.
+    if (params.headless !== undefined)
+      queryParams.push(`headless=${params.headless}`);
     if (params.measurementId)
       queryParams.push(`measurementId=${params.measurementId}`);
     if (params.username)
@@ -46,7 +48,6 @@ export class GtmOperatorService {
       queryParams.push(`password=${encodeURIComponent(params.password)}`);
     if (params.captureRequest)
       queryParams.push(`captureRequest=${params.captureRequest}`);
-    if (params.closeBrowser) queryParams.push('closeBrowser=true');
 
     const queryString = queryParams.join('&');
 

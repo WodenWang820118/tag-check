@@ -16,6 +16,7 @@ import { ReportService } from '../../../../shared/services/api/report/report.ser
 import { GtmOperatorService } from '../../../../shared/services/api/gtm-operator/gtm-operator.service';
 import { SettingsService } from '../../../../shared/services/api/settings/settings.service';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
+import { RunHeadlessService } from '../../services/run-headless/run-headless.service';
 import { ReportTableFacadeService } from './report-table-facade.service';
 
 /** Project settings as GET /settings/:projectSlug returns them. */
@@ -98,5 +99,39 @@ describe('ReportTableFacadeService.runTest', () => {
         requestPassed: true
       })
     ]);
+  });
+
+  it('runs headless as the Run headless toggle says', async () => {
+    localStorage.setItem('tag-check.run-headless.shop', 'true');
+    const runInspectionViaGtm = vi.fn(() => of(RUN_RESULT));
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ChangeDetectorRef, useValue: { markForCheck: vi.fn() } },
+        { provide: ReportService, useValue: {} },
+        { provide: MatDialog, useValue: { open: vi.fn() } },
+        { provide: MatSnackBar, useValue: { open: vi.fn() } },
+        {
+          provide: SettingsService,
+          useValue: { getProjectSettings: () => of(SETTINGS) }
+        },
+        { provide: GtmOperatorService, useValue: { runInspectionViaGtm } }
+      ]
+    });
+    const facade = TestBed.inject(ReportTableFacadeService);
+    TestBed.inject(RunHeadlessService).load('shop');
+    facade.initializeData(
+      TestBed.runInInjectionContext(() => new MatPaginator()),
+      TestBed.runInInjectionContext(() => new MatSort()),
+      { projectSlug: 'shop', projectReport: LIST }
+    );
+
+    await firstValueFrom(facade.runTest(REPORT_LIST_ITEM_SAMPLE.eventId));
+
+    expect(runInspectionViaGtm).toHaveBeenCalledWith(
+      'shop',
+      REPORT_LIST_ITEM_SAMPLE.eventId,
+      expect.objectContaining({ headless: true })
+    );
+    localStorage.clear();
   });
 });

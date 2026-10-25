@@ -10,6 +10,7 @@ import { MatSort } from '@angular/material/sort';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
 import { ReportTableSelectionFacadeService } from './services/report-table-selection-facade/report-table-selection-facade.service';
 import { ReportTableEffectsFacadeService } from './services/report-table-effects-facade/report-table-effects-facade.service';
+import { RunHeadlessService } from '../../services/run-headless/run-headless.service';
 import {
   reportFilterPredicate,
   StatusFilter,
@@ -28,6 +29,7 @@ export class ReportTableFacadeService {
   private readonly reportTableDataSourceModelService = inject(
     ReportTableDataSourceModelService
   );
+  private readonly runHeadlessService = inject(RunHeadlessService);
   private readonly selectionFacade = inject(ReportTableSelectionFacadeService);
   private readonly effectsFacade = inject(ReportTableEffectsFacadeService);
   readonly columns = signal([
@@ -170,13 +172,16 @@ export class ReportTableFacadeService {
 
   //#region Actions
   /**
-   * Runs a test of the current project and emits its report, or undefined
-   * when the run returned none. The test's row is updated when the run ends.
+   * Runs a test of the current project, headless or not as the toolbar's
+   * Run headless toggle says, and emits its report, or undefined when the
+   * run returned none. The test's row is updated when the run ends.
    */
   runTest(eventId: string) {
+    const projectSlug = this.projectSlug();
     return this.testRunningFacadeService.runTestForReport(
       eventId,
-      this.projectSlug()
+      projectSlug,
+      { headless: this.runHeadlessService.headlessFor(projectSlug) }
     );
   }
 

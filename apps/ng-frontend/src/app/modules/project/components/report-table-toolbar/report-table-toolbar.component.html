@@ -25,6 +25,18 @@
   <button
     mat-icon-button
     class="icon"
+    matTooltip="Schedule the selected tests"
+    matTooltipPosition="above"
+    aria-label="Schedule the selected tests"
+    data-testid="tests-schedule-selected"
+    [disabled]="!hasSelection()"
+    (click)="scheduleSelected()"
+  >
+    <mat-icon>schedule</mat-icon>
+  </button>
+  <button
+    mat-icon-button
+    class="icon"
     matTooltip="Delete"
     matTooltipPosition="above"
     aria-label="Delete"
@@ -47,6 +59,15 @@
   >
     <mat-icon>cancel</mat-icon>
   </button>
+  <mat-slide-toggle
+    class="run-headless"
+    data-testid="tests-run-headless"
+    matTooltip="Run tests without a browser window: the play button and Run selected. Until you choose, the project's browser setting applies."
+    matTooltipPosition="above"
+    [checked]="runHeadlessService.headless()"
+    (change)="setRunHeadless($event.checked)"
+    >Run headless</mat-slide-toggle
+  >
   <div class="spacer"></div>
   @if (!isSearchVisible()) {
     <mat-button-toggle-group

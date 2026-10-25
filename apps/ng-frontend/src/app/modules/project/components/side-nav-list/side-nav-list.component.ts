@@ -25,7 +25,12 @@ import { OverlayComponent } from '../overlay/overlay.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSidenav } from '@angular/material/sidenav';
 
-export type NavSection = 'tests' | 'tagbuild' | 'reports' | 'settings';
+export type NavSection =
+  | 'tests'
+  | 'tagbuild'
+  | 'reports'
+  | 'schedules'
+  | 'settings';
 
 /**
  * The menu item a project URL belongs to. A test's own page
@@ -42,6 +47,8 @@ export function navSectionOf(url: string): NavSection {
       return 'tagbuild';
     case 'buckets':
       return 'reports';
+    case 'schedules':
+      return 'schedules';
     case 'settings':
       return 'settings';
     default:
@@ -77,6 +84,13 @@ const NAV_ITEMS: readonly {
     link: 'buckets',
     testId: 'nav-reports',
     section: 'reports'
+  },
+  {
+    icon: 'schedule',
+    title: 'Schedules',
+    link: 'schedules',
+    testId: 'nav-schedules',
+    section: 'schedules'
   }
 ];
 
@@ -118,7 +132,7 @@ const SETTINGS_ITEMS: readonly {
 ];
 
 /**
- * The project's side menu: Tests, TagBuild, Reports and a Settings submenu
+ * The project's side menu: Tests, TagBuild, Reports, Schedules and a Settings submenu
  * shown in an overlay. The item of the current URL is highlighted.
  */
 @Component({
