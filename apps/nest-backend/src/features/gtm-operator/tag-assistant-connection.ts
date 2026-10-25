@@ -158,6 +158,8 @@ export interface ConnectTagAssistantOptions {
   /** How long a required control (Connect, Retry) may take to appear. */
   controlTimeoutMs?: number;
   log?: (message: string) => void;
+  /** Receives a failed attempt that is retried. */
+  warn?: (message: string) => void;
   sleep?: (ms: number) => Promise<void>;
   now?: () => number;
 }
@@ -196,6 +198,7 @@ export async function connectTagAssistant(
   const controlTimeoutMs =
     options.controlTimeoutMs ?? DEFAULT_CONTROL_TIMEOUT_MS;
   const log = options.log ?? (() => undefined);
+  const warn = options.warn ?? log;
   const sleep =
     options.sleep ??
     ((ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
@@ -243,7 +246,7 @@ export async function connectTagAssistant(
         );
         return;
       case 'retry':
-        log(
+        warn(
           `Tag Assistant could not connect to ${site} (attempt ${attempt} of ${maxAttempts}), retrying: ${view.message}`
         );
         await closeSiteWindows(page, options.siteOrigin);

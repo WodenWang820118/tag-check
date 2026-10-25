@@ -280,7 +280,8 @@ export class GtmOperatorService {
     await page.goto(gtmUrl, { waitUntil: 'networkidle2' });
     await connectTagAssistant(page, {
       siteOrigin,
-      log: (message) => this.logger.log(message)
+      log: (message) => this.logger.log(message),
+      warn: (message) => this.logger.warn(message)
     });
   }
 

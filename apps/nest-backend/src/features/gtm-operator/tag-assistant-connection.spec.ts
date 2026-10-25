@@ -208,9 +208,9 @@ describe('connectTagAssistant', () => {
       connecting,
       connectedDialog
     ]);
-    const log = vi.fn();
+    const warn = vi.fn();
 
-    await connectTagAssistant(page.asPage(), { ...fastOptions(), log });
+    await connectTagAssistant(page.asPage(), { ...fastOptions(), warn });
 
     expect(page.click.mock.calls.map(([selector]) => selector)).toEqual([
       TAG_ASSISTANT_SELECTORS.startButton,
@@ -220,7 +220,7 @@ describe('connectTagAssistant', () => {
     ]);
     expect(page.sitePage.close).toHaveBeenCalledOnce();
     expect(page.otherPage.close).not.toHaveBeenCalled();
-    expect(log).toHaveBeenCalledWith(
+    expect(warn).toHaveBeenCalledWith(
       expect.stringContaining('A timeout occurred')
     );
   });
