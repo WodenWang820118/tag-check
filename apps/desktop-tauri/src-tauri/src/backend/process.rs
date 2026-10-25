@@ -12,18 +12,17 @@ use tauri_plugin_shell::{
     ShellExt,
 };
 
-use super::{
-    health::wait_for_backend, paths::resolve_backend_paths, DEFAULT_PORT,
+use super::{health::wait_for_backend, paths::resolve_backend_paths, DEFAULT_PORT};
+use crate::{
+    diagnostics::write_diagnostic_log,
+    window::{show_main_window, MAIN_WINDOW_LABEL},
 };
-use crate::diagnostics::write_diagnostic_log;
 
 #[derive(Default)]
 pub(crate) struct BackendProcess(Mutex<Option<CommandChild>>);
 
 fn create_or_show_main_window(app_handle: &AppHandle) -> tauri::Result<()> {
-    if let Some(window) = app_handle.get_webview_window("main") {
-        window.show()?;
-        window.set_focus()?;
+    if show_main_window(app_handle)? {
         return Ok(());
     }
 
@@ -31,14 +30,17 @@ fn create_or_show_main_window(app_handle: &AppHandle) -> tauri::Result<()> {
         app_handle,
         "backend readiness satisfied, creating main window and loading frontend",
     );
-    let window =
-        WebviewWindowBuilder::new(app_handle, "main", WebviewUrl::App("index.html".into()))
-            .title("Tag Check")
-            .inner_size(1400.0, 900.0)
-            .resizable(true)
-            .fullscreen(false)
-            .visible(true)
-            .build()?;
+    let window = WebviewWindowBuilder::new(
+        app_handle,
+        MAIN_WINDOW_LABEL,
+        WebviewUrl::App("index.html".into()),
+    )
+    .title("Tag Check")
+    .inner_size(1400.0, 900.0)
+    .resizable(true)
+    .fullscreen(false)
+    .visible(true)
+    .build()?;
     window.set_focus()?;
     Ok(())
 }
