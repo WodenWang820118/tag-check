@@ -16,11 +16,12 @@ describe('SpecController', () => {
         .mockResolvedValue({ event: 'view_item' })
     };
     const itemDefRepositoryService = {
-      getItemDefById: vi.fn().mockResolvedValue({ id: 'item-1' }),
-      getItemDefByTemplateName: vi
+      getItemDefByProjectSlugAndEventId: vi
         .fn()
-        .mockResolvedValue({ template: 'tpl-1' }),
-      updateItemDefById: vi.fn().mockResolvedValue('item-updated')
+        .mockResolvedValue({ itemId: 'add_to_cart' }),
+      saveItemDefByProjectSlugAndEventId: vi
+        .fn()
+        .mockResolvedValue('item-saved')
     };
     const controller = new SpecController(
       projectSpecService as never,
@@ -44,37 +45,23 @@ describe('SpecController', () => {
     expect(result).toEqual(['spec-a']);
   });
 
-  it('getItemDef delegates to ItemDefRepositoryService.getItemDefById', async () => {
+  it("getItemDef reads the test's own definition", async () => {
     const { controller, itemDefRepositoryService } = build();
-    const result = await controller.getItemDef('item-1');
-    expect(itemDefRepositoryService.getItemDefById).toHaveBeenCalledWith(
-      'item-1'
-    );
-    expect(result).toEqual({ id: 'item-1' });
-  });
-
-  it('getItemDef falls back to getItemDefByTemplateName when ID lookup returns null', async () => {
-    const { controller, itemDefRepositoryService } = build();
-    itemDefRepositoryService.getItemDefById.mockResolvedValue(null);
-    const result = await controller.getItemDef('tpl-1');
-    expect(itemDefRepositoryService.getItemDefById).toHaveBeenCalledWith(
-      'tpl-1'
-    );
+    const result = await controller.getItemDef('proj-1', 'evt-1');
     expect(
-      itemDefRepositoryService.getItemDefByTemplateName
-    ).toHaveBeenCalledWith('tpl-1');
-    expect(result).toEqual({ template: 'tpl-1' });
+      itemDefRepositoryService.getItemDefByProjectSlugAndEventId
+    ).toHaveBeenCalledWith('proj-1', 'evt-1');
+    expect(result).toEqual({ itemId: 'add_to_cart' });
   });
 
-  it('updateItemDef delegates to ItemDefRepositoryService.updateItemDefById', async () => {
+  it("saveItemDef saves the test's own definition", async () => {
     const { controller, itemDefRepositoryService } = build();
-    const dto = { templateName: 'new' } as never;
-    const result = await controller.updateItemDef('item-1', dto);
-    expect(itemDefRepositoryService.updateItemDefById).toHaveBeenCalledWith(
-      'item-1',
-      dto
-    );
-    expect(result).toBe('item-updated');
+    const dto = { templateName: 'new' };
+    const result = await controller.saveItemDef('proj-1', 'evt-1', dto);
+    expect(
+      itemDefRepositoryService.saveItemDefByProjectSlugAndEventId
+    ).toHaveBeenCalledWith('proj-1', 'evt-1', dto);
+    expect(result).toBe('item-saved');
   });
 
   it('getSpec delegates to SpecRepositoryService.getSpecByProjectSlugAndEventId', async () => {

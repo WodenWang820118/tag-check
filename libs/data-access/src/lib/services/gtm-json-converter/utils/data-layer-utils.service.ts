@@ -23,13 +23,27 @@ export class DataLayerUtils {
    *
    * The `ecommerce` object itself and paths inside arrays are left out: a
    * GA4 event tag sends `items` as one array parameter, never item by item.
+   *
+   * Any other object with keys of its own, such as `user` in
+   * `{ user: { id, type } }`, is left out as well, so it gets neither an
+   * event parameter nor a Data Layer Variable: its keys are sent as
+   * `user_id` and `user_type`. GA4 has no object parameter value. The
+   * BigQuery export stores an event parameter's value as a string, an
+   * integer or a double, and the Measurement Protocol limits parameter
+   * values to 100 characters (500 for GA4 360).
+   * @see https://support.google.com/analytics/answer/7029846
+   * @see https://developers.google.com/analytics/devguides/collection/protocol/ga4/reference#payload_post_body
    */
   getDataLayers(specs: StrictDataLayerEvent[]): DataLayer[] {
     const pathsByEvent = new Map<string, Set<string>>();
     for (const { event, ...rest } of specs) {
       const paths = pathsByEvent.get(event) ?? new Set<string>();
       for (const path of this.utilsService.getAllObjectPaths(rest)) {
-        if (path !== 'ecommerce' && !ARRAY_INDEX_SEGMENT.test(path)) {
+        if (
+          path !== 'ecommerce' &&
+          !ARRAY_INDEX_SEGMENT.test(path) &&
+          !isObjectWithKeys(valueAtPath(rest, path))
+        ) {
           paths.add(path);
         }
       }
@@ -40,4 +54,23 @@ export class DataLayerUtils {
       paths: [...paths]
     }));
   }
+}
+
+/** The value a dot path reads, as a version 2 Data Layer Variable reads it. */
+function valueAtPath(spec: object, path: string): unknown {
+  return path
+    .split('.')
+    .reduce<unknown>(
+      (node, key) => (isRecord(node) ? node[key] : undefined),
+      spec
+    );
+}
+
+/** A non-array object with at least one key, whose keys get paths of their own. */
+function isObjectWithKeys(value: unknown): boolean {
+  return isRecord(value) && Object.keys(value).length > 0;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }

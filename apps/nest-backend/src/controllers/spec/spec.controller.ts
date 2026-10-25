@@ -20,20 +20,28 @@ export class SpecController {
     return await this.projectSpecService.getProjectSpecs(projectSlug);
   }
 
-  @Get(':itemId/item-def')
-  async getItemDef(@Param('itemId') itemId: string) {
-    const byId = await this.itemDefRepositoryService.getItemDefById(itemId);
-    if (byId) return byId;
-    return await this.itemDefRepositoryService.getItemDefByTemplateName(itemId);
+  /** The item definition of one test, or null when it has none. */
+  @Get(':projectSlug/:eventId/item-def')
+  async getItemDef(
+    @Param('projectSlug') projectSlug: string,
+    @Param('eventId') eventId: string
+  ) {
+    return await this.itemDefRepositoryService.getItemDefByProjectSlugAndEventId(
+      projectSlug,
+      eventId
+    );
   }
 
-  @Put(':itemId/item-def')
-  async updateItemDef(
-    @Param('itemId') itemId: string,
+  /** Updates one test's item definition, or creates it if it has none. */
+  @Put(':projectSlug/:eventId/item-def')
+  async saveItemDef(
+    @Param('projectSlug') projectSlug: string,
+    @Param('eventId') eventId: string,
     @Body() updateItemDefDto: UpdateItemDefDto
   ) {
-    return await this.itemDefRepositoryService.updateItemDefById(
-      itemId,
+    return await this.itemDefRepositoryService.saveItemDefByProjectSlugAndEventId(
+      projectSlug,
+      eventId,
       updateItemDefDto
     );
   }
