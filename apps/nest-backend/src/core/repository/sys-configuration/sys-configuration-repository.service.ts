@@ -7,8 +7,7 @@ import {
 } from '@nestjs/common';
 import {
   SysConfigurationEntity,
-  CreateSysConfigurationDto,
-  UpdateSysConfigurationDto
+  CreateSysConfigurationDto
 } from '../../../shared';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigsService } from '../../configs/configs.service';
@@ -73,10 +72,13 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
     }
   }
 
-  create(
+  /** Saves a new entry. Rejects when an entry already has its name. */
+  async create(
     createConfigurationDto: CreateSysConfigurationDto
-  ): SysConfigurationEntity {
-    return this.configurationRepository.create(createConfigurationDto);
+  ): Promise<SysConfigurationEntity> {
+    return await this.configurationRepository.save(
+      this.configurationRepository.create(createConfigurationDto)
+    );
   }
 
   async findAll() {
@@ -111,13 +113,6 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
     }
 
     return configuration;
-  }
-
-  async update(id: number, updateConfigurationDto: UpdateSysConfigurationDto) {
-    return await this.configurationRepository.update(
-      { value: updateConfigurationDto.value },
-      { id: id }
-    );
   }
 
   async remove(id: number) {

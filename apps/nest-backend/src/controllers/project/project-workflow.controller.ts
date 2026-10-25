@@ -1,5 +1,5 @@
 import { ApiBody, ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ProjectWorkFlowControllerService } from './project-workflow-controller.service';
 import { CreateProjectDto } from '../../shared';
 import { ProjectRepositoryService } from '../../core/repository/project/project-repository.service';
@@ -40,16 +40,13 @@ export class ProjectWorkFlowController {
   }
 
   @ApiOperation({
-    summary: 'set and select a current project',
-    description: 'Select and cache current project.'
-  })
-  @ApiQuery({
-    name: 'projectName',
-    description: 'The name of the project to which the event belongs.'
+    summary: 'set and select a current project (no effect)',
+    description:
+      'Kept for older clients. The backend does not keep a current project: nothing read the value this endpoint used to store.'
   })
   @Get('/set-project')
-  async setProject(@Query('projectName') projectName: string) {
-    await this.projectWorkFlowControllerService.setProject(projectName);
+  setProject(): void {
+    // Every request names its project; there is no current project to set.
   }
 
   @ApiOperation({

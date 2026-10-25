@@ -35,9 +35,9 @@ describe('ConfigurationControllerService', () => {
     expect(await ctx.service.getConfiguration('a')).toEqual({ value: 'v' });
   });
 
-  it('createConfiguration() forwards to repository.create', () => {
+  it('createConfiguration() forwards to repository.create', async () => {
     const ctx = build();
-    ctx.service.createConfiguration('n', 'v');
+    await ctx.service.createConfiguration('n', 'v');
     expect(ctx.configurationService.create).toHaveBeenCalledWith({
       name: 'n',
       value: 'v'

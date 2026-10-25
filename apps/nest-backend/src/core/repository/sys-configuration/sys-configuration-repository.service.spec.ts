@@ -20,8 +20,7 @@ function build() {
   };
   const configsService = {
     getCONFIG_ROOT_PATH: vi.fn().mockReturnValue('rootPath'),
-    getROOT_PROJECT_PATH: vi.fn().mockReturnValue('/tmp/projects'),
-    getCONFIG_CURRENT_PROJECT_PATH: vi.fn().mockReturnValue('currentPath')
+    getROOT_PROJECT_PATH: vi.fn().mockReturnValue('/tmp/projects')
   };
   const service = new SysConfigurationRepositoryService(
     repository as never,
@@ -79,11 +78,19 @@ describe('SysConfigurationRepositoryService', () => {
     });
   });
 
-  it('create() delegates to repository.create', () => {
+  it('create() saves the new entry', async () => {
     const { service, repository } = build();
-    (repository.create as ReturnType<typeof vi.fn>).mockReturnValue({ id: 1 });
-    const result = service.create({ name: 'a', value: 'b' } as never);
-    expect(result).toEqual({ id: 1 });
+    (repository.create as ReturnType<typeof vi.fn>).mockImplementation(
+      (dto: object) => ({ ...dto })
+    );
+    (repository.save as ReturnType<typeof vi.fn>).mockImplementation(
+      async (entity: object) => ({ id: 1, ...entity })
+    );
+
+    const result = await service.create({ name: 'a', value: 'b' });
+
+    expect(repository.save).toHaveBeenCalledWith({ name: 'a', value: 'b' });
+    expect(result).toEqual({ id: 1, name: 'a', value: 'b' });
   });
 
   it('findAll() returns all configurations', async () => {
@@ -114,15 +121,6 @@ describe('SysConfigurationRepositoryService', () => {
     await expect(service.findOneByName('a')).rejects.toMatchObject({
       status: 404
     });
-  });
-
-  it('update() forwards the value criteria and id payload', async () => {
-    const { service, repository } = build();
-    (repository.update as ReturnType<typeof vi.fn>).mockResolvedValue({
-      affected: 1
-    });
-    await service.update(7, { value: 'v' } as never);
-    expect(repository.update).toHaveBeenCalledWith({ value: 'v' }, { id: 7 });
   });
 
   it('remove() deletes by id', async () => {
