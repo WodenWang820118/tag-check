@@ -1,5 +1,11 @@
 import { UploadSpecService } from './../../../../shared/services/upload-spec/upload-spec.service';
-import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  signal,
+  ChangeDetectionStrategy,
+  effect,
+  untracked
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { firstValueFrom } from 'rxjs';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -7,6 +13,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -18,10 +27,17 @@ import { ReportTableDataSourceModelService } from '../../services/report-table-d
 
 import { ReportTableFacadeService } from '../report-table/report-table-facade.service';
 import { BatchRunService } from '../../services/batch-run/batch-run.service';
+import { RunHeadlessService } from '../../services/run-headless/run-headless.service';
+import type { ScheduleJson } from '../../../../shared/services/api/schedules/schedules.service';
+import {
+  ScheduleDialogComponent,
+  ScheduleDialogData
+} from '../schedule-dialog/schedule-dialog.component';
 
 /**
- * The tests table's toolbar: add tests, run the selected ones as a
- * batch, delete, stop the running test, search and bookmark.
+ * The tests table's toolbar: add tests, run the selected ones as a batch or
+ * schedule them, delete, stop the running test, run headless, search and
+ * bookmark.
  */
 @Component({
   selector: 'app-report-table-toolbar',
@@ -33,6 +49,7 @@ import { BatchRunService } from '../../services/batch-run/batch-run.service';
     MatTooltipModule,
     MatInputModule,
     MatFormFieldModule,
+    MatSlideToggleModule,
     FormsModule,
     ReactiveFormsModule,
     MatButtonToggleModule
@@ -51,8 +68,19 @@ export class ReportTableToolbarComponent {
     private readonly uploadSpecService: UploadSpecService,
     private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService,
     private readonly reportTableFacadeService: ReportTableFacadeService,
-    private readonly batchRunService: BatchRunService
-  ) {}
+    private readonly batchRunService: BatchRunService,
+    readonly runHeadlessService: RunHeadlessService,
+    private readonly dialog: MatDialog,
+    private readonly snackBar: MatSnackBar
+  ) {
+    // The Run headless toggle shows the choice for the table's project.
+    effect(() => {
+      const projectSlug = this.reportTableFacadeService.projectSlug$();
+      if (projectSlug) {
+        untracked(() => this.runHeadlessService.load(projectSlug));
+      }
+    });
+  }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -103,20 +131,69 @@ export class ReportTableToolbarComponent {
     );
   }
 
-  /** Runs the selected tests in the order the table shows them. */
-  runSelected() {
+  /**
+   * Enqueues the selected tests, in the order the table shows them, as a
+   * batch the backend runs, headless or not as the toggle says.
+   */
+  async runSelected() {
     const projectSlug = this.reportTableFacadeService.projectSlug$();
-    const selection = this.reportTableDataSourceModelService.selection();
-    const tests = this.reportTableDataSourceModelService
-      .dataSource()
-      .filteredData.filter((row) => selection.isSelected(row))
-      .map(({ eventId, eventName }) => ({ eventId, eventName }));
-    if (projectSlug && tests.length > 0 && this.canRunSelected()) {
-      void this.batchRunService.start(projectSlug, tests);
+    const eventIds = this.selectedEventIds();
+    if (!projectSlug || eventIds.length === 0 || !this.canRunSelected()) {
+      return;
     }
+    const error = await this.batchRunService.start(
+      projectSlug,
+      eventIds,
+      this.runHeadlessService.headless()
+    );
+    if (error) {
+      this.notify(error);
+    }
+  }
+
+  /** Opens the schedule dialog for the selected tests, in table order. */
+  scheduleSelected() {
+    const projectSlug = this.reportTableFacadeService.projectSlug$();
+    const eventIds = this.selectedEventIds();
+    if (!projectSlug || eventIds.length === 0) {
+      return;
+    }
+    this.dialog
+      .open<ScheduleDialogComponent, ScheduleDialogData, ScheduleJson>(
+        ScheduleDialogComponent,
+        { data: { projectSlug, eventIds } }
+      )
+      .afterClosed()
+      .subscribe((saved) => {
+        if (saved) {
+          this.notify(
+            `Schedule "${saved.name}" saved. The Schedules page lists it.`
+          );
+        }
+      });
+  }
+
+  setRunHeadless(headless: boolean) {
+    this.runHeadlessService.set(headless);
   }
 
   isRunningTest() {
     return this.testRunningFacade.isRunningTest$();
+  }
+
+  private selectedEventIds(): string[] {
+    const selection = this.reportTableDataSourceModelService.selection();
+    return this.reportTableDataSourceModelService
+      .dataSource()
+      .filteredData.filter((row) => selection.isSelected(row))
+      .map(({ eventId }) => eventId);
+  }
+
+  private notify(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 6000,
+      horizontalPosition: 'right',
+      verticalPosition: 'bottom'
+    });
   }
 }

@@ -3,21 +3,60 @@ import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, Subject, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { ReportDetailResponse } from '@utils';
+import type {
+  BatchRunItemStatus,
+  BatchRunStatus,
+  BatchUpdatePayload,
+  ReportDetailResponse
+} from '@utils';
 import {
-  RunTestOptions,
-  TestRunningFacadeService
-} from '../../../../shared/services/facade/test-running-facade.service';
-import { BatchRunService } from './batch-run.service';
+  BatchRunJson,
+  BatchRunsService
+} from '../../../../shared/services/api/batch-runs/batch-runs.service';
+import { ReportService } from '../../../../shared/services/api/report/report.service';
+import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
+import { ProgressEventsService } from '../../../../shared/services/progress-events/progress-events.service';
+import { ReportTableDataSourceModelService } from '../report-table-data-source-model/report-table-data-source-model.service';
+import { BATCH_POLL_INTERVAL_MS, BatchRunService } from './batch-run.service';
 
-const STORAGE_KEY = 'tag-check.batch-run';
+const names = ['add_to_cart', 'view_item'];
 
-/** The JSON the run endpoint returns for a finished run (dates are strings). */
-function reportJson(
-  eventName: string,
-  passed: boolean,
-  requestPassed: boolean
-): ReportDetailResponse {
+/** A batch as the batch-runs endpoints return it (dates are strings). */
+function batchJson(
+  id: number,
+  status: BatchRunStatus,
+  itemStatuses: BatchRunItemStatus[],
+  overrides: { headless?: boolean; projectSlug?: string } = {}
+): BatchRunJson {
+  return JSON.parse(
+    JSON.stringify({
+      id,
+      projectSlug: overrides.projectSlug ?? 'demo',
+      source: 'manual',
+      scheduleId: null,
+      headless: overrides.headless ?? true,
+      status,
+      createdAt: '2026-10-25T09:00:00.000Z',
+      startedAt: status === 'pending' ? null : '2026-10-25T09:00:01.000Z',
+      finishedAt: null,
+      items: itemStatuses.map((itemStatus, position) => ({
+        id: id * 10 + position,
+        eventId: `id-${names[position]}`,
+        testName: names[position],
+        eventName: names[position],
+        position,
+        status: itemStatus,
+        message: itemStatus === 'cancelled' ? 'Cancelled' : null,
+        startedAt: null,
+        finishedAt: null,
+        testEventDetailId: null
+      }))
+    })
+  ) as BatchRunJson;
+}
+
+/** GET /reports/:projectSlug/:eventId's JSON for a finished run. */
+function reportJson(eventName: string): ReportDetailResponse {
   return JSON.parse(
     JSON.stringify({
       testEvent: {
@@ -26,55 +65,50 @@ function reportJson(
         testName: eventName,
         eventName,
         message: 'Valid',
-        lastRunAt: '2026-10-23T12:00:00.000Z',
+        lastRunAt: '2026-10-25T09:00:10.000Z',
         createdAt: '2026-10-01T00:00:00.000Z',
-        updatedAt: '2026-10-23T12:00:00.000Z'
+        updatedAt: '2026-10-25T09:00:10.000Z'
       },
-      testEventDetails: {
-        id: 7,
-        passed,
-        requestPassed,
-        rawRequest: '',
-        destinationUrl: 'https://ng-gtm-sample.vercel.app/home',
-        message: 'Valid',
-        createdAt: '2026-10-23T12:00:00.000Z',
-        updatedAt: '2026-10-23T12:00:00.000Z'
-      },
+      testEventDetails: { id: 7, passed: true, requestPassed: true },
       testImage: null
     })
   ) as ReportDetailResponse;
 }
 
-const tests = [
-  { eventId: 'id-add_to_cart', eventName: 'add_to_cart' },
-  { eventId: 'id-view_item', eventName: 'view_item' },
-  { eventId: 'id-purchase', eventName: 'purchase' }
-];
-
 describe('BatchRunService', () => {
-  let runTestForReport: ReturnType<
+  let api: {
+    create: ReturnType<typeof vi.fn>;
+    getLatest: ReturnType<typeof vi.fn>;
+    get: ReturnType<typeof vi.fn>;
+    cancel: ReturnType<typeof vi.fn>;
+  };
+  let batchUpdates: Subject<BatchUpdatePayload>;
+  let release: ReturnType<typeof vi.fn>;
+  let hold: ReturnType<typeof vi.fn>;
+  let isRunningTest: WritableSignal<boolean>;
+  let getReportDetails: ReturnType<
     typeof vi.fn<
-      (
-        eventId: string,
-        projectSlug: string,
-        options?: RunTestOptions
-      ) => Observable<ReportDetailResponse | undefined>
+      (projectSlug: string, eventId: string) => Observable<ReportDetailResponse>
     >
   >;
-  let stopOperation: ReturnType<typeof vi.fn<() => Observable<unknown>>>;
-  let isRunningTest: WritableSignal<boolean>;
+  let applyRunResult: ReturnType<typeof vi.fn>;
 
-  function createService(): BatchRunService {
-    TestBed.resetTestingModule();
+  function create(): BatchRunService {
     TestBed.configureTestingModule({
       providers: [
+        { provide: BatchRunsService, useValue: api },
+        {
+          provide: ProgressEventsService,
+          useValue: { batchUpdate$: batchUpdates.asObservable(), hold }
+        },
         {
           provide: TestRunningFacadeService,
-          useValue: {
-            runTestForReport,
-            stopOperation,
-            isRunningTest$: isRunningTest.asReadonly()
-          }
+          useValue: { isRunningTest$: isRunningTest.asReadonly() }
+        },
+        { provide: ReportService, useValue: { getReportDetails } },
+        {
+          provide: ReportTableDataSourceModelService,
+          useValue: { applyRunResult }
         }
       ]
     });
@@ -83,238 +117,242 @@ describe('BatchRunService', () => {
 
   beforeEach(() => {
     localStorage.clear();
-    runTestForReport = vi.fn();
-    stopOperation = vi.fn(() => of(null));
+    api = {
+      create: vi.fn(),
+      getLatest: vi.fn(() => of(null)),
+      get: vi.fn(),
+      cancel: vi.fn()
+    };
+    batchUpdates = new Subject();
+    release = vi.fn();
+    hold = vi.fn(() => release);
     isRunningTest = signal(false);
+    getReportDetails = vi.fn((_slug: string, eventId: string) =>
+      of(reportJson(eventId.replace('id-', '')))
+    );
+    applyRunResult = vi.fn();
   });
 
-  afterEach(() => localStorage.clear());
+  afterEach(() => {
+    vi.useRealTimers();
+    localStorage.clear();
+  });
 
-  it('runs the tests one after another, closing each browser, and records each outcome', async () => {
-    const order: string[] = [];
-    runTestForReport.mockImplementation((eventId) => {
-      order.push(eventId);
-      const outcomes: Record<string, ReportDetailResponse> = {
-        'id-add_to_cart': reportJson('add_to_cart', true, true),
-        'id-view_item': reportJson('view_item', true, false),
-        'id-purchase': reportJson('purchase', false, false)
-      };
-      return of(outcomes[eventId]);
+  it('removes the batch the frontend used to keep in localStorage', () => {
+    localStorage.setItem('tag-check.batch-run', '{"items":[]}');
+
+    create();
+
+    expect(localStorage.getItem('tag-check.batch-run')).toBeNull();
+  });
+
+  it("shows the project's newest batch after a reload and follows it", () => {
+    api.getLatest.mockReturnValue(
+      of(batchJson(5, 'running', ['passed', 'running']))
+    );
+    const service = create();
+
+    service.watch('demo');
+
+    expect(api.getLatest).toHaveBeenCalledWith('demo');
+    expect(hold).toHaveBeenCalledOnce();
+    expect(service.isRunning()).toBe(true);
+    expect(service.doneCount()).toBe(1);
+    expect(service.currentItem()?.eventName).toBe('view_item');
+    // The first row's result was already in the table the page just read.
+    expect(getReportDetails).not.toHaveBeenCalled();
+
+    service.unwatch();
+    expect(release).toHaveBeenCalledOnce();
+  });
+
+  it('starts a batch with the headless choice and updates rows as items finish', async () => {
+    api.create.mockReturnValue(
+      of(batchJson(6, 'pending', ['pending', 'pending']))
+    );
+    const service = create();
+    service.watch('demo');
+
+    await expect(
+      service.start('demo', ['id-add_to_cart', 'id-view_item'], true)
+    ).resolves.toBeNull();
+
+    expect(api.create).toHaveBeenCalledWith('demo', {
+      eventIds: ['id-add_to_cart', 'id-view_item'],
+      headless: true
     });
-    const service = createService();
+    expect(service.isRunning()).toBe(true);
 
-    await service.start('example-project-slug', tests);
+    batchUpdates.next({
+      batchId: 6,
+      projectSlug: 'demo',
+      status: 'running',
+      items: [
+        { eventId: 'id-add_to_cart', status: 'partial', message: null },
+        { eventId: 'id-view_item', status: 'running', message: null }
+      ]
+    });
+    // A second event with the same result does not read the row again.
+    batchUpdates.next({
+      batchId: 6,
+      projectSlug: 'demo',
+      status: 'completed',
+      items: [
+        { eventId: 'id-add_to_cart', status: 'partial', message: null },
+        { eventId: 'id-view_item', status: 'error', message: 'No recording' }
+      ]
+    });
 
-    expect(order).toEqual(['id-add_to_cart', 'id-view_item', 'id-purchase']);
-    expect(runTestForReport).toHaveBeenCalledWith(
+    expect(getReportDetails).toHaveBeenCalledOnce();
+    expect(getReportDetails).toHaveBeenCalledWith('demo', 'id-add_to_cart');
+    expect(applyRunResult).toHaveBeenCalledWith(
       'id-add_to_cart',
-      'example-project-slug',
-      { closeBrowser: true }
+      reportJson('add_to_cart')
     );
-    expect(service.batch()?.items.map((item) => item.status)).toEqual([
-      'passed',
-      'partial',
-      'failed'
+    expect(service.batch()?.items.map((item) => item.message)).toEqual([
+      null,
+      'No recording'
     ]);
-    expect(service.doneCount()).toBe(3);
     expect(service.isRunning()).toBe(false);
-    expect(service.batch()?.finishedAt).toEqual(expect.any(String));
   });
 
-  it('records why a run ended in error and goes on with the next test', async () => {
-    runTestForReport.mockImplementation((eventId) =>
-      eventId === 'id-add_to_cart'
-        ? throwError(
-            () =>
-              new HttpErrorResponse({
-                status: 500,
-                error: { statusCode: 500, message: 'No recording found' }
-              })
-          )
-        : of(
-            eventId === 'id-view_item'
-              ? undefined
-              : reportJson('purchase', true, true)
-          )
-    );
-    const service = createService();
+  it('does not start while a test started from its play button runs', async () => {
+    isRunningTest.set(true);
+    const service = create();
 
-    await service.start('example-project-slug', tests);
+    await service.start('demo', ['id-add_to_cart'], false);
 
-    expect(service.batch()?.items).toEqual([
-      expect.objectContaining({
-        status: 'error',
-        message: 'No recording found'
-      }),
-      expect.objectContaining({
-        status: 'error',
-        message: 'The run returned no result.'
-      }),
-      expect.objectContaining({ status: 'passed' })
-    ]);
+    expect(api.create).not.toHaveBeenCalled();
   });
 
-  it("shows the API's reason when a run service wraps the failed response", async () => {
-    runTestForReport.mockReturnValueOnce(
+  it("returns the API's reason when the batch cannot start", async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    api.create.mockReturnValue(
       throwError(
         () =>
-          new Error('GTM inspection failed', {
-            cause: new HttpErrorResponse({
-              status: 500,
-              error: { statusCode: 500, message: 'No recording found' }
-            })
+          new HttpErrorResponse({
+            status: 400,
+            error: {
+              statusCode: 400,
+              message: {
+                message: 'Unknown tests: id-gone',
+                error: 'Bad Request',
+                statusCode: 400
+              }
+            }
           })
       )
     );
-    runTestForReport.mockReturnValueOnce(
-      throwError(() => new Error('GTM inspection failed'))
+    const service = create();
+
+    await expect(service.start('demo', ['id-gone'], false)).resolves.toBe(
+      'Unknown tests: id-gone'
     );
-    const service = createService();
-
-    await service.start('example-project-slug', tests.slice(0, 2));
-
-    expect(service.batch()?.items.map((item) => item.message)).toEqual([
-      'No recording found',
-      'GTM inspection failed'
-    ]);
+    expect(service.isRunning()).toBe(false);
+    vi.restoreAllMocks();
   });
 
-  it('stops the running test and skips the rest when cancelled', async () => {
-    const firstRun = new Subject<ReportDetailResponse>();
-    runTestForReport.mockReturnValueOnce(firstRun);
-    const service = createService();
+  it('cancels the batch on the server and offers to run the rest again', async () => {
+    api.getLatest.mockReturnValue(
+      of(batchJson(7, 'running', ['passed', 'running']))
+    );
+    api.cancel.mockReturnValue(
+      of(
+        batchJson(7, 'cancelled', ['passed', 'cancelled'], { headless: false })
+      )
+    );
+    api.create.mockReturnValue(of(batchJson(8, 'pending', ['pending'])));
+    const service = create();
+    service.watch('demo');
 
-    const running = service.start('example-project-slug', tests);
-    expect(service.currentItem()?.eventName).toBe('add_to_cart');
     await service.cancel();
-    firstRun.error(new Error('Operation aborted'));
-    await running;
 
-    expect(stopOperation).toHaveBeenCalledOnce();
-    expect(runTestForReport).toHaveBeenCalledOnce();
-    expect(service.batch()?.items.map((item) => item.status)).toEqual([
-      'cancelled',
-      'cancelled',
-      'cancelled'
-    ]);
-  });
-
-  it('marks the stopped test cancelled when its run returns no result', async () => {
-    // A run service answers a run the user stopped with an empty result.
-    const firstRun = new Subject<ReportDetailResponse | undefined>();
-    runTestForReport.mockReturnValueOnce(firstRun);
-    const service = createService();
-
-    const running = service.start('example-project-slug', tests);
-    await service.cancel();
-    firstRun.next(undefined);
-    firstRun.complete();
-    await running;
-
-    expect(service.batch()?.items).toEqual([
-      expect.objectContaining({ status: 'cancelled', message: undefined }),
-      expect.objectContaining({ status: 'cancelled' }),
-      expect.objectContaining({ status: 'cancelled' })
-    ]);
-  });
-
-  it('does not start or resume a batch while a single test runs', async () => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        projectSlug: 'example-project-slug',
-        startedAt: '2026-10-23T12:00:00.000Z',
-        items: [
-          { eventId: 'id-view_item', eventName: 'view_item', status: 'pending' }
-        ]
-      })
-    );
-    isRunningTest.set(true);
-    const service = createService();
-
-    expect(service.canResume()).toBe(false);
-    await service.resume();
-    await service.start('example-project-slug', tests);
-
-    expect(runTestForReport).not.toHaveBeenCalled();
-    expect(service.batch()?.items).toHaveLength(1);
-
-    isRunningTest.set(false);
+    expect(api.cancel).toHaveBeenCalledWith('demo', 7);
+    expect(service.isRunning()).toBe(false);
+    expect(service.remainingCount()).toBe(1);
     expect(service.canResume()).toBe(true);
-  });
 
-  it('ignores a second start while a batch is running', async () => {
-    const firstRun = new Subject<ReportDetailResponse>();
-    runTestForReport.mockReturnValueOnce(firstRun);
-    runTestForReport.mockReturnValue(of(reportJson('view_item', true, true)));
-    const service = createService();
-
-    const running = service.start('example-project-slug', tests);
-    await service.start('other-project', [tests[2]]);
-    firstRun.next(reportJson('add_to_cart', true, true));
-    firstRun.complete();
-    await running;
-
-    expect(service.batch()?.projectSlug).toBe('example-project-slug');
-    expect(service.batch()?.items).toHaveLength(3);
-  });
-
-  it('resumes the tests a reload interrupted, treating the running one as pending', async () => {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify({
-        projectSlug: 'example-project-slug',
-        startedAt: '2026-10-23T12:00:00.000Z',
-        items: [
-          {
-            eventId: 'id-add_to_cart',
-            eventName: 'add_to_cart',
-            status: 'passed'
-          },
-          {
-            eventId: 'id-view_item',
-            eventName: 'view_item',
-            status: 'running'
-          },
-          { eventId: 'id-purchase', eventName: 'purchase', status: 'pending' }
-        ]
-      })
-    );
-    runTestForReport.mockReturnValue(of(reportJson('view_item', true, true)));
-    const service = createService();
-
-    expect(service.canResume()).toBe(true);
     await service.resume();
-
-    expect(runTestForReport.mock.calls.map(([eventId]) => eventId)).toEqual([
-      'id-view_item',
-      'id-purchase'
-    ]);
-    expect(service.canResume()).toBe(false);
-    const stored: unknown = JSON.parse(
-      localStorage.getItem(STORAGE_KEY) ?? '{}'
-    );
-    expect(stored).toEqual(
-      expect.objectContaining({
-        items: [
-          expect.objectContaining({ status: 'passed' }),
-          expect.objectContaining({ status: 'passed' }),
-          expect.objectContaining({ status: 'passed' })
-        ]
-      })
-    );
+    expect(api.create).toHaveBeenCalledWith('demo', {
+      eventIds: ['id-view_item'],
+      headless: false
+    });
   });
 
-  it('ignores stored data that is not a batch, and clears a finished batch', async () => {
-    localStorage.setItem(STORAGE_KEY, '{"items":[{"eventId":1}]}');
-    expect(createService().batch()).toBeNull();
+  it('polls a running batch every 3 s and ignores an answer older than an event', () => {
+    vi.useFakeTimers();
+    api.getLatest.mockReturnValue(
+      of(batchJson(9, 'running', ['running', 'pending']))
+    );
+    const stale = batchJson(9, 'running', ['running', 'pending']);
+    const done = batchJson(9, 'completed', ['passed', 'failed']);
+    api.get.mockReturnValueOnce(of(stale)).mockReturnValueOnce(of(done));
+    const service = create();
+    service.watch('demo');
 
-    runTestForReport.mockReturnValue(of(reportJson('add_to_cart', true, true)));
-    const service = createService();
-    await service.start('example-project-slug', [tests[0]]);
+    batchUpdates.next({
+      batchId: 9,
+      projectSlug: 'demo',
+      status: 'running',
+      items: [
+        { eventId: 'id-add_to_cart', status: 'passed', message: null },
+        { eventId: 'id-view_item', status: 'running', message: null }
+      ]
+    });
+    vi.advanceTimersByTime(BATCH_POLL_INTERVAL_MS);
+    expect(api.get).toHaveBeenCalledWith('demo', 9);
+    expect(service.batch()?.items[0]?.status).toBe('passed');
+
+    vi.advanceTimersByTime(BATCH_POLL_INTERVAL_MS);
+    expect(service.batch()?.status).toBe('completed');
+    expect(getReportDetails.mock.calls.map(([, eventId]) => eventId)).toEqual([
+      'id-add_to_cart',
+      'id-view_item'
+    ]);
+
+    vi.advanceTimersByTime(BATCH_POLL_INTERVAL_MS * 3);
+    expect(api.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('reads a batch a schedule started, and ignores other projects', () => {
+    api.get.mockReturnValue(of(batchJson(12, 'running', ['running'])));
+    const service = create();
+    service.watch('demo');
+
+    batchUpdates.next({
+      batchId: 30,
+      projectSlug: 'other',
+      status: 'running',
+      items: []
+    });
+    batchUpdates.next({
+      batchId: 12,
+      projectSlug: 'demo',
+      status: 'running',
+      items: [{ eventId: 'id-add_to_cart', status: 'running', message: null }]
+    });
+
+    expect(api.get).toHaveBeenCalledOnce();
+    expect(api.get).toHaveBeenCalledWith('demo', 12);
+    expect(service.batch()?.id).toBe(12);
+  });
+
+  it('hides a cleared batch, also after a reload, until the next one', () => {
+    api.getLatest.mockReturnValue(
+      of(batchJson(4, 'completed', ['passed', 'failed']))
+    );
+    const service = create();
+    service.watch('demo');
+    expect(service.batch()?.id).toBe(4);
+
     service.clear();
-
     expect(service.batch()).toBeNull();
-    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+
+    service.watch('demo');
+    expect(service.batch()).toBeNull();
+
+    api.getLatest.mockReturnValue(of(batchJson(5, 'running', ['running'])));
+    service.watch('demo');
+    expect(service.batch()?.id).toBe(5);
   });
 });

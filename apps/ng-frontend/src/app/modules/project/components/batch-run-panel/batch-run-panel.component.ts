@@ -2,8 +2,15 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  inject
+  DestroyRef,
+  effect,
+  inject,
+  signal,
+  untracked
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
+import { map } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -22,7 +29,10 @@ const STATUS_LABELS: Record<BatchItemStatus, string> = {
   cancelled: 'Cancelled'
 };
 
-/** Progress and per-test outcome of the current or last batch run. */
+/**
+ * Progress and per-test outcome of the project's current or last batch,
+ * which the backend runs; a reload shows the server's batch.
+ */
 @Component({
   selector: 'app-batch-run-panel',
   imports: [MatButtonModule, MatIconModule, MatProgressBarModule],
@@ -31,7 +41,9 @@ const STATUS_LABELS: Record<BatchItemStatus, string> = {
     @if (batch(); as run) {
       <section class="batch-run" data-testid="batch-run-panel">
         <div class="batch-run__header">
-          <strong>Batch run</strong>
+          <strong>{{
+            run.source === 'schedule' ? 'Scheduled batch run' : 'Batch run'
+          }}</strong>
           <span data-testid="batch-run-progress">
             {{ batchRun.doneCount() }} / {{ run.items.length }}
           </span>
@@ -59,10 +71,15 @@ const STATUS_LABELS: Record<BatchItemStatus, string> = {
             <button
               mat-stroked-button
               data-testid="batch-run-resume"
-              (click)="batchRun.resume()"
+              (click)="resume()"
             >
-              Resume ({{ pendingCount() }} left)
+              Resume ({{ batchRun.remainingCount() }} left)
             </button>
+          }
+          @if (error(); as message) {
+            <span class="batch-run__message" data-testid="batch-run-error">{{
+              message
+            }}</span>
           }
           @if (!batchRun.isRunning()) {
             <button
@@ -81,7 +98,7 @@ const STATUS_LABELS: Record<BatchItemStatus, string> = {
         <details class="batch-run__items">
           <summary>Tests in this batch</summary>
           <ul>
-            @for (item of run.items; track item.eventId) {
+            @for (item of run.items; track item.id) {
               <li [attr.data-testid]="'batch-run-item-' + item.eventName">
                 <span class="batch-run__name">{{ item.eventName }}</span>
                 <span>{{ label(item.status) }}</span>
@@ -136,12 +153,33 @@ const STATUS_LABELS: Record<BatchItemStatus, string> = {
 export class BatchRunPanelComponent {
   protected readonly batchRun = inject(BatchRunService);
   protected readonly batch = this.batchRun.batch;
-
-  protected readonly pendingCount = computed(
-    () =>
-      this.batch()?.items.filter((item) => item.status === 'pending').length ??
-      0
+  /** Why Resume could not start a batch. */
+  protected readonly error = signal<string | null>(null);
+  private readonly projectSlug = toSignal(
+    inject(ActivatedRoute).paramMap.pipe(
+      map((params) => params.get('projectSlug'))
+    )
   );
+
+  constructor() {
+    // The page's project: its batch shows here and is followed while the
+    // Tests page is open, including one a schedule started.
+    effect(() => {
+      const projectSlug = this.projectSlug();
+      if (projectSlug) {
+        // The batch's signals, read while it is shown, must not re-run this.
+        untracked(() => {
+          this.error.set(null);
+          this.batchRun.watch(projectSlug);
+        });
+      }
+    });
+    inject(DestroyRef).onDestroy(() => this.batchRun.unwatch());
+  }
+
+  protected async resume(): Promise<void> {
+    this.error.set(await this.batchRun.resume());
+  }
 
   protected readonly percent = computed(() => {
     const total = this.batch()?.items.length ?? 0;

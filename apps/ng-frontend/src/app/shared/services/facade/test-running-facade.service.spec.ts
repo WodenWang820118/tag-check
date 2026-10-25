@@ -63,25 +63,25 @@ describe('TestRunningFacadeService.runTestForReport', () => {
 
   beforeEach(() => TestBed.resetTestingModule());
 
-  it('runs through GTM Preview and asks to close the browser for a batch', async () => {
+  it('runs through GTM Preview headless when the run asks for it', async () => {
     const service = create(true);
 
     await firstValueFrom(
-      service.runTestForReport('evt', 'demo', { closeBrowser: true })
+      service.runTestForReport('evt', 'demo', { headless: true })
     );
 
     expect(runInspectionViaGtm).toHaveBeenCalledWith(
       'demo',
       'evt',
       expect.objectContaining({
-        closeBrowser: true,
+        headless: true,
         measurementId: 'G-8HKQR5ZBSK'
       })
     );
     expect(service.isRunningTest$()).toBe(false);
   });
 
-  it('leaves the GTM Preview window open for a single run', async () => {
+  it("uses the project's browser setting when the run does not choose", async () => {
     const service = create(true);
 
     await firstValueFrom(service.runTestForReport('evt', 'demo'));
@@ -89,7 +89,7 @@ describe('TestRunningFacadeService.runTestForReport', () => {
     expect(runInspectionViaGtm).toHaveBeenCalledWith(
       'demo',
       'evt',
-      expect.objectContaining({ closeBrowser: undefined })
+      expect.objectContaining({ headless: false })
     );
   });
 
@@ -98,7 +98,7 @@ describe('TestRunningFacadeService.runTestForReport', () => {
 
     await expect(
       firstValueFrom(
-        service.runTestForReport('evt', 'demo', { closeBrowser: true })
+        service.runTestForReport('evt', 'demo', { headless: true })
       )
     ).resolves.toBeUndefined();
 
@@ -106,7 +106,10 @@ describe('TestRunningFacadeService.runTestForReport', () => {
     expect(runDataLayerWithRequestCheck).toHaveBeenCalledWith(
       'demo',
       'evt',
-      expect.objectContaining({ measurementId: 'G-8HKQR5ZBSK' })
+      expect.objectContaining({
+        measurementId: 'G-8HKQR5ZBSK',
+        headless: true
+      })
     );
   });
 });
