@@ -1,4 +1,4 @@
-import type { Browser, Page } from 'puppeteer';
+import type { Browser, CookieData, Page } from 'puppeteer';
 import type { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 
 type Application = EventInspectionPresetDto['application'];
@@ -31,6 +31,10 @@ export function localStorageScript(application: Application): string | null {
 })();`;
 }
 
+/**
+ * Registers the preset's localStorage as an init script, so every document
+ * the page loads from now on starts with it. Does nothing for an empty preset.
+ */
 export async function preloadApplicationLocalStorage(
   page: Page,
   application: Application
@@ -65,15 +69,42 @@ export async function seedSiteLocalStorage(
   try {
     await page.setRequestInterception(true);
     page.on('request', (request) => {
-      void request.respond({
-        status: 200,
-        contentType: 'text/html',
-        body: '<!doctype html><title></title>'
-      });
+      // A request still in flight when the page closes below cannot be
+      // answered; the rejection must not escape as an unhandled one.
+      request
+        .respond({
+          status: 200,
+          contentType: 'text/html',
+          body: '<!doctype html><title></title>'
+        })
+        .catch(() => undefined);
     });
     await page.goto(new URL(siteUrl).origin);
     await page.evaluate(script);
   } finally {
     await page.close();
   }
+}
+
+/**
+ * Sets the preset's cookies on the host of `siteUrl` before the run opens the
+ * site. Does nothing for an empty preset; throws when `siteUrl` is not a valid
+ * URL and there are cookies to set.
+ */
+export async function applyPresetCookies(
+  browser: Browser,
+  siteUrl: string,
+  application: Application
+): Promise<void> {
+  const cookies = application.cookie.data;
+  if (!cookies.length) {
+    return;
+  }
+  const domain = new URL(siteUrl).hostname;
+  const cookieData: CookieData[] = cookies.map((cookie) => ({
+    name: cookie.key.toString(),
+    value: cookie.value.toString(),
+    domain
+  }));
+  await browser.setCookie(...cookieData);
 }

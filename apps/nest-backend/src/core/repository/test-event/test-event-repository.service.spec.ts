@@ -155,14 +155,6 @@ describe('TestEventRepositoryService', () => {
     expect(result).toEqual([{ id: 1 }]);
   });
 
-  it('getEntityByEventId() throws NOT_FOUND when no entity exists', async () => {
-    const { service, repository } = build();
-    repository.findOne.mockResolvedValue(null);
-    await expect(service.getEntityByEventId('evt')).rejects.toMatchObject({
-      status: 404
-    });
-  });
-
   it('getEntityBySlugAndEventId() returns the entity when found', async () => {
     const { service, repository } = build();
     repository.findOne.mockResolvedValue({ id: 1 });
@@ -292,16 +284,6 @@ describe('TestEventRepositoryService', () => {
     repository.update.mockResolvedValue({ affected: 1 });
     await service.update(1, { message: 'm' } as never);
     expect(repository.update).toHaveBeenCalledWith(1, { message: 'm' });
-  });
-
-  it('deleteByProjectSlugAndEventId() deletes by composite criteria', async () => {
-    const { service, repository } = build();
-    repository.delete.mockResolvedValue({ affected: 1 });
-    await service.deleteByProjectSlugAndEventId('demo', 'evt');
-    expect(repository.delete).toHaveBeenCalledWith({
-      project: { projectSlug: 'demo' },
-      eventId: 'evt'
-    });
   });
 
   it('deleteByProjectSlugAndEventIds() rejects empty event id arrays', async () => {

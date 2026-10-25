@@ -5,14 +5,12 @@ import { EventTagConfig, Tag, TagTypeEnum, Trigger } from '@utils';
 
 describe('EventTag', () => {
   let eventTag: EventTag;
-  let parameterUtils: ParameterUtils;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [EventTag, ParameterUtils]
     });
     eventTag = TestBed.inject(EventTag);
-    parameterUtils = TestBed.inject(ParameterUtils);
   });
 
   it('should create an event tag correctly', () => {
@@ -37,30 +35,6 @@ describe('EventTag', () => {
       }
     ];
 
-    vi.spyOn(parameterUtils, 'createBooleanParameter').mockReturnValue({
-      type: 'BOOLEAN',
-      key: 'sendEcommerceData',
-      value: 'false'
-    });
-
-    vi.spyOn(parameterUtils, 'createTemplateParameter').mockReturnValue({
-      type: 'TEMPLATE',
-      key: 'eventName',
-      value: 'TestTag'
-    });
-
-    vi.spyOn(parameterUtils, 'createListParameter').mockReturnValue({
-      type: 'LIST',
-      key: 'eventParameters',
-      list: []
-    });
-
-    vi.spyOn(parameterUtils, 'createTagReferenceParameter').mockReturnValue({
-      type: 'TAG_REFERENCE',
-      key: 'measurementId',
-      value: 'GoogleTag'
-    });
-
     // Act
     // TODO: reflect the esvContent
     const result = eventTag.createTag(
@@ -81,8 +55,12 @@ describe('EventTag', () => {
       parameter: [
         { type: 'BOOLEAN', key: 'sendEcommerceData', value: 'false' },
         { type: 'TEMPLATE', key: 'eventName', value: 'TestTag' },
-        { type: 'LIST', key: 'eventParameters', list: [] },
-        { type: 'TAG_REFERENCE', key: 'measurementId', value: 'GoogleTag' }
+        { type: 'LIST', key: 'eventSettingsTable', list: [] },
+        {
+          type: 'TEMPLATE',
+          key: 'measurementIdOverride',
+          value: '{{CONST - Measurement ID}}'
+        }
       ],
       firingTriggerId: ['1'],
       tagFiringOption: 'ONCE_PER_EVENT',
@@ -95,21 +73,5 @@ describe('EventTag', () => {
     };
 
     expect(result).toEqual(expectedTag);
-    expect(parameterUtils.createBooleanParameter).toHaveBeenCalledWith(
-      'sendEcommerceData',
-      'false'
-    );
-    expect(parameterUtils.createTemplateParameter).toHaveBeenCalledWith(
-      'eventName',
-      'TestTag'
-    );
-    expect(parameterUtils.createListParameter).toHaveBeenCalledWith(
-      'eventParameters',
-      tag.parameters
-    );
-    expect(parameterUtils.createTagReferenceParameter).toHaveBeenCalledWith(
-      'measurementId',
-      eventTagName
-    );
   });
 });

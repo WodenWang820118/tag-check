@@ -6,7 +6,10 @@ import { ReportDetailRouteContext } from '../report-detail.contracts';
 import { ReportDetailPanelsComponent } from './report-detail-panels.component';
 import { ReportDetailPanelsFacadeService } from './report-detail-panels-facade.service';
 
-function createContext(eventName = 'purchase'): ReportDetailRouteContext {
+function createContext(
+  eventName = 'purchase',
+  projectSlug = 'storybook-project'
+): ReportDetailRouteContext {
   const spec: DataLayerSpec = {
     eventName,
     dataLayerSpec: {
@@ -21,7 +24,7 @@ function createContext(eventName = 'purchase'): ReportDetailRouteContext {
   };
 
   return {
-    projectSlug: 'storybook-project',
+    projectSlug,
     eventId: `evt-${eventName}`,
     spec,
     recording: {
@@ -40,9 +43,15 @@ function createContext(eventName = 'purchase'): ReportDetailRouteContext {
       updatedAt: new Date('2026-04-23T12:34:56.000Z')
     } as ReportDetailRouteContext['reportDetails'],
     videoBlob: undefined,
+    tagAssistantVideoBlob: undefined,
     imageBlob: undefined,
     historyLinkCommands: ['..', 'buckets']
   };
+}
+
+/** The JSON PUT /specs/:projectSlug/:eventId/item-def returns. */
+function savedItemDefJson(json: string): ItemDef {
+  return JSON.parse(json);
 }
 
 describe('ReportDetailPanelsComponent', () => {
@@ -51,12 +60,13 @@ describe('ReportDetailPanelsComponent', () => {
     readFile: vi.fn(),
     updateSpec: vi.fn(),
     updateRecording: vi.fn(),
-    getItemDefById: vi.fn((itemId: string) => {
-      if (!itemDefStreams[itemId]) {
-        itemDefStreams[itemId] = new Subject<ItemDef | null>();
+    getItemDef: vi.fn((projectSlug: string, eventId: string) => {
+      const key = `${projectSlug}/${eventId}`;
+      if (!itemDefStreams[key]) {
+        itemDefStreams[key] = new Subject<ItemDef | null>();
       }
 
-      return itemDefStreams[itemId].asObservable();
+      return itemDefStreams[key].asObservable();
     }),
     updateItemDef: vi.fn()
   };
@@ -66,7 +76,7 @@ describe('ReportDetailPanelsComponent', () => {
     facade.readFile.mockReset();
     facade.updateSpec.mockReset();
     facade.updateRecording.mockReset();
-    facade.getItemDefById.mockClear();
+    facade.getItemDef.mockClear();
     facade.updateItemDef.mockReset();
     facade.updateSpec.mockReturnValue(of({}));
     facade.updateRecording.mockReturnValue(of({ title: 'saved', steps: [] }));
@@ -91,7 +101,7 @@ describe('ReportDetailPanelsComponent', () => {
       .compileComponents();
   });
 
-  it('keeps only the latest item-definition load result when the spec changes', () => {
+  it('keeps only the latest item-definition load result when the test changes', () => {
     const fixture = TestBed.createComponent(ReportDetailPanelsComponent);
     const component = fixture.componentInstance;
 
@@ -100,14 +110,14 @@ describe('ReportDetailPanelsComponent', () => {
     fixture.componentRef.setInput('context', createContext('signup'));
     fixture.detectChanges();
 
-    itemDefStreams['purchase'].next({
+    itemDefStreams['storybook-project/evt-purchase'].next({
       itemId: 'purchase',
       templateName: 'purchase-template',
       fullItemDef: {
         item_name: 'Socks'
       }
     });
-    itemDefStreams['signup'].next({
+    itemDefStreams['storybook-project/evt-signup'].next({
       itemId: 'signup',
       templateName: 'signup-template',
       fullItemDef: {
@@ -116,8 +126,52 @@ describe('ReportDetailPanelsComponent', () => {
     });
 
     expect(component.itemDefContent()?.itemId).toBe('signup');
-    expect(facade.getItemDefById).toHaveBeenCalledWith('purchase');
-    expect(facade.getItemDefById).toHaveBeenCalledWith('signup');
+    expect(facade.getItemDef).toHaveBeenCalledWith(
+      'storybook-project',
+      'evt-purchase'
+    );
+    expect(facade.getItemDef).toHaveBeenCalledWith(
+      'storybook-project',
+      'evt-signup'
+    );
+  });
+
+  it("loads the definition of the test's own project, not by event name", () => {
+    const fixture = TestBed.createComponent(ReportDetailPanelsComponent);
+    const component = fixture.componentInstance;
+
+    fixture.componentRef.setInput(
+      'context',
+      createContext('purchase', 'shop_a')
+    );
+    fixture.detectChanges();
+    fixture.componentRef.setInput(
+      'context',
+      createContext('purchase', 'shop_b')
+    );
+    fixture.detectChanges();
+    itemDefStreams['shop_b/evt-purchase'].next(null);
+
+    expect(facade.getItemDef.mock.calls).toEqual([
+      ['shop_a', 'evt-purchase'],
+      ['shop_b', 'evt-purchase']
+    ]);
+    expect(component.itemDefContent()).toBeNull();
+    expect(component.editItemId()).toBe('purchase');
+  });
+
+  it('does not reload the definition when the spec is saved', () => {
+    const fixture = TestBed.createComponent(ReportDetailPanelsComponent);
+    const component = fixture.componentInstance;
+
+    fixture.componentRef.setInput('context', createContext('purchase'));
+    fixture.detectChanges();
+    component.toggleSpecEdit();
+    component.onSpecDraftChange('{"event":"signup"}');
+    component.saveSpec();
+    fixture.detectChanges();
+
+    expect(facade.getItemDef).toHaveBeenCalledTimes(1);
   });
 
   it('uses explicit route context when saving a valid spec draft', () => {
@@ -186,9 +240,16 @@ describe('ReportDetailPanelsComponent', () => {
     expect(facade.updateItemDef).not.toHaveBeenCalled();
   });
 
-  it('saves item-definition edits with the explicit item id and payload', () => {
+  it("saves item-definition edits to the test's own route", () => {
     const fixture = TestBed.createComponent(ReportDetailPanelsComponent);
     const component = fixture.componentInstance;
+    facade.updateItemDef.mockReturnValue(
+      of(
+        savedItemDefJson(
+          '{"itemId":"purchase","templateName":"purchase-template","fullItemDef":{"item_name":"Socks"}}'
+        )
+      )
+    );
 
     fixture.componentRef.setInput('context', createContext('purchase'));
     fixture.detectChanges();
@@ -200,12 +261,17 @@ describe('ReportDetailPanelsComponent', () => {
     component.itemDefSyntaxError.set(false);
     component.saveItemDef();
 
-    expect(facade.updateItemDef).toHaveBeenCalledWith('purchase', {
-      fullItemDef: {
-        item_name: 'Socks'
-      },
-      templateName: 'purchase-template'
-    });
+    expect(facade.updateItemDef).toHaveBeenCalledWith(
+      'storybook-project',
+      'evt-purchase',
+      {
+        itemId: 'purchase',
+        fullItemDef: {
+          item_name: 'Socks'
+        },
+        templateName: 'purchase-template'
+      }
+    );
     expect(component.itemDefContent()).toEqual({
       itemId: 'purchase',
       templateName: 'purchase-template',
@@ -213,6 +279,43 @@ describe('ReportDetailPanelsComponent', () => {
         item_name: 'Socks'
       }
     });
+    expect(component.itemDefEditMode()).toBe(false);
+  });
+
+  it('creates the definition of a test that has none and shows what was saved', () => {
+    const fixture = TestBed.createComponent(ReportDetailPanelsComponent);
+    const component = fixture.componentInstance;
+    facade.updateItemDef.mockReturnValue(
+      of(
+        savedItemDefJson(
+          '{"itemId":"purchase","templateName":"purchase","fullItemDef":{"item_name":"Hat"}}'
+        )
+      )
+    );
+
+    fixture.componentRef.setInput('context', createContext('purchase'));
+    fixture.detectChanges();
+    itemDefStreams['storybook-project/evt-purchase'].next(null);
+
+    component.toggleItemDefEdit();
+    component.onItemDefDraftChange('{"item_name":"Hat"}');
+    component.saveItemDef();
+
+    expect(facade.updateItemDef).toHaveBeenCalledWith(
+      'storybook-project',
+      'evt-purchase',
+      {
+        itemId: 'purchase',
+        fullItemDef: { item_name: 'Hat' },
+        templateName: undefined
+      }
+    );
+    expect(component.itemDefContent()).toEqual({
+      itemId: 'purchase',
+      templateName: 'purchase',
+      fullItemDef: { item_name: 'Hat' }
+    });
+    expect(component.editTemplateName()).toBe('purchase');
     expect(component.itemDefEditMode()).toBe(false);
   });
 

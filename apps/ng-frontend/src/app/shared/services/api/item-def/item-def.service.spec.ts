@@ -1,124 +1,130 @@
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, of, throwError } from 'rxjs';
+import { provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting
+} from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import { firstValueFrom } from 'rxjs';
+import { ItemDef } from '@utils';
 import { environment } from '../../../../../environments/environment';
 import { ItemDefService } from './item-def.service';
 
+/** What GET and PUT /specs/:projectSlug/:eventId/item-def return. */
+const itemDefJson: ItemDef = JSON.parse(`{
+  "itemId": "add_to_cart",
+  "templateName": "Add to cart Info Items",
+  "fullItemDef": { "item_id": "city001", "item_name": "Switzerland", "price": 799 }
+}`);
+
 describe('ItemDefService', () => {
-  let httpClient: {
-    get: ReturnType<typeof vi.fn>;
-    put: ReturnType<typeof vi.fn>;
-  };
   let service: ItemDefService;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
-    httpClient = { get: vi.fn(), put: vi.fn() };
-    service = new ItemDefService(httpClient as unknown as HttpClient);
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()]
+    });
+    service = TestBed.inject(ItemDefService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
+    httpMock.verify();
     vi.restoreAllMocks();
-    vi.useRealTimers();
   });
 
-  it('round-trips temp/itemDef/loading signals', () => {
-    const itemDef = {
-      itemId: 'a',
-      templateName: 't',
-      fullItemDef: {}
-    } as never;
-    service.setTempItemDef(itemDef);
-    service.setItemDef(itemDef);
-    service.setLoading(true);
-    expect(service.tempItemDefContent$()).toBe(itemDef);
-    expect(service.itemDefContent$()).toBe(itemDef);
-    expect(service.isLoading$()).toBe(true);
-  });
+  it("getItemDef reads the test's definition by project and eventId", async () => {
+    const result = firstValueFrom(
+      service.getItemDef('my_shop', 'add_to_cart_1')
+    );
+    const req = httpMock.expectOne(
+      `${environment.specApiUrl}/my_shop/add_to_cart_1/item-def`
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(itemDefJson);
 
-  it('readItemDefJsonFileContent accepts the full DTO shape', async () => {
-    vi.useFakeTimers();
-    const dto = {
-      templateName: 't',
-      itemId: 'i',
-      fullItemDef: { foo: 'bar' }
-    };
-    const file = { text: () => Promise.resolve(JSON.stringify(dto)) } as File;
-    service.readItemDefJsonFileContent(file);
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(service.tempItemDefContent$()).toEqual(dto);
-    vi.advanceTimersByTime(1000);
-    expect(service.isLoading$()).toBe(false);
-  });
-
-  it('readItemDefJsonFileContent wraps a bare object in the DTO shape', async () => {
-    vi.useFakeTimers();
-    const file = {
-      text: () => Promise.resolve('{"foo":"bar"}')
-    } as File;
-    service.readItemDefJsonFileContent(file);
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(service.tempItemDefContent$()).toEqual({
-      templateName: '',
-      itemId: '',
-      fullItemDef: { foo: 'bar' }
+    await expect(result).resolves.toEqual({
+      itemId: 'add_to_cart',
+      templateName: 'Add to cart Info Items',
+      fullItemDef: { item_id: 'city001', item_name: 'Switzerland', price: 799 }
     });
-    vi.advanceTimersByTime(1000);
   });
 
-  it('readItemDefJsonFileContent sets temp to null on parse error', async () => {
-    vi.useFakeTimers();
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    const file = { text: () => Promise.resolve('not json') } as File;
-    service.tempItemDefContent.set({ itemId: 'old' } as never);
-    service.readItemDefJsonFileContent(file);
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(service.tempItemDefContent$()).toBeNull();
-    vi.advanceTimersByTime(1000);
+  it('getItemDef resolves null when the test has no definition', async () => {
+    const result = firstValueFrom(service.getItemDef('my_shop', 'atc'));
+    httpMock
+      .expectOne(`${environment.specApiUrl}/my_shop/atc/item-def`)
+      .flush(null);
+
+    await expect(result).resolves.toBeNull();
   });
 
-  it('getItemDefById short-circuits when no id is provided', async () => {
-    await expect(firstValueFrom(service.getItemDefById(''))).rejects.toThrow(
-      'itemId is required'
-    );
-    expect(httpClient.get).not.toHaveBeenCalled();
+  it('getItemDef encodes both route parameters', async () => {
+    const result = firstValueFrom(service.getItemDef('a/b', 'c d'));
+    httpMock
+      .expectOne(`${environment.specApiUrl}/a%2Fb/c%20d/item-def`)
+      .flush(itemDefJson);
+    await result;
   });
 
-  it('getItemDefById encodes the id and rethrows wrapped errors', async () => {
-    httpClient.get.mockReturnValueOnce(of({ itemId: 'a/b' } as never));
-    await firstValueFrom(service.getItemDefById('a/b'));
-    expect(httpClient.get).toHaveBeenCalledWith(
-      `${environment.specApiUrl}/${encodeURIComponent('a/b')}/item-def`
+  it('getItemDef short-circuits without a project or eventId', async () => {
+    await expect(firstValueFrom(service.getItemDef('', 'atc'))).rejects.toThrow(
+      'projectSlug and eventId are required'
     );
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    httpClient.get.mockReturnValueOnce(throwError(() => new Error('x')));
-    await expect(firstValueFrom(service.getItemDefById('a'))).rejects.toThrow(
-      'Failed to get item definition'
-    );
-  });
-
-  it('getItemDefByTemplateName returns null when name is empty', async () => {
-    expect(
-      await firstValueFrom(service.getItemDefByTemplateName(''))
-    ).toBeNull();
-    expect(httpClient.get).not.toHaveBeenCalled();
-  });
-
-  it('updateItemDef PUTs the body and short-circuits without an id', async () => {
-    httpClient.put.mockReturnValueOnce(of({ itemId: 'a' } as never));
-    await firstValueFrom(service.updateItemDef('a', { templateName: 't' }));
-    expect(httpClient.put).toHaveBeenCalledWith(
-      `${environment.specApiUrl}/a/item-def`,
-      { templateName: 't' }
-    );
-    await expect(firstValueFrom(service.updateItemDef('', {}))).rejects.toThrow(
-      'itemId is required to update item definition'
-    );
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-    httpClient.put.mockReturnValueOnce(throwError(() => new Error('x')));
     await expect(
-      firstValueFrom(service.updateItemDef('a', {}))
-    ).rejects.toThrow('Failed to update item definition');
+      firstValueFrom(service.getItemDef('my_shop', ''))
+    ).rejects.toThrow('projectSlug and eventId are required');
+    httpMock.expectNone(() => true);
+  });
+
+  it('getItemDef wraps HTTP errors', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const result = firstValueFrom(service.getItemDef('my_shop', 'atc'));
+    httpMock
+      .expectOne(`${environment.specApiUrl}/my_shop/atc/item-def`)
+      .flush('boom', { status: 500, statusText: 'Server Error' });
+
+    await expect(result).rejects.toThrow('Failed to get item definition');
+  });
+
+  it("updateItemDef PUTs the body to the test's route", async () => {
+    const body = {
+      itemId: 'add_to_cart',
+      templateName: 'Add to cart Info Items',
+      fullItemDef: { item_id: 'city001' }
+    };
+    const result = firstValueFrom(
+      service.updateItemDef('my_shop', 'add_to_cart_1', body)
+    );
+    const req = httpMock.expectOne(
+      `${environment.specApiUrl}/my_shop/add_to_cart_1/item-def`
+    );
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual(body);
+    req.flush(itemDefJson);
+
+    await expect(result).resolves.toMatchObject({ itemId: 'add_to_cart' });
+  });
+
+  it('updateItemDef short-circuits without a project or eventId', async () => {
+    await expect(
+      firstValueFrom(service.updateItemDef('my_shop', '', {}))
+    ).rejects.toThrow(
+      'projectSlug and eventId are required to update item definition'
+    );
+    httpMock.expectNone(() => true);
+  });
+
+  it('updateItemDef wraps HTTP errors, such as 404 for a missing test', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const result = firstValueFrom(service.updateItemDef('my_shop', 'atc', {}));
+    httpMock
+      .expectOne(`${environment.specApiUrl}/my_shop/atc/item-def`)
+      .flush(
+        { statusCode: 404, message: 'Test not found' },
+        { status: 404, statusText: 'Not Found' }
+      );
+
+    await expect(result).rejects.toThrow('Failed to update item definition');
   });
 });

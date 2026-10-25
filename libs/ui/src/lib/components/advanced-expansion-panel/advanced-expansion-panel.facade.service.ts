@@ -8,13 +8,17 @@ import {
 import { ErrorDialogComponent } from '../error-dialog/error-dialog.component';
 import { EditorView } from 'codemirror';
 
-// Local shape for the simplified form values the component uses
+/** The advanced options form: built-in events and item-scoped variables. */
 export interface AdvancedFormValues {
   includeVideoTag: boolean;
   includeScrollTag: boolean;
   includeItemScopedVariables: boolean;
 }
 
+/**
+ * Applies tag-build's advanced options panel to the editors and the setup
+ * services.
+ */
 @Injectable({ providedIn: 'root' })
 export class AdvancedExpansionPanelFacade {
   constructor(
@@ -25,14 +29,15 @@ export class AdvancedExpansionPanelFacade {
   ) {}
 
   /**
-   * Safely parse the editor JSON, delegate transformation to EditorFacadeService,
-   * and wire the resulting content back into the editor facade and setup service.
-   * Returns the updated JSON string on success or null on failure.
+   * Parses the input editor's specs, adds or removes the built-in events the
+   * options ask for and shows the result in the editor. Returns the updated
+   * specs, or null when the editor is empty or its JSON does not parse (an
+   * error dialog is shown for the latter).
    */
   updateJsonBasedOnForm(
     editor: EditorView | null | undefined,
     form: AdvancedFormValues
-  ): string | null {
+  ): unknown {
     if (!editor?.state.doc.toString()) return null;
 
     try {
@@ -56,7 +61,9 @@ export class AdvancedExpansionPanelFacade {
   }
 
   /**
-   * Extracts the patch values (video/scroll tag presence) from the editor using the EditorFacadeService helpers.
+   * Whether the input editor's specs already contain video and scroll
+   * events, to check the matching options. Missing editors and specs that do
+   * not parse give false for both.
    */
   getPatchValuesFromEditor(editor: EditorView | null | undefined): {
     includeVideoTag: boolean;
@@ -64,9 +71,16 @@ export class AdvancedExpansionPanelFacade {
   } {
     if (!editor) return { includeVideoTag: false, includeScrollTag: false };
 
+    let json: unknown = null;
+    try {
+      json = JSON.parse(editor.state.doc.toString());
+    } catch {
+      // Unparsable specs contain no built-in events to report.
+    }
+
     return {
-      includeVideoTag: this.editorFacadeService.hasVideoTag(editor),
-      includeScrollTag: this.editorFacadeService.hasScrollTag(editor)
+      includeVideoTag: this.editorFacadeService.hasVideoTag(json),
+      includeScrollTag: this.editorFacadeService.hasScrollTag(json)
     };
   }
 

@@ -6,6 +6,7 @@
   "sourceRoot": "apps/ng-frontend/src",
   "tags": ["scope:frontend", "type:app"],
   "targets": {
+    "typecheck-spec": {},
     "build": {
       "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
@@ -36,7 +37,6 @@
         "styles": [
           "@angular/material/prebuilt-themes/indigo-pink.css",
           "apps/ng-frontend/src/styles.css",
-          "apps/ng-tag-build/src/styles.scss",
           "libs/shared-styles/src/index.scss",
           "node_modules/prismjs/themes/prism-okaidia.css",
           "node_modules/prismjs/plugins/command-line/prism-command-line.css"

@@ -10,14 +10,15 @@ import { DatabaseConfigModule } from './core/database/database.module';
 import { createMigratedDataSource } from './core/database/database-migrations';
 import { LoggerModule, LoggerErrorInterceptor } from 'nestjs-pino';
 import { ConfigsModule } from './core/configs/configs.module';
-import { CacheModule } from '@nestjs/cache-manager';
 import { EntitiesModule } from './infrastructure/database/entities.module';
 import { HealthModule } from './common/health/health.module';
 import { randomUUID } from 'node:crypto';
 
+/** A UUID v4: the only client `x-request-id` accepted into logs. */
 const REQUEST_ID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+/** The header's request id when it is a UUID v4; a malformed one is logged. */
 function normalizeClientRequestId(
   header: string | string[] | number | undefined
 ): string | undefined {
@@ -34,6 +35,7 @@ function normalizeClientRequestId(
   return undefined;
 }
 
+/** A valid client `x-request-id`, else pino's generated request id. */
 function readRequestId(req: {
   id?: unknown;
   headers?: Record<string, string | string[] | number | undefined>;
@@ -41,13 +43,11 @@ function readRequestId(req: {
   const headerRequestId = normalizeClientRequestId(
     req.headers?.['x-request-id']
   );
-  return headerRequestId === undefined
-    ? req.id === undefined
-      ? undefined
-      : String(req.id)
-    : String(headerRequestId);
+  if (headerRequestId !== undefined) return headerRequestId;
+  return req.id === undefined ? undefined : String(req.id);
 }
 
+/** The URL's path without its query string, which may hold secrets. */
 function sanitizeHttpPath(rawUrl: string | undefined): string | undefined {
   if (!rawUrl) return rawUrl;
   try {
@@ -57,14 +57,15 @@ function sanitizeHttpPath(rawUrl: string | undefined): string | undefined {
   }
 }
 
+/**
+ * The backend's root module: configuration, the migrated SQLite database,
+ * the controllers, the global exception filter and pino request logging.
+ */
 @Module({
   imports: [
-    // // Load ConfigModule first as other modules depend on it
+    // Load ConfigModule first as other modules depend on it
     ConfigModule.forRoot({
       isGlobal: true // Make configuration globally available
-    }),
-    CacheModule.register({
-      isGlobal: true
     }),
 
     // Core modules

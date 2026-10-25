@@ -2,9 +2,16 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SelectorSymbol, SelectorType } from '../action-utils';
 import { Page, ElementHandle, JSHandle } from 'puppeteer';
 
+/** Classifies recorded selectors and resolves them to element handles. */
 @Injectable()
 export class ActionUtilsService {
   private readonly logger = new Logger(ActionUtilsService.name);
+
+  /**
+   * Returns the type of a Chrome Recorder selector from its prefix: a query
+   * handler (`xpath/`, `pierce/`, `text/`, `aria/`), a raw XPath, or CSS.
+   * Returns undefined only when `selector` is not a string.
+   */
   getSelectorType(selector: string) {
     try {
       if (this.isXPathSelector(selector)) {
@@ -27,10 +34,11 @@ export class ActionUtilsService {
     }
   }
 
-  async sleep(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
+  /**
+   * Resolves `selector` as `selectorType` to its first element. Returns null
+   * when nothing matches or the lookup fails; never throws. The caller owns
+   * the handle and disposes it.
+   */
   async getElement(
     page: Page,
     selectorType: string,
@@ -90,6 +98,10 @@ export class ActionUtilsService {
     );
   }
 
+  /**
+   * Resolves `pierce/host/child` as the child inside the host's open shadow
+   * root; any other pierce selector goes to Puppeteer's pierce handler.
+   */
   private async getElementByShadowDom(
     page: Page,
     selector: string
@@ -109,6 +121,8 @@ export class ActionUtilsService {
       throw new Error(`Invalid shadow DOM selector: ${selector}`);
     }
 
+    // Helper-free on purpose: swc compiles this function to ES5 for the
+    // page, which has none of the bundle's helpers (see AGENTS.md).
     const jsHandle = await page.evaluateHandle(
       (host, shadow) => {
         const shadowRoot = document.querySelector(host)?.shadowRoot;
@@ -129,24 +143,5 @@ export class ActionUtilsService {
     }
     await jsHandle.dispose();
     return null;
-  }
-
-  isElementHandle(obj: unknown): obj is ElementHandle<Element> {
-    const candidate = obj as Partial<Record<'click' | 'focus', unknown>> | null;
-    return (
-      !!candidate &&
-      typeof candidate.click === 'function' &&
-      typeof candidate.focus === 'function'
-    );
-  }
-
-  queryShadowDom(selector: string, shadowHostSelector: string) {
-    const shadowHost = document.querySelector(shadowHostSelector);
-    if (!shadowHost) return null;
-
-    const shadowRoot = shadowHost.shadowRoot;
-    if (!shadowRoot) return null;
-
-    return shadowRoot.querySelector(selector);
   }
 }

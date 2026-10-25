@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { EventsGatewayService } from './events-gateway.service';
+import { ProgressEventsService } from './progress-events.service';
 
-/** The progress WebSocket gateway; import this module to send progress. */
+/** The progress events module; import this module to send or stream progress. */
 @Module({
-  providers: [EventsGatewayService],
-  exports: [EventsGatewayService]
+  providers: [ProgressEventsService],
+  exports: [ProgressEventsService]
 })
 export class EventsGatewayModule {}

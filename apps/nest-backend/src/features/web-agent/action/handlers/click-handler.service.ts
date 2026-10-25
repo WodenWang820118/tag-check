@@ -21,6 +21,12 @@ import { FileService } from '../../../../infrastructure/os/file/file.service';
 import { OperationFile, Step } from '@utils';
 import { ActionUtilsService } from '../action-utils/action-utils.service';
 
+/**
+ * Replays a click step. Waits for any of the step's selectors to become
+ * visible, then clicks with the first that works. When the test sets
+ * stopNavigation, the recording's last click has its default action
+ * prevented, so it fires the site's listeners without leaving the page.
+ */
 @Injectable()
 export class ClickHandler implements ActionHandler {
   private readonly logger = new Logger(ClickHandler.name);
@@ -130,6 +136,8 @@ export class ClickHandler implements ActionHandler {
       : undefined;
 
     try {
+      // Chrome Recorder stores where inside the element the user clicked;
+      // the replay clicks the same point.
       if (offsetX !== undefined && offsetY !== undefined) {
         const elementHandle = await page.$(selector);
         if (!elementHandle) {
@@ -154,6 +162,8 @@ export class ClickHandler implements ActionHandler {
         }
       }
 
+      // Several tabs with the page on the recorded site means a GTM Preview
+      // run: start with a DOM click there, and with a mouse click otherwise.
       const pages = await page.browserContext().pages();
       const useNormalClick = pages.length === 1 || !page.url().includes(domain);
       const selectorType = this.actionUtilsService.getSelectorType(selector);

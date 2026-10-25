@@ -1,114 +1,160 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { EntityMetadata, QueryRunner } from 'typeorm';
 import { PointerRepairService } from './pointer-repair.service';
+import { IdMapRegistryService } from './id-map-registry.service';
+import type { DeferredPointer } from '../../interfaces/import-types';
+
+/** A test with a latest-result pointer, as TypeORM describes it. */
+const testMeta = {
+  name: 'TestEventEntity',
+  relations: [
+    {
+      isManyToOne: true,
+      propertyName: 'project',
+      joinColumns: [{ databaseName: 'project_id' }],
+      inverseEntityMetadata: { name: 'ProjectEntity' }
+    },
+    {
+      isOneToOneOwner: true,
+      propertyName: 'latestTestEventDetail',
+      joinColumns: [{ databaseName: 'latest_test_event_detail_id' }],
+      inverseEntityMetadata: { name: 'TestEventDetailEntity' }
+    },
+    {
+      isOneToOneOwner: false,
+      propertyName: 'spec',
+      joinColumns: [],
+      inverseEntityMetadata: { name: 'SpecEntity' }
+    }
+  ],
+  columns: [
+    {
+      propertyName: 'latestTestEventDetailId',
+      databaseName: 'latest_test_event_detail_id'
+    },
+    { propertyName: 'eventId', databaseName: 'event_id' }
+  ]
+} as unknown as EntityMetadata;
 
 describe('PointerRepairService', () => {
-  it('repairs many-to-one pointers using id maps and saves the updated rows', async () => {
-    const svc = new PointerRepairService();
-    const save = vi.fn().mockResolvedValue(undefined);
-    const find = vi.fn().mockResolvedValue([
-      { id: 1, project_id: 'old-A' },
-      { id: 2, project_id: 'old-B' },
-      { id: 3, project_id: null }
-    ]);
-    const repo = { find, save };
-    const queryRunner = {
-      manager: { getRepository: () => repo }
-    } as never;
-    const meta = {
-      name: 'Foo',
-      relations: [
+  let registry: IdMapRegistryService;
+  let svc: PointerRepairService;
+
+  beforeEach(() => {
+    registry = new IdMapRegistryService();
+    svc = new PointerRepairService(registry);
+  });
+
+  describe('deferForwardPointers', () => {
+    it('removes a pointer to a pending entity and records it', () => {
+      const raw = {
+        id: 4,
+        project: 1,
+        latestTestEventDetail: 9,
+        latestTestEventDetailId: 9,
+        eventId: 'e'
+      };
+      const materialized: Record<string, unknown> = { ...raw };
+      const ctx = {
+        pendingEntities: new Set(['TestEventEntity', 'TestEventDetailEntity']),
+        deferredPointers: [] as DeferredPointer[]
+      };
+
+      svc.deferForwardPointers(materialized, raw, testMeta, ctx, 'id');
+
+      expect(materialized).toEqual({ id: 4, project: 1, eventId: 'e' });
+      expect(ctx.deferredPointers).toEqual([
         {
-          isManyToOne: true,
-          isOneToOneOwner: false,
-          joinColumns: [{ databaseName: 'project_id' }],
-          propertyName: 'project',
-          inverseEntityMetadata: { name: 'Project' }
+          entityName: 'TestEventEntity',
+          exportedRowId: 4,
+          relationProp: 'latestTestEventDetail',
+          targetEntityName: 'TestEventDetailEntity',
+          exportedTargetId: 9
         }
-      ]
-    } as never;
-    const idMaps = {
-      Project: new Map<unknown, unknown>([
-        ['old-A', 'new-A'],
-        ['old-B', 'new-B']
-      ])
+      ]);
+    });
+
+    it('keeps pointers to entities already imported', () => {
+      const raw = { id: 4, project: 1, latestTestEventDetail: { id: 9 } };
+      const materialized: Record<string, unknown> = { ...raw };
+      const ctx = {
+        pendingEntities: new Set(['TestEventEntity']),
+        deferredPointers: [] as DeferredPointer[]
+      };
+
+      svc.deferForwardPointers(materialized, raw, testMeta, ctx, 'id');
+
+      expect(materialized).toEqual(raw);
+      expect(ctx.deferredPointers).toEqual([]);
+    });
+
+    it('does nothing without pending entities in the context', () => {
+      const raw = { id: 4, latestTestEventDetail: 9 };
+      const materialized: Record<string, unknown> = { ...raw };
+
+      svc.deferForwardPointers(materialized, raw, testMeta, {}, 'id');
+
+      expect(materialized).toEqual(raw);
+    });
+  });
+
+  describe('repairPointers', () => {
+    const pointer: DeferredPointer = {
+      entityName: 'TestEventEntity',
+      exportedRowId: 4,
+      relationProp: 'latestTestEventDetail',
+      targetEntityName: 'TestEventDetailEntity',
+      exportedTargetId: 9
     };
 
-    await svc.repairPointers(
-      queryRunner,
-      new Map([['Foo', meta]]),
-      ['Foo'],
-      idMaps
-    );
+    function queryRunnerWith(update: ReturnType<typeof vi.fn>) {
+      return {
+        manager: { getRepository: vi.fn(() => ({ update })) }
+      } as unknown as QueryRunner;
+    }
 
-    expect(save).toHaveBeenCalledTimes(1);
-    const savedRows = save.mock.calls[0][0];
-    expect(savedRows).toHaveLength(2);
-    expect(savedRows[0].project).toEqual({ id: 'new-A' });
-  });
+    it('points an imported row at the new id of its target', async () => {
+      registry.set('TestEventEntity', 4, 40);
+      registry.markCreated('TestEventEntity', 40);
+      registry.set('TestEventDetailEntity', 9, 90);
+      const update = vi.fn().mockResolvedValue(undefined);
 
-  it('skips entities with no pointer columns', async () => {
-    const svc = new PointerRepairService();
-    const save = vi.fn();
-    const find = vi.fn().mockResolvedValue([{ id: 1 }]);
-    const repo = { find, save };
-    const queryRunner = {
-      manager: { getRepository: () => repo }
-    } as never;
-    const meta = { name: 'Foo', relations: [] } as never;
-    await svc.repairPointers(
-      queryRunner,
-      new Map([['Foo', meta]]),
-      ['Foo'],
-      {}
-    );
-    expect(save).not.toHaveBeenCalled();
-  });
+      await svc.repairPointers(queryRunnerWith(update), [pointer]);
 
-  it('logs and continues when the bulk save throws', async () => {
-    const svc = new PointerRepairService();
-    const save = vi.fn().mockRejectedValue(new Error('save bad'));
-    const find = vi.fn().mockResolvedValue([{ id: 1, project_id: 'old' }]);
-    const repo = { find, save };
-    const meta = {
-      name: 'Foo',
-      relations: [
-        {
-          isManyToOne: true,
-          joinColumns: [{ databaseName: 'project_id' }],
-          propertyName: 'project',
-          inverseEntityMetadata: { name: 'Project' }
-        }
-      ]
-    } as never;
-    const queryRunner = { manager: { getRepository: () => repo } } as never;
-    await expect(
-      svc.repairPointers(queryRunner, new Map([['Foo', meta]]), ['Foo'], {
-        Project: new Map([['old', 'new']])
-      })
-    ).resolves.toBeUndefined();
-    expect(save).toHaveBeenCalled();
-  });
-
-  it('returns a falsy fetch result and skips when find throws', async () => {
-    const svc = new PointerRepairService();
-    const save = vi.fn();
-    const find = vi.fn().mockRejectedValue(new Error('db down'));
-    const repo = { find, save };
-    const meta = {
-      name: 'Foo',
-      relations: [
-        {
-          isManyToOne: true,
-          joinColumns: [{ databaseName: 'project_id' }],
-          propertyName: 'project',
-          inverseEntityMetadata: { name: 'Project' }
-        }
-      ]
-    } as never;
-    const queryRunner = { manager: { getRepository: () => repo } } as never;
-    await svc.repairPointers(queryRunner, new Map([['Foo', meta]]), ['Foo'], {
-      Project: new Map()
+      expect(update).toHaveBeenCalledWith(40, {
+        latestTestEventDetail: { id: 90 }
+      });
     });
-    expect(save).not.toHaveBeenCalled();
+
+    it('leaves a row the import merged into an existing one', async () => {
+      registry.set('TestEventEntity', 4, 40);
+      registry.set('TestEventDetailEntity', 9, 90);
+      const update = vi.fn();
+
+      await svc.repairPointers(queryRunnerWith(update), [pointer]);
+
+      expect(update).not.toHaveBeenCalled();
+    });
+
+    it('leaves the pointer empty when its target was not imported', async () => {
+      registry.set('TestEventEntity', 4, 40);
+      registry.markCreated('TestEventEntity', 40);
+      const update = vi.fn();
+
+      await svc.repairPointers(queryRunnerWith(update), [pointer]);
+
+      expect(update).not.toHaveBeenCalled();
+    });
+
+    it('rethrows a failed update so the import rolls back', async () => {
+      registry.set('TestEventEntity', 4, 40);
+      registry.markCreated('TestEventEntity', 40);
+      registry.set('TestEventDetailEntity', 9, 90);
+      const update = vi.fn().mockRejectedValue(new Error('db down'));
+
+      await expect(
+        svc.repairPointers(queryRunnerWith(update), [pointer])
+      ).rejects.toThrow('db down');
+    });
   });
 });

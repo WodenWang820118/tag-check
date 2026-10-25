@@ -1,5 +1,9 @@
-import { StreamableFile } from '@nestjs/common';
-import { existsSync, mkdirSync } from 'fs';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  StreamableFile
+} from '@nestjs/common';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
@@ -65,6 +69,27 @@ describe('ProjectIoFacadeService', () => {
     expect(importedSlug.startsWith(slug)).toBe(true);
     // Import should still have occurred using the original fixture filename (slug.fixture.json)
     expect(importMock.imported).toBeTruthy();
+  });
+
+  it('reports a failed data import instead of answering as if it succeeded', async () => {
+    importMock.failWith = new Error('SQLITE_CONSTRAINT');
+
+    await expect(
+      harness.service.importProject('proj-fail', 'dummy.zip', harness.tempRoot)
+    ).rejects.toBeInstanceOf(InternalServerErrorException);
+  });
+
+  it('rejects a fixture that is not JSON as a bad request', async () => {
+    harness.projectIoService.unzipProject = async (slug, _zip, output) => {
+      mkdirSync(join(output, slug), { recursive: true });
+      writeFileSync(join(output, slug, `${slug}.fixture.json`), '{not json');
+      return slug;
+    };
+
+    await expect(
+      harness.service.importProject('proj-bad', 'dummy.zip', harness.tempRoot)
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(importMock.importCalls).toEqual([]);
   });
 
   it('should delete the resolved project folder', async () => {

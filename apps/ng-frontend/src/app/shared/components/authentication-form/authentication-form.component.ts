@@ -18,6 +18,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthenticationSetting, ProjectSetting } from '@utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+/** Settings > Authentication: the username and password a run signs in with. */
 @Component({
   selector: 'app-authentication-form',
   standalone: true,

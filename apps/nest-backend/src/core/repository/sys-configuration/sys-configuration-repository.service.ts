@@ -7,14 +7,17 @@ import {
 } from '@nestjs/common';
 import {
   SysConfigurationEntity,
-  CreateSysConfigurationDto,
-  UpdateSysConfigurationDto
+  CreateSysConfigurationDto
 } from '../../../shared';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigsService } from '../../configs/configs.service';
 import { Repository } from 'typeorm';
 import { existsSync } from 'fs';
 
+/**
+ * Reads and writes system configuration entries, such as the root projects
+ * path, which it creates or repairs when the module starts.
+ */
 @Injectable()
 export class SysConfigurationRepositoryService implements OnModuleInit {
   private readonly logger = new Logger(SysConfigurationRepositoryService.name);
@@ -69,10 +72,13 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
     }
   }
 
-  create(
+  /** Saves a new entry. Rejects when an entry already has its name. */
+  async create(
     createConfigurationDto: CreateSysConfigurationDto
-  ): SysConfigurationEntity {
-    return this.configurationRepository.create(createConfigurationDto);
+  ): Promise<SysConfigurationEntity> {
+    return await this.configurationRepository.save(
+      this.configurationRepository.create(createConfigurationDto)
+    );
   }
 
   async findAll() {
@@ -109,13 +115,6 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
     return configuration;
   }
 
-  async update(id: number, updateConfigurationDto: UpdateSysConfigurationDto) {
-    return await this.configurationRepository.update(
-      { value: updateConfigurationDto.value },
-      { id: id }
-    );
-  }
-
   async remove(id: number) {
     return await this.configurationRepository.delete({ id });
   }
@@ -133,20 +132,5 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
     }
 
     return configuration.value;
-  }
-
-  async getCurrentProjectPath() {
-    const configuration = await this.configurationRepository.findOne({
-      where: { name: this.configsService.getCONFIG_CURRENT_PROJECT_PATH() }
-    });
-
-    if (!configuration) {
-      throw new HttpException(
-        'Current project path configuration not found',
-        HttpStatus.NOT_FOUND
-      );
-    }
-
-    return configuration;
   }
 }

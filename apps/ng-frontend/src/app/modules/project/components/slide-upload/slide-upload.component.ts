@@ -13,6 +13,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 import { Ga4UploadComponent } from '../ga4-upload/ga4-upload.component';
 
+/**
+ * The "Add tests" side sheet: GTM import, GA4 import or a test created
+ * by hand.
+ */
 @Component({
   selector: 'app-slide-upload',
   standalone: true,
@@ -48,14 +52,14 @@ export class SlideUploadComponent {
   open() {
     const s = this.sidenav();
     if (!s) return;
-    s.open();
+    void s.open();
   }
 
   closeIfOpen() {
     const s = this.sidenav();
     if (!s) return;
     if (s.opened) {
-      s.close();
+      void s.close();
       this.uploadSpecService.resetStart();
     }
   }

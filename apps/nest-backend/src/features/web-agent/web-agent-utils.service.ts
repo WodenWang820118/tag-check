@@ -47,6 +47,11 @@ export interface PerformTestParams {
   };
 }
 
+/**
+ * Runs one replay of a test on a prepared page: authenticates, arms GA4
+ * request capture when asked, replays the recording and collects the
+ * dataLayer the page pushed.
+ */
 @Injectable()
 export class WebAgentUtilsService {
   private readonly logger = new Logger(WebAgentUtilsService.name);
@@ -95,7 +100,10 @@ export class WebAgentUtilsService {
 
     if (credentials) await this.authenticate(page, credentials);
     const testEventEntity =
-      await this.testEventRepositoryService.getEntityByEventId(eventId);
+      await this.testEventRepositoryService.getEntityBySlugAndEventId(
+        projectSlug,
+        eventId
+      );
     // 2) capture the request if needed
     if (captureRequest) {
       requestInterception = await this.setupRequestInterception(
@@ -216,10 +224,6 @@ export class WebAgentUtilsService {
     requestInterception: RequestInterceptionHandle,
     timeoutMs = 15000
   ): Promise<string> {
-    if (!requestInterception) {
-      throw new Error('Request interception handle is required');
-    }
-
     const eventRequest = await firstValueFrom(
       requestInterception.rawRequest$.pipe(
         timeout(timeoutMs),

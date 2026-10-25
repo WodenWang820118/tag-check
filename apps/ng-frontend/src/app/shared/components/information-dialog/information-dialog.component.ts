@@ -12,6 +12,19 @@ import {
   MatDialogModule
 } from '@angular/material/dialog';
 
+/** What InformationDialogComponent shows; it closes with true on the action. */
+export type InformationDialogData = {
+  title: string;
+  /** The dialog's text, typically the question the action answers. */
+  contents: string;
+  /** The action button's label. */
+  action: string;
+  /** The action button's color; warn when omitted. */
+  actionColor?: string;
+  consent?: boolean;
+};
+
+/** A confirmation dialog: Cancel closes it with false, the action with true. */
 @Component({
   selector: 'app-error-dialog',
   standalone: true,
@@ -80,13 +93,7 @@ export class InformationDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<InformationDialogComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data: {
-      title: string;
-      contents: string;
-      action: string;
-      actionColor: string;
-      consent: boolean;
-    }
+    public data: InformationDialogData
   ) {
     // Handle dialog state changes
     effect(() => {

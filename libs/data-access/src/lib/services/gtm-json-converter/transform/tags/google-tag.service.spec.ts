@@ -29,13 +29,13 @@ describe('GoogleTag', () => {
     expect(config.consentSettings?.consentStatus).toBe('NOT_NEEDED');
   });
 
-  it('emits the documented parameter triplet (tagId, sendPageView, enableSendToServerContainer)', () => {
+  it('emits tagId, configSettingsTable and enableSendToServerContainer', () => {
     const config = service.createGA4Configuration('GA4', 'G-1', 'a', 'c');
 
     const keys = config.parameter?.map((p) => p.key);
     expect(keys).toEqual([
       'tagId',
-      'sendPageView',
+      'configSettingsTable',
       'enableSendToServerContainer'
     ]);
 
@@ -43,9 +43,20 @@ describe('GoogleTag', () => {
     expect(tagId?.type).toBe('TEMPLATE');
     expect(tagId?.value).toBe('{{CONST - Measurement ID}}');
 
-    const sendPageView = config.parameter?.[1];
-    expect(sendPageView?.type).toBe('BOOLEAN');
-    expect(sendPageView?.value).toBe('false');
+    // The Google tag's settings table, as Tag Manager exports it.
+    expect(config.parameter?.[1]).toEqual({
+      type: 'LIST',
+      key: 'configSettingsTable',
+      list: [
+        {
+          type: 'MAP',
+          map: [
+            { type: 'TEMPLATE', key: 'parameter', value: 'send_page_view' },
+            { type: 'TEMPLATE', key: 'parameterValue', value: 'false' }
+          ]
+        }
+      ]
+    });
 
     const sst = config.parameter?.[2];
     expect(sst?.type).toBe('BOOLEAN');

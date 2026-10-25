@@ -5,7 +5,7 @@ import {
   input,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ReportDetailPanelsComponent } from '../report-detail-panels/report-detail-panels.component';
 import {
   getRunStatus,
@@ -47,10 +47,12 @@ function buildReportTabViewModel(
     hasMedia:
       (context.imageBlob?.size || 0) > 0 && (context.videoBlob?.size || 0) > 0,
     videoBlob: context.videoBlob,
+    tagAssistantVideoBlob: context.tagAssistantVideoBlob,
     imageBlob: context.imageBlob
   };
 }
 
+/** A test's Latest result tab, built from the report page's route context. */
 @Component({
   selector: 'app-report-tab',
   standalone: true,
@@ -78,6 +80,7 @@ function buildReportTabViewModel(
 })
 export class ReportTabComponent {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   context = input<ReportDetailRouteContext | undefined>(undefined);
   viewModel = computed(() => buildReportTabViewModel(this.context()));
@@ -117,7 +120,10 @@ export class ReportTabComponent {
       return;
     }
 
+    // The commands are relative to the test's route: without relativeTo
+    // they resolve from the root, to /buckets, which matches no route.
     void this.router.navigate(context.historyLinkCommands, {
+      relativeTo: this.route,
       queryParams: { event: context.reportDetails?.eventName }
     });
   }

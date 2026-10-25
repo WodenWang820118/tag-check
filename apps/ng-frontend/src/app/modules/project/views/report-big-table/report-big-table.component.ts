@@ -12,12 +12,18 @@ import { SlideUploadComponent } from '../../components/slide-upload/slide-upload
 import { SlideImportComponent } from '../../components/slide-import/slide-import.component';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { BatchRunPanelComponent } from '../../components/batch-run-panel/batch-run-panel.component';
+/**
+ * The Tests page: toolbar, batch run panel, tests table and the side
+ * sheet for adding tests, which UploadSpecService opens and closes.
+ */
 @Component({
   selector: 'app-report-big-table',
   standalone: true,
   imports: [
     ReportTableComponent,
     ReportTableToolbarComponent,
+    BatchRunPanelComponent,
     SlideUploadComponent,
     SlideImportComponent,
     MatSidenavModule
@@ -51,6 +57,7 @@ import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
       <mat-sidenav-content>
         <div class="report-view mat-elevation-z4">
           <app-report-table-toolbar></app-report-table-toolbar>
+          <app-batch-run-panel></app-batch-run-panel>
           <app-report-table></app-report-table>
         </div>
       </mat-sidenav-content>
@@ -88,15 +95,15 @@ export class ReportBigTableComponent implements OnDestroy {
         this.uploadSpecService.isOpenImportSidenav();
       const sn = this.sheet();
       if (this.isClosing()) {
-        sn.close();
+        void sn.close();
         document.body.style.overflow = 'auto';
         return;
       }
       if (showUpload || showImport) {
-        sn.open();
+        void sn.open();
         document.body.style.overflow = 'hidden';
       } else {
-        sn.close();
+        void sn.close();
         document.body.style.overflow = 'auto';
       }
     });
@@ -104,7 +111,7 @@ export class ReportBigTableComponent implements OnDestroy {
 
   onBackdrop() {
     this.isClosing.set(true);
-    this.sheet()?.close();
+    void this.sheet()?.close();
   }
 
   onClosed() {

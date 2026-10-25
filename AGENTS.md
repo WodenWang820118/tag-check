@@ -19,16 +19,16 @@ against specs built from a GTM container export. The project list is in
 
 The UI, the API and the entities use different words for the same things.
 
-| UI               | Code                                                            | Meaning                                                                                                                                                                                                                                                                          |
-| ---------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Project          | `ProjectEntity`, `projectSlug`                                  | One website under test, with its settings: website URL, pre-loading values, GTM preview URL, authentication, browser.                                                                                                                                                            |
-| Test             | test event: `TestEventEntity`, `eventId`                        | One GA4 event to check. Owns a Chrome Recorder **recording** (the journey to replay), a **spec** (`SpecEntity`, the expected `dataLayer` push) and an optional item definition (`ItemDefEntity`).                                                                                |
-| Run              | inspection: `inspectSingleEvent`, `singleEventInspectionRecipe` | One replay of a test in Puppeteer. Makes two checks: the **dataLayer check** (`passed`) and the **request check** (`requestPassed`: a GA4 `/g/collect` request for the event, sent to the measurement ID).                                                                       |
-| Result           | `TestEventDetailEntity`                                         | One row per run with both check results, the raw request, the captured `dataLayer`, the message and the run's screenshot (`testImage`; null for older runs). `TestEventEntity.latestTestEventDetailId` points at the latest.                                                     |
-| Media            | `TestImageEntity`, `recording.webm`                             | The run's screenshot (one row per run; the API serves the latest) and its screen recording (`inspection_results/<eventId>/recording.webm`, replaced by every run).                                                                                                               |
-| Report           | `IReportDetails`; `reports`, `file-reports` controllers         | A test's Reports tab, the Reports page (one row per run; deleting rows deletes runs and their screenshots, not tests) and the spreadsheet export. `GET /reports/:projectSlug` flattens each test's latest result into `passed`, `requestPassed`, `hasRecording` and `lastRunAt`. |
-| Status           | `getRunStatus` (`report-detail.contracts.ts`)                   | Not run / Passed / Partial / Failed. A test has run when `lastRunAt` is set (null once every run is deleted).                                                                                                                                                                    |
-| Accompanied mode | `gtm-operator`                                                  | Runs a test through GTM Preview (Tag Assistant) instead of opening the site directly.                                                                                                                                                                                            |
+| UI               | Code                                                            | Meaning                                                                                                                                                                                                                                                                                          |
+| ---------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Project          | `ProjectEntity`, `projectSlug`                                  | One website under test, with its settings: website URL, pre-loading values, GTM preview URL, authentication, browser.                                                                                                                                                                            |
+| Test             | test event: `TestEventEntity`, `eventId`                        | One GA4 event to check. Owns a Chrome Recorder **recording** (the journey to replay), a **spec** (`SpecEntity`, the expected `dataLayer` push) and an optional item definition (`ItemDefEntity`).                                                                                                |
+| Run              | inspection: `inspectSingleEvent`, `singleEventInspectionRecipe` | One replay of a test in Puppeteer. Makes two checks: the **dataLayer check** (`passed`) and the **request check** (`requestPassed`: a GA4 `/g/collect` request for the event, sent to the measurement ID).                                                                                       |
+| Result           | `TestEventDetailEntity`                                         | One row per run with both check results, the raw request, the captured `dataLayer`, the message and the run's screenshot (`testImage`; null for older runs). `TestEventEntity.latestTestEventDetailId` points at the latest.                                                                     |
+| Media            | `TestImageEntity`, `recording.webm`                             | The run's screenshot (one row per run; the API serves the latest) and its screen recording (`inspection_results/<eventId>/recording.webm`, replaced by every run; accompanied-mode runs also record the Tag Assistant tab to `recording-tag-assistant.webm`, served with `?view=tag-assistant`). |
+| Report           | `IReportDetails`; `reports`, `file-reports` controllers         | A test's Reports tab, the Reports page (one row per run; deleting rows deletes runs and their screenshots, not tests) and the spreadsheet export. `GET /reports/:projectSlug` flattens each test's latest result into `passed`, `requestPassed`, `hasRecording` and `lastRunAt`.                 |
+| Status           | `getRunStatus` (`report-detail.contracts.ts`)                   | Not run / Passed / Partial / Failed. A test has run when `lastRunAt` is set (null once every run is deleted).                                                                                                                                                                                    |
+| Accompanied mode | `gtm-operator`                                                  | Runs a test through GTM Preview (Tag Assistant) instead of opening the site directly.                                                                                                                                                                                                            |
 
 ## How a run flows
 
@@ -46,7 +46,7 @@ nest-backend  controllers/gtm-operator      -> features/gtm-operator (opens GTM 
                 web-agent/action/request-interceptor  captures GA4 requests (CDP Fetch)
                 features/request-processor            parses /g/collect payloads
               core/repository: TestEventDetail and TestImage rows; recording.webm on disk
-              core/events-gateway: progressUpdate over WebSocket :7002 (progress chart)
+              core/events-gateway: progressUpdate over SSE (GET /events, opened during a run)
 ng-frontend   the run's HTTP response updates the table row; the report page loads
               GET /reports/:projectSlug/:eventId, /videos/..., /projects/images/...
 ```
@@ -134,8 +134,10 @@ module that provides any other: a second provider creates a second instance.
   `.github/workflows/vercel-previews.yaml`, which deploys the sites whose Nx
   project is affected. Register a new Vercel site in
   `tools/scripts/vercel/preview-targets`.
-- ng-tag-build's initial bundle has about 1.5 kB of headroom under its 1 MB
-  error budget, and `libs/shared-styles` counts against it. Prefer
+- ng-tag-build's initial bundle has about 12 kB of headroom under its 1 MB
+  error budget, and `libs/shared-styles` counts against it. A dynamic import
+  of a CommonJS package (such as exceljs) still adds the bundler's interop
+  helpers to the initial bundle. Prefer
   `mat.*-overrides` mixins with only the tokens you change over
   `mat.*-color` / `mat.*-theme`.
 - The pre-commit hook runs `nx affected` tests three at a time. At six,

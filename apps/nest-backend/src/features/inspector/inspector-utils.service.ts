@@ -12,6 +12,10 @@ import {
 } from '@utils';
 import { STRATEGY_TYPE, ValidationStrategyType } from './utils';
 
+/**
+ * Picks the validation strategy for a spec and runs it on the dataLayer or
+ * on the event rebuilt from a GA4 request.
+ */
 @Injectable()
 export class InspectorUtilsService {
   private readonly logger = new Logger(InspectorUtilsService.name);
@@ -20,9 +24,10 @@ export class InspectorUtilsService {
     private readonly strategy: { [key: string]: ValidationStrategy }
   ) {}
 
-  // return true if the dataLayer is correct
-  // return missing keys if the dataLayer is partially correct
-  // return false if the dataLayer object hasn't been found
+  /**
+   * Validates the dataLayer against the spec. The result fails with a message
+   * when the event is missing or a key does not match.
+   */
   isDataLayerCorrect(
     dataLayer: StrictDataLayerEvent[],
     spec: StrictDataLayerEvent

@@ -1,5 +1,5 @@
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, of, throwError } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom, of, Subject, throwError } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { GtmOperatorService } from './gtm-operator.service';
 
@@ -38,6 +38,18 @@ describe('GtmOperatorService', () => {
     expect(body).toEqual({ name: 'preset' });
   });
 
+  it('runInspectionViaGtm asks the backend to close the browser for a batch', async () => {
+    httpClient.post.mockReturnValueOnce(of([]));
+    await firstValueFrom(
+      service.runInspectionViaGtm('slug', 'evt', {
+        gtmUrl: 'https://x.test',
+        closeBrowser: true
+      })
+    );
+    const [url] = httpClient.post.mock.calls[0];
+    expect(url).toContain('&closeBrowser=true');
+  });
+
   it('runInspectionViaGtm omits optional params when not set', async () => {
     httpClient.post.mockReturnValueOnce(of([]));
     await firstValueFrom(
@@ -65,18 +77,51 @@ describe('GtmOperatorService', () => {
     ).rejects.toThrow('GTM inspection failed');
   });
 
-  it('runInspectionViaGtm returns [] after stopOperation succeeded', async () => {
+  it('runInspectionViaGtm keeps the failed response as the cause', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const response = new HttpErrorResponse({
+      status: 500,
+      error: { statusCode: 500, message: 'No recording found' }
+    });
+    httpClient.post.mockReturnValueOnce(throwError(() => response));
+    await expect(
+      firstValueFrom(
+        service.runInspectionViaGtm('s', 'e', { gtmUrl: 'x' } as never)
+      )
+    ).rejects.toMatchObject({
+      message: 'GTM inspection failed',
+      cause: response
+    });
+  });
+
+  it('runInspectionViaGtm returns [] when the run fails after a stop', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    const run = new Subject<never>();
+    httpClient.post
+      .mockReturnValueOnce(run)
+      .mockReturnValueOnce(of({ status: 200, message: 'ok' }));
+    const result = firstValueFrom(
+      service.runInspectionViaGtm('s', 'e', { gtmUrl: 'x' } as never)
+    );
+    await firstValueFrom(service.stopOperation());
+    expect(service.isStopOperation$()).toBe(true);
+    run.error(new Error('boom'));
+    expect(await result).toEqual([]);
+  });
+
+  it('runInspectionViaGtm reports the failure of a run started after a stop', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     vi.spyOn(console, 'log').mockImplementation(() => undefined);
     httpClient.post
       .mockReturnValueOnce(of({ status: 200, message: 'ok' }))
       .mockReturnValueOnce(throwError(() => new Error('boom')));
     await firstValueFrom(service.stopOperation());
-    expect(service.isStopOperation$()).toBe(true);
-    const result = await firstValueFrom(
-      service.runInspectionViaGtm('s', 'e', { gtmUrl: 'x' } as never)
-    );
-    expect(result).toEqual([]);
+    await expect(
+      firstValueFrom(
+        service.runInspectionViaGtm('s', 'e', { gtmUrl: 'x' } as never)
+      )
+    ).rejects.toThrow('GTM inspection failed');
   });
 
   it('stopOperation only flips on status 200 and rethrows errors', async () => {

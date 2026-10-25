@@ -6,6 +6,9 @@ import {
   ProjectSetting
 } from '../types/tag-check';
 
+/**
+ * The localStorage entries a run sets before replaying a recording.
+ */
 export class LocalStorageDto {
   data: LocalStorageData[];
 
@@ -15,6 +18,9 @@ export class LocalStorageDto {
 }
 
 // Create a new DTO for cookie
+/**
+ * The cookies a run sets before replaying a recording.
+ */
 export class CookieDto {
   data: CookieData[];
 
@@ -23,6 +29,9 @@ export class CookieDto {
   }
 }
 
+/**
+ * A copy of a project's pre-loading values: localStorage entries and cookies.
+ */
 export class ApplicationDto {
   localStorage: LocalStorageDto;
   cookie: CookieDto;
@@ -37,6 +46,10 @@ export class ApplicationDto {
   }
 }
 
+/**
+ * What a run needs from a project's settings: copies of its pre-loading
+ * values and its browser arguments, so the run cannot change the settings.
+ */
 export class EventInspectionPresetDto implements EventInspectionPreset {
   application: Application;
   puppeteerArgs: string[];

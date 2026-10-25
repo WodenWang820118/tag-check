@@ -1,153 +1,39 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  Logger,
-  NotFoundException,
-  StreamableFile
-} from '@nestjs/common';
-import {
-  createReadStream,
-  createWriteStream,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-  existsSync,
-  mkdirSync
-} from 'fs';
-import { FolderService } from '../folder/folder.service';
-import { FolderPathService } from '../path/folder-path/folder-path.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+import { dirname } from 'path';
 import { FilePathService } from '../path/file-path/file-path.service';
-import { join, dirname } from 'path';
-import archiver from 'archiver';
 
+/** Reads and writes the JSON files of the projects folder. */
 @Injectable()
 export class FileService {
-  private readonly logger = new Logger(FileService.name);
-  constructor(
-    private readonly folderService: FolderService,
-    private readonly folderPathService: FolderPathService,
-    private readonly filePathService: FilePathService
-  ) {}
+  constructor(private readonly filePathService: FilePathService) {}
 
+  /**
+   * @returns The file's JSON content, cast to `T` without validation.
+   * @throws NotFoundException when the file does not exist; a SyntaxError
+   * when it is not valid JSON.
+   */
   readJsonFile<T>(filePath: string): T {
     if (!existsSync(filePath)) {
       throw new NotFoundException('File not found');
     }
-
-    const fileContent = readFileSync(`${filePath}`, 'utf8');
-    const parsedData = JSON.parse(fileContent) as T;
-    return parsedData;
+    return JSON.parse(readFileSync(filePath, 'utf8')) as T;
   }
 
-  // get all json files in the project folder
-  async getOperationJsonByProject(projectSlug: string) {
-    const dirPath =
-      await this.folderPathService.getRecordingFolderPath(projectSlug);
-    const jsonFiles = this.folderService
-      .getJsonFilesFromDir(dirPath)
-      .filter((file) => file.endsWith('.json'));
-
-    if (!jsonFiles) {
-      throw new NotFoundException('No JSON files found');
-    }
-
-    return jsonFiles;
-  }
-
-  async getEventReport(projectSlug: string, eventId: string) {
-    const inspectionResultPath =
-      await this.folderPathService.getInspectionEventFolderPath(
-        projectSlug,
-        eventId
-      );
-    const regex = new RegExp(String.raw`${eventId}.*\.xlsx$`, 'i');
-    const files = this.folderService.readFolderFileNames(inspectionResultPath);
-
-    const filteredFiles = files.find((file) => regex.test(file));
-    if (!filteredFiles) {
-      throw new NotFoundException('No matching files found');
-    }
-    const filePath = join(inspectionResultPath, filteredFiles);
-    return new StreamableFile(createReadStream(filePath));
-  }
-
-  downloadFile(filePath: string) {
-    return new StreamableFile(createReadStream(filePath));
-  }
-
-  async downloadFiles(
-    projectSlug: string,
-    testResults: { id: number | string; createdAt: Date | string }[],
-    outputFilePath: string
-  ) {
-    const output = createWriteStream(outputFilePath);
-    const archive = archiver('zip', {});
-
-    output.on('close', () => {
-      this.logger.log(
-        `Archive created successfully. Total bytes: ${archive.pointer()}`
-      );
-    });
-
-    archive.on('warning', (err: archiver.ArchiverError) => {
-      this.logger.warn('Archive warning: ' + err);
-    });
-
-    archive.on('error', (err: archiver.ArchiverError) => {
-      this.logger.error('Archive error: ' + err);
-    });
-
-    for (const testResult of testResults) {
-      const fileName = `${testResult.id}_${testResult.createdAt}'.xlsx'`;
-      if (!fileName) {
-        throw new HttpException(
-          'File name not found',
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
-      }
-      archive.append(createReadStream(join(projectSlug, fileName)), {
-        name: fileName
-      });
-    }
-
-    archive.pipe(output);
-    // Must await the archive.finalize() to ensure the archive is fully written
-    await archive.finalize();
-  }
-
-  async readReport(projectSlug: string, eventId: string, reportName: string) {
-    const reportPath = await this.filePathService.getReportFilePath(
-      projectSlug,
-      eventId,
-      reportName
-    );
-
-    if (!existsSync(reportPath)) {
-      throw new NotFoundException('Report not found');
-    }
-
-    return new StreamableFile(createReadStream(reportPath));
-  }
-
+  /** Writes `content` as indented JSON, creating the folder if needed. */
   writeJsonFile(filePath: string, content: unknown) {
     const dir = dirname(filePath);
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true });
     }
-
     writeFileSync(filePath, JSON.stringify(content, null, 2));
   }
 
+  /** Writes a run's raw result to the test's result cache file. */
   async writeCacheFile(projectSlug: string, eventId: string, data: unknown) {
-    const cachePath = await this.filePathService.getCacheFilePath(
-      projectSlug,
-      eventId
+    this.writeJsonFile(
+      await this.filePathService.getCacheFilePath(projectSlug, eventId),
+      data
     );
-    this.writeJsonFile(cachePath, data);
-  }
-
-  deleteFile(filePath: string) {
-    rmSync(filePath);
   }
 }

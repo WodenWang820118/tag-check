@@ -11,6 +11,9 @@ import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { AsyncPipe } from '@angular/common';
 import { ProjectListFacadeService } from './project-list-facade.service';
 
+/**
+ * The home page's project cards, filtered by the toolbar's search and paged.
+ */
 @Component({
   selector: 'app-project-list',
   standalone: true,
@@ -39,7 +42,6 @@ export class ProjectListComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.facade.setPaginator(this.paginator());
-    this.facade.initializeData();
   }
 
   handlePageEvent(e: PageEvent): void {

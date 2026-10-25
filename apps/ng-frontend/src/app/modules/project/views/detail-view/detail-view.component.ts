@@ -38,6 +38,11 @@ function serializeParamMap(params: ParamMap): string {
   );
 }
 
+/**
+ * A test's page: the Tag Snapshot and Latest result tabs, loaded by
+ * reportPageResolver. `?tab=reports` opens Latest result, and
+ * `?snackbar=missingRecording` says why the test cannot run yet.
+ */
 @Component({
   selector: 'app-detail-view',
   standalone: true,
@@ -137,7 +142,7 @@ export class DetailViewComponent implements OnInit {
   }
 
   goBack() {
-    this.router.navigate(['../'], { relativeTo: this.route });
+    void this.router.navigate(['../'], { relativeTo: this.route });
   }
 
   private handleQueryParams(params: ParamMap) {
@@ -156,7 +161,7 @@ export class DetailViewComponent implements OnInit {
 
       const queryParams: Params = { ...this.route.snapshot.queryParams };
       delete queryParams['snackbar'];
-      this.router.navigate([], {
+      void this.router.navigate([], {
         relativeTo: this.route,
         queryParams,
         replaceUrl: true

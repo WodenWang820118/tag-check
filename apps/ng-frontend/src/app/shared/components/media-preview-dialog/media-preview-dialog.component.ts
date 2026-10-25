@@ -22,6 +22,7 @@ export type MediaPreviewData = {
   caption?: string;
 };
 
+/** Shows a screenshot or a recording at full size, with a download. */
 @Component({
   selector: 'app-media-preview-dialog',
   standalone: true,

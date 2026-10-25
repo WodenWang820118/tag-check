@@ -1,14 +1,24 @@
 import {
   StrictDataLayerEvent,
+  fixJsonString,
   isStrictDataLayerEvent,
   isStrictDataLayerEventArray
 } from '@utils';
 import { Injectable } from '@angular/core';
 
+/**
+ * Reads the specs typed or uploaded into tag-build's input editor.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class SpecExtractService {
+  /**
+   * Parses the input as JSON, repairing JavaScript-style object literals
+   * when plain JSON fails, and returns it as an array of dataLayer specs. A
+   * single event object becomes a one-item array. Throws a user-facing
+   * error when the text does not parse or an entry has no string `event`.
+   */
   preprocessInput(inputString: string): StrictDataLayerEvent[] {
     const parsedInput = this.parseInput(inputString);
 
@@ -34,61 +44,11 @@ export class SpecExtractService {
     );
   }
 
-  fixJsonString(inputString: string) {
-    try {
-      let fixedString = inputString;
-
-      // Remove multi-line comments first (/**/)
-      fixedString = fixedString.replaceAll(/\/\*[\s\S]*?\*\//gm, '');
-
-      // Remove single-line comments that appear after JSON values
-      const lines = fixedString.split('\n');
-      for (let i = 0; i < lines.length; i++) {
-        const commentIndex = lines[i].indexOf('//');
-        if (commentIndex >= 0) {
-          const precedingChars = lines[i].substring(0, commentIndex);
-          if (/[:,]\s*$/.test(precedingChars)) {
-            // Comment appears after a JSON value, remove only the comment
-            lines[i] = lines[i].substring(0, commentIndex);
-          }
-        }
-      }
-
-      fixedString = lines.join('\n');
-
-      // Convert single-quoted JSON keys and string values without
-      // rewriting apostrophes inside already double-quoted content.
-      fixedString = fixedString.replaceAll(
-        /([{,]\s*)'([^']+)'(\s*:)/g,
-        '$1"$2"$3'
-      );
-      fixedString = fixedString.replaceAll(
-        /(:\s*)'([^']*)'(?=\s*[,}\]])/g,
-        '$1"$2"'
-      );
-
-      // Wrap unquoted property names with double quotes
-      fixedString = fixedString.replaceAll(
-        /([{,]\s*)([a-zA-Z_]\w*)(\s*:)/g,
-        '$1"$2"$3'
-      );
-
-      // Fix unquoted values (except true, false, and null) by wrapping them with quotes
-      fixedString = fixedString.replaceAll(
-        /(:\s*)([^"{}[\],\s]+)(?=\s*[,\]}])/g,
-        (match, p1, p2) => {
-          if (['true', 'false', 'null'].includes(p2)) return match;
-          return `${p1}"${p2}"`;
-        }
-      );
-
-      // Remove any trailing commas
-      fixedString = fixedString.replaceAll(/,\s*([\]}])/g, '$1');
-
-      return fixedString;
-    } catch (error) {
-      throw new Error('Failed to fix JSON parsing issues: ' + error);
-    }
+  /**
+   * See {@link fixJsonString} in `@utils`; kept as a method so tests can spy on it.
+   */
+  fixJsonString(inputString: string): string {
+    return fixJsonString(inputString);
   }
 
   private parseInput(inputString: string): unknown {

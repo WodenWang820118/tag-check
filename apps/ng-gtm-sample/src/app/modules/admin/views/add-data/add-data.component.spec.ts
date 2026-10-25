@@ -3,6 +3,7 @@ import { of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CountriesDataService } from '../../../../shared/services/countries-data/countries-data.service';
 import { FirebaseDestinationUploadService } from '../../../../shared/services/firebase-destination-upload/firebase-destination-upload.service';
+import { CreateDestinationDraft } from '../../../../shared/models/create-destination-draft.model';
 import { AddDataComponent } from './add-data.component';
 
 function createFiles() {
@@ -27,7 +28,7 @@ describe('AddDataComponent', () => {
     )
   };
   const uploadService = {
-    upload: vi.fn(() =>
+    upload: vi.fn((_data: CreateDestinationDraft) =>
       of({
         id: 'destination-1'
       })

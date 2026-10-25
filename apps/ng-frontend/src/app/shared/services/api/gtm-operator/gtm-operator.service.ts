@@ -1,33 +1,38 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { EventInspectionPreset, ReportDetailResponse } from '@utils';
+import { ReportDetailResponse } from '@utils';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
+import { GtmInspectionParams } from '../../utils/interfaces';
 
-interface GtmInspectionParams {
-  gtmUrl: string;
-  headless?: boolean;
-  eventInspectionPreset?: EventInspectionPreset;
-  measurementId?: string;
-  username?: string;
-  password?: string;
-  captureRequest?: boolean;
-}
-
+/**
+ * Runs a test in accompanied mode: the backend opens GTM Preview (Tag
+ * Assistant) first and replays the recording on the site it connects to.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class GtmOperatorService {
+  /** Set when the user stopped the run, whose request then fails. */
   private readonly isStopOperation = signal(false);
-  isStopOperation$ = computed(() => this.isStopOperation());
+  readonly isStopOperation$ = this.isStopOperation.asReadonly();
 
   constructor(private readonly http: HttpClient) {}
 
+  /**
+   * Runs the test and emits the API's result. A run the user stopped emits
+   * `[]` instead of failing; any other failure errors with an Error whose
+   * `cause` is the HttpErrorResponse.
+   */
   runInspectionViaGtm(
     projectSlug: string,
     eventId: string,
     params: GtmInspectionParams
   ) {
+    // A stop applies only to the run it interrupted. Every stop sets this
+    // flag in all three run services, so without the reset a later failure
+    // of this service's run would be taken for a stop and hidden.
+    this.isStopOperation.set(false);
     const encodedGtmUrl = encodeURIComponent(params.gtmUrl);
     const queryParams = [`gtmUrl=${encodedGtmUrl}`];
 
@@ -41,6 +46,7 @@ export class GtmOperatorService {
       queryParams.push(`password=${encodeURIComponent(params.password)}`);
     if (params.captureRequest)
       queryParams.push(`captureRequest=${params.captureRequest}`);
+    if (params.closeBrowser) queryParams.push('closeBrowser=true');
 
     const queryString = queryParams.join('&');
 
@@ -55,7 +61,9 @@ export class GtmOperatorService {
           if (this.isStopOperation$()) {
             return of([]);
           }
-          return throwError(() => new Error('GTM inspection failed'));
+          return throwError(
+            () => new Error('GTM inspection failed', { cause: error })
+          );
         })
       );
   }
@@ -68,7 +76,6 @@ export class GtmOperatorService {
       }>(`${environment.dataLayerApiUrl}/stop-gtm-operation`, {})
       .pipe(
         map((message) => {
-          console.log('Operation stopped:', message);
           if (message.status === 200) {
             this.isStopOperation.set(true);
           }

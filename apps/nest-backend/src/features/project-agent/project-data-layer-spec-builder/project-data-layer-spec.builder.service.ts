@@ -13,6 +13,10 @@ import {
 
 type SpecNode = Record<string, unknown>;
 
+/**
+ * Builds the expected `dataLayer` push of a GA4 event tag, resolving the
+ * tag's variables to the data layer keys they read.
+ */
 @Injectable()
 export class ProjectDataLayerSpecBuilderService {
   private readonly logger = new Logger(ProjectDataLayerSpecBuilderService.name);

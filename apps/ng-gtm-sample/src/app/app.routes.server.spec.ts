@@ -1,7 +1,13 @@
-import { RenderMode } from '@angular/ssr';
+import { RenderMode, type ServerRoute } from '@angular/ssr';
 import { describe, expect, it } from 'vitest';
 import { publicDestinationSlugs } from './shared/services/destination/destination-catalog';
 import { serverRoutes } from './app.routes.server';
+
+function hasPrerenderParams(route: ServerRoute): route is ServerRoute & {
+  getPrerenderParams: () => Promise<Record<string, string>[]>;
+} {
+  return 'getPrerenderParams' in route;
+}
 
 describe('serverRoutes', () => {
   it('prerenders only the public SEO surface and keeps private flows client-rendered', () => {
@@ -50,8 +56,15 @@ describe('serverRoutes', () => {
       (route) => route.path === 'product/details/:slug'
     );
 
-    expect(detailRoute?.getPrerenderParams).toBeTypeOf('function');
-    await expect(detailRoute?.getPrerenderParams?.()).resolves.toEqual(
+    expect(detailRoute !== undefined && hasPrerenderParams(detailRoute)).toBe(
+      true
+    );
+    if (detailRoute === undefined || !hasPrerenderParams(detailRoute)) {
+      return;
+    }
+
+    expect(detailRoute.getPrerenderParams).toBeTypeOf('function');
+    await expect(detailRoute.getPrerenderParams()).resolves.toEqual(
       publicDestinationSlugs.map((slug) => ({ slug }))
     );
   });

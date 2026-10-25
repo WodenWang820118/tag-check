@@ -1,6 +1,9 @@
 import { Component, output, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 
+/**
+ * The upload button of tag-build; emits `uploadClick`.
+ */
 @Component({
   selector: 'lib-upload-action',
   standalone: true,

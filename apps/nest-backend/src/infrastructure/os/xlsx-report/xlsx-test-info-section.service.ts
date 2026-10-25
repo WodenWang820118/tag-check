@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { FullTestEventResponseDto } from '../../../shared';
 
+/** Writes a sheet's test details: names and event ID. */
 @Injectable()
 export class XlsxTestInfoSectionService {
   // no constructor needed

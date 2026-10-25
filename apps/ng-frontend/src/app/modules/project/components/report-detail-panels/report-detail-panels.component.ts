@@ -83,6 +83,12 @@ function normalizeItemDefContent(
   };
 }
 
+/**
+ * The JSON panels of a test's Latest result tab: the spec, the recording
+ * and the item definition, each editable, and the dataLayer and GA4
+ * request the run captured. Edits start from the route context and are
+ * reset when it changes.
+ */
 @Component({
   selector: 'app-report-detail-panels',
   standalone: true,
@@ -168,9 +174,15 @@ export class ReportDetailPanelsComponent {
   editItemId = signal('');
   editTemplateName = signal('');
 
-  itemDefLookupId = computed(
-    () => this.specContent()?.dataLayerSpec.event ?? ''
-  );
+  /** The test whose item definition the panel shows and saves. */
+  itemDefTest = computed(() => {
+    const context = this.context();
+    return context
+      ? { projectSlug: context.projectSlug, eventId: context.eventId }
+      : null;
+  });
+  /** The itemId a test without a definition starts from: its event name. */
+  defaultItemId = computed(() => this.specContent()?.dataLayerSpec.event ?? '');
   rawRequest = computed(() => this.context()?.reportDetails?.rawRequest ?? '');
   dataLayerContent = computed(() =>
     stringifyJson(this.context()?.reportDetails?.dataLayer)
@@ -219,18 +231,22 @@ export class ReportDetailPanelsComponent {
         this.syncContext(context);
       });
 
-    toObservable(this.itemDefLookupId)
+    toObservable(this.itemDefTest)
       .pipe(
-        distinctUntilChanged(),
-        switchMap((itemId) => {
-          if (!itemId) {
+        distinctUntilChanged(
+          (previous, current) =>
+            previous?.projectSlug === current?.projectSlug &&
+            previous?.eventId === current?.eventId
+        ),
+        switchMap((test) => {
+          if (!test) {
             this.itemDefLoading.set(false);
             return of(null);
           }
 
           this.itemDefLoading.set(true);
           return this.reportDetailPanelsFacadeService
-            .getItemDefById(itemId)
+            .getItemDef(test.projectSlug, test.eventId)
             .pipe(
               catchError(() => of(null)),
               finalize(() => this.itemDefLoading.set(false))
@@ -240,7 +256,7 @@ export class ReportDetailPanelsComponent {
       )
       .subscribe((itemDef) => {
         this.itemDefContent.set(itemDef);
-        this.editItemId.set(itemDef?.itemId ?? this.itemDefLookupId());
+        this.editItemId.set(itemDef?.itemId ?? this.defaultItemId());
         this.editTemplateName.set(itemDef?.templateName ?? '');
 
         if (!this.itemDefEditMode()) {
@@ -277,7 +293,7 @@ export class ReportDetailPanelsComponent {
   toggleItemDefEdit() {
     if (!this.itemDefEditMode()) {
       this.editItemId.set(
-        this.itemDefContent()?.itemId ?? this.itemDefLookupId()
+        this.itemDefContent()?.itemId ?? this.defaultItemId()
       );
       this.editTemplateName.set(this.itemDefContent()?.templateName ?? '');
       this.itemDefDraftText.set(
@@ -290,9 +306,7 @@ export class ReportDetailPanelsComponent {
   }
 
   cancelItemDefEdit() {
-    this.editItemId.set(
-      this.itemDefContent()?.itemId ?? this.itemDefLookupId()
-    );
+    this.editItemId.set(this.itemDefContent()?.itemId ?? this.defaultItemId());
     this.editTemplateName.set(this.itemDefContent()?.templateName ?? '');
     this.itemDefDraftText.set(
       stringifyJson(this.itemDefContent()?.fullItemDef)
@@ -351,7 +365,7 @@ export class ReportDetailPanelsComponent {
       const parsed = parseJson<unknown>(content);
       const normalized = normalizeItemDefContent(
         parsed,
-        this.editItemId() || this.itemDefLookupId(),
+        this.editItemId() || this.defaultItemId(),
         this.editTemplateName()
       );
 
@@ -425,18 +439,20 @@ export class ReportDetailPanelsComponent {
   }
 
   saveItemDef() {
+    const context = this.context();
     const parsed = parseJson<unknown>(this.itemDefDraftText());
     const itemId = this.editItemId().trim();
     const templateName = this.editTemplateName().trim();
     const normalized = normalizeItemDefContent(parsed, itemId, templateName);
 
-    if (!normalized || !itemId) {
+    if (!context || !normalized || !itemId) {
       return;
     }
 
     this.itemDefLoading.set(true);
     this.reportDetailPanelsFacadeService
-      .updateItemDef(itemId, {
+      .updateItemDef(context.projectSlug, context.eventId, {
+        itemId,
         fullItemDef: normalized.fullItemDef,
         templateName: templateName || undefined
       })
@@ -444,9 +460,11 @@ export class ReportDetailPanelsComponent {
         take(1),
         finalize(() => this.itemDefLoading.set(false))
       )
-      .subscribe(() => {
-        this.itemDefContent.set(normalized);
-        this.itemDefDraftText.set(stringifyJson(normalized.fullItemDef));
+      .subscribe((saved) => {
+        this.itemDefContent.set(saved);
+        this.editItemId.set(saved.itemId);
+        this.editTemplateName.set(saved.templateName);
+        this.itemDefDraftText.set(stringifyJson(saved.fullItemDef));
         this.itemDefSyntaxError.set(false);
         this.itemDefEditMode.set(false);
       });

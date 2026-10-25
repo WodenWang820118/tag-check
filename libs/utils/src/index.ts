@@ -4,7 +4,6 @@ export * from './lib/types/tag-build';
 export * from './lib/types/tag-check';
 
 // Enums
-export * from './lib/enums/common';
 export * from './lib/enums/tag-build';
 export * from './lib/enums/tag-check';
 
@@ -20,4 +19,6 @@ export * from './lib/functions/utils';
 export * from './lib/functions/tag-build-contract';
 export * from './lib/functions/ga4-reference';
 export * from './lib/functions/gtm-container-export';
+export * from './lib/functions/measurement-plan';
 export * from './lib/functions/run-status';
+export * from './lib/functions/data-layer-push';

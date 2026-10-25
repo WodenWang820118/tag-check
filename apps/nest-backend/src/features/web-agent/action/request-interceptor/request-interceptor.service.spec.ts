@@ -24,30 +24,6 @@ describe('RequestInterceptorService', () => {
     );
   });
 
-  it('getRawRequest should time out and return empty string when no request is set', async () => {
-    const raw$ = service.getRawRequest({ timeoutMs: 50 });
-    // firstValueFrom will resolve to '' after timeout inside the operator
-    const val = await firstValueFrom(raw$);
-    expect(val).toBe('');
-  });
-
-  it('setRawRequest and getRawRequest should return the value when set', async () => {
-    const valToSet =
-      'https://www.google-analytics.com/g/collect?v=2&en=test&tid=G-123';
-    // subscribe to the raw request and ensure we get the new value
-    const p = firstValueFrom(service.getRawRequest({ timeoutMs: 500 }));
-    service.setRawRequest(valToSet);
-    const val = await p;
-    expect(val).toBe(valToSet);
-
-    // clear it and ensure subsequent get returns '' (via timeout)
-    service.clearRawRequest();
-    const afterClear = await firstValueFrom(
-      service.getRawRequest({ timeoutMs: 50 })
-    );
-    expect(afterClear).toBe('');
-  });
-
   it('captures through the page Fetch domain and releases every paused request', async () => {
     const fetchSession = createMockCdpSession();
     const page = createMockPage(fetchSession);
@@ -267,6 +243,32 @@ describe('RequestInterceptorService', () => {
     await handle.stop();
     expect(networkSession.send).toHaveBeenCalledWith('Network.disable');
     expect(networkSession.detach).toHaveBeenCalledTimes(1);
+  });
+
+  it('detaches the Network session when the fallback cannot be enabled', async () => {
+    const fetchSession = createMockCdpSession({
+      'Fetch.enable': () => Promise.reject(new Error('not supported'))
+    });
+    const networkSession = createMockCdpSession({
+      'Network.enable': () => Promise.reject(new Error('Target closed'))
+    });
+    const page = createMockPage(fetchSession, networkSession);
+
+    await expect(
+      service.setupInterception(
+        page as never,
+        'project',
+        'event-a',
+        'search',
+        'G-TAGCHECK01'
+      )
+    ).rejects.toThrow('Target closed');
+
+    expect(networkSession.detach).toHaveBeenCalledTimes(1);
+    expect(networkSession.off).toHaveBeenCalledWith(
+      'Network.requestWillBeSent',
+      expect.any(Function)
+    );
   });
 
   it('reports the GA4 events it saw when nothing matched', async () => {

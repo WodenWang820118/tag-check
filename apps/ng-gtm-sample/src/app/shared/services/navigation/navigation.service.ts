@@ -39,7 +39,7 @@ export class NavigationService {
 
   private navigate(path: string, additionalParams: Params = {}) {
     console.log(`Navigating to: ${path}`, additionalParams);
-    this.router.navigate([path], {
+    void this.router.navigate([path], {
       queryParams: this.getMergedQueryParams(additionalParams)
     });
   }

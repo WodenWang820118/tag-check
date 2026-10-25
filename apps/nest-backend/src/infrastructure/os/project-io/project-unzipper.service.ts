@@ -8,7 +8,6 @@ import {
   rmSync,
   mkdirSync,
   ReadStream,
-  mkdirSync as ensureDirSync,
   copyFileSync,
   Dirent
 } from 'fs';
@@ -16,10 +15,30 @@ import { Writable } from 'stream';
 import * as unzipper from 'unzipper';
 import { join } from 'path';
 
+/**
+ * A slug that names exactly one folder: not empty, not `.` or `..`, and
+ * without path separators or characters Windows rejects in a file name.
+ */
+// oxlint-disable-next-line no-control-regex -- control characters are what it rejects
+const SAFE_FOLDER_SLUG = /^(?!\.{1,2}$)[^<>:"/\\|?*\x00-\x1f]+$/;
+
+/**
+ * Extracts a project zip into the projects folder. The zip is extracted to
+ * a staging folder first, so a failed extraction leaves existing projects
+ * untouched; the staging folder is then moved to `<output>/<slug>`.
+ */
 @Injectable()
 export class ProjectUnzipper {
   private readonly logger = new Logger(ProjectUnzipper.name);
 
+  /**
+   * @param providedSlug - The slug to use when the zip has no fixture.
+   * @param options.overwriteExisting - Replace an existing folder of the
+   * same slug (the default) rather than suffixing the slug.
+   * @returns The slug of the folder the project was extracted to.
+   * @throws When extraction fails, or when the resolved slug does not name
+   * a single folder, before anything outside the staging folder is touched.
+   */
   async unzip(
     providedSlug: string,
     zipFilePath: string,
@@ -86,6 +105,12 @@ export class ProjectUnzipper {
       args;
     const inferredSlug = this.inferSlugFromFixture(stagingDir);
     const baseSlug = inferredSlug || providedSlug;
+    // The slug comes from a file name in the zip or from the upload's name.
+    // An empty one, '.' or '..' would make the overwrite below delete the
+    // projects folder itself or its parent.
+    if (!SAFE_FOLDER_SLUG.test(baseSlug)) {
+      throw new Error(`Invalid project slug '${baseSlug}' in the zip`);
+    }
     const finalSlug = overwriteExisting
       ? baseSlug
       : this.ensureUniqueFolderSlug(baseSlug, outputFolderPath);
@@ -192,7 +217,7 @@ export class ProjectUnzipper {
   }
 
   private copyDirRecursive(src: string, dest: string) {
-    if (!existsSync(dest)) ensureDirSync(dest, { recursive: true });
+    if (!existsSync(dest)) mkdirSync(dest, { recursive: true });
     const entries: Dirent[] = readdirSync(src, {
       withFileTypes: true
     }) as unknown as Dirent[];

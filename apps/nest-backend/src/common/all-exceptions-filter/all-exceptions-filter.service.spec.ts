@@ -7,7 +7,9 @@ import {
 } from '@nestjs/common';
 
 const addDocMock = vi.fn().mockResolvedValue(undefined);
-const collectionMock = vi.fn(() => ({ __collection: true }));
+const collectionMock = vi.fn<(...args: unknown[]) => { __collection: boolean }>(
+  () => ({ __collection: true })
+);
 
 vi.mock('firebase/firestore', () => ({
   addDoc: (...args: unknown[]) => addDocMock(...args),

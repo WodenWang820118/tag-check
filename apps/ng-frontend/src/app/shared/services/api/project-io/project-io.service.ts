@@ -4,6 +4,7 @@ import { environment } from '../../../../../environments/environment';
 import { catchError, EMPTY, throwError } from 'rxjs';
 import { catchHttpError } from '../http-error.utils';
 
+/** Exports, imports and deletes whole projects. */
 @Injectable({
   providedIn: 'root'
 })
@@ -42,7 +43,6 @@ export class ProjectIoService {
     }
     const formData = new FormData();
     formData.append('file', file); // 'file' is the field name you'll access on the server
-    console.log('formData', formData.get('file'));
     return this.http
       .post(`${environment.projectApiUrl}/import`, formData, {
         reportProgress: true,

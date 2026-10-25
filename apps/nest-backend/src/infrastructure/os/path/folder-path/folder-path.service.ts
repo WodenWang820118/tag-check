@@ -4,6 +4,11 @@ import { join } from 'path';
 import { SysConfigurationRepositoryService } from '../../../../core/repository/sys-configuration/sys-configuration-repository.service';
 import { ConfigsService } from '../../../../core/configs/configs.service';
 
+/**
+ * Paths of a project's folders: the root, the project, its recordings,
+ * config and run results. Each is checked to stay inside the projects folder
+ * (see PathUtilsService); the folder may not exist yet.
+ */
 @Injectable()
 export class FolderPathService {
   constructor(

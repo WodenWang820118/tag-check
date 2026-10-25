@@ -104,3 +104,35 @@ export const GA4_NUMERIC_ITEM_PARAMETERS: readonly string[] = [
   'price',
   'quantity'
 ];
+
+/**
+ * Prefixes "parameter names can't begin with". The `_` and `gtag.` prefixes on
+ * the same list already fail the letters-numbers-underscores rule.
+ * @see https://support.google.com/analytics/answer/13316687
+ */
+const GA4_RESERVED_PARAMETER_PREFIXES: readonly string[] = [
+  'firebase_',
+  'ga_',
+  'google_'
+];
+
+/**
+ * Returns why an event parameter or item parameter name breaks GA4's naming
+ * rules, or an empty array when it is valid. Google states the character rule
+ * in the Measurement Protocol's limitations: parameter names "can only contain
+ * alphanumeric characters and underscores, and must start with an alphabetic
+ * character", so a dotted name such as `user.id` is not a valid parameter.
+ * @see https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events#limitations
+ * @see https://support.google.com/analytics/answer/13316687
+ * @see https://support.google.com/analytics/answer/9267744
+ */
+export function getGa4ParameterNameIssues(parameterName: string): string[] {
+  const issues = getGa4EventNameIssues(parameterName);
+  const reservedPrefix = GA4_RESERVED_PARAMETER_PREFIXES.find((prefix) =>
+    parameterName.startsWith(prefix)
+  );
+  if (reservedPrefix) {
+    issues.push(`must not begin with the reserved prefix "${reservedPrefix}"`);
+  }
+  return issues;
+}

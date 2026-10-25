@@ -1,4 +1,5 @@
-import { TagTypeEnum } from '../enums/tag-build';
+import { TagTypeEnum, VariableTypeEnum } from '../enums/tag-build';
+import { getGa4ParameterNameIssues } from './ga4-reference';
 import type {
   GTMConfiguration,
   Parameter,
@@ -24,6 +25,10 @@ function isStringArray(value: unknown): value is string[] {
   );
 }
 
+/**
+ * Whether a value is a GTM parameter: a `type`, with an optional string
+ * `key` and `value` and an optional `list` of list items.
+ */
 export function isParameter(value: unknown): value is Parameter {
   if (!isRecord(value) || typeof value['type'] !== 'string') {
     return false;
@@ -58,6 +63,10 @@ export function isParameter(value: unknown): value is Parameter {
   );
 }
 
+/**
+ * Whether a value is a `MAP` parameter, such as one row of an event
+ * parameter table.
+ */
 export function isParameterMap(value: unknown): value is ParameterMap {
   return (
     isRecord(value) &&
@@ -67,6 +76,10 @@ export function isParameterMap(value: unknown): value is ParameterMap {
   );
 }
 
+/**
+ * Whether a value can be an entry of a `LIST` parameter: a map, or a typed
+ * entry such as a trigger reference.
+ */
 export function isParameterListItem(
   value: unknown
 ): value is ParameterListItem {
@@ -93,6 +106,9 @@ export function isParameterListItem(
   return true;
 }
 
+/**
+ * Whether a parameter has both a string `key` and a string `value`.
+ */
 export function isParameterWithKeyValue(
   parameter: Parameter
 ): parameter is ParameterWithKeyValue {
@@ -101,12 +117,19 @@ export function isParameterWithKeyValue(
   );
 }
 
+/**
+ * The entries of a `LIST` parameter, or an empty array when it has none.
+ */
 export function getParameterListItems(
   parameter: Parameter | null | undefined
 ): ParameterListItem[] {
   return Array.isArray(parameter?.list) ? parameter.list : [];
 }
 
+/**
+ * The string value of the parameter with this key (and type, when given),
+ * or undefined when there is none.
+ */
 export function getParameterValue(
   parameters: readonly Parameter[] | null | undefined,
   key: string,
@@ -119,6 +142,10 @@ export function getParameterValue(
   return typeof parameter?.value === 'string' ? parameter.value : undefined;
 }
 
+/**
+ * The string value stored under `key` in a `MAP` list item, or undefined
+ * when the item is not a map or has no such entry.
+ */
 export function getParameterMapValue(
   item: ParameterListItem | null | undefined,
   key: string
@@ -130,6 +157,9 @@ export function getParameterMapValue(
   return getParameterValue(item.map, key);
 }
 
+/**
+ * Whether a value is a trigger name with its ID.
+ */
 export function isTrigger(value: unknown): value is Trigger {
   return (
     isRecord(value) &&
@@ -138,6 +168,10 @@ export function isTrigger(value: unknown): value is Trigger {
   );
 }
 
+/**
+ * Whether a value has the fields every exported trigger has: name, type,
+ * account and container IDs, and well-formed optional IDs and parameters.
+ */
 export function isTriggerConfig(value: unknown): value is TriggerConfig {
   if (
     !isRecord(value) ||
@@ -177,6 +211,10 @@ export function isTriggerConfig(value: unknown): value is TriggerConfig {
   return true;
 }
 
+/**
+ * Whether a value has the fields every exported tag has: name, type,
+ * account and container IDs and a parameter array.
+ */
 export function isTagConfig(value: unknown): value is TagConfig {
   if (
     !isRecord(value) ||
@@ -209,6 +247,9 @@ export function isTagConfig(value: unknown): value is TagConfig {
   return true;
 }
 
+/**
+ * Whether a value has the fields every exported variable has.
+ */
 export function isVariableConfig(value: unknown): value is VariableConfig {
   if (
     !isRecord(value) ||
@@ -232,6 +273,9 @@ export function isVariableConfig(value: unknown): value is VariableConfig {
   return true;
 }
 
+/**
+ * Whether a value is a tag with the triggers that fire it.
+ */
 export function isSpec(value: unknown): value is Spec {
   return (
     isRecord(value) &&
@@ -241,16 +285,26 @@ export function isSpec(value: unknown): value is Spec {
   );
 }
 
+/**
+ * Whether a value is an array of {@link isSpec} values.
+ */
 export function isSpecArray(value: unknown): value is Spec[] {
   return Array.isArray(value) && value.every(isSpec);
 }
 
+/**
+ * Whether a value is an object with a string `event`: the minimum a
+ * dataLayer spec needs.
+ */
 export function isStrictDataLayerEvent(
   value: unknown
 ): value is StrictDataLayerEvent {
   return isRecord(value) && typeof value['event'] === 'string';
 }
 
+/**
+ * Whether every entry of an array is a dataLayer spec.
+ */
 export function isStrictDataLayerEventArray(
   value: unknown
 ): value is StrictDataLayerEvent[] {
@@ -273,6 +327,10 @@ function isGTMContainerVersion(
   );
 }
 
+/**
+ * Whether a value has the shape of a Tag Manager container export, with
+ * all four lists (tag, trigger, variable, builtInVariable) present.
+ */
 export function isGTMConfiguration(value: unknown): value is GTMConfiguration {
   return (
     isRecord(value) &&
@@ -282,12 +340,22 @@ export function isGTMConfiguration(value: unknown): value is GTMConfiguration {
   );
 }
 
+/**
+ * Whether Tag Manager can import a container: `issues` block the import,
+ * `warnings` do not.
+ */
 export interface GTMImportReadiness {
   canImport: boolean;
   issues: string[];
   warnings: string[];
 }
 
+/**
+ * Checks a generated container before the user imports it into Tag Manager:
+ * export format 2, the version and container metadata, consistent paths, a
+ * `GTM-` public ID and the same account and container IDs on every item.
+ * Event parameter names that break GA4's naming rules are warnings.
+ */
 export function validateGTMImportReadiness(value: unknown): GTMImportReadiness {
   const issues: string[] = [];
   const warnings: string[] = [];
@@ -340,6 +408,8 @@ export function validateGTMImportReadiness(value: unknown): GTMImportReadiness {
     version,
     issues
   );
+
+  validateGa4ParameterNames(version, warnings);
 
   if (version.tag.length === 0) {
     warnings.push('The export has no tags.');
@@ -446,10 +516,57 @@ function validateVersionItems(
   });
 }
 
+/**
+ * Warns about event parameter names GA4 does not accept, in the parameter
+ * table of each GA4 event tag and Event Settings variable, and about a name
+ * that appears twice in one table. Tag Manager imports such a container, but
+ * the parameter does not reach GA4 under that name.
+ */
+function validateGa4ParameterNames(
+  version: GTMConfiguration['containerVersion'],
+  warnings: string[]
+): void {
+  const tables = [
+    ...version.tag
+      .filter((tag) => tag.type === TagTypeEnum.GAAWE)
+      .map((tag) => ({ label: `Tag "${tag.name}"`, item: tag })),
+    ...version.variable
+      .filter((variable) => variable.type === VariableTypeEnum.EVENT_SETTINGS)
+      .map((variable) => ({
+        label: `Variable "${variable.name}"`,
+        item: variable
+      }))
+  ];
+
+  for (const { label, item } of tables) {
+    const table = item.parameter?.find(
+      (entry) => entry.key === 'eventSettingsTable'
+    );
+    const seen = new Set<string>();
+    for (const row of getParameterListItems(table)) {
+      const name = getParameterMapValue(row, 'parameter');
+      if (name === undefined) {
+        continue;
+      }
+      for (const issue of getGa4ParameterNameIssues(name)) {
+        warnings.push(`${label}: event parameter "${name}" ${issue}.`);
+      }
+      if (seen.has(name)) {
+        warnings.push(`${label}: event parameter "${name}" is set twice.`);
+      }
+      seen.add(name);
+    }
+  }
+}
+
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
+/**
+ * A tag with only a name, for specs that have no tag yet. It defaults to a
+ * GA4 event tag with empty IDs and no parameters.
+ */
 export function createPlaceholderTagConfig(input: {
   name: string;
   type?: TagConfig['type'];
@@ -466,6 +583,10 @@ export function createPlaceholderTagConfig(input: {
   };
 }
 
+/**
+ * A spec for a tag name, from a placeholder tag and the given overrides,
+ * with no triggers unless some are given.
+ */
 export function createPlaceholderSpec(
   tagName: string,
   options: {

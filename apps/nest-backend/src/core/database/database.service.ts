@@ -4,6 +4,10 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DATABASE_ENTITIES } from './database-entities';
 import { DATABASE_MIGRATIONS } from './database-migrations';
 
+/**
+ * TypeORM's options for the SQLite database. The schema comes from the
+ * migrations, never from `synchronize`.
+ */
 @Injectable()
 export class DatabaseConfigService {
   constructor(private readonly configsService: ConfigsService) {}

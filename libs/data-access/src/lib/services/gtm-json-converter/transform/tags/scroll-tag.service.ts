@@ -2,18 +2,31 @@ import { EventTagConfig, TagTypeEnum, Trigger, DataLayer } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
 import { EventUtils } from '../../utils/event-utils.service';
-import { CONSENT_STATUS_NOT_NEEDED } from '../utils/constant';
+import {
+  CONSENT_STATUS_NOT_NEEDED,
+  MEASUREMENT_ID_VARIABLE_NAME,
+  SCROLL_TRIGGER_NAME
+} from '../utils/constant';
 
+/**
+ * Builds the GA4 scroll event tag, fired by the Scroll Depth trigger with
+ * the threshold reached as a parameter.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class ScrollTag {
-  // Constants for easier maintenance
-  private static readonly TRIGGER_NAME = 'scroll';
+  private static readonly TRIGGER_NAME = SCROLL_TRIGGER_NAME;
   private static readonly TAG_NAME = 'GA4 event - scroll';
   private static readonly EVENT_NAME = 'scroll';
   private static readonly FINGERPRINT = '1690184079241';
-  private static readonly SCROLL_DEPTH_KEY = 'scroll_depth_threshold';
+  /**
+   * GA4's "Percent scrolled" dimension is "Populated by the event parameter
+   * `percent_scrolled`", which enhanced measurement's scroll event sends.
+   * @see https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema
+   * @see https://support.google.com/analytics/answer/9216061
+   */
+  private static readonly SCROLL_DEPTH_KEY = 'percent_scrolled';
   private static readonly SCROLL_DEPTH_VAR = '{{Scroll Depth Threshold}}';
 
   constructor(
@@ -22,7 +35,6 @@ export class ScrollTag {
   ) {}
   // Build the scroll tag configuration
   private buildScrollTag(
-    configurationName: string,
     accountId: string,
     containerId: string,
     triggerId: string
@@ -42,15 +54,16 @@ export class ScrollTag {
             'eventName',
             ScrollTag.EVENT_NAME
           ),
-          this.parameterUtils.createBuiltInListParameter('eventParameters', [
+          this.parameterUtils.createBuiltInListParameter('eventSettingsTable', [
             this.parameterUtils.createMapParameter(
               ScrollTag.SCROLL_DEPTH_KEY,
               ScrollTag.SCROLL_DEPTH_VAR
             )
           ]),
-          this.parameterUtils.createTagReferenceParameter(
-            'measurementId',
-            configurationName
+          // The event tag's Measurement ID field, as Tag Manager exports it.
+          this.parameterUtils.createTemplateParameter(
+            'measurementIdOverride',
+            `{{${MEASUREMENT_ID_VARIABLE_NAME}}}`
           )
         ],
         fingerprint: ScrollTag.FINGERPRINT,
@@ -67,11 +80,13 @@ export class ScrollTag {
   }
 
   /**
-   * Creates scroll tag(s) if scroll events are present in dataLayers
-   * @param configurationName GTM configuration tag reference
+   * Creates the scroll tag when a data layer event is `scroll`, or an empty
+   * array otherwise or when the `event scroll` trigger is missing.
+   * @param configurationName name of the Google tag; not used, because the
+   * event tag sets its measurement ID directly
    * @param accountId GTM account ID
    * @param containerId GTM container ID
-   * @param triggers Available triggers to match
+   * @param triggers trigger names and IDs to find the Scroll Depth trigger in
    * @param dataLayers DataLayer events to inspect
    */
   public createScrollTag(
@@ -81,22 +96,14 @@ export class ScrollTag {
     triggers: Trigger[],
     dataLayers: DataLayer[] = []
   ): EventTagConfig[] {
-    // Only proceed if scroll event is included
     if (!this.eventUtils.isIncludeScroll(dataLayers)) {
       return [];
     }
-    // Find the scroll trigger
     const trigger = triggers.find((t) => t.name === ScrollTag.TRIGGER_NAME);
     if (!trigger?.triggerId) {
       console.error(`Missing trigger (${ScrollTag.TRIGGER_NAME}) or triggerId`);
       return [];
     }
-    // Build and return the tag configuration
-    return this.buildScrollTag(
-      configurationName,
-      accountId,
-      containerId,
-      trigger.triggerId
-    );
+    return this.buildScrollTag(accountId, containerId, trigger.triggerId);
   }
 }

@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { ResolveFn } from '@angular/router';
-import { forkJoin, map } from 'rxjs';
+import { catchError, forkJoin, map, of } from 'rxjs';
 import { AbstractTestEvent } from '@utils';
 import { ImageService } from '../../../shared/services/api/image/image.service';
 import { RecordingService } from '../../../shared/services/api/recording/recording.service';
@@ -26,6 +26,11 @@ export const reportPageResolver: ResolveFn<ReportDetailRouteContext> = (
       eventId
     ),
     video: inject(VideosService).getVideo(projectSlug, eventId),
+    // Only accompanied-mode runs record Tag Assistant; a missing file is
+    // served empty, and a failed request must not block the page.
+    tagAssistantVideo: inject(VideosService)
+      .getVideo(projectSlug, eventId, 'tag-assistant')
+      .pipe(catchError(() => of(null))),
     image: inject(ImageService).getImage(projectSlug, eventId)
   }).pipe(
     map((loaded) => buildReportPage({ projectSlug, eventId, ...loaded }))

@@ -28,5 +28,11 @@ export class InspectGtmQueryDto {
   })
   captureRequest?: string;
 
+  @ApiPropertyOptional({
+    description:
+      'Close the browser when the run ends. A headful run otherwise stays open for inspection; batch runs set this so windows do not pile up.'
+  })
+  closeBrowser?: string;
+
   url?: string;
 }

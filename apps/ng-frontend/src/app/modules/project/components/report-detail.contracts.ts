@@ -16,6 +16,8 @@ export type ReportDetailRouteContext = {
   recording: Recording | null;
   reportDetails: IReportDetails | undefined;
   videoBlob: Blob | undefined;
+  /** The Tag Assistant tab of an accompanied-mode run; empty otherwise. */
+  tagAssistantVideoBlob: Blob | undefined;
   imageBlob: Blob | undefined;
   historyLinkCommands: string[];
 };
@@ -54,6 +56,7 @@ export function buildReportPage(loaded: {
   spec: DataLayerSpec;
   recording: Recording | null;
   video: { blob: Blob } | null;
+  tagAssistantVideo: { blob: Blob } | null;
   image: { blob: Blob } | null;
 }): ReportDetailRouteContext {
   return {
@@ -63,6 +66,7 @@ export function buildReportPage(loaded: {
     recording: loaded.recording,
     reportDetails: toReportDetails(loaded.detail),
     videoBlob: loaded.video?.blob,
+    tagAssistantVideoBlob: loaded.tagAssistantVideo?.blob,
     imageBlob: loaded.image?.blob,
     historyLinkCommands: ['..', 'buckets']
   };
@@ -148,6 +152,7 @@ export type ReportTabViewModel = {
   canExportEvent: boolean;
   hasMedia: boolean;
   videoBlob: Blob | undefined;
+  tagAssistantVideoBlob: Blob | undefined;
   imageBlob: Blob | undefined;
 };
 

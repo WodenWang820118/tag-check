@@ -20,6 +20,10 @@ import {
   EditorThemeStyles
 } from '../../../../shared/services/editor/editor.service';
 
+/**
+ * The "Create a test manually" tab: a spec editor and a recording
+ * editor; a Chrome recording can also be uploaded.
+ */
 @Component({
   selector: 'app-new-report-view',
   standalone: true,
@@ -117,7 +121,6 @@ export class NewReportViewComponent {
     private readonly editorService: EditorService
   ) {
     this.route.data.subscribe((data) => {
-      console.log('data: ', data);
       const projectSlug = data['projectSlug'];
       if (projectSlug) {
         this.projectSlug.set(projectSlug);
@@ -150,9 +153,9 @@ export class NewReportViewComponent {
       .subscribe(() => {
         // force reload the page
         this.router.navigated = false;
-        this.router.navigate([this.router.url]).then(() => {
+        void this.router.navigate([this.router.url]).then(() => {
           if (this.route.snapshot.data['reports']) {
-            this.sidenav().close();
+            void this.sidenav().close();
           }
         });
       });

@@ -1,3 +1,4 @@
+import { SelectionModel } from '@angular/cdk/collections';
 import { Injectable, effect, inject, untracked } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { finalize, take } from 'rxjs';
@@ -8,19 +9,27 @@ import { ReportService } from '../../../../../../shared/services/api/report/repo
 import { InformationDialogComponent } from '../../../../../../shared/components/information-dialog/information-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ReportTableDataSourceModelService } from '../../../../services/report-table-data-source-model/report-table-data-source-model.service';
-
-type Status = 'all' | 'notRun' | 'failed' | 'partial' | 'passed';
+import {
+  reportFilterPredicate,
+  StatusFilter,
+  toReportFilter
+} from '../../report-filter';
 
 export interface ReportTableEffectsInitOptions {
-  getStatus: () => Status;
+  getStatus: () => StatusFilter;
   getProjectSlug: () => string;
 }
 
+/**
+ * The tests table's effects. The toolbar asks for a bookmark save or a
+ * delete through ProjectDataSourceService's signals; these effects carry
+ * them out, and keep the filters applied to the current data source.
+ */
 @Injectable({ providedIn: 'root' })
 export class ReportTableEffectsFacadeService {
   private initialized = false;
-  private getStatus!: () => Status;
-  private getProjectSlug!: () => string;
+  private getStatus: () => StatusFilter = () => 'all';
+  private getProjectSlug: () => string = () => '';
 
   private readonly projectDataSourceService = inject(ProjectDataSourceService);
   private readonly dialog = inject(MatDialog);
@@ -31,52 +40,27 @@ export class ReportTableEffectsFacadeService {
   );
 
   //#region Initialize & effects
+  /**
+   * Starts the effects, reading the status filter and the project from
+   * ReportTableFacadeService, which owns them (passed as callbacks because
+   * that facade injects this one). Must run in an injection context; only
+   * the first call counts, as both services live as long as the app.
+   */
   initialize(opts: ReportTableEffectsInitOptions) {
-    if (this.initialized) return; // idempotent
+    if (this.initialized) return;
     this.initialized = true;
     this.getStatus = opts.getStatus;
     this.getProjectSlug = opts.getProjectSlug;
 
-    // Effect 1: Combine text filter and status filter into one dataSource.filter string
+    // Effect 1: apply the text and status filter to the current data source.
+    // A run or a delete replaces the data source, so the predicate is set
+    // again on each one.
     effect(() => {
       const text = this.projectDataSourceService.getFilterSignal();
       const status = this.getStatus();
       const ds = this.reportTableDataSourceModelService.dataSource();
-      if (ds) {
-        // Ensure custom filter predicate is set once
-        ds.filterPredicate = (data: unknown, filterStr: string) => {
-          let parsed: { text?: string; status?: string } = {};
-          try {
-            parsed = JSON.parse(filterStr || '{}');
-          } catch {
-            // Fallback: treat entire string as text filter
-            parsed = { text: filterStr || '' };
-          }
-          const t = (parsed.text || '').toLowerCase();
-          const s = (parsed.status || 'all') as Status;
-
-          // Text match against key fields
-          const haystack =
-            `${(data as IReportDetails).testName ?? ''} ${(data as IReportDetails).eventName ?? ''}`.toLowerCase();
-          const textMatch = !t || haystack.includes(t);
-
-          // Status match
-          const rd = data as IReportDetails;
-          const run = (rd?.updatedAt ?? 0) > (rd?.createdAt ?? 0);
-          const dl = !!rd?.passed;
-          const req = !!rd?.requestPassed;
-          let statusKey: 'notRun' | 'failed' | 'partial' | 'passed';
-          if (!run) statusKey = 'notRun';
-          else if (dl && req) statusKey = 'passed';
-          else if (dl || req) statusKey = 'partial';
-          else statusKey = 'failed';
-
-          const statusMatch = s === 'all' || s === statusKey;
-          return textMatch && statusMatch;
-        };
-
-        ds.filter = JSON.stringify({ text, status });
-      }
+      ds.filterPredicate = reportFilterPredicate;
+      ds.filter = toReportFilter(text, status);
     });
 
     // Effect 2: Save bookmarks before changing the visible state.
@@ -153,30 +137,42 @@ export class ReportTableEffectsFacadeService {
 
         dialogRef.afterClosed().subscribe((result) => {
           if (result) {
-            const currentDsB =
-              this.reportTableDataSourceModelService.dataSource();
-            const remainingReports = currentDsB.data.filter(
-              (item: IReportDetails) =>
-                !this.reportTableDataSourceModelService
-                  .selection()
-                  .selected.includes(item)
+            const model = this.reportTableDataSourceModelService;
+            const selected = model.selection().selected;
+            const current = model.dataSource();
+            // The rows go at once; the filter effect re-applies the filter
+            // to the new data source.
+            const remaining = new MatTableDataSource<IReportDetails>(
+              current.data.filter((item) => !selected.includes(item))
             );
-            const newDsB = new MatTableDataSource<IReportDetails>([
-              ...remainingReports
-            ]);
-            newDsB.paginator = currentDsB.paginator;
-            newDsB.sort = currentDsB.sort;
-            this.reportTableDataSourceModelService.dataSource.set(newDsB);
+            remaining.paginator = current.paginator;
+            remaining.sort = current.sort;
+            model.dataSource.set(remaining);
+            // The deleted rows must not stay selected, or the toolbar would
+            // still offer to delete, run or bookmark them.
+            model.selection.set(new SelectionModel<IReportDetails>(true, []));
 
+            const deleteProjectSlug = this.getProjectSlug();
             this.reportService
               .deleteBatchReports(
-                this.getProjectSlug(),
-                this.reportTableDataSourceModelService
-                  .selection()
-                  .selected.map((item: IReportDetails) => item.eventId)
+                deleteProjectSlug,
+                selected.map((item) => item.eventId)
               )
               .pipe(take(1))
-              .subscribe();
+              .subscribe({
+                error: () => {
+                  // Another project's table is showing: its rows came from
+                  // the server and never held these tests.
+                  if (this.getProjectSlug() === deleteProjectSlug) {
+                    this.restoreRows(current.data, selected);
+                  }
+                  this.snackBar.open(
+                    'Could not delete the selected tests. Please try again.',
+                    'Dismiss',
+                    { duration: 5000 }
+                  );
+                }
+              });
           }
           this.projectDataSourceService.setDeletedSignal(false);
         });
@@ -184,4 +180,28 @@ export class ReportTableEffectsFacadeService {
     });
   }
   //#endregion
+
+  /**
+   * Puts rows whose delete failed back in the table, in their old order.
+   * Rows that stayed keep their latest version, as a run that ended during
+   * the delete replaced them.
+   */
+  private restoreRows(before: IReportDetails[], deleted: IReportDetails[]) {
+    const model = this.reportTableDataSourceModelService;
+    const latest = model.dataSource();
+    const latestById = new Map(latest.data.map((row) => [row.eventId, row]));
+    const deletedIds = new Set(deleted.map((row) => row.eventId));
+    const beforeIds = new Set(before.map((row) => row.eventId));
+    const rows = before.flatMap((row) => {
+      if (deletedIds.has(row.eventId)) return [row];
+      const kept = latestById.get(row.eventId);
+      return kept ? [kept] : [];
+    });
+    rows.push(...latest.data.filter((row) => !beforeIds.has(row.eventId)));
+
+    const restored = new MatTableDataSource<IReportDetails>(rows);
+    restored.paginator = latest.paginator;
+    restored.sort = latest.sort;
+    model.dataSource.set(restored);
+  }
 }

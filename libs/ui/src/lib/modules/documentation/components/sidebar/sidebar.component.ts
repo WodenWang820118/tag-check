@@ -6,6 +6,9 @@ import { TREE_DATA } from '../../tree-data';
 import { TopicNode } from '@utils';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
+/**
+ * The documentation sidebar: the page tree from {@link TREE_DATA}.
+ */
 @Component({
   selector: 'app-sidebar',
   standalone: true,

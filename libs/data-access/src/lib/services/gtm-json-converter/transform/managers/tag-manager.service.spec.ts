@@ -6,7 +6,13 @@ import { ScrollTag } from '../tags/scroll-tag.service';
 import { VideoTag } from '../tags/video-tag.service';
 import { EventUtils } from '../../utils/event-utils.service';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import type { DataLayer, Trigger } from '@utils';
+import {
+  getGa4ParameterNameIssues,
+  getParameterListItems,
+  getParameterMapValue,
+  type DataLayer,
+  type Trigger
+} from '@utils';
 
 describe('TagManager', () => {
   let service: TagManager;
@@ -123,7 +129,7 @@ describe('TagManager', () => {
 
     it('should include scroll tag when data layers contain a scroll event', () => {
       const dataLayers: DataLayer[] = [{ event: 'scroll', paths: [] }];
-      const triggers: Trigger[] = [{ name: 'scroll', triggerId: '99' }];
+      const triggers: Trigger[] = [{ name: 'event scroll', triggerId: '99' }];
 
       const result = service.getTags(
         mockAccountId,
@@ -192,6 +198,68 @@ describe('TagManager', () => {
 
       const purchaseTag = result.find((t) => t.name === 'GA4 event - purchase');
       expect(purchaseTag).toBeTruthy();
+    });
+
+    function getParameterRows(
+      ecommerce: 'true' | 'false',
+      dataLayer: DataLayer
+    ): Array<[string | undefined, string | undefined]> {
+      const result = service.getTags(
+        mockAccountId,
+        mockContainerId,
+        [dataLayer],
+        [{ name: dataLayer.event, triggerId: '7' }],
+        mockGoogleTagName,
+        mockMeasurementId,
+        ecommerce
+      );
+      const tag = result.find(
+        (t) => t.name === `GA4 event - ${dataLayer.event}`
+      );
+      const table = tag?.parameter.find((p) => p.key === 'eventSettingsTable');
+      return getParameterListItems(table).map((row) => [
+        getParameterMapValue(row, 'parameter'),
+        getParameterMapValue(row, 'parameterValue')
+      ]);
+    }
+
+    it('names a nested parameter with underscores and reads it from its dotted path', () => {
+      const rows = getParameterRows('false', {
+        event: 'login',
+        paths: ['method', 'user', 'user.id', 'user.profile.tier']
+      });
+
+      expect(rows).toEqual([
+        ['method', '{{DLV - method}}'],
+        ['user', '{{DLV - user}}'],
+        ['user_id', '{{DLV - user.id}}'],
+        ['user_profile_tier', '{{DLV - user.profile.tier}}']
+      ]);
+      for (const [name] of rows) {
+        expect(getGa4ParameterNameIssues(name ?? '')).toEqual([]);
+      }
+    });
+
+    it('still names ecommerce parameters without the ecommerce prefix', () => {
+      const rows = getParameterRows('false', {
+        event: 'purchase',
+        paths: ['ecommerce.currency', 'ecommerce.items', 'user.id']
+      });
+
+      expect(rows).toEqual([
+        ['currency', '{{DLV - ecommerce.currency}}'],
+        ['items', '{{DLV - ecommerce.items}}'],
+        ['user_id', '{{DLV - user.id}}']
+      ]);
+    });
+
+    it('leaves ecommerce parameters to Send Ecommerce data when it is on', () => {
+      const rows = getParameterRows('true', {
+        event: 'purchase',
+        paths: ['ecommerce.currency', 'user.id']
+      });
+
+      expect(rows).toEqual([['user_id', '{{DLV - user.id}}']]);
     });
   });
 });

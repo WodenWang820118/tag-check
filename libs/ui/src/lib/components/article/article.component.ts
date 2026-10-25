@@ -1,6 +1,10 @@
 import { JsonPipe } from '@angular/common';
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 
+/**
+ * tag-build's help article: the expected input format, ecommerce data and
+ * Event Settings variables.
+ */
 @Component({
   selector: 'lib-article',
   standalone: true,

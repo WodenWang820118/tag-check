@@ -2,7 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Page } from 'puppeteer';
 import { PageClickService } from './page-click.service';
 import { EvaluateClickService } from './evaluate-click.service';
+import { ClickOperation } from './utils';
 
+/**
+ * Clicks an element with one of two methods and falls back to the other:
+ * page.click(), a real mouse click at the element's position, or
+ * element.click(), a DOM click that reaches elements the mouse cannot.
+ */
 @Injectable()
 export class ClickStrategyService {
   private readonly logger = new Logger(ClickStrategyService.name);
@@ -11,6 +17,11 @@ export class ClickStrategyService {
     private readonly evaluateClickService: EvaluateClickService
   ) {}
 
+  /**
+   * Starts with page.click() when `useNormalClick` is set, otherwise with
+   * element.click(). Resolves true once either method clicked, false when
+   * neither did. Never throws.
+   */
   async clickElement(
     page: Page,
     projectName: string,
@@ -25,86 +36,33 @@ export class ClickStrategyService {
         useNormalClick ? 'page.click()' : 'element.click()'
       }`
     );
+    const [first, fallback]: ClickOperation[] = useNormalClick
+      ? [this.pageClickService, this.evaluateClickService]
+      : [this.evaluateClickService, this.pageClickService];
     try {
-      if (useNormalClick) {
-        return await this.attemptClick(
+      return (
+        (await first.operate(
           page,
           projectName,
           eventId,
           selector,
           selectorType,
-          this.pageClickService.operate,
           timeout
-        );
-      } else {
-        return await this.attemptClick(
+        )) ||
+        (await fallback.operate(
           page,
           projectName,
           eventId,
           selector,
           selectorType,
-          this.evaluateClickService.operate,
           timeout
-        );
-      }
+        ))
+      );
     } catch (error) {
       this.logger.error(
         `Failed to click on element with selector "${selector}": ${error}`
       );
       return false;
     }
-  }
-
-  async attemptClick(
-    page: Page,
-    projectName: string,
-    eventId: string,
-    selector: string,
-    selectorType: string,
-    clickMethod: (
-      page: Page,
-      projectName: string,
-      eventId: string,
-      selector: string,
-      selectorType: string,
-      timeout: number
-    ) => Promise<boolean>,
-    timeout = 10000
-  ): Promise<boolean> {
-    const serviceInstance =
-      clickMethod === this.pageClickService.operate
-        ? this.pageClickService
-        : this.evaluateClickService;
-
-    const result = await clickMethod.call(
-      serviceInstance,
-      page,
-      projectName,
-      eventId,
-      selector,
-      selectorType,
-      timeout
-    );
-
-    if (!result) {
-      // Fallback to the other click method
-      const fallbackMethod =
-        serviceInstance === this.pageClickService
-          ? this.evaluateClickService.operate
-          : this.pageClickService.operate;
-
-      return await fallbackMethod.call(
-        serviceInstance === this.pageClickService
-          ? this.evaluateClickService
-          : this.pageClickService,
-        page,
-        projectName,
-        eventId,
-        selector,
-        selectorType,
-        timeout
-      );
-    }
-    return result;
   }
 }

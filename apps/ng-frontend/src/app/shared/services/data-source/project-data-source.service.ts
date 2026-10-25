@@ -3,6 +3,11 @@ import { IReportDetails } from '@utils';
 import { BehaviorSubject } from 'rxjs';
 import { Injectable, signal } from '@angular/core';
 
+/**
+ * Requests from the tests table's toolbar to the table: the search text,
+ * and the bookmark and delete flags that ReportTableEffectsFacadeService
+ * handles and resets.
+ */
 @Injectable({
   providedIn: 'root'
 })

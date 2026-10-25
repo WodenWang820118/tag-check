@@ -30,7 +30,7 @@ describe('FilePathService', () => {
               async (
                 projectSlug: string,
                 folderName: string,
-                fileName?: string
+                fileName: string
               ) => {
                 if (fileName === 'spec.json') {
                   return await Promise.resolve(
@@ -86,7 +86,16 @@ describe('FilePathService', () => {
                   configsService.getRESULT_FOLDER()
                 )
               );
-            })
+            }),
+            getInspectionEventFolderPath: vi.fn(
+              async (projectSlug: string, eventId: string) =>
+                join(
+                  rootProjectPath,
+                  projectSlug,
+                  configsService.getRESULT_FOLDER(),
+                  eventId
+                )
+            )
           };
         }
 
@@ -115,86 +124,6 @@ describe('FilePathService', () => {
         'ng_gtm_integration_sample',
         'chrome_recordings',
         'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff.json'
-      )
-    );
-  });
-
-  it('should return the correct config file path', async () => {
-    const actualPath = await service.getProjectConfigFilePath(
-      'ng_gtm_integration_sample'
-    );
-    expect(actualPath).toBe(
-      join(rootProjectPath, 'ng_gtm_integration_sample', 'config', 'spec.json')
-    );
-  });
-
-  it('should return the correct setting file path', async () => {
-    const actualPath = await service.getProjectSettingFilePath(
-      'ng_gtm_integration_sample'
-    );
-    expect(actualPath).toBe(
-      join(rootProjectPath, 'ng_gtm_integration_sample', 'settings.json')
-    );
-  });
-
-  it('should return the correct project meta data file path', async () => {
-    const actualPath = await service.getProjectMetaDataFilePath(
-      'ng_gtm_integration_sample'
-    );
-    expect(actualPath).toBe(
-      join(
-        rootProjectPath,
-        'ng_gtm_integration_sample',
-        configsService.getMETA_DATA()
-      )
-    );
-  });
-
-  it('should return the correct report file path', async () => {
-    const actualPath = await service.getReportFilePath(
-      'ng_gtm_integration_sample',
-      'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff',
-      'QA_report_single_add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff_2024-07-15_114529.xlsx'
-    );
-    expect(actualPath).toBe(
-      join(
-        rootProjectPath,
-        'ng_gtm_integration_sample',
-        configsService.getRESULT_FOLDER(),
-        'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff',
-        'QA_report_single_add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff_2024-07-15_114529.xlsx'
-      )
-    );
-  });
-
-  it('should return the correct cache file path', async () => {
-    const actualPath = await service.getCacheFilePath(
-      'ng_gtm_integration_sample',
-      'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff'
-    );
-    expect(actualPath).toBe(
-      join(
-        rootProjectPath,
-        'ng_gtm_integration_sample',
-        configsService.getRESULT_FOLDER(),
-        'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff',
-        'add_payment_info - result cache.json'
-      )
-    );
-  });
-
-  it('should retrun the correct image file path', async () => {
-    const actualPath = await service.getImageFilePath(
-      'ng_gtm_integration_sample',
-      'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff'
-    );
-    expect(actualPath).toBe(
-      join(
-        rootProjectPath,
-        'ng_gtm_integration_sample',
-        configsService.getRESULT_FOLDER(),
-        'add_payment_info_0afeb0fe-0905-4a78-9b81-d171b0fa48ff',
-        'add_payment_info.png'
       )
     );
   });

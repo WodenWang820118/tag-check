@@ -10,6 +10,7 @@ import {
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
+/** Reads and writes a project's site credentials. */
 @Injectable()
 export class AuthenticationSettingRepositoryService {
   constructor(
@@ -65,6 +66,8 @@ export class AuthenticationSettingRepositoryService {
         HttpStatus.NOT_FOUND
       );
     } catch (error) {
+      // Keep the 404 thrown above; only unexpected failures become a 500.
+      if (error instanceof HttpException) throw error;
       Logger.error(`Failed to update authentication settings: ${error}`);
       throw new HttpException(
         'Failed to update authentication settings',

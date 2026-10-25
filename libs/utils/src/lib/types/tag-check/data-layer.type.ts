@@ -46,7 +46,12 @@ export type BaseECommerce = {
 
 export type BaseDataLayerEvent = {
   event?: string;
-  ecommerce?: BaseECommerce;
+  /**
+   * `null` in the `{ ecommerce: null }` push that clears the previous
+   * ecommerce object before each ecommerce event.
+   * @see https://developers.google.com/analytics/devguides/collection/ga4/ecommerce?client_type=gtm
+   */
+  ecommerce?: BaseECommerce | null;
   [key: string]: string | number | BaseECommerce | undefined | null;
 };
 

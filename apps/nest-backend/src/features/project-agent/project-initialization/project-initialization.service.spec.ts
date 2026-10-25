@@ -45,20 +45,12 @@ describe('ProjectInitializationService', () => {
   });
 
   it('initProjectFileSystem() short-circuits folder creation when the project folder already exists', async () => {
-    vi.mocked(existsSync).mockImplementation((p: never) => p === '/root/demo');
+    vi.mocked(existsSync).mockImplementation((p) => p === '/root/demo');
     const ctx = build();
     await ctx.service.initProjectFileSystem('demo', {
       projectSlug: 'demo'
     } as never);
     // root exists -> no mkdir; project folder exists -> no createFolder for sub-paths
     expect(ctx.folderService.createFolder).not.toHaveBeenCalled();
-  });
-
-  it('initInspectionEventSavingFolder() creates the per-event folder', async () => {
-    const ctx = build();
-    await ctx.service.initInspectionEventSavingFolder('demo', 'evt');
-    expect(ctx.folderService.createFolder).toHaveBeenCalledWith(
-      '/root/demo/evt'
-    );
   });
 });

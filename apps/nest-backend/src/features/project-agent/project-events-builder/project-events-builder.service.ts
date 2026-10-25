@@ -31,6 +31,10 @@ export interface BuildEventsResult {
   unchanged: string[];
 }
 
+/**
+ * Creates a project's tests from GTM tags, each with its recording, spec and
+ * item definition, and refreshes specs that are still generated.
+ */
 @Injectable()
 export class ProjectEventsBuilderService {
   private readonly logger = new Logger(ProjectEventsBuilderService.name);
@@ -66,6 +70,8 @@ export class ProjectEventsBuilderService {
     const existingEvents =
       await this.testEventRepositoryService.listWithSpecs(projectSlug);
 
+    // Sequential on purpose: each input writes rows and files, and the
+    // result lists the inputs in order.
     for (const input of inputs) {
       const dataLayerSpec = this.dataLayerSpecBuilderService.buildDataLayerSpec(
         input.spec,

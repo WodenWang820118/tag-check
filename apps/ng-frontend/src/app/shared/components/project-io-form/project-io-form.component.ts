@@ -8,9 +8,13 @@ import { catchError, EMPTY, map, mergeMap, switchMap, take, tap } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectIoService } from '../../services/api/project-io/project-io.service';
-import { InformationDialogComponent } from '../information-dialog/information-dialog.component';
+import {
+  InformationDialogComponent,
+  InformationDialogData
+} from '../information-dialog/information-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 
+/** Settings > Export or delete: exports the project to a file or deletes it. */
 @Component({
   selector: 'app-project-io-form',
   standalone: true,
@@ -52,10 +56,13 @@ export class ProjectIoFormComponent {
       .pipe(
         take(1),
         mergeMap((params) => {
-          const dialogRef = this.dialog.open(InformationDialogComponent, {
+          const dialogRef = this.dialog.open<
+            InformationDialogComponent,
+            InformationDialogData
+          >(InformationDialogComponent, {
             data: {
               title: 'Delete project',
-              message: 'Are you sure you want to delete this project?',
+              contents: 'Are you sure you want to delete this project?',
               action: 'Delete'
             }
           });
@@ -75,7 +82,7 @@ export class ProjectIoFormComponent {
           return EMPTY;
         }),
         tap(() => {
-          this.router.navigate(['/']);
+          void this.router.navigate(['/']);
         }),
         catchError((err) => {
           console.error(err);

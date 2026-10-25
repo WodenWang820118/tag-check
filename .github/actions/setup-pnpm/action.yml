@@ -1,0 +1,35 @@
+name: Setup pnpm
+description: >-
+  Installs the pnpm version from package.json's packageManager through
+  Corepack, with the Corepack directory cached and the download retried.
+runs:
+  using: composite
+  steps:
+    # pnpm 12 downloads its native binary from the npm registry on its first
+    # run and stores it in Corepack's directory, next to the pnpm package.
+    # Caching that directory lets a cache hit skip the registry.
+    - name: Locate the Corepack directory
+      shell: bash
+      run: echo "COREPACK_HOME=${RUNNER_TEMP}/corepack" >> "$GITHUB_ENV"
+    - name: Cache Corepack
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/corepack
+        key: corepack-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package.json') }}
+    # The registry sometimes times out (30 s) for a few minutes; retry
+    # before failing the job.
+    - name: Install pnpm
+      shell: bash
+      run: |
+        corepack enable
+        for delay in 10 30 0; do
+          if corepack install && pnpm --version; then
+            exit 0
+          fi
+          if [ "$delay" -eq 0 ]; then
+            echo "pnpm setup failed after 3 attempts" >&2
+            exit 1
+          fi
+          echo "pnpm setup failed; retrying in ${delay}s" >&2
+          sleep "$delay"
+        done

@@ -11,6 +11,10 @@ import {
 import { plainToInstance } from 'class-transformer';
 import { AbstractSpecResponseDto } from '../../../shared/dto/spec/datalayer-spec-response.dto';
 
+/**
+ * Reads and writes tests' specs (`SpecEntity`): the expected `dataLayer`
+ * push and the GTM tag it was built from.
+ */
 @Injectable()
 export class SpecRepositoryService {
   constructor(

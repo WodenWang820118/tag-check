@@ -85,13 +85,21 @@ describe('SpecExtractService', () => {
     expect(service.fixJsonString(input)).toBe(input);
   });
 
-  it('documents that standalone line comments are not repaired', () => {
-    expect(() =>
+  it('repairs standalone line comments', () => {
+    expect(
       service.preprocessInput(`[
-          // unsupported standalone comment
+          // standalone comment
           { "event": "page_view" }
         ]`)
-    ).toThrow('Error parsing spec JSON. Please check the format.');
+    ).toEqual([{ event: 'page_view' }]);
+  });
+
+  it('keeps URLs in single-quoted values intact', () => {
+    expect(
+      service.preprocessInput(
+        "[{ event: 'page_view', page_location: 'https://example.com/' }]"
+      )
+    ).toEqual([{ event: 'page_view', page_location: 'https://example.com/' }]);
   });
 
   describe('fixJsonString edge cases', () => {
@@ -110,9 +118,8 @@ describe('SpecExtractService', () => {
       const result = service.fixJsonString(input);
       const parsed = JSON.parse(result);
       expect(parsed.active).toBe(true);
+      expect(parsed.count).toBe(0);
       expect(parsed.empty).toBe(null);
-      // Note: numeric 0 becomes "0" — the regex-based repair cannot
-      // distinguish numeric literals from unquoted string values.
     });
 
     it('should repair multiple trailing commas in nested arrays and objects', () => {
@@ -132,16 +139,12 @@ describe('SpecExtractService', () => {
       expect(parsed.meta).toEqual({});
     });
 
-    it('should handle unquoted numeric values (treated as strings by repair)', () => {
-      // The regex repair treats all unquoted values as strings.
-      // This is a known limitation; users should quote values explicitly.
+    it('should keep unquoted numeric values as numbers', () => {
       const input = '{ event: purchase, value: 799.99, quantity: 3 }';
       const result = service.fixJsonString(input);
       const parsed = JSON.parse(result);
-      // Numbers become strings after repair
-      expect(typeof parsed.value).toBe('string');
-      expect(parsed.value).toBe('799.99');
-      expect(parsed.quantity).toBe('3');
+      expect(parsed.value).toBe(799.99);
+      expect(parsed.quantity).toBe(3);
     });
 
     it('should handle single-quoted keys and values in nested structures', () => {
@@ -158,8 +161,7 @@ describe('SpecExtractService', () => {
       const result = service.fixJsonString(input);
       const parsed = JSON.parse(result);
       expect(parsed.event).toBe('page_view');
-      // Numbers become strings through regex repair
-      expect(parsed.value).toBe('100');
+      expect(parsed.value).toBe(100);
     });
 
     it('should repair a realistic multi-event spec with various issues', () => {
@@ -185,8 +187,8 @@ describe('SpecExtractService', () => {
       const result = service.fixJsonString(input);
       const parsed = JSON.parse(result);
       expect(parsed).toHaveLength(2);
-      // Numbers become strings through repair
-      expect(parsed[1].ecommerce.value).toBe('799.99');
+      expect(parsed[0].page_location).toBe('/home');
+      expect(parsed[1].ecommerce.value).toBe(799.99);
       expect(parsed[1].ecommerce.items[0].item_name).toBe('Product A');
     });
   });

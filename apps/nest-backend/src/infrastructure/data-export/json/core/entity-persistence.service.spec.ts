@@ -12,13 +12,13 @@ function makeMeta(name: string): EntityMetadata {
 describe('EntityPersistenceService.persistEntityAndRegister - update path', () => {
   let service: EntityPersistenceService;
   let relationMapper: Pick<RelationMapperService, 'register'>;
-  let idMapRegistry: Pick<IdMapRegistryService, 'ensure'>;
+  let idMapRegistry: Pick<IdMapRegistryService, 'ensure' | 'markCreated'>;
   let repo: Pick<Repository<ObjectLiteral>, 'findOne' | 'save' | 'create'>;
   let upsertSvc: Pick<SinglePerParentUpsertService, 'tryUpsert'>;
 
   beforeEach(() => {
     relationMapper = { register: vi.fn() };
-    idMapRegistry = { ensure: vi.fn(() => new Map()) };
+    idMapRegistry = { ensure: vi.fn(() => new Map()), markCreated: vi.fn() };
     upsertSvc = { tryUpsert: vi.fn().mockResolvedValue(false) };
     service = new EntityPersistenceService(
       relationMapper as RelationMapperService,

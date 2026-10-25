@@ -114,6 +114,8 @@ Fix:
 - `apps/ng-tag-build/src/styles.scss` is reduced to a stub pointing at the
   sibling tailwind entrypoint.
 - `apps/ng-tag-build/project.json` lists both files in `styles`.
+- Later the stub, which held only a comment, was deleted together with its
+  entries in the ng-tag-build, ng-frontend and ng-product-doc `styles` arrays.
 
 A second cascade conflict surfaced after that: Angular Material's baseline
 component styles are emitted **unlayered** from two places — the prebuilt

@@ -87,7 +87,8 @@ describe('StepExecutorUtilsService', () => {
       ).not.toHaveBeenCalled();
     });
 
-    it('throws NotFoundException and closes the page when no selector resolves', async () => {
+    it('throws NotFoundException and leaves the page open when no selector resolves', async () => {
+      // The pipeline screenshots the page to save the failed run.
       const { svc } = build();
       const close = vi.fn();
       const page = {
@@ -99,7 +100,50 @@ describe('StepExecutorUtilsService', () => {
       await expect(
         svc.handleWaitForElement(page, step, 10)
       ).rejects.toBeInstanceOf(NotFoundException);
-      expect(close).toHaveBeenCalled();
+      expect(close).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleNavigate', () => {
+    function navigablePage(evaluate: ReturnType<typeof vi.fn>) {
+      return {
+        setExtraHTTPHeaders: vi.fn().mockResolvedValue(undefined),
+        evaluateOnNewDocument: vi.fn().mockResolvedValue(undefined),
+        goto: vi.fn().mockResolvedValue(undefined),
+        evaluate
+      };
+    }
+
+    it('goes on when the consent preferences cannot be read', async () => {
+      vi.useFakeTimers();
+      try {
+        const { svc } = build();
+        // A site that stores consentPreferences as something other than JSON.
+        const page = navigablePage(
+          vi.fn().mockRejectedValue(new SyntaxError('Unexpected token'))
+        );
+        const state = { isFirstNavigation: true };
+        const step = { type: 'navigate', url: 'https://example.test' } as Step;
+        const application = {
+          localStorage: { data: [] },
+          cookie: { data: [] }
+        };
+
+        const navigation = svc.handleNavigate(
+          page as never,
+          step,
+          state,
+          false,
+          application
+        );
+        await vi.runAllTimersAsync();
+        await navigation;
+
+        expect(page.goto).toHaveBeenCalledTimes(2);
+        expect(state.isFirstNavigation).toBe(false);
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 });

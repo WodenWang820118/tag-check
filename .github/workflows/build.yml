@@ -36,9 +36,7 @@ jobs:
         with:
           node-version: '24.x'
       - name: Setup pnpm
-        run: |
-          corepack enable
-          corepack install
+        uses: ./.github/actions/setup-pnpm
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Format check
@@ -58,6 +56,9 @@ jobs:
         shell: bash
       - name: Test and coverage
         run: pnpm run test:cov
+        shell: bash
+      - name: Type-check specs
+        run: pnpm nx run-many -t typecheck-spec
         shell: bash
       - name: Backend e2e tests with coverage
         run: pnpm run test-back:e2e:cov

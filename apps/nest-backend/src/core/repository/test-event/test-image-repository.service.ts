@@ -11,6 +11,7 @@ import {
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
+/** Reads and saves run screenshots (`TestImageEntity`). */
 @Injectable()
 export class TestImageRepositoryService {
   constructor(

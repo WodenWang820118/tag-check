@@ -1,11 +1,14 @@
-import { Injectable, effect, inject, signal } from '@angular/core';
-import { WebSocketService } from '../web-socket/web-socket.service';
+import { DestroyRef, Injectable, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ProgressEventsService } from '../progress-events/progress-events.service';
 
+/** The running test's steps as signals, fed by ProgressEventsService. */
 @Injectable({
   providedIn: 'root'
 })
 export class ProgressUpdateService {
-  private readonly webSocketService = inject(WebSocketService);
+  private readonly progressEventsService = inject(ProgressEventsService);
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly _currentStep = signal<number>(0);
   private readonly _totalSteps = signal<number>(0);
@@ -16,33 +19,24 @@ export class ProgressUpdateService {
   readonly eventCompleted$ = this._eventCompleted.asReadonly();
 
   constructor() {
-    this.initializeSocketListeners();
+    this.initializeListeners();
   }
 
-  private initializeSocketListeners() {
-    effect(() => {
-      if (this.webSocketService.connectionStatus$()) {
-        console.log(
-          'Connected to server; Starting to listen for progress updates'
-        );
-        this.webSocketService.getSocket().on('progressUpdate', (data) => {
-          console.warn('Received progress update', data);
-          this.setCurrentStep(data.currentStep);
-          this.setTotalSteps(data.totalSteps);
-        });
+  private initializeListeners() {
+    this.progressEventsService.progressUpdate$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((data) => {
+        this.setCurrentStep(data.currentStep);
+        this.setTotalSteps(data.totalSteps);
+      });
 
-        this.webSocketService.getSocket().on('eventCompleted', (data) => {
-          console.warn('Received event completed', data);
-          this.setEventCompleted(true);
-          console.log(
-            'All steps completed via event; resetting progress state'
-          );
-          // Reset the progress state after completion event
-          this.setCurrentStep(0);
-          this.setTotalSteps(0);
-        });
-      }
-    });
+    this.progressEventsService.eventCompleted$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.setEventCompleted(true);
+        this.setCurrentStep(0);
+        this.setTotalSteps(0);
+      });
   }
 
   setCurrentStep(step: number) {

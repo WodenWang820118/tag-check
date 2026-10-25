@@ -1,11 +1,11 @@
-import { Injectable, Logger, NotAcceptableException } from '@nestjs/common';
+import { Injectable, NotAcceptableException } from '@nestjs/common';
 import { SpecService } from './spec.service';
 import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
-import { CreateSpecDto, UpdateSpecDto } from '../../../shared';
+import { CreateSpecDto } from '../../../shared';
 
+/** Lists a project's specs and adds a spec from a GTM tag. */
 @Injectable()
 export class ProjectSpecService {
-  private readonly logger = new Logger(ProjectSpecService.name);
   constructor(
     private readonly specRepositoryService: SpecRepositoryService,
     private readonly specService: SpecService
@@ -20,14 +20,12 @@ export class ProjectSpecService {
     };
   }
 
-  async getSpec(projectSlug: string, eventName: string) {
-    const spec = await this.specService.getSpecByEvent(eventName);
-    if (!spec) {
-      return undefined;
-    }
-    return spec.dataLayerSpec;
-  }
-
+  /**
+   * Saves the spec under the tag's `eventName` parameter.
+   *
+   * @returns The project's specs afterwards.
+   * @throws NotAcceptableException when the tag has no eventName.
+   */
   async addSpec(projectSlug: string, spec: CreateSpecDto) {
     const eventName = spec.rawGtmTag.tag.parameter.find(
       (p) => p.key === 'eventName'
@@ -41,21 +39,6 @@ export class ProjectSpecService {
       eventName: eventName,
       dataLayerSpec: spec.dataLayerSpec,
       rawGtmTag: spec.rawGtmTag
-    });
-
-    const projectSpec = await this.getProjectSpecs(projectSlug);
-    return projectSpec;
-  }
-
-  async updateSpec(projectSlug: string, eventId: string, spec: UpdateSpecDto) {
-    const dbSpec = await this.getSpec(projectSlug, eventId);
-    if (!dbSpec) {
-      throw new NotAcceptableException('Spec not found');
-    }
-
-    await this.specService.updateSpec(Number(dbSpec.id), {
-      eventName: eventId,
-      dataLayerSpec: spec.dataLayerSpec
     });
 
     const projectSpec = await this.getProjectSpecs(projectSlug);

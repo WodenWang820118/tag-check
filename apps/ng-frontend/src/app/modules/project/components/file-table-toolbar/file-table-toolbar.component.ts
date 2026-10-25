@@ -19,7 +19,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatChipsModule } from '@angular/material/chips';
+import { ActivatedRoute, Router } from '@angular/router';
 
+/**
+ * The Reports page's toolbar: delete or download the selected runs, and
+ * filter the table. When History opened the page for one event, a chip
+ * names it and removing the chip lists every run again.
+ */
 @Component({
   selector: 'app-file-table-toolbar',
   standalone: true,
@@ -32,7 +39,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatFormFieldModule,
     FormsModule,
     ReactiveFormsModule,
-    MatButtonToggleModule
+    MatButtonToggleModule,
+    MatChipsModule
   ],
   templateUrl: './file-table-toolbar.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -52,15 +60,29 @@ export class FileTableToolbarComponent implements OnDestroy {
       (this.fileTableDataSourceModelService.dataSource()?.data?.length || 0) > 0
   );
 
+  /** The event whose runs are listed (`?event=`); empty for every run. */
+  eventFilter = computed(() =>
+    this.fileTableDataSourceService.getEventFilterSignal()
+  );
+
   constructor(
     private readonly fileTableDataSourceService: FileTableDataSourceService,
-    private readonly fileTableDataSourceModelService: FileTableDataSourceModelService
+    private readonly fileTableDataSourceModelService: FileTableDataSourceModelService,
+    private readonly router: Router,
+    private readonly route: ActivatedRoute
   ) {}
 
+  /** Drops `?event=`, which lists every run again. */
+  clearEventFilter() {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { event: null },
+      queryParamsHandling: 'merge'
+    });
+  }
+
   applyFilter(event: Event) {
-    console.log('event', event);
     const filterValue = (event.target as HTMLInputElement).value;
-    console.log('filter value in applyFilter', filterValue);
     this.fileTableDataSourceService.setFilterSignal(filterValue);
   }
 

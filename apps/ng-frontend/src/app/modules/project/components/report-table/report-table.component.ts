@@ -1,19 +1,23 @@
-// #region imports
 import { CommonModule } from '@angular/common';
 import {
   Component,
-  OnInit,
-  signal,
   effect,
-  computed,
+  inject,
+  untracked,
   viewChild,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { MatTable, MatTableModule } from '@angular/material/table';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { tap, take } from 'rxjs';
-import { IReportDetails, RunStatus } from '@utils';
+import { take } from 'rxjs';
+import {
+  getCheckStatus,
+  IReportDetails,
+  ReportDetailResponse,
+  RunStatus
+} from '@utils';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
@@ -29,9 +33,30 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
-import { getLastRunAt, getRunStatus, hasRun } from '../report-detail.contracts';
-// #endregion
+import { getLastRunAt, getRunStatus } from '../report-detail.contracts';
+import { BatchRunService } from '../../services/batch-run/batch-run.service';
+import { StatusFilter } from './report-filter';
 
+/** Sort order of the status column: Passed first, Not run last. */
+const STATUS_ORDER: Record<RunStatus, number> = {
+  passed: 3,
+  partial: 2,
+  failed: 1,
+  notRun: 0
+};
+
+const SNACKBAR_CLASSES: Record<Exclude<RunStatus, 'notRun'>, string> = {
+  passed: 'snackbar-success',
+  partial: 'snackbar-warn',
+  failed: 'snackbar-error'
+};
+
+/**
+ * The project's tests: status and text filters, selection, sorting,
+ * pagination and the play button of each row. The rows live in
+ * ReportTableDataSourceModelService, shared with the toolbar and the batch
+ * run; ReportTableFacadeService builds them from the route's data.
+ */
 @Component({
   selector: 'app-report-table',
   standalone: true,
@@ -56,7 +81,34 @@ import { getLastRunAt, getRunStatus, hasRun } from '../report-detail.contracts';
   styleUrls: ['./report-table.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager
 })
-export class ReportTableComponent implements OnInit {
+export class ReportTableComponent {
+  private readonly paginator = viewChild<MatPaginator>(MatPaginator);
+  private readonly sort = viewChild<MatSort>(MatSort);
+  private readonly routeData = toSignal(inject(ActivatedRoute).data);
+
+  constructor(
+    public testRunningFacadeService: TestRunningFacadeService,
+    public batchRunService: BatchRunService,
+    private readonly facade: ReportTableFacadeService,
+    private readonly tableSortService: TableSortService,
+    private readonly snackBar: MatSnackBar,
+    private readonly projectDataSourceService: ProjectDataSourceService
+  ) {
+    // Rebuild the table on every resolve, not only the first: switching
+    // project in the toolbar reuses this component and only resolves the
+    // new project's tests. The view queries resolve after the first render,
+    // so the effect also waits for the paginator and the sort.
+    effect(() => {
+      const data = this.routeData();
+      const paginator = this.paginator();
+      const sort = this.sort();
+      if (data && paginator && sort) {
+        // initializeData reads the filter signals; they must not re-run this.
+        untracked(() => this.facade.initializeData(paginator, sort, data));
+      }
+    });
+  }
+
   /** The single status a row shows: Passed, Partial, Failed or Not run. */
   runStatus(report: IReportDetails): RunStatus {
     return getRunStatus(report);
@@ -65,101 +117,6 @@ export class ReportTableComponent implements OnInit {
   /** When the row's latest run ran; undefined before the first run. */
   lastRunAt(report: IReportDetails) {
     return getLastRunAt(report);
-  }
-
-  // #region viewChild / signals
-  private readonly paginator = viewChild<MatPaginator>(MatPaginator);
-  private readonly sort = viewChild<MatSort>(MatSort);
-  private readonly reportTable =
-    viewChild<MatTable<IReportDetails>>('reportTable');
-  private readonly isUpdating = signal(false);
-  private readonly isUpdating$ = computed(() => this.isUpdating());
-  private readonly updatedData = signal<Record<string, unknown> | undefined>(
-    undefined
-  );
-  private readonly updatedData$ = computed(() => this.updatedData());
-  // #endregion
-
-  constructor(
-    public testRunningFacadeService: TestRunningFacadeService,
-    private readonly route: ActivatedRoute,
-    private readonly facade: ReportTableFacadeService,
-    private readonly tableSortService: TableSortService,
-    private readonly snackBar: MatSnackBar,
-    private readonly projectDataSourceService: ProjectDataSourceService
-  ) {
-    // #region constructor effects
-    effect(() => {
-      const isUpdating = this.isUpdating$();
-      if (isUpdating) {
-        console.log('Updating table...');
-        const paginator = this.paginator();
-        const sort = this.sort();
-        const updatedData = this.updatedData$();
-        const originalData = this.dataSource.data;
-        console.log('Data source before update:', originalData);
-        if (paginator && sort && updatedData) {
-          const newData = [
-            ...(updatedData['projectReport'] as IReportDetails[])
-          ];
-
-          // Normalize and merge by eventId (avoid duplicates with stale state)
-          const toDate = (
-            d: Date | string | number | undefined | null
-          ): Date | undefined => (d == null ? undefined : new Date(d));
-          const normalize = (r: IReportDetails): IReportDetails => ({
-            ...r,
-            // ensure booleans are real booleans (not 'true'/'false' strings)
-            passed: r.passed === true,
-            requestPassed: r.requestPassed === true,
-            createdAt: toDate(r.createdAt) ?? new Date(0),
-            updatedAt: toDate(r.updatedAt)
-          });
-          const merged = new Map<string, IReportDetails>();
-          for (const r of originalData) merged.set(r.eventId, normalize(r));
-          for (const r of newData) merged.set(r.eventId, normalize(r));
-          const mergedList = Array.from(merged.values());
-          console.log('newData: ', newData);
-          this.dataSource.data = mergedList;
-          this.isUpdating.set(false);
-          try {
-            this.reportTable()?.renderRows();
-          } catch {
-            // Ignore errors from renderRows if table not yet available
-          }
-          console.log('Table update complete.');
-        }
-      }
-    });
-    // #endregion
-  }
-
-  ngOnInit() {
-    // #region lifecycle
-    this.route.data
-      .pipe(
-        take(1),
-        tap((data) => {
-          console.warn('data: ', data);
-          // Read the latest viewChild values at the time of data emission
-          const paginator = this.paginator();
-          const sort = this.sort();
-          if (paginator && sort) {
-            this.facade.initializeData(paginator, sort, data);
-          } else {
-            // Defer once to allow view init to complete, then try again
-            queueMicrotask(() => {
-              const p = this.paginator();
-              const s = this.sort();
-              if (p && s) {
-                this.facade.initializeData(p, s, data);
-              }
-            });
-          }
-        })
-      )
-      .subscribe();
-    // #endregion
   }
 
   sortData(sort: Sort) {
@@ -172,16 +129,7 @@ export class ReportTableComponent implements OnInit {
         {
           name: 'status',
           type: 'number',
-          accessor: (row: IReportDetails) => {
-            const run = hasRun(row);
-            const dl = row?.passed === true;
-            const req = row?.requestPassed === true;
-            // Order: Passed (3) > Partial (2) > Failed (1) > Not run (0)
-            if (!run) return 0;
-            if (dl && req) return 3;
-            if (dl || req) return 2;
-            return 1;
-          }
+          accessor: (row: IReportDetails) => STATUS_ORDER[getRunStatus(row)]
         },
         {
           name: 'completedTime',
@@ -192,11 +140,7 @@ export class ReportTableComponent implements OnInit {
     );
   }
 
-  // The following getters make it easier to use signals in the template:
-  get columns() {
-    return this.facade.columns();
-  }
-
+  // Getters let the template read the facade's signals.
   get columnsWithExpand() {
     return this.facade.columnsWithExpand();
   }
@@ -213,38 +157,24 @@ export class ReportTableComponent implements OnInit {
     return this.facade.isAllSelected();
   }
 
-  hasRecording(eventId: string) {
-    return this.facade.hasRecording(eventId);
-  }
-
-  // Expose methods directly:
   isSavingNavigation() {
     return this.projectDataSourceService.getPreventNavigationSignal();
   }
 
+  /** Runs one test; its row updates when the run ends, then a snackbar says how it went. */
   runTest(eventId: string) {
     if (this.isSavingNavigation()) return;
     this.facade
       .runTest(eventId)
       .pipe(take(1))
-      .subscribe((updatedData) => {
-        // Ensure the material table updates immediately with new data
-        console.log('Test result received, updating table:', updatedData.data);
-        // #region update table after run
-        this.isUpdating.set(true);
-        this.updatedData.set({
-          projectReport: updatedData.data.filter(
-            (event) => eventId === event.eventId
-          ),
-          projectSlug: this.route.snapshot.paramMap.get('projectSlug')
-        });
-        this.maybeShowSnackForEvent(updatedData, eventId);
-        // #endregion
+      .subscribe((report) => {
+        if (report) {
+          this.showSnack(report);
+        }
       });
   }
 
-  // Status filter wrappers for the template
-  setStatusFilter(status: 'all' | 'notRun' | 'failed' | 'partial' | 'passed') {
+  setStatusFilter(status: StatusFilter) {
     this.facade.setStatusFilter(status);
   }
 
@@ -256,7 +186,6 @@ export class ReportTableComponent implements OnInit {
     this.facade.toggleAllRows();
   }
 
-  /** Toggle selection of a single row via facade */
   toggleSelection(row: IReportDetails) {
     this.facade.toggleRow(row);
   }
@@ -265,56 +194,24 @@ export class ReportTableComponent implements OnInit {
     return this.facade.checkboxLabel(row);
   }
 
-  // Help MatTable identify rows for efficient updates
+  // Keeps row elements across data source replacements after each run.
   trackByEventId(_index: number, row: IReportDetails) {
     return row.eventId;
   }
-  // #region private helpers (snackbar etc.)
-  private maybeShowSnackForEvent(
-    updatedData: { data: IReportDetails[] } | undefined,
-    eventId: string
-  ) {
-    const row = updatedData?.data?.find((r) => r.eventId === eventId);
-    if (row) this.showSnack(row);
-  }
 
-  private showSnack(row: IReportDetails) {
-    try {
-      const dl = row.passed === true;
-      const req = row.requestPassed === true;
-      const status = this.computeStatus(dl, req);
-      const message = this.buildSnackMessage(row.eventName, status, dl, req);
-      const panelClass = this.classForStatus(status);
-      this.snackBar.open(message, 'Close', {
+  private showSnack(report: ReportDetailResponse) {
+    const dl = report.testEventDetails?.passed === true;
+    const req = report.testEventDetails?.requestPassed === true;
+    const status = getCheckStatus(dl, req);
+    this.snackBar.open(
+      `Test (${report.testEvent.eventName}) ${status}. DataLayer: ${dl ? '✓' : '✗'}, Request: ${req ? '✓' : '✗'}`,
+      'Close',
+      {
         duration: 10000,
         horizontalPosition: 'right',
         verticalPosition: 'bottom',
-        panelClass
-      });
-    } catch {
-      // ignore snackbar errors
-    }
+        panelClass: SNACKBAR_CLASSES[status]
+      }
+    );
   }
-
-  private computeStatus(dl: boolean, req: boolean) {
-    if (dl && req) return 'passed' as const;
-    if (dl || req) return 'partial' as const;
-    return 'failed' as const;
-  }
-
-  private buildSnackMessage(
-    eventName: string,
-    status: 'passed' | 'partial' | 'failed',
-    dl: boolean,
-    req: boolean
-  ) {
-    return `Test (${eventName}) ${status}. DataLayer: ${dl ? '✓' : '✗'}, Request: ${req ? '✓' : '✗'}`;
-  }
-
-  private classForStatus(status: 'passed' | 'partial' | 'failed') {
-    if (status === 'passed') return 'snackbar-success';
-    if (status === 'partial') return 'snackbar-warn';
-    return 'snackbar-error';
-  }
-  // #endregion
 }

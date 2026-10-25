@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ProjectReportService } from './project-report.service';
-import { ProjectAbstractReportModule } from '../project-abstract-report/project-abstract-report.module';
+import { OsModule } from '../../../infrastructure/os/os.module';
 
 @Module({
-  imports: [ProjectAbstractReportModule],
+  imports: [OsModule],
   providers: [ProjectReportService],
   exports: [ProjectReportService]
 })

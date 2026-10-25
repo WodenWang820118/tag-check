@@ -1,10 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EntityMetadata } from 'typeorm';
 
+/** Points a row's `projectId` at the project this import created or merged. */
 @Injectable()
 export class ProjectIdAssignerService {
   private readonly logger = new Logger(ProjectIdAssignerService.name);
 
+  /** Sets `projectId` when the row has one and the new project is known. */
   assignIfApplicable(params: {
     materialized: Record<string, unknown>;
     meta: EntityMetadata;

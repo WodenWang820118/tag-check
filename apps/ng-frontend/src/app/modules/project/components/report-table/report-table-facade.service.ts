@@ -1,3 +1,4 @@
+import { SelectionModel } from '@angular/cdk/collections';
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Subscription } from 'rxjs';
@@ -9,8 +10,17 @@ import { MatSort } from '@angular/material/sort';
 import { ReportTableDataSourceModelService } from '../../services/report-table-data-source-model/report-table-data-source-model.service';
 import { ReportTableSelectionFacadeService } from './services/report-table-selection-facade/report-table-selection-facade.service';
 import { ReportTableEffectsFacadeService } from './services/report-table-effects-facade/report-table-effects-facade.service';
-import { getRunStatus } from '../report-detail.contracts';
+import {
+  reportFilterPredicate,
+  StatusFilter,
+  toReportFilter
+} from './report-filter';
 
+/**
+ * The tests table's state and actions: builds the rows from the route's
+ * data, keeps the status filter and, per project, the page size, and
+ * runs a test.
+ */
 @Injectable({ providedIn: 'root' })
 export class ReportTableFacadeService {
   private readonly projectDataSourceService = inject(ProjectDataSourceService);
@@ -33,14 +43,10 @@ export class ReportTableFacadeService {
     'actions'
   ]);
 
-  readonly expandedElement = signal<Report | null>(null);
   private readonly projectSlug = signal<string>('');
-  private readonly hasRecordingMap: Map<string, boolean> = new Map();
+  readonly projectSlug$ = this.projectSlug.asReadonly();
   private paginatorPageSubscription: Subscription | null = null;
-  // Status filter: all | notRun | failed | partial | passed
-  readonly statusFilter = signal<
-    'all' | 'notRun' | 'failed' | 'partial' | 'passed'
-  >('all');
+  readonly statusFilter = signal<StatusFilter>('all');
 
   constructor() {
     this.effectsFacade.initialize({
@@ -50,51 +56,53 @@ export class ReportTableFacadeService {
   }
 
   //#region Initialization
+  /**
+   * Builds the tests table from the route's data: `projectReport` is
+   * GET /reports/:projectSlug, as JSON (dates are strings), and
+   * `projectSlug` the project. Called again when the project changes; the
+   * previous project's selection and page are dropped.
+   */
   initializeData(
     paginator: MatPaginator,
     sort: MatSort,
     data: Record<string, unknown>
   ) {
-    console.log('Initializing report table with data:', data);
     const reports = (data['projectReport'] || []) as IReportDetails[];
     const toDate = (
       d: Date | string | number | undefined | null
     ): Date | undefined => (d == null ? undefined : new Date(d));
-    const normalize = (r: IReportDetails): IReportDetails => ({
-      ...r,
-      passed: r.passed === true,
-      requestPassed: r.requestPassed === true,
-      createdAt: toDate(r.createdAt) ?? new Date(0),
-      updatedAt: toDate(r.updatedAt)
-    });
-    const normalizedReports = reports.map(normalize);
+    const rows = reports
+      .map((r): IReportDetails => ({
+        ...r,
+        passed: r.passed === true,
+        requestPassed: r.requestPassed === true,
+        createdAt: toDate(r.createdAt) ?? new Date(0),
+        updatedAt: toDate(r.updatedAt)
+      }))
+      .sort((a, b) => a.eventName.localeCompare(b.eventName));
+    const dataSource = new MatTableDataSource(rows);
 
-    if (paginator && sort) {
-      // Sort the data
-      const injectReports = [...normalizedReports].sort((a, b) =>
-        a.eventName.localeCompare(b.eventName)
-      );
-      // Create data source and assign
-      const dataSource = new MatTableDataSource([...injectReports]);
+    const slug = data['projectSlug'] as string | undefined;
+    // A reused paginator still shows the previous project's page.
+    paginator.pageIndex = 0;
+    this.restorePaginatorStateForProject(paginator, slug);
 
-      const slug = data['projectSlug'] as string | undefined;
-      // Try to restore saved page size and page index for this project from localStorage
-      this.restorePaginatorStateForProject(paginator, slug);
+    dataSource.paginator = paginator;
+    dataSource.sort = sort;
+    dataSource.filterPredicate = reportFilterPredicate;
+    dataSource.filter = toReportFilter(
+      this.projectDataSourceService.getFilterSignal(),
+      this.statusFilter()
+    );
+    this.reportTableDataSourceModelService.dataSource.set(dataSource);
+    // Selected rows are row objects of the previous table: drop them, or
+    // the toolbar would act on tests the table no longer shows.
+    this.reportTableDataSourceModelService.selection.set(
+      new SelectionModel<IReportDetails>(true, [])
+    );
+    this.projectSlug.set(slug ?? '');
 
-      dataSource.paginator = paginator;
-      dataSource.sort = sort;
-      // Initialize filter predicate and filter value using current signals
-      dataSource.filterPredicate = this.createFilterPredicate();
-      dataSource.filter = JSON.stringify({
-        text: this.projectDataSourceService.getFilterSignal(),
-        status: this.statusFilter()
-      });
-      this.reportTableDataSourceModelService.dataSource.set(dataSource);
-      this.projectSlug.set(data['projectSlug'] as string);
-
-      // Subscribe to paginator page events to persist pageSize changes per project
-      this.subscribeToPersistPaginatorState(paginator, slug);
-    }
+    this.subscribeToPersistPaginatorState(paginator, slug);
   }
   //#endregion
 
@@ -160,45 +168,16 @@ export class ReportTableFacadeService {
   }
   //#endregion
 
-  //#region Filtering
-  private createFilterPredicate() {
-    return (row: IReportDetails, filterStr: string) => {
-      let parsed: { text?: string; status?: string } = {};
-      try {
-        parsed = JSON.parse(filterStr || '{}');
-      } catch {
-        parsed = { text: filterStr || '' };
-      }
-      const t = (parsed.text || '').toLowerCase();
-      const s = (parsed.status || 'all') as ReturnType<
-        typeof this.statusFilter
-      >;
-
-      const haystack =
-        `${row.testName ?? ''} ${row.eventName ?? ''}`.toLowerCase();
-      const textMatch = !t || haystack.includes(t);
-
-      const statusMatch = s === 'all' || s === getRunStatus(row);
-
-      return textMatch && statusMatch;
-    };
-  }
-  //#endregion
-
   //#region Actions
-  /** Triggers a test run for the given event in the current project. */
+  /**
+   * Runs a test of the current project and emits its report, or undefined
+   * when the run returned none. The test's row is updated when the run ends.
+   */
   runTest(eventId: string) {
-    const projectSlug = this.projectSlug();
-    return this.testRunningFacadeService.runTest(
+    return this.testRunningFacadeService.runTestForReport(
       eventId,
-      projectSlug,
-      this.reportTableDataSourceModelService.dataSource()
+      this.projectSlug()
     );
-  }
-
-  /** Returns true when a recording is associated with the given event. */
-  hasRecording(eventId: string): boolean {
-    return this.hasRecordingMap.get(eventId) || false;
   }
 
   // Selection actions delegated to sub-facade
@@ -218,17 +197,13 @@ export class ReportTableFacadeService {
     return this.reportTableDataSourceModelService.computedDataSource;
   }
 
-  get selectionSignal() {
-    return this.reportTableDataSourceModelService.selection;
-  }
-
   get selection() {
     return this.reportTableDataSourceModelService.computedSelection;
   }
 
   // Status filter API for component
   /** Applies the given status filter to narrow the visible report rows. */
-  setStatusFilter(status: 'all' | 'notRun' | 'failed' | 'partial' | 'passed') {
+  setStatusFilter(status: StatusFilter) {
     this.statusFilter.set(status);
   }
 

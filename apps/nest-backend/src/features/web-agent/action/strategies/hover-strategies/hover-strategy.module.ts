@@ -4,6 +4,7 @@ import { PageHoverService } from './page-hover.service';
 import { EvaluateHoverService } from './evaluate-hover.service';
 import { ActionUtilsModule } from '../../action-utils/action-utils.module';
 
+/** Provides the ways of hovering an element. */
 @Module({
   imports: [ActionUtilsModule],
   providers: [HoverStrategyService, PageHoverService, EvaluateHoverService],

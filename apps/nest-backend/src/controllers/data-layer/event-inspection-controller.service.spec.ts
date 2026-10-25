@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { EventInspectionControllerService } from './event-inspection-controller.service';
 import { SingleEventInspectionService } from '../../features/event-inspection/single-event-inspection.service';
-import { GroupEventsInspectionService } from '../../features/event-inspection/group-events-inspection.service';
 
 describe('EventInspectionControllerService', () => {
   function build() {
@@ -9,14 +8,9 @@ describe('EventInspectionControllerService', () => {
       inspectSingleEvent: vi.fn().mockResolvedValue('ok'),
       abort: vi.fn()
     } as unknown as SingleEventInspectionService;
-    const group = {
-      inspectProject: vi.fn().mockResolvedValue('proj'),
-      stopOperation: vi.fn()
-    } as unknown as GroupEventsInspectionService;
     return {
-      svc: new EventInspectionControllerService(single, group),
-      single,
-      group
+      svc: new EventInspectionControllerService(single),
+      single
     };
   }
 
@@ -63,25 +57,9 @@ describe('EventInspectionControllerService', () => {
     expect(call[2].eventInspectionPresetDto).toBe(preset);
   });
 
-  it('delegates inspectProject to the group service', async () => {
-    const { svc, group } = build();
-    const creds = { username: 'a', password: 'b' };
-    const result = await svc.inspectProject('p', 'true', 'M', creds, 'true', 4);
-    expect(result).toBe('proj');
-    expect(group.inspectProject).toHaveBeenCalledWith(
-      'p',
-      'true',
-      'M',
-      creds,
-      'true',
-      4
-    );
-  });
-
-  it('aborts both services on stopOperation', async () => {
-    const { svc, single, group } = build();
+  it('aborts the running inspection on stopOperation', async () => {
+    const { svc, single } = build();
     await svc.stopOperation();
     expect(single.abort).toHaveBeenCalled();
-    expect(group.stopOperation).toHaveBeenCalled();
   });
 });

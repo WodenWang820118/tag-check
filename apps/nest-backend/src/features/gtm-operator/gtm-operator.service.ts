@@ -4,14 +4,19 @@ import {
   InternalServerErrorException,
   Logger
 } from '@nestjs/common';
-import { CookieData, Page, Browser } from 'puppeteer';
+import { Page } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
-import { PuppeteerUtilsService } from '../web-agent/puppeteer-utils/puppeteer-utils.service';
+import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
+import {
+  isHeadless,
+  PuppeteerUtilsService
+} from '../web-agent/puppeteer-utils/puppeteer-utils.service';
 import { RunRecorder } from '../web-agent/puppeteer-utils/run-recorder';
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
-import { RecordingRepositoryService } from '../../core/repository/recording/recording-repository.service';
+import { RECORDING_FILES, toClientErrorMessage } from '../../shared';
 import {
+  applyPresetCookies,
   preloadApplicationLocalStorage,
   seedSiteLocalStorage
 } from '../web-agent/browser-state-preload.util';
@@ -33,79 +38,112 @@ export const TAG_ASSISTANT_BADGE_PASSTHROUGH = `(function () {
   else document.addEventListener('DOMContentLoaded', addStyle);
 })();`;
 
+/**
+ * Runs one test in accompanied mode: opens the GTM preview URL, lets Tag
+ * Assistant open the site, then records both tabs while the inspection
+ * pipeline replays the recording on the site's tab and saves the result.
+ *
+ * A headless run always closes its browser. A headful run is left open for
+ * the user to inspect, unless the caller passes `closeBrowser=true`, as a
+ * batch does.
+ */
 @Injectable()
 export class GtmOperatorService {
   private readonly logger = new Logger(GtmOperatorService.name);
-  // NOTE(stage2): Replace singleton abort routing with per-operation session IDs.
-  abortController: AbortController | null = null;
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
     private readonly puppeteerUtilsService: PuppeteerUtilsService,
-    private readonly recordingRepositoryService: RecordingRepositoryService
+    private readonly runQueue: RunQueueService
   ) {}
 
-  initializeAbortController() {
-    this.abortController = new AbortController();
-  }
-
-  async inspectSingleEventViaGtm(
+  /**
+   * Runs the test once every run requested before it has finished. Resolves
+   * with the pipeline's result. Rejects with BadRequestException for a GTM
+   * preview URL without a target site, and InternalServerErrorException for
+   * any other failure, with the failure's reason in its message.
+   */
+  inspectSingleEventViaGtm(
     projectSlug: string,
     eventId: string,
     query: InspectGtmQueryDto,
     eventInspectionPresetDto: EventInspectionPresetDto
   ) {
-    this.initializeAbortController();
-    if (!this.abortController) {
-      throw new InternalServerErrorException(
-        'Abort controller is not initialized'
-      );
-    }
+    return this.runQueue.run((signal) =>
+      this.inspectViaGtm(
+        projectSlug,
+        eventId,
+        query,
+        eventInspectionPresetDto,
+        signal
+      )
+    );
+  }
+
+  private async inspectViaGtm(
+    projectSlug: string,
+    eventId: string,
+    query: InspectGtmQueryDto,
+    eventInspectionPresetDto: EventInspectionPresetDto,
+    signal: AbortSignal
+  ) {
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
       query.headless || 'false',
       query.measurementId,
       eventInspectionPresetDto,
-      this.abortController.signal
+      signal
     );
 
-    // normalize headless flag consistently with PuppeteerUtilsService
-    const headlessFlag = query.headless === 'true' || query.headless === '1';
+    // A headful run is left open for inspection unless the caller (a batch)
+    // asks to close it.
+    const closeBrowser =
+      isHeadless(query.headless) || query.closeBrowser === 'true';
     let recorder: RunRecorder | null = null;
+    let tagAssistantRecorder: RunRecorder | null = null;
     try {
       const websiteUrl = this.getPreviewTargetUrl(query.gtmUrl);
-      await this.applyCookies(browser, websiteUrl, eventInspectionPresetDto);
+      await applyPresetCookies(
+        browser,
+        websiteUrl,
+        eventInspectionPresetDto.application
+      );
       await seedSiteLocalStorage(
         browser,
         websiteUrl,
         eventInspectionPresetDto.application
       );
       await this.operateGtmPreviewMode(page, query.gtmUrl);
+      // Gives Tag Assistant time to open the site's window.
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      const pages = await browser.pages();
-      for (const subPage of pages) {
+      // Closes leftover blank tabs, so the target lookup below sees only
+      // the preview and the site.
+      for (const subPage of await browser.pages()) {
         if (subPage.url() === 'about:blank') {
           await subPage.close();
         }
       }
 
-      const target = await browser.waitForTarget(
-        (target: { url: () => string | string[] }) =>
-          target.url().includes(new URL(websiteUrl).origin)
+      // The site's tab is the one Tag Assistant opened on the site's origin.
+      const siteOrigin = new URL(websiteUrl).origin;
+      const target = await browser.waitForTarget((candidate) =>
+        candidate.url().includes(siteOrigin)
       );
 
       const targetUrl = target.url();
-      const targetPage = await target.asPage(); // for using the screencast error-free
+      // A Page handle is needed for the screencast and the replay.
+      const targetPage = await target.asPage();
       if (!targetPage) {
         throw new Error('Failed to find the target page');
       }
 
-      // Apply the recorded viewport to the actual page we'll record (targetPage)
       await this.puppeteerUtilsService.applyRecordedViewport(
         targetPage,
         projectSlug,
         eventId
       );
       await targetPage.bringToFront();
+      // The init scripts apply from the next document on, so the site is
+      // loaded again once they are registered.
       await targetPage.evaluateOnNewDocument(TAG_ASSISTANT_BADGE_PASSTHROUGH);
       await preloadApplicationLocalStorage(
         targetPage,
@@ -117,7 +155,13 @@ export class GtmOperatorService {
         targetPage,
         projectSlug,
         eventId,
-        this.abortController.signal
+        signal
+      );
+      tagAssistantRecorder = await this.startTagAssistantRecorder(
+        page,
+        projectSlug,
+        eventId,
+        signal
       );
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -131,13 +175,16 @@ export class GtmOperatorService {
           query.captureRequest || 'false',
           eventInspectionPresetDto
         );
+      // Lets both recordings show the tags that fired at the end of the
+      // journey before they stop.
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await this.puppeteerUtilsService.stopRecorder(recorder);
+      await this.puppeteerUtilsService.stopRecorder(tagAssistantRecorder);
 
-      if (headlessFlag) {
-        const pages = await browser.pages();
-        await Promise.all(pages.map((page) => page.close()));
-        await browser.close();
+      if (closeBrowser) {
+        // Bounded close: Tag Assistant can hold a headful browser open, and
+        // an unbounded close left the request (and a batch) waiting forever.
+        await this.puppeteerUtilsService.cleanup(browser, page, null);
       } else {
         this.logger.log(
           'Headful mode detected (GTM): leaving browser open for user interaction. Close it manually when done.'
@@ -146,8 +193,15 @@ export class GtmOperatorService {
       return data;
     } catch (error) {
       this.logger.error(error);
+      if (tagAssistantRecorder) {
+        await this.puppeteerUtilsService
+          .stopRecorder(tagAssistantRecorder)
+          .catch((err) =>
+            this.logger.error(`Error stopping Tag Assistant recorder: ${err}`)
+          );
+      }
 
-      if (headlessFlag) {
+      if (closeBrowser) {
         await this.puppeteerUtilsService.cleanup(browser, page, recorder);
       } else {
         await this.puppeteerUtilsService
@@ -160,17 +214,50 @@ export class GtmOperatorService {
       if (error instanceof BadRequestException) {
         throw error;
       }
+      // The batch shows this message, so it says why the run failed, without
+      // a stack trace or a file path.
+      const reason = toClientErrorMessage(error);
       throw new InternalServerErrorException(
-        'Failed to perform GTM validation'
+        reason
+          ? `Failed to perform GTM validation: ${reason}`
+          : 'Failed to perform GTM validation'
       );
     }
   }
 
+  /**
+   * Records the Tag Assistant tab, which lists the tags that fire while the
+   * site's journey replays. The run does not depend on it: a recorder that
+   * fails to start is logged and the run goes on with the site recording.
+   */
+  private async startTagAssistantRecorder(
+    page: Page,
+    projectSlug: string,
+    eventId: string,
+    signal: AbortSignal
+  ): Promise<RunRecorder | null> {
+    try {
+      return await this.puppeteerUtilsService.startRecorder(
+        page,
+        projectSlug,
+        eventId,
+        signal,
+        { file: RECORDING_FILES.tagAssistant, bringToFront: false }
+      );
+    } catch (error) {
+      this.logger.warn(`Tag Assistant was not recorded: ${error}`);
+      return null;
+    }
+  }
+
+  /**
+   * Starts GTM Preview from Tag Assistant's start page: keeps the debug
+   * parameter on the site URL, connects, and continues past the connection
+   * dialog. Throws when one of these controls does not appear.
+   */
   async operateGtmPreviewMode(page: Page, gtmUrl: string) {
     await page.goto(gtmUrl, { waitUntil: 'networkidle2' });
     await this.clickRequiredPreviewControl(page, '#include-debug-param');
-
-    // 3) Start tag manager preview mode
     await this.clickRequiredPreviewControl(page, '#domain-start-button');
 
     const btnSelector = '.btn.btn--filled.wd-continue-debugging-button';
@@ -191,6 +278,10 @@ export class GtmOperatorService {
     }
   }
 
+  /**
+   * Returns the site URL a Tag Assistant URL carries in its `#url=` fragment,
+   * or an empty string when it carries none. Throws on a malformed URL.
+   */
   extractBaseUrlFromGtmUrl(gtmUrl: string) {
     const url = new URL(gtmUrl);
     const fragment = url.hash.substring(1); // Remove the '#' character
@@ -224,32 +315,11 @@ export class GtmOperatorService {
     }
   }
 
+  /**
+   * Aborts the run in progress, which closes its browser, and drops the runs
+   * queued behind it.
+   */
   stopOperation() {
-    if (this.abortController) {
-      this.abortController.abort();
-    }
-  }
-
-  // helper to apply cookies from preset
-  private async applyCookies(
-    browser: Browser,
-    url: string,
-    eventInspectionPresetDto: EventInspectionPresetDto
-  ): Promise<void> {
-    if (!eventInspectionPresetDto.application.cookie.data.length) {
-      return;
-    }
-    const cookies = eventInspectionPresetDto.application.cookie.data.map(
-      (cookie) => ({
-        name: cookie.key.toString(),
-        value: cookie.value.toString()
-      })
-    );
-    const cookieData: CookieData[] = cookies.map((cookie) => ({
-      name: cookie.name,
-      value: cookie.value,
-      domain: new URL(url).hostname
-    }));
-    await browser.setCookie(...cookieData);
+    this.runQueue.stop();
   }
 }

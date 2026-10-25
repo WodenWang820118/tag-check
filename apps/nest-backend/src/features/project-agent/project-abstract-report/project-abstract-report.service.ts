@@ -9,10 +9,14 @@ import {
 } from '@nestjs/common';
 import { IReportDetails, OutputValidationResult } from '@utils';
 import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
-import { existsSync, mkdirSync, statSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
 import { FilePathService } from '../../../infrastructure/os/path/file-path/file-path.service';
 import { FileService } from '../../../infrastructure/os/file/file.service';
 
+/**
+ * Writes and deletes a test's result folder
+ * (`inspection_results/<eventId>`) and its abstract report JSON.
+ */
 @Injectable()
 export class ProjectAbstractReportService {
   private readonly logger = new Logger(ProjectAbstractReportService.name);
@@ -59,32 +63,6 @@ export class ProjectAbstractReportService {
     }
   }
 
-  async writeProjectAbstractTestResultJson(
-    projectName: string,
-    data: OutputValidationResult[]
-  ) {
-    const resultFolderPath =
-      await this.folderPathService.getReportSavingFolderPath(projectName);
-
-    const eventFolderNames = this.folderService
-      .readFolderFiles(resultFolderPath)
-      .filter((dirent) => dirent.isDirectory())
-      .map((dirent) => dirent.name);
-
-    for (const name of eventFolderNames) {
-      for (const dataPiece of data) {
-        if (name === dataPiece.dataLayerSpec.event) {
-          const abstractFilePath =
-            await this.filePathService.getInspectionResultFilePath(
-              projectName,
-              name
-            );
-          this.fileService.writeJsonFile(abstractFilePath, dataPiece);
-        }
-      }
-    }
-  }
-
   async deleteSingleAbstractTestResultFolder(
     projectSlug: string,
     eventId: string
@@ -112,34 +90,6 @@ export class ProjectAbstractReportService {
         'Failed to delete report',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
-    }
-  }
-
-  async getSingleAbstractTestResultJson(projectSlug: string, eventId: string) {
-    try {
-      const filePath = await this.filePathService.getInspectionResultFilePath(
-        projectSlug,
-        eventId
-      );
-
-      if (!existsSync(filePath)) {
-        throw new NotFoundException(`Report not found: ${filePath}`);
-      }
-
-      const completedTime = statSync(filePath).mtime;
-
-      return {
-        // eventName: eventId,
-        ...this.fileService.readJsonFile<IReportDetails>(filePath),
-        completedTime
-      };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-
-      this.logger.error(error);
-      throw new HttpException('Failed to read report', HttpStatus.BAD_REQUEST);
     }
   }
 }

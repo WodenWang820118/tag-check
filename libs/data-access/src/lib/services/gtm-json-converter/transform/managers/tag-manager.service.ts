@@ -4,7 +4,15 @@ import { EventTag } from '../tags/event-tag.service';
 import { GoogleTag } from '../tags/google-tag.service';
 import { ScrollTag } from '../tags/scroll-tag.service';
 import { VideoTag } from '../tags/video-tag.service';
+import { EventUtils } from '../../utils/event-utils.service';
 
+const ECOMMERCE_PREFIX = 'ecommerce.';
+
+/**
+ * Builds the container's tags: the Google tag first, then one GA4 event tag
+ * per custom data layer event, then the video and scroll tags when the specs
+ * ask for them. Tag IDs are positions in that order, starting at "1".
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -13,8 +21,14 @@ export class TagManager {
     private readonly eventTag: EventTag,
     private readonly googleTag: GoogleTag,
     private readonly scrollTag: ScrollTag,
-    private readonly videoTag: VideoTag
+    private readonly videoTag: VideoTag,
+    private readonly eventUtils: EventUtils
   ) {}
+
+  /**
+   * @param triggers the trigger names and IDs from
+   * {@link TriggerManager.createTriggers}, which the tags fire on.
+   */
   getTags(
     accountId: string,
     containerId: string,
@@ -33,20 +47,28 @@ export class TagManager {
       measurementId,
       isSendingEcommerceData
     );
-    return this.assignTagIds(configs) as TagConfig[];
+    return this.assignTagIds(configs);
   }
 
+  /**
+   * One event parameter per data layer path. GA4 reads ecommerce parameters
+   * from the `ecommerce` object, so `ecommerce.currency` is sent as
+   * `currency`. Other nested paths are named with `_` for each `.`, so
+   * `user.id` is sent as `user_id` while its variable still reads `user.id`:
+   * GA4 parameter names "can only contain alphanumeric characters and
+   * underscores".
+   * @see https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events#limitations
+   */
   private preprocessParameters(paths: string[]): Parameter[] {
-    return paths.map((path) => {
-      return {
-        type: 'v',
-        key: path.includes('ecommerce') ? path.split('.')[1] : path,
-        value: path
-      };
-    });
+    return paths.map((path) => ({
+      type: 'v',
+      key: path.startsWith(ECOMMERCE_PREFIX)
+        ? path.slice(ECOMMERCE_PREFIX.length)
+        : path.replace(/\./g, '_'),
+      value: path
+    }));
   }
 
-  // Build raw TagConfig objects without tagId
   private buildRawTagConfigs(
     accountId: string,
     containerId: string,
@@ -56,12 +78,14 @@ export class TagManager {
     measurementId: string,
     isSendingEcommerceData: 'true' | 'false'
   ): Array<Omit<TagConfig, 'tagId'>> {
-    // Base Tag objects
-    const baseTags: Tag[] = dataLayers.map((dL) => ({
-      name: dL.event,
-      triggers: triggers.filter((t) => t.name === dL.event),
-      parameters: this.preprocessParameters(dL.paths)
-    }));
+    // Scroll and video events get the dedicated tags below instead.
+    const baseTags: Tag[] = dataLayers
+      .filter((dL) => !this.eventUtils.isBuiltInEvent(dL.event))
+      .map((dL) => ({
+        name: dL.event,
+        triggers: triggers.filter((t) => t.name === dL.event),
+        parameters: this.preprocessParameters(dL.paths)
+      }));
 
     // GA4 configuration tag
     const configTag = this.googleTag.createGA4Configuration(

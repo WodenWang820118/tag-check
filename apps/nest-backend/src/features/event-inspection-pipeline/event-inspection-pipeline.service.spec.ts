@@ -100,4 +100,80 @@ describe('EventInspectionPipelineService', () => {
     expect(dto.requestPassed).toBe(false);
     expect(dto.dataLayer).toEqual([]);
   });
+
+  it('saves one result when saving a finished run fails, and rejects', async () => {
+    const { svc, testEventDetailRepository, testEventRepository } = build();
+    vi.mocked(testEventRepository.updateTestEvent).mockRejectedValueOnce(
+      new Error('database is locked')
+    );
+    const page = {
+      screenshot: vi.fn().mockResolvedValue(Buffer.from('img'))
+    } as never;
+
+    await expect(
+      svc.singleEventInspectionRecipe(
+        page,
+        'p',
+        'e',
+        'M',
+        { username: '', password: '' },
+        'false',
+        { application: undefined } as never
+      )
+    ).rejects.toThrow('database is locked');
+    expect(testEventDetailRepository.create).toHaveBeenCalledTimes(1);
+    expect(
+      vi.mocked(testEventDetailRepository.create).mock.calls[0][1].passed
+    ).toBe(true);
+  });
+
+  it("rejects with the run's error when the failed run cannot be saved", async () => {
+    const { svc, testEventDetailRepository } = build({
+      inspectError: new Error('Failed to find any of the specified selectors')
+    });
+    const page = {
+      screenshot: vi.fn().mockRejectedValue(new Error('Target closed'))
+    } as never;
+
+    await expect(
+      svc.singleEventInspectionRecipe(
+        page,
+        'p',
+        'e',
+        'M',
+        { username: '', password: '' },
+        'false',
+        { application: undefined } as never
+      )
+    ).rejects.toThrow('Failed to find any of the specified selectors');
+    expect(testEventDetailRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('saves a run without a request check as request not passed', async () => {
+    const { svc, testEventDetailRepository } = build({
+      inspectResult: {
+        dataLayerResult: { passed: true, dataLayer: [], message: 'ok' },
+        destinationUrl: 'https://x',
+        rawRequest: '',
+        requestCheckResult: null
+      }
+    });
+    const page = {
+      screenshot: vi.fn().mockResolvedValue(Buffer.from('img'))
+    } as never;
+
+    await svc.singleEventInspectionRecipe(
+      page,
+      'p',
+      'e',
+      'M',
+      { username: '', password: '' },
+      'false',
+      { application: undefined } as never
+    );
+
+    expect(
+      vi.mocked(testEventDetailRepository.create).mock.calls[0][1]
+    ).toMatchObject({ passed: true, requestPassed: false });
+  });
 });

@@ -21,7 +21,7 @@ describe('XlsxReportService', () => {
       }))
     };
     const nameService = {
-      sanitiseWorksheetName: vi.fn((n: string) => n.slice(0, 31))
+      uniqueWorksheetName: vi.fn((n: string) => n.slice(0, 31))
     };
     const imageService = { embedImage: vi.fn() };
 
@@ -60,8 +60,9 @@ describe('XlsxReportService', () => {
     expect(result).toBeInstanceOf(StreamableFile);
     expect(xlsxHeaderService.addProjectHeader).toHaveBeenCalledTimes(2);
     expect(imageService.embedImage).toHaveBeenCalledTimes(2);
-    expect(nameService.sanitiseWorksheetName).toHaveBeenCalledWith(
-      't2 - No Event'
+    expect(nameService.uniqueWorksheetName).toHaveBeenCalledWith(
+      't2 - No Event',
+      expect.any(Set)
     );
   });
 

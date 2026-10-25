@@ -5,7 +5,8 @@ import {
   IReportDetails,
   ReportDetailsDto,
   Recording,
-  StrictDataLayerEvent
+  StrictDataLayerEvent,
+  createPlaceholderSpec
 } from '@utils';
 import { tap, take, switchMap, throwError, catchError, EMPTY } from 'rxjs';
 import { EditorService } from '../../../../shared/services/editor/editor.service';
@@ -13,11 +14,14 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { Location } from '@angular/common';
 import { v4 as uuidv4 } from 'uuid';
-import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { ProjectDataSourceService } from '../../../../shared/services/data-source/project-data-source.service';
 import { UploadSpecService } from '../../../../shared/services/upload-spec/upload-spec.service';
 import { LoggerService } from '../../../../shared/services/logger/logger.service'; // Create this service
 
+/**
+ * The "Create a test manually" tab: validates the spec and recording
+ * editors and creates the test from them.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -31,7 +35,6 @@ export class NewReportViewFacadeService {
   private readonly fb = inject(FormBuilder);
   private readonly location = inject(Location);
   private readonly dialog = inject(MatDialog);
-  private readonly recordingService = inject(RecordingService);
   private readonly projectDataSourceService = inject(ProjectDataSourceService);
   private readonly uploadSpecService = inject(UploadSpecService);
 
@@ -115,18 +118,20 @@ export class NewReportViewFacadeService {
     this.location.back();
   }
 
+  /**
+   * Shows the chosen Chrome recording in the recording editor; the test is
+   * created from the editor's text, which uploadReport validates.
+   */
   onFileSelected(event: Event) {
     const target = event.target as HTMLInputElement;
     const file: File | null = target.files?.[0] || null;
     if (file) {
-      this.recordingService.readRecordingJsonFileContent(file);
-      const recordingContent = this.recordingService.recordingContent$();
-      if (recordingContent) {
-        this.editorService.setContent(
-          'recordingJson',
-          JSON.stringify(recordingContent)
+      file
+        .text()
+        .then((text) => this.editorService.setContent('recordingJson', text))
+        .catch((error: unknown) =>
+          this.logger.error(`Failed to read the recording file: ${error}`)
         );
-      }
     }
   }
 
@@ -142,7 +147,6 @@ export class NewReportViewFacadeService {
     const recordingEditor = this.editorService.editor$.recordingJsonEditor();
     const specContent = specEditor.state.doc.toString();
     const recordingContent = recordingEditor.state.doc.toString();
-    const testName = specContent ? JSON.parse(specContent).event : '';
     // cleaned legacy combineLatest-based editor content sync
     const eventId = uuidv4();
 
@@ -153,18 +157,21 @@ export class NewReportViewFacadeService {
       try {
         specParsed = JSON.parse(specContent) as StrictDataLayerEvent;
       } catch {
-        this.showErrorDialog('Spec must be valid JSON.');
+        void this.showErrorDialog('Spec must be valid JSON.');
         return EMPTY;
       }
       if (recordingContent && recordingContent.trim() !== '') {
         try {
           recordingParsed = JSON.parse(recordingContent) as Recording;
         } catch {
-          this.showErrorDialog('Recording must be valid JSON.');
+          void this.showErrorDialog('Recording must be valid JSON.');
           return EMPTY;
         }
       }
 
+      // Read after validation: parsing invalid JSON earlier threw before the
+      // "Spec must be valid JSON." dialog could open.
+      const testName = (specParsed as { event?: string }).event ?? '';
       const eventName = (specParsed as { event?: string }).event ?? 'unknown';
       const reportDetails: IReportDetails = new ReportDetailsDto({
         eventId: eventId,
@@ -179,18 +186,24 @@ export class NewReportViewFacadeService {
           this.uploadSpecService.completeUpload();
         }),
         switchMap(() =>
+          // The edited spec is the dataLayer push a run checks, which POST
+          // /reports stores as dataLayerSpec. A manual test has no GTM tag,
+          // so a placeholder fills `spec` (rawGtmTag), as a GA4 upload does.
           this.reportService
-            .addReport(
+            .addFullReport(
               projectSlug,
               eventId,
               reportDetails,
               recordingParsed,
+              createPlaceholderSpec(`GA4 event - ${eventName}`),
               specParsed
             )
             .pipe(
               catchError((error) => {
                 this.logger.error('Error adding report:', error);
-                this.showErrorDialog('Failed to add report. Please try again.');
+                void this.showErrorDialog(
+                  'Failed to add report. Please try again.'
+                );
                 return throwError(() => error);
               })
             )
@@ -198,9 +211,8 @@ export class NewReportViewFacadeService {
       );
     }
 
-    this.showErrorDialog('Spec content is required and cannot be empty.');
+    void this.showErrorDialog('Spec content is required and cannot be empty.');
     return EMPTY;
-    // cleaned legacy combineLatest-based addReport flow
   }
 
   completeUpload() {

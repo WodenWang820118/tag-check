@@ -91,22 +91,6 @@ describe('ProjectAbstractReportService', () => {
     });
   });
 
-  describe('writeProjectAbstractTestResultJson()', () => {
-    it('writes one file per matching event/dataLayerSpec.event pair', async () => {
-      const ctx = build();
-      ctx.folderService.readFolderFiles.mockReturnValue([
-        { name: 'page_view', isDirectory: () => true },
-        { name: 'add_to_cart', isDirectory: () => true },
-        { name: 'ignore-file.txt', isDirectory: () => false }
-      ]);
-      await ctx.service.writeProjectAbstractTestResultJson('demo', [
-        { dataLayerSpec: { event: 'page_view' } } as never,
-        { dataLayerSpec: { event: 'unmatched' } } as never
-      ]);
-      expect(ctx.fileService.writeJsonFile).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('deleteSingleAbstractTestResultFolder()', () => {
     it('throws NotFound when the folder does not exist', async () => {
       vi.mocked(existsSync).mockImplementation(() => false);
@@ -132,31 +116,6 @@ describe('ProjectAbstractReportService', () => {
       await expect(
         ctx.service.deleteSingleAbstractTestResultFolder('demo', 'evt')
       ).rejects.toBeInstanceOf(HttpException);
-    });
-  });
-
-  describe('getSingleAbstractTestResultJson()', () => {
-    it('throws NotFound when the file is missing', async () => {
-      vi.mocked(existsSync).mockImplementation(() => false);
-      const ctx = build();
-      await expect(
-        ctx.service.getSingleAbstractTestResultJson('demo', 'evt')
-      ).rejects.toBeInstanceOf(NotFoundException);
-    });
-
-    it('returns the report contents augmented with the completedTime mtime', async () => {
-      vi.mocked(existsSync).mockImplementation(() => true);
-      const ctx = build();
-      ctx.fileService.readJsonFile.mockReturnValue({
-        passed: true,
-        message: 'ok'
-      });
-      const result = await ctx.service.getSingleAbstractTestResultJson(
-        'demo',
-        'evt'
-      );
-      expect(result).toMatchObject({ passed: true, message: 'ok' });
-      expect(result.completedTime).toBeInstanceOf(Date);
     });
   });
 });

@@ -5,16 +5,16 @@ import { IReportDetails } from '@utils';
 import { FileReportService } from '../../../../shared/services/api/file-report/file-report.service';
 import { VideosService } from '../../../../shared/services/api/videos/videos.service';
 
+/**
+ * Actions of a test's Latest result tab: copy the event name, and export
+ * the spreadsheet, the recording or both. Each says how it went in a
+ * snackbar.
+ */
 @Injectable()
 export class ReportTabFacade {
   private readonly snackBar = inject(MatSnackBar);
   private readonly fileReportService = inject(FileReportService);
   private readonly videosService = inject(VideosService);
-
-  /** Returns true when a recording video blob is present and non-empty. */
-  getRecordingAvailable(videoBlob: Blob | undefined): boolean {
-    return !!(videoBlob && videoBlob.size > 0);
-  }
 
   /** Copies the given event name to the clipboard and shows a snack bar notification. */
   copyEventName(eventName: string | undefined) {
@@ -33,33 +33,13 @@ export class ReportTabFacade {
       .catch(() => this.openSnackBar('Unable to copy'));
   }
 
-  /** Downloads the spreadsheet for the given report, either by direct URL or via the file-report service. */
+  /** Downloads the spreadsheet of the given test through the file-reports API. */
   shareSpreadsheet(
     projectSlug: string | undefined,
     details: IReportDetails | undefined
   ) {
     if (!details) {
       this.openSnackBar('Spreadsheet not available for this run', 1800);
-      return;
-    }
-
-    const url = this.getSpreadsheetUrl(details);
-    if (url) {
-      fetch(url, { credentials: 'include' })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`Failed to fetch spreadsheet: ${response.status}`);
-          }
-
-          return response.blob();
-        })
-        .then((blob) => {
-          this.saveBlob(blob, this.getDownloadFileName(url, 'report.xlsx'));
-          this.openSnackBar('Spreadsheet downloaded', 1400);
-        })
-        .catch(() =>
-          this.openSnackBar('Unable to download spreadsheet from URL')
-        );
       return;
     }
 
@@ -136,35 +116,6 @@ export class ReportTabFacade {
     this.openSnackBar('Starting event export (XLSX + WEBM)', 1200);
     this.shareSpreadsheet(projectSlug, details);
     this.exportRecording(projectSlug, details, existingBlob);
-  }
-
-  private getSpreadsheetUrl(
-    details: IReportDetails | undefined
-  ): string | undefined {
-    if (!details) {
-      return undefined;
-    }
-
-    type WithXlsx = Partial<
-      Record<'xlsxUrl' | 'excelUrl' | 'reportXlsxUrl', string>
-    >;
-
-    const detailWithUrl = details as unknown as WithXlsx;
-    return (
-      detailWithUrl.xlsxUrl ||
-      detailWithUrl.excelUrl ||
-      detailWithUrl.reportXlsxUrl
-    );
-  }
-
-  private getDownloadFileName(url: string, fallback: string): string {
-    try {
-      const parsed = new URL(url);
-      const fileName = parsed.pathname.split('/').pop();
-      return fileName?.includes('.') ? fileName : fallback;
-    } catch {
-      return fallback;
-    }
   }
 
   private saveBlob(blob: Blob, fileName: string) {

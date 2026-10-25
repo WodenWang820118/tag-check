@@ -26,6 +26,7 @@
     }
   },
   "targets": {
+    "typecheck-spec": {},
     "build": {
       "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
@@ -52,7 +53,6 @@
         ],
         "styles": [
           "@angular/material/prebuilt-themes/indigo-pink.css",
-          "apps/ng-tag-build/src/styles.scss",
           "apps/ng-tag-build/src/tailwind.css",
           "libs/shared-styles/src/index.scss",
           "libs/shared-styles/src/variables.scss"

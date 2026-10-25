@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { InspectorGroupEventsService } from './inspector-group-events.service';
 import { WebAgentModule } from '../web-agent/web-agent.module';
 import { RequestProcessorModule } from '../request-processor/request-processor.module';
 import { InspectorSingleEventService } from './inspector-single-event.service';
@@ -26,11 +25,11 @@ const strategyService = {
 };
 
 const services = [
-  InspectorGroupEventsService,
   InspectorSingleEventService,
   strategyService,
   InspectorUtilsService
 ];
+/** Provides the inspector and the dataLayer validation strategies it picks from. */
 @Module({
   imports: [
     WebAgentModule,

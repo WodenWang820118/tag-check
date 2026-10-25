@@ -6,6 +6,7 @@
   "projectType": "library",
   "tags": ["scope:frontend", "type:ui"],
   "targets": {
+    "typecheck-spec": {},
     "test": {
       "executor": "@analogjs/vitest-angular:test",
       "options": {

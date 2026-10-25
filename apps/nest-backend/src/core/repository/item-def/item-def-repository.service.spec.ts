@@ -22,21 +22,19 @@ describe('ItemDefRepositoryService', () => {
     expect(result).toBeDefined();
   });
 
-  it('getItemDefById() looks up by itemId', async () => {
+  it("getItemDefByProjectSlugAndEventId() looks up the test's own definition", async () => {
     const { service, repository } = build();
-    repository.findOne.mockResolvedValue({ id: 1, itemId: 'iid' });
-    await service.getItemDefById('iid');
+    repository.findOne.mockResolvedValue(null);
+    await expect(
+      service.getItemDefByProjectSlugAndEventId('shop', 'add_to_cart_1')
+    ).resolves.toBeNull();
     expect(repository.findOne).toHaveBeenCalledWith({
-      where: { itemId: 'iid' }
-    });
-  });
-
-  it('getItemDefByTemplateName() looks up by templateName', async () => {
-    const { service, repository } = build();
-    repository.findOne.mockResolvedValue({ id: 1, templateName: 't' });
-    await service.getItemDefByTemplateName('t');
-    expect(repository.findOne).toHaveBeenCalledWith({
-      where: { templateName: 't' }
+      where: {
+        testEvent: {
+          eventId: 'add_to_cart_1',
+          project: { projectSlug: 'shop' }
+        }
+      }
     });
   });
 
@@ -69,20 +67,6 @@ describe('ItemDefRepositoryService', () => {
     repository.findOne.mockResolvedValue({ id: 1, itemId: 'iid' });
     const result = await service.update(1, { itemId: 'iid' } as never);
     expect(repository.update).toHaveBeenCalledWith(1, { itemId: 'iid' });
-    expect(result).toBeDefined();
-  });
-
-  it('updateItemDefById() updates by itemId and returns the refreshed entity', async () => {
-    const { service, repository } = build();
-    repository.update.mockResolvedValue(undefined);
-    repository.findOne.mockResolvedValue({ id: 2, itemId: 'iid' });
-    const result = await service.updateItemDefById('iid', {
-      templateName: 'x'
-    } as never);
-    expect(repository.update).toHaveBeenCalledWith(
-      { itemId: 'iid' },
-      { templateName: 'x' }
-    );
     expect(result).toBeDefined();
   });
 

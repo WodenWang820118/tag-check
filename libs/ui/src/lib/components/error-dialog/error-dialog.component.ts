@@ -4,6 +4,9 @@ import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 
 export type ErrorDialogData = { message: string };
 
+/**
+ * A dialog that shows an error message passed as `data.message`.
+ */
 @Component({
   selector: 'lib-error-dialog',
   standalone: true,

@@ -2,8 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   BaseItem,
   GA4_ECOMMERCE_EVENT_PARAMETERS,
-  StrictDataLayerEvent,
-  ValidationResult
+  StrictDataLayerEvent
 } from '@utils';
 import { FileService } from '../../infrastructure/os/file/file.service';
 import { WebAgentService } from '../web-agent/web-agent.service';
@@ -15,7 +14,12 @@ import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-pres
 import { SpecRepositoryService } from '../../core/repository/spec/spec-repository.service';
 import { ItemDefRepositoryService } from '../../core/repository/item-def/item-def-repository.service';
 import { ValidationResultDto } from '../../shared/dto/validation-result.dto';
+import { isQueryFlagOn } from '../../shared/query-flag';
 import { ProjectEventsBuilderService } from '../project-agent/project-events-builder/project-events-builder.service';
+/**
+ * Runs a test's checks: refreshes its spec, replays it, and validates the
+ * captured dataLayer and, when request capture is on, the GA4 request.
+ */
 @Injectable()
 export class InspectorSingleEventService {
   private readonly logger = new Logger(InspectorSingleEventService.name);
@@ -29,7 +33,11 @@ export class InspectorSingleEventService {
     private readonly projectEventsBuilderService: ProjectEventsBuilderService
   ) {}
 
-  // inspect one event
+  /**
+   * Returns both check results with the raw request and the final URL.
+   * `requestCheckResult` is null when request capture is off. Throws when
+   * the spec cannot be read or the replay fails.
+   */
   async inspectDataLayer(
     page: Page,
     projectSlug: string,
@@ -53,9 +61,13 @@ export class InspectorSingleEventService {
         projectSpec
       )) ?? projectSpec.dataLayerSpec;
 
-    const itemDef = await this.itemDefRepositoryService.getItemDefById(
-      projectSpec.eventName
-    );
+    // The test's own definition: looked up by event name, the definition of
+    // another project's test of the same event would replace the items.
+    const itemDef =
+      await this.itemDefRepositoryService.getItemDefByProjectSlugAndEventId(
+        projectSlug,
+        eventId
+      );
     expectItem(
       projectSpec.dataLayerSpec,
       itemDef?.fullItemDef as BaseItem | undefined
@@ -76,7 +88,7 @@ export class InspectorSingleEventService {
       'Expected Spec (from DTO): '
     );
 
-    if (dto.captureRequest === 'false' || !dto.captureRequest) {
+    if (!isQueryFlagOn(dto.captureRequest)) {
       return await this.handleNoCaptureRequest(page, projectSlug, eventId, dto);
     }
 
@@ -124,7 +136,7 @@ export class InspectorSingleEventService {
       dataLayerResult,
       destinationUrl,
       rawRequest: '',
-      requestCheckResult: '' as unknown as ValidationResult
+      requestCheckResult: null
     };
   }
 

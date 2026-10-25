@@ -14,6 +14,10 @@ describe('FilePathService', () => {
     const folderPathService = {
       getReportSavingFolderPath: vi.fn(
         async (slug: string) => `/root/${slug}/inspection_results`
+      ),
+      getInspectionEventFolderPath: vi.fn(
+        async (slug: string, eventId: string) =>
+          `/root/${slug}/inspection_results/${eventId}`
       )
     } as unknown as FolderPathService;
     const configsService = {
@@ -43,27 +47,6 @@ describe('FilePathService', () => {
       'p',
       'chrome_recordings',
       'evt-1.json'
-    );
-  });
-
-  it('builds the project config file path under config/spec.json', async () => {
-    const { svc } = build();
-    expect(await svc.getProjectConfigFilePath('p')).toBe(
-      '/root/p/config/spec.json'
-    );
-  });
-
-  it('builds the project setting and metadata paths at the project root', async () => {
-    const { svc } = build();
-    expect(await svc.getProjectSettingFilePath('p')).toContain('settings.json');
-    expect(await svc.getProjectMetaDataFilePath('p')).toContain('project.json');
-  });
-
-  it('joins the report folder, eventId and report name', async () => {
-    const { svc } = build();
-    const r = await svc.getReportFilePath('p', 'evt-1', 'r.xlsx');
-    expect(r.replace(/\\/g, '/')).toBe(
-      '/root/p/inspection_results/evt-1/r.xlsx'
     );
   });
 

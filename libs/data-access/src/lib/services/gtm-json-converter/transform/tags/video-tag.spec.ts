@@ -78,7 +78,7 @@ describe('VideoTag', () => {
       const containerId = 'container456';
       const triggers: Trigger[] = [
         {
-          name: 'video_start',
+          name: 'event youtube video',
           triggerId: 'trigger789'
         }
       ];
@@ -221,7 +221,7 @@ describe('VideoTag', () => {
           {
             type: 'TEMPLATE',
             key: 'measurementIdOverride',
-            value: '{{Measurement ID}}'
+            value: '{{CONST - Measurement ID}}'
           }
         ],
         fingerprint: '1690374452646',
@@ -244,7 +244,8 @@ describe('VideoTag', () => {
           {
             type: 'TEMPLATE',
             key: 'html',
-            value: '<script src="https://www.youtube.com/iframe_api">\n'
+            value:
+              '<script src="https://www.youtube.com/iframe_api"></script>\n'
           },
           { type: 'BOOLEAN', key: 'supportDocumentWrite', value: 'false' }
         ],

@@ -25,6 +25,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApplicationSetting, ProjectSetting } from '@utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+/**
+ * Settings > Google Tag Manager: the GTM Preview URL, accompanied mode,
+ * which needs that URL, and the request check, which needs a
+ * measurement ID.
+ */
 @Component({
   selector: 'app-gtm-form',
   standalone: true,
@@ -74,7 +79,6 @@ export class GtmFormComponent implements OnInit {
           const settings: ProjectSetting = data[
             'projectInfo'
           ] as ProjectSetting;
-          console.log('settings', settings);
           if (settings) {
             this.previewModeForm.patchValue(settings.applicationSettings.gtm);
             if (settings.measurementId) {
@@ -111,7 +115,7 @@ export class GtmFormComponent implements OnInit {
 
   goToProjectInfo() {
     // Navigate to the project info settings route
-    this.router.navigate(['../project-info'], {
+    void this.router.navigate(['../project-info'], {
       relativeTo: this.route
     });
   }
@@ -126,7 +130,6 @@ export class GtmFormComponent implements OnInit {
         take(1),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
-          console.log(this.previewModeForm.value);
           const settings: Partial<ApplicationSetting> = {
             gtm: {
               gtmPreviewModeUrl:

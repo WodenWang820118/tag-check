@@ -1,4 +1,4 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { EventInspectionPreset, ReportDetailResponse } from '@utils';
@@ -13,19 +13,28 @@ export interface RunDataLayerParams {
   captureRequest?: boolean;
 }
 
+/** Runs a test on the site directly, checking only the dataLayer push. */
 @Injectable({
   providedIn: 'root'
 })
 export class DataLayerService {
+  /** Set when the user stopped the run, whose request then fails. */
   private readonly isStopOperation = signal(false);
-  isStopOperation$ = computed(() => this.isStopOperation());
+  readonly isStopOperation$ = this.isStopOperation.asReadonly();
   constructor(private readonly http: HttpClient) {}
 
+  /**
+   * Runs the test and emits the API's result. A run the user stopped emits
+   * `[]` instead of failing; any other failure errors with an Error whose
+   * `cause` is the HttpErrorResponse.
+   */
   runDataLayerInspection(
     projectSlug: string,
     eventId: string,
     params: RunDataLayerParams
   ) {
+    // A stop applies only to the run it interrupted; see GtmOperatorService.
+    this.isStopOperation.set(false);
     const {
       websiteUrl,
       headless,
@@ -71,8 +80,9 @@ export class DataLayerService {
           }
           return throwError(
             () =>
-              'Error running data layer inspection: ' +
-              JSON.stringify(error, null, 2)
+              new Error('Error running data layer inspection', {
+                cause: error
+              })
           );
         })
       );

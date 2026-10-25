@@ -11,7 +11,6 @@ import { MatCardModule } from '@angular/material/card';
 import { RouterLink, provideRouter } from '@angular/router';
 import { ENTRY_ROUTES } from '../../routes';
 import { AsyncPipe } from '@angular/common';
-import { PaginatorComponent } from '../../../../shared/components/paginator/paginator.component';
 import { ProjectItemComponent } from '../project-item/project-item.component';
 
 const meta: Meta<ProjectListComponent> = {
@@ -20,13 +19,7 @@ const meta: Meta<ProjectListComponent> = {
   decorators: [
     moduleMetadata({
       //👇 Imports both components to allow component composition with Storybook
-      imports: [
-        AsyncPipe,
-        ProjectItemComponent,
-        MatCardModule,
-        RouterLink,
-        PaginatorComponent
-      ],
+      imports: [AsyncPipe, ProjectItemComponent, MatCardModule, RouterLink],
       providers: []
     }),
     applicationConfig({

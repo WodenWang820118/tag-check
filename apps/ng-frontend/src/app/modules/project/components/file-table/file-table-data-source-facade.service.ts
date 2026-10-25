@@ -10,7 +10,13 @@ import { InformationDialogComponent } from '../../../../shared/components/inform
 import { MatSort } from '@angular/material/sort';
 import { FileTableDataSourceModelService } from '../../services/file-table-data-source-model/file-table-data-source-model.service';
 import { SelectionModel } from '@angular/cdk/collections';
+import { runFilterPredicate, toRunFilter } from './run-filter';
 
+/**
+ * The Reports page's runs: one row per run, newest first. The toolbar
+ * asks for a delete or a download through FileTableDataSourceService's
+ * signals; this service confirms it in a dialog and calls the API.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -27,12 +33,16 @@ export class FileTableDataSourceFacadeService {
   private readonly projectSlug = signal<string>('');
 
   constructor() {
+    // A page load replaces the data source, so the predicate is set again
+    // on each one.
     effect(() => {
-      const filterValue = this.fileTableDataSourceService.getFilterSignal();
+      const text = this.fileTableDataSourceService.getFilterSignal();
+      const eventName = this.fileTableDataSourceService.getEventFilterSignal();
       const currentDataSource =
         this.fileTableDataSourceModelService.dataSource();
       if (currentDataSource) {
-        currentDataSource.filter = filterValue;
+        currentDataSource.filterPredicate = runFilterPredicate;
+        currentDataSource.filter = toRunFilter(text, eventName);
       }
     });
     effect(() => {

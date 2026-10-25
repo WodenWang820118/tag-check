@@ -13,7 +13,7 @@ use tauri_plugin_shell::{
 };
 
 use super::{
-    health::wait_for_backend, paths::resolve_backend_paths, DEFAULT_PORT, DEFAULT_WEB_SOCKET,
+    health::wait_for_backend, paths::resolve_backend_paths, DEFAULT_PORT,
 };
 use crate::diagnostics::write_diagnostic_log;
 
@@ -66,7 +66,6 @@ pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::er
             },
         ),
         ("PORT".to_string(), DEFAULT_PORT.to_string()),
-        ("WEB_SOCKET".to_string(), DEFAULT_WEB_SOCKET.to_string()),
         (
             "ROOT_PROJECT_PATH".to_string(),
             backend_paths.projects_path.to_string_lossy().into_owned(),
@@ -89,10 +88,9 @@ pub(crate) fn start_backend(app_handle: AppHandle) -> Result<(), Box<dyn std::er
     write_diagnostic_log(
         &app_handle,
         &format!(
-            "spawning sidecar node.exe with NODE_ENV={} PORT={} WEB_SOCKET={}",
+            "spawning sidecar node.exe with NODE_ENV={} PORT={}",
             if tauri::is_dev() { "dev" } else { "prod" },
-            DEFAULT_PORT,
-            DEFAULT_WEB_SOCKET
+            DEFAULT_PORT
         ),
     );
 

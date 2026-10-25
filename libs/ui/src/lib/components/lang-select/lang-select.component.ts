@@ -17,6 +17,10 @@ import {
   type SupportedLocaleCode
 } from '../../locale/locale-routing';
 
+/**
+ * Language picker of the public sites. Each locale is a separate build, so
+ * choosing one loads the same route under the other locale's URL prefix.
+ */
 @Component({
   selector: 'lib-lang-select',
   standalone: true,
@@ -71,7 +75,12 @@ export class LangSelectComponent {
       return;
     }
 
-    globalThis.localStorage?.setItem('locale', nextLocaleConfig.assetSegment);
+    try {
+      globalThis.localStorage?.setItem('locale', nextLocaleConfig.assetSegment);
+    } catch {
+      // Reading localStorage throws when the browser blocks site data; the
+      // preference is optional, the navigation below is not.
+    }
 
     const currentLocation = this.document.location;
     const logicalPath = stripLocalePrefix(currentLocation.pathname);

@@ -2,6 +2,7 @@
   "extends": "./tsconfig.project.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
+    "allowImportingTsExtensions": true,
     "types": [
       "vitest/globals",
       "vitest/importMeta",

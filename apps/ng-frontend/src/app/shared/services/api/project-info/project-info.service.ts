@@ -23,6 +23,11 @@ const STARTUP_SEED_READINESS_RETRY_DELAY_MS = 1000;
 const STARTUP_PROJECT_LIST_MAX_ATTEMPTS = 10;
 const STARTUP_PROJECT_LIST_RETRY_DELAY_MS = 300;
 
+/**
+ * The projects API. On startup the project list waits until the backend
+ * has seeded the example project, so the home page does not show an
+ * empty list first.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -147,36 +152,10 @@ export class ProjectService {
     return readiness.ready && readiness.projectCount > 0;
   }
 
-  getProject(projectSlug: string) {
-    return this.http
-      .get<ProjectSchema>(`${environment.projectApiUrl}/${projectSlug}`)
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of(null);
-        })
-      );
-  }
-
   initProject(project: Project) {
     return this.http
       .post<ProjectSchema>(
         `${environment.projectApiUrl}/init-project/${project.projectSlug}`,
-        project
-      )
-      .pipe(
-        catchError((error) => {
-          console.error(error);
-          return of(null);
-        })
-      );
-  }
-
-  updateProject(project: Project) {
-    console.log('Updating project: ', project);
-    return this.http
-      .put<ProjectSchema>(
-        `${environment.projectApiUrl}/${project.projectSlug}`,
         project
       )
       .pipe(

@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { firstValueFrom, of, throwError } from 'rxjs';
+import { firstValueFrom, of, Subject, throwError } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { DataLayerService } from './datalayer.service';
 
@@ -47,23 +47,40 @@ describe('DataLayerService', () => {
           websiteUrl: 'https://x.test'
         })
       )
-    ).rejects.toMatch(/Error running data layer inspection/);
+    ).rejects.toThrow('Error running data layer inspection');
   });
 
-  it('runDataLayerInspection swallows the error and resets the stop flag', async () => {
+  it('runDataLayerInspection swallows the error of a stopped run and resets the stop flag', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const run = new Subject<never>();
+    httpClient.post
+      .mockReturnValueOnce(run)
+      .mockReturnValueOnce(of({ status: 200, message: 'ok' }));
+    const result = firstValueFrom(
+      service.runDataLayerInspection('s', 'e', {
+        websiteUrl: 'https://x.test'
+      })
+    );
+    await firstValueFrom(service.stopOperation());
+    expect(service.isStopOperation$()).toBe(true);
+    run.error(new Error('boom'));
+    expect(await result).toEqual([]);
+    expect(service.isStopOperation$()).toBe(false);
+  });
+
+  it('runDataLayerInspection reports the failure of a run started after a stop', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     httpClient.post
       .mockReturnValueOnce(of({ status: 200, message: 'ok' }))
       .mockReturnValueOnce(throwError(() => new Error('boom')));
     await firstValueFrom(service.stopOperation());
-    expect(service.isStopOperation$()).toBe(true);
-    const result = await firstValueFrom(
-      service.runDataLayerInspection('s', 'e', {
-        websiteUrl: 'https://x.test'
-      })
-    );
-    expect(result).toEqual([]);
-    expect(service.isStopOperation$()).toBe(false);
+    await expect(
+      firstValueFrom(
+        service.runDataLayerInspection('s', 'e', {
+          websiteUrl: 'https://x.test'
+        })
+      )
+    ).rejects.toThrow('Error running data layer inspection');
   });
 
   it('stopOperation flips the signal only on status 200 and rethrows errors', async () => {

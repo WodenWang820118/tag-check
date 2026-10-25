@@ -1,52 +1,67 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  Logger
-} from '@nestjs/common';
-import { CookieData, Credentials } from 'puppeteer';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Credentials } from 'puppeteer';
 import { EventInspectionPresetDto } from '@utils';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
-import { PuppeteerUtilsService } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
+import {
+  isHeadless,
+  PuppeteerUtilsService
+} from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
 import { RunRecorder } from '../../features/web-agent/puppeteer-utils/run-recorder';
+import { applyPresetCookies } from '../web-agent/browser-state-preload.util';
+import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
+import { toClientErrorMessage } from '../../shared/client-error-message';
 
+/** What a direct run needs besides the test it runs. */
 export interface InspectSingleEventOptions {
+  /** "true" or "1" for a headless browser; a headful one is left open. */
   headless: string;
   measurementId: string;
   credentials: Credentials;
   captureRequest: string;
+  /** The site the preset's cookies are set on. */
   url: string;
   eventInspectionPresetDto: EventInspectionPresetDto;
 }
 
+/**
+ * Runs one test directly against the site (not through GTM Preview): opens a
+ * browser, records the page and hands it to the inspection pipeline, which
+ * replays the recording and saves the result.
+ *
+ * A headless run always closes its browser. A headful run leaves its browser
+ * open, after success or failure, so the user can inspect the page.
+ */
 @Injectable()
 export class SingleEventInspectionService {
   private readonly logger = new Logger(SingleEventInspectionService.name);
-  // NOTE(stage2): Replace singleton abort routing with per-operation session IDs.
-  abortController: AbortController | null = null;
 
   constructor(
     private readonly eventInspectionPipelineService: EventInspectionPipelineService,
-    private readonly puppeteerUtilsService: PuppeteerUtilsService
+    private readonly puppeteerUtilsService: PuppeteerUtilsService,
+    private readonly runQueue: RunQueueService
   ) {}
 
-  initializeAbortController() {
-    this.abortController = new AbortController();
-  }
-
-  async inspectSingleEvent(
+  /**
+   * Runs the test once every run requested before it has finished. Resolves
+   * with the pipeline's result; rejects with an HttpException (500) when the
+   * run fails.
+   */
+  inspectSingleEvent(
     projectSlug: string,
     eventId: string,
     options: InspectSingleEventOptions
   ) {
-    this.initializeAbortController();
-    if (!this.abortController) {
-      throw new InternalServerErrorException(
-        'Abort controller is not initialized'
-      );
-    }
+    return this.runQueue.run((signal) =>
+      this.inspect(projectSlug, eventId, options, signal)
+    );
+  }
 
+  private async inspect(
+    projectSlug: string,
+    eventId: string,
+    options: InspectSingleEventOptions,
+    signal: AbortSignal
+  ) {
     const {
       headless,
       measurementId,
@@ -55,33 +70,37 @@ export class SingleEventInspectionService {
       url,
       eventInspectionPresetDto
     } = options;
-    // normalize headless flag the same way as PuppeteerUtilsService
-    const headlessFlag = headless === 'true' || headless === '1';
+    const headlessFlag = isHeadless(headless);
     const { browser, page } = await this.puppeteerUtilsService.startBrowser(
       headless,
       measurementId,
       eventInspectionPresetDto,
-      this.abortController.signal
+      signal
     );
     let recorder: RunRecorder | null = null;
 
-    // extract cookie setting logic to helper
-    await this.applyCookies(browser, url, eventInspectionPresetDto);
-    // Apply recorded viewport once per run using shared helper
-    await this.puppeteerUtilsService.applyRecordedViewport(
-      page,
-      projectSlug,
-      eventId
-    );
-    recorder = await this.puppeteerUtilsService.startRecorder(
-      page,
-      projectSlug,
-      eventId,
-      this.abortController.signal
-    );
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
+    // Everything after the launch is inside the try, so a failure in the
+    // set-up (an invalid site URL, ffmpeg missing) still closes the browser.
     try {
+      await applyPresetCookies(
+        browser,
+        url,
+        eventInspectionPresetDto.application
+      );
+      await this.puppeteerUtilsService.applyRecordedViewport(
+        page,
+        projectSlug,
+        eventId
+      );
+      recorder = await this.puppeteerUtilsService.startRecorder(
+        page,
+        projectSlug,
+        eventId,
+        signal
+      );
+      // Gives the recording a moment of the page before the replay starts.
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const data =
         await this.eventInspectionPipelineService.singleEventInspectionRecipe(
           page,
@@ -93,15 +112,10 @@ export class SingleEventInspectionService {
           eventInspectionPresetDto
         );
 
-      // stop recorder (if any) but in headful mode leave the browser running
-      await this.puppeteerUtilsService
-        .stopRecorder(recorder)
-        .catch((err) => this.logger.error(`Error stopping recorder: ${err}`));
-
+      await this.puppeteerUtilsService.stopRecorder(recorder);
       if (headlessFlag) {
-        const pages = await browser.pages();
-        await Promise.all(pages.map((p) => p.close()));
-        await browser.close();
+        // Bounded close: an unbounded one could hold the run queue forever.
+        await this.puppeteerUtilsService.cleanup(browser, page, null);
       } else {
         this.logger.log(
           'Headful mode detected: leaving browser open for user interaction. Close it manually when done.'
@@ -115,47 +129,26 @@ export class SingleEventInspectionService {
       if (headlessFlag) {
         await this.puppeteerUtilsService.cleanup(browser, page, recorder);
       } else {
-        await this.puppeteerUtilsService
-          .stopRecorder(recorder)
-          .catch((err) => this.logger.error(`Error stopping recorder: ${err}`));
+        await this.puppeteerUtilsService.stopRecorder(recorder);
         this.logger.log(
           'Headful mode detected and an error occurred: skipping automatic cleanup so the browser remains open for debugging.'
         );
       }
 
+      // The batch shows this message: the reason, without a stack trace or
+      // a file path.
       throw new HttpException(
-        error instanceof Error ? error.message : String(error),
+        toClientErrorMessage(error) || 'Failed to run the test',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
   }
 
+  /**
+   * Aborts the run in progress, which closes its browser, and drops the runs
+   * queued behind it.
+   */
   abort() {
-    if (this.abortController) {
-      this.abortController.abort();
-    }
-  }
-
-  // helper to apply cookies from preset
-  private async applyCookies(
-    browser: import('puppeteer').Browser,
-    url: string,
-    eventInspectionPresetDto: EventInspectionPresetDto
-  ): Promise<void> {
-    if (!eventInspectionPresetDto.application.cookie.data.length) {
-      return;
-    }
-    const cookies = eventInspectionPresetDto.application.cookie.data.map(
-      (cookie) => ({
-        name: cookie.key.toString(),
-        value: cookie.value.toString()
-      })
-    );
-    const cookieData: CookieData[] = cookies.map((cookie) => ({
-      name: cookie.name,
-      value: cookie.value,
-      domain: new URL(url).hostname
-    }));
-    await browser.setCookie(...cookieData);
+    this.runQueue.stop();
   }
 }

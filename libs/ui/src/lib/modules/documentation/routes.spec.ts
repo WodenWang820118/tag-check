@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { DOCS_ROUTES } from './routes';
-import { treeNodeDeactivateGuard } from './guards/documentation.guard';
 import { treeNodeResolver } from './resolvers/documentation.resolver';
 
 describe('DOCS_ROUTES', () => {
@@ -40,7 +39,6 @@ describe('DOCS_ROUTES', () => {
     expect(contentRoute.loadComponent).toBeDefined();
     expect(contentRoute.data).toMatchObject({ seoKey: 'documentation' });
     expect(contentRoute.resolve?.['data']).toBe(treeNodeResolver);
-    expect(contentRoute.canDeactivate).toContain(treeNodeDeactivateGuard);
   });
 });
 

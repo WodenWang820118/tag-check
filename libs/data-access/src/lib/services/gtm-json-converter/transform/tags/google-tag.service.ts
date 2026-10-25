@@ -1,29 +1,36 @@
 import { GoogleTagConfig, TagTypeEnum } from '@utils';
 import { Injectable } from '@angular/core';
 import { ParameterUtils } from '../utils/parameter-utils.service';
-import { CONSENT_STATUS_NOT_NEEDED } from '../utils/constant';
+import {
+  CONSENT_STATUS_NOT_NEEDED,
+  MEASUREMENT_ID_VARIABLE_NAME
+} from '../utils/constant';
 
+/** Builds the Google tag (`googtag`) every other tag in the container needs. */
 @Injectable({
   providedIn: 'root'
 })
 export class GoogleTag {
-  // Extracted constants
+  /** GTM's built-in "All Pages" trigger. */
   private static readonly DEFAULT_TRIGGER_ID = '2147479553';
   private static readonly TAG_FIRING_OPTION = 'ONCE_PER_EVENT';
   private static readonly MONITORING_METADATA_TYPE = 'MAP';
   private static readonly CONSENT_STATUS = CONSENT_STATUS_NOT_NEEDED;
-  private static readonly MEASUREMENT_ID_TEMPLATE =
-    '{{CONST - Measurement ID}}';
+  private static readonly MEASUREMENT_ID_TEMPLATE = `{{${MEASUREMENT_ID_VARIABLE_NAME}}}`;
 
   constructor(private readonly parameterUtils: ParameterUtils) {}
+
+  /**
+   * Creates the Google tag. Its tag ID reads the measurement ID Constant
+   * variable, so users change the ID in one place in the GTM UI;
+   * `measurementId` itself goes into that variable, not into the tag.
+   */
   createGA4Configuration(
     googleTagName: string,
     measurementId: string,
     accountId: string,
     containerId: string
   ): GoogleTagConfig {
-    // create a constant for the measurementIdParameter
-    // let users define the measurementIdParameter in the GTM UI
     return {
       name: googleTagName,
       type: TagTypeEnum.GOOGLE_TAG,
@@ -47,7 +54,12 @@ export class GoogleTag {
         'tagId',
         GoogleTag.MEASUREMENT_ID_TEMPLATE
       ),
-      this.parameterUtils.createBooleanParameter('sendPageView', 'false'),
+      // The Google tag keeps its settings in a configuration table; the
+      // `sendPageView` checkbox belonged to the GA4 Configuration tag it
+      // replaced. Page views stay off: tag-build only sends the plan's events.
+      this.parameterUtils.createBuiltInListParameter('configSettingsTable', [
+        this.parameterUtils.createMapParameter('send_page_view', 'false')
+      ]),
       this.parameterUtils.createBooleanParameter(
         'enableSendToServerContainer',
         'false'

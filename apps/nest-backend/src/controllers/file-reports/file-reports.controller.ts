@@ -12,6 +12,10 @@ import {
 import type { DeleteRunsResponse } from '@utils';
 import { ProjectFileReportService } from '../../features/project-agent/project-file-report/project-file-report.service';
 
+/**
+ * The Reports page: the project's runs, deleting runs, and the spreadsheet
+ * export.
+ */
 @Controller('file-reports')
 export class FileReportsController {
   constructor(

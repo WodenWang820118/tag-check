@@ -8,6 +8,7 @@ export interface ProjectInfo {
   measurementId: string;
 }
 
+/** Groups exported tests by project and reads a project's header details. */
 @Injectable()
 export class XlsxReportGroupingService {
   groupReportsByProject(

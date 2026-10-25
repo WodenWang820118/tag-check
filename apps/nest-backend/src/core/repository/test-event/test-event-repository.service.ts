@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import {
@@ -11,9 +11,9 @@ import {
 } from '../../../shared';
 import { plainToInstance } from 'class-transformer';
 
+/** Reads and writes tests (`TestEventEntity`). */
 @Injectable()
 export class TestEventRepositoryService {
-  private readonly logger = new Logger(TestEventRepositoryService.name);
   constructor(
     @InjectRepository(TestEventEntity)
     private readonly repository: Repository<TestEventEntity>
@@ -46,14 +46,6 @@ export class TestEventRepositoryService {
       relations: { spec: true },
       where: { project: { projectSlug } }
     });
-  }
-
-  async getEntityByEventId(eventId: string) {
-    const entity = await this.repository.findOne({ where: { eventId } });
-    if (!entity) {
-      throw new HttpException('Test event not found', HttpStatus.NOT_FOUND);
-    }
-    return entity;
   }
 
   /** The test's own columns: a run needs its id, not its past results. */
@@ -176,8 +168,8 @@ export class TestEventRepositoryService {
             updateData.latestTestImageId = updatedEvent.latestTestImageId;
           }
 
-          // Use save instead of update to properly handle relations
-          // Upsert
+          // Sequential on purpose: the saves share the transaction's
+          // connection. save, not update, keeps the loaded relations.
           const updatedEntity = await repo.save({
             ...event,
             ...updateData
@@ -210,14 +202,6 @@ export class TestEventRepositoryService {
       ...data
     });
     return plainToInstance(AbstractTestEventResponseDto, updatedEntity);
-  }
-
-  async deleteByProjectSlugAndEventId(projectSlug: string, eventId: string) {
-    const entity = await this.repository.delete({
-      project: { projectSlug },
-      eventId
-    });
-    return plainToInstance(AbstractTestEventResponseDto, entity);
   }
 
   async deleteByProjectSlugAndEventIds(

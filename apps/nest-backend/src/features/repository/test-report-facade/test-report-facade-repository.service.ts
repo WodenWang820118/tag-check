@@ -2,19 +2,17 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { ReportDetailResponse } from '@utils';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 import { TestImageRepositoryService } from '../../../core/repository/test-event/test-image-repository.service';
-import {
-  CreateFullTestEventDto,
-  CreateItemDefDto,
-  CreateSpecDto,
-  CreateTestEventDetailDto,
-  CreateTestEventDto
-} from '../../../shared';
+import { CreateFullTestEventDto } from '../../../shared';
 import { ProjectRepositoryService } from '../../../core/repository/project/project-repository.service';
 import { TestEventDetailRepositoryService } from '../../../core/repository/test-event/test-event-detail-repository.service';
 import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
 import { ItemDefRepositoryService } from '../../../core/repository/item-def/item-def-repository.service';
 
+/**
+ * Creates and reads a test together with the rows it owns (recording, spec,
+ * item definition, results and screenshot), across their repositories.
+ */
 @Injectable()
 export class TestReportFacadeRepositoryService {
   constructor(
@@ -27,73 +25,11 @@ export class TestReportFacadeRepositoryService {
     private readonly itemDefRepositoryService: ItemDefRepositoryService
   ) {}
 
-  async createAbstractReport(
-    projectSlug: string,
-    eventId: string,
-    data: CreateTestEventDto &
-      CreateTestEventDetailDto &
-      CreateSpecDto &
-      CreateItemDefDto
-  ) {
-    // Get the project entity by slug
-    const projectEntity =
-      await this.projectRepositoryService.getEntityBySlug(projectSlug);
-
-    // Create a test event entity
-    await this.testEventRepositoryService.create(projectEntity, {
-      eventId: data.eventId,
-      testName: data.testName,
-      eventName: data.eventName,
-      message: data.message,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    });
-
-    // Get the test event entity by event id to be used in the following operations
-    const testEventEntity =
-      await this.testEventRepositoryService.getEntityByEventId(eventId);
-
-    const testEventDetailCreation =
-      this.testEventDetailRepositoryService.create(testEventEntity, {
-        passed: false,
-        requestPassed: false,
-        rawRequest: '',
-        destinationUrl: '',
-        dataLayer: []
-      });
-
-    const recordingCreation = this.recordingRepositoryService.create(
-      testEventEntity,
-      {
-        title: data.eventName,
-        steps: []
-      }
-    );
-
-    const specCreation = this.specRepositoryService.create(testEventEntity, {
-      event: data.eventName,
-      eventName: data.eventName,
-      dataLayerSpec: data.dataLayerSpec,
-      rawGtmTag: data.rawGtmTag
-    });
-
-    const itemDefCreation = data.fullItemDef
-      ? this.itemDefRepositoryService.create(testEventEntity, data)
-      : Promise.resolve();
-
-    return Promise.all([
-      testEventDetailCreation,
-      recordingCreation,
-      specCreation,
-      itemDefCreation
-    ]);
-  }
   /**
-   * Initialize all nessessary entities for a full report to be used
-   * @param projectSlug
-   * @param eventId
-   * @param data
-   * @returns
+   * Creates a test in the project with its recording, spec and, when given,
+   * its item definition, and returns the test with its relations. Expects
+   * `eventId` to equal `data.reportDetails.eventId`; rethrows any repository
+   * error.
    */
   async createFullReport(
     projectSlug: string,
@@ -115,8 +51,13 @@ export class TestReportFacadeRepositoryService {
         updatedAt: new Date()
       });
 
+      // eventId is unique only within a project; the example project and
+      // an imported copy of it share every eventId.
       const testEvent =
-        await this.testEventRepositoryService.getEntityByEventId(eventId);
+        await this.testEventRepositoryService.getEntityBySlugAndEventId(
+          projectSlug,
+          eventId
+        );
 
       // Create recording
       await this.recordingRepositoryService.create(testEvent, {
@@ -155,6 +96,10 @@ export class TestReportFacadeRepositoryService {
     }
   }
 
+  /**
+   * Returns a test with its latest result and a summary of its latest
+   * screenshot (no image bytes); either is null when the test has not run.
+   */
   async getReportDetail(
     projectSlug: string,
     eventId: string

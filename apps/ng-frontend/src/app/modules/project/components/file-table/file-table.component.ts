@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { tap } from 'rxjs';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { DatePipe, NgClass, CommonModule } from '@angular/common';
+import { DatePipe, CommonModule } from '@angular/common';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
 import { getCheckStatus, Jsonified, RunSummary } from '@utils';
 import { MatInputModule } from '@angular/material/input';
@@ -21,7 +21,12 @@ import { TableSortService } from '../../../../shared/services/utils/table-sort.s
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.component';
+import { FileTableDataSourceService } from '../../../../shared/services/data-source/file-table-data-source.service';
 
+/**
+ * The Reports page's table: one row per run with its status, sortable
+ * and paged, selected rows being what the toolbar acts on.
+ */
 @Component({
   selector: 'app-file-table',
   standalone: true,
@@ -32,7 +37,6 @@ import { RunStatusChipComponent } from '../run-status-chip/run-status-chip.compo
     MatCheckboxModule,
     DatePipe,
     MatInputModule,
-    NgClass,
     MatSortModule,
     MatChipsModule,
     MatTooltipModule,
@@ -51,7 +55,8 @@ export class FileTableComponent implements OnInit {
     private readonly facade: FileTableDataSourceFacadeService,
     private readonly route: ActivatedRoute,
     private readonly destroyRef: DestroyRef,
-    private readonly tableSortService: TableSortService
+    private readonly tableSortService: TableSortService,
+    private readonly fileTableDataSourceService: FileTableDataSourceService
   ) {}
 
   ngOnInit() {
@@ -66,6 +71,15 @@ export class FileTableComponent implements OnInit {
         })
       )
       .subscribe();
+    // History opens this page with ?event=<event name> to list that
+    // test's runs.
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) =>
+        this.fileTableDataSourceService.setEventFilterSignal(
+          params.get('event') ?? ''
+        )
+      );
   }
 
   sortData(sort: Sort) {

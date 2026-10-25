@@ -53,14 +53,14 @@ export class SlideImportComponent {
   toggleSidenav() {
     const sidenav = this.importedSidenav();
     if (sidenav) {
-      sidenav.toggle();
+      void sidenav.toggle();
     }
   }
 
   closeIfOpen() {
     const sidenav = this.importedSidenav();
     if (sidenav?.opened) {
-      sidenav.close();
+      void sidenav.close();
       this.uploadSpecService.resetImport();
     }
   }

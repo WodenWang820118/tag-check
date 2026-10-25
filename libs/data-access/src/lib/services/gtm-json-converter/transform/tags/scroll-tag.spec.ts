@@ -74,7 +74,7 @@ describe('ScrollTag', () => {
       const containerId = 'container456';
       const triggers: Trigger[] = [
         {
-          name: 'scroll',
+          name: 'event scroll',
           triggerId: 'trigger789'
         }
       ];
@@ -93,7 +93,7 @@ describe('ScrollTag', () => {
 
       vi.spyOn(parameterUtils, 'createBuiltInListParameter').mockReturnValue({
         type: 'LIST',
-        key: 'eventParameters',
+        key: 'eventSettingsTable',
         list: [
           {
             type: 'MAP',
@@ -101,7 +101,7 @@ describe('ScrollTag', () => {
               {
                 type: 'TEMPLATE',
                 key: 'parameter',
-                value: 'scroll_percentage'
+                value: 'percent_scrolled'
               },
               {
                 type: 'TEMPLATE',
@@ -118,14 +118,6 @@ describe('ScrollTag', () => {
           map: [{ type: 'TEMPLATE', key, value }]
         })
       );
-      vi.spyOn(
-        parameterUtils,
-        'createTagReferenceParameter'
-      ).mockImplementation((key, value) => ({
-        type: 'TAG_REFERENCE',
-        key,
-        value
-      }));
 
       // Act
       const result = scrollTag.createScrollTag(
@@ -148,7 +140,7 @@ describe('ScrollTag', () => {
             { type: 'TEMPLATE', key: 'eventName', value: 'scroll' },
             {
               type: 'LIST',
-              key: 'eventParameters',
+              key: 'eventSettingsTable',
               list: [
                 {
                   type: 'MAP',
@@ -156,7 +148,7 @@ describe('ScrollTag', () => {
                     {
                       type: 'TEMPLATE',
                       key: 'parameter',
-                      value: 'scroll_percentage'
+                      value: 'percent_scrolled'
                     },
                     {
                       type: 'TEMPLATE',
@@ -168,9 +160,9 @@ describe('ScrollTag', () => {
               ]
             },
             {
-              type: 'TAG_REFERENCE',
-              key: 'measurementId',
-              value: configurationName
+              type: 'TEMPLATE',
+              key: 'measurementIdOverride',
+              value: '{{CONST - Measurement ID}}'
             }
           ],
           fingerprint: '1690184079241',
@@ -196,17 +188,42 @@ describe('ScrollTag', () => {
         'scroll'
       );
       expect(parameterUtils.createMapParameter).toHaveBeenCalledWith(
-        'scroll_depth_threshold',
+        'percent_scrolled',
         '{{Scroll Depth Threshold}}'
       );
       expect(parameterUtils.createBuiltInListParameter).toHaveBeenCalledWith(
-        'eventParameters',
+        'eventSettingsTable',
         expect.any(Array)
       );
-      expect(parameterUtils.createTagReferenceParameter).toHaveBeenCalledWith(
-        'measurementId',
-        configurationName
+    });
+
+    it('sends the threshold as GA4 percent_scrolled', () => {
+      vi.spyOn(eventUtils, 'isIncludeScroll').mockReturnValue(true);
+
+      const [tag] = scrollTag.createScrollTag(
+        'TestConfig',
+        'account123',
+        'container456',
+        [{ name: 'event scroll', triggerId: 'trigger789' }],
+        []
       );
+
+      const table = tag?.parameter.find(
+        (parameter) => parameter.key === 'eventSettingsTable'
+      );
+      expect(table?.list).toEqual([
+        {
+          type: 'MAP',
+          map: [
+            { type: 'TEMPLATE', key: 'parameter', value: 'percent_scrolled' },
+            {
+              type: 'TEMPLATE',
+              key: 'parameterValue',
+              value: '{{Scroll Depth Threshold}}'
+            }
+          ]
+        }
+      ]);
     });
   });
 });

@@ -1,5 +1,4 @@
 import { TagConfig, TriggerConfig } from '../tag-build';
-import { Auditable } from './auditable.type';
 import { StrictDataLayerEvent } from './data-layer.type';
 
 export type ProjectSpec = {
@@ -8,19 +7,13 @@ export type ProjectSpec = {
 };
 
 /**
- * An individual spec for an event
- * An event corresponds to a tag, which might contains multiple triggers
- * The tag already have reference "name" attribute regarding variables
+ * A GTM tag and the triggers that fire it, as read from a container export.
+ * The tag refers to variables by name (`{{DLV - ecommerce.value}}`).
  */
 export type Spec = {
   tag: TagConfig;
   trigger: TriggerConfig[];
 };
-
-export type SpecSchema = {
-  id: number;
-} & Spec &
-  Auditable;
 
 export type DataLayerSpec = {
   eventName: string;
@@ -28,19 +21,9 @@ export type DataLayerSpec = {
   rawGtmTag: Spec;
 };
 
-export type DataLayerSpecSchema = {
-  id: number;
-} & DataLayerSpec &
-  Auditable;
-
 export type ItemDef = {
   templateName: string;
   itemId: string;
   /** A GA4 item, such as { item_id, item_name, price }. */
   fullItemDef: Record<string, unknown>;
 };
-
-export type ItemDefSchema = {
-  id: number;
-} & ItemDef &
-  Auditable;

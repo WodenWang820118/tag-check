@@ -1,4 +1,4 @@
-import { computed, Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { DataLayerService } from '../api/datalayer/datalayer.service';
 import { GtmOperatorService } from '../api/gtm-operator/gtm-operator.service';
 import {
@@ -9,53 +9,81 @@ import {
   forkJoin,
   Observable,
   of,
-  map,
-  throwError
+  map
 } from 'rxjs';
 import {
-  IReportDetails,
   EventInspectionPresetDto,
   ProjectSetting,
   ReportDetailResponse
 } from '@utils';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import { ProjectDataSourceService } from '../data-source/project-data-source.service';
 import { QaRequestService } from '../api/qa-request/qa-request.service';
 import { SettingsService } from '../api/settings/settings.service';
 import { GtmInspectionParams } from '../utils/interfaces';
 import { ReportTableDataSourceModelService } from '../../../modules/project/services/report-table-data-source-model/report-table-data-source-model.service';
 
+export type RunTestOptions = {
+  /**
+   * Close the run's browser when it ends. An accompanied-mode run otherwise
+   * leaves its GTM Preview window open for inspection; a batch closes each
+   * one so that windows do not pile up.
+   */
+  closeBrowser?: boolean;
+};
+
+/**
+ * Runs one test the way the project's settings ask for: through GTM Preview
+ * in accompanied mode, otherwise on the site directly, with or without the
+ * request check. It tracks which test is running, for the play buttons and
+ * the progress stream, and writes each result into the tests table.
+ */
 @Injectable({ providedIn: 'root' })
 export class TestRunningFacadeService {
-  // Signals to track test-running state
-  private readonly isRunningTest: WritableSignal<boolean> = signal(false);
-  private readonly eventRunningTest: WritableSignal<string> = signal('');
+  private readonly isRunningTest = signal(false);
+  private readonly eventRunningTest = signal('');
 
-  readonly isRunningTest$ = computed(() => this.isRunningTest());
-  readonly eventRunningTest$ = computed(() => this.eventRunningTest());
+  /** Whether a test is running; the backend runs one browser at a time. */
+  readonly isRunningTest$ = this.isRunningTest.asReadonly();
+  /** The eventId of the running test, or '' when none runs. */
+  readonly eventRunningTest$ = this.eventRunningTest.asReadonly();
 
   constructor(
     private readonly dataLayerService: DataLayerService,
     private readonly gtmOperatorService: GtmOperatorService,
     private readonly qaRequestService: QaRequestService,
-    private readonly projectDataSourceService: ProjectDataSourceService,
     private readonly settingsService: SettingsService,
     private readonly reportTableDataSourceModelService: ReportTableDataSourceModelService
   ) {}
 
-  runTest(
+  /**
+   * Runs a test, updates its row in the tests table that is shown when the
+   * run ends, and emits the run's report (undefined when the API returned
+   * none, as for a run the user stopped).
+   */
+  runTestForReport(
     eventId: string,
     projectSlug: string,
-    testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
-  ) {
+    options: RunTestOptions = {}
+  ): Observable<ReportDetailResponse | undefined> {
+    return this.run(eventId, projectSlug, options).pipe(
+      map((res) => {
+        const report = res?.[0];
+        if (report) {
+          this.updateReportDetails(eventId, report);
+        }
+        return report;
+      })
+    );
+  }
+
+  private run(eventId: string, projectSlug: string, options: RunTestOptions) {
+    // The settings are read at run time so that a change made on a settings
+    // page applies to the next run without reloading the tests page.
     return this.settingsService.getProjectSettings(projectSlug).pipe(
       take(1),
       switchMap((project) =>
-        this.chooseAndRunTest(eventId, projectSlug, project)
+        this.chooseAndRunTest(eventId, projectSlug, project, options)
       ),
-      map((res) => this.updateReportDetails(eventId, res, testDataSource)),
-      catchError((error) => throwError(() => error)),
       finalize(() => {
         this.isRunningTest.set(false);
         this.eventRunningTest.set('');
@@ -63,14 +91,14 @@ export class TestRunningFacadeService {
     );
   }
 
-  chooseAndRunTest(
+  private chooseAndRunTest(
     eventId: string,
     projectSlug: string,
-    project: ProjectSetting
+    project: ProjectSetting,
+    options: RunTestOptions
   ) {
     const headless = project.browserSettings.headless;
     const inspectEventDto = new EventInspectionPresetDto(project);
-    // change the play button to a spinner
     this.isRunningTest.set(true);
     this.eventRunningTest.set(eventId);
 
@@ -85,11 +113,11 @@ export class TestRunningFacadeService {
     };
 
     if (project.applicationSettings.gtm.isAccompanyMode) {
-      const measurementId = project.applicationSettings.gtm.isRequestCheck
+      gtmInspectionParams.measurementId = project.applicationSettings.gtm
+        .isRequestCheck
         ? project.measurementId
         : undefined;
-
-      gtmInspectionParams.measurementId = measurementId;
+      gtmInspectionParams.closeBrowser = options.closeBrowser;
       return this.gtmOperatorService.runInspectionViaGtm(
         projectSlug,
         eventId,
@@ -98,14 +126,12 @@ export class TestRunningFacadeService {
     }
 
     if (project.applicationSettings.gtm.isRequestCheck) {
-      console.log('Running data layer with request check');
       return this.qaRequestService.runDataLayerWithRequestCheck(
         projectSlug,
         eventId,
         gtmInspectionParams
       );
     }
-    console.log('Running data layer without request check');
     return this.dataLayerService.runDataLayerInspection(projectSlug, eventId, {
       websiteUrl: project.applicationSettings.websiteUrl,
       headless,
@@ -116,9 +142,12 @@ export class TestRunningFacadeService {
     });
   }
 
+  /**
+   * Asks the backend to stop the running test. All three run services are
+   * asked, since the caller does not know which one runs it; a failed stop
+   * request is logged and does not fail the others.
+   */
   stopOperation(): Observable<unknown> {
-    console.log('Stop operation from the test running facade');
-
     return forkJoin({
       dataLayer: this.dataLayerService.stopOperation().pipe(
         catchError((error) => {
@@ -139,70 +168,45 @@ export class TestRunningFacadeService {
         })
       )
     }).pipe(
-      map((res) => res),
       finalize(() => {
-        console.log('Stop operation completed, setting isRunningTest to false');
         this.isRunningTest.set(false);
         this.eventRunningTest.set('');
       })
     );
   }
 
-  private updateReportDetails(
-    eventId: string,
-    res: ReportDetailResponse[],
-    testDataSource: MatTableDataSource<IReportDetails, MatPaginator>
-  ) {
-    if (!res || res.length === 0) {
-      console.warn('No results to update for eventId:', eventId);
-      return testDataSource;
-    }
+  /**
+   * Writes a run's result into the test's row. The table is read when the
+   * run ends, not when it starts: while a run lasts, the user may leave the
+   * tests page and come back, which builds a new data source bound to a new
+   * paginator and sort.
+   */
+  private updateReportDetails(eventId: string, result: ReportDetailResponse) {
+    const current = this.reportTableDataSourceModelService.dataSource();
+    // The API sends dates as strings; a missing one means the run just ended.
+    const updatedAt = result.testEvent?.updatedAt
+      ? new Date(result.testEvent.updatedAt)
+      : new Date();
 
-    console.log('updateReportDetails called with eventId:', eventId);
-    console.log('updateReportDetails called with res:', res);
-    const result = res[0];
-    // Prefer the server-provided updatedAt if available; otherwise mark as now to indicate "run"
-    // Derive a Date for updatedAt: accept Date/number/string from server, otherwise use current time
-    const rawUpdatedAt: unknown = (
-      result?.testEvent as unknown as { updatedAt?: unknown }
-    )?.updatedAt;
-    let updatedAt: Date;
-    if (rawUpdatedAt instanceof Date) {
-      updatedAt = rawUpdatedAt;
-    } else if (
-      typeof rawUpdatedAt === 'number' ||
-      typeof rawUpdatedAt === 'string'
-    ) {
-      updatedAt = new Date(rawUpdatedAt);
-    } else {
-      updatedAt = new Date();
-    }
-
-    const nextData = testDataSource.data.map((event) =>
+    const nextData = current.data.map((event) =>
       event.eventId === eventId
         ? {
-            // preserve the original identity
             ...event,
             passed: result.testEventDetails?.passed ?? false,
             requestPassed: result.testEventDetails?.requestPassed ?? false,
-            message: result.testEvent?.message ?? [],
+            message: result.testEvent?.message ?? event.message,
             updatedAt,
             lastRunAt: result.testEvent?.lastRunAt ?? updatedAt
           }
         : event
     );
 
-    // Replace the MatTableDataSource instance to trigger signal/reactivity
-    const newDs = new MatTableDataSource<IReportDetails>([...nextData]);
-    newDs.paginator = testDataSource.paginator;
-    newDs.sort = testDataSource.sort;
-    // Preserve current filter/predicate until effects re-apply
-    newDs.filterPredicate = testDataSource.filterPredicate;
-    newDs.filter = testDataSource.filter;
-
-    this.reportTableDataSourceModelService.dataSource.set(newDs);
-
-    console.log('Updated dataSource via signal:', newDs.data);
-    return newDs;
+    // A new data source instance makes the signal, and the table, update.
+    const next = new MatTableDataSource(nextData);
+    next.paginator = current.paginator;
+    next.sort = current.sort;
+    next.filterPredicate = current.filterPredicate;
+    next.filter = current.filter;
+    this.reportTableDataSourceModelService.dataSource.set(next);
   }
 }

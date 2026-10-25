@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { InternalServerErrorException } from '@nestjs/common';
+import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
 import { runInNewContext } from 'node:vm';
 import {
   GtmOperatorService,
@@ -21,6 +23,7 @@ describe('GtmOperatorService recorder lifecycle', () => {
   let openerPage: Record<string, unknown>;
   let targetPage: ReturnType<typeof createMockPage>;
   let recorder: { stop: ReturnType<typeof vi.fn> };
+  let tagAssistantRecorder: { stop: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     vi.spyOn(global, 'setTimeout').mockImplementation((callback) => {
@@ -31,20 +34,24 @@ describe('GtmOperatorService recorder lifecycle', () => {
     browser = createMockBrowser(targetPage);
     openerPage = {};
     recorder = { stop: vi.fn().mockResolvedValue(undefined) };
+    tagAssistantRecorder = { stop: vi.fn().mockResolvedValue(undefined) };
     pipeline = {
       singleEventInspectionRecipe: vi.fn().mockResolvedValue([{ passed: true }])
     };
     puppeteerUtils = {
       startBrowser: vi.fn().mockResolvedValue({ browser, page: openerPage }),
       applyRecordedViewport: vi.fn().mockResolvedValue(undefined),
-      startRecorder: vi.fn().mockResolvedValue(recorder),
+      startRecorder: vi
+        .fn()
+        .mockResolvedValueOnce(recorder)
+        .mockResolvedValueOnce(tagAssistantRecorder),
       stopRecorder: vi.fn().mockResolvedValue(undefined),
       cleanup: vi.fn().mockResolvedValue(undefined)
     };
     service = new GtmOperatorService(
       pipeline as never,
       puppeteerUtils as never,
-      {} as never
+      new RunQueueService()
     );
     vi.spyOn(service, 'operateGtmPreviewMode').mockResolvedValue(undefined);
   });
@@ -65,7 +72,85 @@ describe('GtmOperatorService recorder lifecycle', () => {
     );
     expect(recorder.stop).not.toHaveBeenCalled();
     expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
-    expect(browser.close).toHaveBeenCalledTimes(1);
+    expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(
+      browser,
+      openerPage,
+      null
+    );
+  });
+
+  it('records the Tag Assistant tab next to the site, without bringing it to the front', async () => {
+    await service.inspectSingleEventViaGtm(
+      'project',
+      'event',
+      createQuery(),
+      createPreset()
+    );
+
+    expect(puppeteerUtils.startRecorder).toHaveBeenNthCalledWith(
+      2,
+      openerPage,
+      'project',
+      'event',
+      expect.any(AbortSignal),
+      { file: 'recording-tag-assistant.webm', bringToFront: false }
+    );
+    expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(
+      tagAssistantRecorder
+    );
+  });
+
+  it('runs without the Tag Assistant recording when it cannot start', async () => {
+    puppeteerUtils.startRecorder = vi
+      .fn()
+      .mockResolvedValueOnce(recorder)
+      .mockRejectedValueOnce(new Error('screencast unavailable'));
+
+    await expect(
+      service.inspectSingleEventViaGtm(
+        'project',
+        'event',
+        createQuery(),
+        createPreset()
+      )
+    ).resolves.toEqual([{ passed: true }]);
+    expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
+  });
+
+  it('stopOperation stops the running run and drops the run queued behind it', async () => {
+    let signal: AbortSignal | undefined;
+    puppeteerUtils.startBrowser.mockImplementationOnce(
+      (_headless, _measurementId, _preset, runSignal: AbortSignal) => {
+        signal = runSignal;
+        return new Promise((_resolve, reject) =>
+          runSignal.addEventListener('abort', () =>
+            reject(new Error('Browser start aborted'))
+          )
+        );
+      }
+    );
+
+    const first = service.inspectSingleEventViaGtm(
+      'project',
+      'a',
+      createQuery(),
+      createPreset()
+    );
+    const second = service.inspectSingleEventViaGtm(
+      'project',
+      'b',
+      createQuery(),
+      createPreset()
+    );
+    await vi.waitFor(() => expect(signal).toBeDefined());
+
+    service.stopOperation();
+
+    await expect(first).rejects.toThrow('Browser start aborted');
+    await expect(second).rejects.toThrow(
+      'The run was stopped before it started'
+    );
+    expect(puppeteerUtils.startBrowser).toHaveBeenCalledOnce();
   });
 
   it('passes the recorder handle to cleanup on failure', async () => {
@@ -80,11 +165,53 @@ describe('GtmOperatorService recorder lifecycle', () => {
       )
     ).rejects.toThrow('Failed to perform GTM validation');
 
-    expect(puppeteerUtils.stopRecorder).not.toHaveBeenCalled();
+    expect(puppeteerUtils.stopRecorder).toHaveBeenCalledExactlyOnceWith(
+      tagAssistantRecorder
+    );
     expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(
       browser,
       openerPage,
       recorder
+    );
+  });
+
+  it('rejects with the reason of the failure, without its stack or paths', async () => {
+    pipeline.singleEventInspectionRecipe.mockRejectedValue(
+      new Error(
+        'Waiting for selector `#buy` failed\n    at C:\\app\\main.js:1:1'
+      )
+    );
+
+    const error: unknown = await service
+      .inspectSingleEventViaGtm(
+        'project',
+        'event',
+        createQuery(),
+        createPreset()
+      )
+      .catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(InternalServerErrorException);
+    expect(error).toMatchObject({
+      status: 500,
+      message:
+        'Failed to perform GTM validation: Waiting for selector `#buy` failed'
+    });
+  });
+
+  it('closes a headful run when the caller asks, as a batch does', async () => {
+    await service.inspectSingleEventViaGtm(
+      'project',
+      'event',
+      { ...createQuery(), headless: 'false', closeBrowser: 'true' },
+      createPreset()
+    );
+
+    expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
+    expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(
+      browser,
+      openerPage,
+      null
     );
   });
 
@@ -251,7 +378,7 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      {} as never
+      new RunQueueService()
     );
     const page = createPreviewPage();
 
@@ -286,7 +413,7 @@ describe('GtmOperatorService.operateGtmPreviewMode', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      {} as never
+      new RunQueueService()
     );
     const page = createPreviewPage();
     page.waitForSelector.mockRejectedValueOnce(new Error('missing control'));
@@ -307,7 +434,7 @@ describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      {} as never
+      new RunQueueService()
     );
 
     expect(
@@ -321,7 +448,7 @@ describe('GtmOperatorService.extractBaseUrlFromGtmUrl', () => {
     const service = new GtmOperatorService(
       {} as never,
       {} as never,
-      {} as never
+      new RunQueueService()
     );
 
     expect(

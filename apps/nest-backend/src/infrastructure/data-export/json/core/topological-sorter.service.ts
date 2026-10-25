@@ -4,10 +4,17 @@ import { FixtureEnvelopeV1 } from '../../interfaces/fixture-types';
 
 type RelationMetadata = EntityMetadata['relations'][number];
 
+/**
+ * Orders the envelope's entities so that a parent is imported before the
+ * entities whose rows point at it. Cycles (a test and its latest result
+ * point at each other) fall back to the envelope's order; the import defers
+ * pointers to entities that come later.
+ */
 @Injectable()
 export class TopologicalSorterService {
   private readonly logger = new Logger(TopologicalSorterService.name);
 
+  /** @returns The envelope's entity names, parents first, tests right after projects. */
   order(
     env: FixtureEnvelopeV1,
     metasByName: Map<string, EntityMetadata>

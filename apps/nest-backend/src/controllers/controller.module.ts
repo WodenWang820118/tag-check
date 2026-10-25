@@ -8,6 +8,7 @@ import { ExampleProjectRepositoryModule } from '../features/example-project/exam
 import { GtmParserModule } from '../features/gtm-parser/gtm-parser.module';
 import { ProjectDataExportModule } from '../infrastructure/data-export/project-data-export.module';
 import { TestReportFacadeModule } from '../features/repository/test-report-facade/test-report-facade.module';
+import { EventsGatewayModule } from '../core/events-gateway/events-gateway.module';
 
 // controllers
 import { ProjectWorkFlowController } from './project/project-workflow.controller';
@@ -24,6 +25,7 @@ import { FileReportsController } from './file-reports/file-reports.controller';
 import { VideosController } from './videos/videos.controller';
 import { GtmParserController } from './gtm-parser/gtm-parser.controller';
 import { StartupReadinessController } from './startup/startup-readiness.controller';
+import { EventsController } from './events/events.controller';
 
 // services
 import { EventInspectionControllerService } from './data-layer/event-inspection-controller.service';
@@ -36,6 +38,7 @@ const services = [
   ConfigurationControllerService
 ];
 
+/** Every HTTP controller, with the feature modules they call. */
 @Module({
   imports: [
     ProjectAgentModule,
@@ -44,7 +47,8 @@ const services = [
     ExampleProjectRepositoryModule,
     GtmParserModule,
     TestReportFacadeModule,
-    ProjectDataExportModule
+    ProjectDataExportModule,
+    EventsGatewayModule
   ],
   controllers: [
     ProjectWorkFlowController,
@@ -60,7 +64,8 @@ const services = [
     FileReportsController,
     VideosController,
     GtmParserController,
-    StartupReadinessController
+    StartupReadinessController,
+    EventsController
   ],
   providers: [...services]
 })

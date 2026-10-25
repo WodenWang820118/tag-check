@@ -1,26 +1,39 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { DataSource, EntityMetadata } from 'typeorm';
 import { FixtureEnvelopeV1 } from '../../interfaces/fixture-types';
 import { TopologicalSorterService } from './topological-sorter.service';
 import { PointerRepairService } from './pointer-repair.service';
 import { IdMapRegistryService } from './id-map-registry.service';
 import { EntityImportService } from './entity-import.service';
+import { RelationMapperService } from './relation-mapper.service';
 import {
   ImportRuntimeContext,
   ImportStats
 } from '../../interfaces/import-types';
 
+/**
+ * Imports a whole fixture envelope in one database transaction: either every
+ * row is written or, when any step throws, none is. Rows a step skips (and
+ * counts in the stats) do not abort the import.
+ */
 @Injectable()
 export class ImportTransactionService {
-  private readonly logger = new Logger(ImportTransactionService.name);
   constructor(
     private readonly dataSource: DataSource,
     private readonly sorter: TopologicalSorterService,
     private readonly pointerRepair: PointerRepairService,
     private readonly idMapRegistry: IdMapRegistryService,
-    private readonly entityImporter: EntityImportService
+    private readonly entityImporter: EntityImportService,
+    private readonly relationMapper: RelationMapperService
   ) {}
 
+  /**
+   * Imports the envelope's entities parents first, then sets the pointers
+   * that target rows imported later.
+   *
+   * @returns Inserted and skipped row counts per entity.
+   * @throws Whatever a step throws, after rolling the transaction back.
+   */
   async runWithinTransaction(env: FixtureEnvelopeV1): Promise<{
     stats: Record<string, ImportStats>;
   }> {
@@ -32,37 +45,43 @@ export class ImportTransactionService {
         this.dataSource.entityMetadatas.map((m) => [m.name, m])
       );
       const insertionOrder = this.sorter.order(env, metasByName);
-      const stats: Record<string, ImportStats> = {};
+      // The ID and alternate-key maps are singletons: start from empty ones
+      // so that keys of an earlier (possibly rolled back) import cannot
+      // resolve references of this one.
       this.idMapRegistry.clear();
-      const idMaps = this.idMapRegistry.getAll();
+      this.relationMapper.clear();
 
       const ctx: ImportRuntimeContext = {
         exportedProjectId: this.determineExportedProjectId(env),
         newProjectId: undefined,
-        stats,
-        idMaps
+        stats: {},
+        idMaps: this.idMapRegistry.getAll(),
+        pendingEntities: new Set(
+          insertionOrder.filter((name) => env.entities[name]?.length)
+        ),
+        deferredPointers: []
       };
 
+      // Sequential on purpose: each entity needs the new IDs of the ones
+      // before it, and every write goes through the same transaction.
       for (const name of insertionOrder) {
         const meta = metasByName.get(name);
         if (!meta) continue;
-        const rows = env.entities[name];
         const repo = queryRunner.manager.getRepository(meta.name);
         const maybeNewProjectId = await this.entityImporter.importEntitiesFor(
           name,
-          rows,
+          env.entities[name],
           meta,
           repo,
           ctx
         );
         ctx.newProjectId = maybeNewProjectId ?? ctx.newProjectId;
+        ctx.pendingEntities?.delete(name);
       }
 
       await this.pointerRepair.repairPointers(
         queryRunner,
-        metasByName,
-        insertionOrder,
-        ctx.idMaps
+        ctx.deferredPointers ?? []
       );
       await queryRunner.commitTransaction();
       return { stats: ctx.stats };
@@ -75,13 +94,12 @@ export class ImportTransactionService {
     }
   }
 
+  /** The exported primary key of the envelope's first project row. */
   private determineExportedProjectId(env: FixtureEnvelopeV1): unknown {
-    let exportedProjectId: unknown = undefined;
     const projectRows = env.entities['ProjectEntity'];
-    if (Array.isArray(projectRows) && projectRows.length > 0) {
-      const candidate = projectRows[0] as Record<string, unknown>;
-      if ('id' in candidate) exportedProjectId = candidate['id'];
+    if (!Array.isArray(projectRows) || projectRows.length === 0) {
+      return undefined;
     }
-    return exportedProjectId;
+    return (projectRows[0] as Record<string, unknown>)['id'];
   }
 }

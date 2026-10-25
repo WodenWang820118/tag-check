@@ -19,7 +19,6 @@ describe('ConfigsService', () => {
     expect(svc.getRESULT_FOLDER()).toBe('inspection_results');
     expect(svc.getCONFIG_FOLDER()).toBe('config');
     expect(svc.getCONFIG_ROOT_PATH()).toBe('rootProjectPath');
-    expect(svc.getCONFIG_CURRENT_PROJECT_PATH()).toBe('currentProjectPath');
     expect(svc.getABSTRACT_REPORT_FILE_NAME()).toBe('abstract.json');
     expect(svc.getSPECS()).toBe('spec.json');
     expect(svc.getSETTINGS()).toBe('settings.json');

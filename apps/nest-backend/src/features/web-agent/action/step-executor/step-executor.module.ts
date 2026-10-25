@@ -9,6 +9,7 @@ import { HoverHandler } from '../handlers/hover-handler.service';
 import { ACTION_HANDLERS } from '../handlers/utils';
 import { BrowserAction } from '../action-utils';
 
+/** Provides the step executor and the ACTION_HANDLERS map it dispatches to. */
 @Module({
   imports: [DataLayerModule, HandlerModule],
   providers: [

@@ -16,6 +16,10 @@ import { ActivatedRoute } from '@angular/router';
 import { Project, ProjectSetting } from '@utils';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+/**
+ * Settings > Project information: the project's name, description and
+ * measurement ID.
+ */
 @Component({
   selector: 'app-project-info-form',
   imports: [
@@ -65,8 +69,6 @@ export class ProjectInfoFormComponent implements OnInit {
         take(1),
         switchMap((params) => {
           const projectSlug = params['projectSlug'];
-          console.log(this.projectInfoForm.value);
-          console.log(projectSlug);
 
           const settings: Partial<Project> = {
             projectName: this.projectInfoForm.value.projectName || '',

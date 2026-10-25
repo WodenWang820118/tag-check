@@ -16,6 +16,10 @@ import { ChangeStrategyService } from '../strategies/change-strategies/change-st
 import { ActionUtilsService } from './../action-utils/action-utils.service';
 import { Step } from '@utils';
 
+/**
+ * Replays a change step: types the step's value into a field or selects it
+ * in a select element, with the first of its selectors that works.
+ */
 @Injectable()
 export class ChangeHandler implements ActionHandler {
   private readonly logger = new Logger(ChangeHandler.name);
