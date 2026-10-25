@@ -22,6 +22,10 @@ import {
   preloadApplicationLocalStorage,
   seedSiteLocalStorage
 } from '../web-agent/browser-state-preload.util';
+import {
+  connectTagAssistant,
+  GtmPreviewConnectionError
+} from './tag-assistant-connection';
 
 /**
  * Preview mode pins Tag Assistant's badge (an iframe, 450x200, maximum
@@ -130,10 +134,14 @@ export class GtmOperatorService {
         }
       }
 
-      // The site's tab is the one Tag Assistant opened on the site's origin.
+      // The site's tab is the page Tag Assistant opened on the site's
+      // origin. Not any target there: the site's service worker
+      // (ngsw-worker.js on ng-gtm-sample) is one too, and outlives a window
+      // closed by a retried connection.
       const siteOrigin = new URL(websiteUrl).origin;
-      const target = await browser.waitForTarget((candidate) =>
-        candidate.url().includes(siteOrigin)
+      const target = await browser.waitForTarget(
+        (candidate) =>
+          candidate.type() === 'page' && candidate.url().includes(siteOrigin)
       );
 
       const targetUrl = target.url();
@@ -221,6 +229,11 @@ export class GtmOperatorService {
       if (error instanceof BadRequestException) {
         throw error;
       }
+      // Tag Assistant did not connect: the user sees why in plain words; the
+      // technical detail is in the log above.
+      if (error instanceof GtmPreviewConnectionError) {
+        throw new InternalServerErrorException(error.clientMessage);
+      }
       // The batch shows this message, so it says why the run failed, without
       // a stack trace or a file path.
       const reason = toClientErrorMessage(error);
@@ -258,31 +271,18 @@ export class GtmOperatorService {
   }
 
   /**
-   * Starts GTM Preview from Tag Assistant's start page: keeps the debug
-   * parameter on the site URL, connects, and continues past the connection
-   * dialog. Throws when one of these controls does not appear.
+   * Opens Tag Assistant on the GTM preview URL and connects it to the site
+   * (see connectTagAssistant). Rejects with GtmPreviewConnectionError when
+   * Tag Assistant does not connect.
    */
   async operateGtmPreviewMode(page: Page, gtmUrl: string) {
+    const siteOrigin = new URL(this.getPreviewTargetUrl(gtmUrl)).origin;
     await page.goto(gtmUrl, { waitUntil: 'networkidle2' });
-    await this.clickRequiredPreviewControl(page, '#include-debug-param');
-    await this.clickRequiredPreviewControl(page, '#domain-start-button');
-
-    const btnSelector = '.btn.btn--filled.wd-continue-debugging-button';
-    await this.clickRequiredPreviewControl(page, btnSelector);
-  }
-
-  private async clickRequiredPreviewControl(
-    page: Page,
-    selector: string
-  ): Promise<void> {
-    try {
-      await page.waitForSelector(selector, { visible: true });
-      await page.click(selector);
-    } catch (error) {
-      throw new Error(
-        `Failed to operate GTM preview control "${selector}": ${error}`
-      );
-    }
+    await connectTagAssistant(page, {
+      siteOrigin,
+      log: (message) => this.logger.log(message),
+      warn: (message) => this.logger.warn(message)
+    });
   }
 
   /**
