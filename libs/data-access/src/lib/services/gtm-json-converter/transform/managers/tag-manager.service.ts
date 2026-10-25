@@ -53,14 +53,18 @@ export class TagManager {
   /**
    * One event parameter per data layer path. GA4 reads ecommerce parameters
    * from the `ecommerce` object, so `ecommerce.currency` is sent as
-   * `currency`; other paths keep their full name.
+   * `currency`. Other nested paths are named with `_` for each `.`, so
+   * `user.id` is sent as `user_id` while its variable still reads `user.id`:
+   * GA4 parameter names "can only contain alphanumeric characters and
+   * underscores".
+   * @see https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events#limitations
    */
   private preprocessParameters(paths: string[]): Parameter[] {
     return paths.map((path) => ({
       type: 'v',
       key: path.startsWith(ECOMMERCE_PREFIX)
         ? path.slice(ECOMMERCE_PREFIX.length)
-        : path,
+        : path.replace(/\./g, '_'),
       value: path
     }));
   }

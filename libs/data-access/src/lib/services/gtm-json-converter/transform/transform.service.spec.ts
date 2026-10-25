@@ -23,6 +23,8 @@ import { EventSettingsVariableService } from './variables/event-settings-variabl
 import {
   getGa4EventParameterRows,
   measurementPlanToDataLayerSpecs,
+  resolveVariableReference,
+  validateGTMImportReadiness,
   type GTMContainerConfig,
   type MeasurementPlanRow,
   type StrictDataLayerEvent
@@ -383,6 +385,34 @@ describe('TransformService', () => {
       expect(
         getGa4EventParameterRows(loginTags[0], []).map((row) => row.parameter)
       ).toEqual(['method', 'user_type']);
+    });
+
+    it('sends a nested spec key under a GA4-valid name that reads its dotted path', () => {
+      const result = service.convert(
+        buildOptions({
+          gtmConfigGenerator: {
+            ...mockGtmConfig,
+            specs: [{ event: 'login', user: { id: '$user_id' } }]
+          }
+        })
+      );
+      const { tag, variable } = result.containerVersion;
+      const loginTag = tag.find((t) => t.name === 'GA4 event - login');
+      const rows = loginTag ? getGa4EventParameterRows(loginTag, variable) : [];
+
+      expect(rows).toContainEqual({
+        parameter: 'user_id',
+        value: '{{DLV - user.id}}'
+      });
+      expect(resolveVariableReference('{{DLV - user.id}}', variable)).toEqual({
+        kind: 'dataLayer',
+        path: 'user.id'
+      });
+      expect(
+        validateGTMImportReadiness(result).warnings.filter((warning) =>
+          warning.includes('event parameter')
+        )
+      ).toEqual([]);
     });
 
     it('gives every tag and trigger a unique name', () => {
