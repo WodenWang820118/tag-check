@@ -1,224 +1,166 @@
-import { ExampleProjectRepositoryService } from '../src/features/example-project/example-project-repository.service';
 import request from 'supertest';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import {
   FastifyAdapter,
   NestFastifyApplication
 } from '@nestjs/platform-fastify';
-import { AppModule } from '../src/app.module.js';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { join } from 'path';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { testDbConfig } from './test-db.config.js';
-import { DataSource } from 'typeorm';
-import { vi } from 'vitest';
-// TODO: run all endoint tests to ensure they are all working
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { AppModule } from '../src/app.module.js';
+import { ExampleProjectRepositoryService } from '../src/features/example-project/example-project-repository.service';
 
-const rootProjectPath = join(__dirname, '..', '..', '..', 'tag_check_projects');
+/**
+ * Boots the whole app against a temporary, migrated database and project
+ * folder, seeds the example project and reads it back through the HTTP
+ * routes. Runs (POST /datalayer/...) open a browser on the live example
+ * site, so they are left to the desktop and Playwright checks.
+ */
+const SLUG = 'example-project-slug';
+const workDir = mkdtempSync(join(tmpdir(), 'tag-check-e2e-'));
+const rootProjectPath = join(workDir, 'tag_check_projects');
 
-describe('App (e2e)', () => {
+describe('App (e2e)', { timeout: 120000 }, () => {
   let app: NestFastifyApplication;
-  let dataSource: DataSource;
+  let addToCartId: string;
 
-  vi.setConfig({ testTimeout: 120000 });
+  const get = (path: string) => request(app.getHttpServer()).get(path);
 
   beforeAll(async () => {
-    process.env.NODE_ENV = 'test'; // Ensure test environment is set
+    process.env.NODE_ENV = 'test';
+    process.env.DATABASE_PATH = join(workDir, 'data.sqlite3');
+    process.env.ROOT_PROJECT_PATH = rootProjectPath;
 
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule, TypeOrmModule.forRoot(testDbConfig)],
-      providers: []
-    })
-      .overrideProvider(DataSource)
-      .useValue(dataSource)
-      .compile();
-
+    const moduleFixture = await Test.createTestingModule({
+      imports: [AppModule]
+    }).compile();
     app = moduleFixture.createNestApplication(new FastifyAdapter());
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
 
-    dataSource = moduleFixture.get<DataSource>(DataSource);
-    await dataSource.synchronize(true);
+    await moduleFixture.get(ExampleProjectRepositoryService).ensureSeededOnce();
+  }, 120000);
 
-    const exampleProjectRepositoryService =
-      moduleFixture.get<ExampleProjectRepositoryService>(
-        ExampleProjectRepositoryService
-      );
-    await exampleProjectRepositoryService.ensureSeededOnce();
-  });
-
-  // Single afterAll defined at bottom of file; removed duplicate to avoid double-closing the app
-
-  describe('Environment', () => {
-    it('should be the test environment', () => {
-      expect(process.env.NODE_ENV).toBe('test');
-    });
+  afterAll(async () => {
+    await app?.close();
+    rmSync(workDir, { recursive: true, force: true });
   });
 
   describe('Configuration', () => {
-    it('should get all configurations', async () => {
-      const response = await request(app.getHttpServer()).get(
-        '/configurations'
-      );
-
+    it('lists the configurations', async () => {
+      const response = await get('/configurations');
       expect(response.status).toBe(200);
-      expect(response.text).length.greaterThan(0);
+      expect(response.text.length).toBeGreaterThan(0);
     });
-    it('should get the rootProjectPath value', async () => {
-      const response = await request(app.getHttpServer()).get(
-        '/configurations/rootProjectPath'
-      );
+
+    it('reads rootProjectPath from the temporary folder', async () => {
+      const response = await get('/configurations/rootProjectPath');
       expect(response.status).toBe(200);
-      expect(JSON.parse(response.text)).toEqual({ value: rootProjectPath });
+      expect(response.body).toMatchObject({ value: rootProjectPath });
     });
   });
 
-  // describe('Data Layer', () => {
-  //   it('should return dataLayer examination result', async () => {
-  //     // TODO: will need to be refactored
-  //     const response = await request(app.getHttpServer())
-  //       .post(
-  //         '/datalayer/ng_gtm_integration_sample/page_view_54aab8c1-b641-49b9-9ad9-dad029fb1bec'
-  //       )
-  //       .query({ headless: 'true', measurementId: '' })
-  //       .send({
-  //         application: {
-  //           localStorage: {
-  //             data: [
-  //               {
-  //                 key: 'consentPreferences',
-  //                 value: {
-  //                   ad_storage: true,
-  //                   analytics_storage: true,
-  //                   ad_user_data: true,
-  //                   ad_personalization: false
-  //                 }
-  //               },
-  //               {
-  //                 key: 'consent',
-  //                 value: true
-  //               }
-  //             ]
-  //           },
-  //           cookie: {
-  //             data: []
-  //           }
-  //         },
-  //         puppeteerArgs: [
-  //           '--window-size=1440,900',
-  //           '--no-sandbox',
-  //           '--disable-setuid-sandbox',
-  //           '--disable-dev-shm-usage',
-  //           '--disable-accelerated-2d-canvas',
-  //           '--disable-gpu',
-  //           '--incognito'
-  //         ]
-  //       });
-
-  //     expect(response.status).toBe(201);
-  //     expect(response.body).toBeDefined();
-  //   });
-
-  //   // TODO: it should save data in the database after running the previous test
-  //   // so run the query and check if the data is saved in the database
-  // });
-
-  describe('Recordings', () => {
-    it('should get recordings according to the projectSlug', async () => {
-      const response = await request(app.getHttpServer()).get(
-        '/recordings/ng_gtm_integration_sample'
-      );
+  describe('Startup', () => {
+    it('reports the example project as seeded', async () => {
+      const response = await get('/startup/project-seed-readiness');
       expect(response.status).toBe(200);
-      // expect(response).toEqual(0);
+      expect(response.body).toMatchObject({ ready: true });
     });
   });
 
-  // The app's database is not the in-memory one above, so these only show
-  // that the routes are registered; the SQLite specs in src cover saving.
-  describe('Item definitions', () => {
-    it("should get a test's item definition by project and eventId", async () => {
-      const response = await request(app.getHttpServer()).get(
-        '/specs/e2e_no_such_project/add_to_cart_e2e/item-def'
-      );
+  describe('Projects', () => {
+    it('lists the example project', async () => {
+      const response = await get('/projects');
       expect(response.status).toBe(200);
-      expect(response.text).toBe('null');
+      expect(response.body).toEqual(
+        expect.arrayContaining([expect.objectContaining({ projectSlug: SLUG })])
+      );
     });
 
-    it('should not create an item definition for a missing test', async () => {
+    it("reads the project's settings", async () => {
+      const response = await get(`/settings/${SLUG}`);
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({ projectSlug: SLUG });
+    });
+  });
+
+  describe('Reports', () => {
+    it('lists every test as not run yet', async () => {
+      const response = await get(`/reports/${SLUG}`);
+      expect(response.status).toBe(200);
+      const reports: {
+        eventId: string;
+        eventName: string;
+        lastRunAt: unknown;
+      }[] = response.body;
+      expect(reports.length).toBeGreaterThan(0);
+      expect(reports.every((report) => report.lastRunAt === null)).toBe(true);
+      const addToCart = reports.find(
+        (report) => report.eventName === 'add_to_cart'
+      );
+      expect(addToCart).toBeDefined();
+      addToCartId = addToCart?.eventId ?? '';
+    });
+
+    it('lists no file reports before a run', async () => {
+      const response = await get(`/file-reports/${SLUG}`);
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([]);
+    });
+  });
+
+  describe('Recordings and specs', () => {
+    it("lists the project's recordings", async () => {
+      const response = await get(`/recordings/${SLUG}`);
+      expect(response.status).toBe(200);
+      expect(response.body.length).toBeGreaterThan(0);
+    });
+
+    it("reads a test's recording", async () => {
+      const response = await get(`/recordings/${SLUG}/${addToCartId}`);
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({ title: 'add_to_cart' });
+    });
+
+    it("lists the project's specs", async () => {
+      const response = await get(`/specs/${SLUG}`);
+      expect(response.status).toBe(200);
+      expect(response.body.projectSlug).toBe(SLUG);
+      expect(response.body.specs.length).toBeGreaterThan(0);
+    });
+
+    it("reads a test's spec", async () => {
+      const response = await get(`/specs/${SLUG}/${addToCartId}`);
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({ eventName: 'add_to_cart' });
+    });
+
+    it("reads a test's item definition", async () => {
+      const response = await get(`/specs/${SLUG}/${addToCartId}/item-def`);
+      expect(response.status).toBe(200);
+      expect(response.body).toBeTruthy();
+    });
+
+    it('does not create an item definition for a missing test', async () => {
       const response = await request(app.getHttpServer())
-        .put('/specs/e2e_no_such_project/add_to_cart_e2e/item-def')
+        .put(`/specs/${SLUG}/no_such_test/item-def`)
         .send({ fullItemDef: { item_name: 'Scarf' } });
       expect(response.status).toBe(404);
       expect(response.body).toMatchObject({ message: 'Test not found' });
     });
   });
 
-  describe('File Reports', () => {
-    it('should get all file reports according to the projectSlug', async () => {
-      const response = await request(app.getHttpServer()).get(
-        '/file-reports/ng_gtm_integration_sample'
+  describe('Media', () => {
+    // The route answers an empty body rather than 404 when there is no file.
+    it('serves an empty recording before a run', async () => {
+      const response = await get(`/videos/${SLUG}/${addToCartId}`).responseType(
+        'arraybuffer'
       );
-
       expect(response.status).toBe(200);
-      expect(response.body).toBeDefined();
+      expect(response.headers['content-type']).toBe('video/webm');
+      expect(Buffer.isBuffer(response.body)).toBe(true);
+      expect(response.body).toHaveLength(0);
     });
-  });
-
-  // describe('Project', () => {
-  //   it('should get all projects metadata', async () => {
-  //     const response = await request(app.getHttpServer()).get(
-  //       '/projects/ng_gtm_integration_sample'
-  //     );
-  //     expect(response.status).toBe(200);
-  //     expect(response.body).toBeDefined();
-  //   });
-  // });
-
-  // describe('Reports', () => {
-  //   it('should get all reports for a project', async () => {
-  //     //TODO: implementation
-  //     const response = await request(app.getHttpServer()).get(
-  //       '/reports/ng_gtm_integration_sample'
-  //     );
-  //     console.log(response);
-  //     expect(response.status).toBe(200);
-  //     expect(response.body).toBeDefined();
-  //   });
-  // });
-
-  // describe('Settings', () => {
-  //   it('should get project settings according to the projectSlug', async () => {
-  //     const response = await request(app.getHttpServer()).get(
-  //       '/settings/ng_gtm_integration_sample'
-  //     );
-  //     expect(response.status).toBe(200);
-  //     expect(response.body).toBeDefined();
-  //   });
-  // });
-
-  // describe('Specs', () => {
-  //   it('should get all specs according to the projectSlug', async () => {
-  //     const response = await request(app.getHttpServer()).get(
-  //       '/specs/ng_gtm_integration_sample'
-  //     );
-  //     expect(response.status).toBe(200);
-  //     expect(response.body).toBeDefined();
-  //   });
-  // });
-
-  // describe('Videos', () => {
-  //   it('should get video according to the projectSlug and eventId', async () => {
-  //     const response = await request(app.getHttpServer()).get(
-  //       '/videos/ng_gtm_integration_sample/page_view_54aab8c1-b641-49b9-9ad9-dad029fb1bec'
-  //     );
-  //     expect(response.status).toBe(200);
-  //     expect(response.body).toBeDefined();
-  //   });
-  // });
-
-  afterAll(async () => {
-    if (app) {
-      await app.close();
-    }
   });
 });

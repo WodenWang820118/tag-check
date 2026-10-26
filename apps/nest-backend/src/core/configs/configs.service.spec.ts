@@ -44,6 +44,20 @@ describe('ConfigsService', () => {
       expect(result).toContain('data.sqlite3');
     });
 
+    it('keeps a preset DATABASE_PATH when NODE_ENV=test', () => {
+      process.env.NODE_ENV = 'test';
+      process.env.DATABASE_PATH = '/tmp/e2e/data.sqlite3';
+      expect(svc.getDatabasePath()).toBe('/tmp/e2e/data.sqlite3');
+    });
+
+    it('defaults to the workspace .db folder when NODE_ENV=test', () => {
+      process.env.NODE_ENV = 'test';
+      delete process.env.DATABASE_PATH;
+      const result = svc.getDatabasePath();
+      expect(result).toContain('.db');
+      expect(result).toContain('data.sqlite3');
+    });
+
     it('falls back to default path when NODE_ENV is unset', () => {
       delete process.env.NODE_ENV;
       const result = svc.getDatabasePath();
@@ -56,6 +70,12 @@ describe('ConfigsService', () => {
       process.env.NODE_ENV = 'prod';
       process.env.ROOT_PROJECT_PATH = '/custom/projects';
       expect(svc.getRootProjectPath()).toBe('/custom/projects');
+    });
+
+    it('keeps a preset ROOT_PROJECT_PATH when NODE_ENV=test', () => {
+      process.env.NODE_ENV = 'test';
+      process.env.ROOT_PROJECT_PATH = '/tmp/e2e/projects';
+      expect(svc.getRootProjectPath()).toBe('/tmp/e2e/projects');
     });
 
     it('returns the default project path when NODE_ENV=dev', () => {
