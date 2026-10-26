@@ -28,9 +28,10 @@ export class ChangeHandler implements ActionHandler {
     private readonly actionUtilsService: ActionUtilsService
   ) {}
 
-  // TODO: may need to follow the click handler logic
-  // to switch between page service and evaluate service under different domains
-
+  // Unlike ClickHandler, this needs no GTM Preview switch: typing and
+  // selecting reach the site's tab while Tag Assistant's tab is in front
+  // (checked headless and headful), and ChangeStrategyService already falls
+  // back from page.type() to an element handle.
   async handle(
     page: Page,
     projectName: string,
