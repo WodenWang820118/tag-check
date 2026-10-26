@@ -49,9 +49,7 @@ import { ReportTabViewModel, STATUS_BADGES } from '../report-detail.contracts';
             <mat-card-title class="truncate">
               {{ viewModel().title }}
             </mat-card-title>
-            <mat-card-subtitle
-              class="flex flex-wrap items-center gap-2 text-sm"
-            >
+            <mat-card-subtitle class="flex flex-wrap items-center gap-2">
               @if (viewModel().status === 'notRun') {
                 <span class="text-black/70">Not run yet</span>
               } @else {
@@ -166,7 +164,10 @@ import { ReportTabViewModel, STATUS_BADGES } from '../report-detail.contracts';
             <ng-content select="[report-detail-content]"></ng-content>
 
             <section class="mt-5" aria-labelledby="result-message-label">
-              <div id="result-message-label" class="text-sm text-black/60">
+              <div
+                id="result-message-label"
+                class="text-[1.4rem] text-black/60"
+              >
                 Message
               </div>
               <p

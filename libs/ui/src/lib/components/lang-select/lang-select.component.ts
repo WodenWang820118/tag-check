@@ -6,9 +6,7 @@ import {
   PLATFORM_ID,
   ChangeDetectionStrategy
 } from '@angular/core';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
 import {
   buildLocalizedPath,
   getLocaleConfig,
@@ -20,34 +18,16 @@ import {
 /**
  * Language picker of the public sites. Each locale is a separate build, so
  * choosing one loads the same route under the other locale's URL prefix.
+ *
+ * A native select rather than mat-select: the picker sits in every page's
+ * toolbar, and mat-select brought the form field, overlay and forms
+ * packages (about 200 kB) into the sites' initial bundle.
  */
 @Component({
   selector: 'lib-lang-select',
   standalone: true,
-  imports: [MatFormFieldModule, MatSelectModule, MatIconModule],
-  template: `
-    <mat-form-field
-      appearance="outline"
-      color="primary"
-      class="density-compact"
-    >
-      <mat-select
-        [value]="selectedLocale"
-        (selectionChange)="changeLocale($event.value)"
-        aria-label="Select language"
-      >
-        <mat-select-trigger>
-          <mat-icon class="language-icon">language</mat-icon>
-          {{ selectedLangLabel }}
-        </mat-select-trigger>
-        @for (lang of languages; track lang.code) {
-          <mat-option [value]="lang.code">
-            {{ lang.label }}
-          </mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-  `,
+  imports: [MatIconModule],
+  templateUrl: './lang-select.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./lang-select.component.scss']
 })
@@ -65,6 +45,14 @@ export class LangSelectComponent {
 
   get selectedLangLabel(): string {
     return getLocaleConfig(this.selectedLocale).label;
+  }
+
+  onSelect(event: Event): void {
+    const value = (event.target as HTMLSelectElement | null)?.value;
+    const next = this.languages.find((lang) => lang.code === value);
+    if (next) {
+      this.changeLocale(next.code);
+    }
   }
 
   changeLocale(nextLocale: SupportedLocaleCode): void {

@@ -120,6 +120,15 @@ module that provides any other: a second provider creates a second instance.
   Functions passed to `page.evaluate` or `evaluateOnNewDocument` are compiled
   with swc helpers that do not exist in the page, so pass source strings.
   Raising the target breaks TypeORM entity initialization.
+- The Angular apps set `html { font-size: 62.5% }` (1rem = 10px,
+  `libs/shared-styles/src/styles/_global.scss`). Tailwind's rem scale
+  renders at 62.5% of its documented size, so `text-sm` is 8.75px. Size
+  text with rem values on the 10px scale, such as `text-[1.4rem]` for 14px.
+- ng-frontend and ng-product-doc load `prebuilt-theme-base.scss`, not a
+  Material prebuilt theme: `index.scss` already emits every component
+  theme, and the base adds only the app background, elevation classes and
+  typography hierarchy. Define a palette with one `mat.m2-define-palette`
+  call: wrapping a defined palette again drops its contrast colors.
 - Angular 22 does not sanitize `img`, `source` or `video` `src`. Bind `blob:`
   URLs as plain strings; a `SafeUrl` from `bypassSecurityTrustUrl` is rendered
   as the text "SafeValue must use [property]=binding".
@@ -134,16 +143,17 @@ module that provides any other: a second provider creates a second instance.
   `.github/workflows/vercel-previews.yaml`, which deploys the sites whose Nx
   project is affected. Register a new Vercel site in
   `tools/scripts/vercel/preview-targets`.
-- ng-tag-build's initial bundle is about 878 kB against its 1 MB error
+- ng-tag-build's initial bundle is about 686 kB against its 750 kB warning
   budget, and `libs/shared-styles` counts against it. Its global styles
   (`tag-build-indigo-pink.scss`, `tag-build.scss`) theme only the Material
   components it renders: add a component's theme to
   `styles/_tag-build-components.scss` when the site starts rendering it.
   The bundler splits per file, so a Material, CDK or `@angular/forms` file
   the shell (toolbar, footer) uses carries everything the lazy pages use
-  from it into the initial bundle. A dynamic import of a CommonJS package
-  (such as exceljs) still adds the bundler's interop helpers to the initial
-  bundle. Prefer `mat.*-overrides` mixins with only the tokens you change
+  from it into the initial bundle. The toolbar's language picker is a
+  native `<select>` for that reason: `mat-select` added about 200 kB. A
+  dynamic import of a CommonJS package (such as exceljs) still adds the
+  bundler's interop helpers to the initial bundle. Prefer `mat.*-overrides` mixins with only the tokens you change
   over `mat.*-color` / `mat.*-theme`.
 - The pre-commit hook runs `nx affected` tests three at a time. At six,
   vitest workers ran out of memory (`DataCloneError: ... out of memory`) and

@@ -2,7 +2,7 @@
   <div class="max-w-4xl mx-auto">
     <mat-card class="mb-6" data-testid="tag-snapshot">
       <mat-card-header>
-        <mat-card-title class="text-base font-medium text-gray-800"
+        <mat-card-title class="font-medium text-gray-800"
           >Tag Configuration</mat-card-title
         >
       </mat-card-header>
@@ -10,7 +10,7 @@
         <mat-divider></mat-divider>
 
         <div class="flex flex-col py-4 gap-2 md:gap-8">
-          <div class="text-lg text-gray-600 w-full md:w-full">
+          <div class="text-[1.4rem] text-gray-600 w-full md:w-full">
             Measurement ID
             <div class="mt-2">
               <code
@@ -20,7 +20,7 @@
                 >{{ measurementId$() }}</code
               >
               @if (measurementId$() !== measurementIdReference$()) {
-                <div class="mt-1 text-sm text-gray-600">
+                <div class="mt-1 text-[1.2rem] text-gray-600">
                   From {{ measurementIdReference$() }}
                 </div>
               }
@@ -29,7 +29,7 @@
         </div>
 
         <div class="flex flex-col py-4 gap-2 md:gap-8">
-          <div class="text-lg text-gray-600 w-full md:w-full">
+          <div class="text-[1.4rem] text-gray-600 w-full md:w-full">
             Event Name
             <div class="mt-2">
               <code
@@ -42,9 +42,7 @@
         </div>
 
         <div class="py-4">
-          <h3 class="text-sm font-medium text-gray-800 mb-4">
-            Event Parameters
-          </h3>
+          <h3 class="font-medium text-gray-800 mb-4">Event Parameters</h3>
           <table
             mat-table
             [dataSource]="eventParameters$()"
@@ -54,7 +52,7 @@
               <th
                 mat-header-cell
                 *matHeaderCellDef
-                class="!text-lg !text-gray-700 !font-semibold"
+                class="!text-[1.4rem] !text-gray-700 !font-semibold"
               >
                 Event Parameter
               </th>
@@ -70,7 +68,7 @@
               <th
                 mat-header-cell
                 *matHeaderCellDef
-                class="!text-lg !text-gray-700 !font-semibold"
+                class="!text-[1.4rem] !text-gray-700 !font-semibold"
               >
                 Value
               </th>
@@ -81,7 +79,7 @@
                 >
                 @if (element.resolved) {
                   <div
-                    class="mt-1 px-3 text-sm text-gray-600"
+                    class="mt-1 px-3 text-[1.2rem] text-gray-600"
                     [attr.data-testid]="
                       'tag-parameter-source-' + element.parameter
                     "
@@ -98,12 +96,10 @@
         </div>
 
         <div class="py-4">
-          <h3 class="text-sm font-medium text-gray-800 mb-4">
-            Advanced Settings
-          </h3>
+          <h3 class="font-medium text-gray-800 mb-4">Advanced Settings</h3>
           <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-600">Tag firing options</div>
-            <div class="text-sm text-gray-900">{{ firingOption$() }}</div>
+            <div class="text-[1.4rem] text-gray-600">Tag firing options</div>
+            <div class="text-[1.4rem] text-gray-900">{{ firingOption$() }}</div>
           </div>
         </div>
       </mat-card-content>
@@ -111,7 +107,7 @@
 
     <mat-card>
       <mat-card-header>
-        <mat-card-title class="text-base font-medium text-gray-800"
+        <mat-card-title class="font-medium text-gray-800"
           >Triggering</mat-card-title
         >
       </mat-card-header>
@@ -122,10 +118,10 @@
         >
           <mat-icon matChipAvatar class="!text-gray-600">data_object</mat-icon>
           <div class="flex flex-col ml-2">
-            <div class="text-sm text-gray-900">
+            <div class="text-[1.4rem] text-gray-900">
               {{ triggerName$() }}
             </div>
-            <div class="text-sm text-gray-600">{{ triggerType$() }}</div>
+            <div class="text-[1.4rem] text-gray-600">{{ triggerType$() }}</div>
           </div>
         </mat-chip>
       </mat-card-content>

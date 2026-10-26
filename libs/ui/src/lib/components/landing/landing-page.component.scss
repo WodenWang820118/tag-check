@@ -2,6 +2,8 @@
   display: block;
 }
 
+// Sizes are in rem with the apps' 10px root (html { font-size: 62.5% }).
+
 .landing {
   --landing-ink: #17211b;
   --landing-muted: #5d6a61;
@@ -77,7 +79,7 @@ section {
 
 .eyebrow {
   color: var(--landing-accent);
-  font-size: 0.78rem;
+  font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: 0.18em;
   margin: 0;
@@ -105,7 +107,7 @@ h2 {
 }
 
 h3 {
-  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  font-size: clamp(1.6rem, 2vw, 1.8rem);
   letter-spacing: -0.02em;
 }
 
@@ -114,7 +116,7 @@ h3 {
 .benefits p,
 .learn p {
   color: var(--landing-muted);
-  font-size: clamp(1rem, 1.7vw, 1.2rem);
+  font-size: clamp(1.5rem, 1.7vw, 1.7rem);
   line-height: 1.75;
   max-width: 68ch;
 }
