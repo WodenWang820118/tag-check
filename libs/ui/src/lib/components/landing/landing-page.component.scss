@@ -1,21 +1,15 @@
+// Sizes are in rem with the apps' 10px root (html { font-size: 62.5% }).
+// Layout (grid, flex, gaps, the 860px breakpoint) is in Tailwind utilities
+// in the template; this sheet keeps the look, within the 2 kB budget for a
+// component stylesheet.
+
 :host {
   display: block;
 }
 
-// Sizes are in rem with the apps' 10px root (html { font-size: 62.5% }).
-
 .landing {
-  --landing-ink: #17211b;
-  --landing-muted: #5d6a61;
-  --landing-line: rgba(23, 33, 27, 0.13);
-  --landing-card: rgba(255, 255, 250, 0.82);
-  --landing-accent: #0f6f4e;
-  --landing-accent-strong: #08442f;
-  color: var(--landing-ink);
-  isolation: isolate;
-  overflow: hidden;
+  color: #17211b;
   padding: clamp(1rem, 3vw, 2rem);
-  position: relative;
 }
 
 .landing::before,
@@ -44,45 +38,31 @@
   width: 16rem;
 }
 
-section {
-  margin-inline: auto;
-  max-width: 1180px;
-}
-
-.hero,
-.workflow,
-.benefits,
-.learn {
+.panel {
   background:
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 250, 0.94),
-      rgba(246, 250, 240, 0.8)
-    ),
-    radial-gradient(
-      circle at top right,
-      rgba(15, 111, 78, 0.12),
-      transparent 38rem
-    );
-  border: 1px solid var(--landing-line);
+    linear-gradient(135deg, #fffffaf0, #f6faf0cc),
+    radial-gradient(circle at top right, #0f6f4e1f, transparent 38rem);
+  border: 1px solid #17211b21;
   border-radius: 2rem;
-  box-shadow: 0 24px 80px rgba(23, 33, 27, 0.08);
+  box-shadow: 0 24px 80px #17211b14;
 }
 
 .hero {
-  display: grid;
-  gap: 1.5rem;
   min-height: min(680px, 78dvh);
   padding: clamp(2rem, 7vw, 6rem);
-  place-content: center;
+}
+
+.band {
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  margin-top: clamp(1rem, 3vw, 2rem);
+  padding: clamp(1.5rem, 5vw, 4rem);
 }
 
 .eyebrow {
-  color: var(--landing-accent);
+  color: #0f6f4e;
   font-size: 1.2rem;
   font-weight: 800;
   letter-spacing: 0.18em;
-  margin: 0;
   text-transform: uppercase;
 }
 
@@ -97,7 +77,6 @@ h1 {
   font-size: clamp(2.6rem, 7vw, 6.7rem);
   letter-spacing: -0.08em;
   line-height: 0.92;
-  max-width: 12ch;
 }
 
 h2 {
@@ -111,25 +90,14 @@ h3 {
   letter-spacing: -0.02em;
 }
 
-.hero__copy,
-.workflow p,
-.benefits p,
-.learn p {
-  color: var(--landing-muted);
+.copy {
+  color: #5d6a61;
   font-size: clamp(1.5rem, 1.7vw, 1.7rem);
   line-height: 1.75;
   max-width: 68ch;
 }
 
-.hero__actions,
-.learn__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.85rem;
-}
-
-.button,
-.learn__links a {
+.button {
   align-items: center;
   border-radius: 999px;
   display: inline-flex;
@@ -138,117 +106,43 @@ h3 {
   min-height: 3rem;
   padding: 0.85rem 1.2rem;
   text-decoration: none;
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease;
 }
 
-.button:hover,
-.learn__links a:hover {
-  box-shadow: 0 14px 32px rgba(8, 68, 47, 0.16);
-  transform: translateY(-2px);
+.button:hover {
+  box-shadow: 0 14px 32px #08442f29;
 }
 
 .button--primary {
-  background: var(--landing-accent-strong);
+  background: #08442f;
   color: #fffdf2;
 }
 
-.button--ghost,
-.learn__links a {
-  border: 1px solid var(--landing-line);
-  color: var(--landing-accent-strong);
+.button--ghost {
+  border: 1px solid #17211b21;
+  color: #08442f;
 }
 
-.proof,
-.cards,
-.steps {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+// Without a reduced-motion preference only: the hover lift and its easing.
+@media (prefers-reduced-motion: no-preference) {
+  .button {
+    transition:
+      transform 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .button:hover {
+    transform: translateY(-2px);
+  }
 }
 
-.proof {
-  margin: 1rem 0 0;
-}
-
-.proof div,
-.steps article,
-.cards article {
-  background: var(--landing-card);
-  border: 1px solid var(--landing-line);
+.tile {
+  background: #fffffad1;
+  border: 1px solid #17211b21;
   border-radius: 1.35rem;
   padding: 1.25rem;
 }
 
-.proof dt,
-.steps span {
-  color: var(--landing-accent);
+.accent {
+  color: #0f6f4e;
   font-weight: 900;
-}
-
-.proof dd {
-  color: var(--landing-muted);
-  margin: 0.25rem 0 0;
-}
-
-.workflow,
-.benefits,
-.learn {
-  display: grid;
-  gap: clamp(1.5rem, 3vw, 2.5rem);
-  margin-top: clamp(1rem, 3vw, 2rem);
-  padding: clamp(1.5rem, 5vw, 4rem);
-}
-
-.workflow {
-  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
-}
-
-.steps article {
-  display: grid;
-  gap: 0.65rem;
-}
-
-.benefits {
-  text-align: center;
-}
-
-.benefits p {
-  margin-inline: auto;
-}
-
-.learn {
-  align-items: center;
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-@media (max-width: 860px) {
-  .proof,
-  .cards,
-  .steps,
-  .workflow,
-  .learn {
-    grid-template-columns: 1fr;
-  }
-
-  h1 {
-    max-width: 100%;
-  }
-
-  .learn {
-    align-items: start;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .button,
-  .learn__links a {
-    transition: none;
-  }
-
-  .button:hover,
-  .learn__links a:hover {
-    transform: none;
-  }
 }

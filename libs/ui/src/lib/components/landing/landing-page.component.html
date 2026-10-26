@@ -1,17 +1,24 @@
-<main class="landing">
-  <section class="hero" aria-labelledby="landing-title">
+<main class="landing relative isolate overflow-hidden">
+  <section
+    class="panel hero mx-auto grid max-w-[1180px] place-content-center gap-6"
+    aria-labelledby="landing-title"
+  >
     <p class="eyebrow" i18n="@@landing.hero.eyebrow">
       GTM JSON builder for marketing teams
     </p>
-    <h1 id="landing-title" i18n="@@landing.hero.title">
+    <h1
+      id="landing-title"
+      class="max-w-[12ch] [@media(max-width:860px)]:max-w-full"
+      i18n="@@landing.hero.title"
+    >
       Build cleaner GA4 tag payloads without spreadsheet glue or server setup.
     </h1>
-    <p class="hero__copy" i18n="@@landing.hero.description">
+    <p class="copy" i18n="@@landing.hero.description">
       Tag Build turns event requirements into Google Tag Manager-ready JSON so
       SEO specialists and digital marketers can move faster with fewer
       implementation mistakes.
     </p>
-    <div class="hero__actions" aria-label="Primary actions">
+    <div class="flex flex-wrap gap-[0.85rem]" aria-label="Primary actions">
       <a class="button button--primary" [href]="primaryLink().href">
         {{ primaryLink().label }}
       </a>
@@ -23,54 +30,71 @@
         See how it works
       </a>
     </div>
-    <dl class="proof">
-      <div>
-        <dt i18n="@@landing.proof.agency">Agency friendly</dt>
-        <dd i18n="@@landing.proof.agency.detail">No backend required</dd>
+    <dl
+      class="mt-4 mb-0 grid grid-cols-3 gap-4 [@media(max-width:860px)]:grid-cols-1"
+    >
+      <div class="tile">
+        <dt class="accent" i18n="@@landing.proof.agency">Agency friendly</dt>
+        <dd
+          class="m-0 mt-1 text-[#5d6a61]"
+          i18n="@@landing.proof.agency.detail"
+        >
+          No backend required
+        </dd>
       </div>
-      <div>
-        <dt i18n="@@landing.proof.ga4">GA4 aligned</dt>
-        <dd i18n="@@landing.proof.ga4.detail">Recommended event shape</dd>
+      <div class="tile">
+        <dt class="accent" i18n="@@landing.proof.ga4">GA4 aligned</dt>
+        <dd class="m-0 mt-1 text-[#5d6a61]" i18n="@@landing.proof.ga4.detail">
+          Recommended event shape
+        </dd>
       </div>
-      <div>
-        <dt i18n="@@landing.proof.static">Static-first</dt>
-        <dd i18n="@@landing.proof.static.detail">Fast multilingual pages</dd>
+      <div class="tile">
+        <dt class="accent" i18n="@@landing.proof.static">Static-first</dt>
+        <dd
+          class="m-0 mt-1 text-[#5d6a61]"
+          i18n="@@landing.proof.static.detail"
+        >
+          Fast multilingual pages
+        </dd>
       </div>
     </dl>
   </section>
 
-  <section class="workflow" aria-labelledby="workflow-title">
+  <section
+    class="panel band mx-auto grid max-w-[1180px] grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)] [@media(max-width:860px)]:grid-cols-1"
+    aria-labelledby="workflow-title"
+  >
     <div>
-      <p class="eyebrow" i18n="@@landing.workflow.eyebrow">The workflow</p>
+      <p class="eyebrow copy" i18n="@@landing.workflow.eyebrow">The workflow</p>
       <h2 id="workflow-title" i18n="@@landing.workflow.title">
         From campaign brief to GTM-ready JSON in three calm steps.
       </h2>
-      <p i18n="@@landing.workflow.description">
+      <p class="copy" i18n="@@landing.workflow.description">
         Keep the thinking in plain marketing language, then let the builder
         format the payload for implementation and review.
       </p>
     </div>
-    <div class="steps">
-      <article>
-        <span>01</span>
+    <div class="grid grid-cols-3 gap-4 [@media(max-width:860px)]:grid-cols-1">
+      <article class="tile grid gap-[0.65rem]">
+        <span class="accent">01</span>
         <h3 i18n="@@landing.step.upload.title">Paste the event brief</h3>
-        <p i18n="@@landing.step.upload.description">
+        <p class="copy" i18n="@@landing.step.upload.description">
           Start with the event name, commerce fields, and tracking variables
           your team already uses.
         </p>
       </article>
-      <article>
-        <span>02</span>
+      <article class="tile grid gap-[0.65rem]">
+        <span class="accent">02</span>
         <h3 i18n="@@landing.step.tune.title">Tune the payload shape</h3>
-        <p i18n="@@landing.step.tune.description">
+        <p class="copy" i18n="@@landing.step.tune.description">
           Match GA4's recommended event structure while keeping
           campaign-specific fields visible.
         </p>
       </article>
-      <article>
-        <span>03</span>
+      <article class="tile grid gap-[0.65rem]">
+        <span class="accent">03</span>
         <h3 i18n="@@landing.step.export.title">Export with confidence</h3>
-        <p i18n="@@landing.step.export.description">
+        <p class="copy" i18n="@@landing.step.export.description">
           Copy structured JSON that is easier to review, hand off, and validate
           inside GTM.
         </p>
@@ -78,29 +102,37 @@
     </div>
   </section>
 
-  <section class="benefits" aria-labelledby="benefits-title">
-    <p class="eyebrow" i18n="@@landing.benefits.eyebrow">Why it helps</p>
+  <section
+    class="panel band mx-auto grid max-w-[1180px] text-center"
+    aria-labelledby="benefits-title"
+  >
+    <p class="eyebrow copy mx-auto!" i18n="@@landing.benefits.eyebrow">
+      Why it helps
+    </p>
     <h2 id="benefits-title" i18n="@@landing.benefits.title">
       Less ceremony, more trustworthy tag work.
     </h2>
-    <div class="cards">
-      <article>
+    <div class="grid grid-cols-3 gap-4 [@media(max-width:860px)]:grid-cols-1">
+      <article class="tile">
         <h3 i18n="@@landing.benefit.seo.title">Built for SEO handoffs</h3>
-        <p i18n="@@landing.benefit.seo.description">
+        <p class="copy mx-auto!" i18n="@@landing.benefit.seo.description">
           Turn analytics requirements into implementation-ready JSON without
           asking every stakeholder to learn GTM internals.
         </p>
       </article>
-      <article>
+      <article class="tile">
         <h3 i18n="@@landing.benefit.agency.title">Useful without GCP</h3>
-        <p i18n="@@landing.benefit.agency.description">
+        <p class="copy mx-auto!" i18n="@@landing.benefit.agency.description">
           Teams that cannot run Google Cloud sync jobs still get a structured,
           repeatable build flow.
         </p>
       </article>
-      <article>
+      <article class="tile">
         <h3 i18n="@@landing.benefit.validation.title">Ready for validation</h3>
-        <p i18n="@@landing.benefit.validation.description">
+        <p
+          class="copy mx-auto!"
+          i18n="@@landing.benefit.validation.description"
+        >
           The same data shape supports future validation work in Tag Check, so
           build and QA stay connected.
         </p>
@@ -108,20 +140,32 @@
     </div>
   </section>
 
-  <section class="learn" aria-labelledby="learn-title">
+  <section
+    class="panel band mx-auto grid max-w-[1180px] grid-cols-[minmax(0,1fr)_auto] items-center [@media(max-width:860px)]:grid-cols-1 [@media(max-width:860px)]:[align-items:start]"
+    aria-labelledby="learn-title"
+  >
     <div>
-      <p class="eyebrow" i18n="@@landing.learn.eyebrow">Go deeper</p>
+      <p class="eyebrow copy" i18n="@@landing.learn.eyebrow">Go deeper</p>
       <h2 id="learn-title" i18n="@@landing.learn.title">
         Learn the system before opening the editor.
       </h2>
-      <p i18n="@@landing.learn.description">
+      <p class="copy" i18n="@@landing.learn.description">
         Review the architecture and objectives if you need a lightweight brief
         for teammates before creating payloads.
       </p>
     </div>
-    <div class="learn__links">
-      <a [href]="aboutPath" i18n="@@landing.link.about">Read about Tag Build</a>
-      <a [href]="objectivesPath" i18n="@@landing.link.objectives">
+    <div class="flex flex-wrap gap-[0.85rem]">
+      <a
+        class="button button--ghost"
+        [href]="aboutPath"
+        i18n="@@landing.link.about"
+        >Read about Tag Build</a
+      >
+      <a
+        class="button button--ghost"
+        [href]="objectivesPath"
+        i18n="@@landing.link.objectives"
+      >
         View objectives
       </a>
     </div>

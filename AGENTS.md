@@ -124,6 +124,9 @@ module that provides any other: a second provider creates a second instance.
   `libs/shared-styles/src/styles/_global.scss`). Tailwind's rem scale
   renders at 62.5% of its documented size, so `text-sm` is 8.75px. Size
   text with rem values on the 10px scale, such as `text-[1.4rem]` for 14px.
+  `libs/shared-styles` rules are unlayered and beat Tailwind's
+  `@layer utilities` (paragraph margins, for one); add the `!` suffix
+  (`mx-auto!`) where a utility must win.
 - ng-frontend and ng-product-doc load `prebuilt-theme-base.scss`, not a
   Material prebuilt theme: `index.scss` already emits every component
   theme, and the base adds only the app background, elevation classes and
