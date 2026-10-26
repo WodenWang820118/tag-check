@@ -19,6 +19,8 @@ export type TagConfig = {
   fingerprint?: string;
   // Present on most tags, but not strictly required (e.g., some config tags)
   firingTriggerId?: string[];
+  // GTM writes `paused: true` on paused tags and leaves it out otherwise.
+  paused?: boolean;
   tagFiringOption?: string;
   // Optional additional metadata fields seen in exports
   notes?: string;
