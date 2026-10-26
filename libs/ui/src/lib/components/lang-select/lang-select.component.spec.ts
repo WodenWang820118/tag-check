@@ -37,6 +37,12 @@ describe('LangSelectComponent', () => {
     select.dispatchEvent(new Event('change'));
 
     expect(changeLocale).toHaveBeenCalledWith('zh-Hant');
+
+    changeLocale.mockClear();
+    fixture.componentInstance.onSelect({
+      target: { value: 'xx' }
+    } as unknown as Event);
+    expect(changeLocale).not.toHaveBeenCalled();
   });
 
   it('redirects to the same logical route when changing locales in the browser', () => {

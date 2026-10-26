@@ -27,26 +27,7 @@ import {
   selector: 'lib-lang-select',
   standalone: true,
   imports: [MatIconModule],
-  template: `
-    <label class="lang-select">
-      <mat-icon class="lang-select__icon" aria-hidden="true">language</mat-icon>
-      <select
-        class="lang-select__control"
-        aria-label="Select language"
-        data-testid="lang-select"
-        (change)="onSelect($event)"
-      >
-        @for (lang of languages; track lang.code) {
-          <option [value]="lang.code" [selected]="lang.code === selectedLocale">
-            {{ lang.label }}
-          </option>
-        }
-      </select>
-      <mat-icon class="lang-select__arrow" aria-hidden="true"
-        >arrow_drop_down</mat-icon
-      >
-    </label>
-  `,
+  templateUrl: './lang-select.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./lang-select.component.scss']
 })
