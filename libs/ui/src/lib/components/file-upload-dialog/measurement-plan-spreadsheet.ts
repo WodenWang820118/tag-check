@@ -1,4 +1,7 @@
-import { getGa4MeasurementPlanTemplateRows } from '@utils';
+import {
+  getGa4MeasurementPlanTemplateRows,
+  type ExtractedMeasurementPlanRow
+} from '@utils';
 
 /**
  * The measurement plan travels as CSV: Excel and Google Sheets open and save it
@@ -13,6 +16,14 @@ function toCsvCell(value: string): string {
   return /[",;\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
 }
 
+/** The file name of a plan extracted from a container. */
+export const EXTRACTED_MEASUREMENT_PLAN_FILE_NAME =
+  'ga4-measurement-plan-from-gtm.csv';
+
+function toCsv(table: readonly string[][]): string {
+  return table.map((cells) => cells.map(toCsvCell).join(',')).join('\r\n');
+}
+
 /** The template: the plan header and GA4's recommended events, one per row. */
 export function buildMeasurementPlanTemplateCsv(): string {
   const rows = getGa4MeasurementPlanTemplateRows().map((row) => [
@@ -20,24 +31,47 @@ export function buildMeasurementPlanTemplateCsv(): string {
     row.eventParameters.join(', '),
     row.itemParameters.join(', ')
   ]);
-  return [PLAN_HEADER, ...rows]
-    .map((cells) => cells.map(toCsvCell).join(','))
-    .join('\r\n');
+  return toCsv([PLAN_HEADER, ...rows]);
+}
+
+/**
+ * A plan extracted from a container, with a `notes` column for what to check.
+ * The plan upload reads only the three plan columns, so the file can be
+ * uploaded again as it is.
+ */
+export function buildExtractedMeasurementPlanCsv(
+  rows: readonly ExtractedMeasurementPlanRow[]
+): string {
+  return toCsv([
+    [...PLAN_HEADER, 'notes'],
+    ...rows.map((row) => [
+      row.eventName,
+      row.eventParameters.join(', '),
+      row.itemParameters.join(', '),
+      row.notes.join(' ')
+    ])
+  ]);
+}
+
+/** Downloads CSV text as a UTF-8 file. */
+export function downloadCsv(csv: string, fileName: string): void {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.click();
+  URL.revokeObjectURL(url);
 }
 
 /**
  * Downloads the template as a UTF-8 CSV file.
  */
 export function downloadMeasurementPlanTemplate(): void {
-  const blob = new Blob([buildMeasurementPlanTemplateCsv()], {
-    type: 'text/csv;charset=utf-8'
-  });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = MEASUREMENT_PLAN_TEMPLATE_FILE_NAME;
-  anchor.click();
-  URL.revokeObjectURL(url);
+  downloadCsv(
+    buildMeasurementPlanTemplateCsv(),
+    MEASUREMENT_PLAN_TEMPLATE_FILE_NAME
+  );
 }
 
 function detectDelimiter(text: string): string {

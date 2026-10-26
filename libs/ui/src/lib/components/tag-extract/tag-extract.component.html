@@ -1,0 +1,134 @@
+<section class="flex flex-col gap-4" aria-label="Tag Extract workspace">
+  <p class="m-0 text-[1.5rem] text-gray-700 dark:text-gray-300">
+    Upload a container exported from Tag Manager (Admin › Export container). Its
+    GA4 event tags become a measurement plan you can download, edit and upload
+    to Tag Build again.
+  </p>
+
+  <div class="flex flex-wrap items-center gap-3">
+    <button
+      type="button"
+      mat-flat-button
+      (click)="fileInput.click()"
+      data-testid="tagextract-upload"
+    >
+      <mat-icon>cloud_upload</mat-icon>
+      Upload container export
+    </button>
+    <input
+      hidden
+      #fileInput
+      type="file"
+      accept=".json"
+      (change)="onFileSelected($event)"
+      data-testid="tagextract-file"
+    />
+    @if (fileName(); as name) {
+      <span class="text-[1.4rem] text-gray-600 dark:text-gray-400">{{
+        name
+      }}</span>
+    }
+  </div>
+
+  @if (error(); as message) {
+    <p
+      class="m-0 text-[1.4rem] text-red-700 dark:text-red-400"
+      role="alert"
+      data-testid="tagextract-error"
+    >
+      {{ message }}
+    </p>
+  }
+
+  @if (extraction(); as result) {
+    <div class="flex flex-wrap items-center gap-3">
+      <span class="text-[1.4rem] font-medium" data-testid="tagextract-summary">
+        {{ result.rows.length }}
+        {{ result.rows.length === 1 ? 'event' : 'events' }} from
+        {{ result.ga4EventTagCount }} GA4 event
+        {{ result.ga4EventTagCount === 1 ? 'tag' : 'tags' }}
+      </span>
+      <button
+        type="button"
+        mat-stroked-button
+        [disabled]="result.rows.length === 0"
+        (click)="downloadPlan()"
+        data-testid="tagextract-download"
+      >
+        <mat-icon>download</mat-icon>
+        Download plan (CSV)
+      </button>
+      <button
+        type="button"
+        mat-stroked-button
+        [disabled]="result.rows.length === 0"
+        (click)="openInTagBuild()"
+        data-testid="tagextract-open-in-build"
+      >
+        <mat-icon>arrow_back</mat-icon>
+        Open in Tag Build
+      </button>
+    </div>
+
+    @if (result.skipped.length > 0) {
+      <div
+        class="rounded-md border border-amber-300 bg-amber-50 p-3 text-[1.4rem] text-amber-900 dark:border-amber-700 dark:bg-transparent dark:text-amber-200"
+        data-testid="tagextract-skipped"
+      >
+        <p class="m-0 mb-1 font-medium">Not in the plan</p>
+        <ul class="m-0 pl-5">
+          @for (reason of result.skipped; track $index) {
+            <li>{{ reason }}</li>
+          }
+        </ul>
+      </div>
+    }
+
+    @if (result.rows.length > 0) {
+      <div
+        class="overflow-x-auto rounded-md border border-gray-300 dark:border-gray-700"
+      >
+        <table
+          class="w-full text-left text-[1.4rem]"
+          data-testid="tagextract-table"
+        >
+          <thead class="bg-gray-100 dark:bg-gray-800">
+            <tr>
+              <th class="px-[1.2rem] py-[0.8rem] font-medium">event_name</th>
+              <th class="px-[1.2rem] py-[0.8rem] font-medium">
+                event_parameters
+              </th>
+              <th class="px-[1.2rem] py-[0.8rem] font-medium">
+                item_parameters
+              </th>
+              <th class="px-[1.2rem] py-[0.8rem] font-medium">notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of result.rows; track row.eventName) {
+              <tr
+                class="border-t border-gray-200 align-top dark:border-gray-700"
+                [attr.data-testid]="'tagextract-row-' + row.eventName"
+              >
+                <td class="px-[1.2rem] py-[0.8rem] font-mono">
+                  {{ row.eventName }}
+                </td>
+                <td class="px-[1.2rem] py-[0.8rem]">
+                  {{ row.eventParameters.join(', ') }}
+                </td>
+                <td class="px-[1.2rem] py-[0.8rem]">
+                  {{ row.itemParameters.join(', ') }}
+                </td>
+                <td
+                  class="px-[1.2rem] py-[0.8rem] text-gray-600 dark:text-gray-400"
+                >
+                  {{ row.notes.join(' ') }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</section>

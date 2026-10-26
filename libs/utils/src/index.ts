@@ -20,6 +20,7 @@ export * from './lib/functions/tag-build-contract';
 export * from './lib/functions/ga4-reference';
 export * from './lib/functions/gtm-container-export';
 export * from './lib/functions/measurement-plan';
+export * from './lib/functions/measurement-plan-extract';
 export * from './lib/functions/run-status';
 export * from './lib/functions/schedule-preset';
 export * from './lib/functions/data-layer-push';
