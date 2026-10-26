@@ -1,8 +1,7 @@
 import {
   ApplicationConfig,
   ErrorHandler,
-  provideAppInitializer,
-  SecurityContext
+  provideAppInitializer
 } from '@angular/core';
 import {
   PreloadAllModules,
@@ -17,7 +16,6 @@ import {
   withInterceptors,
   withXhr
 } from '@angular/common/http';
-import { provideMarkdown, SANITIZE } from 'ngx-markdown';
 import * as Sentry from '@sentry/angular';
 import { apiRequestIdInterceptor } from './shared/services/api/api-request-id.interceptor';
 import { AppTitleStrategy } from './shared/services/utils/app-title.strategy';
@@ -27,12 +25,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(APP_ROUTES, withPreloading(PreloadAllModules)),
     { provide: TitleStrategy, useClass: AppTitleStrategy },
     provideHttpClient(withXhr(), withInterceptors([apiRequestIdInterceptor])),
-    provideMarkdown({
-      sanitize: {
-        provide: SANITIZE,
-        useValue: SecurityContext.NONE
-      }
-    }),
     {
       provide: ErrorHandler,
       useValue: Sentry.createErrorHandler({

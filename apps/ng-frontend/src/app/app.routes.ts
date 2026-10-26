@@ -8,7 +8,8 @@ export const APP_ROUTES: Route[] = [
   {
     path: 'documentation',
     title: 'Documentation',
-    loadChildren: () => import('@ui').then((m) => m.DOCS_ROUTES)
+    loadChildren: () =>
+      import('./documentation.routes').then((m) => m.DOCUMENTATION_ROUTES)
   },
   {
     path: 'projects/:projectSlug',
