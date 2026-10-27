@@ -34,6 +34,16 @@ HTTP 認証で保護されたサイト用の **Username** と **Password** で�
 - **Hide the browser?**: ウィンドウを表示せずに Chrome を実行します。Accompanied Mode では常にウィンドウが表示されます。
 - **Add browser setting**: 実行時に使う Chrome のコマンドライン引数を追加します（例: `--window-size=1280,800`）。
 
+## AI Assist
+
+この設定は、このコンピューター上のすべてのプロジェクトに適用されます。ステップが要素を見つけられないとき、このコンピューター上のモデルが代わりのセレクターを提案します。モデルは [Ollama](https://ollama.com) で実行されるため、ページのデータはこのコンピューターの外に出ません。提案が記録を変更するのは保存したときだけで、テストの合否は引き続きテスト自身のチェックで決まります。
+
+- **Suggest replacements when a step cannot find its element**: 既定ではオフです。
+- **Ollama address**: Ollama のアドレスです。このコンピューター上（`localhost`、`127.0.0.1`、`[::1]`）に限られます。既定値は `http://127.0.0.1:11434` です。
+- **Model**: 使用する Ollama モデルです（例: `qwen3.5:9b`）。一覧には Ollama にあるモデルが表示されます。
+
+フォームの下に、Ollama が応答したか、そのモデルがあるかが表示されます。TagCheck は Ollama をインストールせず、モデルもダウンロードしません。Ollama が動いていない場合は起動してください。モデルがない場合は、ターミナルで実行する `ollama pull` コマンドがページに表示されます。その後 **Check again** を選択します。
+
 ## Export or Delete
 
 - **Export**: プロジェクトを、テスト、スペック、記録、結果とともに ZIP ファイルとしてダウンロードします。別のコンピューターでは、New Project ページの **Already got the project?** からインポートします。

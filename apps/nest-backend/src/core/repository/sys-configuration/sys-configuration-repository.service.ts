@@ -115,6 +115,29 @@ export class SysConfigurationRepositoryService implements OnModuleInit {
     return configuration;
   }
 
+  /** The value of the entry named `name`, or null when there is none. */
+  async getValue(name: string): Promise<string | null> {
+    const configuration = await this.configurationRepository.findOne({
+      where: { name }
+    });
+    return configuration?.value ?? null;
+  }
+
+  /** Creates the entry named `name`, or replaces its value. */
+  async setValue(
+    name: string,
+    value: string,
+    description: string
+  ): Promise<void> {
+    await this.configurationRepository
+      .createQueryBuilder()
+      .insert()
+      .into(SysConfigurationEntity)
+      .values({ name, value, description })
+      .orUpdate(['value', 'description'], ['name'])
+      .execute();
+  }
+
   async remove(id: number) {
     return await this.configurationRepository.delete({ id });
   }

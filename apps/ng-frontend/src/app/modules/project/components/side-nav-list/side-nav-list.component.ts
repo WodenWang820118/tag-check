@@ -125,6 +125,11 @@ const SETTINGS_ITEMS: readonly {
     testId: 'nav-settings-browser'
   },
   {
+    title: 'AI Assist',
+    link: ['./', 'settings', 'ai-assist'],
+    testId: 'nav-settings-ai-assist'
+  },
+  {
     title: 'Export or Delete',
     link: ['./', 'settings', 'project-io'],
     testId: 'nav-settings-project-io'

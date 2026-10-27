@@ -25,4 +25,5 @@ export * from './lib/functions/ga4-collect-summary';
 export * from './lib/functions/spec-comparison';
 export * from './lib/functions/run-status';
 export * from './lib/functions/schedule-preset';
+export * from './lib/functions/ai-assist-settings';
 export * from './lib/functions/data-layer-push';

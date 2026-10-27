@@ -15,5 +15,6 @@ export const environment = {
   gtmParserApiUrl: 'http://localhost:7001/gtm-parser',
   progressEventsUrl: 'http://localhost:7001/events',
   batchRunsApiUrl: 'http://localhost:7001/batch-runs',
-  schedulesApiUrl: 'http://localhost:7001/schedules'
+  schedulesApiUrl: 'http://localhost:7001/schedules',
+  aiAssistApiUrl: 'http://localhost:7001/ai-assist'
 };

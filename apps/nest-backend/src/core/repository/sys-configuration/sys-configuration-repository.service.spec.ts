@@ -147,4 +147,40 @@ describe('SysConfigurationRepositoryService', () => {
       status: 404
     });
   });
+  it('getValue() reads the value, or null without the entry', async () => {
+    const { service, repository } = build();
+    (repository.findOne as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ name: 'a', value: 'b' })
+      .mockResolvedValueOnce(null);
+
+    await expect(service.getValue('a')).resolves.toBe('b');
+    await expect(service.getValue('missing')).resolves.toBeNull();
+    expect(repository.findOne).toHaveBeenCalledWith({ where: { name: 'a' } });
+  });
+
+  it('setValue() creates the entry or replaces its value', async () => {
+    const { service, repository } = build();
+    const qb: Record<string, unknown> = {};
+    qb.insert = vi.fn().mockReturnValue(qb);
+    qb.into = vi.fn().mockReturnValue(qb);
+    qb.values = vi.fn().mockReturnValue(qb);
+    qb.orUpdate = vi.fn().mockReturnValue(qb);
+    qb.execute = vi.fn().mockResolvedValue(undefined);
+    (repository.createQueryBuilder as ReturnType<typeof vi.fn>).mockReturnValue(
+      qb
+    );
+
+    await service.setValue('a', 'b', 'about a');
+
+    expect(qb.values).toHaveBeenCalledWith({
+      name: 'a',
+      value: 'b',
+      description: 'about a'
+    });
+    expect(qb.orUpdate).toHaveBeenCalledWith(
+      ['value', 'description'],
+      ['name']
+    );
+    expect(qb.execute).toHaveBeenCalledTimes(1);
+  });
 });
