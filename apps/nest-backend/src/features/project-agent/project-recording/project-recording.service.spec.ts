@@ -11,11 +11,19 @@ function build() {
       async (slug: string, name: string) => `/rec/${slug}/${name}`
     )
   };
+  const recordingRepositoryService = {
+    getRecordingDetails: vi.fn().mockResolvedValue({
+      title: 'previous',
+      steps: [{ type: 'navigate', url: 'https://old.example' }]
+    }),
+    update: vi.fn().mockResolvedValue('updated')
+  };
   const service = new ProjectRecordingService(
     fileService as never,
-    filePathService as never
+    filePathService as never,
+    recordingRepositoryService as never
   );
-  return { service, fileService, filePathService };
+  return { service, fileService, filePathService, recordingRepositoryService };
 }
 
 describe('ProjectRecordingService', () => {
@@ -40,6 +48,41 @@ describe('ProjectRecordingService', () => {
       title: 't',
       steps: []
     } as never);
+    expect(ctx.fileService.writeJsonFile).toHaveBeenCalledTimes(1);
+  });
+
+  it('restores the database row when the recording file update throws', async () => {
+    const ctx = build();
+    const previousSteps = [{ type: 'navigate', url: 'https://old.example' }];
+    const nextSteps = [{ type: 'navigate', url: 'https://new.example' }];
+    const failure = new Error('disk full');
+    ctx.recordingRepositoryService.getRecordingDetails.mockResolvedValue({
+      title: 'Checkout',
+      steps: previousSteps
+    });
+    ctx.fileService.writeJsonFile.mockImplementation(() => {
+      throw failure;
+    });
+
+    await expect(
+      ctx.service.updateRecordingAndFile('demo', 'evt', {
+        title: 'Checkout revised',
+        steps: nextSteps
+      })
+    ).rejects.toBe(failure);
+
+    expect(ctx.recordingRepositoryService.update).toHaveBeenNthCalledWith(
+      1,
+      'demo',
+      'evt',
+      { title: 'Checkout revised', steps: nextSteps }
+    );
+    expect(ctx.recordingRepositoryService.update).toHaveBeenNthCalledWith(
+      2,
+      'demo',
+      'evt',
+      { title: 'Checkout', steps: previousSteps }
+    );
     expect(ctx.fileService.writeJsonFile).toHaveBeenCalledTimes(1);
   });
 });

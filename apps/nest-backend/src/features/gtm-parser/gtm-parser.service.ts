@@ -69,11 +69,16 @@ export class GtmParserService {
 
   /**
    * A GA4 event tag with a literal, valid event name becomes a test input
-   * with its firing triggers; any other tag is skipped with the reason.
+   * with its firing triggers. A paused tag does not fire on the site, so it
+   * is skipped with the other tags that cannot become a test.
    */
   private toTagImport(tag: TagConfig, container: GTMConfiguration): TagImport {
     if (tag.type !== TagTypeEnum.GAAWE) {
       return { skipped: { tagName: tag.name, reason: 'Not a GA4 event tag' } };
+    }
+    if (tag.paused) {
+      this.logger.log(`Skipping paused tag "${tag.name}"`);
+      return { skipped: { tagName: tag.name, reason: 'Paused' } };
     }
     const eventName = getParameterValue(tag.parameter, 'eventName')?.trim();
     if (!eventName) {

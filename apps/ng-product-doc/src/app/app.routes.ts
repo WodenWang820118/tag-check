@@ -62,13 +62,15 @@ function createProductDocRoutes(): Route[] {
   ];
 }
 
+/**
+ * Legacy `/app` links land on the documentation entry. The target is relative
+ * to the matched route, with no leading slash: an absolute path would drop a
+ * locale prefix such as `/ja` and the localized build's base href. Query
+ * params and the fragment are copied onto the target.
+ */
 function createDocumentationEntryRedirect(): RedirectFunction {
   return ({ fragment, queryParams }) => {
-    return appendUrlState(
-      `/${DOCUMENTATION_ENTRY_PATH}`,
-      queryParams,
-      fragment
-    );
+    return appendUrlState(DOCUMENTATION_ENTRY_PATH, queryParams, fragment);
   };
 }
 
