@@ -20,6 +20,40 @@ export function selectorGroupText(group: string | string[]): string {
 }
 
 /**
+ * The selectors to save: `all`, in the same order, without the ones the
+ * user unticked. The diff still lists those, so a dialog passes this list,
+ * not the full replacement, to `withStepSelectors`.
+ */
+export function chosenSelectors(
+  all: readonly string[],
+  excluded: readonly string[]
+): string[] {
+  return all.filter((selector) => !excluded.includes(selector));
+}
+
+/**
+ * The recording with unticked selectors taken off the step. Keeping the
+ * old selectors can put one back when it was already on the step; a
+ * selector the user left unticked is not saved. The recording itself is
+ * not changed.
+ */
+export function withoutExcludedSelectors(
+  recording: Recording,
+  stepIndex: number,
+  excluded: readonly string[]
+): Recording {
+  const step = recording.steps[stepIndex];
+  if (!step || excluded.length === 0) return recording;
+  const selectors = (step.selectors ?? []).filter(
+    (group) => !excluded.includes(selectorGroupText(group))
+  );
+  if (selectors.length === (step.selectors ?? []).length) return recording;
+  const steps = [...recording.steps];
+  steps[stepIndex] = { ...step, selectors };
+  return { ...recording, steps };
+}
+
+/**
  * How a step's selectors change: the new ones first, then the old ones,
  * kept after them or removed. An old selector the new ones repeat is not
  * listed twice.

@@ -23,8 +23,16 @@
     } @else {
       <app-selector-diff
         [changes]="changes()"
+        [selectable]="true"
+        [excluded]="excluded()"
+        (toggle)="toggleExcluded($event)"
         data-testid="fallback-diff"
       ></app-selector-diff>
+      @if (chosen().length === 0) {
+        <p class="m-0! text-[#b3261e]" data-testid="fallback-pick-none">
+          Tick at least one new selector to save.
+        </p>
+      }
       <mat-checkbox
         [checked]="keepOld()"
         (change)="keepOld.set($event.checked)"
@@ -42,7 +50,9 @@
     color="primary"
     type="button"
     (click)="save()"
-    [disabled]="!recording() || alreadySaved() || saving()"
+    [disabled]="
+      !recording() || alreadySaved() || saving() || chosen().length === 0
+    "
     data-testid="fallback-save"
   >
     Save to recording

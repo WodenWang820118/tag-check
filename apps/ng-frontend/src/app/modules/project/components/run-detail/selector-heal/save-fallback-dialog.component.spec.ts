@@ -1,5 +1,7 @@
+import type { DebugElement } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
+import { By } from '@angular/platform-browser';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError, type Observable } from 'rxjs';
@@ -92,6 +94,17 @@ function setUp(
   };
 }
 
+/** Unticks one added selector, as its checkbox change does. */
+function untick(debugElement: DebugElement, index: number): void {
+  const pick = debugElement.query(
+    By.css(`[data-testid="selector-diff-pick-${index}"]`)
+  );
+  if (!pick) {
+    throw new Error(`No selector-diff-pick-${index}`);
+  }
+  pick.triggerEventHandler('change', {});
+}
+
 describe('SaveFallbackDialogComponent', () => {
   it('says why the fallback was used and how the step changes', () => {
     const { text, lines, recordings } = setUp();
@@ -172,6 +185,55 @@ describe('SaveFallbackDialogComponent', () => {
     );
 
     expect(text('fallback-error')).toBe('No recording');
+    expect(find('fallback-save')?.hasAttribute('disabled')).toBe(true);
+  });
+
+  it('saves only the new selectors that stay ticked', async () => {
+    const { fixture, find, recordings } = setUp();
+
+    untick(fixture.debugElement, 1);
+    fixture.detectChanges();
+    find('fallback-save')?.click();
+    await fixture.whenStable();
+
+    const saved = recordings.updateRecording.mock.calls[0]?.[2];
+    expect(saved?.steps[1]?.selectors).toEqual([
+      ['[data-testid="add-to-cart"]']
+    ]);
+  });
+
+  it('disables save when every new selector is unticked', () => {
+    const { fixture, find, text } = setUp();
+
+    untick(fixture.debugElement, 0);
+    untick(fixture.debugElement, 1);
+    fixture.detectChanges();
+
+    expect(find('fallback-save')?.hasAttribute('disabled')).toBe(true);
+    expect(text('fallback-pick-none')).toBe(
+      'Tick at least one new selector to save.'
+    );
+  });
+
+  it('counts the step saved when it waits for the first ticked selector', () => {
+    const { fixture, find, text } = setUp(() =>
+      of({
+        ...RECORDING,
+        steps: [
+          RECORDING.steps[0],
+          { type: 'click', selectors: [['main > button']] }
+        ]
+      })
+    );
+
+    expect(find('fallback-saved')).toBeNull();
+    untick(fixture.debugElement, 0);
+    fixture.detectChanges();
+
+    expect(text('fallback-saved')).toBe(
+      'The recording already waits for this selector first.'
+    );
+    expect(find('fallback-diff')).toBeNull();
     expect(find('fallback-save')?.hasAttribute('disabled')).toBe(true);
   });
 

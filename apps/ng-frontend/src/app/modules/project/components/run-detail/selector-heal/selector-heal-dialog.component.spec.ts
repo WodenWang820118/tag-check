@@ -1,5 +1,7 @@
+import type { DebugElement } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
+import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -68,6 +70,22 @@ const ANSWER = json<SelectorSuggestionsResponse>({
   considered: 23,
   suggestions: [{ candidate: CANDIDATE, reason: 'Same Add to Cart action' }]
 });
+
+function answerFor(
+  items: { index: number; selectors: string[] }[]
+): SelectorSuggestionsResponse {
+  return {
+    ...ANSWER,
+    suggestions: items.map((item) => ({
+      candidate: {
+        ...CANDIDATE,
+        index: item.index,
+        selectors: item.selectors
+      },
+      reason: 'Same Add to Cart action'
+    }))
+  };
+}
 
 const RECORDING: Recording = {
   title: 'Add to cart',
@@ -155,6 +173,17 @@ function setUp(
     backdrop,
     keys
   };
+}
+
+/** Unticks one added selector, as its checkbox change does. */
+function untick(debugElement: DebugElement, index: number): void {
+  const pick = debugElement.query(
+    By.css(`[data-testid="selector-diff-pick-${index}"]`)
+  );
+  if (!pick) {
+    throw new Error(`No selector-diff-pick-${index}`);
+  }
+  pick.triggerEventHandler('change', {});
 }
 
 describe('SelectorHealDialogComponent', () => {
@@ -327,6 +356,77 @@ describe('SelectorHealDialogComponent', () => {
     fixture.detectChanges();
     keys.next(new KeyboardEvent('keydown', { key: 'Escape' }));
     expect(dialogRef.close).toHaveBeenLastCalledWith({ runId: 42 });
+  });
+
+  it('saves only the selectors of a suggestion that stay ticked', async () => {
+    const structural = 'body > app-root > div > button';
+    const { fixture, find, lines, recordings } = setUp({
+      suggest: () =>
+        of(
+          answerFor([
+            {
+              index: 17,
+              selectors: ['[data-testid="add-to-cart"]', structural]
+            }
+          ])
+        )
+    });
+
+    find('heal-try-17')?.click();
+    fixture.detectChanges();
+    untick(fixture.debugElement, 1);
+    fixture.detectChanges();
+
+    expect(lines('heal-diff')[0]).toBe('+ Added: [data-testid="add-to-cart"]');
+    expect(lines('heal-diff')[1]).toBe(`+ Not saved: ${structural}`);
+
+    find('heal-save')?.click();
+    await fixture.whenStable();
+
+    const saved = recordings.updateRecording.mock.calls[0][2];
+    expect(saved.steps[4].selectors).toEqual([['[data-testid="add-to-cart"]']]);
+  });
+
+  it('clears unticked selectors when another suggestion is tried', () => {
+    const structural = 'body > app-root > div > button';
+    const { fixture, find, component, lines } = setUp({
+      suggest: () =>
+        of(
+          answerFor([
+            {
+              index: 17,
+              selectors: ['[data-testid="add-to-cart"]', structural]
+            },
+            {
+              index: 18,
+              selectors: ['[data-testid="buy-now"]', structural]
+            }
+          ])
+        )
+    });
+
+    find('heal-try-17')?.click();
+    fixture.detectChanges();
+    untick(fixture.debugElement, 1);
+    fixture.detectChanges();
+    expect(component.excluded()).toEqual([structural]);
+
+    component.backToSuggestions();
+    fixture.detectChanges();
+    expect(component.excluded()).toEqual([]);
+
+    find('heal-try-18')?.click();
+    fixture.detectChanges();
+    untick(fixture.debugElement, 1);
+    fixture.detectChanges();
+    expect(component.excluded()).toEqual([structural]);
+
+    component.tryIt(component.suggestions()[0]);
+    fixture.detectChanges();
+
+    expect(component.excluded()).toEqual([]);
+    expect(lines('heal-diff')[0]).toBe('+ Added: [data-testid="add-to-cart"]');
+    expect(lines('heal-diff')[1]).toBe(`+ Added: ${structural}`);
   });
 
   it('says when what the run saw cannot be read', () => {

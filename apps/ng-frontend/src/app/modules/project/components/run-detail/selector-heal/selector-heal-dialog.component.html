@@ -149,8 +149,16 @@
         <h3 class="heal__label m-0!">Change to the recording</h3>
         <app-selector-diff
           [changes]="changes()"
+          [selectable]="true"
+          [excluded]="excluded()"
+          (toggle)="toggleExcluded($event)"
           data-testid="heal-diff"
         ></app-selector-diff>
+        @if (chosen().length === 0) {
+          <p class="m-0! text-[#b3261e]" data-testid="heal-pick-none">
+            Tick at least one new selector to save.
+          </p>
+        }
         <mat-checkbox
           [checked]="keepOld()"
           (change)="keepOld.set($event.checked)"
@@ -300,7 +308,9 @@
           color="primary"
           type="button"
           (click)="save()"
-          [disabled]="current.status === 'running' || saving()"
+          [disabled]="
+            current.status === 'running' || saving() || chosen().length === 0
+          "
           data-testid="heal-save"
         >
           Save to recording
