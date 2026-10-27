@@ -34,7 +34,7 @@ TagCheck からエクスポートしたプロジェクトの作業を続ける�
 
 1. Chrome で DevTools と **Recorder** パネルを開き、サイト上でジャーニーを記録します。たとえば、商品ページを開いて **Add to cart** を選択します。
 2. 記録を JSON ファイルとしてエクスポートします。
-3. テストを開いて **Latest result** に移動します。**Chrome Recording** パネルで編集ボタンを選択し、ファイルを **Upload** するか内容を貼り付けて、**Save** を選択します。
+3. テストを開いて **Spec, recording and item definition** を展開します。**Chrome Recording** パネルで編集ボタンを選択し、ファイルを **Upload** するか内容を貼り付けて、**Save** を選択します。
 
 TagCheck は、`setViewport`、`navigate`、`click`、`hover`、`change`、`keyDown`、`keyUp`、`waitForElement` の各ステップを、CSS、ID、ARIA、テキスト、XPath、pierce の各セレクターで再生します。`data-testid` 属性のような安定したセレクターを使うと、デザインが変わっても記録が動作し続けます。
 

@@ -132,6 +132,8 @@ export const PROJECT_ROUTES: Routes = [
           import('./views/detail-view/detail-view.component').then(
             (m) => m.DetailViewComponent
           ),
+        // `?run=<runId>` picks the run the page shows.
+        runGuardsAndResolvers: 'paramsOrQueryParamsChange',
         resolve: {
           page: reportPageResolver
         }

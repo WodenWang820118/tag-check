@@ -38,7 +38,7 @@
 
 數字 `1` 不符合字串 `"1"`。網站推送數字時，請在規格中寫成數字。
 
-從 GTM 容器匯入的測試，一開始的規格是依代碼建立的：每個讀取資料層變數的參數都會成為一個鍵，其值為該變數的參照，例如 `"value": "{{DLV - ecommerce.value}}"`，因此該鍵必須存在。在你想要更嚴格檢查的地方，請將參照替換為值或模式。若要編輯規格，請開啟測試，前往 **Latest result**，並使用 **Data Layer Spec** 面板的編輯按鈕。
+從 GTM 容器匯入的測試，一開始的規格是依代碼建立的：每個讀取資料層變數的參數都會成為一個鍵，其值為該變數的參照，例如 `"value": "{{DLV - ecommerce.value}}"`，因此該鍵必須存在。在你想要更嚴格檢查的地方，請將參照替換為值或模式。若要編輯規格，請開啟測試，展開 **Spec, recording and item definition**，並使用 **Data Layer Spec** 面板的編輯按鈕。
 
 ## 電子商務事件
 
@@ -56,7 +56,7 @@
 }
 ```
 
-如此一來，對於電子商務事件，執行會預期 `ecommerce.items` 的元素就是這個商品，取代規格中的商品。請在測試 **Latest result** 的 **Item Definition** 面板中編輯它。
+如此一來，對於電子商務事件，執行會預期 `ecommerce.items` 的元素就是這個商品，取代規格中的商品。請在測試頁面 **Spec, recording and item definition** 中的 **Item Definition** 面板編輯它。
 
 ## 請求檢查
 

@@ -10,14 +10,20 @@ import { environment } from '../../../../../environments/environment';
 export class ImageService {
   constructor(private readonly http: HttpClient) {}
 
-  getImage(projectSlug: string, eventId: string): Observable<{ blob: Blob }> {
+  /** A run's screenshot; the test's latest one without `runId`. */
+  getImage(
+    projectSlug: string,
+    eventId: string,
+    runId?: number
+  ): Observable<{ blob: Blob }> {
     return this.http
       .get(`${environment.imageApiUrl}/${projectSlug}/${eventId}`, {
         headers: {
           Accept: 'image/png'
         },
         responseType: 'blob',
-        observe: 'response'
+        observe: 'response',
+        params: runId === undefined ? {} : { run: runId }
       })
       .pipe(
         map((response) => {

@@ -18,19 +18,24 @@ export class VideosService {
    * @param eventId     - Test event identifier.
    * @param view        - `tag-assistant` for the Tag Assistant recording of an
    *   accompanied-mode run; the site recording otherwise.
+   * @param runId       - The run; the test's latest run by default.
    * @returns An observable emitting `{ blob }` on success, or an error
    *   with message `'Failed to load video'` on HTTP failure.
    */
   getVideo(
     projectSlug: string,
     eventId: string,
-    view?: 'tag-assistant'
+    view?: 'tag-assistant',
+    runId?: number
   ): Observable<{ blob: Blob }> {
     return this.http
       .get(`${environment.videoApiUrl}/${projectSlug}/${eventId}`, {
         responseType: 'blob',
         observe: 'response',
-        params: view ? { view } : {}
+        params: {
+          ...(view ? { view } : {}),
+          ...(runId === undefined ? {} : { run: runId })
+        }
       })
       .pipe(
         map((response) => ({

@@ -38,7 +38,7 @@
 
 数字 `1` 与字符串 `"1"` 不匹配。当网站推送的是数字时，请将其写为数字。
 
-从 GTM 容器导入的测试，其初始规格根据标签生成：每个读取数据层变量的参数都会成为一个键，其值为变量引用，例如 `"value": "{{DLV - ecommerce.value}}"`，因此该键必须存在。如需更严格的检查，请将引用替换为值或模式。要编辑规格，请打开测试，进入 **Latest result**，然后使用 **Data Layer Spec** 面板的编辑按钮。
+从 GTM 容器导入的测试，其初始规格根据标签生成：每个读取数据层变量的参数都会成为一个键，其值为变量引用，例如 `"value": "{{DLV - ecommerce.value}}"`，因此该键必须存在。如需更严格的检查，请将引用替换为值或模式。要编辑规格，请打开测试，展开 **Spec, recording and item definition**，然后使用 **Data Layer Spec** 面板的编辑按钮。
 
 ## 电子商务事件
 
@@ -56,7 +56,7 @@
 }
 ```
 
-对于电子商务事件，运行随后会期望 `ecommerce.items` 中的条目为该商品，以取代规格中的商品。请在测试 **Latest result** 中的 **Item Definition** 面板里编辑它。
+对于电子商务事件，运行随后会期望 `ecommerce.items` 中的条目为该商品，以取代规格中的商品。请在测试页面 **Spec, recording and item definition** 中的 **Item Definition** 面板里编辑它。
 
 ## 请求检查
 

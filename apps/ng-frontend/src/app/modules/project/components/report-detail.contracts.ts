@@ -4,8 +4,10 @@ import {
   IReportDetails,
   Recording,
   ReportDetailResponse,
+  RunHistoryEntry,
   RunStatus,
-  TagSpec
+  TagSpec,
+  TestEventDetailSchema
 } from '@utils';
 
 /** Everything the report page shows, loaded by reportPageResolver. */
@@ -14,7 +16,14 @@ export type ReportDetailRouteContext = {
   eventId: string;
   spec: DataLayerSpec;
   recording: Recording | null;
+  /** The test with the shown run's checks. */
   reportDetails: IReportDetails | undefined;
+  /** The shown run: `?run=<runId>`, the latest run by default; null before the first run. */
+  run: TestEventDetailSchema | null;
+  /** Every run of the test, newest first. */
+  runs: RunHistoryEntry[];
+  /** Whether the shown run is the test's latest. */
+  isLatestRun: boolean;
   videoBlob: Blob | undefined;
   /** The Tag Assistant tab of an accompanied-mode run; empty otherwise. */
   tagAssistantVideoBlob: Blob | undefined;
@@ -59,12 +68,17 @@ export function buildReportPage(loaded: {
   tagAssistantVideo: { blob: Blob } | null;
   image: { blob: Blob } | null;
 }): ReportDetailRouteContext {
+  const run = loaded.detail?.testEventDetails ?? null;
+  const runs = loaded.detail?.runs ?? [];
   return {
     projectSlug: loaded.projectSlug,
     eventId: loaded.eventId,
     spec: loaded.spec,
     recording: loaded.recording,
     reportDetails: toReportDetails(loaded.detail),
+    run,
+    runs,
+    isLatestRun: !run || runs.length === 0 || runs[0].runId === run.id,
     videoBlob: loaded.video?.blob,
     tagAssistantVideoBlob: loaded.tagAssistantVideo?.blob,
     imageBlob: loaded.image?.blob,
@@ -136,24 +150,6 @@ export const STATUS_BADGES: Record<RunStatus | 'running', StatusBadge> = {
   partial: { label: 'Partial', icon: 'error', color: 'warn' },
   failed: { label: 'Failed', icon: 'cancel', color: 'warn' },
   running: { label: 'Running', icon: 'sync', color: undefined }
-};
-
-export type ReportTabViewModel = {
-  title: string;
-  lastRunAt: Date | string | undefined;
-  status: RunStatus;
-  passed: boolean;
-  eventName: string;
-  message: string;
-  showHistory: boolean;
-  showShareMenu: boolean;
-  canExportSpreadsheet: boolean;
-  canExportRecording: boolean;
-  canExportEvent: boolean;
-  hasMedia: boolean;
-  videoBlob: Blob | undefined;
-  tagAssistantVideoBlob: Blob | undefined;
-  imageBlob: Blob | undefined;
 };
 
 export type EditableJsonPanelState = {

@@ -1,33 +1,85 @@
 .detail {
-  /* Use a responsive max-width container instead of huge fixed side padding */
-  padding: 1rem 1.25rem 2rem;
+  background: #f4f6f5;
+  box-sizing: border-box;
+  min-height: 100%;
+  padding: 1.6rem 2.4rem 4.8rem;
+}
+
+.detail__header,
+.detail__body,
+.detail__older {
   margin: 0 auto;
+  max-width: 128rem;
 }
 
 .detail__header {
-  position: sticky;
-  top: 56px; /* below app toolbar height */
-  z-index: 10;
-  background: var(--mat-sys-surface, #fff);
-  /* subtle separator */
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.detail__header__row {
   display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
 }
 
 .back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+  align-self: flex-start;
 }
 
-@media (max-width: 640px) {
-  .back-label {
-    display: none;
-  }
+.detail__title-row {
+  align-items: flex-end;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.6rem;
+  justify-content: space-between;
+}
+
+.detail__title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.detail__event {
+  align-items: center;
+  background: #e0f2f1;
+  border: 0;
+  border-radius: 0.4rem;
+  color: #004d40;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 0.4rem;
+  min-height: 3.2rem;
+  padding: 0 0.8rem;
+}
+
+.detail__event mat-icon {
+  font-size: 1.6rem;
+  height: 1.6rem;
+  width: 1.6rem;
+}
+
+.detail__older {
+  align-items: center;
+  background: #fff8e6;
+  border: 1px solid #f0d58c;
+  border-radius: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 1.5rem;
+  gap: 1.2rem;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding: 0.8rem 1.6rem;
+}
+
+.detail__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.detail__pair {
+  align-items: start;
+  display: grid;
+  gap: 1.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(40rem, 100%), 1fr));
 }

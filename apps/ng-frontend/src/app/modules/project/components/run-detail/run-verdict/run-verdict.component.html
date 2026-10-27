@@ -1,0 +1,100 @@
+@if (run(); as current) {
+  <section
+    aria-label="Verdict"
+    class="grid gap-[1.6rem] [grid-template-columns:repeat(auto-fit,minmax(26rem,1fr))]"
+    data-testid="run-verdict"
+  >
+    @for (
+      card of [
+        { title: 'dataLayer check', check: dataLayerCheck(), id: 'datalayer' },
+        { title: 'GA4 request check', check: requestCheck(), id: 'request' }
+      ];
+      track card.id
+    ) {
+      @if (card.check; as check) {
+        <article
+          class="flex flex-col gap-[1rem] rounded-[1.2rem] bg-white p-[2rem]"
+          [class.verdict-card--failed]="!check.passed"
+          [attr.data-testid]="'run-check-' + card.id"
+        >
+          <div class="flex items-center justify-between gap-[1rem]">
+            <h2
+              class="m-0 text-[1.3rem]! font-medium! uppercase tracking-[0.06em] text-[#55605d]"
+            >
+              {{ card.title }}
+            </h2>
+            <span
+              class="inline-flex items-center gap-[0.4rem] rounded-full px-[1.2rem] py-[0.4rem] text-[1.4rem] font-medium"
+              [class]="
+                check.passed ? 'verdict-chip--passed' : 'verdict-chip--failed'
+              "
+            >
+              <mat-icon class="verdict-chip__icon" aria-hidden="true">{{
+                check.passed ? 'check' : 'close'
+              }}</mat-icon>
+              {{ check.passed ? 'Passed' : 'Failed' }}
+            </span>
+          </div>
+          <p
+            class="m-0 text-[1.6rem] leading-[1.5]"
+            [attr.data-testid]="'run-check-' + card.id + '-text'"
+          >
+            {{ check.text }}
+            @if (check.code) {
+              <code class="whitespace-nowrap">{{ check.code }}</code
+              >.
+            }
+          </p>
+        </article>
+      }
+    }
+
+    <article
+      class="flex flex-col gap-[1.2rem] rounded-[1.2rem] bg-white p-[2rem]"
+      data-testid="run-history"
+    >
+      <div class="flex items-center justify-between gap-[1rem]">
+        <h2
+          class="m-0 text-[1.3rem]! font-medium! uppercase tracking-[0.06em] text-[#55605d]"
+        >
+          History
+        </h2>
+      </div>
+      <p class="m-0 text-[1.6rem]">
+        {{ passedCount() }} of the last {{ history().length }}
+        {{ history().length === 1 ? 'run' : 'runs' }} passed
+      </p>
+      <ol
+        class="m-0 flex list-none flex-wrap gap-[0.6rem] p-0"
+        aria-label="Recent runs, oldest first"
+      >
+        @for (dot of history(); track dot.runId) {
+          <li>
+            <a
+              class="history-dot"
+              [class]="'history-dot--' + dot.status"
+              [class.history-dot--current]="dot.current"
+              [routerLink]="[]"
+              [queryParams]="{ run: dot.runId }"
+              [attr.aria-label]="dot.label"
+              [attr.aria-current]="dot.current ? 'page' : null"
+              [title]="dot.label"
+              [attr.data-testid]="'run-history-' + dot.runId"
+            ></a>
+          </li>
+        }
+      </ol>
+      <span class="text-[1.3rem] text-[#55605d]">
+        Green: passed · amber: one check failed · red: both failed
+      </span>
+    </article>
+  </section>
+} @else {
+  <section
+    class="rounded-[1.2rem] bg-white p-[2rem] text-[1.6rem]"
+    data-testid="run-verdict-not-run"
+  >
+    This test has not run yet. Run it to see both checks, its recordings and
+    what was pushed and sent.
+  </section>
+}
