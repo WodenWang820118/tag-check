@@ -54,6 +54,15 @@ describe('RequestProcessorService', () => {
   });
 
   describe('addCustomEventParameters', () => {
+    it.each(['constructor', 'toString', 'valueOf'])(
+      'ignores an inherited page parameter name %s',
+      (name) => {
+        expect(
+          service.addCustomEventParameters({}, `${name}=unexpected`)
+        ).toEqual({});
+      }
+    );
+
     it('should add custom event parameters to the data layer', () => {
       const dataLayer = {};
       const queryString = 'en=customEvent&ep.customKey=customValue';
@@ -74,6 +83,17 @@ describe('RequestProcessorService', () => {
   });
 
   describe('processCustomField', () => {
+    it('ignores custom item keys inherited from a record prototype', () => {
+      const item: BaseItem = {};
+      const customKeys: Record<string, string> = Object.create({
+        '0': 'inherited'
+      });
+
+      service.processCustomField('v0unexpected', item, customKeys);
+
+      expect(item).toEqual({});
+    });
+
     it('should process custom key-value fields', () => {
       const item = {};
       const customKeys = {};
@@ -96,6 +116,17 @@ describe('RequestProcessorService', () => {
   });
 
   describe('recomposeGA4ECEvent', () => {
+    it.each(['constructor', 'toString', 'valueOf'])(
+      'recomposes the custom event %s without inherited ecommerce parameters',
+      (eventName) => {
+        expect(
+          service.recomposeGA4ECEvent(
+            `https://www.google-analytics.com/g/collect?en=${eventName}&ep.method=email`
+          )
+        ).toEqual({ event: eventName, method: 'email' });
+      }
+    );
+
     it('should recompose GA4 EC Event', () => {
       const expected = {
         event: 'add_to_cart',

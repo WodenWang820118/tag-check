@@ -114,19 +114,25 @@ export function resolveVariableReference(
  * The parameter rows a GA4 event tag sends: its own event parameter table
  * followed by the table of the Event Settings variable it references, if any.
  *
- * GTM exports the table as `eventSettingsTable`. Containers built by earlier
- * versions of tag-build named the same rows `eventParameters`, so both keys are
- * read.
+ * GTM exports `eventSettingsTable`; older Tag Build versions used
+ * `eventParameters`. Both are read, with `eventSettingsTable` winning
+ * conflicts. Tag values override shared settings.
  */
 export function getGa4EventParameterRows(
   tag: TagConfig,
   variables: readonly VariableConfig[]
 ): { parameter: string; value: string }[] {
+  return getGa4EventParameterTable(tag, variables).rows;
+}
+
+/** Reads the merged parameter rows and notes conflicting values for plan exports. */
+export function getGa4EventParameterTable(
+  tag: TagConfig,
+  variables: readonly VariableConfig[]
+): { rows: { parameter: string; value: string }[]; notes: string[] } {
   const tables = [
-    tag.parameter.find(
-      (entry) =>
-        entry.key === 'eventSettingsTable' || entry.key === 'eventParameters'
-    )
+    ...tag.parameter.filter((entry) => entry.key === 'eventParameters'),
+    ...tag.parameter.filter((entry) => entry.key === 'eventSettingsTable')
   ];
   const settingsReference = getParameterValue(
     tag.parameter,
@@ -140,19 +146,47 @@ export function getGa4EventParameterRows(
       candidate.name === settingsName &&
       candidate.type === VariableTypeEnum.EVENT_SETTINGS
   );
-  tables.push(
-    settingsVariable?.parameter?.find(
-      (entry) => entry.key === 'eventSettingsTable'
-    )
+  const sharedTable = settingsVariable?.parameter?.find(
+    (entry) => entry.key === 'eventSettingsTable'
   );
+  if (sharedTable) {
+    tables.push(sharedTable);
+  }
 
-  return tables.flatMap((table) =>
-    getParameterListItems(table).flatMap((row) => {
+  const parameters = new Map<string, { value: string; source: string }>();
+  const notes: string[] = [];
+  for (const table of tables) {
+    const source =
+      table === sharedTable
+        ? 'Event Settings variable'
+        : (table.key ?? 'the tag');
+    for (const row of getParameterListItems(table)) {
       const parameter = getParameterMapValue(row, 'parameter');
       const value = getParameterMapValue(row, 'parameterValue');
-      return parameter && value ? [{ parameter, value }] : [];
-    })
-  );
+      if (!parameter || value === undefined) {
+        continue;
+      }
+      const existing = parameters.get(parameter);
+      const keepExisting = existing && table === sharedTable;
+      if (existing && existing.value !== value) {
+        const kept = keepExisting ? existing : { value, source };
+        const dropped = keepExisting ? { value, source } : existing;
+        notes.push(
+          `Parameter "${parameter}" has conflicting values in ${dropped.source} and ${kept.source}; kept ${kept.source} value "${kept.value}" instead of "${dropped.value}".`
+        );
+      }
+      if (!keepExisting) {
+        parameters.set(parameter, { value, source });
+      }
+    }
+  }
+  return {
+    rows: [...parameters].map(([parameter, { value }]) => ({
+      parameter,
+      value
+    })),
+    notes
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

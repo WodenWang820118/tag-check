@@ -18,8 +18,9 @@ const RELATIVE_URL_BASE = 'http://localhost';
  * validated against the same spec as the data layer.
  *
  * Parameter names and types follow Google's recommended events reference
- * (https://developers.google.com/analytics/devguides/collection/ga4/reference/events):
- * `ep.` parameters are strings, `epn.` parameters are numbers, and ecommerce
+ * (https://developers.google.com/analytics/devguides/collection/ga4/reference/events).
+ * The wire keys were read from requests recorded from gtag.js; Google does
+ * not document them. `ep.` parameters are strings, `epn.` are numbers, and ecommerce
  * parameters are nested under `ecommerce` as in Tag Manager's data layer
  * (https://developers.google.com/analytics/devguides/collection/ga4/ecommerce?client_type=gtm).
  */
@@ -70,7 +71,7 @@ export class RequestProcessorService {
         dataLayer[key.slice('epn.'.length)] = toNumber(val);
       } else if (key === 'cu') {
         dataLayer['currency'] = val;
-      } else if (key in standardPageParameterMap) {
+      } else if (Object.hasOwn(standardPageParameterMap, key)) {
         dataLayer[standardPageParameterMap[key]] = val;
       }
     }
@@ -94,7 +95,7 @@ export class RequestProcessorService {
       customKeys[index] = field.substring(`k${index}`.length);
     } else if (customValueMatch) {
       const index = customValueMatch[1];
-      if (customKeys[index]) {
+      if (Object.hasOwn(customKeys, index) && customKeys[index]) {
         item[customKeys[index]] = field.substring(`v${index}`.length);
       }
     } else {
@@ -127,12 +128,17 @@ export class RequestProcessorService {
       queryParams.toString()
     );
     const items = this.extractItems(queryParams);
-    const ecommerceParameters = GA4_ECOMMERCE_EVENT_PARAMETERS[event];
+    const ecommerceParameters = Object.hasOwn(
+      GA4_ECOMMERCE_EVENT_PARAMETERS,
+      event
+    )
+      ? GA4_ECOMMERCE_EVENT_PARAMETERS[event]
+      : undefined;
 
     if (ecommerceParameters || items.length) {
       const ecommerce: Record<string, unknown> = {};
       for (const name of ecommerceParameters ?? DEFAULT_ECOMMERCE_PARAMETERS) {
-        if (name in dataLayer) {
+        if (Object.hasOwn(dataLayer, name)) {
           ecommerce[name] = dataLayer[name];
           delete dataLayer[name];
         }
@@ -160,7 +166,10 @@ export class RequestProcessorService {
     const customKeys: { [index: string]: string } = {};
 
     for (const field of splitItemFields(product)) {
-      const paramName = standardParameterMap[field.slice(0, ITEM_KEY_LENGTH)];
+      const key = field.slice(0, ITEM_KEY_LENGTH);
+      const paramName = Object.hasOwn(standardParameterMap, key)
+        ? standardParameterMap[key]
+        : undefined;
       if (!paramName) {
         this.processCustomField(field, item, customKeys);
         continue;
