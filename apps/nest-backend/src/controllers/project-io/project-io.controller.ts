@@ -13,8 +13,7 @@ import {
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { pipeline } from 'node:stream/promises';
 import { createWriteStream } from 'node:fs';
-import { unlink } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { join, basename } from 'node:path';
 import { SysConfigurationRepositoryService } from '../../core/repository/sys-configuration/sys-configuration-repository.service';
 import { ProjectIoFacadeService } from '../../features/project-agent/project-io-facade/project-io-facade.service';
@@ -57,38 +56,42 @@ export class ProjectIoController {
       );
     }
 
-    const filePath = join(tmpdir(), safeFilename);
+    let uploadDirectory: string | undefined;
     try {
-      await pipeline(data.file, createWriteStream(filePath));
       const rootProjectPath =
         await this.configurationSerivce.getRootProjectPath();
-      // Note: Prefer reading config to determine slug in the future instead of file name
+      await mkdir(rootProjectPath, { recursive: true });
+      uploadDirectory = await mkdtemp(join(rootProjectPath, '_upload_tmp_'));
+      const filePath = join(uploadDirectory, safeFilename);
+      await pipeline(data.file, createWriteStream(filePath));
       const importedSlug = await this.projectIoFacadeService.importProject(
-        safeFilename.split('.')[0],
+        safeFilename.slice(0, -4),
         filePath,
         rootProjectPath
       );
       return reply.code(200).send({ projectSlug: importedSlug });
     } catch (error) {
       this.logger.error(error);
+      if (error instanceof HttpException) throw error;
       throw new HttpException(
         error instanceof Error ? error.message : String(error),
         HttpStatus.BAD_REQUEST
       );
     } finally {
-      await unlink(filePath).catch(() => {
-        // Non-fatal: temp file cleanup is best-effort
-      });
+      if (uploadDirectory) {
+        await rm(uploadDirectory, { recursive: true, force: true }).catch(
+          () => {
+            // Non-fatal: temp file cleanup is best-effort.
+          }
+        );
+      }
     }
   }
 
+  /** Remove files first; a folder error fails the request and keeps its rows. */
   @Delete('delete/:projectSlug')
   async deleteProject(@Param('projectSlug') projectSlug: string) {
-    try {
-      await this.projectIoFacadeService.deleteProject(projectSlug);
-    } catch (error) {
-      this.logger.error(error);
-    }
+    await this.projectIoFacadeService.deleteProject(projectSlug);
     return await this.projectRepositoryService.deleteBySlug(projectSlug);
   }
 }
