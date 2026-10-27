@@ -83,3 +83,17 @@
   gap: 1.6rem;
   grid-template-columns: repeat(auto-fit, minmax(min(40rem, 100%), 1fr));
 }
+
+.detail__step-failure {
+  align-items: center;
+  background: #fff8eb;
+  border: 1px solid #e6d3a8;
+  border-radius: 1rem;
+  color: #5b3d0a;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 1.4rem;
+  gap: 1.2rem;
+  justify-content: space-between;
+  padding: 1.4rem 1.6rem;
+}

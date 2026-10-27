@@ -2,3 +2,8 @@
 @layer theme, base, components, utilities;
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
+
+/* A dialog opened as a side panel (panelClass: 'side-sheet-panel'). */
+.side-sheet-panel {
+  --mat-dialog-container-shape: 0;
+}

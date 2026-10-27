@@ -1,3 +1,5 @@
+import { MatDialog } from '@angular/material/dialog';
+import { SelectorHealDialogComponent } from '../../components/run-detail/selector-heal/selector-heal-dialog.component';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -165,6 +167,12 @@ describe('DetailViewComponent', () => {
     exportEvent: vi.fn(),
     copyEventName: vi.fn()
   };
+  const dialogResult$ = new BehaviorSubject<{ runId: number } | undefined>(
+    undefined
+  );
+  const dialog = {
+    open: vi.fn(() => ({ afterClosed: () => dialogResult$.asObservable() }))
+  };
   const testRunning = {
     isRunningTest$: vi.fn(() => false),
     eventRunningTest$: vi.fn(() => ''),
@@ -191,7 +199,8 @@ describe('DetailViewComponent', () => {
         },
         { provide: Router, useValue: router },
         { provide: ProjectService, useValue: projectService },
-        { provide: TestRunningFacadeService, useValue: testRunning }
+        { provide: TestRunningFacadeService, useValue: testRunning },
+        { provide: MatDialog, useValue: dialog }
       ]
     })
       .overrideProvider(MatSnackBar, { useValue: snackBar })
@@ -267,6 +276,91 @@ describe('DetailViewComponent', () => {
     expect(child(fixture, RequestStub).rawRequest()).toBe(page.run?.rawRequest);
     expect(child(fixture, PanelsStub).context()).toBe(page);
     expect(byTestId(fixture, 'detail-older-run')).toBeNull();
+  });
+
+  describe('a step that could not find its element', () => {
+    /** The page of a run whose step 1 could not find its element. */
+    function failedPage(): ReportDetailRouteContext {
+      const page = createPage();
+      return {
+        ...page,
+        recording: {
+          title: 'add_to_cart',
+          steps: [{ type: 'click', selectors: [['[data-testid="add"]']] }]
+        },
+        stepFailure: {
+          stepIndex: 0,
+          stepType: 'click',
+          url: 'https://shop.example/'
+        }
+      };
+    }
+
+    it('names the step and offers a replacement', () => {
+      routeData$.next({ page: failedPage() });
+      const fixture = render();
+
+      expect(
+        byTestId(fixture, 'detail-step-failure')?.textContent?.replace(
+          /\s+/g,
+          ' '
+        )
+      ).toContain(
+        'Step 1 · Click [data-testid="add"] could not find its element'
+      );
+    });
+
+    it('opens the side panel for the shown run, then shows its trial run', () => {
+      routeData$.next({ page: failedPage() });
+      dialogResult$.next({ runId: 42 });
+      const fixture = render();
+
+      byTestId(fixture, 'detail-find-replacement')?.click();
+
+      expect(dialog.open).toHaveBeenCalledWith(
+        SelectorHealDialogComponent,
+        expect.objectContaining({
+          data: {
+            projectSlug: 'demo',
+            eventId: 'evt-1',
+            runId: 7,
+            stepLabel: 'Step 1 · Click [data-testid="add"]'
+          },
+          disableClose: true
+        })
+      );
+      expect(router.navigate).toHaveBeenCalledWith([], {
+        relativeTo: expect.anything(),
+        queryParams: { run: 42 },
+        queryParamsHandling: 'merge'
+      });
+    });
+
+    it('stays on the run when the panel closes without a trial', () => {
+      routeData$.next({ page: failedPage() });
+      dialogResult$.next(undefined);
+      const fixture = render();
+
+      byTestId(fixture, 'detail-find-replacement')?.click();
+
+      expect(dialog.open).toHaveBeenCalled();
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    it('names the step by its type when the recording lacks it', () => {
+      routeData$.next({ page: { ...failedPage(), recording: null } });
+      const fixture = render();
+
+      expect(byTestId(fixture, 'detail-step-failure')?.textContent).toContain(
+        'Step 1 · click could not find its element'
+      );
+    });
+
+    it('offers nothing for a run without one', () => {
+      const fixture = render();
+
+      expect(byTestId(fixture, 'detail-step-failure')).toBeNull();
+    });
   });
 
   it("passes the project's container variables into the tag configuration", () => {

@@ -6,6 +6,7 @@ import {
   ReportDetailResponse,
   RunHistoryEntry,
   RunStatus,
+  StepFailureSummary,
   TagSpec,
   TestEventDetailSchema
 } from '@utils';
@@ -24,6 +25,11 @@ export type ReportDetailRouteContext = {
   runs: RunHistoryEntry[];
   /** Whether the shown run is the test's latest. */
   isLatestRun: boolean;
+  /**
+   * The step of the shown run that could not find its element, when the run
+   * kept what it saw; null otherwise.
+   */
+  stepFailure: StepFailureSummary | null;
   videoBlob: Blob | undefined;
   /** The Tag Assistant tab of an accompanied-mode run; empty otherwise. */
   tagAssistantVideoBlob: Blob | undefined;
@@ -79,6 +85,7 @@ export function buildReportPage(loaded: {
     run,
     runs,
     isLatestRun: !run || runs.length === 0 || runs[0].runId === run.id,
+    stepFailure: loaded.detail?.stepFailure ?? null,
     videoBlob: loaded.video?.blob,
     tagAssistantVideoBlob: loaded.tagAssistantVideo?.blob,
     imageBlob: loaded.image?.blob,

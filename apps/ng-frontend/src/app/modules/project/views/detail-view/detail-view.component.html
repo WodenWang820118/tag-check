@@ -115,6 +115,33 @@
         [runs]="context.runs"
         [eventName]="eventName()"
       ></app-run-verdict>
+      @if (stepFailureLabel(); as stepLabel) {
+        <section
+          class="detail__step-failure"
+          aria-label="Step that failed"
+          data-testid="detail-step-failure"
+        >
+          <div class="flex min-w-0 flex-col gap-[0.4rem]">
+            <strong class="font-medium"
+              >{{ stepLabel }} could not find its element</strong
+            >
+            <span class="text-[1.3rem]"
+              >None of its selectors matched in time. A model on this computer
+              can suggest a replacement.</span
+            >
+          </div>
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            (click)="findReplacement()"
+            data-testid="detail-find-replacement"
+          >
+            <mat-icon aria-hidden="true">search</mat-icon>
+            Find a replacement
+          </button>
+        </section>
+      }
 
       @if (context.run) {
         <app-run-player

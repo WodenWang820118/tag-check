@@ -1,0 +1,342 @@
+<div class="heal" data-testid="heal-dialog">
+  <header
+    class="flex items-start justify-between gap-[1.2rem] border-b border-[#e3e9e7] pt-[1.6rem] pr-[1.2rem] pb-[1.2rem] pl-[2rem]"
+  >
+    <div class="flex min-w-0 flex-col gap-[0.4rem]">
+      <h2 mat-dialog-title class="heal__title font-medium">
+        Find a replacement
+      </h2>
+      <span class="font-medium" data-testid="heal-step">{{
+        data.stepLabel
+      }}</span>
+      @if (ai(); as state) {
+        @if (ready()) {
+          <span class="text-[1.3rem] text-[#55605d]" data-testid="heal-model"
+            >{{ state.settings.model }} on this computer · Ready</span
+          >
+        }
+      }
+    </div>
+    <button
+      mat-icon-button
+      type="button"
+      aria-label="Close"
+      (click)="close()"
+      data-testid="heal-close"
+    >
+      <mat-icon aria-hidden="true">close</mat-icon>
+    </button>
+  </header>
+
+  <mat-dialog-content class="heal__body flex! flex-col gap-[1.8rem]">
+    @if (loadError(); as message) {
+      <p class="m-0! text-[#b3261e]" role="alert" data-testid="heal-load-error">
+        {{ message }}
+      </p>
+    }
+
+    @if (ai(); as state) {
+      @if (!state.settings.enabled) {
+        <section
+          class="flex flex-col items-start gap-[0.8rem] rounded-[0.8rem] border border-[#d5dedc] bg-[#f4f6f6] p-[1.4rem]"
+          role="status"
+          data-testid="heal-off"
+        >
+          <strong>AI assist is off</strong>
+          <p class="m-0! leading-[1.5]">
+            Turn it on to ask the model on this computer which element this step
+            meant.
+          </p>
+          <a
+            mat-stroked-button
+            [routerLink]="[
+              '/projects',
+              data.projectSlug,
+              'settings',
+              'ai-assist'
+            ]"
+            (click)="close()"
+            data-testid="heal-open-settings"
+            >Open AI Assist settings</a
+          >
+        </section>
+      } @else {
+        <app-ai-model-notice
+          [readiness]="state.readiness"
+          [model]="state.settings.model"
+          [checking]="checking()"
+          (recheck)="recheck()"
+        ></app-ai-model-notice>
+      }
+    }
+
+    @if (context(); as seen) {
+      <section
+        class="flex flex-col gap-[0.8rem]"
+        aria-labelledby="heal-seen-title"
+      >
+        <h3 id="heal-seen-title" class="heal__label m-0!">What the run saw</h3>
+        <ul
+          class="heal__selectors m-0! flex list-none flex-col gap-[0.4rem] p-0! text-[1.3rem]"
+          data-testid="heal-seen"
+        >
+          @for (entry of seen.selectors; track entry.selector) {
+            <li>
+              <code class="[overflow-wrap:anywhere]">{{ entry.selector }}</code>
+              <span class="flex-none text-[#b3261e]">{{
+                entry.matches === null
+                  ? 'could not be counted'
+                  : entry.matches === 1
+                    ? '1 match'
+                    : entry.matches + ' matches'
+              }}</span>
+            </li>
+          }
+        </ul>
+        <p class="m-0! text-[1.3rem] leading-[1.5] text-[#55605d]">
+          {{ seen.candidatesFound }} elements a person can act on were on
+          <code class="[overflow-wrap:anywhere]">{{ pagePath() }}</code> when
+          the step gave up after {{ seen.timeoutMs / 1000 }} s.
+        </p>
+      </section>
+    }
+
+    @if (trial(); as current) {
+      <section
+        class="flex flex-col gap-[0.8rem]"
+        aria-labelledby="heal-trial-title"
+        data-testid="heal-trial"
+      >
+        <h3 id="heal-trial-title" class="heal__label m-0!">Trial</h3>
+        @switch (current.status) {
+          @case ('running') {
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            <p
+              class="m-0! text-[1.3rem] leading-[1.5] text-[#55605d]"
+              role="status"
+            >
+              Running the test with this selector. It waits for any run in
+              progress.
+            </p>
+          }
+          @case ('done') {
+            <p
+              [class]="
+                current.result.passed && current.result.requestPassed
+                  ? 'm-0! text-[#1e6b34]'
+                  : 'm-0! text-[#b3261e]'
+              "
+              role="status"
+              data-testid="heal-trial-result"
+            >
+              @if (current.result.passed && current.result.requestPassed) {
+                Both checks passed (run #{{ current.result.runId }}).
+              } @else {
+                The trial did not pass: dataLayer check
+                {{ current.result.passed ? 'passed' : 'failed' }}, request check
+                {{ current.result.requestPassed ? 'passed' : 'failed' }} (run
+                #{{ current.result.runId }}).
+              }
+            </p>
+          }
+          @case ('error') {
+            <p class="m-0! text-[#b3261e]" role="alert">
+              {{ current.message }}
+            </p>
+          }
+        }
+
+        <h3 class="heal__label m-0!">Change to the recording</h3>
+        <ul
+          class="heal__diff m-0! list-none overflow-hidden rounded-[0.8rem] p-0! text-[1.25rem] leading-[1.7]"
+          data-testid="heal-diff"
+        >
+          @for (line of changes(); track line.selector) {
+            <li
+              [class]="
+                'heal__diff-line--' +
+                line.change +
+                ' flex gap-[0.8rem] px-[1rem]'
+              "
+            >
+              <span aria-hidden="true">{{
+                line.change === 'add'
+                  ? '+'
+                  : line.change === 'remove'
+                    ? '−'
+                    : ' '
+              }}</span>
+              <span class="cdk-visually-hidden">{{
+                line.change === 'add'
+                  ? 'Added:'
+                  : line.change === 'remove'
+                    ? 'Removed:'
+                    : 'Kept:'
+              }}</span>
+              <code class="[overflow-wrap:anywhere]">{{ line.selector }}</code>
+            </li>
+          }
+        </ul>
+        <mat-checkbox
+          [checked]="keepOld()"
+          (change)="keepOld.set($event.checked)"
+          data-testid="heal-keep-old"
+          >Keep the old selectors after the new ones</mat-checkbox
+        >
+      </section>
+    } @else if (context() && ready()) {
+      <section
+        class="flex flex-col gap-[0.8rem]"
+        aria-labelledby="heal-suggestions-title"
+      >
+        <h3 id="heal-suggestions-title" class="heal__label m-0!">
+          Suggestions
+        </h3>
+        @if (asking()) {
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          <div
+            class="flex items-center justify-between gap-[1.2rem] text-[#55605d]"
+            role="status"
+            data-testid="heal-asking"
+          >
+            <span
+              >Asking {{ ai()?.settings?.model }} which element this step meant.
+              The first answer also loads the model.</span
+            >
+            <button mat-stroked-button type="button" (click)="cancel()">
+              Cancel
+            </button>
+          </div>
+        } @else if (askError(); as message) {
+          <p
+            class="m-0! text-[#b3261e]"
+            role="alert"
+            data-testid="heal-ask-error"
+          >
+            {{ message }}
+          </p>
+          <button
+            mat-stroked-button
+            type="button"
+            class="self-start"
+            (click)="ask()"
+          >
+            Try again
+          </button>
+        } @else if (answer(); as result) {
+          @for (suggestion of suggestions(); track suggestion.candidate.index) {
+            <article
+              class="heal__suggestion flex flex-col gap-[1rem] rounded-[1rem] p-[1.4rem]"
+              [attr.data-testid]="
+                'heal-suggestion-' + suggestion.candidate.index
+              "
+            >
+              <div class="flex flex-wrap items-center gap-[0.8rem]">
+                <span
+                  class="rounded-full bg-[#fff1d6] px-[0.8rem] py-[0.2rem] text-[1.2rem] font-medium text-[#7a4b00]"
+                  >Suggestion</span
+                >
+                <strong>{{ nameOf(suggestion.candidate) }}</strong>
+                <span class="text-[1.3rem] text-[#55605d]">{{
+                  suggestion.candidate.role || suggestion.candidate.tag
+                }}</span>
+              </div>
+              <ul
+                class="heal__selectors m-0! flex list-none flex-col gap-[0.4rem] p-0! text-[1.3rem]"
+              >
+                @for (
+                  selector of suggestion.candidate.selectors;
+                  track selector
+                ) {
+                  <li>
+                    <code class="[overflow-wrap:anywhere]">{{ selector }}</code>
+                    <span class="flex-none text-[#1e6b34]"
+                      >matched only this</span
+                    >
+                  </li>
+                }
+              </ul>
+              @if (suggestion.reason) {
+                <p
+                  class="m-0! rounded-[0.6rem] bg-[#f4f6f6] px-[1rem] py-[0.8rem] text-[1.3rem] leading-[1.5] text-[#3d4a48]"
+                >
+                  <strong class="font-medium"
+                    >Model's reading, not checked:</strong
+                  >
+                  {{ suggestion.reason }}
+                </p>
+              }
+              <div class="flex flex-wrap gap-[0.8rem]">
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="button"
+                  (click)="tryIt(suggestion)"
+                  [attr.data-testid]="'heal-try-' + suggestion.candidate.index"
+                >
+                  Try it
+                </button>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="dismiss(suggestion)"
+                >
+                  Not this one
+                </button>
+              </div>
+            </article>
+          } @empty {
+            <p class="m-0! leading-[1.5]" data-testid="heal-none">
+              @if (result.suggestions.length === 0) {
+                No element on the page looks like the recorded one. The page may
+                have changed more than a selector can fix: re-record this step.
+              } @else {
+                No suggestion left.
+              }
+            </p>
+            <button
+              mat-stroked-button
+              type="button"
+              class="self-start"
+              (click)="ask()"
+            >
+              Ask again
+            </button>
+          }
+        }
+      </section>
+    }
+  </mat-dialog-content>
+
+  <footer
+    class="flex flex-col gap-[1rem] border-t border-[#e3e9e7] px-[2rem] pt-[1.2rem] pb-[1.6rem]"
+  >
+    @if (trial(); as current) {
+      <div class="flex flex-wrap justify-end gap-[0.8rem]">
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="backToSuggestions()"
+          [disabled]="current.status === 'running' || saving()"
+        >
+          Back to suggestions
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          (click)="save()"
+          [disabled]="current.status === 'running' || saving()"
+          data-testid="heal-save"
+        >
+          Save to recording
+        </button>
+      </div>
+    }
+    <p class="m-0! text-[1.3rem] leading-[1.5] text-[#55605d]">
+      Suggestions come from a model on this computer; page data does not leave
+      it. The recording changes only when you save, and a test passes only on
+      its own checks.
+    </p>
+  </footer>
+</div>
