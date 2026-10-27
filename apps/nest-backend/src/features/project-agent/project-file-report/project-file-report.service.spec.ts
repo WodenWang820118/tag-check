@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { mkdtempSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -8,11 +8,9 @@ let root = '';
 
 function build() {
   root = mkdtempSync(join(tmpdir(), 'file-report-'));
-  const folderPathService = {
-    getReportSavingFolderPath: vi.fn().mockResolvedValue('/rep'),
-    getInspectionEventFolderPath: vi.fn(
-      async (_projectSlug: string, eventId: string) => join(root, eventId)
-    )
+  const runRecordingsService = {
+    removeRuns: vi.fn().mockResolvedValue(undefined),
+    removeLegacy: vi.fn().mockResolvedValue(undefined)
   };
   const xlsxReportService = { writeXlsxFile: vi.fn() };
   const testEventRepositoryService = {
@@ -22,13 +20,14 @@ function build() {
     deleteRuns: vi.fn()
   };
   const service = new ProjectFileReportService(
-    folderPathService as never,
+    runRecordingsService as never,
     xlsxReportService as never,
     testEventRepositoryService as never,
     testEventDetailRepositoryService as never
   );
   return {
     service,
+    runRecordingsService,
     xlsxReportService,
     testEventRepositoryService,
     testEventDetailRepositoryService
@@ -40,19 +39,13 @@ afterEach(() => {
 });
 
 describe('ProjectFileReportService', () => {
-  it('deleteRuns() deletes the runs and the recording of a test whose latest run went', async () => {
+  it("deleteRuns() deletes the runs and their recordings, and a deleted latest run's old ones", async () => {
     const ctx = build();
-    for (const eventId of ['latest-deleted', 'older-deleted']) {
-      mkdirSync(join(root, eventId));
-      writeFileSync(join(root, eventId, 'recording.webm'), 'webm');
-      writeFileSync(
-        join(root, eventId, 'recording-tag-assistant.webm'),
-        'webm'
-      );
-    }
+    const deletedRecordings = [{ eventId: 'add_to_cart', recordingKey: 'k' }];
     ctx.testEventDetailRepositoryService.deleteRuns.mockResolvedValue({
       deletedRunIds: [7, 3],
-      latestRunDeletedEventIds: ['latest-deleted', 'no-recording']
+      latestRunDeletedEventIds: ['add_to_cart', 'purchase'],
+      deletedRecordings
     });
 
     const result = await ctx.service.deleteRuns('demo', [7, 3]);
@@ -61,17 +54,17 @@ describe('ProjectFileReportService', () => {
       ctx.testEventDetailRepositoryService.deleteRuns
     ).toHaveBeenCalledWith('demo', [7, 3]);
     expect(result).toEqual({ deletedRunIds: [7, 3] });
-    expect(existsSync(join(root, 'latest-deleted', 'recording.webm'))).toBe(
-      false
+    expect(ctx.runRecordingsService.removeRuns).toHaveBeenCalledWith(
+      'demo',
+      deletedRecordings
     );
-    expect(
-      existsSync(join(root, 'latest-deleted', 'recording-tag-assistant.webm'))
-    ).toBe(false);
-    expect(
-      existsSync(join(root, 'older-deleted', 'recording-tag-assistant.webm'))
-    ).toBe(true);
-    expect(existsSync(join(root, 'older-deleted', 'recording.webm'))).toBe(
-      true
+    expect(ctx.runRecordingsService.removeLegacy).toHaveBeenCalledWith(
+      'demo',
+      'add_to_cart'
+    );
+    expect(ctx.runRecordingsService.removeLegacy).toHaveBeenCalledWith(
+      'demo',
+      'purchase'
     );
   });
 

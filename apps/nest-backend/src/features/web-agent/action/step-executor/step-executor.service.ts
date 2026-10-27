@@ -23,6 +23,11 @@ export interface StepExecution {
   application: EventInspectionPresetDto['application'];
   /** The recording's last click, which may be kept from navigating away. */
   isLastClick?: boolean;
+  /**
+   * Called when the step acts: for a click, change or hover after the wait
+   * it starts with, right before the action; at once for other steps.
+   */
+  onAction?: () => void;
 }
 
 /**
@@ -48,12 +53,16 @@ export class StepExecutorService {
     state,
     isLastStep,
     application,
-    isLastClick = false
+    isLastClick = false,
+    onAction
   }: StepExecution) {
     // 3 to 5 s: the pause before a click, change or hover, and the
     // navigation wait after a key-up.
     const randomDelay = 3000 + Math.floor(Math.random() * 2000);
 
+    if (!this.waitsBeforeAction(step)) {
+      onAction?.();
+    }
     switch (step.type) {
       case BrowserAction.SETVIEWPORT:
         await this.stepExecutorUtilsService.handleSetViewport(page, step);
@@ -100,10 +109,24 @@ export class StepExecutorService {
           eventId,
           isLastStep,
           randomDelay,
-          isLastClick
+          isLastClick,
+          onAction
         );
         break;
     }
+  }
+
+  /** Steps handleDefaultAction runs, which wait before they act. */
+  private waitsBeforeAction(step: Step): boolean {
+    return !(
+      [
+        BrowserAction.SETVIEWPORT,
+        BrowserAction.NAVIGATE,
+        BrowserAction.WAITFORELEMENT,
+        BrowserAction.KEYDOWN,
+        BrowserAction.KEYUP
+      ] as string[]
+    ).includes(step.type);
   }
 
   /**
@@ -117,9 +140,11 @@ export class StepExecutorService {
     eventId: string,
     isLastStep: boolean,
     delay: number,
-    isLastClick = false
+    isLastClick = false,
+    onAction?: () => void
   ) {
     await new Promise((resolve) => setTimeout(resolve, delay));
+    onAction?.();
     if (
       this.handlers[step.type] &&
       typeof this.handlers[step.type].handle === 'function'

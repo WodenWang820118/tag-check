@@ -78,7 +78,11 @@ describe('TestEventDetailRepositoryService.deleteRuns (SQLite)', () => {
   async function run(
     testEvent: TestEventEntity,
     time: string,
-    { linked = true, message = `run at ${time}` } = {}
+    {
+      linked = true,
+      message = `run at ${time}`,
+      recordingKey = null as string | null
+    } = {}
   ) {
     const screenshot = await dataSource.manager.save(TestImageEntity, {
       testEvent,
@@ -89,7 +93,13 @@ describe('TestEventDetailRepositoryService.deleteRuns (SQLite)', () => {
     // Runs saved before runs were linked to their screenshot have no link.
     const result = await service.create(
       testEvent,
-      { passed: true, requestPassed: true, destinationUrl: '', message },
+      {
+        passed: true,
+        requestPassed: true,
+        destinationUrl: '',
+        message,
+        recordingKey
+      },
       linked ? screenshot : null
     );
     await dataSource.query(
@@ -123,13 +133,21 @@ describe('TestEventDetailRepositoryService.deleteRuns (SQLite)', () => {
     const demo = await project('demo');
     const cart = await test(demo, 'add_to_cart');
     const old = await run(cart, '10:00', { linked: false, message: 'Old' });
-    const latest = await run(cart, '10:05');
+    const latest = await run(cart, '10:05', {
+      recordingKey: '0f0e6b2a-7c1d-4e5f-8a9b-1c2d3e4f5a6b'
+    });
 
     const deleted = await service.deleteRuns('demo', [latest.runId]);
 
     expect(deleted).toEqual({
       deletedRunIds: [latest.runId],
-      latestRunDeletedEventIds: ['add_to_cart']
+      latestRunDeletedEventIds: ['add_to_cart'],
+      deletedRecordings: [
+        {
+          eventId: 'add_to_cart',
+          recordingKey: '0f0e6b2a-7c1d-4e5f-8a9b-1c2d3e4f5a6b'
+        }
+      ]
     });
     expect(await remainingRuns()).toEqual([old.runId]);
     expect(await remainingScreenshots()).toEqual([old.screenshotId]);
@@ -196,5 +214,72 @@ describe('TestEventDetailRepositoryService.deleteRuns (SQLite)', () => {
     const latest = await service.getBySlugAndEventId('demo', 'add_to_cart');
 
     expect(latest.id).toBe(newer.runId);
+  });
+
+  it('lists the runs that keep recordings, newest first, and lets them go', async () => {
+    const demo = await project('demo');
+    const cart = await test(demo, 'add_to_cart');
+    await run(cart, '10:00');
+    const kept = await run(cart, '10:05', {
+      recordingKey: '0f0e6b2a-7c1d-4e5f-8a9b-1c2d3e4f5a6b'
+    });
+    const newer = await run(cart, '10:10', {
+      recordingKey: '1f0e6b2a-7c1d-4e5f-8a9b-1c2d3e4f5a6b'
+    });
+
+    expect(await service.listRecordingKeys(cart.id)).toEqual([
+      { id: newer.runId, recordingKey: '1f0e6b2a-7c1d-4e5f-8a9b-1c2d3e4f5a6b' },
+      { id: kept.runId, recordingKey: '0f0e6b2a-7c1d-4e5f-8a9b-1c2d3e4f5a6b' }
+    ]);
+
+    await service.clearRecordingKeys([kept.runId]);
+
+    expect(await service.listRecordingKeys(cart.id)).toEqual([
+      { id: newer.runId, recordingKey: '1f0e6b2a-7c1d-4e5f-8a9b-1c2d3e4f5a6b' }
+    ]);
+    expect(
+      (await service.listRunHistory('demo', 'add_to_cart')).map((r) => [
+        r.runId,
+        r.recordingKey
+      ])
+    ).toEqual([
+      [newer.runId, '1f0e6b2a-7c1d-4e5f-8a9b-1c2d3e4f5a6b'],
+      [kept.runId, null],
+      [newer.runId - 2, null]
+    ]);
+  });
+
+  it('reads a chosen run, and the screenshot it saved', async () => {
+    const demo = await project('demo');
+    const cart = await test(demo, 'add_to_cart');
+    const older = await run(cart, '10:00', { message: 'older' });
+    await run(cart, '10:05', { message: 'newer' });
+    const unlinked = await run(cart, '10:10', { linked: false });
+
+    const chosen = await service.getBySlugAndEventId(
+      'demo',
+      'add_to_cart',
+      older.runId
+    );
+    const screenshot = await service.getRunScreenshot(
+      'demo',
+      'add_to_cart',
+      older.runId,
+      true
+    );
+
+    expect(chosen.message).toBe('older');
+    expect(screenshot?.id).toBe(older.screenshotId);
+    expect(screenshot?.imageData?.toString()).toBe('10:00');
+    expect(
+      (await service.getRunScreenshot('demo', 'add_to_cart', older.runId))
+        ?.imageData
+    ).toBeUndefined();
+    expect(
+      await service.getRunScreenshot('demo', 'add_to_cart', unlinked.runId)
+    ).toBeNull();
+    expect(
+      await service.getRunScreenshot('other', 'add_to_cart', older.runId)
+    ).toBeNull();
   });
 });

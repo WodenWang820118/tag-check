@@ -52,8 +52,30 @@ export type DeleteRunsResponse = {
  */
 export type ReportDetailResponse = {
   testEvent: AbstractTestEvent;
-  /** The latest run's result, or null before the first run. */
+  /**
+   * The chosen run's result (GET .../:eventId?run=<runId>), the latest run's
+   * by default, or null before the first run.
+   */
   testEventDetails: TestEventDetailSchema | null;
-  /** The latest run's screenshot, or null before the first run. */
+  /** That run's screenshot, or null when it has none. */
   testImage: TestImageSummary | null;
+  /** Every run of the test, newest first. */
+  runs: RunHistoryEntry[];
 };
+
+/** One run in a test's history (ReportDetailResponse.runs). */
+export type RunHistoryEntry = {
+  runId: number;
+  passed: boolean;
+  requestPassed: boolean;
+  /** When the run's result was saved. */
+  runAt: Date;
+  /**
+   * Whether the run's screen recordings are kept: the latest runs of a test
+   * keep theirs (RUN_RECORDINGS_KEPT), older runs only their screenshot.
+   */
+  hasRecording: boolean;
+};
+
+/** How many of a test's latest runs keep their screen recordings. */
+export const RUN_RECORDINGS_KEPT = 10;

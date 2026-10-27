@@ -4,12 +4,14 @@ import { StepExecutorService } from './step-executor/step-executor.service';
 import { EventInspectionPresetDto } from '../../../shared/dto/event-inspection-preset.dto';
 import { ProgressEventsService } from '../../../core/events-gateway/progress-events.service';
 import { RunStatusService } from '../../../core/events-gateway/run-status.service';
+import { RunTimelineService } from '../../../core/events-gateway/run-timeline.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
 
 /**
  * Replays a test's Chrome Recorder recording on a page, step by step, and
  * reports each step to RunStatusService, which sends it over SSE and to the
- * desktop tray. A test without a recording replays nothing.
+ * desktop tray, and the moment each step acts to RunTimelineService. A test
+ * without a recording replays nothing.
  * Rejects with the error of the first step that fails.
  */
 @Injectable()
@@ -19,7 +21,8 @@ export class ActionService {
     private readonly progressEventsService: ProgressEventsService,
     private readonly stepExecutorService: StepExecutorService,
     private readonly recordingRepositoryService: RecordingRepositoryService,
-    private readonly runStatusService: RunStatusService
+    private readonly runStatusService: RunStatusService,
+    private readonly runTimelineService: RunTimelineService
   ) {}
 
   async performOperation(
@@ -56,7 +59,8 @@ export class ActionService {
         state,
         isLastStep: i === totalSteps - 1,
         application,
-        isLastClick: i === lastClickIndex
+        isLastClick: i === lastClickIndex,
+        onAction: () => this.runTimelineService.markStep(eventId, i)
       });
     }
     this.logger.log('Operation performed successfully');

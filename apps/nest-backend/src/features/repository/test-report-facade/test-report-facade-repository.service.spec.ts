@@ -12,11 +12,14 @@ function build() {
   const testEventRepositoryService = {
     create: vi.fn(),
     getEntityBySlugAndEventId: vi.fn(),
-    getBySlugAndEventId: vi.fn()
+    getBySlugAndEventId: vi.fn(),
+    deleteByProjectSlugAndEventIds: vi.fn()
   };
   const testEventDetailRepositoryService = {
     create: vi.fn(),
-    getBySlugAndEventId: vi.fn()
+    getBySlugAndEventId: vi.fn(),
+    getRunScreenshot: vi.fn(),
+    listRunHistory: vi.fn().mockResolvedValue([])
   };
   const specRepositoryService = { create: vi.fn() };
   const testImageRepositoryService = {
@@ -25,6 +28,10 @@ function build() {
   };
   const recordingRepositoryService = { create: vi.fn() };
   const itemDefRepositoryService = { create: vi.fn() };
+  const runRecordingsService = {
+    fileOf: vi.fn().mockResolvedValue(null),
+    removeTests: vi.fn().mockResolvedValue(undefined)
+  };
   const service = new TestReportFacadeRepositoryService(
     projectRepositoryService as never,
     testEventRepositoryService as never,
@@ -32,10 +39,12 @@ function build() {
     specRepositoryService as never,
     testImageRepositoryService as never,
     recordingRepositoryService as never,
-    itemDefRepositoryService as never
+    itemDefRepositoryService as never,
+    runRecordingsService as never
   );
   return {
     service,
+    runRecordingsService,
     projectRepositoryService,
     testEventRepositoryService,
     testEventDetailRepositoryService,
@@ -133,6 +142,15 @@ describe('TestReportFacadeRepositoryService', () => {
       ctx.testImageRepositoryService.getSummaryBySlugAndEventId.mockResolvedValue(
         REPORT_DETAIL_SAMPLE.testImage
       );
+      ctx.testEventDetailRepositoryService.listRunHistory.mockResolvedValue(
+        REPORT_DETAIL_SAMPLE.runs.map(({ hasRecording, ...run }) => ({
+          ...run,
+          runAt: new Date(run.runAt),
+          recordingKey: hasRecording
+            ? '0f0e6b2a-7c1d-4e5f-8a9b-1c2d3e4f5a6b'
+            : null
+        }))
+      );
     }
 
     const wire = (value: unknown) => JSON.parse(JSON.stringify(value));
@@ -180,8 +198,91 @@ describe('TestReportFacadeRepositoryService', () => {
       expect(result).toEqual({
         testEvent: { id: 1 },
         testEventDetails: null,
-        testImage: null
+        testImage: null,
+        runs: []
       });
+    });
+
+    it("reads the chosen run and that run's screenshot", async () => {
+      const ctx = build();
+      stubRepositories(ctx);
+      ctx.testEventDetailRepositoryService.getRunScreenshot.mockResolvedValue({
+        id: 5,
+        imageName: 'screenshot.png'
+      });
+
+      const result = await ctx.service.getReportDetail('demo', 'evt', 5);
+
+      expect(
+        ctx.testEventDetailRepositoryService.getBySlugAndEventId
+      ).toHaveBeenCalledWith('demo', 'evt', 5);
+      expect(
+        ctx.testEventDetailRepositoryService.getRunScreenshot
+      ).toHaveBeenCalledWith('demo', 'evt', 5);
+      expect(
+        ctx.testImageRepositoryService.getSummaryBySlugAndEventId
+      ).not.toHaveBeenCalled();
+      expect(result.testImage).toMatchObject({ id: 5 });
+    });
+
+    it('lists the runs, newest first, and which kept their recordings', async () => {
+      const ctx = build();
+      stubRepositories(ctx);
+      ctx.testEventDetailRepositoryService.listRunHistory.mockResolvedValue([
+        {
+          runId: 9,
+          passed: true,
+          requestPassed: true,
+          runAt: new Date(0),
+          recordingKey: null
+        },
+        {
+          runId: 8,
+          passed: true,
+          requestPassed: false,
+          runAt: new Date(0),
+          recordingKey: null
+        },
+        {
+          runId: 7,
+          passed: false,
+          requestPassed: false,
+          runAt: new Date(0),
+          recordingKey: 'key'
+        }
+      ]);
+      // Only the latest run can own recordings left in the test's folder.
+      ctx.runRecordingsService.fileOf.mockResolvedValue('recording.webm');
+
+      const result = await ctx.service.getReportDetail('demo', 'evt');
+
+      expect(result.runs.map((run) => [run.runId, run.hasRecording])).toEqual([
+        [9, true],
+        [8, false],
+        [7, true]
+      ]);
+      expect(ctx.runRecordingsService.fileOf).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('deleteTests()', () => {
+    it('deletes the tests, then what their runs left on disk', async () => {
+      const ctx = build();
+      ctx.testEventRepositoryService.deleteByProjectSlugAndEventIds.mockResolvedValue(
+        [{ eventId: 'evt-1' }, { eventId: 'evt-2' }]
+      );
+
+      const result = await ctx.service.deleteTests('demo', [
+        'evt-1',
+        'evt-2',
+        'other-project'
+      ]);
+
+      expect(ctx.runRecordingsService.removeTests).toHaveBeenCalledWith(
+        'demo',
+        ['evt-1', 'evt-2']
+      );
+      expect(result).toEqual([{ eventId: 'evt-1' }, { eventId: 'evt-2' }]);
     });
   });
 });

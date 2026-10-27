@@ -4,6 +4,7 @@ import { InspectorSingleEventService } from '../../features/inspector/inspector-
 import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
 import { TestEventDetailRepositoryService } from '../../core/repository/test-event/test-event-detail-repository.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
+import { RunMedia } from './run-media';
 
 describe('EventInspectionPipelineService', () => {
   function build(opts?: { inspectError?: Error; inspectResult?: unknown }) {
@@ -33,13 +34,21 @@ describe('EventInspectionPipelineService', () => {
     const testImageRepository = {
       create: vi.fn().mockResolvedValue({ id: 9 })
     } as unknown as TestImageRepositoryService;
+    const runTimeline = {
+      steps: vi.fn().mockReturnValue([10_000, undefined, 19_000])
+    };
+    const runRecordings = { prune: vi.fn().mockResolvedValue(undefined) };
     return {
       svc: new EventInspectionPipelineService(
         inspector,
         testEventRepository,
         testEventDetailRepository,
-        testImageRepository
+        testImageRepository,
+        runTimeline as never,
+        runRecordings as never
       ),
+      runTimeline,
+      runRecordings,
       inspector,
       testEventRepository,
       testEventDetailRepository,
@@ -74,6 +83,78 @@ describe('EventInspectionPipelineService', () => {
     expect(testEventDetailRepository.create).toHaveBeenCalled();
     expect(testImageRepository.create).toHaveBeenCalled();
     expect(testEventRepository.updateTestEvent).toHaveBeenCalled();
+  });
+
+  it('saves the run with its recordings, step timeline and request message, then prunes older recordings', async () => {
+    const { svc, testEventDetailRepository, runTimeline, runRecordings } =
+      build({
+        inspectResult: {
+          dataLayerResult: { passed: true, dataLayer: [], message: 'Valid' },
+          destinationUrl: 'https://x',
+          rawRequest: 'r',
+          requestCheckResult: {
+            passed: false,
+            message: 'No GA4 request for add_to_cart was captured'
+          }
+        }
+      });
+    const page = {
+      screenshot: vi.fn().mockResolvedValue(Buffer.from('img'))
+    } as never;
+    const media = new RunMedia();
+    media.site = { firstFrameAt: 8_000 } as never;
+    media.tagAssistant = { firstFrameAt: 8_400 } as never;
+
+    await svc.singleEventInspectionRecipe(
+      page,
+      'p',
+      'e',
+      'M',
+      { username: '', password: '' },
+      'true',
+      { application: undefined } as never,
+      media
+    );
+
+    expect(runTimeline.steps).toHaveBeenCalledWith('e');
+    expect(
+      vi.mocked(testEventDetailRepository.create).mock.calls[0][1]
+    ).toMatchObject({
+      message: 'Valid',
+      requestMessage: 'No GA4 request for add_to_cart was captured',
+      recordingKey: media.recordingKey,
+      mediaTimeline: {
+        steps: [
+          { index: 0, atMs: 2000 },
+          { index: 2, atMs: 11000 }
+        ],
+        tagAssistantOffsetMs: 400
+      }
+    });
+    expect(runRecordings.prune).toHaveBeenCalledWith('p', 'e', 1);
+  });
+
+  it('saves a run without recordings when its site recording did not start', async () => {
+    const { svc, testEventDetailRepository, runRecordings } = build();
+    const page = {
+      screenshot: vi.fn().mockResolvedValue(Buffer.from('img'))
+    } as never;
+
+    await svc.singleEventInspectionRecipe(
+      page,
+      'p',
+      'e',
+      'M',
+      { username: '', password: '' },
+      'false',
+      { application: undefined } as never,
+      new RunMedia()
+    );
+
+    expect(
+      vi.mocked(testEventDetailRepository.create).mock.calls[0][1]
+    ).toMatchObject({ recordingKey: null, mediaTimeline: null });
+    expect(runRecordings.prune).not.toHaveBeenCalled();
   });
 
   it('records a fallback failed detail when inspectDataLayer throws', async () => {

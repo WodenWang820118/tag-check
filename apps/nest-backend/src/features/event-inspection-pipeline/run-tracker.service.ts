@@ -6,6 +6,7 @@ import {
   type RunStatusTest
 } from '@utils';
 import { RunStatusService } from '../../core/events-gateway/run-status.service';
+import { RunTimelineService } from '../../core/events-gateway/run-timeline.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 import { toClientErrorMessage } from '../../shared/client-error-message';
 import type { SingleEventInspectionResult } from './event-inspection-pipeline.service';
@@ -36,7 +37,8 @@ export function toRunOutcome(
 }
 
 /**
- * Reports the start and end of every run to RunStatusService. Both run
+ * Reports the start and end of every run to RunStatusService, and keeps the
+ * run's step timeline (RunTimelineService) open while it runs. Both run
  * paths, direct (SingleEventInspectionService) and accompanied
  * (GtmOperatorService), wrap their queued task in `track`.
  */
@@ -46,7 +48,8 @@ export class RunTrackerService {
 
   constructor(
     private readonly runStatus: RunStatusService,
-    private readonly testEvents: TestEventRepositoryService
+    private readonly testEvents: TestEventRepositoryService,
+    private readonly runTimeline: RunTimelineService
   ) {}
 
   /**
@@ -60,6 +63,7 @@ export class RunTrackerService {
     task: () => Promise<SingleEventInspectionResult>
   ): Promise<SingleEventInspectionResult> {
     this.runStatus.start(await this.describe(run));
+    this.runTimeline.begin(run.eventId);
     try {
       const result = await task();
       this.runStatus.finish(
@@ -76,6 +80,8 @@ export class RunTrackerService {
         );
       }
       throw error;
+    } finally {
+      this.runTimeline.end(run.eventId);
     }
   }
 

@@ -10,7 +10,10 @@ import {
 import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
 import { TestEventDetailRepositoryService } from '../../core/repository/test-event/test-event-detail-repository.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
+import { RunTimelineService } from '../../core/events-gateway/run-timeline.service';
+import { RunRecordingsService } from '../../infrastructure/os/run-recordings/run-recordings.service';
 import { ValidationResult } from '@utils';
+import { buildMediaTimeline, type RunMedia } from './run-media';
 
 /**
  * What `singleEventInspectionRecipe` resolves with: the run's checks, or
@@ -27,8 +30,8 @@ export type SingleEventInspectionResult =
 
 /**
  * Runs the checks on a page the caller has prepared and saves the run's
- * result: one TestEventDetail row with the run's screenshot, which then
- * becomes the test's latest result.
+ * result: one TestEventDetail row with the run's screenshot, its recordings'
+ * folder and step timeline, which then becomes the test's latest result.
  */
 @Injectable()
 export class EventInspectionPipelineService {
@@ -38,7 +41,9 @@ export class EventInspectionPipelineService {
     private readonly inspectorSingleEventService: InspectorSingleEventService,
     private readonly testEventRepositoryService: TestEventRepositoryService,
     private readonly testEventDetailRepositoryService: TestEventDetailRepositoryService,
-    private readonly testImageRepositoryService: TestImageRepositoryService
+    private readonly testImageRepositoryService: TestImageRepositoryService,
+    private readonly runTimelineService: RunTimelineService,
+    private readonly runRecordingsService: RunRecordingsService
   ) {}
 
   /**
@@ -49,6 +54,8 @@ export class EventInspectionPipelineService {
    * method resolves with undefined: the caller reads the result from the
    * saved report. It rejects only when the result cannot be saved; for a
    * failed run it then rejects with the run's own error.
+   *
+   * `media` is the run's recordings, which the caller starts and stops.
    */
   async singleEventInspectionRecipe(
     page: Page,
@@ -57,7 +64,8 @@ export class EventInspectionPipelineService {
     measurementId: string,
     credentials: Credentials,
     captureRequest: string,
-    eventInspectionPresetDto: EventInspectionPresetDto
+    eventInspectionPresetDto: EventInspectionPresetDto,
+    media: RunMedia | null = null
   ): Promise<SingleEventInspectionResult> {
     this.logger.log('Inspecting single event');
     const testEvent =
@@ -87,7 +95,8 @@ export class EventInspectionPipelineService {
           projectSlug,
           eventId,
           testEvent,
-          this.buildFallbackTestEventDetail()
+          this.buildFallbackTestEventDetail(),
+          media
         );
       } catch (saveError) {
         // The run's own error says more than the failure to save it.
@@ -120,20 +129,29 @@ export class EventInspectionPipelineService {
       'Updated detail:',
       JSON.stringify(updatedDetail, null, 2)
     );
-    await this.saveResult(page, projectSlug, eventId, testEvent, updatedDetail);
+    await this.saveResult(
+      page,
+      projectSlug,
+      eventId,
+      testEvent,
+      updatedDetail,
+      media
+    );
     return data;
   }
 
   /**
-   * Saves the run's screenshot, then its result linked to it, and points the
-   * test at both as its latest.
+   * Saves the run's screenshot, then its result linked to it and to its
+   * recordings, and points the test at both as its latest. Older runs past
+   * RUN_RECORDINGS_KEPT then lose their recordings.
    */
   private async saveResult(
     page: Page,
     projectSlug: string,
     eventId: string,
     testEvent: TestEventEntity,
-    detail: CreateTestEventDetailDto
+    detail: CreateTestEventDetailDto,
+    media: RunMedia | null
   ): Promise<void> {
     const screenshot = await page.screenshot({ fullPage: true });
     const testImage = await this.testImageRepositoryService.create(
@@ -141,9 +159,21 @@ export class EventInspectionPipelineService {
       eventId,
       { imageName: `screenshot.png`, imageData: screenshot }
     );
+    // A run whose site recording never started has no recordings.
+    const recorded = media?.site ? media : null;
     const testEventDetail = await this.testEventDetailRepositoryService.create(
       testEvent,
-      detail,
+      {
+        ...detail,
+        recordingKey: recorded?.recordingKey ?? null,
+        mediaTimeline: recorded
+          ? buildMediaTimeline(
+              this.runTimelineService.steps(eventId),
+              recorded.site?.firstFrameAt ?? null,
+              recorded.tagAssistant?.firstFrameAt ?? null
+            )
+          : null
+      },
       testImage
     );
 
@@ -158,6 +188,9 @@ export class EventInspectionPipelineService {
     );
     this.logger.debug('Updated info:', JSON.stringify(updatedInfo, null, 2));
     this.logger.debug('Updated event:', JSON.stringify(updatedEvent, null, 2));
+    if (recorded) {
+      await this.runRecordingsService.prune(projectSlug, eventId, testEvent.id);
+    }
   }
 
   /** The result row of a run whose checks finished. */
@@ -173,7 +206,8 @@ export class EventInspectionPipelineService {
       rawRequest: result.rawRequest,
       destinationUrl: result.destinationUrl,
       dataLayer: result.dataLayerResult.dataLayer,
-      message: result.dataLayerResult.message || ''
+      message: result.dataLayerResult.message || '',
+      requestMessage: result.requestCheckResult?.message ?? null
     };
   }
 

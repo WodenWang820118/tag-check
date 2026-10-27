@@ -25,7 +25,8 @@ describe('ReportController', () => {
     };
     const testReportFacadeRepositoryService = {
       createFullReport: vi.fn().mockResolvedValue('full-report'),
-      getReportDetail: vi.fn().mockResolvedValue({ eventId: 'evt-1' })
+      getReportDetail: vi.fn().mockResolvedValue({ eventId: 'evt-1' }),
+      deleteTests: vi.fn().mockResolvedValue('deleted-batch')
     };
     const testEventRepositoryService = {
       listReports: vi.fn().mockResolvedValue([{ eventId: 'evt-1' }]),
@@ -134,15 +135,16 @@ describe('ReportController', () => {
     });
   });
 
-  it('deleteProjectEventReports delegates to TestEventRepositoryService.deleteByProjectSlugAndEventIds', async () => {
-    const { controller, testEventRepositoryService } = build();
+  it('deleteProjectEventReports deletes the tests with their files through the facade', async () => {
+    const { controller, testReportFacadeRepositoryService } = build();
     const result = await controller.deleteProjectEventReports('proj-1', [
       'a',
       'b'
     ]);
-    expect(
-      testEventRepositoryService.deleteByProjectSlugAndEventIds
-    ).toHaveBeenCalledWith('proj-1', ['a', 'b']);
+    expect(testReportFacadeRepositoryService.deleteTests).toHaveBeenCalledWith(
+      'proj-1',
+      ['a', 'b']
+    );
     expect(result).toBe('deleted-batch');
   });
 
@@ -197,8 +199,13 @@ describe('ReportController', () => {
     const result = await controller.getReportDetails('proj-1', 'evt-1');
     expect(
       testReportFacadeRepositoryService.getReportDetail
-    ).toHaveBeenCalledWith('proj-1', 'evt-1');
+    ).toHaveBeenCalledWith('proj-1', 'evt-1', undefined);
     expect(result).toEqual({ eventId: 'evt-1' });
+
+    await controller.getReportDetails('proj-1', 'evt-1', 7);
+    expect(
+      testReportFacadeRepositoryService.getReportDetail
+    ).toHaveBeenLastCalledWith('proj-1', 'evt-1', 7);
   });
 
   it('updateTestEvents maps each report into an UpdateTestEventDto and forwards them', async () => {

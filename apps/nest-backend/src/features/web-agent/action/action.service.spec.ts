@@ -7,13 +7,21 @@ describe('ActionService', () => {
     const states: Array<{ isFirstNavigation: boolean }> = [];
     const eventsGateway = { sendEventCompleted: vi.fn() };
     const runStatus = { step: vi.fn() };
+    const runTimeline = { markStep: vi.fn() };
     const stepExecutor = {
       executeStep: vi
         .fn()
         .mockImplementation(
-          async ({ state }: { state: { isFirstNavigation: boolean } }) => {
+          async ({
+            state,
+            onAction
+          }: {
+            state: { isFirstNavigation: boolean };
+            onAction: () => void;
+          }) => {
             states.push(state);
             state.isFirstNavigation = false;
+            onAction();
           }
         )
     };
@@ -28,7 +36,8 @@ describe('ActionService', () => {
           ]
         })
       } as never,
-      runStatus as never
+      runStatus as never,
+      runTimeline as never
     );
 
     await service.performOperation({} as never, 'project', 'event', {
@@ -42,6 +51,8 @@ describe('ActionService', () => {
     expect(runStatus.step).toHaveBeenNthCalledWith(1, 'event', 2, 1);
     expect(runStatus.step).toHaveBeenNthCalledWith(2, 'event', 2, 2);
     expect(eventsGateway.sendEventCompleted).toHaveBeenCalledWith('event');
+    expect(runTimeline.markStep).toHaveBeenNthCalledWith(1, 'event', 0);
+    expect(runTimeline.markStep).toHaveBeenNthCalledWith(2, 'event', 1);
   });
 
   describe('last click protection', () => {
@@ -76,7 +87,8 @@ describe('ActionService', () => {
         {
           getRecordingDetails: vi.fn().mockResolvedValue({ steps })
         } as never,
-        { step: vi.fn() } as never
+        { step: vi.fn() } as never,
+        { markStep: vi.fn() } as never
       );
       await service.performOperation({} as never, 'project', 'event', {
         localStorage: { data: [] },

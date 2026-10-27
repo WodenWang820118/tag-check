@@ -85,6 +85,11 @@ async function settlesWithin(
 export class RunRecorder {
   private readonly logger = new Logger(RunRecorder.name);
   private lastFrame: { data: Buffer; timestamp: number } | null = null;
+  private firstFrameMs: number | null = null;
+  /** Frames written so far, which place the next frame in the video. */
+  private framesWritten = 0;
+  /** Time cut from the video by gaps longer than MAX_FRAME_SECONDS. */
+  private skippedSeconds = 0;
   private writes: Promise<void> = Promise.resolve();
   private stopping: Promise<void> | null = null;
   private failure: string | null = null;
@@ -159,6 +164,15 @@ export class RunRecorder {
     return recorder;
   }
 
+  /**
+   * When the first frame was captured (epoch ms), which is 0:00 in the
+   * video; null until a frame arrives. Each frame stays on screen until the
+   * next, so the video follows the clock from here.
+   */
+  get firstFrameAt(): number | null {
+    return this.firstFrameMs;
+  }
+
   /** Why the recording failed, or null while it is healthy. */
   get error(): string | null {
     return this.failure;
@@ -225,14 +239,26 @@ export class RunRecorder {
       data: Buffer.from(data, 'base64'),
       timestamp: metadata.timestamp ?? Date.now() / 1000
     };
+    this.firstFrameMs ??= frame.timestamp * 1000;
     const previous = this.lastFrame;
     this.lastFrame = frame;
-    // A frame stays on screen until the next one arrives.
+    // A frame stays on screen until the next one arrives. Frames are placed
+    // on the clock since the first frame, not by their own length rounded
+    // to whole frames: frames closer than one frame apart (an animation)
+    // would round to nothing and the video would fall behind the run.
     if (previous) {
-      this.enqueue(
-        previous.data,
-        frameRepeats(frame.timestamp - previous.timestamp)
+      const gap = frame.timestamp - previous.timestamp;
+      this.skippedSeconds += Math.max(0, gap - MAX_FRAME_SECONDS);
+      const due = Math.round(
+        Math.max(
+          0,
+          frame.timestamp - this.firstFrameMs / 1000 - this.skippedSeconds
+        ) * RECORDING_FPS
       );
+      if (due > this.framesWritten) {
+        this.enqueue(previous.data, due - this.framesWritten);
+        this.framesWritten = due;
+      }
     }
   }
 

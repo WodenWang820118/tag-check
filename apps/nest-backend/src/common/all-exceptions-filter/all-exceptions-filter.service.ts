@@ -83,6 +83,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       );
     }
 
+    // The body is JSON even on a route that serves a video or an image,
+    // whose Content-Type would make Fastify refuse it (a 500 for a 400).
+    response.header('content-type', 'application/json; charset=utf-8');
     response.code(status).send({
       statusCode: status,
       timestamp: new Date().toISOString(),

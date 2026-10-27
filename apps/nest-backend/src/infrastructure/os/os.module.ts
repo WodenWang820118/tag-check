@@ -5,6 +5,7 @@ import { XlsxReportModule } from './xlsx-report/xlsx-report.module';
 import { PathModule } from './path/path.module';
 import { ProjectIoModule } from './project-io/project-io.module';
 import { FolderModule } from './folder/folder.module';
+import { RunRecordingsModule } from './run-recordings/run-recordings.module';
 import { RepositoryModule } from '../../core/repository/repository.module';
 
 const modules = [
@@ -13,11 +14,13 @@ const modules = [
   FileModule,
   FolderModule,
   ProjectIoModule,
+  RunRecordingsModule,
   RepositoryModule
 ];
 /**
  * The data-access layer for features. It brings the infrastructure services
- * (paths, files, folders, spreadsheets, project import and export)
+ * (paths, files, folders, run recordings, spreadsheets, project import and
+ * export)
  * and re-exports RepositoryModule, so a feature module imports OsModule alone
  * rather than RepositoryModule or individual repository and infrastructure
  * modules.

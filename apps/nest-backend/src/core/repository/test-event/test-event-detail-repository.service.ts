@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, IsNull, Not } from 'typeorm';
 import {
   CreateTestEventDetailDto,
   TestEventDetailEntity,
@@ -22,8 +22,23 @@ type RepointedTest = {
 /** What deleteRuns removed. */
 export type DeletedRuns = {
   deletedRunIds: number[];
-  /** Tests whose latest run was deleted: their screen recording is its. */
+  /**
+   * Tests whose latest run was deleted. Runs saved before runs kept their
+   * own recordings left theirs in the test's folder: those go with it.
+   */
   latestRunDeletedEventIds: string[];
+  /** The recording folders of the deleted runs that kept theirs. */
+  deletedRecordings: { eventId: string; recordingKey: string }[];
+};
+
+/** A run in a test's history, with where its recordings are kept. */
+export type RunHistoryRow = {
+  runId: number;
+  passed: boolean;
+  requestPassed: boolean;
+  runAt: Date;
+  /** Null when the run did not keep its recordings in a folder of its own. */
+  recordingKey: string | null;
 };
 
 /** Reads, saves and deletes runs (`TestEventDetailEntity`). */
@@ -88,15 +103,21 @@ export class TestEventDetailRepositoryService {
   }
 
   /**
-   * The test's latest run, or an empty DTO when it has none. Runs saved in
-   * the same second share `createdAt`, so the higher id breaks the tie.
+   * The test's run `runId`, or its latest run without one; null when there
+   * is no such run. Runs saved in the same second share `createdAt`, so the
+   * higher id breaks the tie.
    */
-  async getBySlugAndEventId(projectSlug: string, eventId: string) {
+  async getBySlugAndEventId(
+    projectSlug: string,
+    eventId: string,
+    runId?: number
+  ) {
     const entity = await this.repository.findOne({
       relations: {
         testEvent: true
       },
       where: {
+        ...(runId === undefined ? {} : { id: runId }),
         testEvent: {
           project: {
             projectSlug
@@ -107,6 +128,80 @@ export class TestEventDetailRepositoryService {
       order: { createdAt: 'DESC', id: 'DESC' }
     });
     return plainToInstance(TestEventDetailResponseDto, entity);
+  }
+
+  /** Every run of the test, newest first, without its results' content. */
+  async listRunHistory(
+    projectSlug: string,
+    eventId: string
+  ): Promise<RunHistoryRow[]> {
+    const runs = await this.repository.find({
+      select: {
+        id: true,
+        passed: true,
+        requestPassed: true,
+        createdAt: true,
+        recordingKey: true
+      },
+      where: { testEvent: { eventId, project: { projectSlug } } },
+      order: { createdAt: 'DESC', id: 'DESC' }
+    });
+    return runs.map((run) => ({
+      runId: run.id,
+      passed: run.passed,
+      requestPassed: run.requestPassed,
+      runAt: run.createdAt,
+      recordingKey: run.recordingKey ?? null
+    }));
+  }
+
+  /**
+   * The screenshot run `runId` of the test saved, with its bytes when
+   * `withData` is set; null when the run saved none (or is not the test's).
+   */
+  async getRunScreenshot(
+    projectSlug: string,
+    eventId: string,
+    runId: number,
+    withData = false
+  ): Promise<TestImageEntity | null> {
+    const run = await this.repository.findOne({
+      select: {
+        id: true,
+        testImage: {
+          id: true,
+          imageName: true,
+          imageSize: true,
+          imageData: withData,
+          createdAt: true,
+          updatedAt: true
+        }
+      },
+      relations: { testImage: true },
+      where: { id: runId, testEvent: { eventId, project: { projectSlug } } }
+    });
+    return run?.testImage ?? null;
+  }
+
+  /** The test's runs that keep their recordings, newest first. */
+  async listRecordingKeys(
+    testEventId: number
+  ): Promise<{ id: number; recordingKey: string }[]> {
+    const runs = await this.repository.find({
+      select: { id: true, recordingKey: true },
+      where: { testEvent: { id: testEventId }, recordingKey: Not(IsNull()) },
+      order: { createdAt: 'DESC', id: 'DESC' }
+    });
+    return runs.flatMap((run) =>
+      run.recordingKey ? [{ id: run.id, recordingKey: run.recordingKey }] : []
+    );
+  }
+
+  /** These runs no longer keep their recordings. */
+  async clearRecordingKeys(runIds: number[]): Promise<void> {
+    if (runIds.length > 0) {
+      await this.repository.update({ id: In(runIds) }, { recordingKey: null });
+    }
   }
 
   /**
@@ -129,6 +224,9 @@ export class TestEventDetailRepositoryService {
       testEventDetailEntity.requestPassed = data.requestPassed;
       testEventDetailEntity.rawRequest = data.rawRequest;
       testEventDetailEntity.message = data.message ?? null;
+      testEventDetailEntity.requestMessage = data.requestMessage ?? null;
+      testEventDetailEntity.recordingKey = data.recordingKey ?? null;
+      testEventDetailEntity.mediaTimeline = data.mediaTimeline ?? null;
       testEventDetailEntity.testEvent = testEventEntity;
       if (testImage) {
         testEventDetailEntity.testImage = {
@@ -161,6 +259,7 @@ export class TestEventDetailRepositoryService {
       const runs = await manager.find(TestEventDetailEntity, {
         select: {
           id: true,
+          recordingKey: true,
           testEvent: { id: true, eventId: true, latestTestEventDetailId: true }
         },
         relations: { testEvent: true },
@@ -173,7 +272,11 @@ export class TestEventDetailRepositoryService {
         ).values()
       ];
       if (tests.length === 0) {
-        return { deletedRunIds: [], latestRunDeletedEventIds: [] };
+        return {
+          deletedRunIds: [],
+          latestRunDeletedEventIds: [],
+          deletedRecordings: []
+        };
       }
       const testIds = tests.map((test) => test.id);
       // Every run and screenshot of those tests, oldest first. Screenshots
@@ -243,7 +346,17 @@ export class TestEventDetailRepositoryService {
       }
       return {
         deletedRunIds: [...deleted],
-        latestRunDeletedEventIds: repointed.map(({ test }) => test.eventId)
+        latestRunDeletedEventIds: repointed.map(({ test }) => test.eventId),
+        deletedRecordings: runs.flatMap((run) =>
+          run.recordingKey
+            ? [
+                {
+                  eventId: run.testEvent.eventId,
+                  recordingKey: run.recordingKey
+                }
+              ]
+            : []
+        )
       };
     });
   }

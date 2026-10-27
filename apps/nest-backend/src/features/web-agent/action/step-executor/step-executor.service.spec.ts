@@ -47,6 +47,60 @@ describe('StepExecutorService', () => {
     );
   });
 
+  it('marks a click when it acts, after its wait, and a navigation at once', async () => {
+    vi.useFakeTimers();
+    try {
+      const page = createPage();
+      const events: string[] = [];
+      const handler = {
+        handle: vi.fn(async () => {
+          events.push('click');
+        })
+      };
+      const service = new StepExecutorService(
+        { click: handler },
+        { updateSelfDataLayer: vi.fn() } as never,
+        {
+          handleNavigate: vi.fn(async () => {
+            events.push('navigate');
+          }),
+          handleNavigationIfNeeded: vi.fn()
+        } as never
+      );
+      const replay = {
+        page: page as never,
+        projectSlug: 'project',
+        eventId: 'event',
+        state: { isFirstNavigation: true },
+        isLastStep: false,
+        application: {} as never
+      };
+
+      await service.executeStep({
+        ...replay,
+        step: { type: BrowserAction.NAVIGATE, url: 'https://shop.example' },
+        onAction: () => events.push('mark navigate')
+      });
+      const click = service.executeStep({
+        ...replay,
+        step: { type: BrowserAction.CLICK, selectors: [['#buy']] },
+        onAction: () => events.push('mark click')
+      });
+      expect(events).toEqual(['mark navigate', 'navigate']);
+      await vi.advanceTimersByTimeAsync(5000);
+      await click;
+
+      expect(events).toEqual([
+        'mark navigate',
+        'navigate',
+        'mark click',
+        'click'
+      ]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('starts final-step navigation waiting before invoking the action handler', async () => {
     const page = createPage();
     const utils = {

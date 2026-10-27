@@ -1,6 +1,7 @@
 import type {
   StrictDataLayerEvent,
   BaseDataLayerEvent,
+  RunMediaTimeline,
   TestEventDetailSchema
 } from '@utils';
 import { Exclude, Expose } from 'class-transformer';
@@ -30,6 +31,12 @@ export class TestEventDetailResponseDto implements TestEventDetailSchema {
 
   @Expose()
   message?: string;
+
+  @Expose()
+  requestMessage?: string | null;
+
+  @Expose()
+  mediaTimeline?: RunMediaTimeline | null;
 
   @Expose()
   createdAt!: Date;

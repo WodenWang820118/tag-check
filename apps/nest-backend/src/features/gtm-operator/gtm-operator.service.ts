@@ -7,6 +7,7 @@ import {
 import { Page } from 'puppeteer';
 import { EventInspectionPresetDto } from '../../shared/dto/event-inspection-preset.dto';
 import { EventInspectionPipelineService } from '../event-inspection-pipeline/event-inspection-pipeline.service';
+import { RunMedia } from '../event-inspection-pipeline/run-media';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
 import { RunTrackerService } from '../event-inspection-pipeline/run-tracker.service';
 import {
@@ -166,18 +167,23 @@ export class GtmOperatorService {
       );
       await targetPage.goto(targetUrl);
 
+      const media = new RunMedia();
       recorder = await this.puppeteerUtilsService.startRecorder(
         targetPage,
         projectSlug,
         eventId,
-        signal
+        signal,
+        { recordingKey: media.recordingKey }
       );
+      media.site = recorder;
       tagAssistantRecorder = await this.startTagAssistantRecorder(
         page,
         projectSlug,
         eventId,
-        signal
+        signal,
+        media.recordingKey
       );
+      media.tagAssistant = tagAssistantRecorder;
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const data =
@@ -188,7 +194,8 @@ export class GtmOperatorService {
           query.measurementId,
           { username: query.username || '', password: query.password || '' },
           query.captureRequest || 'false',
-          eventInspectionPresetDto
+          eventInspectionPresetDto,
+          media
         );
       // Lets both recordings show the tags that fired at the end of the
       // journey before they stop.
@@ -254,7 +261,8 @@ export class GtmOperatorService {
     page: Page,
     projectSlug: string,
     eventId: string,
-    signal: AbortSignal
+    signal: AbortSignal,
+    recordingKey: string
   ): Promise<RunRecorder | null> {
     try {
       return await this.puppeteerUtilsService.startRecorder(
@@ -262,7 +270,11 @@ export class GtmOperatorService {
         projectSlug,
         eventId,
         signal,
-        { file: RECORDING_FILES.tagAssistant, bringToFront: false }
+        {
+          recordingKey,
+          file: RECORDING_FILES.tagAssistant,
+          bringToFront: false
+        }
       );
     } catch (error) {
       this.logger.warn(`Tag Assistant was not recorded: ${error}`);

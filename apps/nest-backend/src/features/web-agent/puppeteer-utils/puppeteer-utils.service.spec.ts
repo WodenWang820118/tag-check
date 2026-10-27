@@ -11,6 +11,7 @@ function fakeRecorder() {
 }
 
 const page = { bringToFront: vi.fn() };
+const KEY = '0f0e6b2a-7c1d-4e5f-8a9b-1c2d3e4f5a6b';
 
 describe('PuppeteerUtilsService recorder lifecycle', () => {
   let tempDir: string;
@@ -22,7 +23,12 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
       { getBROWSER_ARGS: vi.fn(() => []) } as never,
       { getRecordingDetails: vi.fn() } as never,
       {
-        getInspectionEventFolderPath: vi.fn().mockResolvedValue(tempDir)
+        folderOf: vi.fn(async (_slug: string, _event: string, key: string) =>
+          join(tempDir, 'runs', key)
+        ),
+        removeLegacy: vi.fn(async () => {
+          await rm(join(tempDir, 'recording.webm'), { force: true });
+        })
       } as never
     );
   });
@@ -42,15 +48,15 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
         page as never,
         'project',
         'event',
-        controller.signal
+        controller.signal,
+        { recordingKey: KEY }
       )
     ).rejects.toThrow(/aborted/i);
     expect(start).not.toHaveBeenCalled();
   });
 
-  it('records the event folder recording.webm with the bundled ffmpeg, replacing an old file', async () => {
-    const file = join(tempDir, 'recording.webm');
-    await writeFile(file, 'previous run');
+  it("records into the run's own folder with the bundled ffmpeg, removing the test's old file", async () => {
+    await writeFile(join(tempDir, 'recording.webm'), 'an earlier run');
     const recorder = fakeRecorder();
     const start = vi
       .spyOn(RunRecorder, 'start')
@@ -59,16 +65,19 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
     const result = await service.startRecorder(
       page as never,
       'project',
-      'event'
+      'event',
+      undefined,
+      { recordingKey: KEY }
     );
 
     expect(result).toBe(recorder);
     expect(start).toHaveBeenCalledWith(
       page,
-      file,
+      join(tempDir, 'runs', KEY, 'recording.webm'),
       expect.stringMatching(/ffmpeg/i)
     );
-    expect(await readdir(tempDir)).toEqual([]);
+    expect(await readdir(tempDir)).toEqual(['runs']);
+    expect(await readdir(join(tempDir, 'runs'))).toEqual([KEY]);
   });
 
   it('stops and rejects when abort happens while recording is starting', async () => {
@@ -86,7 +95,8 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
       page as never,
       'project',
       'event',
-      controller.signal
+      controller.signal,
+      { recordingKey: KEY }
     );
     await vi.waitFor(() => expect(start).toHaveBeenCalled());
     controller.abort();
@@ -106,7 +116,8 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
       page as never,
       'project',
       'event',
-      controller.signal
+      controller.signal,
+      { recordingKey: KEY }
     );
     await service.stopRecorder(result);
 
@@ -124,7 +135,8 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
       page as never,
       'project',
       'event',
-      controller.signal
+      controller.signal,
+      { recordingKey: KEY }
     );
     controller.abort();
 
@@ -143,7 +155,8 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
         page as never,
         'project',
         'event',
-        controller.signal
+        controller.signal,
+        { recordingKey: KEY }
       )
     ).rejects.toThrow('screencast failed');
     expect(removeListener).toHaveBeenCalledWith('abort', expect.any(Function));
@@ -156,9 +169,8 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
       { getBROWSER_ARGS: vi.fn(() => []) } as never,
       { getRecordingDetails: vi.fn() } as never,
       {
-        getInspectionEventFolderPath: vi
-          .fn()
-          .mockRejectedValue(new Error('no project folder'))
+        folderOf: vi.fn().mockRejectedValue(new Error('no project folder')),
+        removeLegacy: vi.fn()
       } as never
     );
 
@@ -167,7 +179,8 @@ describe('PuppeteerUtilsService recorder lifecycle', () => {
         page as never,
         'project',
         'event',
-        controller.signal
+        controller.signal,
+        { recordingKey: KEY }
       )
     ).rejects.toThrow('no project folder');
     expect(addListener).not.toHaveBeenCalled();
