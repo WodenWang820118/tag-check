@@ -20,12 +20,13 @@
         class="flex flex-col gap-[0.8rem]"
         [attr.data-testid]="'import-conflict-' + index"
       >
-        <p class="m-0!">
+        <div class="flex flex-col gap-[0.2rem]">
           <span class="font-medium">{{ conflict.tagName }}</span>
           <span class="text-[#55605d]">
-            {{ conflict.existingEventName }} → {{ conflict.newEventName }}
+            Event: <code>{{ conflict.existingEventName }}</code> →
+            <code>{{ conflict.newEventName }}</code>
           </span>
-        </p>
+        </div>
         @if (conflict.specEdited) {
           <p class="m-0! text-[#7a4e00]">
             The spec was edited. Updating still replaces it, because the event
