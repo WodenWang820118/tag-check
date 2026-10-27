@@ -50,9 +50,13 @@ export class RunVerdictComponent {
   runs = input<RunHistoryEntry[]>([]);
   eventName = input('');
 
-  readonly status = computed<RunStatus>(() => {
+  readonly status = computed<RunStatus | null>(() => {
     const run = this.run();
-    return run ? getCheckStatus(run.passed, run.requestPassed) : 'notRun';
+    return run
+      ? getCheckStatus(run.passed, run.requestPassed)
+      : this.runs().length > 0
+        ? null
+        : 'notRun';
   });
 
   readonly dataLayerCheck = computed<CheckCard | null>(() => {

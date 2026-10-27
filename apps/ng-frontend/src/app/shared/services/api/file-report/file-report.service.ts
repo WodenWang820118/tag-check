@@ -46,7 +46,7 @@ export class FileReportService {
       .pipe(rethrowHttpError('Error deleting runs'));
   }
 
-  downloadFileReports(projectSlug: string, eventIds: string[]) {
+  downloadFileReports(projectSlug: string, eventIds: string[], runId?: number) {
     return this.http
       .post(
         `${environment.fileReportApiUrl}/download/${projectSlug}`,
@@ -54,6 +54,7 @@ export class FileReportService {
         {
           observe: 'response',
           responseType: 'blob',
+          params: runId === undefined ? {} : { run: runId },
           headers: new HttpHeaders({
             Accept:
               'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

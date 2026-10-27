@@ -54,11 +54,17 @@ export class FileReportsController {
   @Header('Content-Disposition', 'attachment; filename="report.xlsx"')
   async downloadReportFiles(
     @Param('projectSlug') projectSlug: string,
-    @Body() eventIds: string[]
+    @Body() eventIds: string[],
+    @Query('run') run?: string
   ) {
+    const runId = run === undefined ? undefined : Number(run);
+    if (runId !== undefined && (!Number.isSafeInteger(runId) || runId <= 0)) {
+      throw new BadRequestException('run must be a positive run id');
+    }
     return await this.projectFileReportService.downloadReportFiles(
       projectSlug,
-      eventIds
+      eventIds,
+      runId
     );
   }
 }

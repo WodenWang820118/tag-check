@@ -17,12 +17,13 @@ import {
   Router,
   RouterLink
 } from '@angular/router';
-import { BehaviorSubject, of, throwError } from 'rxjs';
+import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   DataLayerSpec,
   REPORT_DETAIL_SAMPLE,
   ReportDetailResponse,
+  Recording,
   VariableConfig
 } from '@utils';
 import {
@@ -38,6 +39,7 @@ import { Ga4RequestComponent } from '../../components/run-detail/ga4-request/ga4
 import { ReportTabFacade } from '../../components/report-tab/report-tab-facade.service';
 import { SnackBarComponent } from '../../../../shared/components/snackbar/snackbar.component';
 import { ProjectService } from '../../../../shared/services/api/project-info/project-info.service';
+import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { DetailViewComponent } from './detail-view.component';
 
@@ -128,16 +130,24 @@ const SPEC = {
 } as unknown as DataLayerSpec;
 
 /** The page as the resolver builds it from GET /reports (JSON). */
-function createPage(runId?: number): ReportDetailRouteContext {
+function createPage(
+  runId?: number,
+  missingRun = false
+): ReportDetailRouteContext {
   const detail = JSON.parse(
     JSON.stringify(REPORT_DETAIL_SAMPLE)
   ) as ReportDetailResponse;
   if (runId !== undefined && detail.testEventDetails) {
     detail.testEventDetails.id = runId;
   }
+  if (missingRun) {
+    detail.testEventDetails = null;
+    detail.testImage = null;
+  }
   return buildReportPage({
     projectSlug: 'demo',
     eventId: 'evt-1',
+    runId,
     detail,
     spec: SPEC,
     recording: { title: 'add_to_cart', steps: [] },
@@ -168,6 +178,14 @@ describe('DetailViewComponent', () => {
     exportEvent: vi.fn(),
     copyEventName: vi.fn()
   };
+  const recordingService = {
+    getRecordingDetails: vi.fn(() =>
+      of<Recording>({
+        title: 'add_to_cart',
+        steps: [{ type: 'click', selectors: [['[data-testid="add"]']] }]
+      })
+    )
+  };
   const dialogResult$ = new BehaviorSubject<{ runId: number } | undefined>(
     undefined
   );
@@ -177,7 +195,19 @@ describe('DetailViewComponent', () => {
   const testRunning = {
     isRunningTest$: vi.fn(() => false),
     eventRunningTest$: vi.fn(() => ''),
-    runTestForReport: vi.fn(() => of(undefined))
+    runTestForReport: vi.fn(() =>
+      of<ReportDetailResponse | undefined>(
+        JSON.parse(
+          JSON.stringify({
+            ...REPORT_DETAIL_SAMPLE,
+            testEventDetails: {
+              ...REPORT_DETAIL_SAMPLE.testEventDetails,
+              id: 42
+            }
+          })
+        ) as ReportDetailResponse
+      )
+    )
   };
 
   beforeEach(async () => {
@@ -185,6 +215,7 @@ describe('DetailViewComponent', () => {
     routeData$.next({ page: createPage() });
     routeSnapshot.queryParams = {};
     queryParamMap$.next(convertToParamMap({}));
+    testRunning.isRunningTest$.mockReturnValue(false);
 
     await TestBed.configureTestingModule({
       imports: [DetailViewComponent],
@@ -200,6 +231,7 @@ describe('DetailViewComponent', () => {
         },
         { provide: Router, useValue: router },
         { provide: ProjectService, useValue: projectService },
+        { provide: RecordingService, useValue: recordingService },
         { provide: TestRunningFacadeService, useValue: testRunning },
         { provide: MatDialog, useValue: dialog }
       ]
@@ -429,6 +461,75 @@ describe('DetailViewComponent', () => {
       expect(text(fixture, 'detail-fallback-saved-0')).toBe(
         'Saved in the recording'
       );
+      expect(recordingService.getRecordingDetails).toHaveBeenCalledWith(
+        'demo',
+        'evt-1'
+      );
+      expect(
+        fixture.componentInstance.routeContext()?.recording?.steps[0].selectors
+      ).toEqual([['[data-testid="add"]']]);
+    });
+
+    it('does not mark another test or a reloaded run saved by its step index', () => {
+      routeData$.next({ page: fallbackPage() });
+      dialog.open.mockReturnValueOnce({
+        afterClosed: () => of(true) as never
+      });
+      const fixture = render();
+      byTestId(fixture, 'detail-save-fallback-0')?.click();
+      fixture.detectChanges();
+
+      routeData$.next({ page: { ...fallbackPage(), eventId: 'evt-2' } });
+      fixture.detectChanges();
+      expect(byTestId(fixture, 'detail-fallback-saved-0')).toBeNull();
+      expect(byTestId(fixture, 'detail-save-fallback-0')).not.toBeNull();
+
+      routeData$.next({ page: fallbackPage() });
+      fixture.detectChanges();
+      expect(byTestId(fixture, 'detail-fallback-saved-0')).toBeNull();
+    });
+
+    it('uses the refreshed recording when the saved selector differs from the fallback', () => {
+      routeData$.next({ page: fallbackPage() });
+      recordingService.getRecordingDetails.mockReturnValueOnce(
+        of({
+          title: 'add_to_cart',
+          steps: [{ type: 'click', selectors: [['#different']] }]
+        })
+      );
+      dialog.open.mockReturnValueOnce({
+        afterClosed: () => of(true) as never
+      });
+      const fixture = render();
+      byTestId(fixture, 'detail-save-fallback-0')?.click();
+      fixture.detectChanges();
+
+      expect(byTestId(fixture, 'detail-fallback-saved-0')).toBeNull();
+    });
+
+    it('does not apply a late recording refresh to another test', () => {
+      const refreshed = new Subject<Recording>();
+      routeData$.next({ page: fallbackPage() });
+      recordingService.getRecordingDetails.mockReturnValueOnce(refreshed);
+      dialog.open.mockReturnValueOnce({
+        afterClosed: () => of(true) as never
+      });
+      const fixture = render();
+      byTestId(fixture, 'detail-save-fallback-0')?.click();
+
+      const otherPage = { ...fallbackPage(), eventId: 'evt-2' };
+      routeData$.next({ page: otherPage });
+      refreshed.next({
+        title: 'add_to_cart',
+        steps: [{ type: 'click', selectors: [['[data-testid="add"]']] }]
+      });
+      refreshed.complete();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.routeContext()?.recording).toBe(
+        otherPage.recording
+      );
+      expect(byTestId(fixture, 'detail-fallback-saved-0')).toBeNull();
     });
 
     it('shows it saved when the recording already waits for it', () => {
@@ -471,8 +572,43 @@ describe('DetailViewComponent', () => {
     expect(testRunning.runTestForReport).toHaveBeenCalledWith('evt-1', 'demo');
     expect(router.navigate).toHaveBeenCalledWith(
       [],
-      expect.objectContaining({ queryParams: { run: null } })
+      expect.objectContaining({ queryParams: { run: 42 } })
     );
+  });
+
+  it('stays on the shown run when a stopped run returns no report', () => {
+    testRunning.runTestForReport.mockReturnValueOnce(of(undefined));
+    render().componentInstance.runAgain();
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('shows Run not found with a link to the latest when a positive run id is missing', () => {
+    const page = createPage(999, true);
+    routeData$.next({ page });
+    const fixture = render();
+
+    expect(byTestId(fixture, 'detail-run-not-found')?.textContent).toContain(
+      'Run not found'
+    );
+    const latest = fixture.debugElement.query(
+      By.css('[data-testid="detail-latest-run"]')
+    );
+    expect(latest.injector.get(RouterLinkStub).queryParams()).toEqual({
+      run: null
+    });
+    expect(child(fixture, VerdictStub).runs()).toEqual(page.runs);
+    expect(byTestId(fixture, 'detail-older-run')).toBeNull();
+  });
+
+  it('explains that an older run uses the current spec and recording', () => {
+    routeData$.next({ page: createPage(5) });
+    const fixture = render();
+    expect(
+      byTestId(fixture, 'detail-current-spec-notice')?.textContent?.trim()
+    ).toBe('Compared with the current spec and recording.');
+    routeData$.next({ page: createPage() });
+    fixture.detectChanges();
+    expect(byTestId(fixture, 'detail-current-spec-notice')).toBeNull();
   });
 
   it('says so when the run does not finish, and stays on the run', () => {
@@ -504,7 +640,8 @@ describe('DetailViewComponent', () => {
     ).toBe(true);
   });
 
-  it('exports the run and copies the event name', () => {
+  it('exports the shown older run and copies the event name', () => {
+    routeData$.next({ page: createPage(5) });
     const fixture = render();
     const page = routeData$.value.page;
     const component = fixture.componentInstance;
@@ -516,17 +653,20 @@ describe('DetailViewComponent', () => {
 
     expect(reportFacade.shareSpreadsheet).toHaveBeenCalledWith(
       'demo',
-      page.reportDetails
+      page.reportDetails,
+      page.run?.id
     );
     expect(reportFacade.exportRecording).toHaveBeenCalledWith(
       'demo',
       page.reportDetails,
-      page.videoBlob
+      page.videoBlob,
+      page.run?.id
     );
     expect(reportFacade.exportEvent).toHaveBeenCalledWith(
       'demo',
       page.reportDetails,
-      page.videoBlob
+      page.videoBlob,
+      page.run?.id
     );
     expect(reportFacade.copyEventName).toHaveBeenCalledWith('add_to_cart');
   });

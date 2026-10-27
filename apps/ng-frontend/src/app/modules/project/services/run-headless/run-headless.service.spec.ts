@@ -72,6 +72,29 @@ describe('RunHeadlessService', () => {
     expect(service.headless()).toBe(false);
   });
 
+  it('leaves the run option unset until the project setting arrives', () => {
+    const settings = new Subject<ProjectSetting>();
+    getProjectSettings.mockReturnValue(settings);
+    const service = create();
+    service.load('demo');
+    expect(service.headlessFor('demo')).toBeUndefined();
+    settings.next(settingsJson(true));
+    expect(service.headlessFor('demo')).toBe(true);
+  });
+
+  it('does not reuse the previous default while reloading project settings', () => {
+    const service = create();
+    service.load('demo');
+    getProjectSettings.mockReturnValue(new Subject<ProjectSetting>());
+    service.load('demo');
+    expect(service.headlessFor('demo')).toBeUndefined();
+  });
+
+  it('reads a stored choice when opening a test directly before loading the Tests page', () => {
+    localStorage.setItem('tag-check.run-headless.demo', 'true');
+    expect(create().headlessFor('demo')).toBe(true);
+  });
+
   it('still applies a choice when storage is unavailable', () => {
     const service = create();
     service.load('demo');

@@ -115,4 +115,17 @@ describe('RunVerdictComponent', () => {
 
     expect(text('run-verdict-not-run')).toContain('This test has not run yet.');
   });
+
+  it('keeps history without a Not run verdict when the requested run is missing', () => {
+    const { fixture, text } = render(null);
+    expect(text('run-verdict-not-run')).toBeUndefined();
+    expect(text('run-history')).toContain('1 of the last 2 runs passed');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="run-history-5"]')
+    ).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="run-history-7"]')
+    ).not.toBeNull();
+    expect(fixture.componentInstance.status()).not.toBe('notRun');
+  });
 });

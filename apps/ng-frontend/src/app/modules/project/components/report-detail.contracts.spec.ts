@@ -121,6 +121,35 @@ describe('toReportDetails', () => {
 });
 
 describe('buildReportPage', () => {
+  it('distinguishes a missing positive run id from a test with no runs', () => {
+    const detail = detailResponse({ testEventDetails: null, testImage: null });
+    const loaded = {
+      projectSlug: 'demo',
+      eventId: 'evt-1',
+      detail,
+      spec: {} as DataLayerSpec,
+      recording: null,
+      video: null,
+      tagAssistantVideo: null,
+      image: null
+    };
+    const page = buildReportPage({ ...loaded, runId: 99 });
+    expect(page.runNotFound).toBe(true);
+    expect(page.isLatestRun).toBe(false);
+    expect(page.runs).toEqual(detail.runs);
+    expect(
+      buildReportPage({
+        ...loaded,
+        detail: { ...detail, runs: [] },
+        runId: 99
+      }).runNotFound
+    ).toBe(true);
+    expect(
+      buildReportPage({ ...loaded, detail: { ...detail, runs: [] } })
+        .runNotFound
+    ).toBe(false);
+  });
+
   it('collects what the report page shows', () => {
     const video = new Blob(['webm']);
     const page = buildReportPage({

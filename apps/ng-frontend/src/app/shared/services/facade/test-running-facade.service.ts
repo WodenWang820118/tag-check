@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { DataLayerService } from '../api/datalayer/datalayer.service';
 import { GtmOperatorService } from '../api/gtm-operator/gtm-operator.service';
 import {
@@ -20,6 +20,7 @@ import { QaRequestService } from '../api/qa-request/qa-request.service';
 import { SettingsService } from '../api/settings/settings.service';
 import { GtmInspectionParams } from '../utils/interfaces';
 import { ReportTableDataSourceModelService } from '../../../modules/project/services/report-table-data-source-model/report-table-data-source-model.service';
+import { RunHeadlessService } from '../../../modules/project/services/run-headless/run-headless.service';
 
 export type RunTestOptions = {
   /**
@@ -40,6 +41,7 @@ export type RunTestOptions = {
  */
 @Injectable({ providedIn: 'root' })
 export class TestRunningFacadeService {
+  private readonly runHeadlessService = inject(RunHeadlessService);
   private readonly isRunningTest = signal(false);
   private readonly eventRunningTest = signal('');
 
@@ -101,7 +103,10 @@ export class TestRunningFacadeService {
     project: ProjectSetting,
     options: RunTestOptions
   ) {
-    const headless = options.headless ?? project.browserSettings.headless;
+    const headless =
+      options.headless ??
+      this.runHeadlessService.headlessFor(projectSlug) ??
+      project.browserSettings.headless;
     const inspectEventDto = new EventInspectionPresetDto(project);
     this.isRunningTest.set(true);
     this.eventRunningTest.set(eventId);

@@ -20,12 +20,14 @@ export type ReportDetailRouteContext = {
   recording: Recording | null;
   /** The test with the shown run's checks. */
   reportDetails: IReportDetails | undefined;
-  /** The shown run: `?run=<runId>`, the latest run by default; null before the first run. */
+  /** The chosen run, or null before the first run or when that run is missing. */
   run: TestEventDetailSchema | null;
   /** Every run of the test, newest first. */
   runs: RunHistoryEntry[];
   /** Whether the shown run is the test's latest. */
   isLatestRun: boolean;
+  /** A positive run id was requested, but the test has no such run. */
+  runNotFound: boolean;
   /**
    * The step of the shown run that could not find its element, when the run
    * kept what it saw; null otherwise.
@@ -73,6 +75,7 @@ export function toReportDetails(
 export function buildReportPage(loaded: {
   projectSlug: string;
   eventId: string;
+  runId?: number;
   detail: ReportDetailResponse | null;
   spec: DataLayerSpec;
   recording: Recording | null;
@@ -82,6 +85,7 @@ export function buildReportPage(loaded: {
 }): ReportDetailRouteContext {
   const run = loaded.detail?.testEventDetails ?? null;
   const runs = loaded.detail?.runs ?? [];
+  const runNotFound = loaded.runId !== undefined && run === null;
   return {
     projectSlug: loaded.projectSlug,
     eventId: loaded.eventId,
@@ -90,7 +94,9 @@ export function buildReportPage(loaded: {
     reportDetails: toReportDetails(loaded.detail),
     run,
     runs,
-    isLatestRun: !run || runs.length === 0 || runs[0].runId === run.id,
+    isLatestRun:
+      !runNotFound && (!run || runs.length === 0 || runs[0].runId === run.id),
+    runNotFound,
     stepFailure: loaded.detail?.stepFailure ?? null,
     stepFallbacks: loaded.detail?.stepFallbacks ?? [],
     videoBlob: loaded.video?.blob,
