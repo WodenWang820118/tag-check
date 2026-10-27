@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { VariableConfig } from '@utils';
+import { GtmImportResolution, VariableConfig } from '@utils';
 import { events } from './events/events';
 import { exampleGtmJson } from './gtm-json';
 import {
@@ -32,9 +32,17 @@ export class ExampleEventsBuilderService {
       })
     );
     const { variable, builtInVariable } = exampleGtmJson.containerVersion;
-    await this.projectEventsBuilderService.buildEvents(projectSlug, inputs, [
-      ...variable,
-      ...builtInVariable
-    ] as VariableConfig[]);
+    // Seeding has no one to ask. A tag whose event name changed updates
+    // the existing test instead of failing the import.
+    const resolutions: Record<string, GtmImportResolution> = {};
+    for (const input of inputs) {
+      resolutions[input.testName] = 'update';
+    }
+    await this.projectEventsBuilderService.buildEvents(
+      projectSlug,
+      inputs,
+      [...variable, ...builtInVariable] as VariableConfig[],
+      resolutions
+    );
   }
 }

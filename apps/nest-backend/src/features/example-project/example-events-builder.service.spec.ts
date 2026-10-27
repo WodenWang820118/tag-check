@@ -14,7 +14,7 @@ describe('ExampleEventsBuilderService', () => {
     await service.buildEvents('demo');
 
     expect(projectEventsBuilderService.buildEvents).toHaveBeenCalledOnce();
-    const [slug, inputs, variables] =
+    const [slug, inputs, variables, resolutions] =
       projectEventsBuilderService.buildEvents.mock.calls[0];
     expect(slug).toBe('demo');
     expect(variables).toContainEqual(
@@ -28,10 +28,17 @@ describe('ExampleEventsBuilderService', () => {
       'fullItemDef'
     ];
     expect(inputs).toHaveLength(Object.keys(events).length);
+    const expectedResolutions: Record<string, string> = {};
     for (const input of inputs as Array<Record<string, unknown>>) {
       for (const key of expectedKeys) {
         expect(input).toHaveProperty(key);
       }
+      const testName = input['testName'];
+      expect(typeof testName).toBe('string');
+      if (typeof testName === 'string') {
+        expectedResolutions[testName] = 'update';
+      }
     }
+    expect(resolutions).toEqual(expectedResolutions);
   });
 });

@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
   GTMConfiguration,
+  GtmImportPreview,
+  GtmImportResolution,
   GtmImportSummary,
   parseGtmContainerExport
 } from '@utils';
@@ -23,10 +25,28 @@ export class GtmJsonParserService {
     return container;
   }
 
-  uploadGtmJson(projectSlug: string, json: GTMConfiguration) {
+  /** Asks which tags changed event name. The server writes nothing. */
+  previewGtmJson(projectSlug: string, json: GTMConfiguration) {
+    return this.httpClient.post<GtmImportPreview>(
+      `${environment.gtmParserApiUrl}/preview/${projectSlug}`,
+      json
+    );
+  }
+
+  /**
+   * Uploads the container. When `resolutions` is set, each tag whose event
+   * name changed is updated or kept alongside a new test.
+   */
+  uploadGtmJson(
+    projectSlug: string,
+    json: GTMConfiguration,
+    resolutions?: Readonly<Record<string, GtmImportResolution>>
+  ) {
+    const body =
+      resolutions === undefined ? json : { container: json, resolutions };
     return this.httpClient.post<GtmImportSummary>(
       `${environment.gtmParserApiUrl}/upload/${projectSlug}`,
-      json
+      body
     );
   }
 }

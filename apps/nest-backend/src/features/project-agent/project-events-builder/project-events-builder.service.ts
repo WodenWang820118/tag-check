@@ -1,4 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpStatus,
+  Injectable,
+  Logger
+} from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import {
   IReportDetails,
@@ -6,9 +11,12 @@ import {
   Spec,
   StrictDataLayerEvent,
   ItemDef,
-  VariableConfig
+  VariableConfig,
+  GtmImportConflict,
+  GtmImportResolution,
+  keepBothTestName
 } from '@utils';
-import { CreateFullTestEventDto } from '../../../shared';
+import { CreateFullTestEventDto, TestEventEntity } from '../../../shared';
 import { ProjectReportService } from '../project-report/project-report.service';
 import { TestReportFacadeRepositoryService } from '../../repository/test-report-facade/test-report-facade-repository.service';
 import { ProjectRecordingService } from '../project-recording/project-recording.service';
@@ -29,6 +37,46 @@ export interface BuildEventsResult {
   created: string[];
   updated: string[];
   unchanged: string[];
+  renamed: string[];
+  keptBoth: { tagName: string; testName: string }[];
+}
+
+const IMPORT_CONFLICT_MESSAGE =
+  'These tags already have a test with a different event name. Choose update or keep both for each one.';
+
+/**
+ * Rejects an import that would change an event name before any row is written.
+ * `update` keeps the test and replaces its spec. `keepBoth` adds a new test.
+ */
+export function throwIfGtmImportUnresolved(
+  conflicts: readonly GtmImportConflict[],
+  resolutions: Readonly<Record<string, GtmImportResolution>>
+): void {
+  const unresolved = conflicts.filter(
+    (conflict) => !isGtmImportResolution(resolutions[conflict.tagName])
+  );
+  if (unresolved.length === 0) {
+    return;
+  }
+  throw new ConflictException({
+    statusCode: HttpStatus.CONFLICT,
+    message: IMPORT_CONFLICT_MESSAGE,
+    conflicts: unresolved
+  });
+}
+
+function isGtmImportResolution(value: unknown): value is GtmImportResolution {
+  return value === 'update' || value === 'keepBoth';
+}
+
+function emptyBuildResult(): BuildEventsResult {
+  return {
+    created: [],
+    updated: [],
+    unchanged: [],
+    renamed: [],
+    keptBoth: []
+  };
 }
 
 /**
@@ -50,25 +98,53 @@ export class ProjectEventsBuilderService {
   ) {}
 
   /**
-   * Creates a test event for each input. An input whose tag already has a test
-   * event (same test name and event name) is not duplicated: its spec is
-   * refreshed when it is still the generated one, and kept when it was edited.
+   * Tags whose name already has a test with a different event name. Reads
+   * tests and writes nothing. A test with the same name and the same event
+   * name is not a conflict.
+   */
+  async findImportConflicts(
+    projectSlug: string,
+    inputs: BuildEventInput[],
+    variables: readonly VariableConfig[] = []
+  ): Promise<GtmImportConflict[]> {
+    if (inputs.length === 0) {
+      return [];
+    }
+    const existingEvents =
+      await this.testEventRepositoryService.listWithSpecs(projectSlug);
+    return this.conflictsAmong(existingEvents, inputs, variables);
+  }
+
+  /**
+   * Creates a test for each input. A tag name that already has a test with
+   * the same event name is not duplicated: a generated spec is refreshed and
+   * an edited one is kept. A tag name whose event name changed is a conflict.
+   * `update` gives that test the new event name and the container's spec,
+   * and keeps its recording, item definition and runs. `keepBoth` adds a new
+   * test named with the lowest free "Name (n)" suffix. A conflict with no
+   * resolution throws 409 before anything is written. Callers that are not
+   * asking a user, such as the example project, pass `update` for every input.
    */
   async buildEvents(
     projectSlug: string,
     inputs: BuildEventInput[],
-    variables: readonly VariableConfig[] = []
+    variables: readonly VariableConfig[] = [],
+    resolutions: Readonly<Record<string, GtmImportResolution>> = {}
   ): Promise<BuildEventsResult> {
-    const result: BuildEventsResult = {
-      created: [],
-      updated: [],
-      unchanged: []
-    };
+    const result = emptyBuildResult();
     if (inputs.length === 0) {
       return result;
     }
     const existingEvents =
       await this.testEventRepositoryService.listWithSpecs(projectSlug);
+    throwIfGtmImportUnresolved(
+      this.conflictsAmong(existingEvents, inputs, variables),
+      resolutions
+    );
+
+    // Names already used, plus names this import assigns, so a later
+    // "keep both" does not reuse one.
+    const taken = new Set(existingEvents.map((event) => event.testName));
 
     // Sequential on purpose: each input writes rows and files, and the
     // result lists the inputs in order.
@@ -77,35 +153,44 @@ export class ProjectEventsBuilderService {
         input.spec,
         variables
       );
-      const existing = existingEvents.find(
-        (event) =>
-          event.testName === input.testName &&
-          event.eventName === input.eventName
-      );
+      const match = this.matchExisting(existingEvents, input);
 
-      if (!existing) {
-        await this.createEvent(projectSlug, input, dataLayerSpec);
-        result.created.push(input.testName);
-        continue;
-      }
-
-      const stored = existing.spec;
-      const isGenerated =
-        this.dataLayerSpecBuilderService.isGeneratedDataLayerSpec(
-          stored?.dataLayerSpec,
-          stored?.rawGtmTag,
-          variables
+      if (match.kind === 'same') {
+        await this.refreshSameEvent(
+          projectSlug,
+          match.event,
+          input,
+          dataLayerSpec,
+          variables,
+          result
         );
-      if (!stored || !isGenerated) {
-        result.unchanged.push(input.testName);
         continue;
       }
-      await this.specRepositoryService.update(projectSlug, existing.eventId, {
-        event: input.eventName,
-        dataLayerSpec,
-        rawGtmTag: input.spec
-      });
-      result.updated.push(input.testName);
+
+      if (match.kind === 'conflict') {
+        await this.applyConflict(
+          projectSlug,
+          match.event,
+          input,
+          dataLayerSpec,
+          variables,
+          resolutions,
+          taken,
+          result
+        );
+        continue;
+      }
+
+      const testName = taken.has(input.testName)
+        ? keepBothTestName(input.testName, taken)
+        : input.testName;
+      taken.add(testName);
+      await this.createEvent(
+        projectSlug,
+        testName === input.testName ? input : { ...input, testName },
+        dataLayerSpec
+      );
+      result.created.push(testName);
     }
     return result;
   }
@@ -145,6 +230,144 @@ export class ProjectEventsBuilderService {
       `Rebuilt the generated spec of ${eventId} from the GTM container's data layer variables`
     );
     return upgraded;
+  }
+
+  private conflictsAmong(
+    existingEvents: readonly TestEventEntity[],
+    inputs: readonly BuildEventInput[],
+    variables: readonly VariableConfig[]
+  ): GtmImportConflict[] {
+    const conflicts: GtmImportConflict[] = [];
+    const seen = new Set<string>();
+    for (const input of inputs) {
+      const match = this.matchExisting(existingEvents, input);
+      if (match.kind !== 'conflict' || seen.has(input.testName)) {
+        continue;
+      }
+      seen.add(input.testName);
+      conflicts.push({
+        tagName: input.testName,
+        existingEventName: match.event.eventName,
+        newEventName: input.eventName,
+        specEdited: this.specWasEdited(match.event, variables)
+      });
+    }
+    return conflicts;
+  }
+
+  /**
+   * Prefers a test with the same event name when a project already has more
+   * than one test under the tag name. Otherwise the first test with that
+   * name is the one a conflict asks about.
+   */
+  private matchExisting(
+    existingEvents: readonly TestEventEntity[],
+    input: BuildEventInput
+  ):
+    | { kind: 'same'; event: TestEventEntity }
+    | { kind: 'conflict'; event: TestEventEntity }
+    | { kind: 'new' } {
+    const same = existingEvents.find(
+      (event) =>
+        event.testName === input.testName && event.eventName === input.eventName
+    );
+    if (same) {
+      return { kind: 'same', event: same };
+    }
+    const conflict = existingEvents.find(
+      (event) => event.testName === input.testName
+    );
+    if (conflict) {
+      return { kind: 'conflict', event: conflict };
+    }
+    return { kind: 'new' };
+  }
+
+  private specWasEdited(
+    event: TestEventEntity,
+    variables: readonly VariableConfig[]
+  ): boolean {
+    const stored = event.spec;
+    if (!stored) {
+      return false;
+    }
+    return !this.dataLayerSpecBuilderService.isGeneratedDataLayerSpec(
+      stored.dataLayerSpec,
+      stored.rawGtmTag,
+      variables
+    );
+  }
+
+  private async refreshSameEvent(
+    projectSlug: string,
+    existing: TestEventEntity,
+    input: BuildEventInput,
+    dataLayerSpec: StrictDataLayerEvent,
+    variables: readonly VariableConfig[],
+    result: BuildEventsResult
+  ): Promise<void> {
+    const stored = existing.spec;
+    const isGenerated =
+      this.dataLayerSpecBuilderService.isGeneratedDataLayerSpec(
+        stored?.dataLayerSpec,
+        stored?.rawGtmTag,
+        variables
+      );
+    if (!stored || !isGenerated) {
+      result.unchanged.push(input.testName);
+      return;
+    }
+    await this.specRepositoryService.update(projectSlug, existing.eventId, {
+      event: input.eventName,
+      dataLayerSpec,
+      rawGtmTag: input.spec
+    });
+    result.updated.push(input.testName);
+  }
+
+  private async applyConflict(
+    projectSlug: string,
+    existing: TestEventEntity,
+    input: BuildEventInput,
+    dataLayerSpec: StrictDataLayerEvent,
+    variables: readonly VariableConfig[],
+    resolutions: Readonly<Record<string, GtmImportResolution>>,
+    taken: Set<string>,
+    result: BuildEventsResult
+  ): Promise<void> {
+    const resolution = resolutions[input.testName];
+    if (resolution !== 'update' && resolution !== 'keepBoth') {
+      throwIfGtmImportUnresolved(
+        [
+          {
+            tagName: input.testName,
+            existingEventName: existing.eventName,
+            newEventName: input.eventName,
+            specEdited: this.specWasEdited(existing, variables)
+          }
+        ],
+        {}
+      );
+      return;
+    }
+    if (resolution === 'update') {
+      // The event changed, so the spec is replaced even when it was edited.
+      // The recording, item definition and runs stay on this event id.
+      await this.testEventRepositoryService.update(existing.id, {
+        eventName: input.eventName
+      });
+      await this.specRepositoryService.update(projectSlug, existing.eventId, {
+        event: input.eventName,
+        dataLayerSpec,
+        rawGtmTag: input.spec
+      });
+      result.renamed.push(input.testName);
+      return;
+    }
+    const testName = keepBothTestName(input.testName, taken);
+    taken.add(testName);
+    await this.createEvent(projectSlug, { ...input, testName }, dataLayerSpec);
+    result.keptBoth.push({ tagName: input.testName, testName });
   }
 
   private async createEvent(

@@ -1,5 +1,5 @@
 import { Body, Controller, Logger, Param, Post } from '@nestjs/common';
-import { GtmImportSummary } from '@utils';
+import { GtmImportPreview, GtmImportSummary } from '@utils';
 import { GtmParserService } from '../../features/gtm-parser/gtm-parser.service';
 
 /** The saved container is read through `GET projects/:projectSlug/gtm-config`. */
@@ -8,7 +8,23 @@ export class GtmParserController {
   private readonly logger = new Logger(GtmParserController.name);
   constructor(private readonly gtmParserService: GtmParserService) {}
 
-  /** Accepts the container export as a JSON body or as its text. */
+  /**
+   * Reports tags whose name already has a test but whose event name changed.
+   * Takes the same body as upload and writes nothing.
+   */
+  @Post('/preview/:projectSlug')
+  async previewGtmJson(
+    @Param('projectSlug') projectSlug: string,
+    @Body() payload: unknown
+  ): Promise<GtmImportPreview> {
+    return await this.gtmParserService.previewGtmJson(projectSlug, payload);
+  }
+
+  /**
+   * Accepts the container export as a JSON body or as its text, or
+   * `{ container, resolutions }` once the user has chosen update or keep both
+   * for each tag whose event name changed.
+   */
   @Post('/upload/:projectSlug')
   async uploadGtmJson(
     @Param('projectSlug') projectSlug: string,

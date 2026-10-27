@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BadRequestException, Logger } from '@nestjs/common';
+import { BadRequestException, ConflictException, Logger } from '@nestjs/common';
 import { GtmParserService } from './gtm-parser.service';
 
 function build() {
@@ -8,8 +8,11 @@ function build() {
     buildEvents: vi.fn().mockResolvedValue({
       created: ['GA4 - page_view'],
       updated: [],
-      unchanged: []
-    })
+      unchanged: [],
+      renamed: [],
+      keptBoth: []
+    }),
+    findImportConflicts: vi.fn().mockResolvedValue([])
   };
   const service = new GtmParserService(
     projectGtmContainerService as never,
@@ -92,13 +95,16 @@ describe('GtmParserService', () => {
           }
         }
       ],
-      [dataLayerVariable, builtInVariable]
+      [dataLayerVariable, builtInVariable],
+      {}
     );
     expect(result).toEqual({
       saved: true,
       created: ['GA4 - page_view'],
       updated: [],
       unchanged: [],
+      renamed: [],
+      keptBoth: [],
       skipped: [
         { tagName: 'Custom HTML', reason: 'Not a GA4 event tag' },
         { tagName: 'GA4 - no name', reason: 'No event name' },
@@ -186,5 +192,154 @@ describe('GtmParserService', () => {
     await expect(upload).rejects.toThrow(reason);
     expect(ctx.projectGtmContainerService.save).not.toHaveBeenCalled();
     expect(ctx.projectEventsBuilderService.buildEvents).not.toHaveBeenCalled();
+    expect(
+      ctx.projectEventsBuilderService.findImportConflicts
+    ).not.toHaveBeenCalled();
+  });
+
+  it('forwards resolutions when every event-name conflict is resolved', async () => {
+    const ctx = build();
+    ctx.projectEventsBuilderService.findImportConflicts.mockResolvedValue([
+      {
+        tagName: 'GA4 - page_view',
+        existingEventName: 'page_view',
+        newEventName: 'screen_view',
+        specEdited: false
+      }
+    ]);
+    const resolutions = { 'GA4 - page_view': 'update' as const };
+
+    await ctx.service.uploadGtmJson('demo', { container, resolutions });
+
+    expect(ctx.projectGtmContainerService.save).toHaveBeenCalledWith(
+      'demo',
+      container
+    );
+    expect(ctx.projectEventsBuilderService.buildEvents).toHaveBeenCalledWith(
+      'demo',
+      expect.any(Array),
+      expect.any(Array),
+      resolutions
+    );
+  });
+
+  it('returns 409 and writes nothing when a conflict has no resolution', async () => {
+    const ctx = build();
+    const conflicts = [
+      {
+        tagName: 'GA4 - page_view',
+        existingEventName: 'page_view',
+        newEventName: 'screen_view',
+        specEdited: false
+      },
+      {
+        tagName: 'GA4 - refund',
+        existingEventName: 'refund',
+        newEventName: 'refund_issued',
+        specEdited: true
+      }
+    ];
+    ctx.projectEventsBuilderService.findImportConflicts.mockResolvedValue(
+      conflicts
+    );
+
+    let thrown: unknown;
+    try {
+      await ctx.service.uploadGtmJson('demo', {
+        container,
+        resolutions: { 'GA4 - page_view': 'keepBoth' }
+      });
+    } catch (error) {
+      thrown = error;
+    }
+
+    expect(thrown).toBeInstanceOf(ConflictException);
+    if (thrown instanceof ConflictException) {
+      expect(thrown.getStatus()).toBe(409);
+      expect(thrown.getResponse()).toMatchObject({
+        conflicts: [
+          expect.objectContaining({
+            tagName: 'GA4 - refund',
+            specEdited: true
+          })
+        ]
+      });
+    }
+    expect(ctx.projectGtmContainerService.save).not.toHaveBeenCalled();
+    expect(ctx.projectEventsBuilderService.buildEvents).not.toHaveBeenCalled();
+  });
+
+  it('rejects a resolution other than update or keep both and writes nothing', async () => {
+    const ctx = build();
+    const body = {
+      container,
+      resolutions: { 'GA4 - page_view': 'rename' }
+    };
+    const upload = ctx.service.uploadGtmJson('demo', body);
+    await expect(upload).rejects.toBeInstanceOf(BadRequestException);
+    expect(ctx.projectGtmContainerService.save).not.toHaveBeenCalled();
+    expect(
+      ctx.projectEventsBuilderService.findImportConflicts
+    ).not.toHaveBeenCalled();
+    expect(ctx.projectEventsBuilderService.buildEvents).not.toHaveBeenCalled();
+  });
+
+  it('preview reports conflicts and writes nothing', async () => {
+    const ctx = build();
+    const conflict = {
+      tagName: 'GA4 - page_view',
+      existingEventName: 'page_view',
+      newEventName: 'screen_view',
+      specEdited: true
+    };
+    ctx.projectEventsBuilderService.findImportConflicts.mockResolvedValue([
+      conflict
+    ]);
+
+    await expect(
+      ctx.service.previewGtmJson('demo', container)
+    ).resolves.toEqual({ conflicts: [conflict] });
+    expect(
+      ctx.projectEventsBuilderService.findImportConflicts
+    ).toHaveBeenCalledWith(
+      'demo',
+      [
+        expect.objectContaining({
+          testName: 'GA4 - page_view',
+          eventName: 'page_view'
+        })
+      ],
+      [dataLayerVariable, builtInVariable]
+    );
+    expect(ctx.projectGtmContainerService.save).not.toHaveBeenCalled();
+    expect(ctx.projectEventsBuilderService.buildEvents).not.toHaveBeenCalled();
+  });
+
+  it('preview accepts the upload body shapes and still writes nothing', async () => {
+    const ctx = build();
+
+    await ctx.service.previewGtmJson('demo', JSON.stringify(container));
+    await ctx.service.previewGtmJson('demo', {
+      container,
+      resolutions: { 'GA4 - page_view': 'keepBoth' }
+    });
+
+    expect(
+      ctx.projectEventsBuilderService.findImportConflicts
+    ).toHaveBeenCalledTimes(2);
+    expect(ctx.projectGtmContainerService.save).not.toHaveBeenCalled();
+    expect(ctx.projectEventsBuilderService.buildEvents).not.toHaveBeenCalled();
+  });
+
+  it('preview rejects an invalid file and writes nothing', async () => {
+    const ctx = build();
+    await expect(
+      ctx.service.previewGtmJson('demo', 'not-json{')
+    ).rejects.toBeInstanceOf(BadRequestException);
+    expect(ctx.projectGtmContainerService.save).not.toHaveBeenCalled();
+    expect(ctx.projectEventsBuilderService.buildEvents).not.toHaveBeenCalled();
+    expect(
+      ctx.projectEventsBuilderService.findImportConflicts
+    ).not.toHaveBeenCalled();
   });
 });
