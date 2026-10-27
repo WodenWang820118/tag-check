@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Page } from 'puppeteer';
+import { targetFrame, type QueryRoot } from '../../handlers/frame';
 import { ClickOperation } from './utils';
 import { withTimeout } from '../with-timeout';
 
@@ -8,7 +8,7 @@ import { withTimeout } from '../with-timeout';
 export class PageClickService implements ClickOperation {
   private readonly logger = new Logger(PageClickService.name);
   async operate(
-    page: Page,
+    page: QueryRoot,
     projectName: string,
     eventId: string,
     selector: string,
@@ -17,7 +17,7 @@ export class PageClickService implements ClickOperation {
   ): Promise<boolean> {
     try {
       await withTimeout(
-        page.click(selector, { delay: 100 }),
+        targetFrame(page).click(selector, { delay: 100 }),
         timeout,
         'Timeout exceeded Page Clicking'
       );

@@ -5,8 +5,13 @@ import {
   HttpStatus,
   InternalServerErrorException
 } from '@nestjs/common';
-import { Page } from 'puppeteer';
-import { ActionHandler, getFirstSelector } from './utils';
+import { type Frame, Page } from 'puppeteer';
+import { resolveStepFrame } from './frame';
+import {
+  ActionHandler,
+  STEP_SELECTOR_TIMEOUT_MS,
+  toPuppeteerSelector
+} from './utils';
 import { HoverStrategyService } from '../strategies/hover-strategies/hover-strategy.service';
 import { ActionUtilsService } from '../action-utils/action-utils.service';
 import { Step } from '@utils';
@@ -31,13 +36,18 @@ export class HoverHandler implements ActionHandler {
     _isLastClick: boolean
   ): Promise<void> {
     let hoveredSuccessfully = false;
+    const root = await resolveStepFrame(
+      page,
+      step.frame,
+      step.timeout ?? STEP_SELECTOR_TIMEOUT_MS
+    );
 
     for (const selectorArray of step.selectors ?? []) {
-      const selector = getFirstSelector(selectorArray);
+      const selector = toPuppeteerSelector(selectorArray);
       try {
         // Attempt to hover over the element with the given selector
         const hovered = await this.hoverElement(
-          page,
+          root,
           projectName,
           eventId,
           selector
@@ -62,7 +72,7 @@ export class HoverHandler implements ActionHandler {
   }
 
   private async hoverElement(
-    page: Page,
+    page: Frame,
     projectName: string,
     eventId: string,
     selector: string,

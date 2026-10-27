@@ -6,11 +6,12 @@ import {
   InternalServerErrorException
 } from '@nestjs/common';
 import { Page } from 'puppeteer';
+import { resolveStepFrame, type QueryRoot } from './frame';
 import {
   ActionHandler,
-  getFirstSelector,
   preferSelector,
   STEP_SELECTOR_TIMEOUT_MS,
+  toPuppeteerSelector,
   waitForAnySelector
 } from './utils';
 import { ChangeStrategyService } from '../strategies/change-strategies/change-strategy.service';
@@ -42,7 +43,7 @@ export class ChangeHandler implements ActionHandler {
     _isLastClick?: boolean,
     timeout = 3000
   ): Promise<void> {
-    const candidates = (step.selectors ?? []).map(getFirstSelector);
+    const candidates = (step.selectors ?? []).map(toPuppeteerSelector);
     if (candidates.length === 0) {
       return;
     }
@@ -50,7 +51,8 @@ export class ChangeHandler implements ActionHandler {
     // Give slow pages time to render the field. Typing does not need it to be
     // visible (page.type fills hidden fields too), only present.
     const waitTimeout = step.timeout ?? STEP_SELECTOR_TIMEOUT_MS;
-    const present = await waitForAnySelector(page, candidates, {
+    const root = await resolveStepFrame(page, step.frame, waitTimeout);
+    const present = await waitForAnySelector(root, candidates, {
       timeout: waitTimeout,
       visible: false
     });
@@ -69,7 +71,7 @@ export class ChangeHandler implements ActionHandler {
       try {
         if (
           await this.changeElement(
-            page,
+            root,
             projectName,
             eventId,
             selector,
@@ -93,7 +95,7 @@ export class ChangeHandler implements ActionHandler {
   }
 
   async changeElement(
-    page: Page,
+    page: QueryRoot,
     projectName: string,
     eventId: string,
     selector: string,

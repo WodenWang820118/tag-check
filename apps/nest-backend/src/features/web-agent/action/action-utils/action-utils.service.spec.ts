@@ -127,12 +127,40 @@ describe('ActionUtilsService', () => {
     );
 
     expect(result).toBe(element);
-    expect(page.evaluateHandle).toHaveBeenCalledWith(
-      expect.any(Function),
-      '#host',
-      '.shadow-button'
-    );
+    const source: unknown = page.evaluateHandle.mock.calls[0]?.[0];
+    if (typeof source !== 'string') {
+      throw new Error('Expected the pierce lookup to be a source string');
+    }
+    expect(source).toContain('"#host"');
+    expect(source).toContain('".shadow-button"');
     expect(page.$).not.toHaveBeenCalled();
+  });
+
+  it('resolves a shadow chain with the CSS query', async () => {
+    const page = createPage();
+    const service = new ActionUtilsService();
+    const selector = 'my-widget >>>> button.buy';
+
+    expect(service.getSelectorType(selector)).toBe('css');
+    await service.getElement(page as never, 'css', selector);
+
+    expect(page.$).toHaveBeenCalledWith(selector);
+  });
+
+  it('classifies a converted chain as CSS rather than its first prefix', () => {
+    const service = new ActionUtilsService();
+
+    expect(service.getSelectorType('::-p-aria(Buy) >>>> button')).toBe('css');
+    expect(service.getSelectorType('::-p-xpath(//button) >>>> span')).toBe(
+      'css'
+    );
+    expect(service.getSelectorType('::-p-text(Hello)')).toBe('css');
+    expect(service.getSelectorType(':scope >>> .buy >>>> span')).toBe('css');
+    expect(service.getSelectorType('text/Hello >>>> span')).toBe('css');
+    expect(service.getSelectorType('aria/Buy >>>> span')).toBe('css');
+    expect(service.getSelectorType('pierce/div >>>> span')).toBe('css');
+    expect(service.getSelectorType('xpath//div >>>> span')).toBe('css');
+    expect(service.getSelectorType('.//button >>>> span')).toBe('css');
   });
 });
 
