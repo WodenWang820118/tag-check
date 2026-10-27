@@ -66,3 +66,24 @@ export type StepFailureSummary = Pick<
   StepFailureContext,
   'stepIndex' | 'stepType' | 'url'
 >;
+
+/**
+ * A step the run retried with a fallback selector: its recorded selectors
+ * found nothing, and one candidate clearly was the element. The result's
+ * message says so. No model is involved.
+ */
+export type StepFallback = {
+  /** 0-based. */
+  stepIndex: number;
+  /** The step's type, such as `click`. */
+  stepType: string;
+  /**
+   * The selector the result names. The retry tries every selector of the
+   * candidate; this is its first, which is the most stable.
+   */
+  selector: string;
+  /** Which recorded hint singled the candidate out. */
+  matchedBy: 'testId' | 'id' | 'name';
+  /** The recorded test hook, id or name it matched. */
+  value: string;
+};

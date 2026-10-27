@@ -1,3 +1,12 @@
+import type { StepFallback } from '../types/tag-check/step-failure.type';
+
+/** How `matchedBy` reads in a result message. */
+const MATCH_WORD: Record<StepFallback['matchedBy'], string> = {
+  testId: 'test hook',
+  id: 'id',
+  name: 'name'
+};
+
 /** A wait in seconds as a person reads it: `15 s`, `2.5 s`. */
 function seconds(ms: number): string {
   return `${Number((ms / 1000).toFixed(1))} s`;
@@ -23,4 +32,21 @@ export function describeStepFailure(failure: {
       ? 'its selector did not appear'
       : `none of its ${failure.selectorCount} selectors appeared`;
   return `${step} could not find its element: ${selectors} within ${seconds(failure.timeoutMs)}.`;
+}
+
+/**
+ * One sentence for a step that continued with a fallback selector, such as
+ * `Step 5 (click) used a fallback selector [data-testid="add-to-cart"]:
+ * its recorded selectors found nothing, and one element matched the
+ * recorded test hook "add-to-cart".` Steps count from 1. `matchedBy`
+ * reads as "test hook", "id" or "name".
+ */
+export function describeStepFallback(fallback: StepFallback): string {
+  const step = `Step ${fallback.stepIndex + 1} (${fallback.stepType})`;
+  const how = MATCH_WORD[fallback.matchedBy];
+  return (
+    `${step} used a fallback selector ${fallback.selector}: its recorded ` +
+    'selectors found nothing, and one element matched the recorded ' +
+    `${how} "${fallback.value}".`
+  );
 }

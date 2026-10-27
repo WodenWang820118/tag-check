@@ -28,4 +28,5 @@ export * from './lib/functions/schedule-preset';
 export * from './lib/functions/ai-assist-settings';
 export * from './lib/functions/step-failure';
 export * from './lib/functions/selector-suggestion';
+export * from './lib/functions/selector-fallback';
 export * from './lib/functions/data-layer-push';

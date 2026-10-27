@@ -8,6 +8,7 @@ import {
 } from '@utils';
 import { RunStatusService } from '../../core/events-gateway/run-status.service';
 import { RunTimelineService } from '../../core/events-gateway/run-timeline.service';
+import { RunStepFallbackService } from '../../core/events-gateway/run-step-fallback.service';
 import { RunStepOverrideService } from '../../core/events-gateway/run-step-override.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 import { toClientErrorMessage } from '../../shared/client-error-message';
@@ -42,10 +43,11 @@ export function toRunOutcome(
 
 /**
  * Reports the start and end of every run to RunStatusService, and keeps the
- * run's step timeline (RunTimelineService) and its step override
- * (RunStepOverrideService) open while it runs. Both run
- * paths, direct (SingleEventInspectionService) and accompanied
- * (GtmOperatorService), wrap their queued task in `track`.
+ * run's step timeline (RunTimelineService), the fallback selectors it used
+ * (RunStepFallbackService) and its step override (RunStepOverrideService)
+ * open while it runs. Both run paths, direct
+ * (SingleEventInspectionService) and accompanied (GtmOperatorService),
+ * wrap their queued task in `track`.
  */
 @Injectable()
 export class RunTrackerService {
@@ -55,6 +57,7 @@ export class RunTrackerService {
     private readonly runStatus: RunStatusService,
     private readonly testEvents: TestEventRepositoryService,
     private readonly runTimeline: RunTimelineService,
+    private readonly runStepFallback: RunStepFallbackService,
     private readonly runStepOverride: RunStepOverrideService
   ) {}
 
@@ -70,6 +73,7 @@ export class RunTrackerService {
   ): Promise<SingleEventInspectionResult> {
     this.runStatus.start(await this.describe(run));
     this.runTimeline.begin(run.eventId);
+    this.runStepFallback.begin(run.eventId);
     this.runStepOverride.begin(run.eventId, run.stepOverride ?? null);
     try {
       const result = await task();
@@ -89,6 +93,7 @@ export class RunTrackerService {
       throw error;
     } finally {
       this.runTimeline.end(run.eventId);
+      this.runStepFallback.end(run.eventId);
       this.runStepOverride.end(run.eventId);
     }
   }

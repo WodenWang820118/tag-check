@@ -11,9 +11,11 @@ import { TestImageRepositoryService } from '../../core/repository/test-event/tes
 import { TestEventDetailRepositoryService } from '../../core/repository/test-event/test-event-detail-repository.service';
 import { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 import { RunTimelineService } from '../../core/events-gateway/run-timeline.service';
+import { RunStepFallbackService } from '../../core/events-gateway/run-step-fallback.service';
 import { RunRecordingsService } from '../../infrastructure/os/run-recordings/run-recordings.service';
 import {
   describeStepFailure,
+  describeStepFallback,
   type StepFailureContext,
   ValidationResult
 } from '@utils';
@@ -48,6 +50,7 @@ export class EventInspectionPipelineService {
     private readonly testEventDetailRepositoryService: TestEventDetailRepositoryService,
     private readonly testImageRepositoryService: TestImageRepositoryService,
     private readonly runTimelineService: RunTimelineService,
+    private readonly runStepFallbackService: RunStepFallbackService,
     private readonly runRecordingsService: RunRecordingsService
   ) {}
 
@@ -130,7 +133,7 @@ export class EventInspectionPipelineService {
     ];
     this.logger.debug('Data to be saved:', JSON.stringify(data, null, 2));
 
-    const updatedDetail = this.buildTestEventDetail(inspection);
+    const updatedDetail = this.buildTestEventDetail(inspection, eventId);
     this.logger.debug(
       'Updated detail:',
       JSON.stringify(updatedDetail, null, 2)
@@ -209,20 +212,39 @@ export class EventInspectionPipelineService {
     }
   }
 
-  /** The result row of a run whose checks finished. */
-  private buildTestEventDetail(result: {
-    dataLayerResult: ValidationResult;
-    destinationUrl: string;
-    rawRequest: string;
-    requestCheckResult: ValidationResult | null;
-  }): CreateTestEventDetailDto {
+  /**
+   * The result row of a run whose checks finished. A step that continued
+   * with a fallback selector adds one sentence to the message.
+   */
+  private buildTestEventDetail(
+    result: {
+      dataLayerResult: ValidationResult;
+      destinationUrl: string;
+      rawRequest: string;
+      requestCheckResult: ValidationResult | null;
+    },
+    eventId: string
+  ): CreateTestEventDetailDto {
+    const notes = this.runStepFallbackService
+      .fallbacks(eventId)
+      .map((fallback) => describeStepFallback(fallback));
+    // The check's message, such as "Valid", has no full stop of its own.
+    const checkMessage = result.dataLayerResult.message || '';
+    const message = [
+      notes.length > 0 && checkMessage !== '' && !/[.!?]$/.test(checkMessage)
+        ? `${checkMessage}.`
+        : checkMessage,
+      ...notes
+    ]
+      .filter((part) => part !== '')
+      .join(' ');
     return {
       passed: result.dataLayerResult.passed || false,
       requestPassed: result.requestCheckResult?.passed || false,
       rawRequest: result.rawRequest,
       destinationUrl: result.destinationUrl,
       dataLayer: result.dataLayerResult.dataLayer,
-      message: result.dataLayerResult.message || '',
+      message,
       requestMessage: result.requestCheckResult?.message ?? null
     };
   }
