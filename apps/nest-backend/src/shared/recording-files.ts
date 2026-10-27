@@ -1,7 +1,8 @@
 /**
- * The screen recordings a run writes to its inspection_results/<eventId>
- * folder. Every run replaces them; only accompanied-mode runs write the
- * Tag Assistant one.
+ * The screen recordings a run writes to its own folder,
+ * inspection_results/<eventId>/runs/<recordingKey> (see
+ * RunRecordingsService); only accompanied-mode runs write the Tag
+ * Assistant one.
  */
 export const RECORDING_FILES = {
   site: 'recording.webm',

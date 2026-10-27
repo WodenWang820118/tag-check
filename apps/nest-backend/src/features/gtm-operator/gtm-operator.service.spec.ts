@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
+import { RunMedia } from '../event-inspection-pipeline/run-media';
 import { passThroughTracker } from '../event-inspection-pipeline/run-tracker.spec-helpers';
 import { runInNewContext } from 'node:vm';
 import {
@@ -75,7 +76,8 @@ describe('GtmOperatorService recorder lifecycle', () => {
       targetPage,
       'project',
       'event',
-      expect.any(AbortSignal)
+      expect.any(AbortSignal),
+      { recordingKey: expect.stringMatching(/^[0-9a-f-]{36}$/) }
     );
     expect(recorder.stop).not.toHaveBeenCalled();
     expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
@@ -103,7 +105,8 @@ describe('GtmOperatorService recorder lifecycle', () => {
       'G-TEST',
       { username: '', password: '' },
       'false',
-      expect.anything()
+      expect.anything(),
+      expect.any(RunMedia)
     );
   });
 
@@ -121,8 +124,16 @@ describe('GtmOperatorService recorder lifecycle', () => {
       'project',
       'event',
       expect.any(AbortSignal),
-      { file: 'recording-tag-assistant.webm', bringToFront: false }
+      {
+        recordingKey:
+          puppeteerUtils.startRecorder.mock.calls[0][4].recordingKey,
+        file: 'recording-tag-assistant.webm',
+        bringToFront: false
+      }
     );
+    const media = pipeline.singleEventInspectionRecipe.mock.calls[0][7];
+    expect(media).toBeInstanceOf(RunMedia);
+    expect(media.tagAssistant).toBe(tagAssistantRecorder);
     expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(
       tagAssistantRecorder
     );

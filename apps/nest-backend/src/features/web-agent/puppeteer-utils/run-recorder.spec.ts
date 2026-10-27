@@ -189,6 +189,45 @@ describe('RunRecorder', () => {
     expect(recorder.error).toMatch(/did not finish/);
   });
 
+  it('keeps the video on the clock while frames come faster than it records', async () => {
+    const { ffmpeg, session, start } = setup();
+    const recorder = await start();
+
+    // An animation: a frame every 20 ms for one second, then a still page.
+    for (let i = 0; i <= 50; i++) {
+      session.frame(`f${i}`, 100 + i * 0.02);
+    }
+    session.frame('still', 103);
+    vi.spyOn(Date, 'now').mockReturnValue(103_000);
+    await recorder.stop();
+
+    // The animation fills its second with 15 of its frames, its last frame
+    // holds until the still page at 3 s.
+    expect(new Set(ffmpeg.frames.slice(0, RECORDING_FPS)).size).toBe(
+      RECORDING_FPS
+    );
+    expect(
+      ffmpeg.frames
+        .slice(RECORDING_FPS, 3 * RECORDING_FPS)
+        .every((frame) => frame === 'f50')
+    ).toBe(true);
+    expect(ffmpeg.frames.indexOf('still')).toBe(3 * RECORDING_FPS);
+  });
+
+  it('cuts only the excess of a gap longer than a minute', async () => {
+    const { ffmpeg, session, start } = setup();
+    const recorder = await start();
+
+    session.frame('A', 100);
+    session.frame('B', 100 + 90);
+    session.frame('C', 100 + 91);
+    vi.spyOn(Date, 'now').mockReturnValue(191_000);
+    await recorder.stop();
+
+    expect(ffmpeg.frames.indexOf('B')).toBe(60 * RECORDING_FPS);
+    expect(ffmpeg.frames.indexOf('C')).toBe(61 * RECORDING_FPS);
+  });
+
   it('shows the last frame for at most three seconds after the page stops changing', async () => {
     const { ffmpeg, session, start } = setup();
     const recorder = await start();
@@ -230,6 +269,18 @@ describe('RunRecorder', () => {
 
     await expect(start()).rejects.toThrow('Target closed');
     expect(ffmpeg.stdin.writableEnded).toBe(true);
+  });
+
+  it('knows when its first frame, 0:00 in the video, was captured', async () => {
+    const { session, start } = setup();
+    const recorder = await start();
+    expect(recorder.firstFrameAt).toBeNull();
+
+    session.frame('a', 1000.25);
+    session.frame('b', 1001);
+
+    expect(recorder.firstFrameAt).toBe(1000250);
+    await recorder.stop();
   });
 
   it('returns the same stop when called twice', async () => {

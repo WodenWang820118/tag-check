@@ -71,6 +71,11 @@ describe('AllExceptionsFilter', () => {
 
     expect(code).toHaveBeenCalledWith(404);
     expect(header).toHaveBeenCalledWith('x-request-id', 'req-1');
+    // Also on a route that set a video or image Content-Type.
+    expect(header).toHaveBeenCalledWith(
+      'content-type',
+      'application/json; charset=utf-8'
+    );
     const body = send.mock.calls[0][0] as Record<string, unknown>;
     expect(body.statusCode).toBe(404);
     expect(body.path).toBe('/x');

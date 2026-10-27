@@ -8,6 +8,7 @@ import {
 } from '../../features/web-agent/puppeteer-utils/puppeteer-utils.service';
 import { RunRecorder } from '../../features/web-agent/puppeteer-utils/run-recorder';
 import { applyPresetCookies } from '../web-agent/browser-state-preload.util';
+import { RunMedia } from '../event-inspection-pipeline/run-media';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
 import { RunTrackerService } from '../event-inspection-pipeline/run-tracker.service';
 import { toClientErrorMessage } from '../../shared/client-error-message';
@@ -97,12 +98,15 @@ export class SingleEventInspectionService {
         projectSlug,
         eventId
       );
+      const media = new RunMedia();
       recorder = await this.puppeteerUtilsService.startRecorder(
         page,
         projectSlug,
         eventId,
-        signal
+        signal,
+        { recordingKey: media.recordingKey }
       );
+      media.site = recorder;
       // Gives the recording a moment of the page before the replay starts.
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -114,7 +118,8 @@ export class SingleEventInspectionService {
           measurementId,
           credentials,
           captureRequest,
-          eventInspectionPresetDto
+          eventInspectionPresetDto,
+          media
         );
 
       await this.puppeteerUtilsService.stopRecorder(recorder);

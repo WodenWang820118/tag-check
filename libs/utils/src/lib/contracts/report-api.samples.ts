@@ -51,6 +51,17 @@ export const REPORT_DETAIL_SAMPLE = {
     requestPassed: true,
     passed: true,
     message: 'Valid',
+    requestMessage: 'Valid',
+    mediaTimeline: {
+      steps: [
+        { index: 0, atMs: 2010 },
+        { index: 1, atMs: 2105 },
+        { index: 2, atMs: 9840 },
+        { index: 3, atMs: 16420 },
+        { index: 4, atMs: 23960 }
+      ],
+      tagAssistantOffsetMs: 410
+    },
     rawRequest:
       'https://www.google-analytics.com/g/collect?v=2&tid=G-8HKQR5ZBSK&en=add_to_cart&pr1=idcity001~nmSwitzerland~qt1~pr799&epn.value=799&cu=USD',
     destinationUrl:
@@ -81,7 +92,23 @@ export const REPORT_DETAIL_SAMPLE = {
     imageSize: 780605,
     createdAt: '2026-10-20T06:21:19.000Z',
     updatedAt: '2026-10-20T06:21:19.000Z'
-  }
+  },
+  runs: [
+    {
+      runId: 7,
+      passed: true,
+      requestPassed: true,
+      runAt: '2026-10-20T06:21:19.000Z',
+      hasRecording: true
+    },
+    {
+      runId: 5,
+      passed: true,
+      requestPassed: false,
+      runAt: '2026-10-20T06:18:52.000Z',
+      hasRecording: true
+    }
+  ]
 } satisfies Jsonified<ReportDetailResponse>;
 
 /** One item of GET /file-reports/:projectSlug. */

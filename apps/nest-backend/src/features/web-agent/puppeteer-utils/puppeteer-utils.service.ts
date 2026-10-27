@@ -5,7 +5,7 @@ import { promises as fs } from 'fs';
 import { Page, Browser, LaunchOptions } from 'puppeteer';
 import { ConfigsService } from '../../../core/configs/configs.service';
 import { RecordingRepositoryService } from '../.././../core/repository/recording/recording-repository.service';
-import { FolderPathService } from '../../../infrastructure/os/path/folder-path/folder-path.service';
+import { RunRecordingsService } from '../../../infrastructure/os/run-recordings/run-recordings.service';
 import { RECORDING_FILES, RecordingFile } from '../../../shared';
 import { RunRecorder } from './run-recorder';
 import { isQueryFlagOn } from '../../../shared/query-flag';
@@ -44,7 +44,7 @@ export class PuppeteerUtilsService {
   constructor(
     private readonly configsService: ConfigsService,
     private readonly recordingRepositoryService: RecordingRepositoryService,
-    private readonly folderPathService: FolderPathService
+    private readonly runRecordingsService: RunRecordingsService
   ) {}
 
   /**
@@ -165,16 +165,21 @@ export class PuppeteerUtilsService {
   }
 
   /**
-   * Records `page` to one of the test's recording files (the site recording
-   * by default). Starting the site recording removes the previous run's
-   * Tag Assistant recording, so a direct run never shows a stale one.
+   * Records `page` to one of the run's recording files (the site recording
+   * by default), in the run's own folder (`options.recordingKey`; see
+   * RunRecordingsService). Starting the site recording removes the files
+   * runs saved before keeping their own left in the test's folder.
    */
   async startRecorder(
     page: Page,
     projectSlug: string,
     eventId: string,
-    signal?: AbortSignal,
-    options: { file?: RecordingFile; bringToFront?: boolean } = {}
+    signal: AbortSignal | undefined,
+    options: {
+      recordingKey: string;
+      file?: RecordingFile;
+      bringToFront?: boolean;
+    }
   ): Promise<RunRecorder> {
     const file = options.file ?? RECORDING_FILES.site;
     if (signal?.aborted) {
@@ -188,11 +193,11 @@ export class PuppeteerUtilsService {
       }
     };
 
-    const folderPath =
-      await this.folderPathService.getInspectionEventFolderPath(
-        projectSlug,
-        eventId
-      );
+    const folderPath = await this.runRecordingsService.folderOf(
+      projectSlug,
+      eventId,
+      options.recordingKey
+    );
 
     const outputFile = join(folderPath, file);
 
@@ -205,18 +210,13 @@ export class PuppeteerUtilsService {
       );
       throw e;
     }
-    try {
-      await fs.rm(outputFile, { force: true });
-      if (file === RECORDING_FILES.site) {
-        await fs.rm(join(folderPath, RECORDING_FILES.tagAssistant), {
-          force: true
-        });
+    if (file === RECORDING_FILES.site) {
+      try {
+        await this.runRecordingsService.removeLegacy(projectSlug, eventId);
+      } catch (e) {
+        // Non-fatal: the old files only take space.
+        this.logger.debug(`Could not remove the old recordings: ${e}`);
       }
-    } catch (e) {
-      // Non-fatal; proceed if file didn't exist
-      this.logger.debug(
-        `No previous recording to remove at ${outputFile}: ${e}`
-      );
     }
 
     if (options.bringToFront !== false) {

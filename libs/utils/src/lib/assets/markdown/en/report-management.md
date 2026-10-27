@@ -23,4 +23,4 @@ The share menu exports the result as a spreadsheet (XLSX), the screen recording 
 **Reports** lists every run of the project's tests, newest first, with its status and when it ran. Filter the list by event name, and select runs to act on them:
 
 - **Download** exports a spreadsheet with one sheet per selected test. Each sheet shows the spec; every run's captured data layer, checks, raw request and destination URL; the latest run's status and message; the recording's steps; and the latest screenshot.
-- **Delete** deletes the selected runs and the screenshots they saved. The tests stay. A test whose latest run is deleted shows its previous run, loses its screen recording, which every run replaces, and shows Not run when no run is left.
+- **Delete** deletes the selected runs with the screenshots and screen recordings they saved. The tests stay. A test whose latest run is deleted shows its previous run, and Not run when no run is left. The latest 10 runs of a test keep their screen recordings; older runs keep their screenshot.

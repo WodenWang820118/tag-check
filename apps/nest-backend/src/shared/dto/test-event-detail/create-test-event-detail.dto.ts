@@ -1,5 +1,6 @@
 import type {
   BaseDataLayerEvent,
+  RunMediaTimeline,
   StrictDataLayerEvent,
   TestEventDetail
 } from '@utils';
@@ -36,4 +37,17 @@ export class CreateTestEventDetailDto implements TestEventDetail {
   @IsOptional()
   @IsString()
   message?: string;
+
+  /** The GA4 request check's message, when the run checked the request. */
+  @IsOptional()
+  @IsString()
+  requestMessage?: string | null;
+
+  /** The folder name of the run's recordings; see TestEventDetailEntity. */
+  @IsOptional()
+  @IsString()
+  recordingKey?: string | null;
+
+  @IsOptional()
+  mediaTimeline?: RunMediaTimeline | null;
 }

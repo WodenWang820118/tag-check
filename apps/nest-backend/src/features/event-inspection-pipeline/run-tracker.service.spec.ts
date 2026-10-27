@@ -2,6 +2,7 @@ import { HttpException, HttpStatus } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import type { ValidationResult } from '@utils';
 import type { RunStatusService } from '../../core/events-gateway/run-status.service';
+import type { RunTimelineService } from '../../core/events-gateway/run-timeline.service';
 import type { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 import { RunTrackerService, toRunOutcome } from './run-tracker.service';
 
@@ -32,11 +33,13 @@ function setUp(found = true) {
             new HttpException('Test event not found', HttpStatus.NOT_FOUND)
           )
   };
+  const runTimeline = { begin: vi.fn(), end: vi.fn() };
   const tracker = new RunTrackerService(
     runStatus as unknown as RunStatusService,
-    testEvents as unknown as TestEventRepositoryService
+    testEvents as unknown as TestEventRepositoryService,
+    runTimeline as unknown as RunTimelineService
   );
-  return { tracker, runStatus };
+  return { tracker, runStatus, runTimeline };
 }
 
 describe('toRunOutcome', () => {
@@ -56,6 +59,26 @@ describe('toRunOutcome', () => {
 
 describe('RunTrackerService', () => {
   const run = { projectSlug: 'shop', eventId: 'evt-1' };
+
+  it("keeps the run's step timeline open while it runs", async () => {
+    const { tracker, runTimeline } = setUp();
+    const task = vi.fn(async () => {
+      expect(runTimeline.begin).toHaveBeenCalledWith('evt-1');
+      expect(runTimeline.end).not.toHaveBeenCalled();
+      return undefined;
+    });
+
+    await tracker.track(run, new AbortController().signal, task);
+    await expect(
+      tracker.track(run, new AbortController().signal, async () => {
+        throw new Error('replay failed');
+      })
+    ).rejects.toThrow('replay failed');
+
+    expect(task).toHaveBeenCalledOnce();
+    expect(runTimeline.end).toHaveBeenCalledTimes(2);
+    expect(runTimeline.end).toHaveBeenCalledWith('evt-1');
+  });
 
   it('reports the start with the test names and the end with its checks', async () => {
     const { tracker, runStatus } = setUp();

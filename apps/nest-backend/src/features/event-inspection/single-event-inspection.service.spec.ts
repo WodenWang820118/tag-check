@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { RunQueueService } from '../event-inspection-pipeline/run-queue.service';
+import { RunMedia } from '../event-inspection-pipeline/run-media';
 import { passThroughTracker } from '../event-inspection-pipeline/run-tracker.spec-helpers';
 import {
   InspectSingleEventOptions,
@@ -53,7 +54,15 @@ describe('SingleEventInspectionService recorder lifecycle', () => {
       page,
       'project',
       'event',
-      expect.any(AbortSignal)
+      expect.any(AbortSignal),
+      { recordingKey: expect.stringMatching(/^[0-9a-f-]{36}$/) }
+    );
+    // The pipeline saves the run with the recording it started.
+    const media = pipeline.singleEventInspectionRecipe.mock.calls[0][7];
+    expect(media).toBeInstanceOf(RunMedia);
+    expect(media.site).toBe(recorder);
+    expect(media.recordingKey).toBe(
+      puppeteerUtils.startRecorder.mock.calls[0][4].recordingKey
     );
     expect(puppeteerUtils.stopRecorder).toHaveBeenCalledWith(recorder);
     expect(puppeteerUtils.cleanup).toHaveBeenCalledWith(browser, page, null);

@@ -1,11 +1,13 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { InitialSchema1792540800000 } from './migrations/1792540800000-initial-schema';
 import { BatchRunsAndSchedules1792886400000 } from './migrations/1792886400000-batch-runs-and-schedules';
+import { RunMedia1793059200000 } from './migrations/1793059200000-run-media';
 
 /** Every migration, oldest first. Add a migration for each schema change. */
 export const DATABASE_MIGRATIONS = [
   InitialSchema1792540800000,
-  BatchRunsAndSchedules1792886400000
+  BatchRunsAndSchedules1792886400000,
+  RunMedia1793059200000
 ];
 
 const MIGRATIONS_TABLE = 'migrations';
