@@ -165,6 +165,7 @@ describe('SysConfigurationRepositoryService', () => {
     qb.into = vi.fn().mockReturnValue(qb);
     qb.values = vi.fn().mockReturnValue(qb);
     qb.orUpdate = vi.fn().mockReturnValue(qb);
+    qb.updateEntity = vi.fn().mockReturnValue(qb);
     qb.execute = vi.fn().mockResolvedValue(undefined);
     (repository.createQueryBuilder as ReturnType<typeof vi.fn>).mockReturnValue(
       qb
@@ -181,6 +182,7 @@ describe('SysConfigurationRepositoryService', () => {
       ['value', 'description'],
       ['name']
     );
+    expect(qb.updateEntity).toHaveBeenCalledWith(false);
     expect(qb.execute).toHaveBeenCalledTimes(1);
   });
 });

@@ -34,12 +34,14 @@ function setUp(found = true) {
           )
   };
   const runTimeline = { begin: vi.fn(), end: vi.fn() };
+  const runStepOverride = { begin: vi.fn(), end: vi.fn() };
   const tracker = new RunTrackerService(
     runStatus as unknown as RunStatusService,
     testEvents as unknown as TestEventRepositoryService,
-    runTimeline as unknown as RunTimelineService
+    runTimeline as unknown as RunTimelineService,
+    runStepOverride as never
   );
-  return { tracker, runStatus, runTimeline };
+  return { tracker, runStatus, runTimeline, runStepOverride };
 }
 
 describe('toRunOutcome', () => {
@@ -59,6 +61,27 @@ describe('toRunOutcome', () => {
 
 describe('RunTrackerService', () => {
   const run = { projectSlug: 'shop', eventId: 'evt-1' };
+
+  it("keeps a trial's step override open while it runs", async () => {
+    const { tracker, runStepOverride } = setUp();
+    const stepOverride = { stepIndex: 4, selectors: ['#new'] };
+    const task = vi.fn(async () => {
+      expect(runStepOverride.begin).toHaveBeenCalledWith('evt-1', stepOverride);
+      expect(runStepOverride.end).not.toHaveBeenCalled();
+      return undefined;
+    });
+
+    await tracker.track(
+      { ...run, stepOverride },
+      new AbortController().signal,
+      task
+    );
+
+    expect(task).toHaveBeenCalled();
+    expect(runStepOverride.end).toHaveBeenCalledWith('evt-1');
+    await tracker.track(run, new AbortController().signal, async () => []);
+    expect(runStepOverride.begin).toHaveBeenLastCalledWith('evt-1', null);
+  });
 
   it("keeps the run's step timeline open while it runs", async () => {
     const { tracker, runTimeline } = setUp();

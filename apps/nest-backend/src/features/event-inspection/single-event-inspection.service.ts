@@ -1,6 +1,10 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Credentials } from 'puppeteer';
-import type { EventInspectionPresetDto, RunStatusBatch } from '@utils';
+import type {
+  EventInspectionPresetDto,
+  RunStatusBatch,
+  SelectorTrialRequest
+} from '@utils';
 import { EventInspectionPipelineService } from '../../features/event-inspection-pipeline/event-inspection-pipeline.service';
 import {
   isHeadless,
@@ -47,17 +51,21 @@ export class SingleEventInspectionService {
   /**
    * Runs the test once every run requested before it has finished. Resolves
    * with the pipeline's result; rejects with an HttpException (500) when the
-   * run fails. `batch` places the run in its batch for the run status.
+   * run fails. `batch` places the run in its batch for the run status;
+   * `stepOverride` makes it a trial of other selectors for one step.
    */
   inspectSingleEvent(
     projectSlug: string,
     eventId: string,
     options: InspectSingleEventOptions,
-    batch?: RunStatusBatch
+    batch?: RunStatusBatch,
+    stepOverride?: SelectorTrialRequest
   ) {
     return this.runQueue.run((signal) =>
-      this.runTracker.track({ projectSlug, eventId, batch }, signal, () =>
-        this.inspect(projectSlug, eventId, options, signal)
+      this.runTracker.track(
+        { projectSlug, eventId, batch, stepOverride },
+        signal,
+        () => this.inspect(projectSlug, eventId, options, signal)
       )
     );
   }

@@ -57,6 +57,7 @@ describe('TestRunService', () => {
         closeBrowser: 'true'
       }),
       expect.objectContaining({ puppeteerArgs: [] }),
+      undefined,
       undefined
     );
   });
@@ -77,6 +78,7 @@ describe('TestRunService', () => {
         captureRequest: 'false',
         url: 'https://shop.example/'
       }),
+      undefined,
       undefined
     );
   });
@@ -100,7 +102,25 @@ describe('TestRunService', () => {
       'evt',
       expect.anything(),
       expect.anything(),
-      batch
+      batch,
+      undefined
+    );
+  });
+
+  it('passes a trial run its step override', async () => {
+    const { service, direct } = setUp(
+      project({ isAccompanyMode: false, isRequestCheck: true })
+    );
+    const stepOverride = { stepIndex: 4, selectors: ['#new'] };
+
+    await service.run('shop', 'evt', { headless: true, stepOverride });
+
+    expect(direct.inspectSingleEvent).toHaveBeenCalledWith(
+      'shop',
+      'evt',
+      expect.anything(),
+      undefined,
+      stepOverride
     );
   });
 

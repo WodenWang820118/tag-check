@@ -1,10 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { ReportDetailResponse, RunHistoryEntry } from '@utils';
+import type {
+  ReportDetailResponse,
+  RunHistoryEntry,
+  StepFailureSummary
+} from '@utils';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 import { TestImageRepositoryService } from '../../../core/repository/test-event/test-image-repository.service';
 import { CreateFullTestEventDto } from '../../../shared';
 import { ProjectRepositoryService } from '../../../core/repository/project/project-repository.service';
-import { TestEventDetailRepositoryService } from '../../../core/repository/test-event/test-event-detail-repository.service';
+import {
+  type RunHistoryRow,
+  TestEventDetailRepositoryService
+} from '../../../core/repository/test-event/test-event-detail-repository.service';
 import { SpecRepositoryService } from '../../../core/repository/spec/spec-repository.service';
 import { RecordingRepositoryService } from '../../../core/repository/recording/recording-repository.service';
 import { ItemDefRepositoryService } from '../../../core/repository/item-def/item-def-repository.service';
@@ -17,6 +24,8 @@ import { RECORDING_FILES } from '../../../shared';
  */
 @Injectable()
 export class TestReportFacadeRepositoryService {
+  private readonly logger = new Logger(TestReportFacadeRepositoryService.name);
+
   constructor(
     private readonly projectRepositoryService: ProjectRepositoryService,
     private readonly testEventRepositoryService: TestEventRepositoryService,
@@ -135,10 +144,23 @@ export class TestReportFacadeRepositoryService {
             runId
           );
 
+    const runRows = await this.testEventDetailRepositoryService.listRunHistory(
+      projectSlug,
+      eventId
+    );
+    const shownRun = testEventDetails
+      ? runRows.find((row) => row.runId === testEventDetails.id)
+      : undefined;
+
     return {
       testEvent,
       testEventDetails: testEventDetails ?? null,
-      runs: await this.getRunHistory(projectSlug, eventId),
+      runs: await this.toRunHistory(projectSlug, eventId, runRows),
+      stepFailure: await this.getStepFailure(
+        projectSlug,
+        eventId,
+        shownRun?.recordingKey ?? null
+      ),
       testImage: testImage
         ? {
             id: testImage.id,
@@ -156,14 +178,11 @@ export class TestReportFacadeRepositoryService {
    * recordings: in its own folder, or for the latest run saved before runs
    * kept their own, in the test's folder.
    */
-  private async getRunHistory(
+  private async toRunHistory(
     projectSlug: string,
-    eventId: string
+    eventId: string,
+    runs: RunHistoryRow[]
   ): Promise<RunHistoryEntry[]> {
-    const runs = await this.testEventDetailRepositoryService.listRunHistory(
-      projectSlug,
-      eventId
-    );
     return Promise.all(
       runs.map(async ({ recordingKey, ...run }, index) => ({
         ...run,
@@ -178,6 +197,39 @@ export class TestReportFacadeRepositoryService {
             )) !== null)
       }))
     );
+  }
+
+  /**
+   * Which step of the run kept in `recordingKey`'s folder could not find
+   * its element; null when the run kept none, or it cannot be read.
+   */
+  private async getStepFailure(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string | null
+  ): Promise<StepFailureSummary | null> {
+    if (!recordingKey) {
+      return null;
+    }
+    try {
+      const context = await this.runRecordingsService.readStepFailure(
+        projectSlug,
+        eventId,
+        recordingKey
+      );
+      return context
+        ? {
+            stepIndex: context.stepIndex,
+            stepType: context.stepType,
+            url: context.url
+          }
+        : null;
+    } catch (error) {
+      this.logger.warn(
+        `Could not read what run ${recordingKey}'s step saw: ${error}`
+      );
+      return null;
+    }
   }
 
   /**

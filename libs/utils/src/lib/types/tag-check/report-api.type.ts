@@ -1,3 +1,4 @@
+import type { StepFailureSummary } from './step-failure.type';
 import { Auditable } from './auditable.type';
 import { AbstractTestEvent } from './project.type';
 import { TestEventDetailSchema } from './report.type';
@@ -61,6 +62,11 @@ export type ReportDetailResponse = {
   testImage: TestImageSummary | null;
   /** Every run of the test, newest first. */
   runs: RunHistoryEntry[];
+  /**
+   * The step of that run that could not find its element, when the run
+   * kept what the step saw; null otherwise.
+   */
+  stepFailure: StepFailureSummary | null;
 };
 
 /** One run in a test's history (ReportDetailResponse.runs). */

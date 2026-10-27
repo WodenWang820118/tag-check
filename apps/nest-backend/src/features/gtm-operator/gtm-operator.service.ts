@@ -17,7 +17,7 @@ import {
 import { RunRecorder } from '../web-agent/puppeteer-utils/run-recorder';
 import { InspectGtmQueryDto } from '../../shared/dto/gtm-operator';
 import { RECORDING_FILES, toClientErrorMessage } from '../../shared';
-import type { RunStatusBatch } from '@utils';
+import type { RunStatusBatch, SelectorTrialRequest } from '@utils';
 import {
   applyPresetCookies,
   preloadApplicationLocalStorage,
@@ -69,24 +69,29 @@ export class GtmOperatorService {
    * with the pipeline's result. Rejects with BadRequestException for a GTM
    * preview URL without a target site, and InternalServerErrorException for
    * any other failure, with the failure's reason in its message. `batch`
-   * places the run in its batch for the run status.
+   * places the run in its batch for the run status; `stepOverride` makes it
+   * a trial of other selectors for one step.
    */
   inspectSingleEventViaGtm(
     projectSlug: string,
     eventId: string,
     query: InspectGtmQueryDto,
     eventInspectionPresetDto: EventInspectionPresetDto,
-    batch?: RunStatusBatch
+    batch?: RunStatusBatch,
+    stepOverride?: SelectorTrialRequest
   ) {
     return this.runQueue.run((signal) =>
-      this.runTracker.track({ projectSlug, eventId, batch }, signal, () =>
-        this.inspectViaGtm(
-          projectSlug,
-          eventId,
-          query,
-          eventInspectionPresetDto,
-          signal
-        )
+      this.runTracker.track(
+        { projectSlug, eventId, batch, stepOverride },
+        signal,
+        () =>
+          this.inspectViaGtm(
+            projectSlug,
+            eventId,
+            query,
+            eventInspectionPresetDto,
+            signal
+          )
       )
     );
   }

@@ -30,6 +30,7 @@ function build() {
   const itemDefRepositoryService = { create: vi.fn() };
   const runRecordingsService = {
     fileOf: vi.fn().mockResolvedValue(null),
+    readStepFailure: vi.fn().mockResolvedValue(null),
     removeTests: vi.fn().mockResolvedValue(undefined)
   };
   const service = new TestReportFacadeRepositoryService(
@@ -199,7 +200,8 @@ describe('TestReportFacadeRepositoryService', () => {
         testEvent: { id: 1 },
         testEventDetails: null,
         testImage: null,
-        runs: []
+        runs: [],
+        stepFailure: null
       });
     });
 
@@ -262,6 +264,75 @@ describe('TestReportFacadeRepositoryService', () => {
         [7, true]
       ]);
       expect(ctx.runRecordingsService.fileOf).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getReportDetail() step failure', () => {
+    const KEY = '0f0e6b2a-7c1d-4e5f-8a9b-1c2d3e4f5a6b';
+
+    function setUp(readStepFailure: (...args: unknown[]) => Promise<unknown>) {
+      const ctx = build();
+      ctx.runRecordingsService.readStepFailure.mockImplementation(
+        readStepFailure
+      );
+      ctx.testEventRepositoryService.getBySlugAndEventId.mockResolvedValue(
+        REPORT_DETAIL_SAMPLE.testEvent
+      );
+      ctx.testEventDetailRepositoryService.getBySlugAndEventId.mockResolvedValue(
+        { ...REPORT_DETAIL_SAMPLE.testEventDetails, id: 7 }
+      );
+      ctx.testEventDetailRepositoryService.listRunHistory.mockResolvedValue([
+        {
+          runId: 7,
+          passed: false,
+          requestPassed: false,
+          runAt: new Date(0),
+          recordingKey: KEY
+        }
+      ]);
+      return ctx;
+    }
+
+    it('says which step of the shown run could not find its element', async () => {
+      const ctx = setUp(
+        vi.fn().mockResolvedValue({
+          stepIndex: 4,
+          stepType: 'click',
+          url: 'https://shop.example/',
+          candidates: []
+        })
+      );
+
+      const result = await ctx.service.getReportDetail('demo', 'evt');
+
+      expect(result.stepFailure).toEqual({
+        stepIndex: 4,
+        stepType: 'click',
+        url: 'https://shop.example/'
+      });
+      expect(ctx.runRecordingsService.readStepFailure).toHaveBeenCalledWith(
+        'demo',
+        'evt',
+        KEY
+      );
+    });
+
+    it('is null when the run kept none, or it cannot be read', async () => {
+      expect(
+        (
+          await setUp(vi.fn().mockResolvedValue(null)).service.getReportDetail(
+            'demo',
+            'evt'
+          )
+        ).stepFailure
+      ).toBeNull();
+      expect(
+        (
+          await setUp(
+            vi.fn().mockRejectedValue(new SyntaxError('Unexpected end of JSON'))
+          ).service.getReportDetail('demo', 'evt')
+        ).stepFailure
+      ).toBeNull();
     });
   });
 
