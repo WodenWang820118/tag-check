@@ -34,7 +34,7 @@ Each test replays a Chrome Recorder recording that ends with the action that pus
 
 1. In Chrome, open DevTools and the **Recorder** panel, and record the journey on your site: for example, open a product page and select **Add to cart**.
 2. Export the recording as a JSON file.
-3. Open the test and go to **Latest result**. In the **Chrome Recording** panel, select the edit button, **Upload** the file or paste its content, and select **Save**.
+3. Open the test and expand **Spec, recording and item definition**. In the **Chrome Recording** panel, select the edit button, **Upload** the file or paste its content, and select **Save**.
 
 TagCheck replays the steps `setViewport`, `navigate`, `click`, `hover`, `change`, `keyDown`, `keyUp` and `waitForElement`, with CSS, ID, ARIA, text, XPath and pierce selectors. Stable selectors, such as `data-testid` attributes, keep recordings working after design changes.
 

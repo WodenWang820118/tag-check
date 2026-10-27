@@ -32,6 +32,15 @@ describe('VideosService', () => {
     );
   });
 
+  it("asks for a run's recording with ?run=", async () => {
+    http.get.mockReturnValue(of({ body: new Blob(['v']) }));
+    await firstValueFrom(service.getVideo('p', 'e', 'tag-assistant', 5));
+    expect(http.get).toHaveBeenCalledWith(
+      expect.stringContaining('/p/e'),
+      expect.objectContaining({ params: { view: 'tag-assistant', run: 5 } })
+    );
+  });
+
   it('falls back to an empty Blob when response body is missing', async () => {
     http.get.mockReturnValue(of({ body: null }));
     const result = await firstValueFrom(service.getVideo('p', 'e'));

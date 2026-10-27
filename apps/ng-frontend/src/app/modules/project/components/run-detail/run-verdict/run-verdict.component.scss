@@ -1,0 +1,54 @@
+// Check colors differ in lightness as well as hue, and each chip also
+// carries its icon and word.
+article {
+  border: 1px solid #dde3e1;
+}
+
+.verdict-card--failed {
+  border: 2px solid #c0392b;
+}
+
+.verdict-chip--passed {
+  background: #e2f3e8;
+  color: #17663f;
+}
+
+.verdict-chip--failed {
+  background: #fde8e6;
+  color: #a4231b;
+}
+
+.verdict-chip__icon {
+  font-size: 1.8rem;
+  height: 1.8rem;
+  width: 1.8rem;
+}
+
+.history-dot {
+  border-radius: 50%;
+  display: block;
+  height: 1.6rem;
+  width: 1.6rem;
+}
+
+.history-dot--passed {
+  background: #2e8b57;
+}
+
+.history-dot--partial {
+  background: #f0a500;
+}
+
+.history-dot--failed {
+  background: #c0392b;
+}
+
+.history-dot--current {
+  outline: 2px solid #1d2321;
+  outline-offset: 2px;
+}
+
+.history-dot:focus-visible {
+  outline: 3px solid #00796b;
+  outline-offset: 2px;
+}

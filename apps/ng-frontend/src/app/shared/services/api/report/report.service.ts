@@ -106,15 +106,18 @@ export class ReportService {
    *
    * @param projectSlug - URL-friendly project identifier.
    * @param eventId     - Test event identifier.
+   * @param runId       - The run to read; the test's latest run by default.
    */
   getReportDetails(
     projectSlug: string,
-    eventId: string
+    eventId: string,
+    runId?: number
   ): Observable<ReportDetailResponse> {
     return this.http
       .get<ReportDetailResponse>(
         `${environment.reportApiUrl}/${projectSlug}/${eventId}`,
         {
+          params: runId === undefined ? {} : { run: runId },
           context: new HttpContext().set(
             API_OPERATION_CONTEXT,
             'reports.detail'

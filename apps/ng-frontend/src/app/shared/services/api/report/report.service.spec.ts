@@ -106,6 +106,16 @@ describe('ReportService', () => {
     ).rejects.toThrow('Failed to delete tests');
   });
 
+  it('getReportDetails asks for a run with ?run=, the latest without', async () => {
+    httpClient.get.mockReturnValue(of({}));
+
+    await firstValueFrom(service.getReportDetails('s', 'a', 5));
+    await firstValueFrom(service.getReportDetails('s', 'a'));
+
+    expect(httpClient.get.mock.calls[0][1].params).toEqual({ run: 5 });
+    expect(httpClient.get.mock.calls[1][1].params).toEqual({});
+  });
+
   it('getReportDetails rethrows a friendly error', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     httpClient.get.mockReturnValueOnce(throwError(() => new Error('x')));

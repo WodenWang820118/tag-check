@@ -1,41 +1,113 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Directive,
+  input
+} from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
-import { BehaviorSubject, of } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DataLayerSpec, VariableConfig } from '@utils';
+import {
+  ActivatedRoute,
+  convertToParamMap,
+  Router,
+  RouterLink
+} from '@angular/router';
+import { BehaviorSubject, of, throwError } from 'rxjs';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  DataLayerSpec,
+  REPORT_DETAIL_SAMPLE,
+  ReportDetailResponse,
+  VariableConfig
+} from '@utils';
 import {
   buildReportPage,
   ReportDetailRouteContext
 } from '../../components/report-detail.contracts';
-import { ReportTabComponent } from '../../components/report-tab/report-tab.component';
 import { TagManageTabComponent } from '../../components/tag-manage-tab/tag-manage-tab.component';
+import { ReportDetailPanelsComponent } from '../../components/report-detail-panels/report-detail-panels.component';
+import { RunVerdictComponent } from '../../components/run-detail/run-verdict/run-verdict.component';
+import { RunPlayerComponent } from '../../components/run-detail/run-player/run-player.component';
+import { SpecComparisonComponent } from '../../components/run-detail/spec-comparison/spec-comparison.component';
+import { Ga4RequestComponent } from '../../components/run-detail/ga4-request/ga4-request.component';
+import { ReportTabFacade } from '../../components/report-tab/report-tab-facade.service';
 import { SnackBarComponent } from '../../../../shared/components/snackbar/snackbar.component';
 import { ProjectService } from '../../../../shared/services/api/project-info/project-info.service';
+import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import { DetailViewComponent } from './detail-view.component';
 
-@Component({
-  selector: 'app-report-tab',
-  standalone: true,
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: ''
-})
-class MockReportTabComponent {
-  context = input<ReportDetailRouteContext | undefined>(undefined);
+@Directive({ selector: '[routerLink]', standalone: true })
+class RouterLinkStub {
+  routerLink = input<unknown>();
+  queryParams = input<unknown>();
 }
 
+/** Stand-ins that keep the inputs the page passes them. */
+@Component({
+  selector: 'app-run-verdict',
+  standalone: true,
+  template: '',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+class VerdictStub {
+  run = input<unknown>();
+  runs = input<unknown>();
+  eventName = input<unknown>();
+}
+@Component({
+  selector: 'app-run-player',
+  standalone: true,
+  template: '',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+class PlayerStub {
+  siteBlob = input<unknown>();
+  tagAssistantBlob = input<unknown>();
+  imageBlob = input<unknown>();
+  timeline = input<unknown>();
+  steps = input<unknown>();
+}
+@Component({
+  selector: 'app-spec-comparison',
+  standalone: true,
+  template: '',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+class ComparisonStub {
+  spec = input<unknown>();
+  dataLayer = input<unknown>();
+}
+@Component({
+  selector: 'app-ga4-request',
+  standalone: true,
+  template: '',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+class RequestStub {
+  rawRequest = input<unknown>();
+  requestPassed = input<unknown>();
+  eventName = input<unknown>();
+}
 @Component({
   selector: 'app-tag-manage-tab',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: ''
+  template: '',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-class MockTagManageTabComponent {
-  tagSpec = input<unknown>(undefined);
+class TagStub {
+  tagSpec = input<unknown>();
   variables = input<readonly VariableConfig[]>([]);
+}
+@Component({
+  selector: 'app-report-detail-panels',
+  standalone: true,
+  template: '',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+class PanelsStub {
+  context = input<unknown>();
 }
 
 const MEASUREMENT_ID_CONSTANT: VariableConfig = {
@@ -46,69 +118,64 @@ const MEASUREMENT_ID_CONSTANT: VariableConfig = {
   parameter: [{ type: 'TEMPLATE', key: 'value', value: 'G-8HKQR5ZBSK' }]
 };
 
-function createSpec(eventName = 'purchase'): DataLayerSpec {
-  return {
-    eventName,
-    dataLayerSpec: {
-      event: eventName
-    } as DataLayerSpec['dataLayerSpec'],
-    rawGtmTag: {
-      tag: {
-        name: `${eventName}-tag`
-      } as DataLayerSpec['rawGtmTag']['tag'],
-      trigger: []
-    }
-  };
-}
+const SPEC = {
+  eventName: 'add_to_cart',
+  dataLayerSpec: { event: 'add_to_cart' },
+  rawGtmTag: { tag: { name: 'GA4 event - add_to_cart' }, trigger: [] }
+} as unknown as DataLayerSpec;
 
-function createPage(): ReportDetailRouteContext {
+/** The page as the resolver builds it from GET /reports (JSON). */
+function createPage(runId?: number): ReportDetailRouteContext {
+  const detail = JSON.parse(
+    JSON.stringify(REPORT_DETAIL_SAMPLE)
+  ) as ReportDetailResponse;
+  if (runId !== undefined && detail.testEventDetails) {
+    detail.testEventDetails.id = runId;
+  }
   return buildReportPage({
-    projectSlug: 'storybook-project',
+    projectSlug: 'demo',
     eventId: 'evt-1',
-    detail: null,
-    spec: createSpec(),
-    recording: { title: 'Purchase recording', steps: [] },
+    detail,
+    spec: SPEC,
+    recording: { title: 'add_to_cart', steps: [] },
     video: { blob: new Blob(['video'], { type: 'video/webm' }) },
-    tagAssistantVideo: null,
+    tagAssistantVideo: { blob: new Blob(['ta'], { type: 'video/webm' }) },
     image: { blob: new Blob(['image'], { type: 'image/png' }) }
   });
 }
 
 describe('DetailViewComponent', () => {
-  const routeSnapshot: {
-    queryParams: Record<string, string>;
-  } = {
-    queryParams: {
-      tab: 'reports'
-    }
+  const routeSnapshot: { queryParams: Record<string, string> } = {
+    queryParams: {}
   };
   const routeData$ = new BehaviorSubject<{ page: ReportDetailRouteContext }>({
     page: createPage()
   });
-  const queryParamMap$ = new BehaviorSubject(
-    convertToParamMap({ tab: 'reports' })
-  );
-
-  const router = {
-    navigate: vi.fn().mockResolvedValue(true)
-  };
-  const snackBar = {
-    openFromComponent: vi.fn()
-  };
+  const queryParamMap$ = new BehaviorSubject(convertToParamMap({}));
+  const router = { navigate: vi.fn().mockResolvedValue(true) };
+  const snackBar = { openFromComponent: vi.fn() };
   const projectService = {
     getProjectGtmConfig: vi.fn(() =>
       of({ containerVersion: { variable: [MEASUREMENT_ID_CONSTANT] } })
     )
   };
+  const reportFacade = {
+    shareSpreadsheet: vi.fn(),
+    exportRecording: vi.fn(),
+    exportEvent: vi.fn(),
+    copyEventName: vi.fn()
+  };
+  const testRunning = {
+    isRunningTest$: vi.fn(() => false),
+    eventRunningTest$: vi.fn(() => ''),
+    runTestForReport: vi.fn(() => of(undefined))
+  };
 
   beforeEach(async () => {
-    router.navigate.mockClear();
-    snackBar.openFromComponent.mockClear();
+    vi.clearAllMocks();
     routeData$.next({ page: createPage() });
-    routeSnapshot.queryParams = {
-      tab: 'reports'
-    };
-    queryParamMap$.next(convertToParamMap({ tab: 'reports' }));
+    routeSnapshot.queryParams = {};
+    queryParamMap$.next(convertToParamMap({}));
 
     await TestBed.configureTestingModule({
       imports: [DetailViewComponent],
@@ -122,79 +189,183 @@ describe('DetailViewComponent', () => {
             snapshot: routeSnapshot
           }
         },
-        {
-          provide: Router,
-          useValue: router
-        },
-        { provide: ProjectService, useValue: projectService }
+        { provide: Router, useValue: router },
+        { provide: ProjectService, useValue: projectService },
+        { provide: TestRunningFacadeService, useValue: testRunning }
       ]
     })
-      .overrideProvider(MatSnackBar, {
-        useValue: snackBar
-      })
+      .overrideProvider(MatSnackBar, { useValue: snackBar })
       .overrideComponent(DetailViewComponent, {
         remove: {
-          imports: [ReportTabComponent, TagManageTabComponent]
+          imports: [
+            RouterLink,
+            RunVerdictComponent,
+            RunPlayerComponent,
+            SpecComparisonComponent,
+            Ga4RequestComponent,
+            TagManageTabComponent,
+            ReportDetailPanelsComponent
+          ],
+          providers: [ReportTabFacade]
         },
         add: {
-          imports: [MockReportTabComponent, MockTagManageTabComponent]
+          imports: [
+            RouterLinkStub,
+            VerdictStub,
+            PlayerStub,
+            ComparisonStub,
+            RequestStub,
+            TagStub,
+            PanelsStub
+          ],
+          providers: [{ provide: ReportTabFacade, useValue: reportFacade }]
         }
       })
       .compileComponents();
   });
 
-  it('passes the resolved report page into the report tab', async () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function render() {
     const fixture = TestBed.createComponent(DetailViewComponent);
-
     fixture.detectChanges();
-    await Promise.resolve();
-    fixture.detectChanges();
+    return fixture;
+  }
 
+  const child = <T>(
+    fixture: ReturnType<typeof render>,
+    type: new (...args: never[]) => T
+  ) => fixture.debugElement.query(By.directive(type)).componentInstance as T;
+
+  const byTestId = (fixture: ReturnType<typeof render>, id: string) =>
+    fixture.nativeElement.querySelector(
+      `[data-testid="${id}"]`
+    ) as HTMLElement | null;
+
+  it("shows the run's verdict, recordings, comparison and request", () => {
+    const fixture = render();
+    const page = routeData$.value.page;
+
+    expect(fixture.nativeElement.querySelector('h1').textContent).toContain(
+      'GA4 event - add_to_cart'
+    );
+    expect(byTestId(fixture, 'detail-run')?.textContent).toContain('Run #7');
+    expect(child(fixture, VerdictStub).run()).toBe(page.run);
+    expect(child(fixture, VerdictStub).runs()).toBe(page.runs);
+    expect(child(fixture, PlayerStub).siteBlob()).toBe(page.videoBlob);
+    expect(child(fixture, PlayerStub).timeline()).toEqual(
+      REPORT_DETAIL_SAMPLE.testEventDetails.mediaTimeline
+    );
+    expect(child(fixture, ComparisonStub).spec()).toEqual({
+      event: 'add_to_cart'
+    });
+    expect(child(fixture, ComparisonStub).dataLayer()).toBe(
+      page.run?.dataLayer
+    );
+    expect(child(fixture, RequestStub).rawRequest()).toBe(page.run?.rawRequest);
+    expect(child(fixture, PanelsStub).context()).toBe(page);
+    expect(byTestId(fixture, 'detail-older-run')).toBeNull();
+  });
+
+  it("passes the project's container variables into the tag configuration", () => {
+    const fixture = render();
+
+    expect(projectService.getProjectGtmConfig).toHaveBeenCalledWith('demo');
+    expect(child(fixture, TagStub).variables()).toEqual([
+      MEASUREMENT_ID_CONSTANT
+    ]);
+  });
+
+  it('says when an older run is shown, and goes back to the latest', () => {
+    routeData$.next({ page: createPage(5) });
+    const fixture = render();
+
+    byTestId(fixture, 'detail-latest-run')?.click();
+
+    expect(byTestId(fixture, 'detail-older-run')).not.toBeNull();
+    expect(router.navigate).toHaveBeenCalledWith([], {
+      relativeTo: expect.anything(),
+      queryParams: { run: null },
+      queryParamsHandling: 'merge'
+    });
+  });
+
+  it('runs the test again and shows its new run', () => {
+    const fixture = render();
+
+    byTestId(fixture, 'detail-run-again')?.click();
+
+    expect(testRunning.runTestForReport).toHaveBeenCalledWith('evt-1', 'demo');
+    expect(router.navigate).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({ queryParams: { run: null } })
+    );
+  });
+
+  it('says so when the run does not finish, and stays on the run', () => {
+    testRunning.runTestForReport.mockReturnValueOnce(
+      throwError(() => new Error('browser crashed'))
+    );
+    const fixture = render();
+
+    fixture.componentInstance.runAgain();
+
+    expect(snackBar.openFromComponent).toHaveBeenCalledWith(
+      SnackBarComponent,
+      expect.objectContaining({
+        data: 'The run did not finish. See the message on the Tests page.'
+      })
+    );
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('does not start a run while another one runs', () => {
+    testRunning.isRunningTest$.mockReturnValue(true);
+    const fixture = render();
+
+    fixture.componentInstance.runAgain();
+
+    expect(testRunning.runTestForReport).not.toHaveBeenCalled();
+    expect(
+      (byTestId(fixture, 'detail-run-again') as HTMLButtonElement).disabled
+    ).toBe(true);
+  });
+
+  it('exports the run and copies the event name', () => {
+    const fixture = render();
+    const page = routeData$.value.page;
     const component = fixture.componentInstance;
-    const reportTab = fixture.debugElement.query(
-      By.directive(MockReportTabComponent)
-    ).componentInstance as MockReportTabComponent;
 
-    expect(component.routeContext()).toBe(routeData$.value.page);
-    expect(reportTab.context()).toBe(routeData$.value.page);
-    expect(component.tagSpec()?.event).toBe('purchase');
-    expect(component.selectedTabIndex).toBe(1);
+    component.exportSpreadsheet();
+    component.exportRecording();
+    component.exportEvent();
+    component.copyEventName();
+
+    expect(reportFacade.shareSpreadsheet).toHaveBeenCalledWith(
+      'demo',
+      page.reportDetails
+    );
+    expect(reportFacade.exportRecording).toHaveBeenCalledWith(
+      'demo',
+      page.reportDetails,
+      page.videoBlob
+    );
+    expect(reportFacade.exportEvent).toHaveBeenCalledWith(
+      'demo',
+      page.reportDetails,
+      page.videoBlob
+    );
+    expect(reportFacade.copyEventName).toHaveBeenCalledWith('add_to_cart');
   });
 
-  it("passes the project's container variables into the tag tab", () => {
-    // Without ?tab=reports the page opens on the Tag Snapshot tab.
-    routeSnapshot.queryParams = {};
-    queryParamMap$.next(convertToParamMap({}));
-    const fixture = TestBed.createComponent(DetailViewComponent);
-
-    fixture.detectChanges();
-
-    const tagTab = fixture.debugElement.query(
-      By.directive(MockTagManageTabComponent)
-    ).componentInstance as MockTagManageTabComponent;
-    expect(projectService.getProjectGtmConfig).toHaveBeenCalledWith(
-      'storybook-project'
+  it('shows the missing recording snackbar and strips the query param from the url', () => {
+    routeSnapshot.queryParams = { snackbar: 'missingRecording', run: '5' };
+    queryParamMap$.next(
+      convertToParamMap({ snackbar: 'missingRecording', run: '5' })
     );
-    expect(tagTab.variables()).toEqual([MEASUREMENT_ID_CONSTANT]);
-  });
-
-  it('shows the missing recording snackbar and strips the query param from the url', async () => {
-    const fixture = TestBed.createComponent(DetailViewComponent);
-    routeSnapshot.queryParams = {
-      tab: 'reports',
-      snackbar: 'missingRecording'
-    };
-
-    (
-      fixture.componentInstance as never as {
-        handleQueryParams: (
-          params: ReturnType<typeof convertToParamMap>
-        ) => void;
-      }
-    ).handleQueryParams(
-      convertToParamMap({ tab: 'reports', snackbar: 'missingRecording' })
-    );
-    await Promise.resolve();
+    render();
 
     expect(snackBar.openFromComponent).toHaveBeenCalledWith(SnackBarComponent, {
       duration: 5000,
@@ -202,18 +373,15 @@ describe('DetailViewComponent', () => {
     });
     expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
-      queryParams: {
-        tab: 'reports'
-      },
+      queryParams: { run: '5' },
       replaceUrl: true
     });
   });
 
   it('navigates back relative to the current route', () => {
-    const fixture = TestBed.createComponent(DetailViewComponent);
+    const fixture = render();
 
-    fixture.detectChanges();
-    fixture.componentInstance.goBack();
+    byTestId(fixture, 'detail-back')?.click();
 
     expect(router.navigate).toHaveBeenCalledWith(['../'], {
       relativeTo: expect.anything()

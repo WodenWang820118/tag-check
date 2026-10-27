@@ -1,22 +1,23 @@
 # Report management
 
-Every run saves a result. A test's page shows its latest result, and the **Reports** page lists every run of the project and exports spreadsheets.
+Every run saves a result. A test's page shows its latest run and any earlier one, and the **Reports** page lists every run of the project and exports spreadsheets.
 
-## A test's latest result
+## A test's page
 
-Open a test from the **Tests** page and go to **Latest result**:
+Open a test from the **Tests** page. Its page shows the latest run:
 
-- **Status and last run**: the status of the latest run and when it ran. Hover over the status to see each check.
-- **Message**: why the data layer check failed, such as a missing key or a value that does not match, or `Valid`.
-- **Panels**:
+- **Header**: the event name (select it to copy it), the run's number and when it ran. **Run again** runs the test and shows the new run. **Export** saves the run as a spreadsheet (XLSX), its site recording (WEBM), or both. **All runs** opens the Reports page filtered to this event.
+- **Checks**: the data layer check says whether the site pushed the event with every key the spec requires, or why not. The request check says whether GA4 received the event at the measurement ID. **History** shows the test's last 20 runs, oldest first; select one to open it. An earlier run shows a banner with **Go to the latest run**.
+- **What happened**: the site recording and, for runs in Accompanied Mode, the Tag Assistant recording, playing together on one timeline. The timeline marks each recorded step, and the steps are listed below it; select a step to play from just before it. A run without a screen recording shows its screenshot.
+- **Expected vs captured**: each key of the spec next to the value the run captured, and the result. Keys the site pushed that the spec does not mention are under **Captured, not in the spec**.
+- **GA4 request**: the captured request as GA4 reads it: event, measurement ID, event parameters, items and page. **Copy raw URL** copies the request. Without a request, **Where to look** lists what to check.
+- **Tag configuration**: the event's tag and variables in the project's GTM container.
+- **Spec, recording and item definition**:
   - **Data Layer Spec**: the spec the run compared against; editable.
   - **Chrome Recording**: the journey the run replayed; editable.
   - **Raw Request**: the GA4 request the run captured.
   - **Data Layer**: every `dataLayer` push the run captured.
   - **Item Definition**: a GA4 item the test expects in `ecommerce.items`, if any; editable. **Quality assurance** explains how runs use it.
-- **Media**: the screenshot taken at the end of the run and the screen recording of the run.
-
-The share menu exports the result as a spreadsheet (XLSX), the screen recording (WEBM), or both. The history button opens the Reports page.
 
 ## The Reports page
 

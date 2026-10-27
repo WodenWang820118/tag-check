@@ -28,6 +28,16 @@ describe('ImageService', () => {
     expect(result.blob).toBe(blob);
   });
 
+  it("asks for a run's screenshot with ?run=", async () => {
+    http.get.mockReturnValue(of({ body: new Blob(['x']) }));
+
+    await firstValueFrom(service.getImage('p', 'e', 5));
+    await firstValueFrom(service.getImage('p', 'e'));
+
+    expect(http.get.mock.calls[0][1].params).toEqual({ run: 5 });
+    expect(http.get.mock.calls[1][1].params).toEqual({});
+  });
+
   it('falls back to an empty Blob when response has no body', async () => {
     http.get.mockReturnValue(of({ body: null }));
     const result = await firstValueFrom(service.getImage('p', 'e'));

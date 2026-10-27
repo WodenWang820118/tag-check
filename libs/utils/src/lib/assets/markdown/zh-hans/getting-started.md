@@ -34,7 +34,7 @@
 
 1. 在 Chrome 中打开 DevTools 和 **Recorder** 面板，在您的网站上录制用户旅程：例如，打开一个商品页面并选择 **Add to cart**。
 2. 将录制导出为 JSON 文件。
-3. 打开测试并进入 **Latest result**。在 **Chrome Recording** 面板中，选择编辑按钮，通过 **Upload** 上传该文件或粘贴其内容，然后选择 **Save**。
+3. 打开测试并展开 **Spec, recording and item definition**。在 **Chrome Recording** 面板中，选择编辑按钮，通过 **Upload** 上传该文件或粘贴其内容，然后选择 **Save**。
 
 TagCheck 可以重放 `setViewport`、`navigate`、`click`、`hover`、`change`、`keyDown`、`keyUp` 和 `waitForElement` 步骤，支持 CSS、ID、ARIA、文本、XPath 和 pierce 选择器。稳定的选择器（例如 `data-testid` 属性）可以让录制在设计变更后依然有效。
 
