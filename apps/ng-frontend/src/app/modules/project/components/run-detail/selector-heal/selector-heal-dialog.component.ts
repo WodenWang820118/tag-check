@@ -32,6 +32,7 @@ import { AiModelNoticeComponent } from '../../../../../shared/components/ai-mode
 import { AiAssistService } from '../../../../../shared/services/api/ai-assist/ai-assist.service';
 import { apiErrorMessage } from '../../../../../shared/services/api/http-error.utils';
 import { RecordingService } from '../../../../../shared/services/api/recording/recording.service';
+import { SelectorDiffComponent } from './selector-diff.component';
 import { selectorChanges, withStepSelectors } from './selector-heal';
 
 /** The run whose failed step the drawer finds a replacement for. */
@@ -73,7 +74,8 @@ type Trial =
     MatDialogModule,
     MatIconModule,
     MatProgressBarModule,
-    AiModelNoticeComponent
+    AiModelNoticeComponent,
+    SelectorDiffComponent
   ],
   templateUrl: './selector-heal-dialog.component.html',
   styleUrls: ['./selector-heal-dialog.component.scss'],

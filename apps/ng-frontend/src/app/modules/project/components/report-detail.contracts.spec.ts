@@ -144,6 +144,32 @@ describe('buildReportPage', () => {
     });
     expect(page.reportDetails?.eventName).toBe('add_to_cart');
     expect(page.stepFailure).toBeNull();
+    expect(page.stepFallbacks).toEqual([]);
+  });
+
+  it('keeps the fallback selectors the run used', () => {
+    const stepFallbacks = [
+      {
+        stepIndex: 1,
+        stepType: 'click',
+        selector: '#add',
+        selectors: ['#add'],
+        matchedBy: 'id' as const,
+        value: 'add'
+      }
+    ];
+    const page = buildReportPage({
+      projectSlug: 'demo',
+      eventId: 'evt-1',
+      detail: { ...detailResponse(), stepFallbacks },
+      spec: {} as DataLayerSpec,
+      recording: null,
+      video: null,
+      tagAssistantVideo: null,
+      image: null
+    });
+
+    expect(page.stepFallbacks).toEqual(stepFallbacks);
   });
 
   it('keeps which step of the run could not find its element', () => {

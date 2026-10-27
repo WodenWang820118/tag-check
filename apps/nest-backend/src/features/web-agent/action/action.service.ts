@@ -198,6 +198,7 @@ export class ActionService {
       stepIndex: index,
       stepType: step.type,
       selector,
+      selectors: choice.candidate.selectors,
       matchedBy: choice.matchedBy,
       value: choice.value
     });

@@ -147,36 +147,10 @@
         }
 
         <h3 class="heal__label m-0!">Change to the recording</h3>
-        <ul
-          class="heal__diff m-0! list-none overflow-hidden rounded-[0.8rem] p-0! text-[1.25rem] leading-[1.7]"
+        <app-selector-diff
+          [changes]="changes()"
           data-testid="heal-diff"
-        >
-          @for (line of changes(); track line.selector) {
-            <li
-              [class]="
-                'heal__diff-line--' +
-                line.change +
-                ' flex gap-[0.8rem] px-[1rem]'
-              "
-            >
-              <span aria-hidden="true">{{
-                line.change === 'add'
-                  ? '+'
-                  : line.change === 'remove'
-                    ? '−'
-                    : ' '
-              }}</span>
-              <span class="cdk-visually-hidden">{{
-                line.change === 'add'
-                  ? 'Added:'
-                  : line.change === 'remove'
-                    ? 'Removed:'
-                    : 'Kept:'
-              }}</span>
-              <code class="[overflow-wrap:anywhere]">{{ line.selector }}</code>
-            </li>
-          }
-        </ul>
+        ></app-selector-diff>
         <mat-checkbox
           [checked]="keepOld()"
           (change)="keepOld.set($event.checked)"

@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import type {
   ReportDetailResponse,
   RunHistoryEntry,
-  StepFailureSummary
+  StepFailureSummary,
+  StepFallback
 } from '@utils';
 import { TestEventRepositoryService } from '../../../core/repository/test-event/test-event-repository.service';
 import { TestImageRepositoryService } from '../../../core/repository/test-event/test-image-repository.service';
@@ -161,6 +162,11 @@ export class TestReportFacadeRepositoryService {
         eventId,
         shownRun?.recordingKey ?? null
       ),
+      stepFallbacks: await this.getStepFallbacks(
+        projectSlug,
+        eventId,
+        shownRun?.recordingKey ?? null
+      ),
       testImage: testImage
         ? {
             id: testImage.id,
@@ -197,6 +203,32 @@ export class TestReportFacadeRepositoryService {
             )) !== null)
       }))
     );
+  }
+
+  /**
+   * The fallback selectors the steps of the run kept in `recordingKey`'s
+   * folder continued with; empty when it used none, or they cannot be read.
+   */
+  private async getStepFallbacks(
+    projectSlug: string,
+    eventId: string,
+    recordingKey: string | null
+  ): Promise<StepFallback[]> {
+    if (!recordingKey) {
+      return [];
+    }
+    try {
+      return await this.runRecordingsService.readStepFallbacks(
+        projectSlug,
+        eventId,
+        recordingKey
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Could not read the fallbacks of run ${recordingKey}: ${error}`
+      );
+      return [];
+    }
   }
 
   /**

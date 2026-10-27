@@ -142,6 +142,47 @@
           </button>
         </section>
       }
+      @for (entry of stepFallbacks(); track entry.fallback.stepIndex) {
+        <section
+          class="detail__step-fallback"
+          aria-label="Step that used a fallback selector"
+          [attr.data-testid]="
+            'detail-step-fallback-' + entry.fallback.stepIndex
+          "
+        >
+          <div class="flex min-w-0 flex-col gap-[0.4rem]">
+            <strong class="font-medium"
+              >{{ entry.label }} used a fallback selector</strong
+            >
+            <span class="text-[1.3rem]"
+              >Its recorded selectors found nothing, and {{ entry.reason }}:
+              <code class="[overflow-wrap:anywhere]">{{
+                entry.fallback.selector
+              }}</code></span
+            >
+          </div>
+          @if (entry.saved) {
+            <span
+              class="text-[1.3rem] font-medium"
+              [attr.data-testid]="
+                'detail-fallback-saved-' + entry.fallback.stepIndex
+              "
+              >Saved in the recording</span
+            >
+          } @else {
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="saveFallback(entry.fallback, entry.label)"
+              [attr.data-testid]="
+                'detail-save-fallback-' + entry.fallback.stepIndex
+              "
+            >
+              Save to recording
+            </button>
+          }
+        </section>
+      }
 
       @if (context.run) {
         <app-run-player

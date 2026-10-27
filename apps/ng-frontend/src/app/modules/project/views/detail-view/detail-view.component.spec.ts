@@ -1,5 +1,6 @@
 import { MatDialog } from '@angular/material/dialog';
 import { SelectorHealDialogComponent } from '../../components/run-detail/selector-heal/selector-heal-dialog.component';
+import { SaveFallbackDialogComponent } from '../../components/run-detail/selector-heal/save-fallback-dialog.component';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -360,6 +361,82 @@ describe('DetailViewComponent', () => {
       const fixture = render();
 
       expect(byTestId(fixture, 'detail-step-failure')).toBeNull();
+    });
+  });
+
+  describe('a step that used a fallback selector', () => {
+    const fallback = {
+      stepIndex: 0,
+      stepType: 'click',
+      selector: '[data-testid="add"]',
+      selectors: ['[data-testid="add"]'],
+      matchedBy: 'testId' as const,
+      value: 'add'
+    };
+
+    /** The page of a run whose step 1 continued with a fallback. */
+    function fallbackPage(
+      recorded = 'main > div.old > [data-testid="add"]'
+    ): ReportDetailRouteContext {
+      return {
+        ...createPage(),
+        recording: {
+          title: 'add_to_cart',
+          steps: [{ type: 'click', selectors: [[recorded]] }]
+        },
+        stepFallbacks: [fallback]
+      };
+    }
+
+    const text = (fixture: ReturnType<typeof render>, id: string) =>
+      byTestId(fixture, id)?.textContent?.replace(/\s+/g, ' ').trim();
+
+    it('names the step, why the fallback was chosen, and offers to save it', () => {
+      routeData$.next({ page: fallbackPage() });
+      const fixture = render();
+
+      const shown = text(fixture, 'detail-step-fallback-0');
+      expect(shown).toContain(
+        'Step 1 · Click main > div.old > [data-testid="add"] used a fallback selector'
+      );
+      expect(shown).toContain(
+        'Its recorded selectors found nothing, and one element matched the recorded test hook "add": [data-testid="add"]'
+      );
+      expect(byTestId(fixture, 'detail-save-fallback-0')).not.toBeNull();
+    });
+
+    it('opens the save dialog, then marks the step saved', () => {
+      routeData$.next({ page: fallbackPage() });
+      dialog.open.mockReturnValueOnce({
+        afterClosed: () => of(true) as never
+      });
+      const fixture = render();
+
+      byTestId(fixture, 'detail-save-fallback-0')?.click();
+      fixture.detectChanges();
+
+      expect(dialog.open).toHaveBeenCalledWith(
+        SaveFallbackDialogComponent,
+        expect.objectContaining({
+          data: expect.objectContaining({
+            projectSlug: 'demo',
+            eventId: 'evt-1',
+            fallback
+          })
+        })
+      );
+      expect(byTestId(fixture, 'detail-save-fallback-0')).toBeNull();
+      expect(text(fixture, 'detail-fallback-saved-0')).toBe(
+        'Saved in the recording'
+      );
+    });
+
+    it('shows it saved when the recording already waits for it', () => {
+      routeData$.next({ page: fallbackPage('[data-testid="add"]') });
+      const fixture = render();
+
+      expect(byTestId(fixture, 'detail-fallback-saved-0')).not.toBeNull();
+      expect(byTestId(fixture, 'detail-save-fallback-0')).toBeNull();
     });
   });
 

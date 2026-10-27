@@ -109,7 +109,8 @@ export const REPORT_DETAIL_SAMPLE = {
       hasRecording: true
     }
   ],
-  stepFailure: null
+  stepFailure: null,
+  stepFallbacks: []
 } satisfies Jsonified<ReportDetailResponse>;
 
 /** One item of GET /file-reports/:projectSlug. */

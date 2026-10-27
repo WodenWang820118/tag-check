@@ -12,6 +12,14 @@ function firstOf(group: string | string[]): string {
 }
 
 /**
+ * A recorded selector group as one line: a chain into shadow roots joins
+ * its parts with Puppeteer's ` >>>> ` combinator, as the replay does.
+ */
+export function selectorGroupText(group: string | string[]): string {
+  return Array.isArray(group) ? group.join(' >>>> ') : group;
+}
+
+/**
  * How a step's selectors change: the new ones first, then the old ones,
  * kept after them or removed. An old selector the new ones repeat is not
  * listed twice.

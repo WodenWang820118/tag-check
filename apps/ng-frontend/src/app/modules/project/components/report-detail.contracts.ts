@@ -7,6 +7,7 @@ import {
   RunHistoryEntry,
   RunStatus,
   StepFailureSummary,
+  StepFallback,
   TagSpec,
   TestEventDetailSchema
 } from '@utils';
@@ -30,6 +31,11 @@ export type ReportDetailRouteContext = {
    * kept what it saw; null otherwise.
    */
   stepFailure: StepFailureSummary | null;
+  /**
+   * The steps of the shown run that continued with a fallback selector,
+   * when the run kept its recordings; empty otherwise.
+   */
+  stepFallbacks: StepFallback[];
   videoBlob: Blob | undefined;
   /** The Tag Assistant tab of an accompanied-mode run; empty otherwise. */
   tagAssistantVideoBlob: Blob | undefined;
@@ -86,6 +92,7 @@ export function buildReportPage(loaded: {
     runs,
     isLatestRun: !run || runs.length === 0 || runs[0].runId === run.id,
     stepFailure: loaded.detail?.stepFailure ?? null,
+    stepFallbacks: loaded.detail?.stepFallbacks ?? [],
     videoBlob: loaded.video?.blob,
     tagAssistantVideoBlob: loaded.tagAssistantVideo?.blob,
     imageBlob: loaded.image?.blob,

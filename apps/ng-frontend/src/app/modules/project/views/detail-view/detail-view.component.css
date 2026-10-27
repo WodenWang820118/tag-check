@@ -84,6 +84,20 @@
   grid-template-columns: repeat(auto-fit, minmax(min(40rem, 100%), 1fr));
 }
 
+.detail__step-fallback {
+  align-items: center;
+  background: #eef6f4;
+  border: 1px solid #b9d8d1;
+  border-radius: 1rem;
+  color: #1f4a42;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 1.4rem;
+  gap: 1.2rem;
+  justify-content: space-between;
+  padding: 1.4rem 1.6rem;
+}
+
 .detail__step-failure {
   align-items: center;
   background: #fff8eb;

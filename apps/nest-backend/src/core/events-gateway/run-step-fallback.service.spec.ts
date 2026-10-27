@@ -7,6 +7,7 @@ describe('RunStepFallbackService', () => {
     stepIndex: 4,
     stepType: 'click',
     selector: '[data-testid="add-to-cart"]',
+    selectors: ['[data-testid="add-to-cart"]'],
     matchedBy: 'testId',
     value: 'add-to-cart'
   };

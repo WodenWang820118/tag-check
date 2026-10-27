@@ -36,7 +36,7 @@
 2. 將錄製匯出為 JSON 檔案。
 3. 開啟測試並展開 **Spec, recording and item definition**。在 **Chrome Recording** 面板中點選編輯按鈕，使用 **Upload** 上傳該檔案或貼上其內容，然後點選 **Save**。
 
-TagCheck 會重播 `setViewport`、`navigate`、`click`、`hover`、`change`、`keyDown`、`keyUp` 與 `waitForElement` 步驟，並支援 CSS、ID、ARIA、文字、XPath 與 pierce 選取器。穩定的選取器（例如 `data-testid` 屬性）能讓錄製在設計變更後仍然有效。
+TagCheck 會重播 `setViewport`、`navigate`、`click`、`hover`、`change`、`keyDown`、`keyUp` 與 `waitForElement` 步驟，並支援 CSS、ID、ARIA、文字、XPath 與 pierce 選取器；也會沿著選取器鏈進入 shadow root、在 iframe 裡執行步驟，並在錄製顯示某個步驟會換頁時等待新頁面出現。錄製前，請把 Recorder 的 **Selector attribute** 設為 `data-testid`（或網站使用的測試屬性），並保留所有選取器類型：穩定的選取器能讓錄製在設計變更後仍然有效。當某個步驟的選取器都對應不到元素時，TagCheck 會尋找唯一一個帶有錄製時 test hook、id 或名稱的元素，用它繼續執行，並在結果中註明（見報告管理）。
 
 ## 5. 執行測試
 

@@ -387,6 +387,7 @@ describe('ActionService', () => {
         stepIndex: 0,
         stepType: 'click',
         selector: '[data-testid="add-to-cart"]',
+        selectors: ['[data-testid="add-to-cart"]', 'main > div.new > button'],
         matchedBy: 'testId',
         value: 'add-to-cart'
       });
