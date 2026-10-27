@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ValidationResult } from '@utils';
 import type { RunStatusService } from '../../core/events-gateway/run-status.service';
 import type { RunTimelineService } from '../../core/events-gateway/run-timeline.service';
+import type { RunStepFallbackService } from '../../core/events-gateway/run-step-fallback.service';
 import type { TestEventRepositoryService } from '../../core/repository/test-event/test-event-repository.service';
 import { RunTrackerService, toRunOutcome } from './run-tracker.service';
 
@@ -34,14 +35,16 @@ function setUp(found = true) {
           )
   };
   const runTimeline = { begin: vi.fn(), end: vi.fn() };
+  const runStepFallback = { begin: vi.fn(), end: vi.fn() };
   const runStepOverride = { begin: vi.fn(), end: vi.fn() };
   const tracker = new RunTrackerService(
     runStatus as unknown as RunStatusService,
     testEvents as unknown as TestEventRepositoryService,
     runTimeline as unknown as RunTimelineService,
+    runStepFallback as unknown as RunStepFallbackService,
     runStepOverride as never
   );
-  return { tracker, runStatus, runTimeline, runStepOverride };
+  return { tracker, runStatus, runTimeline, runStepFallback, runStepOverride };
 }
 
 describe('toRunOutcome', () => {
@@ -101,6 +104,26 @@ describe('RunTrackerService', () => {
     expect(task).toHaveBeenCalledOnce();
     expect(runTimeline.end).toHaveBeenCalledTimes(2);
     expect(runTimeline.end).toHaveBeenCalledWith('evt-1');
+  });
+
+  it("keeps the run's fallback selectors open while it runs", async () => {
+    const { tracker, runStepFallback } = setUp();
+    const task = vi.fn(async () => {
+      expect(runStepFallback.begin).toHaveBeenCalledWith('evt-1');
+      expect(runStepFallback.end).not.toHaveBeenCalled();
+      return undefined;
+    });
+
+    await tracker.track(run, new AbortController().signal, task);
+    await expect(
+      tracker.track(run, new AbortController().signal, async () => {
+        throw new Error('replay failed');
+      })
+    ).rejects.toThrow('replay failed');
+
+    expect(task).toHaveBeenCalledOnce();
+    expect(runStepFallback.end).toHaveBeenCalledTimes(2);
+    expect(runStepFallback.end).toHaveBeenCalledWith('evt-1');
   });
 
   it('reports the start with the test names and the end with its checks', async () => {

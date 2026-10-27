@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import type { StepFallback } from '@utils';
 import { EventInspectionPipelineService } from './event-inspection-pipeline.service';
 import { InspectorSingleEventService } from '../../features/inspector/inspector-single-event.service';
 import { TestImageRepositoryService } from '../../core/repository/test-event/test-image-repository.service';
@@ -38,6 +39,9 @@ describe('EventInspectionPipelineService', () => {
     const runTimeline = {
       steps: vi.fn().mockReturnValue([10_000, undefined, 19_000])
     };
+    const runStepFallback = {
+      fallbacks: vi.fn().mockReturnValue([] as StepFallback[])
+    };
     const runRecordings = {
       prune: vi.fn().mockResolvedValue(undefined),
       saveStepFailure: vi.fn().mockResolvedValue(true)
@@ -49,9 +53,11 @@ describe('EventInspectionPipelineService', () => {
         testEventDetailRepository,
         testImageRepository,
         runTimeline as never,
+        runStepFallback as never,
         runRecordings as never
       ),
       runTimeline,
+      runStepFallback,
       runRecordings,
       inspector,
       testEventRepository,
@@ -328,5 +334,78 @@ describe('EventInspectionPipelineService', () => {
     expect(
       vi.mocked(testEventDetailRepository.create).mock.calls[0][1]
     ).toMatchObject({ passed: true, requestPassed: false });
+  });
+
+  describe('a fallback selector', () => {
+    const preset = { application: undefined } as never;
+    const page = {
+      screenshot: vi.fn().mockResolvedValue(Buffer.from('img'))
+    } as never;
+    const inspectResult = {
+      dataLayerResult: { passed: true, dataLayer: [], message: 'Valid' },
+      destinationUrl: 'https://x',
+      rawRequest: 'r',
+      requestCheckResult: null
+    };
+
+    it('adds one sentence per fallback the run recorded', async () => {
+      const { svc, testEventDetailRepository, runStepFallback } = build({
+        inspectResult
+      });
+      runStepFallback.fallbacks.mockReturnValue([
+        {
+          stepIndex: 4,
+          stepType: 'click',
+          selector: '[data-testid="add-to-cart"]',
+          matchedBy: 'testId',
+          value: 'add-to-cart'
+        },
+        {
+          stepIndex: 1,
+          stepType: 'change',
+          selector: '#qty',
+          matchedBy: 'id',
+          value: 'qty'
+        }
+      ]);
+
+      await svc.singleEventInspectionRecipe(
+        page,
+        'p',
+        'e',
+        'M',
+        { username: '', password: '' },
+        'false',
+        preset
+      );
+
+      expect(runStepFallback.fallbacks).toHaveBeenCalledWith('e');
+      expect(
+        vi.mocked(testEventDetailRepository.create).mock.calls[0][1].message
+      ).toBe(
+        'Valid. Step 5 (click) used a fallback selector [data-testid="add-to-cart"]: its recorded selectors found nothing, and one element matched the recorded test hook "add-to-cart". Step 2 (change) used a fallback selector #qty: its recorded selectors found nothing, and one element matched the recorded id "qty".'
+      );
+    });
+
+    it('leaves the message unchanged when the run used no fallback', async () => {
+      const { svc, testEventDetailRepository, runStepFallback } = build({
+        inspectResult
+      });
+
+      await svc.singleEventInspectionRecipe(
+        page,
+        'p',
+        'e',
+        'M',
+        { username: '', password: '' },
+        'false',
+        preset
+      );
+
+      expect(runStepFallback.fallbacks).toHaveBeenCalledWith('e');
+      expect(
+        vi.mocked(testEventDetailRepository.create).mock.calls[0][1].message
+      ).toBe('Valid');
+    });
   });
 });
