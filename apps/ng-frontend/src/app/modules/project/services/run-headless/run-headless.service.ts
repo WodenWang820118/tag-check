@@ -29,11 +29,11 @@ export class RunHeadlessService {
   private readonly settingsService = inject(SettingsService);
   private readonly state = signal<{
     projectSlug: string;
-    headless: boolean;
+    headless: boolean | undefined;
   } | null>(null);
   private settingsSubscription: Subscription | null = null;
 
-  /** The choice for the project last loaded; false before any load. */
+  /** The toggle's display value; the run option stays unset while loading. */
   readonly headless = computed(() => this.state()?.headless ?? false);
 
   /**
@@ -49,10 +49,9 @@ export class RunHeadlessService {
       this.state.set({ projectSlug, headless: stored });
       return;
     }
-    const current = this.state();
     this.state.set({
       projectSlug,
-      headless: current?.projectSlug === projectSlug ? current.headless : false
+      headless: undefined
     });
     this.settingsSubscription = this.settingsService
       .getProjectSettings(projectSlug)
@@ -70,10 +69,12 @@ export class RunHeadlessService {
       });
   }
 
-  /** The choice for `projectSlug`, or undefined when it is not loaded. */
+  /** The project's run choice, unset until its stored choice or default is known. */
   headlessFor(projectSlug: string): boolean | undefined {
     const state = this.state();
-    return state?.projectSlug === projectSlug ? state.headless : undefined;
+    return state?.projectSlug === projectSlug
+      ? state.headless
+      : readStored(projectSlug);
   }
 
   /** Sets and remembers the choice for the loaded project. */

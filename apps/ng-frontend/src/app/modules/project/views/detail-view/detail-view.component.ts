@@ -48,6 +48,7 @@ import { SpecComparisonComponent } from '../../components/run-detail/spec-compar
 import { Ga4RequestComponent } from '../../components/run-detail/ga4-request/ga4-request.component';
 import { SnackBarComponent } from '../../../../shared/components/snackbar/snackbar.component';
 import { ProjectService } from '../../../../shared/services/api/project-info/project-info.service';
+import { RecordingService } from '../../../../shared/services/api/recording/recording.service';
 import { TestRunningFacadeService } from '../../../../shared/services/facade/test-running-facade.service';
 import {
   ReportDetailRouteContext,
@@ -99,16 +100,28 @@ export class DetailViewComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly snackBar = inject(MatSnackBar);
   private readonly projectService = inject(ProjectService);
+  private readonly recordingService = inject(RecordingService);
   private readonly reportFacade = inject(ReportTabFacade);
   private readonly testRunning = inject(TestRunningFacadeService);
   private readonly dialog = inject(MatDialog);
 
   /** Loaded by reportPageResolver. */
-  routeContext = toSignal(
+  private readonly resolvedContext = toSignal(
     this.route.data.pipe(
       map((data) => data['page'] as ReportDetailRouteContext | undefined)
     )
   );
+  private readonly refreshedRecording = signal<{
+    context: ReportDetailRouteContext;
+    recording: ReportDetailRouteContext['recording'];
+  } | null>(null);
+  routeContext = computed(() => {
+    const context = this.resolvedContext();
+    const refreshed = this.refreshedRecording();
+    return context && refreshed && refreshed.context === context
+      ? { ...context, recording: refreshed.recording }
+      : context;
+  });
   tagSpec = computed(() => toTagSpec(this.routeContext()?.spec));
   title = computed(
     () =>
@@ -128,8 +141,6 @@ export class DetailViewComponent implements OnInit {
     const failure = this.routeContext()?.stepFailure;
     return failure ? this.stepLabel(failure.stepIndex, failure.stepType) : null;
   });
-  /** Steps saved with their fallback selector since the page loaded. */
-  private readonly savedFallbacks = signal<number[]>([]);
   /**
    * The steps of the shown run that continued with a fallback selector,
    * each with how the page names it, why the fallback was chosen, and
@@ -145,9 +156,8 @@ export class DetailViewComponent implements OnInit {
         label: this.stepLabel(fallback.stepIndex, fallback.stepType),
         reason: describeFallbackMatch(fallback),
         saved:
-          this.savedFallbacks().includes(fallback.stepIndex) ||
-          (recorded !== undefined &&
-            selectorGroupText(recorded) === fallback.selectors[0])
+          recorded !== undefined &&
+          selectorGroupText(recorded) === fallback.selectors[0]
       };
     });
   });
@@ -210,7 +220,16 @@ export class DetailViewComponent implements OnInit {
       .runTestForReport(context.eventId, context.projectSlug)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => this.showLatestRun(),
+        next: (report) => {
+          const runId = report?.testEventDetails?.id;
+          if (runId !== undefined) {
+            void this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: { run: runId },
+              queryParamsHandling: 'merge'
+            });
+          }
+        },
         error: () =>
           this.snackBar.openFromComponent(SnackBarComponent, {
             duration: 5000,
@@ -270,6 +289,7 @@ export class DetailViewComponent implements OnInit {
    */
   saveFallback(fallback: StepFallback, stepLabel: string) {
     const context = this.routeContext();
+    const resolved = this.resolvedContext();
     if (!context) {
       return;
     }
@@ -291,7 +311,21 @@ export class DetailViewComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((saved) => {
         if (saved) {
-          this.savedFallbacks.update((steps) => [...steps, fallback.stepIndex]);
+          this.recordingService
+            .getRecordingDetails(context.projectSlug, context.eventId)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (recording) => {
+                if (resolved && this.resolvedContext() === resolved) {
+                  this.refreshedRecording.set({ context: resolved, recording });
+                }
+              },
+              error: () =>
+                this.snackBar.openFromComponent(SnackBarComponent, {
+                  duration: 5000,
+                  data: 'The recording was saved, but could not be refreshed. Reload this page.'
+                })
+            });
         }
       });
   }
@@ -321,7 +355,8 @@ export class DetailViewComponent implements OnInit {
     const context = this.routeContext();
     this.reportFacade.shareSpreadsheet(
       context?.projectSlug,
-      context?.reportDetails
+      context?.reportDetails,
+      context?.run?.id
     );
   }
 
@@ -330,7 +365,8 @@ export class DetailViewComponent implements OnInit {
     this.reportFacade.exportRecording(
       context?.projectSlug,
       context?.reportDetails,
-      context?.videoBlob
+      context?.videoBlob,
+      context?.run?.id
     );
   }
 
@@ -339,7 +375,8 @@ export class DetailViewComponent implements OnInit {
     this.reportFacade.exportEvent(
       context?.projectSlug,
       context?.reportDetails,
-      context?.videoBlob
+      context?.videoBlob,
+      context?.run?.id
     );
   }
 

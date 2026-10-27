@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Put, Body, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  Put,
+  Body,
+  Logger
+} from '@nestjs/common';
 import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import {
   ApplicationSetting,
@@ -54,6 +62,21 @@ export class SettingsController {
     @Param('projectSlug') projectSlug: string,
     @Body() settings: Partial<ApplicationSetting>
   ) {
+    if ('websiteUrl' in settings) {
+      try {
+        if (typeof settings.websiteUrl !== 'string') {
+          throw new Error('Invalid URL');
+        }
+        const url = new URL(settings.websiteUrl);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+          throw new Error('Invalid URL');
+        }
+      } catch {
+        throw new BadRequestException(
+          'websiteUrl must be an absolute HTTP(S) URL'
+        );
+      }
+    }
     this.logger.log(
       `updateApplicationSettings - projectSlug=${projectSlug}, keys=${Object.keys(settings).join(',')}`
     );

@@ -158,6 +158,7 @@ export class ApplicationFormComponent implements OnInit {
           const projectSlug = params['projectSlug'];
           if (projectSlug) {
             const settings: Partial<ApplicationSetting> = {
+              websiteUrl: this.applicationForm.controls.websiteUrl.value ?? '',
               localStorage: {
                 data: this.localStorageFormArrayValue.map((item) => ({
                   key: item.value.key,

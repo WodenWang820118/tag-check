@@ -49,7 +49,7 @@ export const reportPageResolver: ResolveFn<ReportDetailRouteContext> = (
       .pipe(catchError(() => of(null))),
     image: inject(ImageService).getImage(projectSlug, eventId, runId)
   }).pipe(
-    map((loaded) => buildReportPage({ projectSlug, eventId, ...loaded }))
+    map((loaded) => buildReportPage({ projectSlug, eventId, runId, ...loaded }))
   );
 };
 

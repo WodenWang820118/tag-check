@@ -95,7 +95,24 @@
       </div>
     </header>
 
-    @if (!context.isLatestRun) {
+    @if (context.runNotFound) {
+      <div
+        class="detail__older"
+        role="status"
+        data-testid="detail-run-not-found"
+      >
+        <span>Run not found</span>
+        <a
+          mat-button
+          [routerLink]="[]"
+          [queryParams]="{ run: null }"
+          queryParamsHandling="merge"
+          data-testid="detail-latest-run"
+        >
+          Go to the latest run
+        </a>
+      </div>
+    } @else if (!context.isLatestRun) {
       <div class="detail__older" role="status" data-testid="detail-older-run">
         <span>You are looking at an older run.</span>
         <button
@@ -110,11 +127,22 @@
     }
 
     <main class="detail__body">
-      <app-run-verdict
-        [run]="context.run"
-        [runs]="context.runs"
-        [eventName]="eventName()"
-      ></app-run-verdict>
+      @if (!context.runNotFound || context.runs.length > 0) {
+        <app-run-verdict
+          [run]="context.run"
+          [runs]="context.runs"
+          [eventName]="eventName()"
+        ></app-run-verdict>
+      }
+      @if (context.run && !context.isLatestRun) {
+        <p
+          class="m-0! text-[1.4rem] text-[#55605d]"
+          role="status"
+          data-testid="detail-current-spec-notice"
+        >
+          Compared with the current spec and recording.
+        </p>
+      }
       @if (stepFailureLabel(); as stepLabel) {
         <section
           class="detail__step-failure"
