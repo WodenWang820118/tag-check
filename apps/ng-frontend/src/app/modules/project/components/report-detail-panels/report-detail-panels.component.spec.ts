@@ -34,6 +34,7 @@ function createContext(
     run: null,
     runs: [],
     isLatestRun: true,
+    stepFailure: null,
     reportDetails: {
       position: 0,
       event: eventName,

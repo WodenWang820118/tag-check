@@ -143,5 +143,26 @@ describe('buildReportPage', () => {
       historyLinkCommands: ['..', 'buckets']
     });
     expect(page.reportDetails?.eventName).toBe('add_to_cart');
+    expect(page.stepFailure).toBeNull();
+  });
+
+  it('keeps which step of the run could not find its element', () => {
+    const stepFailure = {
+      stepIndex: 4,
+      stepType: 'click',
+      url: 'https://shop.example/'
+    };
+    const page = buildReportPage({
+      projectSlug: 'demo',
+      eventId: 'evt-1',
+      detail: { ...detailResponse(), stepFailure },
+      spec: {} as DataLayerSpec,
+      recording: null,
+      video: null,
+      tagAssistantVideo: null,
+      image: null
+    });
+
+    expect(page.stepFailure).toEqual(stepFailure);
   });
 });

@@ -53,4 +53,37 @@ describe('AiAssistService', () => {
 
     await expect(updated).resolves.toEqual(state);
   });
+
+  it("reads a run's failed step, asks for suggestions and runs trials", async () => {
+    const base = environment.aiAssistApiUrl;
+
+    const seen = firstValueFrom(service.getStepFailure('demo', 'e1', 37));
+    const seenRequest = http.expectOne(
+      (request) => request.url === `${base}/step-failures/demo/e1`
+    );
+    expect(seenRequest.request.params.get('run')).toBe('37');
+    seenRequest.flush({ stepIndex: 4 });
+    await expect(seen).resolves.toEqual({ stepIndex: 4 });
+
+    const suggested = firstValueFrom(service.suggest('demo', 'e1', 37));
+    const suggestRequest = http.expectOne(
+      (request) => request.url === `${base}/suggestions/demo/e1`
+    );
+    expect(suggestRequest.request.method).toBe('POST');
+    expect(suggestRequest.request.params.get('run')).toBe('37');
+    suggestRequest.flush({ suggestions: [] });
+    await expect(suggested).resolves.toEqual({ suggestions: [] });
+
+    const body = { stepIndex: 4, selectors: ['#new'] };
+    const tried = firstValueFrom(service.trial('demo', 'e1', body));
+    const trialRequest = http.expectOne(`${base}/trials/demo/e1`);
+    expect(trialRequest.request.method).toBe('POST');
+    expect(trialRequest.request.body).toEqual(body);
+    trialRequest.flush({ runId: 42, passed: true, requestPassed: true });
+    await expect(tried).resolves.toEqual({
+      runId: 42,
+      passed: true,
+      requestPassed: true
+    });
+  });
 });

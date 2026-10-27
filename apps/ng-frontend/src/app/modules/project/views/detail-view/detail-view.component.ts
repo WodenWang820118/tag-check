@@ -21,13 +21,22 @@ import { VariableConfig } from '@utils';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TagManageTabComponent } from '../../components/tag-manage-tab/tag-manage-tab.component';
 import { ReportDetailPanelsComponent } from '../../components/report-detail-panels/report-detail-panels.component';
 import { ReportTabFacade } from '../../components/report-tab/report-tab-facade.service';
 import { RunVerdictComponent } from '../../components/run-detail/run-verdict/run-verdict.component';
-import { RunPlayerComponent } from '../../components/run-detail/run-player/run-player.component';
+import {
+  describeStep,
+  RunPlayerComponent
+} from '../../components/run-detail/run-player/run-player.component';
+import {
+  SelectorHealDialogComponent,
+  type SelectorHealDialogData,
+  type SelectorHealDialogResult
+} from '../../components/run-detail/selector-heal/selector-heal-dialog.component';
 import { SpecComparisonComponent } from '../../components/run-detail/spec-comparison/spec-comparison.component';
 import { Ga4RequestComponent } from '../../components/run-detail/ga4-request/ga4-request.component';
 import { SnackBarComponent } from '../../../../shared/components/snackbar/snackbar.component';
@@ -85,6 +94,7 @@ export class DetailViewComponent implements OnInit {
   private readonly projectService = inject(ProjectService);
   private readonly reportFacade = inject(ReportTabFacade);
   private readonly testRunning = inject(TestRunningFacadeService);
+  private readonly dialog = inject(MatDialog);
 
   /** Loaded by reportPageResolver. */
   routeContext = toSignal(
@@ -103,6 +113,25 @@ export class DetailViewComponent implements OnInit {
     () => this.routeContext()?.reportDetails?.eventName ?? ''
   );
   run = computed(() => this.routeContext()?.run ?? null);
+  /**
+   * The step of the shown run that could not find its element, as the page
+   * names it: `Step 5 · Click [data-testid="add"]`.
+   */
+  stepFailureLabel = computed(() => {
+    const context = this.routeContext();
+    const failure = context?.stepFailure;
+    if (!failure) {
+      return null;
+    }
+    const step = context.recording?.steps?.[failure.stepIndex];
+    const described = step ? describeStep(step) : null;
+    return [
+      `Step ${failure.stepIndex + 1}`,
+      described
+        ? [described.label, described.detail].filter(Boolean).join(' ')
+        : failure.stepType
+    ].join(' · ');
+  });
   hasRecording = computed(
     () => (this.routeContext()?.videoBlob?.size ?? 0) > 0
   );
@@ -168,6 +197,51 @@ export class DetailViewComponent implements OnInit {
             duration: 5000,
             data: 'The run did not finish. See the message on the Tests page.'
           })
+      });
+  }
+
+  /**
+   * Opens the side panel that finds a replacement for the shown run's step
+   * that could not find its element. A trial run in it shows afterwards.
+   */
+  findReplacement() {
+    const context = this.routeContext();
+    const run = context?.run;
+    const stepLabel = this.stepFailureLabel();
+    if (!context || !run || !stepLabel) {
+      return;
+    }
+    this.dialog
+      .open<
+        SelectorHealDialogComponent,
+        SelectorHealDialogData,
+        SelectorHealDialogResult
+      >(SelectorHealDialogComponent, {
+        data: {
+          projectSlug: context.projectSlug,
+          eventId: context.eventId,
+          runId: run.id,
+          stepLabel
+        },
+        // A side panel: the run's recordings stay in view.
+        position: { top: '0', right: '0' },
+        height: '100vh',
+        width: 'min(48rem, 100vw)',
+        maxWidth: '100vw',
+        panelClass: 'side-sheet-panel',
+        // The panel closes itself, so a trial run it made still shows.
+        disableClose: true
+      })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        if (result) {
+          void this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { run: result.runId },
+            queryParamsHandling: 'merge'
+          });
+        }
       });
   }
 
